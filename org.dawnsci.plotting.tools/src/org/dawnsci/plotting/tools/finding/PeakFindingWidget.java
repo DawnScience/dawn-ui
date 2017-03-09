@@ -16,7 +16,6 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Scale;
@@ -107,8 +106,8 @@ public class PeakFindingWidget {
 		});
 
 		
+
 		/* Adjust Peak Finding searchIntensity */
-		// TODO: quick tmp implementation
 		Label searchIntensityLab = new Label(configureComposite, SWT.NONE);
 		searchIntensityLab.setText("Search Intensity");
 		searchIntensityLab.setToolTipText("Higher values tend to lead to less peaks");
@@ -148,6 +147,12 @@ public class PeakFindingWidget {
 		/*Default setups*/
 		searchScaleVal = searchIntensity.getDouble();
 		controller.setSearchScaleIntensity(searchScaleVal);
+		
+		
+		
+		
+		
+		
 		
 		/*
 		 * Swap out peak finders		
@@ -206,7 +211,6 @@ public class PeakFindingWidget {
 			@Override
 			public void peaksChanged(PeakOpportunityEvent evt) {
 				peaks = evt.getPeaks();
-				
 				//XXX: needs to be in own event checkign for peak chaning as not all searches lead to a change in peaks! what if empty huh! maybe that should update the peaks though...
 				runPeakSearch.setEnabled(true);
 				runPeakSearch.setImage(Activator.getImageDescriptor("icons/peakSearch.png").createImage());

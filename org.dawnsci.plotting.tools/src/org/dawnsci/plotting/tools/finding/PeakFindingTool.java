@@ -49,7 +49,7 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 
 	private static final Logger logger = LoggerFactory.getLogger(PeakFittingTool.class);
 	
-	PeakFindingManager controller;
+	PeakFindingManager manager;
 	
 	//View Compomnents
 	private PeakFindingActions actions;
@@ -61,23 +61,24 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 	
 	// Traces
 	//TODO: just making public whilst poking
-	public ILineTrace sampleTrace;
+	private ILineTrace sampleTrace;
+	
+	private String PEAKSTRACENAME = "Peaks";
 	private ILineTrace peaksTrace;
 
 	// Peak Running Process
 	private PeakSearchJob peakSearch;
-
-	private ITraceListener traceListener;
 
 	// Click Button Active TODO: set up differently
 	private Boolean isRemoving = false; 
 	private Boolean isAdding = false;
 
 	// Upper & Lower Selection Bounds
+	private String BOUNDTRACENAME = "Bounds";
 	ILineTrace regionBndsTrace;
 
-	// Selected Region Interest For Searching - TODO: clean on
-	public IRegion searchRegion = null;
+	// Selected Region Interests For Searching - TODO: clean on
+	public IRegion searchRegion;
 
 	//Bound limits for searching 
 	private Double upperBnd;
@@ -88,11 +89,13 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 	
 	private List<Peak> peaks = new ArrayList<Peak>();
 	
+	private IPeakOpportunityListener listener;
+	
 	//TODO: should this default constructor generate controller...
 	public PeakFindingTool() {
 		// Setup up a new PeakSearch Instance
-		this.controller = new PeakFindingManager();
-		this.traceListener = new ITraceListener.Stub() {
+		this.manager = new PeakFindingManager();
+		new ITraceListener.Stub() {
 			@Override
 			public void tracesUpdated(TraceEvent evt) {
 				peakSearch.schedule();
@@ -111,7 +114,7 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 	
 	public PeakFindingTool(IPlottingSystem system, PeakFindingManager controller){
 		this.setPlottingSystem(system);
-		this.controller = controller;
+		this.manager = controller;
 	}
 
 	@Override
@@ -130,24 +133,28 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 	
 	@Override
 	public void createControl(Composite parent) {
+		//super.activate(); TODO: activate earlier
+		//TODO: can not really remove this...component of tool
+		//configureTraces();
+			
+		
+		
 		this.composite = new Composite(parent, SWT.NONE);
 		composite.setLayout(new GridLayout(1, false));
 		composite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, true));
 		GridUtils.removeMargins(composite);
 		
-		//TODO: can not really remove this...component of tool
-		configureTraces();
 		
 		final IPageSite site = getSite();
 		IActionBars actionbars = site != null ? site.getActionBars() : generateActionBar(parent);
 
-		actions = new PeakFindingActions(controller, this);
+		actions = new PeakFindingActions(manager, this);
 		actions.createActions(actionbars.getToolBarManager());
 		
-		table = new PeakFindingTable(controller);
+		table = new PeakFindingTable(manager);
 		table.createTableControl(composite);
 		
-		widget = new PeakFindingWidget(controller);
+		widget = new PeakFindingWidget(manager);
 		widget.createControl(composite);
 
 		// Control Peak Removal + Addition
@@ -174,8 +181,9 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 				}
 			}
 		});
-		controller.addPeakListener(new IPeakOpportunityListener() {
-
+		
+		//TODO: id the listener...
+		listener = new IPeakOpportunityListener() {
 			@Override
 			public void peaksChanged(PeakOpportunityEvent evt) {
 				//Update Peaks
@@ -203,7 +211,7 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 				peakOpp.setYData(yData);
 				
 				//TODO: might need to postpone whilst configure more on peakOpp..
-				controller.loadPeakOppurtunity(peakOpp);
+				manager.loadPeakOppurtunity(peakOpp);
 			}
 
 			@Override
@@ -211,10 +219,8 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 //				xData = nXData;
 //				yData = nYData;				
 			}
-			
-		});
-		
-		super.activate();
+		};
+		manager.addPeakListener(listener);
 		
 		// Begin with the search tool ready to then run on
 		createNewSearch();
@@ -244,7 +250,7 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 
 		updatePeakTrace(peakx, peaky);
 
-		controller.setPeaks(peaks);
+		manager.setPeaks(peaks);
 	}
 
 	private void removePeakValue(Double x, Double y) {
@@ -280,7 +286,7 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 		}
 
 
-		controller.setPeaks(peaks);
+		manager.setPeaks(peaks);
 	}
 
 	public void configureTraces() {
@@ -292,12 +298,16 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 		sampleTrace = (ILineTrace) getPlottingSystem().getTraces().iterator().next();
 
 		// Setup Upper & lower bound for search region
-		regionBndsTrace = getPlottingSystem().createLineTrace("SearchBounds");
-		regionBndsTrace.setLineWidth(3);
-		regionBndsTrace.setTraceType(TraceType.HISTO);
-		regionBndsTrace.setTraceColor(ColorConstants.orange);
-		getPlottingSystem().addTrace(regionBndsTrace);
-
+		if(getPlottingSystem().getTrace(BOUNDTRACENAME) == null){
+			regionBndsTrace = getPlottingSystem().createLineTrace(BOUNDTRACENAME);
+			regionBndsTrace.setLineWidth(3);
+			regionBndsTrace.setTraceType(TraceType.HISTO);
+			regionBndsTrace.setTraceColor(ColorConstants.orange);
+			getPlottingSystem().addTrace(regionBndsTrace);
+		} else {
+			regionBndsTrace = (ILineTrace) getPlottingSystem().getTrace(BOUNDTRACENAME);
+		}
+		
 		// Intialise to upper and low limit of sample trace
 		Dataset xData = (Dataset) sampleTrace.getXData();
 		Double lwrBnd = xData.getDouble(0);
@@ -308,14 +318,18 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 
 		updateTraceBounds(xBnds, bndHeight);
 
+		
 		// Setup PeakTrace
-		peaksTrace = getPlottingSystem().createLineTrace("Peaks");
-		peaksTrace.setLineWidth(1);
-		peaksTrace.setPointStyle(PointStyle.CIRCLE);
-		peaksTrace.setPointSize(3);
-		peaksTrace.setTraceType(TraceType.HISTO);
-
-		getPlottingSystem().addTrace(peaksTrace);
+		if(getPlottingSystem().getTrace(PEAKSTRACENAME) == null) {
+			peaksTrace = getPlottingSystem().createLineTrace(PEAKSTRACENAME);
+			peaksTrace.setLineWidth(1);
+			peaksTrace.setPointStyle(PointStyle.CIRCLE);
+			peaksTrace.setPointSize(3);
+			peaksTrace.setTraceType(TraceType.HISTO);
+			getPlottingSystem().addTrace(peaksTrace);
+		} else {
+			peaksTrace = (ILineTrace) getPlottingSystem().getTrace(PEAKSTRACENAME);
+		}
 	}
 
 
@@ -406,7 +420,7 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 		peakOpp.setUpperBound(this.upperBnd);
 		
 		//TODO: might need to postpone whilst configure more on peakOpp..
-		controller.loadPeakOppurtunity(peakOpp);
+		manager.loadPeakOppurtunity(peakOpp);
 		
 		
 		
@@ -543,6 +557,7 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 	@Override
 	public void activate() {
 		super.activate();
+		configureTraces();
 	}
 
 	@Override
@@ -555,5 +570,40 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 		composite.setFocus();
 	}
 
+	
+	/*DECONSTRUCTION*/
+	
+	
+	@Override
+	public void deactivate() {
+		super.deactivate();
+		// Now remove any listeners to the plotting providing getPlottingSystem()!=null
+		getPlottingSystem().removeRegion(searchRegion);
+		getPlottingSystem().removeTrace(peaksTrace);
+		getPlottingSystem().removeTrace(regionBndsTrace);
+		//Remove icons
+		
+		//TODO: manager remove the ,amager listeners
+		//TODO: is below the way to do it... does remove any listening events that exist anywhere from controller. 
+		//manager.destroyListeners();
+		
+		
+		
+		Collection<IRegion> regions = getPlottingSystem().getRegions();
+		for (IRegion region : regions) {
+			getPlottingSystem().removeRegion(region);
+		}
+
+	}
+	@Override
+	public void dispose() {
+		super.dispose();
+        //TODO: kill manager jobs... maybe might not be storing the jobs... there scheduled though so should have segment of all jobs runnign
+	}
+	
+	
+	
+	
+	
 	
 }

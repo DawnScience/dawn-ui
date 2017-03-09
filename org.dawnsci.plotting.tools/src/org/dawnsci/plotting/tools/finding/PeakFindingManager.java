@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -160,6 +161,14 @@ public class PeakFindingManager {
 	public void loadPeakOppurtunity(IPeakOpportunity peaksOpp){
 		//TODO: have peakOpputunity event use the actual peak opps. This is probs gonna  bite in the butt later by not doing that originally.
 		everythingChangesListeners(new PeakOpportunityEvent(this, peaksOpp));
+	}
+	
+	
+	public void destroyListeners(){
+		Iterator<IPeakOpportunityListener> itr = listeners.iterator();
+		while(itr.hasNext()){
+			listeners.remove(itr);
+		}
 	}
 
 	/**
