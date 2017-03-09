@@ -16,6 +16,7 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Scale;
@@ -108,7 +109,7 @@ public class PeakFindingWidget {
 		
 
 		/* Adjust Peak Finding searchIntensity */
-		Label searchIntensityLab = new Label(configureComposite, SWT.NONE);
+		final Label searchIntensityLab = new Label(configureComposite, SWT.NONE);
 		searchIntensityLab.setText("Search Intensity");
 		searchIntensityLab.setToolTipText("Higher values tend to lead to less peaks");
 
@@ -123,6 +124,7 @@ public class PeakFindingWidget {
 				controller.setSearchScaleIntensity(searchScaleVal);
 			}
 		});	
+		searchIntensity.setEnabled(false);
 		
 		searchScale = new Scale(configure, SWT.HORIZONTAL);
 		searchScale.setBounds(0, 0, 40, 200);
@@ -145,7 +147,10 @@ public class PeakFindingWidget {
 			}
 		});
 		/*Default setups*/
+		searchScale.setEnabled(false);
+		searchScale.setVisible(false);
 		searchScaleVal = searchIntensity.getDouble();
+
 		controller.setSearchScaleIntensity(searchScaleVal);
 		
 		
@@ -167,7 +172,24 @@ public class PeakFindingWidget {
 		peakfinderCombo.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
+				
+				//XXX: hot ui fix as wavelet only component that needs the intentsity active
+				if(peakfinderCombo.getText().equals("Wavelet Transform")){
+					searchIntensity.setEnabled(true);
+					searchScale.setEnabled(true);
+					searchScale.setVisible(true);
+					searchIntensityLab.setForeground(Display.getDefault().getSystemColor(SWT.COLOR_BLACK));
+				} else {
+					searchIntensityLab.setForeground(Display.getDefault().getSystemColor(SWT.COLOR_GRAY));
+					searchIntensity.setEnabled(false);
+					searchScale.setEnabled(false);
+					searchScale.setSelection(0);
+					searchScale.setVisible(false);
+				}
+				
+				
 				controller.setPeakFinderID(peakfinderCombo.getText());			
+			
 			}
 		});
 		

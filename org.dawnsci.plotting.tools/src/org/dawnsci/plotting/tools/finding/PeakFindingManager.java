@@ -154,7 +154,6 @@ public class PeakFindingManager {
 			
 			if (evt.getPeakOpp().getXData() != null && evt.getPeakOpp().getYData() != null)
 				listener.dataChanged(evt.getPeakOpp().getXData(),evt.getPeakOpp().getYData());
-			
 		}
 	}
 
@@ -163,8 +162,7 @@ public class PeakFindingManager {
 		everythingChangesListeners(new PeakOpportunityEvent(this, peaksOpp));
 	}
 	
-	
-	public void destroyListeners(){
+	public void destroyAllListeners(){
 		Iterator<IPeakOpportunityListener> itr = listeners.iterator();
 		while(itr.hasNext()){
 			listeners.remove(itr);
@@ -257,75 +255,5 @@ public class PeakFindingManager {
 		
 		return peaks;
 	}
-
-
-	
-//	public void addFile(ISpectrumFile file) {
-//		if (spectrumFiles.containsKey(file.getLongName())) return;
-//		
-//		spectrumFiles.put(file.getLongName(), file);
-//		
-//		file.plotAll();
-//		fireFileLoadedListeners(new SpectrumFileEvent(this, file));
-//	}
-	
-//Reference to what might need to listen on a peak change	
-
-//	public void updatePeakTrace(){
-//		if(peaksX != null || peaksY != null)
-//			getPeakfindingtool().updatePeakTrace(peaksX, peaksY);
-//	}
-		
-//	public void formatPeakSearch(){
-//		updatePeakTrace();
-//		if (getTable().viewer != null)
-//			getTable().viewer.refresh();
-//
-//		// TODO: CLEAN UP ON ACTIVE PEAKFINDER
-//		getPeakFindData().deactivatePeakFinder(getPeakFinderID());
-//		// TODO: Update with the new peaks
-//		getPeakfindingtool().getPlottingSystem().repaint();
-//
-//		// Reset peak finder 
-//		if (!getWidget().runPeakSearch.isEnabled())
-//			getWidget().runPeakSearch.setImage(Activator.getImageDescriptor("icons/peakSearch.png").createImage());
-//		getWidget().runPeakSearch.setEnabled(true);
-//	}
-//	
-//	public <T> void setPlottingSystem(IPlottingSystem<T> system) {
-//		this.plottingSystem = system;
-//	}
-
-
-//	public void setLowerBnd(double lowerBnd) {
-//		getWidget().setLwrBndVal(lowerBnd);
-//		
-//		if(this.getPeakfindingtool() != null)
-//			this.getPeakfindingtool().updateBoundsLower(lowerBnd);
-//		
-//		if(this.selectedRegion != null){
-//			double[] endPnt = this.selectedRegion.getPointRef();
-//			this.selectedRegion.setEndPoint(new double[]{upperBnd,endPnt[1]});
-//			
-//		}
-//		this.lowerBnd = lowerBnd;
-//	}
-	
-	
-//	public void setUpperBnd(double upperBnd) {
-//		getWidget().setUprBndVal(upperBnd);
-//		
-//		if(getPeakfindingtool() != null)
-//			getPeakfindingtool().updateBoundsUpper(upperBnd);
-//		//TMP impl
-//		if(selectedRegion != null){
-//			double[] endPnt = this.selectedRegion.getEndPoint();
-//			endPnt[0] = upperBnd;
-//			this.selectedRegion.setEndPoint(endPnt);
-//		}
-//		
-//		this.upperBnd = upperBnd;
-//	}
-
 	
 }
