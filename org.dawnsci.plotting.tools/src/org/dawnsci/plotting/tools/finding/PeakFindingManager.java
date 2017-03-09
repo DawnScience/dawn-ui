@@ -27,7 +27,7 @@ import uk.ac.diamond.scisoft.analysis.peakfinding.Peak;
  */
 public class PeakFindingManager {
 	
-	PeakSearchJob peakSearchJob;
+	PeakFindingSearchJob peakSearchJob;
 	
 	// Peak Finders Load From Service Class
 	private static IPeakFindingService peakFindServ = (IPeakFindingService) Activator
@@ -149,8 +149,15 @@ public class PeakFindingManager {
 			Double lower = evt.getPeakOpp().getLowerBound();
 			Double upper = evt.getPeakOpp().getUpperBound();
 
-			if(lower < upper)
-				listener.boundsChanged(evt.getPeakOpp().getUpperBound() , evt.getPeakOpp().getLowerBound() );
+			if(lower < upper){
+			
+				listener.boundsChanged(evt.getPeakOpp().getUpperBound() , evt.getPeakOpp().getLowerBound());
+			
+			} else if(lower > upper){
+				//Well they want a bound setup. So give them it swapped 
+				listener.boundsChanged(evt.getPeakOpp().getLowerBound(), evt.getPeakOpp().getUpperBound());
+			} 	
+			//else some equal value. Why do you hurt me with that search user?
 			
 			if (evt.getPeakOpp().getXData() != null && evt.getPeakOpp().getYData() != null)
 				listener.dataChanged(evt.getPeakOpp().getXData(),evt.getPeakOpp().getYData());

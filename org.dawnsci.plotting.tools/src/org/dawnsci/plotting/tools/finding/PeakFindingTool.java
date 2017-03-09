@@ -6,6 +6,9 @@ import java.util.List;
 import org.dawb.common.ui.util.GridUtils;
 import org.dawb.common.ui.widgets.ActionBarWrapper;
 import org.dawnsci.plotting.tools.fitting.PeakFittingTool;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.dawnsci.analysis.dataset.roi.RectangularROI;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.axis.ClickEvent;
@@ -28,6 +31,7 @@ import org.eclipse.january.dataset.Dataset;
 import org.eclipse.january.dataset.DatasetFactory;
 import org.eclipse.january.dataset.DatasetUtils;
 import org.eclipse.january.dataset.IDataset;
+import org.eclipse.january.dataset.Slice;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -67,7 +71,7 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 	private ILineTrace peaksTrace;
 
 	// Peak Running Process
-	private PeakSearchJob peakSearch;
+	private PeakFindingSearchJob peakSearch;
 
 	// Click Button Active TODO: set up differently
 	private Boolean isRemoving = false; 
@@ -252,7 +256,7 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 
 		manager.setPeaks(peaks);
 	}
-
+	
 	private void removePeakValue(Double x, Double y) {
 		Dataset peakx = DatasetUtils.convertToDataset(peaksTrace.getXData());
 		Dataset peaky = DatasetUtils.convertToDataset(peaksTrace.getYData());
@@ -600,10 +604,49 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 		super.dispose();
         //TODO: kill manager jobs... maybe might not be storing the jobs... there scheduled though so should have segment of all jobs runnign
 	}
-	
-	
-	
-	
+
+//	TODO: just going to draw to the screen a trace they can follow and the user sees some "searching" being done. 
+//	Should work in correspondence the peak search job. Spawn job from peak search job and destroy on that completetion.
+//	class SearchMode extends Job 	{
+//		boolean theChase;
+//		
+//		public SearchMode() {
+//			theChase = true;
+//		}
+//		
+//		@Override
+//		protected IStatus run(IProgressMonitor monitor) {
+//			// TODO Auto-generated method stub
+//			private void theChase(){
+//				ILineTrace runningTrace = getPlottingSystem().createLineTrace("Searching...");
+//				runningTrace.setLineWidth(1);
+//				runningTrace.setPointStyle(PointStyle.CIRCLE);
+//				runningTrace.setPointSize(3);
+//				runningTrace.setTraceType(TraceType.HISTO);
+//				getPlottingSystem().addTrace(peaksTrace);
+//		
+//				int highlightSz= (upperBnd.intValue() - lowerBnd.intValue())/2;
+//				int prvLoci = lowerBnd.intValue();
+//				int stepval = Math.floorDiv(highlightSz, 4);
+//				
+//				while(theChase){
+//					xData.getSlice(new Slice(prvLoci, highlightSz+prvLoci));
+//					runningTrace.setData(xData.getSlice(new Slice(prvLoci, highlightSz+prvLoci)), yData.getSlice(new Slice(prvLoci, highlightSz+prvLoci)));
+//					
+//					if(prvLoci >= upperBnd){
+//						prvLoci = lowerBnd.intValue();
+//					}
+//					prvLoci += stepval;
+//				}
+//				
+//				//CLEANUOP
+//				getPlottingSystem().removeTrace(runningTrace);
+//			}
+//			
+//			return null;
+//		}
+//	}
+
 	
 	
 }

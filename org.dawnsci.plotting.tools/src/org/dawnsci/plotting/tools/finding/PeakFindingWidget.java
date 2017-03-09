@@ -89,7 +89,8 @@ public class PeakFindingWidget {
 				controller.loadPeakOppurtunity(peakOpp);
 			}
 		});
-	
+		
+		
 		Label upperBndLab = new Label(configureComposite, SWT.NONE);
 		upperBndLab.setText("Upper Bound");
 		upperBndLab.setToolTipText("As shown by the vertical line");
@@ -153,12 +154,6 @@ public class PeakFindingWidget {
 
 		controller.setSearchScaleIntensity(searchScaleVal);
 		
-		
-		
-		
-		
-		
-		
 		/*
 		 * Swap out peak finders		
 		 * */
@@ -189,7 +184,6 @@ public class PeakFindingWidget {
 				
 				
 				controller.setPeakFinderID(peakfinderCombo.getText());			
-			
 			}
 		});
 		
@@ -221,7 +215,7 @@ public class PeakFindingWidget {
 	 			if(xData.getSize() > 0 && yData.getSize() > 0){
 					runPeakSearch.setEnabled(false);
 					runPeakSearch.setImage(Activator.getImageDescriptor("icons/peakSearching.png").createImage());			
-					controller.peakSearchJob= new PeakSearchJob(controller, xData, yData);
+					controller.peakSearchJob= new PeakFindingSearchJob(controller, xData, yData);
 					//TODO:Auto schedule in controller func
 					controller.peakSearchJob.schedule();
 				}

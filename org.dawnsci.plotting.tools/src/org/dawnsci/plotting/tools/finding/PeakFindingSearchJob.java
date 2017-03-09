@@ -32,9 +32,9 @@ import uk.ac.diamond.scisoft.analysis.peakfinding.Peak;
  * 
  * @author Dean P. Ottewell
  */
-public class PeakSearchJob extends Job {
+public class PeakFindingSearchJob extends Job {
 
-		protected final Logger logger = LoggerFactory.getLogger(PeakSearchJob.class);
+		protected final Logger logger = LoggerFactory.getLogger(PeakFindingSearchJob.class);
 
 		PeakFindingManager controller;
 
@@ -46,7 +46,7 @@ public class PeakSearchJob extends Job {
 		String peakAlgorithm;
 		Map<String, IPeakFinderParameter> peakParams;
 
-		public PeakSearchJob(PeakFindingManager controller,IDataset xData, IDataset yData) {
+		public PeakFindingSearchJob(PeakFindingManager controller,IDataset xData, IDataset yData) {
 			super("Peak Search");
 			this.controller = controller;
 			this.xData = xData;
@@ -133,7 +133,6 @@ public class PeakSearchJob extends Job {
 				logger.debug("No peaks found with " + peakAlgorithm);
 				return Status.CANCEL_STATUS;
 			}
-
 			
 			/*Format peaks*/
 			List<Double> pPos = new ArrayList<Double>(peaksPos.values());

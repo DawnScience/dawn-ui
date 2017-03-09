@@ -29,4 +29,7 @@ public interface IPeakOpportunity {
 
 	public void setUpperBound(double upper);
 	public void setLowerBound(double lower);
+
+	public void setSearching(boolean searching);
+	public boolean getSearchingStatus();
 }
