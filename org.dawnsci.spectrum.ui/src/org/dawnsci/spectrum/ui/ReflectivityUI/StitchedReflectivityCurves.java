@@ -28,7 +28,7 @@ public class StitchedReflectivityCurves extends Composite {
     private IPlottingSystem<Composite> plotSystem;
     private Dataset[] output;
     private String title;
-    
+    private Dataset[] sortedAttenuatedDatasets;
 
     
      
@@ -66,24 +66,9 @@ public class StitchedReflectivityCurves extends Composite {
         
         plotSystem.createPlotPart(this, "ExamplePlot", actionBarComposite, PlotType.IMAGE, null);
         
-
-
-        
-        
-
 		ILineTrace lt1 = plotSystem.createLineTrace("Concatenated Curve Test");
 		
-		
-		IDataset[][] attenuatedDatasets = AttenuationCorrectedOutput.StitchingOverlapProcessMethod(arrayILDy, arrayILDx, model);
-		
-		Dataset[] sortedAttenuatedDatasets = new Dataset[2];
-		
-		sortedAttenuatedDatasets[0]=DatasetUtils.convertToDataset(DatasetUtils.concatenate(attenuatedDatasets[0], 0));
-		sortedAttenuatedDatasets[1]=DatasetUtils.convertToDataset(DatasetUtils.concatenate(attenuatedDatasets[1], 0));
-		
-		DatasetUtils.sort(sortedAttenuatedDatasets[0],
-				sortedAttenuatedDatasets[1]);
-		
+		sortedAttenuatedDatasets = RefinedStitching.curveStitch3(arrayILDx, arrayILDy, model);
 		
 		lt1.setData(sortedAttenuatedDatasets[1], sortedAttenuatedDatasets[0]);
 		output = sortedAttenuatedDatasets;
@@ -93,22 +78,12 @@ public class StitchedReflectivityCurves extends Composite {
         
 		title = model.getFilepaths()[0];
 		
-		
 		model.addPropertyChangeListener(new PropertyChangeListener() {
 			
 			@Override
 			public void propertyChange(PropertyChangeEvent evt) {
 				
-
-				IDataset[][] attenuatedDatasets = AttenuationCorrectedOutput.StitchingOverlapProcessMethod(arrayILDy, arrayILDx, model);
-				
-				Dataset[] sortedAttenuatedDatasets = new Dataset[2];
-				
-				sortedAttenuatedDatasets[0]=DatasetUtils.convertToDataset(DatasetUtils.concatenate(attenuatedDatasets[0], 0));
-				sortedAttenuatedDatasets[1]=DatasetUtils.convertToDataset(DatasetUtils.concatenate(attenuatedDatasets[1], 0));
-				
-				DatasetUtils.sort(sortedAttenuatedDatasets[0],
-						sortedAttenuatedDatasets[1]);
+				sortedAttenuatedDatasets = RefinedStitching.curveStitch3(arrayILDx, arrayILDy, model);
 								
 				lt1.setData(sortedAttenuatedDatasets[1], sortedAttenuatedDatasets[0]);
 				

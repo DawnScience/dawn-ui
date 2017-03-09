@@ -137,14 +137,14 @@ public class ReflectivityCurves extends Composite {
 			//RectangularROI startROI = new RectangularROI(10,10,100,100,0);
 			regionArray[k].setROI(roiList.get(k));
 	 
-	        model.setROIListElement(roiList.get(k), k);
+	        model.setROIListElement(roiList.get(k).getBounds(), k);
 	        
 	        int ktemp =k;
 	        regionArray[k].addROIListener(new IROIListener() {
 	
 				@Override
 				public void roiDragged(ROIEvent evt) {
-//					model.setROIListElementEst(regionArray[ktemp].getROI(), ktemp);
+					model.setROIListElementEst(regionArray[ktemp].getROI().getBounds(), ktemp);
 //					//model.setROI(region.getROI());
 //					System.out.println("roiDragged, ktemp:  " + ktemp);
 				}
@@ -152,14 +152,14 @@ public class ReflectivityCurves extends Composite {
 				@Override
 				public void roiChanged(ROIEvent evt) {
 					// TODO Auto-generated method stub
-					model.setROIListElementEst(regionArray[ktemp].getROI(), ktemp);
+					model.setROIListElementEst(regionArray[ktemp].getROI().getBounds(), ktemp);
 					//model.setROI(roiList.get(ktemp));
 //					System.out.println("roiChanged, ktemp:  " + ktemp);
 				}
 	
 				@Override
 				public void roiSelected(ROIEvent evt) {
-					model.setROIListElementEst(regionArray[ktemp].getROI(), ktemp);
+					model.setROIListElementEst(regionArray[ktemp].getROI().getBounds(), ktemp);
 					//model.setROI(roiList.get(ktemp));
 //					System.out.println("roiSelected, ktemp:  " + ktemp);
 				}

@@ -1,26 +1,19 @@
 package org.dawnsci.spectrum.ui.ReflectivityUI;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-
 import org.dawnsci.spectrum.ui.file.IContain1DData;
-import org.dawnsci.spectrum.ui.utils.Contain1DDataImpl;
-import org.eclipse.dawnsci.analysis.api.io.IDataHolder;
-import org.eclipse.january.dataset.Dataset;
-import org.eclipse.january.dataset.DatasetUtils;
-import org.eclipse.january.dataset.IDataset;
 import org.eclipse.january.dataset.ILazyDataset;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
-
-import uk.ac.diamond.scisoft.analysis.io.LoaderFactory;
+import org.eclipse.ui.PlatformUI;
 
 public class ReflectivityDialog extends Dialog {
 
@@ -82,14 +75,17 @@ public class ReflectivityDialog extends Dialog {
 
 	@Override
 	protected Point getInitialSize() {
-		return new Point(800, 600);
+		Rectangle rect = PlatformUI.getWorkbench().getWorkbenchWindows()[0].getShell().getBounds();
+		int h = rect.height;
+		int w = rect.width;
+		
+		return new Point((int) Math.round(0.6*w), (int) Math.round(0.8*h));
 	}
-
+	
 	@Override
-	protected boolean isResizable() {
-		return true;
+	  protected boolean isResizable() {
+	    return true;
 	}
-
 	public List<IContain1DData> getResult(){		
 		return output;
 	}

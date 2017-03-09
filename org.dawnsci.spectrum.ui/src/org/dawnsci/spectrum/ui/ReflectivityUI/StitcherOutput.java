@@ -2,19 +2,14 @@ package org.dawnsci.spectrum.ui.ReflectivityUI;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
-
 import org.dawnsci.spectrum.ui.file.IContain1DData;
 import org.dawnsci.spectrum.ui.processing.AbstractProcess;
 import org.dawnsci.spectrum.ui.utils.Contain1DDataImpl;
 import org.eclipse.january.dataset.Dataset;
-import org.eclipse.january.dataset.DatasetFactory;
 import org.eclipse.january.dataset.DatasetUtils;
 import org.eclipse.january.dataset.IDataset;
 import org.eclipse.january.dataset.ILazyDataset;
-import org.eclipse.january.dataset.Maths;
 
 public class StitcherOutput extends AbstractProcess {
 
