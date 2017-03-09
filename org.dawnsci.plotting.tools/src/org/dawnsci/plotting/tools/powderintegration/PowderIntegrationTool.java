@@ -381,7 +381,7 @@ public class PowderIntegrationTool extends AbstractToolPage implements IDataRedu
 
 		};
 		
-		loadMetaAction.setImageDescriptor(Activator.getImageDescriptor("icons/mask-import-wiz.png"));
+		loadMetaAction.setImageDescriptor(Activator.getImageDescriptor("icons/import_wiz.png"));
 		clearImported.setImageDescriptor(Activator.getImageDescriptor("icons/delete.gif"));
 		
 		loadMeta.add(loadMetaAction);

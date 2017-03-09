@@ -958,7 +958,7 @@ public class MaskingTool extends AbstractToolPage implements MouseListener {
 		
 		createToolPageActions();
 		
-		final Action exportMask = new Action("Export mask to file", Activator.getImageDescriptor("icons/mask-export-wiz.png")) {
+		final Action exportMask = new Action("Export mask to file", Activator.getImageDescriptor("icons/save_edit.png")) {
 			public void run() {
 				try {
 					IWizard wiz = EclipseUtils.openWizard(PersistenceExportWizard.ID, false);
@@ -972,7 +972,7 @@ public class MaskingTool extends AbstractToolPage implements MouseListener {
 		};
 		actionBars.getToolBarManager().add(exportMask);
 		
-		final Action importMask = new Action("Import mask from file", Activator.getImageDescriptor("icons/mask-import-wiz.png")) {
+		final Action importMask = new Action("Import mask from file", Activator.getImageDescriptor("icons/import_wiz.png")) {
 			public void run() {
 				try {
 					autoApply.setSelection(false);

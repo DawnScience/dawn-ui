@@ -139,7 +139,7 @@ public class PlotActionsManagerImpl extends PlottingActionBarManager {
 		};
 		printButton.setActionDefinitionId("org.eclipse.ui.file.print");
 
-		final Action export = new Action("Export plot data to Nexus (HDF5)...", PlottingSystemActivator.getImageDescriptor("icons/mask-export-wiz.png")) {
+		final Action export = new Action("Export plot data to Nexus (HDF5)...", PlottingSystemActivator.getImageDescriptor("icons/save_edit.png")) {
 			public void run() {
 				try {
 					system.setFocus();
@@ -160,7 +160,7 @@ public class PlotActionsManagerImpl extends PlottingActionBarManager {
 			}			
 		};
 		
-		final Action convert = new Action("Export plot data to tif/dat...", PlottingSystemActivator.getImageDescriptor("icons/mask-export-wiz.png")) {
+		final Action convert = new Action("Export plot data to tif/dat...", PlottingSystemActivator.getImageDescriptor("icons/save_edit.png")) {
 			public void run() {
 				try {
 					PlotDataConversionWizard wiz = (PlotDataConversionWizard)EclipseUtils.openWizard(PlotDataConversionWizard.ID, false);

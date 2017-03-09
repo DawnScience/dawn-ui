@@ -280,8 +280,8 @@ public class ProcessingView extends ViewPart {
 				lastPath = path;
 			}
 		};
-		save.setImageDescriptor(Activator.getImageDescriptor("icons/mask-import-wiz.png"));
-		load.setImageDescriptor(Activator.getImageDescriptor("icons/mask-export-wiz.png"));
+		save.setImageDescriptor(Activator.getImageDescriptor("icons/save_edit.png"));
+		load.setImageDescriptor(Activator.getImageDescriptor("icons/import_wiz.png"));
 	
 		getViewSite().getActionBars().getToolBarManager().add(save);
 		getViewSite().getActionBars().getMenuManager().add(save);
