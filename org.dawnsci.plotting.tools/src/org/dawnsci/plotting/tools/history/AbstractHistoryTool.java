@@ -309,7 +309,7 @@ public abstract class AbstractHistoryTool extends AbstractToolPage implements Mo
 		getSite().getActionBars().getToolBarManager().add(addPlot);
 		rightClick.add(addPlot);
 
-		final Action exportHist = new Action("Export history", Activator.getImageDescriptor("icons/mask-export-wiz.png")) {
+		final Action exportHist = new Action("Export history", Activator.getImageDescriptor("icons/save_edit.png")) {
 			public void run() {
 				try {
 					IWizard wiz = EclipseUtils.openWizard(PersistenceExportWizard.ID, false);

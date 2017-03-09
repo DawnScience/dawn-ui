@@ -340,7 +340,7 @@ public class PowderLineTool extends AbstractToolPage {
 	private void createActions() {
 		final Shell theShell = this.getSite().getShell();
 		final PowderLineTool theTool = this;
-		final Action loadAction = new Action("Load a list of lines from file", Activator.getImageDescriptor("icons/mask-export-wiz.png")) {
+		final Action loadAction = new Action("Load a list of lines from file", Activator.getImageDescriptor("icons/import_wiz.png")) {
 			@Override
 			public void run() {
 				FileDialog chooser = new FileDialog(theShell, SWT.OPEN);

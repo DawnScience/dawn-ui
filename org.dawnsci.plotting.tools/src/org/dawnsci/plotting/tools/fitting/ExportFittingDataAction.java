@@ -30,7 +30,7 @@ public class ExportFittingDataAction extends Action {
 	public ExportFittingDataAction() {
 		setText("Export functions");
 		setToolTipText("Export function data to an HDF5 file");
-		setImageDescriptor(Activator.getImageDescriptor("icons/mask-export-wiz.png"));
+		setImageDescriptor(Activator.getImageDescriptor("icons/save-edit.png"));
 	}
 	
 	public ExportFittingDataAction(String string,

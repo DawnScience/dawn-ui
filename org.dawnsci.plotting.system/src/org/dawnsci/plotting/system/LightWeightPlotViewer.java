@@ -655,7 +655,7 @@ public class LightWeightPlotViewer<T> extends AbstractPlottingViewer<T> implemen
 			manager.add(visible);
 			
 			if (trace instanceof LineTraceImpl) {
-				final Action export = new Action("Export '"+name+"' to ascii (dat file)", PlottingSystemActivator.getImageDescriptor("icons/mask-export-wiz.png")) {
+				final Action export = new Action("Export '"+name+"' to ascii (dat file)", PlottingSystemActivator.getImageDescriptor("icons/save_edit.png")) {
 					public void run() {
 						try {
 							PlotDataConversionWizard wiz = (PlotDataConversionWizard)EclipseUtils.openWizard(PlotDataConversionWizard.ID, false);

@@ -239,7 +239,7 @@ public class MeasurementTool extends AbstractToolPage implements IRegionListener
 			getSite().getActionBars().getToolBarManager().add(new Separator());
 		}
 
-		final Action exportRegion = new Action("Export region to file", Activator.getImageDescriptor("icons/mask-export-wiz.png")) {
+		final Action exportRegion = new Action("Export region to file", Activator.getImageDescriptor("icons/save_edit.png")) {
 			public void run() {
 				try {
 					IWizard wiz = EclipseUtils.openWizard(PersistenceExportWizard.ID, false);
@@ -252,7 +252,7 @@ public class MeasurementTool extends AbstractToolPage implements IRegionListener
 			}
 		};
 
-		final Action importRegion = new Action("Import region from file", Activator.getImageDescriptor("icons/mask-import-wiz.png")) {
+		final Action importRegion = new Action("Import region from file", Activator.getImageDescriptor("icons/import_wiz.png")) {
 			public void run() {
 				try {
 					IWizard wiz = EclipseUtils.openWizard(PersistenceImportWizard.ID, false);

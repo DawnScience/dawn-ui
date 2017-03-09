@@ -488,7 +488,7 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 
 	private void createActions() {
 
-		final Action exportMeta = new Action("Export metadata to file", Activator.getImageDescriptor("icons/mask-export-wiz.png")) {
+		final Action exportMeta = new Action("Export metadata to file", Activator.getImageDescriptor("icons/save-edit.png")) {
 			public void run() {
 				try {
 					IWizard wiz = EclipseUtils.openWizard(PersistenceExportWizard.ID, false);
@@ -501,7 +501,7 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 			}			
 		};
 		
-		final Action importMeta = new Action("Import metadata from file", Activator.getImageDescriptor("icons/mask-import-wiz.png")) {
+		final Action importMeta = new Action("Import metadata from file", Activator.getImageDescriptor("icons/import-wiz.png")) {
 			public void run() {
 				try {
 					IWizard wiz = EclipseUtils.openWizard(PersistenceImportWizard.ID, false);

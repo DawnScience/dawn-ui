@@ -30,7 +30,7 @@ public class ImportFittingDataAction extends Action {
 	public ImportFittingDataAction() {
 		setText("Import functions");
 		setToolTipText("Import function data from an HDF5 file");
-		setImageDescriptor(Activator.getImageDescriptor("icons/mask-import-wiz.png"));
+		setImageDescriptor(Activator.getImageDescriptor("icons/import_wiz.png"));
 	}
 	
 	public ImportFittingDataAction(String string,

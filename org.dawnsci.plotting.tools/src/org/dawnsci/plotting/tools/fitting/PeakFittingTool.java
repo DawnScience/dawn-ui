@@ -609,7 +609,7 @@ public class PeakFittingTool extends AbstractFittingTool implements IRegionListe
 				}
 			}
 		};
-		export.setImageDescriptor(Activator.getImageDescriptor("icons/mask-export-wiz.png"));
+		export.setImageDescriptor(Activator.getImageDescriptor("icons/save_edit.png"));
 		getSite().getActionBars().getToolBarManager().add(export);
 
 		final Separator sep3 = new Separator(getClass().getName()+".separator3");	
