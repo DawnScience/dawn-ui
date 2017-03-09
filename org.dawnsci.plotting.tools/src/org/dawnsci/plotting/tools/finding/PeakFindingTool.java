@@ -109,7 +109,6 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 	
 	public void setAddMode(boolean status){
 		isAdding = status;
-
 	}
 	
 	public void setRemoveMode(boolean status){
@@ -141,7 +140,6 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 		//TODO: can not really remove this...component of tool
 		//configureTraces();
 			
-		
 		
 		this.composite = new Composite(parent, SWT.NONE);
 		composite.setLayout(new GridLayout(1, false));
@@ -284,9 +282,9 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 			peaky = DatasetFactory.createFromList(pY);
 			updatePeakTrace(peakx, peaky);
 		} else {
-			//Set as not visible as no peaks. Do not want to destroy, tis wasteful
+			//Set as not vis	ible as no peaks. Do not want to destroy, tis wasteful
 			peaksTrace.setVisible(false);
-			getPlottingSystem().repaint(); 
+			getPlottingSystem().repaint();
 		}
 
 
@@ -322,21 +320,25 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 
 		updateTraceBounds(xBnds, bndHeight);
 
-		
 		// Setup PeakTrace
 		if(getPlottingSystem().getTrace(PEAKSTRACENAME) == null) {
-			peaksTrace = getPlottingSystem().createLineTrace(PEAKSTRACENAME);
-			peaksTrace.setLineWidth(1);
-			peaksTrace.setPointStyle(PointStyle.CIRCLE);
-			peaksTrace.setPointSize(3);
-			peaksTrace.setTraceType(TraceType.HISTO);
-			getPlottingSystem().addTrace(peaksTrace);
+			peaksTrace = generatePeakTrace(PEAKSTRACENAME);
 		} else {
 			peaksTrace = (ILineTrace) getPlottingSystem().getTrace(PEAKSTRACENAME);
 		}
 	}
 
-
+	private ILineTrace generatePeakTrace(String tracename){
+		ILineTrace trace = getPlottingSystem().createLineTrace(tracename);
+		trace.setLineWidth(1);
+		trace.setPointStyle(PointStyle.CIRCLE);
+		trace.setPointSize(3);
+		trace.setTraceType(TraceType.HISTO);
+		getPlottingSystem().addTrace(trace);
+		return trace;
+	}
+	
+	
 	public void createNewSearch() {
 		try {
 			Collection<IRegion> regions = getPlottingSystem().getRegions();
@@ -344,19 +346,18 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 				for (IRegion i : regions) {
 					getPlottingSystem().removeRegion(i);
 				}
-
-//TODO: still need to clean up the view and just update peaks with a empty list i guess??
-//				if (!controller.getPeaks().isEmpty()) {
-//					controller.getPeaks().clear();
-//				}
-
-				peaksTrace.setVisible(false);
+				
 				regionBndsTrace.setVisible(false);
-
 				// hide region bounds whilst search
 				regionBndsTrace.setVisible(true);
 			}
 
+			if(!peaks.isEmpty()){
+				//Regenerate the trace to older times
+				peaksTrace = generatePeakTrace(PEAKSTRACENAME);
+			}
+			
+			
 			getPlottingSystem().addRegionListener(this);
 			this.searchRegion = getPlottingSystem().createRegion(
 					RegionUtils.getUniqueName("Search selection", getPlottingSystem()),
@@ -422,11 +423,8 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 		peakOpp.setYData(this.yData);
 		peakOpp.setLowerBound(this.lowerBnd);
 		peakOpp.setUpperBound(this.upperBnd);
-		
 		//TODO: might need to postpone whilst configure more on peakOpp..
 		manager.loadPeakOppurtunity(peakOpp);
-		
-		
 		
 	}
 
@@ -576,7 +574,6 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 
 	
 	/*DECONSTRUCTION*/
-	
 	
 	@Override
 	public void deactivate() {
