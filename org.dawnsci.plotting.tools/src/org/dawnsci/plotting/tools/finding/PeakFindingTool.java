@@ -199,23 +199,23 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 
 			@Override
 			public void boundsChanged(double upper, double lower) {
-				//TODO: call functio nto update trace bounds and set new data areas
-				upperBnd = upper;
-				lowerBnd = lower;
-				double[] x = { lowerBnd, upperBnd};
-				
-				Dataset xdata = DatasetFactory.createFromObject(x);
-				Dataset ydata = genBoundsHeight();
-				
-				updateTraceBounds(xdata, ydata); //TODO: this is already triggers
-				setSearchDataOnBounds();
-		
-				PeakOppurtunity peakOpp = new PeakOppurtunity();
-				peakOpp.setXData(xData); 
-				peakOpp.setYData(yData);
-				
-				//TODO: might need to postpone whilst configure more on peakOpp..
-				manager.loadPeakOppurtunity(peakOpp);
+				RectangularROI rect = (RectangularROI) searchRegion.getROI();
+				double[] bounds = { lower, upper};
+				//TODO: shouldnt be trigger anyway
+				if(bounds[0] != rect.getPointRef()[0] && bounds[1] != rect.getPointRef()[1]){
+					//Update region
+					rect.setPoint(bounds);
+	
+					lowerBnd = rect.getPointRef()[0];
+					upperBnd = rect.getPointRef()[1];
+					searchRegion.setROI(rect);
+					
+					Dataset xdata = DatasetFactory.createFromObject(bounds);
+					Dataset ydata = genBoundsHeight();
+					
+					updateTraceBounds(xdata, ydata); //TODO: this is already triggers
+					setSearchDataOnBounds();
+				}
 			}
 
 			@Override
@@ -383,7 +383,17 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 					// TODO Auto-generated method stub
 					RectangularROI rectangle = (RectangularROI) searchRegion.getROI();
 					updateSearchBnds(rectangle);
-
+					
+					
+					//Load in new search bounds to beacon
+					
+					PeakOppurtunity peakOpp = new PeakOppurtunity();
+					peakOpp.setXData(xData);
+					peakOpp.setYData(yData);
+					peakOpp.setLowerBound(lowerBnd);
+					peakOpp.setUpperBound(upperBnd);
+					//TODO: might need to postpone whilst configure more on peakOpp..
+					manager.loadPeakOppurtunity(peakOpp);
 				}
 			});
 			
@@ -396,7 +406,7 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 				// Set the region bounds
 				updateSearchBnds(rectangle);
 			}
-
+			
 			// TODO: need to now connect up this to have a resultant effect on
 			// the viewer
 			if (table.viewer != null) {
@@ -433,19 +443,7 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 		updateTraceBounds(xdata, ydata); //TODO: this is already triggers
 		
 		//TODO: update manager search data 
-		setSearchDataOnBounds();
-		
-		
-		//Load in new search bounds to beacon
-		
-		PeakOppurtunity peakOpp = new PeakOppurtunity();
-		peakOpp.setXData(this.xData);
-		peakOpp.setYData(this.yData);
-		peakOpp.setLowerBound(this.lowerBnd);
-		peakOpp.setUpperBound(this.upperBnd);
-		//TODO: might need to postpone whilst configure more on peakOpp..
-		manager.loadPeakOppurtunity(peakOpp);
-		
+		setSearchDataOnBounds();	
 	}
 
 	public void updateBoundsUpper(double upperVal){
