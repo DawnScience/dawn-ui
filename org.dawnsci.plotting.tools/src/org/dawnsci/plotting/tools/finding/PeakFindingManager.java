@@ -111,7 +111,6 @@ public class PeakFindingManager {
 	}
 
 	public void setSearchScaleIntensity(double searchScaleIntensity) {
-		
 		String peakfinder = Activator.getPlottingPreferenceStore().getString(PeakFindingConstants.PeakAlgorithm);	
 		//TODO: tmp as only wavelet has this value
 		if(peakfinder.equals("Wavelet Transform")){
