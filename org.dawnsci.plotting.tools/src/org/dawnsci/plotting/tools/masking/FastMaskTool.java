@@ -7,6 +7,10 @@ import java.util.Optional;
 
 import org.dawb.common.ui.util.EclipseUtils;
 import org.dawb.common.ui.wizard.persistence.PersistenceExportWizard;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.region.IROIListener;
 import org.eclipse.dawnsci.plotting.api.region.IRegion;
@@ -35,6 +39,8 @@ public class FastMaskTool extends AbstractToolPage {
 	private Composite control;
 	private MaskCircularBuffer buffer;
 	private List<NamedRegionType> regionTypes;
+	private FastMaskJob job;
+	
 	
 	
 	public FastMaskTool() {
@@ -54,6 +60,7 @@ public class FastMaskTool extends AbstractToolPage {
 
 	@Override
 	public void createControl(Composite parent) {
+		this.job = new FastMaskJob();
 		this.control = new Composite(parent, SWT.NONE);
 		control.setBackground(Display.getDefault().getSystemColor(SWT.COLOR_WHITE));
 		control.setLayout(new GridLayout(1, false));
@@ -93,10 +100,19 @@ public class FastMaskTool extends AbstractToolPage {
 				if (imageTrace != null) {
 					IDataset data = imageTrace.getData();
 					if (buffer == null) buffer = new MaskCircularBuffer(data.getShape());
-					Collection<IRegion> regions = getPlottingSystem().getRegions();
-					for (IRegion r : regions) buffer.maskROI(r.getROI());
+					final Collection<IRegion> regions = getPlottingSystem().getRegions();
 					
-					imageTrace.setMask(buffer.getMask());
+					Runnable r = new Runnable() {
+						
+						@Override
+						public void run() {
+							for (IRegion r : regions) buffer.maskROI(r.getROI());
+							
+						}
+					};
+					
+					job.setRunnable(r);
+					job.schedule();
 				}
 				
 			}
@@ -157,10 +173,17 @@ public class FastMaskTool extends AbstractToolPage {
 								IDataset data = imageTrace.getData();
 
 								if (buffer == null) buffer = new MaskCircularBuffer(data.getShape());
-								Collection<IRegion> regions = getPlottingSystem().getRegions();
-								for (IRegion r : regions) buffer.maskROI(r.getROI());
-
-								imageTrace.setMask(buffer.getMask());
+								Runnable r = new Runnable() {
+									
+									@Override
+									public void run() {
+										for (IRegion r : regions) buffer.maskROI(r.getROI());
+										
+									}
+								};
+								
+								job.setRunnable(r);
+								job.schedule();
 							}
 
 						}
@@ -235,4 +258,41 @@ public class FastMaskTool extends AbstractToolPage {
 		}
 	}
 	
+	private class FastMaskJob extends Job {
+
+		private Runnable runnable;
+		int count = 0;
+		
+		public FastMaskJob() {
+			super("Apply Mask");
+		}
+		
+		public void setRunnable(Runnable r) {
+			this.runnable = r;
+		}
+
+		@Override
+		protected IStatus run(IProgressMonitor monitor) {
+			Runnable r = runnable;
+			r.run();
+			count++;
+			
+			if (count > 10) {
+				
+			count = 0;
+			
+			Display.getDefault().syncExec(new Runnable() {
+				
+				@Override
+				public void run() {
+					long t = System.currentTimeMillis();
+					getImageTrace().setMask(buffer.getMask());
+					System.out.println(System.currentTimeMillis() - t);
+				}
+			});
+			}
+			return Status.OK_STATUS;
+		}
+		
+	}
 }
