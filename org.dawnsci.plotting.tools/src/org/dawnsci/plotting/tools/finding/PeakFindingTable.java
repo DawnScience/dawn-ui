@@ -38,7 +38,6 @@ public class PeakFindingTable {
 		viewer.getTable().setHeaderVisible(true);
 		viewer.getTable().setLayoutData(new GridData(GridData.FILL_BOTH));
 		viewer.setContentProvider(new ArrayContentProvider());
-		
 		/*Table Content Manipulation*/
 		viewer.getControl().addKeyListener( new org.eclipse.swt.events.KeyAdapter() {
 		      public void keyPressed(KeyEvent e) {
@@ -89,12 +88,12 @@ public class PeakFindingTable {
 		table.getColumn().setText("x");
 		table.getColumn().setAlignment(SWT.CENTER);
 		table.getColumn().setWidth(200);
-		table.getColumn().setResizable(false);
+		table.getColumn().setResizable(true);
 		table.setLabelProvider(new ColumnLabelProvider() {
 			@Override
 			public String getText(Object element) {
 				Peak peakNo = (Peak) element;
-				return peakNo.getX().toString();
+				return String.format("%.2f", peakNo.getX());
 			}
 		});
 		ret.add(table);
@@ -103,12 +102,12 @@ public class PeakFindingTable {
 		table.getColumn().setText("y");
 		table.getColumn().setAlignment(SWT.CENTER);
 		table.getColumn().setWidth(200);
-		table.getColumn().setResizable(false);
+		table.getColumn().setResizable(true);
 		table.setLabelProvider(new ColumnLabelProvider() {
 			@Override
 			public String getText(Object element) {
 				Peak peakNo = (Peak) element;
-				return peakNo.getY().toString();
+				return String.format("%.2f", peakNo.getY());
 			}
 		});
 		

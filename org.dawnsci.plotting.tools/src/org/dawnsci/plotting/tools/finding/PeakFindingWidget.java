@@ -58,7 +58,6 @@ public class PeakFindingWidget {
 	}
 	
 	public void createControl(final Composite parent){
-
 		Group configure = new Group(parent, SWT.NONE);
 		configure.setText("Peakfinding Configuration ");
 		configure.setLayout(new GridLayout(1, false));
@@ -79,7 +78,7 @@ public class PeakFindingWidget {
 		
 		lwrBndVal = new FloatSpinner(configureComposite, SWT.BORDER,  max , 3);
 		lwrBndVal.setLayoutData(new GridData(SWT.FILL, SWT.LEFT, true, false));
-
+		lwrBndVal.setPrecision(4);
 		lwrBndVal.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
 				PeakOppurtunity peakOpp = new PeakOppurtunity();
@@ -95,6 +94,7 @@ public class PeakFindingWidget {
 	
 		uprBndVal = new FloatSpinner(configureComposite, SWT.BORDER, max , 3);
 		uprBndVal.setLayoutData(new GridData(SWT.FILL, SWT.LEFT, true, false));
+		uprBndVal.setPrecision(4);
 		uprBndVal.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
 				PeakOppurtunity peakOpp = new PeakOppurtunity();
@@ -121,7 +121,6 @@ public class PeakFindingWidget {
 				manager.setSearchScaleIntensity(searchScaleVal);
 			}
 		});	
-		searchIntensity.setEnabled(false);
 		
 		searchScale = new Scale(configure, SWT.HORIZONTAL);
 		searchScale.setBounds(0, 0, 40, 200);
@@ -146,8 +145,6 @@ public class PeakFindingWidget {
 		});
 		
 		/*Default setups*/
-		searchScale.setEnabled(false);
-		searchScale.setVisible(false);
 		searchScaleVal = searchIntensity.getDouble();
 
 		manager.setSearchScaleIntensity(searchScaleVal);
@@ -193,7 +190,8 @@ public class PeakFindingWidget {
 			peakfinderCombo.add(nameID);
 			manager.setPeakFinderID(pfID); 
 		}			
-		peakfinderCombo.select(0);
+		peakfinderCombo.select(1); 
+		
 		manager.setPeakFinderID(peakfinderCombo.getText().toString()); 
 		Activator.getPlottingPreferenceStore().setValue(PeakFindingConstants.PeakAlgorithm, peakfinderCombo.getText().toString());		
 		

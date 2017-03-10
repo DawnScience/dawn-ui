@@ -124,9 +124,9 @@ public class PeakFindingSearchJob extends Job {
 					boolean running = true;
 					final List<Peak> peaks = new ArrayList<Peak>();
 					peaks.add(new Peak(0.0,0.0));
+					int stepSize = xData.getSize()/500;
 					while(running) {
 						xData.getSize();
-						int stepSize = xData.getSize()/10;
 						for(int i = 0; i < xData.getSize(); i+= stepSize){
 							peaks.set(0, new Peak(xData.getDouble(i), yData.getDouble(i)));
 							

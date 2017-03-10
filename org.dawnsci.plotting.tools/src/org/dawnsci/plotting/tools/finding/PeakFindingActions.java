@@ -36,10 +36,12 @@ public class PeakFindingActions {
 		
 		final Action createNewSelection = new Action("New Search Selection.", IAction.AS_PUSH_BUTTON) {
 			public void run() {
+				
 				if (removeMode.isChecked()){
 					 tool.setRemoveMode(false);
 					 removeMode.setChecked(false);
 				}
+				
 				if (addMode.isChecked()){
 					 tool.setAddMode(false);
 					 addMode.setChecked(false);

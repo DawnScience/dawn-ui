@@ -6,9 +6,6 @@ import java.util.List;
 import org.dawb.common.ui.util.GridUtils;
 import org.dawb.common.ui.widgets.ActionBarWrapper;
 import org.dawnsci.plotting.tools.fitting.PeakFittingTool;
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.dawnsci.analysis.dataset.roi.RectangularROI;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.axis.ClickEvent;
@@ -16,8 +13,6 @@ import org.eclipse.dawnsci.plotting.api.axis.IClickListener;
 import org.eclipse.dawnsci.plotting.api.region.IROIListener;
 import org.eclipse.dawnsci.plotting.api.region.IRegion;
 import org.eclipse.dawnsci.plotting.api.region.IRegionListener;
-import org.eclipse.dawnsci.plotting.api.region.MouseEvent;
-import org.eclipse.dawnsci.plotting.api.region.MouseListener;
 import org.eclipse.dawnsci.plotting.api.region.ROIEvent;
 import org.eclipse.dawnsci.plotting.api.region.RegionEvent;
 import org.eclipse.dawnsci.plotting.api.region.RegionUtils;
@@ -91,8 +86,8 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 	private Double upperBnd;
 	private Double lowerBnd;
 	
-	private IDataset xData;
-	private IDataset yData;
+	private IDataset interestXData;
+	private IDataset interestYData;
 	
 	private List<Peak> peaks = new ArrayList<Peak>();
 	
@@ -111,16 +106,18 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 	
 	public void setAddMode(boolean status){
 		isAdding = status;
+		//if(searchRegion.isVisible() != !status)
 		searchRegion.setMobile(!status);
 		searchRegion.setVisible(!status);
 	}
-	
 	
 	public void setRemoveMode(boolean status){
 		isRemoving = status;
+		//if(searchRegion.isVisible() != !status)
 		searchRegion.setMobile(!status);
 		searchRegion.setVisible(!status);
 	}
+	
 	
 	public PeakFindingTool(IPlottingSystem system, PeakFindingManager controller){
 		this.setPlottingSystem(system);
@@ -285,30 +282,37 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 
 	public void configureTraces() {
 		// TODO: this must have like a name? just feel concerned in just assuming the trace i get is the plotting trace ...
-		sampleTrace = (ILineTrace) getPlottingSystem().getTraces().iterator().next();
+		if(getPlottingSystem().getTraces() != null){
+			sampleTrace = (ILineTrace) getPlottingSystem().getTraces().iterator().next();
 
-		// Setup Upper & lower bound for search region
-		if(getPlottingSystem().getTrace(BOUNDTRACENAME) == null){
-			regionBndsTrace = getPlottingSystem().createLineTrace(BOUNDTRACENAME);
-			regionBndsTrace.setLineWidth(3);
-			regionBndsTrace.setTraceType(TraceType.HISTO);
-			regionBndsTrace.setTraceColor(ColorConstants.orange);
-			getPlottingSystem().addTrace(regionBndsTrace);
-		} else {
-			regionBndsTrace = (ILineTrace) getPlottingSystem().getTrace(BOUNDTRACENAME);
+			// Setup Upper & lower bound for search region
+			if(getPlottingSystem().getTrace(BOUNDTRACENAME) == null){
+				regionBndsTrace = generateBoundTrace(BOUNDTRACENAME);
+				getPlottingSystem().addTrace(regionBndsTrace);
+			} else {
+				regionBndsTrace = (ILineTrace) getPlottingSystem().getTrace(BOUNDTRACENAME);
+			}
+			
+			// Intialise to upper and low limit of sample trace
+			Dataset xData = (Dataset) sampleTrace.getXData();
+			Double lwrBnd = xData.getDouble(0);
+			Double uprBnd = xData.getDouble(xData.argMax());
+	
+			Dataset xBnds = DatasetFactory.createFromObject(new double[] { lwrBnd, uprBnd });
+			Dataset bndHeight = genBoundsHeight();
+	
+			updateTraceBounds(xBnds, bndHeight);
 		}
-		
-		// Intialise to upper and low limit of sample trace
-		Dataset xData = (Dataset) sampleTrace.getXData();
-		Double lwrBnd = xData.getDouble(0);
-		Double uprBnd = xData.getDouble(xData.argMax());
-
-		Dataset xBnds = DatasetFactory.createFromObject(new double[] { lwrBnd, uprBnd });
-		Dataset bndHeight = genBoundsHeight();
-
-		updateTraceBounds(xBnds, bndHeight);
 	}
 
+	private ILineTrace generateBoundTrace(String tracename){
+		ILineTrace trace = getPlottingSystem().createLineTrace(BOUNDTRACENAME);
+		trace.setLineWidth(3);
+		trace.setTraceType(TraceType.HISTO);
+		trace.setTraceColor(ColorConstants.orange);
+		return trace;
+	}
+	
 	private ILineTrace generatePeakTrace(String tracename){
 		ILineTrace trace = getPlottingSystem().createLineTrace(tracename);
 		trace.setLineWidth(1);
@@ -335,7 +339,7 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 				getPlottingSystem().addTrace(peaksTrace);
 
 				PeakOppurtunity peakOpp = new PeakOppurtunity();
-				peakOpp.setYData(yData);
+				peakOpp.setYData(interestYData);
 
 				peaks.clear();
 				manager.setPeaks(peaks);
@@ -346,23 +350,11 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 					RegionUtils.getUniqueName("Search selection", getPlottingSystem()),
 					getPlottingSystem().is2D() ? IRegion.RegionType.BOX : IRegion.RegionType.XAXIS);
 			
+			searchRegion.setLineWidth(5);
 			searchRegion.setRegionColor(ColorConstants.red);
-			searchRegion.setMobile(false);
+			searchRegion.setMobile(true);
 			//searchRegion.setTrackMouse(true);//TODO: expands the region by hovering...
 			
-			MouseListener listen = new MouseListener.Stub() {
-				@Override
-				public void mousePressed(MouseEvent me) {
-					if(isAdding){
-						addPeakValue((double) me.getX(), (double)me.getY()); 
-					} else if (isRemoving) {
-						if(!peaks.isEmpty())
-							removePeakValue((double)me.getX(), (double)me.getY());
-					}
-				}
-			};
-			
-			searchRegion.addMouseListener(listen);
 			searchRegion.addROIListener(new IROIListener() {
 				@Override
 				public void roiSelected(ROIEvent evt) {
@@ -385,8 +377,10 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 						
 						//Load in new search bounds to beacon
 	 					PeakOppurtunity peakOpp = new PeakOppurtunity();
-						peakOpp.setXData(xData);
-						peakOpp.setYData(yData);
+	 					
+						peakOpp.setXData(interestXData); //TODO: slice from sample data with region here instead
+						peakOpp.setYData(interestYData);
+						
 						peakOpp.setLowerBound(lowerBnd);
 						peakOpp.setUpperBound(upperBnd);
 						//TODO: might need to postpone whilst configure more on peakOpp..
@@ -425,8 +419,8 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 		Dataset yData = DatasetUtils.convertToDataset(sampleTrace.getYData().squeeze());
 
 		BooleanDataset allowed = Comparisons.withinRange(xData, lowerBnd, upperBnd);
-		this.xData = xData.getByBoolean(allowed);
-		this.yData = yData.getByBoolean(allowed);
+		this.interestXData = xData.getByBoolean(allowed);
+		this.interestYData = yData.getByBoolean(allowed);
 	}
 	
 
@@ -462,8 +456,9 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 		regionBndsTrace.setData(x, y);
 		if (!regionBndsTrace.isVisible())
 			regionBndsTrace.setVisible(true);
-
-		getPlottingSystem().repaint();
+		
+		if(getPlottingSystem() != null)
+			getPlottingSystem().repaint();
 	}
 
 	public void updatePeakTrace(Dataset x, Dataset y) {
@@ -559,7 +554,7 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 			searchRegion = evt.getRegion();
 			searchRegion.setAlpha(3);
 
-			RectangularROI rectangle = (RectangularROI) searchRegion.getROI();
+			RectangularROI rectangle = (RectangularROI) searchRegion.getROI();	
 
 			updateSearchBnds(rectangle);
 			// Make inactive so can touch around
