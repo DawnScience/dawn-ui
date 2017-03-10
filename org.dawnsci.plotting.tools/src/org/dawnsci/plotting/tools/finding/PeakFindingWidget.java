@@ -217,9 +217,11 @@ public class PeakFindingWidget {
 	 			if(xData != null && yData != null){
 	 				runPeakSearch.setEnabled(false);
 					runPeakSearch.setImage(Activator.getImageDescriptor("icons/peakSearching.png").createImage());			
-					manager.peakSearchJob= new PeakFindingSearchJob(manager, xData, yData);
+					
+					manager.peakSearchJob = new PeakFindingSearchJob(manager, xData, yData);
 					manager.peakSearchJob.schedule();
-				} else {
+
+	 			} else {
 					//No peak data set...
 					peaks.clear();
 					manager.setPeaks(peaks);

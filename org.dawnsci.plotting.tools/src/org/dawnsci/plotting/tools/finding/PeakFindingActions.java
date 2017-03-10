@@ -36,7 +36,6 @@ public class PeakFindingActions {
 		
 		final Action createNewSelection = new Action("New Search Selection.", IAction.AS_PUSH_BUTTON) {
 			public void run() {
-				//TODO: Need to deactivate grey of peak finding tool setup
 				if (removeMode.isChecked()){
 					 tool.setRemoveMode(false);
 					 removeMode.setChecked(false);

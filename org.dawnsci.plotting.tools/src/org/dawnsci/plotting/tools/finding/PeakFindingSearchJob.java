@@ -14,6 +14,9 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.dawnsci.analysis.api.peakfinding.IPeakFinderParameter;
+import org.eclipse.dawnsci.plotting.api.trace.ILineTrace;
+import org.eclipse.dawnsci.plotting.api.trace.ILineTrace.PointStyle;
+import org.eclipse.dawnsci.plotting.api.trace.ILineTrace.TraceType;
 import org.eclipse.january.dataset.Dataset;
 import org.eclipse.january.dataset.DatasetFactory;
 import org.eclipse.january.dataset.IDataset;
@@ -111,11 +114,46 @@ public class PeakFindingSearchJob extends Job {
 			
 			final List<Peak> peaks = new ArrayList<Peak>();
 			
+			//Start the running man	
+			Job runner = new RunningMan("Searching", xData, yData);
+			
+			//TODO: can i not manage a job async though?
+			Thread thread = new Thread(new Runnable() {
+				@Override
+				public void run() {
+					boolean running = true;
+					final List<Peak> peaks = new ArrayList<Peak>();
+					peaks.add(new Peak(0.0,0.0));
+					while(running) {
+						xData.getSize();
+						int stepSize = xData.getSize()/10;
+						for(int i = 0; i < xData.getSize(); i+= stepSize){
+							peaks.set(0, new Peak(xData.getDouble(i), yData.getDouble(i)));
+							
+							try {
+								Thread.sleep(100);
+							} catch (InterruptedException e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+							}
+							Display.getDefault().syncExec(new Runnable() {
+								@Override
+								public void run() {
+									controller.setPeaks(peaks);
+								}
+							});
+						}
+					}
+				}
+			});
+			thread.start();
+			
 			/*Perform Peak Search*/
 			try {
 				controller.getPeakFindServ().findPeaks(controller.getPeakFindData());
 			} catch (Exception e) {
 				logger.debug("Finding peaks data resulted in error in peak service");
+				thread.stop();
 				updatePeak(peaks);
 				return Status.CANCEL_STATUS;
 			}
@@ -125,6 +163,7 @@ public class PeakFindingSearchJob extends Job {
 
 			if(peaksPos.isEmpty()){
 				logger.debug("No peaks found with " + peakAlgorithm);
+				thread.stop();
 				updatePeak(peaks);
 				return Status.CANCEL_STATUS;
 			}
@@ -144,7 +183,12 @@ public class PeakFindingSearchJob extends Job {
 				peaks.add(p);
 			}
 			
+			//TODO: tmp just wanted to see things play
+			thread.stop();
+			
 			updatePeak(peaks);
+			
+			
 			
 			return Status.OK_STATUS;
 		}
@@ -158,6 +202,47 @@ public class PeakFindingSearchJob extends Job {
 				}
 			});
 	
+		}
+		
+		class RunningMan extends Job{
+
+			IDataset xData;
+			IDataset yData;
+			public RunningMan(String name, IDataset xpos, IDataset ypos) {
+				super(name);
+				this.xData = xpos;
+				this.yData = ypos;
+				// TODO Auto-generated constructor stub
+			}
+
+			@Override
+			protected IStatus run(IProgressMonitor monitor) {
+				boolean running = true;
+				final List<Peak> peaks = new ArrayList<Peak>();
+				peaks.add(new Peak(0.0,0.0));
+				while(running) {
+					xData.getSize();
+					
+					for(int i = 0; i < xData.getSize(); ++i){
+						peaks.set(0, new Peak(xData.getDouble(i), yData.getDouble(i)));
+						try {
+							Thread.sleep(100);
+						} catch (InterruptedException e) {
+							logger.debug("Runner collapses");
+							e.printStackTrace();
+						}
+						
+						Display.getDefault().syncExec(new Runnable() {
+							@Override
+							public void run() {
+								controller.setPeaks(peaks);
+							}
+						});
+					}
+				}
+				return Status.OK_STATUS;
+			}
+			
 		}
 			
 }
