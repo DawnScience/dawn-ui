@@ -6,10 +6,13 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.dawnsci.datavis.api.IRecentPlaces;
+import org.dawnsci.datavis.view.Activator;
+import org.eclipse.jface.preference.IPreferenceStore;
 
 public class RecentPlacesImpl implements IRecentPlaces {
 
-	private LinkedList<String> lastFile = new LinkedList<String>(); 
+	private LinkedList<String> lastFile = new LinkedList<String>();
+	private final static String RECENT_PLACES = "org.dawnsci.datavis.recentplaces";
 	
 	@Override
 	public void addPlace(String path) {
@@ -24,12 +27,32 @@ public class RecentPlacesImpl implements IRecentPlaces {
 				lastFile.remove(parentPath);
 				lastFile.addFirst(parentPath);
 			}
+			
+			StringBuilder builder = new StringBuilder();
+			for (String file : lastFile) {
+				builder.append(file);
+				builder.append(File.pathSeparator);
+			}
+			IPreferenceStore store = Activator.getDefault().getPreferenceStore();
+			store.setValue(RECENT_PLACES, builder.toString());
 		}
 		
 	}
 
 	@Override
 	public List<String> getRecentPlaces() {
+		
+		if (lastFile.isEmpty()) {
+			IPreferenceStore store = Activator.getDefault().getPreferenceStore();
+			String string = store.getString("org.dawnsci.datavis.recentplaces");
+			String[] split = string.split(File.pathSeparator);
+			for (String s : split) {
+				if (!s.isEmpty()) {
+					lastFile.add(s);
+				}
+			}
+		}
+		
 		return new ArrayList<String>(lastFile);
 	}
 
