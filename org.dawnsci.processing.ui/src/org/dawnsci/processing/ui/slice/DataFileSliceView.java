@@ -792,7 +792,7 @@ public class DataFileSliceView extends ViewPart {
 				
 				
 				} catch (OperationException e) {
-					logger.error(e.getMessage(), e);
+					logger.info(e.getMessage(), e);
 					EventAdmin eventAdmin = ServiceHolder.getEventAdmin();
 					Map<String,OperationException> props = new HashMap<>();
 					props.put("error", e);
