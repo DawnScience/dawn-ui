@@ -37,7 +37,7 @@ public class PeakFindingWidget {
 	
 	private static final Logger logger = LoggerFactory.getLogger(PeakFindingWidget.class);
 
-	PeakFindingManager controller;
+	PeakFindingManager manager;
 
 	private FloatSpinner uprBndVal;
 	private FloatSpinner lwrBndVal;	
@@ -53,7 +53,7 @@ public class PeakFindingWidget {
 	IDataset yData;
 	
 	public PeakFindingWidget(PeakFindingManager controller){
-		this.controller = controller;
+		this.manager = controller;
 	}
 	
 	public void createControl(final Composite parent){
@@ -68,11 +68,8 @@ public class PeakFindingWidget {
 		configureComposite.setLayoutData(new GridData(SWT.FILL, SWT.LEFT, true, false));
 		configureComposite.setLayout(new GridLayout(2, false));
 
-		// GET SAMPLE CONFIGURATION TODO: refactor and extract earlier
-		//Where else am i going to get this?
 		//ILineTrace sampleTrace = controller.getPeakfindingtool().sampleTrace;
-//		int max = sampleTrace.getXData().getSize();
-		//TODO: tmp limit
+		//TODO: tmp limit. Base of trace
 		int max = 100000;
 		
 		Label lwrBndLab = new Label(configureComposite, SWT.NONE);
@@ -87,7 +84,7 @@ public class PeakFindingWidget {
 				PeakOppurtunity peakOpp = new PeakOppurtunity();
 				peakOpp.setUpperBound(uprBndVal.getDouble());
 				peakOpp.setLowerBound(lwrBndVal.getDouble());
-				controller.loadPeakOppurtunity(peakOpp);
+				manager.loadPeakOppurtunity(peakOpp);
 			}
 		});
 		
@@ -104,7 +101,7 @@ public class PeakFindingWidget {
 				PeakOppurtunity peakOpp = new PeakOppurtunity();
 				peakOpp.setUpperBound(uprBndVal.getDouble());
 				peakOpp.setLowerBound(lwrBndVal.getDouble());
-				controller.loadPeakOppurtunity(peakOpp);
+				manager.loadPeakOppurtunity(peakOpp);
 			}
 		});
 
@@ -121,9 +118,9 @@ public class PeakFindingWidget {
 		searchIntensity.setLayoutData(new GridData(SWT.FILL, SWT.LEFT, true, false));
 		searchIntensity.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
-				// Adjust parameter to be passed to appropriate peak finder
+				
 				searchScaleVal = searchIntensity.getDouble();
-				controller.setSearchScaleIntensity(searchScaleVal);
+				manager.setSearchScaleIntensity(searchScaleVal);
 			}
 		});	
 		searchIntensity.setEnabled(false);
@@ -143,17 +140,19 @@ public class PeakFindingWidget {
 			public void widgetSelected(SelectionEvent e) {
 				int perspectiveValue = searchScale.getSelection(); 
 				searchIntensity.setDouble(perspectiveValue); 
-				//TODO: does this trigger event as have selection listener so should have a on change
+				
+				//TODO: need to change as changing the search intensity and using that trigger...
 				searchScaleVal = searchIntensity.getDouble();
-				controller.setSearchScaleIntensity(searchScaleVal);
+				manager.setSearchScaleIntensity(searchScaleVal);
 			}
 		});
+		
 		/*Default setups*/
 		searchScale.setEnabled(false);
 		searchScale.setVisible(false);
 		searchScaleVal = searchIntensity.getDouble();
 
-		controller.setSearchScaleIntensity(searchScaleVal);
+		manager.setSearchScaleIntensity(searchScaleVal);
 		
 		/*
 		 * Swap out peak finders		
@@ -168,8 +167,7 @@ public class PeakFindingWidget {
 		peakfinderCombo.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				
-				//XXX: hot ui fix as wavelet only component that needs the intentsity active
+				//XXX: hot ui fix as wavelet only component that needs the intensity active
 				if(peakfinderCombo.getText().equals("Wavelet Transform")){
 					searchIntensity.setEnabled(true);
 					searchScale.setEnabled(true);
@@ -182,25 +180,23 @@ public class PeakFindingWidget {
 					searchScale.setVisible(false);
 				}
 				
-				controller.setPeakFinderID(peakfinderCombo.getText());			
+				manager.setPeakFinderID(peakfinderCombo.getText());			
 			}
 		});
 		
-		controller.setPeakFindServ((IPeakFindingService) Activator.getService(IPeakFindingService.class));
+		manager.setPeakFindServ((IPeakFindingService) Activator.getService(IPeakFindingService.class));
 		//Load in peak finders
-		Collection<String> peakFinders = controller.getPeakFindServ().getRegisteredPeakFinders();
+		Collection<String> peakFinders = manager.getPeakFindServ().getRegisteredPeakFinders();
 
-		controller.setPeakFindData(new PeakFindingData(controller.getPeakFindServ()));
+		manager.setPeakFindData(new PeakFindingData(manager.getPeakFindServ()));
 
 		for (String pfID : peakFinders) {
-			String nameID = controller.getPeakFindServ().getPeakFinderName(pfID);
-			// peakFindData.activatePeakFinder(pfID);
+			String nameID = manager.getPeakFindServ().getPeakFinderName(pfID);
 			peakfinderCombo.add(nameID);
-		
-			controller.setPeakFinderID(pfID); // TODO: another tmp fix
+			manager.setPeakFinderID(pfID); 
 		}			
 		peakfinderCombo.select(0);
-		controller.setPeakFinderID(peakfinderCombo.getText().toString()); 
+		manager.setPeakFinderID(peakfinderCombo.getText().toString()); 
 		Activator.getPlottingPreferenceStore().setValue(PeakFindingConstants.PeakAlgorithm, peakfinderCombo.getText().toString());		
 		
 		runPeakSearch = new Button(configure, SWT.PUSH);
@@ -216,26 +212,25 @@ public class PeakFindingWidget {
 					PeakOppurtunity peakOpp = new PeakOppurtunity();
 					peakOpp.setLowerBound(uprBndVal.getDouble());
 					peakOpp.setUpperBound(lwrBndVal.getDouble());
-					controller.loadPeakOppurtunity(peakOpp);
+					manager.loadPeakOppurtunity(peakOpp);
 				} 	
 				
 				// Run peakSearch
 	 			if(xData.getSize() > 0 && yData.getSize() > 0){
 	 				runPeakSearch.setEnabled(false);
 					runPeakSearch.setImage(Activator.getImageDescriptor("icons/peakSearching.png").createImage());			
-					controller.peakSearchJob= new PeakFindingSearchJob(controller, xData, yData);
-					//TODO:Auto schedule in controller func
-					controller.peakSearchJob.schedule();
+					manager.peakSearchJob= new PeakFindingSearchJob(manager, xData, yData);
+					manager.peakSearchJob.schedule();
 				}
 			}
 		});
 	
 		//TODO: check is searching instead
-		controller.addPeakListener(new IPeakOpportunityListener() {
+		manager.addPeakListener(new IPeakOpportunityListener() {
 			@Override
 			public void peaksChanged(PeakOpportunityEvent evt) {
 				peaks = evt.getPeaks();
-				//XXX: needs to be in own event checkign for peak chaning as not all searches lead to a change in peaks! what if empty huh! maybe that should update the peaks though...
+				//XXX: needs to be in own event checking for peak changing as not all searches lead to a change in peaks! what if empty huh! maybe that should update the peaks though...
 				runPeakSearch.setEnabled(true);
 				runPeakSearch.setImage(Activator.getImageDescriptor("icons/peakSearch.png").createImage());
 			}

@@ -27,7 +27,6 @@ public class PeakFindingSetupWidget {
 	private Composite composite;
 	private TableViewer viewer;
 	
-	//TODO: controller setup?
 	public void createControl(final Composite composite) {
 		this.composite = composite;
 		

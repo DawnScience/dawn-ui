@@ -25,7 +25,6 @@ public class PeakFindingActions {
 	Action addMode;
 	Action removeMode;
 	
-	//TODO: need to summon the peak finder connected too
 	PeakFindingTool tool;
 	
 	public PeakFindingActions(PeakFindingManager controller,PeakFindingTool peakTool){
@@ -37,8 +36,7 @@ public class PeakFindingActions {
 		
 		final Action createNewSelection = new Action("New Search Selection.", IAction.AS_PUSH_BUTTON) {
 			public void run() {
-				//TODO: how will trigger the peak finding tool
-				//Need to grey of peak finding tool setup
+				//TODO: Need to deactivate grey of peak finding tool setup
 				tool.createNewSearch();
 			}
 		};
@@ -84,7 +82,6 @@ public class PeakFindingActions {
 		
 		final Action preferences = new Action("Preferences...") {
 			public void run() {
-//				/if (!controller.isToolPageActive()) return;
 				PreferenceDialog pref = PreferencesUtil.createPreferenceDialogOn(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(), PeakFindingPreferencePage.ID, null, null);
 				if (pref != null) pref.open();
 			}

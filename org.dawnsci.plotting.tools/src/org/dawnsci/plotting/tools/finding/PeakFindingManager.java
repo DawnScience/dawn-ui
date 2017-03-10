@@ -38,10 +38,8 @@ public class PeakFindingManager {
 	private IPeakFindingData peakFindData; 
 	private String peakFinderID;
 	
-	//TODO: check out HashSet. Do I really need a set. 
 	private HashSet<IPeakOpportunityListener> listeners;
 	
-	//Really need that intermediate of a identified peak. COuld the below be the answer
 	List<IdentifiedPeak> peaksIdentified = new ArrayList<IdentifiedPeak>();
 
 	public PeakFindingManager(){
@@ -92,7 +90,6 @@ public class PeakFindingManager {
 
 		final BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(file), "UTF-8"));
 		try {
-			
 			//TODO: fix the formatter. have iterate over identified peaks 
 			for (Peak p : peaks) {
 				writer.write(p.getXYFormat());
@@ -112,7 +109,7 @@ public class PeakFindingManager {
 
 	public void setSearchScaleIntensity(double searchScaleIntensity) {
 		String peakfinder = Activator.getPlottingPreferenceStore().getString(PeakFindingConstants.PeakAlgorithm);	
-		//TODO: tmp as only wavelet has this value
+		//TODO: tmp as only wavelet has the adjustability
 		if(peakfinder.equals("Wavelet Transform")){
 			Activator.getPlottingPreferenceStore().setValue("widthSz", searchScaleIntensity);
 		}
@@ -120,19 +117,18 @@ public class PeakFindingManager {
 		this.searchScaleIntensity = searchScaleIntensity;
 	}
 	
+	/*TRIGGERS*/
+	
 	public void setPeaks(List<Peak> peaks){
-		//TODO:this should then trigger all the updates... I hope, I hope, I hope
 		IPeakOpportunity peakOpp = new PeakOppurtunity();
 		peakOpp.setPeaks(peaks);
 		everythingChangesListeners(new PeakOpportunityEvent(this, peakOpp));
 	}
 	
-	//Triggers People Listening
 	public void addPeakListener(IPeakOpportunityListener listener) {
 		listeners.add(listener);
 	}
 	
-	//TODO: do I have to manage these listener removals?
 	public void removePeakListener(IPeakOpportunityListener listener) {
 		listeners.remove(listener);
 	}
@@ -142,26 +138,16 @@ public class PeakFindingManager {
 			
 			if(!evt.getPeaks().isEmpty())
 				listener.peaksChanged(evt);
-			
-			
-			//TODO: further sophisitication
-			Double lower = evt.getPeakOpp().getLowerBound();
-			Double upper = evt.getPeakOpp().getUpperBound();
 
-			if(lower != 0 && upper != 0)
+			if(evt.getPeakOpp().getLowerBound() != 0 && evt.getPeakOpp().getUpperBound() != 0)
 				listener.boundsChanged(evt.getPeakOpp().getUpperBound() , evt.getPeakOpp().getLowerBound());
-			//} else if(lower > upper){
-				//Well they want a bound setup. So give them it swapped 
-			//} 	
-			//else some equal value. Why do you hurt me with that search user?
-			
+
 			if (evt.getPeakOpp().getXData() != null && evt.getPeakOpp().getYData() != null)
 				listener.dataChanged(evt.getPeakOpp().getXData(),evt.getPeakOpp().getYData());
 		}
 	}
 
 	public void loadPeakOppurtunity(IPeakOpportunity peaksOpp){
-		//TODO: have peakOpputunity event use the actual peak opps. This is probs gonna  bite in the butt later by not doing that originally.
 		everythingChangesListeners(new PeakOpportunityEvent(this, peaksOpp));
 	}
 	

@@ -26,7 +26,6 @@ import uk.ac.diamond.scisoft.analysis.peakfinding.IPeakFindingService;
 import uk.ac.diamond.scisoft.analysis.peakfinding.Peak;
 
 /**
- * TODO: remove activator dependency here and just get through controller
  * TODO: have job update trace to look like things are going on
  * TODO: finally call formatPeakSearch
  * 
@@ -71,13 +70,8 @@ public class PeakFindingSearchJob extends Job {
 //			// // Set the region bounds
 //			controller.getPeakfindingtool().updateSearchBnds(rectangle);
 //		}
-//
-//		
-//		/* Clean up last peak search */
-//		controller.clearPeaks(); //TODO: shouldnt have to do this... just get peaks from trace when would like them?
-//		
 
-
+		
 		private void loadPeakFinderParams(){
 			//TODO: clean control function
 			// Free up active peakfinder calls
@@ -103,7 +97,6 @@ public class PeakFindingSearchJob extends Job {
 				controller.getPeakFindData().setPFParameterByName(peakAlgorithm, param.getName(), param.getValue());
 			}
 			controller.getPeakFindData().setPFParametersByPeakFinder(peakAlgorithm, peakParams);
-		
 		}
 		
 		@Override
@@ -113,7 +106,6 @@ public class PeakFindingSearchJob extends Job {
 			loadPeakFinderParams();
 			
 			controller.getPeakFindData().setPFParametersByPeakFinder(peakAlgorithm, peakParams);
-		
 			controller.getPeakFindData().setData(xData, yData);
 			controller.getPeakFindData().setNPeaks(20);
 			
@@ -126,7 +118,6 @@ public class PeakFindingSearchJob extends Job {
 			}
 	
 			/*Extract Peak Search Data */
-			//Should just call a controller function for this?
 			TreeMap<Integer, Double> peaksPos = (TreeMap<Integer, Double>) controller.getPeakFindData().getPeaks(peakAlgorithm);
 
 			if(peaksPos.isEmpty()){

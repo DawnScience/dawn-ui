@@ -60,7 +60,7 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 	
 	PeakFindingManager manager;
 	
-	//View Compomnents
+	//View Components
 	private PeakFindingActions actions;
 	private PeakFindingWidget widget;
 	private PeakFindingTable table;
@@ -100,7 +100,6 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 	
 	private IPeakOpportunityListener listener;
 	
-	//TODO: should this default constructor generate controller...
 	public PeakFindingTool() {
 		// Setup up a new PeakSearch Instance
 		this.manager = new PeakFindingManager();
@@ -141,10 +140,6 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 	
 	@Override
 	public void createControl(Composite parent) {
-		//super.activate(); TODO: activate earlier
-		//TODO: can not really remove this...component of tool
-		//configureTraces();
-		
 		this.composite = new Composite(parent, SWT.NONE);
 		composite.setLayout(new GridLayout(1, false));
 		composite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, true));
@@ -197,8 +192,8 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 
 			@Override
 			public void dataChanged(IDataset nXData, IDataset nYData) {
-//				xData = nXData;
-//				yData = nYData;				
+				//xData = nXData;
+				//yData = nYData;				
 			}
 		};
 		manager.addPeakListener(listener);
@@ -251,8 +246,6 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 		pX.remove(toRemove);
 		pY.remove(toRemove);
 
-		// TODO: renive hot fix setup and functionalize
-		// remove peaks from table should be at same index?
 		peaks.remove(toRemove);
 				
 		if(!peaks.isEmpty()){
@@ -265,11 +258,7 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 	}
 
 	public void configureTraces() {
-		// Grab the current trace data
-		// TODO: this must have like a name? just feel concerned in just
-		// assuming the trace i get is the plotting trace ...
-		// TODO: should check first if trace is loaded... because will fail if
-		// not. or better
+		// TODO: this must have like a name? just feel concerned in just assuming the trace i get is the plotting trace ...
 		sampleTrace = (ILineTrace) getPlottingSystem().getTraces().iterator().next();
 
 		// Setup Upper & lower bound for search region
@@ -292,13 +281,6 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 		Dataset bndHeight = genBoundsHeight();
 
 		updateTraceBounds(xBnds, bndHeight);
-
-		// Setup PeakTrace
-//		if(getPlottingSystem().getTrace(PEAKSTRACENAME) == null) {
-//			peaksTrace = generatePeakTrace(PEAKSTRACENAME);
-//		} else {
-//			peaksTrace = (ILineTrace) getPlottingSystem().getTrace(PEAKSTRACENAME);
-//		}
 	}
 
 	private ILineTrace generatePeakTrace(String tracename){
@@ -396,7 +378,7 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 			}
 			
 			
-//			// Control Peak Removal + Addition
+			// Control Peak Removal + Addition
 			getPlottingSystem().addClickListener(new IClickListener() {
 				@Override
 				public void doubleClickPerformed(ClickEvent evt) {
@@ -420,13 +402,6 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 					}
 				}
 			});
-			
-			
-			
-			
-			
-			
-			
 			
 			
 			// TODO: need to now connect up this to have a resultant effect on
@@ -464,7 +439,6 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 		
 		updateTraceBounds(xdata, ydata); //TODO: this is already triggers
 		
-		//TODO: update manager search data 
 		setSearchDataOnBounds();	
 	}
 
@@ -506,7 +480,6 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 	}
 
 	private void updatePeakTrace(List<Peak> peakSet) {
-		//TODO: do i need this
 		List<Double> pX = new ArrayList<Double>();
 		List<Double> pY = new ArrayList<Double>();
 
@@ -587,7 +560,6 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 			RectangularROI rectangle = (RectangularROI) searchRegion.getROI();
 
 			updateSearchBnds(rectangle);
-
 			// Make inactive so can touch around
 			//evt.getRegion().setVisible(false);
 		}
@@ -629,13 +601,10 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 		getPlottingSystem().removeRegion(searchRegion);
 		getPlottingSystem().removeTrace(peaksTrace);
 		getPlottingSystem().removeTrace(regionBndsTrace);
-		//Remove icons
 		
-		//TODO: manager remove the ,amager listeners
-		//TODO: is below the way to do it... does remove any listening events that exist anywhere from controller. 
-		//manager.destroyListeners();
-		
-		
+		//TODO: icon removeal
+		//TODO: clear peaks 
+		//TODO: manager remove the manager listeners?
 		
 		Collection<IRegion> regions = getPlottingSystem().getRegions();
 		for (IRegion region : regions) {

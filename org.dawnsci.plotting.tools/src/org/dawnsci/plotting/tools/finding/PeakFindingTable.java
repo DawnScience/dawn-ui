@@ -6,9 +6,6 @@ import java.util.List;
 import org.eclipse.january.dataset.IDataset;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
-import org.eclipse.jface.viewers.ISelectionChangedListener;
-import org.eclipse.jface.viewers.SelectionChangedEvent;
-import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.swt.SWT;
@@ -45,12 +42,9 @@ public class PeakFindingTable {
 		viewer.getControl().addKeyListener( new org.eclipse.swt.events.KeyAdapter() {
 		      public void keyPressed(KeyEvent e) {
 		          if (e.keyCode == SWT.DEL){
-		        	  //Delete the peak the refresh should fix itself
-		        	  //TODO:These index should line up because of how they are populated... If a comparator is set we are doomed.
+		        	  //XXX:These index should line up because of how they are populated... If a comparator is set we are doomed.
 		        	  int idx = viewer.getTable().getSelectionIndex();
 		        	  
-		        	  //TODO: controller.updatePeakTrace(controller.peaks); 
-		        	  //TODO: UPDATE PEAKS CONTROLLER FUNCTION CHANGE. EVERYONE IS LISTENING FOR THIS CHANGE
 		        	  List<Peak> peaks = (List<Peak>) viewer.getInput();
 		        	  peaks.remove(idx);
 		        	  controller.setPeaks(peaks);
@@ -76,7 +70,6 @@ public class PeakFindingTable {
 			@Override
 			public void dataChanged(IDataset nXData, IDataset nYData) {
 				// TODO Auto-generated method stub
-				
 			}
 
 
@@ -88,8 +81,7 @@ public class PeakFindingTable {
 
 		List<TableViewerColumn> ret = new ArrayList<TableViewerColumn>(2);
 
-		// TODO: different selectiosnneed to trigger certain events..
-		// TODO: lablerprivuider for peaks ans might want to know algorithm or more data
+		// TODO: label provider for peaks and might want to know algorithm or more data
 		// TODO: selection listener table.getColumn().addSelectionListener();
 		TableViewerColumn table = new TableViewerColumn(viewer, SWT.NONE, 0);
 		table.getColumn().setText("x");
