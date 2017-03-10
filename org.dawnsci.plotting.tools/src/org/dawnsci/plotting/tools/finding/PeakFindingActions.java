@@ -37,6 +37,15 @@ public class PeakFindingActions {
 		final Action createNewSelection = new Action("New Search Selection.", IAction.AS_PUSH_BUTTON) {
 			public void run() {
 				//TODO: Need to deactivate grey of peak finding tool setup
+				if (removeMode.isChecked()){
+					 tool.setRemoveMode(false);
+					 removeMode.setChecked(false);
+				}
+				if (addMode.isChecked()){
+					 tool.setAddMode(false);
+					 addMode.setChecked(false);
+				}
+				
 				tool.createNewSearch();
 			}
 		};
@@ -46,7 +55,6 @@ public class PeakFindingActions {
 		addMode = new Action("Add peaks to those already found", IAction.AS_CHECK_BOX) {
 			 public void run() {
 				 tool.setAddMode(this.isChecked());
-				 
 				 if (removeMode.isChecked()){
 					 tool.setRemoveMode(false);
 					 removeMode.setChecked(false);

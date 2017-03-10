@@ -30,7 +30,8 @@ public class PeakFindingTable {
 	
 	public void createTableControl(Composite parent) {
 
-		viewer = new TableViewer(parent , SWT.FULL_SELECTION | SWT.SINGLE | SWT.H_SCROLL | SWT.V_SCROLL | SWT.BORDER);
+		
+		viewer = new TableViewer(parent , SWT.FULL_SELECTION | SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL);
 		createPeakDataColumns(viewer);
 
 		viewer.getTable().setLinesVisible(true);
@@ -43,17 +44,18 @@ public class PeakFindingTable {
 		      public void keyPressed(KeyEvent e) {
 		          if (e.keyCode == SWT.DEL){
 		        	  //XXX:These index should line up because of how they are populated... If a comparator is set we are doomed.
-		        	  int idx = viewer.getTable().getSelectionIndex();
-		        	  
-		        	  List<Peak> peaks = (List<Peak>) viewer.getInput();
-		        	  peaks.remove(idx);
-		        	  controller.setPeaks(peaks);
-		        	  	
-		        	  viewer.refresh();
+		        	  int[] selections = viewer.getTable().getSelectionIndices();
+		        	  for (int i =0; i < selections.length; ++i){
+			        	  List<Peak> peaks = (List<Peak>) viewer.getInput();
+			        	  peaks.remove(i);
+			        	  controller.setPeaks(peaks);
+			        	  viewer.refresh();
+		        	  }
 		          }
 		      }
 		});
-			
+		
+		
 		viewer.refresh();
 		
 		controller.addPeakListener(new IPeakOpportunityListener() {

@@ -164,7 +164,14 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 			public void peaksChanged(PeakOpportunityEvent evt) {
 				//Update Peaks
 				peaks = evt.getPeaks();
-				updatePeakTrace(peaks);
+				if(!peaks.isEmpty()){
+					updatePeakTrace(peaks);
+				} else {
+					if(peaksTrace!= null){
+						getPlottingSystem().removeTrace(peaksTrace);
+						peaksTrace = null;
+					}
+				}
 			}
 
 			@Override
@@ -387,7 +394,7 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 				}
 				@Override
 				public void clickPerformed(ClickEvent evt) {
-						if(isAdding){
+					if(isAdding){
 							addPeakValue(evt.getxValue(), evt.getyValue());
 						} else if (isRemoving) {
 							if(!peaks.isEmpty())
@@ -596,7 +603,7 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 			
 			if(regionBndsTrace != null)
 				getPlottingSystem().removeTrace(regionBndsTrace);
-			
+				
 			if(peaksTrace != null)
 				getPlottingSystem().removeTrace(peaksTrace);
 			
