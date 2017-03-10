@@ -203,6 +203,24 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 		};
 		manager.addPeakListener(listener);
 		
+		// Control Peak Removal + Addition
+		getPlottingSystem().addClickListener(new IClickListener() {
+			@Override
+			public void doubleClickPerformed(ClickEvent evt) {
+				// TODO Auto-generated method stub
+			}
+			@Override
+			public void clickPerformed(ClickEvent evt) {
+				if(isAdding){
+						addPeakValue(evt.getxValue(), evt.getyValue());
+					} else if (isRemoving) {
+						if(!peaks.isEmpty())
+							removePeakValue(evt.getxValue(), evt.getyValue());
+					}
+			}
+		});
+
+		
 		// Begin with the search tool ready to then run on
 		createNewSearch();
 	}
@@ -385,24 +403,6 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 				updateSearchBnds(rectangle);
 			}
 			
-			// Control Peak Removal + Addition
-			
-			getPlottingSystem().addClickListener(new IClickListener() {
-				@Override
-				public void doubleClickPerformed(ClickEvent evt) {
-					// TODO Auto-generated method stub
-				}
-				@Override
-				public void clickPerformed(ClickEvent evt) {
-					if(isAdding){
-							addPeakValue(evt.getxValue(), evt.getyValue());
-						} else if (isRemoving) {
-							if(!peaks.isEmpty())
-								removePeakValue(evt.getxValue(), evt.getyValue());
-						}
-				}
-			});
-
 			// TODO: need to now connect up this to have a resultant effect on
 			// the viewer
 			if (table.viewer != null) {
