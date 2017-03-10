@@ -1,5 +1,6 @@
 package org.dawnsci.plotting.tools.finding;
 	
+import java.awt.Container;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -49,8 +50,8 @@ public class PeakFindingWidget {
 	Button runPeakSearch;
 	
 	List<Peak> peaks = new ArrayList<Peak>();
-	IDataset xData;
-	IDataset yData;
+	IDataset xData = null;
+	IDataset yData = null ;
 	
 	public PeakFindingWidget(PeakFindingManager controller){
 		this.manager = controller;
@@ -88,11 +89,9 @@ public class PeakFindingWidget {
 			}
 		});
 		
-		
 		Label upperBndLab = new Label(configureComposite, SWT.NONE);
 		upperBndLab.setText("Upper Bound");
 		upperBndLab.setToolTipText("As shown by the vertical line");
-
 	
 		uprBndVal = new FloatSpinner(configureComposite, SWT.BORDER, max , 3);
 		uprBndVal.setLayoutData(new GridData(SWT.FILL, SWT.LEFT, true, false));
@@ -105,7 +104,6 @@ public class PeakFindingWidget {
 			}
 		});
 
-		
 
 		/* Adjust Peak Finding searchIntensity */
 		final Label searchIntensityLab = new Label(configureComposite, SWT.NONE);
@@ -216,11 +214,17 @@ public class PeakFindingWidget {
 				} 	
 				
 				// Run peakSearch
-	 			if(xData.getSize() > 0 && yData.getSize() > 0){
+	 			if(xData != null && yData != null){
 	 				runPeakSearch.setEnabled(false);
 					runPeakSearch.setImage(Activator.getImageDescriptor("icons/peakSearching.png").createImage());			
 					manager.peakSearchJob= new PeakFindingSearchJob(manager, xData, yData);
 					manager.peakSearchJob.schedule();
+				} else {
+					//No peak data set...
+					peaks.clear();
+					manager.setPeaks(peaks);
+					runPeakSearch.setEnabled(true);
+					runPeakSearch.setImage(Activator.getImageDescriptor("icons/peakSearch.png").createImage());
 				}
 			}
 		});
@@ -241,6 +245,8 @@ public class PeakFindingWidget {
 				setUpperBound(upper);
 			}
 
+			
+			//TODO: trigger this intially on a base search
 			@Override
 			public void dataChanged(IDataset nXData, IDataset nYData) {
 				xData = nXData;

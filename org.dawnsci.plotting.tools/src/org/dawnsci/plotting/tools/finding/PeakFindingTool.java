@@ -6,9 +6,6 @@ import java.util.List;
 import org.dawb.common.ui.util.GridUtils;
 import org.dawb.common.ui.widgets.ActionBarWrapper;
 import org.dawnsci.plotting.tools.fitting.PeakFittingTool;
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.dawnsci.analysis.dataset.roi.RectangularROI;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.axis.ClickEvent;
@@ -18,7 +15,6 @@ import org.eclipse.dawnsci.plotting.api.region.IRegion;
 import org.eclipse.dawnsci.plotting.api.region.IRegionListener;
 import org.eclipse.dawnsci.plotting.api.region.MouseEvent;
 import org.eclipse.dawnsci.plotting.api.region.MouseListener;
-import org.eclipse.dawnsci.plotting.api.region.MouseMotionListener;
 import org.eclipse.dawnsci.plotting.api.region.ROIEvent;
 import org.eclipse.dawnsci.plotting.api.region.RegionEvent;
 import org.eclipse.dawnsci.plotting.api.region.RegionUtils;
@@ -36,7 +32,6 @@ import org.eclipse.january.dataset.Dataset;
 import org.eclipse.january.dataset.DatasetFactory;
 import org.eclipse.january.dataset.DatasetUtils;
 import org.eclipse.january.dataset.IDataset;
-import org.eclipse.january.dataset.Slice;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -113,10 +108,15 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 	
 	public void setAddMode(boolean status){
 		isAdding = status;
+		searchRegion.setMobile(!status);
+		searchRegion.setVisible(!status);
 	}
+	
 	
 	public void setRemoveMode(boolean status){
 		isRemoving = status;
+		searchRegion.setMobile(!status);
+		searchRegion.setVisible(!status);
 	}
 	
 	public PeakFindingTool(IPlottingSystem system, PeakFindingManager controller){
@@ -163,10 +163,8 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 			@Override
 			public void peaksChanged(PeakOpportunityEvent evt) {
 				//Update Peaks
-				if(!evt.getPeaks().isEmpty()){
-					peaks = evt.getPeaks();
-					updatePeakTrace(peaks);
-				}
+				peaks = evt.getPeaks();
+				updatePeakTrace(peaks);
 			}
 
 			@Override
@@ -322,13 +320,17 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 			
 			searchRegion.setRegionColor(ColorConstants.red);
 			searchRegion.setMobile(false);
-			//searchRegion.setTrackMouse(true);// expands the region by hovering...
+			//searchRegion.setTrackMouse(true);//TODO: expands the region by hovering...
 			
 			MouseListener listen = new MouseListener.Stub() {
 				@Override
 				public void mousePressed(MouseEvent me) {
-					
-					if(isAdding){}
+					if(isAdding){
+						addPeakValue((double) me.getX(), (double)me.getY()); 
+					} else if (isRemoving) {
+						if(!peaks.isEmpty())
+							removePeakValue((double)me.getX(), (double)me.getY());
+					}
 				}
 			};
 			
@@ -336,7 +338,6 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 			searchRegion.addROIListener(new IROIListener() {
 				@Override
 				public void roiSelected(ROIEvent evt) {
-	
 						if (isAdding){}
 				}
 				
@@ -377,8 +378,8 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 				updateSearchBnds(rectangle);
 			}
 			
-			
 			// Control Peak Removal + Addition
+			
 			getPlottingSystem().addClickListener(new IClickListener() {
 				@Override
 				public void doubleClickPerformed(ClickEvent evt) {
@@ -386,24 +387,15 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 				}
 				@Override
 				public void clickPerformed(ClickEvent evt) {
-					if (evt.isShiftDown()) {
-						// getPlottingSystem().plotDataWithHold(evt.getxValue(),
-						// evt.getyValue());
-						// addPeakValue(evt.getxValue(), evt.getyValue());
-					} else {
-						if (isAdding) {	
+						if(isAdding){
 							addPeakValue(evt.getxValue(), evt.getyValue());
 						} else if (isRemoving) {
 							if(!peaks.isEmpty())
 								removePeakValue(evt.getxValue(), evt.getyValue());
 						}
-						//TODO: refresh table data...
-						//getPlottingSystem().repaint(); // update plots
-					}
 				}
 			});
-			
-			
+
 			// TODO: need to now connect up this to have a resultant effect on
 			// the viewer
 			if (table.viewer != null) {
@@ -524,7 +516,7 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 	}
 
 	public Dataset genBoundsHeight() {
-		double top = getPlottingSystem().getAxes().get(1).getUpper();
+		double top = sampleTrace.getYAxis().getUpper();
 		double[] h = { top, top }; // Only can have two boundary points
 		return DatasetFactory.createFromObject(h);
 	}
@@ -598,13 +590,21 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 	public void deactivate() {
 		super.deactivate();
 		// Now remove any listeners to the plotting providing getPlottingSystem()!=null
-		getPlottingSystem().removeRegion(searchRegion);
-		getPlottingSystem().removeTrace(peaksTrace);
-		getPlottingSystem().removeTrace(regionBndsTrace);
-		
-		//TODO: icon removeal
+		if(getPlottingSystem() != null){
+			if(searchRegion != null)
+				getPlottingSystem().removeRegion(searchRegion);
+			
+			if(regionBndsTrace != null)
+				getPlottingSystem().removeTrace(regionBndsTrace);
+			
+			if(peaksTrace != null)
+				getPlottingSystem().removeTrace(peaksTrace);
+			
+		}
+		//TODO: icon removal
 		//TODO: clear peaks 
-		//TODO: manager remove the manager listeners?
+		//TODO: manager remove the manager listeners? destorying anwyay though
+		//manager.destroyAllListeners();
 		
 		Collection<IRegion> regions = getPlottingSystem().getRegions();
 		for (IRegion region : regions) {
@@ -614,7 +614,9 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 	}
 	@Override
 	public void dispose() {
+		deactivate();
 		super.dispose();
+		composite.dispose();
         //TODO: kill manager jobs... maybe might not be storing the jobs... there scheduled though so should have segment of all jobs runnign
 	}
 

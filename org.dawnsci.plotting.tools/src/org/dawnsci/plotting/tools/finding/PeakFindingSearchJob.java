@@ -109,11 +109,14 @@ public class PeakFindingSearchJob extends Job {
 			controller.getPeakFindData().setData(xData, yData);
 			controller.getPeakFindData().setNPeaks(20);
 			
+			final List<Peak> peaks = new ArrayList<Peak>();
+			
 			/*Perform Peak Search*/
 			try {
 				controller.getPeakFindServ().findPeaks(controller.getPeakFindData());
 			} catch (Exception e) {
 				logger.debug("Finding peaks data resulted in error in peak service");
+				updatePeak(peaks);
 				return Status.CANCEL_STATUS;
 			}
 	
@@ -122,6 +125,7 @@ public class PeakFindingSearchJob extends Job {
 
 			if(peaksPos.isEmpty()){
 				logger.debug("No peaks found with " + peakAlgorithm);
+				updatePeak(peaks);
 				return Status.CANCEL_STATUS;
 			}
 			
@@ -132,7 +136,7 @@ public class PeakFindingSearchJob extends Job {
 			IDataset peaksY= DatasetFactory.createFromList(pPos);
 			IDataset peaksX = ((Dataset) xData).getBy1DIndex((IntegerDataset) DatasetFactory.createFromList(pHeight));
 			
-			final List<Peak> peaks = new ArrayList<Peak>();
+			
 			// Create peaks
 			for (int i = 0; i < peaksY.getSize(); ++i) {
 				Peak p = new Peak(peaksX.getDouble(i), peaksY.getDouble(i));
@@ -140,6 +144,12 @@ public class PeakFindingSearchJob extends Job {
 				peaks.add(p);
 			}
 			
+			updatePeak(peaks);
+			
+			return Status.OK_STATUS;
+		}
+		
+		private void updatePeak(final List<Peak> peaks){
 			/*Send peaks update*/
 			Display.getDefault().syncExec(new Runnable() {
 				@Override
@@ -147,8 +157,7 @@ public class PeakFindingSearchJob extends Job {
 					controller.setPeaks(peaks);
 				}
 			});
-			
-			return Status.OK_STATUS;
+	
 		}
 			
 }

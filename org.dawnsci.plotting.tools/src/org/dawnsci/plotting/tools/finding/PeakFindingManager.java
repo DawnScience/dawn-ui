@@ -136,8 +136,8 @@ public class PeakFindingManager {
 	private void everythingChangesListeners(PeakOpportunityEvent evt) {
 		for(IPeakOpportunityListener listener : listeners){
 			
-			if(!evt.getPeaks().isEmpty())
-				listener.peaksChanged(evt);
+			//if(!evt.getPeaks().isEmpty())
+			listener.peaksChanged(evt);
 
 			if(evt.getPeakOpp().getLowerBound() != 0 && evt.getPeakOpp().getUpperBound() != 0)
 				listener.boundsChanged(evt.getPeakOpp().getUpperBound() , evt.getPeakOpp().getLowerBound());
@@ -154,7 +154,7 @@ public class PeakFindingManager {
 	public void destroyAllListeners(){
 		Iterator<IPeakOpportunityListener> itr = listeners.iterator();
 		while(itr.hasNext()){
-			listeners.remove(itr);
+			listeners.remove(itr.next());
 		}
 	}
 
