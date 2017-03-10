@@ -309,4 +309,11 @@ public class RGBMixerDialog extends Dialog  {
 	  protected boolean isResizable() {
 	    return true;
 	  }
+	
+	@Override
+	public boolean close() {
+		if (system != null && !system.isDisposed()) system.dispose();
+		return super.close();
+	}
+	
 }

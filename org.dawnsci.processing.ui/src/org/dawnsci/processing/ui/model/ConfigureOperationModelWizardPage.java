@@ -521,6 +521,13 @@ public class ConfigureOperationModelWizardPage extends AbstractOperationModelWiz
 		return changed;
 	}
 	
+	@Override
+	public void dispose(){
+		super.dispose();
+		if (input != null && !input.isDisposed()) input.dispose();
+		if (output != null && !output.isDisposed()) output.dispose();
+	}
+	
 	private RectangularROI getRoiFromAnnotation(OperationModelField an, String name) {
 		
 		if (an != null && an.rangevalue() != RangeType.NONE) {

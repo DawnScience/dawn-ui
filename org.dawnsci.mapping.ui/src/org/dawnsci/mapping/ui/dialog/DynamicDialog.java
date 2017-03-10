@@ -82,4 +82,10 @@ public class DynamicDialog extends Dialog {
 	    return true;
 	  }
 	
+	@Override
+	public boolean close() {
+		component.dispose();
+		return super.close();
+	}
+	
 }

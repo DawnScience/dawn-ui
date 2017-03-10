@@ -370,4 +370,10 @@ public class VectorMixerDialog extends Dialog  {
 		// Plot this trace on top of the 2D image, if present
 		plotSystem.addTrace(this.vectorPlot);
 	}
+	
+	@Override
+	public boolean close() {
+		if (plotSystem != null && !plotSystem.isDisposed()) plotSystem.dispose();
+		return super.close();
+	}
 }

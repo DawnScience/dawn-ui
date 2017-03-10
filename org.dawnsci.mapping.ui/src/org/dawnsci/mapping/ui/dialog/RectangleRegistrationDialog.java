@@ -578,5 +578,13 @@ public class RectangleRegistrationDialog extends Dialog {
 	  protected boolean isResizable() {
 	    return true;
 	  }
+	
+	@Override
+	public boolean close() {
+		if (systemMap != null && !systemMap.isDisposed()) systemMap.dispose();
+		if (systemImage != null && !systemImage.isDisposed()) systemImage.dispose();
+		if (systemComposite != null && !systemComposite.isDisposed()) systemComposite.dispose();
+		return super.close();
+	}
 }
 

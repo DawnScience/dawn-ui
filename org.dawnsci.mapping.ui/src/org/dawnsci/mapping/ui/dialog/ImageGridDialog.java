@@ -85,4 +85,10 @@ public class ImageGridDialog extends Dialog{
 		Rectangle bounds = PlatformUI.getWorkbench().getWorkbenchWindows()[0].getShell().getBounds();
 		return new Point((int)(bounds.width*0.8),(int)(bounds.height*0.8));
 	}
+	
+	@Override
+	public boolean close() {
+		for (IPlottingSystem<Composite> system : systems) if (system != null && !system.isDisposed()) system.dispose();
+		return super.close();
+	}
 }

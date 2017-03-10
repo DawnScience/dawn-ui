@@ -177,6 +177,12 @@ public class DerivativeToolExternalPlot extends AbstractToolPage {
 		super.deactivate();
 	}
 	
+	@Override
+	public void dispose() {
+		super.dispose();
+		if (system != null && !system.isDisposed()) system.dispose();
+	}
+	
 	private void createActions() {
 		//final MenuAction modeSelect= new MenuAction("Select Mode");
 
