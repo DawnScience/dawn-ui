@@ -137,7 +137,6 @@ public class PeakFindingWidget {
 			public void widgetSelected(SelectionEvent e) {
 				int perspectiveValue = searchScale.getSelection(); 
 				searchIntensity.setDouble(perspectiveValue); 
-				
 				//TODO: need to change as changing the search intensity and using that trigger...
 				searchScaleVal = searchIntensity.getDouble();
 				manager.setSearchScaleIntensity(searchScaleVal);
