@@ -3,6 +3,8 @@ package org.dawnsci.plotting.tools.finding;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
+
 import org.dawb.common.ui.util.GridUtils;
 import org.dawb.common.ui.widgets.ActionBarWrapper;
 import org.dawnsci.plotting.tools.fitting.PeakFittingTool;
@@ -43,6 +45,7 @@ import org.eclipse.ui.part.IPageSite;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import uk.ac.diamond.scisoft.analysis.fitting.functions.IdentifiedPeak;
 import uk.ac.diamond.scisoft.analysis.peakfinding.Peak;
 
 /**
@@ -54,7 +57,7 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 
 	private static final Logger logger = LoggerFactory.getLogger(PeakFittingTool.class);
 
-	PeakFindingManager manager;
+	public PeakFindingManager manager;
 
 	// View Components
 	private PeakFindingActions actions;
@@ -175,8 +178,8 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 			public void peaksChanged(PeakOpportunityEvent evt) {
 				// Update Peaks
 				peaks = evt.getPeaks();
-				if (!peaks.isEmpty()) {
-					updatePeakTrace(peaks);
+				if (!getPeaks().isEmpty()) {
+					updatePeakTrace(getPeaks());
 				} else {
 					//We have no longer any peaks to plot remove]
 					//getPlottingSystem().getTrace(PEAKSTRACENAME) != null
@@ -244,7 +247,7 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 				if (isAdding) {
 					addPeakValue(evt.getxValue(), evt.getyValue());
 				} else if (isRemoving) {
-					if (!peaks.isEmpty())
+					if (!getPeaks().isEmpty())
 						removePeakValue(evt.getxValue(), evt.getyValue());
 				}
 			}
@@ -326,10 +329,10 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 		List<Double> pX = new ArrayList<Double>();
 		List<Double> pY = new ArrayList<Double>();
 
-		if (!peaks.isEmpty()) {
-			for (int i = 0; i < peaks.size(); ++i) {
-				pX.add(peaks.get(i).getX());
-				pY.add(peaks.get(i).getY());
+		if (!getPeaks().isEmpty()) {
+			for (int i = 0; i < getPeaks().size(); ++i) {
+				pX.add(getPeaks().get(i).getX());
+				pY.add(getPeaks().get(i).getY());
 			}
 		}
 
@@ -338,7 +341,7 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 		Peak p = new Peak(x, y);
 		// XXX: Unfortunately now this will be on the end of the result. The
 		// order is important for the table view. Need comaprator there
-		peaks.add(p);
+		getPeaks().add(p);
 
 		// Update Trace
 		Dataset peakx = DatasetFactory.createFromList(pX);
@@ -346,7 +349,7 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 
 		updatePeakTrace(peakx, peaky);
 
-		manager.setPeaks(peaks);
+		manager.setPeaks(getPeaks());
 	}
 
 	private void removePeakValue(Double x, Double y) {
@@ -366,15 +369,15 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 		pX.remove(toRemove);
 		pY.remove(toRemove);
 
-		peaks.remove(toRemove);
+		getPeaks().remove(toRemove);
 
-		if (!peaks.isEmpty()) {
+		if (!getPeaks().isEmpty()) {
 			peakx = DatasetFactory.createFromList(pX);
 			peaky = DatasetFactory.createFromList(pY);
 			updatePeakTrace(peakx, peaky);
 		}
 
-		manager.setPeaks(peaks);
+		manager.setPeaks(getPeaks());
 	}
 
 	public void configureTraces() {
@@ -433,13 +436,13 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 				}
 			}
 
-			if (!peaks.isEmpty()) {
+			if (!getPeaks().isEmpty()) {
 				// Regenerate the trace to older times
 				getPlottingSystem().removeTrace(peaksTrace);
 				peaksTrace.dispose();
 				//Update reset
 				PeakOppurtunity peakOpp = new PeakOppurtunity();
-				manager.setPeaks(peaks);
+				manager.setPeaks(getPeaks());
 				manager.loadPeakOppurtunity(peakOpp);
 			}
 
@@ -734,4 +737,8 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 		// there scheduled though so should have segment of all jobs runnign
 	}
 
+	public List<Peak> getPeaks() {
+		return peaks;
+	}
+	
 }

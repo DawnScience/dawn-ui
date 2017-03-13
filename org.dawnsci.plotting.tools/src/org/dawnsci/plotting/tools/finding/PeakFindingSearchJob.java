@@ -116,6 +116,7 @@ public class PeakFindingSearchJob extends Job {
 			manager.getPeakFindData().setNPeaks(20);
 			
 			final List<Peak> peaks = new ArrayList<Peak>();
+			TreeMap<Integer, Double> peaksPos = new TreeMap<Integer, Double>();
 			
 			//Start the running man	
 //			Job runner = new RunningMan("Searching", xData, yData);
@@ -157,47 +158,52 @@ public class PeakFindingSearchJob extends Job {
 			} catch (Exception e) {
 				logger.debug("Finding peaks data resulted in error in peak service");
 				//thread.stop();
-				updatePeak(peaks);
+				updatePeak(peaksPos);
 				return Status.CANCEL_STATUS;
 			}
 	
 			/*Extract Peak Search Data */
-			TreeMap<Integer, Double> peaksPos = (TreeMap<Integer, Double>) manager.getPeakFindData().getPeaks(peakAlgorithm);
+			peaksPos = (TreeMap<Integer, Double>) manager.getPeakFindData().getPeaks(peakAlgorithm);
 
 			if(peaksPos.isEmpty()){
 				logger.debug("No peaks found with " + peakAlgorithm);
 				//thread.stop();
-				updatePeak(peaks);
+				updatePeak(peaksPos);
 				return Status.CANCEL_STATUS;
-			}
-			
-			/*Format peaks*/
-			List<Double> pPos = new ArrayList<Double>(peaksPos.values());
-			List<Integer> pHeight = new ArrayList<Integer>(peaksPos.keySet());
-			
-			IDataset peaksY= DatasetFactory.createFromList(pPos);
-			IDataset peaksX = ((Dataset) xData).getBy1DIndex((IntegerDataset) DatasetFactory.createFromList(pHeight));
-			
-			// Create peaks
-			for (int i = 0; i < peaksY.getSize(); ++i) {
-				Peak p = new Peak(peaksX.getDouble(i), peaksY.getDouble(i));
-				p.setName("P" + i);
-				peaks.add(p);
 			}
 			
 			//TODO: tmp just wanted to see things play
 			//thread.stop();
 			
-			updatePeak(peaks);
+			updatePeak(peaksPos );
 			
 			return Status.OK_STATUS;
 		}
 		
-		private void updatePeak(final List<Peak> peaks){
+		private void updatePeak(final Map<Integer,Double> peaksPos){
 			/*Send peaks update*/
 			Display.getDefault().syncExec(new Runnable() {
 				@Override
 				public void run() {
+
+					List<Peak> peaks = new ArrayList<Peak>();
+					
+					/*Format peaks*/
+					List<Double> pPos = new ArrayList<Double>(peaksPos.values());
+					List<Integer> pHeight = new ArrayList<Integer>(peaksPos.keySet());
+
+					IDataset peaksY= DatasetFactory.createFromList(pPos);
+					IDataset peaksX = ((Dataset) xData).getBy1DIndex((IntegerDataset) DatasetFactory.createFromList(pHeight));
+
+					// Create peaks
+					for (int i = 0; i < peaksY.getSize(); ++i) {
+						Peak p = new Peak(peaksX.getDouble(i), peaksY.getDouble(i));
+						p.setName("P" + i);
+						peaks.add(p);
+					}
+
+					manager.setPeaks(peaksPos,xData,yData);
+					
 					manager.setPeaks(peaks);
 					manager.finishedPeakSearching();
 				}

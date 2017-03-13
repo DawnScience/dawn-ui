@@ -15,6 +15,8 @@ import org.dawnsci.plotting.tools.Activator;
 import org.dawnsci.plotting.tools.preference.PeakFindingConstants;
 import org.eclipse.january.dataset.Dataset;
 import org.eclipse.january.dataset.DatasetUtils;
+import org.eclipse.january.dataset.IDataset;
+
 import uk.ac.diamond.scisoft.analysis.fitting.functions.IdentifiedPeak;
 import uk.ac.diamond.scisoft.analysis.peakfinding.IPeakFindingData;
 import uk.ac.diamond.scisoft.analysis.peakfinding.IPeakFindingService;
@@ -122,6 +124,12 @@ public class PeakFindingManager {
 	public void setPeaks(List<Peak> peaks){
 		IPeakOpportunity peakOpp = new PeakOppurtunity();
 		peakOpp.setPeaks(peaks);
+		everythingChangesListeners(new PeakOpportunityEvent(this, peakOpp));
+	}
+	
+	public void setPeaks(Map<Integer,Double> peakpos,IDataset xData, IDataset yData){
+		IPeakOpportunity peakOpp = new PeakOppurtunity();
+		peakOpp.setPeaksId(convertIntoPeaks(peakpos, (Dataset) xData, (Dataset) yData));
 		everythingChangesListeners(new PeakOpportunityEvent(this, peakOpp));
 	}
 	

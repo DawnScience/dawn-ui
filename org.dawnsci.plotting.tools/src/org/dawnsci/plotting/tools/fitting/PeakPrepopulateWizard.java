@@ -1,6 +1,9 @@
 package org.dawnsci.plotting.tools.fitting;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
+import java.util.Map;
 
 import org.dawb.common.ui.widgets.ActionBarWrapper;
 import org.dawnsci.plotting.tools.finding.PeakFindingManager;
@@ -11,11 +14,8 @@ import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.PlotType;
 import org.eclipse.dawnsci.plotting.api.PlottingFactory;
 import org.eclipse.dawnsci.plotting.api.trace.ILineTrace;
-import org.eclipse.dawnsci.plotting.api.trace.ITrace;
-import org.eclipse.dawnsci.plotting.api.trace.ILineTrace.PointStyle;
-import org.eclipse.dawnsci.plotting.api.trace.ILineTrace.TraceType;
 import org.eclipse.january.dataset.Dataset;
-import org.eclipse.january.dataset.IDataset;
+import org.eclipse.january.dataset.DatasetUtils;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.FillLayout;
@@ -23,12 +23,12 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.ui.part.Page;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import uk.ac.diamond.scisoft.analysis.fitting.functions.Add;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.FunctionFactory;
+import uk.ac.diamond.scisoft.analysis.fitting.functions.IdentifiedPeak;
 
 /**
  * TODO: adjust to spawn peak finder widget
@@ -53,16 +53,14 @@ public class PeakPrepopulateWizard extends WizardPage {
 	private Add pkCompFunction = null;
 	private IFunction bkgFunction = null;
 	private Add compFunction = null;
-	
-	private PeakFindingManager controller;
-	
+
 	private IPlottingSystem<Composite> plotting;
-	
-	private Collection<ITrace> traces;
-	
+
 	private FunctionFittingTool parentFittingTool;
 	
-	public PeakPrepopulateWizard(FunctionFittingTool parentFittingTool, Dataset[] roiLimits) {
+	private PeakFindingTool peakFindTool;
+	
+	public PeakPrepopulateWizard(FunctionFittingTool parentFittingTool) {
 		super("Intial peak searching tool");
 		this.setDescription("Search for peaks to then pass onto function fitting");
 		this.setTitle("Peak Finding");
@@ -92,9 +90,9 @@ public class PeakPrepopulateWizard extends WizardPage {
 		createPlottingSystem(right);
 		
 		//TODO: NEED TO BE ABLE TO GET THE PLOT TO REDRAW FROM CONTROLLER SETUp 
-		PeakFindingTool tool = new PeakFindingTool(plotting);
+		peakFindTool = new PeakFindingTool(plotting);
 		
-		tool.createControl(left);
+		peakFindTool.createControl(left);
 	}
 	
 	private void createPlottingSystem(Composite pos){
@@ -114,9 +112,12 @@ public class PeakPrepopulateWizard extends WizardPage {
 		plotting.createPlotPart(displayPlotComp, "Slice", actionBarWrapper, PlotType.XY, null);
 		
 		ILineTrace searchTrace =  plotting.createLineTrace("test");
-		ILineTrace sampleData = (ILineTrace) parentFittingTool.getPlottingSystem().getTraces().iterator().next();
-		searchTrace.setData(sampleData.getXData(), sampleData.getYData());
-
+		
+		if(parentFittingTool.getPlottingSystem().getTraces() != null){
+			ILineTrace sampleData = (ILineTrace) parentFittingTool.getPlottingSystem().getTraces().iterator().next();
+			searchTrace.setData(sampleData.getXData(), sampleData.getYData());
+		}
+		
 		plotting.addTrace(searchTrace);
 		
 		//TODO: this was passing some chopped slices
@@ -136,62 +137,101 @@ public class PeakPrepopulateWizard extends WizardPage {
 		return selectedProfile;
 	}
 	
-	/**
-	 * Update the composite function with either new peaks or new background.
-	 * Uses existing background if none is given and does nothing if there are
-	 * no peak or background functions.
-	 * @param peaks - new peak Add function
-	 * @param bkg - new background function
-	 */
-	private void updateCompFunction(Add peaks, IFunction bkg) {
-		try {// Have to copy peak function info across, otherwise we're 
-			 // updating the reference, not the object!
-			if (peaks != null) {
-				compFunction = (Add)peaks.copy();
-			} else if (pkCompFunction != null) {
-				compFunction = (Add)pkCompFunction.copy();
-			} else {
-				compFunction = new Add();
-			}
-		} catch (Exception e) {
-			logger.error("Failed to update fit with peak functions",e);
-		}
-		if (bkg != null) {
-			compFunction.addFunction(bkg);
-		} else if (bkgFunction != null) {
-			compFunction.addFunction(bkgFunction);
-		}
-	}
 	
-	/**
-	 * Creates peak finding job and then sets parameters for the peak finding before scheduling job.
-	 * JobChangeListener waits until peak finding finishes before calling back to parent tool
-	 * to draw in located peaks.
-	 */
-	private void findInitialPeaks() {
-
+	public void gatherInitalPeaks(){
 		
-//		if (findStartingPeaksJob == null) {
-//			findStartingPeaksJob = new FindInitialPeaksJob("Find Initial Peaks");
-//		}
-//		
-//		findStartingPeaksJob.setData(roiLimits);
-//		findStartingPeaksJob.setNrPeaks(nrPeaks);
-//		findStartingPeaksJob.setPeakFunction(getProfileFunction());
-//		
-//		findStartingPeaksJob.schedule();
-//		
-//		findStartingPeaksJob.addJobChangeListener(new JobChangeAdapter(){
-//			@Override
-//			public void done(IJobChangeEvent event) {
-//				updateCompFunction(pkCompFunction, null);
-//				// TODO this wants updating to use something more generic
-//				parentFittingTool.setInitialPeaks(compFunction);
-//			}
-//		});
-	
-	
-	
+		peakFindTool.getPeaks();
+		
+		
 	}
 
+
+	/**
+	 * Assumes peakpos are those represented in yData passed into. 
+	 * xData and yData must be same size
+	 * 
+	 * @param peakpos
+	 * @param xData
+	 * @param yData
+	 * @return every peak pos inside @peakpos cast to identified Peak
+	 */
+	private List<IdentifiedPeak> convertIntoPeaks(Map<Integer, Double> peakpos, Dataset xData, Dataset yData){
+		
+		ArrayList<IdentifiedPeak> peaks = new ArrayList<IdentifiedPeak>();
+		int backPos, forwardPos;
+		double backTotal, forwardTotal;
+		double backValue, forwardValue;
+		
+		for (Map.Entry<Integer, Double> peak : peakpos.entrySet()) {
+
+			backPos = peak.getKey() - 1;
+			backValue = yData.getElementDoubleAbs(backPos);
+			
+			
+			forwardPos = peak.getKey() + 1;
+			forwardValue = yData.getElementDoubleAbs(forwardPos);
+			
+			/*XXX: well if not normalised to zero can not really assume that zero is the turning point...*/
+
+			// Found zero crossing from positive to negative (maximum)
+			// now, work out left and right height differences from local minima or edge
+			backTotal = 0;
+			// get the backwards points
+			while (backPos > 0) {
+				if (backValue >= 0) {
+					backTotal += backValue;
+					backPos -= 1;
+					backValue = yData.getElementDoubleAbs(backPos);
+				} else {
+					break;
+				}
+			}
+
+			// get the forward points
+			forwardTotal = 0;
+			while (forwardPos < xData.getSize()) {
+				if (forwardValue <= 0) {
+					forwardTotal -= forwardValue;
+					forwardPos += 1;
+					forwardValue = yData.getElementDoubleAbs(forwardPos);
+				} else {
+					break;
+				}
+			}
+			
+			//Okay so below is some logic can grab to finding the peak info
+			int[] start = { backPos };
+			int[] stop = { forwardPos };
+			int[] step = { 1 };
+			
+			Dataset slicedXData = (Dataset) xData.getSlice(start, stop, step);
+			Dataset slicedYData = (Dataset) yData.getSlice(start, stop, step);
+			
+			List<Double> crossings = DatasetUtils.crossings(slicedXData, slicedYData, slicedYData.max()
+					.doubleValue() / 2);
+			
+			//No slice gathered as range too small. Must be current values
+			if (crossings.size() <= 1) {
+				crossings.clear();
+				crossings.add((double) backPos);
+				crossings.add((double) forwardPos);
+			}
+			
+			double position = peak.getKey();
+			double minXValue = xData.getElementDoubleAbs(backPos) ;
+			double maxXValue = xData.getElementDoubleAbs(forwardPos); 
+			double area = Math.min(backTotal, forwardTotal); 
+			double height = slicedYData.peakToPeak().doubleValue();
+			int indexOfMinXVal = backPos; 
+			int indexofMaxXVal = forwardPos;
+			List<Double> crossingsFnd = crossings;
+			
+			IdentifiedPeak newPeak = new IdentifiedPeak(position, minXValue,maxXValue,area,height,indexofMaxXVal,indexOfMinXVal,crossingsFnd);
+			peaks.add(newPeak);
+		}
+		
+		return peaks;
+	}
+	
+	
 }

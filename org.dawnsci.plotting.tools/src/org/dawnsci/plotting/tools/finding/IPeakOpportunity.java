@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.eclipse.january.dataset.IDataset;
 
+import uk.ac.diamond.scisoft.analysis.fitting.functions.IdentifiedPeak;
 import uk.ac.diamond.scisoft.analysis.peakfinding.Peak;
 
 /**
@@ -15,7 +16,11 @@ public interface IPeakOpportunity {
 
 	public List<Peak> getPeaks();
 	public void setPeaks(List<Peak> peaks);
-		
+	
+	public List<IdentifiedPeak>  getPeaksId();
+	public void setPeaksId(List<IdentifiedPeak> peaks);
+	
+	
 	public IDataset getXData();
 	public void  setXData(IDataset xData);
 	
