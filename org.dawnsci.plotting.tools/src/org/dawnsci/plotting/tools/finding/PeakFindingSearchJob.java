@@ -118,7 +118,7 @@ public class PeakFindingSearchJob extends Job {
 			final List<Peak> peaks = new ArrayList<Peak>();
 			
 			//Start the running man	
-			Job runner = new RunningMan("Searching", xData, yData);
+//			Job runner = new RunningMan("Searching", xData, yData);
 			
 			//TODO: can i not manage a job async though?
 //			Thread thread = new Thread(new Runnable() {

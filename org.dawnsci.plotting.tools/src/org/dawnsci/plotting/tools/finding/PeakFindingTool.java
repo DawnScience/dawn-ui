@@ -169,9 +169,11 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 				if (!peaks.isEmpty()) {
 					updatePeakTrace(peaks);
 				} else {
-					if (peaksTrace != null) {
+					//We have no longer any peaks to plot remove]
+					//getPlottingSystem().getTrace(PEAKSTRACENAME) != null
+					if(getPlottingSystem().getTrace(PEAKSTRACENAME) != null){
 						getPlottingSystem().removeTrace(peaksTrace);
-						peaksTrace = null;
+						peaksTrace.dispose();
 					}
 				}
 			}
@@ -195,7 +197,6 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 
 					updateTraceBounds(xdata, ydata); // TODO: this is already
 														// triggers
-
 					if (!getPlottingSystem().getTraces().isEmpty()) {
 						setSearchDataOnBounds((ILineTrace) getPlottingSystem().getTraces().iterator().next());
 					}
@@ -274,44 +275,21 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 				ILineTrace traceUpdate = (ILineTrace) evt.getSource();
 				if (traceUpdate.getName() != BOUNDTRACENAME && traceUpdate.getName() != PEAKSTRACENAME) {
 					
-
-					if (!peaks.isEmpty()) {
-						// Regenerate the trace to older times
-						getPlottingSystem().removeTrace(peaksTrace);
-						peaksTrace = generatePeakTrace(PEAKSTRACENAME);
-						getPlottingSystem().addTrace(peaksTrace);
-
-						PeakOppurtunity peakOpp = new PeakOppurtunity();
-						peaks.clear();
-						manager.setPeaks(peaks);
-						// TODO: might need to postpone whilst configure more on
-						// peakOpp..
-						manager.loadPeakOppurtunity(peakOpp);
-					}
-					
-					RectangularROI rectangle = (RectangularROI) searchRegion.getROI();
-					updateSearchBnds(rectangle);
-					
-					
-					
-					
 					setSearchDataOnBounds(traceUpdate);
 					// Load in new search bounds to beacon
 					PeakOppurtunity peakOpp = new PeakOppurtunity();
 
-					peakOpp.setXData(interestXData); // TODO: slice from sample
-														// data with region here
-														// instead
+					peakOpp.setXData(interestXData);
 					peakOpp.setYData(interestYData);
-					peakOpp.setLowerBound(lowerBnd);
-					peakOpp.setUpperBound(upperBnd);
-
-					// Clear old peaks
-					//peaks.clear();
-					//peakOpp.setPeaks(peaks);
+					//peakOpp.setLowerBound(lowerBnd);
+					//peakOpp.setUpperBound(upperBnd);
 
 					manager.loadPeakOppurtunity(peakOpp);
 				}
+				
+				//If the data has been changed I will assume wish for a search to be created.
+				//TODO: activate widget search event
+				
 			}
 
 			@Override
@@ -452,14 +430,10 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 			if (!peaks.isEmpty()) {
 				// Regenerate the trace to older times
 				getPlottingSystem().removeTrace(peaksTrace);
-				peaksTrace = generatePeakTrace(PEAKSTRACENAME);
-				getPlottingSystem().addTrace(peaksTrace);
-
+				peaksTrace.dispose();
+				//Update reset
 				PeakOppurtunity peakOpp = new PeakOppurtunity();
-				peaks.clear();
 				manager.setPeaks(peaks);
-				// TODO: might need to postpone whilst configure more on
-				// peakOpp..
 				manager.loadPeakOppurtunity(peakOpp);
 			}
 
@@ -583,7 +557,7 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 	}
 
 	public void updatePeakTrace(Dataset x, Dataset y) {
-		if (peaksTrace == null) {
+		if (getPlottingSystem().getTrace(PEAKSTRACENAME) == null) {
 			peaksTrace = generatePeakTrace(PEAKSTRACENAME);
 			getPlottingSystem().addTrace(peaksTrace);
 		}
@@ -591,7 +565,7 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 		peaksTrace.setData(x, y);
 
 		if (!peaksTrace.isVisible()) {
-			peaksTrace.setVisible(true);
+			peaksTrace.setVisible(true);		
 		}
 
 		getPlottingSystem().repaint();
@@ -600,7 +574,7 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 	private void updatePeakTrace(List<Peak> peakSet) {
 		List<Double> pX = new ArrayList<Double>();
 		List<Double> pY = new ArrayList<Double>();
-
+		
 		if (!peakSet.isEmpty()) {
 			for (int i = 0; i < peakSet.size(); ++i) {
 				pX.add(peakSet.get(i).getX());
