@@ -119,6 +119,13 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 	}
 	
 	
+	public void resetActions(){
+		searchRegion.setMobile(true);
+		searchRegion.setVisible(true);
+	}
+	
+	
+	
 	public PeakFindingTool(IPlottingSystem system, PeakFindingManager controller){
 		this.setPlottingSystem(system);
 		this.manager = controller;
