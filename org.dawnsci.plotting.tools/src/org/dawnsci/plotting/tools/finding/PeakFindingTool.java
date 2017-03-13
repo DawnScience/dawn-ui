@@ -93,7 +93,10 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 	private IDataset interestYData;
 
 	private List<Peak> peaks = new ArrayList<Peak>();
+	private List<IdentifiedPeak> peaksId = new ArrayList<IdentifiedPeak>();
 
+	
+	
 	private IPeakOpportunityListener listener;
 
 	public PeakFindingTool() {
@@ -188,6 +191,9 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 						peaksTrace.dispose();
 					}
 				}
+				
+				//TODO: now ill just place these identifed peaks here too
+				peaks	Id = evt.getPeakOpp().getPeaksId();
 			}
 
 			@Override
@@ -740,5 +746,10 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 	public List<Peak> getPeaks() {
 		return peaks;
 	}
+
+	public List<IdentifiedPeak> getPeaksId() {
+		return peaksId;
+	}
+
 	
 }

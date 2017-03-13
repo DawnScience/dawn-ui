@@ -161,6 +161,10 @@ public class PeakFindingManager {
 			if(evt.getPeaks() != null)
 				listener.peaksChanged(evt);			
 
+			if(evt.getPeakOpp().getPeaks() != null)
+				listener.peaksChanged(evt);
+			
+			
 			if(evt.getPeakOpp().getLowerBound() != 0 && evt.getPeakOpp().getUpperBound() != 0)
 				listener.boundsChanged(evt.getPeakOpp().getUpperBound() , evt.getPeakOpp().getLowerBound());
 
@@ -174,6 +178,9 @@ public class PeakFindingManager {
 					listener.isPeakFinding();
 				}
 			}
+			
+			
+			
 		}
 	}
 

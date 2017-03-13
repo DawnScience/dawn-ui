@@ -203,7 +203,6 @@ public class PeakFindingSearchJob extends Job {
 					}
 
 					manager.setPeaks(peaksPos,xData,yData);
-					
 					manager.setPeaks(peaks);
 					manager.finishedPeakSearching();
 				}
