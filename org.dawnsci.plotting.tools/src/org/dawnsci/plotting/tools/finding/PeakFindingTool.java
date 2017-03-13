@@ -628,7 +628,7 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 	}
 
 	public Dataset genBoundsHeight() {
-		double top = getPlottingSystem().getSelectedYAxis().getUpper();
+		double top = getPlottingSystem().getAxes().get(0).getUpper();
 		double[] h = { top, top }; // Only can have two boundary points
 		return DatasetFactory.createFromObject(h);
 	}
@@ -661,9 +661,9 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 			searchRegion = evt.getRegion();
 			searchRegion.setAlpha(3);
 
-			RectangularROI rectangle = (RectangularROI) searchRegion.getROI();
-
-			updateSearchBnds(rectangle);
+//			RectangularROI rectangle = (RectangularROI) searchRegion.getROI();
+//
+//			updateSearchBnds(rectangle);
 			// Make inactive so can touch around
 			// evt.getRegion().setVisible(false);
 		}

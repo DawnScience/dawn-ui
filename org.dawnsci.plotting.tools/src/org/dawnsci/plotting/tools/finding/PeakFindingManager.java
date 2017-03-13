@@ -127,14 +127,14 @@ public class PeakFindingManager {
 	
 	public void setPeakSearching(){
 		IPeakOpportunity peakOpp = new PeakOppurtunity();
-		peakOpp.setSearching(true);
+		peakOpp.setSearching(false);
 		everythingChangesListeners(new PeakOpportunityEvent(this, peakOpp));
 	
 	}
 	
 	public void finishedPeakSearching(){
 		IPeakOpportunity peakOpp = new PeakOppurtunity();
-		peakOpp.setSearching(false);
+		peakOpp.setSearching(true);
 		everythingChangesListeners(new PeakOpportunityEvent(this, peakOpp));
 	}
 	
@@ -148,10 +148,10 @@ public class PeakFindingManager {
 	}
 
 	private void everythingChangesListeners(PeakOpportunityEvent evt) {
-		for(IPeakOpportunityListener listener : listeners){
+		for(IPeakOpportunityListener listener : listeners) {
 			
-			//if(!evt.getPeaks().isEmpty())
-			listener.peaksChanged(evt);
+			if(evt.getPeaks() != null)
+				listener.peaksChanged(evt);			
 
 			if(evt.getPeakOpp().getLowerBound() != 0 && evt.getPeakOpp().getUpperBound() != 0)
 				listener.boundsChanged(evt.getPeakOpp().getUpperBound() , evt.getPeakOpp().getLowerBound());
@@ -159,13 +159,13 @@ public class PeakFindingManager {
 			if (evt.getPeakOpp().getXData() != null && evt.getPeakOpp().getYData() != null)
 				listener.dataChanged(evt.getPeakOpp().getXData(),evt.getPeakOpp().getYData());
 			
-			if(evt.getPeakOpp().getSearchingStatus() != null){
-				if (evt.getPeakOpp().getSearchingStatus())
-					listener.isPeakFinding();
-				else
+			if (evt.getPeakOpp().getSearchingStatus() != null) {
+				if(evt.getPeakOpp().getSearchingStatus()){
 					listener.finishedPeakFinding();
-			} 
-				
+				} else {
+					listener.isPeakFinding();
+				}
+			}
 		}
 	}
 

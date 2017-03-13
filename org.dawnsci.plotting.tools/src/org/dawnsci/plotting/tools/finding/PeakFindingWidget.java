@@ -234,8 +234,6 @@ public class PeakFindingWidget {
 			public void peaksChanged(PeakOpportunityEvent evt) {
 				peaks = evt.getPeaks();
 				//XXX: needs to be in own event checking for peak changing as not all searches lead to a change in peaks! what if empty huh! maybe that should update the peaks though...
-				runPeakSearch.setEnabled(true);
-				runPeakSearch.setImage(Activator.getImageDescriptor("icons/peakSearch.png").createImage());
 			}
 
 			@Override
