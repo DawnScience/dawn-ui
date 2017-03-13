@@ -21,6 +21,7 @@ import org.eclipse.dawnsci.plotting.api.tool.AbstractToolPage;
 import org.eclipse.dawnsci.plotting.api.trace.ILineTrace;
 import org.eclipse.dawnsci.plotting.api.trace.ITraceListener;
 import org.eclipse.dawnsci.plotting.api.trace.TraceEvent;
+import org.eclipse.dawnsci.plotting.api.trace.TraceWillPlotEvent;
 import org.eclipse.dawnsci.plotting.api.trace.ILineTrace.PointStyle;
 import org.eclipse.dawnsci.plotting.api.trace.ILineTrace.TraceType;
 import org.eclipse.draw2d.ColorConstants;
@@ -29,6 +30,7 @@ import org.eclipse.january.dataset.Comparisons;
 import org.eclipse.january.dataset.Dataset;
 import org.eclipse.january.dataset.DatasetFactory;
 import org.eclipse.january.dataset.DatasetUtils;
+import org.eclipse.january.dataset.DoubleDataset;
 import org.eclipse.january.dataset.IDataset;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
@@ -62,16 +64,13 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 	private Composite composite;
 	
 	// Traces
-	//TODO: just making public whilst poking
-	private ILineTrace sampleTrace;
-	
 	private String PEAKSTRACENAME = "Peaks";
 	private ILineTrace peaksTrace;
 
 	// Peak Running Process
 	private PeakFindingSearchJob peakSearch;
 
-	// Click Button Active TODO: set up differently
+	// Click Button Active 
 	private Boolean isRemoving = false; 
 	private Boolean isAdding = false;
 
@@ -103,7 +102,7 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 			}
 		};
 	}
-	
+		
 	public void setAddMode(boolean status){
 		isAdding = status;
 		//if(searchRegion.isVisible() != !status)
@@ -185,6 +184,7 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 			public void boundsChanged(double upper, double lower) {
 				RectangularROI rect = (RectangularROI) searchRegion.getROI();
 				double[] bounds = { lower, upper};
+				
 				//TODO: shouldnt be trigger anyway
 				if(bounds[0] != rect.getPointRef()[0] && bounds[1] != rect.getPointRef()[1]){
 					//Update region
@@ -198,7 +198,10 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 					Dataset ydata = genBoundsHeight();
 					
 					updateTraceBounds(xdata, ydata); //TODO: this is already triggers
-					setSearchDataOnBounds();
+					
+					if(!getPlottingSystem().getTraces().isEmpty()){
+						setSearchDataOnBounds((ILineTrace) getPlottingSystem().getTraces().iterator().next());
+					}
 				}
 			}
 
@@ -226,11 +229,80 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 					}
 			}
 		});
-
+		
+		
+		getPlottingSystem().addTraceListener(new ITraceListener() {
+			
+			@Override
+			public void tracesUpdated(TraceEvent evt) {
+				// TODO Auto-generated method stub
+				Object evtTrace = evt.getSource();
+				ILineTrace traceUpdate = (ILineTrace) getPlottingSystem().getTraces().iterator().next();
+				setSearchDataOnBounds(traceUpdate);
+			}
+			
+			@Override
+			public void tracesRemoved(TraceEvent evet) {
+				//The last trace removed should be the trace of search interest
+				if (getPlottingSystem().getTraces().isEmpty()){
+					//TODO:We have no data! Abort abort
+					//disable all actions? dis	able all running?
+				}
+			}
+			
+			@Override
+			public void tracesAdded(TraceEvent evt) {
+				// TODO Auto-generated method stub
+				//evt.getSource().
+				Object evtTrace = evt.getSource();
+				
+			}
+			
+			@Override
+			public void traceWillPlot(TraceWillPlotEvent evt) {
+				//When selecting data from cols this is triggered...
+				ILineTrace traceUpdate = (ILineTrace) evt.getSource();
+				traceUpdate.getName();
+				//traceUpdate = (ILineTrace) getPlottingSystem().getTraces().iterator().next();
+				if(traceUpdate.getName() != BOUNDTRACENAME || traceUpdate.getName() !=  PEAKSTRACENAME){
+					//setSearchDataOnBounds(traceUpdate);
+				}
+			}
+			
+			@Override
+			public void traceUpdated(TraceEvent evt) {
+				//On a change here we should update the search based on thsi new data
+				ILineTrace traceUpdate = (ILineTrace) evt.getSource();
+				if(traceUpdate.getName() != BOUNDTRACENAME || traceUpdate.getName() !=  PEAKSTRACENAME){
+					//setSearchDataOnBounds(traceUpdate);
+				}
+				
+				
+			}
+			
+			@Override
+			public void traceRemoved(TraceEvent evt) {
+				//if trace is my sample trace though
+	
+				
+			}
+			
+			@Override
+			public void traceCreated(TraceEvent evt) {
+				// TODO Auto-generated method stub
+				
+			}
+			
+			@Override
+			public void traceAdded(TraceEvent evt) {
+				// TODO Auto-generated method stub
+				
+			}
+		});
 		
 		// Begin with the search tool ready to then run on
 		createNewSearch();
-	}
+ 	}
 
 	private void addPeakValue(Double x, Double y) {
 
@@ -288,10 +360,9 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 	}
 
 	public void configureTraces() {
-		// TODO: this must have like a name? just feel concerned in just assuming the trace i get is the plotting trace ...
-		if(getPlottingSystem().getTraces() != null){
-			sampleTrace = (ILineTrace) getPlottingSystem().getTraces().iterator().next();
-
+		if(!getPlottingSystem().getTraces().isEmpty()){
+			ILineTrace sampleTrace = (ILineTrace) getPlottingSystem().getTraces().iterator().next(); //XXX:assumes base trace is the sample trace
+			
 			// Setup Upper & lower bound for search region
 			if(getPlottingSystem().getTrace(BOUNDTRACENAME) == null){
 				regionBndsTrace = generateBoundTrace(BOUNDTRACENAME);
@@ -377,22 +448,23 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 				
 				@Override
 				public void roiChanged(ROIEvent evt) {
+					
+					
+					
 					// TODO Auto-generated method stub
-					if(!searchRegion.isTrackMouse()){
-						RectangularROI rectangle = (RectangularROI) searchRegion.getROI();
-						updateSearchBnds(rectangle);
-						
-						//Load in new search bounds to beacon
-	 					PeakOppurtunity peakOpp = new PeakOppurtunity();
-	 					
-						peakOpp.setXData(interestXData); //TODO: slice from sample data with region here instead
-						peakOpp.setYData(interestYData);
-						
-						peakOpp.setLowerBound(lowerBnd);
-						peakOpp.setUpperBound(upperBnd);
-						//TODO: might need to postpone whilst configure more on peakOpp..
-						manager.loadPeakOppurtunity(peakOpp);
-					}
+					RectangularROI rectangle = (RectangularROI) searchRegion.getROI();
+					updateSearchBnds(rectangle);
+					
+					//Load in new search bounds to beacon
+ 					PeakOppurtunity peakOpp = new PeakOppurtunity();
+ 					
+					peakOpp.setXData(interestXData); //TODO: slice from sample data with region here instead
+					peakOpp.setYData(interestYData);
+					
+					peakOpp.setLowerBound(lowerBnd);
+					peakOpp.setUpperBound(upperBnd);
+					//TODO: might need to postpone whilst configure more on peakOpp..
+					manager.loadPeakOppurtunity(peakOpp);
 				}
 			});
 			
@@ -420,11 +492,15 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 	
 	
 	
-	public void setSearchDataOnBounds(){
+	public void setSearchDataOnBounds(ILineTrace trace){
 		// Obtain Upper and Lower Bounds
-		Dataset xData = DatasetUtils.convertToDataset(sampleTrace.getXData().squeeze());
-		Dataset yData = DatasetUtils.convertToDataset(sampleTrace.getYData().squeeze());
-
+		Dataset xDataRaw = DatasetUtils.convertToDataset(trace.getXData().squeeze());
+		Dataset yDataRaw = DatasetUtils.convertToDataset(trace.getYData().squeeze());
+		
+		//TODO: believe a cast in the peakfinder foreced me to use DoubleDateset here. Fix interface setup peakfinder.
+		DoubleDataset xData = DatasetUtils.cast(DoubleDataset.class, xDataRaw);
+		DoubleDataset yData = DatasetUtils.cast(DoubleDataset.class,yDataRaw);
+		
 		BooleanDataset allowed = Comparisons.withinRange(xData, lowerBnd, upperBnd);
 		this.interestXData = xData.getByBoolean(allowed);
 		this.interestYData = yData.getByBoolean(allowed);
@@ -442,7 +518,9 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 		
 		updateTraceBounds(xdata, ydata); //TODO: this is already triggers
 		
-		setSearchDataOnBounds();	
+		if(!getPlottingSystem().getTraces().isEmpty()){
+			setSearchDataOnBounds((ILineTrace) getPlottingSystem().getTraces().iterator().next());
+		}
 	}
 
 	public void updateBoundsUpper(double upperVal){
@@ -528,7 +606,7 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 	}
 
 	public Dataset genBoundsHeight() {
-		double top = sampleTrace.getYAxis().getUpper();
+		double top = getPlottingSystem().getSelectedYAxis().getUpper();
 		double[] h = { top, top }; // Only can have two boundary points
 		return DatasetFactory.createFromObject(h);
 	}
@@ -609,7 +687,7 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 			if(regionBndsTrace != null)
 				getPlottingSystem().removeTrace(regionBndsTrace);
 				
-			if(peaksTrace != null)
+			if(peaksTrace != null)	
 				getPlottingSystem().removeTrace(peaksTrace);
 			
 		}
