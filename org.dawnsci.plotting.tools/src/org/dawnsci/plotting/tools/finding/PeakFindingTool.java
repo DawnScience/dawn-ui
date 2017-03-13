@@ -208,6 +208,18 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 				// xData = nXData;
 				// yData = nYData;
 			}
+
+			@Override
+			public void isPeakFinding() {
+				// TODO Auto-generated method stub
+				
+			}
+
+			@Override
+			public void finishedPeakFinding() {
+				// TODO Auto-generated method stub
+				
+			}
 		};
 		manager.addPeakListener(listener);
 

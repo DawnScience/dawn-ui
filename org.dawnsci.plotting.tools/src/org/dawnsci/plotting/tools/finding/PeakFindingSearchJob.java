@@ -202,6 +202,7 @@ public class PeakFindingSearchJob extends Job {
 				@Override
 				public void run() {
 					controller.setPeaks(peaks);
+					controller.finishedPeakSearching();
 				}
 			});
 	

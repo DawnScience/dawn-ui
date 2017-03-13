@@ -125,6 +125,20 @@ public class PeakFindingManager {
 		everythingChangesListeners(new PeakOpportunityEvent(this, peakOpp));
 	}
 	
+	public void setPeakSearching(){
+		IPeakOpportunity peakOpp = new PeakOppurtunity();
+		peakOpp.setSearching(true);
+		everythingChangesListeners(new PeakOpportunityEvent(this, peakOpp));
+	
+	}
+	
+	public void finishedPeakSearching(){
+		IPeakOpportunity peakOpp = new PeakOppurtunity();
+		peakOpp.setSearching(false);
+		everythingChangesListeners(new PeakOpportunityEvent(this, peakOpp));
+	}
+	
+	
 	public void addPeakListener(IPeakOpportunityListener listener) {
 		listeners.add(listener);
 	}
@@ -144,6 +158,14 @@ public class PeakFindingManager {
 
 			if (evt.getPeakOpp().getXData() != null && evt.getPeakOpp().getYData() != null)
 				listener.dataChanged(evt.getPeakOpp().getXData(),evt.getPeakOpp().getYData());
+			
+			if(evt.getPeakOpp().getSearchingStatus() != null){
+				if (evt.getPeakOpp().getSearchingStatus())
+					listener.isPeakFinding();
+				else
+					listener.finishedPeakFinding();
+			} 
+				
 		}
 	}
 

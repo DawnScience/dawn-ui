@@ -21,7 +21,6 @@ public interface IPeakOpportunity {
 	
 	public IDataset getYData();
 	public void setYData(IDataset yData);
-
 	
 	//TODO: can bound changes exists without data set?
 	public double getUpperBound();
@@ -31,5 +30,5 @@ public interface IPeakOpportunity {
 	public void setLowerBound(double lower);
 
 	public void setSearching(boolean searching);
-	public boolean getSearchingStatus();
+	public Boolean getSearchingStatus();
 }

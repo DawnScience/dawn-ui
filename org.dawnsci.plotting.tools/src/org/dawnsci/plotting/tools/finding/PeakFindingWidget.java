@@ -217,7 +217,7 @@ public class PeakFindingWidget {
 					
 					manager.peakSearchJob = new PeakFindingSearchJob(manager, xData, yData);
 					manager.peakSearchJob.schedule();
-
+					
 	 			} else {
 					//No peak data set...
 					peaks.clear();
@@ -250,6 +250,18 @@ public class PeakFindingWidget {
 			public void dataChanged(IDataset nXData, IDataset nYData) {
 				xData = nXData;
 				yData = nYData;
+			}
+
+			@Override
+			public void isPeakFinding() {
+				runPeakSearch.setEnabled(false);
+				runPeakSearch.setImage(Activator.getImageDescriptor("icons/peakSearching.png").createImage());
+			}
+
+			@Override
+			public void finishedPeakFinding() {
+				runPeakSearch.setEnabled(true);
+				runPeakSearch.setImage(Activator.getImageDescriptor("icons/peakSearch.png").createImage());
 			}
 			
 		});

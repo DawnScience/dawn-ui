@@ -73,6 +73,18 @@ public class PeakFindingTable {
 				// TODO Auto-generated method stub
 			}
 
+			@Override
+			public void isPeakFinding() {
+				// TODO Auto-generated method stub
+				
+			}
+
+			@Override
+			public void finishedPeakFinding() {
+				// TODO Auto-generated method stub
+				
+			}
+
 
 		});
 	
