@@ -10,8 +10,12 @@ import org.eclipse.dawnsci.analysis.api.fitting.functions.IPeak;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.PlotType;
 import org.eclipse.dawnsci.plotting.api.PlottingFactory;
+import org.eclipse.dawnsci.plotting.api.trace.ILineTrace;
 import org.eclipse.dawnsci.plotting.api.trace.ITrace;
+import org.eclipse.dawnsci.plotting.api.trace.ILineTrace.PointStyle;
+import org.eclipse.dawnsci.plotting.api.trace.ILineTrace.TraceType;
 import org.eclipse.january.dataset.Dataset;
+import org.eclipse.january.dataset.IDataset;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.FillLayout;
@@ -68,35 +72,15 @@ public class PeakPrepopulateWizard extends WizardPage {
 	
 		//Configure controller for peak tool
 		
-		this.parentFittingTool = parentFittingTool;
-		this.traces = parentFittingTool.getPlottingSystem().getTraces();
-		
-		this.controller = new PeakFindingManager();
-		
-		//Need to set plotting system in controller
-		//this.controller = new PeakFindingController();
-		//this.controller.setPlottingSystem(parentFittingTool.getPlottingSystem());
-		//this.controller.setRegion((RectangularROI)parentFittingTool.getPlottingSystem().getRegion("fit_region").getROI());
+		this.parentFittingTool = parentFittingTool;		
 	}
 	
 	@Override
-	public void createControl(Composite parent) {
-		
-		//Create/get the base containers and set up the grid layout
+	public void createControl(Composite parent) {		
 		dialogContainer = new Composite(parent, SWT.NONE);
 		dialogContainer.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, true));
 		dialogContainer.setLayout(new GridLayout(2, false));
 		
-		//TODO: create tool segments..
-//		Composite tool = new Composite(dialogContainer, SWT.RIGHT);
-//		tool.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, true));
-//		tool.setLayout(new GridLayout(1, false));
-//		
-//		
-//		IToolBarManager toolBar = new ToolBarManager(new ToolBar(dialogContainer, SWT.FILL));
-//		controller.getActions().createActions(toolBar);
-		
-		//controller.getWidget().createControl(dialogContainer);
 		Composite left = new Composite(dialogContainer, SWT.FILL);
 		left.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		left.setLayout(new GridLayout());
@@ -108,10 +92,7 @@ public class PeakPrepopulateWizard extends WizardPage {
 		createPlottingSystem(right);
 		
 		//TODO: NEED TO BE ABLE TO GET THE PLOT TO REDRAW FROM CONTROLLER SETUp 
-		//this.controller.setPlottingSystem(plotting);
-		
-		//TODO: pass onlt controller
-		PeakFindingTool tool = new PeakFindingTool(plotting,controller);
+		PeakFindingTool tool = new PeakFindingTool(plotting);
 		
 		tool.createControl(left);
 	}
@@ -127,14 +108,20 @@ public class PeakPrepopulateWizard extends WizardPage {
 		
 		try {
 			plotting = PlottingFactory.createPlottingSystem();
-			plotting.createPlotPart(displayPlotComp, "Slice", actionBarWrapper, PlotType.IMAGE, null);
 		} catch (Exception e) {
 			logger.error("cannot create plotting system",e);
 		}
+		plotting.createPlotPart(displayPlotComp, "Slice", actionBarWrapper, PlotType.XY, null);
 		
-		//Populate with last trace
-		for(ITrace trace : traces)
-			plotting.addTrace(trace);
+		ILineTrace searchTrace =  plotting.createLineTrace("test");
+		ILineTrace sampleData = (ILineTrace) parentFittingTool.getPlottingSystem().getTraces().iterator().next();
+		searchTrace.setData(sampleData.getXData(), sampleData.getYData());
+
+		plotting.addTrace(searchTrace);
+		
+		//TODO: this was passing some chopped slices
+//		for(ITrace trace : parentFittingTool.getPlottingSystem().getTraces())
+//			plotting.addTrace(trace);
 	}	
 	
 	/**

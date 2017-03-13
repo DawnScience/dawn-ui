@@ -8,6 +8,7 @@ import org.dawb.common.ui.widgets.ActionBarWrapper;
 import org.dawnsci.plotting.tools.fitting.PeakFittingTool;
 import org.eclipse.dawnsci.analysis.dataset.roi.RectangularROI;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
+import org.eclipse.dawnsci.plotting.api.PlotType;
 import org.eclipse.dawnsci.plotting.api.axis.ClickEvent;
 import org.eclipse.dawnsci.plotting.api.axis.IClickListener;
 import org.eclipse.dawnsci.plotting.api.region.IROIListener;
@@ -122,9 +123,9 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 		searchRegion.setVisible(true);
 	}
 
-	public PeakFindingTool(IPlottingSystem system, PeakFindingManager controller) {
+	public PeakFindingTool(IPlottingSystem system) {
+		this.manager = new PeakFindingManager();
 		this.setPlottingSystem(system);
-		this.manager = controller;
 	}
 
 	@Override
@@ -147,7 +148,7 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 		composite.setLayout(new GridLayout(1, false));
 		composite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, true));
 		GridUtils.removeMargins(composite);
-
+		
 		final IPageSite site = getSite();
 		IActionBars actionbars = site != null ? site.getActionBars() : generateActionBar(parent);
 
@@ -159,7 +160,15 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 
 		widget = new PeakFindingWidget(manager);
 		widget.createControl(composite);
-
+		
+		
+		//TODO: additioanl plot serivce
+		getPlottingSystem().createPlotPart(composite, getTitle(), actionbars, PlotType.XY, this.getViewPart());
+		
+		
+		
+		
+		
 		// TODO: id the listener...
 		listener = new IPeakOpportunityListener() {
 			@Override
@@ -254,12 +263,12 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 				if (getPlottingSystem().getTraces().isEmpty()) {
 					// TODO:We have no data! Abort abort
 					// disable all actions? dis able all running?
-				}
+				}	
 			}
 
 			@Override
 			public void tracesAdded(TraceEvent evt) {
-
+				// TODO Auto-generated method stub
 			}
 
 			@Override
@@ -545,7 +554,13 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 	// TODO: HAVE A UPDATE OR A SET? really do they do anything different
 	// TODO: this needs another trigger in roder to redraw to the plot ...
 	private void updateTraceBounds(Dataset x, Dataset y) {
+		if(regionBndsTrace == null) {
+			regionBndsTrace = generateBoundTrace(BOUNDTRACENAME);
+			getPlottingSystem().addTrace(regionBndsTrace);
+		}
 		regionBndsTrace.setData(x, y);
+		
+		
 		if (!regionBndsTrace.isVisible())
 			regionBndsTrace.setVisible(true);
 
