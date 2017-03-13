@@ -28,3 +28,4 @@ Import-Package: javax.annotation;version="1.2.0",
  org.osgi.service.event
 Service-Component: OSGI-INF/*.xml
 Bundle-Activator: org.dawnsci.datavis.view.Activator
+Bundle-Vendor: Diamond Light Source
