@@ -40,7 +40,7 @@ public class PeakFindingSearchJob extends Job {
 
 		protected final Logger logger = LoggerFactory.getLogger(PeakFindingSearchJob.class);
 
-		PeakFindingManager controller;
+		PeakFindingManager manager;
 
 		IPeakFindingService peakFindServ = (IPeakFindingService)Activator.getService(IPeakFindingService.class);
 
@@ -50,9 +50,9 @@ public class PeakFindingSearchJob extends Job {
 		String peakAlgorithm;
 		Map<String, IPeakFinderParameter> peakParams;
 
-		public PeakFindingSearchJob(PeakFindingManager controller,IDataset xData, IDataset yData) {
+		public PeakFindingSearchJob(PeakFindingManager manager,IDataset xData, IDataset yData) {
 			super("Peak Search");
-			this.controller = controller;
+			this.manager = manager;
 			this.xData = xData;
 			this.yData = yData;
 			setPriority(Job.INTERACTIVE);
@@ -80,15 +80,15 @@ public class PeakFindingSearchJob extends Job {
 		private void loadPeakFinderParams(){
 			//TODO: clean control function
 			// Free up active peakfinder calls
-			if (controller.getPeakFindData().hasActivePeakFinders()) {
-				Collection<String> actives = controller.getPeakFindData().getActivePeakFinders();
+			if (manager.getPeakFindData().hasActivePeakFinders()) {
+				Collection<String> actives = manager.getPeakFindData().getActivePeakFinders();
 				for (String active : actives) {
-					controller.getPeakFindData().deactivatePeakFinder(active);
+					manager.getPeakFindData().deactivatePeakFinder(active);
 				}
 			}
 			
 			peakAlgorithm= Activator.getPlottingPreferenceStore().getString(PeakFindingConstants.PeakAlgorithm);
-			controller.getPeakFindData().activatePeakFinder(peakAlgorithm);
+			manager.getPeakFindData().activatePeakFinder(peakAlgorithm);
 			//Configure peak finder on preference store go through all the params that match
 			peakParams = peakFindServ.getPeakFinderParameters(peakAlgorithm);
 			for (Entry<String, IPeakFinderParameter> peakParam : peakParams.entrySet()){
@@ -99,9 +99,9 @@ public class PeakFindingSearchJob extends Job {
 					val = (int) val.doubleValue();
 				param.setValue(val);
 				//TODO: allow single param pass
-				controller.getPeakFindData().setPFParameterByName(peakAlgorithm, param.getName(), param.getValue());
+				manager.getPeakFindData().setPFParameterByName(peakAlgorithm, param.getName(), param.getValue());
 			}
-			controller.getPeakFindData().setPFParametersByPeakFinder(peakAlgorithm, peakParams);
+			manager.getPeakFindData().setPFParametersByPeakFinder(peakAlgorithm, peakParams);
 		}
 		
 		@Override
@@ -110,10 +110,10 @@ public class PeakFindingSearchJob extends Job {
 			// Free up active peakfinder calls
 			loadPeakFinderParams();
 			
-			controller.getPeakFindData().setPFParametersByPeakFinder(peakAlgorithm, peakParams);
+			manager.getPeakFindData().setPFParametersByPeakFinder(peakAlgorithm, peakParams);
 			//DoubleDataset xDubsData = (DoubleDataset) DatasetUtils.convertToDataset(xData);
-			controller.getPeakFindData().setData(xData, yData);
-			controller.getPeakFindData().setNPeaks(20);
+			manager.getPeakFindData().setData(xData, yData);
+			manager.getPeakFindData().setNPeaks(20);
 			
 			final List<Peak> peaks = new ArrayList<Peak>();
 			
@@ -153,7 +153,7 @@ public class PeakFindingSearchJob extends Job {
 			
 			/*Perform Peak Search*/
 			try {
-				controller.getPeakFindServ().findPeaks(controller.getPeakFindData());
+				manager.getPeakFindServ().findPeaks(manager.getPeakFindData());
 			} catch (Exception e) {
 				logger.debug("Finding peaks data resulted in error in peak service");
 				//thread.stop();
@@ -162,7 +162,7 @@ public class PeakFindingSearchJob extends Job {
 			}
 	
 			/*Extract Peak Search Data */
-			TreeMap<Integer, Double> peaksPos = (TreeMap<Integer, Double>) controller.getPeakFindData().getPeaks(peakAlgorithm);
+			TreeMap<Integer, Double> peaksPos = (TreeMap<Integer, Double>) manager.getPeakFindData().getPeaks(peakAlgorithm);
 
 			if(peaksPos.isEmpty()){
 				logger.debug("No peaks found with " + peakAlgorithm);
@@ -178,7 +178,6 @@ public class PeakFindingSearchJob extends Job {
 			IDataset peaksY= DatasetFactory.createFromList(pPos);
 			IDataset peaksX = ((Dataset) xData).getBy1DIndex((IntegerDataset) DatasetFactory.createFromList(pHeight));
 			
-			
 			// Create peaks
 			for (int i = 0; i < peaksY.getSize(); ++i) {
 				Peak p = new Peak(peaksX.getDouble(i), peaksY.getDouble(i));
@@ -191,8 +190,6 @@ public class PeakFindingSearchJob extends Job {
 			
 			updatePeak(peaks);
 			
-			
-			
 			return Status.OK_STATUS;
 		}
 		
@@ -201,53 +198,53 @@ public class PeakFindingSearchJob extends Job {
 			Display.getDefault().syncExec(new Runnable() {
 				@Override
 				public void run() {
-					controller.setPeaks(peaks);
-					controller.finishedPeakSearching();
+					manager.setPeaks(peaks);
+					manager.finishedPeakSearching();
 				}
 			});
 	
 		}
 		
-		class RunningMan extends Job{
-
-			IDataset xData;
-			IDataset yData;
-			public RunningMan(String name, IDataset xpos, IDataset ypos) {
-				super(name);
-				this.xData = xpos;
-				this.yData = ypos;
-				// TODO Auto-generated constructor stub
-			}
-
-			@Override
-			protected IStatus run(IProgressMonitor monitor) {
-				boolean running = true;
-				final List<Peak> peaks = new ArrayList<Peak>();
-				peaks.add(new Peak(0.0,0.0));
-				while(running) {
-					xData.getSize();
-					
-					for(int i = 0; i < xData.getSize(); ++i){
-						peaks.set(0, new Peak(xData.getDouble(i), yData.getDouble(i)));
-						try {
-							Thread.sleep(100);
-						} catch (InterruptedException e) {
-							logger.debug("Runner collapses");
-							e.printStackTrace();
-						}
-						
-						Display.getDefault().syncExec(new Runnable() {
-							@Override
-							public void run() {
-								controller.setPeaks(peaks);
-							}
-						});
-					}
-				}
-				return Status.OK_STATUS;
-			}
-			
-		}
+//		class RunningMan extends Job{
+//
+//			IDataset xData;
+//			IDataset yData;
+//			public RunningMan(String name, IDataset xpos, IDataset ypos) {
+//				super(name);
+//				this.xData = xpos;
+//				this.yData = ypos;
+//				// TODO Auto-generated constructor stub
+//			}
+//
+//			@Override
+//			protected IStatus run(IProgressMonitor monitor) {
+//				boolean running = true;
+//				final List<Peak> peaks = new ArrayList<Peak>();
+//				peaks.add(new Peak(0.0,0.0));
+//				while(running) {
+//					xData.getSize();
+//					
+//					for(int i = 0; i < xData.getSize(); ++i){
+//						peaks.set(0, new Peak(xData.getDouble(i), yData.getDouble(i)));
+//						try {
+//							Thread.sleep(100);
+//						} catch (InterruptedException e) {
+//							logger.debug("Runner collapses");
+//							e.printStackTrace();
+//						}
+//						
+//						Display.getDefault().syncExec(new Runnable() {
+//							@Override
+//							public void run() {
+//								//manager.setPeaks(peaks);
+//							}
+//						});
+//					}
+//				}
+//				return Status.OK_STATUS;
+//			}
+//			
+//		}
 			
 }
 

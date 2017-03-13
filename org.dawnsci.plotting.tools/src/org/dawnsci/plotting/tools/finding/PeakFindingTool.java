@@ -246,9 +246,6 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 			@Override
 			public void tracesUpdated(TraceEvent evt) {
 				// TODO Auto-generated method stub
-				Object evtTrace = evt.getSource();
-				ILineTrace traceUpdate = (ILineTrace) getPlottingSystem().getTraces().iterator().next();
-				setSearchDataOnBounds(traceUpdate);
 			}
 
 			@Override
@@ -262,28 +259,16 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 
 			@Override
 			public void tracesAdded(TraceEvent evt) {
-				// TODO Auto-generated method stub
-				// evt.getSource().
-				Object evtTrace = evt.getSource();
 
 			}
 
 			@Override
 			public void traceWillPlot(TraceWillPlotEvent evt) {
-				// When selecting data from cols this is triggered...
-				ILineTrace traceUpdate = (ILineTrace) evt.getSource();
-				traceUpdate.getName();
-				// traceUpdate = (ILineTrace)
-				// getPlottingSystem().getTraces().iterator().next();
-				if (traceUpdate.getName() != BOUNDTRACENAME || traceUpdate.getName() != PEAKSTRACENAME) {
-					// setSearchDataOnBounds(traceUpdate);
-				}
+				// TODO Auto-generated method stub
 			}
 
 			@Override
 			public void traceUpdated(TraceEvent evt) {
-				// On a change here we should update the search based on thsi
-				// new data
 				ILineTrace traceUpdate = (ILineTrace) evt.getSource();
 				if (traceUpdate.getName() != BOUNDTRACENAME && traceUpdate.getName() != PEAKSTRACENAME) {
 					
@@ -295,18 +280,18 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 					peakOpp.setYData(interestYData);
 					//peakOpp.setLowerBound(lowerBnd);
 					//peakOpp.setUpperBound(upperBnd);
-
 					manager.loadPeakOppurtunity(peakOpp);
+				
+					
+					//If the data has been changed I will assume wish for a search to be created.
+					//TODO: activate widget search event
+					manager.setPeakSearching();
 				}
-				
-				//If the data has been changed I will assume wish for a search to be created.
-				//TODO: activate widget search event
-				
 			}
 
 			@Override
 			public void traceRemoved(TraceEvent evt) {
-				// if trace is my sample trace though
+				// TODO Auto-generated method stub
 
 			}
 
@@ -319,7 +304,7 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 			@Override
 			public void traceAdded(TraceEvent evt) {
 				// TODO Auto-generated method stub
-
+		
 			}
 		});
 

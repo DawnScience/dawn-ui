@@ -211,20 +211,22 @@ public class PeakFindingWidget {
 				} 	
 				
 				// Run peakSearch
-	 			if(xData != null && yData != null){
-	 				runPeakSearch.setEnabled(false);
-					runPeakSearch.setImage(Activator.getImageDescriptor("icons/peakSearching.png").createImage());			
-					
-					manager.peakSearchJob = new PeakFindingSearchJob(manager, xData, yData);
-					manager.peakSearchJob.schedule();
-					
-	 			} else {
-					//No peak data set...
-					peaks.clear();
-					manager.setPeaks(peaks);
-					runPeakSearch.setEnabled(true);
-					runPeakSearch.setImage(Activator.getImageDescriptor("icons/peakSearch.png").createImage());
-				}
+				manager.setPeakSearching();
+//				
+//				if(xData != null && yData != null){
+//					manager.setPeakSearching();
+//	 				
+//	 				//TODO: set the searching mode ...
+//					manager.peakSearchJob = new PeakFindingSearchJob(manager, xData, yData);
+//					manager.peakSearchJob.schedule();		
+//	 			
+//	 			} else {
+//					//No peak data set...
+//					peaks.clear();
+//					manager.setPeaks(peaks);
+//					runPeakSearch.setEnabled(true);
+//					runPeakSearch.setImage(Activator.getImageDescriptor("icons/peakSearch.png").createImage());
+//				}
 			}
 		});
 	
@@ -254,6 +256,18 @@ public class PeakFindingWidget {
 			public void isPeakFinding() {
 				runPeakSearch.setEnabled(false);
 				runPeakSearch.setImage(Activator.getImageDescriptor("icons/peakSearching.png").createImage());
+
+	 			if(xData != null && yData != null){	 				
+	 				//TODO: set the searching mode ...
+					manager.peakSearchJob = new PeakFindingSearchJob(manager, xData, yData);
+					manager.peakSearchJob.schedule();		
+	 			} else {
+					//No peak data set...
+					peaks.clear();
+					manager.setPeaks(peaks);
+					runPeakSearch.setEnabled(true);
+					runPeakSearch.setImage(Activator.getImageDescriptor("icons/peakSearch.png").createImage());
+				}
 			}
 
 			@Override
