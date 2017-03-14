@@ -323,7 +323,7 @@ public class SurfaceScatterViewStart extends Dialog {
 				ssps3c.generalUpdate();
 				customComposite.generalCorrectionsUpdate();
 				customComposite.getPlotSystem1CompositeView().generalUpdate();
-
+				updateIndicators(0);
 				getPlotSystemCompositeView().removeBackgroundSubtractedSubImage();
 				getSsps3c().isOutputCurvesVisible(false);
 				customComposite.getReplay().setEnabled(false);
