@@ -17,6 +17,7 @@ import org.eclipse.january.dataset.Dataset;
 import org.eclipse.january.dataset.DatasetUtils;
 import org.eclipse.january.dataset.IDataset;
 
+import uk.ac.diamond.scisoft.analysis.fitting.Generic1DFitter;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.IdentifiedPeak;
 import uk.ac.diamond.scisoft.analysis.peakfinding.IPeakFindingData;
 import uk.ac.diamond.scisoft.analysis.peakfinding.IPeakFindingService;
@@ -210,43 +211,55 @@ public class PeakFindingManager {
 		double backTotal, forwardTotal;
 		double backValue, forwardValue;
 		
+		List<IdentifiedPeak> oldPeaks = Generic1DFitter.parseDataDerivative(xData, yData, 1);
+		
 		for (Map.Entry<Integer, Double> peak : peakpos.entrySet()) {
-
+			
+			//Get a intial backwards position
 			backPos = peak.getKey() >= 0 ? peak.getKey() : peak.getKey()-1;
 			backValue = yData.getElementDoubleAbs(backPos);
 			
-			
+
+			//Get a intial forward posiiton
 			forwardPos = peak.getKey() + 1;
 			forwardValue = yData.getElementDoubleAbs(forwardPos);
 			
-			/*XXX: well if not normalised to zero can not really assume that zero is the turning point...*/
-
-			// Found zero crossing from positive to negative (maximum)
-			// now, work out left and right height differences from local minima or edge
+			//Check state of calucalteing back and forward posiition is not greater than peaks 
+			boolean backDescending = (peak.getValue() >= backValue);
+			boolean forwardDescending = (peak.getValue() >= forwardValue);
+			
 			backTotal = 0;
-			// get the backwards points
-			while (backPos > 0) {
-				if (backValue >= 0) {
-					backTotal += backValue;
-					backPos -= 1;
+			while(backDescending){
+				if(backPos > 0) {
+					double nextBackVal = yData.getElementDoubleAbs(backPos+-1); //get nextPos
 					backValue = yData.getElementDoubleAbs(backPos);
+					if (backValue >= nextBackVal) { 
+						backTotal += backValue;
+						backPos-=1; 
+					} else {
+						backDescending = false;
+					}
 				} else {
-					break;
-				}
-			}
-
-			// get the forward points
-			forwardTotal = 0;
-			while (forwardPos < xData.getSize()) {
-				if (forwardValue <= 0) {
-					forwardTotal -= forwardValue;
-					forwardPos += 1;
-					forwardValue = yData.getElementDoubleAbs(forwardPos);
-				} else {
-					break;
+					backDescending = false;
 				}
 			}
 			
+			forwardTotal = 0;
+			while(forwardDescending){
+				if(forwardPos < yData.getSize()) {
+					double nextBackVal = yData.getElementDoubleAbs(forwardPos + 1); //get nextPos
+					forwardValue = yData.getElementDoubleAbs(forwardPos);
+					if (forwardValue >= nextBackVal) {
+						forwardTotal -= forwardValue;
+						forwardPos++; 
+					} else {
+						forwardDescending= false;
+					}
+				} else {
+					backDescending = false;
+				}
+			}
+
 			//Okay so below is some logic can grab to finding the peak info
 			int[] start = { backPos };
 			int[] stop = { forwardPos };
@@ -274,7 +287,7 @@ public class PeakFindingManager {
 			int indexofMaxXVal = forwardPos;
 			List<Double> crossingsFnd = crossings;
 			
-			IdentifiedPeak newPeak = new IdentifiedPeak(position, minXValue,maxXValue,area,height,indexofMaxXVal,indexOfMinXVal,crossingsFnd);
+			IdentifiedPeak newPeak = new IdentifiedPeak(position, minXValue,maxXValue,area,height,indexOfMinXVal, indexofMaxXVal,crossingsFnd);
 			peaks.add(newPeak);
 		}
 		

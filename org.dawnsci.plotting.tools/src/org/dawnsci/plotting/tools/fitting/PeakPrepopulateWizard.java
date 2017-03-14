@@ -125,7 +125,7 @@ public class PeakPrepopulateWizard extends WizardPage {
 	}	
 	
 	public Add gatherPeaksFunc(){
-		Add compFuncPeaks = FittingUtils.getSeededPeakFit(peakFindTool.getPeaksId(), (Dataset)peakFindTool.gettingXData(), (Dataset)peakFindTool.gettingYData(), (Class<? extends IPeak>) Gaussian.class);
+		Add compFuncPeaks = FittingUtils.getSeededPeakFit(peakFindTool.getPeaksId(), (Dataset)peakFindTool.gettingXData(), (Dataset)peakFindTool.gettingYData(), null);
 		return compFuncPeaks;
 	}
 	
