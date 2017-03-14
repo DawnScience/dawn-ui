@@ -12,10 +12,13 @@ import java.util.List;
 import java.util.Map;
 
 import org.dawnsci.plotting.tools.Activator;
+import org.dawnsci.plotting.tools.fitting.FunctionFittingTool;
 import org.dawnsci.plotting.tools.preference.PeakFindingConstants;
 import org.eclipse.january.dataset.Dataset;
 import org.eclipse.january.dataset.DatasetUtils;
 import org.eclipse.january.dataset.IDataset;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import uk.ac.diamond.scisoft.analysis.fitting.Generic1DFitter;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.IdentifiedPeak;
@@ -29,6 +32,8 @@ import uk.ac.diamond.scisoft.analysis.peakfinding.Peak;
  * @author Dean P. Ottewell
  */
 public class PeakFindingManager {
+
+	private static final Logger logger = LoggerFactory.getLogger(PeakFindingManager.class);
 	
 	PeakFindingSearchJob peakSearchJob;
 	
@@ -201,17 +206,18 @@ public class PeakFindingManager {
 	 * 
 	 * @param peakpos
 	 * @param xData
-	 * @param yData
+	 * @param yData 
 	 * @return every peak pos inside @peakpos cast to identified Peak
 	 */
 	private List<IdentifiedPeak> convertIntoPeaks(Map<Integer, Double> peakpos, Dataset xData, Dataset yData){
+		
+		if(xData.getSize() != yData.getSize())
+			logger.error("Signal data must be matching size");
 		
 		ArrayList<IdentifiedPeak> peaks = new ArrayList<IdentifiedPeak>();
 		int backPos, forwardPos;	
 		double backTotal, forwardTotal;
 		double backValue, forwardValue;
-		
-		List<IdentifiedPeak> oldPeaks = Generic1DFitter.parseDataDerivative(xData, yData, 1);
 		
 		for (Map.Entry<Integer, Double> peak : peakpos.entrySet()) {
 			
@@ -221,12 +227,12 @@ public class PeakFindingManager {
 			
 
 			//Get a intial forward posiiton
-			forwardPos = peak.getKey() + 1;
+			forwardPos = peak.getKey() <= yData.getSize() ? peak.getKey(): peak.getKey()+1;
 			forwardValue = yData.getElementDoubleAbs(forwardPos);
 			
-			//Check state of calucalteing back and forward posiition is not greater than peaks 
-			boolean backDescending = (peak.getValue() >= backValue);
-			boolean forwardDescending = (peak.getValue() >= forwardValue);
+			//Check state of calucalteing back and forward posiition is not greater tha	n peaks 
+			boolean backDescending = true;//(peak.getValue() >= backValue);
+			boolean forwardDescending = true;//(peak.getValue() >= forwardValue);
 			
 			backTotal = 0;
 			while(backDescending){
@@ -246,17 +252,17 @@ public class PeakFindingManager {
 			
 			forwardTotal = 0;
 			while(forwardDescending){
-				if(forwardPos < yData.getSize()) {
+				if(forwardPos < yData.getSize()-1) {
 					double nextBackVal = yData.getElementDoubleAbs(forwardPos + 1); //get nextPos
 					forwardValue = yData.getElementDoubleAbs(forwardPos);
 					if (forwardValue >= nextBackVal) {
 						forwardTotal -= forwardValue;
-						forwardPos++; 
+						forwardPos++;  
 					} else {
 						forwardDescending= false;
 					}
 				} else {
-					backDescending = false;
+					forwardDescending = false;
 				}
 			}
 

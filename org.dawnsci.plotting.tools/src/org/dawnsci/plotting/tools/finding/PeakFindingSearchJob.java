@@ -183,21 +183,23 @@ public class PeakFindingSearchJob extends Job {
 
 					List<Peak> peaks = new ArrayList<Peak>();
 					
-					/*Format peaks*/
-					List<Double> pPos = new ArrayList<Double>(peaksPos.values());
-					List<Integer> pHeight = new ArrayList<Integer>(peaksPos.keySet());
-
-					IDataset peaksY= DatasetFactory.createFromList(pPos);
-					IDataset peaksX = ((Dataset) xData).getBy1DIndex((IntegerDataset) DatasetFactory.createFromList(pHeight));
-
-					// Create peaks
-					for (int i = 0; i < peaksY.getSize(); ++i) {
-						Peak p = new Peak(peaksX.getDouble(i), peaksY.getDouble(i));
-						p.setName("P" + i);
-						peaks.add(p);
+					if(!peaksPos.isEmpty()){
+						/*Format peaks*/
+						List<Double> pPos = new ArrayList<Double>(peaksPos.values());
+						List<Integer> pHeight = new ArrayList<Integer>(peaksPos.keySet());
+	
+						IDataset peaksY = DatasetFactory.createFromList(pPos);
+						IDataset peaksX = ((Dataset) xData).getBy1DIndex((IntegerDataset) DatasetFactory.createFromList(pHeight));
+						
+						// Create peaks
+						for (int i = 0; i < peaksY.getSize(); ++i) {
+							Peak p = new Peak(peaksX.getDouble(i), peaksY.getDouble(i));
+							p.setName("P" + i);
+							peaks.add(p);
+						}
 					}
-
 					manager.setPeaks(peaksPos,xData,yData);
+					
 					manager.setPeaks(peaks);
 					manager.finishedPeakSearching();
 				}
