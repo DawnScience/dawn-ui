@@ -193,7 +193,7 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 				}
 				
 				//TODO: now ill just place these identifed peaks here too
-				//peaksId = evt.getPeakOpp().getPeaksId();
+				peaksId = evt.getPeakOpp().getPeaksId();
 			}
 
 			@Override
