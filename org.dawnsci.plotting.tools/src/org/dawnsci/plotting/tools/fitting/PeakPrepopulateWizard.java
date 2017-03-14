@@ -1,6 +1,8 @@
 package org.dawnsci.plotting.tools.fitting;
 
 import java.util.List;
+
+import org.apache.commons.math3.analysis.function.Gaussian;
 import org.dawb.common.ui.widgets.ActionBarWrapper;
 import org.dawnsci.plotting.tools.finding.PeakFindingTool;
 import org.eclipse.dawnsci.analysis.api.fitting.functions.IFunction;
@@ -121,6 +123,11 @@ public class PeakPrepopulateWizard extends WizardPage {
 //		for(ITrace trace : parentFittingTool.getPlottingSystem().getTraces())
 //			plotting.addTrace(trace);
 	}	
+	
+	public Add gatherPeaksFunc(){
+		Add compFuncPeaks = FittingUtils.getSeededPeakFit(peakFindTool.getPeaksId(), (Dataset)peakFindTool.gettingXData(), (Dataset)peakFindTool.gettingYData(), (Class<? extends IPeak>) Gaussian.class);
+		return compFuncPeaks;
+	}
 	
 	public List<IdentifiedPeak> gatherInitalPeaks(){
 		return peakFindTool.getPeaksId();

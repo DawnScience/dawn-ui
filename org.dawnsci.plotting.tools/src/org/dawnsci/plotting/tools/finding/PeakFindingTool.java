@@ -92,6 +92,16 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 	private IDataset interestXData;
 	private IDataset interestYData;
 
+	//TODO: tmp getters just wanted to test fitting
+	public IDataset gettingXData() {
+		return this.interestXData;
+	}
+	public IDataset gettingYData() {
+		return this.interestYData;
+	}
+	
+	
+	
 	private List<Peak> peaks = new ArrayList<Peak>();
 	private List<IdentifiedPeak> peaksId = new ArrayList<IdentifiedPeak>();
 	
@@ -103,7 +113,7 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 		new ITraceListener.Stub() {
 			@Override
 			public void tracesUpdated(TraceEvent evt) {
-				peakSearch.schedule();
+				//peakSearch.schedule();
 			}
 		};
 	}
@@ -177,21 +187,24 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 		listener = new IPeakOpportunityListener() {
 			@Override
 			public void peaksChanged(PeakOpportunityEvent evt) {
-				// Update Peaks
-				peaks = evt.getPeaks();
-				if (!getPeaks().isEmpty()) {
-					updatePeakTrace(getPeaks());
-				} else {
-					//We have no longer any peaks to plot remove]
-					//getPlottingSystem().getTrace(PEAKSTRACENAME) != null
-					if(getPlottingSystem().getTrace(PEAKSTRACENAME) != null){
-						getPlottingSystem().removeTrace(peaksTrace);
-						peaksTrace.dispose();
+				if(evt.getPeaks() != null) {
+					// Update Peaks
+					peaks = evt.getPeaks();
+					if (!getPeaks().isEmpty()) {
+						updatePeakTrace(getPeaks());
+					} else {
+						//We have no longer any peaks to plot remove]
+						//getPlottingSystem().getTrace(PEAKSTRACENAME) != null
+						if(getPlottingSystem().getTrace(PEAKSTRACENAME) != null){
+							getPlottingSystem().removeTrace(peaksTrace);
+							peaksTrace.dispose();
+						}
 					}
 				}
-				
+
 				//TODO: now ill just place these identifed peaks here too
-				peaksId = evt.getPeakOpp().getPeaksId();
+				if(evt.getPeakOpp().getPeaksId() != null)
+					peaksId = evt.getPeakOpp().getPeaksId();
 			}
 
 			@Override
@@ -450,7 +463,7 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 				}
 			}
 
-			if (!getPeaks().isEmpty()) {
+			if (getPeaks() != null && !getPeaks().isEmpty()) {
 				// Regenerate the trace to older times
 				getPlottingSystem().removeTrace(peaksTrace);
 				peaksTrace.dispose();
