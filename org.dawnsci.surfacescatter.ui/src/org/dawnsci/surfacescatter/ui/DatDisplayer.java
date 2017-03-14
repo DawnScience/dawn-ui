@@ -4,10 +4,8 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-
-import org.dawnsci.surfacescatter.MethodSettingEnum.MethodSetting;
 import org.dawnsci.surfacescatter.GeometricCorrectionsReflectivityMethod;
-import org.dawnsci.surfacescatter.ReflectivityFluxCorrectionsForDialog;
+import org.dawnsci.surfacescatter.MethodSettingEnum.MethodSetting;
 import org.dawnsci.surfacescatter.ReflectivityMetadataTitlesForDialog;
 import org.dawnsci.surfacescatter.SXRDGeometricCorrections;
 import org.eclipse.dawnsci.analysis.api.io.IDataHolder;
@@ -29,7 +27,6 @@ import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.swt.widgets.Text;
-
 import uk.ac.diamond.scisoft.analysis.io.LoaderFactory;
 
 public class DatDisplayer extends Composite {
@@ -51,6 +48,7 @@ public class DatDisplayer extends Composite {
 	private Group rodConstrucion;
 	private Button deleteSelected;
 	private Button clearTable;
+	private Button clearRodTable;
 	private Group scannedVariableOptions;
 	private Group rodComponents;
 	private Text datFolderText;
@@ -219,6 +217,11 @@ public class DatDisplayer extends Composite {
 		rodComponents.setText("Rod Components");
 		rodComponents.setEnabled(false);
 
+		clearRodTable= new Button(rodComponents, SWT.PUSH | SWT.FILL);
+		clearRodTable.setText("Clear Rod Table");
+		clearRodTable.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		clearRodTable.setEnabled(false);
+		
 		deleteSelected = new Button(rodComponents, SWT.PUSH);
 		deleteSelected.setText("Delete Selected");
 		deleteSelected.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
@@ -282,7 +285,6 @@ public class DatDisplayer extends Composite {
 						tidiedTransferList.add(it1);
 					}
 				}
-
 				
 				IDataHolder dh1 = null;
 				ILazyDataset ild = null;
@@ -290,7 +292,8 @@ public class DatDisplayer extends Composite {
 				try {
 
 					String filename = tidiedTransferList.get(0).getText();
-					filepath = datFolderPath + File.separator + filename;
+					String filepath1 = datFolderPath + File.separator + filename;
+					filepath = filepath1;
 					dh1 = LoaderFactory.getData(filepath);
 
 				} catch (Exception e2) {
@@ -312,30 +315,49 @@ public class DatDisplayer extends Composite {
 						ild = dh1.getLazyDataset(ssp.getImageName());
 						
 						if(ild == null){
-							ssp.dialogToChangeImageFolder(promptedForImageFolder, dd);		
+							ssp.dialogToChangeImageFolder(promptedForImageFolder, dd);	
+							
+							try {
+
+								dh1 = ssp.copiedDatWithCorrectedTifs(tidiedTransferList.get(0).getText(), datFolderPath);
+								ild = dh1.getLazyDataset(ssp.getImageName());
+								
+							} catch (Exception e2) {
+								e2.printStackTrace();
+								ssp.dialogToChangeImageFolder(promptedForImageFolder, dd);	
+							}
 						}
 					}
 					
-					try {
-
-						dh1 = ssp.copiedDatWithCorrectedTifs(tidiedTransferList.get(0).getText(), datFolderPath);
-						ild = dh1.getLazyDataset(ssp.getImageName());
+					if (ild == null && r ==true && ssp.getImageFolderPath() != null ){
 						
-					} catch (Exception e2) {
-						e2.printStackTrace();
+						try {
+							
+							dh1 = ssp.copiedDatWithCorrectedTifs(tidiedTransferList.get(0).getText(), datFolderPath);
+							ild = dh1.getLazyDataset(ssp.getImageName());
+	
+						} catch (Exception e2) {
+							e2.printStackTrace();
+						}
+						
 					}
+					
+					
 					
 					if(ild == null && r ==true){
+						
 						ssp.dialogToChangeImageFolder(promptedForImageFolder, dd);
-					}
 					
-					try {
-
-						dh1 = ssp.copiedDatWithCorrectedTifs(tidiedTransferList.get(0).getText(), datFolderPath);
-						ild = dh1.getLazyDataset(ssp.getImageName());
-
-					} catch (Exception e2) {
-						e2.printStackTrace();
+					
+						try {
+	
+							dh1 = ssp.copiedDatWithCorrectedTifs(tidiedTransferList.get(0).getText(), datFolderPath);
+							ild = dh1.getLazyDataset(ssp.getImageName());
+	
+						} catch (Exception e2) {
+							e2.printStackTrace();
+						}
+						
 					}
 					
 					if(ild != null){
@@ -369,7 +391,7 @@ public class DatDisplayer extends Composite {
 					}
 
 					optionsDropDown.select(0);
-					
+					clearRodTable.setEnabled(true);
 					rodConstrucion.setEnabled(true);
 					deleteSelected.setEnabled(true);
 					buildRod.setEnabled(true);
@@ -379,8 +401,6 @@ public class DatDisplayer extends Composite {
 					scannedVariableOptions.setEnabled(true);
 					folderDisplayTable.getVerticalBar().setEnabled(true);
 					ssvs.setupRightEnabled(true);
-					
-					
 					
 				}
 				
@@ -403,6 +423,8 @@ public class DatDisplayer extends Composite {
 				enableRodConstruction(false);
 				transferToRod.setEnabled(false);
 				clearTable.setEnabled(false);
+				ssp.setImageFolderPath(null);
+				rodDisplayTable.clearAll();				
 			}
 
 			@Override
@@ -411,28 +433,43 @@ public class DatDisplayer extends Composite {
 
 			}
 		});
+		
+		
+		clearRodTable.addSelectionListener(new SelectionListener() {
+			
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				rodDisplayTable.removeAll();
+				enableRodConstruction(false);
+				
+			}
+			
+			@Override
+			public void widgetDefaultSelected(SelectionEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+		});
 
 		deleteSelected.addSelectionListener(new SelectionListener() {
 
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 
-				TableItem[] itemsToRemove = rodDisplayTable.getSelection();
-				ArrayList<String> namesToBeKept = new ArrayList<>();
-
+				ArrayList<String> itemsToKeepList = new ArrayList<>(); 
+				
+				
 				for (TableItem ra : rodDisplayTable.getItems()) {
-					for (TableItem rb : itemsToRemove) {
-						if (ra.getText().equals(rb.getText()) == false) {
-							namesToBeKept.add(ra.getText());
-						}
+					if(ra.getChecked() == false){
+						itemsToKeepList.add(ra.getText());
 					}
 				}
 
 				rodDisplayTable.removeAll();
 
-				for (String sr : namesToBeKept) {
-					TableItem t = new TableItem(rodDisplayTable, SWT.NONE);
-					t.setText(sr);
+				for (String ra : itemsToKeepList) {
+					TableItem rat = new TableItem(rodDisplayTable, SWT.NONE);
+					rat.setText(ra);
 				}
 
 				IDataHolder dh1 = null;
@@ -494,6 +531,7 @@ public class DatDisplayer extends Composite {
 		buildRod.setEnabled(enabled);
 		deleteSelected.setEnabled(enabled);
 		optionsDropDown.setEnabled(enabled);
+		clearRodTable.setEnabled(enabled);
 	}
 
 	public Button getMassRunner() {
@@ -665,7 +703,7 @@ public class DatDisplayer extends Composite {
 			
 		}
 		
-		output.add(MethodSetting.NO_Correction);
+		output.add(MethodSetting.Reflectivity_NO_Correction);
 		
 		
 		return output;

@@ -1,4 +1,5 @@
 package org.dawnsci.surfacescatter.ui;
+
 import org.dawb.common.ui.widgets.ActionBarWrapper;
 import org.dawnsci.surfacescatter.ExampleModel;
 import org.dawnsci.surfacescatter.MethodSettingEnum.MethodSetting;
@@ -58,6 +59,8 @@ public class PlotSystemCompositeView extends Composite {
 	private Text polarisation;
 	private Text areaCorrection;
 	private Text rawIntensity;
+	private Text reflectivityAreaCorr;
+	private Text reflectivityFluxCorr;
 	private SashForm form;
 	private TabItem subBgI;
 	private TabItem correctionsTab;
@@ -307,7 +310,7 @@ public class PlotSystemCompositeView extends Composite {
 			
 		correctionsTab.setControl(correctionsTabComposite);
 		
-		if (MethodSetting.toInt(ssp.getCorrectionSelection()) ==0 ){
+		if (ssp.getCorrectionSelection() == MethodSetting.SXRD ){
 			
 			Group corrections = new Group(correctionsTabComposite, SWT.NONE);
 		    GridLayout 	correctionsLayout = new GridLayout(2,true);
@@ -326,6 +329,47 @@ public class PlotSystemCompositeView extends Composite {
 			
 		}
 		
+		if (ssp.getCorrectionSelection() == MethodSetting.Reflectivity_with_Flux_Correction ){
+			
+			Group corrections = new Group(correctionsTabComposite, SWT.NONE);
+		    GridLayout 	correctionsLayout = new GridLayout(2,true);
+		    corrections.setLayout(correctionsLayout);
+			GridData correctionsData = new GridData(SWT.FILL, SWT.NULL, true, false);
+			corrections.setLayoutData(correctionsData);
+			
+			InputTileGenerator subTile0 = new InputTileGenerator("Raw Intensity:", String.valueOf(ssp.getCurrentRawIntensity()), corrections);
+			rawIntensity = subTile0.getText();
+			InputTileGenerator subTile1 = new InputTileGenerator("Area Correction:", String.valueOf(ssp.getCurrentLorentzCorrection()), corrections);
+			reflectivityAreaCorr= subTile1.getText();
+			InputTileGenerator subTile2 = new InputTileGenerator("Flux Correction:", String.valueOf(ssp.getCurrentPolarisationCorrection()), corrections);
+			reflectivityFluxCorr = subTile2.getText();
+		}
+		
+		if (ssp.getCorrectionSelection() == MethodSetting.Reflectivity_without_Flux_Correction ){
+			
+			Group corrections = new Group(correctionsTabComposite, SWT.NONE);
+		    GridLayout 	correctionsLayout = new GridLayout(2,true);
+		    corrections.setLayout(correctionsLayout);
+			GridData correctionsData = new GridData(SWT.FILL, SWT.NULL, true, false);
+			corrections.setLayoutData(correctionsData);
+			
+			InputTileGenerator subTile0 = new InputTileGenerator("Raw Intensity:", String.valueOf(ssp.getCurrentRawIntensity()), corrections);
+			rawIntensity = subTile0.getText();
+			InputTileGenerator subTile1 = new InputTileGenerator("Area Correction:", String.valueOf(ssp.getCurrentLorentzCorrection()), corrections);
+			reflectivityAreaCorr = subTile1.getText();
+		}
+		
+		if (ssp.getCorrectionSelection() == MethodSetting.Reflectivity_NO_Correction){
+			
+			Group corrections = new Group(correctionsTabComposite, SWT.NONE);
+		    GridLayout 	correctionsLayout = new GridLayout(2,true);
+		    corrections.setLayout(correctionsLayout);
+			GridData correctionsData = new GridData(SWT.FILL, SWT.NULL, true, false);
+			corrections.setLayoutData(correctionsData);
+			
+			InputTileGenerator subTile0 = new InputTileGenerator("Raw Intensity:", String.valueOf(ssp.getCurrentRawIntensity()), corrections);
+			rawIntensity = subTile0.getText();
+		}
 		
 		folder.pack();
 		
@@ -539,6 +583,88 @@ public class PlotSystemCompositeView extends Composite {
 		
 	}
 	
+	public void resetCorrectionsTab(){
+		
+		correctionsTab.dispose();
+		
+		
+		correctionsTab = new TabItem(folder, SWT.NONE);
+		correctionsTab.setText("Raw Output and Corrections");
+		correctionsTab.setData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		
+		Composite correctionsTabComposite = new Composite(folder, SWT.NONE | SWT.FILL);
+		correctionsTabComposite.setLayout(new GridLayout());
+		correctionsTabComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+			
+		correctionsTab.setControl(correctionsTabComposite);
+		
+		if (ssp.getCorrectionSelection() == MethodSetting.SXRD ){
+			
+			Group corrections = new Group(correctionsTabComposite, SWT.NONE);
+		    GridLayout 	correctionsLayout = new GridLayout(2,true);
+		    corrections.setLayout(correctionsLayout);
+			GridData correctionsData = new GridData(SWT.FILL, SWT.NULL, true, false);
+			corrections.setLayoutData(correctionsData);
+			
+			InputTileGenerator subTile0 = new InputTileGenerator("Raw Intensity:", String.valueOf(ssp.getCurrentRawIntensity()), corrections);
+			rawIntensity = subTile0.getText();
+			InputTileGenerator subTile1 = new InputTileGenerator("Lorentz Correction:", String.valueOf(ssp.getCurrentLorentzCorrection()), corrections);
+			lorentz = subTile1.getText();
+			InputTileGenerator subTile2 = new InputTileGenerator("Polarisation Correction:", String.valueOf(ssp.getCurrentPolarisationCorrection()), corrections);
+			polarisation = subTile2.getText();
+			InputTileGenerator subTile3 = new InputTileGenerator("Area Correction:", String.valueOf(ssp.getCurrentAreaCorrection()), corrections);
+			setAreaCorrection(subTile3.getText());
+			
+		}
+		
+		if (ssp.getCorrectionSelection() == MethodSetting.Reflectivity_with_Flux_Correction ){
+			
+			Group corrections = new Group(correctionsTabComposite, SWT.NONE);
+		    GridLayout 	correctionsLayout = new GridLayout(2,true);
+		    corrections.setLayout(correctionsLayout);
+			GridData correctionsData = new GridData(SWT.FILL, SWT.NULL, true, false);
+			corrections.setLayoutData(correctionsData);
+			
+			InputTileGenerator subTile0 = new InputTileGenerator("Raw Intensity:", String.valueOf(ssp.getCurrentRawIntensity()), corrections);
+			rawIntensity = subTile0.getText();
+			InputTileGenerator subTile1 = new InputTileGenerator("Area Correction:", String.valueOf(ssp.getCurrentLorentzCorrection()), corrections);
+			reflectivityAreaCorr= subTile1.getText();
+			InputTileGenerator subTile2 = new InputTileGenerator("Flux Correction:", String.valueOf(ssp.getCurrentPolarisationCorrection()), corrections);
+			reflectivityFluxCorr = subTile2.getText();
+		}
+		
+		if (ssp.getCorrectionSelection() == MethodSetting.Reflectivity_without_Flux_Correction ){
+			
+			Group corrections = new Group(correctionsTabComposite, SWT.NONE);
+		    GridLayout 	correctionsLayout = new GridLayout(2,true);
+		    corrections.setLayout(correctionsLayout);
+			GridData correctionsData = new GridData(SWT.FILL, SWT.NULL, true, false);
+			corrections.setLayoutData(correctionsData);
+			
+			InputTileGenerator subTile0 = new InputTileGenerator("Raw Intensity:", String.valueOf(ssp.getCurrentRawIntensity()), corrections);
+			rawIntensity = subTile0.getText();
+			InputTileGenerator subTile1 = new InputTileGenerator("Area Correction:", String.valueOf(ssp.getCurrentLorentzCorrection()), corrections);
+			reflectivityAreaCorr = subTile1.getText();
+		}
+		
+		if (ssp.getCorrectionSelection() == MethodSetting.Reflectivity_NO_Correction){
+			
+			Group corrections = new Group(correctionsTabComposite, SWT.NONE);
+		    GridLayout 	correctionsLayout = new GridLayout(2,true);
+		    corrections.setLayout(correctionsLayout);
+			GridData correctionsData = new GridData(SWT.FILL, SWT.NULL, true, false);
+			corrections.setLayoutData(correctionsData);
+			
+			InputTileGenerator subTile0 = new InputTileGenerator("Raw Intensity:", String.valueOf(ssp.getCurrentRawIntensity()), corrections);
+			rawIntensity = subTile0.getText();
+		}
+		
+		folder.pack();	
+		form.setWeights(new int[] {23, 45, 25, 7});
+		
+	}
+	
+	
 	
 	public void setROITexts(int[][] LenPt){
 		
@@ -555,15 +681,37 @@ public class PlotSystemCompositeView extends Composite {
 	
 	public void generalCorrectionsUpdate(){
 		
-		lorentz.setText(String.valueOf(ssp.getCurrentLorentzCorrection()));
-		polarisation.setText(String.valueOf(ssp.getCurrentPolarisationCorrection()));
-		rawIntensity.setText(String.valueOf(ssp.getCurrentRawIntensity()));
-		areaCorrection.setText(String.valueOf(ssp.getCurrentAreaCorrection()));
+		if (ssp.getCorrectionSelection() == MethodSetting.SXRD){
+				
+			lorentz.setText(String.valueOf(ssp.getCurrentLorentzCorrection()));
+			polarisation.setText(String.valueOf(ssp.getCurrentPolarisationCorrection()));
+			rawIntensity.setText(String.valueOf(ssp.getCurrentRawIntensity()));
+			areaCorrection.setText(String.valueOf(ssp.getCurrentAreaCorrection()));
+			
+		}
+		
+		if (ssp.getCorrectionSelection() == MethodSetting.Reflectivity_with_Flux_Correction){
+			
+			rawIntensity.setText(String.valueOf(ssp.getCurrentRawIntensity()));
+			reflectivityFluxCorr.setText(String.valueOf(ssp.getCurrentReflectivityFluxCorrection()));
+			reflectivityAreaCorr.setText(String.valueOf(ssp.getCurrentReflectivityAreaCorrection()));
+			
+		}
+		
+		if (ssp.getCorrectionSelection() == MethodSetting.Reflectivity_without_Flux_Correction){
+			
+			rawIntensity.setText(String.valueOf(ssp.getCurrentRawIntensity()));
+			reflectivityAreaCorr.setText(String.valueOf(ssp.getCurrentReflectivityAreaCorrection()));
+			
+		}
+		
+		if (ssp.getCorrectionSelection() == MethodSetting.Reflectivity_NO_Correction){
+			
+			rawIntensity.setText(String.valueOf(ssp.getCurrentRawIntensity()));
+		}
 		
 		this.update();
 		
-		
-	
 	}
 
 	public void generalCorrectionsSet(double lorentzCorrection,
@@ -576,6 +724,34 @@ public class PlotSystemCompositeView extends Composite {
 		rawIntensity.setText(String.valueOf(rawIntensityValue));
 		areaCorrection.setText(String.valueOf(areaCorrectionValue));
 	
+	}
+
+	public void generalReflectivityCorrectionsSet(double areaCorrection,
+									  double rawIntensityValue,
+									  double fluxCorrection){
+		
+		if (ssp.getCorrectionSelection() == MethodSetting.Reflectivity_with_Flux_Correction){
+			
+			rawIntensity.setText(String.valueOf(rawIntensityValue));
+			reflectivityFluxCorr.setText(String.valueOf(fluxCorrection));
+			reflectivityAreaCorr.setText(String.valueOf(areaCorrection));
+			
+		}
+		
+		if (ssp.getCorrectionSelection() == MethodSetting.Reflectivity_without_Flux_Correction){
+			
+			rawIntensity.setText(String.valueOf(rawIntensityValue));
+			reflectivityAreaCorr.setText(String.valueOf(areaCorrection));
+			
+		}
+		
+		if (ssp.getCorrectionSelection() == MethodSetting.Reflectivity_NO_Correction){
+			
+			rawIntensity.setText(String.valueOf(rawIntensityValue));
+		}
+		
+		this.update();
+
 	}
 
 	public void generalUpdate(){
@@ -641,8 +817,14 @@ public class PlotSystemCompositeView extends Composite {
 	}
 	
 	public void removeBackgroundSubtractedSubImage(){
-		TabItem m = folder.getItem(2);
-		m.dispose();
+		
+		try{
+			TabItem m = folder.getItem(2);
+			m.dispose();
+		}
+		catch(Exception o){
+			
+		}
 		folder.pack();
 		subBgI = null;
 		form.setWeights(new int[] {23, 45, 25, 7});

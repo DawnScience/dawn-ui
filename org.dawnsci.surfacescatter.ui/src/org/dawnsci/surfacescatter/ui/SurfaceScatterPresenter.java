@@ -62,10 +62,13 @@ import org.eclipse.january.dataset.Maths;
 import org.eclipse.january.dataset.ShapeUtils;
 import org.eclipse.january.dataset.SliceND;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.ProgressBar;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Slider;
 import org.eclipse.swt.widgets.TabFolder;
@@ -74,7 +77,6 @@ import uk.ac.diamond.scisoft.analysis.io.LoaderFactory;
 
 public class SurfaceScatterPresenter {
 
-	
 	private ArrayList<ExampleModel> models;
 	private ArrayList<DataModel> dms;
 	private ArrayList<GeometricParametersModel> gms;
@@ -82,8 +84,7 @@ public class SurfaceScatterPresenter {
 	private int noImages = 0;
 	private SurfaceScatterViewStart ssvs;
 	private IRegion backgroundRegion;
-	private String imageName = "file_image";
-	
+	private String imageName = "file_image";	
 	
 	public String getImageName() {
 		return imageName;
@@ -464,6 +465,25 @@ public class SurfaceScatterPresenter {
 			fireStateListeners();
 		}
 	}
+	
+	public double getCurrentReflectivityFluxCorrection(){
+		return sm.getCurrentReflectivityFluxCorrection();
+	}
+	
+	public double getCurrentReflectivityAreaCorrection(){
+		return sm.getCurrentReflectivityAreaCorrection();
+	}
+
+	public void setCurrentReflectivityFluxCorrection(double l){
+		sm.setCurrentReflectivityFluxCorrection(l);
+	}
+	
+	public void setCurrentReflectivityAreaCorrection(double l){
+		sm.setCurrentReflectivityAreaCorrection(l);
+	}
+	
+
+	
 	public IDataHolder copiedDatWithCorrectedTifs(String fp, String datFolderPath) {
 	
 		String localFilepathCopy = StringUtils.substringBeforeLast(fp, ".dat") + "_copy";	
@@ -500,8 +520,6 @@ public class SurfaceScatterPresenter {
 		}
 	
 	}
-	
-	
 	
 	public void correctionsDisplayUpdate(){
 		
@@ -1212,10 +1230,8 @@ public class SurfaceScatterPresenter {
 	}
 
 	public void geometricParametersUpdate(
-//										  String xNameRef,
 										  String fluxPath,
 										  double beamHeight,
-//										  String savePath,
 										  double footprint,
 										  double angularFudgeFactor,
 										  boolean beamCorrection,
@@ -1233,14 +1249,11 @@ public class SurfaceScatterPresenter {
 										  double normalisationFactor,
 										  boolean specular,
 										  String imageName
-//										  String xName
 										  ){
 											
 		for(GeometricParametersModel gm: gms){
-//			gm.setxNameRef(xNameRef);
 			gm.setFluxPath(fluxPath);
 			gm.setBeamHeight(beamHeight);
-//			gm.setSavePath(savePath);
 			gm.setFootprint(footprint);
 			gm.setAngularFudgeFactor(angularFudgeFactor);
 			gm.setBeamCorrection(beamCorrection);
@@ -1258,7 +1271,6 @@ public class SurfaceScatterPresenter {
 			gm.setNormalisationFactor(normalisationFactor);
 			gm.setSpecular(specular);
 			gm.setImageName(imageName);
-//			gm.setxName(xName);
 		}
 		
 	}
@@ -1409,11 +1421,7 @@ public class SurfaceScatterPresenter {
 	}
 	
 	public void genXSave(String title, String[] fr){
-			
-		IDataset outputDatY = DatasetFactory.ones(new int[] {1});
-		
-		String s = gms.get(sm.getSelection()).getSavePath();
-		
+	
 		try {
 			File file = new File(title);
 			file.createNewFile();
@@ -1427,41 +1435,89 @@ public class SurfaceScatterPresenter {
 		SimpleDateFormat sdfDate = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");//dd/MM/yyyy
 	    Date now = new Date();
 	    String strDate = sdfDate.format(now);
+	    writer.println("#Output file created: " + strDate);
 	    
-	    IDataset[] hArray = new IDataset[sm.getFilepaths().length];
-	    IDataset[] kArray = new IDataset[sm.getFilepaths().length];
-	    IDataset[] lArray = new IDataset[sm.getFilepaths().length];
+	    if (sm.getCorrectionSelection() == MethodSetting.SXRD){
 	    
-	    for (int id = 0; id < sm.getFilepaths().length; id++) {
-	    
-	    	ILazyDataset h = SXRDGeometricCorrections.geth(models.get(id));
-			ILazyDataset k = SXRDGeometricCorrections.getk(models.get(id));
-			ILazyDataset l = SXRDGeometricCorrections.getl(models.get(id));
+
+		    IDataset[] hArray = new IDataset[sm.getFilepaths().length];
+		    IDataset[] kArray = new IDataset[sm.getFilepaths().length];
+		    IDataset[] lArray = new IDataset[sm.getFilepaths().length];
+		    
+		    for (int id = 0; id < sm.getFilepaths().length; id++) {
+		    
+		    	ILazyDataset h = SXRDGeometricCorrections.geth(models.get(id));
+				ILazyDataset k = SXRDGeometricCorrections.getk(models.get(id));
+				ILazyDataset l = SXRDGeometricCorrections.getl(models.get(id));
+				
+				hArray[id] = (IDataset) h;
+				kArray[id] = (IDataset) k;
+				lArray[id] = (IDataset) l;
+				
+		    }
+		    
+		    Dataset hArrayCon = DatasetUtils.concatenate(hArray, 0);
+		    Dataset kArrayCon = DatasetUtils.concatenate(kArray, 0);
+		    Dataset lArrayCon = DatasetUtils.concatenate(lArray, 0);	
+				
+		    hArrayCon.sort(0);
+		    kArrayCon.sort(0);
+		    lArrayCon.sort(0);
+		    
 			
-			hArray[id] = (IDataset) h;
-			kArray[id] = (IDataset) k;
-			lArray[id] = (IDataset) l;
-			
+			for(int gh = 0 ; gh<sm.getImages().length; gh++){
+					writer.println(hArrayCon.getDouble(gh) +"	"+ kArrayCon.getDouble(gh) +"	"+lArrayCon.getDouble(gh) + 
+							"	"+ sm.getSplicedCurveYFhkl().getDouble(gh)+ "	"+ sm.getSplicedCurveY().getError(gh));
+			}
 	    }
-	    
-	    Dataset hArrayCon = DatasetUtils.concatenate(hArray, 0);
-	    Dataset kArrayCon = DatasetUtils.concatenate(kArray, 0);
-	    Dataset lArrayCon = DatasetUtils.concatenate(lArray, 0);	
+		
+		else{
+		    
 			
-	    hArrayCon.sort(0);
-	    kArrayCon.sort(0);
-	    lArrayCon.sort(0);
-	    
-		writer.println("#Output file created: " + strDate);
-
-	
-		IDataset outputDatX = sm.getSortedX();
-
-		for(int gh = 0 ; gh<sm.getImages().length; gh++){
-				writer.println(hArrayCon.getDouble(gh) +"	"+ kArrayCon.getDouble(gh) +"	"+lArrayCon.getDouble(gh) + 
-						"	"+ sm.getSplicedCurveYFhkl().getDouble(gh)+ "	"+ sm.getSplicedCurveY().getError(gh));
-		}
-
+		    if (models.get(0).getQdcdDat() != null){
+		    	 
+		    	IDataset[] qdcd = new IDataset[sm.getFilepaths().length];
+			    Dataset qdcdArrayCon = DatasetFactory.zeros(new int[] {1});
+				
+		    	
+  		   	 	 for (int id = 0; id < sm.getFilepaths().length; id++) {
+				    
+		   	 		IDataset qdcdDat = (IDataset) models.get(id).getQdcdDat();
+						
+		   	 		qdcd[id] = (IDataset) qdcdDat;
+					
+		   	 		qdcdArrayCon = DatasetUtils.concatenate(qdcd, 0);
+				 
+				    qdcdArrayCon.sort(0);
+				
+		   	 	 }
+			
+			   	 writer.println("# Test file created: " + strDate);
+				 writer.println("# Headers: ");
+				 writer.println("#qdcd	I	Ie");
+			
+				 for(int gh = 0 ; gh<sm.getImages().length; gh++){
+							writer.println(qdcdArrayCon.getDouble(gh) +"	"+ 
+						    sm.getSplicedCurveY().getDouble(gh)+ "	"+ 
+							sm.getSplicedCurveY().getError(gh));
+				 }
+			
+			
+		    }
+		    
+		    else{
+		    	writer.println("#"+gms.get(0).getxName()+"	I	Ie");
+				
+				 for(int gh = 0 ; gh<sm.getImages().length; gh++){
+							writer.println(sm.getxList().get(gh) +"	"+ 
+						    sm.getSplicedCurveY().getDouble(gh)+ "	"+ 
+							sm.getSplicedCurveY().getError(gh));
+				 }
+			
+		    }
+		    
+		 	
+	    }	
 		writer.close();
 	}	
 	
@@ -1484,12 +1540,7 @@ public class SurfaceScatterPresenter {
 	
 	
 	public void anarodSave(String title, String[] fr){
-		
-		IDataset outputDatY = DatasetFactory.ones(new int[] {1});
-		
-		String s = gms.get(sm.getSelection()).getSavePath();
 
-		
 		try {
 			File file = new File(title);
 			file.createNewFile();
@@ -1504,41 +1555,89 @@ public class SurfaceScatterPresenter {
 	    Date now = new Date();
 	    String strDate = sdfDate.format(now);
 	    
-	    IDataset[] hArray = new IDataset[sm.getFilepaths().length];
-	    IDataset[] kArray = new IDataset[sm.getFilepaths().length];
-	    IDataset[] lArray = new IDataset[sm.getFilepaths().length];
-	    
-	    for (int id = 0; id < sm.getFilepaths().length; id++) {
-	    
-	    	ILazyDataset h = SXRDGeometricCorrections.geth(models.get(id));
-			ILazyDataset k = SXRDGeometricCorrections.getk(models.get(id));
-			ILazyDataset l = SXRDGeometricCorrections.getl(models.get(id));
-			
-			hArray[id] = (IDataset) h;
-			kArray[id] = (IDataset) k;
-			lArray[id] = (IDataset) l;
-			
+	    if (sm.getCorrectionSelection() == MethodSetting.SXRD){
+		    
+		    IDataset[] hArray = new IDataset[sm.getFilepaths().length];
+		    IDataset[] kArray = new IDataset[sm.getFilepaths().length];
+		    IDataset[] lArray = new IDataset[sm.getFilepaths().length];
+		    
+		    for (int id = 0; id < sm.getFilepaths().length; id++) {
+		    
+		    	ILazyDataset h = SXRDGeometricCorrections.geth(models.get(id));
+				ILazyDataset k = SXRDGeometricCorrections.getk(models.get(id));
+				ILazyDataset l = SXRDGeometricCorrections.getl(models.get(id));
+				
+				hArray[id] = (IDataset) h;
+				kArray[id] = (IDataset) k;
+				lArray[id] = (IDataset) l;
+				
+		    }
+		    
+		    Dataset hArrayCon = DatasetUtils.concatenate(hArray, 0);
+		    Dataset kArrayCon = DatasetUtils.concatenate(kArray, 0);
+		    Dataset lArrayCon = DatasetUtils.concatenate(lArray, 0);	
+				
+		    hArrayCon.sort(0);
+		    kArrayCon.sort(0);
+		    lArrayCon.sort(0);
+		    
+			writer.println("# Test file created: " + strDate);
+			writer.println("# Headers: ");
+			writer.println("#h	k	l	F	Fe");
+	
+			for(int gh = 0 ; gh<sm.getImages().length; gh++){
+					writer.println(hArrayCon.getDouble(gh) +"	"+ kArrayCon.getDouble(gh) +"	"+lArrayCon.getDouble(gh) + 
+							"	"+ sm.getSplicedCurveYFhkl().getDouble(gh)+ "	"+ sm.getSplicedCurveYFhkl().getError(gh));
+			}
 	    }
 	    
-	    Dataset hArrayCon = DatasetUtils.concatenate(hArray, 0);
-	    Dataset kArrayCon = DatasetUtils.concatenate(kArray, 0);
-	    Dataset lArrayCon = DatasetUtils.concatenate(lArray, 0);	
+	    else{
+		    
 			
-	    hArrayCon.sort(0);
-	    kArrayCon.sort(0);
-	    lArrayCon.sort(0);
+		    if (models.get(0).getQdcdDat() != null){
+		    	 
+		    	IDataset[] qdcd = new IDataset[sm.getFilepaths().length];
+			    Dataset qdcdArrayCon = DatasetFactory.zeros(new int[] {1});
+				
+		    	
+  		   	 	 for (int id = 0; id < sm.getFilepaths().length; id++) {
+				    
+		   	 		IDataset qdcdDat = (IDataset) models.get(id).getQdcdDat();
+						
+		   	 		qdcd[id] = (IDataset) qdcdDat;
+					
+		   	 		qdcdArrayCon = DatasetUtils.concatenate(qdcd, 0);
+				 
+				    qdcdArrayCon.sort(0);
+				
+		   	 	 }
+			
+			   	 writer.println("# Test file created: " + strDate);
+				 writer.println("# Headers: ");
+				 writer.println("#qdcd	I	Ie");
+			
+				 for(int gh = 0 ; gh<sm.getImages().length; gh++){
+						writer.println(qdcdArrayCon.getDouble(gh) +"	"+ 
+					    sm.getSplicedCurveY().getDouble(gh)+ "	"+ 
+					    sm.getSplicedCurveY().getError(gh));
+				}
+			
+			
+		    }
+		    
+		    else{
+		    	writer.println("#"+gms.get(0).getxName()+"	I	Ie");
+				
+				 for(int gh = 0 ; gh<sm.getImages().length; gh++){
+							writer.println(sm.getxList().get(gh) +"	"+ 
+						    sm.getSplicedCurveY().getDouble(gh)+ "	"+ 
+							sm.getSplicedCurveY().getError(gh));
+				 }
+			
+		    }
+	    	
+	    }
 	    
-		writer.println("# Test file created: " + strDate);
-		writer.println("# Headers: ");
-		writer.println("#h	k	l	F	Fe");
-	
-		IDataset outputDatX = sm.getSortedX();
-
-		for(int gh = 0 ; gh<sm.getImages().length; gh++){
-				writer.println(hArrayCon.getDouble(gh) +"	"+ kArrayCon.getDouble(gh) +"	"+lArrayCon.getDouble(gh) + 
-						"	"+ sm.getSplicedCurveYFhkl().getDouble(gh)+ "	"+ sm.getSplicedCurveYFhkl().getError(gh));
-		}
-
 		writer.close();
 	}	
 	
@@ -1557,6 +1656,7 @@ public class SurfaceScatterPresenter {
 		}
 		
 		int index  = title.lastIndexOf(".");
+		
 		if(index != -1){
 			String ext = title.substring(0,index);
 			file.renameTo(new File(ext + ".int"));
@@ -1564,50 +1664,174 @@ public class SurfaceScatterPresenter {
 		else{
 			file.renameTo(new File(title + ".int"));
 		}
-			
-		
 		
 		SimpleDateFormat sdfDate = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");//dd/MM/yyyy
 	    Date now = new Date();
 	    String strDate = sdfDate.format(now);
 	    
-	    IDataset[] hArray = new IDataset[sm.getFilepaths().length];
-	    IDataset[] kArray = new IDataset[sm.getFilepaths().length];
-	    IDataset[] lArray = new IDataset[sm.getFilepaths().length];
+	    if(sm.getCorrectionSelection() == MethodSetting.SXRD){
 	    
-	    for (int id = 0; id < sm.getFilepaths().length; id++) {
-	    
-	    	ILazyDataset h = SXRDGeometricCorrections.geth(models.get(id));
-			ILazyDataset k = SXRDGeometricCorrections.getk(models.get(id));
-			ILazyDataset l = SXRDGeometricCorrections.getl(models.get(id));
-			
-			hArray[id] = (IDataset) h;
-			kArray[id] = (IDataset) k;
-			lArray[id] = (IDataset) l;
-			
+		    IDataset[] hArray = new IDataset[sm.getFilepaths().length];
+		    IDataset[] kArray = new IDataset[sm.getFilepaths().length];
+		    IDataset[] lArray = new IDataset[sm.getFilepaths().length];
+		    
+		    for (int id = 0; id < sm.getFilepaths().length; id++) {
+		    
+		    	ILazyDataset h = SXRDGeometricCorrections.geth(models.get(id));
+				ILazyDataset k = SXRDGeometricCorrections.getk(models.get(id));
+				ILazyDataset l = SXRDGeometricCorrections.getl(models.get(id));
+				
+				hArray[id] = (IDataset) h;
+				kArray[id] = (IDataset) k;
+				lArray[id] = (IDataset) l;
+				
+		    }
+		    
+		    Dataset hArrayCon = DatasetUtils.concatenate(hArray, 0);
+		    Dataset kArrayCon = DatasetUtils.concatenate(kArray, 0);
+		    Dataset lArrayCon = DatasetUtils.concatenate(lArray, 0);	
+				
+		    hArrayCon.sort(0);
+		    kArrayCon.sort(0);
+		    lArrayCon.sort(0);
+		    
+			writer.println("# Test file created: " + strDate);
+			writer.println("# Headers: ");
+			writer.println("#h	k	l	F	Fe	lorentz	correction 	polarisation correction		area correction");
+	
+			for(int gh = 0 ; gh<sm.getImages().length; gh++){
+					writer.println(hArrayCon.getDouble(gh) +"	"+ kArrayCon.getDouble(gh) +"	"+lArrayCon.getDouble(gh) + 
+							"	"+ sm.getSplicedCurveYFhkl().getDouble(gh)+ "	"+ sm.getSplicedCurveYFhkl().getError(gh) +"	"
+							+ sm.getLorentzCorrection().get(gh)+"	" + sm.getPolarisation().get(gh)+"	" + sm.getAreaCorrection().get(gh));
+			}
 	    }
-	    
-	    Dataset hArrayCon = DatasetUtils.concatenate(hArray, 0);
-	    Dataset kArrayCon = DatasetUtils.concatenate(kArray, 0);
-	    Dataset lArrayCon = DatasetUtils.concatenate(lArray, 0);	
+	    else{
+	    	
+	    	 writer.println("# Test file created: " + strDate);
+			 writer.println("# Headers: ");
+
+		    if (models.get(0).getQdcdDat() != null){
+		    	 
+		    	IDataset[] qdcd = new IDataset[sm.getFilepaths().length];
+			    Dataset qdcdArrayCon = DatasetFactory.zeros(new int[] {1});
+				
+		    	
+  		   	 	 for (int id = 0; id < sm.getFilepaths().length; id++) {
+				    
+		   	 		IDataset qdcdDat = (IDataset) models.get(id).getQdcdDat();
+						
+		   	 		qdcd[id] = (IDataset) qdcdDat;
+					
+		   	 		qdcdArrayCon = DatasetUtils.concatenate(qdcd, 0);
+				 
+				    qdcdArrayCon.sort(0);
+				
+		   	 	 }
 			
-	    hArrayCon.sort(0);
-	    kArrayCon.sort(0);
-	    lArrayCon.sort(0);
-	    
-		writer.println("# Test file created: " + strDate);
-		writer.println("# Headers: ");
-		writer.println("#h	k	l	F	Fe	lorentz	correction 	polarisation correction		area correction");
+			   	
+				 writer.println("#qdcd	I	Ie	Area Correction	Flux Correction");
+				 
+				 if(sm.getCorrectionSelection() == MethodSetting.Reflectivity_with_Flux_Correction){
 
-		for(int gh = 0 ; gh<sm.getImages().length; gh++){
-				writer.println(hArrayCon.getDouble(gh) +"	"+ kArrayCon.getDouble(gh) +"	"+lArrayCon.getDouble(gh) + 
-						"	"+ sm.getSplicedCurveYFhkl().getDouble(gh)+ "	"+ sm.getSplicedCurveYFhkl().getError(gh) +"	"
-						+ sm.getLorentzCorrection().get(gh)+"	" + sm.getPolarisation().get(gh)+"	" + sm.getAreaCorrection().get(gh));
-		}
+					 for(int gh = 0 ; gh<sm.getImages().length; gh++){
+							writer.println(qdcdArrayCon.getDouble(gh) +"	"+ 
+						    sm.getSplicedCurveY().getDouble(gh)+ "	"+ 
+						    sm.getSplicedCurveY().getError(gh)+ "	"+ 
+						    sm.getReflectivityAreaCorrection().get(gh)+ "	"+
+						    sm.getReflectivityFluxCorrection().get(gh));
+					}
+				 }
+				 
+				 if(sm.getCorrectionSelection() == MethodSetting.Reflectivity_without_Flux_Correction){
 
+					 for(int gh = 0 ; gh<sm.getImages().length; gh++){
+							writer.println(qdcdArrayCon.getDouble(gh) +"	"+ 
+						    sm.getSplicedCurveY().getDouble(gh)+ "	"+ 
+						    sm.getSplicedCurveY().getError(gh)+ "	"+ 
+						    sm.getReflectivityAreaCorrection().get(gh));
+					}
+				 }
+				 
+				 if(sm.getCorrectionSelection() == MethodSetting.Reflectivity_NO_Correction){
+
+					 for(int gh = 0 ; gh<sm.getImages().length; gh++){
+							writer.println(qdcdArrayCon.getDouble(gh) +"	"+ 
+						    sm.getSplicedCurveY().getDouble(gh)+ "	"+ 
+						    sm.getSplicedCurveY().getError(gh));
+					 }
+				 }
+			
+		    }
+		    		    
+		    else{
+		    	writer.println("#"+gms.get(0).getxName()+"	I	Ie	Area Correction	Flux Correction");
+				
+		    	if(sm.getCorrectionSelection() == MethodSetting.Reflectivity_with_Flux_Correction){
+
+					 for(int gh = 0 ; gh<sm.getImages().length; gh++){
+						 	writer.println(sm.getxList().get(gh) +"	"+ 
+						    sm.getSplicedCurveY().getDouble(gh)+ "	"+ 
+						    sm.getSplicedCurveY().getError(gh)+ "	"+ 
+						    sm.getReflectivityAreaCorrection().get(gh)+ "	"+
+						    sm.getReflectivityFluxCorrection().get(gh));
+					}
+				 }
+				 
+				 if(sm.getCorrectionSelection() == MethodSetting.Reflectivity_without_Flux_Correction){
+
+					 for(int gh = 0 ; gh<sm.getImages().length; gh++){
+						 	writer.println(sm.getxList().get(gh) +"	"+ 
+						    sm.getSplicedCurveY().getDouble(gh)+ "	"+ 
+						    sm.getSplicedCurveY().getError(gh)+ "	"+ 
+						    sm.getReflectivityAreaCorrection().get(gh));
+					}
+				 }
+				 
+				 if(sm.getCorrectionSelection() == MethodSetting.Reflectivity_NO_Correction){
+
+					 for(int gh = 0 ; gh<sm.getImages().length; gh++){
+						 	writer.println(sm.getxList().get(gh) +"	"+ 
+						    sm.getSplicedCurveY().getDouble(gh)+ "	"+ 
+						    sm.getSplicedCurveY().getError(gh));
+					 }
+			
+		    }
+	    	
+		   }	    
+	    }
 		writer.close();
 	}	
 	
+	public void writeOutReflectivityDat(){
+		
+		IDataset[] qdcd = new IDataset[sm.getFilepaths().length];
+			
+    	 for (int id = 0; id < sm.getFilepaths().length; id++) {
+		    
+    		IDataset qdcdDat = (IDataset) models.get(id).getQdcdDat();
+					
+		    qdcd[id] = (IDataset) qdcdDat;
+				
+		 }
+		    
+		 Dataset qdcdArrayCon = DatasetUtils.concatenate(qdcd, 0);
+		 
+		 qdcdArrayCon.sort(0);
+		 
+		 SimpleDateFormat sdfDate = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");//dd/MM/yyyy
+		 Date now = new Date();
+		 String strDate = sdfDate.format(now);
+		    
+		 writer.println("# Test file created: " + strDate);
+		 writer.println("# Headers: ");
+		 writer.println("#qdcd	I	Ie");
+	
+		 for(int gh = 0 ; gh<sm.getImages().length; gh++){
+					writer.println(qdcdArrayCon.getDouble(gh) +"	"+ 
+				    sm.getSplicedCurveY().getDouble(gh)+ "	"+ 
+				    sm.getSplicedCurveY().getError(gh));
+		}	
+	}
 	
 	public void simpleXYYeSave(String title, String[] fr){
 		
@@ -1632,35 +1856,9 @@ public class SurfaceScatterPresenter {
 			file.renameTo(new File(title + ".int"));
 		}
 			
-		
-		
 		SimpleDateFormat sdfDate = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");//dd/MM/yyyy
 	    Date now = new Date();
 	    String strDate = sdfDate.format(now);
-	    
-	    IDataset[] hArray = new IDataset[sm.getFilepaths().length];
-	    IDataset[] kArray = new IDataset[sm.getFilepaths().length];
-	    IDataset[] lArray = new IDataset[sm.getFilepaths().length];
-	    
-	    for (int id = 0; id < sm.getFilepaths().length; id++) {
-	    
-	    	ILazyDataset h = SXRDGeometricCorrections.geth(models.get(id));
-			ILazyDataset k = SXRDGeometricCorrections.getk(models.get(id));
-			ILazyDataset l = SXRDGeometricCorrections.getl(models.get(id));
-			
-			hArray[id] = (IDataset) h;
-			kArray[id] = (IDataset) k;
-			lArray[id] = (IDataset) l;
-			
-	    }
-	    
-	    Dataset hArrayCon = DatasetUtils.concatenate(hArray, 0);
-	    Dataset kArrayCon = DatasetUtils.concatenate(kArray, 0);
-	    Dataset lArrayCon = DatasetUtils.concatenate(lArray, 0);	
-			
-	    hArrayCon.sort(0);
-	    kArrayCon.sort(0);
-	    lArrayCon.sort(0);
 	    
 		writer.println("# Test file created: " + strDate);
 		writer.println("# Headers: ");
@@ -1735,6 +1933,24 @@ public class SurfaceScatterPresenter {
 	public void numberFormatWarning(String note){
 		RegionOutOfBoundsWarning roobw = new RegionOutOfBoundsWarning(parentShell,1,note);
 		roobw.open();
+		
+		
+		roobw.getOverride().addSelectionListener(new SelectionListener() {
+			
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				roobw.close();
+				return; 
+				
+			}
+			
+			@Override
+			public void widgetDefaultSelected(SelectionEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+		}); 
+		
 	}
 	
 	public void boundariesWarning(String note, Display d){
@@ -1751,12 +1967,48 @@ public class SurfaceScatterPresenter {
 	public void numberFormatWarning(){
 		RegionOutOfBoundsWarning roobw = new RegionOutOfBoundsWarning(parentShell,1,null);
 		roobw.open();
+		
+		roobw.getOverride().addSelectionListener(new SelectionListener() {
+			
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				roobw.close();
+				return; 
+				
+			}
+			
+			@Override
+			public void widgetDefaultSelected(SelectionEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+		}); 
+		
+		
+		
 		return;
 	}
 	
 	public void correctionMethodsWarning(){
 		RegionOutOfBoundsWarning roobw = new RegionOutOfBoundsWarning(parentShell,2,null);
+
 		roobw.open();
+		
+		roobw.getOverride().addSelectionListener(new SelectionListener() {
+			
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				roobw.close();
+				return; 
+				
+			}
+			
+			@Override
+			public void widgetDefaultSelected(SelectionEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+		}); 
 		
 		ssvs.getFolder().setSelection(0);
 		
@@ -1767,6 +2019,22 @@ public class SurfaceScatterPresenter {
 		RegionOutOfBoundsWarning roobw = new RegionOutOfBoundsWarning(parentShell,3,null);
 		roobw.open();
 		
+		roobw.getOverride().addSelectionListener(new SelectionListener() {
+			
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				roobw.close();
+				return; 
+				
+			}
+			
+			@Override
+			public void widgetDefaultSelected(SelectionEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+		}); 
+		
 		ssvs.getFolder().setSelection(0);
 		
 		return;
@@ -1776,6 +2044,22 @@ public class SurfaceScatterPresenter {
 	public void dialogToChangeImageName(){
 		RegionOutOfBoundsWarning roobw = new RegionOutOfBoundsWarning(parentShell,3,null);
 		roobw.open();
+		
+		roobw.getOverride().addSelectionListener(new SelectionListener() {
+			
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				roobw.close();
+				return; 
+				
+			}
+			
+			@Override
+			public void widgetDefaultSelected(SelectionEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+		}); 
 		
 		ssvs.getFolder().setSelection(0);
 		
@@ -1788,9 +2072,6 @@ public class SurfaceScatterPresenter {
 																   this, 
 																   t, 
 																   dd);
-		
-		
-		
 		ifcd.open();
 		
 		
@@ -2065,7 +2346,9 @@ public class SurfaceScatterPresenter {
 							   IPlottingSystem<Composite> outputCurves,
 							   IPlottingSystem<Composite> pS,
 							   TabFolder folder,
-							   IPlottingSystem<Composite> subIBgPS) {
+							   IPlottingSystem<Composite> subIBgPS,
+							   ProgressBar progress,
+							   TrackingProgressAndAbortView tpaav) {
 
 		sm.resetAll();
 		sm.setLocationList(null);
@@ -2079,6 +2362,7 @@ public class SurfaceScatterPresenter {
 		
 		trackingJob tj = new trackingJob();
 		debug("tj invoked");
+		tj.setProgress(progress);
 		tj.setSsvs(ssvs);
 		tj.setCorrectionSelection(MethodSetting.toInt(sm.getCorrectionSelection()));
 		tj.setSuperModel(sm);
@@ -2090,6 +2374,7 @@ public class SurfaceScatterPresenter {
 		tj.setOutputCurves(outputCurves);
 		tj.setTimeStep(Math.round((2 / noImages)));
 		tj.setSsp(this);
+		tj.setTPAAV(tpaav);
 		tj.runTJ1();
 		
 
@@ -2163,9 +2448,23 @@ class trackingJob {
 	private SurfaceScatterPresenter ssp;
 	private IPlottingSystem<Composite> ssvsPS;
 	private int DEBUG = 1;
+	private ProgressBar progressBar;
+	private TrackingProgressAndAbortView tpaav;
+
+	public TrackingProgressAndAbortView getTPAAV() {
+		return tpaav;
+	}
+
+	public void setTPAAV(TrackingProgressAndAbortView tpaav) {
+		this.tpaav = tpaav;
+	}
 
 	public SurfaceScatterViewStart getSsvs() {
 		return ssvs;
+	}
+	
+	public void setProgress(ProgressBar progress){
+		this.progressBar = progress;
 	}
 
 	public void setSsvs(SurfaceScatterViewStart ssvs) {
@@ -2463,6 +2762,7 @@ class trackingJob {
 
 			trackingJob2 tj = new trackingJob2();
 			debug("tj2 invoked");
+			tj.setProgress(progressBar);
 			tj.setCorrectionSelection(MethodSetting.toInt(sm.getCorrectionSelection()));
 			tj.setSuperModel(sm);
 			tj.setGms(gms);
@@ -2473,8 +2773,10 @@ class trackingJob {
 			tj.setTimeStep(Math.round(2 / sm.getImages().length));
 			tj.setSsp(ssp);
 			tj.setSsvs(ssvs);
+			tj.setTPAAV(tpaav);
 			tj.runTJ2();
 		}
+		
 		
 		ssvs.getCustomComposite().getReplay().setEnabled(true);
 //		ssvs.getOutputCurves().addImageNoRegion(ssp.getXValue((ssp.getNumberOfImages())/2));
@@ -2500,6 +2802,13 @@ class trackingJob {
 			ssp.stitchAndPresent(ssvs.getSsps3c().getOutputCurves());
 			ssp.trackingRegionOfInterestSetter(sm.getLocationList().get(imageNumber), imageNumber);
 			ssvs.getSsps3c().getOutputCurves().getIntensity().select(0);
+			progressBar.setSelection(progressBar.getSelection() +1);
+			System.out.println(progressBar.getSelection());
+			
+			if(progressBar.getSelection() == progressBar.getMaximum()){
+				System.out.println(progressBar.getSelection() +" in the break");
+				tpaav.close();
+			}
 		}
 }
 
@@ -2522,6 +2831,20 @@ class trackingJob2 {
 	private IPlottingSystem<Composite> ssvsPS; 
 	private SurfaceScatterViewStart ssvs;
 	private int DEBUG = 0;
+	private ProgressBar progressBar;
+	private TrackingProgressAndAbortView tpaav;
+
+	public TrackingProgressAndAbortView getTPAAV() {
+		return tpaav;
+	}
+
+	public void setTPAAV(TrackingProgressAndAbortView tpaav) {
+		this.tpaav = tpaav;
+	}
+
+	public void setProgress(ProgressBar progress){
+		this.progressBar = progress;
+	}
 	
 	public SurfaceScatterViewStart getSsvs() {
 		return ssvs;
@@ -2755,7 +3078,7 @@ class trackingJob2 {
 																										   1);
 											dm.setSeedLocation(seedLocation);
 											
-											debug("!!!!!!!!!!!!!!!     }}}}}{{{{{{{{ seedlocation[0] : " + seedLocation[0] +" + " + "seedlocation[1] :" + seedLocation[1]);
+//											debug("!!!!!!!!!!!!!!!     }}}}}{{{{{{{{ seedlocation[0] : " + seedLocation[0] +" + " + "seedlocation[1] :" + seedLocation[1]);
 									
 										}
 										else{
@@ -2877,7 +3200,7 @@ class trackingJob2 {
 																									   1);
 										dm.setSeedLocation(seedLocation);
 										
-										debug("!!!!!!!!!!!!!!!     }}}}}{{{{{{{{ seedlocation[0] : " + seedLocation[0] +" + " + "seedlocation[1] :" + seedLocation[1]);
+//										debug("!!!!!!!!!!!!!!!     }}}}}{{{{{{{{ seedlocation[0] : " + seedLocation[0] +" + " + "seedlocation[1] :" + seedLocation[1]);
 										
 									
 									}	
@@ -2935,8 +3258,6 @@ class trackingJob2 {
 											return;
 										}
 										});
-									
-
 								}
 							}
 
@@ -3625,6 +3946,13 @@ class trackingJob2 {
 		ssp.trackingRegionOfInterestSetter(sm.getLocationList().get(imageNumber), imageNumber);
 		ssvs.getSsps3c().getOutputCurves().getIntensity().select(0);
 		ssvs.getSsps3c().getOutputCurves().getIntensity().redraw();
+		System.out.println(progressBar.getSelection());
+		progressBar.setSelection(progressBar.getSelection() +1);
+		if(progressBar.getSelection() >= progressBar.getMaximum()){
+			
+			System.out.println(progressBar.getSelection() +" in the break");
+			tpaav.close();
+		}
 		
 	}
 

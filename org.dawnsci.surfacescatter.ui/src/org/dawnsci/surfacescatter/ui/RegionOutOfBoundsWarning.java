@@ -1,11 +1,13 @@
 package org.dawnsci.surfacescatter.ui;
 
 import org.eclipse.jface.dialogs.Dialog;
+import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
@@ -19,6 +21,7 @@ public class RegionOutOfBoundsWarning extends Dialog {
 	
 	private int selector;
 	private String note;
+	private Button override;
 	
 	
 	public RegionOutOfBoundsWarning(Shell parentShell, int selector, String note) {
@@ -83,6 +86,17 @@ public class RegionOutOfBoundsWarning extends Dialog {
 	@Override
 	  protected boolean isResizable() {
 	    return true;
+	}
+	
+	@Override
+    protected void createButtonsForButtonBar(Composite parent) {
+            createButton(parent, IDialogConstants.OK_ID, "OK", true);
+            override = createButton(parent, IDialogConstants.CANCEL_ID,
+                           "Override", false);
+    }
+	
+	public Button getOverride(){
+		return override;
 	}
 	
 }

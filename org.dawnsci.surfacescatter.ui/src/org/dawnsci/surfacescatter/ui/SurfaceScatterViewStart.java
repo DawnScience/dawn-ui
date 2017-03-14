@@ -7,6 +7,7 @@ import org.dawnsci.surfacescatter.MethodSettingEnum;
 import org.dawnsci.surfacescatter.MethodSettingEnum.MethodSetting;
 import org.dawnsci.surfacescatter.ReflectivityFluxCorrectionsForDialog;
 import org.dawnsci.surfacescatter.ReflectivityMetadataTitlesForDialog;
+import org.eclipse.core.internal.runtime.PrintStackUtil;
 import org.eclipse.dawnsci.analysis.api.io.IDataHolder;
 import org.eclipse.dawnsci.analysis.dataset.roi.RectangularROI;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
@@ -36,12 +37,13 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Group;
+import org.eclipse.swt.widgets.ProgressBar;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Slider;
 import org.eclipse.swt.widgets.TableItem;
-
 import uk.ac.diamond.scisoft.analysis.io.LoaderFactory;
 
 public class SurfaceScatterViewStart extends Dialog {
@@ -73,6 +75,7 @@ public class SurfaceScatterViewStart extends Dialog {
 	private Group methodSetting;
 	private Group parametersSetting;
 	private int[] correctionsDropDownArray;
+
 
 	public CTabFolder getFolder() {
 		return folder;
@@ -279,15 +282,37 @@ public class SurfaceScatterViewStart extends Dialog {
 				customComposite.getOutputControl().redraw();
 				ssp.resetSmOutputObjects();
 				
-				ssp.surfaceScatterPresenterBuild(ssp.getParentShell(), filepaths, datDisplayer.getSelectedOption(),
-						ssp.getImageFolderPath(), datFolderPath, MethodSetting.toInt(ssp.getCorrectionSelection()));
-
+				int[][] r = new int[][] {{50, 50}, {10, 10}};
+				String q = "holder";
 				
-				ssp.resetCorrectionsSelection(correctionsDropDownArray[correctionsDropDown.getSelectionIndex()]);	
+				try{
+					
+					q = ssp.getSaveFolder();
+					r = ssp.getLenPt();
+				}
+				catch(NullPointerException f){
+					
+				}
+				
+				ssp.surfaceScatterPresenterBuild(ssp.getParentShell(), filepaths, datDisplayer.getSelectedOption(),
+						ssp.getImageFolderPath(), datFolderPath, correctionsDropDownArray[correctionsDropDown.getSelectionIndex()]);
+				
+				try{
+					ssp.setLenPt(r);
+					
+					if(q.equals("holder") == false){
+						ssp.setSaveFolder(q);
+					}
+				}
+				catch(Exception m){
 
+				}
+				
+				
 				folder.setSelection(1);
 		
 				ssp.setSelection(0);
+				customComposite.getSlider().setSelection(0);
 				customComposite.getSlider().setMinimum(0);
 				customComposite.getSlider().setMaximum(ssp.getNoImages());
 				customComposite.getSlider().setThumb(1);
@@ -301,7 +326,7 @@ public class SurfaceScatterViewStart extends Dialog {
 				getPlotSystemCompositeView().removeBackgroundSubtractedSubImage();
 				getSsps3c().isOutputCurvesVisible(false);
 				customComposite.getReplay().setEnabled(false);
-				
+				customComposite.resetCorrectionsTab();
 				ssps3c.isOutputCurvesVisible(false);
 				
 			}
@@ -487,6 +512,8 @@ public class SurfaceScatterViewStart extends Dialog {
 
 					ssp.regionOfInterestSetter(newLenPt);
 					ssp.backgroundBoxesManager();
+					
+					ssps3c.generalUpdate();
 
 			}
 
@@ -505,6 +532,7 @@ public class SurfaceScatterViewStart extends Dialog {
 					modify = false;
 
 					double in = 0;
+					
 					try {
 						in = Double.parseDouble(customComposite.getXValue().getText());
 					} catch (Exception e1) {
@@ -531,33 +559,40 @@ public class SurfaceScatterViewStart extends Dialog {
 		});
 
 		customComposite.getRun().addSelectionListener(new SelectionListener() {
-
+				
 			@Override
-			public void widgetSelected(SelectionEvent e) {
-
+			public void widgetSelected(SelectionEvent e){ 
+								
 				ssp.setStartFrame(ssvs.getSliderList().get(0).getSelection());
 				ssp.resetDataModels();
 				ssp.triggerBoxOffsetTransfer();
-
-				if (getPlotSystemCompositeView().getBackgroundSubtractedSubImage() == null) {
-					getPlotSystemCompositeView().appendBackgroundSubtractedSubImage();
-					getPlotSystemCompositeView().getSash().setWeights(new int[] { 23, 45, 25, 7 });
-
-				}
-
+				
 				if (getSsps3c().getOutputCurves().isVisible() != true) {
 					getSsps3c().getOutputCurves().setVisible(true);
 					getSsps3c().getSashForm().setWeights(new int[] { 50, 50 });
 					getSsps3c().getLeft().setWeights(new int[] { 50, 50 });
 					getSsps3c().getRight().setWeights(new int[] { 50, 50 });
 				}
-
+		
+				if (getPlotSystemCompositeView().getBackgroundSubtractedSubImage() == null) {
+					getPlotSystemCompositeView().appendBackgroundSubtractedSubImage();
+					getPlotSystemCompositeView().getSash().setWeights(new int[] { 23, 45, 25, 7 });
+		
+				}
+				
 				analysisSash.setWeights(new int[] { 40, 60 });
 				analysisSash.redraw();
-
-				ssp.runTrackingJob(customComposite.getSubImagePlotSystem(),
-						getSsps3c().getOutputCurves().getPlotSystem(), customComposite.getPlotSystem(),
-						customComposite.getFolder(), customComposite.getSubImageBgPlotSystem());
+				
+				TrackingProgressAndAbortView tpaav 
+							= new TrackingProgressAndAbortView(getParentShell(), 
+															   ssp.getNumberOfImages(),
+															   ssp,
+															   customComposite.getSubImagePlotSystem(),
+															   getSsps3c().getOutputCurves().getPlotSystem(),
+															   customComposite.getPlotSystem(),
+															   customComposite.getFolder(),
+															   customComposite.getSubImageBgPlotSystem());
+				tpaav.open();
 
 			}
 

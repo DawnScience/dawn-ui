@@ -202,11 +202,7 @@ public class ImageFolderChangeDialog extends Dialog {
 		saveFolderText.setEditable(false);
 		
 		dd.setPromptedForImageFolder(true);
-		
-		
-		
-
-		
+	
 		return container;
 	}
 
