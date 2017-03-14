@@ -8,6 +8,7 @@
  */
 package org.dawnsci.plotting.system;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 
@@ -17,6 +18,7 @@ import org.eclipse.january.dataset.DatasetFactory;
 import org.eclipse.january.dataset.DatasetUtils;
 import org.eclipse.january.dataset.IDataset;
 import org.eclipse.january.dataset.ILazyDataset;
+import org.eclipse.january.dataset.IndexIterator;
 import org.eclipse.nebula.visualization.xygraph.dataprovider.IDataProvider;
 import org.eclipse.nebula.visualization.xygraph.dataprovider.IDataProviderListener;
 import org.eclipse.nebula.visualization.xygraph.dataprovider.ISample;
@@ -36,6 +38,7 @@ class LightWeightDataProvider implements IDataProvider {
 	private Dataset xerr;
 	private Dataset yerr;
 	private Range cachedXRange, cachedYRange;
+	private double[] positiveMins = new double[2]; // zeros indicate need to update
 
 	public LightWeightDataProvider() {
 		
@@ -69,34 +72,83 @@ class LightWeightDataProvider implements IDataProvider {
 
 	@Override
 	public Range getXDataMinMax() {
-		if (x==null) return new Range(0,100);
-		if (cachedXRange!=null) return cachedXRange;
+		return getXDataMinMax(false);
+	}
+
+	@Override
+	public Range getXDataMinMax(boolean positiveOnly) {
+		return getDataMinMax(true, positiveOnly);
+	}
+
+	@Override
+	public Range getYDataMinMax() {
+		return getYDataMinMax(false);
+	}
+
+	@Override
+	public Range getYDataMinMax(boolean positiveOnly) {
+		return getDataMinMax(false, positiveOnly);
+	}
+	
+	private Range getDataMinMax(boolean isX, boolean positiveOnly) {
+		Dataset d = isX ? x : y;
+		if (d == null) return new Range(0, 100);
+		int idx = isX ? 0 : 1;
+
 		try {
-			cachedXRange= new Range(getMin(x), getMax(x));
-			return cachedXRange;
+			Range range;
+			range = isX ? cachedXRange : cachedYRange;
+			if (positiveOnly || range == null) {
+				double max = getMax(d);
+				double min = getMin(d);
+				if (positiveOnly) {
+					if (min <= 0) {
+						min = positiveMins[idx];
+						if (positiveMins[idx] == 0) {
+							min = positiveMin(d);
+							positiveMins[idx] = min;
+						}
+					}
+					if (max <= 0) {
+						max = min;
+					}
+					range = new Range(min, max);
+				} else {
+					range = new Range(min, max);
+					if (isX) {
+						cachedXRange = range;
+					} else {
+						cachedYRange = range;
+					}
+				}
+			}
+			return range;
 		} catch (Throwable ne) {
 			return new Range(0,100);
 		}
 	}
 
-	@Override
-	public Range getYDataMinMax() {
-		if (y==null) return new Range(0,100);
-		if (cachedYRange!=null) return cachedYRange;
-		try {
-			cachedYRange = new Range(getMin(y), getMax(y));
-			return cachedYRange;
-		} catch (Throwable ne) {
-			return new Range(0,100);
-		}
-	}
-	
 	private double getMin(Dataset a) {
 		return a.min(true).doubleValue();
 	}
 
 	private double getMax(Dataset a) {
 		return a.max(true).doubleValue();
+	}
+
+	private double positiveMin(Dataset a) {
+		IndexIterator it = a.getIterator();
+		double min = Double.POSITIVE_INFINITY; 
+		while (it.hasNext()) {
+			double val = a.getElementDoubleAbs(it.index);
+			if (Double.isFinite(val) && val > 0) {
+				if (min > val) {
+					min = val;
+				}
+			}
+		}
+
+		return min;
 	}
 
 	@Override
@@ -128,8 +180,9 @@ class LightWeightDataProvider implements IDataProvider {
 		setDataInternal(xData, yData);
 		fireDataProviderListeners();
 	}
-	
+
 	private void setDataInternal(IDataset xData, IDataset yData) {
+		Arrays.fill(positiveMins, 0); // reset
 		this.x = DatasetUtils.convertToDataset(xData);
 		this.y = DatasetUtils.convertToDataset(yData);
 		ILazyDataset xel = x.getError();
@@ -184,17 +237,24 @@ class LightWeightDataProvider implements IDataProvider {
 	                          
 	    final double[] xa = new double[xArray.length+1];
 	    System.arraycopy(xArray, 0, xa, 0, xArray.length);
-	    xa[xa.length-1] = xValue.doubleValue();
+	    double value = xValue.doubleValue();
+	    if (value > 0 && positiveMins[0] > value) {
+	    	positiveMins[0] = value;
+	    }
+	    xa[xa.length-1] = value;
 	    this.x = DatasetFactory.createFromObject(xa);
 	    
 	    final double[] ya = new double[yArray.length+1];
 	    System.arraycopy(yArray, 0, ya, 0, yArray.length);
-	    ya[ya.length-1] = yValue.doubleValue();
+	    value = yValue.doubleValue();
+	    if (value > 0 && positiveMins[1] > value) {
+	    	positiveMins[1] = value;
+	    }
+	    ya[ya.length-1] = value;
 	    this.y = DatasetFactory.createFromObject(ya);
 	    
 		this.cachedXRange = null;
 		this.cachedYRange = null;
-	    
 	    fireDataProviderListeners();
 	}
 
