@@ -312,6 +312,7 @@ public class SurfaceScatterViewStart extends Dialog {
 				folder.setSelection(1);
 		
 				ssp.setSelection(0);
+				ssp.setSliderPos(0);;
 				customComposite.getSlider().setSelection(0);
 				customComposite.getSlider().setMinimum(0);
 				customComposite.getSlider().setMaximum(ssp.getNoImages());
