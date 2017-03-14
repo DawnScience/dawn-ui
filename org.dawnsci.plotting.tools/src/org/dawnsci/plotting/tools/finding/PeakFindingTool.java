@@ -280,7 +280,7 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 				
 				for(ILineTrace trace : traceUpdate){
 					if (trace.getName() != BOUNDTRACENAME && trace.getName() != PEAKSTRACENAME) {
-						runAutoSearch(trace);
+						runTraceSearch(trace);
 					}
 				}
 			}
@@ -299,7 +299,7 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 				traceUpdate.equals(getPlottingSystem().getTrace(BOUNDTRACENAME));
 				
 				if (traceUpdate.getName() != BOUNDTRACENAME && traceUpdate.getName() != PEAKSTRACENAME) {
-					runAutoSearch(traceUpdate);
+					runTraceSearch(traceUpdate);
 				}
 			}
 
@@ -319,7 +319,7 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 			public void traceAdded(TraceEvent evt) {
 				ILineTrace traceUpdate = (ILineTrace) evt.getSource();
 				if (traceUpdate.getName() != BOUNDTRACENAME && traceUpdate.getName() != PEAKSTRACENAME) {
-					runAutoSearch(traceUpdate);
+					runTraceSearch(traceUpdate);
 				}
 			}
 		});
@@ -328,12 +328,14 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 		createNewSearch();
 	}
 	
-	private void runAutoSearch(ILineTrace trace){
+	private void runTraceSearch(ILineTrace trace){
 		setSearchDataOnBounds(trace);
 		// Load in new search bounds to beacon
 		PeakOppurtunity peakOpp = new PeakOppurtunity();
 		peakOpp.setXData(interestXData);
 		peakOpp.setYData(interestYData);
+		peakOpp.setLowerBound(lowerBnd);
+		peakOpp.setUpperBound(upperBnd);
 		manager.loadPeakOppurtunity(peakOpp);
 		manager.setPeakSearching();
 	}
@@ -492,22 +494,7 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 					RectangularROI rectangle = (RectangularROI) searchRegion.getROI();
 					updateSearchBnds(rectangle);
 					if (!getPlottingSystem().getTraces().isEmpty()) {
-						setSearchDataOnBounds((ILineTrace) getPlottingSystem().getTraces().iterator().next());
-						// Load in new search bounds to beacon
-						PeakOppurtunity peakOpp = new PeakOppurtunity();
-
-						peakOpp.setXData(interestXData); // TODO: slice from
-															// sample data with
-															// region here
-															// instead
-						peakOpp.setYData(interestYData);
-
-						peakOpp.setLowerBound(lowerBnd);
-						peakOpp.setUpperBound(upperBnd);
-						// TODO: might need to postpone whilst configure more on
-						// peakOpp..
-						manager.loadPeakOppurtunity(peakOpp);
-
+						runTraceSearch((ILineTrace) getPlottingSystem().getTraces().iterator().next());
 					}
 
 				}
