@@ -9,9 +9,12 @@ import org.dawnsci.common.widgets.spinner.FloatSpinner;
 import org.dawnsci.plotting.tools.Activator;
 import org.dawnsci.plotting.tools.preference.PeakFindingConstants;
 import org.eclipse.january.dataset.IDataset;
+import org.eclipse.jface.action.Action;
+import org.eclipse.jface.action.IAction;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -67,17 +70,29 @@ public class PeakFindingWidget {
 		Composite configureComposite = new Composite(configure, SWT.NONE);
 		configureComposite.setLayoutData(new GridData(SWT.FILL, SWT.LEFT, true, false));
 		configureComposite.setLayout(new GridLayout(2, false));
+		
+//		Button adjustSearch = new Button(configureComposite, SWT.BUTTON1);
+//		adjustSearch.addSelectionListener(new SelectionAdapter() {
+//			@Override
+//			public void widgetSelected(SelectionEvent e) {
+//				manager.setPeakSearching();
+//			}
+//		});
+//		adjustSearch.setImage(Activator.getImageDescriptor("icons/plot-tool-peak-fit.png").createImage());
+//
+//		Composite boundsConfig = new Composite(configureComposite, SWT.BORDER);
+//		configureComposite.setLayoutData(new GridData(SWT.FILL, SWT.LEFT, true, true));
+//		configureComposite.setLayout(new GridLayout(2, true));
 
 		//ILineTrace sampleTrace = controller.getPeakfindingtool().sampleTrace;
 		//TODO: tmp limit. Base of trace
-		int max = 100000;
+		int max = 100000; 
 		
-		Label lwrBndLab = new Label(configureComposite, SWT.NONE);
+		Label lwrBndLab = new Label(configureComposite , SWT.NONE);
 		lwrBndLab.setText("Lower Bound");
 		lwrBndLab.setToolTipText("As shown by the second vertical line");
 		
-		lwrBndVal = new FloatSpinner(configureComposite, SWT.BORDER,  max , 3);
-		lwrBndVal.setLayoutData(new GridData(SWT.FILL, SWT.LEFT, true, false));
+		lwrBndVal = new FloatSpinner(configureComposite , SWT.BORDER,  max , 3);
 		lwrBndVal.setPrecision(4);
 		lwrBndVal.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
@@ -88,12 +103,11 @@ public class PeakFindingWidget {
 			}
 		});
 		
-		Label upperBndLab = new Label(configureComposite, SWT.NONE);
+		Label upperBndLab = new Label(configureComposite , SWT.NONE);
 		upperBndLab.setText("Upper Bound");
 		upperBndLab.setToolTipText("As shown by the vertical line");
 	
-		uprBndVal = new FloatSpinner(configureComposite, SWT.BORDER, max , 3);
-		uprBndVal.setLayoutData(new GridData(SWT.FILL, SWT.LEFT, true, false));
+		uprBndVal = new FloatSpinner(configureComposite , SWT.BORDER, max , 3);
 		uprBndVal.setPrecision(4);
 		uprBndVal.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {

@@ -100,8 +100,6 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 		return this.interestYData;
 	}
 	
-	
-	
 	private List<Peak> peaks = new ArrayList<Peak>();
 	private List<IdentifiedPeak> peaksId = new ArrayList<IdentifiedPeak>();
 	
@@ -178,10 +176,6 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 		
 		//TODO: additioanl plot serivce
 		getPlottingSystem().createPlotPart(composite, getTitle(), actionbars, PlotType.XY, this.getViewPart());
-		
-		
-		
-		
 		
 		// TODO: id the listener...
 		listener = new IPeakOpportunityListener() {
@@ -416,7 +410,6 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 																										// the
 																										// sample
 																										// trace
-
 			// Setup Upper & lower bound for search region
 			if (getPlottingSystem().getTrace(BOUNDTRACENAME) == null) {
 				regionBndsTrace = generateBoundTrace(BOUNDTRACENAME);
@@ -731,7 +724,7 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 		// TODO: icon removal
 		// TODO: clear peaks
 		// TODO: manager remove the manager listeners? destorying anwyay though
-		// manager.destroyAllListeners();
+		manager.destroyAllListeners();
 
 		Collection<IRegion> regions = getPlottingSystem().getRegions();
 		for (IRegion region : regions) {
@@ -744,7 +737,7 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 	public void dispose() {
 		deactivate();
 		super.dispose();
-		composite.dispose();
+		//composite.dispose();
 		// TODO: kill manager jobs... maybe might not be storing the jobs...
 		// there scheduled though so should have segment of all jobs runnign
 	}
