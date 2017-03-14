@@ -193,7 +193,7 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 				}
 				
 				//TODO: now ill just place these identifed peaks here too
-				peaks	Id = evt.getPeakOpp().getPeaksId();
+				//peaksId = evt.getPeakOpp().getPeaksId();
 			}
 
 			@Override
@@ -263,7 +263,6 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 
 			@Override
 			public void tracesUpdated(TraceEvent evt) {
-				// TODO Auto-generated method stub
 			}
 
 			@Override
@@ -277,7 +276,13 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 
 			@Override
 			public void tracesAdded(TraceEvent evt) {
-				// TODO Auto-generated method stub
+				List<ILineTrace> traceUpdate = (ArrayList<ILineTrace>) evt.getSource();
+				
+				for(ILineTrace trace : traceUpdate){
+					if (trace.getName() != BOUNDTRACENAME && trace.getName() != PEAKSTRACENAME) {
+						runAutoSearch(trace);
+					}
+				}
 			}
 
 			@Override
@@ -288,22 +293,13 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 			@Override
 			public void traceUpdated(TraceEvent evt) {
 				ILineTrace traceUpdate = (ILineTrace) evt.getSource();
-				if (traceUpdate.getName() != BOUNDTRACENAME && traceUpdate.getName() != PEAKSTRACENAME) {
-					
-					setSearchDataOnBounds(traceUpdate);
-					// Load in new search bounds to beacon
-					PeakOppurtunity peakOpp = new PeakOppurtunity();
-
-					peakOpp.setXData(interestXData);
-					peakOpp.setYData(interestYData);
-					//peakOpp.setLowerBound(lowerBnd);
-					//peakOpp.setUpperBound(upperBnd);
-					manager.loadPeakOppurtunity(peakOpp);
 				
-					
-					//If the data has been changed I will assume wish for a search to be created.
-					//TODO: activate widget search event
-					manager.setPeakSearching();
+				//TODO: check against object but unfortunately do not have it hanging around ...
+				traceUpdate.equals(peaksTrace);
+				traceUpdate.equals(getPlottingSystem().getTrace(BOUNDTRACENAME));
+				
+				if (traceUpdate.getName() != BOUNDTRACENAME && traceUpdate.getName() != PEAKSTRACENAME) {
+					runAutoSearch(traceUpdate);
 				}
 			}
 
@@ -321,13 +317,25 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 
 			@Override
 			public void traceAdded(TraceEvent evt) {
-				// TODO Auto-generated method stub
-		
+				ILineTrace traceUpdate = (ILineTrace) evt.getSource();
+				if (traceUpdate.getName() != BOUNDTRACENAME && traceUpdate.getName() != PEAKSTRACENAME) {
+					runAutoSearch(traceUpdate);
+				}
 			}
 		});
 
 		// Begin with the search tool ready to then run on
 		createNewSearch();
+	}
+	
+	private void runAutoSearch(ILineTrace trace){
+		setSearchDataOnBounds(trace);
+		// Load in new search bounds to beacon
+		PeakOppurtunity peakOpp = new PeakOppurtunity();
+		peakOpp.setXData(interestXData);
+		peakOpp.setYData(interestYData);
+		manager.loadPeakOppurtunity(peakOpp);
+		manager.setPeakSearching();
 	}
 
 	private void addPeakValue(Double x, Double y) {
