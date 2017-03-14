@@ -94,8 +94,6 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 
 	private List<Peak> peaks = new ArrayList<Peak>();
 	private List<IdentifiedPeak> peaksId = new ArrayList<IdentifiedPeak>();
-
-	
 	
 	private IPeakOpportunityListener listener;
 

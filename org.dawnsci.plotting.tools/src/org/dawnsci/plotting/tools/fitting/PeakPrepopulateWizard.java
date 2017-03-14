@@ -1,21 +1,16 @@
 package org.dawnsci.plotting.tools.fitting;
 
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
-import java.util.Map;
-
 import org.dawb.common.ui.widgets.ActionBarWrapper;
-import org.dawnsci.plotting.tools.finding.PeakFindingManager;
 import org.dawnsci.plotting.tools.finding.PeakFindingTool;
 import org.eclipse.dawnsci.analysis.api.fitting.functions.IFunction;
+import org.eclipse.dawnsci.analysis.api.fitting.functions.IOperator;
 import org.eclipse.dawnsci.analysis.api.fitting.functions.IPeak;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.PlotType;
 import org.eclipse.dawnsci.plotting.api.PlottingFactory;
 import org.eclipse.dawnsci.plotting.api.trace.ILineTrace;
 import org.eclipse.january.dataset.Dataset;
-import org.eclipse.january.dataset.DatasetUtils;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.FillLayout;
@@ -26,9 +21,11 @@ import org.eclipse.swt.widgets.Composite;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import uk.ac.diamond.scisoft.analysis.fitting.Generic1DFitter;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.Add;
-import uk.ac.diamond.scisoft.analysis.fitting.functions.FunctionFactory;
+import uk.ac.diamond.scisoft.analysis.fitting.functions.CompositeFunction;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.IdentifiedPeak;
+import uk.ac.diamond.scisoft.analysis.optimize.IOptimizer;
 
 /**
  * TODO: adjust to spawn peak finder widget
@@ -125,22 +122,8 @@ public class PeakPrepopulateWizard extends WizardPage {
 //			plotting.addTrace(trace);
 	}	
 	
-	/**
-	 * Gets the currently selected peak profile type in the combo box
-	 * @return peak function class
-	 */
-	private Class<? extends IPeak> getProfileFunction(){
-		String selectedProfileName = peakTypeCombo.getText();
-		
-		Class<? extends IPeak> selectedProfile = FunctionFactory.getPeakFunctionClass(selectedProfileName);
-		
-		return selectedProfile;
-	}
-	
-	
 	public List<IdentifiedPeak> gatherInitalPeaks(){
 		return peakFindTool.getPeaksId();
 	}
 
-	
 }
