@@ -21,6 +21,7 @@ import org.dawnsci.fileviewer.handlers.ConvertHandler;
 import org.dawnsci.fileviewer.handlers.LayoutHandler;
 import org.dawnsci.fileviewer.handlers.OpenHandler;
 import org.dawnsci.fileviewer.handlers.ParentHandler;
+import org.dawnsci.fileviewer.handlers.PreferencesHandler;
 import org.dawnsci.fileviewer.handlers.RefreshHandler;
 import org.dawnsci.fileviewer.table.FileTableExplorer;
 import org.dawnsci.fileviewer.table.FileTableViewerComparator;
@@ -34,6 +35,7 @@ import org.eclipse.core.runtime.jobs.JobChangeAdapter;
 import org.eclipse.e4.core.commands.ECommandService;
 import org.eclipse.e4.core.commands.EHandlerService;
 import org.eclipse.e4.ui.workbench.modeling.ESelectionService;
+import org.eclipse.jface.preference.PreferenceDialog;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
@@ -61,6 +63,7 @@ import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.swt.widgets.ToolItem;
 import org.eclipse.swt.widgets.TreeItem;
 import org.eclipse.ui.PartInitException;
+import org.eclipse.ui.dialogs.PreferencesUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -206,37 +209,49 @@ public class FileViewer {
 		ToolBar bar = new ToolBar(parent, SWT.NONE);
 		bar.setBackground(parent.getBackground());
 		ToolItem parentToolItem = new ToolItem(bar, SWT.NONE);
-		parentToolItem.setToolTipText(Utils.getResourceString("tool.Parent.tiptext"));
+		parentToolItem.setToolTipText(Utils.getResourceString(FileViewerConstants.PARENT_TIP));
 		parentToolItem.setImage(Activator.getImage("icons/arrow-090.png"));
 		parentToolItem.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent event) {
-				ParameterizedCommand myCommand = commandService.createCommand("org.dawnsci.fileviewer.parentCommand", null);
-				handlerService.activateHandler("org.dawnsci.fileviewer.parentCommand", new ParentHandler(FileViewer.this));
+				ParameterizedCommand myCommand = commandService.createCommand(FileViewerConstants.PARENT_CMD, null);
+				handlerService.activateHandler(FileViewerConstants.PARENT_CMD, new ParentHandler(FileViewer.this));
 				handlerService.executeHandler(myCommand);
 			}
 		});
 
 		ToolItem refreshToolItem = new ToolItem(bar, SWT.NONE);
-		refreshToolItem.setToolTipText(Utils.getResourceString("tool.Refresh.tiptext"));
+		refreshToolItem.setToolTipText(Utils.getResourceString(FileViewerConstants.REFRESH_TIP));
 		refreshToolItem.setImage(Activator.getImage("icons/arrow-circle-double-135.png"));
 		refreshToolItem.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent event) {
-				ParameterizedCommand myCommand = commandService.createCommand("org.dawnsci.fileviewer.refreshCommand", null);
-				handlerService.activateHandler("org.dawnsci.fileviewer.refreshCommand", new RefreshHandler(FileViewer.this));
+				ParameterizedCommand myCommand = commandService.createCommand(FileViewerConstants.REFRESH_CMD, null);
+				handlerService.activateHandler(FileViewerConstants.REFRESH_CMD, new RefreshHandler(FileViewer.this));
 				handlerService.executeHandler(myCommand);
 			}
 		});
 
 		ToolItem layoutToolItem = new ToolItem(bar, SWT.NONE);
-		layoutToolItem.setToolTipText(Utils.getResourceString("tool.LayoutEdit.tiptext"));
+		layoutToolItem.setToolTipText(Utils.getResourceString(FileViewerConstants.LAYOUT_TIP));
 		layoutToolItem.setImage(Activator.getImage("icons/layout-design.png"));
 		layoutToolItem.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent event) {
-				ParameterizedCommand myCommand = commandService.createCommand("org.dawnsci.fileviewer.layoutCommand", null);
-				handlerService.activateHandler("org.dawnsci.fileviewer.layoutCommand", new LayoutHandler(FileViewer.this));
+				ParameterizedCommand myCommand = commandService.createCommand(FileViewerConstants.LAYOUT_CMD, null);
+				handlerService.activateHandler(FileViewerConstants.LAYOUT_CMD, new LayoutHandler(FileViewer.this));
+				handlerService.executeHandler(myCommand);
+			}
+		});
+
+		ToolItem preferencesToolItem = new ToolItem(bar, SWT.NONE);
+		preferencesToolItem.setToolTipText(Utils.getResourceString(FileViewerConstants.PREFERENCES_TIP));
+		preferencesToolItem.setImage(Activator.getImage("icons/preferences.png"));
+		preferencesToolItem.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent event) {
+				ParameterizedCommand myCommand = commandService.createCommand(FileViewerConstants.PREFERENCES_CMD, null);
+				handlerService.activateHandler(FileViewerConstants.PREFERENCES_CMD, new PreferencesHandler(FileViewer.this));
 				handlerService.executeHandler(myCommand);
 			}
 		});
@@ -634,6 +649,17 @@ public class FileViewer {
 	}
 
 	/**
+	 * Open the File Viewer preference page
+	 */
+	public void openPreferences() {
+		PreferenceDialog pref = PreferencesUtil.createPreferenceDialogOn(Display.getDefault().getActiveShell(),
+				"org.dawnsci.fileviewer.preferencePage", null, null);
+		if (pref != null) {
+			pref.open();
+		}
+	}
+
+	/**
 	 * Validates a drop target as a candidate for a drop operation.
 	 * <p>
 	 * Used in dragOver() and dropAccept().<br>
@@ -919,4 +945,5 @@ public class FileViewer {
 	public FileTreeExplorer getTreeExplorer() {
 		return treeExplo;
 	}
+
 }

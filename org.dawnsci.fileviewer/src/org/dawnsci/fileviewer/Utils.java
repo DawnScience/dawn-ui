@@ -13,8 +13,11 @@ package org.dawnsci.fileviewer;
 
 import java.io.File;
 import java.io.FileFilter;
+import java.io.Serializable;
 import java.text.MessageFormat;
+import java.util.Collection;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 import java.util.regex.Pattern;
@@ -28,6 +31,9 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Platform;
+import org.eclipse.dawnsci.analysis.api.io.IDataHolder;
+import org.eclipse.dawnsci.analysis.api.io.ILoaderService;
+import org.eclipse.january.metadata.IMetadata;
 import org.eclipse.swt.program.Program;
 
 import uk.ac.diamond.sda.navigator.views.IOpenFileAction;
@@ -40,7 +46,8 @@ public class Utils {
 		NAME,
 		SIZE,
 		TYPE,
-		DATE;
+		DATE,
+		SCAN;
 	}
 
 	/**
@@ -155,6 +162,12 @@ public class Utils {
 			Date date1 = new Date(a.lastModified());
 			Date date2 = new Date(b.lastModified());
 			compare = date1.compareTo(date2);
+			break;
+		case SCAN:
+			String scana = getFileScanCmdString(a), scanb = getFileScanCmdString(b);
+			compare = scana.compareToIgnoreCase(scanb);
+			if (compare == 0)
+				compare = scana.compareTo(scanb);
 			break;
 		default:
 			return 0;
@@ -285,4 +298,46 @@ public class Utils {
 	public static String getFileDateString(File file) {
 		return FileViewerConstants.dateFormat.format(new Date(file.lastModified()));
 	}
+
+	/**
+	 * Get the Scan Command if file contains one
+	 * 
+	 * @param file
+	 * @return scan command
+	 */
+	public static String getFileScanCmdString(File file) {
+		if (file.isFile()) {
+			String extension = getFileExtension(file);
+			if (extension.equals("nxs") || extension.equals("hdf") || extension.equals("h5")
+					|| extension.equals("hdf5") || extension.equals("dat")) {
+				String filePath = file.getAbsolutePath();
+				try {
+					ILoaderService loader = ServiceHolder.getLoaderService();
+					IDataHolder dh = loader.getData(filePath, null);
+					IMetadata meta = dh.getMetadata();
+					Collection<String> metanames = meta.getMetaNames();
+					for (Iterator<String> iterator = metanames.iterator(); iterator.hasNext();) {
+						String string = (String) iterator.next();
+						if (string.contains("scan_command")) {
+							Serializable value = meta.getMetaValue(string);
+							return (String) value;
+						}
+					}
+				} catch (Exception e) {
+				
+				}
+			}
+		}
+		return "";
+	}
+
+	private static String getFileExtension(File file) {
+		String name = file.getName();
+		try {
+			return name.substring(name.lastIndexOf(".") + 1);
+		} catch (Exception e) {
+			return "";
+		}
+	}
+
 }

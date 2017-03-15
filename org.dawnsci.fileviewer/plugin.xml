@@ -34,6 +34,19 @@
             id="org.dawnsci.fileviewer.parentCommand"
             name="Parent">
       </command>
+      <command
+            id="org.dawnsci.fileviewer.preferencesCommand"
+            name="Preferences">
+      </command>
+   </extension>
+   <extension
+         point="org.eclipse.ui.preferencePages">
+      <page
+            category="uk.ac.diamond.scisoft.analysis.rcp.preferences.root"
+            class="org.dawnsci.fileviewer.preferences.FileViewerPreferencePage"
+            id="org.dawnsci.fileviewer.preferencePage"
+            name="File Viewer">
+      </page>
    </extension>
 
 </plugin>
