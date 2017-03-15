@@ -133,7 +133,7 @@ public class PeakFindingManager {
 		everythingChangesListeners(new PeakOpportunityEvent(this, peakOpp));
 	}
 	
-	public void setPeaks(List<IdentifiedPeak> peaksId){
+	public void setPeaksId(List<IdentifiedPeak> peaksId){
 		IPeakOpportunity peakOpp = new PeakOppurtunity();
 		peakOpp.setPeaksId(peaksId);
 		everythingChangesListeners(new PeakOpportunityEvent(this, peakOpp));
@@ -216,16 +216,12 @@ public class PeakFindingManager {
 	 * @param yData 
 	 * @return every peak pos inside @peakpos cast to identified Peak
 	 */
-	private List<IdentifiedPeak> convertIntoPeaks(Map<Integer, Double> peakpos, Dataset xData, Dataset yData){
+	List<IdentifiedPeak> convertIntoPeaks(Map<Integer, Double> peakpos, Dataset xData, Dataset yData){
 		
 		if(xData.getSize() != yData.getSize())
 			logger.error("Signal data must be matching size");
 		
 		List<IdentifiedPeak> peaksID = new ArrayList<IdentifiedPeak>();
-		int backPos, forwardPos;	
-		double backTotal, forwardTotal;
-		double backValue, forwardValue;
-		
 		for (Map.Entry<Integer, Double> peak : peakpos.entrySet()) {
 			peaksID.add(generateIdentifedPeak(peak.getKey(),xData,yData));
 		}
@@ -301,16 +297,16 @@ public class PeakFindingManager {
 			crossings.add((double) forwardPos);
 		}
 		
-		double position = pos;
+		double positionVal = xData.getElementDoubleAbs(pos);
 		double minXValue = xData.getElementDoubleAbs(backPos) ;
 		double maxXValue = xData.getElementDoubleAbs(forwardPos); 
 		double area = Math.min(backTotal, forwardTotal); 
-		double height = slicedYData.peakToPeak().doubleValue(); //or just yData.getElementDoubleAbs(pos);
+		double height = yData.getElementDoubleAbs(pos); //slicedYData.peakToPeak().doubleValue(); //or just yData.getElementDoubleAbs(pos);
 		int indexOfMinXVal = backPos; 
 		int indexofMaxXVal = forwardPos;
 		List<Double> crossingsFnd = crossings;
 		
-		IdentifiedPeak newPeak = new IdentifiedPeak(position, minXValue,maxXValue,area,height,indexOfMinXVal, indexofMaxXVal,crossingsFnd);
+		IdentifiedPeak newPeak = new IdentifiedPeak(positionVal, minXValue,maxXValue,area,height,indexOfMinXVal, indexofMaxXVal,crossingsFnd);
 		
 		return newPeak;
 	}

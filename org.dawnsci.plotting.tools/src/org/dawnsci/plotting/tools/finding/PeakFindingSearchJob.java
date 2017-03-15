@@ -22,6 +22,7 @@ import org.eclipse.swt.widgets.Display;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import uk.ac.diamond.scisoft.analysis.fitting.functions.IdentifiedPeak;
 import uk.ac.diamond.scisoft.analysis.peakfinding.IPeakFindingService;
 import uk.ac.diamond.scisoft.analysis.peakfinding.Peak;
 
@@ -185,11 +186,11 @@ public class PeakFindingSearchJob extends Job {
 					
 					if(!peaksPos.isEmpty()){
 						/*Format peaks*/
-						List<Double> pPos = new ArrayList<Double>(peaksPos.values());
-						List<Integer> pHeight = new ArrayList<Integer>(peaksPos.keySet());
+						List<Double> pValues = new ArrayList<Double>(peaksPos.values());
+						List<Integer> pPositions = new ArrayList<Integer>(peaksPos.keySet());
 	
-						IDataset peaksY = DatasetFactory.createFromList(pPos);
-						IDataset peaksX = ((Dataset) xData).getBy1DIndex((IntegerDataset) DatasetFactory.createFromList(pHeight));
+						IDataset peaksY = DatasetFactory.createFromList(pValues);
+						IDataset peaksX = ((Dataset) xData).getBy1DIndex((IntegerDataset) DatasetFactory.createFromList(pPositions));
 						
 						// Create peaks
 						for (int i = 0; i < peaksY.getSize(); ++i) {
@@ -198,6 +199,8 @@ public class PeakFindingSearchJob extends Job {
 							peaks.add(p);
 						}
 					}
+					
+					List<IdentifiedPeak> peaksId = manager.convertIntoPeaks(peaksPos, (Dataset) xData, (Dataset) yData);
 					manager.setPeaks(peaksPos,xData,yData);
 					
 					manager.setPeaks(peaks);

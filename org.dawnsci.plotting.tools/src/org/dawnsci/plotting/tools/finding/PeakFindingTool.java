@@ -1,12 +1,9 @@
 package org.dawnsci.plotting.tools.finding;
 
-import java.awt.Rectangle;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
-
 import org.dawb.common.ui.util.GridUtils;
 import org.dawb.common.ui.widgets.ActionBarWrapper;
 import org.dawnsci.plotting.tools.fitting.PeakFittingTool;
@@ -361,13 +358,6 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 		List<Double> pX = new ArrayList<Double>();
 		List<Double> pY = new ArrayList<Double>();
 
-//		if (!getPeaks().isEmpty()) {
-//			for (int i = 0; i < getPeaks().size(); ++i) {
-//				pX.add(getPeaks().get(i).getX());
-//				pY.add(getPeaks().get(i).getY());
-//			}
-//		}
-		
 		if (!peaksId.isEmpty()) {
 			for (int i = 0; i < peaksId.size(); ++i) {
 				pX.add(peaksId.get(i).getPos());
@@ -378,9 +368,13 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 		pX.add(x);
 		pY.add(y);
 		
-		Peak p = new Peak(x, y);
-		manager.generateIdentifedPeak( (Integer)x, interestXData, interestYData);
 		
+		//TODO: its mroe than jsu the interest dataset. Its the whole thing when addign a peak
+		//TODO: find where posiiton lies...
+		//manager.generateIdentifedPeak(interestXData.Get, interestXData, interestYData);
+		IdentifiedPeak p = new IdentifiedPeak();
+		p.setPos(x);
+		p.setHeight(y);
 		// XXX: Unfortunately now this will be on the end of the result. The
 		// order is important for the table view. Need comaprator there
 		peaksId.add(p);
@@ -389,9 +383,11 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 		Dataset peakx = DatasetFactory.createFromList(pX);
 		Dataset peaky = DatasetFactory.createFromList(pY);
 
-		updatePeakTrace(peakx, peaky);
-
-		manager.setPeaks(getPeaks());
+		//TODO:
+		//updatePeakTrace(peakx, peaky);
+		
+		manager.setPeaksId(peaksId);
+		//manager.setPeaks(getPeaks());
 	}
 
 	private void removePeakValue(Double x, Double y) {
@@ -411,15 +407,18 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 		pX.remove(toRemove);
 		pY.remove(toRemove);
 
-		getPeaks().remove(toRemove);
+		peaksId.remove(toRemove);
 
-		if (!getPeaks().isEmpty()) {
+		if (!peaksId.isEmpty()) {
 			peakx = DatasetFactory.createFromList(pX);
 			peaky = DatasetFactory.createFromList(pY);
-			updatePeakTrace(peakx, peaky);
+			
+			
+			//updatePeakTrace(peakx, peaky);
 		}
-
-		manager.setPeaks(getPeaks());
+		
+		manager.setPeaksId(peaksId);
+		//manager.setPeaks(getPeaks());
 	}
 
 	public void configureTraces() {
@@ -479,13 +478,14 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 				}
 			}
 
-			if (getPeaks() != null && !getPeaks().isEmpty()) {
+			if (peaksId != null && !peaksId.isEmpty()) {
 				// Regenerate the trace to older times
 				getPlottingSystem().removeTrace(peaksTrace);
 				peaksTrace.dispose();
 				//Update reset
 				PeakOppurtunity peakOpp = new PeakOppurtunity();
-				manager.setPeaks(getPeaks());
+				manager.setPeaksId(peaksId);
+				//manager.setPeaks(getPeaks());
 				manager.loadPeakOppurtunity(peakOpp);
 			}
 
@@ -674,10 +674,10 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 		int closeIdx = 0;
 
 		for (int i = 1; i < x.getSize(); ++i) {
-			Double cur_x = (Double) x.getDouble(closeIdx);
-			Double nw_x = (Double) x.getDouble(i);
+			Double curX = (Double) x.getDouble(closeIdx);
+			Double nwX = (Double) x.getDouble(i);
 
-			if (Math.abs(nw_x - xy[0]) < Math.abs(cur_x - xy[0])) {
+			if (Math.abs(nwX - xy[0]) < Math.abs(curX - xy[0])) {
 				closeIdx = i;
 			}
 		}
