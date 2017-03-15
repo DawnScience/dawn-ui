@@ -959,7 +959,8 @@ public class LightWeightPlotViewer<T> extends AbstractPlottingViewer<T> implemen
 			trace.setPointStyle(org.eclipse.nebula.visualization.xygraph.figures.Trace.PointStyle.NONE);
 			int index = system.getTraces().size()+iplot-1;
 			if (index<0) index=0;
-			final Color plotColor = ColorUtility.getSwtColour(colorMap!=null?colorMap.values():null, index);
+//			final Color plotColor = ColorUtility.getSwtColour(colorMap!=null?colorMap.values():null, index);
+			final Color plotColor = ColorUtility.getSwtColour(null, iplot);
 			if (colorMap!=null) {
 				if (system.getColorOption()==ColorOption.BY_NAME) {
 					colorMap.put(y.getName(),plotColor);
