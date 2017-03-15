@@ -1,6 +1,5 @@
 package org.dawnsci.plotting.tools.finding;
 	
-import java.awt.Container;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -9,14 +8,9 @@ import org.dawnsci.common.widgets.spinner.FloatSpinner;
 import org.dawnsci.plotting.tools.Activator;
 import org.dawnsci.plotting.tools.preference.PeakFindingConstants;
 import org.eclipse.january.dataset.IDataset;
-import org.eclipse.jface.action.Action;
-import org.eclipse.jface.action.IAction;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.ControlEvent;
-import org.eclipse.swt.events.ControlListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -29,8 +23,8 @@ import org.eclipse.swt.widgets.Scale;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import uk.ac.diamond.scisoft.analysis.fitting.functions.IdentifiedPeak;
 import uk.ac.diamond.scisoft.analysis.peakfinding.IPeakFindingService;
-import uk.ac.diamond.scisoft.analysis.peakfinding.Peak;
 import uk.ac.diamond.scisoft.analysis.peakfinding.PeakFindingData;
 
 /**
@@ -54,7 +48,7 @@ public class PeakFindingWidget {
 	
 	Button runPeakSearch;
 	
-	List<Peak> peaks = new ArrayList<Peak>();
+	List<IdentifiedPeak> peaks = new ArrayList<IdentifiedPeak>();
 	IDataset xData = null;
 	IDataset yData = null ;
 	
@@ -252,7 +246,7 @@ public class PeakFindingWidget {
 		manager.addPeakListener(new IPeakOpportunityListener() {
 			@Override
 			public void peaksChanged(PeakOpportunityEvent evt) {
-				peaks = evt.getPeakOpp().getPeaks();
+				peaks = evt.getPeakOpp().getPeaksId();
 				//XXX: needs to be in own event checking for peak changing as not all searches lead to a change in peaks! what if empty huh! maybe that should update the peaks though...
 			}
 
@@ -282,7 +276,7 @@ public class PeakFindingWidget {
 	 			} else {
 					//No peak data set...
 					peaks.clear();
-					manager.setPeaks(peaks);
+					manager.setPeaksId(peaks);
 					runPeakSearch.setEnabled(true);
 					runPeakSearch.setImage(Activator.getImageDescriptor("icons/peakSearch.png").createImage());
 				}

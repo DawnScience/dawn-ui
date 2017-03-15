@@ -3,9 +3,6 @@ package org.dawnsci.plotting.tools.finding;
 import java.util.EventObject;
 import java.util.List;
 
-
-import uk.ac.diamond.scisoft.analysis.peakfinding.Peak;
-
 /**
  *
  * @author Dean P. Ottewell

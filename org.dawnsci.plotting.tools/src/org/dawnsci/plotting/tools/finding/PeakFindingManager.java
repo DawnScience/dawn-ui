@@ -7,12 +7,10 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
 import org.dawnsci.plotting.tools.Activator;
-import org.dawnsci.plotting.tools.fitting.FunctionFittingTool;
 import org.dawnsci.plotting.tools.preference.PeakFindingConstants;
 import org.eclipse.january.dataset.Dataset;
 import org.eclipse.january.dataset.DatasetUtils;
@@ -20,11 +18,9 @@ import org.eclipse.january.dataset.IDataset;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import uk.ac.diamond.scisoft.analysis.fitting.Generic1DFitter;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.IdentifiedPeak;
 import uk.ac.diamond.scisoft.analysis.peakfinding.IPeakFindingData;
 import uk.ac.diamond.scisoft.analysis.peakfinding.IPeakFindingService;
-import uk.ac.diamond.scisoft.analysis.peakfinding.Peak;
 
 /**
  * Manages the interactions of peakfinders to view
@@ -87,7 +83,7 @@ public class PeakFindingManager {
 	 * @return
 	 * @throws IOException
 	 */
-	String exportFoundPeaks(final String path, List<Peak> peaks) throws IOException {
+	String exportFoundPeaks(final String path, List<IdentifiedPeak> peaks) throws IOException {
 		File file = new File(path);
 		if (!file.getName().toLowerCase().endsWith(".xy"))
 			file = new File(path + ".xy");
@@ -99,9 +95,8 @@ public class PeakFindingManager {
 		final BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(file), "UTF-8"));
 		try {
 			//TODO: fix the formatter. have iterate over identified peaks 
-			for (Peak p : peaks) {
-				writer.write(p.getXYFormat());
-				writer.newLine();
+			for (IdentifiedPeak p : peaks){
+				writer.write(p.getPos() + "," + p.getHeight());
 			}
 			
 		} finally {
@@ -126,12 +121,6 @@ public class PeakFindingManager {
 	}
 	
 	/*TRIGGERS*/
-	
-	public void setPeaks(List<Peak> peaks){
-		IPeakOpportunity peakOpp = new PeakOppurtunity();
-		peakOpp.setPeaks(peaks);
-		everythingChangesListeners(new PeakOpportunityEvent(this, peakOpp));
-	}
 	
 	public void setPeaksId(List<IdentifiedPeak> peaksId){
 		IPeakOpportunity peakOpp = new PeakOppurtunity();
@@ -170,9 +159,6 @@ public class PeakFindingManager {
 	private void everythingChangesListeners(PeakOpportunityEvent evt) {
 		for(IPeakOpportunityListener listener : listeners) {
 			
-			if(evt.getPeakOpp().getPeaks() != null)
-				listener.peaksChanged(evt);			
-
 			if(evt.getPeakOpp().getPeaksId() != null)
 				listener.peaksChanged(evt);
 			

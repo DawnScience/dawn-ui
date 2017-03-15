@@ -24,7 +24,6 @@ import org.slf4j.LoggerFactory;
 
 import uk.ac.diamond.scisoft.analysis.fitting.functions.IdentifiedPeak;
 import uk.ac.diamond.scisoft.analysis.peakfinding.IPeakFindingService;
-import uk.ac.diamond.scisoft.analysis.peakfinding.Peak;
 
 /**
  * TODO: have job update trace to look like things are going on
@@ -111,7 +110,6 @@ public class PeakFindingSearchJob extends Job {
 			manager.getPeakFindData().setData(xData, yData);
 			manager.getPeakFindData().setNPeaks(20);
 			
-			final List<Peak> peaks = new ArrayList<Peak>();
 			TreeMap<Integer, Double> peaksPos = new TreeMap<Integer, Double>();
 			
 			//Start the running man	
@@ -181,29 +179,10 @@ public class PeakFindingSearchJob extends Job {
 			Display.getDefault().syncExec(new Runnable() {
 				@Override
 				public void run() {
-
-					List<Peak> peaks = new ArrayList<Peak>();
-					
-					if(!peaksPos.isEmpty()){
-						/*Format peaks*/
-						List<Double> pValues = new ArrayList<Double>(peaksPos.values());
-						List<Integer> pPositions = new ArrayList<Integer>(peaksPos.keySet());
 	
-						IDataset peaksY = DatasetFactory.createFromList(pValues);
-						IDataset peaksX = ((Dataset) xData).getBy1DIndex((IntegerDataset) DatasetFactory.createFromList(pPositions));
-						
-						// Create peaks
-						for (int i = 0; i < peaksY.getSize(); ++i) {
-							Peak p = new Peak(peaksX.getDouble(i), peaksY.getDouble(i));
-							p.setName("P" + i);
-							peaks.add(p);
-						}
-					}
-					
 					List<IdentifiedPeak> peaksId = manager.convertIntoPeaks(peaksPos, (Dataset) xData, (Dataset) yData);
 					manager.setPeaks(peaksPos,xData,yData);
 					
-					manager.setPeaks(peaks);
 					manager.finishedPeakSearching();
 				}
 			});
