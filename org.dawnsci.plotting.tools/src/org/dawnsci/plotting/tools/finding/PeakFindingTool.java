@@ -1,5 +1,6 @@
 package org.dawnsci.plotting.tools.finding;
 
+import java.awt.Rectangle;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
@@ -9,6 +10,7 @@ import java.util.Map;
 import org.dawb.common.ui.util.GridUtils;
 import org.dawb.common.ui.widgets.ActionBarWrapper;
 import org.dawnsci.plotting.tools.fitting.PeakFittingTool;
+import org.eclipse.dawnsci.analysis.api.roi.IRectangularROI;
 import org.eclipse.dawnsci.analysis.dataset.roi.RectangularROI;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.PlotType;
@@ -205,23 +207,17 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 
 			@Override
 			public void boundsChanged(double upper, double lower) {
-				RectangularROI rect = (RectangularROI) searchRegion.getROI();
+				RectangularROI rectBounds = (RectangularROI) searchRegion.getROI().getBounds();
 				double[] bounds = { lower, upper };
 
 				// TODO: shouldnt be trigger anyway
-				if (bounds[0] != rect.getPointRef()[0] && bounds[1] != rect.getPointRef()[1]) {
+				if (bounds[0] != rectBounds.getPoint()[0] || bounds[1] != rectBounds.getEndPoint()[0]) {
 					// Update region
-					rect.setPoint(bounds);
+					rectBounds.setPoint(lower, rectBounds.getPoint()[1]);
+					rectBounds.setEndPoint(new double[]{upper, rectBounds.getEndPoint()[1]});
+					searchRegion.setROI(rectBounds);
 
-					lowerBnd = rect.getPointRef()[0];
-					upperBnd = rect.getPointRef()[1];
-					searchRegion.setROI(rect);
 
-					Dataset xdata = DatasetFactory.createFromObject(bounds);
-					Dataset ydata = genBoundsHeight();
-
-					updateTraceBounds(xdata, ydata); // TODO: this is already
-														// triggers
 					if (!getPlottingSystem().getTraces().isEmpty()) {
 						setSearchDataOnBounds((ILineTrace) getPlottingSystem().getTraces().iterator().next());
 					}
@@ -340,8 +336,15 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 		PeakOppurtunity peakOpp = new PeakOppurtunity();
 		peakOpp.setXData(interestXData);
 		peakOpp.setYData(interestYData);
-		peakOpp.setLowerBound(lowerBnd);
-		peakOpp.setUpperBound(upperBnd);
+		
+		IRectangularROI interest = searchRegion.getROI().getBounds();
+		double[] start = interest.getPoint();
+		double[] end = interest.getEndPoint();
+						
+		peakOpp.setLowerBound(start[0]);
+		peakOpp.setUpperBound(end[0]);
+		
+		
 		manager.loadPeakOppurtunity(peakOpp);
 		manager.setPeakSearching();
 	}
@@ -519,7 +522,7 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 			if (searchRegion != null && searchRegion.getROI() instanceof RectangularROI) {
 				RectangularROI rectangle = (RectangularROI) searchRegion.getROI();
 				// Set the region bounds
-				updateSearchBnds(rectangle);
+				//updateSearchBnds(rectangle);
 			}
 
 
@@ -549,7 +552,11 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 		DoubleDataset xData = DatasetUtils.cast(DoubleDataset.class, xDataRaw);
 		DoubleDataset yData = DatasetUtils.cast(DoubleDataset.class, yDataRaw);
 		
-		BooleanDataset allowed = Comparisons.withinRange(xData, lowerBnd, upperBnd);
+		IRectangularROI interest = searchRegion.getROI().getBounds();
+		double[] start = interest.getPoint();
+		double[] end = interest.getEndPoint();
+						
+		BooleanDataset allowed = Comparisons.withinRange(xData, start[0], end[0]);
 		this.interestXData = xData.getByBoolean(allowed);
 		this.interestYData = yData.getByBoolean(allowed);
 	}
@@ -564,18 +571,6 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 		Dataset ydata = genBoundsHeight();
 
 		updateTraceBounds(xdata, ydata); // TODO: this is already triggers
-	}
-
-	public void updateBoundsUpper(double upperVal) {
-		Dataset xData = (Dataset) regionBndsTrace.getXData();
-		xData.set(upperVal, 1);
-		updateTraceBounds(xData, (Dataset) regionBndsTrace.getYData());
-	}
-
-	public void updateBoundsLower(double lowerVal) {
-		Dataset xData = (Dataset) regionBndsTrace.getXData();
-		xData.set(lowerVal, 0);
-		updateTraceBounds(xData, (Dataset) regionBndsTrace.getYData());
 	}
 
 	// TODO: HAVE A UPDATE OR A SET? really do they do anything different
