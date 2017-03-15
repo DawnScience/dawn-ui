@@ -32,7 +32,7 @@ public class PeakFindingTable {
 	
 	public void createTableControl(Composite parent) {
 		
-		viewer = new TableViewer(parent , SWT.FULL_SELECTION | SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL | SWT.CENTER);
+		viewer = new TableViewer(parent , SWT.FULL_SELECTION | SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL);
 		createPeakDataColumns(viewer);
 
 		viewer.getTable().setLinesVisible(true);

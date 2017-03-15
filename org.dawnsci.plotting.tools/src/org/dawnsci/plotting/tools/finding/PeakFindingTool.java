@@ -2,6 +2,7 @@ package org.dawnsci.plotting.tools.finding;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -22,6 +23,7 @@ import org.eclipse.dawnsci.plotting.api.region.RegionUtils;
 import org.eclipse.dawnsci.plotting.api.region.IRegion.RegionType;
 import org.eclipse.dawnsci.plotting.api.tool.AbstractToolPage;
 import org.eclipse.dawnsci.plotting.api.trace.ILineTrace;
+import org.eclipse.dawnsci.plotting.api.trace.ITrace;
 import org.eclipse.dawnsci.plotting.api.trace.ITraceListener;
 import org.eclipse.dawnsci.plotting.api.trace.TraceEvent;
 import org.eclipse.dawnsci.plotting.api.trace.TraceWillPlotEvent;
@@ -284,7 +286,7 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 				List<ILineTrace> traceUpdate = (ArrayList<ILineTrace>) evt.getSource();
 				
 				for(ILineTrace trace : traceUpdate){
-					if (trace.getName() != BOUNDTRACENAME && trace.getName() != PEAKSTRACENAME) {
+					if (isValidTraceForSearch((ITrace) traceUpdate)) {
 						runTraceSearch(trace);
 					}
 				}
@@ -302,8 +304,7 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 				//TODO: check against object but unfortunately do not have it hanging around ...
 				traceUpdate.equals(peaksTrace);
 				traceUpdate.equals(getPlottingSystem().getTrace(BOUNDTRACENAME));
-				
-				if (traceUpdate.getName() != BOUNDTRACENAME && traceUpdate.getName() != PEAKSTRACENAME) {
+				if (isValidTraceForSearch(traceUpdate)) {
 					runTraceSearch(traceUpdate);
 				}
 			}
@@ -323,7 +324,7 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 			@Override
 			public void traceAdded(TraceEvent evt) {
 				ILineTrace traceUpdate = (ILineTrace) evt.getSource();
-				if (traceUpdate.getName() != BOUNDTRACENAME && traceUpdate.getName() != PEAKSTRACENAME) {
+				if (isValidTraceForSearch(traceUpdate)) {
 					runTraceSearch(traceUpdate);
 				}
 			}
@@ -498,7 +499,14 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 					RectangularROI rectangle = (RectangularROI) searchRegion.getROI();
 					updateSearchBnds(rectangle);
 					if (!getPlottingSystem().getTraces().isEmpty()) {
-						runTraceSearch((ILineTrace) getPlottingSystem().getTraces().iterator().next());
+						Iterator<ITrace> traces = getPlottingSystem().getTraces().iterator();
+						while(traces.hasNext()){
+							ITrace trace = traces.next();
+							getPlottingSystem().getTraces().iterator().next();
+							if (isValidTraceForSearch(trace)) {
+								runTraceSearch((ILineTrace) trace); //Default to first valid trace found
+							}
+						}
 					}
 
 				}
@@ -519,17 +527,28 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 			logger.error("Cannot put the selection into searching region mode!", e);
 		}
 	}
+	
+	private boolean isValidTraceForSearch(ITrace trace){
+		boolean valid = false;
+		
+		//Check against being a trace created for me
+		if (trace.getName() != BOUNDTRACENAME && trace.getName() != PEAKSTRACENAME) {
+			ILineTrace lineTrace = (ILineTrace) trace;
+			valid = true;
+		}
+		return valid;
+	}
 
 	public void setSearchDataOnBounds(ILineTrace trace) {
 		// Obtain Upper and Lower Bounds
 		Dataset xDataRaw = DatasetUtils.convertToDataset(trace.getXData().squeeze());
 		Dataset yDataRaw = DatasetUtils.convertToDataset(trace.getYData().squeeze());
 
-		// TODO: believe a cast in the peakfinder foreced me to use
+		// TODO: believe a ca	st in the peakfinder foreced me to use
 		// DoubleDateset here. Fix interface setup peakfinder.
 		DoubleDataset xData = DatasetUtils.cast(DoubleDataset.class, xDataRaw);
 		DoubleDataset yData = DatasetUtils.cast(DoubleDataset.class, yDataRaw);
-
+		
 		BooleanDataset allowed = Comparisons.withinRange(xData, lowerBnd, upperBnd);
 		this.interestXData = xData.getByBoolean(allowed);
 		this.interestYData = yData.getByBoolean(allowed);
