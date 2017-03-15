@@ -104,7 +104,6 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 		return this.interestYData;
 	}
 	
-	private List<Peak> peaks = new ArrayList<Peak>();
 	private List<IdentifiedPeak> peaksId = new ArrayList<IdentifiedPeak>();
 	
 	private IPeakOpportunityListener listener;
@@ -179,11 +178,29 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 		listener = new IPeakOpportunityListener() {
 			@Override
 			public void peaksChanged(PeakOpportunityEvent evt) {
-				if(evt.getPeaks() != null) {
-					// Update Peaks
-					peaks = evt.getPeaks();
-					if (!getPeaks().isEmpty()) {
-						updatePeakTrace(getPeaks());
+//				if(evt.getPeakOpp().getPeaks() != null) {
+//					// Update Peaks
+//					
+//					peaks = evt.getPeakOpp().getPeaks();
+//					
+//					if (!getPeaks().isEmpty()) {
+//						updatePeakTrace(getPeaks());
+//					} else {
+//						//We have no longer any peaks to plot remove]
+//						//getPlottingSystem().getTrace(PEAKSTRACENAME) != null
+//						if(getPlottingSystem().getTrace(PEAKSTRACENAME) != null){
+//							getPlottingSystem().removeTrace(peaksTrace);
+//							peaksTrace.dispose();
+//						}
+//					}
+//				}
+
+				//TODO: now ill just place these identifed peaks here too
+				if(evt.getPeakOpp().getPeaksId() != null){
+					peaksId = evt.getPeakOpp().getPeaksId();
+					
+					if (!peaksId.isEmpty()) {
+						updatePeakTrace(peaksId);
 					} else {
 						//We have no longer any peaks to plot remove]
 						//getPlottingSystem().getTrace(PEAKSTRACENAME) != null
@@ -192,11 +209,8 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 							peaksTrace.dispose();
 						}
 					}
+				
 				}
-
-				//TODO: now ill just place these identifed peaks here too
-				if(evt.getPeakOpp().getPeaksId() != null)
-					peaksId = evt.getPeakOpp().getPeaksId();
 			}
 
 			@Override
@@ -250,7 +264,7 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 				if (isAdding) {
 					addPeakValue(evt.getxValue(), evt.getyValue());
 				} else if (isRemoving) {
-					if (!getPeaks().isEmpty())
+					if (!peaksId.isEmpty())
 						removePeakValue(evt.getxValue(), evt.getyValue());
 				}
 			}
@@ -347,19 +361,29 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 		List<Double> pX = new ArrayList<Double>();
 		List<Double> pY = new ArrayList<Double>();
 
-		if (!getPeaks().isEmpty()) {
-			for (int i = 0; i < getPeaks().size(); ++i) {
-				pX.add(getPeaks().get(i).getX());
-				pY.add(getPeaks().get(i).getY());
+//		if (!getPeaks().isEmpty()) {
+//			for (int i = 0; i < getPeaks().size(); ++i) {
+//				pX.add(getPeaks().get(i).getX());
+//				pY.add(getPeaks().get(i).getY());
+//			}
+//		}
+		
+		if (!peaksId.isEmpty()) {
+			for (int i = 0; i < peaksId.size(); ++i) {
+				pX.add(peaksId.get(i).getPos());
+				pY.add(peaksId.get(i).getHeight());
 			}
 		}
 
 		pX.add(x);
 		pY.add(y);
+		
 		Peak p = new Peak(x, y);
+		manager.generateIdentifedPeak( (Integer)x, interestXData, interestYData);
+		
 		// XXX: Unfortunately now this will be on the end of the result. The
 		// order is important for the table view. Need comaprator there
-		getPeaks().add(p);
+		peaksId.add(p);
 
 		// Update Trace
 		Dataset peakx = DatasetFactory.createFromList(pX);
@@ -597,14 +621,32 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 		getPlottingSystem().repaint();
 	}
 
-	private void updatePeakTrace(List<Peak> peakSet) {
+//	private void updatePeakTrace(List<Peak> peakSet) {
+//		List<Double> pX = new ArrayList<Double>();
+//		List<Double> pY = new ArrayList<Double>();
+//		
+//		if (!peakSet.isEmpty()) {
+//			for (int i = 0; i < peakSet.size(); ++i) {
+//				pX.add(peakSet.get(i).getX());
+//				pY.add(peakSet.get(i).getY());
+//			}
+//		}
+//
+//		// Update Trace
+//		Dataset peakx = DatasetFactory.createFromList(pX);
+//		Dataset peaky = DatasetFactory.createFromList(pY);
+//
+//		updatePeakTrace(peakx, peaky);
+//	}
+	
+	private void updatePeakTrace(List<IdentifiedPeak> peakSet) {
 		List<Double> pX = new ArrayList<Double>();
 		List<Double> pY = new ArrayList<Double>();
 		
 		if (!peakSet.isEmpty()) {
 			for (int i = 0; i < peakSet.size(); ++i) {
-				pX.add(peakSet.get(i).getX());
-				pY.add(peakSet.get(i).getY());
+				pX.add(peakSet.get(i).getPos());
+				pY.add(peakSet.get(i).getHeight());
 			}
 		}
 
@@ -614,6 +656,7 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 
 		updatePeakTrace(peakx, peaky);
 	}
+
 
 	/**
 	 * Finds the closest point to position given data
@@ -746,10 +789,6 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 		//composite.dispose();
 		// TODO: kill manager jobs... maybe might not be storing the jobs...
 		// there scheduled though so should have segment of all jobs runnign
-	}
-
-	public List<Peak> getPeaks() {
-		return peaks;
 	}
 
 	public List<IdentifiedPeak> getPeaksId() {

@@ -252,7 +252,7 @@ public class PeakFindingWidget {
 		manager.addPeakListener(new IPeakOpportunityListener() {
 			@Override
 			public void peaksChanged(PeakOpportunityEvent evt) {
-				peaks = evt.getPeaks();
+				peaks = evt.getPeakOpp().getPeaks();
 				//XXX: needs to be in own event checking for peak changing as not all searches lead to a change in peaks! what if empty huh! maybe that should update the peaks though...
 			}
 

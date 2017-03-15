@@ -133,6 +133,12 @@ public class PeakFindingManager {
 		everythingChangesListeners(new PeakOpportunityEvent(this, peakOpp));
 	}
 	
+	public void setPeaks(List<IdentifiedPeak> peaksId){
+		IPeakOpportunity peakOpp = new PeakOppurtunity();
+		peakOpp.setPeaksId(peaksId);
+		everythingChangesListeners(new PeakOpportunityEvent(this, peakOpp));
+	}
+	
 	public void setPeaks(Map<Integer,Double> peakpos,IDataset xData, IDataset yData){
 		IPeakOpportunity peakOpp = new PeakOppurtunity();
 		peakOpp.setPeaksId(convertIntoPeaks(peakpos, (Dataset) xData, (Dataset) yData));
@@ -164,7 +170,7 @@ public class PeakFindingManager {
 	private void everythingChangesListeners(PeakOpportunityEvent evt) {
 		for(IPeakOpportunityListener listener : listeners) {
 			
-			if(evt.getPeaks() != null)
+			if(evt.getPeakOpp().getPeaks() != null)
 				listener.peaksChanged(evt);			
 
 			if(evt.getPeakOpp().getPeaksId() != null)
@@ -215,90 +221,100 @@ public class PeakFindingManager {
 		if(xData.getSize() != yData.getSize())
 			logger.error("Signal data must be matching size");
 		
-		ArrayList<IdentifiedPeak> peaks = new ArrayList<IdentifiedPeak>();
+		List<IdentifiedPeak> peaksID = new ArrayList<IdentifiedPeak>();
 		int backPos, forwardPos;	
 		double backTotal, forwardTotal;
 		double backValue, forwardValue;
 		
 		for (Map.Entry<Integer, Double> peak : peakpos.entrySet()) {
-			
-			//Get a intial backwards position
-			backPos = peak.getKey() >= 0 ? peak.getKey() : peak.getKey()-1;
-			backValue = yData.getElementDoubleAbs(backPos);
-			
+			peaksID.add(generateIdentifedPeak(peak.getKey(),xData,yData));
+		}
+		
+		
+		return peaksID;
+	}
+	
+	public IdentifiedPeak generateIdentifedPeak(Integer pos, Dataset xData, Dataset yData){
+		int backPos, forwardPos;	
+		double backTotal, forwardTotal;
+		double backValue, forwardValue;
+		
+		backPos = pos >= 0 ? pos : pos-1;
+		backValue = yData.getElementDoubleAbs(backPos);
+		
 
-			//Get a intial forward posiiton
-			forwardPos = peak.getKey() <= yData.getSize() ? peak.getKey(): peak.getKey()+1;
-			forwardValue = yData.getElementDoubleAbs(forwardPos);
-			
-			//Check state of calucalteing back and forward posiition is not greater tha	n peaks 
-			boolean backDescending = true;//(peak.getValue() >= backValue);
-			boolean forwardDescending = true;//(peak.getValue() >= forwardValue);
-			
-			backTotal = 0;
-			while(backDescending){
-				if(backPos > 0) {
-					double nextBackVal = yData.getElementDoubleAbs(backPos+-1); //get nextPos
-					backValue = yData.getElementDoubleAbs(backPos);
-					if (backValue >= nextBackVal) { 
-						backTotal += backValue;
-						backPos-=1; 
-					} else {
-						backDescending = false;
-					}
+		//Get a intial forward posiiton
+		forwardPos = pos <= yData.getSize() ? pos: pos+1;
+		forwardValue = yData.getElementDoubleAbs(forwardPos);
+		
+		//Check state of calucalteing back and forward posiition is not greater tha	n peaks 
+		boolean backDescending = true;//(peak.getValue() >= backValue);
+		boolean forwardDescending = true;//(peak.getValue() >= forwardValue);
+		
+		backTotal = 0;
+		while(backDescending){
+			if(backPos > 0) {
+				double nextBackVal = yData.getElementDoubleAbs(backPos+-1); //get nextPos
+				backValue = yData.getElementDoubleAbs(backPos);
+				if (backValue >= nextBackVal) { 
+					backTotal += backValue;
+					backPos-=1; 
 				} else {
 					backDescending = false;
 				}
+			} else {
+				backDescending = false;
 			}
-			
-			forwardTotal = 0;
-			while(forwardDescending){
-				if(forwardPos < yData.getSize()-1) {
-					double nextBackVal = yData.getElementDoubleAbs(forwardPos + 1); //get nextPos
-					forwardValue = yData.getElementDoubleAbs(forwardPos);
-					if (forwardValue >= nextBackVal) {
-						forwardTotal -= forwardValue;
-						forwardPos++;  
-					} else {
-						forwardDescending= false;
-					}
-				} else {
-					forwardDescending = false;
-				}
-			}
-
-			//Okay so below is some logic can grab to finding the peak info
-			int[] start = { backPos };
-			int[] stop = { forwardPos };
-			int[] step = { 1 };
-			
-			Dataset slicedXData = (Dataset) xData.getSlice(start, stop, step);
-			Dataset slicedYData = (Dataset) yData.getSlice(start, stop, step);
-			
-			List<Double> crossings = DatasetUtils.crossings(slicedXData, slicedYData, slicedYData.max()
-					.doubleValue() / 2);
-			
-			//No slice gathered as range too small. Must be current values
-			if (crossings.size() <= 1) {
-				crossings.clear();
-				crossings.add((double) backPos);
-				crossings.add((double) forwardPos);
-			}
-			
-			double position = peak.getKey();
-			double minXValue = xData.getElementDoubleAbs(backPos) ;
-			double maxXValue = xData.getElementDoubleAbs(forwardPos); 
-			double area = Math.min(backTotal, forwardTotal); 
-			double height = slicedYData.peakToPeak().doubleValue();
-			int indexOfMinXVal = backPos; 
-			int indexofMaxXVal = forwardPos;
-			List<Double> crossingsFnd = crossings;
-			
-			IdentifiedPeak newPeak = new IdentifiedPeak(position, minXValue,maxXValue,area,height,indexOfMinXVal, indexofMaxXVal,crossingsFnd);
-			peaks.add(newPeak);
 		}
 		
-		return peaks;
+		forwardTotal = 0;
+		while(forwardDescending){
+			if(forwardPos < yData.getSize()-1) {
+				double nextBackVal = yData.getElementDoubleAbs(forwardPos + 1); //get nextPos
+				forwardValue = yData.getElementDoubleAbs(forwardPos);
+				if (forwardValue >= nextBackVal) {
+					forwardTotal -= forwardValue;
+					forwardPos++;  
+				} else {
+					forwardDescending= false;
+				}
+			} else {
+				forwardDescending = false;
+			}
+		}
+
+		//Okay so below is some logic can grab to finding the peak info
+		int[] start = { backPos };
+		int[] stop = { forwardPos };
+		int[] step = { 1 };
+		
+		Dataset slicedXData = (Dataset) xData.getSlice(start, stop, step);
+		Dataset slicedYData = (Dataset) yData.getSlice(start, stop, step);
+		
+		List<Double> crossings = DatasetUtils.crossings(slicedXData, slicedYData, slicedYData.max()
+				.doubleValue() / 2);
+		
+		//No slice gathered as range too small. Must be current values
+		if (crossings.size() <= 1) {
+			crossings.clear();
+			crossings.add((double) backPos);
+			crossings.add((double) forwardPos);
+		}
+		
+		double position = pos;
+		double minXValue = xData.getElementDoubleAbs(backPos) ;
+		double maxXValue = xData.getElementDoubleAbs(forwardPos); 
+		double area = Math.min(backTotal, forwardTotal); 
+		double height = slicedYData.peakToPeak().doubleValue(); //or just yData.getElementDoubleAbs(pos);
+		int indexOfMinXVal = backPos; 
+		int indexofMaxXVal = forwardPos;
+		List<Double> crossingsFnd = crossings;
+		
+		IdentifiedPeak newPeak = new IdentifiedPeak(position, minXValue,maxXValue,area,height,indexOfMinXVal, indexofMaxXVal,crossingsFnd);
+		
+		return newPeak;
 	}
+	
+	
 	
 }

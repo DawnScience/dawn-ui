@@ -24,9 +24,6 @@ public class PeakOpportunityEvent extends EventObject {
 	public IPeakOpportunity getPeakOpp(){
 		return peakOpp;
 	}
-	
-	public List<Peak> getPeaks(){
-		return peakOpp.getPeaks();
-	}
+
 	
 }

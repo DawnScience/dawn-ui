@@ -3,7 +3,6 @@ package org.dawnsci.plotting.tools.finding;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.dawnsci.common.widgets.gda.function.FunctionTreeViewer.COLUMN;
 import org.eclipse.january.dataset.IDataset;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
@@ -12,9 +11,9 @@ import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.layout.GridData;
-import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 
+import uk.ac.diamond.scisoft.analysis.fitting.functions.IdentifiedPeak;
 import uk.ac.diamond.scisoft.analysis.peakfinding.Peak;
 
 /**
@@ -45,23 +44,28 @@ public class PeakFindingTable {
 		          if (e.keyCode == SWT.DEL){
 		        	  //XXX:These index should line up because of how they are populated... If a comparator is set we are doomed.
 		        	  int[] selections = viewer.getTable().getSelectionIndices();
-		        	  for (int i =0; i < selections.length-1; ++i){
-			        	  List<Peak> peaks = (List<Peak>) viewer.getInput();
-			        	  peaks.remove(i);
-			        	  controller.setPeaks(peaks);
-			        	  viewer.refresh();
-		        	  }
+//		        	  for (int i =0; i < selections.length-1; ++i){
+//			        	  List<Peak> peaks = (List<Peak>) viewer.getInput();
+//			        	  peaks.remove(i);
+//			        	  controller.setPeaks(peaks);
+//			        	  viewer.refresh();
+//		        	  }
+		        	  
+		        	  
+		        	  
+		        	  
 		          }
 		      }
 		});
 		
-		
-		viewer.refresh();
-		
 		controller.addPeakListener(new IPeakOpportunityListener() {
 			@Override
 			public void peaksChanged(PeakOpportunityEvent evt) {
-				viewer.setInput(evt.getPeaks());
+				List<IdentifiedPeak> peaksId = evt.getPeakOpp().getPeaksId();
+				if(peaksId != null){
+					viewer.setInput(peaksId);
+					viewer.refresh();
+				}
 			}
 
 			@Override
@@ -91,8 +95,8 @@ public class PeakFindingTable {
 	}
 	
 	private List<TableViewerColumn> createPeakDataColumns(final TableViewer viewer) {
-
 		List<TableViewerColumn> ret = new ArrayList<TableViewerColumn>(2);
+
 		// TODO: label provider for peaks and might want to know algorithm or more data
 		// TODO: selection listener table.getColumn().addSelectionListener();
 		TableViewerColumn table = new TableViewerColumn(viewer, SWT.FILL, 0);
@@ -102,8 +106,9 @@ public class PeakFindingTable {
 		table.setLabelProvider(new ColumnLabelProvider() {
 			@Override
 			public String getText(Object element) {
-				Peak peakNo = (Peak) element;
-				return String.format("%.2f", peakNo.getX());
+				//Format Identified peaks
+				IdentifiedPeak peak = (IdentifiedPeak) element;
+				return String.format("%.2f", peak.getPos());
 			}
 		});
 		ret.add(table);
@@ -115,8 +120,9 @@ public class PeakFindingTable {
 		table.setLabelProvider(new ColumnLabelProvider() {
 			@Override
 			public String getText(Object element) {
-				Peak peakNo = (Peak) element;
-				return String.format("%.2f", peakNo.getY());
+				IdentifiedPeak peak = (IdentifiedPeak) element;
+				return String.format("%.2f", peak.getHeight());
+				//return String.format("%.2f", 0.0);
 			}
 		});
 		
