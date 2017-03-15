@@ -87,6 +87,8 @@ public class MappedFileManager {
 					locallyReloadLiveFile(path);
 				}
 			});
+			
+			return;
 		}
 		
 		IProgressService service = (IProgressService) PlatformUI.getWorkbench().getService(IProgressService.class);

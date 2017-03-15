@@ -129,9 +129,10 @@ public abstract class AbstractMapData implements PlottableMapObject{
 			
 //			updateRemappedData(null);
 			
+		} catch (DatasetException e) {
+			logger.warn("Could not slice data",e);
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.error("Error updating map" ,e);
 		}
 		
 		return null;

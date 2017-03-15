@@ -161,8 +161,9 @@ public class LivePlottingUtils {
 		}else {
 			laa = axes.getAxis(0);
 		}
-			
-			
+		
+		if (laa.length < 2) return null;
+		
 		try {
 			y = laa[0].getSlice();
 			x = laa[1].getSlice();
