@@ -112,12 +112,6 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 	public PeakFindingTool() {
 		// Setup up a new PeakSearch Instance
 		this.manager = new PeakFindingManager();
-		new ITraceListener.Stub() {
-			@Override
-			public void tracesUpdated(TraceEvent evt) {
-				//peakSearch.schedule();
-			}
-		};
 	}
 
 	public void setAddMode(boolean status) {
@@ -282,7 +276,7 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 				List<ILineTrace> traceUpdate = (ArrayList<ILineTrace>) evt.getSource();
 				
 				for(ILineTrace trace : traceUpdate){
-					if (isValidTraceForSearch((ITrace) traceUpdate)) {
+					if (isValidTraceForSearch((ITrace) trace)) {
 						runTraceSearch(trace);
 					}
 				}
@@ -340,10 +334,9 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 		IRectangularROI interest = searchRegion.getROI().getBounds();
 		double[] start = interest.getPoint();
 		double[] end = interest.getEndPoint();
-						
+
 		peakOpp.setLowerBound(start[0]);
 		peakOpp.setUpperBound(end[0]);
-		
 		
 		manager.loadPeakOppurtunity(peakOpp);
 		manager.setPeakSearching();
@@ -424,9 +417,11 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 
 			// Intialise to upper and low limit of sample trace
 			Dataset xData = (Dataset) sampleTrace.getXData();
+			
 			Double lwrBnd = xData.getDouble(0);
 			Double uprBnd = xData.getDouble(xData.argMax());
 
+			
 			Dataset xBnds = DatasetFactory.createFromObject(new double[] { lwrBnd, uprBnd });
 			Dataset bndHeight = genBoundsHeight();
 
@@ -478,8 +473,6 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 			searchRegion.setLineWidth(5);
 			searchRegion.setRegionColor(ColorConstants.red);
 			searchRegion.setMobile(true);
-			// searchRegion.setTrackMouse(true);//TODO: expands the region by
-			// hovering...
 
 			searchRegion.addROIListener(new IROIListener() {
 				@Override
@@ -516,13 +509,12 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 			});
 
 			// SELECTING THOSE BOUNDS UPPER AND LOWER
-
 			// TODO: cant't yet do this here as rectangularROI doesnt exist yet
 			// TODO: this can be do e when a region is added isntead ... why so?
 			if (searchRegion != null && searchRegion.getROI() instanceof RectangularROI) {
 				RectangularROI rectangle = (RectangularROI) searchRegion.getROI();
 				// Set the region bounds
-				//updateSearchBnds(rectangle);
+				updateSearchBnds(rectangle);
 			}
 
 
