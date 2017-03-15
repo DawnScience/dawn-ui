@@ -135,7 +135,7 @@ public class OperationUIServiceImpl implements IOperationUIService {
 			List<IOperationSetupWizardPage> endPages) {
 		
 		// the challenging part here is processing the operationsFile
-		IOperation<? extends IOperationModel, ? extends OperationData>[] operations = null;
+		IOperation<? extends IOperationModel, ? extends OperationData>[] operations;
 		List <IOperation<? extends IOperationModel, ? extends OperationData>> operationsList;
 	
 		if (operationsFile != null) {

@@ -56,29 +56,29 @@ public class OperationModelWizard extends Wizard implements IOperationModelWizar
 	
 	@Override
 	public void addPages() {
-		wizardPages.stream().forEachOrdered(page -> addPage(page));
-		templateWizardPages.stream().forEachOrdered(page -> addPage(page));
+		wizardPages.stream().forEachOrdered(this::addPage);
+		templateWizardPages.stream().forEachOrdered(this::addPage);
 	}
 
 	@Override
 	public boolean performFinish() {
-		wizardPages.stream().forEachOrdered(page -> {
-			page.wizardTerminatingButtonPressed(Dialog.OK);
-		});
-		templateWizardPages.stream().forEachOrdered(page -> {
-			page.wizardTerminatingButtonPressed(Dialog.OK);
-		});
+		wizardPages.stream().forEachOrdered(page -> 
+			page.wizardTerminatingButtonPressed(Dialog.OK)
+		);
+		templateWizardPages.stream().forEachOrdered(page -> 
+			page.wizardTerminatingButtonPressed(Dialog.OK)
+		);
 		return true;
 	}
 
 	@Override
 	public boolean performCancel() {
-		wizardPages.stream().forEachOrdered(page -> {
-			page.wizardTerminatingButtonPressed(Dialog.CANCEL);
-		});
-		templateWizardPages.stream().forEachOrdered(page -> {
-				page.wizardTerminatingButtonPressed(Dialog.CANCEL);
-		});
+		wizardPages.stream().forEachOrdered(page ->
+			page.wizardTerminatingButtonPressed(Dialog.CANCEL)
+		);
+		templateWizardPages.stream().forEachOrdered(page ->
+			page.wizardTerminatingButtonPressed(Dialog.CANCEL)
+		);
 		return true;
 	}
 
