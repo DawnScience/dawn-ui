@@ -555,7 +555,7 @@ public class SurfaceScatterPresenter {
 	public void saveParameters(String title){
 		
 		ExampleModel m = models.get(sm.getSelection());
-		System.out.println(title);
+//		System.out.println(title);
 		
 		FittingParametersOutput.FittingParametersOutputTest(title, 
 														    m.getLenPt()[1][0],
@@ -780,6 +780,23 @@ public class SurfaceScatterPresenter {
 			r2.setFill(true);
 			r2.setLineWidth(3);
 			
+			if (sm.getBackgroundLenPt()!=null){
+			
+				int[][] redLenPt = sm.getBackgroundLenPt();
+				int[] redLen = redLenPt[0];
+				int[] redPt = redLenPt[1];
+				
+				
+				RectangularROI startROI = new RectangularROI(redPt[0],
+															 redPt[1],
+															 redLen[0],
+															 redLen[1],
+															 0);
+			
+				r2.setROI(startROI);
+				
+			}
+			
 			
 			
 			r2.setRegionColor(magenta);		
@@ -866,6 +883,15 @@ public class SurfaceScatterPresenter {
 				
 			}
 		}
+		
+		if(models.get(0).getMethodology() == Methodology.SECOND_BACKGROUND_BOX){
+			try{
+				sm.setPermanentBackgroundLenPt(sm.getBackgroundLenPt());
+			}
+			catch(Exception j){
+				
+			}
+		}
 	}
 	
 	public void trackingRegionOfInterestSetter(double[] location, int k) {
@@ -919,6 +945,27 @@ public class SurfaceScatterPresenter {
 			
 			ssvs.getPlotSystemCompositeView().getSecondBgRegion().setROI(offsetBgROI);
 		}
+		
+		if(models.get(0).getMethodology() == Methodology.SECOND_BACKGROUND_BOX){
+			
+			int[] bgLen = sm.getPermanentBackgroundLenPt()[0];
+			int[] bgPt = sm.getPermanentBackgroundLenPt()[1];
+			
+			int pt0 = bgPt[0];
+			int pt1 = bgPt[1];
+			
+			
+			int len0 = bgLen[0];
+			int len1 = bgLen[1];
+			
+			RectangularROI bgROI1 = new RectangularROI(pt0,
+					  pt1,
+					  len0,
+					  len1,
+					  0);
+			
+			ssvs.getPlotSystemCompositeView().getSecondBgRegion().setROI(bgROI1);
+		}
 
 		try{
 			ssvs.getSsps3c().generalUpdate(lenPt);
@@ -927,7 +974,6 @@ public class SurfaceScatterPresenter {
 			
 		}
 			
-		
 	}
 	
 	public void trackingRegionOfInterestSetter(int[][] lenPt) {
@@ -1920,14 +1966,35 @@ public class SurfaceScatterPresenter {
 		ExampleModel model = models.get(jok);
 		return model.getROI();
 	}
+	
+	public int[][] getPermanentBoxOffsetLenPt() {
+		return sm.getPermanentBoxOffsetLenPt();
+	}
 
+	public void setPermanentBoxOffsetLenPt(int[][] l) {
+		sm.setPermanentBoxOffsetLenPt(l);
+	}
+	
+	public int[][] getBoxOffsetLenPt() {
+		return sm.getBoxOffsetLenPt();
+	}
+
+	public void setBoxOffsetLenPt(int[][] l) {
+		sm.setBoxOffsetLenPt(l);
+	}
+	
 	public int getSliderPos() {
 		return sm.getSliderPos();
 	}
 	
 	public void boundariesWarning(){
-//		RegionOutOfBoundsWarning roobw = new RegionOutOfBoundsWarning(parentShell,0, null);
-//		roobw.open();
+		RegionOutOfBoundsWarning roobw = new RegionOutOfBoundsWarning(parentShell,0, null);
+		roobw.open();
+	}
+	
+	public void outOfMemoryWarning(){
+		RegionOutOfBoundsWarning roobw = new RegionOutOfBoundsWarning(parentShell,5, null);
+		roobw.open();
 	}
 	
 	public void numberFormatWarning(String note){
@@ -2164,7 +2231,16 @@ public class SurfaceScatterPresenter {
 		lt.setErrorBarColor(red);
 	
 		pS.addTrace(lt);
+		pS.autoscaleAxes();
+		
+		double start = lt.getXData().getDouble(0);
+		double end = lt.getXData().getDouble(lt.getXData().getShape()[0]-1);
+		double range = end - start;
+				
+		pS.getAxes().get(0).setRange((start - 0.1*range), (end) + 0.1*range);
+		
 		pS.repaint();	
+		
 	}
 	
 	public void setCorrectionSelection(int correctionSelection){
@@ -2177,6 +2253,14 @@ public class SurfaceScatterPresenter {
 	
 	public void setSliderPos (int selection){
 		sm.setSliderPos(selection);
+	}
+	
+	public int[][] getBackgroundLenPt(){
+		return sm.getBackgroundLenPt();
+	}
+	
+	public void setBackgroundLenPt(int[][] l){
+		sm.setBackgroundLenPt(l);
 	}
 		
 	public void addSecondBgRegionListeners(){
@@ -2389,21 +2473,28 @@ public class SurfaceScatterPresenter {
 		outputCurves.resetCurve();
 
 		IPlottingSystem<Composite> pS = outputCurves.getPlotSystem();
-
+		
 		IDataset[] output = StitchedOutputWithErrors.curveStitch4(dms, sm);
 
 		ILineTrace lt = pS.createLineTrace("progress");
 
 		lt.setData(sm.getSplicedCurveX(), sm.getSplicedCurveY());
-		lt.isErrorBarEnabled();
-		
+	
 		pS.clear();
 		pS.addTrace(lt);
 		
 		pS.repaint();
 		pS.autoscaleAxes();
 		
-
+		double start = lt.getXData().getDouble(0);
+		double end = lt.getXData().getDouble(lt.getXData().getShape()[0]-1);
+		double range = end - start;
+				
+		pS.getAxes().get(0).setRange((start - 0.1*range), (end) + 0.1*range);
+		pS.getAxes().get(1).setLog10(true);
+		
+		lt.setErrorBarEnabled(false);
+		
 	}
 	
 	public void switchErrorDisplay(){
@@ -2447,7 +2538,7 @@ class trackingJob {
 	private int imageNumber;
 	private SurfaceScatterPresenter ssp;
 	private IPlottingSystem<Composite> ssvsPS;
-	private int DEBUG = 1;
+	private int DEBUG = 0;
 	private ProgressBar progressBar;
 	private TrackingProgressAndAbortView tpaav;
 
@@ -2802,11 +2893,12 @@ class trackingJob {
 			ssp.stitchAndPresent(ssvs.getSsps3c().getOutputCurves());
 			ssp.trackingRegionOfInterestSetter(sm.getLocationList().get(imageNumber), imageNumber);
 			ssvs.getSsps3c().getOutputCurves().getIntensity().select(0);
+			ssvs.getSsps3c().getOutputCurves().getIntensity().redraw();
 			progressBar.setSelection(progressBar.getSelection() +1);
-			System.out.println(progressBar.getSelection());
+//			System.out.println(progressBar.getSelection());
 			
 			if(progressBar.getSelection() == progressBar.getMaximum()){
-				System.out.println(progressBar.getSelection() +" in the break");
+//				System.out.println(progressBar.getSelection() +" in the break");
 				tpaav.close();
 			}
 		}
@@ -3678,7 +3770,7 @@ class trackingJob2 {
 								updateTrackingDisplay(tempImage, imageNumber);
 								return;
 							}
-							});
+						});
 						
 
 					}
@@ -3722,33 +3814,60 @@ class trackingJob2 {
 							ArrayList<double[]> seedList = dms.get(nearestCompletedDatFileNo).getLocationList();
 							ArrayList<Double> lList = dms.get(nearestCompletedDatFileNo).getxList();
 							
-							Dataset yValues = DatasetFactory.zeros(seedList.size());
-							Dataset xValues = DatasetFactory.zeros(seedList.size());
-							Dataset lValues = DatasetFactory.zeros(seedList.size());
+							double[] seedLocation =null;
+							Dataset yValues = DatasetFactory.zeros(new int[] {1});
+							Dataset xValues = DatasetFactory.zeros(new int[] {1});
+							Dataset lValues = DatasetFactory.zeros(new int[] {1});
 							
-							for(int op = 0; op<seedList.size(); op++){
-								
-								double x = seedList.get(op)[1];
-								double y = seedList.get(op)[0];
-								double l = lList.get(op);
-								
-								xValues.set(x, op);
-								yValues.set(y, op);
-								lValues.set(l, op);
-		
+							try{
+								yValues = DatasetFactory.zeros(seedList.size());
+								xValues = DatasetFactory.zeros(seedList.size());
+								lValues = DatasetFactory.zeros(seedList.size());
 							}
 							
-							double[] seedLocation = PolynomialOverlap.extrapolatedLocation(sm.getSortedX().getDouble(k),
-																						   lValues, 
-																						   xValues, 
-																						   yValues, 
-																						   sm.getInitialLenPt()[0],
-																						   1);
-							dm.setSeedLocation(seedLocation);
+							catch(Exception r){
+								
+								boolean f = true;
+								
+								while(f){
+									
+									for(DataModel kr : dms){
+										if(kr.getLocationList() != null){
+											
+											seedList = kr.getLocationList();
+											
+											yValues = DatasetFactory.zeros(seedList.size());
+											xValues = DatasetFactory.zeros(seedList.size());
+											lValues = DatasetFactory.zeros(seedList.size());
+											
+											f = false;
+										}
+									}
+								}
+							}
 							
+							for(int op = 0; op<seedList.size(); op++){
+									
+									double x = seedList.get(op)[1];
+									double y = seedList.get(op)[0];
+									double l = lList.get(op);
+									
+									xValues.set(x, op);
+									yValues.set(y, op);
+									lValues.set(l, op);
+			
+							}
+								
+							seedLocation = PolynomialOverlap.extrapolatedLocation(sm.getSortedX().getDouble(k),
+																							   lValues, 
+																							   xValues, 
+																							   yValues, 
+																							   sm.getInitialLenPt()[0],
+																							   1);
+							dm.setSeedLocation(seedLocation);
+								
 							debug("!!!!!!!!!!!!!!!     }}}}}{{{{{{{{ seedlocation[0] : " + seedLocation[0] +" + " + "seedlocation[1] :" + seedLocation[1]);
 							
-						
 						}	
 						
 						dm.addxList(model.getDatImages().getShape()[0], imagePosInOriginalDat[k],
@@ -3778,7 +3897,7 @@ class trackingJob2 {
 						if(Arrays.equals(output1.getShape(), (new int[] {2,2}))){
 							Display d =Display.getCurrent();
 							debug("Dummy Proccessing failure");
-//							ssp.boundariesWarning("position 1, line ~2245, k: " + Integer.toString(k),d);
+							ssp.boundariesWarning("position 1, line ~2245, k: " + Integer.toString(k),d);
 							
 							break;
 						}
@@ -3888,7 +4007,7 @@ class trackingJob2 {
 							if(Arrays.equals(output1.getShape(), (new int[] {2,2}))){
 								Display d =Display.getCurrent();
 								debug("Dummy Proccessing failure");
-	//							ssp.boundariesWarning("position 1, line ~2369, k: " + Integer.toString(k),d);
+								ssp.boundariesWarning(Integer.toString(k),d);
 								
 								break;
 							}
@@ -3946,11 +4065,12 @@ class trackingJob2 {
 		ssp.trackingRegionOfInterestSetter(sm.getLocationList().get(imageNumber), imageNumber);
 		ssvs.getSsps3c().getOutputCurves().getIntensity().select(0);
 		ssvs.getSsps3c().getOutputCurves().getIntensity().redraw();
-		System.out.println(progressBar.getSelection());
+//		System.out.println(progressBar.getSelection());
 		progressBar.setSelection(progressBar.getSelection() +1);
+		
 		if(progressBar.getSelection() >= progressBar.getMaximum()){
 			
-			System.out.println(progressBar.getSelection() +" in the break");
+//			System.out.println(progressBar.getSelection() +" in the break");
 			tpaav.close();
 		}
 		

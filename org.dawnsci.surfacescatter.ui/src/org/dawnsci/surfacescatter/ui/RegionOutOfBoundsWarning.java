@@ -58,6 +58,9 @@ public class RegionOutOfBoundsWarning extends Dialog {
 		if (selector == 4){
 			warning.setText("Unable to locate flux data.");	
 		}
+		if (selector == 5){
+			warning.setText("Ran out of memory. Try a smaller region of interest, or a shorter image stack.");	
+		}
 		
 		if(note != null){
 			Label noteLabel = new Label(container, SWT.FILL);

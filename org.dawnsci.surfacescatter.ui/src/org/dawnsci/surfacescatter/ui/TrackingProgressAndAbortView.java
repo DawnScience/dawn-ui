@@ -88,15 +88,26 @@ public class TrackingProgressAndAbortView extends Dialog {
 			}
 		});
 		
+		try{
 		
-		ssp.runTrackingJob(subImage,
-						   outputCurvesPlotSystem, 
-						   mainImagePlotSytem,
-						   backgroundTabFolder, 
-						   subBgImage, 
-						   progress,
-						   tpaav
-						  );
+			ssp.runTrackingJob(subImage,
+							   outputCurvesPlotSystem, 
+							   mainImagePlotSytem,
+							   backgroundTabFolder, 
+							   subBgImage, 
+							   progress,
+							   tpaav
+							  );
+		}
+		catch(IndexOutOfBoundsException d){
+			ssp.boundariesWarning();
+		}
+		
+		catch(java.lang.OutOfMemoryError e){
+			ssp.boundariesWarning();
+		}
+		
+	
 
 		
 		

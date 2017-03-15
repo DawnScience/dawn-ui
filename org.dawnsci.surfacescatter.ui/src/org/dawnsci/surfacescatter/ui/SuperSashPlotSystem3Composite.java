@@ -114,7 +114,7 @@ public class SuperSashPlotSystem3Composite extends Composite{
 	/////////////////Left SashForm///////////////////////////////////////////////////
 		
 		Group topImage = new Group(left, SWT.NONE);
-        topImage.setText("Top Image");
+        topImage.setText("Horizontal Slice");
         GridLayout topImageLayout = new GridLayout();
         topImage.setLayout(topImageLayout);
 		GridData topImageData= new GridData(SWT.FILL, SWT.FILL, true, true);
@@ -130,7 +130,7 @@ public class SuperSashPlotSystem3Composite extends Composite{
 		plotSystem1.getAxis("X-Axis").setTitle("");
         
         Group mainImage = new Group(left, SWT.NONE);
-        mainImage.setText("Main Image");
+        mainImage.setText("Raw Sub Image");
         GridLayout mainImageLayout = new GridLayout();
         mainImage.setLayout(mainImageLayout);
 		GridData mainImageData= new GridData(SWT.FILL, SWT.FILL, true, true);

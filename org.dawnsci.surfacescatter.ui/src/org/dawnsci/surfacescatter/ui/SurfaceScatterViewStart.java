@@ -7,7 +7,6 @@ import org.dawnsci.surfacescatter.MethodSettingEnum;
 import org.dawnsci.surfacescatter.MethodSettingEnum.MethodSetting;
 import org.dawnsci.surfacescatter.ReflectivityFluxCorrectionsForDialog;
 import org.dawnsci.surfacescatter.ReflectivityMetadataTitlesForDialog;
-import org.eclipse.core.internal.runtime.PrintStackUtil;
 import org.eclipse.dawnsci.analysis.api.io.IDataHolder;
 import org.eclipse.dawnsci.analysis.dataset.roi.RectangularROI;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
@@ -37,13 +36,12 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Group;
-import org.eclipse.swt.widgets.ProgressBar;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Slider;
 import org.eclipse.swt.widgets.TableItem;
+
 import uk.ac.diamond.scisoft.analysis.io.LoaderFactory;
 
 public class SurfaceScatterViewStart extends Dialog {
@@ -283,12 +281,40 @@ public class SurfaceScatterViewStart extends Dialog {
 				ssp.resetSmOutputObjects();
 				
 				int[][] r = new int[][] {{50, 50}, {10, 10}};
-				String q = "holder";
+				String q = null;
+				int[][] pbolp = null;
+				int[][] bolp = null;
+				int[][] bglpt = null;
 				
 				try{
+					bglpt = ssp.getBackgroundLenPt();
+				}
+				catch(NullPointerException f){
 					
+				}
+				
+				try{
 					q = ssp.getSaveFolder();
+				}
+				catch(NullPointerException f){
+					
+				}
+				try{
 					r = ssp.getLenPt();
+					
+				}
+				catch(NullPointerException f){
+					
+				}
+				try{
+					pbolp = ssp.getPermanentBoxOffsetLenPt();
+				}
+				catch(NullPointerException f){
+					
+				}
+				try{
+					bolp = ssp.getBoxOffsetLenPt();
+							
 				}
 				catch(NullPointerException f){
 					
@@ -299,10 +325,30 @@ public class SurfaceScatterViewStart extends Dialog {
 				
 				try{
 					ssp.setLenPt(r);
-					
-					if(q.equals("holder") == false){
-						ssp.setSaveFolder(q);
-					}
+				}
+				catch(Exception m){
+
+				}
+				try{
+					ssp.setPermanentBoxOffsetLenPt(pbolp);
+				}
+				catch(Exception m){
+
+				}	
+				try{
+					ssp.setBoxOffsetLenPt(bolp);
+				}
+				catch(Exception m){
+
+				}
+				try{
+					ssp.setSaveFolder(q);
+				}
+				catch(Exception m){
+
+				}
+				try{
+					ssp.setBackgroundLenPt(bglpt);
 				}
 				catch(Exception m){
 
@@ -878,6 +924,25 @@ public class SurfaceScatterViewStart extends Dialog {
 			}
 
 		});
+		
+//		customComposite.getOutputControl().addSelectionListener(new SelectionListener() {
+//			
+//			@Override
+//			public void widgetSelected(SelectionEvent e) {
+//				
+//				double start = outputCurves.getPlotSystem().get
+//				
+//				outputCurves.getPlotSystem().getAxes().get(0).setRange(start, end);
+//				
+//			}
+//			
+//			@Override
+//			public void widgetDefaultSelected(SelectionEvent e) {
+//				// TODO Auto-generated method stub
+//				
+//			}
+//		});ferrors
+		
 
 		outputCurves.getIntensity().addSelectionListener(new SelectionListener() {
 

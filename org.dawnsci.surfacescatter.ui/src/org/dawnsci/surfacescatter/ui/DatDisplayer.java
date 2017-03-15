@@ -424,7 +424,7 @@ public class DatDisplayer extends Composite {
 				transferToRod.setEnabled(false);
 				clearTable.setEnabled(false);
 				ssp.setImageFolderPath(null);
-				rodDisplayTable.clearAll();				
+				rodDisplayTable.removeAll();				
 			}
 
 			@Override
