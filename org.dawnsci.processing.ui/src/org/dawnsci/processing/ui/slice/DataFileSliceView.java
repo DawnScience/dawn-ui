@@ -44,6 +44,7 @@ import org.eclipse.dawnsci.analysis.api.processing.IOperationInputData;
 import org.eclipse.dawnsci.analysis.api.processing.OperationData;
 import org.eclipse.dawnsci.analysis.api.processing.OperationException;
 import org.eclipse.dawnsci.analysis.api.processing.model.IOperationModel;
+import org.eclipse.dawnsci.analysis.api.tree.Tree;
 import org.eclipse.dawnsci.analysis.dataset.slicer.SliceFromSeriesMetadata;
 import org.eclipse.dawnsci.analysis.dataset.slicer.SliceInformation;
 import org.eclipse.dawnsci.analysis.dataset.slicer.Slicer;
@@ -91,6 +92,7 @@ import org.eclipse.swt.dnd.TextTransfer;
 import org.eclipse.swt.dnd.Transfer;
 import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.events.KeyListener;
+import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Image;
@@ -405,7 +407,17 @@ public class DataFileSliceView extends ViewPart {
 					});
 				}
 				
-				ExtendedFileSelectionDialog fsd = new ExtendedFileSelectionDialog(Display.getCurrent().getActiveShell());
+				String filePath = fileManager.getFilePaths().get(0);
+				boolean isHDF5 = false;
+				try {
+					Tree tree = ServiceHolder.getLoaderService().getData(filePath, null).getTree();
+					isHDF5 = tree != null;
+				} catch (Exception e2) {
+					// TODO Auto-generated catch block
+					e2.printStackTrace();
+				}
+				
+				ExtendedFileSelectionDialog fsd = new ExtendedFileSelectionDialog(Display.getCurrent().getActiveShell(),isHDF5);
 				if (lastPath == null) {
 					final File source = new File(fileManager.getFilePaths().get(0));
 					lastPath  = source.getParent();
@@ -959,38 +971,83 @@ public class DataFileSliceView extends ViewPart {
 	
 	private class ExtendedFileSelectionDialog extends FileSelectionDialog {
 		
-		public ExtendedFileSelectionDialog(Shell parentShell) {
+		private boolean isHDF5 = false;
+		
+		public ExtendedFileSelectionDialog(Shell parentShell, boolean isH5) {
 			super(parentShell);
+			this.isHDF5 = isH5;
 		}
 		
 		@Override
 		protected Control createDialogArea(Composite parent) {
 			super.createDialogArea(parent);
-			final Button button1 = new Button(parent, SWT.CHECK);
-			button1.setText("Include original data in output (hdf5 and NeXus only).");
+			if (isHDF5) {
+				final Button button1 = new Button(parent, SWT.RADIO);
+				final Button button2 = new Button(parent, SWT.RADIO);
+				final Button button3 = new Button(parent, SWT.RADIO);
+				button1.setText("Processed data only");
+				button2.setText("Link original data (no data copied)");
+				button3.setText("Process data into copy of original");
 
-			if (processingOutputType == ProcessingOutputType.ORIGINAL_AND_PROCESSED) button1.setSelection(true);
-						
-			SelectionListener groupListener = new SelectionListener() {
-				@Override
-				public void widgetSelected(SelectionEvent e) {
-					if (button1.getSelection()) {
-						processingOutputType = ProcessingOutputType.ORIGINAL_AND_PROCESSED;
-					} else {
-						processingOutputType = ProcessingOutputType.PROCESSING_ONLY;
+				switch (processingOutputType) {
+				case PROCESSING_ONLY :{
+					button1.setSelection(true);
+					break;
+				}
+				case LINK_ORIGINAL :{
+					button2.setSelection(true);
+					break;
+				}
+				case ORIGINAL_AND_PROCESSED :{
+					button3.setSelection(true);
+					break;
+				}
+				default:
+					button1.setSelection(true);
+					processingOutputType = ProcessingOutputType.PROCESSING_ONLY;
+				}
+
+				SelectionListener l1 = new SelectionAdapter() {
+					@Override
+					public void widgetSelected(SelectionEvent e) {
+						if (button1.getSelection()) {
+							processingOutputType = ProcessingOutputType.PROCESSING_ONLY;
+						} 
 					}
-				}
-				@Override
-				public void widgetDefaultSelected(SelectionEvent e) {
-					widgetSelected(e);
-				}
-			};
-			
-			button1.addSelectionListener(groupListener);
+				};
+
+				button1.addSelectionListener(l1);
+
+				SelectionListener l2 = new SelectionAdapter() {
+					@Override
+					public void widgetSelected(SelectionEvent e) {
+						if (button2.getSelection()) {
+							processingOutputType = ProcessingOutputType.LINK_ORIGINAL;
+						} 
+					}
+				};
+
+				button2.addSelectionListener(l2);
+
+				SelectionListener l3 = new SelectionAdapter() {
+					@Override
+					public void widgetSelected(SelectionEvent e) {
+						if (button3.getSelection()) {
+							processingOutputType = ProcessingOutputType.ORIGINAL_AND_PROCESSED;
+						} 
+					}
+				};
+
+				button3.addSelectionListener(l3);
+			}
 			
 			return parent;
 		}
 		
+		@Override
+		  protected Point getInitialSize() {
+		    return new Point(500, 250);
+		  }
 	}
 
 }
