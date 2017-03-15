@@ -119,7 +119,7 @@ public class PeakFindingManager {
 		String peakfinder = Activator.getPlottingPreferenceStore().getString(PeakFindingConstants.PeakAlgorithm);	
 		//TODO: tmp as only wavelet has the adjustability
 		if(peakfinder.equals("Wavelet Transform")){
-			Activator.getPlottingPreferenceStore().setValue("widthSz", searchScaleIntensity);
+			Activator.getPlottingPreferenceStore().setValue("Convole Width Size", searchScaleIntensity);
 		}
 		
 		this.searchScaleIntensity = searchScaleIntensity;

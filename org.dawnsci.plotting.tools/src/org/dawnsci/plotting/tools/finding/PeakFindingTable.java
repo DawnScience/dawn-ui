@@ -45,7 +45,7 @@ public class PeakFindingTable {
 		          if (e.keyCode == SWT.DEL){
 		        	  //XXX:These index should line up because of how they are populated... If a comparator is set we are doomed.
 		        	  int[] selections = viewer.getTable().getSelectionIndices();
-		        	  for (int i =0; i < selections.length; ++i){
+		        	  for (int i =0; i < selections.length-1; ++i){
 			        	  List<Peak> peaks = (List<Peak>) viewer.getInput();
 			        	  peaks.remove(i);
 			        	  controller.setPeaks(peaks);
