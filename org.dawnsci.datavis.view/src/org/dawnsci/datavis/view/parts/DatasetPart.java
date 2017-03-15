@@ -71,8 +71,6 @@ public class DatasetPart {
 		viewer = new DataOptionTableViewer();
 		viewer.createControl(parent);
 		viewer.getControl().setLayoutData(checkForm);
-//		viewer.setContentProvider(new ArrayContentProvider());
-//		viewer.setLabelProvider(new ViewLabelLabelProvider());
 		
 		viewer.addSelectionChangedListener(new ISelectionChangedListener() {
 			
@@ -146,28 +144,7 @@ public class DatasetPart {
 			@Override
 			public void stateChanged(FileControllerStateEvent event) {
 			
-				if (event.isSelectedFileChanged()) {
-					LoadedFile currentFile = fileController.getCurrentFile();
-					if (currentFile == null) {
-						viewer.setInput(null);
-						table.setInput(null);
-						optionsViewer.setInput(null);
-						return;
-					}
-					List<DataOptions> dataOptions = currentFile.getDataOptions();
-					viewer.setInput(dataOptions.toArray());
-//					viewer.setCheckedElements(currentFile.getChecked().toArray());
-//					
-					if (fileController.getCurrentDataOption() != null) {
-						DataOptions op = fileController.getCurrentDataOption();
-						viewer.setSelection(new StructuredSelection(op),true);
-						table.setInput(plotManager.getPlottableObject().getNDimensions());
-						
-					}
-					
-					
-					viewer.refresh();
-				}
+				updateOnStateChange(event.isSelectedFileChanged());
 				
 			}
 		};
@@ -192,6 +169,36 @@ public class DatasetPart {
 		};
 		
 		plotManager.addPlotModeListener(plotModeListener);
+		
+		if (fileController.getCurrentFile() != null) {
+			updateOnStateChange(true);
+		}
+		
+	}
+	
+	private void updateOnStateChange(boolean selectedFileChanged){
+		if (selectedFileChanged) {
+			LoadedFile currentFile = fileController.getCurrentFile();
+			if (currentFile == null) {
+				viewer.setInput(null);
+				table.setInput(null);
+				optionsViewer.setInput(null);
+				return;
+			}
+			List<DataOptions> dataOptions = currentFile.getDataOptions();
+			viewer.setInput(dataOptions.toArray());
+//			viewer.setCheckedElements(currentFile.getChecked().toArray());
+//			
+			if (fileController.getCurrentDataOption() != null) {
+				DataOptions op = fileController.getCurrentDataOption();
+				viewer.setSelection(new StructuredSelection(op),true);
+				table.setInput(plotManager.getPlottableObject().getNDimensions());
+				
+			}
+			
+			
+			viewer.refresh();
+		}
 	}
 	
 	@PreDestroy
