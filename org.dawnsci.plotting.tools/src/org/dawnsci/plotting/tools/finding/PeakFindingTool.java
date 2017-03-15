@@ -111,21 +111,19 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 
 	public void setAddMode(boolean status) {
 		isAdding = status;
-		// if(searchRegion.isVisible() != !status)
-		searchRegion.setMobile(!status);
-		searchRegion.setVisible(!status);
+		if(searchRegion != null)
+			searchRegion.setVisible(!status);
 	}
 
 	public void setRemoveMode(boolean status) {
 		isRemoving = status;
-		// if(searchRegion.isVisible() != !status)
-		searchRegion.setMobile(!status);
-		searchRegion.setVisible(!status);
+		if(searchRegion != null)
+			searchRegion.setVisible(!status);
 	}
 
 	public void resetActions() {
-		searchRegion.setMobile(true);
-		searchRegion.setVisible(true);
+		if(searchRegion != null)
+			searchRegion.setVisible(true);
 	}
 
 	public PeakFindingTool(IPlottingSystem system) {
@@ -320,6 +318,7 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 
 		// Begin with the search tool ready to then run on
 		createNewSearch();
+
 	}
 	
 	private void runTraceSearch(ILineTrace trace){
@@ -773,7 +772,6 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 	public void dispose() {
 		deactivate();
 		super.dispose();
-		//composite.dispose();
 		// TODO: kill manager jobs... maybe might not be storing the jobs...
 		// there scheduled though so should have segment of all jobs runnign
 	}
