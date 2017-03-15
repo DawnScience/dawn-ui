@@ -64,7 +64,7 @@ public class PeakOppurtunity implements IPeakOpportunity {
 	}
 
 	@Override
-	public void setSearching(boolean searching) {
+	public void setPeakSearching(boolean searching) {
 		this.isSearching = searching;
 	}
 
@@ -82,4 +82,6 @@ public class PeakOppurtunity implements IPeakOpportunity {
 	public void setPeaksId(List<IdentifiedPeak> peaks) {
 		this.peaksId = peaks;
 	}
+
+
 }

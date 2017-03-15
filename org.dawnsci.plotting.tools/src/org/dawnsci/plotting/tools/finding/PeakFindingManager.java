@@ -136,14 +136,19 @@ public class PeakFindingManager {
 	
 	public void setPeakSearching(){
 		IPeakOpportunity peakOpp = new PeakOppurtunity();
-		peakOpp.setSearching(false);
+		peakOpp.setPeakSearching(false);
 		everythingChangesListeners(new PeakOpportunityEvent(this, peakOpp));
+	}
 	
+	public void activateSearchRegion(){
+		for(IPeakOpportunityListener listener : listeners) {
+			listener.activateSearchRegion();
+		}
 	}
 	
 	public void finishedPeakSearching(){
 		IPeakOpportunity peakOpp = new PeakOppurtunity();
-		peakOpp.setSearching(true);
+		peakOpp.setPeakSearching(true);
 		everythingChangesListeners(new PeakOpportunityEvent(this, peakOpp));
 	}
 	

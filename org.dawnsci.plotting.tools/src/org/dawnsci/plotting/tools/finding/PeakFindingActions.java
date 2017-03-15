@@ -44,6 +44,8 @@ public class PeakFindingActions {
 					 tool.setAddMode(false);
 					 addMode.setChecked(false);
 				}
+				
+				
 				tool.createNewSearch();
 			}
 		};

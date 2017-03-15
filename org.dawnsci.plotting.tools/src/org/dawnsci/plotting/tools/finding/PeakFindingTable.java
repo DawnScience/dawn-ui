@@ -88,6 +88,11 @@ public class PeakFindingTable {
 				
 			}
 
+			@Override
+			public void activateSearchRegion() {
+				// TODO Auto-generated method stub
+				
+			}
 
 		});
 	

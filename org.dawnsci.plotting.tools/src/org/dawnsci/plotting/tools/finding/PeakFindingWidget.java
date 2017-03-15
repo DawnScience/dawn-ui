@@ -73,7 +73,7 @@ public class PeakFindingWidget {
 		adjustSearchBtn.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				manager.setPeakSearching();
+				manager.activateSearchRegion();
 			}
 		});
 		adjustSearchBtn.setImage(Activator.getImageDescriptor("icons/plot-tool-peak-fit.png").createImage());
@@ -224,21 +224,7 @@ public class PeakFindingWidget {
 				
 				// Run peakSearch
 				manager.setPeakSearching();
-//				
-//				if(xData != null && yData != null){
-//					manager.setPeakSearching();
-//	 				
-//	 				//TODO: set the searching mode ...
-//					manager.peakSearchJob = new PeakFindingSearchJob(manager, xData, yData);
-//					manager.peakSearchJob.schedule();		
-//	 			
-//	 			} else {
-//					//No peak data set...
-//					peaks.clear();
-//					manager.setPeaks(peaks);
-//					runPeakSearch.setEnabled(true);
-//					runPeakSearch.setImage(Activator.getImageDescriptor("icons/peakSearch.png").createImage());
-//				}
+
 			}
 		});
 	
@@ -286,6 +272,12 @@ public class PeakFindingWidget {
 			public void finishedPeakFinding() {
 				runPeakSearch.setEnabled(true);
 				runPeakSearch.setImage(Activator.getImageDescriptor("icons/peakSearch.png").createImage());
+			}
+
+			@Override
+			public void activateSearchRegion() {
+				// TODO Auto-generated method stub
+				
 			}
 			
 		});

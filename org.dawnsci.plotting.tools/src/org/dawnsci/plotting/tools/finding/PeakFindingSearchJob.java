@@ -15,9 +15,7 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.dawnsci.analysis.api.peakfinding.IPeakFinderParameter;
 import org.eclipse.january.dataset.Dataset;
-import org.eclipse.january.dataset.DatasetFactory;
 import org.eclipse.january.dataset.IDataset;
-import org.eclipse.january.dataset.IntegerDataset;
 import org.eclipse.swt.widgets.Display;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -70,7 +68,6 @@ public class PeakFindingSearchJob extends Job {
 //			// // Set the region bounds
 //			controller.getPeakfindingtool().updateSearchBnds(rectangle);
 //		}
-
 		
 		private void loadPeakFinderParams(){
 			//TODO: clean control function

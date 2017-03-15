@@ -174,23 +174,6 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 		listener = new IPeakOpportunityListener() {
 			@Override
 			public void peaksChanged(PeakOpportunityEvent evt) {
-//				if(evt.getPeakOpp().getPeaks() != null) {
-//					// Update Peaks
-//					
-//					peaks = evt.getPeakOpp().getPeaks();
-//					
-//					if (!getPeaks().isEmpty()) {
-//						updatePeakTrace(getPeaks());
-//					} else {
-//						//We have no longer any peaks to plot remove]
-//						//getPlottingSystem().getTrace(PEAKSTRACENAME) != null
-//						if(getPlottingSystem().getTrace(PEAKSTRACENAME) != null){
-//							getPlottingSystem().removeTrace(peaksTrace);
-//							peaksTrace.dispose();
-//						}
-//					}
-//				}
-
 				//TODO: now ill just place these identifed peaks here too
 				if(evt.getPeakOpp().getPeaksId() != null){
 					peaksId = evt.getPeakOpp().getPeaksId();
@@ -244,6 +227,11 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 			public void finishedPeakFinding() {
 				// TODO Auto-generated method stub
 				
+			}
+
+			@Override
+			public void activateSearchRegion() {
+				createNewSearch();
 			}
 		};
 		manager.addPeakListener(listener);
