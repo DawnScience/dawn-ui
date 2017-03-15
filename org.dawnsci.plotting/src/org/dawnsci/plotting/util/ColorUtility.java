@@ -27,65 +27,21 @@ public class ColorUtility {
 	// See http://www.gnuplotting.org/tag/palette/
 	public static final Color[] GRAPH_DEFAULT_COLORS = { 
 
-			/* Original Colours */
-			//		Color.blue,
-//		new Color(191, 91, 23),
-//		new Color(240,2,127),
-//		new Color(204, 0, 204),
-//		new Color(56, 108, 176),
-//		new Color(0, 153, 51),
-//		new Color(102, 0, 102),
-//		new Color(255, 102, 255),
-//		new Color(255, 155, 0),
-//		new Color(204, 255, 0),
-//		new Color(51, 255, 51),
-//		new Color(102, 255, 255),
-//		new Color(102, 102, 255),
-//		new Color(153, 153, 0),
-//		new Color(150, 150, 150), 
-//		new Color(255, 204, 204),
-//		new Color(77, 175, 74)
-			
-			/* My primaries, secondaries and tertiaries, of similar lightness */
-//		new Color(0,0,0),
-//		new Color(204, 0, 0),
-//		new Color(0, 128, 0),
-//		new Color(0, 0, 255),
-//		new Color(179, 179, 0),
-//		new Color(0, 165, 165),
-//		new Color(179, 0, 179),
-//		new Color(180, 90, 0),
-//		new Color(0, 153, 78),
-//		new Color(102, 0, 204),
-//		new Color(78, 154, 0),
-//		new Color(0, 89, 179),
-//		new Color(204, 0, 103)
-		
-		/* Guy off the internet colours
-		 * (http://blogs.mathworks.com/pick/2008/08/15/colors-for-your-multi-line-plots/#comment-12842)
-		 */
-		new Color(0, 0, 0),
-		new Color(0f, 0f, 1f),
-		new Color(0f, 0.5f, 0f),
-		new Color(1f, 0f, 0f),
-		new Color(0f, 0.75f, 0.75f),
-		new Color(0.75f, 0.75f, 0f),
-		new Color(0.25f, 0.25f, 0.25f),
-		new Color(0.75f, 0.25f, 0.25f),
-		new Color(0.95f, 0.95f, 0f),
-		new Color(0.25f, 0.25f, 0.75f),
-		new Color(0.75f, 0.75f, 0.75f),
-		new Color(0f, 1f, 0f),
-		new Color(0.76f, 0.57f, 0.17f),
-		new Color(0.54f, 0.63f, 0.22f),
-		new Color(0.34f, 0.57f, 0.92f),
-		new Color(1f, 0.1f, 0.6f),
-		new Color(0.88f, 0.75f, 0.73f),
-		new Color(.1f, 0.49f, 0.47f),
-		new Color(0.66f, 0.34f, 0.65f),
-		new Color(0.59f, 0.41f, 0.23f)
+			/* My primaries, secondaries and tertiaries, of varying shade */
+		new Color(0,0,0),			// black (dark)
+		new Color(255, 0, 0),		// red (mid)
+		new Color(0, 220, 0),		// green (bright)
+		new Color(0, 0, 255),		// blue (dark)
+		new Color(179, 179, 0),		// goldish (mid)
+		new Color(0, 217, 217),		// turquoise (bright)
+		new Color(179, 0, 179),		// fuchsia (dark)
+		new Color(242, 121, 0),		// sienna (bright)
+		new Color(0, 180, 90),		// forest green (mid)
+		new Color(102, 0, 204),		// purple (dark)
+		new Color(0, 128, 255),		// azure (mid)
+		new Color(255, 0, 128),		// rose (bright)
+		new Color(78, 154, 0)		// spring green (dark)
 
-//		new Color(),
 	};
 	
 	public static final Collection<org.eclipse.swt.graphics.Color> DEFAULT_SWT_COLORS;
