@@ -157,13 +157,13 @@ public class PeakFindingPreferencePage extends PreferencePage implements IWorkbe
 		for (Entry<String, IPeakFinderParameter> peakParam : peakParams.entrySet()){
 			IPeakFinderParameter param = peakParam.getValue();
 			
-			if(isDefault){
+			if(!isDefault){
 				String curVal = getPreferenceStore().getString(peakParam.getKey());
 				Number val = Double.parseDouble(curVal);
 				if (param.isInt())
 					val = (int) val.doubleValue();
 				param.setValue(val);
-			}
+			} 
 			genParam(parentLayout, param);
 		}
 		
@@ -237,7 +237,7 @@ public class PeakFindingPreferencePage extends PreferencePage implements IWorkbe
 		    final Composite pageN = new Composite(contentPanel, SWT.NONE);
 			pageN.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
 			pageN.setLayout(new GridLayout(2, false));
-			loadPeakFinderParams(pageN, false, finderID);
+			loadPeakFinderParams(pageN, true, finderID);
 		    controlPages.add(pageN);
 		}
 		Object choicee = algorithmCombo.getSelectionIndex();
