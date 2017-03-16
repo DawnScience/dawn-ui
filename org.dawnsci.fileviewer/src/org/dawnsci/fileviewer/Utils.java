@@ -246,19 +246,26 @@ public class Utils {
 	}
 
 	/**
-	 * Get the formatted File size as a String
+	 * Get the formatted File size as a String <br>
+	 * See {@link http://stackoverflow.com/questions/3758606/}
+	 * for more information on how to properly format the size
 	 * 
 	 * @param file
+	 * @param si
+	 *         if True, the SI Units will be used, otherwise the binary ones will be used
 	 * @return size as a string
 	 */
-	public static String getFileSizeString(File file) {
-		String sizeString;
-		if (file.isDirectory()) {
-			sizeString = "";
-		} else {
-			sizeString = Utils.getResourceString("filesize.KB", new Object[] { new Long((file.length() + 512) / 1024) });
+	public static String getFileSizeString(File file, boolean si) {
+		if (!file.isDirectory()) {
+			long bytes = file.length();
+			int unit = si ? 1000 : 1024;
+			if (bytes < unit)
+				return bytes + " B";
+			int exp = (int) (Math.log(bytes) / Math.log(unit));
+			String pre = (si ? "kMGTPE" : "KMGTPE").charAt(exp - 1) + (si ? "" : "i");
+			return String.format("%.1f %sB", bytes / Math.pow(unit, exp), pre);
 		}
-		return sizeString;
+		return "";
 	}
 
 	/**

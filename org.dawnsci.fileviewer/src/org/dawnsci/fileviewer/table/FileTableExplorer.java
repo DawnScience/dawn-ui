@@ -50,6 +50,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Table;
+import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.swt.widgets.Text;
 import org.slf4j.Logger;
@@ -67,12 +68,7 @@ public class FileTableExplorer {
 			Utils.getResourceString(FileViewerConstants.TYPE_TITLE),
 			Utils.getResourceString(FileViewerConstants.MODIFIED_TITLE),
 			Utils.getResourceString(FileViewerConstants.SCAN_TITLE) };
-	private final String[] tableToolTips = new String[] {
-			Utils.getResourceString(FileViewerConstants.NAME_TIP),
-			Utils.getResourceString(FileViewerConstants.SIZE_TIP),
-			Utils.getResourceString(FileViewerConstants.TYPE_TIP),
-			Utils.getResourceString(FileViewerConstants.MODIFIED_TIP),
-			Utils.getResourceString(FileViewerConstants.SCAN_TIP) };
+	private String[] tableToolTips;
 
 	private Label tableContentsOfLabel;
 
@@ -108,6 +104,8 @@ public class FileTableExplorer {
 	private String filter;
 	
 	private boolean useRegex = false;
+
+	private boolean isSizeSIUnits;
 	
 	public FileTableExplorer(FileViewer viewer, Composite parent, int style) {
 		this.viewer = viewer;
@@ -169,10 +167,16 @@ public class FileTableExplorer {
 		boolean showType = store.getBoolean(FileViewerConstants.SHOW_TYPE_COLUMN);
 		boolean showModified = store.getBoolean(FileViewerConstants.SHOW_MODIFIED_COLUMN);
 		boolean showScanCmd = store.getBoolean(FileViewerConstants.SHOW_SCANCMD_COLUMN);
-
-		
+		isSizeSIUnits = store.getBoolean(FileViewerConstants.DISPLAY_WITH_SI_UNITS);
+		// set tooltip accordingly
+		tableToolTips = new String[] { Utils.getResourceString(FileViewerConstants.NAME_TIP),
+				isSizeSIUnits ? Utils.getResourceString(FileViewerConstants.SIZE_SI_TIP)
+						: Utils.getResourceString(FileViewerConstants.SIZE_BIN_TIP),
+				Utils.getResourceString(FileViewerConstants.TYPE_TIP),
+				Utils.getResourceString(FileViewerConstants.MODIFIED_TIP),
+				Utils.getResourceString(FileViewerConstants.SCAN_TIP) };
 		// we listen to the preference store property changes
-		final int sizeWidth = showSize ? 60 : 0;
+		final int sizeWidth = showSize ? 75 : 0;
 		final int typeWidth = showType ? 75 : 0;
 		final int modifiedWidth = showModified ? 150 : 0;
 		final int scanCmdWidth = showScanCmd ? 300 : 0;
@@ -180,13 +184,23 @@ public class FileTableExplorer {
 			@Override
 			public void propertyChange(PropertyChangeEvent event) {
 				if (event.getProperty().equals(FileViewerConstants.SHOW_SIZE_COLUMN)) {
-					setColumnVisible(1, 60, (Boolean) event.getNewValue());
+					setColumnVisible(1, 75, (Boolean) event.getNewValue());
 				} else if (event.getProperty().equals(FileViewerConstants.SHOW_TYPE_COLUMN)) {
 					setColumnVisible(2, 75, (Boolean) event.getNewValue());
 				} else if (event.getProperty().equals(FileViewerConstants.SHOW_MODIFIED_COLUMN)) {
 					setColumnVisible(3, 150, (Boolean) event.getNewValue());
 				} else if (event.getProperty().equals(FileViewerConstants.SHOW_SCANCMD_COLUMN)) {
 					setColumnVisible(4, 300, (Boolean) event.getNewValue());
+				} else if (event.getProperty().equals(FileViewerConstants.DISPLAY_WITH_SI_UNITS)) {
+					isSizeSIUnits = (Boolean) event.getNewValue();
+					// change tooltip of size column
+					Table table = tviewer.getTable();
+					TableColumn sizeColumn = (table != null) && (!table.isDisposed()) ? table.getColumn(1) : null;
+					if (sizeColumn != null) {
+						sizeColumn.setToolTipText(Utils.getResourceString(
+								isSizeSIUnits ? FileViewerConstants.SIZE_SI_TIP : FileViewerConstants.SIZE_BIN_TIP));
+					}
+					tviewer.refresh();
 				}
 			}
 		});
@@ -490,5 +504,8 @@ public class FileTableExplorer {
 	public boolean getUseRegex() {
 		return useRegex;
 	}
-	
+
+	public boolean isSizeSIUnit() {
+		return isSizeSIUnits;
+	}
 }

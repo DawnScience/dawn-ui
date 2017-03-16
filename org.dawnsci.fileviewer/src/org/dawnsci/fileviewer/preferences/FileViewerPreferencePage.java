@@ -23,6 +23,7 @@ public class FileViewerPreferencePage extends FieldEditorPreferencePage implemen
 	private BooleanFieldEditor showType;
 	private BooleanFieldEditor showModified;
 	private BooleanFieldEditor showScanCmd;
+	private BooleanFieldEditor displayWithSIUnit;
 
 	public FileViewerPreferencePage() {
 		super(GRID);
@@ -46,6 +47,12 @@ public class FileViewerPreferencePage extends FieldEditorPreferencePage implemen
 		showScanCmd = new BooleanFieldEditor(FileViewerConstants.SHOW_SCANCMD_COLUMN,
 				"Show scan command column", getFieldEditorParent());
 		addField(showScanCmd);
+
+		displayWithSIUnit = new BooleanFieldEditor(FileViewerConstants.DISPLAY_WITH_SI_UNITS,
+				"Display file size with SI Units", getFieldEditorParent());
+		displayWithSIUnit.getDescriptionControl(getFieldEditorParent()).setToolTipText("If SI Units are used, 1kB = 1000Bytes, "
+				+ "if not, binary Units are used (1kB = 1024Bytes)");
+		addField(displayWithSIUnit);
 	}
 
 	@Override

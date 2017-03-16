@@ -70,6 +70,7 @@ public class FileViewerConstants {
 	public static final String SHOW_TYPE_COLUMN = "org.dawnsci.fileviewer.showtype";
 	public static final String SHOW_MODIFIED_COLUMN = "org.dawnsci.fileviewer.showmodified";
 	public static final String SHOW_SCANCMD_COLUMN = "org.dawnsci.fileviewer.showscancmd";
+	public static final String DISPLAY_WITH_SI_UNITS = "org.dawnsci.fileviewer.displaySIUnits";
 
 	/**
 	 * Tooltip texts
@@ -78,7 +79,8 @@ public class FileViewerConstants {
 	 * Table tooltip
 	 */
 	public static final String NAME_TIP = "table.Name.tooltip";
-	public static final String SIZE_TIP = "table.Size.tooltip";
+	public static final String SIZE_SI_TIP = "table.SizeSI.tooltip";
+	public static final String SIZE_BIN_TIP = "table.SizeBIN.tooltip";
 	public static final String TYPE_TIP = "table.Type.tooltip";
 	public static final String MODIFIED_TIP = "table.Modified.tooltip";
 	public static final String SCAN_TIP = "table.ScanCmd.tooltip";

@@ -63,7 +63,7 @@ public class FileTableColumnLabelProvider extends ColumnLabelProvider {
 		case 0:
 			return file.getName();
 		case 1:
-			return Utils.getFileSizeString(file);
+			return Utils.getFileSizeString(file, viewer.isSizeSIUnit());
 		case 2:
 			return Utils.getFileTypeString(file);
 		case 3:

@@ -946,4 +946,12 @@ public class FileViewer {
 		return treeExplo;
 	}
 
+	/**
+	 * 
+	 * @return True if SI Unit is used to display size of files
+	 */
+	public boolean isSizeSIUnit() {
+		return tableExplo.isSizeSIUnit();
+	}
+
 }

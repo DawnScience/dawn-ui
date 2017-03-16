@@ -48,5 +48,11 @@
             name="File Viewer">
       </page>
    </extension>
+   <extension
+         point="org.eclipse.core.runtime.preferences">
+      <initializer
+            class="org.dawnsci.fileviewer.preferences.FileViewerPreferenceInitializer">
+      </initializer>
+   </extension>
 
 </plugin>
