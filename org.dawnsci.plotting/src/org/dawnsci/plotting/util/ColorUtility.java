@@ -34,12 +34,12 @@ public class ColorUtility {
 		new Color(0, 0, 255),		// blue (dark)
 		new Color(179, 179, 0),		// goldish (mid)
 		new Color(0, 217, 217),		// turquoise (bright)
-		new Color(179, 0, 179),		// fuchsia (dark)
-		new Color(242, 121, 0),		// sienna (bright)
+		new Color(128, 0, 128),		// fuchsia (dark)
+		new Color(128, 64, 0),		// sienna (bright)
 		new Color(0, 180, 90),		// forest green (mid)
-		new Color(102, 0, 204),		// purple (dark)
+		new Color(160, 32, 255),		// purple (dark)
 		new Color(0, 128, 255),		// azure (mid)
-		new Color(255, 0, 128),		// rose (bright)
+		new Color(192, 0, 96),		// rose (bright)
 		new Color(78, 154, 0)		// spring green (dark)
 
 	};
