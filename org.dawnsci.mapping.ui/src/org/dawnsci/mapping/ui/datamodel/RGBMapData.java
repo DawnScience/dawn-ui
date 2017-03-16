@@ -113,8 +113,8 @@ public class RGBMapData extends MappedData {
 	}
 	
 	private Dataset update(Dataset ds, int lower, int upper, boolean log) {
-		double dMin = ds.min().doubleValue();
-		double dMax = ds.max().doubleValue();
+		double dMin = ds.min(true).doubleValue();
+		double dMax = ds.max(true).doubleValue();
 		
 		double dRange = dMax - dMin;
 		int min = lower;
