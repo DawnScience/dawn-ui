@@ -7,6 +7,7 @@ import org.eclipse.january.MetadataException;
 import org.eclipse.january.dataset.IDataset;
 import org.eclipse.january.dataset.IDynamicDataset;
 import org.eclipse.january.dataset.ILazyDataset;
+import org.eclipse.january.dataset.ShapeUtils;
 import org.eclipse.january.dataset.SliceND;
 import org.eclipse.january.metadata.AxesMetadata;
 import org.eclipse.january.metadata.MetadataFactory;
@@ -121,7 +122,16 @@ public abstract class AbstractMapData implements PlottableMapObject{
 			mapDims.updateNonXYScanSlice(baseMap.getShape());
 			SliceND mapSlice = mapDims.getMapSlice(baseMap);
 			IDataset slice = baseMap.getSlice(mapSlice);
-			slice.squeeze();
+			if (slice.getRank() != 2) {
+				int[] ss = ShapeUtils.squeezeShape(slice.getShape(), false);
+				if (ss.length == 1) {
+					int[] s2d = new int[]{1, ss[0]};
+					slice.setShape(s2d);
+				} else {
+					slice.squeeze();
+				}
+			}
+
 			slice = LivePlottingUtils.cropNanValuesFromAxes(slice,!mapDims.isRemappingRequired());
 			if (slice == null) return null;
 			setRange(MappingUtils.getRange(slice, !mapDims.isRemappingRequired()));
