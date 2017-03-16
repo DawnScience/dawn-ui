@@ -50,7 +50,7 @@ public class RegionOutOfBoundsWarning extends Dialog {
 			warning.setText("Enter number as int or double");	
 		}
 		if (selector == 2){
-			warning.setText("Error in geometeric corrections. Check experimental setup");	
+			warning.setText("Error in geometric corrections. Check experimental setup");	
 		}
 		if (selector == 3){
 			warning.setText("Unable to locate images. Check images file path, or image name in geometric paramters unavwindow.");	
@@ -59,7 +59,7 @@ public class RegionOutOfBoundsWarning extends Dialog {
 			warning.setText("Unable to locate flux data.");	
 		}
 		if (selector == 5){
-			warning.setText("Ran out of memory. Try a smaller region of interest, or a shorter image stack.");	
+			warning.setText("Ran out of memory. Abort the process, then try a smaller region of interest, or a shorter image stack.");	
 		}
 		
 		if(note != null){
@@ -83,7 +83,7 @@ public class RegionOutOfBoundsWarning extends Dialog {
 		int h = rect.height;
 		int w = rect.width;
 		
-		return new Point((int) Math.round(0.2*w), (int) Math.round(0.2*h));
+		return new Point((int) Math.round(0.4*w), (int) Math.round(0.2*h));
 	}
 	
 	@Override

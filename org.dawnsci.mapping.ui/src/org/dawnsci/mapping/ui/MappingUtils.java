@@ -79,17 +79,35 @@ public class MappingUtils {
 		double[] range = new double[4];
 		int xs = axes[1].getSize();
 		int ys = axes[0].getSize();
-		range[0] = axes[1].min(true).doubleValue();
-		range[1] = axes[1].max(true).doubleValue();
+		
+		double fMin = axes[1].min(true).doubleValue();
+		double fMax = axes[1].max(true).doubleValue();
+		
+		range[0] = fMin;
+		range[1] = fMax;
 		double dx = ((range[1]-range[0])/(xs-1))/2;
 		range[0] -= dx;
 		range[1] += dx;
 		
-		range[2] = axes[0].min(true).doubleValue();
-		range[3] = axes[0].max(true).doubleValue();
-		double dy = ((range[3]-range[2])/(ys-1))/2;
-		range[2] -= dy;
-		range[3] += dy;
+		double sMin = axes[0].min(true).doubleValue();
+		double sMax = axes[0].max(true).doubleValue();
+		
+		//first line
+		if (sMin == sMax) {
+			double d = (fMax-fMin)/2;
+			sMax = sMin + d;
+			sMin = sMin - d;
+		} else {
+			double dy = ((sMax-sMin)/(ys-1))/2;
+			sMin+=dy;
+			sMax+=dy;
+		}
+		
+		range[2] = sMin;
+		range[3] = sMax;
+//		double dy = ((range[3]-range[2])/(ys-1))/2;
+//		range[2] -= dy;
+//		range[3] += dy;
 		return range;
 	}
 	

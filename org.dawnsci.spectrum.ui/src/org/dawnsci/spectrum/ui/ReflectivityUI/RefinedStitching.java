@@ -39,17 +39,7 @@ public class RefinedStitching {
 		IDataset[] yArrayCorrected = yArray.clone();
 		
 		IDataset[][] attenuatedDatasets = new IDataset[2][];
-		
-//		int d = xArray.length;
-//		
-//		double[][] maxMinArray = new double[d][2];
-//		
-//		for(int k =0;k<d;k++){
-//			maxMinArray[k][0] = (double) xArray[k].max(null);
-//			maxMinArray[k][1] = (double) xArray[k].min(null);
-//		}
-//		
-//		
+			
 		int d =  model.getROIList().size();
 		
 		double[][] maxMinArray = new double[d][2];

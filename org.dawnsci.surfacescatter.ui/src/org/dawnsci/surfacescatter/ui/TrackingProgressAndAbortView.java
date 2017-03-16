@@ -30,7 +30,6 @@ public class TrackingProgressAndAbortView extends Dialog {
 	private TabFolder backgroundTabFolder;
 	private IPlottingSystem<Composite> subBgImage;
 	private Shell parentShell;
-	private TrackingProgressAndAbortView tpaav;
 	
 	
 	public TrackingProgressAndAbortView(Shell parentShell, 
@@ -52,9 +51,8 @@ public class TrackingProgressAndAbortView extends Dialog {
 		this.mainImagePlotSytem = mainImagePlotSytem;
 		this.backgroundTabFolder= backgroundTabFolder;
 		this.subBgImage = subBgImage;
-		this.tpaav = this;
 		
-		setShellStyle(getShellStyle() | SWT.RESIZE);		
+		setShellStyle(getShellStyle() | SWT.RESIZE | SWT.APPLICATION_MODAL);		
 
 	}
 
@@ -96,15 +94,15 @@ public class TrackingProgressAndAbortView extends Dialog {
 							   backgroundTabFolder, 
 							   subBgImage, 
 							   progress,
-							   tpaav
+							   this
 							  );
 		}
 		catch(IndexOutOfBoundsException d){
 			ssp.boundariesWarning();
 		}
 		
-		catch(java.lang.OutOfMemoryError e){
-			ssp.boundariesWarning();
+		catch(OutOfMemoryError e){
+			ssp.outOfMemoryWarning();
 		}
 		
 	

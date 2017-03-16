@@ -62,7 +62,7 @@ public class SurfaceScatterViewStart extends Dialog {
 	private int numberOfImages;
 	private Dataset nullImage;
 	private SurfaceScatterPresenter ssp;
-	private SurfaceScatterViewStart ssvs;
+//	private SurfaceScatterViewStart ssvs;
 	private ArrayList<Slider> sliderList;
 	private int DEBUG = 1;
 	private boolean modify = true;
@@ -127,7 +127,7 @@ public class SurfaceScatterViewStart extends Dialog {
 				
 			}
 		});
-		this.ssvs = this;
+//		this.ssvs = this;
 		this.datFolderPath = datFolderPath;
 
 		setShellStyle(getShellStyle() | SWT.RESIZE);
@@ -375,6 +375,7 @@ public class SurfaceScatterViewStart extends Dialog {
 				customComposite.getReplay().setEnabled(false);
 				customComposite.resetCorrectionsTab();
 				ssps3c.isOutputCurvesVisible(false);
+				customComposite.getOutputControl().setEnabled(false);
 				
 			}
 
@@ -446,7 +447,7 @@ public class SurfaceScatterViewStart extends Dialog {
 
 				int sliderPos = customComposite.getSlider().getSelection();
 				ssp.sliderMovemementMainImage(sliderPos);
-				ssvs.updateIndicators(sliderPos);
+				SurfaceScatterViewStart.this.updateIndicators(sliderPos);
 				ssp.bgImageUpdate(customComposite.getSubImageBgPlotSystem(), sliderPos);
 			}
 
@@ -542,10 +543,10 @@ public class SurfaceScatterViewStart extends Dialog {
 					ssp.sliderMovemementMainImage(k);
 					ssp.sliderZoomedArea(k, customComposite.getGreenRegion().getROI(),
 							customComposite.getSubImagePlotSystem());
-					ssp.updateSliders(ssvs.getSliderList(), k);
+					ssp.updateSliders(SurfaceScatterViewStart.this.getSliderList(), k);
 					ssp.bgImageUpdate(customComposite.getSubImageBgPlotSystem(), k);
 
-					ssvs.updateIndicators(k);
+					SurfaceScatterViewStart.this.updateIndicators(k);
 
 					modify = true;
 
@@ -592,10 +593,10 @@ public class SurfaceScatterViewStart extends Dialog {
 					ssp.sliderZoomedArea(k, customComposite.getGreenRegion().getROI(),
 							customComposite.getSubImagePlotSystem());
 
-					ssp.updateSliders(ssvs.getSliderList(), k);
+					ssp.updateSliders(SurfaceScatterViewStart.this.getSliderList(), k);
 					ssp.bgImageUpdate(customComposite.getSubImageBgPlotSystem(), k);
 
-					ssvs.updateIndicators(k);
+					SurfaceScatterViewStart.this.updateIndicators(k);
 					modify = true;
 				}
 			}
@@ -610,7 +611,7 @@ public class SurfaceScatterViewStart extends Dialog {
 			@Override
 			public void widgetSelected(SelectionEvent e){ 
 								
-				ssp.setStartFrame(ssvs.getSliderList().get(0).getSelection());
+				ssp.setStartFrame(SurfaceScatterViewStart.this.getSliderList().get(0).getSelection());
 				ssp.resetDataModels();
 				ssp.triggerBoxOffsetTransfer();
 				
@@ -640,7 +641,8 @@ public class SurfaceScatterViewStart extends Dialog {
 															   customComposite.getFolder(),
 															   customComposite.getSubImageBgPlotSystem());
 				tpaav.open();
-
+				
+				customComposite.getOutputControl().setEnabled(true);
 			}
 
 			@Override
@@ -651,7 +653,7 @@ public class SurfaceScatterViewStart extends Dialog {
 		//////////////////////// Analysis Right//////////////////////////////
 		///////////////// anaRight Window 4/////////////////////////////////
 		try {
-			ssps3c = new SuperSashPlotSystem3Composite(anaRight, SWT.FILL, ssvs, ssp);
+			ssps3c = new SuperSashPlotSystem3Composite(anaRight, SWT.FILL, SurfaceScatterViewStart.this, ssp);
 
 			ssps3c.setLayout(new GridLayout());
 			ssps3c.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
@@ -675,6 +677,10 @@ public class SurfaceScatterViewStart extends Dialog {
 
 				FileDialog fd = new FileDialog(getParentShell(), SWT.SAVE);
 
+				if(ssp.getSaveFolder()!=null){
+					fd.setFilterPath(ssp.getSaveFolder());
+				}
+				
 				String stitle = "r";
 				String path = "p";
 
@@ -685,7 +691,11 @@ public class SurfaceScatterViewStart extends Dialog {
 				}
 
 				String title = path + File.separator + stitle;
-
+				
+				if(ssp.getSaveFolder()==null){
+					ssp.setSaveFolder(path);;
+				}
+				
 				ssp.saveParameters(title);
 
 			}
@@ -703,6 +713,10 @@ public class SurfaceScatterViewStart extends Dialog {
 
 				FileDialog fd = new FileDialog(getParentShell(), SWT.OPEN);
 
+				if(ssp.getSaveFolder() !=null){
+					fd.setFilterPath(ssp.getSaveFolder());;
+				}
+				
 				String stitle = "r";
 				String path = "p";
 
@@ -838,7 +852,7 @@ public class SurfaceScatterViewStart extends Dialog {
 	}
 	
 	public void resetIntensityCombo(){
-		ssvs.getSsps3c().getOutputCurves().getIntensity().select(0);
+		SurfaceScatterViewStart.this.getSsps3c().getOutputCurves().getIntensity().select(0);
 	}
 	
 	public void setupRightEnabled(boolean enabled){
@@ -906,7 +920,7 @@ public class SurfaceScatterViewStart extends Dialog {
 
 					int xPos = ssp.xPositionFinder(outputCurves.getRegionNo().getROI().getPointX());
 
-					ssp.updateSliders(ssvs.getSliderList(), xPos);
+					ssp.updateSliders(SurfaceScatterViewStart.this.getSliderList(), xPos);
 
 					ssp.sliderMovemementMainImage(xPos);
 					ssp.sliderZoomedArea(xPos, customComposite.getGreenRegion().getROI(),
@@ -914,7 +928,7 @@ public class SurfaceScatterViewStart extends Dialog {
 					
 					customComposite.getPlotSystem().updatePlot2D(ssp.getImage(xPos),null, null);
 
-					ssvs.updateIndicators(xPos);
+					SurfaceScatterViewStart.this.updateIndicators(xPos);
 
 					ssp.bgImageUpdate(customComposite.getSubImageBgPlotSystem(), xPos);
 
@@ -988,6 +1002,10 @@ public class SurfaceScatterViewStart extends Dialog {
 
 				FileDialog fd = new FileDialog(getParentShell(), SWT.SAVE);
 
+				if(ssp.getSaveFolder()!=null){
+					fd.setFilterPath(ssp.getSaveFolder());
+				}
+				
 				String stitle = "r";
 				String path = "p";
 
@@ -996,7 +1014,11 @@ public class SurfaceScatterViewStart extends Dialog {
 					path = fd.getFilterPath();
 
 				}
-
+				
+				if(ssp.getSaveFolder()==null){
+					ssp.setSaveFolder(path);;
+				}
+				
 				String title = path + File.separator + stitle;
 
 				String[] fr = CurveStateIdentifier.CurveStateIdentifier1(outputCurves.getPlotSystem());
@@ -1069,7 +1091,7 @@ public class SurfaceScatterViewStart extends Dialog {
 			}
 		
 			double ref = 
-					ReflectivityFluxCorrectionsForDialog.reflectivityFluxCorrectionsDouble(ssvs.getParamField().getFluxPath().getText(), 
+					ReflectivityFluxCorrectionsForDialog.reflectivityFluxCorrectionsDouble(SurfaceScatterViewStart.this.getParamField().getFluxPath().getText(), 
 																				 	   	   QdcdDat.getDouble(0), 
 																				 	   	   filepath);
 			

@@ -12,6 +12,7 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.DirectoryDialog;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
@@ -132,14 +133,28 @@ public class ImageFolderChangeDialog extends Dialog {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 
-				FileDialog fd = new FileDialog(parent.getShell(), SWT.OPEN);
-
-				String path = "p";
-
-				if (fd.open() != null) {
-					path = fd.getFilterPath();
+				
+				DirectoryDialog dlg = new DirectoryDialog(parent.getShell(), SWT.OPEN);
+				
+				// Set the initial filter path according
+		        // to anything they've selected or typed in
+				
+				if(ssp.getImageFolderPath() != null){
+				
+					dlg.setFilterPath(ssp.getImageFolderPath());
 				}
+		        // Change the title bar text
+		        dlg.setText(".tif image file directory");
 
+		        // Customizable message displayed in the dialog
+		        dlg.setMessage("Select a directory");
+
+		        // Calling open() will open and run the dialog.
+		        // It will return the selected directory, or
+		        // null if user cancels
+		       
+		        String path = dlg.open();
+				
 				imageFolderPath = path;		
 				imageFolderText.setText(imageFolderPath);
 				imageFolderText.setEnabled(true);
@@ -174,14 +189,28 @@ public class ImageFolderChangeDialog extends Dialog {
 
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-
-				FileDialog fd = new FileDialog(parent.getShell(), SWT.OPEN);
-
-				String path = "p";
-
-				if (fd.open() != null) {
-					path = fd.getFilterPath();
+				
+				DirectoryDialog dlg = new DirectoryDialog(parent.getShell(), SWT.OPEN);
+				
+				// Set the initial filter path according
+		        // to anything they've selected or typed in
+				
+				if(ssp.getSaveFolder() != null){
+				
+					dlg.setFilterPath(ssp.getSaveFolder());
 				}
+				
+		        // Change the title bar text
+		        dlg.setText("Foder into which ammended .dat files are saved");
+
+		        // Customizable message displayed in the dialog
+		        dlg.setMessage("Select a directory");
+
+		        // Calling open() will open and run the dialog.
+		        // It will return the selected directory, or
+		        // null if user cancels
+		       
+		        String path = dlg.open();
 
 				saveFolderPath = path;		
 				saveFolderText.setText(saveFolderPath);
@@ -218,7 +247,7 @@ public class ImageFolderChangeDialog extends Dialog {
 		int h = rect.height;
 		int w = rect.width;
 		
-		return new Point((int) Math.round(0.5*w), (int) Math.round(0.3*h));
+		return new Point((int) Math.round(0.6*w), (int) Math.round(0.3*h));
 	}
 	
 	@Override
