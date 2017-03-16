@@ -2491,7 +2491,6 @@ public class SurfaceScatterPresenter {
 		double range = end - start;
 				
 		pS.getAxes().get(0).setRange((start - 0.1*range), (end) + 0.1*range);
-		pS.getAxes().get(1).setLog10(true);
 		
 		lt.setErrorBarEnabled(false);
 		
@@ -2894,12 +2893,14 @@ class trackingJob {
 			ssp.trackingRegionOfInterestSetter(sm.getLocationList().get(imageNumber), imageNumber);
 			ssvs.getSsps3c().getOutputCurves().getIntensity().select(0);
 			ssvs.getSsps3c().getOutputCurves().getIntensity().redraw();
-			progressBar.setSelection(progressBar.getSelection() +1);
-//			System.out.println(progressBar.getSelection());
-			
-			if(progressBar.getSelection() == progressBar.getMaximum()){
-//				System.out.println(progressBar.getSelection() +" in the break");
-				tpaav.close();
+			if(progressBar.isDisposed() != true){
+				progressBar.setSelection(progressBar.getSelection() +1);
+	//			System.out.println(progressBar.getSelection());
+				
+				if(progressBar.getSelection() == progressBar.getMaximum()){
+	//				System.out.println(progressBar.getSelection() +" in the break");
+					tpaav.close();
+				}
 			}
 		}
 }
@@ -4066,12 +4067,15 @@ class trackingJob2 {
 		ssvs.getSsps3c().getOutputCurves().getIntensity().select(0);
 		ssvs.getSsps3c().getOutputCurves().getIntensity().redraw();
 //		System.out.println(progressBar.getSelection());
-		progressBar.setSelection(progressBar.getSelection() +1);
 		
-		if(progressBar.getSelection() >= progressBar.getMaximum()){
+		if(progressBar.isDisposed() != true){
+			progressBar.setSelection(progressBar.getSelection() +1);
+//			System.out.println(progressBar.getSelection());
 			
-//			System.out.println(progressBar.getSelection() +" in the break");
-			tpaav.close();
+			if(progressBar.getSelection() == progressBar.getMaximum()){
+//				System.out.println(progressBar.getSelection() +" in the break");
+				tpaav.close();
+			}
 		}
 		
 	}

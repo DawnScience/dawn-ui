@@ -22,6 +22,7 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.DirectoryDialog;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Table;
@@ -54,9 +55,10 @@ public class DatDisplayer extends Composite {
 	private Text datFolderText;
 	private String imageName;
 	private Boolean promptedForImageFolder = false;
-	private DatDisplayer dd = this;
+//	private DatDisplayer dd = this;
 	private boolean r;
 	private String filepath;
+	private Button selectAll;
 
 	public Boolean getPromptedForImageFolder() {
 		return promptedForImageFolder;
@@ -123,17 +125,29 @@ public class DatDisplayer extends Composite {
 
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-
-				FileDialog fd = new FileDialog(ssvs.getShell(), SWT.OPEN);
-
-				String path = "p";
-
-				if (fd.open() != null) {
-					path = fd.getFilterPath();
+				
+				DirectoryDialog dlg = new DirectoryDialog(ssvs.getShell(), SWT.OPEN);
+				
+				// Set the initial filter path according
+		        // to anything they've selected or typed in
+				
+				if(ssvs.getDatFolderPath() != null){
+				
+					dlg.setFilterPath(ssvs.getDatFolderPath());
 				}
+		        // Change the title bar text
+		        dlg.setText(".dat file directory");
 
-				datFolderPath = path;
-				ssvs.setDatFolderPath(path);
+		        // Customizable message displayed in the dialog
+		        dlg.setMessage("Select a directory");
+
+		        // Calling open() will open and run the dialog.
+		        // It will return the selected directory, or
+		        // null if user cancels
+		       
+		        String dir = dlg.open();
+				datFolderPath = dir;
+				ssvs.setDatFolderPath(dir);
 
 				if (datFolderPath != null) {
 
@@ -221,6 +235,11 @@ public class DatDisplayer extends Composite {
 		clearRodTable.setText("Clear Rod Table");
 		clearRodTable.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		clearRodTable.setEnabled(false);
+		
+		selectAll= new Button(rodComponents, SWT.PUSH | SWT.FILL);
+		selectAll.setText("Select All");
+		selectAll.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		selectAll.setEnabled(false);
 		
 		deleteSelected = new Button(rodComponents, SWT.PUSH);
 		deleteSelected.setText("Delete Selected");
@@ -315,7 +334,7 @@ public class DatDisplayer extends Composite {
 						ild = dh1.getLazyDataset(ssp.getImageName());
 						
 						if(ild == null){
-							ssp.dialogToChangeImageFolder(promptedForImageFolder, dd);	
+							ssp.dialogToChangeImageFolder(promptedForImageFolder, DatDisplayer.this);	
 							
 							try {
 
@@ -324,7 +343,7 @@ public class DatDisplayer extends Composite {
 								
 							} catch (Exception e2) {
 								e2.printStackTrace();
-								ssp.dialogToChangeImageFolder(promptedForImageFolder, dd);	
+								ssp.dialogToChangeImageFolder(promptedForImageFolder, DatDisplayer.this);	
 							}
 						}
 					}
@@ -346,7 +365,7 @@ public class DatDisplayer extends Composite {
 					
 					if(ild == null && r ==true){
 						
-						ssp.dialogToChangeImageFolder(promptedForImageFolder, dd);
+						ssp.dialogToChangeImageFolder(promptedForImageFolder, DatDisplayer.this);
 					
 					
 						try {
@@ -401,6 +420,7 @@ public class DatDisplayer extends Composite {
 					scannedVariableOptions.setEnabled(true);
 					folderDisplayTable.getVerticalBar().setEnabled(true);
 					ssvs.setupRightEnabled(true);
+					enableRodConstruction(true);
 					
 				}
 				
@@ -411,6 +431,29 @@ public class DatDisplayer extends Composite {
 			public void widgetDefaultSelected(SelectionEvent e) {
 				// TODO Auto-generated method stub
 
+			}
+		});
+		
+		selectAll.addSelectionListener(new SelectionListener() {
+			
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				
+				rodDisplayTable.selectAll();
+				
+				for(TableItem f :rodDisplayTable.getItems()){
+					f.setChecked(true);
+				}
+					
+					
+				
+				
+			}
+			
+			@Override
+			public void widgetDefaultSelected(SelectionEvent e) {
+				// TODO Auto-generated method stub
+				
 			}
 		});
 
@@ -532,6 +575,7 @@ public class DatDisplayer extends Composite {
 		deleteSelected.setEnabled(enabled);
 		optionsDropDown.setEnabled(enabled);
 		clearRodTable.setEnabled(enabled);
+		selectAll.setEnabled(enabled);
 	}
 
 	public Button getMassRunner() {
