@@ -23,6 +23,11 @@
       <initializer
             class="org.dawnsci.plotting.tools.preference.CrossProfileInitializer">
       </initializer>
+      
+      <initializer
+            class="org.dawnsci.plotting.tools.preference.PeakFindingPreferenceInitializer">
+      </initializer>
+      
    </extension>
 
    <extension
@@ -75,6 +80,13 @@
             id="org.dawnsci.plotting.tools.crossProfilePreference"
             name="Cross Profile Preferences">
       </page>
+      
+      <page
+            category="org.dawnsci.preferences.root"
+            class="org.dawnsci.plotting.tools.preference.PeakFindingPreferencePage"
+            id="org.dawb.workbench.plotting.PeakFindingPreferencePage"
+            name="Peak Finding Preferences">
+      </page>
      
    </extension>
 
@@ -95,6 +107,17 @@
             id="org.dawnsci.plotting.tools.plotting_tool_category.fitting"
             label="Maths and Fitting">
       </plotting_tool_category>
+      
+      <plotting_tool_page
+            category="org.dawnsci.plotting.tools.plotting_tool_category.fitting"
+            class="org.dawnsci.plotting.tools.finding.PeakFindingTool"
+            icon="icons/peakSearch.png"
+            id="org.dawb.workbench.plotting.tools.PeakFindingTool"
+            label="Peak Finding"
+            tooltip="A tool for finding peaks on data currently plotted.">
+      </plotting_tool_page>
+      
+      
       <plotting_tool_page
             category="org.dawnsci.plotting.tools.plotting_tool_category.fitting"
             cheat_sheet_id="org.dawb.workbench.plotting.cheatsheet.peak"
@@ -519,6 +542,13 @@
             id="org.dawb.workbench.plotting.dataReductionExportWizard"
             name="Data Reduction">
       </wizard>
+           <wizard
+            class="org.dawnsci.plotting.tools.finding.PeakFindingExportWizard"
+            icon="icons/peakSearch.png"
+            id="org.dawb.workbench.plotting.peakFindingExportWizard"
+            name="Peak Finding Export Wizard">
+      </wizard>
+      
    </extension>
    <extension
          point="org.eclipse.ui.newWizards">

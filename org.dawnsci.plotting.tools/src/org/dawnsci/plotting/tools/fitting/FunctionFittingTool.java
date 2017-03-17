@@ -11,8 +11,10 @@ package org.dawnsci.plotting.tools.fitting;
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.math3.analysis.function.Gaussian;
 import org.apache.commons.math3.exception.TooManyEvaluationsException;
 import org.dawb.common.ui.util.GridUtils;
 import org.dawb.common.ui.widgets.ActionBarWrapper;
@@ -25,6 +27,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.dawnsci.analysis.api.conversion.IConversionContext.ConversionScheme;
 import org.eclipse.dawnsci.analysis.api.fitting.functions.IDataBasedFunction;
 import org.eclipse.dawnsci.analysis.api.fitting.functions.IFunction;
 import org.eclipse.dawnsci.analysis.api.fitting.functions.IFunctionService;
@@ -51,6 +54,9 @@ import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.preference.IPreferenceStore;
+import org.eclipse.jface.wizard.IWizardPage;
+import org.eclipse.jface.wizard.Wizard;
+import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.MouseAdapter;
 import org.eclipse.swt.events.MouseEvent;
@@ -58,6 +64,7 @@ import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -77,25 +84,22 @@ import uk.ac.diamond.scisoft.analysis.fitting.FittingConstants.FIT_ALGORITHMS;
 import uk.ac.diamond.scisoft.analysis.fitting.Generic1DFitter;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.AFunction;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.Add;
+import uk.ac.diamond.scisoft.analysis.fitting.functions.IdentifiedPeak;
 import uk.ac.diamond.scisoft.analysis.optimize.ApacheOptimizer;
 import uk.ac.diamond.scisoft.analysis.optimize.ApacheOptimizer.Optimizer;
 import uk.ac.diamond.scisoft.analysis.optimize.GeneticAlg;
 import uk.ac.diamond.scisoft.analysis.optimize.IOptimizer;
 
-public class FunctionFittingTool extends AbstractToolPage implements
-		IFunctionService {
+public class FunctionFittingTool extends AbstractToolPage implements IFunctionService {
 
-	private static final Logger logger = LoggerFactory
-			.getLogger(FunctionFittingTool.class);
+	private static final Logger logger = LoggerFactory.getLogger(FunctionFittingTool.class);
 
-	private static final Image FIT = Activator
-			.getImage("icons/chart_curve_go.png");
-	private static final Image UPDATE = Activator
-			.getImage("icons/arrow_refresh_small.png");
+	private static final Image FIT = Activator.getImage("icons/chart_curve_go.png");
+	private static final Image UPDATE = Activator.getImage("icons/arrow_refresh_small.png");
 
 	private Control control;
 	private boolean autoRefit;
-	
+
 	private boolean firstRun = true;
 
 	protected IROIListener roiListener = new FunctionFittingROIListener();
@@ -113,10 +117,12 @@ public class FunctionFittingTool extends AbstractToolPage implements
 
 	private Button updateAllButton;
 	private Button findPeaksButton;
-	
-	//These are controls for whether FindPeaksButton should be visible when FunctionFittingTool called (e.g.) as part of
-	//a workflow. enableFindPeaksButton is used internally only, whereas showFindPeaksWorkFlow can be used as a control.
-	private boolean showFindPeaksWorkFlow = false; 
+
+	// These are controls for whether FindPeaksButton should be visible when
+	// FunctionFittingTool called (e.g.) as part of
+	// a workflow. enableFindPeaksButton is used internally only, whereas
+	// showFindPeaksWorkFlow can be used as a control.
+	private boolean showFindPeaksWorkFlow = false;
 	private boolean enableFindPeaksButton = true;
 
 	private IPreferenceStore prefs = Activator.getPlottingPreferenceStore();
@@ -137,18 +143,15 @@ public class FunctionFittingTool extends AbstractToolPage implements
 		control = composite;
 
 		Composite infoComposite = new Composite(composite, SWT.NONE);
-		infoComposite.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false,
-				false, 1, 1));
+		infoComposite.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 1, 1));
 		infoComposite.setLayout(new GridLayout(2, true));
 
 		Composite actionComposite = new Composite(infoComposite, SWT.NONE);
-		actionComposite.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true,
-				false, 1, 1));
+		actionComposite.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
 		actionComposite.setLayout(new GridLayout(2, true));
 
 		final Button autoRefitButton = new Button(actionComposite, SWT.TOGGLE);
-		autoRefitButton.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true,
-				false, 1, 1));
+		autoRefitButton.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
 		autoRefitButton.setText("Auto Refit");
 		autoRefitButton.setImage(FIT);
 		autoRefitButton.addMouseListener(new MouseAdapter() {
@@ -160,8 +163,7 @@ public class FunctionFittingTool extends AbstractToolPage implements
 		});
 
 		updateAllButton = new Button(actionComposite, SWT.PUSH);
-		updateAllButton.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true,
-				false, 1, 1));
+		updateAllButton.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
 		updateAllButton.setText("Update All");
 		updateAllButton.setImage(UPDATE);
 		updateAllButton.addSelectionListener(new SelectionAdapter() {
@@ -172,8 +174,7 @@ public class FunctionFittingTool extends AbstractToolPage implements
 		});
 
 		fitOnceButton = new Button(actionComposite, SWT.PUSH);
-		fitOnceButton.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true,
-				false, 1, 1));
+		fitOnceButton.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
 		fitOnceButton.setText("Fit Once");
 		fitOnceButton.setEnabled(true);
 		fitOnceButton.addSelectionListener(new SelectionAdapter() {
@@ -182,40 +183,35 @@ public class FunctionFittingTool extends AbstractToolPage implements
 				updateFunctionPlot(true);
 			}
 		});
-		
+
 		if (enableFindPeaksButton) {
 			findPeaksButton = new Button(actionComposite, SWT.PUSH);
-			findPeaksButton.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true,
-					false, 1, 1));
+			findPeaksButton.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
 			findPeaksButton.setText("Find Peaks...");
 			findPeaksButton.setEnabled(true);
 			findPeaksButton.addSelectionListener(new SelectionAdapter() {
 				@Override
 				public void widgetSelected(SelectionEvent e) {
-					openPeakPrepopulateTool();
+					openPeakPrepopulateWizard();
 				}
 			});
 		}
 
 		Composite resultsComposite = new Composite(infoComposite, SWT.BORDER);
-		resultsComposite.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true,
-				false, 1, 1));
+		resultsComposite.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
 		resultsComposite.setLayout(new GridLayout(1, false));
 
 		Label chiSquaredInfoLabel = new Label(resultsComposite, SWT.NONE);
-		chiSquaredInfoLabel.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER,
-				true, false, 1, 1));
+		chiSquaredInfoLabel.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, true, false, 1, 1));
 		chiSquaredInfoLabel.setText("Normalised goodness of fit:");
 
-		chiSquaredValueText = new Text(resultsComposite, SWT.READ_ONLY
-				| SWT.CENTER);
+		chiSquaredValueText = new Text(resultsComposite, SWT.READ_ONLY | SWT.CENTER);
 		chiSquaredValueText.setBackground(resultsComposite.getBackground());
 		GridData gd = new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1);
 		chiSquaredValueText.setLayoutData(gd);
 		chiSquaredValueText.setText("Not Calculated");
 
-		functionWidget = new FunctionFittingWidget(composite,
-				new DefaultFunctionDescriptorProvider(), getSite());
+		functionWidget = new FunctionFittingWidget(composite, new DefaultFunctionDescriptorProvider(), getSite());
 		GridDataFactory.fillDefaults().grab(true, true).applyTo(functionWidget);
 
 		// Initialise with a simple function.
@@ -232,8 +228,7 @@ public class FunctionFittingTool extends AbstractToolPage implements
 			}
 
 			@Override
-			public void fittedFunctionInvalidated(
-					IFittedFunctionInvalidatedEvent event) {
+			public void fittedFunctionInvalidated(IFittedFunctionInvalidatedEvent event) {
 				resultFunction = null;
 				chiSquaredValueText.setText("Not Calculated");
 				updateAllButton.setEnabled(false);
@@ -244,27 +239,28 @@ public class FunctionFittingTool extends AbstractToolPage implements
 		ActionBarWrapper actionBarWrapper = null;
 		if (getSite() == null) {
 			parent = new Composite(parent, SWT.NONE);
-			parent.setLayout(new GridLayout(1,true));
+			parent.setLayout(new GridLayout(1, true));
 			actionBarWrapper = ActionBarWrapper.createActionBars(parent, null);
 		}
-		
-//		sashForm = new SashForm(parent, SWT.VERTICAL);
-//		if (getSite() == null) sashForm.setLayoutData(new GridData(GridData.FILL_BOTH));
+
+		// sashForm = new SashForm(parent, SWT.VERTICAL);
+		// if (getSite() == null) sashForm.setLayoutData(new
+		// GridData(GridData.FILL_BOTH));
 
 		final IPageSite site = getSite();
-		IActionBars actionbars = site!=null?site.getActionBars():actionBarWrapper;
+		IActionBars actionbars = site != null ? site.getActionBars() : actionBarWrapper;
 
 		if (getSite() != null) {
 			getSite().setSelectionProvider(functionWidget.getFunctionViewer());
 		} else {
-			
+
 		}
 		fillActionBar(actionbars);
 		if (connectLater) {
 			connectPlotSystemListeners();
 			compFunctionModified();
 		}
-		//track tool usage
+		// track tool usage
 		super.createControl(parent);
 	}
 
@@ -293,8 +289,7 @@ public class FunctionFittingTool extends AbstractToolPage implements
 	private void compFunctionModified() {
 		updateFunctionPlot(false);
 		fitOnceButton
-				.setEnabled(functionWidget.isValid() && compFunction != null
-						&& compFunction.getNoOfFunctions() != 0);
+				.setEnabled(functionWidget.isValid() && compFunction != null && compFunction.getNoOfFunctions() != 0);
 	}
 
 	private void connectPlotSystemListeners() {
@@ -302,21 +297,22 @@ public class FunctionFittingTool extends AbstractToolPage implements
 			getPlottingSystem().addTraceListener(traceListener);
 
 			region = getPlottingSystem().getRegion("fit_region");
+
 			if (region == null) {
 				region = getPlottingSystem().createRegion("fit_region", RegionType.XAXIS);
 				region.setRegionColor(ColorConstants.blue);
-				region.setROI(new RectangularROI(getPlottingSystem()
-						.getSelectedXAxis().getLower(), 0, getPlottingSystem()
-						.getSelectedXAxis().getUpper()
-						- getPlottingSystem().getSelectedXAxis().getLower(),
+				region.setROI(new RectangularROI(getPlottingSystem().getSelectedXAxis().getLower(), 0,
+						getPlottingSystem().getSelectedXAxis().getUpper()
+								- getPlottingSystem().getSelectedXAxis().getLower(),
 						100, 0));
 				getPlottingSystem().addRegion(region);
 			} else {
 				region.setVisible(true);
 			}
 			region.addROIListener(roiListener);
-			
-			//Without this, updateFunctionPlot gets called twice at start up for no reason
+
+			// Without this, updateFunctionPlot gets called twice at start up
+			// for no reason
 			if (firstRun) {
 				firstRun = false;
 				return;
@@ -365,9 +361,11 @@ public class FunctionFittingTool extends AbstractToolPage implements
 		menuManager.add(new Separator());
 	}
 
-	//XXX Consider separating the trace finding and the ROI getting (Abstract method?)
+	// XXX Consider separating the trace finding and the ROI getting (Abstract
+	// method?)
 	/**
 	 * Determines the first user trace and returns the ROI limits for it
+	 * 
 	 * @return ROI limits [x ,y]
 	 */
 	private Dataset[] getFirstUserTraceROI() {
@@ -387,46 +385,46 @@ public class FunctionFittingTool extends AbstractToolPage implements
 
 					// We peak fit only the first of the data sets plotted
 					// for now.
-					Dataset[] traceROI = new Dataset[]{DatasetUtils.convertToDataset(trace.getXData()), DatasetUtils.convertToDataset(trace.getYData())};
+					Dataset[] traceROI = new Dataset[] { DatasetUtils.convertToDataset(trace.getXData()),
+							DatasetUtils.convertToDataset(trace.getYData()) };
 
 					try {
-						traceROI = Generic1DFitter.selectInRange(traceROI[0], traceROI[1],
-								p1[0], p2[0]);
+						traceROI = Generic1DFitter.selectInRange(traceROI[0], traceROI[1], p1[0], p2[0]);
 					} catch (Throwable npe) {
-						//Do nothing
+						// Do nothing
 					}
 					return traceROI;
-					
+
 				}
 			}
 		}
 		logger.debug("No user traces found in plot.");
 		return null;
 	}
-	
+
 	/**
 	 * Plot the line for the un-fitted function.
-	 * @param roiLimits ROI region [x, y]
+	 * 
+	 * @param roiLimits
+	 *            ROI region [x, y]
 	 */
 	private void plotEstimateLine(Dataset[] roiLimits) {
 		estimate = (ILineTrace) getPlottingSystem().getTrace("Estimate");
 		if (estimate == null) {
-			estimate = getPlottingSystem().createLineTrace(
-					"Estimate");
+			estimate = getPlottingSystem().createLineTrace("Estimate");
 			estimate.setUserTrace(false);
 			estimate.setTraceType(ILineTrace.TraceType.DASH_LINE);
 			getPlottingSystem().addTrace(estimate);
 		}
 
 		if (compFunction != null) {
-			for ( IFunction function : compFunction.getFunctions()) {
+			for (IFunction function : compFunction.getFunctions()) {
 				if (function instanceof IDataBasedFunction) {
 					IDataBasedFunction dataBasedFunction = (IDataBasedFunction) function;
 					dataBasedFunction.setData(roiLimits[0], roiLimits[1]);
 				}
 			}
-			DoubleDataset functionData = compFunction
-					.calculateValues(roiLimits[0]);
+			DoubleDataset functionData = compFunction.calculateValues(roiLimits[0]);
 			estimate.setData(roiLimits[0], functionData);
 		}
 	}
@@ -446,10 +444,13 @@ public class FunctionFittingTool extends AbstractToolPage implements
 			return;
 		}
 		getPlottingSystem().removeTraceListener(traceListener);
-		
+
 		Dataset[] traceROI = getFirstUserTraceROI();
-		if (traceROI == null) { return; };
-		
+		if (traceROI == null) {
+			return;
+		}
+		;
+
 		plotEstimateLine(traceROI);
 
 		// System.out.println(x);
@@ -474,26 +475,47 @@ public class FunctionFittingTool extends AbstractToolPage implements
 		}
 
 	}
-	
-	private void openPeakPrepopulateTool() {
+
+	private void openPeakPrepopulateWizard() {
+		
 		getPlottingSystem().removeTraceListener(traceListener);
-		Shell shell = Display.getDefault().getActiveShell();
-		PeakPrepopulateTool peakFindOptions = new PeakPrepopulateTool(shell, this, getFirstUserTraceROI());
-		peakFindOptions.open();
-		getPlottingSystem().addTraceListener(traceListener);
+		PeakPrepopulateWizard peakFindOptions = new PeakPrepopulateWizard(this);
+		
+		final Wizard wiz = new Wizard() {
+			//set 
+			@Override
+			public boolean performFinish() {
+				//TODO: grab peaks
+				//IWizardPage peakFindpage = wiz.getStartingPage();
+				PeakPrepopulateWizard peakToolpage = (PeakPrepopulateWizard) this.getStartingPage();
+				setInitialPeaks(peakToolpage.gatherPeaksFunc());
+				return true;
+			}
+		};
+		
+		wiz.setNeedsProgressMonitor(true);
+		wiz.addPage(peakFindOptions);
+
+		final WizardDialog wd = new WizardDialog(getSite().getShell(),wiz);
+		wd.setPageSize(new Point(900, 500));
+		wd.create();
+		wd.getCurrentPage();
+		if (wd.open() == WizardDialog.OK)
+		
+		getPlottingSystem().addTraceListener(traceListener);	
 	}
-	
+
 	public void setInitialPeaks(Add initPeakCompFunc) {
 		compFunction = initPeakCompFunc;
-		final Dataset[] currRoiLimits = getFirstUserTraceROI(); 
+		final Dataset[] currRoiLimits = getFirstUserTraceROI();
 		Display.getDefault().syncExec(new Runnable() {
 			@Override
 			public void run() {
 				functionWidget.setInput(compFunction);
 				functionWidget.setFittedInput(null);
-				
-				//From new peak(s), plot estimate line
-				plotEstimateLine(new Dataset[]{currRoiLimits[0],currRoiLimits[1]});
+
+				// From new peak(s), plot estimate line
+				plotEstimateLine(new Dataset[] { currRoiLimits[0], currRoiLimits[1] });
 				getPlottingSystem().repaint();
 				refreshViewer();
 			}
@@ -561,7 +583,7 @@ public class FunctionFittingTool extends AbstractToolPage implements
 					optimizer = new ApacheOptimizer(Optimizer.LEVENBERG_MARQUARDT);
 					break;
 				}
-				optimizer.optimize(new IDataset[] {x}, y, resultFunction);
+				optimizer.optimize(new IDataset[] { x }, y, resultFunction);
 
 				// TODO (review race condition) this copy of compFunction
 				// appears to happen "late" if the job is not scheduled for a
@@ -589,9 +611,7 @@ public class FunctionFittingTool extends AbstractToolPage implements
 				@Override
 				public void run() {
 					getPlottingSystem().removeTraceListener(traceListener);
-					setChiSquaredValue(
-							resultFunction.residual(true, y, null,
-									new IDataset[] { x }) / x.count(),
+					setChiSquaredValue(resultFunction.residual(true, y, null, new IDataset[] { x }) / x.count(),
 							notConverged);
 
 					fitTrace = (ILineTrace) getPlottingSystem().getTrace("Fit");
@@ -643,16 +663,14 @@ public class FunctionFittingTool extends AbstractToolPage implements
 
 		if (compFunction != null) {
 			for (int i = 0; i < compFunction.getNoOfFunctions(); i++) {
-				String key = String.format("%03d_initial_%s", i, compFunction
-						.getFunction(i).getName());
+				String key = String.format("%03d_initial_%s", i, compFunction.getFunction(i).getName());
 				functions.put(key, compFunction.getFunction(i));
 			}
 		}
 
 		if (resultFunction != null) {
 			for (int i = 0; i < resultFunction.getNoOfFunctions(); i++) {
-				String key = String.format("%03d_result_%s", i, resultFunction
-						.getFunction(i).getName());
+				String key = String.format("%03d_result_%s", i, resultFunction.getFunction(i).getName());
 				functions.put(key, resultFunction.getFunction(i));
 			}
 		}
@@ -793,17 +811,18 @@ public class FunctionFittingTool extends AbstractToolPage implements
 	 */
 	@Override
 	public void setToolData(Serializable toolData) {
-		
-		//Allows the user to specify whether the peak button will be shown, for example in a workflow
-		//tool. By default it is not shown. To show the button, use the setShowFindPeaksWorkFlow method
+
+		// Allows the user to specify whether the peak button will be shown, for
+		// example in a workflow
+		// tool. By default it is not shown. To show the button, use the
+		// setShowFindPeaksWorkFlow method
 		if (showFindPeaksWorkFlow == true) {
 			enableFindPeaksButton = true;
-		}
-		else {
+		} else {
 			enableFindPeaksButton = false;
 		}
-		
-//		final UserPlotBean bean = (UserPlotBean) toolData;
+
+		// final UserPlotBean bean = (UserPlotBean) toolData;
 		functions = new HashMap<String, Serializable>();
 		functions.put("Function", toolData);
 
@@ -826,7 +845,7 @@ public class FunctionFittingTool extends AbstractToolPage implements
 	@Override
 	public Serializable getToolData() {
 
-//		UserPlotBean bean = new UserPlotBean();
+		// UserPlotBean bean = new UserPlotBean();
 
 		int count = 0;
 		for (String key : functions.keySet()) {
@@ -838,17 +857,18 @@ public class FunctionFittingTool extends AbstractToolPage implements
 
 		// Also add the composite function
 		functions.put("Comp", compFunction);
-		
-//		bean.setFunctions(functions); // We only set functions because it does a
-//										// replace merge.
+
+		// bean.setFunctions(functions); // We only set functions because it
+		// does a
+		// // replace merge.
 
 		return compFunction;
 	}
-	
+
 	public void setShowFindPeaksWorkFlow(boolean buttonEnable) {
 		showFindPeaksWorkFlow = buttonEnable;
 	}
-	
+
 	public boolean getShowFindPeaksWorkFlow() {
 		return showFindPeaksWorkFlow;
 	}
