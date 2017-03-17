@@ -8,7 +8,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.eclipse.dawnsci.analysis.api.peakfinding.IPeakFinder;
 import org.eclipse.dawnsci.analysis.api.peakfinding.IPeakFinderParameter;
+import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.PreferencePage;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.swt.SWT;
@@ -29,9 +31,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import uk.ac.diamond.scisoft.analysis.peakfinding.IPeakFindingService;
+import uk.ac.diamond.scisoft.analysis.peakfinding.PeakFindingServiceImpl;
 
 import org.dawnsci.common.widgets.spinner.FloatSpinner;
 import org.dawnsci.plotting.tools.Activator;
+import org.dawnsci.plotting.tools.finding.PeakFindingTool;
 import org.dawnsci.plotting.tools.preference.PeakFindingConstants;
 
 
@@ -134,7 +138,7 @@ public class PeakFindingPreferencePage extends PreferencePage implements IWorkbe
 		    final Composite pageN = new Composite(contentPanel, SWT.NONE);
 			pageN.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
 			pageN.setLayout(new GridLayout(2, false));
-			loadPeakFinderParams(pageN, false, finderID);
+			loadPeakFinderParams(pageN, finderID);
 			controlPages.add(pageN);
 		}
 		algorithmCombo.select(0);
@@ -144,7 +148,7 @@ public class PeakFindingPreferencePage extends PreferencePage implements IWorkbe
 		return comp;
 	}
 	
-	private void loadPeakFinderParams(Composite parentLayout, boolean isDefault, String desiredFinder){
+	private void loadPeakFinderParams(Composite parentLayout, String desiredFinder){
 		String currPeakFinderID =  desiredFinder;//algorithmCombo.getText();
 
 		//Well cannot clear preference values so therefore just load in every parameter as default
@@ -152,18 +156,18 @@ public class PeakFindingPreferencePage extends PreferencePage implements IWorkbe
 		
 		//TODO: store params as constnats?
 		IPeakFindingService peakFindServ = (IPeakFindingService)Activator.getService(IPeakFindingService.class);
+		
 		Map<String, IPeakFinderParameter> peakParams = peakFindServ.getPeakFinderParameters(currPeakFinderID);
 		
 		for (Entry<String, IPeakFinderParameter> peakParam : peakParams.entrySet()){
 			IPeakFinderParameter param = peakParam.getValue();
+			String curVal = getPreferenceStore().getString(peakParam.getKey());
 			
-			if(!isDefault){
-				String curVal = getPreferenceStore().getString(peakParam.getKey());
-				Number val = Double.parseDouble(curVal);
-				if (param.isInt())
-					val = (int) val.doubleValue();
-				param.setValue(val);
-			} 
+			Number val = Double.parseDouble(curVal);
+			if (param.isInt())
+				val = (int) val.doubleValue();
+			param.setValue(val);
+			
 			genParam(parentLayout, param);
 		}
 		
@@ -230,6 +234,16 @@ public class PeakFindingPreferencePage extends PreferencePage implements IWorkbe
 		
 		//Clear the previous pages
 		controlPages.clear();
+		IPeakFindingService peakFindServ = (IPeakFindingService)Activator.getService(IPeakFindingService.class);
+	
+		Iterator<String> peakfinder = peakFindServ.getRegisteredPeakFinders().iterator();
+		while(peakfinder.hasNext()){
+			Map<String, IPeakFinderParameter> peakParams = peakFindServ.getPeakFinderParameters(peakfinder.next());
+			for (Entry<String, IPeakFinderParameter> peakParam : peakParams.entrySet()){
+				String defaultVal =getPreferenceStore().getDefaultString(peakParam.getKey());
+				getPreferenceStore().setValue(peakParam.getKey(),defaultVal);
+			}
+		}
 		
 		//reload pages with default values
 		peakFindersID = PeakFindingConstants.PEAKFINDERS;
@@ -237,9 +251,10 @@ public class PeakFindingPreferencePage extends PreferencePage implements IWorkbe
 		    final Composite pageN = new Composite(contentPanel, SWT.NONE);
 			pageN.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
 			pageN.setLayout(new GridLayout(2, false));
-			loadPeakFinderParams(pageN, true, finderID);
+			loadPeakFinderParams(pageN, finderID);
 		    controlPages.add(pageN);
 		}
+		
 		Object choicee = algorithmCombo.getSelectionIndex();
 		controlsLayout.topControl =  controlPages.get(algorithmCombo.getSelectionIndex());
     	contentPanel.layout();
