@@ -247,7 +247,7 @@ public class ImageFolderChangeDialog extends Dialog {
 		int h = rect.height;
 		int w = rect.width;
 		
-		return new Point((int) Math.round(0.6*w), (int) Math.round(0.3*h));
+		return new Point((int) Math.round(0.6*w), (int) Math.round(0.6*h));
 	}
 	
 	@Override

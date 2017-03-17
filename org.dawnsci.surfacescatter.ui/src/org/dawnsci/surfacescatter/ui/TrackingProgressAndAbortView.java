@@ -125,7 +125,7 @@ public class TrackingProgressAndAbortView extends Dialog {
 		int h = rect.height;
 		int w = rect.width;
 		
-		return new Point((int) Math.round(0.2*w), (int) Math.round(0.15*h));
+		return new Point((int) Math.round(0.2*w), (int) Math.round(0.4*h));
 	}
 	
 	@Override
