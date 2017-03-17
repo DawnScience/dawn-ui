@@ -75,6 +75,7 @@ public class FittingUtils {
 		//We need to find things that look like peaks in the data
 		List<IdentifiedPeak> foundPeaks = Generic1DFitter.parseDataDerivative(xDataSet, yDataSet, smoothing);
 		
+
 		//How many peaks are we looking for (user specified, can be null)
 		Integer nrPeaks = nPeaks;
 		if (nrPeaks == null) {
@@ -86,6 +87,7 @@ public class FittingUtils {
 				return null;
 			}
 		}
+		
 		//Fit the peaks we found
 		fittedPeaksAndBkgs = Generic1DFitter.fitPeakFunctions(foundPeaks, xDataSet, yDataSet, peakFunction, optimizer, smoothing, nrPeaks,  0.0, false, false, null, true);
 		
@@ -102,6 +104,69 @@ public class FittingUtils {
 		
 		return initialPeaks;
 	}
+	
+	
+	//Fit the peaks we found
+	//TODO: place inside fitting utils
+	//TODO: just default IPeak to gaussian 
+	/**
+	 * A variate that takes a already fittin set of found peaks
+	 * 
+	 * Number of peaks fitted based on the found peaks size	
+	 * 
+	 * @param foundPeaks
+	 * @param xDataSet
+	 * @param yDataSet
+	 * @param peakClass
+	 * @return
+	 */
+	public static Add getSeededPeakFit(List<IdentifiedPeak> foundPeaks, Dataset xDataSet, Dataset yDataSet, Class<? extends IPeak> peakClass) {
+		
+		Add initialPeaks = new Add();
+		
+		//Set variables for peak finding and fitting
+		//-this has to be a list of composite functions unless we change Generic1DFitter
+		List<CompositeFunction> fittedPeaksAndBkgs;
+		
+		//TODO: these are set before in the fitting utils section
+		IOptimizer optimizer = getOptimizer();
+		
+		int smoothing = getSmoothing();
+		
+		//Check user variables are defined
+		Class<? extends IPeak> peakFunction = peakClass;
+		if (peakFunction == null) {
+				peakFunction = getPeakClass();
+		}
+		
+		//How many peaks are we looking for (user specified, can be null)
+		Integer nrPeaks = foundPeaks.size() - 1;
+		if (nrPeaks == null || nrPeaks == 0) {
+			//In case no peaks were found
+			logger.error("Trying to fit on no peaks found!");
+			return null;
+		}
+		
+
+		//Intial fit against the peaks against the foundPeaks
+		fittedPeaksAndBkgs = Generic1DFitter.fitPeakFunctions(foundPeaks, xDataSet, yDataSet, peakFunction, optimizer, smoothing, nrPeaks,  0.0, false, false, null, true);
+		
+		if (fittedPeaksAndBkgs == null)
+			return null;
+		
+		//Pick out the peak functions of the correct class & package into new composite function
+		for (IOperator peakAndBkg : fittedPeaksAndBkgs) {
+			for (IFunction partFunction : peakAndBkg.getFunctions()) {
+				if (partFunction.getClass() == peakFunction) {
+					initialPeaks.addFunction(partFunction);
+				}
+			}
+		}
+		
+		return initialPeaks;
+	} 
+	
+	
 	
 //	public static DataSet getTraceRemainder(DataSet xDataSet, DataSet yDataSet, Add, initialPeakFuncs) {
 //		
