@@ -49,9 +49,7 @@ import org.slf4j.LoggerFactory;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.IdentifiedPeak;
 
 /**
- * 
  * @author Dean P. Ottewell
- *
  */
 public class PeakFindingTool extends AbstractToolPage implements IRegionListener {
 
@@ -92,7 +90,6 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 	private IDataset interestXData;
 	private IDataset interestYData;
 
-	//TODO: tmp getters just wanted to test fitting
 	public IDataset gettingXData() {
 		return this.interestXData;
 	}
@@ -164,7 +161,6 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 		widget = new PeakFindingWidget(manager);
 		widget.createControl(composite);
 		
-		
 		//TODO: additioanl plot serivce
 		getPlottingSystem().createPlotPart(composite, getTitle(), actionbars, PlotType.XY, this.getViewPart());
 		
@@ -218,13 +214,11 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 			@Override
 			public void isPeakFinding() {
 				// TODO Auto-generated method stub
-				
 			}
 
 			@Override
 			public void finishedPeakFinding() {
 				// TODO Auto-generated method stub
-				
 			}
 
 			@Override
@@ -262,8 +256,7 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 			public void tracesRemoved(TraceEvent evet) {
 				// The last trace removed should be the trace of search interest
 				if (getPlottingSystem().getTraces().isEmpty()) {
-					// TODO:We have no data! Abort abort
-					// disable all actions? dis able all running?
+					// TODO:We have no data! Abort abort disable all actions? disable all running?
 				}	
 			}
 
@@ -354,10 +347,6 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 		pX.add(x);
 		pY.add(y);
 		
-		
-		//TODO: its mroe than jsu the interest dataset. Its the whole thing when addign a peak
-		//TODO: find where posiiton lies...
-		//manager.generateIdentifedPeak(interestXData.Get, interestXData, interestYData);
 		IdentifiedPeak p = new IdentifiedPeak();
 		p.setPos(x);
 		p.setHeight(y);
@@ -369,11 +358,7 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 		Dataset peakx = DatasetFactory.createFromList(pX);
 		Dataset peaky = DatasetFactory.createFromList(pY);
 
-		//TODO:
-		//updatePeakTrace(peakx, peaky);
-		
 		manager.setPeaksId(peaksId);
-		//manager.setPeaks(getPeaks());
 	}
 
 	private void removePeakValue(Double x, Double y) {
@@ -398,24 +383,15 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 		if (!peaksId.isEmpty()) {
 			peakx = DatasetFactory.createFromList(pX);
 			peaky = DatasetFactory.createFromList(pY);
-			
-			
-			//updatePeakTrace(peakx, peaky);
 		}
 		
 		manager.setPeaksId(peaksId);
-		//manager.setPeaks(getPeaks());
 	}
 
 	public void configureTraces() {
 		if (!getPlottingSystem().getTraces().isEmpty()) {
-			ILineTrace sampleTrace = (ILineTrace) getPlottingSystem().getTraces().iterator().next(); // XXX:assumes
-																										// base
-																										// trace
-																										// is
-																										// the
-																										// sample
-																										// trace
+			// XXX:assumes base trace is sample trace
+			ILineTrace sampleTrace = (ILineTrace) getPlottingSystem().getTraces().iterator().next(); 
 			// Setup Upper & lower bound for search region
 			if (getPlottingSystem().getTrace(BOUNDTRACENAME) == null) {
 				regionBndsTrace = generateBoundTrace(BOUNDTRACENAME);
@@ -424,7 +400,7 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 				regionBndsTrace = (ILineTrace) getPlottingSystem().getTrace(BOUNDTRACENAME);
 			}
 
-			// Intialise to upper and low limit of sample trace
+			// Initialise to upper and low limit of sample trace
 			Dataset xData = (Dataset) sampleTrace.getXData();
 			
 			Double lwrBnd = xData.getDouble(0);
@@ -471,7 +447,6 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 				//Update reset
 				PeakOppurtunity peakOpp = new PeakOppurtunity();
 				manager.setPeaksId(peaksId);
-				//manager.setPeaks(getPeaks());
 				manager.loadPeakOppurtunity(peakOpp);
 			}
 
@@ -519,8 +494,8 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 			});
 
 			// SELECTING THOSE BOUNDS UPPER AND LOWER
-			// TODO: cant't yet do this here as rectangularROI doesnt exist yet
-			// TODO: this can be do e when a region is added isntead ... why so?
+			// TODO: cant't yet do this here as rectangularROI does not exist yet
+			// TODO: this can be do e when a region is added instead ... why so?
 			if (searchRegion != null && searchRegion.getROI() instanceof RectangularROI) {
 				RectangularROI rectangle = (RectangularROI) searchRegion.getROI();
 				// Set the region bounds
@@ -536,11 +511,18 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 	private boolean isValidTraceForSearch(ITrace trace){
 		boolean valid = false;
 		
+		ILineTrace lineTrace = (ILineTrace) trace;
 		//Check against being a trace created for me
 		if (trace.getName() != BOUNDTRACENAME && trace.getName() != PEAKSTRACENAME) {
-			ILineTrace lineTrace = (ILineTrace) trace;
 			valid = true;
+
+			if(lineTrace.getXData() == null)
+				valid =false;
+			
+			if(lineTrace.getXData() == null)
+				valid =false;
 		}
+
 		return valid;
 	}
 
@@ -549,8 +531,6 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 		Dataset xDataRaw = DatasetUtils.convertToDataset(trace.getXData().squeeze());
 		Dataset yDataRaw = DatasetUtils.convertToDataset(trace.getYData().squeeze());
 
-		// TODO: believe a ca	st in the peakfinder foreced me to use
-		// DoubleDateset here. Fix interface setup peakfinder.
 		DoubleDataset xData = DatasetUtils.cast(DoubleDataset.class, xDataRaw);
 		DoubleDataset yData = DatasetUtils.cast(DoubleDataset.class, yDataRaw);
 		
@@ -572,11 +552,9 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 		Dataset xdata = DatasetFactory.createFromObject(x);
 		Dataset ydata = genBoundsHeight();
 
-		updateTraceBounds(xdata, ydata); // TODO: this is already triggers
+		updateTraceBounds(xdata, ydata); // TODO: this is already triggered
 	}
 
-	// TODO: HAVE A UPDATE OR A SET? really do they do anything different
-	// TODO: this needs another trigger in roder to redraw to the plot ...
 	private void updateTraceBounds(Dataset x, Dataset y) {
 		if(regionBndsTrace == null) {
 			regionBndsTrace = generateBoundTrace(BOUNDTRACENAME);
@@ -606,24 +584,6 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 
 		getPlottingSystem().repaint();
 	}
-
-//	private void updatePeakTrace(List<Peak> peakSet) {
-//		List<Double> pX = new ArrayList<Double>();
-//		List<Double> pY = new ArrayList<Double>();
-//		
-//		if (!peakSet.isEmpty()) {
-//			for (int i = 0; i < peakSet.size(); ++i) {
-//				pX.add(peakSet.get(i).getX());
-//				pY.add(peakSet.get(i).getY());
-//			}
-//		}
-//
-//		// Update Trace
-//		Dataset peakx = DatasetFactory.createFromList(pX);
-//		Dataset peaky = DatasetFactory.createFromList(pY);
-//
-//		updatePeakTrace(peakx, peaky);
-//	}
 	
 	private void updatePeakTrace(List<IdentifiedPeak> peakSet) {
 		List<Double> pX = new ArrayList<Double>();
@@ -756,9 +716,8 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 				getPlottingSystem().removeTrace(peaksTrace);
 
 		}
-		// TODO: icon removal
-		// TODO: clear peaks
-		// TODO: manager remove the manager listeners? destorying anwyay though
+
+		//TODO: just kill manager?
 		manager.destroyAllListeners();
 
 		Collection<IRegion> regions = getPlottingSystem().getRegions();
@@ -773,7 +732,6 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 		deactivate();
 		super.dispose();
 		// TODO: kill manager jobs... maybe might not be storing the jobs...
-		// there scheduled though so should have segment of all jobs runnign
 	}
 
 	public List<IdentifiedPeak> getPeaksId() {

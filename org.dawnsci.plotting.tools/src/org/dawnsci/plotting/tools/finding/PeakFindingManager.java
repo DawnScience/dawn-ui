@@ -112,7 +112,7 @@ public class PeakFindingManager {
 
 	public void setSearchScaleIntensity(double searchScaleIntensity) {
 		String peakfinder = Activator.getPlottingPreferenceStore().getString(PeakFindingConstants.PeakAlgorithm);	
-		//TODO: tmp as only wavelet has the adjustability
+		//TODO: tmp as only wavelet has the adjustment configured correctly
 		if(peakfinder.equals("Wavelet Transform")){
 			Activator.getPlottingPreferenceStore().setValue("Convole Width Size", searchScaleIntensity);
 		}
@@ -228,13 +228,12 @@ public class PeakFindingManager {
 		
 		backPos = pos >= 0 ? pos : pos-1;
 		backValue = yData.getElementDoubleAbs(backPos);
-		
 
-		//Get a intial forward posiiton
+		//Get a initial forward position
 		forwardPos = pos <= yData.getSize() ? pos: pos+1;
 		forwardValue = yData.getElementDoubleAbs(forwardPos);
 		
-		//Check state of calucalteing back and forward posiition is not greater tha	n peaks 
+		//Check state of calculating back and forward position is not greater that	n peaks 
 		boolean backDescending = true;//(peak.getValue() >= backValue);
 		boolean forwardDescending = true;//(peak.getValue() >= forwardValue);
 		

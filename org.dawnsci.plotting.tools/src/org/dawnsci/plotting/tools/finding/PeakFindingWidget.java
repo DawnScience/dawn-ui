@@ -28,7 +28,6 @@ import uk.ac.diamond.scisoft.analysis.peakfinding.IPeakFindingService;
 import uk.ac.diamond.scisoft.analysis.peakfinding.PeakFindingData;
 
 /**
- * 
  * Widget to handle all the components that would go into using a peak finder algorithm.
  * 
  * @author Dean P. Ottewell
@@ -68,7 +67,6 @@ public class PeakFindingWidget {
 		configureComposite.setLayout(new GridLayout(2, false));
 		
 		Button adjustSearchBtn = new Button(configureComposite, SWT.BUTTON1);
-		//adjustSearchBtn.setLayoutData(new GridData(GridData.FILL_BOTH));
 		adjustSearchBtn.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, true));
 		adjustSearchBtn.addSelectionListener(new SelectionAdapter() {
 			@Override
@@ -81,7 +79,7 @@ public class PeakFindingWidget {
 		Composite boundsConfig = new Composite(configureComposite, SWT.NONE);
 		boundsConfig.setLayoutData(new GridData(SWT.FILL, SWT.LEFT, true, false));
 		boundsConfig.setLayout(new GridLayout(2, false));
-		//TODO: tmp limit. Base of trace
+		//TODO: Base of trace size
 		int max = 100000; 
 		
 		Label lwrBndLab = new Label(boundsConfig , SWT.NONE);
@@ -233,7 +231,6 @@ public class PeakFindingWidget {
 			@Override
 			public void peaksChanged(PeakOpportunityEvent evt) {
 				peaks = evt.getPeakOpp().getPeaksId();
-				//XXX: needs to be in own event checking for peak changing as not all searches lead to a change in peaks! what if empty huh! maybe that should update the peaks though...
 			}
 
 			@Override
@@ -277,7 +274,6 @@ public class PeakFindingWidget {
 			@Override
 			public void activateSearchRegion() {
 				// TODO Auto-generated method stub
-				
 			}
 			
 		});

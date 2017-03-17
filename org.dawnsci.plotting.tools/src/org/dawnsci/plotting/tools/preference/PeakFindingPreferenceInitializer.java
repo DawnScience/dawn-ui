@@ -18,11 +18,9 @@ public class PeakFindingPreferenceInitializer extends AbstractPreferenceInitiali
 	@Override
 	public void initializeDefaultPreferences() {
 		IPreferenceStore store = Activator.getPlottingPreferenceStore();
-		//TODO: Shouldnt really use like this but the loaded params inside the particular peakfinder
 		//My Preferences are loaded from the dataServ
 		store.setDefault(PeakFindingConstants.PeakAlgorithm, PeakFindingConstants.PEAKFINDERS.iterator().next());
 		
-		//TODO:Just load in every params defaults
 		IPeakFindingService peakFindServ = (IPeakFindingService)Activator.getService(IPeakFindingService.class);
 		
 		Iterator<String> peakfinder = peakFindServ.getRegisteredPeakFinders().iterator();

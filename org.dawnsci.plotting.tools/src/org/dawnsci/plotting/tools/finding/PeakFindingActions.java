@@ -12,7 +12,6 @@ import org.eclipse.ui.dialogs.PreferencesUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
 /**
  * @author Dean P. Ottewell
  */
@@ -44,7 +43,6 @@ public class PeakFindingActions {
 					 tool.setAddMode(false);
 					 addMode.setChecked(false);
 				}
-				
 				
 				tool.createNewSearch();
 			}

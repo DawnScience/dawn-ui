@@ -24,9 +24,7 @@ import uk.ac.diamond.scisoft.analysis.fitting.functions.IdentifiedPeak;
 import uk.ac.diamond.scisoft.analysis.peakfinding.IPeakFindingService;
 
 /**
- * TODO: have job update trace to look like things are going on
- * TODO: finally call formatPeakSearch
- * 
+ * TODO: have job mroe status to retreive how the peak search in proceeding
  * @author Dean P. Ottewell
  */
 public class PeakFindingSearchJob extends Job {
@@ -56,10 +54,7 @@ public class PeakFindingSearchJob extends Job {
 //				//TODO: Do not realyl need to grab event peaks as we have them here but maybe better off here putting them in a event structure rather than passing this list object around...
 //		controller.addPeaks(peaks);
 //		}
-		
-	
 
-//TODO: should be done previously		
 //		if (controller.getPeakfindingtool().sampleTrace == null){
 //			return Status.CANCEL_STATUS;
 //		}
@@ -103,7 +98,6 @@ public class PeakFindingSearchJob extends Job {
 			loadPeakFinderParams();
 			
 			manager.getPeakFindData().setPFParametersByPeakFinder(peakAlgorithm, peakParams);
-			//DoubleDataset xDubsData = (DoubleDataset) DatasetUtils.convertToDataset(xData);
 			manager.getPeakFindData().setData(xData, yData);
 			manager.getPeakFindData().setNPeaks(20);
 			
@@ -111,8 +105,7 @@ public class PeakFindingSearchJob extends Job {
 			
 			//Start the running man	
 //			Job runner = new RunningMan("Searching", xData, yData);
-			
-			//TODO: can i not manage a job async though?
+//TODO: can i not manage a job async though?
 //			Thread thread = new Thread(new Runnable() {
 //				@Override
 //				public void run() {

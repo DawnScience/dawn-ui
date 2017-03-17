@@ -4,7 +4,6 @@ import java.util.List;
 
 import org.dawb.common.ui.util.EclipseUtils;
 import org.dawb.common.ui.wizard.ResourceChoosePage;
-import org.dawnsci.plotting.tools.fitting.PeakLabelProvider;
 import org.dawnsci.plotting.views.ToolPageView;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
@@ -23,7 +22,6 @@ import org.slf4j.LoggerFactory;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.IdentifiedPeak;
 
 /**
- *
  * @author Dean P. Ottewell
  */
 public class PeakFindingExportWizard extends Wizard implements IExportWizard {
@@ -99,7 +97,6 @@ public class PeakFindingExportWizard extends Wizard implements IExportWizard {
 		staticFileName    = exportPage.getFileLabel();
 	
 		try {
-			//TODO: get peaks triggered here
 			PeakFindingTool tool = ((PeakFindingTool)container.getActiveTool());
 			tool.manager.exportFoundPeaks(containerFullPath.toOSString(), tool.getPeaksId());
 		} catch (Exception e) {

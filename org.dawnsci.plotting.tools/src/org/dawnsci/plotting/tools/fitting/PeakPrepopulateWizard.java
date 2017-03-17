@@ -2,12 +2,9 @@ package org.dawnsci.plotting.tools.fitting;
 
 import java.util.List;
 
-import org.apache.commons.math3.analysis.function.Gaussian;
 import org.dawb.common.ui.widgets.ActionBarWrapper;
 import org.dawnsci.plotting.tools.finding.PeakFindingTool;
 import org.eclipse.dawnsci.analysis.api.fitting.functions.IFunction;
-import org.eclipse.dawnsci.analysis.api.fitting.functions.IOperator;
-import org.eclipse.dawnsci.analysis.api.fitting.functions.IPeak;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.PlotType;
 import org.eclipse.dawnsci.plotting.api.PlottingFactory;
@@ -23,17 +20,13 @@ import org.eclipse.swt.widgets.Composite;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import uk.ac.diamond.scisoft.analysis.fitting.Generic1DFitter;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.Add;
-import uk.ac.diamond.scisoft.analysis.fitting.functions.CompositeFunction;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.IdentifiedPeak;
-import uk.ac.diamond.scisoft.analysis.optimize.IOptimizer;
 
 /**
  * TODO: adjust to spawn peak finder widget
  * 
  * @edits Dean P. Ottewell
- *
  */
 public class PeakPrepopulateWizard extends WizardPage {
 	
@@ -68,7 +61,6 @@ public class PeakPrepopulateWizard extends WizardPage {
 		//Setup the dialog and get the parent fitting tool as well as the ROI limits we're interested in.
 	
 		//Configure controller for peak tool
-		
 		this.parentFittingTool = parentFittingTool;		
 	}
 	

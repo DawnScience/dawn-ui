@@ -4,7 +4,6 @@ import java.util.EventObject;
 import java.util.List;
 
 /**
- *
  * @author Dean P. Ottewell
  */
 public class PeakOpportunityEvent extends EventObject {
@@ -22,5 +21,4 @@ public class PeakOpportunityEvent extends EventObject {
 		return peakOpp;
 	}
 
-	
 }

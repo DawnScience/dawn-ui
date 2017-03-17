@@ -7,14 +7,11 @@ import org.eclipse.january.dataset.IDataset;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.IdentifiedPeak;
 
 /**
- * TODO: use instead of Peak
- * 
  * @author Dean P. Ottewell
  */
 public interface IPeakOpportunity {
 	public List<IdentifiedPeak>  getPeaksId();
 	public void setPeaksId(List<IdentifiedPeak> peaks);
-	
 	
 	public IDataset getXData();
 	public void  setXData(IDataset xData);
@@ -22,7 +19,6 @@ public interface IPeakOpportunity {
 	public IDataset getYData();
 	public void setYData(IDataset yData);
 	
-	//TODO: can bound changes exists without data set?
 	public double getUpperBound();
 	public double getLowerBound();
 

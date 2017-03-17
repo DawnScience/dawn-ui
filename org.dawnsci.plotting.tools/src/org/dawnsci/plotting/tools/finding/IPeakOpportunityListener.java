@@ -6,7 +6,7 @@ import org.eclipse.january.dataset.IDataset;
 
 /**
  * TODO: data pass for peaks
- * TODO: region bounds might be better off as seperate
+ * TODO: region bounds might be better off as separate
  * @author Dean P. Ottewell
  *
  */

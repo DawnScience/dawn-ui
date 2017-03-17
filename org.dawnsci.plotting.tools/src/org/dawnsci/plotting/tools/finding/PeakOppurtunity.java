@@ -8,7 +8,6 @@ import uk.ac.diamond.scisoft.analysis.fitting.functions.IdentifiedPeak;
 
 /**
  * @author Dean P. Ottewell
- *
  */
 public class PeakOppurtunity implements IPeakOpportunity {
 

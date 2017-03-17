@@ -82,13 +82,11 @@ public class PeakFindingTable {
 			@Override
 			public void finishedPeakFinding() {
 				// TODO Auto-generated method stub
-				
 			}
 
 			@Override
 			public void activateSearchRegion() {
 				// TODO Auto-generated method stub
-				
 			}
 
 		});
@@ -123,7 +121,6 @@ public class PeakFindingTable {
 			public String getText(Object element) {
 				IdentifiedPeak peak = (IdentifiedPeak) element;
 				return String.format("%.2f", peak.getHeight());
-				//return String.format("%.2f", 0.0);
 			}
 		});
 		
