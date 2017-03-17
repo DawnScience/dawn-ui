@@ -78,7 +78,8 @@ public class SWTXYFigureTest {
 
 		// plot an image
 		try {
-			system.updatePlot2D(data.getSlice(), null, null);
+			
+			system.updatePlot2D(data.getDataset().getSlice(), null, null);
 			// set palette
 			IImageTrace image = (IImageTrace)system.getTraces().iterator().next();
 			image.setPalette("Nipy Spectral");
