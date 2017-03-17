@@ -756,7 +756,7 @@ public class SurfaceScatterViewStart extends Dialog {
 	@Override
 	protected void configureShell(Shell newShell) {
 		super.configureShell(newShell);
-		newShell.setText("SurfaceScatterDialog");
+		newShell.setText("Rod Analysis (RodAn)");
 
 	}
 
