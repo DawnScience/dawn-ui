@@ -444,7 +444,9 @@ public class PlotController {
 		if (dataOptions.getPlottableObject() != null) return dataOptions.getPlottableObject();
 		
 		NDimensions nd = dataOptions.buildNDimensions();
-		IPlotMode defaultMode = getDefaultMode(nd.getRank());
+		int[] shape = ShapeUtils.squeezeShape(dataOptions.getLazyDataset().getShape(), false);
+		int rank = shape.length;
+		IPlotMode defaultMode = getDefaultMode(rank);
 		nd.setOptions(defaultMode.getOptions());
 		
 		PlottableObject po = new PlottableObject(defaultMode, nd);
