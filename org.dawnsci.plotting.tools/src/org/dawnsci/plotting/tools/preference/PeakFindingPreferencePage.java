@@ -95,7 +95,7 @@ public class PeakFindingPreferencePage extends PreferencePage implements IWorkbe
 		algGroup.setLayout(new GridLayout(2, false));
 		algGroup.setText("Peak Finding Algorithm Controls");
 		
-		contentPanel = new Composite(comp, SWT.BORDER);
+		contentPanel = new Composite(comp, SWT.NONE);
 		contentPanel.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
 		contentPanel.setLayout(new GridLayout(1, false));
 		
