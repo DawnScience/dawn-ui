@@ -96,7 +96,7 @@ public class PeakFindingManager {
 		try {
 			//TODO: fix the formatter. have iterate over identified peaks 
 			for (IdentifiedPeak p : peaks){
-				writer.write(p.getPos() + "," + p.getHeight());
+				writer.write(p.getPos() + "," + p.getHeight()+ "\n");
 			}
 			
 		} finally {

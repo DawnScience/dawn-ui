@@ -8,9 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.eclipse.dawnsci.analysis.api.peakfinding.IPeakFinder;
 import org.eclipse.dawnsci.analysis.api.peakfinding.IPeakFinderParameter;
-import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.PreferencePage;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.swt.SWT;
@@ -31,21 +29,17 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import uk.ac.diamond.scisoft.analysis.peakfinding.IPeakFindingService;
-import uk.ac.diamond.scisoft.analysis.peakfinding.PeakFindingServiceImpl;
-
 import org.dawnsci.common.widgets.spinner.FloatSpinner;
 import org.dawnsci.plotting.tools.Activator;
-import org.dawnsci.plotting.tools.finding.PeakFindingTool;
 import org.dawnsci.plotting.tools.preference.PeakFindingConstants;
 
 
 /**
- * //TODO: is the workbench preference page still the best page...
+ * TODO: is the workbench preference page still the best page...
  * 
  * removed the algorithm list
  * 
  * @author Dean P. Ottewell
- *
  */
 public class PeakFindingPreferencePage extends PreferencePage implements IWorkbenchPreferencePage { 
 

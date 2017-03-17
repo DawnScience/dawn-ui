@@ -1,7 +1,10 @@
 package org.dawnsci.plotting.tools.finding;
 
+import java.util.List;
+
 import org.dawb.common.ui.util.EclipseUtils;
 import org.dawb.common.ui.wizard.ResourceChoosePage;
+import org.dawnsci.plotting.tools.fitting.PeakLabelProvider;
 import org.dawnsci.plotting.views.ToolPageView;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
@@ -16,6 +19,8 @@ import org.eclipse.ui.IViewReference;
 import org.eclipse.ui.IWorkbench;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import uk.ac.diamond.scisoft.analysis.fitting.functions.IdentifiedPeak;
 
 /**
  *
@@ -32,6 +37,8 @@ public class PeakFindingExportWizard extends Wizard implements IExportWizard {
 	
 	ExportPeaksPage exportPage;
 	
+	List<IdentifiedPeak> peaks;
+	
 	public PeakFindingExportWizard() {
 		super();
 		this.exportPage = new ExportPeaksPage();
@@ -39,6 +46,17 @@ public class PeakFindingExportWizard extends Wizard implements IExportWizard {
 		addPage(exportPage);
 		setWindowTitle("Export Found Peaks");
 	}
+	
+	
+	public PeakFindingExportWizard(List<IdentifiedPeak> peaks) {
+		super();
+		this.exportPage = new ExportPeaksPage();
+		exportPage.setDescription("Please choose the location of the file to export. This file will be in a .xy format");
+		addPage(exportPage);
+		setWindowTitle("Export Found Peaks");
+		this.peaks = peaks;
+	}
+
 
 	@Override
 	public void init(IWorkbench workbench, IStructuredSelection selection) {
@@ -81,8 +99,9 @@ public class PeakFindingExportWizard extends Wizard implements IExportWizard {
 		staticFileName    = exportPage.getFileLabel();
 	
 		try {
-			//TODO: get peaks trigger here
-			//((PeakFindingTool)container.getActiveTool()).controller.exportFoundPeaks(containerFullPath.toOSString());
+			//TODO: get peaks triggered here
+			PeakFindingTool tool = ((PeakFindingTool)container.getActiveTool());
+			tool.manager.exportFoundPeaks(containerFullPath.toOSString(), tool.getPeaksId());
 		} catch (Exception e) {
 			logger.error("Cannot export peaks", e);
 		}

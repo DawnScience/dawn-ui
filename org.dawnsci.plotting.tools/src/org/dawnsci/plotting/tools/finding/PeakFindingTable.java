@@ -50,9 +50,6 @@ public class PeakFindingTable {
 			        	  viewer.refresh();
 		        	  }
 		        	  
-		        	  
-		        	  
-		        	  
 		          }
 		      }
 		});
