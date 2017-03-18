@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016 Diamond Light Source Ltd.
+ * Copyright (c) 2016-2017 Diamond Light Source Ltd.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -63,11 +63,13 @@ public class FileTableColumnLabelProvider extends ColumnLabelProvider {
 		case 0:
 			return file.getName();
 		case 1:
-			return Utils.getFileSizeString(file);
+			return Utils.getFileSizeString(file, viewer.isSizeSIUnit());
 		case 2:
 			return Utils.getFileTypeString(file);
 		case 3:
 			return Utils.getFileDateString(file);
+		case 4:
+			return Utils.getFileScanCmdString(file);
 		default:
 			break;
 		}

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016 Diamond Light Source Ltd.
+ * Copyright (c) 2016-2017 Diamond Light Source Ltd.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -94,6 +94,8 @@ public class FileTableViewerComparator {
 			return SortType.TYPE;
 		else if (i == 3)
 			return SortType.DATE;
+		else if (i == 4)
+			return SortType.SCAN;
 		return null;
 	}
 }

@@ -1,3 +1,11 @@
+/*
+ * Copyright (c) 2017 Diamond Light Source Ltd.
+ *
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ */
 package org.dawnsci.fileviewer;
 
 import java.io.File;
@@ -50,11 +58,52 @@ public class FileViewerConstants {
 	 */
 	public static final String TABLEDATA_DIR = "Table.dir";
 
-	public static final int[] tableWidths = new int[] { 150, 60, 75, 150 };
-
 	/**
 	 * Extension point used for opening files with special actions
 	 */
 	public static final String OPEN_FILE_EXTENSION_POINT = "uk.ac.diamond.sda.navigator.openFile";
+
+	/**
+	 * constants to store preferences to display or not columns of table
+	 */
+	public static final String SHOW_SIZE_COLUMN = "org.dawnsci.fileviewer.showsize";
+	public static final String SHOW_TYPE_COLUMN = "org.dawnsci.fileviewer.showtype";
+	public static final String SHOW_MODIFIED_COLUMN = "org.dawnsci.fileviewer.showmodified";
+	public static final String SHOW_SCANCMD_COLUMN = "org.dawnsci.fileviewer.showscancmd";
+	public static final String DISPLAY_WITH_SI_UNITS = "org.dawnsci.fileviewer.displaySIUnits";
+
+	/**
+	 * Tooltip texts
+	 */
+	/**
+	 * Table tooltip
+	 */
+	public static final String NAME_TIP = "table.Name.tooltip";
+	public static final String SIZE_SI_TIP = "table.SizeSI.tooltip";
+	public static final String SIZE_BIN_TIP = "table.SizeBIN.tooltip";
+	public static final String TYPE_TIP = "table.Type.tooltip";
+	public static final String MODIFIED_TIP = "table.Modified.tooltip";
+	public static final String SCAN_TIP = "table.ScanCmd.tooltip";
+	public static final String PARENT_TIP = "tool.Parent.tiptext";
+	public static final String REFRESH_TIP = "tool.Refresh.tiptext";
+	public static final String LAYOUT_TIP = "tool.LayoutEdit.tiptext";
+	public static final String PREFERENCES_TIP = "tool.Preferences.tiptext";
+
+	/**
+	 * Commands constants
+	 */
+	public static final String PARENT_CMD = "org.dawnsci.fileviewer.parentCommand";
+	public static final String REFRESH_CMD = "org.dawnsci.fileviewer.refreshCommand";
+	public static final String LAYOUT_CMD = "org.dawnsci.fileviewer.layoutCommand";
+	public static final String PREFERENCES_CMD = "org.dawnsci.fileviewer.preferencesCommand";
+
+	/**
+	 * Table titles
+	 */
+	public static final String NAME_TITLE = "table.Name.title";
+	public static final String SIZE_TITLE = "table.Size.title";
+	public static final String TYPE_TITLE = "table.Type.title";
+	public static final String MODIFIED_TITLE = "table.Modified.title";
+	public static final String SCAN_TITLE = "table.ScanCmd.title";
 
 }
