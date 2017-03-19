@@ -13,7 +13,7 @@ import java.util.List;
 import org.eclipse.draw2d.IFigure;
 import org.eclipse.draw2d.UpdateManager;
 import org.eclipse.draw2d.geometry.Dimension;
-import org.eclipse.nebula.visualization.xygraph.undo.IUndoableCommand;
+import org.eclipse.nebula.visualization.internal.xygraph.undo.IUndoableCommand;
 
 public class TranslateCommand implements IUndoableCommand {
 

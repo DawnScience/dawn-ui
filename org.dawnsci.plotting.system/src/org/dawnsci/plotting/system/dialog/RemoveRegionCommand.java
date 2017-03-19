@@ -13,7 +13,7 @@ import java.util.List;
 
 import org.dawnsci.plotting.draw2d.swtxy.XYRegionGraph;
 import org.dawnsci.plotting.draw2d.swtxy.selection.AbstractSelectionRegion;
-import org.eclipse.nebula.visualization.xygraph.undo.IUndoableCommand;
+import org.eclipse.nebula.visualization.internal.xygraph.undo.IUndoableCommand;
 
 /**The undoable command to remove an annotation.
  * @author Xihui Chen
