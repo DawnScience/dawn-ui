@@ -22,7 +22,7 @@ import org.eclipse.draw2d.UpdateManager;
 import org.eclipse.draw2d.geometry.Dimension;
 import org.eclipse.draw2d.geometry.Point;
 import org.eclipse.draw2d.geometry.Rectangle;
-import org.eclipse.nebula.visualization.xygraph.figures.XYGraph;
+import org.eclipse.nebula.visualization.xygraph.figures.IXYGraph;
 
 /**
  * Class from SWT examples which allows a draw2D figure to move.
@@ -38,7 +38,7 @@ public class FigureTranslator implements MouseListener, MouseMotionListener {
 	
 	private final IFigure redrawFigure;
 	private Rectangle bounds;
-	private XYGraph xyGraph;
+	private IXYGraph xyGraph;
 	private Dimension cumulativeOffset;
 	private Point startLocation;
 	private Point location;
@@ -48,11 +48,11 @@ public class FigureTranslator implements MouseListener, MouseMotionListener {
 
 	private IFigure listenerFigure;
  
-	public FigureTranslator(XYGraph xyGraph, IFigure figure) {
+	public FigureTranslator(IXYGraph xyGraph, IFigure figure) {
 		this(xyGraph, figure, figure, Arrays.asList(new IFigure[]{figure}));
 	}
 
-	public FigureTranslator(XYGraph xyGraph, IFigure redrawFigure, IFigure listenerFigure, List<IFigure> moveFigures) {
+	public FigureTranslator(IXYGraph xyGraph, IFigure redrawFigure, IFigure listenerFigure, List<IFigure> moveFigures) {
 		this.redrawFigure = redrawFigure;
 		this.listenerFigure = listenerFigure;
 		listenerFigure.addMouseListener(this);

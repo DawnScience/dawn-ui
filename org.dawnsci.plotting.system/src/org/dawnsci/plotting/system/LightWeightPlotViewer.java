@@ -112,13 +112,13 @@ import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.nebula.visualization.internal.xygraph.toolbar.RemoveAnnotationDialog;
 import org.eclipse.nebula.visualization.internal.xygraph.undo.AddAnnotationCommand;
 import org.eclipse.nebula.visualization.internal.xygraph.undo.RemoveAnnotationCommand;
-import org.eclipse.nebula.visualization.internal.xygraph.undo.ZoomType;
 import org.eclipse.nebula.visualization.widgets.datadefinition.IManualValueChangeListener;
 import org.eclipse.nebula.visualization.widgets.figureparts.ColorMapRamp;
 import org.eclipse.nebula.visualization.widgets.figures.ScaledSliderFigure;
 import org.eclipse.nebula.visualization.xygraph.figures.Annotation;
 import org.eclipse.nebula.visualization.xygraph.figures.Axis;
-import org.eclipse.nebula.visualization.xygraph.figures.XYGraph;
+import org.eclipse.nebula.visualization.xygraph.figures.IXYGraph;
+import org.eclipse.nebula.visualization.xygraph.figures.ZoomType;
 import org.eclipse.nebula.visualization.xygraph.linearscale.AbstractScale.LabelSide;
 import org.eclipse.nebula.visualization.xygraph.linearscale.LinearScaleTickLabels;
 import org.eclipse.swt.SWT;
@@ -286,17 +286,17 @@ public class LightWeightPlotViewer<T> extends AbstractPlottingViewer<T> implemen
 		}
 		
 		// Configure axes
-		xyGraph.primaryXAxis.setShowMajorGrid(true);
-		xyGraph.primaryXAxis.setShowMinorGrid(true);		
-		xyGraph.primaryYAxis.setShowMajorGrid(true);
-		xyGraph.primaryYAxis.setShowMinorGrid(true);
-		xyGraph.primaryYAxis.setTitle("");
+		xyGraph.getPrimaryXAxis().setShowMajorGrid(true);
+		xyGraph.getPrimaryXAxis().setShowMinorGrid(true);		
+		xyGraph.getPrimaryYAxis().setShowMajorGrid(true);
+		xyGraph.getPrimaryYAxis().setShowMinorGrid(true);
+		xyGraph.getPrimaryYAxis().setTitle("");
 		
 		if (system.getPlotType()!=null) {
 			// Do not change this, the test is correct, remove axes in non-1D only. 1D always has axes.
 			if (!PlottingSystemActivator.getPlottingPreferenceStore().getBoolean(PlottingConstants.SHOW_AXES) && !system.getPlotType().is1D()) {
-				xyGraph.primaryXAxis.setVisible(false);
-				xyGraph.primaryYAxis.setVisible(false);
+				xyGraph.getPrimaryXAxis().setVisible(false);
+				xyGraph.getPrimaryYAxis().setVisible(false);
 			}
 		}
 		if (bars!=null) bars.updateActionBars();
@@ -600,11 +600,12 @@ public class LightWeightPlotViewer<T> extends AbstractPlottingViewer<T> implemen
 
 		final Action delAnnotation = new Action("Remove Annotation...", PlottingSystemActivator.getImageDescriptor("icons/Del_Annotation.png")) {
 			public void run() {
-				RemoveAnnotationDialog dialog = new RemoveAnnotationDialog(Display.getCurrent().getActiveShell(), xyGraph);
+				RemoveAnnotationDialog dialog = new RemoveAnnotationDialog(Display.getCurrent().getActiveShell(),
+						(IXYGraph) xyGraph);
 				if(dialog.open() == Window.OK && dialog.getAnnotation() != null){
 					xyGraph.removeAnnotation(dialog.getAnnotation());
-					xyGraph.getOperationsManager().addCommand(
-							new RemoveAnnotationCommand(xyGraph, dialog.getAnnotation()));					
+					xyGraph.getOperationsManager()
+							.addCommand(new RemoveAnnotationCommand((IXYGraph) xyGraph, dialog.getAnnotation()));
 				}
 				
 			}
@@ -714,7 +715,7 @@ public class LightWeightPlotViewer<T> extends AbstractPlottingViewer<T> implemen
 						final LineTraceImpl lt = (LineTraceImpl)trace;
 						xyGraph.addAnnotation(new Annotation(annotName, lt.getTrace()));
 					} else {
-						xyGraph.addAnnotation(new Annotation(annotName, xyGraph.primaryXAxis, xyGraph.primaryYAxis));
+						xyGraph.addAnnotation(new Annotation(annotName, xyGraph.getPrimaryXAxis(), xyGraph.getPrimaryYAxis()));
 					}
 				}
 			};
@@ -1089,15 +1090,15 @@ public class LightWeightPlotViewer<T> extends AbstractPlottingViewer<T> implemen
 		if (xyGraph == null)
 			return;
 		removeAdditionalAxes();
-		xyGraph.primaryXAxis.setTitle(XYGraph.X_AXIS);
-		xyGraph.primaryYAxis.setTitle(XYGraph.Y_AXIS);
+		xyGraph.getPrimaryXAxis().setTitle(IXYGraph.X_AXIS);
+		xyGraph.getPrimaryYAxis().setTitle(IXYGraph.Y_AXIS);
 	}
 
 	protected void removeAdditionalAxes() {
-		xyGraph.setSelectedXAxis((IAxis) xyGraph.primaryXAxis);
-		xyGraph.setSelectedYAxis((IAxis) xyGraph.primaryYAxis);
+		xyGraph.setSelectedXAxis((IAxis) xyGraph.getPrimaryXAxis());
+		xyGraph.setSelectedYAxis((IAxis) xyGraph.getPrimaryYAxis());
 		for (Axis axis : xyGraph.getAxisList()) {
-			if (axis!=xyGraph.primaryXAxis && axis!=xyGraph.primaryYAxis) {
+			if (axis!=xyGraph.getPrimaryXAxis() && axis!=xyGraph.getPrimaryYAxis()) {
 				axis.setVisible(false); 
 				removeAxis((IAxis) axis);
 			}
@@ -1124,14 +1125,16 @@ public class LightWeightPlotViewer<T> extends AbstractPlottingViewer<T> implemen
 	public void addAnnotation(final IAnnotation annotation) {
 		final AnnotationWrapper wrapper = (AnnotationWrapper) annotation;
 		xyGraph.addAnnotation(wrapper.getAnnotation());
-		xyGraph.getOperationsManager().addCommand(new AddAnnotationCommand(xyGraph, wrapper.getAnnotation()));
+		xyGraph.getOperationsManager()
+				.addCommand(new AddAnnotationCommand((IXYGraph) xyGraph, wrapper.getAnnotation()));
 	}
 
 	@Override
 	public void removeAnnotation(final IAnnotation annotation) {
 		final AnnotationWrapper wrapper = (AnnotationWrapper) annotation;
 		xyGraph.removeAnnotation(wrapper.getAnnotation());
-		xyGraph.getOperationsManager().addCommand(new RemoveAnnotationCommand(xyGraph, wrapper.getAnnotation()));
+		xyGraph.getOperationsManager()
+				.addCommand(new RemoveAnnotationCommand((IXYGraph) xyGraph, wrapper.getAnnotation()));
 	}
 
 	@Override

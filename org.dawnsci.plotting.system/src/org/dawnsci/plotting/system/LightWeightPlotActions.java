@@ -71,9 +71,10 @@ import org.eclipse.nebula.visualization.internal.xygraph.undo.AddAnnotationComma
 import org.eclipse.nebula.visualization.internal.xygraph.undo.IOperationsManagerListener;
 import org.eclipse.nebula.visualization.internal.xygraph.undo.OperationsManager;
 import org.eclipse.nebula.visualization.internal.xygraph.undo.RemoveAnnotationCommand;
-import org.eclipse.nebula.visualization.internal.xygraph.undo.ZoomType;
 import org.eclipse.nebula.visualization.xygraph.figures.Axis;
+import org.eclipse.nebula.visualization.xygraph.figures.IXYGraph;
 import org.eclipse.nebula.visualization.xygraph.figures.XYGraphFlags;
+import org.eclipse.nebula.visualization.xygraph.figures.ZoomType;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.DisposeEvent;
@@ -498,11 +499,11 @@ class LightWeightPlotActions {
 		
 		final Action addAnnotation = new Action("Add Annotation...", PlottingSystemActivator.getImageDescriptor("icons/Add_Annotation.png")) {
 			public void run() {
-				AddAnnotationDialog dialog = new AddAnnotationDialog(Display.getCurrent().getActiveShell(), xyGraph);
+				AddAnnotationDialog dialog = new AddAnnotationDialog(Display.getCurrent().getActiveShell(), (IXYGraph) xyGraph);
 				if(dialog.open() == Window.OK){
 					xyGraph.addAnnotation(dialog.getAnnotation());
 					xyGraph.getOperationsManager().addCommand(
-							new AddAnnotationCommand(xyGraph, dialog.getAnnotation()));
+							new AddAnnotationCommand((IXYGraph) xyGraph, dialog.getAnnotation()));
 				}
 				
 			}
@@ -512,11 +513,11 @@ class LightWeightPlotActions {
 		
 		final Action delAnnotation = new Action("Remove Annotation...", PlottingSystemActivator.getImageDescriptor("icons/Del_Annotation.png")) {
 			public void run() {
-				RemoveAnnotationDialog dialog = new RemoveAnnotationDialog(Display.getCurrent().getActiveShell(), xyGraph);
+				RemoveAnnotationDialog dialog = new RemoveAnnotationDialog(Display.getCurrent().getActiveShell(), (IXYGraph) xyGraph);
 				if(dialog.open() == Window.OK && dialog.getAnnotation() != null){
 					xyGraph.removeAnnotation(dialog.getAnnotation());
 					xyGraph.getOperationsManager().addCommand(
-							new RemoveAnnotationCommand(xyGraph, dialog.getAnnotation()));					
+							new RemoveAnnotationCommand((IXYGraph) xyGraph, dialog.getAnnotation()));					
 				}
 				
 			}
@@ -964,17 +965,17 @@ class LightWeightPlotActions {
 		//remove axes for images
 		if (plotType == PlotType.IMAGE) {
 
-			boolean xVis = xyGraph.primaryXAxis.isVisible();
-			boolean yVis = xyGraph.primaryYAxis.isVisible();
+			boolean xVis = xyGraph.getPrimaryXAxis().isVisible();
+			boolean yVis = xyGraph.getPrimaryYAxis().isVisible();
 
-			xyGraph.primaryXAxis.setVisible(false);
-			xyGraph.primaryYAxis.setVisible(false);
+			xyGraph.getPrimaryXAxis().setVisible(false);
+			xyGraph.getPrimaryYAxis().setVisible(false);
 
 			try {
 				shell.setBackgroundImage(xyGraph.getImage(rect));
 			} finally {
-				xyGraph.primaryXAxis.setVisible(xVis);
-				xyGraph.primaryYAxis.setVisible(yVis);
+				xyGraph.getPrimaryXAxis().setVisible(xVis);
+				xyGraph.getPrimaryYAxis().setVisible(yVis);
 			}
 		} else {
 			

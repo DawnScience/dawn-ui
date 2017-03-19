@@ -36,8 +36,8 @@ import org.eclipse.draw2d.geometry.Rectangle;
 import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.nebula.visualization.xygraph.figures.Grid;
+import org.eclipse.nebula.visualization.xygraph.figures.IXYGraph;
 import org.eclipse.nebula.visualization.xygraph.figures.Trace;
-import org.eclipse.nebula.visualization.xygraph.figures.XYGraph;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Cursor;
 import org.eclipse.swt.graphics.Image;
@@ -298,12 +298,12 @@ public abstract class AbstractSelectionRegion<T extends IROI> extends AbstractRe
 		bean.setPlotType(type);
 	}
 
-	public XYGraph getXyGraph() {
+	public IXYGraph getXyGraph() {
 		return bean.getXyGraph();
 	}
 
 
-	public void setXyGraph(XYGraph xyGraph) {
+	public void setXyGraph(IXYGraph xyGraph) {
 		bean.setXyGraph(xyGraph);
 	}
 

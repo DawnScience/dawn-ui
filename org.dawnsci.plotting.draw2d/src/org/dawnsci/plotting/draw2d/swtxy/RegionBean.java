@@ -12,6 +12,7 @@ import java.io.Serializable;
 
 import org.eclipse.dawnsci.plotting.api.PlotType;
 import org.eclipse.dawnsci.plotting.api.axis.ICoordinateSystem;
+import org.eclipse.nebula.visualization.xygraph.figures.IXYGraph;
 import org.eclipse.nebula.visualization.xygraph.figures.XYGraph;
 import org.eclipse.swt.graphics.Color;
 
@@ -22,7 +23,7 @@ public class RegionBean implements Serializable {
 	private static final long serialVersionUID = 3501897005952664393L;
 	
 	protected ICoordinateSystem    coordinateSystem;
-	protected XYGraph xyGraph;
+	protected IXYGraph xyGraph;
 	protected String  name;
 	protected PlotType plotType;
 	protected Color   regionColor;
@@ -69,11 +70,11 @@ public class RegionBean implements Serializable {
 		this.plotType = type;
 	}
 
-	public XYGraph getXyGraph() {
+	public IXYGraph getXyGraph() {
 		return xyGraph;
 	}
 
-	public void setXyGraph(XYGraph xyGraph) {
+	public void setXyGraph(IXYGraph xyGraph) {
 		this.xyGraph = xyGraph;
 	}
 
