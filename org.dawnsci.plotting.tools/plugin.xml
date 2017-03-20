@@ -428,7 +428,7 @@
              icon="icons/zoom_box.png"
              id="org.dawnsci.plotting.tools.masking.FastMaskTool"
              label="Fast Mask"
-             visible="true">
+             visible="false">
       </plotting_tool_page>
    </extension>
 
