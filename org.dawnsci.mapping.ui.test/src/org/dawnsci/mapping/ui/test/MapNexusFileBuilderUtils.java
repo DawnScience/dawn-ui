@@ -211,10 +211,10 @@ public class MapNexusFileBuilderUtils {
 				DoubleDataset ax = DatasetFactory.createRange(shape[i]);
 				axes[i] = axis;
 				nxData.setDataset(axis, ax);
-				nxData.setAttribute(null, axis + "_indices", new int[]{i});
+				nxData.setAttribute(null, axis + "_indices", i);
 				
 				nxData.setDataset(axis.substring(0,axis.length()-4), ax);
-				nxData.setAttribute(null, axis.substring(0,axis.length()-4) + "_indices", new int[]{i});
+				nxData.setAttribute(null, axis.substring(0,axis.length()-4) + "_indices", i);
 			}
 		}
 		
@@ -259,10 +259,10 @@ public class MapNexusFileBuilderUtils {
 					DoubleDataset ax = DatasetFactory.createRange(shape[i]);
 					String axis = FASTEST_AXES[1];
 					nxData.setDataset(axis, ax);
-					nxData.setAttribute(null, axis + "_indices", new int[]{i});
+					nxData.setAttribute(null, axis + "_indices", i);
 					axis = FASTEST_AXES[0];
 					nxData.setDataset(axis, ax);
-					nxData.setAttribute(null, axis + "_indices", new int[]{i});
+					nxData.setAttribute(null, axis + "_indices", i);
 				} else {
 					String axis = FASTEST_AXES[scanRank-i];
 					if (isEnergy) {
@@ -271,7 +271,7 @@ public class MapNexusFileBuilderUtils {
 					DoubleDataset ax = DatasetFactory.createRange(shape[i]);
 					axes[i] = axis;
 					nxData.setDataset(axis, ax);
-					nxData.setAttribute(null, axis + "_indices", new int[]{i});
+					nxData.setAttribute(null, axis + "_indices", i);
 				}
 				
 				
