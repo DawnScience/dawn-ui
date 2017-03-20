@@ -4,9 +4,9 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 import java.util.stream.Collectors;
 
 import org.dawnsci.datavis.api.IDataFilePackage;
@@ -27,7 +27,7 @@ public class LoadedFile implements IDataObject, IDataFilePackage {
 
 	public LoadedFile(IDataHolder dataHolder) {
 		this.dataHolder = dataHolder;		
-		dataOptions = new LinkedHashMap<>();
+		dataOptions = new TreeMap<>();
 		String[] names = null;
 		if (dataHolder.getTree() != null) {
 			Map<DataNode, String> uniqueDataNodes = TreeUtils.getUniqueDataNodes(dataHolder.getTree().getGroupNode());
