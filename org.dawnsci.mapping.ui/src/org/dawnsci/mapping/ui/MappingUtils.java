@@ -99,7 +99,7 @@ public class MappingUtils {
 			sMin = sMin - d;
 		} else {
 			double dy = ((sMax-sMin)/(ys-1))/2;
-			sMin+=dy;
+			sMin-=dy;
 			sMax+=dy;
 		}
 		
