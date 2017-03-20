@@ -72,7 +72,11 @@ public class PlotSystemCompositeView extends Composite {
 	private TabItem correctionsTab;
 	private Button centreRegion;
 	private Button centreSecondBgRegion;
-
+	private Button increment;
+	private Button decrement;
+	private Group manualControls;
+	private SurfaceScatterViewStart ssvs;
+	private Button accept;
 	
     public PlotSystemCompositeView(Composite parent, 
     							   int style,
@@ -80,12 +84,14 @@ public class PlotSystemCompositeView extends Composite {
     							   int extra,
     							   int numberOfImages,
     							   Dataset nullImage,
-    							   SurfaceScatterPresenter ssp
+    							   SurfaceScatterPresenter ssp,
+    							   SurfaceScatterViewStart ssvs
     							   ) {
         super(parent, style);
         this.numberOfImages = numberOfImages;
         this.nullImage = nullImage;
         this.ssp = ssp;
+        this.ssvs = ssvs;
         
         try {
 			plotSystem = PlottingFactory.createPlottingSystem();
@@ -159,6 +165,8 @@ public class PlotSystemCompositeView extends Composite {
 		
 		outputControl = new Button (indicators, SWT.CHECK);
         outputControl.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+        outputControl.setSelection(true);
+//        outputControl.setIm
         
         Group buttons = new Group (mainImage,SWT.NONE);  
         GridLayout 	buttonsLayout = new GridLayout(2,true);
@@ -436,17 +444,168 @@ public class PlotSystemCompositeView extends Composite {
 	    	processingMode.add(ProccessingMethod.toString(i));
 	    }
 	    
-	    processingMode.select(0);
+	    manualControls = new Group(processing,SWT.NONE);
+	   
 	    
-		run = new Button (processing, SWT.PUSH);	
-		run.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-		run.setText("Run");
-			
+	    changeProcessingMode();
+	   
+	    addChangeProcessingMethodListeners();
+
 		form.setWeights(new int[] {23, 45, 25, 7});
     }
-		
+	
+    
+    public void addChangeProcessingMethodListeners(){
+    	
+	    processingMode.addSelectionListener(new SelectionListener() {
+			
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				ssp.setProcessingMethodSelection(ProccessingMethod.toMethodology(processingMode.getSelectionIndex()));
+				changeProcessingMode();
+			}
+			
+			@Override
+			public void widgetDefaultSelected(SelectionEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+		});
+	    
+	}
+    
+    public void changeProcessingMode(){
+    	
+    	for(Control i : manualControls.getChildren()){
+    		i.dispose();
+    	}
+    	
+    	if(ssp.getProcessingMethodSelection() == ProccessingMethod.AUTOMATIC){
+
+    	    processingMode.select(0);
+    	    
+    	    GridLayout manualControlsLayout = new GridLayout(1,true);
+    	    manualControls .setLayout(manualControlsLayout);
+    	    GridData manualControlsData = new GridData(SWT.FILL, SWT.NULL, true, false);
+    	    manualControls .setLayoutData(manualControlsData);
+    	    
+    		run = new Button (manualControls, SWT.PUSH);	
+    		run.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+    		run.setText("Run");
+    		addRunListener();
+    		
+    	}
+    	
+    	if(ssp.getProcessingMethodSelection() == ProccessingMethod.MANUAL){
+
+    	    GridLayout manualControlsLayout = new GridLayout(3,true);
+    	    manualControls .setLayout(manualControlsLayout);
+    	    GridData manualControlsData = new GridData(SWT.FILL, SWT.NULL, true, false);
+    	    manualControls .setLayoutData(manualControlsData);
+    	    
+    	    decrement = new Button (manualControls, SWT.PUSH);	
+    	    decrement.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+    	    decrement.setText("<");
+    		
+    		accept = new Button (manualControls, SWT.PUSH);	
+    		accept.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+    		accept.setText("Accept");
+    		
+    		increment = new Button (manualControls, SWT.PUSH);	
+    	    increment.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+    	    increment.setText(">");
+    	    
+    	    addManualListeners();
+    	
+    	}
+    	
+    	form.setWeights(new int[] {23, 45, 25, 7});
+    	 
+    	manualControls.layout(true, true);
+    	manualControls.redraw();
+    }
+    
+    
+    public void addRunListener(){
+    	
+    	run.addSelectionListener(new SelectionListener() {
+			
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				ssvs.fireRun();
+			}
+			
+			@Override
+			public void widgetDefaultSelected(SelectionEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+		});
+    }
    
-   public int getSliderPos(){
+    public void addManualListeners(){
+    	
+    	accept.addSelectionListener(new SelectionListener() {
+			
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+//				ssvs.fireRun();
+			}
+			
+			@Override
+			public void widgetDefaultSelected(SelectionEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+		});
+    	
+    	increment.addSelectionListener(new SelectionListener() {
+			
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+
+				slider.setSelection(slider.getSelection() +1);
+				ssp.setSliderPos(slider.getSelection());
+				generalUpdate();
+				ssvs.sliderMovementGeneralUpdate();
+			}
+			
+			@Override
+			public void widgetDefaultSelected(SelectionEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+		});
+    	
+    	decrement.addSelectionListener(new SelectionListener() {
+			
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				
+				slider.setSelection(slider.getSelection() -1);
+				ssp.setSliderPos(slider.getSelection());
+				generalUpdate();
+				
+				ssvs.sliderMovementGeneralUpdate();
+			}
+			
+			@Override
+			public void widgetDefaultSelected(SelectionEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+		});
+    }
+    
+    public Combo getProcessingMode() {
+		return processingMode;
+	}
+
+	public void setProcessingMode(Combo processingMode) {
+		this.processingMode = processingMode;
+	}
+
+	public int getSliderPos(){
 	   int sliderPos = slider.getSelection();
 	   return sliderPos;
    }
@@ -894,6 +1053,30 @@ public class PlotSystemCompositeView extends Composite {
 
 	public void setRawIntensity(Text rawIntensity) {
 		this.rawIntensity = rawIntensity;
+	}
+
+	public Button getIncrement() {
+		return increment;
+	}
+
+	public void setIncrement(Button increment) {
+		this.increment = increment;
+	}
+
+	public Button getDecrement() {
+		return decrement;
+	}
+
+	public void setDecrement(Button decrement) {
+		this.decrement = decrement;
+	}
+
+	public Button getAccept() {
+		return accept;
+	}
+
+	public void setAccept(Button accept) {
+		this.accept = accept;
 	}
 
 }

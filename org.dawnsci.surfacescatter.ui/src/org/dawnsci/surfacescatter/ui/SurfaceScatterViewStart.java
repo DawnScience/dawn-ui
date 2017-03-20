@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import org.dawnsci.surfacescatter.CurveStateIdentifier;
 import org.dawnsci.surfacescatter.MethodSettingEnum;
 import org.dawnsci.surfacescatter.MethodSettingEnum.MethodSetting;
+import org.dawnsci.surfacescatter.ProcessingMethodsEnum.ProccessingMethod;
 import org.dawnsci.surfacescatter.ReflectivityFluxCorrectionsForDialog;
 import org.dawnsci.surfacescatter.ReflectivityMetadataTitlesForDialog;
 import org.eclipse.dawnsci.analysis.api.io.IDataHolder;
@@ -255,6 +256,7 @@ public class SurfaceScatterViewStart extends Dialog {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 
+				
 				ArrayList<TableItem> checkedList = new ArrayList<>();
 
 				for (TableItem d : datDisplayer.getRodDisplayTable().getItems()) {
@@ -376,6 +378,8 @@ public class SurfaceScatterViewStart extends Dialog {
 				customComposite.resetCorrectionsTab();
 				ssps3c.isOutputCurvesVisible(false);
 				customComposite.getOutputControl().setEnabled(false);
+				ssp.setProcessingMethodSelection(ProccessingMethod.toMethodology(customComposite.getProcessingMode().getSelectionIndex()));
+				
 				
 			}
 
@@ -418,8 +422,14 @@ public class SurfaceScatterViewStart extends Dialog {
 		////////////////////// Analysis Left//////////////////////////////
 		///////////////// anaLeft Window 3/////////////////////////////////
 
-		customComposite = new PlotSystemCompositeView(anaLeft, SWT.FILL, ssp.getImage(0), 1, numberOfImages, nullImage,
-				ssp);
+		customComposite = new PlotSystemCompositeView(anaLeft, 
+													  SWT.FILL, 
+													  ssp.getImage(0), 
+													  1, 
+													  numberOfImages, 
+													  nullImage,
+													  ssp, 
+													  this);
 
 		customComposite.setLayout(new GridLayout());
 		customComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
@@ -606,50 +616,6 @@ public class SurfaceScatterViewStart extends Dialog {
 			}
 		});
 
-		customComposite.getRun().addSelectionListener(new SelectionListener() {
-				
-			@Override
-			public void widgetSelected(SelectionEvent e){ 
-								
-				ssp.setStartFrame(SurfaceScatterViewStart.this.getSliderList().get(0).getSelection());
-				ssp.resetDataModels();
-				ssp.triggerBoxOffsetTransfer();
-				
-				if (getSsps3c().getOutputCurves().isVisible() != true) {
-					getSsps3c().getOutputCurves().setVisible(true);
-					getSsps3c().getSashForm().setWeights(new int[] { 50, 50 });
-					getSsps3c().getLeft().setWeights(new int[] { 50, 50 });
-					getSsps3c().getRight().setWeights(new int[] { 50, 50 });
-				}
-		
-				if (getPlotSystemCompositeView().getBackgroundSubtractedSubImage() == null) {
-					getPlotSystemCompositeView().appendBackgroundSubtractedSubImage();
-					getPlotSystemCompositeView().getSash().setWeights(new int[] { 23, 45, 25, 7 });
-		
-				}
-				
-				analysisSash.setWeights(new int[] { 40, 60 });
-				analysisSash.redraw();
-				
-				TrackingProgressAndAbortView tpaav 
-							= new TrackingProgressAndAbortView(getParentShell(), 
-															   ssp.getNumberOfImages(),
-															   ssp,
-															   customComposite.getSubImagePlotSystem(),
-															   getSsps3c().getOutputCurves().getPlotSystem(),
-															   customComposite.getPlotSystem(),
-															   customComposite.getFolder(),
-															   customComposite.getSubImageBgPlotSystem());
-				tpaav.open();
-				
-				customComposite.getOutputControl().setEnabled(true);
-			}
-
-			@Override
-			public void widgetDefaultSelected(SelectionEvent e) {
-			}
-		});
-
 		//////////////////////// Analysis Right//////////////////////////////
 		///////////////// anaRight Window 4/////////////////////////////////
 		try {
@@ -752,6 +718,50 @@ public class SurfaceScatterViewStart extends Dialog {
 
 		return container;
 	}
+	
+	public void fireRun(){
+		
+
+		if(ssp.getProcessingMethodSelection() == ProccessingMethod.AUTOMATIC){
+			
+			ssp.setStartFrame(SurfaceScatterViewStart.this.getSliderList().get(0).getSelection());
+			ssp.resetDataModels();
+			ssp.triggerBoxOffsetTransfer();
+			
+			if (getSsps3c().getOutputCurves().isVisible() != true) {
+				getSsps3c().getOutputCurves().setVisible(true);
+				getSsps3c().getSashForm().setWeights(new int[] { 50, 50 });
+				getSsps3c().getLeft().setWeights(new int[] { 50, 50 });
+				getSsps3c().getRight().setWeights(new int[] { 50, 50 });
+			}
+	
+			if (getPlotSystemCompositeView().getBackgroundSubtractedSubImage() == null) {
+				getPlotSystemCompositeView().appendBackgroundSubtractedSubImage();
+				getPlotSystemCompositeView().getSash().setWeights(new int[] { 23, 45, 25, 7 });
+	
+			}
+			
+			analysisSash.setWeights(new int[] { 40, 60 });
+			analysisSash.redraw();
+			
+			TrackingProgressAndAbortView tpaav 
+						= new TrackingProgressAndAbortView(getParentShell(), 
+														   ssp.getNumberOfImages(),
+														   ssp,
+														   customComposite.getSubImagePlotSystem(),
+														   getSsps3c().getOutputCurves().getPlotSystem(),
+														   customComposite.getPlotSystem(),
+														   customComposite.getFolder(),
+														   customComposite.getSubImageBgPlotSystem());
+			tpaav.open();
+			
+			customComposite.getOutputControl().setEnabled(true);
+			customComposite.getOutputControl().setSelection(true);
+			
+		}
+		
+	}
+	
 
 	@Override
 	protected void configureShell(Shell newShell) {
@@ -759,12 +769,24 @@ public class SurfaceScatterViewStart extends Dialog {
 		newShell.setText("Rod Analysis (RodAn)");
 
 	}
+	
+	
 
 	@Override
 	protected boolean isResizable() {
 		return true;
 	}
 
+	public void sliderMovementGeneralUpdate(){
+		int sliderPos = customComposite.getSlider().getSelection();
+		ssp.sliderMovemementMainImage(sliderPos);
+		SurfaceScatterViewStart.this.updateIndicators(sliderPos);
+		ssp.bgImageUpdate(customComposite.getSubImageBgPlotSystem(), sliderPos);
+		ssps3c.generalUpdate();
+	}
+	
+	
+	
 	public PlotSystemCompositeView getPlotSystemCompositeView() {
 		return customComposite;
 	}
@@ -994,6 +1016,8 @@ public class SurfaceScatterViewStart extends Dialog {
 
 			}
 		});
+		
+		
 
 		outputCurves.getSave().addSelectionListener(new SelectionListener() {
 

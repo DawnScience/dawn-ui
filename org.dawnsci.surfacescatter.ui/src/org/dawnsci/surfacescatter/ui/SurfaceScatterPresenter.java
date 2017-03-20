@@ -33,9 +33,11 @@ import org.dawnsci.surfacescatter.FittingParametersInputReader;
 import org.dawnsci.surfacescatter.FittingParametersOutput;
 import org.dawnsci.surfacescatter.GeometricParametersModel;
 import org.dawnsci.surfacescatter.MethodSettingEnum.MethodSetting;
+import org.dawnsci.surfacescatter.ProcessingMethodsEnum.ProccessingMethod;
 import org.dawnsci.surfacescatter.OverlapUIModel;
 import org.dawnsci.surfacescatter.PlotSystem2DataSetter;
 import org.dawnsci.surfacescatter.PolynomialOverlap;
+import org.dawnsci.surfacescatter.ProcessingMethodsEnum;
 import org.dawnsci.surfacescatter.ReflectivityMetadataTitlesForDialog;
 import org.dawnsci.surfacescatter.SXRDGeometricCorrections;
 import org.dawnsci.surfacescatter.StitchedOutputWithErrors;
@@ -84,8 +86,16 @@ public class SurfaceScatterPresenter {
 	private int noImages = 0;
 	private SurfaceScatterViewStart ssvs;
 	private IRegion backgroundRegion;
-	private String imageName = "file_image";	
+	private String imageName = "file_image";
 	
+	public ProccessingMethod getProcessingMethodSelection() {
+		return sm.getProcessingMethodSelection();
+	}
+
+	public void setProcessingMethodSelection(ProcessingMethodsEnum.ProccessingMethod processingMethodSelection) {
+		sm.setProcessingMethodSelection(processingMethodSelection);
+	}
+
 	public String getImageName() {
 		return imageName;
 	}
