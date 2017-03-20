@@ -571,10 +571,10 @@ public class MaskObject {
 			}
 
 			int xStart = Math.max(0, (int) Math.round(beg[0]));
-			int xEnd   = Math.min(shape[1] - 1, (int) Math.round(end[0]));
+			int xEnd   = Math.min(shape[1], (int) Math.round(end[0]));
 			
 			int yStart = Math.max(0, (int) Math.round(beg[1]));
-			int yEnd   = Math.min(shape[0] - 1, (int) Math.round(end[1]));
+			int yEnd   = Math.min(shape[0], (int) Math.round(end[1]));
 
 			final Collection<RegionAction> actions = new ArrayList<RegionAction>(yEnd/INC);
 			// We loop all pixels here because looping bounds boxes of rois did not work yet.

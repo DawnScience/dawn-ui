@@ -764,10 +764,10 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 									if (set instanceof IDataset) { // Data was all read in already.
 										IDataset errSet = (IDataset)set;
 										// Read plotted data into memory, so can read error data too.
-										errSet.setError(getVariableValue(ob.getVariable(), null));
+										errSet.setErrors(getVariableValue(ob.getVariable(), null));
 										
 									} else { // Set errors lazily
-										set.setError(currentSelectedData);
+										set.setErrors(currentSelectedData);
 									}
 									fireSelectionListeners(selections);
 
@@ -777,12 +777,12 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 					}
 
 					final boolean isDatasetError = currentSelectedData.hasErrors();
-					final boolean isLazyError    = currentSelectedData.getError() != null;
+					final boolean isLazyError    = currentSelectedData.getErrors() != null;
 					if (isDatasetError || isLazyError) {
 						menuManager.add(new Action("Clear error on '"+currentSelectedData.getName()+"'") {
 							@Override
 							public void run() {
-								currentSelectedData.setError(null);
+								currentSelectedData.setErrors(null);
 								fireSelectionListeners(selections);
 							}
 						});
