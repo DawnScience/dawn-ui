@@ -2,7 +2,10 @@ package org.dawnsci.surfacescatter.ui;
 
 import org.dawb.common.ui.widgets.ActionBarWrapper;
 import org.dawnsci.surfacescatter.ExampleModel;
+import org.dawnsci.surfacescatter.TrackingMethodology;
 import org.dawnsci.surfacescatter.MethodSettingEnum.MethodSetting;
+import org.dawnsci.surfacescatter.ProcessingMethodsEnum.ProccessingMethod;
+import org.dawnsci.surfacescatter.TrackingMethodology.TrackerType1;
 import org.eclipse.dawnsci.analysis.dataset.roi.RectangularROI;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.PlotType;
@@ -21,6 +24,7 @@ import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
@@ -42,7 +46,9 @@ public class PlotSystemCompositeView extends Composite {
     private IRegion bgRegion;
     private IRegion secondBgRegion;
     private Button outputControl;
+    private Group processing;
     private Button run;
+    private Combo processingMode;;
     private int numberOfImages;
     private Dataset nullImage;
     private SurfaceScatterPresenter ssp;
@@ -416,8 +422,23 @@ public class PlotSystemCompositeView extends Composite {
 			}
 		});
 	    
-		run = new Button (form, SWT.PUSH);
-				
+		processing = new Group (form,SWT.NONE);  
+	    GridLayout processingLayout = new GridLayout(2,true);
+	    processing.setLayout(processingLayout);
+	    GridData processingData = new GridData(SWT.FILL, SWT.NULL, true, false);
+	    processing.setLayoutData(processingData);
+
+	    InputTileGenerator tile0 = new InputTileGenerator("Processing Method:", processing);
+	    processingMode = tile0.getCombo();
+
+	    
+	    for(ProccessingMethod  i: ProccessingMethod.values()){
+	    	processingMode.add(ProccessingMethod.toString(i));
+	    }
+	    
+	    processingMode.select(0);
+	    
+		run = new Button (processing, SWT.PUSH);	
 		run.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		run.setText("Run");
 			

@@ -87,7 +87,6 @@ public class PlotSystem1CompositeView extends Composite {
     	Group methodSetting = new Group(this, SWT.FILL | SWT.FILL);
         GridLayout methodSettingLayout = new GridLayout(2, true);
 	    GridData methodSettingData = new GridData(GridData.FILL_HORIZONTAL);
-//	    methodSettingData .minimumWidth = 50;
 	    methodSetting.setLayout(methodSettingLayout);
 	    methodSetting.setLayoutData(methodSettingData);
 	    
