@@ -60,6 +60,7 @@ public class ReMappedData extends AbstractMapData {
 
 				} else {
 					fm = baseMap.getSlice(parent.getMapDims().getMapSlice(baseMap));
+					fm.squeeze();
 				}
 			} catch (DatasetException e) {
 				logger.error("Error sliceing lazy dataset", e);
