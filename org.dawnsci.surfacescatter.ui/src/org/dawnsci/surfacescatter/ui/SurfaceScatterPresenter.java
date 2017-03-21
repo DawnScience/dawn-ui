@@ -85,7 +85,7 @@ public class SurfaceScatterPresenter {
 	private SuperModel sm;
 	private int noImages = 0;
 	private SurfaceScatterViewStart ssvs;
-	private IRegion backgroundRegion;
+//	private IRegion backgroundRegion;
 	private String imageName = "file_image";
 	
 	public ProccessingMethod getProcessingMethodSelection() {
@@ -559,6 +559,23 @@ public class SurfaceScatterPresenter {
 				
 			}
 		}
+	}
+	
+	
+	public void addXValuesForFireAccept(){
+		
+		int[] imagePosInOriginalDat = CountUpToArray.CountUpToArray1(sm.getFilepathsSortedArray());
+		
+		int jok = sm.getFilepathsSortedArray()[sm.getSliderPos()];
+		DataModel dm = dms.get(jok);
+		ExampleModel model = models.get(jok);
+		
+		dm.addxList(model.getDatImages().getShape()[0], imagePosInOriginalDat[sm.getSliderPos()],
+				sm.getSortedX().getDouble(sm.getSliderPos()));
+		
+		sm.addxList(sm.getImages().length, sm.getSliderPos(),
+				sm.getSortedX().getDouble(sm.getSliderPos()));
+		
 	}
 	
 	
@@ -2890,7 +2907,7 @@ class trackingJob {
 		
 		public void updateTrackingDisplay(IDataset tempImage, int imageNumber){
 			
-			ssp.updateSliders(ssvs.getSliderList(), imageNumber);
+			
 			ssvs.getPlotSystemCompositeView().getFolder().setSelection(2);
 			ssp.updateSliders(ssvs.getSliderList(), imageNumber);
 			ssvs.updateIndicators(imageNumber);

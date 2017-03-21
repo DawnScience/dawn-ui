@@ -2,6 +2,8 @@ package org.dawnsci.surfacescatter.ui;
 
 import java.io.File;
 import java.util.ArrayList;
+
+import org.dawnsci.surfacescatter.CountUpToArray;
 import org.dawnsci.surfacescatter.CurveStateIdentifier;
 import org.dawnsci.surfacescatter.MethodSettingEnum;
 import org.dawnsci.surfacescatter.MethodSettingEnum.MethodSetting;
@@ -718,12 +720,51 @@ public class SurfaceScatterViewStart extends Dialog {
 
 		return container;
 	}
+
 	
-	public void firePresenterDummyProcessAccept(){
+	public void fireAccept(){
+		
+		ssp.addXValuesForFireAccept();
+		
+		
+		
 		ssp.presenterDummyProcess(ssp.getSliderPos(), 
 								  ssp.getImage(ssp.getSliderPos()), 
 								  customComposite.getPlotSystem(), 
 								  4);
+		
+		if (getSsps3c().getOutputCurves().isVisible() != true) {
+			getSsps3c().getOutputCurves().setVisible(true);
+			getSsps3c().getSashForm().setWeights(new int[] { 50, 50 });
+			getSsps3c().getLeft().setWeights(new int[] { 50, 50 });
+			getSsps3c().getRight().setWeights(new int[] { 50, 50 });
+		}
+
+		if (getPlotSystemCompositeView().getBackgroundSubtractedSubImage() == null) {
+			getPlotSystemCompositeView().appendBackgroundSubtractedSubImage();
+			getPlotSystemCompositeView().getSash().setWeights(new int[] { 23, 45, 25, 7 });
+
+		}
+		
+//		ssp.updateSliders(ssvs.getSliderList(), imageNumber);
+		this.getPlotSystemCompositeView().getFolder().setSelection(2);
+//		ssvs.updateIndicators(imageNumber);
+//		ssvs.getPlotSystemCompositeView().getPlotSystem().updatePlot2D(tempImage, null, null);
+//		ssvs.getPlotSystemCompositeView().getSubImageBgPlotSystem().updatePlot2D(sm.getBackgroundDatArray().get(imageNumber), null, null);
+//		ssvs.getPlotSystemCompositeView().getPlotSystem().repaint(true);
+//		ssvs.getPlotSystemCompositeView().getSubImageBgPlotSystem().repaint(true);
+		this.getSsps3c().generalUpdate();
+		ssp.stitchAndPresent(this.getSsps3c().getOutputCurves());
+//		ssp.trackingRegionOfInterestSetter(ssp.getLocationList().get(imageNumber), imageNumber);
+		this.getSsps3c().getOutputCurves().getIntensity().select(0);
+		this.getSsps3c().getOutputCurves().getIntensity().redraw();
+		
+		
+		
+		
+		analysisSash.setWeights(new int[] { 40, 60 });
+		analysisSash.redraw();
+		
 	}
 	
 	public void fireRun(){

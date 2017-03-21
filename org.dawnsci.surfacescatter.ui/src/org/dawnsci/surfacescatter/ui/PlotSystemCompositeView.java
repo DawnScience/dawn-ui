@@ -548,7 +548,7 @@ public class PlotSystemCompositeView extends Composite {
 			
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				ssvs.firePresenterDummyProcessAccept();
+				ssvs.fireAccept();
 			}
 			
 			@Override
