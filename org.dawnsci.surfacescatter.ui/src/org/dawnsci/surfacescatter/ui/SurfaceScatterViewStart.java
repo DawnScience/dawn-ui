@@ -719,6 +719,13 @@ public class SurfaceScatterViewStart extends Dialog {
 		return container;
 	}
 	
+	public void firePresenterDummyProcessAccept(){
+		ssp.presenterDummyProcess(ssp.getSliderPos(), 
+								  ssp.getImage(ssp.getSliderPos()), 
+								  customComposite.getPlotSystem(), 
+								  4);
+	}
+	
 	public void fireRun(){
 		
 

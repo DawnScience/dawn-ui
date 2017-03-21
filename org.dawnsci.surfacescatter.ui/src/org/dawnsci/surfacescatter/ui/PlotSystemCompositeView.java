@@ -166,7 +166,6 @@ public class PlotSystemCompositeView extends Composite {
 		outputControl = new Button (indicators, SWT.CHECK);
         outputControl.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
         outputControl.setSelection(true);
-//        outputControl.setIm
         
         Group buttons = new Group (mainImage,SWT.NONE);  
         GridLayout 	buttonsLayout = new GridLayout(2,true);
@@ -549,7 +548,7 @@ public class PlotSystemCompositeView extends Composite {
 			
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-//				ssvs.fireRun();
+				ssvs.firePresenterDummyProcessAccept();
 			}
 			
 			@Override
