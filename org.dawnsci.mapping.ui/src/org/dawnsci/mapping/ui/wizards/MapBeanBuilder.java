@@ -108,7 +108,7 @@ public class MapBeanBuilder {
 					String name = next.getName();
 					if(name.startsWith(names[0]) && name.endsWith(NexusTreeUtils.NX_AXES_SET+NexusTreeUtils.NX_INDICES_SUFFIX)) {
 						IDataset v = next.getValue();
-						int index = Integer.parseInt(v.getString());
+						int index = v.getShape().length == 0 ? Integer.parseInt(v.getString()) : Integer.parseInt(v.getString(0));
 						axNames[index] = names[1] + name.substring(names[0].length(), name.length()-8);
 						remap = names[0] + name.substring(names[0].length(), name.length()-8);
 						break;
@@ -406,9 +406,9 @@ public class MapBeanBuilder {
 					foundx = true;
 					IDataset value = next.getValue();
 					if (index == null) {
-						index = Integer.parseInt(value.getString());
+						index = value.getShape().length == 0 ? Integer.parseInt(value.getString()) : Integer.parseInt(value.getString(0));
 					} else {
-						int i = Integer.parseInt(value.getString());
+						int i = value.getShape().length == 0 ? Integer.parseInt(value.getString()) : Integer.parseInt(value.getString(0));
 						if (i != index) {
 							return false;
 						}
@@ -419,9 +419,9 @@ public class MapBeanBuilder {
 					foundy = true;
 					IDataset value = next.getValue();
 					if (index == null) {
-						index = Integer.parseInt(value.getString());
+						index = value.getShape().length == 0  ? Integer.parseInt(value.getString()) : Integer.parseInt(value.getString(0));
 					} else {
-						int i = Integer.parseInt(value.getString());
+						int i = value.getShape().length == 0 ? Integer.parseInt(value.getString()) : Integer.parseInt(value.getString(0));
 						if (i != index) {
 							return false;
 						}
