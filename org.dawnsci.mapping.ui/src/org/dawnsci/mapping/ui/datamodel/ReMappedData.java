@@ -1,5 +1,6 @@
 package org.dawnsci.mapping.ui.datamodel;
 
+import org.dawnsci.mapping.ui.LivePlottingUtils;
 import org.dawnsci.mapping.ui.MappingUtils;
 import org.eclipse.dawnsci.plotting.api.trace.MetadataPlotUtils;
 import org.eclipse.january.DatasetException;
@@ -65,6 +66,11 @@ public class ReMappedData extends AbstractMapData {
 				return;
 			}
 		}
+		
+		MapScanDimensions mapDims = oParent.getMapDims();
+		
+		fm = LivePlottingUtils.cropNanValuesFromAxes(fm,!mapDims.isRemappingRequired());
+		
 		IDataset[] remapData = MappingUtils.remapData(fm, shape, 0);
 		
 		if (remapData == null) return;
@@ -72,6 +78,8 @@ public class ReMappedData extends AbstractMapData {
 		if (shape == null) {
 			this.shape = remapData[0].getShape().clone();
 		}
+		
+		setRange(MappingUtils.getRange(remapData[0], true));
 		
 		map = remapData[0];
 		lookup = remapData[1];
