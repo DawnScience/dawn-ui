@@ -750,7 +750,8 @@ public class SurfaceScatterViewStart extends Dialog {
 		this.getPlotSystemCompositeView().getFolder().setSelection(2);
 //		ssvs.updateIndicators(imageNumber);
 //		ssvs.getPlotSystemCompositeView().getPlotSystem().updatePlot2D(tempImage, null, null);
-//		ssvs.getPlotSystemCompositeView().getSubImageBgPlotSystem().updatePlot2D(sm.getBackgroundDatArray().get(imageNumber), null, null);
+		IDataset  s = ssp.getBackgroundDatArray().get(ssp.getSliderPos());
+		this.getPlotSystemCompositeView().getSubImageBgPlotSystem().updatePlot2D(s, null, null);
 //		ssvs.getPlotSystemCompositeView().getPlotSystem().repaint(true);
 //		ssvs.getPlotSystemCompositeView().getSubImageBgPlotSystem().repaint(true);
 		this.getSsps3c().generalUpdate();

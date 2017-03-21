@@ -576,6 +576,22 @@ public class SurfaceScatterPresenter {
 		sm.addxList(sm.getImages().length, sm.getSliderPos(),
 				sm.getSortedX().getDouble(sm.getSliderPos()));
 		
+		int[] localPt = sm.getInitialLenPt()[1];
+		int[] localLen = sm.getInitialLenPt()[0];
+
+		double[] localLocation = new double[] { (double) (localPt[0]), 
+												(double) (localPt[1]), 
+												(double) (localPt[0] + localLen[0]),
+												(double) (localPt[1]), 
+												(double) (localPt[0]), 
+												(double) (localPt[1] + localLen[1]), 
+												(double) (localPt[0] + localLen[0]),
+												(double) (localPt[1] + localLen[1]) };
+		
+		
+		model.setTrackerCoordinates(localLocation);
+		sm.addTrackerLocationList(sm.getSliderPos(), localLocation);
+		
 	}
 	
 	
@@ -1226,7 +1242,7 @@ public class SurfaceScatterPresenter {
 	
 	public ArrayList<IDataset> getBackgroundDatArray(){
 		try{
-			return dms.get(0).getBackgroundDatArray();
+			return sm.getBackgroundDatArray();
 		}
 		catch(Exception j){
 			return null;
@@ -1290,7 +1306,11 @@ public class SurfaceScatterPresenter {
 													 MethodSetting.toInt(sm.getCorrectionSelection()), 
 													 imagePosInOriginalDat[selection], 
 													 trackingMarker,
-													 selection);		
+													 selection);	
+			
+			
+			sm.addBackgroundDatArray(sm.getImages().length, selection, output);
+			
 			return output;
 			
 		}
@@ -1981,7 +2001,7 @@ public class SurfaceScatterPresenter {
 		lt1.isErrorBarEnabled();
 		
 		parentPs.addTrace(lt1);
-		parentPs.repaint();
+//		parentPs.repaint();
 		ssvs.getSsps3c().getOutputCurves().getIntensity().select(0);;
 	}
 
@@ -2266,7 +2286,7 @@ public class SurfaceScatterPresenter {
 				
 		pS.getAxes().get(0).setRange((start - 0.1*range), (end) + 0.1*range);
 		
-		pS.repaint();	
+//		pS.repaint();	
 		
 	}
 	
