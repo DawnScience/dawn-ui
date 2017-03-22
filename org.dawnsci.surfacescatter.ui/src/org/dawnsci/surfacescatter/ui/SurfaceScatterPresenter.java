@@ -4149,7 +4149,7 @@ class MovieJob {
 	private SuperModel sm;
 	private int noImages;
 	private int timeStep;
-	private int DEBUG = 1;
+	private int DEBUG = 0;
 	private IPlottingSystem<Composite> pS;
 	private IPlottingSystem<Composite> subIBgPS;
 	private SurfaceScatterPresenter ssp;

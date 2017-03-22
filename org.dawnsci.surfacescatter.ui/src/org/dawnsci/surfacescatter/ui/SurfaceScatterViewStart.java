@@ -3,7 +3,6 @@ package org.dawnsci.surfacescatter.ui;
 import java.io.File;
 import java.util.ArrayList;
 
-import org.dawnsci.surfacescatter.CountUpToArray;
 import org.dawnsci.surfacescatter.CurveStateIdentifier;
 import org.dawnsci.surfacescatter.MethodSettingEnum;
 import org.dawnsci.surfacescatter.MethodSettingEnum.MethodSetting;
@@ -65,7 +64,6 @@ public class SurfaceScatterViewStart extends Dialog {
 	private int numberOfImages;
 	private Dataset nullImage;
 	private SurfaceScatterPresenter ssp;
-//	private SurfaceScatterViewStart ssvs;
 	private ArrayList<Slider> sliderList;
 	private int DEBUG = 1;
 	private boolean modify = true;
