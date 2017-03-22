@@ -70,6 +70,7 @@ import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.ProgressBar;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Slider;
@@ -85,7 +86,6 @@ public class SurfaceScatterPresenter {
 	private SuperModel sm;
 	private int noImages = 0;
 	private SurfaceScatterViewStart ssvs;
-//	private IRegion backgroundRegion;
 	private String imageName = "file_image";
 	
 	public ProccessingMethod getProcessingMethodSelection() {
@@ -908,6 +908,116 @@ public class SurfaceScatterPresenter {
 				this.regionOfInterestSetter();
 				
 			}
+		
+	}
+	
+	public void interpolationTrackerBoxes(){
+		
+		Listener[] p = ssvs.getCustomComposite().getPlotSystem1CompositeView().getAcceptLocation().getListeners(SWT.PUSH);
+		Listener[] q = ssvs.getCustomComposite().getPlotSystem1CompositeView().getRejectLocation().getListeners(SWT.PUSH);
+		
+		
+		for(Listener c : p ){
+			ssvs.getCustomComposite().getPlotSystem1CompositeView().getAcceptLocation().removeSelectionListener((SelectionListener) c);
+		}
+		
+		for(Listener d : q ){
+			ssvs.getCustomComposite().getPlotSystem1CompositeView().getRejectLocation().removeSelectionListener((SelectionListener) d);
+		}
+		
+		Display display = Display.getCurrent();
+        Color blue = display.getSystemColor(SWT.COLOR_BLUE);
+        
+        
+		IRegion r2 = ssvs.getPlotSystemCompositeView().getSecondBgRegion();
+		r2.setRegionColor(blue);
+		r2.setVisible(true);
+		r2.setUserRegion(true);
+		r2.setLineWidth(1);
+		r2.setMobile(true);
+		r2.setFill(true);
+		r2.setLineWidth(3);
+		
+		
+		ssvs.getCustomComposite().getPlotSystem1CompositeView().getAcceptLocation().addSelectionListener(new SelectionListener() {
+			
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				
+				double[][] box = new double[3][];
+				
+				double[] lengths = new double[] {(double) r2.getROI().getBounds().getIntLengths()[0], (double) r2.getROI().getBounds().getIntLengths()[1]};
+				double[] pts = new double[] {(double) r2.getROI().getBounds().getIntPoint()[0], r2.getROI().getBounds().getIntPoint()[1]};
+				double[] xdata = new double[]{(double) sm.getSliderPos(), (double) sm.getSortedX().getDouble(sm.getSliderPos())};
+				
+				box[0] = lengths;
+				box[1] = pts;
+				box[2] = xdata;
+				
+				sm.addToInterpolatorBoxes(box);
+				
+			}
+			
+			@Override
+			public void widgetDefaultSelected(SelectionEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+		});
+		
+		
+		if (sm.getBackgroundLenPt()!=null){
+		
+			int[][] redLenPt = sm.getBackgroundLenPt();
+			int[] redLen = redLenPt[0];
+			int[] redPt = redLenPt[1];
+			
+			
+			RectangularROI startROI = new RectangularROI(redPt[0],
+														 redPt[1],
+														 redLen[0],
+														 redLen[1],
+														 0);
+		
+			r2.setROI(startROI);
+			
+		}
+		
+		
+		
+		r2.setRegionColor(magenta);		
+		
+		ssvs.getPlotSystemCompositeView().getCentreSecondBgRegion().setEnabled(true);
+		
+		if (models.get(0).getMethodology() == Methodology.OVERLAPPING_BACKGROUND_BOX){
+				
+			if (sm.getBoxOffsetLenPt()!=null){
+					
+					int[][] newOffsetLenPt =sm.getBoxOffsetLenPt();
+					int[] len = sm.getInitialLenPt()[0]; 
+					int[] pt = sm.getInitialLenPt()[1];
+					
+					int[] offsetLen = newOffsetLenPt[0];
+					int[] offsetPt = newOffsetLenPt[1];
+					
+					int pt0 = pt[0] + offsetPt[0];
+					int pt1 = pt[1] + offsetPt[1];
+					
+					int len0 = len[0] + offsetLen[0];
+					int len1 = len[1] + offsetLen[1];
+					
+					sm.setBackgroundLenPt(new int[][] {{pt0,pt1},{len0,len1}});
+				}
+        
+        
+        
+        
+        
+        
+        
+        
+		}   
+        
 		
 	}
 	

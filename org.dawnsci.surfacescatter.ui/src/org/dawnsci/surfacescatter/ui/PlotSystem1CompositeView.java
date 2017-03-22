@@ -35,7 +35,9 @@ public class PlotSystem1CompositeView extends Composite {
     private Button button1;
     private Button button2;
     private Button button3;
-    private Button trackerOnButton;
+    private Button button4;
+    private Button button5;
+	private Button trackerOnButton;
     private Combo comboDropDown0;
 	private Combo comboDropDown1;
 	private Combo comboDropDown2;
@@ -205,6 +207,19 @@ public class PlotSystem1CompositeView extends Composite {
         button2.setData(new GridData(SWT.FILL));
         button3.setData(new GridData(SWT.FILL));
         
+        button4 = new Button(methodSetting, SWT.PUSH);
+        button4.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+        button4.setData(new GridData(SWT.FILL));
+        button4.setText("Accept Position");
+        button4.setEnabled(false);
+        
+        button5 = new Button(methodSetting, SWT.PUSH);
+        button5.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+        button5.setData(new GridData(SWT.FILL));
+        button5.setText("Reject Position");
+        button5.setEnabled(false);
+
+        
 	}
     
    public Composite getComposite(){   	
@@ -352,7 +367,23 @@ public class PlotSystem1CompositeView extends Composite {
 	    }
 	    
    }
-   
+	   
+	public Button getAcceptLocation() {
+		return button4;
+	}
+	
+	public void setAcceptLocation(Button button4) {
+		this.button4 = button4;
+	}
+	public Button getRejectLocation() {
+		return button5;
+	}
+	
+	public void setRejectLocation(Button button5) {
+		this.button5 = button5;
+	}
+	
+
 class operationJob extends Job {
 
 	private IDataset input;
