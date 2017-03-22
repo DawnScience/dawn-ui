@@ -14,7 +14,7 @@ public class SavuPluginFinder {
 	public SavuPluginFinder() throws Exception {
 //		Does this on startup
 	try {
-		this.s = new AnalysisRpcPythonPyDevService(false);
+		this.s = AnalysisRpcPythonPyDevService.create();
 		pythonRunSavuService = new PythonRunSavuService(this.s);
 	} catch (Exception e) {
 		throw new Exception("Could not start the savu python interpreter");
