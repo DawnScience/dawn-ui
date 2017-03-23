@@ -263,6 +263,17 @@ public class SurfaceScatterViewStart extends Dialog {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 
+
+				try{
+					for(IRegion g : ssp.getInterpolatorRegions()){
+						customComposite.getPlotSystem().removeRegion(g);
+						g.remove();
+						
+					}
+				}
+				catch(Exception u){
+						
+				}
 				
 				ArrayList<TableItem> checkedList = new ArrayList<>();
 
@@ -363,7 +374,6 @@ public class SurfaceScatterViewStart extends Dialog {
 
 				}
 				
-				
 				folder.setSelection(1);
 		
 				ssp.setSelection(0);
@@ -386,6 +396,13 @@ public class SurfaceScatterViewStart extends Dialog {
 				ssps3c.isOutputCurvesVisible(false);
 				customComposite.getOutputControl().setEnabled(false);
 				ssp.setProcessingMethodSelection(ProccessingMethod.toMethodology(customComposite.getProcessingMode().getSelectionIndex()));
+				
+				try{
+					customComposite.getPlotSystem().removeTrace(customComposite.getPlotSystem().getTrace("Interpolated trajectory"));	
+				}
+				catch(Exception g){
+					
+				}
 				
 				
 			}
@@ -735,7 +752,12 @@ public class SurfaceScatterViewStart extends Dialog {
 			ArrayList<double[][]> jk = ssp.interpolationTrackerBoxesAccept();
 			
 			IPlottingSystem<Composite> pS = customComposite.getPlotSystem();
-			
+			try{
+				pS.removeTrace(pS.getTrace("Interpolated trajectory"));	
+			}
+			catch(Exception g){
+				
+			}
 			ILineTrace lt1 = pS.createLineTrace("Interpolated trajectory");
 			
 			Dataset xData = DatasetFactory.zeros(new int[] {jk.size()}, Dataset.ARRAYFLOAT64);
@@ -786,9 +808,11 @@ public class SurfaceScatterViewStart extends Dialog {
 		ssp.stitchAndPresent(this.getSsps3c().getOutputCurves());
 		this.getSsps3c().getOutputCurves().getIntensity().select(0);
 		this.getSsps3c().getOutputCurves().getIntensity().redraw();
-		
+		this.getSsps3c().getOutputCurves().getPlotSystem().repaint(false);
 		analysisSash.setWeights(new int[] { 40, 60 });
 		analysisSash.redraw();
+		
+		
 		
 	}
 	
@@ -901,6 +925,12 @@ public class SurfaceScatterViewStart extends Dialog {
 		modify = true;
 		
 		ssp.illuminateCorrectInterpolationBox(k);
+		
+		if(ssp.getInterpolatedLenPts() != null){
+			
+		}
+		
+		
 	}
 
 	public ArrayList<Slider> getSliderList() {

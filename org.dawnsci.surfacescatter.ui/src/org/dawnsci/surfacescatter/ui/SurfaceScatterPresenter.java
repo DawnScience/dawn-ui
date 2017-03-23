@@ -80,6 +80,8 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Slider;
 import org.eclipse.swt.widgets.TabFolder;
 
+import com.sun.management.jmx.Trace;
+
 import uk.ac.diamond.scisoft.analysis.io.LoaderFactory;
 
 public class SurfaceScatterPresenter {
@@ -1015,6 +1017,10 @@ public class SurfaceScatterPresenter {
 		}
 	}
 	
+	public ArrayList<double[][]> getInterpolatedLenPts(){
+		return sm.getInterpolatedLenPts();
+	}
+	
 	
 	public void illuminateCorrectInterpolationBox(int k){
 		
@@ -1613,12 +1619,12 @@ public class SurfaceScatterPresenter {
 				g.remove();
 				
 			}
-			
-			for(ITrace it : ssvs.getPlotSystemCompositeView().getPlotSystem().getTraces()){
-				
-				it.dispose();
+			try{
+				ssvs.getPlotSystemCompositeView().getPlotSystem().removeTrace(ssvs.getPlotSystemCompositeView().getPlotSystem().getTrace("Interpolated trajectory"));	
 			}
-			
+			catch(Exception g){
+				
+			}
 			sm.setInterpolatorRegions(null);
 			
 			if(sm.getInterpolatorBoxes() != null){
@@ -1629,12 +1635,18 @@ public class SurfaceScatterPresenter {
 			ssvs.getPlotSystemCompositeView().getPlotSystem1CompositeView().getRejectLocation().setEnabled(false);
 		}
 		
-		else if(TrackingMethodology.intToTracker1(trackerSelection) == TrackerType1.INTERPOLATION){
+		else if(TrackingMethodology.intToTracker1(trackerSelection) == TrackerType1.INTERPOLATION &&
+				sm.getTrackerOn()){
 	
 			ssvs.getPlotSystemCompositeView().getPlotSystem1CompositeView().getAcceptLocation().setEnabled(true);
 			ssvs.getPlotSystemCompositeView().getPlotSystem1CompositeView().getRejectLocation().setEnabled(true);
 		}
 	}
+	
+	public ArrayList<IRegion> getInterpolatorRegions(){
+		return sm.getInterpolatorRegions();
+	}
+	
 
 	public String[] getAnalysisSetup(int k){
 		
@@ -3333,7 +3345,7 @@ class trackingJob2 {
 									ExampleModel model = models.get(jokLocal);
 									
 									
-									if(dm.getLocationList() == null){
+									if(dm.getLocationList() == null && models.get(0).getTrackerType() != TrackerType1.INTERPOLATION){
 										
 										if (sm.getTrackerLocationList() == null | sm.getTrackerLocationList().size() <= 10 ){
 											int seedIndex = 
@@ -3383,6 +3395,19 @@ class trackingJob2 {
 											dm.setSeedLocation(seedLocation);
 										}
 									}	
+									
+									
+									else if(models.get(0).getTrackerType() == TrackerType1.INTERPOLATION){
+										
+										int[] len = new int[] {(int) Math.round(sm.getInterpolatedLenPts().get(k)[0][0]),(int) Math.round(sm.getInterpolatedLenPts().get(k)[0][1])};
+										int[]  pt = new int[] {(int) Math.round(sm.getInterpolatedLenPts().get(k)[1][0]),(int) Math.round(sm.getInterpolatedLenPts().get(k)[1][1])};
+										
+										double[] seedLocation = new double[] { (double) pt[0], (double) pt[1], (double) (pt[0] + len[0]),
+												(double) (pt[1]), (double) pt[0], (double) pt[1] + len[1], (double) (pt[0] + len[0]),
+												(double) (pt[1] + len[1]) };
+										
+										dm.setSeedLocation(seedLocation);
+									}
 									
 									dm.addxList(sm.getSortedX().getDouble(k));
 									
@@ -3457,7 +3482,7 @@ class trackingJob2 {
 									GeometricParametersModel gm = gms.get(nextjok);
 									ExampleModel model = models.get(nextjok);
 									
-									if(dm.getLocationList() == null){
+									if(dm.getLocationList() == null && models.get(0).getTrackerType() != TrackerType1.INTERPOLATION){
 										
 										int seedIndex = 
 												ClosestNoFinder.closestNoWithLocation(sm.getSortedX().getDouble(k),
@@ -3497,7 +3522,19 @@ class trackingJob2 {
 //										debug("!!!!!!!!!!!!!!!     }}}}}{{{{{{{{ seedlocation[0] : " + seedLocation[0] +" + " + "seedlocation[1] :" + seedLocation[1]);
 										
 									
-									}	
+									}
+									
+									else if(models.get(0).getTrackerType() == TrackerType1.INTERPOLATION){
+										
+										int[] len = new int[] {(int) Math.round(sm.getInterpolatedLenPts().get(k)[0][0]),(int) Math.round(sm.getInterpolatedLenPts().get(k)[0][1])};
+										int[]  pt = new int[] {(int) Math.round(sm.getInterpolatedLenPts().get(k)[1][0]),(int) Math.round(sm.getInterpolatedLenPts().get(k)[1][1])};
+										
+										double[] seedLocation = new double[] { (double) pt[0], (double) pt[1], (double) (pt[0] + len[0]),
+												(double) (pt[1]), (double) pt[0], (double) pt[1] + len[1], (double) (pt[0] + len[0]),
+												(double) (pt[1] + len[1]) };
+										
+										dm.setSeedLocation(seedLocation);
+									}
 									
 									dm.addxList(model.getDatImages().getShape()[0], imagePosInOriginalDat[k],
 											sm.getSortedX().getDouble(k));
@@ -3574,7 +3611,7 @@ class trackingJob2 {
 										ExampleModel model = models.get(nextjok);
 	
 										
-										if(dm.getLocationList() == null){
+										if(dm.getLocationList() == null && models.get(0).getTrackerType() != TrackerType1.INTERPOLATION){
 											
 											int seedIndex = 
 													ClosestNoFinder.closestNoWithLocation(sm.getSortedX().getDouble(k),
@@ -3612,6 +3649,19 @@ class trackingJob2 {
 											dm.setSeedLocation(seedLocation);
 										
 										}	
+										
+										else if(models.get(0).getTrackerType() == TrackerType1.INTERPOLATION){
+											
+											int[] len = new int[] {(int) Math.round(sm.getInterpolatedLenPts().get(k)[0][0]),(int) Math.round(sm.getInterpolatedLenPts().get(k)[0][1])};
+											int[]  pt = new int[] {(int) Math.round(sm.getInterpolatedLenPts().get(k)[1][0]),(int) Math.round(sm.getInterpolatedLenPts().get(k)[1][1])};
+											
+											double[] seedLocation = new double[] { (double) pt[0], (double) pt[1], (double) (pt[0] + len[0]),
+													(double) (pt[1]), (double) pt[0], (double) pt[1] + len[1], (double) (pt[0] + len[0]),
+													(double) (pt[1] + len[1]) };
+											
+											dm.setSeedLocation(seedLocation);
+										}
+										
 										
 										dm.addxList(model.getDatImages().getShape()[0], imagePosInOriginalDat[k],
 												sm.getSortedX().getDouble(k));
@@ -3873,7 +3923,7 @@ class trackingJob2 {
 						ExampleModel model = models.get(jokLocal);
 						
 						
-						if(dm.getLocationList() == null){
+						if(dm.getLocationList() == null && models.get(0).getTrackerType() != TrackerType1.INTERPOLATION){
 							
 							if (sm.getTrackerLocationList() == null | sm.getTrackerLocationList().size() <= 10 ){
 								int seedIndex = 
@@ -3923,6 +3973,19 @@ class trackingJob2 {
 								dm.setSeedLocation(seedLocation);
 							}
 						}	
+						
+						
+						else if(models.get(0).getTrackerType() == TrackerType1.INTERPOLATION){
+							
+							int[] len = new int[] {(int) Math.round(sm.getInterpolatedLenPts().get(k)[0][0]),(int) Math.round(sm.getInterpolatedLenPts().get(k)[0][1])};
+							int[]  pt = new int[] {(int) Math.round(sm.getInterpolatedLenPts().get(k)[1][0]),(int) Math.round(sm.getInterpolatedLenPts().get(k)[1][1])};
+							
+							double[] seedLocation = new double[] { (double) pt[0], (double) pt[1], (double) (pt[0] + len[0]),
+									(double) (pt[1]), (double) pt[0], (double) pt[1] + len[1], (double) (pt[0] + len[0]),
+									(double) (pt[1] + len[1]) };
+							
+							dm.setSeedLocation(seedLocation);
+						}
 						
 						dm.addxList(sm.getSortedX().getDouble(k));
 						
@@ -4003,7 +4066,7 @@ class trackingJob2 {
 						GeometricParametersModel gm = gms.get(nextjok);
 						ExampleModel model = models.get(nextjok);
 						
-						if(dm.getLocationList() == null){
+						if(dm.getLocationList() == null && models.get(0).getTrackerType() != TrackerType1.INTERPOLATION){
 							
 							int seedIndex = 
 									ClosestNoFinder.closestNoWithLocation(sm.getSortedX().getDouble(k),
@@ -4071,6 +4134,18 @@ class trackingJob2 {
 							debug("!!!!!!!!!!!!!!!     }}}}}{{{{{{{{ seedlocation[0] : " + seedLocation[0] +" + " + "seedlocation[1] :" + seedLocation[1]);
 							
 						}	
+						
+						else if(models.get(0).getTrackerType() == TrackerType1.INTERPOLATION){
+							
+							int[] len = new int[] {(int) Math.round(sm.getInterpolatedLenPts().get(k)[0][0]),(int) Math.round(sm.getInterpolatedLenPts().get(k)[0][1])};
+							int[]  pt = new int[] {(int) Math.round(sm.getInterpolatedLenPts().get(k)[1][0]),(int) Math.round(sm.getInterpolatedLenPts().get(k)[1][1])};
+							
+							double[] seedLocation = new double[] { (double) pt[0], (double) pt[1], (double) (pt[0] + len[0]),
+									(double) (pt[1]), (double) pt[0], (double) pt[1] + len[1], (double) (pt[0] + len[0]),
+									(double) (pt[1] + len[1]) };
+							
+							dm.setSeedLocation(seedLocation);
+						}
 						
 						dm.addxList(model.getDatImages().getShape()[0], imagePosInOriginalDat[k],
 								sm.getSortedX().getDouble(k));
@@ -4145,7 +4220,7 @@ class trackingJob2 {
 							ExampleModel model = models.get(nextjok);
 	
 							
-							if(dm.getLocationList() == null){
+							if(dm.getLocationList() == null && models.get(0).getTrackerType() != TrackerType1.INTERPOLATION){
 								
 								int seedIndex = 
 										ClosestNoFinder.closestNoWithLocation(sm.getSortedX().getDouble(k),
@@ -4183,6 +4258,19 @@ class trackingJob2 {
 								dm.setSeedLocation(seedLocation);
 							
 							}	
+							
+							else if(models.get(0).getTrackerType() == TrackerType1.INTERPOLATION){
+								
+								int[] len = new int[] {(int) Math.round(sm.getInterpolatedLenPts().get(k)[0][0]),(int) Math.round(sm.getInterpolatedLenPts().get(k)[0][1])};
+								int[]  pt = new int[] {(int) Math.round(sm.getInterpolatedLenPts().get(k)[1][0]),(int) Math.round(sm.getInterpolatedLenPts().get(k)[1][1])};
+								
+								double[] seedLocation = new double[] { (double) pt[0], (double) pt[1], (double) (pt[0] + len[0]),
+										(double) (pt[1]), (double) pt[0], (double) pt[1] + len[1], (double) (pt[0] + len[0]),
+										(double) (pt[1] + len[1]) };
+								
+								dm.setSeedLocation(seedLocation);
+							}
+							
 							
 							dm.addxList(model.getDatImages().getShape()[0], imagePosInOriginalDat[k],
 									sm.getSortedX().getDouble(k));

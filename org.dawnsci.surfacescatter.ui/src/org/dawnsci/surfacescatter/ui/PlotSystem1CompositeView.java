@@ -185,11 +185,18 @@ public class PlotSystem1CompositeView extends Composite {
 				else{
 					trackerOn= true;
 				}
+				
 				if(trackerOn){
 					trackerOnButton.setText("Tracker On");
+					if(ssp.getTrackerType() == TrackerType1.INTERPOLATION){
+						button4.setEnabled(true);
+						button5.setEnabled(true);
+					}
 				}
 				else{
 					trackerOnButton.setText("Tracker Off");
+					button4.setEnabled(false);
+					button5.setEnabled(false);
 				}
 				
 				ssp.setTrackerOn(trackerOn);
@@ -307,6 +314,11 @@ public class PlotSystem1CompositeView extends Composite {
        ssp.backgroundBoxesManager();
        
        ssp.regionOfInterestSetter();
+       
+       if(ssp.getTrackerType() != TrackerType1.INTERPOLATION){
+    	   button4.setEnabled(false);
+    	   button5.setEnabled(false);
+       }
       
    }
    
@@ -398,6 +410,8 @@ public class PlotSystem1CompositeView extends Composite {
 	 
 	   if(ssp.getTrackerOn() ==false){
 		   trackerOnButton.setText("Tracker Off");
+		   button4.setEnabled(false);
+		   button5.setEnabled(false);
 	   }
 	   else{
 		   trackerOnButton.setText("Tracker On");
