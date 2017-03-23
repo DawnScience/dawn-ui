@@ -32,6 +32,7 @@ import org.dawnsci.surfacescatter.FittingParameters;
 import org.dawnsci.surfacescatter.FittingParametersInputReader;
 import org.dawnsci.surfacescatter.FittingParametersOutput;
 import org.dawnsci.surfacescatter.GeometricParametersModel;
+import org.dawnsci.surfacescatter.InterpolationTracker;
 import org.dawnsci.surfacescatter.MethodSettingEnum.MethodSetting;
 import org.dawnsci.surfacescatter.ProcessingMethodsEnum.ProccessingMethod;
 import org.dawnsci.surfacescatter.OverlapUIModel;
@@ -44,6 +45,7 @@ import org.dawnsci.surfacescatter.StitchedOutputWithErrors;
 import org.dawnsci.surfacescatter.SuperModel;
 import org.dawnsci.surfacescatter.TrackerLocationInterpolation;
 import org.dawnsci.surfacescatter.TrackingMethodology;
+import org.dawnsci.surfacescatter.TrackingMethodology.TrackerType1;
 import org.eclipse.dawnsci.analysis.api.io.IDataHolder;
 import org.eclipse.dawnsci.analysis.api.roi.IROI;
 import org.eclipse.dawnsci.analysis.api.roi.IRectangularROI;
@@ -52,7 +54,9 @@ import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.region.IROIListener;
 import org.eclipse.dawnsci.plotting.api.region.IRegion;
 import org.eclipse.dawnsci.plotting.api.region.ROIEvent;
+import org.eclipse.dawnsci.plotting.api.region.IRegion.RegionType;
 import org.eclipse.dawnsci.plotting.api.trace.ILineTrace;
+import org.eclipse.dawnsci.plotting.api.trace.ITrace;
 import org.eclipse.january.dataset.AggregateDataset;
 import org.eclipse.january.dataset.DTypeUtils;
 import org.eclipse.january.dataset.Dataset;
@@ -476,6 +480,10 @@ public class SurfaceScatterPresenter {
 		}
 	}
 	
+	public TrackerType1 getTrackerType(){
+		return models.get(0).getTrackerType();
+	}
+	
 	public double getCurrentReflectivityFluxCorrection(){
 		return sm.getCurrentReflectivityFluxCorrection();
 	}
@@ -540,10 +548,23 @@ public class SurfaceScatterPresenter {
 							  int selection){
 		
 		if(sm.getBackgroundDatArray()!=null){
-			
-			subImageBgPlotSystem.updatePlot2D(sm.getBackgroundDatArray().get(selection),
-											  null, 
-											  null);
+			try{
+				subImageBgPlotSystem.updatePlot2D(sm.getBackgroundDatArray().get(selection),
+												  null,
+												  null);
+			}
+			catch(Exception n ){
+				IDataset nullImage = DatasetFactory.zeros(new int[] {2,2});
+				Maths.add(nullImage, 0.1);
+				try{
+					subImageBgPlotSystem.updatePlot2D(nullImage,
+							  null,
+							  null);
+				}
+				catch(Exception o){
+					
+				}
+			}
 		}
 		
 		else{
@@ -911,115 +932,108 @@ public class SurfaceScatterPresenter {
 		
 	}
 	
-	public void interpolationTrackerBoxes(){
-		
-		Listener[] p = ssvs.getCustomComposite().getPlotSystem1CompositeView().getAcceptLocation().getListeners(SWT.PUSH);
-		Listener[] q = ssvs.getCustomComposite().getPlotSystem1CompositeView().getRejectLocation().getListeners(SWT.PUSH);
-		
-		
-		for(Listener c : p ){
-			ssvs.getCustomComposite().getPlotSystem1CompositeView().getAcceptLocation().removeSelectionListener((SelectionListener) c);
-		}
-		
-		for(Listener d : q ){
-			ssvs.getCustomComposite().getPlotSystem1CompositeView().getRejectLocation().removeSelectionListener((SelectionListener) d);
-		}
+	public ArrayList<double[][]> interpolationTrackerBoxesAccept(){
 		
 		Display display = Display.getCurrent();
-        Color blue = display.getSystemColor(SWT.COLOR_BLUE);
-        
-        
-		IRegion r2 = ssvs.getPlotSystemCompositeView().getSecondBgRegion();
-		r2.setRegionColor(blue);
-		r2.setVisible(true);
-		r2.setUserRegion(true);
-		r2.setLineWidth(1);
-		r2.setMobile(true);
-		r2.setFill(true);
-		r2.setLineWidth(3);
+		Color blue = display.getSystemColor(SWT.COLOR_CYAN);
 		
-		
-		ssvs.getCustomComposite().getPlotSystem1CompositeView().getAcceptLocation().addSelectionListener(new SelectionListener() {
-			
-			@Override
-			public void widgetSelected(SelectionEvent e) {
+		IRegion r2 = ssvs.getPlotSystemCompositeView().getGreenRegion();
 				
-				double[][] box = new double[3][];
+		double[][] box = new double[3][];
 				
-				double[] lengths = new double[] {(double) r2.getROI().getBounds().getIntLengths()[0], (double) r2.getROI().getBounds().getIntLengths()[1]};
-				double[] pts = new double[] {(double) r2.getROI().getBounds().getIntPoint()[0], r2.getROI().getBounds().getIntPoint()[1]};
-				double[] xdata = new double[]{(double) sm.getSliderPos(), (double) sm.getSortedX().getDouble(sm.getSliderPos())};
+		double[] lengths = new double[] {(double) r2.getROI().getBounds().getIntLengths()[0], (double) r2.getROI().getBounds().getIntLengths()[1]};
+		double[] pts = new double[] {(double) r2.getROI().getBounds().getIntPoint()[0], r2.getROI().getBounds().getIntPoint()[1]};
+		double[] xdata = new double[]{(double) sm.getSliderPos(), (double) sm.getSortedX().getDouble(sm.getSliderPos())};
 				
-				box[0] = lengths;
-				box[1] = pts;
-				box[2] = xdata;
+		box[0] = lengths;
+		box[1] = pts;
+		box[2] = xdata;
 				
-				sm.addToInterpolatorBoxes(box);
+		sm.addToInterpolatorBoxes(box);
 				
-			}
-			
-			@Override
-			public void widgetDefaultSelected(SelectionEvent e) {
-				// TODO Auto-generated method stub
-				
-			}
-		});
-		
-		
-		if (sm.getBackgroundLenPt()!=null){
-		
-			int[][] redLenPt = sm.getBackgroundLenPt();
-			int[] redLen = redLenPt[0];
-			int[] redPt = redLenPt[1];
-			
-			
-			RectangularROI startROI = new RectangularROI(redPt[0],
-														 redPt[1],
-														 redLen[0],
-														 redLen[1],
-														 0);
-		
-			r2.setROI(startROI);
-			
+		try {
+			IRegion region =ssvs.getPlotSystemCompositeView().getPlotSystem().createRegion(("Interpolation Region: " + sm.getSliderPos()), RegionType.BOX);
+			region.setROI(r2.getROI());
+			sm.addToInterpolatorRegions(region);
+			region.setRegionColor(blue);
+			region.setLineWidth(5);
+			region.setFill(true);
+			region.setUserRegion(false);
+			region.setMobile(false);
+			ssvs.getPlotSystemCompositeView().getPlotSystem().addRegion(region);
+
+		} catch (Exception e1) {
+					// TODO Auto-generated catch block
+			e1.printStackTrace();
 		}
 		
-		
-		
-		r2.setRegionColor(magenta);		
-		
-		ssvs.getPlotSystemCompositeView().getCentreSecondBgRegion().setEnabled(true);
-		
-		if (models.get(0).getMethodology() == Methodology.OVERLAPPING_BACKGROUND_BOX){
+		if(sm.getInterpolatorBoxes().size() > 1){
+			
+			ArrayList<double[][]> interpolatedLenPts = InterpolationTracker.interpolatedTrackerLenPtArray(sm.getInterpolatorBoxes(), 
+										  sm.getSortedX());
+			sm.setInterpolatedLenPts(interpolatedLenPts);
 				
-			if (sm.getBoxOffsetLenPt()!=null){
-					
-					int[][] newOffsetLenPt =sm.getBoxOffsetLenPt();
-					int[] len = sm.getInitialLenPt()[0]; 
-					int[] pt = sm.getInitialLenPt()[1];
-					
-					int[] offsetLen = newOffsetLenPt[0];
-					int[] offsetPt = newOffsetLenPt[1];
-					
-					int pt0 = pt[0] + offsetPt[0];
-					int pt1 = pt[1] + offsetPt[1];
-					
-					int len0 = len[0] + offsetLen[0];
-					int len1 = len[1] + offsetLen[1];
-					
-					sm.setBackgroundLenPt(new int[][] {{pt0,pt1},{len0,len1}});
+			return interpolatedLenPts;
+		}
+		
+		return null;
+	}
+	
+	
+	public void interpolationTrackerBoxesReject(){
+		
+						
+		double u =(double) sm.getSliderPos();
+				
+		if(sm.getInterpolatorBoxes() != null){
+			for(int j = 0; j<sm.getInterpolatorBoxes().size(); j++){
+				if(sm.getInterpolatorBoxes().get(j)[2][0] == u){
+					sm.getInterpolatorBoxes().remove(j);
+					ssvs.getPlotSystemCompositeView().getPlotSystem().removeRegion(sm.getInterpolatorRegions().get(j));
+					sm.getInterpolatorRegions().remove(j);
+					ssvs.getPlotSystemCompositeView().getPlotSystem().repaint(false);
 				}
-        
-        
-        
-        
-        
-        
-        
-        
-		}   
-        
+			}
+		}
 		
 	}
+	
+	public void illuminateCorrectInterpolationBox(){
+		
+		if(getTrackerType() == TrackerType1.INTERPOLATION && sm.getInterpolatorRegions()!= null){
+			
+			double u =(double) sm.getSliderPos();
+			
+			for(int j =0; j<sm.getInterpolatorBoxes().size(); j++){
+				if(sm.getInterpolatorBoxes().get(j)[2][0] == u){
+					sm.getInterpolatorRegions().get(j).setFill(true);
+				}
+				else{
+					sm.getInterpolatorRegions().get(j).setFill(false);
+				}
+			}
+		}
+	}
+	
+	
+	public void illuminateCorrectInterpolationBox(int k){
+		
+		if(getTrackerType() == TrackerType1.INTERPOLATION && sm.getInterpolatorRegions()!= null){
+			
+			double u =(double) k;
+			
+			for(int j =0; j<sm.getInterpolatorRegions().size(); j++){
+				if(sm.getInterpolatorBoxes().get(j)[2][0] == u){
+					sm.getInterpolatorRegions().get(j).setFill(true);
+				}
+				else{
+					sm.getInterpolatorRegions().get(j).setFill(false);
+				}
+			}
+		}
+	}
+	
+	
 	
 	public AnalaysisMethodologies.Methodology getBackgroundSubtraction(){
 		return models.get(0).getMethodology();
@@ -1590,6 +1604,36 @@ public class SurfaceScatterPresenter {
 			
 			model.setBoundaryBox((int) Math.round(r));
 		}
+		
+		if(TrackingMethodology.intToTracker1(trackerSelection) != TrackerType1.INTERPOLATION 
+				&& sm.getInterpolatorRegions() != null){
+			
+			for(IRegion g : sm.getInterpolatorRegions()){
+				ssvs.getPlotSystemCompositeView().getPlotSystem().removeRegion(g);
+				g.remove();
+				
+			}
+			
+			for(ITrace it : ssvs.getPlotSystemCompositeView().getPlotSystem().getTraces()){
+				
+				it.dispose();
+			}
+			
+			sm.setInterpolatorRegions(null);
+			
+			if(sm.getInterpolatorBoxes() != null){
+				sm.setInterpolatorBoxes(null);
+			}
+			
+			ssvs.getPlotSystemCompositeView().getPlotSystem1CompositeView().getAcceptLocation().setEnabled(false);
+			ssvs.getPlotSystemCompositeView().getPlotSystem1CompositeView().getRejectLocation().setEnabled(false);
+		}
+		
+		else if(TrackingMethodology.intToTracker1(trackerSelection) == TrackerType1.INTERPOLATION){
+	
+			ssvs.getPlotSystemCompositeView().getPlotSystem1CompositeView().getAcceptLocation().setEnabled(true);
+			ssvs.getPlotSystemCompositeView().getPlotSystem1CompositeView().getRejectLocation().setEnabled(true);
+		}
 	}
 
 	public String[] getAnalysisSetup(int k){
@@ -2106,7 +2150,7 @@ public class SurfaceScatterPresenter {
 	
 		parentPs.clear();
 
-		ILineTrace lt1 = parentPs.createLineTrace("Ajusted Spliced Curve");
+		ILineTrace lt1 = parentPs.createLineTrace("Adjusted Spliced Curve");
 		lt1.setData(xData, yData);
 		lt1.isErrorBarEnabled();
 		

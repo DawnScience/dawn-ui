@@ -15,8 +15,10 @@ import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.region.IROIListener;
 import org.eclipse.dawnsci.plotting.api.region.IRegion;
 import org.eclipse.dawnsci.plotting.api.region.ROIEvent;
+import org.eclipse.dawnsci.plotting.api.trace.ILineTrace;
 import org.eclipse.january.DatasetException;
 import org.eclipse.january.dataset.Dataset;
+import org.eclipse.january.dataset.DatasetFactory;
 import org.eclipse.january.dataset.IDataset;
 import org.eclipse.january.dataset.ILazyDataset;
 import org.eclipse.january.dataset.SliceND;
@@ -33,16 +35,21 @@ import org.eclipse.swt.events.FocusEvent;
 import org.eclipse.swt.events.FocusListener;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
+import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Slider;
 import org.eclipse.swt.widgets.TableItem;
+import org.eclipse.ui.PlatformUI;
 
 import uk.ac.diamond.scisoft.analysis.io.LoaderFactory;
 
@@ -719,12 +726,41 @@ public class SurfaceScatterViewStart extends Dialog {
 		return container;
 	}
 
+	public void interpolationTrackerBoxesAccept(){
+		
+		try{
+			Display display = Display.getCurrent();
+	        Color cyan = display.getSystemColor(SWT.COLOR_DARK_CYAN);
+			
+			ArrayList<double[][]> jk = ssp.interpolationTrackerBoxesAccept();
+			
+			IPlottingSystem<Composite> pS = customComposite.getPlotSystem();
+			
+			ILineTrace lt1 = pS.createLineTrace("Interpolated trajectory");
+			
+			Dataset xData = DatasetFactory.zeros(new int[] {jk.size()}, Dataset.ARRAYFLOAT64);
+			Dataset yData = DatasetFactory.zeros(new int[] {jk.size()}, Dataset.ARRAYFLOAT64);
+			
+			for(int ty = 0; ty<jk.size(); ty++){
+				double[][] consideredBox = jk.get(ty);
+				
+				xData.set(consideredBox[1][0], ty);
+				yData.set(consideredBox[1][1], ty);
+			}
+			
+			lt1.setData(xData, yData);
+			lt1.setTraceColor(cyan);
+			pS.addTrace(lt1);
+		}
+		catch(Exception f){
+			
+		}
+	}
+	
 	
 	public void fireAccept(){
 		
 		ssp.addXValuesForFireAccept();
-		
-		
 		
 		ssp.presenterDummyProcess(ssp.getSliderPos(), 
 								  ssp.getImage(ssp.getSliderPos()), 
@@ -741,25 +777,15 @@ public class SurfaceScatterViewStart extends Dialog {
 		if (getPlotSystemCompositeView().getBackgroundSubtractedSubImage() == null) {
 			getPlotSystemCompositeView().appendBackgroundSubtractedSubImage();
 			getPlotSystemCompositeView().getSash().setWeights(new int[] { 23, 45, 25, 7 });
-
 		}
-		
-//		ssp.updateSliders(ssvs.getSliderList(), imageNumber);
+
 		this.getPlotSystemCompositeView().getFolder().setSelection(2);
-//		ssvs.updateIndicators(imageNumber);
-//		ssvs.getPlotSystemCompositeView().getPlotSystem().updatePlot2D(tempImage, null, null);
 		IDataset  s = ssp.getBackgroundDatArray().get(ssp.getSliderPos());
 		this.getPlotSystemCompositeView().getSubImageBgPlotSystem().updatePlot2D(s, null, null);
-//		ssvs.getPlotSystemCompositeView().getPlotSystem().repaint(true);
-//		ssvs.getPlotSystemCompositeView().getSubImageBgPlotSystem().repaint(true);
 		this.getSsps3c().generalUpdate();
 		ssp.stitchAndPresent(this.getSsps3c().getOutputCurves());
-//		ssp.trackingRegionOfInterestSetter(ssp.getLocationList().get(imageNumber), imageNumber);
 		this.getSsps3c().getOutputCurves().getIntensity().select(0);
 		this.getSsps3c().getOutputCurves().getIntensity().redraw();
-		
-		
-		
 		
 		analysisSash.setWeights(new int[] { 40, 60 });
 		analysisSash.redraw();
@@ -817,6 +843,15 @@ public class SurfaceScatterViewStart extends Dialog {
 
 	}
 	
+
+	@Override
+	protected Point getInitialSize() {
+		Rectangle rect = PlatformUI.getWorkbench().getWorkbenchWindows()[0].getShell().getBounds();
+		int h = rect.height;
+		int w = rect.width;
+		
+		return new Point((int) Math.round(1*w), (int) Math.round(1*h));
+	}
 	
 
 	@Override
@@ -847,6 +882,7 @@ public class SurfaceScatterViewStart extends Dialog {
 	}
 
 	public void updateIndicators(int k) {
+		
 		modify = false;
 		if (customComposite.getXValue().equals(ssp.getXValue(k)) == false) {
 			customComposite.getXValue().setText(String.valueOf(ssp.getXValue(k)));
@@ -863,6 +899,8 @@ public class SurfaceScatterViewStart extends Dialog {
 		}
 
 		modify = true;
+		
+		ssp.illuminateCorrectInterpolationBox(k);
 	}
 
 	public ArrayList<Slider> getSliderList() {
@@ -1007,25 +1045,7 @@ public class SurfaceScatterViewStart extends Dialog {
 			}
 
 		});
-		
-//		customComposite.getOutputControl().addSelectionListener(new SelectionListener() {
-//			
-//			@Override
-//			public void widgetSelected(SelectionEvent e) {
-//				
-//				double start = outputCurves.getPlotSystem().get
-//				
-//				outputCurves.getPlotSystem().getAxes().get(0).setRange(start, end);
-//				
-//			}
-//			
-//			@Override
-//			public void widgetDefaultSelected(SelectionEvent e) {
-//				// TODO Auto-generated method stub
-//				
-//			}
-//		});ferrors
-		
+			
 
 		outputCurves.getIntensity().addSelectionListener(new SelectionListener() {
 

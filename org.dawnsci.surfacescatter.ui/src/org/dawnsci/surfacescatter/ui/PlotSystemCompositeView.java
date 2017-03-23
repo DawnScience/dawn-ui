@@ -280,7 +280,8 @@ public class PlotSystemCompositeView extends Composite {
     												    SWT.NONE,
     												    0, 
     												    0, 
-    												    ssp);
+    												    ssp,
+    												    ssvs);
     		
     	customComposite1.setLayout(new GridLayout());
     	customComposite1.setLayoutData(ld2);
@@ -549,6 +550,10 @@ public class PlotSystemCompositeView extends Composite {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				ssvs.fireAccept();
+				slider.setSelection(slider.getSelection() +1);
+				ssp.setSliderPos(slider.getSelection());
+				generalUpdate();
+				ssvs.sliderMovementGeneralUpdate();
 			}
 			
 			@Override

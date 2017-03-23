@@ -18,6 +18,7 @@ import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
+import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -44,16 +45,19 @@ public class PlotSystem1CompositeView extends Composite {
     private Spinner boundaryBoxText;
     private SurfaceScatterPresenter ssp;
     private Boolean trackerOn =false;
+    private SurfaceScatterViewStart ssvs;
 	
   
     public PlotSystem1CompositeView(Composite parent, 
     		int style, 
     		int trackingMarker, 
     		int extra,
-    		SurfaceScatterPresenter ssp){
+    		SurfaceScatterPresenter ssp,
+    		SurfaceScatterViewStart ssvs){
     	
         super(parent, style);
         this.ssp = ssp;
+        this.ssvs = ssvs;
 
         try {
 			plotSystem1 = PlottingFactory.createPlottingSystem();
@@ -218,9 +222,42 @@ public class PlotSystem1CompositeView extends Composite {
         button5.setData(new GridData(SWT.FILL));
         button5.setText("Reject Position");
         button5.setEnabled(false);
+        
+        
+        button4.addSelectionListener(new SelectionListener() {
+			
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				
+				ssvs.interpolationTrackerBoxesAccept();
+				
+			}
+			
+			@Override
+			public void widgetDefaultSelected(SelectionEvent e) {
+				
+			}
+		});
+        
+        
+        button5.addSelectionListener(new SelectionListener() {
+			
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				
+				ssp.interpolationTrackerBoxesReject();
+				
+			}
+			
+			@Override
+			public void widgetDefaultSelected(SelectionEvent e) {
+				
+			}
+		});
+        
 
         
-	}
+    }
     
    public Composite getComposite(){   	
 	   return this;
