@@ -65,5 +65,12 @@
             restorable="true">
       </view>
    </extension>
+   <extension
+         point="org.eclipse.dawnsci.plotting.api.plottingViewer">
+      <plottingViewer
+            class="org.dawnsci.slicing.tools.hyper.HyperPlotViewer"
+            id="org.dawnsci.slicing.tools.hyper.HyperPlotViewer">
+      </plottingViewer>
+   </extension>
 
 </plugin>
