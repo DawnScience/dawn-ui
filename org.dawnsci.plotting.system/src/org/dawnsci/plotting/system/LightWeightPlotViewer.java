@@ -662,7 +662,7 @@ public class LightWeightPlotViewer<T> extends AbstractPlottingViewer<T> implemen
 							wiz.setFilePath(lastPath);
 							WizardDialog wd = new  WizardDialog(Display.getCurrent().getActiveShell(), wiz);
 							wd.setTitle(wiz.getWindowTitle());
-							if (wiz instanceof PlotDataConversionWizard) ((PlotDataConversionWizard)wiz).setPlottingSystem(system);
+							wiz.setPlottingSystem(system);
 							wd.open();
 							lastPath = wiz.getFilePath();
 						} catch (Exception e) {
