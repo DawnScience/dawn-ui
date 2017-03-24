@@ -1,4 +1,4 @@
-RELEASE NOTES FOR DAWN 2.4.0
+RELEASE NOTES FOR DAWN 2.5.0
 
 1. Use the '-data' switch to specify a different workspace if the disk access at your facility
    is slow or restricted in the default location. 
@@ -13,27 +13,6 @@ RELEASE NOTES FOR DAWN 2.4.0
 
 New features:
 ---------------
--PEEMA alignment
--Raise dataset table when using it in DExplore
--Speed up accessing HDF5 data
--Jython update from 2.5 to 2.7
--New higher contrast colours for line plots
--Plot axes now reversible
--New processing steps: Fit peaks to a caked 2d xrd image (for strain analysis), sum of series of frames, filter data using the ratio of two integrated areas and others
--Processing using python scripts can use python from the path if pydev not configured
--Graylog for error logging internal to diamond
--Alpha version of DataVis perspective
 
 Bug fixes:
 ---------------
--PEEMA tweaks and fixes
--1D line plots: log-scale fix
--2D image plots: fix many oddities in histogram tool
--Scisoftpy:
---fix bitwise and logical operations on boolean arrays
---add copy function
---fix advanced index of rank>1 arrays
---fix slice setting
--Fixed memory leak in line traces.
--Flushing of data in processing now more efficient
--Consistent save and import icons throughout
