@@ -76,8 +76,10 @@ public class SuperSashPlotSystem3Composite extends Composite{
         
         try {
         	plotSystem1 = PlottingFactory.createPlottingSystem();
+        	plotSystem1.setShowLegend(false);
 			plotSystem2 = PlottingFactory.createPlottingSystem();
 			plotSystem3 = PlottingFactory.createPlottingSystem();
+			plotSystem3.setShowLegend(false);
         } 
         catch (Exception e2) {
 			e2.printStackTrace();
@@ -278,6 +280,10 @@ public class SuperSashPlotSystem3Composite extends Composite{
 		});
 
 
+		
+		plotSystem3.setShowLegend(false);
+		plotSystem1.setShowLegend(false);
+		
 	   }
 	   
 	   public Composite getComposite(){   	

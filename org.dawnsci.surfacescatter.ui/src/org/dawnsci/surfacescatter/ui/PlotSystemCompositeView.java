@@ -162,10 +162,12 @@ public class PlotSystemCompositeView extends Composite {
 		
 		Label outputControlLabel = new Label(indicators, SWT.NULL);
 		outputControlLabel.setText("Take Ouput Marker:");
+		outputControlLabel.setVisible(false);
 		
 		outputControl = new Button (indicators, SWT.CHECK);
         outputControl.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
         outputControl.setSelection(true);
+        outputControl.setVisible(false);
         
         Group buttons = new Group (mainImage,SWT.NONE);  
         GridLayout 	buttonsLayout = new GridLayout(2,true);
