@@ -254,6 +254,20 @@ public class PlotSystem1CompositeView extends Composite {
 				
 				ssp.interpolationTrackerBoxesReject();
 				
+				double u =(double) ssp.getSliderPos();
+				
+				if(ssp.getInterpolatorBoxes() != null){
+					for(int j = 0; j<ssp.getInterpolatorBoxes().size(); j++){
+						if(ssp.getInterpolatorBoxes().get(j)[2][0] == u){
+							ssp.getInterpolatorBoxes().remove(j);
+							ssvs.getPlotSystemCompositeView().getPlotSystem().removeRegion(ssp.getInterpolatorRegions().get(j));
+							ssp.getInterpolatorRegions().remove(j);
+							ssvs.getPlotSystemCompositeView().getPlotSystem().repaint(false);
+						}
+					}
+				}
+				
+				
 			}
 			
 			@Override
@@ -306,14 +320,22 @@ public class PlotSystem1CompositeView extends Composite {
 	   int trackerSelection = comboDropDown2.getSelectionIndex();
        
 	   String boundaryBox = String.valueOf(boundaryBoxText.getSelection());
-       ssp.updateAnalysisMethodology(methodologySelection, 
+       ssvs.updateAnalysisMethodology(methodologySelection, 
      		  						 fitPowerSelection, 
      		  						 trackerSelection, 
      		  						 boundaryBox);
        
-       ssp.backgroundBoxesManager();
+       ssp.backgroundBoxesManager(ssvs.getPlotSystemCompositeView().getBgRegion(),
+    		   					  ssvs.getPlotSystemCompositeView().getSecondBgRegion(),
+    		   					  ssvs.getPlotSystemCompositeView().getCentreSecondBgRegion());
        
-       ssp.regionOfInterestSetter();
+       
+       
+       ssvs.getPlotSystemCompositeView().getBgRegion().setROI(ssp.regionOfInterestSetter(ssvs.getPlotSystemCompositeView().getPlotSystem().
+		getRegion("myRegion").getROI()));
+       
+       
+//       ssp.regionOfInterestSetter();
        
        if(ssp.getTrackerType() != TrackerType1.INTERPOLATION){
     	   button4.setEnabled(false);

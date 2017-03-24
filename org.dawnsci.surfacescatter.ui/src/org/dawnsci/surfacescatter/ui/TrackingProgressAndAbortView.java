@@ -1,5 +1,6 @@
 package org.dawnsci.surfacescatter.ui;
 
+import org.dawnsci.surfacescatter.MethodSettingEnum.MethodSetting;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.swt.SWT;
@@ -23,6 +24,7 @@ public class TrackingProgressAndAbortView extends Dialog {
 	private Button abort;
 	private ProgressBar progress;
 	private int maximum;
+	private SurfaceScatterViewStart ssvs;
 	private SurfaceScatterPresenter ssp;
 	private IPlottingSystem<Composite> subImage;
 	private IPlottingSystem<Composite> outputCurvesPlotSystem;
@@ -87,15 +89,37 @@ public class TrackingProgressAndAbortView extends Dialog {
 		});
 		
 		try{
-		
-			ssp.runTrackingJob(subImage,
-							   outputCurvesPlotSystem, 
-							   mainImagePlotSytem,
-							   backgroundTabFolder, 
-							   subBgImage, 
-							   progress,
-							   this
-							  );
+			
+			TrackingHandler tj = new TrackingHandler(); 
+			
+			
+			tj.setProgress(progress);
+			tj.setSsvs(ssvs);
+			tj.setCorrectionSelection(MethodSetting.toInt(ssp.getCorrectionSelection()));
+//			tj.setSuperModel(sm);
+//			tj.setGms(gms);
+//			tj.setSsvsPS(ssvs.getPlotSystemCompositeView().getPlotSystem());
+			tj.setPlotSystem(ssvs.getPlotSystemCompositeView().getPlotSystem());
+			tj.setOutputCurves(ssvs.getSsps3c().getOutputCurves().getPlotSystem());
+			tj.setTimeStep(Math.round((2 / ssp.getNoImages())));
+			tj.setSsp(ssp);
+			tj.setTPAAV(TrackingProgressAndAbortView.this);
+			tj.runTJ1();
+			
+
+			
+			
+			
+			
+//		
+//			ssp.runTrackingJob(subImage,
+//							   outputCurvesPlotSystem, 
+//							   mainImagePlotSytem,
+//							   backgroundTabFolder, 
+//							   subBgImage, 
+//							   progress,
+//							   this
+//							  );
 		}
 		catch(IndexOutOfBoundsException d){
 			ssp.boundariesWarning();

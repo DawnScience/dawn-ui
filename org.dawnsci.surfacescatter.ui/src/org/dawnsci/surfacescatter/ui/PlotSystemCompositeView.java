@@ -6,6 +6,7 @@ import org.dawnsci.surfacescatter.TrackingMethodology;
 import org.dawnsci.surfacescatter.MethodSettingEnum.MethodSetting;
 import org.dawnsci.surfacescatter.ProcessingMethodsEnum.ProccessingMethod;
 import org.dawnsci.surfacescatter.TrackingMethodology.TrackerType1;
+import org.eclipse.dawnsci.analysis.api.roi.IROI;
 import org.eclipse.dawnsci.analysis.dataset.roi.RectangularROI;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.PlotType;
@@ -407,8 +408,8 @@ public class PlotSystemCompositeView extends Composite {
 			}
 			
 			public void roiStandard(ROIEvent evt) {
-				ssp.regionOfInterestSetter();
-				
+				IROI bg = ssp.regionOfInterestSetter(region.getROI());
+				bgRegion.setROI(bg);
 				
 			}
 		});

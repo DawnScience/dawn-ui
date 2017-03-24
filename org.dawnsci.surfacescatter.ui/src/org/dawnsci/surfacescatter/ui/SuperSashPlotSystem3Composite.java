@@ -433,7 +433,7 @@ public class SuperSashPlotSystem3Composite extends Composite{
 				left.setWeights(new int[] {50,50});
 				right.setWeights(new int[] {50,50});
 				
-				ssp.correctionsDisplayUpdate();
+				ssvs.getCustomComposite().generalCorrectionsUpdate();
 				
 				return;
 		}
@@ -522,7 +522,7 @@ public class SuperSashPlotSystem3Composite extends Composite{
 			left.setWeights(new int[] {50,50});
 			right.setWeights(new int[] {50,50});
 
-			ssp.correctionsDisplayUpdate();
+			ssvs.getCustomComposite().generalCorrectionsUpdate();
 			
 			
 			return;

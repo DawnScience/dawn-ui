@@ -36,6 +36,7 @@ public class GeneralOverlapHandlerView extends Dialog {
     private ArrayList<IDataset> yArrayListRawError;
     private Button export;
     private SurfaceScatterPresenter ssp;
+    private SurfaceScatterViewStart ssvs;
     private IPlottingSystem<Composite> parentPs;
     private StitchedOverlapCurves stitchedCurves;
     private boolean errorFlag =true;
@@ -49,7 +50,8 @@ public class GeneralOverlapHandlerView extends Dialog {
 			ArrayList<IDataset> yArrayListRaw,
 			ArrayList<IDataset> yArrayListRawError,
 			IPlottingSystem<Composite> parentPs,
-			SurfaceScatterPresenter ssp){
+			SurfaceScatterPresenter ssp,
+			SurfaceScatterViewStart ssvs){
 		
 		super(parentShell);
 		setShellStyle(getShellStyle() | SWT.RESIZE);
@@ -149,7 +151,8 @@ public class GeneralOverlapHandlerView extends Dialog {
 				IDataset xData = stitchedCurves.getLineTrace1().getXData();
 				IDataset yData = stitchedCurves.getLineTrace1().getYData();
 				
-				ssp.export(parentPs, xData, yData);
+				ssvs.export(parentPs, xData, yData);
+				
 			}
 			
 			@Override
