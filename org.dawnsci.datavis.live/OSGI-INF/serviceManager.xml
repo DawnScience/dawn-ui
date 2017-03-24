@@ -3,4 +3,5 @@
    <implementation class="org.dawnsci.datavis.live.ServiceManager"/>
    <reference bind="setRemoteDatasetService" cardinality="1..1" interface="org.eclipse.dawnsci.analysis.api.io.IRemoteDatasetService" name="IRemoteDatasetService" policy="static"/>
    <reference bind="setIEventService" cardinality="1..1" interface="org.eclipse.scanning.api.event.IEventService" name="IEventService" policy="static"/>
+   <reference bind="setILoaderService" cardinality="1..1" interface="org.eclipse.dawnsci.analysis.api.io.ILoaderService" name="ILoaderService" policy="static"/>
 </scr:component>

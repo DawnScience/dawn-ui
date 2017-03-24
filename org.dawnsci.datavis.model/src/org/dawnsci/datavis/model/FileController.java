@@ -1,18 +1,15 @@
 package org.dawnsci.datavis.model;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import org.dawnsci.datavis.api.IRecentPlaces;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.january.dataset.IDynamicDataset;
-import org.eclipse.january.dataset.ShapeUtils;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.progress.IProgressService;
@@ -70,26 +67,38 @@ public class FileController implements IFileController {
 				@Override
 				public void refreshRequest() {
 					
-					Display.getDefault().syncExec(new Runnable() {
+					Runnable r = new Runnable() {
 						
 						@Override
 						public void run() {
+							
 							getLoadedFiles().stream()
 							.filter(IRefreshable.class::isInstance)
 							.map(IRefreshable.class::cast)
 							.forEach(d -> d.refresh());
 							
-							fireStateChangeListeners(false, true);
+							Display.getDefault().syncExec(new Runnable() {
+								
+								@Override
+								public void run() {
+									
+									fireStateChangeListeners(false, true);
+									
+								}
+							});
 							
 						}
-					});
+					};
 					
-					
+					LiveServiceManager.getILiveFileService().runUpdate(r);
 				}
 				
 				@Override
 				public void localReload(String path) {
-					// TODO Auto-generated method stub
+					LoadedFile loadedFile = loadedFiles.getLoadedFile(path);
+					if (loadedFile instanceof IRefreshable) {
+						((IRefreshable)loadedFile).locallyReload();
+					}
 					
 				}
 				

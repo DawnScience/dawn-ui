@@ -5,10 +5,15 @@ import java.net.URISyntaxException;
 import java.util.EventListener;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicReference;
 
 import org.dawnsci.datavis.model.ILiveFileListener;
 import org.dawnsci.datavis.model.ILiveFileService;
 import org.dawnsci.datavis.model.LoadedFile;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.scanning.api.event.EventConstants;
 import org.eclipse.scanning.api.event.EventException;
 import org.eclipse.scanning.api.event.IEventService;
@@ -24,6 +29,10 @@ public class LiveFileServiceImpl implements ILiveFileService {
 	private Set<ILiveFileListener> listeners = new HashSet<>();
 	private ISubscriber<EventListener> subscriber;
 	
+	private static long MIN_REFRESH_TIME = 2000;
+	
+	private UpdateJob job;
+	
 	@Override
 	public void addLiveFileListener(ILiveFileListener l) {
 		listeners.add(l);
@@ -33,6 +42,16 @@ public class LiveFileServiceImpl implements ILiveFileService {
 	public void removeLiveFileListener(ILiveFileListener l) {
 		listeners.remove(l);
 		
+	}
+	
+	@Override
+	public void runUpdate(Runnable runnable) {
+		if (job == null) {
+			job = new UpdateJob("Update Live Data");
+			job.setPriority(Job.INTERACTIVE);
+		}
+		job.setRunnable(runnable);
+		job.schedule();
 	}
 
 	@Override
@@ -152,6 +171,37 @@ public class LiveFileServiceImpl implements ILiveFileService {
 		if (port<=0) port = Integer.getInteger("GDA/gda.dataserver.port", -1);
 		if (port<=0) port = Integer.getInteger("gda.dataserver.port", -1);
 		return port;
+	}
+	
+	private class UpdateJob extends Job {
+
+		private final AtomicReference<Runnable> task =new AtomicReference<Runnable>();
+		
+		public UpdateJob(String name) {
+			super(name);
+		}
+		
+		public void setRunnable(Runnable runnable) {
+			this.task.set(runnable);
+		}
+
+		@Override
+		protected IStatus run(IProgressMonitor monitor) {
+			Runnable local = task.getAndSet(null);
+			if (local == null) return Status.OK_STATUS;
+			local.run();
+
+
+			try {
+				Thread.sleep(MIN_REFRESH_TIME);
+			} catch (InterruptedException e) {
+				return Status.OK_STATUS;
+			}
+
+
+			return Status.OK_STATUS;
+		}
+		
 	}
 
 }

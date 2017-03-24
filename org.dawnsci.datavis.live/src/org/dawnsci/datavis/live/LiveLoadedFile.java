@@ -10,6 +10,7 @@ import org.dawnsci.datavis.model.LoadedFile;
 import org.dawnsci.datavis.model.NDimensions;
 import org.dawnsci.datavis.model.PlottableObject;
 import org.eclipse.dawnsci.analysis.api.io.IDataHolder;
+import org.eclipse.dawnsci.analysis.api.io.ILoaderService;
 import org.eclipse.dawnsci.analysis.api.tree.DataNode;
 import org.eclipse.dawnsci.analysis.api.tree.IFindInTree;
 import org.eclipse.dawnsci.analysis.api.tree.Node;
@@ -29,6 +30,8 @@ import uk.ac.diamond.scisoft.analysis.io.DataHolder;
 
 public class LiveLoadedFile extends LoadedFile implements IRefreshable {
 
+	private boolean live = true;
+	
 	public LiveLoadedFile(String path, String host, int port) {
 		this(createDataHolder(path,host,port));
 	}
@@ -75,17 +78,18 @@ public class LiveLoadedFile extends LoadedFile implements IRefreshable {
 		Metadata md = new Metadata();
 		
 		for (String s : result.keySet()) {
+			String name = "/"+s;
 			IDatasetConnector r = ServiceManager.getRemoteDatasetService().createRemoteDataset(host, port);
 			r.setPath(path);
-			r.setDatasetName("/"+s);
+			r.setDatasetName(name);
 			IDynamicDataset dataset = (IDynamicDataset)r.getDataset();
 			dataset.refreshShape();
-			dataset.setName("/"+s);
-			dh.addDataset(s, dataset);
+			dataset.setName(name);
+			dh.addDataset(name, dataset);
 			long[] maxShape = ((DataNode)result.get(s).getDestination()).getMaxShape();
 			int[] max = new int[maxShape.length];
 			for (int i = 0; i < maxShape.length; i++) max[i] = (int)maxShape[i];
-			md.addDataInfo(s, max);
+			md.addDataInfo(name, max);
 			
 		}
 		
@@ -100,6 +104,8 @@ public class LiveLoadedFile extends LoadedFile implements IRefreshable {
 
 	@Override
 	public void refresh() {
+		if (!live) return;
+		
 		if (dataOptions.isEmpty()) {
 			String[] names = dataHolder.getNames();
 			for (String n : names) {
@@ -134,6 +140,20 @@ public class LiveLoadedFile extends LoadedFile implements IRefreshable {
 			int[] shape = o.getLazyDataset().getShape();
 			nDimensions.updateShape(shape);
 		}
+		
+	}
+
+	@Override
+	public void locallyReload() {
+		ILoaderService service = ServiceManager.getILoaderService();
+		try {
+			dataHolder = service.getData(getFilePath(), null);
+			dataOptions.values().stream().forEach(o -> o.setAxes(null));
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		live = false;
 		
 	}
 	

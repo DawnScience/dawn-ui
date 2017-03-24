@@ -197,15 +197,29 @@ public class NDimensions {
 	
 	public void updateShape(int[] shape) {
 		for (int i = 0 ; i < shape.length; i++) {
-			boolean complete = false;
-			if (dimensions[i].getSlice() != null && dimensions[i].getSlice().isSliceComplete() && dimensions[i].getSize() != 1) {
-				complete = true;
+			boolean containsEnd = false;
+			boolean isSingle = false;
+			
+	
+			if (dimensions[i].getSlice() != null && dimensions[i].getSize() != 1) {
+				int size = dimensions[i].getSize();
+				Slice slice = dimensions[i].getSlice();
+				if (size == slice.getStop()) {
+					containsEnd = true;
+				}
+				if (size-1 == slice.getStart()) {
+					isSingle = true;
+				}
 			}
 			dimensions[i].setSize(shape[i]);
-			if (complete) {
+			if (containsEnd) {
 				Slice slice = dimensions[i].getSlice();
 				slice.setStop(shape[i]);
-				
+			}
+			
+			if (isSingle) {
+				Slice slice = dimensions[i].getSlice();
+				slice.setStart(shape[i]-1);
 			}
 		}
 	}
