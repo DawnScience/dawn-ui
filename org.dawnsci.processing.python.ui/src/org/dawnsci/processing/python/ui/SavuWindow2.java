@@ -32,9 +32,7 @@ public class SavuWindow2 extends Composite {
 		super(parent, style);
 		final String wspacePath = ResourcesPlugin.getWorkspace().getRoot().getLocation().toString();
 		final String savuPluginPath = wspacePath+"savu_plugin_info.ser";
-//		final String savuPluginPath = "cheese.ser";
 		setLayout(new GridLayout(3, false));
-		
 		Label lblAvailableSavuPlugin = new Label(this, SWT.NONE);
 		lblAvailableSavuPlugin.setText("Available Savu Plugins");
 		new Label(this, SWT.NONE);
