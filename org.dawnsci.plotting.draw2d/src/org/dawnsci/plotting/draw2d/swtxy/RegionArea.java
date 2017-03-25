@@ -55,9 +55,10 @@ import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.nebula.visualization.widgets.figureparts.ColorMapRamp;
 import org.eclipse.nebula.visualization.xygraph.figures.Annotation;
 import org.eclipse.nebula.visualization.xygraph.figures.Axis;
+import org.eclipse.nebula.visualization.xygraph.figures.IXYGraph;
 import org.eclipse.nebula.visualization.xygraph.figures.PlotArea;
 import org.eclipse.nebula.visualization.xygraph.figures.Trace;
-import org.eclipse.nebula.visualization.xygraph.undo.ZoomType;
+import org.eclipse.nebula.visualization.xygraph.figures.ZoomType;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.graphics.Color;
@@ -82,7 +83,7 @@ public class RegionArea extends PlotArea {
 	private MouseMotionListener             positionListener;
 
 	public RegionArea(XYRegionGraph xyGraph) {
-		super(xyGraph);
+		super((IXYGraph) xyGraph);
 		this.regions     = new LinkedHashMap<String,AbstractSelectionRegion<?>>();
 		this.imageTraces = new LinkedHashMap<String,ImageTrace>();	
 		
@@ -91,8 +92,8 @@ public class RegionArea extends PlotArea {
 			public void mouseMoved(MouseEvent me) {
 				
 				firePositionListeners(new PositionEvent(RegionArea.this, 
-						                               (AspectAxis)getRegionGraph().primaryXAxis,
-						                               (AspectAxis)getRegionGraph().primaryYAxis,
+						                               (AspectAxis)getRegionGraph().getPrimaryXAxis(),
+						                               (AspectAxis)getRegionGraph().getPrimaryYAxis(),
 													    me.x, 
 													    me.y));
 				createPositionCursor(me);

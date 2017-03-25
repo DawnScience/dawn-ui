@@ -31,6 +31,8 @@ import org.eclipse.nebula.visualization.widgets.figureparts.ColorMapRamp;
 import org.eclipse.nebula.visualization.xygraph.figures.Annotation;
 import org.eclipse.nebula.visualization.xygraph.figures.Axis;
 import org.eclipse.nebula.visualization.xygraph.figures.IAnnotationLabelProvider;
+import org.eclipse.nebula.visualization.xygraph.figures.IAxesFactory;
+import org.eclipse.nebula.visualization.xygraph.figures.IXYGraph;
 import org.eclipse.nebula.visualization.xygraph.figures.Legend;
 import org.eclipse.nebula.visualization.xygraph.figures.PlotArea;
 import org.eclipse.nebula.visualization.xygraph.figures.Trace;
@@ -47,24 +49,29 @@ import org.eclipse.ui.preferences.ScopedPreferenceStore;
  *
  */
 public class XYRegionGraph extends XYGraph {
-	
-	
-	public XYRegionGraph() {
-		super();
-		removeAxis(primaryXAxis);
-		removeAxis(primaryYAxis);
-		
-		primaryYAxis = new AspectAxis(Y_AXIS, true);
-		primaryYAxis.setTickLabelSide(LabelSide.Primary);
-		primaryYAxis.setAutoScaleThreshold(0.1);
-		addAxis(primaryYAxis);
 
-		primaryXAxis = new AspectAxis(X_AXIS, false);
-		primaryXAxis.setTickLabelSide(LabelSide.Primary);
-		addAxis(primaryXAxis);
+	private static final class XYRegionGraphAxesFactory implements IAxesFactory {
+		@Override
+		public Axis createXAxis() {
+			AspectAxis newAxis = new AspectAxis(X_AXIS, false);
+			newAxis.setTickLabelSide(LabelSide.Primary);
+			return newAxis;
+		}
+
+		@Override
+		public Axis createYAxis() {
+			Axis newAxis = new AspectAxis(Y_AXIS, true);
+			newAxis.setTickLabelSide(LabelSide.Primary);
+			newAxis.setAutoScaleThreshold(0.1);
+			return newAxis;
+		}
+	}
+
+	public XYRegionGraph() {
+		super(new XYRegionGraphAxesFactory());
 
 		try {
-		    this.showLegend = getPreferenceStore().getBoolean(BasePlottingConstants.XY_SHOWLEGEND);
+			this.showLegend = getPreferenceStore().getBoolean(BasePlottingConstants.XY_SHOWLEGEND);
 		} catch (NullPointerException ne) {
 			this.showLegend = true;
 		}
@@ -76,10 +83,10 @@ public class XYRegionGraph extends XYGraph {
 		store = new ScopedPreferenceStore(InstanceScope.INSTANCE, "org.dawnsci.plotting");
 		return store;
 	}
-	
+
 	@Override
-	protected PlotArea createPlotArea(XYGraph xyGraph) {
-        return new RegionArea(this);
+	protected PlotArea createPlotArea(IXYGraph xyGraph) {
+		return new RegionArea(this);
 	}
 
 	public void addRegion(final AbstractSelectionRegion<?> region) {
@@ -278,10 +285,10 @@ public class XYRegionGraph extends XYGraph {
 		if(getPlotArea() != null && getPlotArea().isVisible()){
 
 			Rectangle plotAreaBound = new Rectangle(
-					primaryXAxis.getBounds().x + primaryXAxis.getMargin(),
-					primaryYAxis.getBounds().y + primaryYAxis.getMargin(),
-					primaryXAxis.getTickLength(),
-					primaryYAxis.getTickLength()
+					getPrimaryXAxis().getBounds().x + getPrimaryXAxis().getMargin(),
+					getPrimaryYAxis().getBounds().y + getPrimaryYAxis().getMargin(),
+					getPrimaryXAxis().getTickLength(),
+					getPrimaryYAxis().getTickLength()
 					);
 			getPlotArea().setBounds(plotAreaBound);
 
@@ -303,8 +310,8 @@ public class XYRegionGraph extends XYGraph {
 	 */
 	public void setZoomLevel(MouseEvent evt, double delta, boolean tryToUseWhitespace) {
 		
-		int primX = primaryXAxis.getTickLength();
-		int primY = primaryYAxis.getTickLength();
+		int primX = getPrimaryXAxis().getTickLength();
+		int primY = getPrimaryYAxis().getTickLength();
 		double xScale = delta;
 		double yScale = delta;	
 
@@ -426,8 +433,8 @@ public class XYRegionGraph extends XYGraph {
 	}
 
 	public void setShowAxes(final boolean checked) {
-		this.primaryXAxis.setVisible(checked);
-		this.primaryYAxis.setVisible(checked);
+		this.getPrimaryXAxis().setVisible(checked);
+		this.getPrimaryYAxis().setVisible(checked);
 	}
 
 	/**
@@ -446,7 +453,7 @@ public class XYRegionGraph extends XYGraph {
 
 	public IAxis getSelectedXAxis() {
 		if (selectedXAxis==null) {
-			return (AspectAxis)primaryXAxis;
+			return (AspectAxis)getPrimaryXAxis();
 		}
 		return selectedXAxis;
 	}
@@ -457,7 +464,7 @@ public class XYRegionGraph extends XYGraph {
 
 	public IAxis getSelectedYAxis() {
 		if (selectedYAxis==null) {
-			return (AspectAxis)primaryYAxis;
+			return (AspectAxis)getPrimaryYAxis();
 		}
 		return selectedYAxis;
 	}

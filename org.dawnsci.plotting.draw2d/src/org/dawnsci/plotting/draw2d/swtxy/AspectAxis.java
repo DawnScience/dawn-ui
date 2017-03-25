@@ -510,7 +510,7 @@ public class AspectAxis extends Axis implements IAxis {
 	@Override
 	public boolean isPrimaryAxis() {
 		final XYRegionGraph xyGraph = (XYRegionGraph)getGraph();
-		return xyGraph.primaryXAxis==this || xyGraph.primaryYAxis==this;
+		return xyGraph.getPrimaryXAxis()==this || xyGraph.getPrimaryYAxis()==this;
 	}
 
 	@Override

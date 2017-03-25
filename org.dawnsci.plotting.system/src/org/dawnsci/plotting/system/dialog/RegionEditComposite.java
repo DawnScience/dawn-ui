@@ -341,11 +341,11 @@ public class RegionEditComposite extends Composite {
 		};
         roiViewer.addROIListener(roiListener);
        
-        Range range = xyGraph.primaryXAxis.getRange();
+        Range range = xyGraph.getPrimaryXAxis().getRange();
         roiViewer.setXLowerBound(Math.min(range.getUpper(), range.getLower()));
         roiViewer.setXUpperBound(Math.max(range.getUpper(), range.getLower()));
 		
-        range = xyGraph.primaryYAxis.getRange();
+        range = xyGraph.getPrimaryYAxis().getRange();
         roiViewer.setYLowerBound(Math.min(range.getUpper(), range.getLower()));
         roiViewer.setYUpperBound(Math.max(range.getUpper(), range.getLower()));
 
