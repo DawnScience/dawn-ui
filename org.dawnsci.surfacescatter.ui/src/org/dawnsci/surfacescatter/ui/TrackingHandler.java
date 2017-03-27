@@ -32,7 +32,7 @@ public class TrackingHandler {
 	private ArrayList<ExampleModel> models;
 	private IPlottingSystem<Composite> plotSystem;
 	private IPlottingSystem<Composite> outputCurves;
-	private ArrayList<GeometricParametersModel> gms;
+	private GeometricParametersModel gm;
 	private SuperModel sm;
 	private SurfaceScatterViewStart ssvs;
 	private int correctionSelection;
@@ -85,8 +85,8 @@ public class TrackingHandler {
 		this.sm = sm;
 	}
 
-	public void setGms(ArrayList<GeometricParametersModel> gms) {
-		this.gms = gms;
+	public void setGm(GeometricParametersModel gms) {
+		this.gm = gms;
 	}
 
 	public void setPlotSystem(IPlottingSystem<Composite> plotSystem) {
@@ -115,7 +115,7 @@ public class TrackingHandler {
 
 		this.sm = ssp.getSm();
 		this.dms = ssp.getDms();
-		this.gms = ssp.getGms();
+		this.gm = ssp.getGm();
 		this.models = ssp.getModels();
 		
 		
@@ -163,7 +163,7 @@ public class TrackingHandler {
 									IDataset j = ssp.getImage(imageNumber);
 									int jok = sm.getFilepathsSortedArray()[imageNumber];
 									DataModel dm = dms.get(jok);
-									GeometricParametersModel gm = gms.get(jok);
+//									GeometricParametersModel gm = gm;
 									ExampleModel model = models.get(jok);
 
 									dm.addxList(sm.getSortedX().getDouble(imageNumber));
@@ -241,7 +241,7 @@ public class TrackingHandler {
 						IDataset j = ssp.getImage(k);
 						int jok = sm.getFilepathsSortedArray()[k];
 						DataModel dm = dms.get(jok);
-						GeometricParametersModel gm = gms.get(jok);
+//						GeometricParametersModel gm = gms.get(jok);
 						ExampleModel model = models.get(jok);
 	
 						dm.addxList(model.getDatImages().getShape()[0], imagePosInOriginalDat[k],
@@ -300,7 +300,7 @@ public class TrackingHandler {
 							IDataset j = ssp.getImage(k);
 							int jok = sm.getFilepathsSortedArray()[k];
 							DataModel dm = dms.get(jok);
-							GeometricParametersModel gm = gms.get(jok);
+//							GeometricParametersModel gm = gms.get(jok);
 							ExampleModel model = models.get(jok);
 		
 							dm.addxList(model.getDatImages().getShape()[0], imagePosInOriginalDat[k],
@@ -367,7 +367,7 @@ public class TrackingHandler {
 			tj.setProgress(progressBar);
 			tj.setCorrectionSelection(MethodSetting.toInt(sm.getCorrectionSelection()));
 			tj.setSuperModel(sm);
-			tj.setGms(gms);
+			tj.setGm(gm);
 			tj.setDms(dms);
 			tj.setModels(models);
 			tj.setPlotSystem(plotSystem);
@@ -441,7 +441,7 @@ class trackingJob2 {
 	private ArrayList<ExampleModel> models;
 	private IPlottingSystem<Composite> plotSystem;
 	private IPlottingSystem<Composite> outputCurves;
-	private ArrayList<GeometricParametersModel> gms;
+	private GeometricParametersModel gm;
 	private SuperModel sm;
 	private int correctionSelection;
 	private int noImages;
@@ -493,8 +493,8 @@ class trackingJob2 {
 		this.sm = sm;
 	}
 
-	public void setGms(ArrayList<GeometricParametersModel> gms) {
-		this.gms = gms;
+	public void setGm(GeometricParametersModel gms) {
+		this.gm = gms;
 	}
 
 	public void setPlotSystem(IPlottingSystem<Composite> plotSystem) {
@@ -563,7 +563,7 @@ class trackingJob2 {
 							int trackingMarker = 0;
 							IDataset j = ssp.getImage(k);
 							DataModel dm = dms.get(jok);
-							GeometricParametersModel gm = gms.get(jok);
+//							GeometricParametersModel gm = gms.get(jok);
 							ExampleModel model = models.get(jok);
 		
 							dm.addxList(sm.getSortedX().getDouble(k));
@@ -655,7 +655,7 @@ class trackingJob2 {
 									IDataset j = ssp.getImage(k);
 									int jokLocal = sm.getFilepathsSortedArray()[k];
 									DataModel dm = dms.get(jokLocal);
-									GeometricParametersModel gm = gms.get(jokLocal);
+//									GeometricParametersModel gm = gms.get(jokLocal);
 									ExampleModel model = models.get(jokLocal);
 									
 									
@@ -793,7 +793,7 @@ class trackingJob2 {
 									int trackingMarker = 1;
 									IDataset j = ssp.getImage(k);
 									DataModel dm = dms.get(nextjok);
-									GeometricParametersModel gm = gms.get(nextjok);
+//									GeometricParametersModel gm = gms.get(nextjok);
 									ExampleModel model = models.get(nextjok);
 									
 									if(dm.getLocationList() == null && models.get(0).getTrackerType() != TrackerType1.INTERPOLATION){
@@ -921,7 +921,7 @@ class trackingJob2 {
 										int trackingMarker = 2;
 										IDataset j = ssp.getImage(k);
 										DataModel dm = dms.get(nextjok);
-										GeometricParametersModel gm = gms.get(nextjok);
+//										GeometricParametersModel gm = gms.get(nextjok);
 										ExampleModel model = models.get(nextjok);
 	
 										
@@ -1066,7 +1066,7 @@ class trackingJob2 {
 					int trackingMarker = 1;
 					IDataset j = ssp.getImage(k);
 					DataModel dm = dms.get(jok);
-					GeometricParametersModel gm = gms.get(jok);
+//					GeometricParametersModel gm = gms.get(jok);
 					ExampleModel model = models.get(jok);
 
 					dm.addxList(model.getDatImages().getShape()[0], imagePosInOriginalDat[k],
@@ -1137,7 +1137,7 @@ class trackingJob2 {
 						int trackingMarker = 2;
 						IDataset j = ssp.getImage(k);
 						DataModel dm = dms.get(jok);
-						GeometricParametersModel gm = gms.get(jok);
+//						GeometricParametersModel gm = gms.get(jok);
 						ExampleModel model = models.get(jok);
 	
 						dm.addxList(model.getDatImages().getShape()[0], imagePosInOriginalDat[k],
@@ -1233,7 +1233,7 @@ class trackingJob2 {
 						IDataset j = ssp.getImage(k);
 						int jokLocal = sm.getFilepathsSortedArray()[k];
 						DataModel dm = dms.get(jokLocal);
-						GeometricParametersModel gm = gms.get(jokLocal);
+//						GeometricParametersModel gm = gms.get(jokLocal);
 						ExampleModel model = models.get(jokLocal);
 						
 						
@@ -1377,7 +1377,7 @@ class trackingJob2 {
 						int trackingMarker = 1;
 						IDataset j = ssp.getImage(k);
 						DataModel dm = dms.get(nextjok);
-						GeometricParametersModel gm = gms.get(nextjok);
+//						GeometricParametersModel gm = gms.get(nextjok);
 						ExampleModel model = models.get(nextjok);
 						
 						if(dm.getLocationList() == null && models.get(0).getTrackerType() != TrackerType1.INTERPOLATION){
@@ -1530,7 +1530,7 @@ class trackingJob2 {
 							int trackingMarker = 2;
 							IDataset j = ssp.getImage(k);
 							DataModel dm = dms.get(nextjok);
-							GeometricParametersModel gm = gms.get(nextjok);
+//							GeometricParametersModel gm = gms.get(nextjok);
 							ExampleModel model = models.get(nextjok);
 	
 							

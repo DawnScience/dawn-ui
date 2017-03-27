@@ -568,6 +568,34 @@ public class GeometricParametersWindows extends Composite{
 	}
 	
 	
+	public void getGeometricParameters() {
+		
+		ssp.geometricParametersUpdate(
+				  fluxPath.getText(),
+				  (Double.parseDouble(beamHeight.getText())),
+				  (Double.parseDouble(footprint.getText())),
+				  (Double.parseDouble(angularFudgeFactor.getText())),
+				  beamCorrection.getSelection(),
+				  (Double.parseDouble(beamInPlane.getText())),
+				  (Double.parseDouble(beamOutPlane.getText())),
+				  (Double.parseDouble(covar.getText())),
+				  (Double.parseDouble(detectorSlits.getText())),
+				  (Double.parseDouble(inPlaneSlits.getText())),
+				  (Double.parseDouble(inplanePolarisation.getText())),
+				  (Double.parseDouble(outPlaneSlits.getText())),
+				  (Double.parseDouble(outplanePolarisation.getText())),
+				  (Double.parseDouble(scalingFactor.getText())),
+				  (Double.parseDouble(reflectivityA.getText())),
+				  (Double.parseDouble(sampleSize.getText())),
+				  (Double.parseDouble(normalisationFactor.getText())),
+				  (specular.getSelection()),
+				  (imageName.getText())
+				  );
+		
+	}
+	
+	
+	
 	public void localGeometricParametersUpdate(GeometricParametersModel gm) {
 		
 		gm.setFluxPath(fluxPath.getText());

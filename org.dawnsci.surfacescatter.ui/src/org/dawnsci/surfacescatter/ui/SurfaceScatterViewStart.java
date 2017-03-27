@@ -273,9 +273,9 @@ public class SurfaceScatterViewStart extends Dialog {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 
-				paramField.localGeometricParametersUpdate(gms.get(id));
+				ssp.createGm();
 				
-				
+				paramField.geometricParametersUpdate();
 				
 				try{
 					for(IRegion g : ssp.getInterpolatorRegions()){
@@ -478,9 +478,21 @@ public class SurfaceScatterViewStart extends Dialog {
 
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-
-				ssp.runReplay(customComposite.getPlotSystem(), customComposite.getFolder(),
-						customComposite.getSubImageBgPlotSystem());
+//
+//				ssp.runReplay(customComposite.getPlotSystem(), customComposite.getFolder(),
+//						customComposite.getSubImageBgPlotSystem());
+//				
+				MovieJob mJ = new MovieJob();
+//				mJ.setSuperModel(sm);
+				mJ.setPS(customComposite.getPlotSystem());
+				mJ.setTime(220);
+				mJ.setSsp(ssp);
+				mJ.setSsvs(SurfaceScatterViewStart.this);
+				mJ.setSliders(SurfaceScatterViewStart.this.getSliderList());
+				mJ.setFolder(customComposite.getFolder());
+				mJ.setSubIBgPS(customComposite.getSubImageBgPlotSystem());
+				mJ.run();
+				
 
 			}
 
@@ -931,7 +943,7 @@ public void addSecondBgRegionListeners(IRegion r2){
 				region.setROI(customComposite.getGreenRegion().getROI());
 				ssp.addToInterpolatorRegions(region);
 				region.setRegionColor(cyan);
-				region.setLineWidth(5);
+				region.setLineWidth(10);
 				region.setFill(true);
 				region.setUserRegion(false);
 				region.setMobile(false);
@@ -1042,7 +1054,8 @@ public void addSecondBgRegionListeners(IRegion r2){
 														   getSsps3c().getOutputCurves().getPlotSystem(),
 														   customComposite.getPlotSystem(),
 														   customComposite.getFolder(),
-														   customComposite.getSubImageBgPlotSystem());
+														   customComposite.getSubImageBgPlotSystem(),
+														   SurfaceScatterViewStart.this);
 			tpaav.open();
 			
 			customComposite.getOutputControl().setEnabled(true);
@@ -1083,6 +1096,7 @@ public void addSecondBgRegionListeners(IRegion r2){
 		ssp.bgImageUpdate(customComposite.getSubImageBgPlotSystem(), sliderPos);
 		ssps3c.generalUpdate();
 	}
+	
 	
 	
 	

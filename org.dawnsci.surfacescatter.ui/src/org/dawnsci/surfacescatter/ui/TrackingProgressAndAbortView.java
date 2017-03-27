@@ -41,7 +41,8 @@ public class TrackingProgressAndAbortView extends Dialog {
 										IPlottingSystem<Composite> outputCurvesPlotSystem,
 										IPlottingSystem<Composite> mainImagePlotSytem,
 										TabFolder backgroundTabFolder,
-										IPlottingSystem<Composite> subBgImage) {
+										IPlottingSystem<Composite> subBgImage,
+										SurfaceScatterViewStart ssvs) {
 		
 		
 		super(parentShell);
@@ -53,6 +54,7 @@ public class TrackingProgressAndAbortView extends Dialog {
 		this.mainImagePlotSytem = mainImagePlotSytem;
 		this.backgroundTabFolder= backgroundTabFolder;
 		this.subBgImage = subBgImage;
+		this.ssvs = ssvs;
 		
 		setShellStyle(getShellStyle() | SWT.RESIZE | SWT.APPLICATION_MODAL);		
 

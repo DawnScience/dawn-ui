@@ -87,7 +87,8 @@ public class SurfaceScatterPresenter {
 	
 	private ArrayList<ExampleModel> models;
 	private ArrayList<DataModel> dms;
-	private ArrayList<GeometricParametersModel> gms;
+//	private ArrayList<GeometricParametersModel> gms;
+	private GeometricParametersModel gm;
 	private SuperModel sm;
 	private int noImages = 0;
 //	private SurfaceScatterViewStart ssvs;
@@ -149,13 +150,13 @@ public class SurfaceScatterPresenter {
 		return  dms;
 	}
 	
-	public ArrayList<GeometricParametersModel> getGms() {
-		return gms;
-	}
-
-	public void setGms(ArrayList<GeometricParametersModel> gms) {
-		this.gms = gms;
-	}
+//	public ArrayList<GeometricParametersModel> getGms() {
+//		return gms;
+//	}
+//
+//	public void setGms(ArrayList<GeometricParametersModel> gms) {
+//		this.gms = gms;
+//	}
 	
 	public void addStateListener(IPresenterStateChangeEventListener listener){
 		listeners.add(listener);
@@ -169,6 +170,10 @@ public class SurfaceScatterPresenter {
 		sm = new SuperModel();
 	}
 	
+	public void createGm(){
+		gm = new GeometricParametersModel();
+	}
+	
 	
 	public void surfaceScatterPresenterBuild(Shell parentShell, 
 								   String[] filepaths,
@@ -179,7 +184,7 @@ public class SurfaceScatterPresenter {
 
 		this.parentShell = parentShell;
 		sm = new SuperModel();
-		gms = new ArrayList<GeometricParametersModel>();
+//		gms = new ArrayList<GeometricParametersModel>();
 		dms = new ArrayList<DataModel>();
 		models = new ArrayList<ExampleModel>();
 		sm.setFilepaths(filepaths);
@@ -199,12 +204,12 @@ public class SurfaceScatterPresenter {
 				
 					models.add(new ExampleModel());
 					dms.add(new DataModel());
-					gms.add(new GeometricParametersModel());
+//					gms.add(new GeometricParametersModel());
+//					
+//					ssvs.getParamField().localGeometricParametersUpdate(gms.get(id));
 					
-					ssvs.getParamField().localGeometricParametersUpdate(gms.get(id));
-					
-					gms.get(id).setxName(xName);
-					gms.get(id).setxNameRef(xName);
+					gm.setxName(xName);
+					gm.setxNameRef(xName);
 					
 					if(imageFolderPath == null){
 						dh1 = LoaderFactory.getData(filepaths[id]);
@@ -248,7 +253,7 @@ public class SurfaceScatterPresenter {
 					ILazyDataset ild = null;
 					
 					
-					ild = dh1.getLazyDataset(gms.get(sm.getSelection()).getImageName());
+					ild = dh1.getLazyDataset(gm.getImageName());
 					
 					if(ild == null){
 						ild = dh1.getLazyDataset("file_image");
@@ -284,7 +289,7 @@ public class SurfaceScatterPresenter {
 					if (MethodSetting.toInt(sm.getCorrectionSelection()) == 0) {
 						
 						try{
-							ILazyDataset ildx = dh1.getLazyDataset(gms.get(sm.getSelection()).getxName());
+							ILazyDataset ildx = dh1.getLazyDataset(gm.getxName());
 							models.get(id).setDatX(ildx);
 							SliceND slice1 = new SliceND(ildx.getShape());
 							IDataset xdat = ildx.getSlice(slice1);
@@ -300,7 +305,7 @@ public class SurfaceScatterPresenter {
 							MethodSetting.toInt(sm.getCorrectionSelection()) == 2||	
 							MethodSetting.toInt(sm.getCorrectionSelection()) == 3){
 						
-						ILazyDataset ildx = dh1.getLazyDataset(gms.get(sm.getSelection()).getxNameRef());
+						ILazyDataset ildx = dh1.getLazyDataset(gm.getxNameRef());
 						models.get(id).setDatX(ildx);
 	
 						SliceND slice1 = new SliceND(ildx.getShape());
@@ -346,7 +351,7 @@ public class SurfaceScatterPresenter {
 			}
 		
 
-		for (GeometricParametersModel gm : gms) {
+		
 
 			gm.addPropertyChangeListener(new PropertyChangeListener() {
 
@@ -354,7 +359,7 @@ public class SurfaceScatterPresenter {
 					for (int id = 0; id < filepaths.length; id++) {
 						try {
 							IDataHolder dh1 = LoaderFactory.getData(filepaths[id]);
-							ILazyDataset ild = dh1.getLazyDataset(gms.get(sm.getSelection()).getImageName());
+							ILazyDataset ild = dh1.getLazyDataset(gm.getImageName());
 							models.get(id).setDatImages(ild);
 						}
 
@@ -365,7 +370,7 @@ public class SurfaceScatterPresenter {
 					}
 				}
 			});
-		}
+		
 
 		updateAnalysisMethodology(0, 1, 0, "10");
 		
@@ -444,7 +449,7 @@ public class SurfaceScatterPresenter {
 	}
 	
 	public String getXName(){
-		return gms.get(0).getxName();
+		return gm.getxName();
 	}
 	
 	public String getImageFolderPath(){
@@ -1546,7 +1551,7 @@ public class SurfaceScatterPresenter {
 													 image, 
 													 models.get(j), 
 													 dms.get(j), 
-													 gms.get(j), 
+													 gm, 
 													 pS,
 //													 ssvs.getPlotSystemCompositeView().getPlotSystem(),
 													 MethodSetting.toInt(sm.getCorrectionSelection()), 
@@ -1590,7 +1595,7 @@ public class SurfaceScatterPresenter {
 										  String imageName
 										  ){
 											
-		for(GeometricParametersModel gm: gms){
+		
 			gm.setFluxPath(fluxPath);
 			gm.setBeamHeight(beamHeight);
 			gm.setFootprint(footprint);
@@ -1610,7 +1615,7 @@ public class SurfaceScatterPresenter {
 			gm.setNormalisationFactor(normalisationFactor);
 			gm.setSpecular(specular);
 			gm.setImageName(imageName);
-		}
+		
 		
 	}
 	
@@ -1888,7 +1893,7 @@ public class SurfaceScatterPresenter {
 		    }
 		    
 		    else{
-		    	writer.println("#"+gms.get(0).getxName()+"	I	Ie");
+		    	writer.println("#"+gm.getxName()+"	I	Ie");
 				
 				 for(int gh = 0 ; gh<sm.getImages().length; gh++){
 							writer.println(sm.getxList().get(gh) +"	"+ 
@@ -1916,10 +1921,10 @@ public class SurfaceScatterPresenter {
 		}
 	}
 	
-	public ArrayList<GeometricParametersModel> getGeometricParamtersModels(){
-		return gms;
-	}
-	
+//	public ArrayList<GeometricParametersModel> getGeometricParamtersModels(){
+//		return gms;
+//	}
+//	
 	
 	public void anarodSave(String title, String[] fr){
 
@@ -2008,7 +2013,7 @@ public class SurfaceScatterPresenter {
 		    }
 		    
 		    else{
-		    	writer.println("#"+gms.get(0).getxName()+"	I	Ie");
+		    	writer.println("#"+gm.getxName()+"	I	Ie");
 				
 				 for(int gh = 0 ; gh<sm.getImages().length; gh++){
 							writer.println(sm.getxList().get(gh) +"	"+ 
@@ -2146,7 +2151,7 @@ public class SurfaceScatterPresenter {
 		    }
 		    		    
 		    else{
-		    	writer.println("#"+gms.get(0).getxName()+"	I	Ie	Area Correction	Flux Correction");
+		    	writer.println("#"+gm.getxName()+"	I	Ie	Area Correction	Flux Correction");
 				
 		    	if(sm.getCorrectionSelection() == MethodSetting.Reflectivity_with_Flux_Correction){
 
@@ -2669,22 +2674,22 @@ public class SurfaceScatterPresenter {
 //	
 	
 	
-	public void runReplay(IPlottingSystem<Composite> pS,
-						  TabFolder folder,
-						  IPlottingSystem<Composite> subIBgPS){
-		
-		MovieJob mJ = new MovieJob();
-		mJ.setSuperModel(sm);
-		mJ.setPS(pS);
-		mJ.setTime(220);
-		mJ.setSsp(this);
-		mJ.setSsvs(ssvs);
-		mJ.setSliders(ssvs.getSliderList());
-		mJ.setFolder(folder);
-		mJ.setSubIBgPS(subIBgPS);
-		mJ.run();	
-		
-	}
+//	public void runReplay(IPlottingSystem<Composite> pS,
+//						  TabFolder folder,
+//						  IPlottingSystem<Composite> subIBgPS){
+//		
+//		MovieJob mJ = new MovieJob();
+//		mJ.setSuperModel(sm);
+//		mJ.setPS(pS);
+//		mJ.setTime(220);
+//		mJ.setSsp(this);
+//		mJ.setSsvs(ssvs);
+//		mJ.setSliders(ssvs.getSliderList());
+//		mJ.setFolder(folder);
+//		mJ.setSubIBgPS(subIBgPS);
+//		mJ.run();	
+//		
+//	}
 	
 	public void setStartFrame(int f){
 		sm.setStartFrame(f);
@@ -2778,46 +2783,46 @@ public class SurfaceScatterPresenter {
 		return sm;
 	}
 
-	public void runTrackingJob(IPlottingSystem<Composite> subPS, 
-							   IPlottingSystem<Composite> outputCurves,
-							   IPlottingSystem<Composite> pS,
-							   TabFolder folder,
-							   IPlottingSystem<Composite> subIBgPS,
-							   ProgressBar progress,
-							   TrackingProgressAndAbortView tpaav) {
-
-//		sm.resetAll();
-//		sm.setLocationList(null);
+//	public void runTrackingJob(IPlottingSystem<Composite> subPS, 
+//							   IPlottingSystem<Composite> outputCurves,
+//							   IPlottingSystem<Composite> pS,
+//							   TabFolder folder,
+//							   IPlottingSystem<Composite> subIBgPS,
+//							   ProgressBar progress,
+//							   TrackingProgressAndAbortView tpaav) {
+//
+////		sm.resetAll();
+////		sm.setLocationList(null);
+////		
+////		for(DataModel md: dms){
+////			md.resetAll();
+////		}
+////		this.backgroundBoxesManager();
+////	
+////		sm.setStartFrame(sm.getSliderPos());
 //		
-//		for(DataModel md: dms){
-//			md.resetAll();
-//		}
-//		this.backgroundBoxesManager();
-//	
-//		sm.setStartFrame(sm.getSliderPos());
-		
-		trackingJob tj = new trackingJob();
-		debug("tj invoked");
-		tj.setProgress(progress);
-		tj.setSsvs(ssvs);
-		tj.setCorrectionSelection(MethodSetting.toInt(sm.getCorrectionSelection()));
-		tj.setSuperModel(sm);
-		tj.setGms(gms);
-		tj.setDms(dms);
-		tj.setSsvsPS(ssvs.getPlotSystemCompositeView().getPlotSystem());
-		tj.setModels(models);
-		tj.setPlotSystem(subPS);
-		tj.setOutputCurves(outputCurves);
-		tj.setTimeStep(Math.round((2 / noImages)));
-		tj.setSsp(this);
-		tj.setTPAAV(tpaav);
-		tj.runTJ1();
-		
-
-		
-		return;
-		
-	}
+//		trackingJob tj = new trackingJob();
+//		debug("tj invoked");
+//		tj.setProgress(progress);
+//		tj.setSsvs(ssvs);
+//		tj.setCorrectionSelection(MethodSetting.toInt(sm.getCorrectionSelection()));
+//		tj.setSuperModel(sm);
+//		tj.setGms(gms);
+//		tj.setDms(dms);
+//		tj.setSsvsPS(ssvs.getPlotSystemCompositeView().getPlotSystem());
+//		tj.setModels(models);
+//		tj.setPlotSystem(subPS);
+//		tj.setOutputCurves(outputCurves);
+//		tj.setTimeStep(Math.round((2 / noImages)));
+//		tj.setSsp(this);
+//		tj.setTPAAV(tpaav);
+//		tj.runTJ1();
+//		
+//
+//		
+//		return;
+//		
+//	}
 
 	
 	public void stitchAndPresent(MultipleOutputCurvesTableView outputCurves) {
@@ -2867,6 +2872,14 @@ public class SurfaceScatterPresenter {
 		if (DEBUG == 1) {
 			System.out.println(output);
 		}
+	}
+
+	public GeometricParametersModel getGm() {
+		return gm;
+	}
+
+	public void setGm(GeometricParametersModel gm) {
+		this.gm = gm;
 	}
 }
 
@@ -4519,125 +4532,7 @@ public class SurfaceScatterPresenter {
 //////////////////////////////////////////Movie Job/////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////////
 
-class MovieJob {
-
-	private int time = 220;
-//	private IRegion background;
-	private IDataset tempImage;
-	private IDataset subTempImage;
-	private IDataset subIBgTempImage;
-	private double[] tempLoc;
-	private SuperModel sm;
-	private int noImages;
-	private int timeStep;
-	private int DEBUG = 0;
-	private IPlottingSystem<Composite> pS;
-	private IPlottingSystem<Composite> subIBgPS;
-	private SurfaceScatterPresenter ssp;
-	private SurfaceScatterViewStart ssvs;
-	private int imageNumber;
-	private ArrayList<Slider> sliders;
-	private TabFolder folder;
- 
-
-	
-	public MovieJob() {
-//		super("Playing movie...");
-	}
-		
-	public void setTime(int time) {
-		this.time = time;
-	}
-	
-	public void setSsp(SurfaceScatterPresenter ssp) {
-		this.ssp = ssp;
-	}
-	
-	public void setSliders(ArrayList<Slider> sliders){
-		this.sliders = sliders;
-	}
-	
-	public void setSsvs(SurfaceScatterViewStart ssvs) {
-		this.ssvs = ssvs;
-	}
-	
-	public void setSuperModel(SuperModel sm) {
-		this.sm = sm;
-	}
-	
-	public void setPS(IPlottingSystem<Composite> pS) {
-		this.pS = pS;
-	}
-	
-	public void setSubIBgPS(IPlottingSystem<Composite> subIBgPS) {
-		this.subIBgPS = subIBgPS;
-	}
-	
-	public void setFolder (TabFolder folder){
-		this.folder = folder;
-	}
-	
-//	@Override
-	protected void run() {
-		
-
-		
-		final Display display = Display.getCurrent();
-		
-		Thread t  = new Thread(){
-			@Override
-			public void run(){
-				
-				sm.setSliderPos(0);
-				
-				int k = 0;
-				
-				for( k = 0; k<sm.getImages().length; k++){
-							
-					tempImage = ssp.getImage(k);
-					subTempImage = sm.getBackgroundDatArray().get(k);
-					tempLoc = sm.getLocationList().get(k);
-					imageNumber =k;
-					sm.setSliderPos(k);
-					RectangularROI newROI = new RectangularROI(tempLoc[0],
-														       tempLoc[1],
-														       sm.getInitialLenPt()[0][0],
-														       sm.getInitialLenPt()[0][1],0);
-						
-					display.syncExec(new Runnable() {
-							@Override
-							public void run() {
-								
-								folder.setSelection(folder.getItems().length -1);
-								ssp.updateSliders(ssvs.getSliderList(), imageNumber);
-								ssvs.updateIndicators(imageNumber);
-								pS.updatePlot2D(tempImage, null, null);
-								subIBgPS.updatePlot2D(sm.getBackgroundDatArray().get(imageNumber), null, null);
-								pS.repaint(true);
-								subIBgPS.repaint(true);
-								ssvs.getSsps3c().generalUpdate();
-								ssp.trackingRegionOfInterestSetter(imageNumber);
-								return;
-							}
-						});					 
-						
-
-						
-						debug("Repaint k ascending: "  + k);
-				 }
-				
-			return;	
-			}
-			
-		};
-				
-		t.start();
-	
-	}
-
-	private void debug (String output) {
-		if (DEBUG == 1) {
-			System.out.println(output);
-		}
-	}
-}
+//class MovieJob {
+//
+//	
+//}
