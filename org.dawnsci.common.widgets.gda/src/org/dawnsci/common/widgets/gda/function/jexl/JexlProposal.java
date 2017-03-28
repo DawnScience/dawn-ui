@@ -15,7 +15,7 @@ public class JexlProposal extends ContentProposal {
 	private ExpressionFunctionProposalProvider provider;
 
 	public JexlProposal(String content, ExpressionFunctionProposalProvider provider) {
-		super(content);
+		super((content == null) ? "" : content);
 		this.provider = provider;
 	}
 
