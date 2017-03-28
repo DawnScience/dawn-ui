@@ -29,7 +29,7 @@ public class MovieJob {
 	private SurfaceScatterPresenter ssp;
 	private SurfaceScatterViewStart ssvs;
 	private int imageNumber;
-	private ArrayList<Slider> sliders;
+	private Slider sliders;
 	private TabFolder folder;
  
 
@@ -46,9 +46,13 @@ public class MovieJob {
 		this.ssp = ssp;
 	}
 	
-	public void setSliders(ArrayList<Slider> sliders){
+	public void setSliders(Slider sliders){
 		this.sliders = sliders;
 	}
+	
+//	public void setSliders(Slider sliders){
+//		this.sliders = sliders;
+//	}
 	
 	public void setSsvs(SurfaceScatterViewStart ssvs) {
 		this.ssvs = ssvs;
@@ -102,7 +106,7 @@ public class MovieJob {
 							public void run() {
 								
 								folder.setSelection(folder.getItems().length -1);
-								ssp.updateSliders(ssvs.getSliderList(), imageNumber);
+								ssp.updateSliders(ssvs.getPlotSystemCompositeView().getSlider(), imageNumber);
 								ssvs.updateIndicators(imageNumber);
 								pS.updatePlot2D(tempImage, null, null);
 								subIBgPS.updatePlot2D(sm.getBackgroundDatArray().get(imageNumber), null, null);

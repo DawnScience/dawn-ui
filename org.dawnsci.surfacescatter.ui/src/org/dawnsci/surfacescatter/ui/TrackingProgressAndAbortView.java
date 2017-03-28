@@ -1,7 +1,6 @@
 package org.dawnsci.surfacescatter.ui;
 
 import org.dawnsci.surfacescatter.MethodSettingEnum.MethodSetting;
-import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionEvent;
@@ -15,7 +14,6 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.ProgressBar;
 import org.eclipse.swt.widgets.Shell;
-import org.eclipse.swt.widgets.TabFolder;
 import org.eclipse.ui.PlatformUI;
 
 public class TrackingProgressAndAbortView extends Dialog {
@@ -26,34 +24,29 @@ public class TrackingProgressAndAbortView extends Dialog {
 	private int maximum;
 	private SurfaceScatterViewStart ssvs;
 	private SurfaceScatterPresenter ssp;
-	private IPlottingSystem<Composite> subImage;
-	private IPlottingSystem<Composite> outputCurvesPlotSystem;
-	private IPlottingSystem<Composite> mainImagePlotSytem;
-	private TabFolder backgroundTabFolder;
-	private IPlottingSystem<Composite> subBgImage;
-	private Shell parentShell;
+	private TrackingHandler tj; 
 	
 	
 	public TrackingProgressAndAbortView(Shell parentShell, 
 										int maximum,
 										SurfaceScatterPresenter ssp,
-										IPlottingSystem<Composite> subImage,
-										IPlottingSystem<Composite> outputCurvesPlotSystem,
-										IPlottingSystem<Composite> mainImagePlotSytem,
-										TabFolder backgroundTabFolder,
-										IPlottingSystem<Composite> subBgImage,
+//										IPlottingSystem<Composite> subImage,
+//										IPlottingSystem<Composite> outputCurvesPlotSystem,
+//										IPlottingSystem<Composite> mainImagePlotSytem,
+//										TabFolder backgroundTabFolder,
+//										IPlottingSystem<Composite> subBgImage,
 										SurfaceScatterViewStart ssvs) {
 		
 		
 		super(parentShell);
-		this.parentShell = parentShell;
+//		this.parentShell = parentShell;
 		this.ssp =ssp;
 		this.maximum = maximum;		
-		this.subImage = subImage;
-		this.outputCurvesPlotSystem =outputCurvesPlotSystem;
-		this.mainImagePlotSytem = mainImagePlotSytem;
-		this.backgroundTabFolder= backgroundTabFolder;
-		this.subBgImage = subBgImage;
+//		this.subImage = subImage;
+//		this.outputCurvesPlotSystem =outputCurvesPlotSystem;
+//		this.mainImagePlotSytem = mainImagePlotSytem;
+//		this.backgroundTabFolder= backgroundTabFolder;
+//		this.subBgImage = subBgImage;
 		this.ssvs = ssvs;
 		
 		setShellStyle(getShellStyle() | SWT.RESIZE | SWT.APPLICATION_MODAL);		
@@ -80,7 +73,10 @@ public class TrackingProgressAndAbortView extends Dialog {
 			
 			@Override
 			public void widgetSelected(SelectionEvent e) {
+				Thread t = tj.getT();
+				t.interrupt();				
 				getShell().close();
+
 			}
 			
 			@Override
@@ -92,7 +88,7 @@ public class TrackingProgressAndAbortView extends Dialog {
 		
 		try{
 			
-			TrackingHandler tj = new TrackingHandler(); 
+			tj = new TrackingHandler(); 
 			
 			
 			tj.setProgress(progress);
@@ -107,11 +103,6 @@ public class TrackingProgressAndAbortView extends Dialog {
 			tj.setSsp(ssp);
 			tj.setTPAAV(TrackingProgressAndAbortView.this);
 			tj.runTJ1();
-			
-
-			
-			
-			
 			
 //		
 //			ssp.runTrackingJob(subImage,
@@ -154,8 +145,8 @@ public class TrackingProgressAndAbortView extends Dialog {
 	protected Control createButtonBar(Composite parent) {
 		Control c = super.createButtonBar(parent);
 		getShell().setDefaultButton(null);
-		c.setVisible(false);
-		c.dispose();
+		c.setVisible(true);
+//		c.dispose();
 		return c;
 	}
 	

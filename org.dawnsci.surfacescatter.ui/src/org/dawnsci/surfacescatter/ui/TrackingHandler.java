@@ -44,6 +44,20 @@ public class TrackingHandler {
 	private int DEBUG = 0;
 	private ProgressBar progressBar;
 	private TrackingProgressAndAbortView tpaav;
+	private Thread t;
+	private trackingJob2 tj;
+
+	public Thread getT() {
+		if(tj != null){
+			t = tj.getT();
+		}
+		
+		return t;
+	}
+
+	public void setT(Thread t) {
+		this.t = t;
+	}
 
 	public TrackingProgressAndAbortView getTPAAV() {
 		return tpaav;
@@ -118,7 +132,6 @@ public class TrackingHandler {
 		this.gm = ssp.getGm();
 		this.models = ssp.getModels();
 		
-		
 		sm.resetAll();
 		sm.setStartFrame(sm.getSliderPos());
 		
@@ -150,12 +163,16 @@ public class TrackingHandler {
 
 			if (sm.getStartFrame() == 0) {
 												
-					Thread t  = new Thread(){
+					t  = new Thread(){
 						@Override
 						public void run(){
 									
 								for (int k = 0; k < noImages; k++) {
 										
+									if(t.isInterrupted()){
+										break;
+									}
+									
 									debug("l value: " + Double.toString(sm.getSortedX().getDouble(k)) + " , " + "local k:  " + Integer.toString(k));
 							
 									int trackingMarker = 0;
@@ -226,7 +243,7 @@ public class TrackingHandler {
 				//////////////////////// inside second loop
 				//////////////////////// scenario@@@@@@@@@@@@@@@@@@@@@@@@@@@@///////////
 
-				Thread t  = new Thread(){
+				t  = new Thread(){
 					
 					public void run(){
 				
@@ -234,6 +251,10 @@ public class TrackingHandler {
 						
 						for (int k = (sm.getStartFrame()); k >= 0; k--) {
 	
+							if(t.isInterrupted()){
+								break;
+							}
+							
 //						debug("l value: " + Double.toString(sm.getSortedX().getDouble(k)) + " , " + "local k:  " + Integer.toString(k));
 						
 						int trackingMarker = 1;
@@ -294,6 +315,9 @@ public class TrackingHandler {
 					if(sm.getStartFrame() != noImages-1){	
 						for (int k = sm.getStartFrame()+1; k < noImages; k++) {
 							
+							if(t.isInterrupted()){
+								break;
+							}
 							
 							int trackingMarker = 2;
 		
@@ -393,7 +417,7 @@ public class TrackingHandler {
 		public void updateTrackingDisplay(IDataset tempImage, int imageNumber){
 			
 			ssvs.getPlotSystemCompositeView().getFolder().setSelection(2);
-			ssp.updateSliders(ssvs.getSliderList(), imageNumber);
+			ssp.updateSliders(ssvs.getPlotSystemCompositeView().getSlider(), imageNumber);
 			ssvs.updateIndicators(imageNumber);
 			ssvs.getPlotSystemCompositeView().getPlotSystem().updatePlot2D(tempImage, null, null);
 			ssvs.getPlotSystemCompositeView().getSubImageBgPlotSystem().updatePlot2D(sm.getBackgroundDatArray().get(imageNumber), null, null);
@@ -453,6 +477,15 @@ class trackingJob2 {
 	private int DEBUG = 0;
 	private ProgressBar progressBar;
 	private TrackingProgressAndAbortView tpaav;
+	private Thread t;
+
+	public Thread getT() {
+		return t;
+	}
+
+	public void setT(Thread t) {
+		this.t = t;
+	}
 
 	public TrackingProgressAndAbortView getTPAAV() {
 		return tpaav;
@@ -547,12 +580,17 @@ class trackingJob2 {
 		if (sm.getStartFrame() == 0) {
 			
 			
-			Thread t  = new Thread(){
+			t  = new Thread(){
 				
 				@Override
 				public void run(){
 			
 					for (int k = 0; k < noImages; k++) {
+						
+						if(t.isInterrupted()){
+							break;
+						}
+						
 						if (sm.getFilepathsSortedArray()[k] == jok) {
 							
 							debug("l value: " + Double.toString(sm.getSortedX().getDouble(k)) + " , " + "local k:  " + Integer.toString(k)
@@ -644,6 +682,10 @@ class trackingJob2 {
 							
 							for (int k = nextk; k < noImages; k++) {
 
+								if(t.isInterrupted()){
+									break;
+								}
+								
 								if (sm.getFilepathsSortedArray()[k] == nextjok) {
 //									ssp.sliderMovemementMainImage(k, ssp.getSsvs().getPlotSystemCompositeView().getPlotSystem());
 
@@ -785,6 +827,10 @@ class trackingJob2 {
 
 							for (int k = (sm.getStartFrame()); k >= 0; k--) {
 
+								if(t.isInterrupted()){
+									break;
+								}
+								
 								if (sm.getFilepathsSortedArray()[k] == nextjok) {
 
 									debug("l value: " + Double.toString(sm.getSortedX().getDouble(k)) + " , " + "local k:  " + Integer.toString(k)
@@ -913,6 +959,10 @@ class trackingJob2 {
 							if(sm.getStartFrame() != noImages-1){
 								for (int k = sm.getStartFrame()+1; k < noImages; k++) {
 	
+									if(t.isInterrupted()){
+										break;
+									}
+									
 									if (sm.getFilepathsSortedArray()[k] == nextjok) {
 	
 										debug("l value: " + Double.toString(sm.getSortedX().getDouble(k)) + " , " + "local k:  " + Integer.toString(k)
@@ -1048,7 +1098,7 @@ class trackingJob2 {
 
 		else {
 
-			Thread t  = new Thread(){
+			t  = new Thread(){
 				
 				@Override
 				public void run(){
@@ -1057,6 +1107,10 @@ class trackingJob2 {
 		
 			for (int k = (sm.getStartFrame()); k >= 0; k--) {
 
+				if(t.isInterrupted()){
+					break;
+				}
+				
 				if (sm.getFilepathsSortedArray()[k] == jok) {
 					
 					debug("switched to k--");
@@ -1124,7 +1178,14 @@ class trackingJob2 {
 			models.get(jok).setInput(null);
 			
 			if(sm.getStartFrame() != noImages-1){
+				
+				
+				
 				for (int k = sm.getStartFrame(); k < noImages; k++) {
+					
+					if(t.isInterrupted()){
+						break;
+					}
 	
 					if (sm.getFilepathsSortedArray()[k] == jok) {
 	
@@ -1224,6 +1285,10 @@ class trackingJob2 {
 				
 				for (int k = nextk; k < noImages; k++) {
 
+					if(t.isInterrupted()){
+						break;
+					}
+					
 					if (sm.getFilepathsSortedArray()[k] == nextjok) {
 
 						debug("l value: " + Double.toString(sm.getSortedX().getDouble(k)) + " , " + "local k:  " + Integer.toString(k)
@@ -1365,6 +1430,10 @@ class trackingJob2 {
 				
 				for (int k = (sm.getStartFrame()); k >= 0; k--) {
 
+					if(t.isInterrupted()){
+						break;
+					}
+					
 					if (sm.getFilepathsSortedArray()[k] == nextjok) {
 
 						debug("l value: " + Double.toString(sm.getSortedX().getDouble(k)) + " , " + "local k:  " + Integer.toString(k)
@@ -1521,6 +1590,11 @@ class trackingJob2 {
 				models.get(nextjok).setInput(null);
 				if(sm.getStartFrame() != noImages-1){
 					for (int k = sm.getStartFrame()+1; k < noImages; k++) {
+						
+						if(t.isInterrupted()){
+							break;
+						}
+						
 						debug("%%%%%%%%%%%%%%%%% sm.getStartFrame:  "  +  sm.getStartFrame() + "??????????????????" );
 						if (sm.getFilepathsSortedArray()[k] == nextjok) {
 	
@@ -1657,9 +1731,9 @@ class trackingJob2 {
 	
 	public void updateTrackingDisplay(IDataset tempImage, int imageNumber){
 		
-		ssp.updateSliders(ssvs.getSliderList(), imageNumber);
+
 		ssvs.getPlotSystemCompositeView().getFolder().setSelection(2);
-		ssp.updateSliders(ssvs.getSliderList(), imageNumber);
+		ssp.updateSliders(ssvs.getPlotSystemCompositeView().getSlider(), imageNumber);
 		ssvs.updateIndicators(imageNumber);
 		ssvs.getPlotSystemCompositeView().getPlotSystem().updatePlot2D(tempImage, null, null);
 		ssvs.getPlotSystemCompositeView().getSubImageBgPlotSystem().updatePlot2D(sm.getBackgroundDatArray().get(imageNumber), null, null);

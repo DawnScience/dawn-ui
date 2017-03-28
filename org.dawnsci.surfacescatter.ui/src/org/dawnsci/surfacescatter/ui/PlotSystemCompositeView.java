@@ -457,7 +457,7 @@ public class PlotSystemCompositeView extends Composite {
 	   
 	    addChangeProcessingMethodListeners();
 
-		form.setWeights(new int[] {15, 45, 33, 7});
+		form.setWeights(new int[]{19, 45, 29, 7});
     }
 	
     
@@ -525,7 +525,7 @@ public class PlotSystemCompositeView extends Composite {
     	
     	}
     	
-    	form.setWeights(new int[] {15, 45, 33, 7});
+    	form.setWeights(new int[]{19, 45, 29, 7});
     	 
     	manualControls.layout(true, true);
     	manualControls.redraw();
@@ -851,7 +851,7 @@ public class PlotSystemCompositeView extends Composite {
 		}
 		
 		folder.pack();	
-		form.setWeights(new int[] {15, 45, 33, 7});
+		form.setWeights(new int[]{19, 45, 29, 7});
 		
 	}
 	
@@ -1018,7 +1018,7 @@ public class PlotSystemCompositeView extends Composite {
 		}
 		folder.pack();
 		subBgI = null;
-		form.setWeights(new int[] {15, 45, 33, 7});
+		form.setWeights(new int[]{19, 45, 29, 7});
 		folder.setSelection(0);
 	}	
 	

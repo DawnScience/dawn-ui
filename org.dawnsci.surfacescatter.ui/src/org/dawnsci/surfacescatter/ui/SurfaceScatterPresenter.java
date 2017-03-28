@@ -14,7 +14,6 @@ import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
@@ -45,7 +44,6 @@ import org.dawnsci.surfacescatter.ReflectivityMetadataTitlesForDialog;
 import org.dawnsci.surfacescatter.SXRDGeometricCorrections;
 import org.dawnsci.surfacescatter.StitchedOutputWithErrors;
 import org.dawnsci.surfacescatter.SuperModel;
-import org.dawnsci.surfacescatter.TrackerLocationInterpolation;
 import org.dawnsci.surfacescatter.TrackingMethodology;
 import org.dawnsci.surfacescatter.TrackingMethodology.TrackerType1;
 import org.eclipse.dawnsci.analysis.api.io.IDataHolder;
@@ -53,10 +51,7 @@ import org.eclipse.dawnsci.analysis.api.roi.IROI;
 import org.eclipse.dawnsci.analysis.api.roi.IRectangularROI;
 import org.eclipse.dawnsci.analysis.dataset.roi.RectangularROI;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
-import org.eclipse.dawnsci.plotting.api.region.IROIListener;
 import org.eclipse.dawnsci.plotting.api.region.IRegion;
-import org.eclipse.dawnsci.plotting.api.region.IRegion.RegionType;
-import org.eclipse.dawnsci.plotting.api.region.ROIEvent;
 import org.eclipse.dawnsci.plotting.api.trace.ILineTrace;
 import org.eclipse.january.dataset.AggregateDataset;
 import org.eclipse.january.dataset.DTypeUtils;
@@ -76,10 +71,8 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.ProgressBar;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Slider;
-import org.eclipse.swt.widgets.TabFolder;
 
 import uk.ac.diamond.scisoft.analysis.io.LoaderFactory;
 
@@ -1688,6 +1681,14 @@ public class SurfaceScatterPresenter {
 			}
 		}
 	}
+	
+	public void updateSliders(Slider sl, int k) {
+
+		sm.setSliderPos(k);
+
+		sl.setSelection(k);
+
+	}
 
 	public int xPositionFinder(double myNum) {
 
@@ -1812,7 +1813,7 @@ public class SurfaceScatterPresenter {
 		return noImages;
 	}
 	
-	public void genXSave(String title, String[] fr){
+	public void genXSave(String title){
 	
 		try {
 			File file = new File(title);
@@ -1931,7 +1932,7 @@ public class SurfaceScatterPresenter {
 //	}
 //	
 	
-	public void anarodSave(String title, String[] fr){
+	public void anarodSave(String title){
 
 		try {
 			File file = new File(title);
@@ -2033,7 +2034,7 @@ public class SurfaceScatterPresenter {
 		writer.close();
 	}	
 	
-	public void intSave(String title, String[] fr){
+	public void intSave(String title){
 		
 		File file =null;
 		
@@ -2225,7 +2226,7 @@ public class SurfaceScatterPresenter {
 		}	
 	}
 	
-	public void simpleXYYeSave(String title, String[] fr, int state){
+	public void simpleXYYeSave(String title, int state){
 		
 		File file =null;
 		
