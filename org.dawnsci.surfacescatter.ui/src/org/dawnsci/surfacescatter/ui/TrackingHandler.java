@@ -392,7 +392,6 @@ public class TrackingHandler {
 		
 		public void updateTrackingDisplay(IDataset tempImage, int imageNumber){
 			
-			
 			ssvs.getPlotSystemCompositeView().getFolder().setSelection(2);
 			ssp.updateSliders(ssvs.getSliderList(), imageNumber);
 			ssvs.updateIndicators(imageNumber);
@@ -401,14 +400,18 @@ public class TrackingHandler {
 			ssvs.getPlotSystemCompositeView().getPlotSystem().repaint(true);
 			ssvs.getPlotSystemCompositeView().getSubImageBgPlotSystem().repaint(true);
 			ssvs.getSsps3c().generalUpdate();
-			ssp.stitchAndPresent(ssvs.getSsps3c().getOutputCurves());
-//			ssp.trackingRegionOfInterestSetter(sm.getLocationList().get(imageNumber), imageNumber);
+			ssp.stitchAndPresent1(ssvs.getSsps3c().getOutputCurves(), ssvs.getIds());
 			
-			RectangularROI[] greenAndBg = ssp.trackingRegionOfInterestSetter(ssp.getLenPt());
+			double[] location = ssp.getLocationList().get((imageNumber));
+			
+			int[] len = new int[] {(int) (location[2]-location[0]),(int) (location[5]-location[1])};
+			int[] pt = new int[] {(int) location[0],(int) location[1]};
+			int[][] lenPt = { len, pt };
+			
+			RectangularROI[] greenAndBg = ssp.trackingRegionOfInterestSetter(lenPt);
 			
 			ssvs.getPlotSystemCompositeView().getIRegion().setROI(greenAndBg[0]);
 			ssvs.getPlotSystemCompositeView().getBgRegion().setROI(greenAndBg[1]);
-			
 			
 			if(ssp.getMethodology() == Methodology.OVERLAPPING_BACKGROUND_BOX){
 				ssvs.getPlotSystemCompositeView().getSecondBgRegion().setROI(ssp.generateOffsetBgROI(ssp.getLenPt()));
@@ -416,15 +419,13 @@ public class TrackingHandler {
 			
 			ssvs.getSsps3c().generalUpdate(ssp.getLenPt());
 			
-			ssvs.getSsps3c().getOutputCurves().getIntensity().select(0);
+//			ssvs.getSsps3c().getOutputCurves().getIntensity().select(0);
 			ssvs.getSsps3c().getOutputCurves().getIntensity().redraw();
 			
 			if(progressBar.isDisposed() != true){
 				progressBar.setSelection(progressBar.getSelection() +1);
-	//			System.out.println(progressBar.getSelection());
 				
 				if(progressBar.getSelection() == progressBar.getMaximum()){
-	//				System.out.println(progressBar.getSelection() +" in the break");
 					tpaav.close();
 				}
 			}
@@ -613,8 +614,8 @@ class trackingJob2 {
 									updateTrackingDisplay(tempImage, imageNumber);
 									
 									return;
-									}
-								});
+								}
+							});
 							
 							
 							
@@ -1665,10 +1666,16 @@ class trackingJob2 {
 		ssvs.getPlotSystemCompositeView().getPlotSystem().repaint(true);
 		ssvs.getPlotSystemCompositeView().getSubImageBgPlotSystem().repaint(true);
 		ssvs.getSsps3c().generalUpdate();
-		ssp.stitchAndPresent(ssvs.getSsps3c().getOutputCurves());
-//		
+		ssp.stitchAndPresent1(ssvs.getSsps3c().getOutputCurves(), ssvs.getIds());
 
-		RectangularROI[] greenAndBg = ssp.trackingRegionOfInterestSetter(ssp.getLenPt());
+		double[] location = ssp.getLocationList().get((imageNumber));
+		
+		int[] len = new int[] {(int) (location[2]-location[0]),(int) (location[5]-location[1])};
+		int[] pt = new int[] {(int) location[0],(int) location[1]};
+		int[][] lenPt = { len, pt };
+		
+		
+		RectangularROI[] greenAndBg = ssp.trackingRegionOfInterestSetter(lenPt);
 		
 		ssvs.getPlotSystemCompositeView().getIRegion().setROI(greenAndBg[0]);
 		ssvs.getPlotSystemCompositeView().getBgRegion().setROI(greenAndBg[1]);
@@ -1680,13 +1687,10 @@ class trackingJob2 {
 		
 		ssvs.getSsps3c().generalUpdate(ssp.getLenPt());
 		
-		ssvs.getSsps3c().getOutputCurves().getIntensity().select(0);
+//		ssvs.getSsps3c().getOutputCurves().getIntensity().select(0);
 		ssvs.getSsps3c().getOutputCurves().getIntensity().redraw();
 		
 		
-		
-		ssvs.getSsps3c().getOutputCurves().getIntensity().select(0);
-		ssvs.getSsps3c().getOutputCurves().getIntensity().redraw();
 //		System.out.println(progressBar.getSelection());
 		
 		if(progressBar.isDisposed() != true){

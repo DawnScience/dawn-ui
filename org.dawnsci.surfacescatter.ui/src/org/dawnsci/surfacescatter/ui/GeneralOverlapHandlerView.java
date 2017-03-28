@@ -73,6 +73,8 @@ public class GeneralOverlapHandlerView extends Dialog {
 	protected Control createButtonBar(Composite parent) {
 		Control c = super.createButtonBar(parent);
 		getShell().setDefaultButton(null);
+		
+		c.dispose();
 		return c;
 	}
 

@@ -130,12 +130,7 @@ public class TrackingProgressAndAbortView extends Dialog {
 		catch(OutOfMemoryError e){
 			ssp.outOfMemoryWarning();
 		}
-		
-	
-
-		
-		
-		
+			
 		return container;
 	}
 
@@ -152,6 +147,16 @@ public class TrackingProgressAndAbortView extends Dialog {
 		int w = rect.width;
 		
 		return new Point((int) Math.round(0.2*w), (int) Math.round(0.4*h));
+	}
+	
+	
+	@Override
+	protected Control createButtonBar(Composite parent) {
+		Control c = super.createButtonBar(parent);
+		getShell().setDefaultButton(null);
+		c.setVisible(false);
+		c.dispose();
+		return c;
 	}
 	
 	@Override

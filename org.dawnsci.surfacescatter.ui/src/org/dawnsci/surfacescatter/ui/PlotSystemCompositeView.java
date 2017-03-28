@@ -170,6 +170,9 @@ public class PlotSystemCompositeView extends Composite {
         outputControl.setSelection(true);
         outputControl.setVisible(false);
         
+        outputControlLabel.dispose();
+        outputControl.dispose();
+        
         Group buttons = new Group (mainImage,SWT.NONE);  
         GridLayout 	buttonsLayout = new GridLayout(2,true);
         buttons.setLayout(buttonsLayout);
@@ -454,7 +457,7 @@ public class PlotSystemCompositeView extends Composite {
 	   
 	    addChangeProcessingMethodListeners();
 
-		form.setWeights(new int[] {23, 45, 25, 7});
+		form.setWeights(new int[] {15, 45, 33, 7});
     }
 	
     
@@ -522,7 +525,7 @@ public class PlotSystemCompositeView extends Composite {
     	
     	}
     	
-    	form.setWeights(new int[] {23, 45, 25, 7});
+    	form.setWeights(new int[] {15, 45, 33, 7});
     	 
     	manualControls.layout(true, true);
     	manualControls.redraw();
@@ -636,6 +639,7 @@ public class PlotSystemCompositeView extends Composite {
    
 	public Button getOutputControl(){
 		return outputControl;
+		
 	}
 
 	public Slider getSlider(){
@@ -847,7 +851,7 @@ public class PlotSystemCompositeView extends Composite {
 		}
 		
 		folder.pack();	
-		form.setWeights(new int[] {23, 45, 25, 7});
+		form.setWeights(new int[] {15, 45, 33, 7});
 		
 	}
 	
@@ -1014,7 +1018,7 @@ public class PlotSystemCompositeView extends Composite {
 		}
 		folder.pack();
 		subBgI = null;
-		form.setWeights(new int[] {23, 45, 25, 7});
+		form.setWeights(new int[] {15, 45, 33, 7});
 		folder.setSelection(0);
 	}	
 	

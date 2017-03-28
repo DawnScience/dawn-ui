@@ -5,14 +5,17 @@ import java.util.ArrayList;
 
 import org.dawnsci.surfacescatter.CurveStateIdentifier;
 import org.dawnsci.surfacescatter.FittingParameters;
+import org.dawnsci.surfacescatter.IntensityDisplayEnum;
 import org.dawnsci.surfacescatter.MethodSettingEnum;
 import org.dawnsci.surfacescatter.MethodSettingEnum.MethodSetting;
 import org.dawnsci.surfacescatter.ProcessingMethodsEnum.ProccessingMethod;
 import org.dawnsci.surfacescatter.TrackingMethodology.TrackerType1;
 import org.dawnsci.surfacescatter.ReflectivityFluxCorrectionsForDialog;
 import org.dawnsci.surfacescatter.ReflectivityMetadataTitlesForDialog;
+import org.dawnsci.surfacescatter.SavingFormatEnum.SaveFormatSetting;
 import org.dawnsci.surfacescatter.TrackingMethodology;
 import org.dawnsci.surfacescatter.AnalaysisMethodologies.Methodology;
+import org.dawnsci.surfacescatter.IntensityDisplayEnum.IntensityDisplaySetting;
 import org.eclipse.dawnsci.analysis.api.io.IDataHolder;
 import org.eclipse.dawnsci.analysis.api.roi.IRectangularROI;
 import org.eclipse.dawnsci.analysis.dataset.roi.RectangularROI;
@@ -87,6 +90,8 @@ public class SurfaceScatterViewStart extends Dialog {
 	private Group methodSetting;
 	private Group parametersSetting;
 	private int[] correctionsDropDownArray;
+	private IntensityDisplaySetting ids;
+	private SaveFormatSetting sms;
 
 
 	public CTabFolder getFolder() {
@@ -156,8 +161,8 @@ public class SurfaceScatterViewStart extends Dialog {
 	protected Control createButtonBar(Composite parent) {
 		Control c = super.createButtonBar(parent);
 		getShell().setDefaultButton(null);
-		
-		
+		c.setVisible(false);
+		c.dispose();
 		return c;
 	}
 
@@ -273,6 +278,13 @@ public class SurfaceScatterViewStart extends Dialog {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 
+				int mr = ssps3c.getOutputCurves().getIntensity().getSelectionIndex();
+				IntensityDisplaySetting ids0 = IntensityDisplaySetting.toMethod(ssps3c.getOutputCurves().getIntensity().getSelectionIndex());
+				
+				
+				setIds(ids0);
+				setSms(SaveFormatSetting.toMethod(ssps3c.getOutputCurves().getOutputFormatSelection().getSelectionIndex()));
+				
 				ssp.createGm();
 				
 				paramField.geometricParametersUpdate();
@@ -309,8 +321,7 @@ public class SurfaceScatterViewStart extends Dialog {
 					filepaths[f] = datFolderPath + File.separator + filename;
 				}
 				
-				customComposite.getOutputControl().setSelection(false);
-				customComposite.getOutputControl().redraw();
+
 				ssp.resetSmOutputObjects();
 				
 				int[][] r = new int[][] {{50, 50}, {10, 10}};
@@ -407,8 +418,11 @@ public class SurfaceScatterViewStart extends Dialog {
 				customComposite.getReplay().setEnabled(false);
 				customComposite.resetCorrectionsTab();
 				ssps3c.isOutputCurvesVisible(false);
-				customComposite.getOutputControl().setEnabled(false);
+//				customComposite.getOutputControl().setEnabled(false);
 				ssp.setProcessingMethodSelection(ProccessingMethod.toMethodology(customComposite.getProcessingMode().getSelectionIndex()));
+				
+				ssps3c.getOutputCurves().getIntensity().select(IntensityDisplaySetting.toInt(ids));
+				ssps3c.getOutputCurves().getOutputFormatSelection().select(SaveFormatSetting.toInt(sms));
 				
 				try{
 					customComposite.getPlotSystem().removeTrace(customComposite.getPlotSystem().getTrace("Interpolated trajectory"));	
@@ -840,7 +854,15 @@ public class SurfaceScatterViewStart extends Dialog {
 				
 			}
 			
+			try{
+				customComposite.getPlotSystem().removeRegion(customComposite.getPlotSystem().getRegion("Gray Region"));
+			}
+			catch(Exception u){
+				
+			}
+			
 			ssp.setInterpolatorRegions(null);
+			ssp.setInterpolatedLenPts(null);
 			
 			if(ssp.getInterpolatorBoxes() != null){
 				ssp.setInterpolatorBoxes(null);
@@ -860,7 +882,16 @@ public class SurfaceScatterViewStart extends Dialog {
 		
 	}
 	
-public void addSecondBgRegionListeners(IRegion r2){
+//	@Override
+//	protected Control createButtonBar(Composite parent) {
+//		Control c = super.createButtonBar(parent);
+//		getShell().setDefaultButton(null);
+//		return c;
+//	}
+	
+	
+	
+	public void addSecondBgRegionListeners(IRegion r2){
 		
 //		IRegion r2 = ssvs.getPlotSystemCompositeView().getSecondBgRegion();
 //		
@@ -925,15 +956,12 @@ public void addSecondBgRegionListeners(IRegion r2){
 			}
 		});				
 	}
-	
-	
-	
 
 	public void interpolationTrackerBoxesAccept(){
 		
 		try{
 			Display display = Display.getCurrent();
-	        Color cyan = display.getSystemColor(SWT.COLOR_DARK_CYAN);
+	        Color cyan = display.getSystemColor(SWT.COLOR_CYAN);
 	        
 			
 			ArrayList<double[][]> jk = ssp.interpolationTrackerBoxesAccept(customComposite.getGreenRegion());
@@ -1058,8 +1086,8 @@ public void addSecondBgRegionListeners(IRegion r2){
 														   SurfaceScatterViewStart.this);
 			tpaav.open();
 			
-			customComposite.getOutputControl().setEnabled(true);
-			customComposite.getOutputControl().setSelection(true);
+//			customComposite.getOutputControl().setEnabled(true);
+//			customComposite.getOutputControl().setSelection(true);
 			
 		}
 		
@@ -1114,6 +1142,16 @@ public void addSecondBgRegionListeners(IRegion r2){
 
 	public void updateIndicators(int k) {
 		
+		try{
+			customComposite.getPlotSystem().removeRegion(customComposite.getPlotSystem().getRegion("Gray Region"));
+		}
+		catch(Exception u){
+			
+		}
+		
+		Display display = Display.getCurrent();
+        Color gray= display.getSystemColor(SWT.COLOR_DARK_GRAY);
+		
 		modify = false;
 		if (customComposite.getXValue().equals(ssp.getXValue(k)) == false) {
 			customComposite.getXValue().setText(String.valueOf(ssp.getXValue(k)));
@@ -1133,11 +1171,31 @@ public void addSecondBgRegionListeners(IRegion r2){
 		
 		ssp.illuminateCorrectInterpolationBox(k);
 		
-		if(ssp.getInterpolatedLenPts() != null){
+		if(ssp.getTrackerType() == TrackerType1.INTERPOLATION && ssp.getInterpolatedLenPts()!= null){
 			
+			double[][] lf =ssp.getInterpolatedLenPts().get(ssp.getSliderPos());
+			
+			RectangularROI grayROI = new RectangularROI(lf[1][0],
+					  lf[1][1],
+					  lf[0][0],
+					  lf[0][1],
+					  0);
+			
+			try {
+				IRegion grayRegion = customComposite.getPlotSystem().createRegion("Gray Region", RegionType.BOX);
+				grayRegion.setROI(grayROI);
+				grayRegion.setRegionColor(gray);
+				grayRegion.setLineWidth(10);
+				grayRegion.setFill(true);
+				grayRegion.setUserRegion(false);
+				grayRegion.setMobile(false);
+				customComposite.getPlotSystem().addRegion(grayRegion);				
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			
+			}
 		}
-		
-		
 	}
 
 	public ArrayList<Slider> getSliderList() {
@@ -1261,7 +1319,8 @@ public void addSecondBgRegionListeners(IRegion r2){
 			@Override
 			public void roiChanged(ROIEvent evt) {
 
-				if (customComposite.getOutputControl().getSelection() && modify == true) {
+//				customComposite.getOutputControl().getSelection() && 
+				if ( modify == true) {
 
 					int xPos = ssp.xPositionFinder(outputCurves.getRegionNo().getROI().getPointX());
 
@@ -1308,6 +1367,7 @@ public void addSecondBgRegionListeners(IRegion r2){
 
 				IPlottingSystem<Composite> pS = outputCurves.getPlotSystem();
 				ssp.switchFhklIntensity(pS, outputCurves.getIntensity());
+				ids = IntensityDisplaySetting.toMethod(ssps3c.getOutputCurves().getIntensity().getSelectionIndex());
 
 			}
 
@@ -1466,5 +1526,21 @@ public void addSecondBgRegionListeners(IRegion r2){
 			RegionOutOfBoundsWarning roobw = new RegionOutOfBoundsWarning(getShell(),4,null);
 			roobw.open();
 		}
+	}
+
+	public SaveFormatSetting getSms() {
+		return sms;
+	}
+
+	public void setSms(SaveFormatSetting sms) {
+		this.sms = sms;
+	}
+
+	public IntensityDisplaySetting getIds() {
+		return ids;
+	}
+
+	public void setIds(IntensityDisplaySetting ids) {
+		this.ids = ids;
 	}
 }

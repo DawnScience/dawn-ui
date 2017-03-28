@@ -33,6 +33,7 @@ import org.dawnsci.surfacescatter.FittingParameters;
 import org.dawnsci.surfacescatter.FittingParametersInputReader;
 import org.dawnsci.surfacescatter.FittingParametersOutput;
 import org.dawnsci.surfacescatter.GeometricParametersModel;
+import org.dawnsci.surfacescatter.IntensityDisplayEnum.IntensityDisplaySetting;
 import org.dawnsci.surfacescatter.InterpolationTracker;
 import org.dawnsci.surfacescatter.MethodSettingEnum.MethodSetting;
 import org.dawnsci.surfacescatter.OverlapUIModel;
@@ -1326,6 +1327,10 @@ public class SurfaceScatterPresenter {
 		
 //		ssvs.getPlotSystemCompositeView().getSecondBgRegion().setROI(offsetBgROI);
 		
+	}
+	
+	public void setInterpolatedLenPts(ArrayList<double[][]> intepolatedLenPts){
+		sm.setInterpolatedLenPts(intepolatedLenPts);
 	}
 	
 	
@@ -2852,6 +2857,68 @@ public class SurfaceScatterPresenter {
 		lt.setErrorBarEnabled(false);
 		
 	}
+	
+	public void stitchAndPresent1(MultipleOutputCurvesTableView outputCurves,
+								  IntensityDisplaySetting ids) {
+
+		Display display = Display.getCurrent();
+		
+		outputCurves.resetCurve();
+
+		IPlottingSystem<Composite> pS = outputCurves.getPlotSystem();
+		
+		IDataset[] output = StitchedOutputWithErrors.curveStitch4(dms, sm);
+
+		ILineTrace lt = pS.createLineTrace("progress");
+
+		if(ids == null){
+
+			lt.setData(sm.getSplicedCurveX(), sm.getSplicedCurveY());
+			Color blue = display.getSystemColor(SWT.COLOR_BLUE);
+			lt.setTraceColor(blue);
+		}
+		
+		else if(ids == IntensityDisplaySetting.Corrected_Intensity){
+
+			lt.setData(sm.getSplicedCurveX(), sm.getSplicedCurveY());
+			Color blue = display.getSystemColor(SWT.COLOR_BLUE);
+			lt.setTraceColor(blue);
+			
+		}
+		else if(ids == IntensityDisplaySetting.Fhkl){
+
+			lt.setData(sm.getSplicedCurveX(), sm.getSplicedCurveYFhkl());
+			Color green = display.getSystemColor(SWT.COLOR_GREEN);
+			lt.setTraceColor(green);
+		}
+		else if(ids == IntensityDisplaySetting.Raw_Intensity){
+
+			lt.setData(sm.getSplicedCurveX(), sm.getSplicedCurveYRaw());
+			Color black = display.getSystemColor(SWT.COLOR_BLACK);
+			lt.setTraceColor(black);
+			
+		
+		}
+		
+		
+
+	
+		pS.clear();
+		pS.addTrace(lt);
+		
+		pS.repaint();
+		pS.autoscaleAxes();
+		
+		double start = lt.getXData().getDouble(0);
+		double end = lt.getXData().getDouble(lt.getXData().getShape()[0]-1);
+		double range = end - start;
+				
+		pS.getAxes().get(0).setRange((start - 0.1*range), (end) + 0.1*range);
+		
+		lt.setErrorBarEnabled(false);
+		
+	}
+	
 	
 	public void switchErrorDisplay(){
 		if (sm.isErrorDisplayFlag() ==true){

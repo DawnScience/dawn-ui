@@ -1,9 +1,15 @@
 package org.dawnsci.surfacescatter.ui;
 
 import org.dawb.common.ui.widgets.ActionBarWrapper;
+import org.dawnsci.surfacescatter.AnalaysisMethodologies;
 import org.dawnsci.surfacescatter.DataModel;
 import org.dawnsci.surfacescatter.ExampleModel;
+import org.dawnsci.surfacescatter.IntensityDisplayEnum;
+import org.dawnsci.surfacescatter.IntensityDisplayEnum.IntensityDisplaySetting;
+import org.dawnsci.surfacescatter.SavingFormatEnum;
+import org.dawnsci.surfacescatter.SavingFormatEnum.SaveFormatSetting;
 import org.dawnsci.surfacescatter.SuperModel;
+import org.dawnsci.surfacescatter.AnalaysisMethodologies.Methodology;
 import org.eclipse.dawnsci.analysis.dataset.roi.RectangularROI;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.PlotType;
@@ -14,6 +20,7 @@ import org.eclipse.dawnsci.plotting.api.trace.ILineTrace;
 import org.eclipse.january.dataset.Dataset;
 import org.eclipse.january.dataset.DatasetFactory;
 import org.eclipse.january.dataset.IDataset;
+import org.eclipse.jface.viewers.ComboViewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.layout.GridData;
@@ -72,21 +79,22 @@ public class MultipleOutputCurvesTableView extends Composite {
 		errors.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		
 		intensitySelect = new Combo(overlapSelection, SWT.DROP_DOWN | SWT.BORDER |SWT.FILL);
-		intensitySelect.add("Corrected Intensity");
-		intensitySelect.add("Fhkl");
-		intensitySelect.add("Raw Intensity");
+		
+		for(IntensityDisplaySetting  t: IntensityDisplayEnum.IntensityDisplaySetting.values()){
+			intensitySelect.add(IntensityDisplaySetting.toString(t));
+		}
+	
 		intensitySelect.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		intensitySelect.select(0);
 		
 		outputFormatSelection = new Combo(overlapSelection, SWT.DROP_DOWN | SWT.BORDER | SWT.FILL);
-		outputFormatSelection.setText("GenX");
-		outputFormatSelection.add("GenX");
-		outputFormatSelection.add("Anrod");
-		outputFormatSelection.add(".int");
-		outputFormatSelection.add("X/Y/Ye .txt");
+		
+		for(SaveFormatSetting  t: SavingFormatEnum.SaveFormatSetting.values()){
+			outputFormatSelection.add(SaveFormatSetting.toString(t));
+		}
+	
 		outputFormatSelection.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		outputFormatSelection.select(0);
-		
 		
 		save = new Button(overlapSelection, SWT.PUSH |SWT.FILL);
 		save.setText("Save Spliced");
