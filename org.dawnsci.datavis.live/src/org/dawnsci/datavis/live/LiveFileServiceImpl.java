@@ -14,14 +14,18 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.dawnsci.analysis.api.processing.IOperationBean;
 import org.eclipse.scanning.api.event.EventConstants;
 import org.eclipse.scanning.api.event.EventException;
 import org.eclipse.scanning.api.event.IEventService;
+import org.eclipse.scanning.api.event.bean.BeanEvent;
+import org.eclipse.scanning.api.event.bean.IBeanListener;
 import org.eclipse.scanning.api.event.core.IPropertyFilter.FilterAction;
 import org.eclipse.scanning.api.event.core.ISubscriber;
 import org.eclipse.scanning.api.event.scan.IScanListener;
 import org.eclipse.scanning.api.event.scan.ScanBean;
 import org.eclipse.scanning.api.event.scan.ScanEvent;
+import org.eclipse.scanning.api.event.status.StatusBean;
 import org.eclipse.scanning.api.ui.CommandConstants;
 
 public class LiveFileServiceImpl implements ILiveFileService {
@@ -142,6 +146,40 @@ public class LiveFileServiceImpl implements ILiveFileService {
 					}
 				}
 				
+			});
+			
+			
+			ISubscriber<EventListener> procSub = eService.createSubscriber(uri, "scisoft.operation.STATUS_TOPIC");
+			
+			procSub.addListener(new IBeanListener<StatusBean>() {
+
+				@Override
+				public void beanChangePerformed(BeanEvent<StatusBean> evt) {
+					System.out.println("bean update " + evt.getBean().toString());
+					if (evt.getBean() instanceof IOperationBean && evt.getBean().getStatus().isRunning()) {
+						String host = getDataServerHost();
+						int port    = getDataServerPort();
+						
+
+						LiveLoadedFile f = new LiveLoadedFile(((IOperationBean)evt.getBean()).getOutputFilePath(), host, port);
+						
+						fireListeners(f);
+
+						
+						
+					}
+					
+					if (!evt.getBean().getStatus().isFinal()) return;
+					if (evt.getBean() instanceof IOperationBean) {
+
+						for (ILiveFileListener l : listeners) l.localReload(((IOperationBean)evt.getBean()).getOutputFilePath());
+
+					}
+				}
+				
+				public Class<StatusBean> getBeanClass() {
+					return StatusBean.class;
+				}
 			});
 			
 //			logger.info("Created subscriber");

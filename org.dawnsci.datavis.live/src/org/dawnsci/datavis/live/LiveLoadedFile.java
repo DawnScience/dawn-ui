@@ -31,9 +31,13 @@ import uk.ac.diamond.scisoft.analysis.io.DataHolder;
 public class LiveLoadedFile extends LoadedFile implements IRefreshable {
 
 	private boolean live = true;
+	private String host;
+	private int port;
 	
 	public LiveLoadedFile(String path, String host, int port) {
 		this(createDataHolder(path,host,port));
+		this.host = host;
+		this.port = port;
 	}
 
 	private LiveLoadedFile(IDataHolder dh) {
@@ -59,7 +63,7 @@ public class LiveLoadedFile extends LoadedFile implements IRefreshable {
 			e.printStackTrace();
 		}
 		
-		if (map == null) return null;
+		if (map == null) return dh;
 		
 		Tree tree = TreeToMapUtils.mapToTree(map, path);
 		IFindInTree finder = new IFindInTree() {
@@ -105,6 +109,12 @@ public class LiveLoadedFile extends LoadedFile implements IRefreshable {
 	@Override
 	public void refresh() {
 		if (!live) return;
+		
+		if (dataHolder.getList().isEmpty()){
+			dataHolder = createDataHolder(dataHolder.getFilePath(), host, port);
+			if (dataHolder.getList().isEmpty()) return;
+		}
+		
 		
 		if (dataOptions.isEmpty()) {
 			String[] names = dataHolder.getNames();
