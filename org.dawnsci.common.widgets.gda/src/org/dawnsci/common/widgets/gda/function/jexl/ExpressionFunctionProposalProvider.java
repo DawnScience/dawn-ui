@@ -98,7 +98,8 @@ public class ExpressionFunctionProposalProvider implements
 				List<JexlProposal> content = new ArrayList<>();
 
 				for (String key : keys) {
-					if (key.startsWith(last))
+					// TODO: get content for the null namespace, rather than just ignoring it.
+					if (key != null && key.startsWith(last))
 						content.add(new JexlProposal(key, this));
 				}
 
