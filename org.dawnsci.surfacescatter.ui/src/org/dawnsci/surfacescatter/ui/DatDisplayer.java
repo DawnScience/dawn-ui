@@ -4,6 +4,8 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+
+import org.apache.commons.lang.StringUtils;
 import org.dawnsci.surfacescatter.GeometricCorrectionsReflectivityMethod;
 import org.dawnsci.surfacescatter.MethodSettingEnum.MethodSetting;
 import org.dawnsci.surfacescatter.ReflectivityMetadataTitlesForDialog;
@@ -55,10 +57,27 @@ public class DatDisplayer extends Composite {
 	private Text datFolderText;
 	private String imageName;
 	private Boolean promptedForImageFolder = false;
-//	private DatDisplayer dd = this;
 	private boolean r;
 	private String filepath;
 	private Button selectAll;
+	private String option;
+
+
+	public String getOption() {
+		return option;
+	}
+
+	public void setOption(String option) {
+		this.option = option;
+	}
+
+	public String[] getOptions() {
+		return options;
+	}
+
+	public void setOptions(String[] options) {
+		this.options = options;
+	}
 
 	public Boolean getPromptedForImageFolder() {
 		return promptedForImageFolder;
@@ -409,7 +428,24 @@ public class DatDisplayer extends Composite {
 						optionsDropDown.add(options[t]);
 					}
 
-					optionsDropDown.select(0);
+					boolean isThePreviousOptionAvailable = false;
+					
+					if(option != null){
+						for(int y = 0; y<options.length; y++){
+							if(StringUtils.equals(options[y], option)){
+								isThePreviousOptionAvailable =true;
+								optionsDropDown.select(y);
+							}
+						}
+					}
+					else{
+						optionsDropDown.select(0);
+					}
+					
+					if (isThePreviousOptionAvailable == false){
+						optionsDropDown.select(0);
+					}
+					
 					clearRodTable.setEnabled(true);
 					rodConstrucion.setEnabled(true);
 					deleteSelected.setEnabled(true);

@@ -33,8 +33,8 @@ public class SuperSashPlotSystem3Composite extends Composite{
     private IRegion verticalSlice;
     private IRegion horizontalSlice;
     private IDataset image2;
-    private SashForm right; 
-    private SashForm left;
+//    private SashForm right; 
+//    private SashForm left;
 	private MultipleOutputCurvesTableView outputCurves;
 	private SurfaceScatterPresenter ssp;
     private Group topRight;
@@ -76,8 +76,10 @@ public class SuperSashPlotSystem3Composite extends Composite{
         
         try {
         	plotSystem1 = PlottingFactory.createPlottingSystem();
+        	plotSystem1.setShowLegend(false);
 			plotSystem2 = PlottingFactory.createPlottingSystem();
 			plotSystem3 = PlottingFactory.createPlottingSystem();
+			plotSystem3.setShowLegend(false);
         } 
         catch (Exception e2) {
 			e2.printStackTrace();
@@ -104,9 +106,9 @@ public class SuperSashPlotSystem3Composite extends Composite{
 		sashForm= new SashForm(this, SWT.HORIZONTAL);
 		sashForm.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 			
-		left = new SashForm(sashForm, SWT.VERTICAL);
+		SashForm left = new SashForm(sashForm, SWT.VERTICAL);
 		
-		right = new SashForm(sashForm, SWT.VERTICAL);
+		SashForm right = new SashForm(sashForm, SWT.VERTICAL);
 		
 		sashForm.setWeights(new int[]{50,50});
 		
@@ -122,9 +124,9 @@ public class SuperSashPlotSystem3Composite extends Composite{
 	
 		GridData ld1 = new GridData(SWT.FILL, SWT.FILL, true, true);
 
-		ActionBarWrapper actionBarCompositeTop = ActionBarWrapper.createActionBars(topImage, null);;
+//		ActionBarWrapper actionBarCompositeTop = ActionBarWrapper.createActionBars(topImage, null);;
         
-		plotSystem1.createPlotPart(topImage, "Horizontal Slice", actionBarCompositeTop, PlotType.IMAGE, null);
+		plotSystem1.createPlotPart(topImage, "Horizontal Slice", null, PlotType.IMAGE, null);
 		plotSystem1.getPlotComposite().setLayoutData(ld1);
 		
 		plotSystem1.getAxis("X-Axis").setTitle("");
@@ -185,9 +187,9 @@ public class SuperSashPlotSystem3Composite extends Composite{
 		
 		GridData ld3 = new GridData(SWT.FILL, SWT.FILL, true, true);
 		
-		ActionBarWrapper actionBarCompositeSide= ActionBarWrapper.createActionBars(sideImage, null);;
+//		ActionBarWrapper actionBarCompositeSide= ActionBarWrapper.createActionBars(sideImage, null);;
         
-		plotSystem3.createPlotPart(sideImage, "Side Image", actionBarCompositeSide, PlotType.IMAGE, null);
+		plotSystem3.createPlotPart(sideImage, "Side Image", null, PlotType.IMAGE, null);
 		plotSystem3.getPlotComposite().setLayoutData(ld3);
 		
 		plotSystem3.getAxis("X-Axis").setTitle("");
@@ -216,8 +218,6 @@ public class SuperSashPlotSystem3Composite extends Composite{
 //			horizontalSlice.setROI(horizROI);
 //			horizontalSlice.setActive(true);
 //			horizontalSlice.setMobile(true);
-			
-		
 			
 			plotSystem2.addRegion(horizontalSlice);
 			plotSystem2.addRegion(verticalSlice);
@@ -278,6 +278,10 @@ public class SuperSashPlotSystem3Composite extends Composite{
 		});
 
 
+		
+		plotSystem3.setShowLegend(false);
+		plotSystem1.setShowLegend(false);
+		
 	   }
 	   
 	   public Composite getComposite(){   	
@@ -325,13 +329,13 @@ public class SuperSashPlotSystem3Composite extends Composite{
 			return hv;
 		}
 		
-		public SashForm getRight(){
-			return right;	
-		}
-		
-		public SashForm getLeft(){
-			return left;	
-		}
+//		public SashForm getRight(){
+//			return right;	
+//		}
+//		
+//		public SashForm getLeft(){
+//			return left;	
+//		}
 
 		public MultipleOutputCurvesTableView getOutputCurves(){
 			return outputCurves;
@@ -378,9 +382,9 @@ public class SuperSashPlotSystem3Composite extends Composite{
 				
 					@SuppressWarnings("unchecked")
 					IDataset output = ssp.presenterDummyProcess(selection,
-							ssp.getImage(selection),
-							ssvs.getPlotSystemCompositeView().getPlotSystem(),
-							3);
+																ssp.getImage(selection),
+																ssvs.getPlotSystemCompositeView().getPlotSystem(),
+																3);
 			
 					ILineTrace lt3 = VerticalHorizontalSlices.horizontalsliceBackgroundSubtracted(
 							horizontalSlice.getROI().getBounds(),
@@ -423,11 +427,11 @@ public class SuperSashPlotSystem3Composite extends Composite{
 				plotSystem1.repaint();
 				plotSystem3.repaint();
 				
-				sashForm.setWeights(new int[] {50,50});
-				left.setWeights(new int[] {50,50});
-				right.setWeights(new int[] {50,50});
+//				sashForm.setWeights(new int[] {50,50});
+//				left.setWeights(new int[] {50,50});
+//				right.setWeights(new int[] {50,50});
 				
-				ssp.correctionsDisplayUpdate();
+				ssvs.getCustomComposite().generalCorrectionsUpdate();
 				
 				return;
 		}
@@ -512,11 +516,11 @@ public class SuperSashPlotSystem3Composite extends Composite{
 			plotSystem1.repaint();
 			plotSystem3.repaint();
 			
-			sashForm.setWeights(new int[] {50,50});
-			left.setWeights(new int[] {50,50});
-			right.setWeights(new int[] {50,50});
+//			sashForm.setWeights(new int[] {50,50});
+//			left.setWeights(new int[] {50,50});
+//			right.setWeights(new int[] {50,50});
 
-			ssp.correctionsDisplayUpdate();
+			ssvs.getCustomComposite().generalCorrectionsUpdate();
 			
 			
 			return;

@@ -15,18 +15,18 @@ public class OpenDialogHandler extends AbstractHandler {
 
 		Shell s =PlatformUI.getWorkbench().getWorkbenchWindows()[0].getShell();
 
-		SurfaceScatterPresenter ssp = new SurfaceScatterPresenter();
-
-		ssp.setImageFolderPath(null);
+//		SurfaceScatterPresenter ssp = new SurfaceScatterPresenter();
+//
+//		ssp.setImageFolderPath(null);
 
 		SurfaceScatterViewStart ssvs = new SurfaceScatterViewStart(s, 
 				null, 
-				ssp.getNumberOfImages(), 
-				ssp.getImage(0),
-				ssp,
+				0, 
+				null,
+				null,
 				null);
 
-		ssp.setSsvs(ssvs);
+//		ssp.setSsvs(ssvs);
 		ssvs.open();
 		
 		return null;

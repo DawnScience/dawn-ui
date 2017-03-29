@@ -1,6 +1,6 @@
 package org.dawnsci.surfacescatter.ui;
 
-import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
+import org.dawnsci.surfacescatter.MethodSettingEnum.MethodSetting;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionEvent;
@@ -14,7 +14,6 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.ProgressBar;
 import org.eclipse.swt.widgets.Shell;
-import org.eclipse.swt.widgets.TabFolder;
 import org.eclipse.ui.PlatformUI;
 
 public class TrackingProgressAndAbortView extends Dialog {
@@ -23,34 +22,26 @@ public class TrackingProgressAndAbortView extends Dialog {
 	private Button abort;
 	private ProgressBar progress;
 	private int maximum;
+	private SurfaceScatterViewStart ssvs;
 	private SurfaceScatterPresenter ssp;
-	private IPlottingSystem<Composite> subImage;
-	private IPlottingSystem<Composite> outputCurvesPlotSystem;
-	private IPlottingSystem<Composite> mainImagePlotSytem;
-	private TabFolder backgroundTabFolder;
-	private IPlottingSystem<Composite> subBgImage;
-	private Shell parentShell;
+	private TrackingHandler tj; 
 	
 	
 	public TrackingProgressAndAbortView(Shell parentShell, 
 										int maximum,
 										SurfaceScatterPresenter ssp,
-										IPlottingSystem<Composite> subImage,
-										IPlottingSystem<Composite> outputCurvesPlotSystem,
-										IPlottingSystem<Composite> mainImagePlotSytem,
-										TabFolder backgroundTabFolder,
-										IPlottingSystem<Composite> subBgImage) {
+//										IPlottingSystem<Composite> subImage,
+//										IPlottingSystem<Composite> outputCurvesPlotSystem,
+//										IPlottingSystem<Composite> mainImagePlotSytem,
+//										TabFolder backgroundTabFolder,
+//										IPlottingSystem<Composite> subBgImage,
+										SurfaceScatterViewStart ssvs) {
 		
 		
 		super(parentShell);
-		this.parentShell = parentShell;
 		this.ssp =ssp;
 		this.maximum = maximum;		
-		this.subImage = subImage;
-		this.outputCurvesPlotSystem =outputCurvesPlotSystem;
-		this.mainImagePlotSytem = mainImagePlotSytem;
-		this.backgroundTabFolder= backgroundTabFolder;
-		this.subBgImage = subBgImage;
+		this.ssvs = ssvs;
 		
 		setShellStyle(getShellStyle() | SWT.RESIZE | SWT.APPLICATION_MODAL);		
 
@@ -76,7 +67,10 @@ public class TrackingProgressAndAbortView extends Dialog {
 			
 			@Override
 			public void widgetSelected(SelectionEvent e) {
+				Thread t = tj.getT();
+				t.interrupt();				
 				getShell().close();
+
 			}
 			
 			@Override
@@ -87,15 +81,29 @@ public class TrackingProgressAndAbortView extends Dialog {
 		});
 		
 		try{
-		
-			ssp.runTrackingJob(subImage,
-							   outputCurvesPlotSystem, 
-							   mainImagePlotSytem,
-							   backgroundTabFolder, 
-							   subBgImage, 
-							   progress,
-							   this
-							  );
+			
+			tj = new TrackingHandler(); 
+			
+			
+			tj.setProgress(progress);
+			tj.setSsvs(ssvs);
+			tj.setCorrectionSelection(MethodSetting.toInt(ssp.getCorrectionSelection()));
+			tj.setPlotSystem(ssvs.getPlotSystemCompositeView().getPlotSystem());
+			tj.setOutputCurves(ssvs.getSsps3c().getOutputCurves().getPlotSystem());
+//			tj.setTimeStep(Math.round((2 / ssp.getNoImages())));
+			tj.setSsp(ssp);
+			tj.setTPAAV(TrackingProgressAndAbortView.this);
+			tj.runTJ1();
+			
+//		
+//			ssp.runTrackingJob(subImage,
+//							   outputCurvesPlotSystem, 
+//							   mainImagePlotSytem,
+//							   backgroundTabFolder, 
+//							   subBgImage, 
+//							   progress,
+//							   this
+//							  );
 		}
 		catch(IndexOutOfBoundsException d){
 			ssp.boundariesWarning();
@@ -104,12 +112,7 @@ public class TrackingProgressAndAbortView extends Dialog {
 		catch(OutOfMemoryError e){
 			ssp.outOfMemoryWarning();
 		}
-		
-	
-
-		
-		
-		
+			
 		return container;
 	}
 
@@ -126,6 +129,16 @@ public class TrackingProgressAndAbortView extends Dialog {
 		int w = rect.width;
 		
 		return new Point((int) Math.round(0.2*w), (int) Math.round(0.4*h));
+	}
+	
+	
+	@Override
+	protected Control createButtonBar(Composite parent) {
+		Control c = super.createButtonBar(parent);
+		getShell().setDefaultButton(null);
+		c.setVisible(true);
+//		c.dispose();
+		return c;
 	}
 	
 	@Override
