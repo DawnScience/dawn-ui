@@ -35,6 +35,9 @@ import org.eclipse.swt.widgets.Slider;
 import org.eclipse.swt.widgets.TabFolder;
 import org.eclipse.swt.widgets.TabItem;
 import org.eclipse.swt.widgets.Text;
+import org.eclipse.swt.events.KeyAdapter;
+import org.eclipse.swt.events.KeyEvent;
+import org.eclipse.swt.events.KeyListener;
 
 public class PlotSystemCompositeView extends Composite {
 
@@ -435,6 +438,39 @@ public class PlotSystemCompositeView extends Composite {
 				
 			}
 		});
+		
+//		slider.addKeyListener(new KeyListener() {
+//			
+//			@Override
+//			public void keyReleased(KeyEvent e) {
+//				// TODO Auto-generated method stub
+//				
+//			}
+//			
+//			@Override
+//			public void keyPressed(KeyEvent ke) {
+////				ke.character;
+//				int key = ke.keyCode;
+//				
+//				
+//				switch(key){
+//				case SWT.ARROW_LEFT:
+//					ssp.sliderMovemementMainImage(ssp.getSliderPos() -1);
+//					slider.setSelection(slider.getSelection() - 1);
+//					break;
+//				case SWT.ARROW_RIGHT:
+//					ssp.sliderMovemementMainImage(ssp.getSliderPos() +1);
+//					slider.setSelection(slider.getSelection() + 1);
+//					break;
+////				case KeyEvent.VK_SPACE:
+////					ssvs.fireAccept();
+////					break;
+//			
+//				}
+//				
+//			}
+//		});
+		
 	    
 		processing = new Group (form,SWT.NONE);  
 	    GridLayout processingLayout = new GridLayout(2,true);
@@ -568,6 +604,31 @@ public class PlotSystemCompositeView extends Composite {
 				
 			}
 		});
+    	
+    	
+    	accept.addKeyListener(new KeyListener() {
+			
+			@Override
+			public void keyReleased(KeyEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+			
+			@Override
+			public void keyPressed(KeyEvent ke) {
+				
+				int key = ke.keyLocation;
+				
+				
+				switch(key){
+				case SWT.SPACE:
+					ssvs.fireAccept();
+					break;
+				}
+				
+			}
+		});
+		
     	
     	increment.addSelectionListener(new SelectionListener() {
 			

@@ -37,10 +37,10 @@ public class TrackingHandler {
 	private SurfaceScatterViewStart ssvs;
 	private int correctionSelection;
 	private int noImages;
-	private int timeStep;
-	private int imageNumber;
+//	private int timeStep;
+//	private int imageNumber;
 	private SurfaceScatterPresenter ssp;
-	private IPlottingSystem<Composite> ssvsPS;
+//	private IPlottingSystem<Composite> ssvsPS;
 	private int DEBUG = 0;
 	private ProgressBar progressBar;
 	private TrackingProgressAndAbortView tpaav;
@@ -107,17 +107,17 @@ public class TrackingHandler {
 		this.plotSystem = plotSystem;
 	}
 
-	public void setTimeStep(int timeStep) {
-		this.timeStep = timeStep;
-	}
+//	public void setTimeStep(int timeStep) {
+//		this.timeStep = timeStep;
+//	}
 
 	public void setSsp(SurfaceScatterPresenter ssp) {
 		this.ssp = ssp;
 	}
 
-	public void setSsvsPS(IPlottingSystem<Composite> ssvsPS) {
-		this.ssvsPS = ssvsPS;
-	}
+//	public void setSsvsPS(IPlottingSystem<Composite> ssvsPS) {
+//		this.ssvsPS = ssvsPS;
+//	}
 	
 	public void setps(IPlottingSystem<Composite> plotSystem) {
 		this.plotSystem = plotSystem;
@@ -1760,23 +1760,17 @@ class trackingJob2 {
 		}
 		
 		ssvs.getSsps3c().generalUpdate(ssp.getLenPt());
-		
-//		ssvs.getSsps3c().getOutputCurves().getIntensity().select(0);
+
 		ssvs.getSsps3c().getOutputCurves().getIntensity().redraw();
-		
-		
-//		System.out.println(progressBar.getSelection());
+
 		
 		if(progressBar.isDisposed() != true){
 			progressBar.setSelection(progressBar.getSelection() +1);
-//			System.out.println(progressBar.getSelection());
-			
+	
 			if(progressBar.getSelection() == progressBar.getMaximum()){
-//				System.out.println(progressBar.getSelection() +" in the break");
 				tpaav.close();
 			}
-		}
-		
+		}	
 	}
 
 	private void debug (String output) {

@@ -39,14 +39,8 @@ public class TrackingProgressAndAbortView extends Dialog {
 		
 		
 		super(parentShell);
-//		this.parentShell = parentShell;
 		this.ssp =ssp;
 		this.maximum = maximum;		
-//		this.subImage = subImage;
-//		this.outputCurvesPlotSystem =outputCurvesPlotSystem;
-//		this.mainImagePlotSytem = mainImagePlotSytem;
-//		this.backgroundTabFolder= backgroundTabFolder;
-//		this.subBgImage = subBgImage;
 		this.ssvs = ssvs;
 		
 		setShellStyle(getShellStyle() | SWT.RESIZE | SWT.APPLICATION_MODAL);		
@@ -94,12 +88,9 @@ public class TrackingProgressAndAbortView extends Dialog {
 			tj.setProgress(progress);
 			tj.setSsvs(ssvs);
 			tj.setCorrectionSelection(MethodSetting.toInt(ssp.getCorrectionSelection()));
-//			tj.setSuperModel(sm);
-//			tj.setGms(gms);
-//			tj.setSsvsPS(ssvs.getPlotSystemCompositeView().getPlotSystem());
 			tj.setPlotSystem(ssvs.getPlotSystemCompositeView().getPlotSystem());
 			tj.setOutputCurves(ssvs.getSsps3c().getOutputCurves().getPlotSystem());
-			tj.setTimeStep(Math.round((2 / ssp.getNoImages())));
+//			tj.setTimeStep(Math.round((2 / ssp.getNoImages())));
 			tj.setSsp(ssp);
 			tj.setTPAAV(TrackingProgressAndAbortView.this);
 			tj.runTJ1();

@@ -3,27 +3,25 @@ package org.dawnsci.surfacescatter.ui;
 import java.io.File;
 import java.util.ArrayList;
 
-import org.dawnsci.surfacescatter.CurveStateIdentifier;
+import org.dawnsci.surfacescatter.AnalaysisMethodologies.Methodology;
 import org.dawnsci.surfacescatter.FittingParameters;
-//import org.dawnsci.surfacescatter.IntensityDisplayEnum;
+import org.dawnsci.surfacescatter.IntensityDisplayEnum.IntensityDisplaySetting;
 import org.dawnsci.surfacescatter.MethodSettingEnum;
 import org.dawnsci.surfacescatter.MethodSettingEnum.MethodSetting;
 import org.dawnsci.surfacescatter.ProcessingMethodsEnum.ProccessingMethod;
-import org.dawnsci.surfacescatter.TrackingMethodology.TrackerType1;
 import org.dawnsci.surfacescatter.ReflectivityFluxCorrectionsForDialog;
 import org.dawnsci.surfacescatter.ReflectivityMetadataTitlesForDialog;
 import org.dawnsci.surfacescatter.SavingFormatEnum.SaveFormatSetting;
 import org.dawnsci.surfacescatter.TrackingMethodology;
-import org.dawnsci.surfacescatter.AnalaysisMethodologies.Methodology;
-import org.dawnsci.surfacescatter.IntensityDisplayEnum.IntensityDisplaySetting;
+import org.dawnsci.surfacescatter.TrackingMethodology.TrackerType1;
 import org.eclipse.dawnsci.analysis.api.io.IDataHolder;
 import org.eclipse.dawnsci.analysis.api.roi.IRectangularROI;
 import org.eclipse.dawnsci.analysis.dataset.roi.RectangularROI;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.region.IROIListener;
 import org.eclipse.dawnsci.plotting.api.region.IRegion;
-import org.eclipse.dawnsci.plotting.api.region.ROIEvent;
 import org.eclipse.dawnsci.plotting.api.region.IRegion.RegionType;
+import org.eclipse.dawnsci.plotting.api.region.ROIEvent;
 import org.eclipse.dawnsci.plotting.api.trace.ILineTrace;
 import org.eclipse.january.DatasetException;
 import org.eclipse.january.dataset.Dataset;
@@ -53,14 +51,19 @@ import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Group;
+import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
-//import org.eclipse.swt.widgets.Slider;
 import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.ui.PlatformUI;
-
 import uk.ac.diamond.scisoft.analysis.io.LoaderFactory;
+import org.eclipse.swt.events.KeyAdapter;
+import org.eclipse.swt.events.KeyEvent;
+import org.eclipse.swt.events.KeyListener;
+import org.eclipse.swt.events.KeyEvent;
+import org.eclipse.swt.events.KeyListener;
 
 public class SurfaceScatterViewStart extends Dialog {
 
@@ -71,16 +74,10 @@ public class SurfaceScatterViewStart extends Dialog {
 	private DatDisplayer datDisplayer;
 	private GeometricParametersWindows paramField;
 	private CTabFolder folder;
-//	private SashForm right;
-//	private SashForm left;
-//	private SashForm anaRight;
-//	private SashForm anaLeft;
-//	private SashForm setupSash;
 	private SashForm analysisSash;
 	private int numberOfImages;
 	private Dataset nullImage;
 	private SurfaceScatterPresenter ssp;
-//	private ArrayList<Slider> sliderList;
 	private int DEBUG = 1;
 	private boolean modify = true;
 	private String datFolderPath;
@@ -93,6 +90,15 @@ public class SurfaceScatterViewStart extends Dialog {
 	private IntensityDisplaySetting ids;
 	private SaveFormatSetting sms;
 	private String option;
+	
+	public SurfaceScatterPresenter getSsp() {
+		return ssp;
+	}
+
+	public void setSsp(SurfaceScatterPresenter ssp) {
+		this.ssp = ssp;
+	}
+
 
 
 	public CTabFolder getFolder() {
@@ -131,8 +137,8 @@ public class SurfaceScatterViewStart extends Dialog {
 		this.modify = modify;
 	}
 
-	public SurfaceScatterViewStart(Shell parentShell, String[] filepaths, int numberOfImages, Dataset nullImage,
-			SurfaceScatterPresenter ssp, String datFolderPath) {
+	public SurfaceScatterViewStart (Shell parentShell, String[] filepaths, int numberOfImages, Dataset nullImage,
+			SurfaceScatterPresenter ssp, String datFolderPath){
 
 		super(parentShell);
 
@@ -142,6 +148,8 @@ public class SurfaceScatterViewStart extends Dialog {
 		this.numberOfImages = numberOfImages;
 		this.nullImage = nullImage;
 		
+		
+		
 		this.ssp.addStateListener(new IPresenterStateChangeEventListener() {
 
 			@Override
@@ -150,13 +158,14 @@ public class SurfaceScatterViewStart extends Dialog {
 			}
 		});
 		
-//		this.ssvs = this;
 		this.datFolderPath = datFolderPath;
 		this.ssp.setSsvs(this);
-
+		
 		setShellStyle(getShellStyle() | SWT.RESIZE | SWT.PRIMARY_MODAL);
 
 	}
+	
+	
 
 	@Override
 	protected Control createButtonBar(Composite parent) {
@@ -168,7 +177,7 @@ public class SurfaceScatterViewStart extends Dialog {
 	}
 
 	@Override
-	protected Control createDialogArea(Composite parent) {
+	protected Control createDialogArea(Composite parent){
 
 		JFaceResources.getString(IDialogConstants.NO_TO_ALL_LABEL);
 
@@ -422,7 +431,6 @@ public class SurfaceScatterViewStart extends Dialog {
 				customComposite.getReplay().setEnabled(false);
 				customComposite.resetCorrectionsTab();
 				ssps3c.isOutputCurvesVisible(false);
-//				customComposite.getOutputControl().setEnabled(false);
 				ssp.setProcessingMethodSelection(ProccessingMethod.toMethodology(customComposite.getProcessingMode().getSelectionIndex()));
 				
 				ssps3c.getOutputCurves().getIntensity().select(IntensityDisplaySetting.toInt(ids));
@@ -434,6 +442,8 @@ public class SurfaceScatterViewStart extends Dialog {
 				catch(Exception g){
 					
 				}
+				
+				ssps3c.resetCrossHairs();
 				
 				
 			}
@@ -827,7 +837,48 @@ public class SurfaceScatterViewStart extends Dialog {
 
 		datDisplayer.redrawDatDisplayerFolderView();
 
+		
+		Display.getCurrent().addFilter(SWT.KeyDown, new Listener()
+	    {
+	        @Override
+	        public void handleEvent(Event event)
+	        {
+	        	
+				int key = event.keyCode;
+				
+				
+				switch(key){
+				case SWT.ARROW_LEFT:
+					ssp.sliderMovemementMainImage(ssp.getSliderPos() -1);
+					customComposite.getSlider().setSelection(customComposite.getSlider().getSelection() - 1);
+					break;
+				case SWT.ARROW_RIGHT:
+					ssp.sliderMovemementMainImage(ssp.getSliderPos() +1);
+					customComposite.getSlider().setSelection(customComposite.getSlider().getSelection() + 1);
+					break;
+				case SWT.SPACE:
+					SurfaceScatterViewStart.this.fireAccept();
+					break;
+			
+				}
+	        }
+	    });
+		
+		
 		return container;
+	}
+	
+	private static boolean isChild(Control parent, Control child)
+	{
+	    if (child.equals(parent))
+	        return true;
+
+	    Composite p = child.getParent();
+
+	    if (p != null)
+	        return isChild(parent, p);
+	    else
+	        return false;
 	}
 	
 	
@@ -1009,37 +1060,39 @@ public class SurfaceScatterViewStart extends Dialog {
 	
 	public void fireAccept(){
 		
-		ssp.addXValuesForFireAccept();
-		
-		ssp.presenterDummyProcess(ssp.getSliderPos(), 
-								  ssp.getImage(ssp.getSliderPos()), 
-								  customComposite.getPlotSystem(), 
-								  4);
-		
-		if (getSsps3c().getOutputCurves().isVisible() != true) {
-			getSsps3c().getOutputCurves().setVisible(true);
-			getSsps3c().getSashForm().setWeights(new int[] { 50, 50 });
-			getSsps3c().getLeft().setWeights(new int[] { 50, 50 });
-			getSsps3c().getRight().setWeights(new int[] { 50, 50 });
+		if(ssp.getProcessingMethodSelection() ==ProccessingMethod.MANUAL){
+			
+			ssp.addXValuesForFireAccept();
+			
+			ssp.presenterDummyProcess(ssp.getSliderPos(), 
+									  ssp.getImage(ssp.getSliderPos()), 
+									  customComposite.getPlotSystem(), 
+									  4);
+			
+			if (getSsps3c().getOutputCurves().isVisible() != true) {
+				getSsps3c().getOutputCurves().setVisible(true);
+				getSsps3c().getSashForm().setWeights(new int[] { 50, 50 });
+	//			getSsps3c().getLeft().setWeights(new int[] { 50, 50 });
+	//			getSsps3c().getRight().setWeights(new int[] { 50, 50 });
+			}
+	
+			if (getPlotSystemCompositeView().getBackgroundSubtractedSubImage() == null) {
+				getPlotSystemCompositeView().appendBackgroundSubtractedSubImage();
+				getPlotSystemCompositeView().getSash().setWeights(new int[]{19, 45, 29, 7});
+			}
+	
+	
+			IDataset  s = ssp.getBackgroundDatArray().get(ssp.getSliderPos());
+			this.getPlotSystemCompositeView().getSubImageBgPlotSystem().updatePlot2D(s, null, null);
+			this.getSsps3c().generalUpdate();
+			ssp.stitchAndPresent1(this.getSsps3c().getOutputCurves(), ids);
+	
+			this.getSsps3c().getOutputCurves().getPlotSystem().repaint(false);
+			customComposite.getFolder().setSelection(0);
+			analysisSash.setWeights(new int[] { 40, 60 });
+			analysisSash.redraw();
+			
 		}
-
-		if (getPlotSystemCompositeView().getBackgroundSubtractedSubImage() == null) {
-			getPlotSystemCompositeView().appendBackgroundSubtractedSubImage();
-			getPlotSystemCompositeView().getSash().setWeights(new int[]{19, 45, 29, 7});
-		}
-
-
-		IDataset  s = ssp.getBackgroundDatArray().get(ssp.getSliderPos());
-		this.getPlotSystemCompositeView().getSubImageBgPlotSystem().updatePlot2D(s, null, null);
-		this.getSsps3c().generalUpdate();
-		ssp.stitchAndPresent1(this.getSsps3c().getOutputCurves(), ids);
-
-		this.getSsps3c().getOutputCurves().getPlotSystem().repaint(false);
-		customComposite.getFolder().setSelection(0);
-		analysisSash.setWeights(new int[] { 40, 60 });
-		analysisSash.redraw();
-		
-		
 		
 	}
 	
@@ -1055,8 +1108,8 @@ public class SurfaceScatterViewStart extends Dialog {
 			if (getSsps3c().getOutputCurves().isVisible() != true) {
 				getSsps3c().getOutputCurves().setVisible(true);
 				getSsps3c().getSashForm().setWeights(new int[] { 50, 50 });
-				getSsps3c().getLeft().setWeights(new int[] { 50, 50 });
-				getSsps3c().getRight().setWeights(new int[] { 50, 50 });
+//				getSsps3c().getLeft().setWeights(new int[] { 50, 50 });
+//				getSsps3c().getRight().setWeights(new int[] { 50, 50 });
 			}
 	
 			if (getPlotSystemCompositeView().getBackgroundSubtractedSubImage() == null) {
@@ -1535,4 +1588,9 @@ public class SurfaceScatterViewStart extends Dialog {
 	public void setIds(IntensityDisplaySetting ids) {
 		this.ids = ids;
 	}
-}
+}	
+
+
+	
+	
+	
