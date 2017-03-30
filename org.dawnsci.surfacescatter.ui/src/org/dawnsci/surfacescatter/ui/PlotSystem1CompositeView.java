@@ -18,7 +18,6 @@ import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
-import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -188,11 +187,13 @@ public class PlotSystem1CompositeView extends Composite {
 				
 				if(trackerOn){
 					trackerOnButton.setText("Tracker On");
-					if(ssp.getTrackerType() == TrackerType1.INTERPOLATION){
+					if((ssp.getTrackerType() == TrackerType1.INTERPOLATION ||
+							ssp.getTrackerType() == TrackerType1.SPLINE_INTERPOLATION)){
 						button4.setEnabled(true);
 						button5.setEnabled(true);
 					}
 				}
+				
 				else{
 					trackerOnButton.setText("Tracker Off");
 					button4.setEnabled(false);
@@ -333,14 +334,23 @@ public class PlotSystem1CompositeView extends Composite {
        
        ssvs.getPlotSystemCompositeView().getBgRegion().setROI(ssp.regionOfInterestSetter(ssvs.getPlotSystemCompositeView().getPlotSystem().
 		getRegion("myRegion").getROI()));
+
        
-       
-//       ssp.regionOfInterestSetter();
-       
-       if(ssp.getTrackerType() != TrackerType1.INTERPOLATION){
+       if(ssp.getTrackerType() != TrackerType1.INTERPOLATION ||
+    		   ssp.getTrackerType() != TrackerType1.SPLINE_INTERPOLATION){
+    	   
     	   button4.setEnabled(false);
     	   button5.setEnabled(false);
        }
+       
+       
+       if((TrackingMethodology.intToTracker1(trackerSelection) == TrackerType1.INTERPOLATION 
+				|| TrackingMethodology.intToTracker1(trackerSelection) == TrackerType1.SPLINE_INTERPOLATION)
+						&& ssp.getTrackerOn()){
+	
+    	   button4.setEnabled(true);
+    	   button5.setEnabled(true);
+		}
       
    }
    

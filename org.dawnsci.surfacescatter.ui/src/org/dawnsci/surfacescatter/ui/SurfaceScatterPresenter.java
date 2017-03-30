@@ -42,6 +42,7 @@ import org.dawnsci.surfacescatter.ProcessingMethodsEnum;
 import org.dawnsci.surfacescatter.ProcessingMethodsEnum.ProccessingMethod;
 import org.dawnsci.surfacescatter.ReflectivityMetadataTitlesForDialog;
 import org.dawnsci.surfacescatter.SXRDGeometricCorrections;
+import org.dawnsci.surfacescatter.SplineInterpolationTracker;
 import org.dawnsci.surfacescatter.StitchedOutputWithErrors;
 import org.dawnsci.surfacescatter.SuperModel;
 import org.dawnsci.surfacescatter.TrackingMethodology;
@@ -1009,13 +1010,9 @@ public class SurfaceScatterPresenter {
 		sm.addToInterpolatorRegions(region);
 	}
 	
+	@SuppressWarnings("incomplete-switch")
 	public ArrayList<double[][]> interpolationTrackerBoxesAccept(IRegion r2){
-//		
-//		Display display = Display.getCurrent();
-//		Color blue = display.getSystemColor(SWT.COLOR_CYAN);
-//		
-//		IRegion r2 = ssvs.getPlotSystemCompositeView().getGreenRegion();
-//				
+				
 		double[][] box = new double[3][];
 				
 		double[] lengths = new double[] {(double) r2.getROI().getBounds().getIntLengths()[0], (double) r2.getROI().getBounds().getIntLengths()[1]};
@@ -1027,31 +1024,35 @@ public class SurfaceScatterPresenter {
 		box[2] = xdata;
 				
 		sm.addToInterpolatorBoxes(box);
-				
-//		try {
-//			IRegion region =ssvs.getPlotSystemCompositeView().getPlotSystem().createRegion(("Interpolation Region: " + sm.getSliderPos()), RegionType.BOX);
-//			region.setROI(r2.getROI());
-//			sm.addToInterpolatorRegions(region);
-//			region.setRegionColor(blue);
-//			region.setLineWidth(5);
-//			region.setFill(true);
-//			region.setUserRegion(false);
-//			region.setMobile(false);
-//			ssvs.getPlotSystemCompositeView().getPlotSystem().addRegion(region);
-//
-//		} catch (Exception e1) {
-//					// TODO Auto-generated catch block
-//			e1.printStackTrace();
-//		}
 		
-		if(sm.getInterpolatorBoxes().size() > 1){
+		ArrayList<double[][]> interpolatedLenPts = new ArrayList<>();
+		
+
+		if(sm.getInterpolatorBoxes().size() > 2 
+				&& getTrackerType() == TrackerType1.SPLINE_INTERPOLATION ){
 			
-			ArrayList<double[][]> interpolatedLenPts = InterpolationTracker.interpolatedTrackerLenPtArray(sm.getInterpolatorBoxes(), 
-										  sm.getSortedX());
-			sm.setInterpolatedLenPts(interpolatedLenPts);
+					SplineInterpolationTracker split = new SplineInterpolationTracker();
+					
+					interpolatedLenPts = split.interpolatedTrackerLenPtArray1(sm.getInterpolatorBoxes(),
+																			  sm.getSortedX());
+					
+					sm.setInterpolatedLenPts(interpolatedLenPts);
+
+					return interpolatedLenPts;
+			}
+
+		if(sm.getInterpolatorBoxes().size() > 1){
 				
-			return interpolatedLenPts;
+					interpolatedLenPts = InterpolationTracker.interpolatedTrackerLenPtArray(sm.getInterpolatorBoxes(), 
+												  sm.getSortedX());
+					sm.setInterpolatedLenPts(interpolatedLenPts);
+		
+					return interpolatedLenPts;
 		}
+		
+			
+		
+		
 		
 		return null;
 	}
@@ -1080,7 +1081,9 @@ public class SurfaceScatterPresenter {
 	
 	public void illuminateCorrectInterpolationBox(){
 		
-		if(getTrackerType() == TrackerType1.INTERPOLATION && sm.getInterpolatorRegions()!= null){
+		if((getTrackerType() == TrackerType1.INTERPOLATION 
+				|| getTrackerType() == TrackerType1.SPLINE_INTERPOLATION)
+				&& sm.getInterpolatorRegions()!= null){
 			
 			double u =(double) sm.getSliderPos();
 			
@@ -1102,7 +1105,9 @@ public class SurfaceScatterPresenter {
 	
 	public void illuminateCorrectInterpolationBox(int k){
 		
-		if(getTrackerType() == TrackerType1.INTERPOLATION && sm.getInterpolatorRegions()!= null){
+		if((getTrackerType() == TrackerType1.INTERPOLATION 
+				|| getTrackerType() == TrackerType1.SPLINE_INTERPOLATION)
+				&& sm.getInterpolatorRegions()!= null){
 			
 			double u =(double) k;
 			

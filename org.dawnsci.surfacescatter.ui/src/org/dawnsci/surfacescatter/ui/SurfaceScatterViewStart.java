@@ -849,12 +849,20 @@ public class SurfaceScatterViewStart extends Dialog {
 				
 				switch(key){
 				case SWT.ARROW_LEFT:
-					ssp.sliderMovemementMainImage(ssp.getSliderPos() -1);
-					customComposite.getSlider().setSelection(customComposite.getSlider().getSelection() - 1);
+					if(ssp.getSliderPos() > 0){
+						int k = (ssp.getSliderPos()-1);
+						ssp.sliderMovemementMainImage(k);
+						customComposite.getSlider().setSelection(k);
+						SurfaceScatterViewStart.this.updateIndicators(k);
+					}
 					break;
 				case SWT.ARROW_RIGHT:
-					ssp.sliderMovemementMainImage(ssp.getSliderPos() +1);
-					customComposite.getSlider().setSelection(customComposite.getSlider().getSelection() + 1);
+					if(ssp.getSliderPos() < (ssp.getNumberOfImages()-1)){
+						int k = (ssp.getSliderPos()+1);
+						ssp.sliderMovemementMainImage(k);
+						customComposite.getSlider().setSelection(k);
+						SurfaceScatterViewStart.this.updateIndicators(k);
+					}
 					break;
 				case SWT.SPACE:
 					SurfaceScatterViewStart.this.fireAccept();
@@ -895,6 +903,7 @@ public class SurfaceScatterViewStart extends Dialog {
 		
 		
 		if(TrackingMethodology.intToTracker1(trackerSelection) != TrackerType1.INTERPOLATION 
+				&& TrackingMethodology.intToTracker1(trackerSelection) != TrackingMethodology.TrackerType1.SPLINE_INTERPOLATION
 				&& ssp.getInterpolatorRegions() != null){
 			
 			for(IRegion g : ssp.getInterpolatorRegions()){
@@ -927,8 +936,9 @@ public class SurfaceScatterViewStart extends Dialog {
 			customComposite.getPlotSystem1CompositeView().getRejectLocation().setEnabled(false);
 		}
 		
-		else if(TrackingMethodology.intToTracker1(trackerSelection) == TrackerType1.INTERPOLATION &&
-				ssp.getTrackerOn()){
+		else if((TrackingMethodology.intToTracker1(trackerSelection) == TrackerType1.INTERPOLATION 
+				|| TrackingMethodology.intToTracker1(trackerSelection) == TrackerType1.SPLINE_INTERPOLATION)
+						&& ssp.getTrackerOn()){
 	
 			customComposite.getPlotSystem1CompositeView().getAcceptLocation().setEnabled(true);
 			customComposite.getPlotSystem1CompositeView().getRejectLocation().setEnabled(true);
@@ -1025,6 +1035,7 @@ public class SurfaceScatterViewStart extends Dialog {
 			} catch (Exception e1) {
 						// TODO Auto-generated catch block
 				e1.printStackTrace();
+				debug("Box not accepted");
 			}
 
 			
@@ -1218,7 +1229,9 @@ public class SurfaceScatterViewStart extends Dialog {
 		
 		ssp.illuminateCorrectInterpolationBox(k);
 		
-		if(ssp.getTrackerType() == TrackerType1.INTERPOLATION && ssp.getInterpolatedLenPts()!= null){
+		if((ssp.getTrackerType() == TrackerType1.INTERPOLATION 
+				|| ssp.getTrackerType() == TrackerType1.SPLINE_INTERPOLATION)
+				&& ssp.getInterpolatedLenPts()!= null){
 			
 			double[][] lf =ssp.getInterpolatedLenPts().get(ssp.getSliderPos());
 			
