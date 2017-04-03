@@ -61,7 +61,7 @@ public class DataOptions implements IDataObject, IDataPackage {
 	}
 	
 	public ILazyDataset getLazyDataset() {
-		if (data == null) {
+		if (data == null || !Arrays.equals(data.getShape(), parent.getLazyDataset(name).getShape())) {
 			ILazyDataset local = parent.getLazyDataset(name).getSliceView();
 			if (axes != null) {
 				AxesMetadata ax;

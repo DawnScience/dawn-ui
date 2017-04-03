@@ -258,6 +258,8 @@ public class LoadedFilePart {
 		
 		fileController.addStateListener(fileStateListener);
 		
+		fileController.attachLive();
+		
 		DropTargetAdapter dropListener = new DropTargetAdapter() {
 			@Override
 			public void drop(DropTargetEvent event) {
@@ -364,6 +366,9 @@ public class LoadedFilePart {
 			String path = (String)data.getProperty("path");
 			paths = new String[]{path};
 		}
+		
+		if (data.getProperty("live_bean") != null) return;
+		
 		IProgressService service = (IProgressService) PlatformUI.getWorkbench().getService(IProgressService.class);
 		fileController.loadFiles(paths,service);
 

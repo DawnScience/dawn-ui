@@ -1,18 +1,17 @@
 package org.dawnsci.datavis.model;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import org.dawnsci.datavis.api.IRecentPlaces;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.january.dataset.ShapeUtils;
 import org.eclipse.jface.operation.IRunnableWithProgress;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.progress.IProgressService;
 
 public class FileController implements IFileController {
@@ -59,6 +58,60 @@ public class FileController implements IFileController {
 	@Override
 	public void loadFile(String path) {
 		loadFiles(new String[]{path}, null);
+	}
+	
+	public void attachLive() {
+		if (LiveServiceManager.getILiveFileService() != null) {
+			LiveServiceManager.getILiveFileService().addLiveFileListener(new ILiveFileListener() {
+				
+				@Override
+				public void refreshRequest() {
+					
+					Runnable r = new Runnable() {
+						
+						@Override
+						public void run() {
+							
+							getLoadedFiles().stream()
+							.filter(IRefreshable.class::isInstance)
+							.map(IRefreshable.class::cast)
+							.forEach(d -> d.refresh());
+							
+							Display.getDefault().syncExec(new Runnable() {
+								
+								@Override
+								public void run() {
+									
+									fireStateChangeListeners(false, true);
+									
+								}
+							});
+							
+						}
+					};
+					
+					LiveServiceManager.getILiveFileService().runUpdate(r);
+				}
+				
+				@Override
+				public void localReload(String path) {
+					LoadedFile loadedFile = loadedFiles.getLoadedFile(path);
+					if (loadedFile instanceof IRefreshable) {
+						((IRefreshable)loadedFile).locallyReload();
+					}
+					
+				}
+				
+				@Override
+				public void fileLoaded(LoadedFile loadedFile) {
+					loadedFile.toString();
+					loadedFiles.addFile(loadedFile);
+					fireStateChangeListeners(false, false);
+				}
+			});
+			
+			LiveServiceManager.getILiveFileService().attach();
+		}
 	}
 	
 	
@@ -295,9 +348,15 @@ public class FileController implements IFileController {
 	private class FileLoadingRunnable implements IRunnableWithProgress {
 
 		String[] paths;
+		boolean live = false;
 		
 		public FileLoadingRunnable(String[] paths) {
 			this.paths = paths;
+		}
+		
+		public FileLoadingRunnable(String[] paths, boolean live) {
+			this.paths = paths;
+			this.live = live;
 		}
 		
 		@Override
