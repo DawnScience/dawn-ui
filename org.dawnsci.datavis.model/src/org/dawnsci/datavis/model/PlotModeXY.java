@@ -59,7 +59,7 @@ public class PlotModeXY implements IPlotMode {
 	}
 
 	@Override
-	public void displayData(IDataset[] data, ITrace[] update, IPlottingSystem system, Object userObject)
+	public void displayData(IDataset[] data, ITrace[] update, IPlottingSystem<?> system, Object userObject)
 			throws Exception {
 		
 		renameUpdates(update, system);
@@ -75,7 +75,7 @@ public class PlotModeXY implements IPlotMode {
 		system.repaint();
 	}
 	
-	private void renameUpdates(ITrace[] update, IPlottingSystem system) {
+	private void renameUpdates(ITrace[] update, IPlottingSystem<?> system) {
 		
 		if (update == null) return;
 		
@@ -91,7 +91,7 @@ public class PlotModeXY implements IPlotMode {
 		}
 	}
 
-	private void createSingleTrace(IDataset data, IPlottingSystem system, Object userObject, ITrace update) throws DatasetException {
+	private void createSingleTrace(IDataset data, IPlottingSystem<?> system, Object userObject, ITrace update) throws DatasetException {
 		
 		if (update != null && !(update instanceof ILineTrace)) system.removeTrace(update);
 		

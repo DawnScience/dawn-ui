@@ -55,7 +55,7 @@ public class PlotModeImage implements IPlotMode {
 		return new IDataset[]{data};
 	}
 	
-	public void displayData(IDataset[] data, ITrace[] update, IPlottingSystem system, Object userObject) throws Exception {
+	public void displayData(IDataset[] data, ITrace[] update, IPlottingSystem<?> system, Object userObject) throws Exception {
 		long t = System.currentTimeMillis();
 		IDataset d = data[0];
 		AxesMetadata metadata = d.getFirstMetadata(AxesMetadata.class);

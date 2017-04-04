@@ -55,7 +55,7 @@ import org.slf4j.LoggerFactory;
 public class PlotController {
 	
 	private IPlottingService pService;
-	private IPlottingSystem system;
+	private IPlottingSystem<?> system;
 
 	private IPlotMode[] modes = new IPlotMode[]{new PlotModeXY(), new PlotModeImage(), new PlotModeSurface()};
 	private IPlotMode currentMode;
@@ -74,7 +74,7 @@ public class PlotController {
 	
 	private final static Logger logger = LoggerFactory.getLogger(PlotController.class);
 	
-	public PlotController (IPlottingSystem system) {
+	public PlotController (IPlottingSystem<?> system) {
 		this.system = system;
 		init();
 	}
@@ -167,7 +167,7 @@ public class PlotController {
 			}
 		});
 		
-		IPlottingSystem system = getPlottingSystem();
+		IPlottingSystem<?> system = getPlottingSystem();
 		
 		List<IAxis> axes = system.getAxes();
 		for (IAxis axis : axes) axis.setAxisAutoscaleTight(true);
@@ -227,7 +227,7 @@ public class PlotController {
 		//remove traces if not the same as mode
 		//update the data in the plot
 		
-		IPlottingSystem system = getPlottingSystem();
+		IPlottingSystem<?> system = getPlottingSystem();
 		
 		PlottableObject plotObject = stateObject.getPlotObject();
 		NDimensions nd = plotObject.getNDimensions();
@@ -377,7 +377,7 @@ public class PlotController {
 
 	private Map<DataOptions, List<ITrace>> collectTracesFromPlot() {
 		
-		IPlottingSystem system = getPlottingSystem();
+		IPlottingSystem<?> system = getPlottingSystem();
 		
 		Collection<ITrace> traces = system.getTraces();
 		
@@ -399,7 +399,7 @@ public class PlotController {
 		return optionTraceMap;
 	}
 	
-	private IPlottingSystem getPlottingSystem() {
+	private IPlottingSystem<?> getPlottingSystem() {
 		if (system == null) {
 			system = pService.getPlottingSystem("Plot");
 		}
