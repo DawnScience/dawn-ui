@@ -17,6 +17,7 @@ import org.eclipse.dawnsci.analysis.dataset.slicer.SliceInformation;
 import org.eclipse.dawnsci.analysis.dataset.slicer.SourceInformation;
 import org.eclipse.dawnsci.plotting.api.IPlottingService;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
+import org.eclipse.dawnsci.plotting.api.axis.IAxis;
 import org.eclipse.dawnsci.plotting.api.trace.ITrace;
 import org.eclipse.january.dataset.IDataset;
 import org.eclipse.january.dataset.ILazyDataset;
@@ -167,6 +168,9 @@ public class PlotController {
 		});
 		
 		IPlottingSystem system = getPlottingSystem();
+		
+		List<IAxis> axes = system.getAxes();
+		for (IAxis axis : axes) axis.setAxisAutoscaleTight(true);
 
 		final Map<DataOptions, List<ITrace>> traceMap = collectTracesFromPlot();
 
