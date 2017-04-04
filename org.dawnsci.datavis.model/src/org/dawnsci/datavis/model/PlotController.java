@@ -60,6 +60,9 @@ public class PlotController {
 	private IPlotMode[] modes = new IPlotMode[]{new PlotModeXY(), new PlotModeImage(), new PlotModeSurface()};
 	private IPlotMode currentMode;
 	
+	private IPlotDataModifier[] modifiers;
+	private IPlotDataModifier currentModifier;
+	
 	private IFileController fileController = ServiceManager.getFileController();
 	
 	private ISliceChangeListener sliceListener;
@@ -194,7 +197,6 @@ public class PlotController {
 			}
 		});
 		
-		
 		for (DataStateObject object : state) {
 
 			List<ITrace> list = updateMap.remove(object.getOption());
@@ -257,7 +259,15 @@ public class PlotController {
 		SliceInformation s = new SliceInformation(slice, slice, new SliceND(dataOp.getLazyDataset().getShape()), mode.getDataDimensions(options), 1, 0);
 		SliceFromSeriesMetadata md = new SliceFromSeriesMetadata(si, s);
 		
-		for (IDataset d : data) d.setMetadata(md);
+		for (int i = 0; i < data.length ; i++) {
+			IDataset d = data[i];
+			if (currentModifier != null && currentModifier.getSupportedRank() == currentMode.getMinimumRank()) {
+				d = currentModifier.modifyForDisplay(d);
+			}
+			d.setMetadata(md);
+			data[i] = d;
+		}
+		
 	
 		final IDataset[] finalData = data;
 		
