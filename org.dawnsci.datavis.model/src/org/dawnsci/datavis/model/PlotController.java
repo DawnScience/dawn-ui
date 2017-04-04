@@ -26,6 +26,8 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Cursor;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Controller class for the plotting system
@@ -63,12 +65,13 @@ public class PlotController {
 	
 	private Set<PlotModeChangeEventListener> listeners = new HashSet<PlotModeChangeEventListener>();
 	
-//	private SliceForPlotJob job;
 	private ExecutorService executor;
 	private AtomicReference<Runnable> atomicRunnable = new AtomicReference<>();
 	private AtomicReference<Future<?>> atomicFuture = new AtomicReference<Future<?>>();
 	
 	private static String id = "org.dawnsci.prototype.nano.model.PlotManager";
+	
+	private final static Logger logger = LoggerFactory.getLogger(PlotController.class);
 	
 	public PlotController (IPlottingSystem system) {
 		this.system = system;
@@ -84,7 +87,6 @@ public class PlotController {
 	
 	private void init(){
 		
-//		job = new SliceForPlotJob();
 		executor = Executors.newSingleThreadExecutor();
 		
 		fileController.addStateListener(new FileControllerStateEventListener() {
@@ -123,7 +125,6 @@ public class PlotController {
 		}
 		
 		boolean selected = file.isSelected() && dOption.isSelected();
-//		if (!file.isSelected() || !dOption.isSelected()) return;
 		
 		PlottableObject plotObject = dOption.getPlottableObject();
 		IPlotMode localMode = currentMode;
@@ -170,10 +171,6 @@ public class PlotController {
 		final Map<DataOptions, List<ITrace>> traceMap = collectTracesFromPlot();
 
 		if (state == null) state = new ArrayList<DataStateObject>();
-		
-//		if (mode != null && !mode.supportsMultiple()) {
-//			system.clear();
-//		}
 		
 		Map<DataOptions, List<ITrace>> updateMap = new HashMap<>();
 		//have to do multiple iterations so image traces arent removed after correct
@@ -225,7 +222,6 @@ public class PlotController {
 	private void updatePlottedData(DataStateObject stateObject,final List<ITrace> traces, IPlotMode mode) {
 		//remove traces if not the same as mode
 		//update the data in the plot
-		//TODO
 		
 		IPlottingSystem system = getPlottingSystem();
 		
@@ -247,21 +243,8 @@ public class PlotController {
 
 			data = mode.sliceForPlot(view, slice,options);
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.error("Could not slice data for plotting", e);
 		}
-		
-//		ITrace[] t = null;
-//		try {
-//			ILazyDataset view = dataOp.getData().getSliceView();
-//			view.setName(dataOp.getFileName() + ":" + dataOp.getName());
-//
-//			t = mode.buildTraces(view,
-//					slice, options, system);
-//		} catch (Exception e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		}
 		
 		if (data == null) return;	
 		
@@ -281,8 +264,7 @@ public class PlotController {
 					try {
 						mode.displayData(finalData, traces.isEmpty() ? null : traces.toArray(new ITrace[traces.size()]), system, dataOp);
 					} catch (Exception e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
+						logger.error("Error displaying data", e);
 					}
 				
 			getPlottingSystem().repaint();
@@ -463,33 +445,9 @@ public class PlotController {
 			try {
 				future.get();
 			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				logger.info("Error from future", e);
 			} 
 		}
 		
 	}
-	
-//	private class SliceForPlotJob extends Job {
-//
-//		private Runnable runnable;
-//		
-//		public SliceForPlotJob() {
-//			super("Slice for plot");
-//		}
-//		
-//		public void setRunnable(Runnable runnable) {
-//			this.runnable = runnable;
-//		}
-//
-//		@Override
-//		protected IStatus run(IProgressMonitor monitor) {
-//			running.set(true);
-//			Runnable local = runnable;
-//			local.run();
-//			running.set(false);
-//			return Status.OK_STATUS;
-//		}
-//		
-//	}
 }

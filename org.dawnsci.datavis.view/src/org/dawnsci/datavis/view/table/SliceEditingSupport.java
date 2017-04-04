@@ -58,8 +58,6 @@ public class SliceEditingSupport extends EditingSupport {
 				
 				@Override
 				public void verifyText(VerifyEvent e) {
-					String s = e.text;
-					char character = e.character;
 					
 					 //Validation for keys like Backspace, left arrow key, right arrow key and del keys
 					if (e.character == SWT.BS || e.keyCode == SWT.ARROW_LEFT

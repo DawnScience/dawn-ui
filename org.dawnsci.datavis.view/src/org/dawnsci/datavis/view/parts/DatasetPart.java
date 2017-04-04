@@ -8,7 +8,6 @@ import javax.annotation.PreDestroy;
 import javax.inject.Inject;
 
 import org.dawnsci.datavis.model.DataOptions;
-import org.dawnsci.datavis.model.FileController;
 import org.dawnsci.datavis.model.FileControllerStateEvent;
 import org.dawnsci.datavis.model.FileControllerStateEventListener;
 import org.dawnsci.datavis.model.IFileController;
@@ -187,8 +186,7 @@ public class DatasetPart {
 			}
 			List<DataOptions> dataOptions = currentFile.getDataOptions();
 			viewer.setInput(dataOptions.toArray());
-//			viewer.setCheckedElements(currentFile.getChecked().toArray());
-//			
+
 			if (fileController.getCurrentDataOption() != null) {
 				DataOptions op = fileController.getCurrentDataOption();
 				viewer.setSelection(new StructuredSelection(op),true);

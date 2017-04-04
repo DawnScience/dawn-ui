@@ -34,7 +34,6 @@ public class AxisEditSupport extends EditingSupport {
 
 			@Override
 			public void widgetSelected(SelectionEvent event) {
-				ColumnViewer viewer2 = getViewer();
 				ISelection selection = getViewer().getSelection();
 				if (!selection.isEmpty()) {
 					CCombo cCombo = axisEditor.getViewer().getCCombo();

@@ -5,14 +5,14 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 import org.dawnsci.datavis.api.IRecentPlaces;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.progress.IProgressService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class FileController implements IFileController {
 	
@@ -22,7 +22,7 @@ public class FileController implements IFileController {
 	
 	private Set<FileControllerStateEventListener> listeners = new HashSet<FileControllerStateEventListener>();
 	
-	
+	private final static Logger logger = LoggerFactory.getLogger(FileController.class);
 	
 	public FileController(){
 		loadedFiles = new LoadedFiles();
@@ -42,13 +42,9 @@ public class FileController implements IFileController {
 			try {
 				progressService.busyCursorWhile(runnable);
 			} catch (Exception e) {
-				e.printStackTrace();
+				logger.debug("Busy while interrupted", e);
 			} 
 		}
-		
-//		IProgressService service = (IProgressService) PlatformUI.getWorkbench().getService(IProgressService.class);
-		
-			
 	}
 	
 	
@@ -104,7 +100,6 @@ public class FileController implements IFileController {
 				
 				@Override
 				public void fileLoaded(LoadedFile loadedFile) {
-					loadedFile.toString();
 					loadedFiles.addFile(loadedFile);
 					fireStateChangeListeners(false, false);
 				}
@@ -114,8 +109,6 @@ public class FileController implements IFileController {
 		}
 	}
 	
-	
-	//TODO stop leaking this object
 	/* (non-Javadoc)
 	 * @see org.dawnsci.datavis.model.IFileController#getLoadedFiles()
 	 */
@@ -141,29 +134,6 @@ public class FileController implements IFileController {
 		fireStateChangeListeners(false,false);
 	}
 	
-//	public void deselectFiles(List<LoadedFile> files) {
-//		for (LoadedFile file : files) {
-//			file.setSelected(false);	
-//		}
-//		fireStateChangeListeners(false,false);
-//	}
-//	
-//	public void deselectOptions(List<DataOptions> options) {
-//		 for (DataOptions option : options) {
-//			 option.setSelected(false);
-//		 }
-//		fireStateChangeListeners(false,false);
-//	}
-	
-//	public void deselectAllOthers() {
-//		List<DataOptions> dataOptions = currentFile.getDataOptions();
-//		for (DataOptions dop : dataOptions) {
-//			if (currentData != dop) dop.setSelected(false);
-//		}
-//		loadedFiles.deselectOthers(currentFile.getLongName());
-//		
-//		fireStateChangeListeners(false,false);
-//	}
 	
 	/* (non-Javadoc)
 	 * @see org.dawnsci.datavis.model.IFileController#selectFiles(java.util.List, boolean)
@@ -271,16 +241,6 @@ public class FileController implements IFileController {
 		return currentFile;
 	}
 	
-//	public List<DataOptions> getSelectedDataOptions(){
-//		
-//		List<DataOptions> checked = new ArrayList<>();
-//		
-//		for (DataOptions op : currentFile.getDataOptions()) {
-//			if (op.isSelected()) checked.add(op);
-//		}
-//		return checked;
-//	}
-	
 	/* (non-Javadoc)
 	 * @see org.dawnsci.datavis.model.IFileController#getSelectedFiles()
 	 */
@@ -348,15 +308,9 @@ public class FileController implements IFileController {
 	private class FileLoadingRunnable implements IRunnableWithProgress {
 
 		String[] paths;
-		boolean live = false;
 		
 		public FileLoadingRunnable(String[] paths) {
 			this.paths = paths;
-		}
-		
-		public FileLoadingRunnable(String[] paths, boolean live) {
-			this.paths = paths;
-			this.live = live;
 		}
 		
 		@Override
@@ -373,7 +327,7 @@ public class FileController implements IFileController {
 				try {
 					f = new LoadedFile(ServiceManager.getLoaderService().getData(path, null));
 				} catch (Exception e) {
-					e.printStackTrace();
+					logger.error("Exception loading file",e);
 				}
 				
 				if (monitor != null) monitor.worked(1);
@@ -392,12 +346,6 @@ public class FileController implements IFileController {
 			fireStateChangeListeners(false,false);
 			
 		}
-
-		private void addPlace(String name) {
-			// TODO Auto-generated method stub
-			
-		}
-		
 	}
 
 	/* (non-Javadoc)
