@@ -8,7 +8,6 @@ import org.dawnsci.datavis.model.DataOptions;
 import org.dawnsci.datavis.model.IRefreshable;
 import org.dawnsci.datavis.model.LoadedFile;
 import org.dawnsci.datavis.model.NDimensions;
-import org.dawnsci.datavis.model.PlottableObject;
 import org.eclipse.dawnsci.analysis.api.io.IDataHolder;
 import org.eclipse.dawnsci.analysis.api.io.ILoaderService;
 import org.eclipse.dawnsci.analysis.api.tree.DataNode;
@@ -120,7 +119,9 @@ public class LiveLoadedFile extends LoadedFile implements IRefreshable {
 			String[] names = dataHolder.getNames();
 			for (String n : names) {
 				ILazyDataset lazyDataset = dataHolder.getLazyDataset(n);
-				((IDynamicDataset)lazyDataset).refreshShape();
+				if (lazyDataset instanceof IDynamicDataset) {
+					((IDynamicDataset)lazyDataset).refreshShape();
+				}
 				if (lazyDataset != null && ((LazyDatasetBase)lazyDataset).getDType() != Dataset.STRING) {
 					DataOptions d = new DataOptions(n, this);
 					dataOptions.put(d.getName(),d);
@@ -133,13 +134,11 @@ public class LiveLoadedFile extends LoadedFile implements IRefreshable {
 		String[] names = dataHolder.getNames();
 		for (String n : names) {
 			ILazyDataset lazyDataset = dataHolder.getLazyDataset(n);
-			((IDynamicDataset)lazyDataset).refreshShape();
+			if (lazyDataset instanceof IDynamicDataset) {
+				((IDynamicDataset)lazyDataset).refreshShape();
+			}
 		}
 		
-//		dataOptions.values().stream().map(d -> d.getLazyDataset())
-//		.filter(IDynamicDataset.class::isInstance)
-//		.map(IDynamicDataset.class::cast)
-//		.forEach(d -> d.refreshShape());
 		
 		DataOptions[] array = dataOptions.values().stream()
 		.filter(d -> d.getPlottableObject() != null && d.getPlottableObject().getNDimensions() != null).toArray(size ->new DataOptions[size]);
