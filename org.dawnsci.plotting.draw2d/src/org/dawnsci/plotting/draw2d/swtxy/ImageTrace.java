@@ -442,11 +442,13 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 					xPixD = xSize-maxX;
 					xPix = (int) Math.floor(xPixD);
 					xOffset = (xPixD - xPix)*xScale;
+					reverseXScale*=-1;
 				}
 				if (!origin.isOnTop()) {
 					yPixD = ySize-maxY;
 					yPix = (int) Math.floor(yPixD);
 					yOffset = (yPixD - yPix)*yScale;
+					reverseYScale*=-1;
 				}
 				if (xPix < 0 || yPix < 0 || xPix+fullWidth > xSize || yPix+fullHeight > ySize) {
 					return false; // prevent IAE in calling getPixel
