@@ -121,7 +121,7 @@ public class PlotSystem1CompositeView extends Composite {
 	    }
 	    
 	    for(FitPower  i: AnalaysisMethodologies.FitPower.values()){
-	    	comboDropDown1.add(String.valueOf(AnalaysisMethodologies.toInt(i)));
+	    	comboDropDown1.add(AnalaysisMethodologies.toString(i));
 	    }
 	    
 	    for(TrackerType1  i: TrackingMethodology.TrackerType1.values()){
@@ -321,6 +321,7 @@ public class PlotSystem1CompositeView extends Composite {
 	   int trackerSelection = comboDropDown2.getSelectionIndex();
        
 	   String boundaryBox = String.valueOf(boundaryBoxText.getSelection());
+	   
        ssvs.updateAnalysisMethodology(methodologySelection, 
      		  						 fitPowerSelection, 
      		  						 trackerSelection, 

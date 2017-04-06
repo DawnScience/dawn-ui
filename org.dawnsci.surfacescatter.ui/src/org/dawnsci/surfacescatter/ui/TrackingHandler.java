@@ -704,7 +704,8 @@ class trackingJob2 {
 									
 									if(dm.getLocationList() == null && models.get(0).getTrackerType() != TrackerType1.INTERPOLATION){
 										
-										if (sm.getTrackerLocationList() == null | sm.getTrackerLocationList().size() <= 10 ){
+										if (sm.getTrackerLocationList() == null  ){
+//											| sm.getTrackerLocationList().size() <= 10
 											int seedIndex = 
 													ClosestNoFinder.closestNoWithLocation(sm.getSortedX().getDouble(k),
 																						  sm.getSortedX(), 
@@ -1305,7 +1306,9 @@ class trackingJob2 {
 						
 						if(dm.getLocationList() == null && models.get(0).getTrackerType() != TrackerType1.INTERPOLATION){
 							
-							if (sm.getTrackerLocationList() == null | sm.getTrackerLocationList().size() <= 10 ){
+							if (sm.getTrackerLocationList() == null ){
+								
+//								| sm.getTrackerLocationList().size() <= 10 
 								int seedIndex = 
 										ClosestNoFinder.closestNoWithLocation(sm.getSortedX().getDouble(k),
 																			  sm.getSortedX(), 

@@ -9,6 +9,7 @@ import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Group;
@@ -20,7 +21,7 @@ import org.eclipse.swt.widgets.Text;
 public class GeometricParametersWindows extends Composite{
 
 	private Button beamCorrection;
-	
+	private Button radio;
 	private Text beamInPlane;
 	private Text beamOutPlane;
 	private Text covar;
@@ -40,10 +41,13 @@ public class GeometricParametersWindows extends Composite{
 	private Text angularFudgeFactor;
 	private Text savePath;
 	private Text fluxPath;
+	private Text energy;
 	private TabFolder folder;
 	private SurfaceScatterPresenter ssp;
 	private GeometricParametersWindows gpw;
 	private Group geometricParametersSX;
+	private Combo theta;
+	private Combo selectedOption;
 	
 	public GeometricParametersWindows(Composite parent, 
 									  int style,
@@ -62,9 +66,6 @@ public class GeometricParametersWindows extends Composite{
 		
 		folder = new TabFolder(this, SWT.NONE);
 		folder.setLayoutData(new GridData(GridData.FILL_BOTH));
-		
-		
-		
 		
 	    //Tab 1
 	    TabItem paramsSXRD = new TabItem(folder, SWT.NONE);
@@ -124,8 +125,6 @@ public class GeometricParametersWindows extends Composite{
 
 		paramsSXRD.setControl(geometricParametersSX);
 	   	    
-		
-		
 	    //Tab 2
 	    TabItem paramsReflec = new TabItem(folder, SWT.NONE);
 	    paramsReflec.setText("Reflectivity Parameters");
@@ -333,9 +332,96 @@ public class GeometricParametersWindows extends Composite{
 			}
 	    	
 	    });		
+
+		InputTileGenerator tile0 = new InputTileGenerator("Compute q", 
+														  geometricParametersReflec,
+														   true);
+		radio = tile0.getRadio();
+		
+		
+		InputTileGenerator tile1 = new InputTileGenerator("Beam Energy / KeV:",
+				 "3.00",
+				 geometricParametersReflec);
+		
+		energy  = tile1.getText();
+		
+		String[] thetas = new String[] {"Theta", "2*Theta"};
+		
+		InputTileGenerator tile2 = new InputTileGenerator("Angle:",
+														 thetas,
+														 geometricParametersReflec);
+		theta = tile2.getComboDropDownTheta();
+
+		InputTileGenerator tile3 = new InputTileGenerator("Coded Parameter:",
+														  ssp.getOptions(),
+														  geometricParametersReflec);
+		
+		selectedOption = tile3.getCombo();
+		
+		for(Control l : tile1.getGroup().getChildren()){
+			l.setEnabled(false);
+		}
+		
+		for(Control l : tile2.getGroup().getChildren()){
+			l.setEnabled(false);
+		}
+		
+		for(Control l : tile3.getGroup().getChildren()){
+			l.setEnabled(false);
+		}
+		
+		radio.addSelectionListener(new SelectionListener() {
+			
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				for(Control l : tile1.getGroup().getChildren()){
+					l.setEnabled(radio.getSelection());
+				}
+				
+				for(Control l : tile2.getGroup().getChildren()){
+					l.setEnabled(radio.getSelection());
+				}
+				
+				for(Control l : tile3.getGroup().getChildren()){
+					l.setEnabled(radio.getSelection());
+				}
+				
+			}
+			
+			@Override
+			public void widgetDefaultSelected(SelectionEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+		});
+		
 	}
 	
 	
+	public Button getRadio() {
+		return radio;
+	}
+
+	public void setRadio(Button radio) {
+		this.radio = radio;
+	}
+
+	public Combo getTheta() {
+		return theta;
+	}
+
+	public void setTheta(Combo theta) {
+		this.theta = theta;
+	}
+
+	public Combo getSelectedOption() {
+		return selectedOption;
+	}
+
+	public void setSelectedOption(Combo selectedOption) {
+		this.selectedOption = selectedOption;
+	}
+
 	public Button getBeamCorrection() {
 		return beamCorrection;
 	}
@@ -619,6 +705,14 @@ public class GeometricParametersWindows extends Composite{
 		gm.setImageName (imageName.getText());		
 		
 		
+	}
+
+	public Text getEnergy() {
+		return energy;
+	}
+
+	public void setEnergy(Text energy) {
+		this.energy = energy;
 	}
 	
 }

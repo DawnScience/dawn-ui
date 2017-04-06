@@ -82,14 +82,20 @@ public class SurfaceScatterPresenter {
 	
 	private ArrayList<ExampleModel> models;
 	private ArrayList<DataModel> dms;
-//	private ArrayList<GeometricParametersModel> gms;
 	private GeometricParametersModel gm;
 	private SuperModel sm;
 	private int noImages = 0;
-//	private SurfaceScatterViewStart ssvs;
 	private String imageName = "file_image";
+	private String[] options;
 	
-	
+	public String[] getOptions() {
+		return options;
+	}
+
+	public void setOptions(String[] options) {
+		this.options = options;
+	}
+
 	public ArrayList<ExampleModel> getModels() {
 		return models;
 	}
@@ -801,7 +807,7 @@ public class SurfaceScatterPresenter {
 		sm.setInitialLenPt(LenPt);
 		
 		try{
-			fireStateListeners();;
+			fireStateListeners();
 		}
 		catch(NullPointerException f){
 			
@@ -1242,8 +1248,6 @@ public class SurfaceScatterPresenter {
 				len[1],
 				0);
 
-//		ssvs.getPlotSystemCompositeView().getIRegion().setROI(newGreenROI);	
-		
 		double[] bgRegionROI = BoxSlicerRodScanUtilsForDialog.backgroundBoxForDisplay(lenPt, 
 				   models.get(0).getBoundaryBox(), 
 				   models.get(0).getMethodology());
@@ -2416,6 +2420,7 @@ public class SurfaceScatterPresenter {
 		return;
 	}
 	
+
 	public void correctionMethodsWarning(){
 		RegionOutOfBoundsWarning roobw = new RegionOutOfBoundsWarning(parentShell,2,null);
 

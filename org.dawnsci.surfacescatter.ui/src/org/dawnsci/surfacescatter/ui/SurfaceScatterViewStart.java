@@ -1068,6 +1068,18 @@ public class SurfaceScatterViewStart extends Dialog {
 		}
 	}
 	
+	public void populateThetaDropDown(){
+		
+		Combo c = paramField.getSelectedOption();
+		
+		c.removeAll();
+		
+		for(String u : ssp.getOptions()){
+			c.add(u);
+		}
+		
+		 paramField.redraw();
+	}
 	
 	public void fireAccept(){
 		
@@ -1083,8 +1095,6 @@ public class SurfaceScatterViewStart extends Dialog {
 			if (getSsps3c().getOutputCurves().isVisible() != true) {
 				getSsps3c().getOutputCurves().setVisible(true);
 				getSsps3c().getSashForm().setWeights(new int[] { 50, 50 });
-	//			getSsps3c().getLeft().setWeights(new int[] { 50, 50 });
-	//			getSsps3c().getRight().setWeights(new int[] { 50, 50 });
 			}
 	
 			if (getPlotSystemCompositeView().getBackgroundSubtractedSubImage() == null) {
@@ -1136,16 +1146,9 @@ public class SurfaceScatterViewStart extends Dialog {
 						= new TrackingProgressAndAbortView(getParentShell(), 
 														   ssp.getNumberOfImages(),
 														   ssp,
-//														   customComposite.getSubImagePlotSystem(),
-//														   getSsps3c().getOutputCurves().getPlotSystem(),
-//														   customComposite.getPlotSystem(),
-//														   customComposite.getFolder(),
-//														   customComposite.getSubImageBgPlotSystem(),
 														   SurfaceScatterViewStart.this);
 			tpaav.open();
 			
-//			customComposite.getOutputControl().setEnabled(true);
-//			customComposite.getOutputControl().setSelection(true);
 			
 		}
 		
@@ -1251,23 +1254,12 @@ public class SurfaceScatterViewStart extends Dialog {
 				grayRegion.setMobile(false);
 				customComposite.getPlotSystem().addRegion(grayRegion);				
 			} catch (Exception e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			
 			}
 		}
 	}
 
-//	public ArrayList<Slider> getSliderList() {
-//
-//		sliderList = null;
-//
-//		sliderList = new ArrayList<Slider>();
-//
-//		sliderList.add(customComposite.getSlider());
-//
-//		return sliderList;
-//	}
 
 	private void debug(String output) {
 		if (DEBUG == 1) {
@@ -1360,7 +1352,7 @@ public class SurfaceScatterViewStart extends Dialog {
 
 			@Override
 			public void widgetDefaultSelected(SelectionEvent e) {
-				// TODO Auto-generated method stub
+				
 
 			}
 		});
