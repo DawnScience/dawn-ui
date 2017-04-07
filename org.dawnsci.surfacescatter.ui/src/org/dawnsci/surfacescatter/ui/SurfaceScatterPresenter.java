@@ -18,7 +18,6 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.TreeMap;
-
 import org.apache.commons.lang.StringUtils;
 import org.dawnsci.surfacescatter.AnalaysisMethodologies;
 import org.dawnsci.surfacescatter.AnalaysisMethodologies.Methodology;
@@ -69,7 +68,6 @@ import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.widgets.Button;
-import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
@@ -87,7 +85,27 @@ public class SurfaceScatterPresenter {
 	private int noImages = 0;
 	private String imageName = "file_image";
 	private String[] options;
+	private boolean qConvert;
+	private double energy;
+	private int theta;
 	
+	public int getTheta() {
+		return sm.getTheta();
+	}
+
+	public void setTheta(int theta) {
+		this.theta = theta;
+		sm.setTheta(theta);
+	}
+
+	public boolean isqConvert() {
+		return qConvert;
+	}
+
+	public void setqConvert(boolean qConvert) {
+		this.qConvert = qConvert;
+	}
+
 	public String[] getOptions() {
 		return options;
 	}
@@ -104,8 +122,6 @@ public class SurfaceScatterPresenter {
 		this.models = models;
 	}
 
-	
-	
 	public ProccessingMethod getProcessingMethodSelection() {
 		return sm.getProcessingMethodSelection();
 	}
@@ -120,14 +136,11 @@ public class SurfaceScatterPresenter {
 
 	public void setImageName(String imageName) {
 		this.imageName = imageName;
-//		ssvs.getParamField().setImageName(imageName);
 	}
 
 	private Set<IPresenterStateChangeEventListener> listeners = new HashSet<>();
 	
-	public void setSsvs(SurfaceScatterViewStart ssvs) {
-//		this.ssvs = ssvs;
-	}
+	
 
 	private int DEBUG = 1;
 	private PrintWriter writer;
@@ -150,14 +163,6 @@ public class SurfaceScatterPresenter {
 	public ArrayList<DataModel> getDms() {
 		return  dms;
 	}
-	
-//	public ArrayList<GeometricParametersModel> getGms() {
-//		return gms;
-//	}
-//
-//	public void setGms(ArrayList<GeometricParametersModel> gms) {
-//		this.gms = gms;
-//	}
 	
 	public void addStateListener(IPresenterStateChangeEventListener listener){
 		listeners.add(listener);
@@ -185,7 +190,6 @@ public class SurfaceScatterPresenter {
 
 		this.parentShell = parentShell;
 		sm = new SuperModel();
-//		gms = new ArrayList<GeometricParametersModel>();
 		dms = new ArrayList<DataModel>();
 		models = new ArrayList<ExampleModel>();
 		sm.setFilepaths(filepaths);
@@ -205,9 +209,6 @@ public class SurfaceScatterPresenter {
 				
 					models.add(new ExampleModel());
 					dms.add(new DataModel());
-//					gms.add(new GeometricParametersModel());
-//					
-//					ssvs.getParamField().localGeometricParametersUpdate(gms.get(id));
 					
 					gm.setxName(xName);
 					gm.setxNameRef(xName);
@@ -788,10 +789,10 @@ public class SurfaceScatterPresenter {
 	public RectangularROI regionOfInterestSetter(IROI green) {
 
 		IRectangularROI greenRectangle = green.getBounds();
-		int[] Len = greenRectangle.getIntLengths();
-		int[] Pt = greenRectangle.getIntPoint();
+		int[] len = greenRectangle.getIntLengths();
+		int[] pt = greenRectangle.getIntPoint();
 
-		int[][] LenPt = { Len, Pt };
+		int[][] LenPt = { len, pt };
 
 		for (ExampleModel m : models) {
 			m.setBox(greenRectangle);
@@ -826,79 +827,10 @@ public class SurfaceScatterPresenter {
 		
 		
 		return bgROI;
-//		try{
-//			ssvs.getPlotSystemCompositeView().getBgRegion().setROI(bgROI);
-//		}
-//		catch(Exception f){
-//			
-//		}	
+	
 	}
 	
-//	public void regionOfInterestSetter() {
-//
-//		IROI green = ssvs.getPlotSystemCompositeView().getPlotSystem().
-//				getRegion("myRegion").getROI();
-//		
-//		IRectangularROI greenRectangle = green.getBounds();
-//		int[] Len = greenRectangle.getIntLengths();
-//		int[] Pt = greenRectangle.getIntPoint();
-//		int[][] LenPt = { Len, Pt };
-//
-//		for (ExampleModel m : models) {
-//			m.setBox(greenRectangle);
-//			m.setLenPt(LenPt);
-//			m.setROI(green);
-//		}
-//
-//		for (DataModel dm :dms){
-//			dm.setInitialLenPt(LenPt);
-//		}
-//		
-//		int[][] ilpt = sm.getInitialLenPt();
-//		
-//		if(LenPt[0][0] != ilpt[0][0] ||
-//		   LenPt[0][1] != ilpt[0][1] ||	
-//		   LenPt[1][0] != ilpt[1][0] ||
-//		   LenPt[1][1] != ilpt[1][1]){
-//			
-//			sm.setInitialLenPt(LenPt);
-//		
-//			try{
-//				fireStateListeners();;
-//			}
-//			catch(NullPointerException f){
-//				
-//			};
-//		}
-//		double[] bgRegionROI = BoxSlicerRodScanUtilsForDialog.backgroundBoxForDisplay(LenPt, 
-//				   models.get(0).getBoundaryBox(), 
-//				   models.get(0).getMethodology());
-//
-//		RectangularROI bgROI = new RectangularROI(bgRegionROI[0],
-//												  bgRegionROI[1],
-//												  bgRegionROI[2],
-//												  bgRegionROI[3],
-//												  bgRegionROI[4]);
-//		try{
-//			ssvs.getPlotSystemCompositeView().getBgRegion().setROI(bgROI);
-//		}
-//		catch(Exception f){
-//			debug("couldn't get the gold backgrounds");
-//		}
-//	}
-//	
-	
-	
-	
-	
-	
-//	public void trackingRegionOfInterestSetter(int k){
-//	
-//		double[] loc= sm.getLocationList().get(k);
-//		
-//		trackingRegionOfInterestSetter(loc, k);
-//		
-//	}
+
 	
 	public ArrayList<double[]> getLocationList(){
 		return sm.getLocationList();
@@ -1705,6 +1637,13 @@ public class SurfaceScatterPresenter {
 
 		return xPos;
 	}
+	
+	public int qPositionFinder(double myNum) {
+
+		int qPos = ClosestNoFinder.closestNoPos(myNum, sm.getSortedQ());
+
+		return qPos;
+	}
 
 //	public SurfaceScatterViewStart getSsvs() {
 //		return ssvs;
@@ -1922,6 +1861,27 @@ public class SurfaceScatterPresenter {
 	    }	
 		writer.close();
 	}	
+	
+	public IDataset getSplicedCurveX(){
+		return sm.getSplicedCurveX();
+	}
+	
+	public IDataset getSplicedCurveY(){
+		return sm.getSplicedCurveY();
+	}
+	
+	public IDataset getSplicedCurveYFhkl(){
+		return sm.getSplicedCurveYFhkl();
+	}
+	
+	public IDataset getSplicedCurveYRaw(){
+		return sm.getSplicedCurveYRaw();
+	}
+
+	
+	public IDataset getSplicedCurveQ(){
+		return sm.getSplicedCurveQ();
+	}
 	
 	public void setTrackerOn(Boolean trackerOn){
 		sm.setTrackerOn(trackerOn);
@@ -2319,6 +2279,10 @@ public class SurfaceScatterPresenter {
 		sm.setSplicedCurveX(xData);
 	}
 	
+	public ArrayList<Double> getQList(){
+		return sm.getqList();
+	}
+	
 	public void setSplicedCurveY(IDataset yData){
 		sm.setSplicedCurveY(yData);
 	}
@@ -2549,7 +2513,9 @@ public class SurfaceScatterPresenter {
 		return attenuatedDatasets;
 	}
 
-	public void switchFhklIntensity(IPlottingSystem<Composite> pS, Combo selector){
+	public void switchFhklIntensity(IPlottingSystem<Composite> pS, 
+									int selector,
+									boolean qAxis){
 		
 		pS.clear();
 		
@@ -2558,31 +2524,40 @@ public class SurfaceScatterPresenter {
 		
 		Display display = Display.getCurrent();
 		
-		if(selector.getSelectionIndex() ==0){
+		IDataset x = DatasetFactory.zeros(new int[] {2,2}, Dataset.ARRAYFLOAT64);
+		
+		if(qAxis){
+			x = getSplicedCurveQ();
+		}
+		else{
+			x = getSplicedCurveX();
+		}
+		
+		if(selector ==0){
 					
-			lt.setData(sm.getSortedX(),sm.getSplicedCurveY());
+			lt.setData(x,sm.getSplicedCurveY());
 		
 			Color blue = display.getSystemColor(SWT.COLOR_BLUE);
 			
 			lt.setTraceColor(blue);
 		}
 
-		if(selector.getSelectionIndex() ==1){
+		if(selector ==1){
 			
 			lt.setName("Fhkl Curve");
 			
-			lt.setData(sm.getSortedX(),sm.getSplicedCurveYFhkl());
+			lt.setData(x,sm.getSplicedCurveYFhkl());
 			
 			Color green = display.getSystemColor(SWT.COLOR_GREEN);
 		
 			lt.setTraceColor(green);
 		}
 		
-		if(selector.getSelectionIndex() ==2){
+		if(selector ==2){
 			
 			lt.setName("Raw Intensity Curve");
 			
-			lt.setData(sm.getSortedX(),sm.getSplicedCurveYRaw());
+			lt.setData(x,sm.getSplicedCurveYRaw());
 			
 			Color black = display.getSystemColor(SWT.COLOR_BLACK);
 		
@@ -2798,6 +2773,11 @@ public class SurfaceScatterPresenter {
 	public SuperModel getSm(){
 		return sm;
 	}
+	
+	
+	public void qConversion(){
+		sm.qConversion();
+	}
 
 //	public void runTrackingJob(IPlottingSystem<Composite> subPS, 
 //							   IPlottingSystem<Composite> outputCurves,
@@ -2882,38 +2862,48 @@ public class SurfaceScatterPresenter {
 
 		ILineTrace lt = pS.createLineTrace("progress");
 
+		IDataset X = DatasetFactory.createFromObject(sm.getSplicedCurveX());
+		
+		if(outputCurves.getqAxis().getSelection()){
+			
+			sm.qConversion();
+			X = sm.getSplicedCurveQ();
+		}
+		
+		else{
+			X = sm.getSplicedCurveX();
+		}
+		
+		
 		if(ids == null){
 
-			lt.setData(sm.getSplicedCurveX(), sm.getSplicedCurveY());
+			lt.setData(X, sm.getSplicedCurveY());
 			Color blue = display.getSystemColor(SWT.COLOR_BLUE);
 			lt.setTraceColor(blue);
 		}
 		
 		else if(ids == IntensityDisplaySetting.Corrected_Intensity){
 
-			lt.setData(sm.getSplicedCurveX(), sm.getSplicedCurveY());
+			lt.setData(X, sm.getSplicedCurveY());
 			Color blue = display.getSystemColor(SWT.COLOR_BLUE);
 			lt.setTraceColor(blue);
 			
 		}
 		else if(ids == IntensityDisplaySetting.Fhkl){
 
-			lt.setData(sm.getSplicedCurveX(), sm.getSplicedCurveYFhkl());
+			lt.setData(X, sm.getSplicedCurveYFhkl());
 			Color green = display.getSystemColor(SWT.COLOR_GREEN);
 			lt.setTraceColor(green);
 		}
 		else if(ids == IntensityDisplaySetting.Raw_Intensity){
 
-			lt.setData(sm.getSplicedCurveX(), sm.getSplicedCurveYRaw());
+			lt.setData(X, sm.getSplicedCurveYRaw());
 			Color black = display.getSystemColor(SWT.COLOR_BLACK);
 			lt.setTraceColor(black);
 			
-		
 		}
 		
 		
-
-	
 		pS.clear();
 		pS.addTrace(lt);
 		
@@ -2941,6 +2931,15 @@ public class SurfaceScatterPresenter {
 	}
 	
 
+	public boolean getErrorFlag(){
+		return sm.isErrorDisplayFlag();
+	}
+	
+	public void setErrorFlag(boolean n){
+		 sm.setErrorDisplayFlag(n);
+	}
+	
+	
 	
 	public void geometricParametersWindowPopulate(){
 		
@@ -2958,6 +2957,15 @@ public class SurfaceScatterPresenter {
 
 	public void setGm(GeometricParametersModel gm) {
 		this.gm = gm;
+	}
+
+	public double getEnergy() {
+		return energy;
+	}
+
+	public void setEnergy(double energy) {
+		this.energy = energy;
+		sm.setEnergy(energy);
 	}
 }
 

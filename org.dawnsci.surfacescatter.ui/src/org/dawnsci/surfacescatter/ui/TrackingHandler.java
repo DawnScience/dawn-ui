@@ -443,7 +443,6 @@ public class TrackingHandler {
 			
 			ssvs.getSsps3c().generalUpdate(ssp.getLenPt());
 			
-//			ssvs.getSsps3c().getOutputCurves().getIntensity().select(0);
 			ssvs.getSsps3c().getOutputCurves().getIntensity().redraw();
 			
 			if(progressBar.isDisposed() != true){

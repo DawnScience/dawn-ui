@@ -427,10 +427,6 @@ public class SuperSashPlotSystem3Composite extends Composite{
 				plotSystem1.repaint();
 				plotSystem3.repaint();
 				
-//				sashForm.setWeights(new int[] {50,50});
-//				left.setWeights(new int[] {50,50});
-//				right.setWeights(new int[] {50,50});
-				
 				ssvs.getCustomComposite().generalCorrectionsUpdate();
 				
 				return;

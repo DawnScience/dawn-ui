@@ -350,13 +350,15 @@ public class GeometricParametersWindows extends Composite{
 		InputTileGenerator tile2 = new InputTileGenerator("Angle:",
 														 thetas,
 														 geometricParametersReflec);
-		theta = tile2.getComboDropDownTheta();
-
+		theta = tile2.getCombo();
+//		theta.select(0);
+		
 		InputTileGenerator tile3 = new InputTileGenerator("Coded Parameter:",
 														  ssp.getOptions(),
 														  geometricParametersReflec);
 		
 		selectedOption = tile3.getCombo();
+		
 		
 		for(Control l : tile1.getGroup().getChildren()){
 			l.setEnabled(false);
@@ -386,6 +388,7 @@ public class GeometricParametersWindows extends Composite{
 					l.setEnabled(radio.getSelection());
 				}
 				
+				ssp.setqConvert(radio.getSelection());
 			}
 			
 			@Override

@@ -343,7 +343,9 @@ public class DatDisplayer extends Composite {
 				options = dh1.getNames();
 				
 				ssp.setOptions(options);
-				ssvs.populateThetaDropDown();
+				ssvs.populateThetaOptionsDropDown();
+				ssvs.getParamField().getSelectedOption().select(0);
+				ssvs.getParamField().getTheta().select(0);
 				
 				List<String> pb = Arrays.asList(options);
 				
@@ -566,7 +568,7 @@ public class DatDisplayer extends Composite {
 
 					options = dh1.getNames();
 					ssp.setOptions(options);
-					ssvs.populateThetaDropDown();
+					ssvs.populateThetaOptionsDropDown();
 
 					for (int t = 0; t < options.length; t++) {
 						optionsDropDown.add(options[t]);

@@ -78,6 +78,7 @@ public class PlotSystemCompositeView extends Composite {
 	private Group manualControls;
 	private SurfaceScatterViewStart ssvs;
 	private Button accept;
+	private Button acceptBack;
 	
     public PlotSystemCompositeView(Composite parent, 
     							   int style,
@@ -436,39 +437,6 @@ public class PlotSystemCompositeView extends Composite {
 			}
 		});
 		
-//		slider.addKeyListener(new KeyListener() {
-//			
-//			@Override
-//			public void keyReleased(KeyEvent e) {
-//				// TODO Auto-generated method stub
-//				
-//			}
-//			
-//			@Override
-//			public void keyPressed(KeyEvent ke) {
-////				ke.character;
-//				int key = ke.keyCode;
-//				
-//				
-//				switch(key){
-//				case SWT.ARROW_LEFT:
-//					ssp.sliderMovemementMainImage(ssp.getSliderPos() -1);
-//					slider.setSelection(slider.getSelection() - 1);
-//					break;
-//				case SWT.ARROW_RIGHT:
-//					ssp.sliderMovemementMainImage(ssp.getSliderPos() +1);
-//					slider.setSelection(slider.getSelection() + 1);
-//					break;
-////				case KeyEvent.VK_SPACE:
-////					ssvs.fireAccept();
-////					break;
-//			
-//				}
-//				
-//			}
-//		});
-		
-	    
 		processing = new Group (form,SWT.NONE);  
 	    GridLayout processingLayout = new GridLayout(2,true);
 	    processing.setLayout(processingLayout);
@@ -537,7 +505,7 @@ public class PlotSystemCompositeView extends Composite {
     	
     	if(ssp.getProcessingMethodSelection() == ProccessingMethod.MANUAL){
 
-    	    GridLayout manualControlsLayout = new GridLayout(3,true);
+    	    GridLayout manualControlsLayout = new GridLayout(4,true);
     	    manualControls .setLayout(manualControlsLayout);
     	    GridData manualControlsData = new GridData(SWT.FILL, SWT.NULL, true, false);
     	    manualControls .setLayoutData(manualControlsData);
@@ -546,9 +514,14 @@ public class PlotSystemCompositeView extends Composite {
     	    decrement.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
     	    decrement.setText("<");
     		
+
+    		acceptBack = new Button (manualControls, SWT.PUSH);	
+    		acceptBack.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+    		acceptBack.setText("< Accept");
+    	    
     		accept = new Button (manualControls, SWT.PUSH);	
     		accept.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-    		accept.setText("Accept");
+    		accept.setText("Accept >");
     		
     		increment = new Button (manualControls, SWT.PUSH);	
     	    increment.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
@@ -584,6 +557,26 @@ public class PlotSystemCompositeView extends Composite {
    
     public void addManualListeners(){
     	
+    	acceptBack.addSelectionListener(new SelectionListener() {
+			
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				ssvs.fireAccept();
+				slider.setSelection(slider.getSelection() -2);
+				ssp.setSliderPos(slider.getSelection());
+				generalUpdate();
+				ssvs.sliderMovementGeneralUpdate();
+			}
+			
+			@Override
+			public void widgetDefaultSelected(SelectionEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+		});
+    	
+    	
+    	
     	accept.addSelectionListener(new SelectionListener() {
 			
 			@Override
@@ -603,29 +596,7 @@ public class PlotSystemCompositeView extends Composite {
 		});
     	
     	
-    	accept.addKeyListener(new KeyListener() {
-			
-			@Override
-			public void keyReleased(KeyEvent e) {
-				// TODO Auto-generated method stub
-				
-			}
-			
-			@Override
-			public void keyPressed(KeyEvent ke) {
-				
-				int key = ke.keyLocation;
-				
-				
-				switch(key){
-				case SWT.SPACE:
-					ssvs.fireAccept();
-					break;
-				}
-				
-			}
-		});
-		
+    	
     	
     	increment.addSelectionListener(new SelectionListener() {
 			
@@ -1146,6 +1117,14 @@ public class PlotSystemCompositeView extends Composite {
 
 	public void setAccept(Button accept) {
 		this.accept = accept;
+	}
+
+	public Button getAcceptBack() {
+		return acceptBack;
+	}
+
+	public void setAcceptBack(Button acceptBack) {
+		this.acceptBack = acceptBack;
 	}
 
 }

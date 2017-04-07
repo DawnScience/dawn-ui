@@ -149,10 +149,7 @@ public class PresenterInitialSetup extends Dialog {
 						   ssp.getImage(0),
 						   ssp,
 						   null);
-//						   datFolderPath);
-				
-				ssp.setSsvs(ssvs);
-				
+
 				ssvs.open();
 				
 				

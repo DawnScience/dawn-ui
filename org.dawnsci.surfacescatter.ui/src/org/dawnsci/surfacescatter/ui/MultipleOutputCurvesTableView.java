@@ -44,6 +44,7 @@ public class MultipleOutputCurvesTableView extends Composite {
 	private Group overlapSelection;
 	private Button errors;
 	private Button overlapZoom;
+	private Button qAxis;
 	private IRegion marker;
 	
 	public MultipleOutputCurvesTableView (Composite parent, 
@@ -128,10 +129,30 @@ public class MultipleOutputCurvesTableView extends Composite {
 
 		plotSystem4.getPlotComposite().setLayoutData(gd_secondField);
 
-		overlapZoom = new Button(sashForm, SWT.PUSH);
-		overlapZoom.setText("Overlap Zoom");
+		Group extraButtons = new Group(sashForm, SWT.NULL);
+		GridLayout extraButtonsLayout = new GridLayout(2,true);
+		GridData extraButtonsData = new GridData(SWT.FILL, SWT.NULL, true, false);
+		extraButtons.setLayout(extraButtonsLayout);
+		extraButtons.setLayoutData(extraButtonsData);
 		
-		sashForm.setWeights(new int[]{10,7,78,5});
+		overlapZoom = new Button(extraButtons, SWT.PUSH);
+		overlapZoom.setText("Overlap Zoom");
+		overlapZoom.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+	    
+		qAxis= new Button(extraButtons, SWT.CHECK);
+		qAxis.setText("q Axis");
+		qAxis.setEnabled(false);
+		qAxis.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		
+		sashForm.setWeights(new int[]{10,7,75,8});
+	}
+
+	public Button getqAxis() {
+		return qAxis;
+	}
+
+	public void setqAxis(Button qAxis) {
+		this.qAxis = qAxis;
 	}
 
 	public Composite getComposite() {

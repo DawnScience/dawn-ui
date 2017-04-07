@@ -110,6 +110,7 @@ public class StitchedOverlapCurves extends Composite {
 	
 		lt1.setData(attenuatedDatasets[1], attenuatedDatasets[0]);
 		
+		
 		output = sortedAttenuatedDatasets;
 
 		plotSystem.addTrace(lt1);
