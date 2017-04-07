@@ -562,7 +562,7 @@ public class PlotSystemCompositeView extends Composite {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				ssvs.fireAccept();
-				slider.setSelection(slider.getSelection() -2);
+				slider.setSelection(slider.getSelection() -1);
 				ssp.setSliderPos(slider.getSelection());
 				generalUpdate();
 				ssvs.sliderMovementGeneralUpdate();

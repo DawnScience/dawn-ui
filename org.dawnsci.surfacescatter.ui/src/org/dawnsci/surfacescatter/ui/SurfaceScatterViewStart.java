@@ -1372,8 +1372,15 @@ public class SurfaceScatterViewStart extends Dialog {
 		if (customComposite.getImageNo().equals(String.valueOf(k)) == false) {
 			customComposite.getImageNo().setText(String.valueOf(k));
 		}
-
-		RectangularROI r = new RectangularROI(ssp.getXValue(k), 0.1, 0, 0.1, 0);
+		
+		double x = ssp.getXValue(k);
+		
+		if(outputCurves.getqAxis().getSelection()){
+			x = ssp.getQValue(k);
+		}
+		
+		RectangularROI r = new RectangularROI(x, 0.1, 0, 0.1, 0);
+		
 		try {
 			outputCurves.getRegionNo().setROI(r);
 		} catch (NullPointerException f) {

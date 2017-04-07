@@ -328,14 +328,6 @@ public class SuperSashPlotSystem3Composite extends Composite{
 			IRegion[] hv = new IRegion[] {horizontalSlice, verticalSlice};
 			return hv;
 		}
-		
-//		public SashForm getRight(){
-//			return right;	
-//		}
-//		
-//		public SashForm getLeft(){
-//			return left;	
-//		}
 
 		public MultipleOutputCurvesTableView getOutputCurves(){
 			return outputCurves;
@@ -352,7 +344,6 @@ public class SuperSashPlotSystem3Composite extends Composite{
 				plotSystem3.clear();
 				
 				int[][] lenPt = ssp.getLenPt();
-				
 				
 				IRectangularROI greenRectangle = new RectangularROI(lenPt[1][0], lenPt[1][1],
 																	lenPt[0][0], lenPt[0][1], 0);
@@ -380,43 +371,43 @@ public class SuperSashPlotSystem3Composite extends Composite{
 				
 				plotSystem3.addTrace(lt2);	
 				
-					@SuppressWarnings("unchecked")
-					IDataset output = ssp.presenterDummyProcess(selection,
+				@SuppressWarnings("unchecked")
+				IDataset output = ssp.presenterDummyProcess(selection,
 																ssp.getImage(selection),
 																ssvs.getPlotSystemCompositeView().getPlotSystem(),
 																3);
 			
-					ILineTrace lt3 = VerticalHorizontalSlices.horizontalsliceBackgroundSubtracted(
+				ILineTrace lt3 = VerticalHorizontalSlices.horizontalsliceBackgroundSubtracted(
 							horizontalSlice.getROI().getBounds(),
 							plotSystem1, 
 							ssp.getTemporaryBackground(),
 							greenRectangle);
 					
-					ILineTrace lt4 = VerticalHorizontalSlices.verticalsliceBackgroundSubtracted(
+				ILineTrace lt4 = VerticalHorizontalSlices.verticalsliceBackgroundSubtracted(
 							verticalSlice.getROI().getBounds(),
 							getPlotSystem3(),
 							ssp.getTemporaryBackground(),
 							greenRectangle);
 				
-					ILineTrace lt5 = VerticalHorizontalSlices.horizontalsliceBackgroundSubtracted(
+				ILineTrace lt5 = VerticalHorizontalSlices.horizontalsliceBackgroundSubtracted(
 							horizontalSlice.getROI().getBounds(),
 							plotSystem1, 
 							output,
 							greenRectangle);
 					
-					ILineTrace lt6 = VerticalHorizontalSlices.verticalsliceBackgroundSubtracted(
+				ILineTrace lt6 = VerticalHorizontalSlices.verticalsliceBackgroundSubtracted(
 							verticalSlice.getROI().getBounds(),
 							plotSystem3,
 							output,
 							greenRectangle);
 					
-					lt3.setName("background Slice");
-					lt4.setName("background Slice");
+				lt3.setName("background Slice");
+				lt4.setName("background Slice");
 					
-					plotSystem1.addTrace(lt3);
-					plotSystem3.addTrace(lt4);
-					plotSystem1.addTrace(lt5);
-					plotSystem3.addTrace(lt6);
+				plotSystem1.addTrace(lt3);
+				plotSystem3.addTrace(lt4);
+				plotSystem1.addTrace(lt5);
+				plotSystem3.addTrace(lt6);
 				
 				plotSystem1.clearAnnotations();
 				plotSystem3.clearAnnotations();
@@ -511,13 +502,8 @@ public class SuperSashPlotSystem3Composite extends Composite{
 	
 			plotSystem1.repaint();
 			plotSystem3.repaint();
-			
-//			sashForm.setWeights(new int[] {50,50});
-//			left.setWeights(new int[] {50,50});
-//			right.setWeights(new int[] {50,50});
 
 			ssvs.getCustomComposite().generalCorrectionsUpdate();
-			
 			
 			return;
 	}

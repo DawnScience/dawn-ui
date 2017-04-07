@@ -632,6 +632,10 @@ public class SurfaceScatterPresenter {
 		model.setTrackerCoordinates(localLocation);
 		sm.addTrackerLocationList(sm.getSliderPos(), localLocation);
 		
+		if(qConvert){
+			qConversion();
+		}
+		
 	}
 	
 	
@@ -1443,6 +1447,21 @@ public class SurfaceScatterPresenter {
 		if(sm != null){
 			if(sm.getSortedX() != null){
 				return sm.getSortedX().getDouble(k);
+			}
+			else{
+				return 0;
+			}
+		}
+		else{
+			return 0;
+		}
+	}
+	
+	public double getQValue(int k){
+		
+		if(sm != null){
+			if(sm.getSortedQ() != null){
+				return sm.getSortedQ().getDouble(k);
 			}
 			else{
 				return 0;
@@ -2866,7 +2885,7 @@ public class SurfaceScatterPresenter {
 		
 		if(outputCurves.getqAxis().getSelection()){
 			
-			sm.qConversion();
+			qConversion();
 			X = sm.getSplicedCurveQ();
 		}
 		
