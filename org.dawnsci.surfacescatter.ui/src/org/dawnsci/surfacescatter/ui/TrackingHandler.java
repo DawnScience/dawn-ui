@@ -417,7 +417,7 @@ public class TrackingHandler {
 		public void updateTrackingDisplay(IDataset tempImage, int imageNumber){
 			
 			ssvs.getPlotSystemCompositeView().getFolder().setSelection(2);
-			ssp.updateSliders(ssvs.getPlotSystemCompositeView().getSlider(), imageNumber);
+//			ssp.updateSliders(ssvs.getPlotSystemCompositeView().getSlider(), imageNumber);
 			ssvs.updateIndicators(imageNumber);
 			ssvs.getPlotSystemCompositeView().getPlotSystem().updatePlot2D(tempImage, null, null);
 			ssvs.getPlotSystemCompositeView().getSubImageBgPlotSystem().updatePlot2D(sm.getBackgroundDatArray().get(imageNumber), null, null);
@@ -1735,7 +1735,7 @@ class trackingJob2 {
 		
 
 		ssvs.getPlotSystemCompositeView().getFolder().setSelection(2);
-		ssp.updateSliders(ssvs.getPlotSystemCompositeView().getSlider(), imageNumber);
+//		ssp.updateSliders(ssvs.getPlotSystemCompositeView().getSlider(), imageNumber);
 		ssvs.updateIndicators(imageNumber);
 		ssvs.getPlotSystemCompositeView().getPlotSystem().updatePlot2D(tempImage, null, null);
 		ssvs.getPlotSystemCompositeView().getSubImageBgPlotSystem().updatePlot2D(sm.getBackgroundDatArray().get(imageNumber), null, null);

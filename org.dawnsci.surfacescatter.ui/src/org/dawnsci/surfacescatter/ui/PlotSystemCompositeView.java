@@ -4,7 +4,6 @@ import org.dawb.common.ui.widgets.ActionBarWrapper;
 import org.dawnsci.surfacescatter.ExampleModel;
 import org.dawnsci.surfacescatter.MethodSettingEnum.MethodSetting;
 import org.dawnsci.surfacescatter.ProcessingMethodsEnum.ProccessingMethod;
-import org.eclipse.dawnsci.analysis.api.roi.IROI;
 import org.eclipse.dawnsci.analysis.dataset.roi.RectangularROI;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.PlotType;
@@ -17,8 +16,6 @@ import org.eclipse.january.dataset.Dataset;
 import org.eclipse.january.dataset.IDataset;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
-import org.eclipse.swt.events.KeyEvent;
-import org.eclipse.swt.events.KeyListener;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Color;
@@ -412,8 +409,15 @@ public class PlotSystemCompositeView extends Composite {
 			}
 			
 			public void roiStandard(ROIEvent evt) {
-				IROI bg = ssp.regionOfInterestSetter(region.getROI());
-				bgRegion.setROI(bg);
+				double[] bgRegionROI = ssp.regionOfInterestSetter(region.getROI());
+				
+				RectangularROI bgROI = new RectangularROI(bgRegionROI[0],
+						  bgRegionROI[1],
+						  bgRegionROI[2],
+						  bgRegionROI[3],
+						  bgRegionROI[4]);
+				
+				bgRegion.setROI(bgROI);
 				
 			}
 		});

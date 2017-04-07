@@ -2,7 +2,7 @@ package org.dawnsci.surfacescatter.ui;
 
 import java.io.File;
 import java.util.ArrayList;
-
+import java.util.Arrays;
 import org.dawnsci.surfacescatter.AnalaysisMethodologies.Methodology;
 import org.dawnsci.surfacescatter.FittingParameters;
 import org.dawnsci.surfacescatter.IntensityDisplayEnum.IntensityDisplaySetting;
@@ -24,7 +24,6 @@ import org.eclipse.dawnsci.plotting.api.region.IRegion;
 import org.eclipse.dawnsci.plotting.api.region.IRegion.RegionType;
 import org.eclipse.dawnsci.plotting.api.region.ROIEvent;
 import org.eclipse.dawnsci.plotting.api.trace.ILineTrace;
-import org.eclipse.dawnsci.plotting.api.trace.ITrace;
 import org.eclipse.january.DatasetException;
 import org.eclipse.january.dataset.Dataset;
 import org.eclipse.january.dataset.DatasetFactory;
@@ -62,7 +61,6 @@ import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.ui.PlatformUI;
 import uk.ac.diamond.scisoft.analysis.io.LoaderFactory;
 
-
 public class SurfaceScatterViewStart extends Dialog {
 
 	private String[] filepaths;
@@ -90,82 +88,39 @@ public class SurfaceScatterViewStart extends Dialog {
 	private String option;
 	private boolean qConvert;
 	
-	public SurfaceScatterPresenter getSsp() {
-		return ssp;
-	}
-
-	public void setSsp(SurfaceScatterPresenter ssp) {
-		this.ssp = ssp;
-	}
-
-
-
-	public CTabFolder getFolder() {
-		return folder;
-	}
-
-	public void setFolder(CTabFolder folder) {
-		this.folder = folder;
-	}
-	
-	public GeometricParametersWindows getParamField(){
-		return paramField;
-	}
-
-	public String getDatFolderPath() {
-		return datFolderPath;
-	}
-
-	public void setDatFolderPath(String datFolderPath) {
-		this.datFolderPath = datFolderPath;
-	}
-
-	public SuperSashPlotSystem3Composite getSsps3c() {
-		return ssps3c;
-	}
-
-	public void setSsps3c(SuperSashPlotSystem3Composite ssps3c) {
-		this.ssps3c = ssps3c;
-	}
-
-	public boolean isModify() {
-		return modify;
-	}
-
-	public void setModify(boolean modify) {
-		this.modify = modify;
-	}
-
-	public SurfaceScatterViewStart (Shell parentShell, String[] filepaths, int numberOfImages, Dataset nullImage,
-			SurfaceScatterPresenter ssp, String datFolderPath){
+	public SurfaceScatterViewStart (Shell parentShell, 
+									int numberOfImages){
 
 		super(parentShell);
 
-		
-		this.ssp = new SurfaceScatterPresenter();
-		this.filepaths = filepaths;
+		this.ssp = new SurfaceScatterPresenter();;
 		this.numberOfImages = numberOfImages;
-		this.nullImage = nullImage;
-		
-		
 		
 		this.ssp.addStateListener(new IPresenterStateChangeEventListener() {
 
 			@Override
 			public void update() {
+				debug("listener fired");
+				customComposite.getSlider().setSelection(ssp.getSliderPos());
+				updateIndicators(ssp.getSliderPos());
+				RectangularROI[] bgRegionROI = ssp.trackingRegionOfInterestSetter(ssp.getLenPt());
+				
+				if((Arrays.equals(ssp.getLenPt()[0], 
+						customComposite.getIRegion().getROI().getBounds().getIntLengths()) == false) ||
+						(Arrays.equals(ssp.getLenPt()[1], 
+								customComposite.getIRegion().getROI().getBounds().getIntPoint()) == false)){
+			
+					customComposite.getIRegion().setROI(bgRegionROI[0]);				
+					customComposite.getBgRegion().setROI(bgRegionROI[1]);
+				}
+				
 				
 			}
 		});
 		
-		this.datFolderPath = datFolderPath;
-
-		
 		setShellStyle(getShellStyle() | SWT.RESIZE | SWT.PRIMARY_MODAL);
-
 	}
 	
-	
-
 	@Override
 	protected Control createButtonBar(Composite parent) {
 		Control c = super.createButtonBar(parent);
@@ -188,6 +143,7 @@ public class SurfaceScatterViewStart extends Dialog {
 		folder.setLayout(new GridLayout());
 		folder.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 
+		
 		////////////////////////////////////////////////////////
 		// Tab 1 Setup
 		//////////////////////////////////////////////////////////
@@ -277,6 +233,8 @@ public class SurfaceScatterViewStart extends Dialog {
 			
 			this.setupRightEnabled(false);
 			
+			
+			
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -289,7 +247,6 @@ public class SurfaceScatterViewStart extends Dialog {
 
 				datDisplayer.setOption(datDisplayer.getSelectedOption());
 				
-//				int mr = ssps3c.getOutputCurves().getIntensity().getSelectionIndex();
 				IntensityDisplaySetting ids0 = IntensityDisplaySetting.toMethod(ssps3c.getOutputCurves().getIntensity().getSelectionIndex());
 				
 				setIds(ids0);
@@ -341,41 +298,14 @@ public class SurfaceScatterViewStart extends Dialog {
 				int[][] bolp = null;
 				int[][] bglpt = null;
 				
-				try{
-					bglpt = ssp.getBackgroundLenPt();
-				}
-				catch(NullPointerException f){
-					
-				}
 				
-				try{
-					q = ssp.getSaveFolder();
-				}
-				catch(NullPointerException f){
-					
-				}
-				try{
-					r = ssp.getLenPt();
-					
-				}
-				catch(NullPointerException f){
-					
-				}
-				try{
-					pbolp = ssp.getPermanentBoxOffsetLenPt();
-				}
-				catch(NullPointerException f){
-					
-				}
-				try{
-					bolp = ssp.getBoxOffsetLenPt();
-							
-				}
-				catch(NullPointerException f){
-					
-				}
+				bglpt = ssp.getBackgroundLenPt();
+				q = ssp.getSaveFolder();
+				r = ssp.getLenPt();
+				pbolp = ssp.getPermanentBoxOffsetLenPt();
+				bolp = ssp.getBoxOffsetLenPt();
 				
-				ssp.surfaceScatterPresenterBuild(ssp.getParentShell(), filepaths, datDisplayer.getSelectedOption(),
+				ssp.surfaceScatterPresenterBuild(filepaths, datDisplayer.getSelectedOption(),
 						ssp.getImageFolderPath(), datFolderPath, correctionsDropDownArray[correctionsDropDown.getSelectionIndex()]);
 				
 				try{
@@ -587,7 +517,15 @@ public class SurfaceScatterViewStart extends Dialog {
 					customComposite.getSlider().setMaximum(ssp.getNoImages());
 					customComposite.getPlotSystem1CompositeView().generalUpdate();
 					paramField.geometricParametersUpdate();
-					RectangularROI bgROI =ssp.regionOfInterestSetter(customComposite.getGreenRegion().getROI());
+					
+					
+					double[] bgRegionROI =ssp.regionOfInterestSetter(customComposite.getGreenRegion().getROI());
+					RectangularROI bgROI = new RectangularROI(bgRegionROI[0],
+							  bgRegionROI[1],
+							  bgRegionROI[2],
+							  bgRegionROI[3],
+							  bgRegionROI[4]);
+					
 					customComposite.getBgRegion().setROI(bgROI);
 
 					if (ssp.getYList() == (null)) {
@@ -635,7 +573,7 @@ public class SurfaceScatterViewStart extends Dialog {
 					ssp.sliderMovemementMainImage(k);
 					ssp.sliderZoomedArea(k, customComposite.getGreenRegion().getROI(),
 							customComposite.getSubImagePlotSystem());
-					ssp.updateSliders(customComposite.getSlider(), k);
+//					ssp.updateSliders(customComposite.getSlider(), k);
 					ssp.bgImageUpdate(customComposite.getSubImageBgPlotSystem(), k);
 
 					SurfaceScatterViewStart.this.updateIndicators(k);
@@ -691,7 +629,6 @@ public class SurfaceScatterViewStart extends Dialog {
 					ssp.sliderZoomedArea(k, customComposite.getGreenRegion().getROI(),
 							customComposite.getSubImagePlotSystem());
 
-					ssp.updateSliders(customComposite.getSlider(), k);
 					ssp.bgImageUpdate(customComposite.getSubImageBgPlotSystem(), k);
 
 					SurfaceScatterViewStart.this.updateIndicators(k);
@@ -785,10 +722,10 @@ public class SurfaceScatterViewStart extends Dialog {
 				FittingParameters fp = ssp.loadParameters(title); 
 			
 				RectangularROI loadedROI = new RectangularROI(fp.getLenpt()[1][0],
-						  fp.getLenpt()[1][1],
-						  fp.getLenpt()[0][0],
-						  fp.getLenpt()[0][1],
-						  0);
+															  fp.getLenpt()[1][1],
+															  fp.getLenpt()[0][0],
+															  fp.getLenpt()[0][1],
+															  0);
 				
 				
 				customComposite.getPlotSystem1CompositeView().setMethodologyDropDown(fp.getBgMethod());
@@ -797,13 +734,19 @@ public class SurfaceScatterViewStart extends Dialog {
 				customComposite.getPlotSystem1CompositeView().setBoundaryBox(fp.getBoundaryBox());
 				
 				customComposite.setRegion(fp.getLenpt());
-				RectangularROI bgROI = ssp.regionOfInterestSetter(loadedROI);
+				double[] bgRegionROI = ssp.regionOfInterestSetter(loadedROI);
+				
+				RectangularROI bgROI = new RectangularROI(bgRegionROI[0],
+						  bgRegionROI[1],
+						  bgRegionROI[2],
+						  bgRegionROI[3],
+						  bgRegionROI[4]);
+				
 				customComposite.getBgRegion().setROI(bgROI);
 				
 				customComposite.redraw();
 						
 				int selection = ssp.closestImageNo(fp.getXValue());
-				ssp.updateSliders(customComposite.getSlider(),selection);
 				SurfaceScatterViewStart.this.updateIndicators(selection);
 				
 				
@@ -869,10 +812,8 @@ public class SurfaceScatterViewStart extends Dialog {
 					if(ssp.getProcessingMethodSelection() ==ProccessingMethod.MANUAL){
 						SurfaceScatterViewStart.this.fireAccept();
 						if(ssp.getSliderPos() < (ssp.getNumberOfImages()-1)){
-							int k = (ssp.getSliderPos()+1);
-							ssp.sliderMovemementMainImage(k);
-							customComposite.getSlider().setSelection(k);
-							SurfaceScatterViewStart.this.updateIndicators(k);
+							ssp.setSliderPos(ssp.getSliderPos()+1);
+							
 						}
 					}
 					break;
@@ -881,10 +822,7 @@ public class SurfaceScatterViewStart extends Dialog {
 		        	if(ssp.getProcessingMethodSelection() ==ProccessingMethod.MANUAL){
 			        	SurfaceScatterViewStart.this.fireAccept();
 						if(ssp.getSliderPos() > 0){
-							int k = (ssp.getSliderPos()-1);
-							ssp.sliderMovemementMainImage(k);
-							customComposite.getSlider().setSelection(k);
-							SurfaceScatterViewStart.this.updateIndicators(k);
+							ssp.setSliderPos(ssp.getSliderPos()-1);
 						}
 						
 					}
@@ -995,11 +933,8 @@ public class SurfaceScatterViewStart extends Dialog {
 					
 					
 				}
-					
-			
 				
 			}
-
 			
 			
 			@Override
@@ -1015,21 +950,7 @@ public class SurfaceScatterViewStart extends Dialog {
 		
 		return container;
 	}
-	
-//	private static boolean isChild(Control parent, Control child)
-//	{
-//	    if (child.equals(parent))
-//	        return true;
-//
-//	    Composite p = child.getParent();
-//
-//	    if (p != null)
-//	        return isChild(parent, p);
-//	    else
-//	        return false;
-//	}
-//	
-	
+
 	public void updateAnalysisMethodology(int methodologySelection, 
 										  int fitPowerSelection, 
 										  int trackerSelection,
@@ -1083,7 +1004,6 @@ public class SurfaceScatterViewStart extends Dialog {
 			customComposite.getPlotSystem1CompositeView().getAcceptLocation().setEnabled(true);
 			customComposite.getPlotSystem1CompositeView().getRejectLocation().setEnabled(true);
 		}
-		
 		
 	}
 	
@@ -1451,9 +1371,7 @@ public class SurfaceScatterViewStart extends Dialog {
 		correctionsDropDown.select(0);
 		
 		setCorrectionsDropDownArray(input);
-		
-		
-		
+
 	}	
 
 	public Combo getCorrectionSelection() {
@@ -1541,8 +1459,9 @@ public class SurfaceScatterViewStart extends Dialog {
 					else{
 						xPos = ssp.xPositionFinder(outputCurves.getRegionNo().getROI().getPointX());
 					}
-					ssp.updateSliders(customComposite.getSlider(), xPos);
-
+					
+//					ssp.sliderMovemementMainImage(xPos);
+					
 					ssp.sliderMovemementMainImage(xPos);
 					ssp.sliderZoomedArea(xPos, customComposite.getGreenRegion().getROI(),
 							customComposite.getSubImagePlotSystem());
@@ -1769,6 +1688,51 @@ public class SurfaceScatterViewStart extends Dialog {
 		}
 	}
 
+	public SurfaceScatterPresenter getSsp() {
+		return ssp;
+	}
+
+	public void setSsp(SurfaceScatterPresenter ssp) {
+		this.ssp = ssp;
+	}
+
+	public CTabFolder getFolder() {
+		return folder;
+	}
+
+	public void setFolder(CTabFolder folder) {
+		this.folder = folder;
+	}
+	
+	public GeometricParametersWindows getParamField(){
+		return paramField;
+	}
+
+	public String getDatFolderPath() {
+		return datFolderPath;
+	}
+
+	public void setDatFolderPath(String datFolderPath) {
+		this.datFolderPath = datFolderPath;
+	}
+
+	public SuperSashPlotSystem3Composite getSsps3c() {
+		return ssps3c;
+	}
+
+	public void setSsps3c(SuperSashPlotSystem3Composite ssps3c) {
+		this.ssps3c = ssps3c;
+	}
+
+	public boolean isModify() {
+		return modify;
+	}
+
+	public void setModify(boolean modify) {
+		this.modify = modify;
+	}
+	
+	
 	public SaveFormatSetting getSms() {
 		return sms;
 	}
