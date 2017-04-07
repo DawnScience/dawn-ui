@@ -8,4 +8,7 @@ public interface IHyperTrace extends ITrace {
 
 	public void setData(ILazyDataset lazy, int[] order);
 	
+	public ILazyDataset getLazyDataset();
+	
+	public int[] getOrder();
 }

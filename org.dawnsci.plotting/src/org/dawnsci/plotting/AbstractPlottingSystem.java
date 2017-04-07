@@ -36,6 +36,7 @@ import org.eclipse.dawnsci.plotting.api.tool.IToolPageSystem;
 import org.eclipse.dawnsci.plotting.api.tool.ToolChangeEvent;
 import org.eclipse.dawnsci.plotting.api.trace.ColorOption;
 import org.eclipse.dawnsci.plotting.api.trace.IImageTrace;
+import org.eclipse.dawnsci.plotting.api.trace.IIsosurfaceTrace;
 import org.eclipse.dawnsci.plotting.api.trace.ILineTrace;
 import org.eclipse.dawnsci.plotting.api.trace.ITrace;
 import org.eclipse.dawnsci.plotting.api.trace.ITraceListener;
@@ -425,7 +426,8 @@ public abstract class AbstractPlottingSystem<T> implements IPlottingSystem<T>, I
 	protected IWorkbenchPart part;
 	
 	// The plotting mode, used for updates to data
-	protected PlotType plottingMode;
+//	protected PlotType plottingMode;
+	protected Class<ITrace> traceClazz;
 
 	protected String plotName;
 	
@@ -917,6 +919,19 @@ public abstract class AbstractPlottingSystem<T> implements IPlottingSystem<T>, I
 
 	public void setAutoHideRegions(boolean isAutoHideRegions) {
 		this.isAutoHideRegions = isAutoHideRegions;
+	}
+	
+	private Class<? extends ITrace> getTraceClass(PlotType type) {
+		switch (type) {
+		case XY:
+			return ILineTrace.class;
+		case IMAGE:
+			return IImageTrace.class;
+		case ISOSURFACE:
+			return IIsosurfaceTrace.class;
+		}
+		
+		return null;
 	}
 
 }

@@ -10,6 +10,7 @@ package org.dawnsci.plotting.system;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
@@ -174,6 +175,8 @@ public class LightWeightPlotViewer<T> extends AbstractPlottingViewer<T> implemen
 	private LayeredPane content;
 
 	private static String lastPath;
+	
+	private static final Collection<Class<? extends ITrace>> SUPPORTED_TRACES = Arrays.asList(ILineTrace.class, IImageTrace.class, IVectorTrace.class, IImageStackTrace.class);
 	
 	public void init(IPlottingSystem<T> system) {
 		this.system = (PlottingSystemImpl<T>)system;
@@ -1715,5 +1718,10 @@ public class LightWeightPlotViewer<T> extends AbstractPlottingViewer<T> implemen
 		if (getXYRegionGraph()                ==null) return;
 		if (getXYRegionGraph().getRegionArea()==null) return;
 	    getXYRegionGraph().getRegionArea().removeAuxilliaryClickListener(mcl);
+	}
+
+	@Override
+	public Collection<Class<? extends ITrace>> getSupportTraceTypes() {
+		return new ArrayList<>(SUPPORTED_TRACES);
 	}
 }

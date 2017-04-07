@@ -5,6 +5,9 @@ import org.eclipse.january.dataset.ILazyDataset;
 
 public class HyperTrace implements IHyperTrace {
 
+	private ILazyDataset lazy;
+	private int[] order;
+	
 	@Override
 	public String getDataName() {
 		// TODO Auto-generated method stub
@@ -91,8 +94,18 @@ public class HyperTrace implements IHyperTrace {
 
 	@Override
 	public void setData(ILazyDataset lazy, int[] order) {
-		// TODO Auto-generated method stub
+		this.lazy = lazy;
+		this.order = order;
+	}
 
+	@Override
+	public ILazyDataset getLazyDataset() {
+		return lazy;
+	}
+
+	@Override
+	public int[] getOrder() {
+		return order;
 	}
 
 }

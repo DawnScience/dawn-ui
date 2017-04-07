@@ -643,7 +643,7 @@ public class PlottingSystemImpl<T> extends AbstractPlottingSystem<T> {
 				traceName = part.getTitle();
 			}
 			if (monitor!=null&&monitor.isCanceled()) return null;
-
+			
 			ITrace trace=null;
 			if (plottingMode.is3D()) {
 				trace = createSurfaceTrace(traceName);
@@ -968,6 +968,21 @@ public class PlottingSystemImpl<T> extends AbstractPlottingSystem<T> {
 	public void addTrace(ITrace trace) {
 
 		IPlottingSystemViewer<T> viewer = getViewer(trace.getClass());
+		
+		if (viewer != activeViewer) {
+			if (viewer.getControl()==null) {
+				viewer.init(this);
+				viewer.createControl(parent);
+				Composite cparent = (Composite)parent;
+				if (parent != null && !cparent.isDisposed() && cparent.getLayout() instanceof StackLayout) {
+					final StackLayout layout = (StackLayout)cparent.getLayout();
+					layout.topControl = (Control)viewer.getControl();
+					layout();
+				}
+			}
+			activeViewer = viewer;
+		}
+		
 		boolean ok = viewer.addTrace(trace);
 		if (!ok) return; // it has not added.
 
@@ -1492,6 +1507,24 @@ public class PlottingSystemImpl<T> extends AbstractPlottingSystem<T> {
 
 	public void setKeepAspect(boolean checked){
 		activeViewer.setKeepAspect(checked);
+	}
+	
+	public List<Class<? extends ITrace>> getRegisteredTraceClasses() {
+		
+		List<Class<? extends ITrace>> traceClazz = new ArrayList<Class<? extends ITrace>>();
+		for (IPlottingSystemViewer<?> v : viewers) traceClazz.addAll(v.getSupportTraceTypes());
+		
+		return traceClazz;
+	}
+	
+	public <U extends ITrace> U createTrace(String traceName, Class<U> clazz) {
+		for (IPlottingSystemViewer<?> v : viewers) {
+			if (v.isTraceTypeSupported(clazz)) {
+				return v.createTrace(traceName, clazz);
+			}
+		}
+		
+		return null;
 	}
 
 	public Object getAdapter(@SuppressWarnings("rawtypes") Class adapter) {
