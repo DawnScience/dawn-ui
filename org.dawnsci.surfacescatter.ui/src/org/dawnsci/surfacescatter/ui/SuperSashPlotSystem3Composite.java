@@ -95,7 +95,12 @@ public class SuperSashPlotSystem3Composite extends Composite{
 				
 				@Override
 				public void update() {
-					generalUpdate();
+					try{
+						generalUpdate();
+					}
+					catch(Exception r){
+						
+					}
 					
 				}
 			});

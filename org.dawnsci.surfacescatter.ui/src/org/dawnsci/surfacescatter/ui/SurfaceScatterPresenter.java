@@ -85,7 +85,6 @@ public class SurfaceScatterPresenter {
 	private String[] options;
 	private boolean qConvert;
 	private double energy;
-//	private int theta;
 	private Set<IPresenterStateChangeEventListener> listeners = new HashSet<>();
 	private int DEBUG = 1;
 	private PrintWriter writer;
@@ -701,64 +700,60 @@ public class SurfaceScatterPresenter {
 					
 				if (sm.getBoxOffsetLenPt()!=null){
 						
-						int[][] newOffsetLenPt =sm.getBoxOffsetLenPt();
-						int[] len = sm.getInitialLenPt()[0]; 
-						int[] pt = sm.getInitialLenPt()[1];
+					int[][] newOffsetLenPt =sm.getBoxOffsetLenPt();
+					int[] len = sm.getInitialLenPt()[0]; 
+					int[] pt = sm.getInitialLenPt()[1];
 						
-						int[] offsetLen = newOffsetLenPt[0];
-						int[] offsetPt = newOffsetLenPt[1];
+					int[] offsetLen = newOffsetLenPt[0];
+					int[] offsetPt = newOffsetLenPt[1];
 						
-						int pt0 = pt[0] + offsetPt[0];
-						int pt1 = pt[1] + offsetPt[1];
+					int pt0 = pt[0] + offsetPt[0];
+					int pt1 = pt[1] + offsetPt[1];
 						
-						int len0 = len[0] + offsetLen[0];
-						int len1 = len[1] + offsetLen[1];
+					int len0 = len[0] + offsetLen[0];
+					int len1 = len[1] + offsetLen[1];
 						
-						sm.setBackgroundLenPt(new int[][] {{pt0,pt1},{len0,len1}});
-					}
+					sm.setBackgroundLenPt(new int[][] {{pt0,pt1},{len0,len1}});
+				}
 					
 					
 				else{
 						
-						int[] len = sm.getInitialLenPt()[0]; 
-						int[] pt = sm.getInitialLenPt()[1];
+					int[] len = sm.getInitialLenPt()[0]; 
+					int[] pt = sm.getInitialLenPt()[1];
 						
-						int pt0 = pt[0] + 25;
-						int pt1 = pt[1] + 25;
+					int pt0 = pt[0] + 25;
+					int pt1 = pt[1] + 25;
 						
-						int len0 = len[0] + 0;
-						int len1 = len[1] + 0;
+					int len0 = len[0] + 0;
+					int len1 = len[1] + 0;
 					
-						IRectangularROI newROI = new RectangularROI(pt0,pt1,len0,len1,0);
+					IRectangularROI newROI = new RectangularROI(pt0,pt1,len0,len1,0);
 					
-						r2.setROI(newROI);
+					r2.setROI(newROI);
 						
-						sm.setBackgroundLenPt(new int[][] {{pt0,pt1},{len0,len1}});
-					}
-					
-					r2.setRegionColor(red);
-					
+					sm.setBackgroundLenPt(new int[][] {{pt0,pt1},{len0,len1}});
 				}
-		}
-			else{
-				
-				r1.setVisible(true);
-				r2.setVisible(false);
-				
-				r2.setRegionColor(magenta);
-				r2.setUserRegion(false);
-				r2.setLineWidth(1);
-				r2.setMobile(false);
-				r2.setFill(false);
-				r2.setLineWidth(0);
-				
-				centreButton.setEnabled(false);
-				
-				
-//				this.regionOfInterestSetter();
-				
+					
+				r2.setRegionColor(red);		
 			}
-		
+		}
+			
+		else{
+				
+			r1.setVisible(true);
+			r2.setVisible(false);
+				
+			r2.setRegionColor(magenta);
+			r2.setUserRegion(false);
+			r2.setLineWidth(1);
+			r2.setMobile(false);
+			r2.setFill(false);
+			r2.setLineWidth(0);
+			
+			centreButton.setEnabled(false);
+				
+		}
 	}
 	
 	public void addToInterpolatorRegions(IRegion region){
@@ -1080,19 +1075,13 @@ public class SurfaceScatterPresenter {
 	}
 
 	public void sliderZoomedArea(int sliderPos, IROI box, IPlottingSystem<Composite>... pS) {
-
 		Dataset image = this.getImage(sliderPos);
 		Dataset subImage = (Dataset) PlotSystem2DataSetter.PlotSystem2DataSetter1(box, image);
-
-
 	}
 	
 	public void resetCorrectionsSelection(int  correctionSelection){
-		
 		sm.setCorrectionSelection(MethodSetting.toMethod(correctionSelection));
 	}
-	
-	
 	
 	public int closestImageNo(double in){
 		int out = ClosestNoFinder.closestNoPos(in, sm.getSortedX());
@@ -1122,6 +1111,7 @@ public class SurfaceScatterPresenter {
 			return null;
 		}
 	}
+	
 	public double getXValue(int k){
 		
 		if(sm != null){
@@ -1170,7 +1160,6 @@ public class SurfaceScatterPresenter {
 	}
 	
 	public Dataset subImage(int sliderPos, IROI box) {
-
 		Dataset image = this.getImage(sliderPos);  // sm.getImages()[sliderPos];
 		Dataset subImage = (Dataset) PlotSystem2DataSetter.PlotSystem2DataSetter1(box, image);
 		return subImage;
@@ -1252,8 +1241,7 @@ public class SurfaceScatterPresenter {
 			gm.setNormalisationFactor(normalisationFactor);
 			gm.setSpecular(specular);
 			gm.setImageName(imageName);
-		
-		
+			
 	}
 	
 	public ArrayList<ArrayList<IDataset>> xyArrayPreparer(){
@@ -1345,6 +1333,8 @@ public class SurfaceScatterPresenter {
 			
 			model.setBoundaryBox((int) Math.round(r));
 		}
+		
+		fireStateListeners();
 	}
 	
 	public ArrayList<IRegion> getInterpolatorRegions(){
@@ -1780,10 +1770,8 @@ public class SurfaceScatterPresenter {
 						    sm.getSplicedCurveY().getDouble(gh)+ "	"+ 
 						    sm.getSplicedCurveY().getError(gh));
 					 }
-			
-		    }
-	    	
-		   }	    
+				 }    	
+		    }	    
 	    }
 		writer.close();
 	}	
@@ -1889,7 +1877,6 @@ public class SurfaceScatterPresenter {
 		sm.setSplicedCurveY(yData);
 	}
 	
-	
 	public IROI getROI() {
 
 		int jok = sm.getFilepathsSortedArray()[sm.getSliderPos()];
@@ -1981,12 +1968,9 @@ public class SurfaceScatterPresenter {
 			}
 		}); 
 		
-		
-		
 		return;
 	}
 	
-
 	public void correctionMethodsWarning(){
 		RegionOutOfBoundsWarning roobw = new RegionOutOfBoundsWarning(parentShell,2,null);
 
@@ -2399,7 +2383,6 @@ public class SurfaceScatterPresenter {
 		
 	}
 	
-	
 	public void switchErrorDisplay(){
 		if (sm.isErrorDisplayFlag() ==true){
 			sm.setErrorDisplayFlag(false);
@@ -2409,7 +2392,6 @@ public class SurfaceScatterPresenter {
 		}
 	}
 	
-
 	public boolean getErrorFlag(){
 		return sm.isErrorDisplayFlag();
 	}
@@ -2417,8 +2399,6 @@ public class SurfaceScatterPresenter {
 	public void setErrorFlag(boolean n){
 		 sm.setErrorDisplayFlag(n);
 	}
-	
-	
 	
 	public void geometricParametersWindowPopulate(){
 		

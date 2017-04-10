@@ -37,10 +37,7 @@ public class TrackingHandler {
 	private SurfaceScatterViewStart ssvs;
 	private int correctionSelection;
 	private int noImages;
-//	private int timeStep;
-//	private int imageNumber;
 	private SurfaceScatterPresenter ssp;
-//	private IPlottingSystem<Composite> ssvsPS;
 	private int DEBUG = 0;
 	private ProgressBar progressBar;
 	private TrackingProgressAndAbortView tpaav;
@@ -417,6 +414,7 @@ public class TrackingHandler {
 		public void updateTrackingDisplay(IDataset tempImage, int imageNumber){
 			
 			ssvs.getPlotSystemCompositeView().getFolder().setSelection(2);
+			ssp.sliderMovemementMainImage(imageNumber);
 //			ssp.updateSliders(ssvs.getPlotSystemCompositeView().getSlider(), imageNumber);
 			ssvs.updateIndicators(imageNumber);
 			ssvs.getPlotSystemCompositeView().getPlotSystem().updatePlot2D(tempImage, null, null);
@@ -545,8 +543,7 @@ class trackingJob2 {
 	public void setSsvsPS (IPlottingSystem<Composite> ssvsPS) {
 		this.ssvsPS = ssvsPS;
 	}
-	
-	
+		
 	@SuppressWarnings("unchecked")
 	protected void runTJ2() {
 
@@ -1735,6 +1732,7 @@ class trackingJob2 {
 		
 
 		ssvs.getPlotSystemCompositeView().getFolder().setSelection(2);
+		ssp.sliderMovemementMainImage(imageNumber);
 //		ssp.updateSliders(ssvs.getPlotSystemCompositeView().getSlider(), imageNumber);
 		ssvs.updateIndicators(imageNumber);
 		ssvs.getPlotSystemCompositeView().getPlotSystem().updatePlot2D(tempImage, null, null);

@@ -15,7 +15,7 @@ public class OpenDialogHandler extends AbstractHandler {
 
 		Shell s =PlatformUI.getWorkbench().getWorkbenchWindows()[0].getShell();
 
-		SurfaceScatterViewStart ssvs = new SurfaceScatterViewStart(s,0);
+		SurfaceScatterViewStart ssvs = new SurfaceScatterViewStart(s);
 
 		ssvs.open();
 		

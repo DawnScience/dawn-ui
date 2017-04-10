@@ -76,6 +76,7 @@ public class PlotSystemCompositeView extends Composite {
 	private SurfaceScatterViewStart ssvs;
 	private Button accept;
 	private Button acceptBack;
+
 	
     public PlotSystemCompositeView(Composite parent, 
     							   int style,
