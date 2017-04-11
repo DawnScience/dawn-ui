@@ -37,9 +37,16 @@ import org.eclipse.dawnsci.plotting.api.tool.ToolChangeEvent;
 import org.eclipse.dawnsci.plotting.api.trace.ColorOption;
 import org.eclipse.dawnsci.plotting.api.trace.IImageTrace;
 import org.eclipse.dawnsci.plotting.api.trace.IIsosurfaceTrace;
+import org.eclipse.dawnsci.plotting.api.trace.ILine3DTrace;
+import org.eclipse.dawnsci.plotting.api.trace.ILineStackTrace;
 import org.eclipse.dawnsci.plotting.api.trace.ILineTrace;
+import org.eclipse.dawnsci.plotting.api.trace.IMulti2DTrace;
+import org.eclipse.dawnsci.plotting.api.trace.IPlane3DTrace;
+import org.eclipse.dawnsci.plotting.api.trace.IScatter3DTrace;
+import org.eclipse.dawnsci.plotting.api.trace.ISurfaceTrace;
 import org.eclipse.dawnsci.plotting.api.trace.ITrace;
 import org.eclipse.dawnsci.plotting.api.trace.ITraceListener;
+import org.eclipse.dawnsci.plotting.api.trace.IVolumeRenderTrace;
 import org.eclipse.dawnsci.plotting.api.trace.TraceEvent;
 import org.eclipse.dawnsci.plotting.api.trace.TraceWillPlotEvent;
 import org.eclipse.draw2d.Figure;
@@ -226,7 +233,7 @@ public abstract class AbstractPlottingSystem<T> implements IPlottingSystem<T>, I
 
 	@Override
 	public PlotType getPlotType() {
-		return plottingMode;
+		return getPlotType(traceClazz);
 	}
 	/**
 	 * Override to define what should happen if the 
@@ -238,7 +245,7 @@ public abstract class AbstractPlottingSystem<T> implements IPlottingSystem<T>, I
 	 * @param image
 	 */
 	public void setPlotType(PlotType plotType) {
-		this.plottingMode = plotType;
+		traceClazz = getTraceClass(plotType);
 	}
 
 	public boolean isXFirst() {
@@ -427,7 +434,7 @@ public abstract class AbstractPlottingSystem<T> implements IPlottingSystem<T>, I
 	
 	// The plotting mode, used for updates to data
 //	protected PlotType plottingMode;
-	protected Class<ITrace> traceClazz;
+	protected Class<? extends ITrace> traceClazz;
 
 	protected String plotName;
 	
@@ -453,7 +460,7 @@ public abstract class AbstractPlottingSystem<T> implements IPlottingSystem<T>, I
 //			throw new NullPointerException("The plot name cannot be null or empty string!");
 //		}
 		this.plotName = plotName;
-		this.plottingMode = hint;
+		this.traceClazz = getTraceClass(hint);
 		this.part = part;
 		this.bars = bars;
 		PlottingFactory.registerPlottingSystem(plotName, this);
@@ -796,7 +803,7 @@ public abstract class AbstractPlottingSystem<T> implements IPlottingSystem<T>, I
 				if (iTrace instanceof IImageTrace) return true;
 			}
 		}
-		return plottingMode!=null ? plottingMode.is2D() : false;
+		return (traceClazz!=null && getPlotType(traceClazz) != null) ? getPlotType(traceClazz).is2D() : false;
 	}
 
 	@Override
@@ -921,7 +928,7 @@ public abstract class AbstractPlottingSystem<T> implements IPlottingSystem<T>, I
 		this.isAutoHideRegions = isAutoHideRegions;
 	}
 	
-	private Class<? extends ITrace> getTraceClass(PlotType type) {
+	protected Class<? extends ITrace> getTraceClass(PlotType type) {
 		switch (type) {
 		case XY:
 			return ILineTrace.class;
@@ -929,9 +936,44 @@ public abstract class AbstractPlottingSystem<T> implements IPlottingSystem<T>, I
 			return IImageTrace.class;
 		case ISOSURFACE:
 			return IIsosurfaceTrace.class;
+		case SURFACE:
+			return ISurfaceTrace.class;
+		case VOLUME:
+			return IVolumeRenderTrace.class;
+		case PLANE3D:
+			return IPlane3DTrace.class;
+		case XY_STACKED:
+			return ILineTrace.class;
+		case XY_STACKED_3D:
+			return ILineStackTrace.class;
+		case XY_SCATTER_3D:
+			return IScatter3DTrace.class;
+		case MULTI_IMAGE:
+			return IMulti2DTrace.class;
+		case COMPOSITE_IMAGE:
+			break;
+		default:
+			break;
 		}
 		
 		return null;
+	}
+	
+	protected PlotType getPlotType(Class<? extends ITrace> clazz) {
+		
+		if (ILineTrace.class.isAssignableFrom(clazz)) return PlotType.XY;
+		if (IImageTrace.class.isAssignableFrom(clazz)) return PlotType.IMAGE;
+		if (ISurfaceTrace.class.isAssignableFrom(clazz)) return PlotType.SURFACE;
+		if (IIsosurfaceTrace.class.isAssignableFrom(clazz)) return PlotType.ISOSURFACE;
+		if (IVolumeRenderTrace.class.isAssignableFrom(clazz)) return PlotType.VOLUME;
+		if (IPlane3DTrace.class.isAssignableFrom(clazz)) return PlotType.PLANE3D;
+		if (ILineStackTrace.class.isAssignableFrom(clazz)) return PlotType.XY_STACKED;
+		if (ILine3DTrace.class.isAssignableFrom(clazz)) return PlotType.XY_STACKED_3D;
+		if (IScatter3DTrace.class.isAssignableFrom(clazz)) return PlotType.XY_SCATTER_3D;
+		if (IMulti2DTrace.class.isAssignableFrom(clazz)) return PlotType.MULTI_IMAGE;
+
+		return null;
+
 	}
 
 }

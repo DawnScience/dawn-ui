@@ -839,15 +839,15 @@ public class LightWeightPlotViewer<T> extends AbstractPlottingViewer<T> implemen
 		}
 	}
 	
-	public ITrace createTrace(String name, Class<? extends ITrace> clazz) {
+	public <U extends ITrace> U createTrace(String name, Class<? extends ITrace> clazz) {
 		if (ILineTrace.class.isAssignableFrom(clazz)) {
-			return createLineTrace(name);
+			return (U) createLineTrace(name);
 		} else if (IVectorTrace.class.isAssignableFrom(clazz)) {
-			return createVectorTrace(name);
+			return (U) createVectorTrace(name);
 		} else if (IImageTrace.class.isAssignableFrom(clazz)) {
-			return createImageTrace(name);
+			return (U) createImageTrace(name);
 		} else if (IImageStackTrace.class.isAssignableFrom(clazz)) {
-			return createImageStackTrace(name);
+			return (U) createImageStackTrace(name);
 		} else {
 			throw new RuntimeException("Trace type not supported "+clazz.getSimpleName());
 		}

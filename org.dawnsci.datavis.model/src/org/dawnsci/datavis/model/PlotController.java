@@ -175,9 +175,6 @@ public class PlotController implements IPlotController {
 		if (localModifier != null) localModifier.init();
 		
 		IPlottingSystem<?> system = getPlottingSystem();
-		
-		List<IAxis> axes = system.getAxes();
-		for (IAxis axis : axes) axis.setAxisAutoscaleTight(true);
 
 		final Map<DataOptions, List<ITrace>> traceMap = collectTracesFromPlot();
 
@@ -214,6 +211,9 @@ public class PlotController implements IPlotController {
 				updatePlottedData(object, list, localCurrentMode, localModifier);
 			}
 		}
+		
+		List<IAxis> axes = system.getAxes();
+		if (axes != null) for (IAxis axis : axes) if (axis != null) axis.setAxisAutoscaleTight(true);
 		
 		Display.getDefault().syncExec(new Runnable() {
 			

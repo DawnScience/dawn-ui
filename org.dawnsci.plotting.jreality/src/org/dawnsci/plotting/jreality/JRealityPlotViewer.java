@@ -238,16 +238,16 @@ public class JRealityPlotViewer extends IPlottingSystemViewer.Stub<Composite> im
 		}
 	}
 	
-	public ITrace createTrace(String name, Class<? extends ITrace> trace) {
+	public <U extends ITrace> U createTrace(String name, Class<? extends ITrace> trace) {
 		
 		if (ISurfaceTrace.class.isAssignableFrom(trace)) {
-			return createSurfaceTrace(name);
+			return (U)createSurfaceTrace(name);
 		} else if (IMulti2DTrace.class.isAssignableFrom(trace)) {
-			return createMulti2DTrace(name);
+			return (U)createMulti2DTrace(name);
 		} else if (ILineStackTrace.class.isAssignableFrom(trace)) {
-			return createStackTrace(name);
+			return (U)createStackTrace(name);
 		} else if (IScatter3DTrace.class.isAssignableFrom(trace)) {
-			return createScatter3DTrace(name);	
+			return (U)createScatter3DTrace(name);	
 		} else {
 		    throw new RuntimeException("Trace type not supported "+trace.getClass().getSimpleName());
 		}

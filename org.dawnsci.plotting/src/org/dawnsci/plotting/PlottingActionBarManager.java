@@ -124,6 +124,8 @@ public class PlottingActionBarManager implements IPlotActionSystem {
 	
 	public boolean switchActions(final PlotType type) {
 		
+		if (type == null) return false;
+		
 		if (type == lastPlotTypeUpdate) return false;
 		try {
 			

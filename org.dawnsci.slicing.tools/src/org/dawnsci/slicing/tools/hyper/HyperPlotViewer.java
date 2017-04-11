@@ -61,10 +61,10 @@ public class HyperPlotViewer extends IPlottingSystemViewer.Stub<Composite> {
 	
 	
 	@Override
-	public <U extends ITrace> U createTrace(String traceName, Class<U> clazz){
+	public  <U extends ITrace> U createTrace(String name, Class<? extends ITrace> clazz) {
 		if (clazz == IHyperTrace.class) {
 			HyperTrace hyperTrace = new HyperTrace();
-			hyperTrace.setName(traceName);
+			hyperTrace.setName(name);
 			return (U)hyperTrace;
 		}
 		return null;
