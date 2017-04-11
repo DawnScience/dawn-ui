@@ -425,7 +425,7 @@ public class HistogramViewer extends ContentViewer {
 	@Override
 	protected void inputChanged(Object input, Object oldInput) {
 		try {
-			firstUpdateTraces = true;
+			firstUpdateTraces = histogramPlottingSystem.isRescale();
 			refresh();
 		} catch (Exception e) {
 			logger.debug(e.getMessage());
@@ -571,6 +571,4 @@ public class HistogramViewer extends ContentViewer {
 	public void setFocus() {
 		histogramPlottingSystem.setFocus();
 	}
-
-
 }
