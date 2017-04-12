@@ -39,6 +39,7 @@ Export-Package: org.dawnsci.common.widgets,
  org.dawnsci.common.widgets.periodictable,
  org.dawnsci.common.widgets.radio,
  org.dawnsci.common.widgets.spinner,
+ org.dawnsci.common.widgets.statuscomposite,
  org.dawnsci.common.widgets.stepper,
  org.dawnsci.common.widgets.tree,
  org.dawnsci.common.widgets.utils
