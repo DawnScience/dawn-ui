@@ -28,7 +28,7 @@ public class StatusComposite extends Composite {
 		listeners.remove(listener);
 	}
 	
-	final protected void fireListeners(boolean status) {
+	protected final void fireListeners(boolean status) {
 		StatusCompositeChangedEvent event = new StatusCompositeChangedEvent(this, status);
 		for (IStatusCompositeChangedListener listener : listeners) 
 			listener.compositeStatusChanged(event);
