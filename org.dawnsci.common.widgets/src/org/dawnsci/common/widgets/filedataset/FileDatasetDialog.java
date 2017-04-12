@@ -2,6 +2,8 @@ package org.dawnsci.common.widgets.filedataset;
 
 import java.io.File;
 
+import org.dawnsci.common.widgets.statuscomposite.IStatusCompositeChangedListener;
+import org.dawnsci.common.widgets.statuscomposite.StatusCompositeChangedEvent;
 import org.eclipse.january.dataset.ILazyDataset;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
@@ -30,9 +32,10 @@ public class FileDatasetDialog extends Dialog {
 	protected Control createDialogArea(Composite parent) {
 		Composite container = (Composite) super.createDialogArea(parent);
 		composite = new FileDatasetComposite(container, initialFile, filter, SWT.NONE);
-		composite.addFileDatasetCompositeStatusChangedListener(new IFileDatasetCompositeStatusChangedListener() {
+		composite.addStatusCompositeChangedListener(new IStatusCompositeChangedListener() {
+			
 			@Override
-			public void compositeStatusChanged(FileDatasetCompositeStatusChangedEvent event) {
+			public void compositeStatusChanged(StatusCompositeChangedEvent event) {
 				boolean status = event.getStatus();
 				getButton(IDialogConstants.OK_ID).setEnabled(status);
 			}
