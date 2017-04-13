@@ -11,6 +11,7 @@ import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.PlotType;
 import org.eclipse.dawnsci.plotting.api.PlottingFactory;
 import org.eclipse.dawnsci.plotting.api.axis.AxisEvent;
+import org.eclipse.dawnsci.plotting.api.axis.IAxis;
 import org.eclipse.dawnsci.plotting.api.axis.IAxisListener;
 import org.eclipse.dawnsci.plotting.api.region.IROIListener;
 import org.eclipse.dawnsci.plotting.api.region.IRegion;
@@ -91,7 +92,7 @@ public class HistogramViewer extends ContentViewer {
 					getHistogramProvider().setMin(rroi.getPoint()[0]);
 					double max = rroi.getEndPoint()[0];
 					getHistogramProvider().setMax(max);
-					rescaleAxis();
+					rescaleAxis(false);
 				}
 			} catch (Exception e) {
 				logger.error(e.getMessage());
@@ -298,7 +299,8 @@ public class HistogramViewer extends ContentViewer {
 	 * Update RGB traces
 	 */
 	private void updateTraces() {
-		IHistogramDatasets data = getHistogramProvider().getDatasets();
+		IAxis xAxis = histogramPlottingSystem.getSelectedXAxis();
+		IHistogramDatasets data = getHistogramProvider().getDatasets(xAxis.getLower(), xAxis.getUpper());
 		histoTrace.setData(data.getX(), data.getY());
 		redTrace.setData(data.getRGBX(), data.getR());
 		greenTrace.setData(data.getRGBX(), data.getG());
@@ -315,9 +317,9 @@ public class HistogramViewer extends ContentViewer {
 
 		histogramPlottingSystem.getSelectedYAxis().setAxisAutoscaleTight(true);
 
+		rescaleAxis(firstUpdateTraces);
 		if (firstUpdateTraces) {
 			firstUpdateTraces = false;
-			histogramPlottingSystem.autoscaleAxes();
 		}
 
 		updateMinMaxSpinnerIncrements();
@@ -363,7 +365,7 @@ public class HistogramViewer extends ContentViewer {
 						updateRegion(minValue, getHistogramProvider().getMax());
 					}
 					maxText.setMinimum(minValue);
-					rescaleAxis();
+					rescaleAxis(false);
 				}
 			}
 		});
@@ -378,7 +380,7 @@ public class HistogramViewer extends ContentViewer {
 						updateRegion(getHistogramProvider().getMin(), maxValue);
 					}
 					minText.setMaximum(maxValue);
-					rescaleAxis();
+					rescaleAxis(false);
 				}
 			}
 		});
@@ -425,7 +427,6 @@ public class HistogramViewer extends ContentViewer {
 	@Override
 	protected void inputChanged(Object input, Object oldInput) {
 		try {
-			firstUpdateTraces = histogramPlottingSystem.isRescale();
 			refresh();
 		} catch (Exception e) {
 			logger.debug(e.getMessage());
@@ -542,9 +543,21 @@ public class HistogramViewer extends ContentViewer {
 	public void setSelection(ISelection selection, boolean reveal) {
 		// TODO Auto-generated method stub
 	}
-	
+
 	public void rescaleAxis() {
-		histogramPlottingSystem.autoscaleAxes();
+		rescaleAxis(true);
+	}
+
+	private void rescaleAxis(boolean force) {
+		if (force || histogramPlottingSystem.isRescale()) {
+	
+			IAxis xAxis = histogramPlottingSystem.getSelectedXAxis();
+			IHistogramProvider hp = getHistogramProvider();
+			double min = hp.getMin();
+			double max = hp.getMax();
+			histogramPlottingSystem.autoscaleAxes();
+			xAxis.setRange(min, max);
+		}
 	}
 
 	/**

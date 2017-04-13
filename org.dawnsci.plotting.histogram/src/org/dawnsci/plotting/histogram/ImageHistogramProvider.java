@@ -83,7 +83,7 @@ public class ImageHistogramProvider implements IHistogramProvider {
 		return max;
 	}
 
-	public double getMininumRange() {
+	public double getMinimumRange() {
 		double rMin = doubleValue(bean.getMinimumCutBound().getBound());
 		if (Double.isInfinite(rMin))
 			rMin = getMin();
@@ -133,13 +133,12 @@ public class ImageHistogramProvider implements IHistogramProvider {
 	/**
 	 * This will take an image, and pull out all the parameters required to
 	 * calculate the histogram
+	 * @param rangeMin 
+	 * @param rangeMax 
 	 *
 	 * @return Calculated histogram, index 0 for Y values, 1 for X values
 	 */
-	private IDataset[] generateHistogramData(IDataset imageDataset, int numBins) {
-		double rangeMax = getMaximumRange();
-		double rangeMin = getMininumRange();
-
+	private IDataset[] generateHistogramData(IDataset imageDataset, int numBins, double rangeMin, double rangeMax) {
 		Histogram hist = new Histogram(numBins, rangeMin, rangeMax, true);
 		List<? extends Dataset> histogram_values = hist.value(imageDataset);
 
@@ -156,10 +155,16 @@ public class ImageHistogramProvider implements IHistogramProvider {
 
 	@Override
 	public IHistogramDatasets getDatasets() {
+		return getDatasets(getMinimumRange(), getMaximumRange());
+	}
+
+	@Override
+	public IHistogramDatasets getDatasets(double lower, double upper) {
 		Assert.isNotNull(image, "This provider must have an image set when get datasets is called");
 
 		IDataset[] histogramData = generateHistogramData(imageDataset,
-				getNumberOfBins());
+				getNumberOfBins(), lower, upper);
+
 		final IDataset histogramY = histogramData[0];
 		final IDataset histogramX = histogramData[1];
 
@@ -187,10 +192,10 @@ public class ImageHistogramProvider implements IHistogramProvider {
 
 		//getmin and max - validate values and swap
 		//validate these are good numbers
-		double histoMin = histogramX.min(true).doubleValue();
-		double histoMax = histogramX.max(true).doubleValue();
+		double histoMin = getMinimumRange();
+		double histoMax = getMaximumRange();
 
-		final Dataset RGBX = DatasetFactory.createLinearSpace(histoMin, histoMax, numPaletteColours, Dataset.FLOAT64);
+		final Dataset RGBX = DatasetFactory.createLinearSpace(DoubleDataset.class, histoMin, histoMax, numPaletteColours);
 		RGBX.setName("Axis");
 
 		return new IHistogramDatasets() {
