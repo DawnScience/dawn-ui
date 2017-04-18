@@ -20,10 +20,12 @@ import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.region.IRegion;
 import org.eclipse.dawnsci.plotting.api.trace.ILineTrace;
 import org.eclipse.dawnsci.plotting.api.trace.ITrace;
+import org.eclipse.nebula.visualization.internal.xygraph.toolbar.ITraceConfigPage;
 import org.eclipse.nebula.visualization.internal.xygraph.toolbar.XYGraphConfigDialog;
 import org.eclipse.nebula.visualization.xygraph.figures.Annotation;
 import org.eclipse.nebula.visualization.xygraph.figures.Axis;
 import org.eclipse.nebula.visualization.xygraph.figures.IXYGraph;
+import org.eclipse.nebula.visualization.xygraph.figures.Trace;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StackLayout;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -50,8 +52,8 @@ public class XYRegionConfigDialog extends XYGraphConfigDialog {
 	public XYRegionConfigDialog(Shell parentShell, IXYGraph xyGraph, boolean isRescale) {
 		super(parentShell, xyGraph);
 		regionList = new ArrayList<RegionEditComposite>();
+
 		this.regionGraph = (XYRegionGraph)xyGraph;
-	
 		command = new XYRegionConfigCommand(xyGraph);
 		command.savePreviousStates();
         this.isRescale = isRescale;
@@ -64,6 +66,7 @@ public class XYRegionConfigDialog extends XYGraphConfigDialog {
 		final TabFolder tabFolder = (TabFolder)parent_composite.getChildren()[0];  
 
 		int imageTraceIndex = -1;
+		// trace configure page
 		
 		//Image Trace Configure Page     
 		if (regionGraph.getRegionArea().getImageTraces().size()>0){
@@ -194,7 +197,7 @@ public class XYRegionConfigDialog extends XYGraphConfigDialog {
         		tabFolder.setSelection(2);
         	   	int index = regionGraph.getRegionArea().getTraceList().indexOf(selectedTrace); 
         	   	if (index>0) {
-	        		Composite traceComp = traceConfigPageList.get(index).getComposite(); 		
+	        		Composite traceComp = traceConfigPageList.get(index).getComposite();
 		        	setTraceTabSelected(index, tabFolder, traceCombo, traceComp);
         	   	}
 	        	
@@ -226,7 +229,12 @@ public class XYRegionConfigDialog extends XYGraphConfigDialog {
 		}
 		return parent_composite;
 	}
-	
+
+	@Override
+	protected ITraceConfigPage createTraceConfigPage(Trace trace) {
+		return new DTraceConfigPage(xyGraph, trace);
+	}
+
 	private static final void setTraceTabSelected(int index, TabFolder tabFolder, Combo combo, Composite composite) {
 
 		combo.select(index);
