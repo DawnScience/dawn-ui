@@ -30,6 +30,7 @@ import uk.ac.diamond.scisoft.analysis.io.DataHolder;
 public class LiveLoadedFile extends LoadedFile implements IRefreshable {
 
 	private boolean live = true;
+	private IRemoteData remoteData;
 	private String host;
 	private int port;
 	
@@ -96,29 +97,81 @@ public class LiveLoadedFile extends LoadedFile implements IRefreshable {
 			
 		}
 		
-		
-//		md.addDataInfo(name, shape);
-		
 		dh.setMetadata(md);
 		
 		
 		return dh;
+	}
+	
+	private void updateDataHolder() {
+
+		IRemoteData rd = ServiceManager.getRemoteDatasetService().createRemoteData(host, port);
+		String path = getFilePath();
+		rd.setPath(path);
+		Map<String, Object> map = null;
+		try {
+			map = rd.getTree();
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		if (map == null) return;
+		
+		Tree tree = TreeToMapUtils.mapToTree(map, path);
+		IFindInTree finder = new IFindInTree() {
+			
+			@Override
+			public boolean found(NodeLink node) {
+				Node d = node.getDestination();
+				if (d instanceof DataNode) {
+					return true;
+				}
+				return false;
+			}
+		};
+		Map<String, NodeLink> result = TreeUtils.treeBreadthFirstSearch(tree.getGroupNode(), finder, false, null);
+		
+		for (String s : result.keySet()) {
+			String name = "/"+s;
+			
+			if (dataOptions.containsKey(name)) continue;
+			
+			IDatasetConnector r = ServiceManager.getRemoteDatasetService().createRemoteDataset(host, port);
+			r.setPath(path);
+			r.setDatasetName(name);
+			IDynamicDataset dataset = (IDynamicDataset)r.getDataset();
+			dataset.refreshShape();
+			dataset.setName(name);
+			dataHolder.get().addDataset(name, dataset);
+			long[] maxShape = ((DataNode)result.get(s).getDestination()).getMaxShape();
+			int[] max = new int[maxShape.length];
+			for (int i = 0; i < maxShape.length; i++) max[i] = (int)maxShape[i];
+			dataHolder.get().getMetadata().addDataInfo(name, max);
+			
+			if (((LazyDatasetBase)dataset).getDType() != Dataset.STRING) {
+				DataOptions d = new DataOptions(name, this);
+				dataOptions.put(d.getName(),d);
+			}
+			
+		}
 	}
 
 	@Override
 	public void refresh() {
 		if (!live) return;
 		
-		if (dataHolder.getList().isEmpty()){
-			dataHolder = createDataHolder(dataHolder.getFilePath(), host, port);
-			if (dataHolder.getList().isEmpty()) return;
+		if (dataHolder.get().getList().isEmpty()){
+			String path = dataHolder.get().getFilePath();
+			dataHolder.set(createDataHolder(path, host, port));
+			if (dataHolder.get().getList().isEmpty()) return;
 		}
 		
 		
 		if (dataOptions.isEmpty()) {
-			String[] names = dataHolder.getNames();
+			String[] names = dataHolder.get().getNames();
 			for (String n : names) {
-				ILazyDataset lazyDataset = dataHolder.getLazyDataset(n);
+				ILazyDataset lazyDataset = dataHolder.get().getLazyDataset(n);
 				if (lazyDataset instanceof IDynamicDataset) {
 					((IDynamicDataset)lazyDataset).refreshShape();
 				}
@@ -129,11 +182,13 @@ public class LiveLoadedFile extends LoadedFile implements IRefreshable {
 			}
 			
 			return;
+		} else {
+			updateDataHolder();
 		}
 		
-		String[] names = dataHolder.getNames();
+		String[] names = dataHolder.get().getNames();
 		for (String n : names) {
-			ILazyDataset lazyDataset = dataHolder.getLazyDataset(n);
+			ILazyDataset lazyDataset = dataHolder.get().getLazyDataset(n);
 			if (lazyDataset instanceof IDynamicDataset) {
 				((IDynamicDataset)lazyDataset).refreshShape();
 			}
@@ -156,7 +211,8 @@ public class LiveLoadedFile extends LoadedFile implements IRefreshable {
 	public void locallyReload() {
 		ILoaderService service = ServiceManager.getILoaderService();
 		try {
-			dataHolder = service.getData(getFilePath(), null);
+			String path = getFilePath();
+			dataHolder.set(service.getData(path, null));
 			dataOptions.values().stream().forEach(o -> o.setAxes(null));
 		} catch (Exception e) {
 			// TODO Auto-generated catch block

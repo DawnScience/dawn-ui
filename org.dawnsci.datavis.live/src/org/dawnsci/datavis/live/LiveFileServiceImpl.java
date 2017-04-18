@@ -12,7 +12,6 @@ import org.dawnsci.datavis.model.ILiveFileService;
 import org.dawnsci.datavis.model.LoadedFile;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.dawnsci.analysis.api.processing.IOperationBean;
 import org.eclipse.scanning.api.event.EventConstants;
@@ -25,6 +24,7 @@ import org.eclipse.scanning.api.event.core.ISubscriber;
 import org.eclipse.scanning.api.event.scan.IScanListener;
 import org.eclipse.scanning.api.event.scan.ScanBean;
 import org.eclipse.scanning.api.event.scan.ScanEvent;
+import org.eclipse.scanning.api.event.status.Status;
 import org.eclipse.scanning.api.event.status.StatusBean;
 import org.eclipse.scanning.api.ui.CommandConstants;
 
@@ -88,14 +88,17 @@ public class LiveFileServiceImpl implements ILiveFileService {
 					if (Boolean.getBoolean("org.dawnsci.mapping.ui.processing.off")) return;
 					
 					ScanBean beanNoScanReq = event.getBean();
+					
+					if (beanNoScanReq.getStatus().equals(Status.RUNNING)) {
+						for (ILiveFileListener l : listeners) {
+							l.refreshRequest();
+						}
+					}
+					
 					final String filePath = beanNoScanReq.getFilePath();
 					// Scan started
 					if (beanNoScanReq.scanStart() == true) {
-//						logger.info("Pushing data to live visualisation from SWMR file: {}", filePath);
 
-						// Create the LiveDataBean
-//						LiveDataBean liveDataBean = new LiveDataBean();
-						
 						// Recent change to GDA means that its configuration may be read without
 						// making a dependency on it.
 						String host = getDataServerHost();
@@ -106,42 +109,10 @@ public class LiveFileServiceImpl implements ILiveFileService {
 						
 						fireListeners(f);
 
-
-						// Configure the liveDataBean with a host and port to reach a dataserver
-//						liveDataBean.setHost(dataServerHost);
-						// Default the port to -1 so it can be checked next. An Integer is unboxed here to int
-//						liveDataBean.setPort(dataServerPort);
-						// Check the liveDataBean is valid
-//						if (liveDataBean.getHost() == null || liveDataBean.getPort() == -1) {
-//							logger.error("Live visualisation failed. The properties: {} or {} have not been set",
-//									"GDA/gda.dataserver.host", "GDA/gda.dataserver.port");
-//							// We can't do anything live at this point so return
-//							return;
-//						}
-
-						// Create map holding the info needed to display the map
-//						Map<String, Object> eventMap = new HashMap<String, Object>();
-//						eventMap.put("path", filePath);
-//						eventMap.put("live_bean", liveDataBean);
-//
-//						// Send the event
-//						eventAdmin.postEvent(new Event(DAWNSCI_MAPPING_FILE_OPEN, eventMap));
-//					}
-//					// Scan ended swap out remote SWMR file access for direct file access
-//					if (beanNoScanReq.scanEnd() == true) {
-//						logger.info("Switching from remote SWMR file to direct access: {}", filePath);
-//						Map<String, Object> eventMap = new HashMap<String, Object>();
-//						eventMap.put("path", filePath);
-//						// Reload the old remote file
-//						eventAdmin.postEvent(new Event(DAWNSCI_MAPPING_FILE_RELOAD, eventMap));
 					}
 					
 					if (beanNoScanReq.scanEnd() == true) {
-//						logger.info("Switching from remote SWMR file to direct access: {}", filePath);
-//						Map<String, Object> eventMap = new HashMap<String, Object>();
-//						eventMap.put("path", filePath);
-						// Reload the old remote file
-//						eventAdmin.postEvent(new Event(DAWNSCI_MAPPING_FILE_RELOAD, eventMap));
+
 						for (ILiveFileListener l : listeners) l.localReload(filePath);
 					}
 				}
@@ -226,18 +197,18 @@ public class LiveFileServiceImpl implements ILiveFileService {
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
 			Runnable local = task.getAndSet(null);
-			if (local == null) return Status.OK_STATUS;
+			if (local == null) return org.eclipse.core.runtime.Status.OK_STATUS;
 			local.run();
 
 
 			try {
 				Thread.sleep(MIN_REFRESH_TIME);
 			} catch (InterruptedException e) {
-				return Status.OK_STATUS;
+				return org.eclipse.core.runtime.Status.OK_STATUS;
 			}
 
 
-			return Status.OK_STATUS;
+			return org.eclipse.core.runtime.Status.OK_STATUS;
 		}
 		
 	}
