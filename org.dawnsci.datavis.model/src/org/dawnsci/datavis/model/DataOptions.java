@@ -86,7 +86,7 @@ public class DataOptions implements IDataObject, IDataPackage {
 
 							for (int j = axRank-1; j >= 0; j--) {
 								int id = axShape[j];
-								updateShape(i, max, shape, id, idx, found);
+								updateShape(j, max, shape, id, idx, found);
 
 							}
 
@@ -100,10 +100,19 @@ public class DataOptions implements IDataObject, IDataPackage {
 								newShape[idx[j]] = axShape[j];
 							}
 							
-							lzAxes = lzAxes.getSliceView();
-							lzAxes.setShape(newShape);
+							try {
+								lzAxes = lzAxes.getSliceView();
+								lzAxes.setShape(newShape);
+								ax.setAxis(i, lzAxes);
+							} catch (Exception e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+							}
+							
+						} else {
+							ax.setAxis(i, parent.getLazyDataset(axes[i]));
 						}
-						ax.setAxis(i, parent.getLazyDataset(axes[i]));
+						
 					}
 					local.setMetadata(ax);
 				} catch (MetadataException e) {
