@@ -10,11 +10,15 @@ import org.eclipse.january.dataset.IDataset;
 import org.eclipse.january.dataset.ILazyDataset;
 import org.eclipse.january.dataset.SliceND;
 import org.eclipse.january.metadata.AxesMetadata;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class PlotModeXY implements IPlotMode {
 
 	private static final String[] options =  new String[]{"X"};
 	private long count = 0;
+	
+	private final static Logger logger = LoggerFactory.getLogger(PlotModeXY.class);
 
 	public String[] getOptions() {
 		return options;
@@ -43,7 +47,9 @@ public class PlotModeXY implements IPlotMode {
 	@Override
 	public IDataset[] sliceForPlot(ILazyDataset lz, SliceND slice, Object[] options) throws Exception {
 		
+		long t = System.currentTimeMillis();
 		IDataset allData = lz.getSlice(slice);
+		logger.info("Slice time {} ms for slice {} of {}", (System.currentTimeMillis()-t), slice.toString(), lz.getName());
 		
 		SliceViewIterator it = new SliceViewIterator(allData, null, getDataDimensions(options));
 		

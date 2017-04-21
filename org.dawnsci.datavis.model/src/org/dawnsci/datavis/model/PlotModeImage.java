@@ -48,7 +48,7 @@ public class PlotModeImage implements IPlotMode {
 	public IDataset[] sliceForPlot(ILazyDataset lz, SliceND slice, Object[] options) throws Exception {
 		long t = System.currentTimeMillis();
 		Dataset data = DatasetUtils.convertToDataset(lz.getSlice(slice));
-		logger.info("Slice time " + (System.currentTimeMillis()-t) + " ms");
+		logger.info("Slice time {} ms for slice {} of {}", (System.currentTimeMillis()-t), slice.toString(), lz.getName());
 		data.squeeze();
 		if (data.getRank() != 2) return null;
 		if (transposeNeeded(options)) data = data.getTransposedView(null);
