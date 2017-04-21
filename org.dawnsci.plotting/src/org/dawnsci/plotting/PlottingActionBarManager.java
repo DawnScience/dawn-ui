@@ -124,13 +124,34 @@ public class PlottingActionBarManager implements IPlotActionSystem {
 	
 	public boolean switchActions(final PlotType type) {
 		
-		if (type == null) return false;
-		
 		if (type == lastPlotTypeUpdate) return false;
 		try {
 			
 			final IActionBars bars = system.getActionBars();
 	    	if (bars==null) return false;
+	    	
+	    	//TODO switch from PlotType to Class<U extends ITrace>
+	    	if (type == null) {
+	    		for (ActionType actionType : ActionType.values()) {
+		    		
+		    		final List<ActionContainer> actions = actionMap.get(actionType);
+		        	if (actions!=null) for (ActionContainer ac : actions) {
+		        		ac.remove();
+		    		}
+		
+		    	}
+	    		
+	    		if (bars.getToolBarManager()!=null)    bars.getToolBarManager().update(true);
+		    	if (bars.getMenuManager()!=null)       bars.getMenuManager().update(true);
+		    	if (bars.getStatusLineManager()!=null) bars.getStatusLineManager().update(true);
+		    	bars.updateActionBars();
+		    	
+		    	clearTool(ToolPageRole.ROLE_1D);
+		    	clearTool(ToolPageRole.ROLE_2D);
+	    		clearTool(ToolPageRole.ROLE_3D);
+
+		    	return true;
+	    	}
 	    	
 	    	imageMenu.setEnabled(type==PlotType.IMAGE);
 	    	xyMenu.setEnabled(type.is1D());

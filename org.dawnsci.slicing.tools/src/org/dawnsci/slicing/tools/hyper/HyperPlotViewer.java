@@ -22,6 +22,8 @@ public class HyperPlotViewer extends IPlottingSystemViewer.Stub<Composite> {
 	public void createControl(final Composite parent) {
 		hyper = new HyperComponent();
 		hyper.createControl(parent);
+		
+		
 	}
 	
 	@Override

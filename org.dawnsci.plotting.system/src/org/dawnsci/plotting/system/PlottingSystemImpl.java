@@ -454,7 +454,7 @@ public class PlottingSystemImpl<T> extends AbstractPlottingSystem<T> {
 									final IProgressMonitor      monitor) {
 
 		if (monitor!=null) monitor.worked(1);
-
+		
 		// create index datasets if necessary
 		final List<ITrace> traces = new ArrayList<ITrace>(7);
 		final IDataset x;
@@ -745,6 +745,11 @@ public class PlottingSystemImpl<T> extends AbstractPlottingSystem<T> {
 
 		// Switch off error bars if very many plots.
 		IPreferenceStore store = getPreferenceStore();
+		
+		if (traceClazz != ILineTrace.class) {
+			traceClazz = ILineTrace.class;
+			switchPlottingType(traceClazz);
+		}
 
 		boolean errorBarEnabled = store.getBoolean(PlottingConstants.GLOBAL_SHOW_ERROR_BARS);
 		Collection<ITrace> existing = getTraces(ILineTrace.class);
