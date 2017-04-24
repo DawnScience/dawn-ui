@@ -97,6 +97,7 @@ public abstract class AbstractMapData implements PlottableMapObject{
 	protected IDataset updateMap() {
 		if (!live) return null;
 
+		long startTime = System.currentTimeMillis();
 
 		if (baseMap.getFirstMetadata(AxesMetadata.class) == null) {
 			try {
@@ -121,7 +122,9 @@ public abstract class AbstractMapData implements PlottableMapObject{
 			MapScanDimensions mapDims = oParent.getMapDims();
 			mapDims.updateNonXYScanSlice(baseMap.getShape());
 			SliceND mapSlice = mapDims.getMapSlice(baseMap);
+			long preSlice = System.currentTimeMillis();
 			IDataset slice = baseMap.getSlice(mapSlice);
+			logger.info("Slice of data from {} took {} ms", name, (System.currentTimeMillis()-preSlice));
 			if (slice.getRank() != 2) {
 				int[] ss = ShapeUtils.squeezeShape(slice.getShape(), false);
 				if (ss.length == 1) {
@@ -135,6 +138,8 @@ public abstract class AbstractMapData implements PlottableMapObject{
 			slice = LivePlottingUtils.cropNanValuesFromAxes(slice,!mapDims.isRemappingRequired());
 			if (slice == null) return null;
 			setRange(MappingUtils.getRange(slice, !mapDims.isRemappingRequired()));
+			
+			logger.info("Update of data from {} took {} ms", name, (System.currentTimeMillis()-startTime));
 			return slice;
 			
 //			updateRemappedData(null);
