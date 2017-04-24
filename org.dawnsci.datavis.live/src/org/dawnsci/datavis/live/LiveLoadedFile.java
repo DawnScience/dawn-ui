@@ -3,6 +3,7 @@ package org.dawnsci.datavis.live;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.dawnsci.datavis.model.DataOptions;
 import org.dawnsci.datavis.model.IRefreshable;
@@ -30,7 +31,6 @@ import uk.ac.diamond.scisoft.analysis.io.DataHolder;
 public class LiveLoadedFile extends LoadedFile implements IRefreshable {
 
 	private boolean live = true;
-	private IRemoteData remoteData;
 	private String host;
 	private int port;
 	
@@ -213,7 +213,34 @@ public class LiveLoadedFile extends LoadedFile implements IRefreshable {
 		try {
 			String path = getFilePath();
 			dataHolder.set(service.getData(path, null));
+			
+			if (dataOptions.isEmpty()) {
+				String[] names = dataHolder.get().getNames();
+				for (String n : names) {
+					ILazyDataset lazyDataset = dataHolder.get().getLazyDataset(n);
+					if (lazyDataset instanceof IDynamicDataset) {
+						((IDynamicDataset)lazyDataset).refreshShape();
+					}
+					if (lazyDataset != null && ((LazyDatasetBase)lazyDataset).getDType() != Dataset.STRING) {
+						DataOptions d = new DataOptions(n, this);
+						dataOptions.put(d.getName(),d);
+					}
+				}
+				
+				return;
+			} else {
+				updateDataHolder();
+			}
+			
 			dataOptions.values().stream().forEach(o -> o.setAxes(null));
+			IDataHolder dh = dataHolder.get();
+			Set<String> keySet = dataOptions.keySet();
+			for (String k : keySet) {
+				if (!dh.contains(k)) {
+					dataOptions.remove(k);
+				}
+			}
+			
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

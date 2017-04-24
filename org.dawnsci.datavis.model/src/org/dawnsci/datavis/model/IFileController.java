@@ -12,6 +12,8 @@ public interface IFileController {
 
 	public void attachLive();
 	
+	public void detachLive();
+	
 	public List<LoadedFile> getLoadedFiles();
 
 	public void deselect(List<IDataObject> objects);
