@@ -129,6 +129,13 @@ public class FloatSpinner extends Composite {
 	 */
 	public void setPrecision(int precision) {
 		this.precision = precision;
+		
+		// To guard against precision = 0, as this causes a stack overflow
+		if (precision < 1) {
+			this.precision = 1;
+			precision = 1;
+		}
+		
 		factor = Math.pow(10, precision);
 		spinner.setDigits(precision);
 		setWidth(width);
