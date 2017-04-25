@@ -8,6 +8,8 @@
  */
 package org.dawnsci.plotting.draw2d.swtxy;
 
+import java.util.List;
+
 import org.dawnsci.plotting.draw2d.swtxy.selection.AbstractSelectionRegion;
 import org.eclipse.draw2d.Figure;
 import org.eclipse.draw2d.Graphics;
@@ -55,7 +57,9 @@ public class RegionCreationLayer extends Layer {
 	public void setMouseListenerActive(final RegionMouseListener rl, final boolean isActive) {
 		this.regionListener = rl;
 		if (isActive) {
-			layeredPane.add(this);
+			List<?> children = layeredPane.getChildren();
+			if (children != null && !children.contains(this))
+				layeredPane.add(this);
 			this.regionListener = rl;
 			regionOverlayArea.setOpaque(true);
 			regionOverlayArea.addMouseListener(rl);
@@ -66,7 +70,9 @@ public class RegionCreationLayer extends Layer {
 			}
 
 		} else {
-			layeredPane.remove(this);
+			List<?> children = layeredPane.getChildren();
+			if (children != null && children.contains(this))
+				layeredPane.remove(this);
 			this.regionListener = null;
 			regionOverlayArea.setOpaque(false);
 			regionOverlayArea.removeMouseListener(rl);
