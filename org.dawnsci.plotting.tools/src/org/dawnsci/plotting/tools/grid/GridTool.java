@@ -609,7 +609,7 @@ public class GridTool extends AbstractToolPage implements IResettableExpansion{
 			region.setUserObject(getMarker());
 						
 		} catch (Exception e) {
-			logger.error("Cannot create region for profile tool!");
+			logger.error("Cannot create region for profile tool: "+ e.getMessage());
 		}
 	}
 

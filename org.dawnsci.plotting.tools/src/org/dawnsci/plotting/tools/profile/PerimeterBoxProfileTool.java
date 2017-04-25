@@ -513,7 +513,7 @@ public class PerimeterBoxProfileTool extends AbstractToolPage  implements IROILi
 			IRegion region = getPlottingSystem().createRegion(RegionUtils.getUniqueName(getRegionName(), getPlottingSystem()), getCreateRegionType());
 			region.setUserObject(getMarker());
 		} catch (Exception e) {
-			logger.error("Cannot create region for profile tool!");
+			logger.error("Cannot create region for profile tool:" + e.getMessage());
 		}
 	}
 	
