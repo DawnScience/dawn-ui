@@ -376,6 +376,7 @@ public class MaskingTool extends AbstractToolPage implements MouseListener {
 		minimum.setEnabled(false);
 		minimum.setMinimum(Integer.MIN_VALUE);
 		minimum.setMaximum(Integer.MAX_VALUE);
+		minimum.setWidth(String.valueOf(Integer.MAX_VALUE).length());
 		minimum.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
 		if (image!=null) minimum.setDouble(getValue(image.getMin(), image.getMinCut(), 0));
 		minimum.setToolTipText("Press enter to apply a full update of the mask.");
@@ -429,6 +430,7 @@ public class MaskingTool extends AbstractToolPage implements MouseListener {
 		maximum.setEnabled(false);
 		maximum.setMinimum(Integer.MIN_VALUE);
 		maximum.setMaximum(Integer.MAX_VALUE);
+		maximum.setWidth(String.valueOf(Integer.MAX_VALUE).length());
 		maximum.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
 		if (image!=null) maximum.setDouble(getValue(image.getMax(), image.getMaxCut(), Integer.MAX_VALUE));
 		maximum.setToolTipText("Press enter to apply a full update of the mask.");
@@ -543,6 +545,7 @@ public class MaskingTool extends AbstractToolPage implements MouseListener {
 		minThresh.setIncrement(1d);
 		minThresh.setMinimum(Integer.MIN_VALUE);
 		minThresh.setMaximum(Integer.MAX_VALUE);
+		minThresh.setWidth(String.valueOf(Integer.MAX_VALUE).length());
 		minThresh.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
 		if (image!=null) minThresh.setDouble(getValue(image.getMin(), image.getMinCut(), 0));
 		minThresh.setToolTipText("Press enter to set minimum threshold for brush.");
@@ -557,6 +560,7 @@ public class MaskingTool extends AbstractToolPage implements MouseListener {
 		maxThresh.setIncrement(1d);
 		maxThresh.setMinimum(Integer.MIN_VALUE);
 		maxThresh.setMaximum(Integer.MAX_VALUE);
+		maxThresh.setWidth(String.valueOf(Integer.MAX_VALUE).length());
 		maxThresh.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
 		if (image!=null) maxThresh.setDouble(getValue(image.getMax(), image.getMaxCut(), Integer.MAX_VALUE));
 		maxThresh.setToolTipText("Press enter to set maximum threshold for brush.");
