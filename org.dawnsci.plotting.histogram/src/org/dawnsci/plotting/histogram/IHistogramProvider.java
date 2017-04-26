@@ -54,19 +54,9 @@ public interface IHistogramProvider extends IContentProvider {
 	public boolean isLogColorScale();
 
 	/**
-	 * Similar to {@link #getDatasets(double, double)}
-	 * but uses automatically set limits
 	 * @return datasets for histograms
 	 */
 	public IHistogramDatasets getDatasets();
-
-	/**
-	 * 
-	 * @param lower
-	 * @param upper
-	 * @return datasets for histograms
-	 */
-	public IHistogramDatasets getDatasets(double lower, double upper);
 
 	public interface IHistogramDatasets {
 		/**

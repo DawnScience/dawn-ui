@@ -299,21 +299,15 @@ public class HistogramViewer extends ContentViewer {
 	 * Update RGB traces
 	 */
 	private void updateTraces() {
-		IAxis xAxis = histogramPlottingSystem.getSelectedXAxis();
-		IHistogramDatasets data = getHistogramProvider().getDatasets(xAxis.getLower(), xAxis.getUpper());
+		IHistogramDatasets data = getHistogramProvider().getDatasets();
 		histoTrace.setData(data.getX(), data.getY());
 		redTrace.setData(data.getRGBX(), data.getR());
 		greenTrace.setData(data.getRGBX(), data.getG());
 		blueTrace.setData(data.getRGBX(), data.getB());
 		blueTrace.repaint();
-		// if (rescale && updateAxis) {
-		// histogramPlottingSystem.getSelectedXAxis().setRange(
-		// histogramProvider.getMin(), histogramProvider.getMax());
-		// }
-		histogramPlottingSystem.getSelectedXAxis().setLog10(
-				getHistogramProvider().isLogColorScale());
-		histogramPlottingSystem.getSelectedXAxis().setAxisAutoscaleTight(true);
-		// histogramPlottingSystem.getSelectedXAxis().setLog10(btnColourMapLog.getSelection());
+		IAxis xAxis = histogramPlottingSystem.getSelectedXAxis();
+		xAxis.setLog10(getHistogramProvider().isLogColorScale());
+		xAxis.setAxisAutoscaleTight(true);
 
 		histogramPlottingSystem.getSelectedYAxis().setAxisAutoscaleTight(true);
 
@@ -341,8 +335,9 @@ public class HistogramViewer extends ContentViewer {
 
 		// Option 2:
 		// Set the increment to be the difference between two x pixels.
-		double val1 = histogramPlottingSystem.getSelectedXAxis().getPositionValue(1);
-		double val2 = histogramPlottingSystem.getSelectedXAxis().getPositionValue(2);
+		IAxis xAxis = histogramPlottingSystem.getSelectedXAxis();
+		double val1 = xAxis.getPositionValue(1);
+		double val2 = xAxis.getPositionValue(2);
 		double increment = Math.abs(val2 - val1);
 		// update precision too
 		int logInc = (int) Math.floor(Math.log10(increment));
@@ -403,7 +398,7 @@ public class HistogramViewer extends ContentViewer {
 	 * Check our minimum values are valid before
 	 * applying them 
 	 */
-	private boolean validateMin(double minValue){
+	private boolean validateMin(double minValue) {
 		if (minValue > maxText.getDouble()){
 			return false;
 		}
@@ -550,7 +545,6 @@ public class HistogramViewer extends ContentViewer {
 
 	private void rescaleAxis(boolean force) {
 		if (force || histogramPlottingSystem.isRescale()) {
-	
 			IAxis xAxis = histogramPlottingSystem.getSelectedXAxis();
 			IHistogramProvider hp = getHistogramProvider();
 			double min = hp.getMin();

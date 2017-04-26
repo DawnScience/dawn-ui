@@ -31,11 +31,13 @@ public class ImageHistogramProvider implements IHistogramProvider {
 	private Dataset imageDataset;
 	private ImageServiceBean bean;
 
+	private IDataset[] histogramData = null;
+
 	public ImageHistogramProvider() {
 
 	}
 
-	private void setImage(IPaletteTrace image){
+	private void setImage(IPaletteTrace image) {
 		//TODO: connect and disconnect listeners, etc...
 		this.image = image;
 		this.imageDataset = getImageData(image);
@@ -138,7 +140,10 @@ public class ImageHistogramProvider implements IHistogramProvider {
 	 *
 	 * @return Calculated histogram, index 0 for Y values, 1 for X values
 	 */
-	private IDataset[] generateHistogramData(IDataset imageDataset, int numBins, double rangeMin, double rangeMax) {
+	private IDataset[] generateHistogramData(IDataset imageDataset, int numBins) {
+		double rangeMin = imageDataset.min(true).doubleValue();
+		double rangeMax = imageDataset.max(true).doubleValue();
+
 		Histogram hist = new Histogram(numBins, rangeMin, rangeMax, true);
 		List<? extends Dataset> histogram_values = hist.value(imageDataset);
 
@@ -155,21 +160,14 @@ public class ImageHistogramProvider implements IHistogramProvider {
 
 	@Override
 	public IHistogramDatasets getDatasets() {
-		return getDatasets(getMinimumRange(), getMaximumRange());
-	}
-
-	@Override
-	public IHistogramDatasets getDatasets(double lower, double upper) {
 		Assert.isNotNull(image, "This provider must have an image set when get datasets is called");
 
-		IDataset[] histogramData = generateHistogramData(imageDataset,
-				getNumberOfBins(), lower, upper);
+		IDataset[] histogramData = generateHistogramData(imageDataset, getNumberOfBins());
 
 		final IDataset histogramY = histogramData[0];
 		final IDataset histogramX = histogramData[1];
 
-		// now build the RGB Lines ( All the -3's here are to avoid the
-		// min/max/NAN colours)
+		// now build the RGB lines
 		PaletteData paletteData = image.getPaletteData();
 		final int numPaletteColours = paletteData.colors.length - 3; // The -3 here is to avoid the min/max/NAN colours
 		final Dataset R = DatasetFactory.zeros(DoubleDataset.class, numPaletteColours);
@@ -179,11 +177,7 @@ public class ImageHistogramProvider implements IHistogramProvider {
 		G.setName("green");
 		B.setName("blue");
 
-		double scale = histogramY.max(true).doubleValue() / 255;
-		if (scale <= 0)
-			scale = 1.0 / 255;
-
-		// palleteData.colors = new RGB[256];
+		double scale = Math.max(1, histogramY.max(true).doubleValue()) / (numPaletteColours - 1);
 		for (int i = 0; i < numPaletteColours; i++) {
 			R.set(paletteData.colors[i].red * scale, i);
 			G.set(paletteData.colors[i].green * scale, i);
