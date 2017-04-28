@@ -10,7 +10,9 @@ package org.dawnsci.fileviewer.table;
 
 import java.io.File;
 
+import org.dawnsci.fileviewer.Activator;
 import org.dawnsci.fileviewer.FileViewer;
+import org.dawnsci.fileviewer.FileViewerConstants;
 import org.dawnsci.fileviewer.Utils;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.swt.graphics.Image;
@@ -69,7 +71,9 @@ public class FileTableColumnLabelProvider extends ColumnLabelProvider {
 		case 3:
 			return Utils.getFileDateString(file);
 		case 4:
-			return Utils.getFileScanCmdString(file);
+			if (Activator.getDefault().getPreferenceStore().getBoolean(FileViewerConstants.SHOW_SCANCMD_COLUMN))
+				return Utils.getFileScanCmdString(file);
+			return null;
 		default:
 			break;
 		}
