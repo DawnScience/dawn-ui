@@ -514,7 +514,7 @@ public class AspectAxis extends Axis implements IAxis {
 	}
 
 	@Override
-	public boolean areLabelsCustomised() {
+	public boolean areLabelCustomised() {
 		return labelData != null;
 	}
 	
