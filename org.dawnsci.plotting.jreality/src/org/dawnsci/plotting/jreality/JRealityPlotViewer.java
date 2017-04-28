@@ -659,9 +659,14 @@ public class JRealityPlotViewer extends IPlottingSystemViewer.Stub<Composite> im
 		}
 		if (yAxis.isData()) plotter.setYAxisValues(yAxis);
 		if (zAxis.isData()) plotter.setZAxisValues(zAxis);
-
-		setXTickLabelFormat(TickFormatting.roundAndChopMode);
-		setYTickLabelFormat(TickFormatting.roundAndChopMode);
+		
+		if(xModeIsCustom){
+			setXTickLabelFormat(TickFormatting.plainMode);
+			setYTickLabelFormat(TickFormatting.plainMode);
+		} else {
+			setXTickLabelFormat(TickFormatting.roundAndChopMode);
+			setYTickLabelFormat(TickFormatting.roundAndChopMode);
+		}
 
 		try {
 			if (window == null && mode == PlottingMode.SURF2D) {

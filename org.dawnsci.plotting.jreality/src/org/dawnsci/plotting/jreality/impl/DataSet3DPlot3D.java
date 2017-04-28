@@ -30,11 +30,12 @@ import org.eclipse.dawnsci.plotting.api.jreality.data.ColourImageData;
 import org.eclipse.dawnsci.plotting.api.jreality.impl.SurfPlotStyles;
 import org.eclipse.dawnsci.plotting.api.jreality.util.ArrayPoolUtility;
 import org.eclipse.dawnsci.plotting.api.jreality.util.ScalingUtility;
+import org.eclipse.january.dataset.Dataset;
 import org.eclipse.january.dataset.IDataset;
+import org.eclipse.january.dataset.Slice;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import uk.ac.diamond.scisoft.analysis.axis.AxisValues;
 import de.jreality.geometry.IndexedLineSetFactory;
 import de.jreality.geometry.PointSetFactory;
 import de.jreality.geometry.QuadMeshFactory;
@@ -55,6 +56,7 @@ import de.jreality.shader.ShaderUtility;
 import de.jreality.ui.viewerapp.AbstractViewerApp;
 import de.jreality.util.CameraUtility;
 import de.jreality.util.SceneGraphUtility;
+import uk.ac.diamond.scisoft.analysis.axis.AxisValues;
 
 /**
  *
@@ -763,8 +765,9 @@ public class DataSet3DPlot3D implements IDataSet3DCorePlot {
 					globalRealXmin = xAxisValues.getMinValue();
 					globalRealXmax = xAxisValues.getMaxValue();
 				} else {
-					globalRealXmin = xAxisValues.getValue(windowStartPosX);
-					globalRealXmax = xAxisValues.getValue(windowEndPosX);
+					Dataset windowedXAxis = xAxisValues.toDataset().getSliceView(new Slice(windowStartPosX, windowEndPosX +1));
+					globalRealXmin = windowedXAxis.min().doubleValue();
+					globalRealXmax = windowedXAxis.max().doubleValue();
 				}
 			break;
 		}
@@ -793,8 +796,9 @@ public class DataSet3DPlot3D implements IDataSet3DCorePlot {
 					globalRealYmin = yAxisValues.getMinValue();
 					globalRealYmax = yAxisValues.getMaxValue();
 				} else {
-					globalRealYmin = yAxisValues.getValue(windowStartPosY);
-					globalRealYmax = yAxisValues.getValue(windowEndPosY);
+					Dataset windowedYAxis = yAxisValues.toDataset().getSliceView(new Slice(windowStartPosY, windowEndPosY +1));
+					globalRealYmin = windowedYAxis.min().doubleValue();
+					globalRealYmax = windowedYAxis.max().doubleValue();
 				}			
 			break;
 		}
