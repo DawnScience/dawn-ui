@@ -106,7 +106,7 @@ public class MovieJob {
 							public void run() {
 								
 								folder.setSelection(folder.getItems().length -1);
-								ssp.updateSliders(ssvs.getPlotSystemCompositeView().getSlider(), imageNumber);
+								ssp.sliderMovemementMainImage(imageNumber);
 								ssvs.updateIndicators(imageNumber);
 								pS.updatePlot2D(tempImage, null, null);
 								subIBgPS.updatePlot2D(sm.getBackgroundDatArray().get(imageNumber), null, null);

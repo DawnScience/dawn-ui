@@ -3,9 +3,9 @@ package org.dawnsci.common.widgets.filedataset;
 import java.io.File;
 import java.util.ArrayDeque;
 import java.util.Deque;
-import java.util.HashSet;
 import java.util.StringJoiner;
 
+import org.dawnsci.common.widgets.statuscomposite.StatusComposite;
 import org.eclipse.january.dataset.ILazyDataset;
 import org.eclipse.jface.viewers.AbstractTreeViewer;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
@@ -31,7 +31,7 @@ import org.slf4j.LoggerFactory;
  * After http://blog.vogella.com/2009/06/23/eclipse-rcp-file-browser/
  */
 
-public class FileDatasetComposite extends Composite {
+public class FileDatasetComposite extends StatusComposite {
 
 	private final TreeViewer treeViewer;
 	private final TableViewer tableViewer;
@@ -39,7 +39,6 @@ public class FileDatasetComposite extends Composite {
 	private final static Logger logger = LoggerFactory.getLogger(FileDatasetComposite.class);
 	private volatile File currentSelectedFile = null;
 	private volatile ILazyDataset currentSelectedDataset = null;
-	private final HashSet<IFileDatasetCompositeStatusChangedListener> listeners = new HashSet<>();
 	
 	
 	public FileDatasetComposite(Composite parent, IFileDatasetFilter filter, int style) {
@@ -214,18 +213,5 @@ public class FileDatasetComposite extends Composite {
 		}
 		return false;
 	}
-	
-	public void addFileDatasetCompositeStatusChangedListener(IFileDatasetCompositeStatusChangedListener listener) {
-		listeners.add(listener);
-	}
-	
-	public void removeFileDatasetCompositeStatusChangedListener(IFileDatasetCompositeStatusChangedListener listener) {
-		listeners.remove(listener);
-	}
-	
-	private void fireListeners(boolean status) {
-		FileDatasetCompositeStatusChangedEvent event = new FileDatasetCompositeStatusChangedEvent(this, status);
-		for (IFileDatasetCompositeStatusChangedListener listener : listeners) 
-			listener.compositeStatusChanged(event);
-	}
+
 }

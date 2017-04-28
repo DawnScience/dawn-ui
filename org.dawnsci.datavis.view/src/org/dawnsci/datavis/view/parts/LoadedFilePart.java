@@ -298,18 +298,13 @@ public class LoadedFilePart {
 			return;
 		}
 		
-//		if (!event.isSelectedDataChanged() && !event.isSelectedFileChanged()) {
-//			List<LoadedFile> fs = fileController().getSelectedFiles();
-//			viewer.setCheckedElements(fs.toArray());
-//
-//		}
-//		viewer.setCheckedElements(new Object[]{fileController()});
 		viewer.refresh();
 	}
 	
 	@PreDestroy
 	public void dispose(){
 		fileController.removeStateListener(fileStateListener);
+		fileController.detachLive();
 		ticked.dispose();
 		unticked.dispose();
 	}
@@ -318,38 +313,6 @@ public class LoadedFilePart {
 	public void setFocus() {
 		if (viewer != null) viewer.getControl().setFocus();
 	}
-	
-//	@Inject
-//	@Optional
-//	private void subscribeFileOpen(@UIEventTopic("orgdawnsciprototypee4nano") String path) {
-//	  try {
-//			LoadedFile f = new LoadedFile(lService.getData(path,null));
-//			fileController().getLoadedFiles().addFile(f);
-//			viewer.refresh();
-//		} catch (Exception e1) {
-//			// TODO Auto-generated catch block
-//			e1.printStackTrace();
-//		}
-//	}
-	
-//	@Inject
-//	@Optional
-//	private void subscribeFileOpen(@UIEventTopic("orgdawnsciprototypeplotupdate")  Event data) {
-//	  try {
-//			if (data.containsProperty("path")){
-//				String path = data.getProperty("path").toString();
-//				System.out.println(fileController().getCurrentFile().isSelected());
-//				if (!fileController().getCurrentFile().isSelected()) return;
-//				fileController().getLoadedFiles().deselectOthers(path);
-////				viewer.setCheckedElements(new Object[]{fileController().getLoadedFiles().getLoadedFile(path)});
-//				viewer.refresh();
-//			}
-//			
-//		} catch (Exception e1) {
-//			// TODO Auto-generated catch block
-//			e1.printStackTrace();
-//		}
-//	}
 	
 	@Inject
 	@Optional

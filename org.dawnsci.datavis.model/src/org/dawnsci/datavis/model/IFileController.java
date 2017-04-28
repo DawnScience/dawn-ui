@@ -1,6 +1,5 @@
 package org.dawnsci.datavis.model;
 
-import java.util.Collection;
 import java.util.List;
 
 import org.eclipse.ui.progress.IProgressService;
@@ -12,6 +11,8 @@ public interface IFileController {
 	public void loadFile(String path);
 
 	public void attachLive();
+	
+	public void detachLive();
 	
 	public List<LoadedFile> getLoadedFiles();
 

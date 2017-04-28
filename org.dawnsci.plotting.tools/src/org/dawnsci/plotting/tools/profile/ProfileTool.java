@@ -346,7 +346,7 @@ public abstract class ProfileTool extends AbstractToolPage  implements IROIListe
 			IRegion region = getPlottingSystem().createRegion(RegionUtils.getUniqueName(getRegionName(), getPlottingSystem()), getCreateRegionType());
 			region.setUserObject(getMarker());
 		} catch (Exception e) {
-			logger.error("Cannot create region for profile tool!");
+			logger.error("Cannot create region for profile tool: "+ e.getMessage());
 		}
 	}
 	

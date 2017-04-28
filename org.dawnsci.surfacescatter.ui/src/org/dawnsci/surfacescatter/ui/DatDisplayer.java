@@ -61,6 +61,7 @@ public class DatDisplayer extends Composite {
 	private String filepath;
 	private Button selectAll;
 	private String option;
+	private RodSetupWindow rsw;
 
 
 	public String getOption() {
@@ -95,14 +96,18 @@ public class DatDisplayer extends Composite {
 		this.imageName = imageName;
 	}
 
-	public DatDisplayer(Composite parent, int style, String[] filepaths, SurfaceScatterPresenter ssp,
-			String datFolderPath, SurfaceScatterViewStart ssvs) {
+	public DatDisplayer(Composite parent, 
+						int style, 
+						SurfaceScatterPresenter ssp,
+						SurfaceScatterViewStart ssvs,
+						RodSetupWindow rsw) {
 
 		super(parent, style);
 
 		this.createContents();
 		this.ssp = ssp;
 		this.ssvs = ssvs;
+		this.rsw = rsw;
 
 	}
 
@@ -147,23 +152,15 @@ public class DatDisplayer extends Composite {
 				
 				DirectoryDialog dlg = new DirectoryDialog(ssvs.getShell(), SWT.OPEN);
 				
-				// Set the initial filter path according
-		        // to anything they've selected or typed in
-				
 				if(ssvs.getDatFolderPath() != null){
 				
 					dlg.setFilterPath(ssvs.getDatFolderPath());
 				}
-		        // Change the title bar text
+
 		        dlg.setText(".dat file directory");
 
-		        // Customizable message displayed in the dialog
 		        dlg.setMessage("Select a directory");
 
-		        // Calling open() will open and run the dialog.
-		        // It will return the selected directory, or
-		        // null if user cancels
-		       
 		        String dir = dlg.open();
 				datFolderPath = dir;
 				ssvs.setDatFolderPath(dir);
@@ -180,7 +177,6 @@ public class DatDisplayer extends Composite {
 				folderDisplayTable.setEnabled(true);
 				transferToRod.setEnabled(true);
 				clearTable.setEnabled(true);
-
 			}
 
 			@Override
@@ -342,6 +338,11 @@ public class DatDisplayer extends Composite {
 
 				options = dh1.getNames();
 				
+				ssp.setOptions(options);
+				ssvs.populateThetaOptionsDropDown();
+				ssvs.getParamField().getSelectedOption().select(0);
+				ssvs.getParamField().getTheta().select(0);
+				
 				List<String> pb = Arrays.asList(options);
 				
 				while(r){
@@ -380,13 +381,10 @@ public class DatDisplayer extends Composite {
 						
 					}
 					
-					
-					
 					if(ild == null && r ==true){
 						
 						ssp.dialogToChangeImageFolder(promptedForImageFolder, DatDisplayer.this);
-					
-					
+						
 						try {
 	
 							dh1 = ssp.copiedDatWithCorrectedTifs(tidiedTransferList.get(0).getText(), datFolderPath);
@@ -394,8 +392,7 @@ public class DatDisplayer extends Composite {
 	
 						} catch (Exception e2) {
 							e2.printStackTrace();
-						}
-						
+						}	
 					}
 					
 					if(ild != null){
@@ -422,7 +419,6 @@ public class DatDisplayer extends Composite {
 					} catch (Exception e2) {
 						e2.printStackTrace();
 					}
-					
 					
 					for (int t = 0; t < options.length; t++) {
 						optionsDropDown.add(options[t]);
@@ -457,10 +453,12 @@ public class DatDisplayer extends Composite {
 					folderDisplayTable.getVerticalBar().setEnabled(true);
 					ssvs.setupRightEnabled(true);
 					enableRodConstruction(true);
-					
+					rsw.setupRightEnabled(true);
 				}
 				
-				ssvs.resetSXRDReflectivityCombo(comboPositionToEnumInt(checkCorrections()));
+				ArrayList<MethodSetting> cC = checkCorrections();
+				
+				ssvs.resetSXRDReflectivityCombo(comboPositionToEnumInt(cC));
 			}
 
 			@Override
@@ -476,14 +474,10 @@ public class DatDisplayer extends Composite {
 			public void widgetSelected(SelectionEvent e) {
 				
 				rodDisplayTable.selectAll();
-				
+		
 				for(TableItem f :rodDisplayTable.getItems()){
 					f.setChecked(true);
-				}
-					
-					
-				
-				
+				}				
 			}
 			
 			@Override
@@ -520,6 +514,7 @@ public class DatDisplayer extends Composite {
 			public void widgetSelected(SelectionEvent e) {
 				rodDisplayTable.removeAll();
 				enableRodConstruction(false);
+				rsw.setupRightEnabled(false);
 				
 			}
 			
@@ -562,6 +557,8 @@ public class DatDisplayer extends Composite {
 					optionsDropDown.removeAll();
 
 					options = dh1.getNames();
+					ssp.setOptions(options);
+					ssvs.populateThetaOptionsDropDown();
 
 					for (int t = 0; t < options.length; t++) {
 						optionsDropDown.add(options[t]);
@@ -570,13 +567,13 @@ public class DatDisplayer extends Composite {
 					optionsDropDown.select(0);
 
 				} catch (Exception e2) {
-					// TODO Auto-generated catch block
 					e2.printStackTrace();
 				}
 
 				if (rodDisplayTable.getItemCount() == 0) {
 					enableRodConstruction(false);
 					ssvs.setupRightEnabled(false);
+					rsw.setupRightEnabled(false);
 				}
 
 			}
@@ -736,7 +733,7 @@ public class DatDisplayer extends Composite {
 					dcdtheta = dh1.getLazyDataset(ReflectivityMetadataTitlesForDialog.getsdcdtheta());
 		
 				} catch (Exception e2) {
-//					System.out.println("can't get dcdtheta");
+
 				}
 			} 
 			else {
@@ -747,7 +744,7 @@ public class DatDisplayer extends Composite {
 					qdcd = dh1.getLazyDataset(ReflectivityMetadataTitlesForDialog.getqsdcd());
 		
 				} catch (Exception e2) {
-//					System.out.println("can't get qdcd");
+
 				}
 			} 
 			
@@ -799,12 +796,5 @@ public class DatDisplayer extends Composite {
 		
 		return output;
 	}
-	
-	
-	
-	
-	
-	
-	
 	
 }

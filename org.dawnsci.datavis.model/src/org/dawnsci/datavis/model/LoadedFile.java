@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 import org.dawnsci.datavis.api.IDataFilePackage;
@@ -21,12 +22,12 @@ import org.eclipse.january.dataset.LazyDatasetBase;
 
 public class LoadedFile implements IDataObject, IDataFilePackage {
 
-	protected IDataHolder dataHolder;
+	protected AtomicReference<IDataHolder> dataHolder;
 	protected Map<String,DataOptions> dataOptions;
 	private boolean selected = false;
 
 	public LoadedFile(IDataHolder dataHolder) {
-		this.dataHolder = dataHolder;		
+		this.dataHolder = new AtomicReference<IDataHolder>(dataHolder);		
 		dataOptions = new TreeMap<>();
 		String[] names = null;
 		if (dataHolder.getTree() != null) {
@@ -90,25 +91,25 @@ public class LoadedFile implements IDataObject, IDataFilePackage {
 	
 	@Override
 	public String getName() {
-		File f = new File(dataHolder.getFilePath());
+		File f = new File(dataHolder.get().getFilePath());
 		return f.getName();
 	}
 	
 	public String getFilePath() {
-		return dataHolder.getFilePath();
+		return dataHolder.get().getFilePath();
 	}
 	
 	public ILazyDataset getLazyDataset(String name){
-		return dataHolder.getLazyDataset(name);
+		return dataHolder.get().getLazyDataset(name);
 	}
 	
 	public Map<String, int[]> getDataShapes(){
 		
-		Map<String, int[]> ds = dataHolder.getMetadata().getDataShapes();
+		Map<String, int[]> ds = dataHolder.get().getMetadata().getDataShapes();
 		ds = new HashMap<>(ds);
 		for (String s : ds.keySet()) {
 			if (ds.get(s) == null) {
-				ds.put(s, dataHolder.getLazyDataset(s).getShape());
+				ds.put(s, dataHolder.get().getLazyDataset(s).getShape());
 			}
 		}
 		

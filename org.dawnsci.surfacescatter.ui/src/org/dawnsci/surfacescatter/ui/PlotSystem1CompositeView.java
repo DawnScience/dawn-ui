@@ -10,6 +10,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.dawnsci.analysis.dataset.roi.RectangularROI;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.PlottingFactory;
 import org.eclipse.january.dataset.IDataset;
@@ -121,7 +122,7 @@ public class PlotSystem1CompositeView extends Composite {
 	    }
 	    
 	    for(FitPower  i: AnalaysisMethodologies.FitPower.values()){
-	    	comboDropDown1.add(String.valueOf(AnalaysisMethodologies.toInt(i)));
+	    	comboDropDown1.add(AnalaysisMethodologies.toString(i));
 	    }
 	    
 	    for(TrackerType1  i: TrackingMethodology.TrackerType1.values()){
@@ -321,6 +322,7 @@ public class PlotSystem1CompositeView extends Composite {
 	   int trackerSelection = comboDropDown2.getSelectionIndex();
        
 	   String boundaryBox = String.valueOf(boundaryBoxText.getSelection());
+	   
        ssvs.updateAnalysisMethodology(methodologySelection, 
      		  						 fitPowerSelection, 
      		  						 trackerSelection, 
@@ -331,9 +333,17 @@ public class PlotSystem1CompositeView extends Composite {
     		   					  ssvs.getPlotSystemCompositeView().getCentreSecondBgRegion());
        
        
+       double[] bgRegionROI = ssp.regionOfInterestSetter(ssvs.getPlotSystemCompositeView().getPlotSystem().
+    			getRegion("myRegion").getROI());
        
-       ssvs.getPlotSystemCompositeView().getBgRegion().setROI(ssp.regionOfInterestSetter(ssvs.getPlotSystemCompositeView().getPlotSystem().
-		getRegion("myRegion").getROI()));
+       RectangularROI bgROI = new RectangularROI(bgRegionROI[0],
+				  bgRegionROI[1],
+				  bgRegionROI[2],
+				  bgRegionROI[3],
+				  bgRegionROI[4]);
+       
+       
+       ssvs.getPlotSystemCompositeView().getBgRegion().setROI(bgROI);
 
        
        if(ssp.getTrackerType() != TrackerType1.INTERPOLATION ||

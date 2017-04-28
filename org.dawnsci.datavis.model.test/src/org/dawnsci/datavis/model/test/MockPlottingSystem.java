@@ -292,8 +292,7 @@ public class MockPlottingSystem implements IPlottingSystem<Object> {
 
 	@Override
 	public List<IAxis> getAxes() {
-		// TODO Auto-generated method stub
-		return null;
+		return new ArrayList<IAxis>();
 	}
 
 	@Override

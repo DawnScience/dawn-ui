@@ -10,11 +10,15 @@ import org.eclipse.january.dataset.IDataset;
 import org.eclipse.january.dataset.ILazyDataset;
 import org.eclipse.january.dataset.SliceND;
 import org.eclipse.january.metadata.AxesMetadata;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class PlotModeXY implements IPlotMode {
 
 	private static final String[] options =  new String[]{"X"};
 	private long count = 0;
+	
+	private final static Logger logger = LoggerFactory.getLogger(PlotModeXY.class);
 
 	public String[] getOptions() {
 		return options;
@@ -43,7 +47,9 @@ public class PlotModeXY implements IPlotMode {
 	@Override
 	public IDataset[] sliceForPlot(ILazyDataset lz, SliceND slice, Object[] options) throws Exception {
 		
+		long t = System.currentTimeMillis();
 		IDataset allData = lz.getSlice(slice);
+		logger.info("Slice time {} ms for slice {} of {}", (System.currentTimeMillis()-t), slice.toString(), lz.getName());
 		
 		SliceViewIterator it = new SliceViewIterator(allData, null, getDataDimensions(options));
 		
@@ -59,7 +65,7 @@ public class PlotModeXY implements IPlotMode {
 	}
 
 	@Override
-	public void displayData(IDataset[] data, ITrace[] update, IPlottingSystem system, Object userObject)
+	public void displayData(IDataset[] data, ITrace[] update, IPlottingSystem<?> system, Object userObject)
 			throws Exception {
 		
 		renameUpdates(update, system);
@@ -75,7 +81,7 @@ public class PlotModeXY implements IPlotMode {
 		system.repaint();
 	}
 	
-	private void renameUpdates(ITrace[] update, IPlottingSystem system) {
+	private void renameUpdates(ITrace[] update, IPlottingSystem<?> system) {
 		
 		if (update == null) return;
 		
@@ -91,7 +97,7 @@ public class PlotModeXY implements IPlotMode {
 		}
 	}
 
-	private void createSingleTrace(IDataset data, IPlottingSystem system, Object userObject, ITrace update) throws DatasetException {
+	private void createSingleTrace(IDataset data, IPlottingSystem<?> system, Object userObject, ITrace update) throws DatasetException {
 		
 		if (update != null && !(update instanceof ILineTrace)) system.removeTrace(update);
 		

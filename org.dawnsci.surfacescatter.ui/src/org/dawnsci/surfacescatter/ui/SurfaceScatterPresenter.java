@@ -14,11 +14,11 @@ import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.TreeMap;
-
 import org.apache.commons.lang.StringUtils;
 import org.dawnsci.surfacescatter.AnalaysisMethodologies;
 import org.dawnsci.surfacescatter.AnalaysisMethodologies.Methodology;
@@ -69,117 +69,34 @@ import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.widgets.Button;
-import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
-import org.eclipse.swt.widgets.Slider;
-
 import uk.ac.diamond.scisoft.analysis.io.LoaderFactory;
 
 public class SurfaceScatterPresenter {
 
-	
 	private ArrayList<ExampleModel> models;
 	private ArrayList<DataModel> dms;
-//	private ArrayList<GeometricParametersModel> gms;
 	private GeometricParametersModel gm;
 	private SuperModel sm;
 	private int noImages = 0;
-//	private SurfaceScatterViewStart ssvs;
 	private String imageName = "file_image";
-	
-	
-	public ArrayList<ExampleModel> getModels() {
-		return models;
-	}
-
-	public void setModels(ArrayList<ExampleModel> models) {
-		this.models = models;
-	}
-
-	
-	
-	public ProccessingMethod getProcessingMethodSelection() {
-		return sm.getProcessingMethodSelection();
-	}
-
-	public void setProcessingMethodSelection(ProcessingMethodsEnum.ProccessingMethod processingMethodSelection) {
-		sm.setProcessingMethodSelection(processingMethodSelection);
-	}
-
-	public String getImageName() {
-		return imageName;
-	}
-
-	public void setImageName(String imageName) {
-		this.imageName = imageName;
-//		ssvs.getParamField().setImageName(imageName);
-	}
-
+	private String[] options;
+	private boolean qConvert;
+	private double energy;
 	private Set<IPresenterStateChangeEventListener> listeners = new HashSet<>();
-	
-	public void setSsvs(SurfaceScatterViewStart ssvs) {
-//		this.ssvs = ssvs;
-	}
-
 	private int DEBUG = 1;
 	private PrintWriter writer;
 	private Shell parentShell;
 	
-	public Shell getParentShell() {
-		return parentShell;
-	}
-
-	public void setParentShell(Shell parentShell) {
-		this.parentShell = parentShell;
-	}
-
-	private IDataHolder dh1;
-	
-	public void setDms(ArrayList<DataModel> dms) {
-		this.dms = dms;
-	}
-
-	public ArrayList<DataModel> getDms() {
-		return  dms;
-	}
-	
-//	public ArrayList<GeometricParametersModel> getGms() {
-//		return gms;
-//	}
-//
-//	public void setGms(ArrayList<GeometricParametersModel> gms) {
-//		this.gms = gms;
-//	}
-	
-	public void addStateListener(IPresenterStateChangeEventListener listener){
-		listeners.add(listener);
-	}
-	
-	private void fireStateListeners(){
-		for (IPresenterStateChangeEventListener l : listeners) l.update();
-	}
-	
-	public SurfaceScatterPresenter(){
-		sm = new SuperModel();
-	}
-	
-	public void createGm(){
-		gm = new GeometricParametersModel();
-	}
-	
-	
-	public void surfaceScatterPresenterBuild(Shell parentShell, 
-								   String[] filepaths,
+	public void surfaceScatterPresenterBuild(String[] filepaths,
 								   String xName,
 								   String imageFolderPath,
 								   String datFolderPath,
 								   int correctionSelection) {
 
-		this.parentShell = parentShell;
 		sm = new SuperModel();
-//		gms = new ArrayList<GeometricParametersModel>();
 		dms = new ArrayList<DataModel>();
 		models = new ArrayList<ExampleModel>();
 		sm.setFilepaths(filepaths);
@@ -199,9 +116,6 @@ public class SurfaceScatterPresenter {
 				
 					models.add(new ExampleModel());
 					dms.add(new DataModel());
-//					gms.add(new GeometricParametersModel());
-//					
-//					ssvs.getParamField().localGeometricParametersUpdate(gms.get(id));
 					
 					gm.setxName(xName);
 					gm.setxNameRef(xName);
@@ -262,11 +176,9 @@ public class SurfaceScatterPresenter {
 						imagesUnavailableWarning();
 					}
 					
-					
 					dms.get(id).setName(StringUtils.substringAfterLast(sm.getFilepaths()[id], File.separator));
 					models.get(id).setDatImages(ild);
 					models.get(id).setFilepath(filepaths[id]);
-					SliceND slice = new SliceND(ild.getShape());
 					imageArray[id] = ild;
 	
 					for (int f = 0; f < (imageArray[id].getShape()[0]); f++) {
@@ -345,9 +257,6 @@ public class SurfaceScatterPresenter {
 				e1.printStackTrace();
 			}
 		
-
-		
-
 			gm.addPropertyChangeListener(new PropertyChangeListener() {
 
 				public void propertyChange(PropertyChangeEvent evt) {
@@ -436,7 +345,6 @@ public class SurfaceScatterPresenter {
 		catch(Exception e){
 			
 		}
-	
 	}
 	
 	public ArrayList<Double> getYList(){
@@ -512,8 +420,6 @@ public class SurfaceScatterPresenter {
 		sm.setCurrentReflectivityAreaCorrection(l);
 	}
 	
-
-	
 	public IDataHolder copiedDatWithCorrectedTifs(String fp, String datFolderPath) {
 	
 		String localFilepathCopy = StringUtils.substringBeforeLast(fp, ".dat") + "_copy";	
@@ -550,11 +456,6 @@ public class SurfaceScatterPresenter {
 		}
 	
 	}
-	
-//	public void correctionsDisplayUpdate(){
-//		
-//		ssvs.getCustomComposite().generalCorrectionsUpdate();
-//	}
 	
 	public void bgImageUpdate(IPlottingSystem<Composite> subImageBgPlotSystem,
 							  int selection){
@@ -625,13 +526,16 @@ public class SurfaceScatterPresenter {
 		model.setTrackerCoordinates(localLocation);
 		sm.addTrackerLocationList(sm.getSliderPos(), localLocation);
 		
+		if(qConvert){
+			qConversion();
+		}
+		
 	}
 	
 	
 	public void saveParameters(String title){
 		
 		ExampleModel m = models.get(sm.getSelection());
-//		System.out.println(title);
 		
 		FittingParametersOutput.FittingParametersOutputTest(title, 
 														    m.getLenPt()[1][0],
@@ -648,59 +552,6 @@ public class SurfaceScatterPresenter {
 														    sm.getFilepaths());
 		
 	}
-	
-	
-//	@SuppressWarnings("unchecked")
-//	public int loadParameters(String title,
-//							   PlotSystemCompositeView pscv,
-//							   PlotSystem1CompositeView ps1cv
-//							   ){
-//		
-//		FittingParameters fp = FittingParametersInputReader.reader(title);
-//		
-//		for( ExampleModel m : models){
-//		
-//			m.setLenPt(fp.getLenpt());
-//			m.setTrackerType(fp.getTracker());
-//			m.setFitPower(fp.getFitPower());
-//			m.setBoundaryBox(fp.getBoundaryBox());
-//			m.setMethodology(fp.getBgMethod());
-//		}
-//		
-//		sm.setInitialLenPt(fp.getLenpt());
-//		int selection = this.closestImageNo(fp.getXValue());
-//		
-//		sm.setInitialLenPt(fp.getLenpt());
-//		sm.setSliderPos(this.closestImageNo(fp.getXValue()));
-//		
-//		ps1cv.setMethodologyDropDown(fp.getBgMethod());
-//		ps1cv.setFitPowerDropDown(fp.getFitPower());
-//		ps1cv.setTrackerTypeDropDown(fp.getTracker());
-//		ps1cv.setBoundaryBox(fp.getBoundaryBox());
-//		
-//		
-//		
-//		pscv.setRegion(fp.getLenpt());
-//		pscv.redraw();
-//		
-//		RectangularROI loadedROI = new RectangularROI(fp.getLenpt()[1][0],
-//													  fp.getLenpt()[1][1],
-//													  fp.getLenpt()[0][0],
-//													  fp.getLenpt()[0][1],
-//													  0);
-//		
-//		this.updateSliders(ssvs.getSliderList(),selection);
-//		
-//		this.sliderMovemementMainImage(selection);
-//		
-//		this.regionOfInterestSetter(loadedROI);
-//		
-//		ssvs.updateIndicators(selection);
-//		
-//		
-//		return this.closestImageNo(fp.getXValue());
-//		
-//	}
 	
 	
 	@SuppressWarnings("unchecked")
@@ -729,29 +580,7 @@ public class SurfaceScatterPresenter {
 		
 		
 		return fp;
-		
-		
-//		ps1cv.setMethodologyDropDown(fp.getBgMethod());
-//		ps1cv.setFitPowerDropDown(fp.getFitPower());
-//		ps1cv.setTrackerTypeDropDown(fp.getTracker());
-//		ps1cv.setBoundaryBox(fp.getBoundaryBox());
-//		
-//		
-//		
-//		pscv.setRegion(fp.getLenpt());
-//		pscv.redraw();
-		
-		
-		
-//		this.updateSliders(ssvs.getSliderList(),selection);
-		
-		
-		
-//		ssvs.updateIndicators(selection);
-		
-		
-//		return this.closestImageNo(fp.getXValue());
-		
+			
 	}
 	
 	public Dataset getImage(int k) {
@@ -779,120 +608,51 @@ public class SurfaceScatterPresenter {
 	}
 	
 	
-	public RectangularROI regionOfInterestSetter(IROI green) {
+	public double[] regionOfInterestSetter(IROI green) {
 
 		IRectangularROI greenRectangle = green.getBounds();
-		int[] Len = greenRectangle.getIntLengths();
-		int[] Pt = greenRectangle.getIntPoint();
+		int[] len = greenRectangle.getIntLengths();
+		int[] pt = greenRectangle.getIntPoint();
 
-		int[][] LenPt = { Len, Pt };
+		int[][] lenPt = { len, pt };
 
 		for (ExampleModel m : models) {
 			m.setBox(greenRectangle);
-			m.setLenPt(LenPt);
+			m.setLenPt(lenPt);
 			m.setROI(green);
 		}
 		
 		for (DataModel dm :dms){
-			dm.setInitialLenPt(LenPt);
+			dm.setInitialLenPt(lenPt);
 		}
 		
+		int [][] test = getLenPt();
 		
-		sm.setInitialLenPt(LenPt);
-		
-		try{
-			fireStateListeners();;
-		}
-		catch(NullPointerException f){
+		if((Arrays.equals(lenPt[0], getLenPt()[0]) == false) ||
+		   (Arrays.equals(lenPt[1], getLenPt()[1]) == false)){
+			
+			sm.setInitialLenPt(lenPt);
+			
+			try{
+				fireStateListeners();
+			}
+			catch(Exception f){
+				
+			}
 			
 		}
 		
-		double[] bgRegionROI = BoxSlicerRodScanUtilsForDialog.backgroundBoxForDisplay(LenPt, 
+		double[] bgRegionROI = BoxSlicerRodScanUtilsForDialog.backgroundBoxForDisplay(lenPt, 
 															   models.get(0).getBoundaryBox(), 
 															   models.get(0).getMethodology());
 	
-		RectangularROI bgROI = new RectangularROI(bgRegionROI[0],
-												  bgRegionROI[1],
-												  bgRegionROI[2],
-												  bgRegionROI[3],
-												  bgRegionROI[4]);
 		
 		
-		
-		return bgROI;
-//		try{
-//			ssvs.getPlotSystemCompositeView().getBgRegion().setROI(bgROI);
-//		}
-//		catch(Exception f){
-//			
-//		}	
+		return bgRegionROI;
+	
 	}
 	
-//	public void regionOfInterestSetter() {
-//
-//		IROI green = ssvs.getPlotSystemCompositeView().getPlotSystem().
-//				getRegion("myRegion").getROI();
-//		
-//		IRectangularROI greenRectangle = green.getBounds();
-//		int[] Len = greenRectangle.getIntLengths();
-//		int[] Pt = greenRectangle.getIntPoint();
-//		int[][] LenPt = { Len, Pt };
-//
-//		for (ExampleModel m : models) {
-//			m.setBox(greenRectangle);
-//			m.setLenPt(LenPt);
-//			m.setROI(green);
-//		}
-//
-//		for (DataModel dm :dms){
-//			dm.setInitialLenPt(LenPt);
-//		}
-//		
-//		int[][] ilpt = sm.getInitialLenPt();
-//		
-//		if(LenPt[0][0] != ilpt[0][0] ||
-//		   LenPt[0][1] != ilpt[0][1] ||	
-//		   LenPt[1][0] != ilpt[1][0] ||
-//		   LenPt[1][1] != ilpt[1][1]){
-//			
-//			sm.setInitialLenPt(LenPt);
-//		
-//			try{
-//				fireStateListeners();;
-//			}
-//			catch(NullPointerException f){
-//				
-//			};
-//		}
-//		double[] bgRegionROI = BoxSlicerRodScanUtilsForDialog.backgroundBoxForDisplay(LenPt, 
-//				   models.get(0).getBoundaryBox(), 
-//				   models.get(0).getMethodology());
-//
-//		RectangularROI bgROI = new RectangularROI(bgRegionROI[0],
-//												  bgRegionROI[1],
-//												  bgRegionROI[2],
-//												  bgRegionROI[3],
-//												  bgRegionROI[4]);
-//		try{
-//			ssvs.getPlotSystemCompositeView().getBgRegion().setROI(bgROI);
-//		}
-//		catch(Exception f){
-//			debug("couldn't get the gold backgrounds");
-//		}
-//	}
-//	
-	
-	
-	
-	
-	
-//	public void trackingRegionOfInterestSetter(int k){
-//	
-//		double[] loc= sm.getLocationList().get(k);
-//		
-//		trackingRegionOfInterestSetter(loc, k);
-//		
-//	}
+
 	
 	public ArrayList<double[]> getLocationList(){
 		return sm.getLocationList();
@@ -907,11 +667,7 @@ public class SurfaceScatterPresenter {
 		if (models.get(0).getMethodology() == Methodology.SECOND_BACKGROUND_BOX ||
 			models.get(0).getMethodology() == Methodology.OVERLAPPING_BACKGROUND_BOX){
 
-
-//			IRegion r1 = ssvs.getPlotSystemCompositeView().getBgRegion();
 			r1.setVisible(false);
-			
-//			IRegion r2 = ssvs.getPlotSystemCompositeView().getSecondBgRegion();
 			r2.setVisible(true);
 			r2.setUserRegion(true);
 			r2.setLineWidth(1);
@@ -936,8 +692,6 @@ public class SurfaceScatterPresenter {
 				
 			}
 			
-			
-			
 			r2.setRegionColor(magenta);		
 			
 			centreButton.setEnabled(true);
@@ -946,64 +700,60 @@ public class SurfaceScatterPresenter {
 					
 				if (sm.getBoxOffsetLenPt()!=null){
 						
-						int[][] newOffsetLenPt =sm.getBoxOffsetLenPt();
-						int[] len = sm.getInitialLenPt()[0]; 
-						int[] pt = sm.getInitialLenPt()[1];
+					int[][] newOffsetLenPt =sm.getBoxOffsetLenPt();
+					int[] len = sm.getInitialLenPt()[0]; 
+					int[] pt = sm.getInitialLenPt()[1];
 						
-						int[] offsetLen = newOffsetLenPt[0];
-						int[] offsetPt = newOffsetLenPt[1];
+					int[] offsetLen = newOffsetLenPt[0];
+					int[] offsetPt = newOffsetLenPt[1];
 						
-						int pt0 = pt[0] + offsetPt[0];
-						int pt1 = pt[1] + offsetPt[1];
+					int pt0 = pt[0] + offsetPt[0];
+					int pt1 = pt[1] + offsetPt[1];
 						
-						int len0 = len[0] + offsetLen[0];
-						int len1 = len[1] + offsetLen[1];
+					int len0 = len[0] + offsetLen[0];
+					int len1 = len[1] + offsetLen[1];
 						
-						sm.setBackgroundLenPt(new int[][] {{pt0,pt1},{len0,len1}});
-					}
+					sm.setBackgroundLenPt(new int[][] {{pt0,pt1},{len0,len1}});
+				}
 					
 					
 				else{
 						
-						int[] len = sm.getInitialLenPt()[0]; 
-						int[] pt = sm.getInitialLenPt()[1];
+					int[] len = sm.getInitialLenPt()[0]; 
+					int[] pt = sm.getInitialLenPt()[1];
 						
-						int pt0 = pt[0] + 25;
-						int pt1 = pt[1] + 25;
+					int pt0 = pt[0] + 25;
+					int pt1 = pt[1] + 25;
 						
-						int len0 = len[0] + 0;
-						int len1 = len[1] + 0;
+					int len0 = len[0] + 0;
+					int len1 = len[1] + 0;
 					
-						IRectangularROI newROI = new RectangularROI(pt0,pt1,len0,len1,0);
+					IRectangularROI newROI = new RectangularROI(pt0,pt1,len0,len1,0);
 					
-						r2.setROI(newROI);
+					r2.setROI(newROI);
 						
-						sm.setBackgroundLenPt(new int[][] {{pt0,pt1},{len0,len1}});
-					}
-					
-					r2.setRegionColor(red);
-					
+					sm.setBackgroundLenPt(new int[][] {{pt0,pt1},{len0,len1}});
 				}
-		}
-			else{
-				
-				r1.setVisible(true);
-				r2.setVisible(false);
-				
-				r2.setRegionColor(magenta);
-				r2.setUserRegion(false);
-				r2.setLineWidth(1);
-				r2.setMobile(false);
-				r2.setFill(false);
-				r2.setLineWidth(0);
-				
-				centreButton.setEnabled(false);
-				
-				
-//				this.regionOfInterestSetter();
-				
+					
+				r2.setRegionColor(red);		
 			}
-		
+		}
+			
+		else{
+				
+			r1.setVisible(true);
+			r2.setVisible(false);
+				
+			r2.setRegionColor(magenta);
+			r2.setUserRegion(false);
+			r2.setLineWidth(1);
+			r2.setMobile(false);
+			r2.setFill(false);
+			r2.setLineWidth(0);
+			
+			centreButton.setEnabled(false);
+				
+		}
 	}
 	
 	public void addToInterpolatorRegions(IRegion region){
@@ -1150,88 +900,6 @@ public class SurfaceScatterPresenter {
 		}
 	}
 	
-//	public void trackingRegionOfInterestSetter(double[] location) {
-//
-//		int[] len = new int[] {(int) (location[2]-location[0]),(int) (location[5]-location[1])};
-//		int[] pt = new int[] {(int) location[0],(int) location[1]};
-//		int[][] lenPt = { len, pt };
-//		
-//		RectangularROI newGreenROI = new RectangularROI(pt[0],
-//				pt[1],
-//				len[0],
-//				len[1],
-//				0);
-//
-//		ssvs.getPlotSystemCompositeView().getIRegion().setROI(newGreenROI);	
-//		
-//		double[] bgRegionROI = BoxSlicerRodScanUtilsForDialog.backgroundBoxForDisplay(lenPt, 
-//				   models.get(0).getBoundaryBox(), 
-//				   models.get(0).getMethodology());
-//
-//		RectangularROI bgROI = new RectangularROI(bgRegionROI[0],
-//												  bgRegionROI[1],
-//												  bgRegionROI[2],
-//												  bgRegionROI[3],
-//												  bgRegionROI[4]);
-//
-//		try{
-//			ssvs.getPlotSystemCompositeView().getBgRegion().setROI(bgROI);
-//		}
-//		catch(Exception f){
-//			
-//		}
-//		
-//		if(models.get(0).getMethodology() == Methodology.OVERLAPPING_BACKGROUND_BOX){
-//		
-//			int[] offsetLen = sm.getPermanentBoxOffsetLenPt()[0];
-//			int[] offsetPt = sm.getPermanentBoxOffsetLenPt()[1];
-//			
-//			int pt0 = pt[0] + offsetPt[0];
-//			int pt1 = pt[1] + offsetPt[1];
-//			
-//			
-//			int len0 = len[0] + offsetLen[0];
-//			int len1 = len[1] + offsetLen[1];
-//			
-//			RectangularROI offsetBgROI = new RectangularROI(pt0,
-//					  pt1,
-//					  len0,
-//					  len1,
-//					  0);
-//			
-//			ssvs.getPlotSystemCompositeView().getSecondBgRegion().setROI(offsetBgROI);
-//		}
-//		
-//		if(models.get(0).getMethodology() == Methodology.SECOND_BACKGROUND_BOX){
-//			
-//			int[] bgLen = sm.getPermanentBackgroundLenPt()[0];
-//			int[] bgPt = sm.getPermanentBackgroundLenPt()[1];
-//			
-//			int pt0 = bgPt[0];
-//			int pt1 = bgPt[1];
-//			
-//			
-//			int len0 = bgLen[0];
-//			int len1 = bgLen[1];
-//			
-//			RectangularROI bgROI1 = new RectangularROI(pt0,
-//					  pt1,
-//					  len0,
-//					  len1,
-//					  0);
-//			
-//			ssvs.getPlotSystemCompositeView().getSecondBgRegion().setROI(bgROI1);
-//		}
-//
-//		try{
-//			ssvs.getSsps3c().generalUpdate(lenPt);
-//		}
-//		catch(NullPointerException f){
-//			
-//		}
-//			
-//	}
-	
 	public RectangularROI[] trackingRegionOfInterestSetter(int[][] lenPt) {
 
 		int[] len = lenPt[0];
@@ -1242,8 +910,6 @@ public class SurfaceScatterPresenter {
 				len[1],
 				0);
 
-//		ssvs.getPlotSystemCompositeView().getIRegion().setROI(newGreenROI);	
-		
 		double[] bgRegionROI = BoxSlicerRodScanUtilsForDialog.backgroundBoxForDisplay(lenPt, 
 				   models.get(0).getBoundaryBox(), 
 				   models.get(0).getMethodology());
@@ -1255,43 +921,6 @@ public class SurfaceScatterPresenter {
 												  bgRegionROI[4]);
 
 		return new RectangularROI[] {newGreenROI, bgROI};
-		
-		
-//		try{
-//			ssvs.getPlotSystemCompositeView().getBgRegion().setROI(bgROI);
-//		}
-//		catch(Exception f){
-//			
-//		}
-		
-//		if(models.get(0).getMethodology() == Methodology.OVERLAPPING_BACKGROUND_BOX){
-//		
-//			int[] offsetLen = sm.getPermanentBoxOffsetLenPt()[0];
-//			int[] offsetPt = sm.getPermanentBoxOffsetLenPt()[1];
-//			
-//			int pt0 = pt[0] + offsetPt[0];
-//			int pt1 = pt[1] + offsetPt[1];
-//			
-//			
-//			int len0 = len[0] + offsetLen[0];
-//			int len1 = len[1] + offsetLen[1];
-//			
-//			RectangularROI offsetBgROI = new RectangularROI(pt0,
-//					  pt1,
-//					  len0,
-//					  len1,
-//					  0);
-//			
-////			ssvs.getPlotSystemCompositeView().getSecondBgRegion().setROI(offsetBgROI);
-//		}
-
-//		try{
-//			ssvs.getSsps3c().generalUpdate(lenPt);
-//		}
-//		catch(NullPointerException f){
-//			
-//		}
-			
 		
 	}
 	
@@ -1322,8 +951,6 @@ public class SurfaceScatterPresenter {
 				  0);
 		
 		return offsetBgROI;
-		
-//		ssvs.getPlotSystemCompositeView().getSecondBgRegion().setROI(offsetBgROI);
 		
 	}
 	
@@ -1384,30 +1011,31 @@ public class SurfaceScatterPresenter {
 		return result;
 	}
 	
-	public RectangularROI[] regionOfInterestSetter(int[][] LenPt) {
+	public RectangularROI[] regionOfInterestSetter(int[][] lenPt) {
 
 		
-		RectangularROI green = new RectangularROI(LenPt[1][0],
-												  LenPt[1][1],
-												  LenPt[0][0],
-												  LenPt[0][1],
+		RectangularROI green = new RectangularROI(lenPt[1][0],
+												  lenPt[1][1],
+												  lenPt[0][0],
+												  lenPt[0][1],
 												  0);
 
 		for (ExampleModel m : models) {
-		
-			m.setLenPt(LenPt);
+			m.setLenPt(lenPt);
 			m.setROI(green);
 		}
 		
 		for (DataModel dm :dms){
-			dm.setInitialLenPt(LenPt);
+			dm.setInitialLenPt(lenPt);
 		}
 		
-		if(sm.getInitialLenPt().equals(LenPt) == false){
-			sm.setInitialLenPt(LenPt);
+		if(Arrays.equals(sm.getInitialLenPt()[0],lenPt[0]) == false ||
+		   Arrays.equals(sm.getInitialLenPt()[1],lenPt[1]) == false){
+			
+			sm.setInitialLenPt(lenPt);
 		}
 		
-		double[] bgRegionROI = BoxSlicerRodScanUtilsForDialog.backgroundBoxForDisplay(LenPt, 
+		double[] bgRegionROI = BoxSlicerRodScanUtilsForDialog.backgroundBoxForDisplay(lenPt, 
 				   models.get(0).getBoundaryBox(), 
 				   models.get(0).getMethodology());
 
@@ -1418,13 +1046,7 @@ public class SurfaceScatterPresenter {
 											      bgRegionROI[4]);
 		
 		return new RectangularROI[] {green, bgROI};
-//		try{
-//			ssvs.getPlotSystemCompositeView().getGreenRegion().setROI(green);
-//			ssvs.getPlotSystemCompositeView().getBgRegion().setROI(bgROI);
-//		}
-//		catch(Exception f){
-//			
-//		}		
+	
 	}
 	
 	public int[][] getLenPt(){
@@ -1436,43 +1058,30 @@ public class SurfaceScatterPresenter {
 		}
 		
 	}
-	public void setLenPt(int[][] LenPt){
-		sm.setInitialLenPt(LenPt);
-		fireStateListeners();
+	
+	public void setLenPt(int[][] lenPt){
+		
+		if((Arrays.equals(lenPt[0], getLenPt()[0]) == false) ||
+		   (Arrays.equals(lenPt[1], getLenPt()[1]) == false)){
+					
+			sm.setInitialLenPt(lenPt);
+					
+			try{
+				fireStateListeners();
+			}
+			catch(Exception f){			
+			}			
+		}
 	}
 
 	public void sliderZoomedArea(int sliderPos, IROI box, IPlottingSystem<Composite>... pS) {
-
 		Dataset image = this.getImage(sliderPos);
 		Dataset subImage = (Dataset) PlotSystem2DataSetter.PlotSystem2DataSetter1(box, image);
-
-
 	}
-	
-//	public void resetCorrectionsSelection(){
-//		
-//		int  correctionSelection =0;
-//		
-//		
-//		try{
-//			correctionSelection = ssvs.getCorrectionsDropDownArray()[ssvs.getCorrectionSelection().getSelectionIndex()];
-//			
-//		}
-//		catch(ArrayIndexOutOfBoundsException e1){
-//			correctionSelection = 0;
-//
-//		}
-//		
-//		sm.setCorrectionSelection(MethodSetting.toMethod(correctionSelection));
-//	}
-//	
 	
 	public void resetCorrectionsSelection(int  correctionSelection){
-		
 		sm.setCorrectionSelection(MethodSetting.toMethod(correctionSelection));
 	}
-	
-	
 	
 	public int closestImageNo(double in){
 		int out = ClosestNoFinder.closestNoPos(in, sm.getSortedX());
@@ -1502,11 +1111,27 @@ public class SurfaceScatterPresenter {
 			return null;
 		}
 	}
+	
 	public double getXValue(int k){
 		
 		if(sm != null){
 			if(sm.getSortedX() != null){
 				return sm.getSortedX().getDouble(k);
+			}
+			else{
+				return 0;
+			}
+		}
+		else{
+			return 0;
+		}
+	}
+	
+	public double getQValue(int k){
+		
+		if(sm != null){
+			if(sm.getSortedQ() != null){
+				return sm.getSortedQ().getDouble(k);
 			}
 			else{
 				return 0;
@@ -1535,7 +1160,6 @@ public class SurfaceScatterPresenter {
 	}
 	
 	public Dataset subImage(int sliderPos, IROI box) {
-
 		Dataset image = this.getImage(sliderPos);  // sm.getImages()[sliderPos];
 		Dataset subImage = (Dataset) PlotSystem2DataSetter.PlotSystem2DataSetter1(box, image);
 		return subImage;
@@ -1556,7 +1180,6 @@ public class SurfaceScatterPresenter {
 													 dms.get(j), 
 													 gm, 
 													 pS,
-//													 ssvs.getPlotSystemCompositeView().getPlotSystem(),
 													 MethodSetting.toInt(sm.getCorrectionSelection()), 
 													 imagePosInOriginalDat[selection], 
 													 trackingMarker,
@@ -1618,8 +1241,7 @@ public class SurfaceScatterPresenter {
 			gm.setNormalisationFactor(normalisationFactor);
 			gm.setSpecular(specular);
 			gm.setImageName(imageName);
-		
-		
+			
 	}
 	
 	public ArrayList<ArrayList<IDataset>> xyArrayPreparer(){
@@ -1671,29 +1293,6 @@ public class SurfaceScatterPresenter {
 			return 0;
 		}
 	}
-	
-	public void updateSliders(ArrayList<Slider> sl, int k) {
-
-		sm.setSliderPos(k);
-
-		for (Slider x : sl) {
-			if( x.isDisposed() == false){
-				try {
-					x.setSelection(k);
-				} catch (Error e) {
-	
-				}
-			}
-		}
-	}
-	
-	public void updateSliders(Slider sl, int k) {
-
-		sm.setSliderPos(k);
-
-		sl.setSelection(k);
-
-	}
 
 	public int xPositionFinder(double myNum) {
 
@@ -1701,22 +1300,14 @@ public class SurfaceScatterPresenter {
 
 		return xPos;
 	}
+	
+	public int qPositionFinder(double myNum) {
 
-//	public SurfaceScatterViewStart getSsvs() {
-//		return ssvs;
-//	}
+		int qPos = ClosestNoFinder.closestNoPos(myNum, sm.getSortedQ());
 
-	public void updateGreenROIs(ArrayList<Slider> sl, int k) {
-
-		sm.setSliderPos(k);
-
-		for (Slider x : sl) {
-			if (x.getSelection() != k) {
-				x.setSelection(k);
-			}
-		}
+		return qPos;
 	}
-
+	
 	public void updateAnalysisMethodology(int methodologySelection, int fitPowerSelection, int trackerSelection,
 			String boundaryBox) {
 
@@ -1743,36 +1334,7 @@ public class SurfaceScatterPresenter {
 			model.setBoundaryBox((int) Math.round(r));
 		}
 		
-//		if(TrackingMethodology.intToTracker1(trackerSelection) != TrackerType1.INTERPOLATION 
-//				&& sm.getInterpolatorRegions() != null){
-//			
-//			for(IRegion g : sm.getInterpolatorRegions()){
-//				ssvs.getPlotSystemCompositeView().getPlotSystem().removeRegion(g);
-//				g.remove();
-//				
-//			}
-//			try{
-//				ssvs.getPlotSystemCompositeView().getPlotSystem().removeTrace(ssvs.getPlotSystemCompositeView().getPlotSystem().getTrace("Interpolated trajectory"));	
-//			}
-//			catch(Exception g){
-//				
-//			}
-//			sm.setInterpolatorRegions(null);
-//			
-//			if(sm.getInterpolatorBoxes() != null){
-//				sm.setInterpolatorBoxes(null);
-//			}
-//			
-//			ssvs.getPlotSystemCompositeView().getPlotSystem1CompositeView().getAcceptLocation().setEnabled(false);
-//			ssvs.getPlotSystemCompositeView().getPlotSystem1CompositeView().getRejectLocation().setEnabled(false);
-//		}
-//		
-//		else if(TrackingMethodology.intToTracker1(trackerSelection) == TrackerType1.INTERPOLATION &&
-//				sm.getTrackerOn()){
-//	
-//			ssvs.getPlotSystemCompositeView().getPlotSystem1CompositeView().getAcceptLocation().setEnabled(true);
-//			ssvs.getPlotSystemCompositeView().getPlotSystem1CompositeView().getRejectLocation().setEnabled(true);
-//		}
+		fireStateListeners();
 	}
 	
 	public ArrayList<IRegion> getInterpolatorRegions(){
@@ -1919,6 +1481,27 @@ public class SurfaceScatterPresenter {
 		writer.close();
 	}	
 	
+	public IDataset getSplicedCurveX(){
+		return sm.getSplicedCurveX();
+	}
+	
+	public IDataset getSplicedCurveY(){
+		return sm.getSplicedCurveY();
+	}
+	
+	public IDataset getSplicedCurveYFhkl(){
+		return sm.getSplicedCurveYFhkl();
+	}
+	
+	public IDataset getSplicedCurveYRaw(){
+		return sm.getSplicedCurveYRaw();
+	}
+
+	
+	public IDataset getSplicedCurveQ(){
+		return sm.getSplicedCurveQ();
+	}
+	
 	public void setTrackerOn(Boolean trackerOn){
 		sm.setTrackerOn(trackerOn);
 	}
@@ -1931,12 +1514,7 @@ public class SurfaceScatterPresenter {
 			return false;
 		}
 	}
-	
-//	public ArrayList<GeometricParametersModel> getGeometricParamtersModels(){
-//		return gms;
-//	}
-//	
-	
+
 	public void anarodSave(String title){
 
 		try {
@@ -2192,10 +1770,8 @@ public class SurfaceScatterPresenter {
 						    sm.getSplicedCurveY().getDouble(gh)+ "	"+ 
 						    sm.getSplicedCurveY().getError(gh));
 					 }
-			
-		    }
-	    	
-		   }	    
+				 }    	
+		    }	    
 	    }
 		writer.close();
 	}	
@@ -2289,36 +1865,17 @@ public class SurfaceScatterPresenter {
 		writer.close();
 	}	
 	
-	
-	
-	
-//	public void export(IPlottingSystem<Composite> parentPs, 
-//						IDataset xData,
-//						IDataset yData){
-//		
-//		sm.setSplicedCurveX(xData);
-//		sm.setSplicedCurveY(yData);
-//	
-//		parentPs.clear();
-//
-//		ILineTrace lt1 = parentPs.createLineTrace("Adjusted Spliced Curve");
-//		lt1.setData(xData, yData);
-//		lt1.isErrorBarEnabled();
-//		
-//		parentPs.addTrace(lt1);
-////		parentPs.repaint();
-//		ssvs.getSsps3c().getOutputCurves().getIntensity().select(0);;
-//	}
-
-	
 	public void setSplicedCurveX(IDataset xData){
 		sm.setSplicedCurveX(xData);
+	}
+	
+	public ArrayList<Double> getQList(){
+		return sm.getqList();
 	}
 	
 	public void setSplicedCurveY(IDataset yData){
 		sm.setSplicedCurveY(yData);
 	}
-	
 	
 	public IROI getROI() {
 
@@ -2411,8 +1968,6 @@ public class SurfaceScatterPresenter {
 			}
 		}); 
 		
-		
-		
 		return;
 	}
 	
@@ -2461,9 +2016,7 @@ public class SurfaceScatterPresenter {
 				
 			}
 		}); 
-		
-//		ssvs.getFolder().setSelection(0);
-		
+
 		return;
 	}
 	
@@ -2487,8 +2040,7 @@ public class SurfaceScatterPresenter {
 				
 			}
 		}); 
-		
-//		ssvs.getFolder().setSelection(0);
+
 		
 		return;
 	}
@@ -2500,9 +2052,7 @@ public class SurfaceScatterPresenter {
 																   t, 
 																   dd);
 		ifcd.open();
-		
-		
-		
+
 		return;
 	}
 	
@@ -2544,7 +2094,9 @@ public class SurfaceScatterPresenter {
 		return attenuatedDatasets;
 	}
 
-	public void switchFhklIntensity(IPlottingSystem<Composite> pS, Combo selector){
+	public void switchFhklIntensity(IPlottingSystem<Composite> pS, 
+									int selector,
+									boolean qAxis){
 		
 		pS.clear();
 		
@@ -2553,31 +2105,40 @@ public class SurfaceScatterPresenter {
 		
 		Display display = Display.getCurrent();
 		
-		if(selector.getSelectionIndex() ==0){
+		IDataset x = DatasetFactory.zeros(new int[] {2,2}, Dataset.ARRAYFLOAT64);
+		
+		if(qAxis){
+			x = getSplicedCurveQ();
+		}
+		else{
+			x = getSplicedCurveX();
+		}
+		
+		if(selector ==0){
 					
-			lt.setData(sm.getSortedX(),sm.getSplicedCurveY());
+			lt.setData(x,sm.getSplicedCurveY());
 		
 			Color blue = display.getSystemColor(SWT.COLOR_BLUE);
 			
 			lt.setTraceColor(blue);
 		}
 
-		if(selector.getSelectionIndex() ==1){
+		if(selector ==1){
 			
 			lt.setName("Fhkl Curve");
 			
-			lt.setData(sm.getSortedX(),sm.getSplicedCurveYFhkl());
+			lt.setData(x,sm.getSplicedCurveYFhkl());
 			
 			Color green = display.getSystemColor(SWT.COLOR_GREEN);
 		
 			lt.setTraceColor(green);
 		}
 		
-		if(selector.getSelectionIndex() ==2){
+		if(selector ==2){
 			
 			lt.setName("Raw Intensity Curve");
 			
-			lt.setData(sm.getSortedX(),sm.getSplicedCurveYRaw());
+			lt.setData(x,sm.getSplicedCurveYRaw());
 			
 			Color black = display.getSystemColor(SWT.COLOR_BLACK);
 		
@@ -2598,8 +2159,7 @@ public class SurfaceScatterPresenter {
 		double range = end - start;
 				
 		pS.getAxes().get(0).setRange((start - 0.1*range), (end) + 0.1*range);
-		
-//		pS.repaint();	
+
 		
 	}
 	
@@ -2626,81 +2186,6 @@ public class SurfaceScatterPresenter {
 	public int[][] getInitialLenPt(){
 		return sm.getInitialLenPt();
 	}
-		
-//	public void addSecondBgRegionListeners(IRegion r2){
-//		
-////		IRegion r2 = ssvs.getPlotSystemCompositeView().getSecondBgRegion();
-////		
-//		r2.addROIListener(new IROIListener() {
-//			
-//			@Override
-//			public void roiDragged(ROIEvent evt) {
-//				roiStandard(evt);
-//			}
-//	
-//			@Override
-//			public void roiChanged(ROIEvent evt) {
-//				roiStandard(evt);
-//			}
-//	
-//			@Override
-//			public void roiSelected(ROIEvent evt) {
-//				roiStandard(evt);
-//			}
-//			
-//			public void roiStandard(ROIEvent evt) {
-//				
-//				int[] len = sm.getInitialLenPt()[0]; 
-//				int[] pt = sm.getInitialLenPt()[1];
-//				int[][] lenpt = {len, pt};
-//				
-//				IRectangularROI bounds = r2.getROI().getBounds();
-//				int[] redLen = bounds.getIntLengths();
-//				int[] redPt = bounds.getIntPoint();
-//				int[][] redLenPt = {redLen, redPt};
-//				
-//				sm.setBackgroundLenPt(redLenPt);
-//				
-//				if (models.get(0).getMethodology() == Methodology.OVERLAPPING_BACKGROUND_BOX){
-//					
-//					int [][] newOffsetLenPt = new int[2][2];
-//					
-//					newOffsetLenPt[0][0]  =  -len[0] + redLen[0];
-//					newOffsetLenPt[0][1]  =  -len[1] + redLen[1];
-//					
-//					
-//					newOffsetLenPt[1][0]  = -pt[0] + redPt[0];
-//					newOffsetLenPt[1][1]  = -pt[1] + redPt[1];
-//					
-//					 
-//					sm.setBoxOffsetLenPt(newOffsetLenPt);
-//				}
-//				
-//				regionOfInterestSetter();
-//				ssvs.getSsps3c().generalUpdate();
-//				
-//			}
-//		});				
-//	}
-//	
-	
-	
-//	public void runReplay(IPlottingSystem<Composite> pS,
-//						  TabFolder folder,
-//						  IPlottingSystem<Composite> subIBgPS){
-//		
-//		MovieJob mJ = new MovieJob();
-//		mJ.setSuperModel(sm);
-//		mJ.setPS(pS);
-//		mJ.setTime(220);
-//		mJ.setSsp(this);
-//		mJ.setSsvs(ssvs);
-//		mJ.setSliders(ssvs.getSliderList());
-//		mJ.setFolder(folder);
-//		mJ.setSubIBgPS(subIBgPS);
-//		mJ.run();	
-//		
-//	}
 	
 	public void setStartFrame(int f){
 		sm.setStartFrame(f);
@@ -2793,48 +2278,11 @@ public class SurfaceScatterPresenter {
 	public SuperModel getSm(){
 		return sm;
 	}
-
-//	public void runTrackingJob(IPlottingSystem<Composite> subPS, 
-//							   IPlottingSystem<Composite> outputCurves,
-//							   IPlottingSystem<Composite> pS,
-//							   TabFolder folder,
-//							   IPlottingSystem<Composite> subIBgPS,
-//							   ProgressBar progress,
-//							   TrackingProgressAndAbortView tpaav) {
-//
-////		sm.resetAll();
-////		sm.setLocationList(null);
-////		
-////		for(DataModel md: dms){
-////			md.resetAll();
-////		}
-////		this.backgroundBoxesManager();
-////	
-////		sm.setStartFrame(sm.getSliderPos());
-//		
-//		trackingJob tj = new trackingJob();
-//		debug("tj invoked");
-//		tj.setProgress(progress);
-//		tj.setSsvs(ssvs);
-//		tj.setCorrectionSelection(MethodSetting.toInt(sm.getCorrectionSelection()));
-//		tj.setSuperModel(sm);
-//		tj.setGms(gms);
-//		tj.setDms(dms);
-//		tj.setSsvsPS(ssvs.getPlotSystemCompositeView().getPlotSystem());
-//		tj.setModels(models);
-//		tj.setPlotSystem(subPS);
-//		tj.setOutputCurves(outputCurves);
-//		tj.setTimeStep(Math.round((2 / noImages)));
-//		tj.setSsp(this);
-//		tj.setTPAAV(tpaav);
-//		tj.runTJ1();
-//		
-//
-//		
-//		return;
-//		
-//	}
-
+	
+	
+	public void qConversion(){
+		sm.qConversion();
+	}
 	
 	public void stitchAndPresent(MultipleOutputCurvesTableView outputCurves) {
 
@@ -2877,38 +2325,48 @@ public class SurfaceScatterPresenter {
 
 		ILineTrace lt = pS.createLineTrace("progress");
 
+		IDataset X = DatasetFactory.createFromObject(sm.getSplicedCurveX());
+		
+		if(outputCurves.getqAxis().getSelection()){
+			
+			qConversion();
+			X = sm.getSplicedCurveQ();
+		}
+		
+		else{
+			X = sm.getSplicedCurveX();
+		}
+		
+		
 		if(ids == null){
 
-			lt.setData(sm.getSplicedCurveX(), sm.getSplicedCurveY());
+			lt.setData(X, sm.getSplicedCurveY());
 			Color blue = display.getSystemColor(SWT.COLOR_BLUE);
 			lt.setTraceColor(blue);
 		}
 		
 		else if(ids == IntensityDisplaySetting.Corrected_Intensity){
 
-			lt.setData(sm.getSplicedCurveX(), sm.getSplicedCurveY());
+			lt.setData(X, sm.getSplicedCurveY());
 			Color blue = display.getSystemColor(SWT.COLOR_BLUE);
 			lt.setTraceColor(blue);
 			
 		}
 		else if(ids == IntensityDisplaySetting.Fhkl){
 
-			lt.setData(sm.getSplicedCurveX(), sm.getSplicedCurveYFhkl());
+			lt.setData(X, sm.getSplicedCurveYFhkl());
 			Color green = display.getSystemColor(SWT.COLOR_GREEN);
 			lt.setTraceColor(green);
 		}
 		else if(ids == IntensityDisplaySetting.Raw_Intensity){
 
-			lt.setData(sm.getSplicedCurveX(), sm.getSplicedCurveYRaw());
+			lt.setData(X, sm.getSplicedCurveYRaw());
 			Color black = display.getSystemColor(SWT.COLOR_BLACK);
 			lt.setTraceColor(black);
 			
-		
 		}
 		
 		
-
-	
 		pS.clear();
 		pS.addTrace(lt);
 		
@@ -2925,7 +2383,6 @@ public class SurfaceScatterPresenter {
 		
 	}
 	
-	
 	public void switchErrorDisplay(){
 		if (sm.isErrorDisplayFlag() ==true){
 			sm.setErrorDisplayFlag(false);
@@ -2935,7 +2392,13 @@ public class SurfaceScatterPresenter {
 		}
 	}
 	
-
+	public boolean getErrorFlag(){
+		return sm.isErrorDisplayFlag();
+	}
+	
+	public void setErrorFlag(boolean n){
+		 sm.setErrorDisplayFlag(n);
+	}
 	
 	public void geometricParametersWindowPopulate(){
 		
@@ -2954,1658 +2417,98 @@ public class SurfaceScatterPresenter {
 	public void setGm(GeometricParametersModel gm) {
 		this.gm = gm;
 	}
+
+	public double getEnergy() {
+		return energy;
+	}
+
+	public void setEnergy(double energy) {
+		this.energy = energy;
+		sm.setEnergy(energy);
+	}
+	
+	
+	public int getTheta() {
+		return sm.getTheta();
+	}
+
+	public void setTheta(int theta) {
+	
+		sm.setTheta(theta);
+	}
+
+	public boolean isqConvert() {
+		return qConvert;
+	}
+
+	public void setqConvert(boolean qConvert) {
+		this.qConvert = qConvert;
+	}
+
+	public String[] getOptions() {
+		return options;
+	}
+
+	public void setOptions(String[] options) {
+		this.options = options;
+	}
+
+	public ArrayList<ExampleModel> getModels() {
+		return models;
+	}
+
+	public void setModels(ArrayList<ExampleModel> models) {
+		this.models = models;
+	}
+
+	public ProccessingMethod getProcessingMethodSelection() {
+		return sm.getProcessingMethodSelection();
+	}
+
+	public void setProcessingMethodSelection(ProcessingMethodsEnum.ProccessingMethod processingMethodSelection) {
+		sm.setProcessingMethodSelection(processingMethodSelection);
+	}
+
+	public String getImageName() {
+		return imageName;
+	}
+
+	public void setImageName(String imageName) {
+		this.imageName = imageName;
+	}
+	
+	public Shell getParentShell() {
+		return parentShell;
+	}
+
+	public void setParentShell(Shell parentShell) {
+		this.parentShell = parentShell;
+	}
+
+	private IDataHolder dh1;
+	
+	public void setDms(ArrayList<DataModel> dms) {
+		this.dms = dms;
+	}
+
+	public ArrayList<DataModel> getDms() {
+		return  dms;
+	}
+	
+	public void addStateListener(IPresenterStateChangeEventListener listener){
+		listeners.add(listener);
+	}
+	
+	private void fireStateListeners(){
+		for (IPresenterStateChangeEventListener l : listeners) l.update();
+	}
+	
+	public SurfaceScatterPresenter(){
+		sm = new SuperModel();
+	}
+	
+	public void createGm(){
+		gm = new GeometricParametersModel();
+	}
+
 }
-
-/////////////////////////////////////////////////////////////////////
-///////////////////// Tracking Job////////////////////////////////////
-/////////////////////////////////////////////////////////////////////
-
-//class trackingJob {
-//extends job
-//	private ArrayList<DataModel> dms;
-//	private ArrayList<ExampleModel> models;
-//	private IPlottingSystem<Composite> plotSystem;
-//	private IPlottingSystem<Composite> outputCurves;
-//	private ArrayList<GeometricParametersModel> gms;
-//	private SuperModel sm;
-//	private SurfaceScatterViewStart ssvs;
-//	private int correctionSelection;
-//	private int noImages;
-//	private int timeStep;
-//	private int imageNumber;
-//	private SurfaceScatterPresenter ssp;
-//	private IPlottingSystem<Composite> ssvsPS;
-//	private int DEBUG = 0;
-//	private ProgressBar progressBar;
-//	private TrackingProgressAndAbortView tpaav;
-//
-//	public TrackingProgressAndAbortView getTPAAV() {
-//		return tpaav;
-//	}
-//
-//	public void setTPAAV(TrackingProgressAndAbortView tpaav) {
-//		this.tpaav = tpaav;
-//	}
-//
-//	public SurfaceScatterViewStart getSsvs() {
-//		return ssvs;
-//	}
-//	
-//	public void setProgress(ProgressBar progress){
-//		this.progressBar = progress;
-//	}
-//
-//	public void setSsvs(SurfaceScatterViewStart ssvs) {
-//		this.ssvs = ssvs;
-//	}
-//	
-//	public void setOutputCurves(IPlottingSystem<Composite> outputCurves) {
-//		this.outputCurves = outputCurves;
-//	}
-//
-//	public void setCorrectionSelection(int cS) {
-//		this.correctionSelection = cS;
-//	}
-//
-//	public void setDms(ArrayList<DataModel> dms) {
-//		this.dms = dms;
-//	}
-//
-//	public void setModels(ArrayList<ExampleModel> models) {
-//		this.models = models;
-//	}
-//
-//	public void setSuperModel(SuperModel sm) {
-//		this.sm = sm;
-//	}
-//
-//	public void setGms(ArrayList<GeometricParametersModel> gms) {
-//		this.gms = gms;
-//	}
-//
-//	public void setPlotSystem(IPlottingSystem<Composite> plotSystem) {
-//		this.plotSystem = plotSystem;
-//	}
-//
-//	public void setTimeStep(int timeStep) {
-//		this.timeStep = timeStep;
-//	}
-//
-//	public void setSsp(SurfaceScatterPresenter ssp) {
-//		this.ssp = ssp;
-//	}
-//
-//	public void setSsvsPS(IPlottingSystem<Composite> ssvsPS) {
-//		this.ssvsPS = ssvsPS;
-//	}
-//	
-//	public void setps(IPlottingSystem<Composite> plotSystem) {
-//		this.plotSystem = plotSystem;
-//	}
-//
-//	@SuppressWarnings("unchecked")
-//	
-//	protected  void runTJ1(){
-//
-//		
-//		for(ExampleModel em: models){
-//			em.setInput(null);
-//		}
-//		
-//		for(DataModel dm :dms){
-//			dm.resetAll();
-//		}
-//		
-//		sm.setLocationList(null);
-//		final Display display = Display.getCurrent();
-//		int[] imagePosInOriginalDat = CountUpToArray.CountUpToArray1(sm.getFilepathsSortedArray());
-//		
-//		ssp.regionOfInterestSetter();
-//		
-//		if (models.get(sm.getSelection()).getMethodology() != AnalaysisMethodologies.Methodology.TWOD_TRACKING &&
-//				sm.getTrackerOn() != true) {
-//
-//			noImages = sm.getImages().length;
-//				
-//			for (DataModel dm : dms) {
-//				dm.resetAll();
-//			}
-//			outputCurves.clear();
-//
-//			int k = 0;
-//
-//			if (sm.getStartFrame() == 0) {
-//												
-//					Thread t  = new Thread(){
-//						@Override
-//						public void run(){
-//									
-//								for (int k = 0; k < noImages; k++) {
-//										
-//									debug("l value: " + Double.toString(sm.getSortedX().getDouble(k)) + " , " + "local k:  " + Integer.toString(k));
-//							
-//									int trackingMarker = 0;
-//									int imageNumber =k;
-//									IDataset j = ssp.getImage(imageNumber);
-//									int jok = sm.getFilepathsSortedArray()[imageNumber];
-//									DataModel dm = dms.get(jok);
-//									GeometricParametersModel gm = gms.get(jok);
-//									ExampleModel model = models.get(jok);
-//
-//									dm.addxList(sm.getSortedX().getDouble(imageNumber));
-//									
-//									sm.addxList(sm.getImages().length, k,
-//											sm.getSortedX().getDouble(k));
-//									
-//									debug("value added to xList:  "   + sm.getSortedX().getDouble(k)  + "  k:   " + k);
-//									
-//									IDataset output1 = DummyProcessingClass.DummyProcess(sm, 
-//																						 j,
-//																						 model, 
-//																						 dm, 
-//																						 gm, 
-//																						 plotSystem,
-////																						 ssvsPS,
-//																						 correctionSelection, 
-//																						 imagePosInOriginalDat[imageNumber], 
-//																						 trackingMarker, 
-//																						 imageNumber);
-//									
-//									if(Arrays.equals(output1.getShape(),(new int[] {2,2}))){
-//										ssp.boundariesWarning();
-//
-//									}
-//								
-//									sm.addBackgroundDatArray(sm.getImages().length, imageNumber, output1);
-//									IDataset tempImage = ssp.getImage(imageNumber);
-//									double[] tempLoc = sm.getLocationList().get(imageNumber);
-//									double[] tl = tempLoc;
-//									int[] sml =  sm.getInitialLenPt()[0];
-//									sm.setSliderPos(imageNumber);
-//									RectangularROI newROI = new RectangularROI(tempLoc[0],
-//																		       tempLoc[1],
-//																		       sm.getInitialLenPt()[0][0],
-//																		       sm.getInitialLenPt()[0][1],0);
-//									
-//						display.syncExec(new Runnable() {
-//							@Override
-//							public void run() {	
-//								updateTrackingDisplay(tempImage, imageNumber);
-//								return;
-//								}
-//							});
-//								
-//						}
-//								//////bottom of k++ loop
-//								return;
-//					};
-//
-//				}; ////Starts  the thread
-//					
-//					t.start();			
-//			}
-//			
-//		
-//
-//			else if (sm.getStartFrame() != 0) {
-//
-//				//////////////////////// inside second loop
-//				//////////////////////// scenario@@@@@@@@@@@@@@@@@@@@@@@@@@@@///////////
-//
-//				Thread t  = new Thread(){
-//					
-//					public void run(){
-//				
-//						int[] imagePosInOriginalDat = CountUpToArray.CountUpToArray1(sm.getFilepathsSortedArray());
-//						
-//						for (int k = (sm.getStartFrame()); k >= 0; k--) {
-//	
-////						debug("l value: " + Double.toString(sm.getSortedX().getDouble(k)) + " , " + "local k:  " + Integer.toString(k));
-//						
-//						int trackingMarker = 1;
-//						int imageNumber =k;
-//						IDataset j = ssp.getImage(k);
-//						int jok = sm.getFilepathsSortedArray()[k];
-//						DataModel dm = dms.get(jok);
-//						GeometricParametersModel gm = gms.get(jok);
-//						ExampleModel model = models.get(jok);
-//	
-//						dm.addxList(model.getDatImages().getShape()[0], imagePosInOriginalDat[k],
-//								sm.getSortedX().getDouble(k));
-//						
-//						sm.addxList(sm.getImages().length, k,
-//								sm.getSortedX().getDouble(k));
-//						
-//						debug("value added to xList:  "   + sm.getSortedX().getDouble(k)  + "  k:   " + k);
-//						
-//						IDataset output1 = DummyProcessingClass.DummyProcess(sm, 
-//																			 j, 
-//																			 model, 
-//																			 dm, 
-//																			 gm, 
-//																			 plotSystem,
-////																			 ssvsPS,
-//																			 correctionSelection, 
-//																			 imagePosInOriginalDat[k], 
-//																			 trackingMarker, 
-//																			 k);
-//	
-//						if(Arrays.equals(output1.getShape(), (new int[] {2,2}))){
-//							debug("Dummy Proccessing failure");
-//							ssp.boundariesWarning();
-//							break;
-//						}
-//						
-//						sm.addBackgroundDatArray(sm.getImages().length, k, output1);
-//						
-//						IDataset tempImage = ssp.getImage(imageNumber);
-//						double[] tempLoc = sm.getLocationList().get(imageNumber);
-//						RectangularROI newROI = new RectangularROI(tempLoc[0],
-//							       tempLoc[1],
-//							       sm.getInitialLenPt()[0][0],
-//							       sm.getInitialLenPt()[0][1],0);						
-//						
-//						display.syncExec(new Runnable() {
-//							@Override
-//							public void run() {	
-//									
-//								updateTrackingDisplay(tempImage, imageNumber);
-//								return;
-//								}
-//							});		
-//						
-//					}
-//					
-//					
-//					if(sm.getStartFrame() != noImages-1){	
-//						for (int k = sm.getStartFrame()+1; k < noImages; k++) {
-//							
-//							
-//							int trackingMarker = 2;
-//		
-//							IDataset j = ssp.getImage(k);
-//							int jok = sm.getFilepathsSortedArray()[k];
-//							DataModel dm = dms.get(jok);
-//							GeometricParametersModel gm = gms.get(jok);
-//							ExampleModel model = models.get(jok);
-//		
-//							dm.addxList(model.getDatImages().getShape()[0], imagePosInOriginalDat[k],
-//									sm.getSortedX().getDouble(k));
-//							
-//							sm.addxList(sm.getImages().length, k,
-//									sm.getSortedX().getDouble(k));
-//							
-//							debug("value added to xList:  "   + sm.getSortedX().getDouble(k)  + "  k:   " + k);
-//							
-//							IDataset output1 = DummyProcessingClass.DummyProcess(sm, 
-//																				 j, 
-//																				 model, 
-//																				 dm, 
-//																				 gm, 
-//																				 plotSystem,
-////																				 ssvsPS,
-//																				 correctionSelection, 
-//																				 imagePosInOriginalDat[k], 
-//																				 trackingMarker, 
-//																				 k);
-//		
-//							if(Arrays.equals(output1.getShape(), (new int[] {2,2}))){
-//	//							ssp.boundariesWarning();
-//								debug("Dummy Proccessing failure");
-//								break;
-//							}
-//							
-//							sm.addBackgroundDatArray(sm.getImages().length, k, output1);
-//							
-//							int imageNumber =k;
-//							IDataset tempImage = ssp.getImage(imageNumber);
-//							double[] tempLoc = sm.getLocationList().get(imageNumber);
-//							RectangularROI newROI = new RectangularROI(tempLoc[0],
-//								       tempLoc[1],
-//								       sm.getInitialLenPt()[0][0],
-//								       sm.getInitialLenPt()[0][1],0);
-//	
-//							
-//							display.syncExec(new Runnable() {
-//								@Override
-//								public void run() {	
-//										
-//									updateTrackingDisplay(tempImage, imageNumber);
-//									
-//									return;
-//									}
-//								});
-//							}
-//						}
-//					//////bottom of k++ loop
-//					return;
-//					}
-//					
-//				};
-//			t.start();
-//			}	
-//			
-//		}
-//		else {
-//
-//			trackingJob2 tj = new trackingJob2();
-//			debug("tj2 invoked");
-//			tj.setProgress(progressBar);
-//			tj.setCorrectionSelection(MethodSetting.toInt(sm.getCorrectionSelection()));
-//			tj.setSuperModel(sm);
-//			tj.setGms(gms);
-//			tj.setDms(dms);
-//			tj.setModels(models);
-//			tj.setPlotSystem(plotSystem);
-//			tj.setOutputCurves(outputCurves);
-//			tj.setTimeStep(Math.round(2 / sm.getImages().length));
-//			tj.setSsp(ssp);
-//			tj.setSsvs(ssvs);
-//			tj.setTPAAV(tpaav);
-//			tj.runTJ2();
-//		}
-//		
-//		
-//		ssvs.getCustomComposite().getReplay().setEnabled(true);
-////		ssvs.getOutputCurves().addImageNoRegion(ssp.getXValue((ssp.getNumberOfImages())/2));
-//	}
-//		private void debug(String output) {
-//		if (DEBUG == 1) {
-//			System.out.println(output);
-//		}
-//	}
-//		
-//		
-//		public void updateTrackingDisplay(IDataset tempImage, int imageNumber){
-//			
-//			
-//			ssvs.getPlotSystemCompositeView().getFolder().setSelection(2);
-//			ssp.updateSliders(ssvs.getSliderList(), imageNumber);
-//			ssvs.updateIndicators(imageNumber);
-//			ssvs.getPlotSystemCompositeView().getPlotSystem().updatePlot2D(tempImage, null, null);
-//			ssvs.getPlotSystemCompositeView().getSubImageBgPlotSystem().updatePlot2D(sm.getBackgroundDatArray().get(imageNumber), null, null);
-//			ssvs.getPlotSystemCompositeView().getPlotSystem().repaint(true);
-//			ssvs.getPlotSystemCompositeView().getSubImageBgPlotSystem().repaint(true);
-//			ssvs.getSsps3c().generalUpdate();
-//			ssp.stitchAndPresent(ssvs.getSsps3c().getOutputCurves());
-//			ssp.trackingRegionOfInterestSetter(sm.getLocationList().get(imageNumber), imageNumber);
-//			ssvs.getSsps3c().getOutputCurves().getIntensity().select(0);
-//			ssvs.getSsps3c().getOutputCurves().getIntensity().redraw();
-//			if(progressBar.isDisposed() != true){
-//				progressBar.setSelection(progressBar.getSelection() +1);
-//	//			System.out.println(progressBar.getSelection());
-//				
-//				if(progressBar.getSelection() == progressBar.getMaximum()){
-//	//				System.out.println(progressBar.getSelection() +" in the break");
-//					tpaav.close();
-//				}
-//			}
-//		}
-//}
-//
-///////////////////////////////////////////////////////////////////////
-/////////////////////// Tracking Job2////////////////////////////////////
-///////////////////////////////////////////////////////////////////////
-//
-//class trackingJob2 {
-//
-//	private ArrayList<DataModel> dms;
-//	private ArrayList<ExampleModel> models;
-//	private IPlottingSystem<Composite> plotSystem;
-//	private IPlottingSystem<Composite> outputCurves;
-//	private ArrayList<GeometricParametersModel> gms;
-//	private SuperModel sm;
-//	private int correctionSelection;
-//	private int noImages;
-//	private int timeStep;
-//	private SurfaceScatterPresenter ssp;
-//	private IPlottingSystem<Composite> ssvsPS; 
-//	private SurfaceScatterViewStart ssvs;
-//	private int DEBUG = 0;
-//	private ProgressBar progressBar;
-//	private TrackingProgressAndAbortView tpaav;
-//
-//	public TrackingProgressAndAbortView getTPAAV() {
-//		return tpaav;
-//	}
-//
-//	public void setTPAAV(TrackingProgressAndAbortView tpaav) {
-//		this.tpaav = tpaav;
-//	}
-//
-//	public void setProgress(ProgressBar progress){
-//		this.progressBar = progress;
-//	}
-//	
-//	public SurfaceScatterViewStart getSsvs() {
-//		return ssvs;
-//	}
-//
-//	public void setSsvs(SurfaceScatterViewStart ssvs) {
-//		this.ssvs = ssvs;
-//	}
-//
-//	public void setOutputCurves(IPlottingSystem<Composite> outputCurves) {
-//		this.outputCurves = outputCurves;
-//	}
-//
-//	public void setCorrectionSelection(int cS) {
-//		this.correctionSelection = cS;
-//	}
-//
-//	public void setDms(ArrayList<DataModel> dms) {
-//		this.dms = dms;
-//	}
-//
-//	public void setModels(ArrayList<ExampleModel> models) {
-//		this.models = models;
-//	}
-//
-//	public void setSuperModel(SuperModel sm) {
-//		this.sm = sm;
-//	}
-//
-//	public void setGms(ArrayList<GeometricParametersModel> gms) {
-//		this.gms = gms;
-//	}
-//
-//	public void setPlotSystem(IPlottingSystem<Composite> plotSystem) {
-//		this.plotSystem = plotSystem;
-//	}
-//
-//	public void setTimeStep(int timeStep) {
-//		this.timeStep = timeStep;
-//	}
-//
-//	public void setSsp(SurfaceScatterPresenter ssp) {
-//		this.ssp = ssp;
-//	}
-//	
-//	public void setSsvsPS (IPlottingSystem<Composite> ssvsPS) {
-//		this.ssvsPS = ssvsPS;
-//	}
-//	
-//	
-//	@SuppressWarnings("unchecked")
-//	protected void runTJ2() {
-//
-//		final Display display = Display.getCurrent();
-//	
-//		debug("@@@@@@@@@@@~~~~~~~~~~~~~~~in the new tracker~~~~~~~~~~~~~~~~~~@@@@@@@@@@@@@@");
-//		sm.resetTrackers();
-//		sm.resetAll();
-//		
-//		for(ExampleModel m : models){
-//			m.setInput(null);
-//		}
-//		
-//		noImages = sm.getImages().length;
-//
-//		int[] imagePosInOriginalDat = CountUpToArray.CountUpToArray1(sm.getFilepathsSortedArray());
-//
-//		for (DataModel dm : dms) {
-//			dm.resetAll();
-//		}
-//
-//		ssp.regionOfInterestSetter();
-//		outputCurves.clear();
-//
-//		int jok = sm.getFilepathsSortedArray()[sm.getStartFrame()];
-//
-//		String[] doneArray = new String[sm.getFilepaths().length];
-//		
-//		if (sm.getStartFrame() == 0) {
-//			
-//			
-//			Thread t  = new Thread(){
-//				
-//				@Override
-//				public void run(){
-//			
-//					for (int k = 0; k < noImages; k++) {
-//						if (sm.getFilepathsSortedArray()[k] == jok) {
-//							
-//							debug("l value: " + Double.toString(sm.getSortedX().getDouble(k)) + " , " + "local k:  " + Integer.toString(k)
-//							+ " , " + "local jok:  " + Integer.toString(jok));
-//							
-//							debug("@@@@@@@@@@@~~~~~~~~~~~~~~~in the 0 loop~~~~~~~~~~~~~~~~~~@@@@@@@@@@@@@@");
-//
-//							int jok = sm.getFilepathsSortedArray()[k];
-//							int trackingMarker = 0;
-//							IDataset j = ssp.getImage(k);
-//							DataModel dm = dms.get(jok);
-//							GeometricParametersModel gm = gms.get(jok);
-//							ExampleModel model = models.get(jok);
-//		
-//							dm.addxList(sm.getSortedX().getDouble(k));
-//							
-//							sm.addxList(sm.getImages().length, k,
-//									sm.getSortedX().getDouble(k));
-//							
-//							debug("value added to xList:  "   + sm.getSortedX().getDouble(k)  + "  k:   " + k);
-//							
-//							debug("Tracker should fire once");
-//							
-//							IDataset output1 = DummyProcessingClass.DummyProcess(sm, 
-//																				 j, 
-//																				 model, 
-//																				 dm, 
-//																				 gm, 
-//																				 plotSystem,
-////																				 ssvsPS,
-//																				 correctionSelection, 
-//																				 imagePosInOriginalDat[k], 
-//																				 trackingMarker, 
-//																				 k);
-//							debug("Tracker should HAVE fired once");
-//							
-//							if(Arrays.equals(output1.getShape(), (new int[] {2,2}))){
-//								debug("Dummy Proccessing failure");
-//								Display d =Display.getCurrent();
-//								ssp.boundariesWarning("position 1, line ~1410, k: " + Integer.toString(k),d);
-//								break;
-//							}
-//							
-//							sm.addBackgroundDatArray(sm.getImages().length, k, output1);
-//							
-//							int imageNumber =k;
-//							IDataset tempImage = ssp.getImage(imageNumber);
-//							double[] tempLoc = sm.getLocationList().get(imageNumber);
-//							RectangularROI newROI = new RectangularROI(tempLoc[0],
-//								       tempLoc[1],
-//								       sm.getInitialLenPt()[0][0],
-//								       sm.getInitialLenPt()[0][1],0);
-//							
-//							
-//							
-//							display.syncExec(new Runnable() {
-//								@Override
-//								public void run() {																			
-//									updateTrackingDisplay(tempImage, imageNumber);
-//									
-//									return;
-//									}
-//								});
-//							
-//							
-//							
-//							
-//						}
-//					}
-//					//////bottom of k++ loop
-//					doneArray[jok] = "done";
-//					
-//					while (ClosestNoFinder.full(doneArray, "done") == false) {
-//
-//						debug("in the while loop");
-//
-//						int nextk = ClosestNoFinder.closestNoWithoutDone(sm.getSortedX().getDouble(sm.getSliderPos()),
-//								sm.getSortedX(), doneArray, sm.getFilepathsSortedArray());
-//
-//						int nextjok = sm.getFilepathsSortedArray()[nextk];
-//
-//						debug("nextk :" + nextk);
-//						debug("nextjok :" + nextjok);
-//						debug("doneArray[nextjok]: " + doneArray[nextjok]);
-//						
-//						if (imagePosInOriginalDat[nextk] == 0) {
-//				
-//							debug("In the while loop for imagePosInOriginalDat[nextk] == 0");
-//							
-//							for (int k = nextk; k < noImages; k++) {
-//
-//								if (sm.getFilepathsSortedArray()[k] == nextjok) {
-////									ssp.sliderMovemementMainImage(k, ssp.getSsvs().getPlotSystemCompositeView().getPlotSystem());
-//
-//
-//									debug("l value: " + Double.toString(sm.getSortedX().getDouble(k)) + " , " + "local k:  " + Integer.toString(k)
-//									+ " , " + "local nextjok:  " + Integer.toString(nextjok));
-//									
-//									
-//									int trackingMarker = 0;
-//									IDataset j = ssp.getImage(k);
-//									int jokLocal = sm.getFilepathsSortedArray()[k];
-//									DataModel dm = dms.get(jokLocal);
-//									GeometricParametersModel gm = gms.get(jokLocal);
-//									ExampleModel model = models.get(jokLocal);
-//									
-//									
-//									if(dm.getLocationList() == null && models.get(0).getTrackerType() != TrackerType1.INTERPOLATION){
-//										
-//										if (sm.getTrackerLocationList() == null | sm.getTrackerLocationList().size() <= 10 ){
-//											int seedIndex = 
-//													ClosestNoFinder.closestNoWithLocation(sm.getSortedX().getDouble(k),
-//																						  sm.getSortedX(), 
-//																						  sm.getLocationList());
-//					
-//											int nearestCompletedDatFileNo = sm.getFilepathsSortedArray()[seedIndex];
-//											
-//											
-//											ArrayList<double[]> seedList = dms.get(nearestCompletedDatFileNo).getLocationList();
-//											ArrayList<Double> lList = dms.get(nearestCompletedDatFileNo).getxList();
-//											
-//											Dataset yValues = DatasetFactory.zeros(seedList.size());
-//											Dataset xValues = DatasetFactory.zeros(seedList.size());
-//											Dataset lValues = DatasetFactory.zeros(seedList.size());
-//											
-//											for(int op = 0; op<seedList.size(); op++){
-//												
-//												double x = seedList.get(op)[1];
-//												double y = seedList.get(op)[0];
-//												double l = lList.get(op);
-//												
-//												xValues.set(x, op);
-//												yValues.set(y, op);
-//												lValues.set(l, op);
-//						
-//											}
-//											
-//											
-//											double[] seedLocation = PolynomialOverlap.extrapolatedLocation(sm.getSortedX().getDouble(k),
-//																										   lValues, 
-//																										   xValues, 
-//																										   yValues, 
-//																										   sm.getInitialLenPt()[0],
-//																										   1);
-//											dm.setSeedLocation(seedLocation);
-//											
-////											debug("!!!!!!!!!!!!!!!     }}}}}{{{{{{{{ seedlocation[0] : " + seedLocation[0] +" + " + "seedlocation[1] :" + seedLocation[1]);
-//									
-//										}
-//										else{
-//											double[] seedLocation = TrackerLocationInterpolation.trackerInterpolationInterpolator0(sm.getTrackerLocationList(), 
-//																										   sm.getSortedX(), 
-//																										   sm.getInitialLenPt()[0],
-//																										   k);
-//											dm.setSeedLocation(seedLocation);
-//										}
-//									}	
-//									
-//									
-//									else if(models.get(0).getTrackerType() == TrackerType1.INTERPOLATION){
-//										
-//										int[] len = new int[] {(int) Math.round(sm.getInterpolatedLenPts().get(k)[0][0]),(int) Math.round(sm.getInterpolatedLenPts().get(k)[0][1])};
-//										int[]  pt = new int[] {(int) Math.round(sm.getInterpolatedLenPts().get(k)[1][0]),(int) Math.round(sm.getInterpolatedLenPts().get(k)[1][1])};
-//										
-//										double[] seedLocation = new double[] { (double) pt[0], (double) pt[1], (double) (pt[0] + len[0]),
-//												(double) (pt[1]), (double) pt[0], (double) pt[1] + len[1], (double) (pt[0] + len[0]),
-//												(double) (pt[1] + len[1]) };
-//										
-//										dm.setSeedLocation(seedLocation);
-//									}
-//									
-//									dm.addxList(sm.getSortedX().getDouble(k));
-//									
-//									sm.addxList(sm.getImages().length, k,
-//											sm.getSortedX().getDouble(k));
-//									
-//									debug("value added to xList:  "   + sm.getSortedX().getDouble(k)  + "  k:   " + k);
-//									
-//									IDataset output1 = 
-//											DummyProcessingClass.DummyProcess1(sm, 
-//																			   j, 
-//																			   model, 
-//																			   dm, 
-//																			   gm, 
-//																			   plotSystem,
-//																			   ssvsPS,
-//																			   correctionSelection, 
-//																			   imagePosInOriginalDat[k], 
-//																			   trackingMarker, 
-//																			   k,
-//																			   dm.getSeedLocation());
-//
-//									if(Arrays.equals(output1.getShape(), (new int[] {2,2}))){
-//										debug("Dummy Proccessing failure");
-//										Display d =Display.getCurrent();
-//										ssp.boundariesWarning("position 1, line ~2115, k: " + Integer.toString(k),d);
-//										
-//										break;
-//									}
-//									
-//									sm.addBackgroundDatArray(sm.getImages().length, k, output1);
-//									
-//									
-//									int imageNumber =k;
-//									IDataset tempImage = ssp.getImage(imageNumber);
-//									double[] tempLoc = sm.getLocationList().get(imageNumber);
-//									RectangularROI newROI = new RectangularROI(tempLoc[0],
-//										       tempLoc[1],
-//										       sm.getInitialLenPt()[0][0],
-//										       sm.getInitialLenPt()[0][1],0);
-//									
-//									display.syncExec(new Runnable() {
-//										@Override
-//										public void run() {	
-//									
-//											updateTrackingDisplay(tempImage, imageNumber);
-//											
-//											return;
-//										}
-//										});
-//									
-//
-//								}
-//								doneArray[nextjok] = "done";
-//							}
-//							//////bottom of k++ loop
-//						}
-//
-//						else if (imagePosInOriginalDat[nextk] != 0) {
-//
-//							for (int k = (sm.getStartFrame()); k >= 0; k--) {
-//
-//								if (sm.getFilepathsSortedArray()[k] == nextjok) {
-//
-//									debug("l value: " + Double.toString(sm.getSortedX().getDouble(k)) + " , " + "local k:  " + Integer.toString(k)
-//									+ " , " + "local nextjok:  " + Integer.toString(nextjok));
-//									
-//									
-//									int trackingMarker = 1;
-//									IDataset j = ssp.getImage(k);
-//									DataModel dm = dms.get(nextjok);
-//									GeometricParametersModel gm = gms.get(nextjok);
-//									ExampleModel model = models.get(nextjok);
-//									
-//									if(dm.getLocationList() == null && models.get(0).getTrackerType() != TrackerType1.INTERPOLATION){
-//										
-//										int seedIndex = 
-//												ClosestNoFinder.closestNoWithLocation(sm.getSortedX().getDouble(k),
-//																					  sm.getSortedX(), 
-//																					  sm.getLocationList());
-//				
-//										int nearestCompletedDatFileNo = sm.getFilepathsSortedArray()[seedIndex];
-//										
-//										
-//										ArrayList<double[]> seedList = dms.get(nearestCompletedDatFileNo).getLocationList();
-//										ArrayList<Double> lList = dms.get(nearestCompletedDatFileNo).getxList();
-//										
-//										Dataset yValues = DatasetFactory.zeros(seedList.size());
-//										Dataset xValues = DatasetFactory.zeros(seedList.size());
-//										Dataset lValues = DatasetFactory.zeros(seedList.size());
-//										
-//										for(int op = 0; op<seedList.size(); op++){
-//											
-//											double x = seedList.get(op)[1];
-//											double y = seedList.get(op)[0];
-//											double l = lList.get(op);
-//											
-//											xValues.set(x, op);
-//											yValues.set(y, op);
-//											lValues.set(l, op);
-//					
-//										}
-//										
-//										double[] seedLocation = PolynomialOverlap.extrapolatedLocation(sm.getSortedX().getDouble(k),
-//																									   lValues, 
-//																									   xValues, 
-//																									   yValues, 
-//																									   sm.getInitialLenPt()[0],
-//																									   1);
-//										dm.setSeedLocation(seedLocation);
-//										
-////										debug("!!!!!!!!!!!!!!!     }}}}}{{{{{{{{ seedlocation[0] : " + seedLocation[0] +" + " + "seedlocation[1] :" + seedLocation[1]);
-//										
-//									
-//									}
-//									
-//									else if(models.get(0).getTrackerType() == TrackerType1.INTERPOLATION){
-//										
-//										int[] len = new int[] {(int) Math.round(sm.getInterpolatedLenPts().get(k)[0][0]),(int) Math.round(sm.getInterpolatedLenPts().get(k)[0][1])};
-//										int[]  pt = new int[] {(int) Math.round(sm.getInterpolatedLenPts().get(k)[1][0]),(int) Math.round(sm.getInterpolatedLenPts().get(k)[1][1])};
-//										
-//										double[] seedLocation = new double[] { (double) pt[0], (double) pt[1], (double) (pt[0] + len[0]),
-//												(double) (pt[1]), (double) pt[0], (double) pt[1] + len[1], (double) (pt[0] + len[0]),
-//												(double) (pt[1] + len[1]) };
-//										
-//										dm.setSeedLocation(seedLocation);
-//									}
-//									
-//									dm.addxList(model.getDatImages().getShape()[0], imagePosInOriginalDat[k],
-//											sm.getSortedX().getDouble(k));
-//									
-//									
-//									sm.addxList(sm.getImages().length, k,
-//											sm.getSortedX().getDouble(k));
-//									
-//									debug("value added to xList:  "   + sm.getSortedX().getDouble(k)  + "  k:   " + k);
-//									
-//									IDataset output1 = 
-//											DummyProcessingClass.DummyProcess1(sm, 
-//																			   j, 
-//																			   model, 
-//																			   dm, 
-//																			   gm, 
-//																			   plotSystem,
-//																			   ssvsPS,
-//																			   correctionSelection, 
-//																			   imagePosInOriginalDat[k], 
-//																			   trackingMarker, 
-//																			   k,
-//																			   dm.getSeedLocation());
-//
-//									
-//									if(Arrays.equals(output1.getShape(), (new int[] {2,2}))){
-//										debug("Dummy Proccessing failure");
-//										Display d =Display.getCurrent();
-//										ssp.boundariesWarning("position 1, line ~2245, k: " + Integer.toString(k),d);
-//										
-//										break;
-//									}
-//									
-//									
-//									sm.addBackgroundDatArray(sm.getImages().length, k, output1);
-//									
-//									
-//									int imageNumber =k;
-//									IDataset tempImage = ssp.getImage(imageNumber);
-//									double[] tempLoc = sm.getLocationList().get(imageNumber);
-//									RectangularROI newROI = new RectangularROI(tempLoc[0],
-//										       tempLoc[1],
-//										       sm.getInitialLenPt()[0][0],
-//										       sm.getInitialLenPt()[0][1],0);
-//									
-//									display.syncExec(new Runnable() {
-//										@Override
-//										public void run() {	
-//										
-//											updateTrackingDisplay(tempImage, imageNumber);
-//											
-//											return;
-//										}
-//										});
-//								}
-//							}
-//
-//							
-//							models.get(nextjok).setInput(null);
-//							
-//							if(sm.getStartFrame() != noImages-1){
-//								for (int k = sm.getStartFrame()+1; k < noImages; k++) {
-//	
-//									if (sm.getFilepathsSortedArray()[k] == nextjok) {
-//	
-//										debug("l value: " + Double.toString(sm.getSortedX().getDouble(k)) + " , " + "local k:  " + Integer.toString(k)
-//										+ " , " + "local nextjok:  " + Integer.toString(nextjok));
-//										
-//										
-//										int trackingMarker = 2;
-//										IDataset j = ssp.getImage(k);
-//										DataModel dm = dms.get(nextjok);
-//										GeometricParametersModel gm = gms.get(nextjok);
-//										ExampleModel model = models.get(nextjok);
-//	
-//										
-//										if(dm.getLocationList() == null && models.get(0).getTrackerType() != TrackerType1.INTERPOLATION){
-//											
-//											int seedIndex = 
-//													ClosestNoFinder.closestNoWithLocation(sm.getSortedX().getDouble(k),
-//																						  sm.getSortedX(), 
-//																						  sm.getLocationList());
-//					
-//											int nearestCompletedDatFileNo = sm.getFilepathsSortedArray()[seedIndex];
-//											
-//											
-//											ArrayList<double[]> seedList = dms.get(nearestCompletedDatFileNo).getLocationList();
-//											ArrayList<Double> lList = dms.get(nearestCompletedDatFileNo).getxList();
-//											
-//											Dataset yValues = DatasetFactory.zeros(seedList.size());
-//											Dataset xValues = DatasetFactory.zeros(seedList.size());
-//											Dataset lValues = DatasetFactory.zeros(seedList.size());
-//											
-//											for(int op = 0; op<seedList.size(); op++){
-//												
-//												double x = seedList.get(op)[1];
-//												double y = seedList.get(op)[0];
-//												double l = lList.get(op);
-//												
-//												xValues.set(x, op);
-//												yValues.set(y, op);
-//												lValues.set(l, op);
-//						
-//											}
-//											
-//											double[] seedLocation = PolynomialOverlap.extrapolatedLocation(sm.getSortedX().getDouble(k),
-//																										   lValues, 
-//																										   xValues, 
-//																										   yValues, 
-//																										   sm.getInitialLenPt()[0],
-//																										   1);
-//											dm.setSeedLocation(seedLocation);
-//										
-//										}	
-//										
-//										else if(models.get(0).getTrackerType() == TrackerType1.INTERPOLATION){
-//											
-//											int[] len = new int[] {(int) Math.round(sm.getInterpolatedLenPts().get(k)[0][0]),(int) Math.round(sm.getInterpolatedLenPts().get(k)[0][1])};
-//											int[]  pt = new int[] {(int) Math.round(sm.getInterpolatedLenPts().get(k)[1][0]),(int) Math.round(sm.getInterpolatedLenPts().get(k)[1][1])};
-//											
-//											double[] seedLocation = new double[] { (double) pt[0], (double) pt[1], (double) (pt[0] + len[0]),
-//													(double) (pt[1]), (double) pt[0], (double) pt[1] + len[1], (double) (pt[0] + len[0]),
-//													(double) (pt[1] + len[1]) };
-//											
-//											dm.setSeedLocation(seedLocation);
-//										}
-//										
-//										
-//										dm.addxList(model.getDatImages().getShape()[0], imagePosInOriginalDat[k],
-//												sm.getSortedX().getDouble(k));
-//										
-//										sm.addxList(sm.getImages().length, k,
-//												sm.getSortedX().getDouble(k));
-//										
-//										debug("value added to xList:  "   + sm.getSortedX().getDouble(k)  + "  k:   " + k);
-//										
-//										IDataset output1 = 
-//												DummyProcessingClass.DummyProcess1(sm, 
-//																				   j, 
-//																				   model, 
-//																				   dm, 
-//																				   gm, 
-//																				   plotSystem,
-//																				   ssvsPS,
-//																				   correctionSelection, 
-//																				   imagePosInOriginalDat[k], 
-//																				   trackingMarker, 
-//																				   k,
-//																				   dm.getSeedLocation());
-//	
-//										if(Arrays.equals(output1.getShape(), (new int[] {2,2}))){
-//											debug("Dummy Proccessing failure");
-//											Display d =Display.getCurrent();
-//											ssp.boundariesWarning("position 1, line ~2369, k: " + Integer.toString(k),d);
-//											
-//											break;
-//										}
-//										
-//										
-//										sm.addBackgroundDatArray(sm.getImages().length, k, output1);
-//										
-//										int imageNumber =k;
-//										IDataset tempImage = ssp.getImage(imageNumber);
-//										double[] tempLoc = sm.getLocationList().get(imageNumber);
-//										RectangularROI newROI = new RectangularROI(tempLoc[0],
-//											       tempLoc[1],
-//											       sm.getInitialLenPt()[0][0],
-//											       sm.getInitialLenPt()[0][1],0);
-//										
-//										display.syncExec(new Runnable() {
-//											@Override
-//											public void run() {	
-//													
-//												updateTrackingDisplay(tempImage, imageNumber);
-//												
-//												return;
-//											}
-//											});
-//	
-//									}
-//								}
-//							}
-//							//////bottom of k++ loop
-//							doneArray[nextjok] = "done";
-//						}
-//					}
-//					
-//					return;
-//				}
-//			};
-//			t.start();
-//		}
-//
-//		//////////////////////// inside second loop
-//		//////////////////////// scenario@@@@@@@@@@@@@@@@@@@@@@@@@@@@///////////
-//
-//		else {
-//
-//			Thread t  = new Thread(){
-//				
-//				@Override
-//				public void run(){
-//			
-//			
-//		
-//			for (int k = (sm.getStartFrame()); k >= 0; k--) {
-//
-//				if (sm.getFilepathsSortedArray()[k] == jok) {
-//					
-//					debug("switched to k--");
-//					debug("%%%%%%%%%%%%%%%%% sm.getStartFrame:  "  +  sm.getStartFrame() + "??????????????????" );
-//					debug("l value: " + Double.toString(sm.getSortedX().getDouble(k)) + " , " + "local k:  " + Integer.toString(k)
-//					+ " , " + "local jok:  " + Integer.toString(jok));
-//					
-//					int trackingMarker = 1;
-//					IDataset j = ssp.getImage(k);
-//					DataModel dm = dms.get(jok);
-//					GeometricParametersModel gm = gms.get(jok);
-//					ExampleModel model = models.get(jok);
-//
-//					dm.addxList(model.getDatImages().getShape()[0], imagePosInOriginalDat[k],
-//							sm.getSortedX().getDouble(k));
-//					
-//					
-//					sm.addxList(sm.getImages().length, k,
-//							sm.getSortedX().getDouble(k));
-//					
-//					debug("value added to xList:  "   + sm.getSortedX().getDouble(k)  + "  k:   " + k);
-//					
-//					IDataset output1 = DummyProcessingClass.DummyProcess(sm, 
-//																		 j, 
-//																		 model, 
-//																		 dm, 
-//																		 gm, 
-//																		 plotSystem,
-////																		 ssvsPS,
-//																		 correctionSelection, 
-//																		 imagePosInOriginalDat[k], 
-//																		 trackingMarker, 
-//																		 k);
-//
-//					if(Arrays.equals(output1.getShape(),(new int[] {2,2}) )){
-//						debug("Dummy Proccessing failure");
-//
-//						break;	
-//					}
-//					
-//					sm.addBackgroundDatArray(sm.getImages().length, k, output1);
-//					
-//					int imageNumber =k;
-//					IDataset tempImage = ssp.getImage(imageNumber);
-//					double[] tempLoc = sm.getLocationList().get(imageNumber);
-//					RectangularROI newROI = new RectangularROI(tempLoc[0],
-//						       tempLoc[1],
-//						       sm.getInitialLenPt()[0][0],
-//						       sm.getInitialLenPt()[0][1],0);
-//					
-//					display.syncExec(new Runnable() {
-//						@Override
-//						public void run() {	
-//								
-//		
-//							updateTrackingDisplay(tempImage, imageNumber);
-//							return;
-//							}
-//						});
-//				}
-//			}
-//
-//			debug("%%%%%%%%%%%%%%%%% sm.getStartFrame:  "  +  sm.getStartFrame() + "??????????????????" );
-//			
-//			models.get(jok).setInput(null);
-//			
-//			if(sm.getStartFrame() != noImages-1){
-//				for (int k = sm.getStartFrame(); k < noImages; k++) {
-//	
-//					if (sm.getFilepathsSortedArray()[k] == jok) {
-//	
-//						debug("%%%%%%%%%%%%%%%%% sm.getStartFrame:  "  +  sm.getStartFrame() + "??????????????????" );
-//						
-//						
-//						debug("switched to k++");
-//						debug("l value: " + Double.toString(sm.getSortedX().getDouble(k)) + " , " + "local k:  " + Integer.toString(k)
-//						+ " , " + "local jok:  " + Integer.toString(jok));
-//						
-//						int trackingMarker = 2;
-//						IDataset j = ssp.getImage(k);
-//						DataModel dm = dms.get(jok);
-//						GeometricParametersModel gm = gms.get(jok);
-//						ExampleModel model = models.get(jok);
-//	
-//						dm.addxList(model.getDatImages().getShape()[0], imagePosInOriginalDat[k],
-//								sm.getSortedX().getDouble(k));
-//						
-//						
-//						sm.addxList(sm.getImages().length, k,
-//								sm.getSortedX().getDouble(k));
-//						
-//						debug("value added to xList:  "   + sm.getSortedX().getDouble(k)  + "  k:   " + k);
-//						
-//						IDataset output1 = 
-//								DummyProcessingClass.DummyProcess0(sm, 
-//																  j, 
-//																  model, 
-//																  dm,
-//														   		  gm, 
-//														   		  plotSystem,
-//														   		  ssvsPS,
-//														   		  correctionSelection, 
-//														   		  imagePosInOriginalDat[k], 
-//														   		  trackingMarker, 
-//														   		  k);
-//	
-//						
-//	
-//						if(Arrays.equals(output1.getShape(),(new int[] {2,2}) )){
-//							Display d =Display.getCurrent();
-//							debug("Dummy Proccessing failure");
-//							ssp.boundariesWarning("position 1, line ~1955, k: " + Integer.toString(k),d);
-//						
-//							break;	
-//						}
-//						
-//						sm.addBackgroundDatArray(sm.getImages().length, k, output1);
-//						
-//						
-//						int imageNumber =k;
-//						IDataset tempImage = ssp.getImage(imageNumber);
-//						double[] tempLoc = sm.getLocationList().get(imageNumber);
-//						RectangularROI newROI = new RectangularROI(tempLoc[0],
-//							       tempLoc[1],
-//							       sm.getInitialLenPt()[0][0],
-//							       sm.getInitialLenPt()[0][1],0);
-//						
-//						display.syncExec(new Runnable() {
-//							@Override
-//							public void run() {	
-//									
-//								updateTrackingDisplay(tempImage, imageNumber);
-//								
-//								return;
-//							}
-//							});
-//						
-//						
-//					}
-//				}
-//			}
-//		//////bottom of k++ loop
-//
-//		doneArray[jok] = "done";
-//
-//		//////////////////////////// continuing to next
-//		//////////////////////////// dat////////////////////////////////////////
-//
-//		while (ClosestNoFinder.full(doneArray, "done") == false) {
-//
-//			debug("in the while loop");
-//
-//			int nextk = ClosestNoFinder.closestNoWithoutDone(sm.getSortedX().getDouble(sm.getSliderPos()),
-//					sm.getSortedX(), doneArray, sm.getFilepathsSortedArray());
-//
-//			int nextjok = sm.getFilepathsSortedArray()[nextk];
-//
-//			debug("nextk :" + nextk);
-//			debug("nextjok :" + nextjok);
-//			debug("doneArray[nextjok]: " + doneArray[nextjok]);
-//			
-//			if (imagePosInOriginalDat[nextk] == 0) {
-//	
-//				debug("In the while loop for imagePosInOriginalDat[nextk] == 0");
-//				
-//				for (int k = nextk; k < noImages; k++) {
-//
-//					if (sm.getFilepathsSortedArray()[k] == nextjok) {
-//
-//						debug("l value: " + Double.toString(sm.getSortedX().getDouble(k)) + " , " + "local k:  " + Integer.toString(k)
-//						+ " , " + "local nextjok:  " + Integer.toString(nextjok));
-//						
-//						
-//						int trackingMarker = 0;
-//						IDataset j = ssp.getImage(k);
-//						int jokLocal = sm.getFilepathsSortedArray()[k];
-//						DataModel dm = dms.get(jokLocal);
-//						GeometricParametersModel gm = gms.get(jokLocal);
-//						ExampleModel model = models.get(jokLocal);
-//						
-//						
-//						if(dm.getLocationList() == null && models.get(0).getTrackerType() != TrackerType1.INTERPOLATION){
-//							
-//							if (sm.getTrackerLocationList() == null | sm.getTrackerLocationList().size() <= 10 ){
-//								int seedIndex = 
-//										ClosestNoFinder.closestNoWithLocation(sm.getSortedX().getDouble(k),
-//																			  sm.getSortedX(), 
-//																			  sm.getLocationList());
-//		
-//								int nearestCompletedDatFileNo = sm.getFilepathsSortedArray()[seedIndex];
-//								
-//								
-//								ArrayList<double[]> seedList = dms.get(nearestCompletedDatFileNo).getLocationList();
-//								ArrayList<Double> lList = dms.get(nearestCompletedDatFileNo).getxList();
-//								
-//								Dataset yValues = DatasetFactory.zeros(seedList.size());
-//								Dataset xValues = DatasetFactory.zeros(seedList.size());
-//								Dataset lValues = DatasetFactory.zeros(seedList.size());
-//								
-//								for(int op = 0; op<seedList.size(); op++){
-//									
-//									double x = seedList.get(op)[1];
-//									double y = seedList.get(op)[0];
-//									double l = lList.get(op);
-//									
-//									xValues.set(x, op);
-//									yValues.set(y, op);
-//									lValues.set(l, op);
-//			
-//								}
-//								
-//								
-//								double[] seedLocation = PolynomialOverlap.extrapolatedLocation(sm.getSortedX().getDouble(k),
-//																							   lValues, 
-//																							   xValues, 
-//																							   yValues, 
-//																							   sm.getInitialLenPt()[0],
-//																							   1);
-//								dm.setSeedLocation(seedLocation);
-//								
-//								debug("!!!!!!!!!!!!!!!     }}}}}{{{{{{{{ seedlocation[0] : " + seedLocation[0] +" + " + "seedlocation[1] :" + seedLocation[1]);
-//						
-//							}
-//							else{
-//								double[] seedLocation = TrackerLocationInterpolation.trackerInterpolationInterpolator0(sm.getTrackerLocationList(), 
-//																							   sm.getSortedX(), 
-//																							   sm.getInitialLenPt()[0],
-//																							   k);
-//								dm.setSeedLocation(seedLocation);
-//							}
-//						}	
-//						
-//						
-//						else if(models.get(0).getTrackerType() == TrackerType1.INTERPOLATION){
-//							
-//							int[] len = new int[] {(int) Math.round(sm.getInterpolatedLenPts().get(k)[0][0]),(int) Math.round(sm.getInterpolatedLenPts().get(k)[0][1])};
-//							int[]  pt = new int[] {(int) Math.round(sm.getInterpolatedLenPts().get(k)[1][0]),(int) Math.round(sm.getInterpolatedLenPts().get(k)[1][1])};
-//							
-//							double[] seedLocation = new double[] { (double) pt[0], (double) pt[1], (double) (pt[0] + len[0]),
-//									(double) (pt[1]), (double) pt[0], (double) pt[1] + len[1], (double) (pt[0] + len[0]),
-//									(double) (pt[1] + len[1]) };
-//							
-//							dm.setSeedLocation(seedLocation);
-//						}
-//						
-//						dm.addxList(sm.getSortedX().getDouble(k));
-//						
-//						sm.addxList(sm.getImages().length, k,
-//								sm.getSortedX().getDouble(k));
-//						
-//						debug("value added to xList:  "   + sm.getSortedX().getDouble(k)  + "  k:   " + k);
-//						
-//						IDataset output1 = 
-//								DummyProcessingClass.DummyProcess1(sm, 
-//																   j, 
-//																   model, 
-//																   dm, 
-//																   gm, 
-//																   plotSystem,
-//																   ssvsPS,
-//																   correctionSelection, 
-//																   imagePosInOriginalDat[k], 
-//																   trackingMarker, 
-//																   k,
-//																   dm.getSeedLocation());
-//
-//						if(Arrays.equals(output1.getShape(), (new int[] {2,2}))){
-//							Display d =Display.getCurrent();
-//							debug("Dummy Proccessing failure");
-//							ssp.boundariesWarning("position 1, line ~2115, k: " + Integer.toString(k),d);
-//							
-//							break;
-//						}
-//						
-//						sm.addBackgroundDatArray(sm.getImages().length, k, output1);
-//						
-//						
-//						int imageNumber =k;
-//						IDataset tempImage = ssp.getImage(imageNumber);
-//						double[] tempLoc = sm.getLocationList().get(imageNumber);
-//						RectangularROI newROI = new RectangularROI(tempLoc[0],
-//							       tempLoc[1],
-//							       sm.getInitialLenPt()[0][0],
-//							       sm.getInitialLenPt()[0][1],0);
-//						
-//						
-//						display.syncExec(new Runnable() {
-//							@Override
-//							public void run() {	
-//
-//								updateTrackingDisplay(tempImage, imageNumber);
-//								return;
-//							}
-//						});
-//						
-//
-//					}
-//					doneArray[nextjok] = "done";
-//				}
-//			}
-//
-//			else if (imagePosInOriginalDat[nextk] != 0) {
-//
-//				debug("%%%%%%%%%%%%%%%%% switched the dat file");
-//				debug("%%%%%%%%%%%%%%%%% sm.getStartFrame:  "  +  sm.getStartFrame() + "??????????????????" );
-//				
-//				for (int k = (sm.getStartFrame()); k >= 0; k--) {
-//
-//					if (sm.getFilepathsSortedArray()[k] == nextjok) {
-//
-//						debug("l value: " + Double.toString(sm.getSortedX().getDouble(k)) + " , " + "local k:  " + Integer.toString(k)
-//						+ " , " + "local nextjok:  " + Integer.toString(nextjok));
-//						
-//						
-//						debug("%%%%%%%%%%%%%%%%% switched the dat file");
-//						debug("%%%%%%%%%%%%%%%%% sm.getStartFrame:  "  +  sm.getStartFrame() + "??????????????????" );
-//						
-//						
-//						int trackingMarker = 1;
-//						IDataset j = ssp.getImage(k);
-//						DataModel dm = dms.get(nextjok);
-//						GeometricParametersModel gm = gms.get(nextjok);
-//						ExampleModel model = models.get(nextjok);
-//						
-//						if(dm.getLocationList() == null && models.get(0).getTrackerType() != TrackerType1.INTERPOLATION){
-//							
-//							int seedIndex = 
-//									ClosestNoFinder.closestNoWithLocation(sm.getSortedX().getDouble(k),
-//																		  sm.getSortedX(), 
-//																		  sm.getLocationList());
-//	
-//							int nearestCompletedDatFileNo = sm.getFilepathsSortedArray()[seedIndex];
-//							
-//							
-//							ArrayList<double[]> seedList = dms.get(nearestCompletedDatFileNo).getLocationList();
-//							ArrayList<Double> lList = dms.get(nearestCompletedDatFileNo).getxList();
-//							
-//							double[] seedLocation =null;
-//							Dataset yValues = DatasetFactory.zeros(new int[] {1});
-//							Dataset xValues = DatasetFactory.zeros(new int[] {1});
-//							Dataset lValues = DatasetFactory.zeros(new int[] {1});
-//							
-//							try{
-//								yValues = DatasetFactory.zeros(seedList.size());
-//								xValues = DatasetFactory.zeros(seedList.size());
-//								lValues = DatasetFactory.zeros(seedList.size());
-//							}
-//							
-//							catch(Exception r){
-//								
-//								boolean f = true;
-//								
-//								while(f){
-//									
-//									for(DataModel kr : dms){
-//										if(kr.getLocationList() != null){
-//											
-//											seedList = kr.getLocationList();
-//											
-//											yValues = DatasetFactory.zeros(seedList.size());
-//											xValues = DatasetFactory.zeros(seedList.size());
-//											lValues = DatasetFactory.zeros(seedList.size());
-//											
-//											f = false;
-//										}
-//									}
-//								}
-//							}
-//							
-//							for(int op = 0; op<seedList.size(); op++){
-//									
-//									double x = seedList.get(op)[1];
-//									double y = seedList.get(op)[0];
-//									double l = lList.get(op);
-//									
-//									xValues.set(x, op);
-//									yValues.set(y, op);
-//									lValues.set(l, op);
-//			
-//							}
-//								
-//							seedLocation = PolynomialOverlap.extrapolatedLocation(sm.getSortedX().getDouble(k),
-//																							   lValues, 
-//																							   xValues, 
-//																							   yValues, 
-//																							   sm.getInitialLenPt()[0],
-//																							   1);
-//							dm.setSeedLocation(seedLocation);
-//								
-//							debug("!!!!!!!!!!!!!!!     }}}}}{{{{{{{{ seedlocation[0] : " + seedLocation[0] +" + " + "seedlocation[1] :" + seedLocation[1]);
-//							
-//						}	
-//						
-//						else if(models.get(0).getTrackerType() == TrackerType1.INTERPOLATION){
-//							
-//							int[] len = new int[] {(int) Math.round(sm.getInterpolatedLenPts().get(k)[0][0]),(int) Math.round(sm.getInterpolatedLenPts().get(k)[0][1])};
-//							int[]  pt = new int[] {(int) Math.round(sm.getInterpolatedLenPts().get(k)[1][0]),(int) Math.round(sm.getInterpolatedLenPts().get(k)[1][1])};
-//							
-//							double[] seedLocation = new double[] { (double) pt[0], (double) pt[1], (double) (pt[0] + len[0]),
-//									(double) (pt[1]), (double) pt[0], (double) pt[1] + len[1], (double) (pt[0] + len[0]),
-//									(double) (pt[1] + len[1]) };
-//							
-//							dm.setSeedLocation(seedLocation);
-//						}
-//						
-//						dm.addxList(model.getDatImages().getShape()[0], imagePosInOriginalDat[k],
-//								sm.getSortedX().getDouble(k));
-//						
-//						
-//						sm.addxList(sm.getImages().length, k,
-//								sm.getSortedX().getDouble(k));
-//						
-//						debug("value added to xList:  "   + sm.getSortedX().getDouble(k)  + "  k:   " + k);
-//						
-//						IDataset output1 = 
-//								DummyProcessingClass.DummyProcess1(sm, 
-//																   j, 
-//																   model, 
-//																   dm, 
-//																   gm, 
-//																   plotSystem,
-//																   ssvsPS,
-//																   correctionSelection, 
-//																   imagePosInOriginalDat[k], 
-//																   trackingMarker, 
-//																   k,
-//																   dm.getSeedLocation());
-//
-//						
-//						if(Arrays.equals(output1.getShape(), (new int[] {2,2}))){
-//							Display d =Display.getCurrent();
-//							debug("Dummy Proccessing failure");
-//							ssp.boundariesWarning("position 1, line ~2245, k: " + Integer.toString(k),d);
-//							
-//							break;
-//						}
-//						
-//						
-//						sm.addBackgroundDatArray(sm.getImages().length, k, output1);
-//						
-//						
-//						int imageNumber =k;
-//						IDataset tempImage = ssp.getImage(imageNumber);
-//						double[] tempLoc = sm.getLocationList().get(imageNumber);
-//						RectangularROI newROI = new RectangularROI(tempLoc[0],
-//							       tempLoc[1],
-//							       sm.getInitialLenPt()[0][0],
-//							       sm.getInitialLenPt()[0][1],0);
-//						
-//						display.syncExec(new Runnable() {
-//							@Override
-//							public void run() {	
-//								
-//								updateTrackingDisplay(tempImage, imageNumber);
-//								return;
-//							}
-//							});
-//						
-//
-//					}
-//				}
-//				models.get(nextjok).setInput(null);
-//				if(sm.getStartFrame() != noImages-1){
-//					for (int k = sm.getStartFrame()+1; k < noImages; k++) {
-//						debug("%%%%%%%%%%%%%%%%% sm.getStartFrame:  "  +  sm.getStartFrame() + "??????????????????" );
-//						if (sm.getFilepathsSortedArray()[k] == nextjok) {
-//	
-//							debug("l value: " + Double.toString(sm.getSortedX().getDouble(k)) + " , " + "local k:  " + Integer.toString(k)
-//							+ " , " + "local nextjok:  " + Integer.toString(nextjok));
-//							
-//							
-//							int trackingMarker = 2;
-//							IDataset j = ssp.getImage(k);
-//							DataModel dm = dms.get(nextjok);
-//							GeometricParametersModel gm = gms.get(nextjok);
-//							ExampleModel model = models.get(nextjok);
-//	
-//							
-//							if(dm.getLocationList() == null && models.get(0).getTrackerType() != TrackerType1.INTERPOLATION){
-//								
-//								int seedIndex = 
-//										ClosestNoFinder.closestNoWithLocation(sm.getSortedX().getDouble(k),
-//																			  sm.getSortedX(), 
-//																			  sm.getLocationList());
-//		
-//								int nearestCompletedDatFileNo = sm.getFilepathsSortedArray()[seedIndex];
-//								
-//								
-//								ArrayList<double[]> seedList = dms.get(nearestCompletedDatFileNo).getLocationList();
-//								ArrayList<Double> lList = dms.get(nearestCompletedDatFileNo).getxList();
-//								
-//								Dataset yValues = DatasetFactory.zeros(seedList.size());
-//								Dataset xValues = DatasetFactory.zeros(seedList.size());
-//								Dataset lValues = DatasetFactory.zeros(seedList.size());
-//								
-//								for(int op = 0; op<seedList.size(); op++){
-//									
-//									double x = seedList.get(op)[1];
-//									double y = seedList.get(op)[0];
-//									double l = lList.get(op);
-//									
-//									xValues.set(x, op);
-//									yValues.set(y, op);
-//									lValues.set(l, op);
-//			
-//								}
-//								
-//								double[] seedLocation = PolynomialOverlap.extrapolatedLocation(sm.getSortedX().getDouble(k),
-//																							   lValues, 
-//																							   xValues, 
-//																							   yValues, 
-//																							   sm.getInitialLenPt()[0],
-//																							   1);
-//								dm.setSeedLocation(seedLocation);
-//							
-//							}	
-//							
-//							else if(models.get(0).getTrackerType() == TrackerType1.INTERPOLATION){
-//								
-//								int[] len = new int[] {(int) Math.round(sm.getInterpolatedLenPts().get(k)[0][0]),(int) Math.round(sm.getInterpolatedLenPts().get(k)[0][1])};
-//								int[]  pt = new int[] {(int) Math.round(sm.getInterpolatedLenPts().get(k)[1][0]),(int) Math.round(sm.getInterpolatedLenPts().get(k)[1][1])};
-//								
-//								double[] seedLocation = new double[] { (double) pt[0], (double) pt[1], (double) (pt[0] + len[0]),
-//										(double) (pt[1]), (double) pt[0], (double) pt[1] + len[1], (double) (pt[0] + len[0]),
-//										(double) (pt[1] + len[1]) };
-//								
-//								dm.setSeedLocation(seedLocation);
-//							}
-//							
-//							
-//							dm.addxList(model.getDatImages().getShape()[0], imagePosInOriginalDat[k],
-//									sm.getSortedX().getDouble(k));
-//							
-//							sm.addxList(sm.getImages().length, k,
-//									sm.getSortedX().getDouble(k));
-//							
-//							debug("value added to xList:  "   + sm.getSortedX().getDouble(k)  + "  k:   " + k);
-//							
-//							IDataset output1 = 
-//									DummyProcessingClass.DummyProcess1(sm, 
-//																	   j, 
-//																	   model, 
-//																	   dm, 
-//																	   gm, 
-//																	   plotSystem,
-//																	   ssvsPS,
-//																	   correctionSelection, 
-//																	   imagePosInOriginalDat[k], 
-//																	   trackingMarker, 
-//																	   k,
-//																	   dm.getSeedLocation());
-//	
-//							if(Arrays.equals(output1.getShape(), (new int[] {2,2}))){
-//								Display d =Display.getCurrent();
-//								debug("Dummy Proccessing failure");
-//								ssp.boundariesWarning(Integer.toString(k),d);
-//								
-//								break;
-//							}
-//							
-//							
-//							sm.addBackgroundDatArray(sm.getImages().length, k, output1);
-//							
-//							int imageNumber =k;
-//							IDataset tempImage = ssp.getImage(imageNumber);
-//							double[] tempLoc = sm.getLocationList().get(imageNumber);
-//							RectangularROI newROI = new RectangularROI(tempLoc[0],
-//								       tempLoc[1],
-//								       sm.getInitialLenPt()[0][0],
-//								       sm.getInitialLenPt()[0][1],0);
-//							
-//							display.syncExec(new Runnable() {
-//								@Override
-//								public void run() {	
-//										
-//									updateTrackingDisplay(tempImage, imageNumber);
-//									
-//									return;
-//								}
-//								});
-//	
-//						}
-//					}
-//				}
-//				//////bottom of k++ loop	
-//				doneArray[nextjok] = "done";
-//			}
-//		}
-//		return;
-//				}
-//				
-//		};
-//		t.start();
-//		}
-//		
-//		ssvs.getCustomComposite().getReplay().setEnabled(true);
-//	}
-//	
-//	public void updateTrackingDisplay(IDataset tempImage, int imageNumber){
-//		
-//		ssp.updateSliders(ssvs.getSliderList(), imageNumber);
-//		ssvs.getPlotSystemCompositeView().getFolder().setSelection(2);
-//		ssp.updateSliders(ssvs.getSliderList(), imageNumber);
-//		ssvs.updateIndicators(imageNumber);
-//		ssvs.getPlotSystemCompositeView().getPlotSystem().updatePlot2D(tempImage, null, null);
-//		ssvs.getPlotSystemCompositeView().getSubImageBgPlotSystem().updatePlot2D(sm.getBackgroundDatArray().get(imageNumber), null, null);
-//		ssvs.getPlotSystemCompositeView().getPlotSystem().repaint(true);
-//		ssvs.getPlotSystemCompositeView().getSubImageBgPlotSystem().repaint(true);
-//		ssvs.getSsps3c().generalUpdate();
-//		ssp.stitchAndPresent(ssvs.getSsps3c().getOutputCurves());
-//		ssp.trackingRegionOfInterestSetter(sm.getLocationList().get(imageNumber), imageNumber);
-//		ssvs.getSsps3c().getOutputCurves().getIntensity().select(0);
-//		ssvs.getSsps3c().getOutputCurves().getIntensity().redraw();
-////		System.out.println(progressBar.getSelection());
-//		
-//		if(progressBar.isDisposed() != true){
-//			progressBar.setSelection(progressBar.getSelection() +1);
-////			System.out.println(progressBar.getSelection());
-//			
-//			if(progressBar.getSelection() == progressBar.getMaximum()){
-////				System.out.println(progressBar.getSelection() +" in the break");
-//				tpaav.close();
-//			}
-//		}
-//		
-//	}
-//
-//	private void debug (String output) {
-//		if (DEBUG == 1) {
-//			System.out.println(output);
-//		}
-//	}
-//}
-
-///////////////////////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////Movie Job/////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////////////////////////
-
-//class MovieJob {
-//
-//	
-//}

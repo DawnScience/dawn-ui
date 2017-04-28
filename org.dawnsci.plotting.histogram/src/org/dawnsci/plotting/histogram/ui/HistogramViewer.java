@@ -11,6 +11,7 @@ import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.PlotType;
 import org.eclipse.dawnsci.plotting.api.PlottingFactory;
 import org.eclipse.dawnsci.plotting.api.axis.AxisEvent;
+import org.eclipse.dawnsci.plotting.api.axis.IAxis;
 import org.eclipse.dawnsci.plotting.api.axis.IAxisListener;
 import org.eclipse.dawnsci.plotting.api.region.IROIListener;
 import org.eclipse.dawnsci.plotting.api.region.IRegion;
@@ -91,7 +92,7 @@ public class HistogramViewer extends ContentViewer {
 					getHistogramProvider().setMin(rroi.getPoint()[0]);
 					double max = rroi.getEndPoint()[0];
 					getHistogramProvider().setMax(max);
-					rescaleAxis();
+					rescaleAxis(false);
 				}
 			} catch (Exception e) {
 				logger.error(e.getMessage());
@@ -304,20 +305,15 @@ public class HistogramViewer extends ContentViewer {
 		greenTrace.setData(data.getRGBX(), data.getG());
 		blueTrace.setData(data.getRGBX(), data.getB());
 		blueTrace.repaint();
-		// if (rescale && updateAxis) {
-		// histogramPlottingSystem.getSelectedXAxis().setRange(
-		// histogramProvider.getMin(), histogramProvider.getMax());
-		// }
-		histogramPlottingSystem.getSelectedXAxis().setLog10(
-				getHistogramProvider().isLogColorScale());
-		histogramPlottingSystem.getSelectedXAxis().setAxisAutoscaleTight(true);
-		// histogramPlottingSystem.getSelectedXAxis().setLog10(btnColourMapLog.getSelection());
+		IAxis xAxis = histogramPlottingSystem.getSelectedXAxis();
+		xAxis.setLog10(getHistogramProvider().isLogColorScale());
+		xAxis.setAxisAutoscaleTight(true);
 
 		histogramPlottingSystem.getSelectedYAxis().setAxisAutoscaleTight(true);
 
+		rescaleAxis(firstUpdateTraces);
 		if (firstUpdateTraces) {
 			firstUpdateTraces = false;
-			histogramPlottingSystem.autoscaleAxes();
 		}
 
 		updateMinMaxSpinnerIncrements();
@@ -339,8 +335,9 @@ public class HistogramViewer extends ContentViewer {
 
 		// Option 2:
 		// Set the increment to be the difference between two x pixels.
-		double val1 = histogramPlottingSystem.getSelectedXAxis().getPositionValue(1);
-		double val2 = histogramPlottingSystem.getSelectedXAxis().getPositionValue(2);
+		IAxis xAxis = histogramPlottingSystem.getSelectedXAxis();
+		double val1 = xAxis.getPositionValue(1);
+		double val2 = xAxis.getPositionValue(2);
 		double increment = Math.abs(val2 - val1);
 		// update precision too
 		int logInc = (int) Math.floor(Math.log10(increment));
@@ -363,7 +360,7 @@ public class HistogramViewer extends ContentViewer {
 						updateRegion(minValue, getHistogramProvider().getMax());
 					}
 					maxText.setMinimum(minValue);
-					rescaleAxis();
+					rescaleAxis(false);
 				}
 			}
 		});
@@ -378,7 +375,7 @@ public class HistogramViewer extends ContentViewer {
 						updateRegion(getHistogramProvider().getMin(), maxValue);
 					}
 					minText.setMaximum(maxValue);
-					rescaleAxis();
+					rescaleAxis(false);
 				}
 			}
 		});
@@ -401,7 +398,7 @@ public class HistogramViewer extends ContentViewer {
 	 * Check our minimum values are valid before
 	 * applying them 
 	 */
-	private boolean validateMin(double minValue){
+	private boolean validateMin(double minValue) {
 		if (minValue > maxText.getDouble()){
 			return false;
 		}
@@ -425,7 +422,6 @@ public class HistogramViewer extends ContentViewer {
 	@Override
 	protected void inputChanged(Object input, Object oldInput) {
 		try {
-			firstUpdateTraces = true;
 			refresh();
 		} catch (Exception e) {
 			logger.debug(e.getMessage());
@@ -542,9 +538,20 @@ public class HistogramViewer extends ContentViewer {
 	public void setSelection(ISelection selection, boolean reveal) {
 		// TODO Auto-generated method stub
 	}
-	
+
 	public void rescaleAxis() {
-		histogramPlottingSystem.autoscaleAxes();
+		rescaleAxis(true);
+	}
+
+	private void rescaleAxis(boolean force) {
+		if (force || histogramPlottingSystem.isRescale()) {
+			IAxis xAxis = histogramPlottingSystem.getSelectedXAxis();
+			IHistogramProvider hp = getHistogramProvider();
+			double min = hp.getMin();
+			double max = hp.getMax();
+			histogramPlottingSystem.autoscaleAxes();
+			xAxis.setRange(min, max);
+		}
 	}
 
 	/**
@@ -571,6 +578,4 @@ public class HistogramViewer extends ContentViewer {
 	public void setFocus() {
 		histogramPlottingSystem.setFocus();
 	}
-
-
 }

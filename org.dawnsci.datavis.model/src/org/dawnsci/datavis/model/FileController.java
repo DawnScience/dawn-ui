@@ -19,6 +19,7 @@ public class FileController implements IFileController {
 	private LoadedFiles loadedFiles;
 	private LoadedFile currentFile;
 	private DataOptions currentData;
+	private ILiveFileListener listener;
 	
 	private Set<FileControllerStateEventListener> listeners = new HashSet<FileControllerStateEventListener>();
 	
@@ -58,54 +59,19 @@ public class FileController implements IFileController {
 	
 	public void attachLive() {
 		if (LiveServiceManager.getILiveFileService() != null) {
-			LiveServiceManager.getILiveFileService().addLiveFileListener(new ILiveFileListener() {
-				
-				@Override
-				public void refreshRequest() {
-					
-					Runnable r = new Runnable() {
-						
-						@Override
-						public void run() {
-							
-							getLoadedFiles().stream()
-							.filter(IRefreshable.class::isInstance)
-							.map(IRefreshable.class::cast)
-							.forEach(d -> d.refresh());
-							
-							Display.getDefault().syncExec(new Runnable() {
-								
-								@Override
-								public void run() {
-									
-									fireStateChangeListeners(false, true);
-									
-								}
-							});
-							
-						}
-					};
-					
-					LiveServiceManager.getILiveFileService().runUpdate(r);
-				}
-				
-				@Override
-				public void localReload(String path) {
-					LoadedFile loadedFile = loadedFiles.getLoadedFile(path);
-					if (loadedFile instanceof IRefreshable) {
-						((IRefreshable)loadedFile).locallyReload();
-					}
-					
-				}
-				
-				@Override
-				public void fileLoaded(LoadedFile loadedFile) {
-					loadedFiles.addFile(loadedFile);
-					fireStateChangeListeners(false, false);
-				}
-			});
 			
-			LiveServiceManager.getILiveFileService().attach();
+			if (listener == null) {
+				listener = new LiveFileListener();
+			}
+			
+			LiveServiceManager.getILiveFileService().addLiveFileListener(listener);
+
+		}
+	}
+	
+	public void detachLive() {
+		if (LiveServiceManager.getILiveFileService() != null && listener != null) {
+			LiveServiceManager.getILiveFileService().removeLiveFileListener(listener);
 		}
 	}
 	
@@ -392,5 +358,53 @@ public class FileController implements IFileController {
 		
 		fireStateChangeListeners(false, true);
 		
+	}
+	
+	private class LiveFileListener implements ILiveFileListener {
+
+		@Override
+		public void refreshRequest() {
+
+			Runnable r = new Runnable() {
+
+				@Override
+				public void run() {
+
+					getLoadedFiles().stream()
+					.filter(IRefreshable.class::isInstance)
+					.map(IRefreshable.class::cast)
+					.forEach(d -> d.refresh());
+
+					Display.getDefault().syncExec(new Runnable() {
+
+						@Override
+						public void run() {
+
+							fireStateChangeListeners(false, true);
+
+						}
+					});
+
+				}
+			};
+
+			LiveServiceManager.getILiveFileService().runUpdate(r);
+		}
+
+		@Override
+		public void localReload(String path) {
+			LoadedFile loadedFile = loadedFiles.getLoadedFile(path);
+			if (loadedFile instanceof IRefreshable) {
+				((IRefreshable)loadedFile).locallyReload();
+			}
+
+		}
+
+		@Override
+		public void fileLoaded(LoadedFile loadedFile) {
+			loadedFiles.addFile(loadedFile);
+			fireStateChangeListeners(false, false);
+		}
+
 	}
 }

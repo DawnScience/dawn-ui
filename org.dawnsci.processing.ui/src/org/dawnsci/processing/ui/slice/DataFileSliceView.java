@@ -147,7 +147,7 @@ public class DataFileSliceView extends ViewPart {
 		fileManager = new FileManager(new SetupContextHelper());
 		
 		parent.setLayout(new GridLayout());
-		viewer = new TableViewer(parent);
+		viewer = new TableViewer(parent, SWT.H_SCROLL | SWT.V_SCROLL | SWT.BORDER);
 		viewer.getTable().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		viewer.setLabelProvider(new ViewLabelProvider());
 		viewer.setContentProvider(new BasicContentProvider());
@@ -343,7 +343,7 @@ public class DataFileSliceView extends ViewPart {
 
 			@Override
 			public void keyPressed(KeyEvent e) {
-				if (e.keyCode == SWT.DEL) {
+				if (e.keyCode == SWT.DEL || e.keyCode == SWT.BS) {
 					clearSelected();
 				}
 			}

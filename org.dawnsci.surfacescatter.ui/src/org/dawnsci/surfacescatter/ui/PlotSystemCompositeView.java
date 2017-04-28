@@ -4,7 +4,6 @@ import org.dawb.common.ui.widgets.ActionBarWrapper;
 import org.dawnsci.surfacescatter.ExampleModel;
 import org.dawnsci.surfacescatter.MethodSettingEnum.MethodSetting;
 import org.dawnsci.surfacescatter.ProcessingMethodsEnum.ProccessingMethod;
-import org.eclipse.dawnsci.analysis.api.roi.IROI;
 import org.eclipse.dawnsci.analysis.dataset.roi.RectangularROI;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.PlotType;
@@ -17,8 +16,6 @@ import org.eclipse.january.dataset.Dataset;
 import org.eclipse.january.dataset.IDataset;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
-import org.eclipse.swt.events.KeyEvent;
-import org.eclipse.swt.events.KeyListener;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Color;
@@ -78,6 +75,8 @@ public class PlotSystemCompositeView extends Composite {
 	private Group manualControls;
 	private SurfaceScatterViewStart ssvs;
 	private Button accept;
+	private Button acceptBack;
+
 	
     public PlotSystemCompositeView(Composite parent, 
     							   int style,
@@ -411,8 +410,15 @@ public class PlotSystemCompositeView extends Composite {
 			}
 			
 			public void roiStandard(ROIEvent evt) {
-				IROI bg = ssp.regionOfInterestSetter(region.getROI());
-				bgRegion.setROI(bg);
+				double[] bgRegionROI = ssp.regionOfInterestSetter(region.getROI());
+				
+				RectangularROI bgROI = new RectangularROI(bgRegionROI[0],
+						  bgRegionROI[1],
+						  bgRegionROI[2],
+						  bgRegionROI[3],
+						  bgRegionROI[4]);
+				
+				bgRegion.setROI(bgROI);
 				
 			}
 		});
@@ -436,39 +442,6 @@ public class PlotSystemCompositeView extends Composite {
 			}
 		});
 		
-//		slider.addKeyListener(new KeyListener() {
-//			
-//			@Override
-//			public void keyReleased(KeyEvent e) {
-//				// TODO Auto-generated method stub
-//				
-//			}
-//			
-//			@Override
-//			public void keyPressed(KeyEvent ke) {
-////				ke.character;
-//				int key = ke.keyCode;
-//				
-//				
-//				switch(key){
-//				case SWT.ARROW_LEFT:
-//					ssp.sliderMovemementMainImage(ssp.getSliderPos() -1);
-//					slider.setSelection(slider.getSelection() - 1);
-//					break;
-//				case SWT.ARROW_RIGHT:
-//					ssp.sliderMovemementMainImage(ssp.getSliderPos() +1);
-//					slider.setSelection(slider.getSelection() + 1);
-//					break;
-////				case KeyEvent.VK_SPACE:
-////					ssvs.fireAccept();
-////					break;
-//			
-//				}
-//				
-//			}
-//		});
-		
-	    
 		processing = new Group (form,SWT.NONE);  
 	    GridLayout processingLayout = new GridLayout(2,true);
 	    processing.setLayout(processingLayout);
@@ -537,7 +510,7 @@ public class PlotSystemCompositeView extends Composite {
     	
     	if(ssp.getProcessingMethodSelection() == ProccessingMethod.MANUAL){
 
-    	    GridLayout manualControlsLayout = new GridLayout(3,true);
+    	    GridLayout manualControlsLayout = new GridLayout(4,true);
     	    manualControls .setLayout(manualControlsLayout);
     	    GridData manualControlsData = new GridData(SWT.FILL, SWT.NULL, true, false);
     	    manualControls .setLayoutData(manualControlsData);
@@ -546,9 +519,14 @@ public class PlotSystemCompositeView extends Composite {
     	    decrement.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
     	    decrement.setText("<");
     		
+
+    		acceptBack = new Button (manualControls, SWT.PUSH);	
+    		acceptBack.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+    		acceptBack.setText("< Accept");
+    	    
     		accept = new Button (manualControls, SWT.PUSH);	
     		accept.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-    		accept.setText("Accept");
+    		accept.setText("Accept >");
     		
     		increment = new Button (manualControls, SWT.PUSH);	
     	    increment.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
@@ -584,6 +562,26 @@ public class PlotSystemCompositeView extends Composite {
    
     public void addManualListeners(){
     	
+    	acceptBack.addSelectionListener(new SelectionListener() {
+			
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				ssvs.fireAccept();
+				slider.setSelection(slider.getSelection() -1);
+				ssp.setSliderPos(slider.getSelection());
+				generalUpdate();
+				ssvs.sliderMovementGeneralUpdate();
+			}
+			
+			@Override
+			public void widgetDefaultSelected(SelectionEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+		});
+    	
+    	
+    	
     	accept.addSelectionListener(new SelectionListener() {
 			
 			@Override
@@ -603,29 +601,7 @@ public class PlotSystemCompositeView extends Composite {
 		});
     	
     	
-    	accept.addKeyListener(new KeyListener() {
-			
-			@Override
-			public void keyReleased(KeyEvent e) {
-				// TODO Auto-generated method stub
-				
-			}
-			
-			@Override
-			public void keyPressed(KeyEvent ke) {
-				
-				int key = ke.keyLocation;
-				
-				
-				switch(key){
-				case SWT.SPACE:
-					ssvs.fireAccept();
-					break;
-				}
-				
-			}
-		});
-		
+    	
     	
     	increment.addSelectionListener(new SelectionListener() {
 			
@@ -1010,25 +986,9 @@ public class PlotSystemCompositeView extends Composite {
 		
 	}
 	
-	public void recursiveSetEnabled(Control ctrl, boolean enabled) {
-		   
-		if (ctrl instanceof Composite) {
-		      Composite comp = (Composite) ctrl;
-		      Control[] kids = comp.getChildren();
-		      for (Control c : kids)
-		         recursiveSetEnabled(c, enabled);
-		      if (kids == null || kids.length == 0) 
-		    	  ctrl.setEnabled(enabled);
-		 } else {
-		      ctrl.setEnabled(enabled);
-		 }
-	}
-	
-	
 	public TabItem getBackgroundSubtractedSubImage(){
 		return subBgI;
 	}
-	
 	
 	public void appendBackgroundSubtractedSubImage(){
 		
@@ -1146,6 +1106,14 @@ public class PlotSystemCompositeView extends Composite {
 
 	public void setAccept(Button accept) {
 		this.accept = accept;
+	}
+
+	public Button getAcceptBack() {
+		return acceptBack;
+	}
+
+	public void setAcceptBack(Button acceptBack) {
+		this.acceptBack = acceptBack;
 	}
 
 }
