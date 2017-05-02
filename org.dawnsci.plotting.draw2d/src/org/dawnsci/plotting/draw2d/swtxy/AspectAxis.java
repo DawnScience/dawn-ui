@@ -514,7 +514,7 @@ public class AspectAxis extends DAxis implements IAxis {
 	}
 
 	@Override
-	public boolean areLabelsCustomised() {
+	public boolean isLabelCustomised() {
 		return labelData != null;
 	}
 	
