@@ -6,4 +6,8 @@ public interface IRefreshable {
 	
 	public void locallyReload();
 	
+	public boolean isLive();
+	
+	public boolean hasFinished();
+	
 }

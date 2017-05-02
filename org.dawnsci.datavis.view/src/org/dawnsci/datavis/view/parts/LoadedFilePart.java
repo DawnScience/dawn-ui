@@ -13,7 +13,9 @@ import javax.inject.Inject;
 import org.dawnsci.datavis.model.FileControllerStateEvent;
 import org.dawnsci.datavis.model.FileControllerStateEventListener;
 import org.dawnsci.datavis.model.IFileController;
+import org.dawnsci.datavis.model.IRefreshable;
 import org.dawnsci.datavis.model.LoadedFile;
+import org.dawnsci.datavis.view.Activator;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.dawnsci.analysis.api.io.ILoaderService;
 import org.eclipse.e4.core.di.annotations.Optional;
@@ -65,6 +67,9 @@ import org.osgi.service.event.EventAdmin;
 
 public class LoadedFilePart {
 
+	private final Image icon = Activator.getImage("icons/document-block.png");
+	private final Image iconLive = Activator.getImage("icons/document-light.png");
+	
 	private TableViewer viewer;
 	
 	@Inject ILoaderService lService;
@@ -82,6 +87,8 @@ public class LoadedFilePart {
 		FillLayout fillLayout = new FillLayout();
 		fillLayout.type = SWT.VERTICAL;
 		parent.setLayout(fillLayout);
+		
+		
 		
 		Composite tableComposite = new Composite(parent, SWT.NONE);
 		
@@ -136,7 +143,20 @@ public class LoadedFilePart {
 		name.setLabelProvider(new ColumnLabelProvider() {
 			@Override
 			public String getText(Object element) {
-				return ((LoadedFile)element).getName();
+				
+				String name = ((LoadedFile)element).getName();
+				
+				return name;
+			}
+			
+			@Override
+			public Image getImage(Object element) {
+				
+				if (element instanceof IRefreshable && ((IRefreshable)element).isLive()) {
+					return iconLive;
+				}
+				
+				return icon;
 			}
 		});
 		

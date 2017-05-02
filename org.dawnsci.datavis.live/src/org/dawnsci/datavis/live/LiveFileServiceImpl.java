@@ -205,8 +205,12 @@ public class LiveFileServiceImpl implements ILiveFileService {
 		
 		@Override
 		public void beanChangePerformed(BeanEvent<StatusBean> evt) {
-			System.out.println("bean update " + evt.getBean().toString());
-			if (evt.getBean() instanceof IOperationBean && evt.getBean().getStatus().isRunning()) {
+			
+			if (!(evt.getBean() instanceof IOperationBean)) return;
+			
+			StatusBean bean = evt.getBean();
+			
+			if (Status.RUNNING.equals(bean.getStatus()) && !Status.RUNNING.equals(bean.getPreviousStatus())) {
 				String host = getDataServerHost();
 				int port    = getDataServerPort();
 				
@@ -215,7 +219,16 @@ public class LiveFileServiceImpl implements ILiveFileService {
 				
 				fireListeners(f);
 				
+				return;
+				
 			}
+			
+			if (Status.RUNNING.equals(bean.getStatus())) {
+				for (ILiveFileListener l : listeners) {
+					l.refreshRequest();
+				}
+			}
+			
 			
 			if (!evt.getBean().getStatus().isFinal()) return;
 			if (evt.getBean() instanceof IOperationBean) {

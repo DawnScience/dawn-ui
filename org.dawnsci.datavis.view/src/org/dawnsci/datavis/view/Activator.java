@@ -1,5 +1,7 @@
 package org.dawnsci.datavis.view;
 
+import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
 
@@ -43,4 +45,12 @@ public class Activator extends AbstractUIPlugin {
 	public static Activator getDefault() {
 		return plugin;
 	}
+	
+	public static ImageDescriptor getImageDescriptor(String path) {
+        return imageDescriptorFromPlugin("org.dawnsci.datavis.view", path);
+    }
+    		 
+    public static Image getImage(String path) {
+        return getImageDescriptor(path).createImage();
+    }
 }

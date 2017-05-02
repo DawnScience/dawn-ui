@@ -121,7 +121,8 @@ public class PlotController {
 		DataOptions dOption = fileController.getCurrentDataOption();
 		LoadedFile file = fileController.getCurrentFile();
 		if (dOption == null) { 
-			updatePlotStateInJob(null, currentMode);
+			final List<DataStateObject> state = fileController.getImmutableFileState();
+			updatePlotStateInJob(state, currentMode);
 			return;
 		}
 		

@@ -25,14 +25,19 @@ import org.eclipse.january.dataset.ILazyDataset;
 import org.eclipse.january.dataset.IRemoteData;
 import org.eclipse.january.dataset.LazyDatasetBase;
 import org.eclipse.january.metadata.Metadata;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import uk.ac.diamond.scisoft.analysis.io.DataHolder;
 
 public class LiveLoadedFile extends LoadedFile implements IRefreshable {
 
 	private boolean live = true;
+	private boolean finished = false;
 	private String host;
 	private int port;
+	
+	private final static Logger logger = LoggerFactory.getLogger(LiveLoadedFile.class);
 	
 	public LiveLoadedFile(String path, String host, int port) {
 		this(createDataHolder(path,host,port));
@@ -112,8 +117,7 @@ public class LiveLoadedFile extends LoadedFile implements IRefreshable {
 		try {
 			map = rd.getTree();
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.warn("Could not get remote NeXus tree from {}!", path);
 		}
 		
 		if (map == null) return;
@@ -156,10 +160,31 @@ public class LiveLoadedFile extends LoadedFile implements IRefreshable {
 			
 		}
 	}
+	
+	private void updateOptionsNonLiveDataHolder() {
+
+		String[] names = dataHolder.get().getNames();
+		for (String n : names) {
+			
+			if (dataOptions.containsKey(n)) continue;
+			
+			ILazyDataset lazyDataset = dataHolder.get().getLazyDataset(n);
+			if (lazyDataset != null && ((LazyDatasetBase)lazyDataset).getDType() != Dataset.STRING) {
+				DataOptions d = new DataOptions(n, this);
+				dataOptions.put(d.getName(),d);
+			}
+		}
+	}
+	
 
 	@Override
 	public void refresh() {
 		if (!live) return;
+		
+		if (finished) {
+			locallyReload();
+			return;
+		}
 		
 		if (dataHolder.get().getList().isEmpty()){
 			String path = dataHolder.get().getFilePath();
@@ -209,10 +234,20 @@ public class LiveLoadedFile extends LoadedFile implements IRefreshable {
 
 	@Override
 	public void locallyReload() {
+		
+		finished = true;
+		
 		ILoaderService service = ServiceManager.getILoaderService();
 		try {
 			String path = getFilePath();
-			dataHolder.set(service.getData(path, null));
+			IDataHolder tmp = service.getData(path, null);
+			
+			if (tmp == null || tmp.getTree() == null || tmp.getNames() == null) {
+				logger.error("Scan finished but local reload not ready for {}!", path);
+				return;
+			}
+			
+			dataHolder.set(tmp);
 			
 			if (dataOptions.isEmpty()) {
 				String[] names = dataHolder.get().getNames();
@@ -229,7 +264,7 @@ public class LiveLoadedFile extends LoadedFile implements IRefreshable {
 				
 				return;
 			} else {
-				updateDataHolder();
+				updateOptionsNonLiveDataHolder();
 			}
 			
 			dataOptions.values().stream().forEach(o -> o.setAxes(null));
@@ -242,11 +277,20 @@ public class LiveLoadedFile extends LoadedFile implements IRefreshable {
 			}
 			
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.error("Could not locally load data!");
 		}
 		live = false;
 		
+	}
+
+	@Override
+	public boolean isLive() {
+		return live;
+	}
+
+	@Override
+	public boolean hasFinished() {
+		return finished;
 	}
 	
 }

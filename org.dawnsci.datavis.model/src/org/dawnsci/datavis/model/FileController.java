@@ -139,8 +139,6 @@ public class FileController implements IFileController {
 			option = file.getDataOptions().get(0);
 		}
 		
-		if (option == null) return;
-		
 		setCurrentDataOnFileChange(option);
 		
 	}
