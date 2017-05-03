@@ -20,12 +20,12 @@ import java.util.Iterator;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 
+import org.apache.commons.lang.ArrayUtils;
 import org.dawb.common.ui.util.EclipseUtils;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
@@ -39,7 +39,6 @@ import uk.ac.diamond.sda.navigator.views.IOpenFileAction;
 public class Utils {
 
 	private static ResourceBundle resourceBundle = ResourceBundle.getBundle("file_viewer");
-	private static final ScanCmdJob job = new ScanCmdJob();
 
 	public enum SortType {
 		NAME,
@@ -49,6 +48,12 @@ public class Utils {
 		SCAN;
 	}
 
+	public enum SortDirection {
+		ASC,
+		NONE,
+		DESC;
+	}
+	
 	/**
 	 * Returns a string from the resource bundle. We don't want to crash because
 	 * of a missing String. Returns the key if not found.
@@ -178,8 +183,7 @@ public class Utils {
 		protected IStatus run(IProgressMonitor monitor) {
 			if (file.isFile()) {
 				String extension = getFileExtension(file);
-				if (extension.equals("nxs") || extension.equals("hdf") || extension.equals("h5")
-						|| extension.equals("hdf5") || extension.equals("dat")) {
+				if (ArrayUtils.contains(new String[]{"nxs", "hdf", "h5", "hdf5", "dat"}, extension)) {
 					String filePath = file.getAbsolutePath();
 					try {
 						ILoaderService loader = ServiceHolder.getLoaderService();
@@ -189,7 +193,7 @@ public class Utils {
 						for (Iterator<String> iterator = metanames.iterator(); iterator.hasNext();) {
 							if (monitor.isCanceled())
 								return Status.OK_STATUS;
-							String string = (String) iterator.next();
+							String string = iterator.next();
 							if (string.contains("scan_command")) {
 								Serializable value = meta.getMetaValue(string);
 								scanCmd = (String) value;
@@ -232,8 +236,7 @@ public class Utils {
 						String string = (String) iterator.next();
 						if (string.contains("scan_command")) {
 							Serializable value = meta.getMetaValue(string);
-							String scanCmd = (String) value;
-							return scanCmd;
+							return (String) value;
 						}
 					}
 				} catch (Exception e) {

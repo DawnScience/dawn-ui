@@ -11,6 +11,7 @@ package org.dawnsci.fileviewer.table;
 import java.io.File;
 
 import org.dawnsci.fileviewer.FileViewer;
+import org.dawnsci.fileviewer.Utils.SortDirection;
 import org.dawnsci.fileviewer.Utils.SortType;
 import org.eclipse.jface.viewers.ColumnViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
@@ -28,11 +29,7 @@ import org.eclipse.swt.widgets.Table;
  */
 public class FileTableViewerComparator {
 
-	public static final int ASC = 1;
-	public static final int NONE = 0;
-	public static final int DESC = -1;
-
-	private int direction = 0;
+	private SortDirection direction = SortDirection.NONE;
 	private TableViewerColumn column;
 	private ColumnViewer viewer;
 	private int index;
@@ -54,48 +51,35 @@ public class FileTableViewerComparator {
 		return new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				int tdirection = FileTableViewerComparator.this.direction;
-				if (tdirection == ASC || tdirection == NONE) {
-					setSorter(FileTableViewerComparator.this, DESC);
-				} else if (tdirection == DESC) {
-					setSorter(FileTableViewerComparator.this, ASC);
+				SortDirection tdirection = FileTableViewerComparator.this.direction;
+				if (tdirection == SortDirection.ASC || tdirection == SortDirection.NONE) {
+					setSorter(FileTableViewerComparator.this, SortDirection.DESC);
+				} else if (tdirection == SortDirection.DESC) {
+					setSorter(FileTableViewerComparator.this, SortDirection.ASC);
 				}
 			}
 		};
 	}
 
-	private void setSorter(FileTableViewerComparator sorter, int direction) {
+	private void setSorter(FileTableViewerComparator sorter, SortDirection direction) {
 		Table columnParent = column.getColumn().getParent();
 		// Re sort the file[] array
 		try {
-			tableExplorer.setSortType(getSortTypeByIdx(index));
+			tableExplorer.setSortType(SortType.values()[index]);
 			File dir = fileViewer.getCurrentDirectory();
 			tableExplorer.workerUpdate(dir, true, tableExplorer.getSortType(), direction);
 		} finally {
-			if (direction == NONE) {
+			if (direction == SortDirection.NONE) {
 				columnParent.setSortColumn(null);
 				columnParent.setSortDirection(SWT.NONE);
 				viewer.setComparator(null);
 			} else {
 				columnParent.setSortColumn(column.getColumn());
 				sorter.direction = direction;
-				columnParent.setSortDirection(direction == ASC ? SWT.DOWN : SWT.UP);
+				columnParent.setSortDirection(direction == SortDirection.ASC ? SWT.DOWN : SWT.UP);
 				viewer.refresh();
 			}
 		}
 	}
 
-	private SortType getSortTypeByIdx(int i) {
-		if (i == 0)
-			return SortType.NAME;
-		else if (i == 1)
-			return SortType.SIZE;
-		else if (i == 2)
-			return SortType.TYPE;
-		else if (i == 3)
-			return SortType.DATE;
-		else if (i == 4)
-			return SortType.SCAN;
-		return null;
-	}
 }

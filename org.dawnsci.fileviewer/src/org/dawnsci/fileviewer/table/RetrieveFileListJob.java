@@ -11,6 +11,7 @@ package org.dawnsci.fileviewer.table;
 import java.io.File;
 
 import org.dawnsci.fileviewer.Utils.SortType;
+import org.dawnsci.fileviewer.Utils.SortDirection;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -19,14 +20,14 @@ import org.eclipse.core.runtime.jobs.Job;
 public class RetrieveFileListJob extends Job {
 	private FileTableContent[] dirList;
 	private int dirListCount;
-	final private File workerStateDir;
-	final private SortType sortType;
-	final private int direction;
-	final private String filter;
-	final private boolean useRegex;
-	final private boolean quick;
+	private final File workerStateDir;
+	private final SortType sortType;
+	private final SortDirection direction;
+	private final String filter;
+	private final boolean useRegex;
+	private final boolean quick;
 	
-	public RetrieveFileListJob(File workerStateDir, SortType sortType, int direction, String filter, boolean useRegex, boolean quick) {
+	public RetrieveFileListJob(File workerStateDir, SortType sortType, SortDirection direction, String filter, boolean useRegex, boolean quick) {
 		super("Retrieving file list..");
 		this.workerStateDir = workerStateDir;
 		this.sortType = sortType;
@@ -39,7 +40,7 @@ public class RetrieveFileListJob extends Job {
 	@Override
 	protected IStatus run(IProgressMonitor monitor) {
 		if (quick) {
-			dirListCount = FileTableUtils.getDirectoryListCount(workerStateDir, sortType, direction, filter, useRegex, monitor);
+			dirListCount = FileTableUtils.getDirectoryListCount(workerStateDir, filter, useRegex, monitor);
 		} else {
 			dirList = FileTableUtils.getDirectoryList(workerStateDir, sortType, direction, filter, useRegex, monitor);
 			dirListCount = dirList.length;
