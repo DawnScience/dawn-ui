@@ -140,7 +140,6 @@ public class FileTableUtils {
 	 *         null
 	 */
 	public static FileTableContent[] getDirectoryList(File file, SortType sortType, int direction, String filter, boolean useRegex, IProgressMonitor monitor) {
-		System.out.println("getting directory list for " + file.getName());
 		File[] list = null;
 		if (filter == null || filter.equals("*") || Pattern.matches("^\\s*$", filter)) {
 			list = file.listFiles();
@@ -163,7 +162,6 @@ public class FileTableUtils {
 	}
 
 	public static int getDirectoryListCount(File file, SortType sortType, int direction, String filter, boolean useRegex, IProgressMonitor monitor) {
-		System.out.println("getting directory list count for " + file.getName());
 		File[] list = null;
 		if (filter == null || filter.equals("*") || Pattern.matches("^\\s*$", filter)) {
 			list = file.listFiles();
