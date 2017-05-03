@@ -14,6 +14,11 @@ import org.dawnsci.fileviewer.Utils.SortDirection;
 import org.eclipse.core.runtime.IProgressMonitor;
 
 public class FileTableUtils {
+	
+	private FileTableUtils() {
+		
+	}
+	
 	/**
 	 * Sorts files lexicographically by name.
 	 * 
@@ -71,11 +76,6 @@ public class FileTableUtils {
 	}
 
 	public static int compareFiles(FileTableContent a, FileTableContent b, SortType sortType, SortDirection direction) {
-		// boolean aIsDir = a.isDirectory();
-		// boolean bIsDir = b.isDirectory();
-		// if (aIsDir && ! bIsDir) return -1;
-		// if (bIsDir && ! aIsDir) return 1;
-
 		// sort case-sensitive files in a case-insensitive manner
 		int compare = 0;
 		switch (sortType) {
@@ -97,7 +97,8 @@ public class FileTableUtils {
 			compare = sizea < sizeb ? -1 : 1;
 			break;
 		case TYPE:
-			String typea = a.getFileType(), typeb = b.getFileType();
+			String typea = a.getFileType();
+			String typeb = b.getFileType();
 			compare = typea.compareToIgnoreCase(typeb);
 			if (compare == 0)
 				compare = typea.compareTo(typeb);
@@ -108,7 +109,8 @@ public class FileTableUtils {
 			compare = date1.compareTo(date2);
 			break;
 		case SCAN:
-			String scana = a.getFileScanCmd(), scanb = b.getFileScanCmd();
+			String scana = a.getFileScanCmd();
+			String scanb = b.getFileScanCmd();
 			compare = scana.compareToIgnoreCase(scanb);
 			if (compare == 0)
 				compare = scana.compareTo(scanb);
@@ -167,7 +169,7 @@ public class FileTableUtils {
 		return contentList;
 	}
 
-	public static int getDirectoryListCount(File file, String filter, boolean useRegex, IProgressMonitor monitor) {
+	public static int getDirectoryListCount(File file, String filter, boolean useRegex) {
 		File[] list = null;
 		if (filter == null || "*".equals(filter) || Pattern.matches("^\\s*$", filter)) {
 			list = file.listFiles();

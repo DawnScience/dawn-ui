@@ -40,7 +40,7 @@ public class RetrieveFileListJob extends Job {
 	@Override
 	protected IStatus run(IProgressMonitor monitor) {
 		if (quick) {
-			dirListCount = FileTableUtils.getDirectoryListCount(workerStateDir, filter, useRegex, monitor);
+			dirListCount = FileTableUtils.getDirectoryListCount(workerStateDir, filter, useRegex);
 		} else {
 			dirList = FileTableUtils.getDirectoryList(workerStateDir, sortType, direction, filter, useRegex, monitor);
 			dirListCount = dirList.length;

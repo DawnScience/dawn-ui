@@ -17,7 +17,6 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.dawb.common.ui.util.EclipseUtils;
-import org.dawnsci.fileviewer.Utils.SortType;
 import org.dawnsci.fileviewer.handlers.ConvertHandler;
 import org.dawnsci.fileviewer.handlers.LayoutHandler;
 import org.dawnsci.fileviewer.handlers.OpenHandler;
@@ -26,7 +25,6 @@ import org.dawnsci.fileviewer.handlers.PreferencesHandler;
 import org.dawnsci.fileviewer.handlers.RefreshHandler;
 import org.dawnsci.fileviewer.table.FileTableContent;
 import org.dawnsci.fileviewer.table.FileTableExplorer;
-import org.dawnsci.fileviewer.table.FileTableViewerComparator;
 import org.dawnsci.fileviewer.table.RetrieveFileListJob;
 import org.dawnsci.fileviewer.tree.FileTreeExplorer;
 import org.dawnsci.fileviewer.tree.TreeUtils;
