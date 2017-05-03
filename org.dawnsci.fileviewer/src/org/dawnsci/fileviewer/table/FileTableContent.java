@@ -3,6 +3,8 @@ package org.dawnsci.fileviewer.table;
 import java.io.File;
 
 import org.dawnsci.fileviewer.Utils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class FileTableContent {
 	private final File file;
@@ -12,6 +14,8 @@ public class FileTableContent {
 	private final String fileType;
 	private final String fileDate;
 	private String fileScanCmd = "";
+	
+	private final static Logger logger = LoggerFactory.getLogger(FileTableContent.class);
 	
 	static class FileScanCmdThread extends Thread {
 		private final File file;
@@ -49,7 +53,10 @@ public class FileTableContent {
 		// Since I cannot cancel the HDF5 loader routine while it is running,
 		// and since it blocks all other invocations of this loader,
 		// I see no alternative other than killing this thread
-		thread.stop();
+		if (thread.isAlive()) {
+			logger.warn("Killing thread for {}", file.getName());
+			thread.stop();
+		}
 	}
 
 	public File getFile() {
