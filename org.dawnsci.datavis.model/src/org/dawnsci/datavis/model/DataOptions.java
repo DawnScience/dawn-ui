@@ -1,6 +1,7 @@
 package org.dawnsci.datavis.model;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Map;
 
 import org.dawnsci.datavis.api.IDataPackage;
@@ -36,7 +37,9 @@ public class DataOptions implements IDataObject, IDataPackage {
 	}
 	
 	public Map<String, int[]> getAllPossibleAxes() {
-		return parent.getDataShapes();
+		Map<String, int[]> map = new HashMap<>(parent.getDataShapes());
+		map.remove(name);
+		return map;
 	}
 	
 	public String[] getPrimaryAxes(){
