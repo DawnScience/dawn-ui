@@ -3,7 +3,6 @@ package org.dawnsci.fileviewer.table;
 import java.io.File;
 import java.io.FileFilter;
 import java.util.Arrays;
-import java.util.Comparator;
 import java.util.Date;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
@@ -13,7 +12,6 @@ import org.apache.commons.io.filefilter.WildcardFileFilter;
 import org.dawnsci.fileviewer.Utils;
 import org.dawnsci.fileviewer.Utils.SortType;
 import org.dawnsci.fileviewer.Utils.SortDirection;
-import org.eclipse.core.runtime.IProgressMonitor;
 
 public class FileTableUtils {
 	
@@ -79,21 +77,7 @@ public class FileTableUtils {
 	 * @return an array of files this directory contains, may be empty but not
 	 *         null
 	 */
-	public static FileTableContent[] getDirectoryList(File file, SortType sortType, SortDirection sortDirection, String filter, boolean useRegex) {
-		return getDirectoryList(file, sortType, sortDirection, filter, useRegex, null);
-	}
-
-	/**
-	 * Gets a directory listing
-	 * 
-	 * @param file
-	 *            the directory to be listed
-	 * @param sort
-	 *            the sorting type
-	 * @return an array of files this directory contains, may be empty but not
-	 *         null
-	 */
-	public static FileTableContent[] getDirectoryList(File file, SortType sortType, SortDirection sortDirection, String filter, boolean useRegex, IProgressMonitor monitor) {
+	public static FileTableContent[] getDirectoryList(File file, SortType sortType, SortDirection sortDirection, String filter, boolean useRegex ) {
 		File[] list = null;
 		if (filter == null || "*".equals(filter) || Pattern.matches("^\\s*$", filter)) {
 			list = file.listFiles();
@@ -111,13 +95,7 @@ public class FileTableUtils {
 		if (list == null || list.length == 0)
 			return new FileTableContent[0];
 		FileTableContent[] contentList = createFileTableContentListFromFiles(list);
-		Arrays.sort(contentList, new Comparator<FileTableContent>() {
-
-			@Override
-			public int compare(FileTableContent o1, FileTableContent o2) {
-				return compareFiles(o1, o2, sortType, sortDirection);
-			}
-		});
+		Arrays.sort(contentList, (a, b) -> compareFiles(a, b, sortType, sortDirection));
 		return contentList;
 	}
 

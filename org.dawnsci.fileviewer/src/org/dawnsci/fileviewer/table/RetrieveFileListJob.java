@@ -42,7 +42,7 @@ public class RetrieveFileListJob extends Job {
 		if (quick) {
 			dirListCount = FileTableUtils.getDirectoryListCount(workerStateDir, filter, useRegex);
 		} else {
-			dirList = FileTableUtils.getDirectoryList(workerStateDir, sortType, direction, filter, useRegex, monitor);
+			dirList = FileTableUtils.getDirectoryList(workerStateDir, sortType, direction, filter, useRegex);
 			dirListCount = dirList.length;
 		}
 		if (dirList == null)
