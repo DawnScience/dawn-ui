@@ -15,7 +15,7 @@ public class FileTableContent {
 	private final String fileDate;
 	private String fileScanCmd = "";
 	
-	private final static Logger logger = LoggerFactory.getLogger(FileTableContent.class);
+	private static final Logger logger = LoggerFactory.getLogger(FileTableContent.class);
 	
 	static class FileScanCmdThread extends Thread {
 		private final File file;

@@ -2,6 +2,8 @@ package org.dawnsci.fileviewer.table;
 
 import java.io.File;
 import java.io.FileFilter;
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
@@ -18,64 +20,8 @@ public class FileTableUtils {
 	private FileTableUtils() {
 		
 	}
-	
-	/**
-	 * Sorts files lexicographically by name.
-	 * 
-	 * @param files
-	 *            the array of Files to be sorted
-	 */
-	public static void sortFiles(FileTableContent[] files, SortType sortType, SortDirection direction) {
-		/* Very lazy merge sort algorithm */
-		sortBlock(files, 0, files.length - 1, new FileTableContent[files.length], sortType, direction, null);
-	}
 
-	/**
-	 * Sorts files lexicographically by name.
-	 * 
-	 * @param files
-	 *            the array of Files to be sorted
-	 */
-	public static void sortFiles(FileTableContent[] files, SortType sortType, SortDirection direction, IProgressMonitor monitor) {
-		/* Very lazy merge sort algorithm */
-		sortBlock(files, 0, files.length - 1, new FileTableContent[files.length], sortType, direction, monitor);
-	}
-
-	private static void sortBlock(FileTableContent[] files, int start, int end, FileTableContent[] mergeTemp, SortType sortType, SortDirection direction, IProgressMonitor monitor) {
-		final int length = end - start + 1;
-		if (length < 8) {
-			for (int i = end; i > start; --i) {
-				for (int j = end; j > start; --j) {
-					if (compareFiles(files[j - 1], files[j], sortType, direction) > 0) {
-						final FileTableContent temp = files[j];
-						files[j] = files[j - 1];
-						files[j - 1] = temp;
-						if (monitor != null && monitor.isCanceled())
-							return;
-					}
-				}
-			}
-			return;
-		}
-		final int mid = (start + end) / 2;
-		sortBlock(files, start, mid, mergeTemp, sortType, direction, monitor);
-		sortBlock(files, mid + 1, end, mergeTemp, sortType, direction, monitor);
-		int x = start;
-		int y = mid + 1;
-		for (int i = 0; i < length; ++i) {
-			if ((x > mid) || ((y <= end) && compareFiles(files[x], files[y], sortType, direction) > 0)) {
-				mergeTemp[i] = files[y++];
-			} else {
-				mergeTemp[i] = files[x++];
-			}
-			if (monitor != null && monitor.isCanceled())
-				return;
-		}
-		for (int i = 0; i < length; ++i)
-			files[i + start] = mergeTemp[i];
-	}
-
-	public static int compareFiles(FileTableContent a, FileTableContent b, SortType sortType, SortDirection direction) {
+	public static int compareFiles(FileTableContent a, FileTableContent b, SortType sortType, SortDirection sortDirection) {
 		// sort case-sensitive files in a case-insensitive manner
 		int compare = 0;
 		switch (sortType) {
@@ -118,8 +64,8 @@ public class FileTableUtils {
 		default:
 			return 0;
 		}
-		if (Utils.SortDirection.DESC == direction)
-			return (-1 * compare);
+		if (Utils.SortDirection.DESC == sortDirection)
+			return -1 * compare;
 		return compare;
 	}
 
@@ -133,8 +79,8 @@ public class FileTableUtils {
 	 * @return an array of files this directory contains, may be empty but not
 	 *         null
 	 */
-	public static FileTableContent[] getDirectoryList(File file, SortType sortType, SortDirection direction, String filter, boolean useRegex) {
-		return getDirectoryList(file, sortType, direction, filter, useRegex, null);
+	public static FileTableContent[] getDirectoryList(File file, SortType sortType, SortDirection sortDirection, String filter, boolean useRegex) {
+		return getDirectoryList(file, sortType, sortDirection, filter, useRegex, null);
 	}
 
 	/**
@@ -147,7 +93,7 @@ public class FileTableUtils {
 	 * @return an array of files this directory contains, may be empty but not
 	 *         null
 	 */
-	public static FileTableContent[] getDirectoryList(File file, SortType sortType, SortDirection direction, String filter, boolean useRegex, IProgressMonitor monitor) {
+	public static FileTableContent[] getDirectoryList(File file, SortType sortType, SortDirection sortDirection, String filter, boolean useRegex, IProgressMonitor monitor) {
 		File[] list = null;
 		if (filter == null || "*".equals(filter) || Pattern.matches("^\\s*$", filter)) {
 			list = file.listFiles();
@@ -165,7 +111,13 @@ public class FileTableUtils {
 		if (list == null || list.length == 0)
 			return new FileTableContent[0];
 		FileTableContent[] contentList = createFileTableContentListFromFiles(list);
-		sortFiles(contentList, sortType, direction, monitor);
+		Arrays.sort(contentList, new Comparator<FileTableContent>() {
+
+			@Override
+			public int compare(FileTableContent o1, FileTableContent o2) {
+				return compareFiles(o1, o2, sortType, sortDirection);
+			}
+		});
 		return contentList;
 	}
 

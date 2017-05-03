@@ -111,7 +111,6 @@ public class TreeUtils {
 		/* Get directory listing */
 		File[] subFiles = null;
 		if (dir != null) {
-			//subFiles = Utils.getDirectoryList(null, SortType.NAME, FileTableViewerComparator.ASC, null, true);
 			subFiles = dir.listFiles();
 			Arrays.sort(subFiles);
 		}
