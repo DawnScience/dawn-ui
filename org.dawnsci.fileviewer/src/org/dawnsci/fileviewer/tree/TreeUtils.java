@@ -12,19 +12,26 @@
 package org.dawnsci.fileviewer.tree;
 
 import java.io.File;
+import java.util.Arrays;
 
 import org.dawnsci.fileviewer.FileViewer;
 import org.dawnsci.fileviewer.FileViewerConstants;
 import org.dawnsci.fileviewer.IconCache;
-import org.dawnsci.fileviewer.Utils;
-import org.dawnsci.fileviewer.Utils.SortType;
-import org.dawnsci.fileviewer.table.FileTableViewerComparator;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.TreeItem;
 
 public class TreeUtils {
 
+	public static int compareFiles(File a, File b) {
+		// sort case-sensitive files in a case-insensitive manner
+		int compare = 0;
+			compare = a.getName().compareToIgnoreCase(b.getName());
+			if (compare == 0)
+				compare = a.getName().compareTo(b.getName());
+		return compare;
+	}
+	
 	/**
 	 * Traverse the entire tree and update only what has changed.
 	 * 
@@ -44,7 +51,7 @@ public class TreeUtils {
 				continue;
 			}
 			final File masterFile = masterFiles[masterIndex];
-			int compare = Utils.compareFiles(masterFile, itemFile, SortType.NAME, FileTableViewerComparator.ASC);
+			int compare = compareFiles(masterFile, itemFile);
 			if (compare == 0) {
 				// same file, update it
 				treeRefreshItem(viewer, item, false, iconCache);
@@ -104,7 +111,9 @@ public class TreeUtils {
 		/* Get directory listing */
 		File[] subFiles = null;
 		if (dir != null) {
-			subFiles = Utils.getDirectoryList(dir, SortType.NAME, FileTableViewerComparator.ASC, null, true);
+			//subFiles = Utils.getDirectoryList(null, SortType.NAME, FileTableViewerComparator.ASC, null, true);
+			subFiles = dir.listFiles();
+			Arrays.sort(subFiles);
 		}
 		if (subFiles == null || subFiles.length == 0) {
 			/* Error or no contents */
@@ -133,7 +142,7 @@ public class TreeUtils {
 				item.dispose();
 				continue;
 			}
-			int compare = Utils.compareFiles(masterFile, itemFile, SortType.NAME, FileTableViewerComparator.ASC);
+			int compare = compareFiles(masterFile, itemFile);
 			if (compare == 0) {
 				// same file, update it
 				treeRefreshItem(viewer, item, false, iconCache);

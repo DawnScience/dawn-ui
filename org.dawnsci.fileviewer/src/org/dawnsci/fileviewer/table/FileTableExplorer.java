@@ -238,9 +238,9 @@ public class FileTableExplorer {
 	 * Returns the selected files in the table
 	 * @return
 	 */
-	public File[] getSelectedFiles() {
+	public FileTableContent[] getSelectedFiles() {
 		StructuredSelection selection = (StructuredSelection) tviewer.getSelection();
-		return Arrays.copyOf(selection.toArray(), selection.size(), File[].class);
+		return Arrays.copyOf(selection.toArray(), selection.size(), FileTableContent[].class);
 	}
 
 	private void createColumns(int[] widths) {
@@ -294,8 +294,8 @@ public class FileTableExplorer {
 					return;
 				sourceNames = new String[dndSelection.length];
 				for (int i = 0; i < dndSelection.length; i++) {
-					File file = (File) dndSelection[i].getData();
-					sourceNames[i] = file.getAbsolutePath();
+					FileTableContent content = (FileTableContent) dndSelection[i].getData();
+					sourceNames[i] = content.getFile().getAbsolutePath();
 				}
 				event.data = sourceNames;
 			}
@@ -456,12 +456,12 @@ public class FileTableExplorer {
 				if (retrieveDirJob != null && retrieveDirJob.getState() == Job.RUNNING) {
 					retrieveDirJob.cancel();
 				}
-				retrieveDirJob = new RetrieveFileListJob(workerStateDir, sortType, direction, filter, useRegex);
+				retrieveDirJob = new RetrieveFileListJob(workerStateDir, sortType, direction, filter, useRegex, false);
 				retrieveDirJob.setThread(workerThread);
 				retrieveDirJob.addJobChangeListener(new JobChangeAdapter() {
 					@Override
 					public void done(IJobChangeEvent event) {
-						File[] dirList = retrieveDirJob.getDirList();
+						FileTableContent[] dirList = retrieveDirJob.getDirList();
 						Display.getDefault().syncExec(new Runnable() {
 							public void run() {
 								if (tviewer != null && dirList != null) {

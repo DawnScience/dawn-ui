@@ -8,8 +8,6 @@
  */
 package org.dawnsci.fileviewer.table;
 
-import java.io.File;
-
 import org.eclipse.jface.viewers.ILazyContentProvider;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.Viewer;
@@ -17,7 +15,7 @@ import org.eclipse.jface.viewers.Viewer;
 public class FileTableContentProvider implements ILazyContentProvider {
 
 	private TableViewer viewer;
-	private File[] input;
+	private FileTableContent[] input;
 
 	public FileTableContentProvider(TableViewer viewer) {
 		this.viewer = viewer;
@@ -27,7 +25,7 @@ public class FileTableContentProvider implements ILazyContentProvider {
 	}
 
 	public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
-		this.input = (File[]) newInput;
+		this.input = (FileTableContent[]) newInput;
 	}
 
 	public void updateElement(int index) {
