@@ -46,7 +46,7 @@ public class FileTableContent {
 		FileScanCmdThread thread = new FileScanCmdThread(file);
 		thread.start();
 		try {
-			thread.join(100);
+			thread.join(200);
 			fileScanCmd = thread.getFileScanCmd();
 		} catch (InterruptedException e) {
 		}
