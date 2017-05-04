@@ -33,8 +33,6 @@ public class SuperSashPlotSystem3Composite extends Composite{
     private IRegion verticalSlice;
     private IRegion horizontalSlice;
     private IDataset image2;
-//    private SashForm right; 
-//    private SashForm left;
 	private MultipleOutputCurvesTableView outputCurves;
 	private SurfaceScatterPresenter ssp;
     private Group topRight;
@@ -191,9 +189,7 @@ public class SuperSashPlotSystem3Composite extends Composite{
 		sideImage.setLayoutData(sideImageData);
 		
 		GridData ld3 = new GridData(SWT.FILL, SWT.FILL, true, true);
-		
-//		ActionBarWrapper actionBarCompositeSide= ActionBarWrapper.createActionBars(sideImage, null);;
-        
+		 
 		plotSystem3.createPlotPart(sideImage, "Side Image", null, PlotType.IMAGE, null);
 		plotSystem3.getPlotComposite().setLayoutData(ld3);
 		
@@ -219,10 +215,6 @@ public class SuperSashPlotSystem3Composite extends Composite{
 			
 			RectangularROI vertROI = new RectangularROI((int) Math.round(ad[1]/4),0,(int) Math.round(ad[1]*0.5),ad[0],0);
 			verticalSlice.setROI(vertROI);
-//			
-//			horizontalSlice.setROI(horizROI);
-//			horizontalSlice.setActive(true);
-//			horizontalSlice.setMobile(true);
 			
 			plotSystem2.addRegion(horizontalSlice);
 			plotSystem2.addRegion(verticalSlice);
@@ -379,7 +371,6 @@ public class SuperSashPlotSystem3Composite extends Composite{
 				@SuppressWarnings("unchecked")
 				IDataset output = ssp.presenterDummyProcess(selection,
 																ssp.getImage(selection),
-																ssvs.getPlotSystemCompositeView().getPlotSystem(),
 																3);
 			
 				ILineTrace lt3 = VerticalHorizontalSlices.horizontalsliceBackgroundSubtracted(
@@ -464,7 +455,6 @@ public class SuperSashPlotSystem3Composite extends Composite{
 			@SuppressWarnings("unchecked")
 			IDataset output = ssp.presenterDummyProcess(selection,
 						ssp.getImage(selection),
-						ssvs.getPlotSystemCompositeView().getPlotSystem(),
 						3);
 		
 			ILineTrace lt3 = VerticalHorizontalSlices.horizontalsliceBackgroundSubtracted(

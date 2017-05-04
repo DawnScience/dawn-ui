@@ -139,7 +139,7 @@ public class PlotSystem1CompositeView extends Composite {
 	          
 	        }
 
-	      });
+	    });
 	    
 	    comboDropDown1.addSelectionListener(new SelectionListener() {
 	    	@Override

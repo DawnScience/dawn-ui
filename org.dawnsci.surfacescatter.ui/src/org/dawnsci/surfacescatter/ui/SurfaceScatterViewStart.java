@@ -11,6 +11,7 @@ import org.dawnsci.surfacescatter.MethodSettingEnum.MethodSetting;
 import org.dawnsci.surfacescatter.ProcessingMethodsEnum.ProccessingMethod;
 import org.dawnsci.surfacescatter.ReflectivityFluxCorrectionsForDialog;
 import org.dawnsci.surfacescatter.ReflectivityMetadataTitlesForDialog;
+import org.dawnsci.surfacescatter.SXRDNexusReader;
 import org.dawnsci.surfacescatter.SavingFormatEnum.SaveFormatSetting;
 import org.dawnsci.surfacescatter.TrackingMethodology;
 import org.dawnsci.surfacescatter.TrackingMethodology.TrackerType1;
@@ -19,11 +20,13 @@ import org.eclipse.dawnsci.analysis.api.roi.IROI;
 import org.eclipse.dawnsci.analysis.api.roi.IRectangularROI;
 import org.eclipse.dawnsci.analysis.dataset.roi.RectangularROI;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
+import org.eclipse.dawnsci.plotting.api.PlotType;
 import org.eclipse.dawnsci.plotting.api.region.IROIListener;
 import org.eclipse.dawnsci.plotting.api.region.IRegion;
 import org.eclipse.dawnsci.plotting.api.region.IRegion.RegionType;
 import org.eclipse.dawnsci.plotting.api.region.ROIEvent;
 import org.eclipse.dawnsci.plotting.api.trace.ILineTrace;
+import org.eclipse.dawnsci.plotting.api.trace.ITrace;
 import org.eclipse.january.DatasetException;
 import org.eclipse.january.dataset.Dataset;
 import org.eclipse.january.dataset.DatasetFactory;
@@ -84,6 +87,7 @@ public class SurfaceScatterViewStart extends Dialog {
 	private SaveFormatSetting sms;
 	private String option;
 	private boolean qConvert;
+	private RodAnalysisWindow raw ;
 	
 	public SurfaceScatterViewStart (Shell parentShell){
 
@@ -293,7 +297,7 @@ public class SurfaceScatterViewStart extends Dialog {
 		// Tab 2 Analysis
 		////////////////////////////////////////////////////// #
 
-		RodAnalysisWindow raw = new RodAnalysisWindow(folder,
+		raw = new RodAnalysisWindow(folder,
 														ssp,
 														this); 
 		
@@ -677,6 +681,8 @@ public class SurfaceScatterViewStart extends Dialog {
 	        }
 	    });
 		
+		
+		
 		ssps3c.getOutputCurves().getqAxis().addSelectionListener(new SelectionListener() {
 			
 			Display display = Display.getCurrent();
@@ -994,7 +1000,7 @@ public class SurfaceScatterViewStart extends Dialog {
 			
 			ssp.presenterDummyProcess(ssp.getSliderPos(), 
 									  ssp.getImage(ssp.getSliderPos()), 
-									  customComposite.getPlotSystem(), 
+//									  customComposite.getPlotSystem(), 
 									  4);
 			
 			if (getSsps3c().getOutputCurves().isVisible() != true) {
@@ -1046,16 +1052,12 @@ public class SurfaceScatterViewStart extends Dialog {
 	
 			}
 			
-//			analysisSash.setWeights(new int[] { 40, 60 });
-//			analysisSash.redraw();
-			
 			TrackingProgressAndAbortView tpaav 
 						= new TrackingProgressAndAbortView(getParentShell(), 
 														   ssp.getNumberOfImages(),
 														   ssp,
 														   SurfaceScatterViewStart.this);
 			tpaav.open();
-			
 			
 		}
 		
@@ -1429,6 +1431,64 @@ public class SurfaceScatterViewStart extends Dialog {
 
 			}
 		});
+		
+		outputCurves.getStoreAsNexus().addSelectionListener(new SelectionListener() {
+
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+
+				FileDialog fd = new FileDialog(getParentShell(), SWT.SAVE);
+
+				if(ssp.getNexusPath()!=null){
+					fd.setFilterPath(ssp.getNexusPath());
+				}
+				
+				String stitle = "r";
+				String path = "p";
+
+				if (fd.open() != null) {
+					stitle = fd.getFileName();
+					path = fd.getFilterPath();
+
+				}
+				
+				ssp.setNexusPath(path);
+				
+				String title = path + File.separator + stitle + ".nxs";
+
+				ssp.writeNexus(title);
+				
+				raw.getTabFolder().getTabList()[1].setEnabled(true);
+				
+				IPlottingSystem<Composite> pS = raw.getPlotSystem();
+				
+				ILineTrace lt = pS.createLineTrace(title);
+				
+				IDataset[] ltData = SXRDNexusReader.getScannedVariableAndFhkl(title);
+				
+				lt.setData(ltData[0], ltData[1]);		
+				
+				pS.addTrace(lt);
+				
+				
+				try{
+					ITrace t = pS.getTrace("Blank Curve");
+					pS.removeTrace(t);
+				}
+				catch(Exception n){
+					
+				}
+				
+				pS.autoscaleAxes();
+					
+			}
+
+			@Override
+			public void widgetDefaultSelected(SelectionEvent e) {
+
+			}
+		});
+		
 	}
 
 	public int[] getCorrectionsDropDownArray() {

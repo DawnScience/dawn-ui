@@ -281,9 +281,8 @@ public class AnalysisTabRightPane extends Dialog {
 		
 				
 				IDataset output = ssp.presenterDummyProcess(selection,
-						ssp.getImage(selection),
-						ssvs.getPlotSystemCompositeView().getPlotSystem(),
-						3);
+															ssp.getImage(selection),
+															3);
 		
 				ILineTrace lt3 = VerticalHorizontalSlices.horizontalsliceBackgroundSubtracted(
 						customComposite2.getRegions()[0].getROI().getBounds(),

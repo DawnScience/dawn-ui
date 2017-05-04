@@ -30,11 +30,6 @@ public class TrackingProgressAndAbortView extends Dialog {
 	public TrackingProgressAndAbortView(Shell parentShell, 
 										int maximum,
 										SurfaceScatterPresenter ssp,
-//										IPlottingSystem<Composite> subImage,
-//										IPlottingSystem<Composite> outputCurvesPlotSystem,
-//										IPlottingSystem<Composite> mainImagePlotSytem,
-//										TabFolder backgroundTabFolder,
-//										IPlottingSystem<Composite> subBgImage,
 										SurfaceScatterViewStart ssvs) {
 		
 		
@@ -95,15 +90,7 @@ public class TrackingProgressAndAbortView extends Dialog {
 			tj.setTPAAV(TrackingProgressAndAbortView.this);
 			tj.runTJ1();
 			
-//		
-//			ssp.runTrackingJob(subImage,
-//							   outputCurvesPlotSystem, 
-//							   mainImagePlotSytem,
-//							   backgroundTabFolder, 
-//							   subBgImage, 
-//							   progress,
-//							   this
-//							  );
+
 		}
 		catch(IndexOutOfBoundsException d){
 			ssp.boundariesWarning();
@@ -146,19 +133,7 @@ public class TrackingProgressAndAbortView extends Dialog {
 	    return true;
 	}
 	
-//	@Override
-//    protected void createButtonsForButtonBar(Composite parent) {
-//            createButton(parent, IDialogConstants.OK_ID, "OK", true);
-//            override = createButton(parent, IDialogConstants.CANCEL_ID,
-//                           "Override", false);
-//    }
-//	
-//	public Button getOverride(){
-//		return override;
-//	}
-//	
-	
-	
+
 	
 	public ProgressBar getProgressBar(){
 		return progress;

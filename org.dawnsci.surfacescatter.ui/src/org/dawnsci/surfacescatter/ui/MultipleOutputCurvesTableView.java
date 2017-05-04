@@ -1,7 +1,6 @@
 package org.dawnsci.surfacescatter.ui;
 
 import org.dawb.common.ui.widgets.ActionBarWrapper;
-import org.dawnsci.surfacescatter.AnalaysisMethodologies;
 import org.dawnsci.surfacescatter.DataModel;
 import org.dawnsci.surfacescatter.ExampleModel;
 import org.dawnsci.surfacescatter.IntensityDisplayEnum;
@@ -9,7 +8,6 @@ import org.dawnsci.surfacescatter.IntensityDisplayEnum.IntensityDisplaySetting;
 import org.dawnsci.surfacescatter.SavingFormatEnum;
 import org.dawnsci.surfacescatter.SavingFormatEnum.SaveFormatSetting;
 import org.dawnsci.surfacescatter.SuperModel;
-import org.dawnsci.surfacescatter.AnalaysisMethodologies.Methodology;
 import org.eclipse.dawnsci.analysis.dataset.roi.RectangularROI;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.PlotType;
@@ -20,7 +18,6 @@ import org.eclipse.dawnsci.plotting.api.trace.ILineTrace;
 import org.eclipse.january.dataset.Dataset;
 import org.eclipse.january.dataset.DatasetFactory;
 import org.eclipse.january.dataset.IDataset;
-import org.eclipse.jface.viewers.ComboViewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.layout.GridData;
@@ -45,6 +42,7 @@ public class MultipleOutputCurvesTableView extends Composite {
 	private Button errors;
 	private Button overlapZoom;
 	private Button qAxis;
+	private Button storeAsNexus;
 	private IRegion marker;
 	
 	public MultipleOutputCurvesTableView (Composite parent, 
@@ -112,7 +110,11 @@ public class MultipleOutputCurvesTableView extends Composite {
 		gd_secondField.grabExcessVerticalSpace = true;
 		gd_secondField.heightHint = 100;
 
-		plotSystem4.createPlotPart(sashForm, "ExamplePlot", actionBarComposite, PlotType.IMAGE, null);
+		plotSystem4.createPlotPart(sashForm,
+								   "ExamplePlot", 
+								   actionBarComposite, 
+								   PlotType.IMAGE, 
+								   null);
 			
 		lt = plotSystem4.createLineTrace("Blank Curve");
 		IDataset backup = DatasetFactory.createRange(0, 200, 1, Dataset.FLOAT64);
@@ -130,7 +132,7 @@ public class MultipleOutputCurvesTableView extends Composite {
 		plotSystem4.getPlotComposite().setLayoutData(gd_secondField);
 
 		Group extraButtons = new Group(sashForm, SWT.NULL);
-		GridLayout extraButtonsLayout = new GridLayout(2,true);
+		GridLayout extraButtonsLayout = new GridLayout(3,true);
 		GridData extraButtonsData = new GridData(SWT.FILL, SWT.NULL, true, false);
 		extraButtons.setLayout(extraButtonsLayout);
 		extraButtons.setLayoutData(extraButtonsData);
@@ -143,6 +145,12 @@ public class MultipleOutputCurvesTableView extends Composite {
 		qAxis.setText("q Axis");
 		qAxis.setEnabled(false);
 		qAxis.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		
+		storeAsNexus = new Button(extraButtons, SWT.PUSH);
+		storeAsNexus.setText("Store As Nexus");
+		storeAsNexus.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+	    
+		
 		
 		sashForm.setWeights(new int[]{10,7,75,8});
 	}
@@ -284,5 +292,14 @@ public class MultipleOutputCurvesTableView extends Composite {
 		RectangularROI r = new RectangularROI(j ,0.1,0,0.1,0);
 		imageNo.setROI(r);
 	}
+	
+	public Button getStoreAsNexus() {
+		return storeAsNexus;
+	}
+
+	public void setStoreAsNexus(Button storeAsNexus) {
+		this.storeAsNexus = storeAsNexus;
+	}
+
 	
 }

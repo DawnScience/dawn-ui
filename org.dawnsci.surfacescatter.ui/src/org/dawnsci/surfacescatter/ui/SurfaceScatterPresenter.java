@@ -19,7 +19,9 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.TreeMap;
+
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.math3.util.MathArrays;
 import org.dawnsci.surfacescatter.AnalaysisMethodologies;
 import org.dawnsci.surfacescatter.AnalaysisMethodologies.Methodology;
 import org.dawnsci.surfacescatter.BoxSlicerRodScanUtilsForDialog;
@@ -41,6 +43,8 @@ import org.dawnsci.surfacescatter.PolynomialOverlap;
 import org.dawnsci.surfacescatter.ProcessingMethodsEnum;
 import org.dawnsci.surfacescatter.ProcessingMethodsEnum.ProccessingMethod;
 import org.dawnsci.surfacescatter.ReflectivityMetadataTitlesForDialog;
+import org.dawnsci.surfacescatter.RodObjectNexusBuilderModel;
+import org.dawnsci.surfacescatter.RodObjectNexusUtils;
 import org.dawnsci.surfacescatter.SXRDGeometricCorrections;
 import org.dawnsci.surfacescatter.SplineInterpolationTracker;
 import org.dawnsci.surfacescatter.StitchedOutputWithErrors;
@@ -59,6 +63,7 @@ import org.eclipse.january.dataset.DTypeUtils;
 import org.eclipse.january.dataset.Dataset;
 import org.eclipse.january.dataset.DatasetFactory;
 import org.eclipse.january.dataset.DatasetUtils;
+import org.eclipse.january.dataset.DoubleDataset;
 import org.eclipse.january.dataset.IDataset;
 import org.eclipse.january.dataset.ILazyDataset;
 import org.eclipse.january.dataset.Maths;
@@ -72,6 +77,7 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
+
 import uk.ac.diamond.scisoft.analysis.io.LoaderFactory;
 
 public class SurfaceScatterPresenter {
@@ -104,11 +110,25 @@ public class SurfaceScatterPresenter {
 		sm.setImageFolderPath(imageFolderPath);
 
 		ILazyDataset[] imageArray = new ILazyDataset[filepaths.length];
+		//////imageArray is an array of the image ILazyDatasets 
+		
 		IDataset[] xArray = new IDataset[filepaths.length];
+		////xArray is an array of the l params (for a rod)
+		
+		IDataset[] tifNamesArray = new IDataset[filepaths.length];
+		////tifNamesArray is an array of the tif names contained in each .dat (one dataset of tif names per dat in the array)
+		
+		
 		TreeMap<Integer, ILazyDataset> som = new TreeMap<Integer, ILazyDataset>();
 		ArrayList<Integer> imageRefList = new ArrayList<>();
+		/////imageRefList is the number that the image is read in at, i.e. the nth image to be read
+		
+		
 		int imageRef = 0;
 		ArrayList<Integer> imagesToFilepathRef = new ArrayList<Integer>();
+		
+		//////imagesToFilepathRef: once the images have been sorted into an ascending "array", the position on that array of an image
+		//////corresponds to an integer in this list, which corresponds to the position of that image's dat file in String[] filepaths
 		
 		try {
 		
@@ -157,10 +177,34 @@ public class SurfaceScatterPresenter {
 						
 						dh1 = LoaderFactory.getData(to.toString());
 						
+						
+						//////////////////getting an array of .tifs
+						
+						String[] tifNames = StringUtils.substringsBetween(content, File.separator, ".tif");
+						String[] tifNamesOut = new String[tifNames.length];
+						
+						for(int w = 0; w<tifNames.length; w++){
+							String t = tifNames[w];
+							
+							if(t.contains(File.separator)){
+								t = StringUtils.substringAfterLast(t,File.separator);
+							}
+							
+							t = imageFolderPath + File.separator + t +".tif";
+							
+							System.out.println(t);
+							
+							tifNamesOut[w] = t;
+						}
+						
+						Dataset tifNamesDatasetOut = DatasetFactory.createFromObject(tifNamesOut);
+						
+						models.get(id).setTifNames(tifNamesDatasetOut);
+						tifNamesArray[id] = tifNamesDatasetOut;
+						
 					}
 					
 					ILazyDataset ild = null;
-					
 					
 					ild = dh1.getLazyDataset(gm.getImageName());
 					
@@ -180,6 +224,7 @@ public class SurfaceScatterPresenter {
 					models.get(id).setDatImages(ild);
 					models.get(id).setFilepath(filepaths[id]);
 					imageArray[id] = ild;
+//					imageArray is an array of the images in read-in order
 	
 					for (int f = 0; f < (imageArray[id].getShape()[0]); f++) {
 	
@@ -279,6 +324,7 @@ public class SurfaceScatterPresenter {
 		updateAnalysisMethodology(0, 1, 0, "10");
 		
 		Dataset xArrayCon = DatasetFactory.zeros(1);
+		Dataset tifNamesCon = DatasetFactory.zeros(1);
 		
 		AggregateDataset imageCon = null;
 		
@@ -293,6 +339,9 @@ public class SurfaceScatterPresenter {
 		
 		try{
 			xArrayCon = DatasetUtils.concatenate(xArray, 0);
+//			xArrayCon is an unsorted, but concatenated DoubleDataset of l values
+			tifNamesCon = DatasetUtils.concatenate(tifNamesArray, 0);;
+//			tifNamesCon is an unsorted, but concatenated DoubleDataset of l tif names
 			numberOfImages = xArrayCon.getSize();
 		}
 		catch(NullPointerException e){
@@ -300,50 +349,78 @@ public class SurfaceScatterPresenter {
 		}
 				
 		Dataset imageRefDat = DatasetFactory.ones(imageRefList.size());
+		
+//		imageRefDat is a dataset, equal to imageRefList (list of the integer number of the image that is read in - the nth read in, for example), 
+//		and will be sorted based on the xArrayCon, which is the"l" values (for a rod)
+		
 		Dataset imagesToFilepathRefDat = DatasetFactory.ones(imageRefList.size());
-
+		
+//		imagesToFilepathRefDat is a dataset, equal to imagesToFilepathRef (list of the integer number of the dat (in String[] filepaths) of the image that is read in at that point- the nth read in, for example), 
+//		and will be sorted based on the xArrayCon, which is the"l" values (for a rod)
+		
 		for (int sd = 0; sd < imageRefList.size(); sd++) {
 			imageRefDat.set(imageRefList.get(sd), sd);
 			imagesToFilepathRefDat.set(imagesToFilepathRef.get(sd), sd);
 		}
 
+		sm.setSortedDatIntsInOrderDataset(imagesToFilepathRefDat);
+		
 		Dataset xArrayConClone = xArrayCon.clone();
-
+   
+		DoubleDataset xArrayConCloneDouble = (DoubleDataset) xArrayConClone.clone();
+		
 		try{
 			DatasetUtils.sort(xArrayCon, imageRefDat);
+//			so now we have the image number in imageArray (imageRefDat) sorted by "l" value xArrayCon
 			DatasetUtils.sort(xArrayConClone, imagesToFilepathRefDat);
-
-				
-		ILazyDataset[] imageSortedDat = new ILazyDataset[imageRefList.size()];
-		int[] filepathsSortedArray = new int[imageRefList.size()];
-		noImages = imageRefList.size();
-
-		for (int y = 0; y < imageRefList.size(); y++) {
-			filepathsSortedArray[y] = imagesToFilepathRefDat.getInt(y);
-		}
-
-		sm.setFilepathsSortedArray(filepathsSortedArray);
-
-		for (int rf = 0; rf < imageRefList.size(); rf++) {
-			int pos = imageRefDat.getInt(rf);
-			imageSortedDat[rf] = som.get(pos);
-		}
-
-		sm.setImages(imageSortedDat);
-		sm.setImageStack(imageCon);
-		sm.setSortedX(xArrayCon);
-
-		SliceND slice2 = new SliceND(imageCon.getShape());
-		slice2.setSlice(0, 0, 1, 1);
-		Dataset nullImage = (Dataset) imageCon.getSlice(slice2);
-
-		sm.setNullImage((Dataset) imageCon.getSlice(slice2));
-
-		sm.setNumberOfImages(numberOfImages);
-		sm.setNullImage(nullImage);
+//			so now we have the dat number in filepaths (imagesToFilepathRefDat) sorted by "l" value xArrayCon
+			Dataset sortedTifNamesCon = this.sortStrings(xArrayConCloneDouble, tifNamesCon);
+//			so now we have the tif names sorted by "l" value xArrayCon
+			
+			ILazyDataset[] imageSortedDat = new ILazyDataset[imageRefList.size()];
+	//		imageSortedDat this is the array of sorted images - sorte according to "l"
+			
+			int[] filepathsSortedArray = new int[imageRefList.size()];
+	//		filepathsSortedArray is the .dat positions in filepaths  - sorted by images "l" values
+			noImages = imageRefList.size();
+	
+	
+			String[] datNamesInOrder = new String[imageRefList.size()];
+			
+			for(int f = 0; f<imageRefList.size(); f++ ){
+				datNamesInOrder[f] = filepaths[imagesToFilepathRefDat.getInt(f)];
+			}
+			
+			Dataset sortedDatNamesInOrderDataset = DatasetFactory.createFromObject(datNamesInOrder);
+			sm.setSortedDatNamesInOrderDataset(sortedDatNamesInOrderDataset);
+			
+			for (int y = 0; y < imageRefList.size(); y++) {
+				filepathsSortedArray[y] = imagesToFilepathRefDat.getInt(y);
+			}
+	
+			sm.setFilepathsSortedArray(filepathsSortedArray);
+	
+			for (int rf = 0; rf < imageRefList.size(); rf++) {
+				int pos = imageRefDat.getInt(rf);
+				imageSortedDat[rf] = som.get(pos);
+			}
+	
+			sm.setImages(imageSortedDat);
+			sm.setImageStack(imageCon);
+			sm.setSortedX(xArrayCon);
+			sm.setSortedTifFiles(sortedTifNamesCon);
+	
+			SliceND slice2 = new SliceND(imageCon.getShape());
+			slice2.setSlice(0, 0, 1, 1);
+			Dataset nullImage = (Dataset) imageCon.getSlice(slice2);
+	
+			sm.setNullImage((Dataset) imageCon.getSlice(slice2));
+	
+			sm.setNumberOfImages(numberOfImages);
+			sm.setNullImage(nullImage);
 		}
 		catch(Exception e){
-			
+			System.out.println(e.getMessage());
 		}
 	}
 	
@@ -1167,7 +1244,7 @@ public class SurfaceScatterPresenter {
 
 	public IDataset presenterDummyProcess(int selection, 
 										  IDataset image, 
-										  IPlottingSystem<Composite> pS,
+//										  IPlottingSystem<Composite> pS,
 										  int trackingMarker) {
 
 		int j = sm.getFilepathsSortedArray()[selection];
@@ -1179,6 +1256,7 @@ public class SurfaceScatterPresenter {
 													 models.get(j), 
 													 dms.get(j), 
 													 gm, 
+//													 pS,
 													 MethodSetting.toInt(sm.getCorrectionSelection()), 
 													 imagePosInOriginalDat[selection], 
 													 trackingMarker,
@@ -1378,6 +1456,24 @@ public class SurfaceScatterPresenter {
 	public int getNoImages() {
 		return noImages;
 	}
+	
+	public void writeNexus(String nexusFilePath){
+		RodObjectNexusBuilderModel rnbm = new RodObjectNexusBuilderModel();
+		rnbm.setSm(sm);
+		rnbm.setDms(dms);
+		rnbm.setGm(gm);
+		rnbm.setModels(models);
+		rnbm.setFilepath(nexusFilePath);
+		
+		RodObjectNexusUtils ronu = new RodObjectNexusUtils(rnbm);
+		
+	}
+	
+	
+	
+	
+	
+	
 	
 	public void genXSave(String title){
 	
@@ -2283,6 +2379,14 @@ public class SurfaceScatterPresenter {
 		sm.qConversion();
 	}
 	
+	public void setNexusPath(String np){
+		sm.setNexusPath(np);
+	}
+	
+	public String getNexusPath(){
+		return sm.getNexusPath();
+	}
+	
 	public void stitchAndPresent(MultipleOutputCurvesTableView outputCurves) {
 
 		outputCurves.resetCurve();
@@ -2509,5 +2613,56 @@ public class SurfaceScatterPresenter {
 	public void createGm(){
 		gm = new GeometricParametersModel();
 	}
+	
+	
+	public static Dataset sortStrings(DoubleDataset a, Dataset b) {
+		if (!DTypeUtils.isDTypeNumerical(a.getDType())) {
+			throw new UnsupportedOperationException("Sorting non-numerical datasets not supported yet");
+		}
+
+		// gather all datasets as double dataset copies
+		
+		DoubleDataset s = (DoubleDataset) DatasetFactory.createFromObject(a);
+				
+		int l = b == null ? 0 : b.getSize();
+		Dataset[] t = new Dataset[l];
+		int n = 0;
+		for (int i = 0; i < l; i++) {
+			if (b.getObject(i) != null) {
+
+				t[i] = DatasetFactory.createFromObject(b.getObject(i));
+				n++;
+			}
+		}
+
+		double[] positionsInB  = new double[l]; 
+		
+		for (int r = 0; r<l; r++){
+			positionsInB[r] = r;
+		}
+		
+//		String[][] y = new String[n][];
+//		for (int i = 0, j = 0; i < l; i++) {
+//			if (t[i] != null) {
+//				y[j++] = t[i].getObject();
+//			}
+//		}
+
+		MathArrays.sortInPlace(s.getData(), positionsInB);
+
+		String[] sortedB  = new String[l]; 
+		
+		for (int r = 0; r<l; r++){
+			sortedB[r] = b.getString((int) positionsInB[r]);
+		}
+		
+		Dataset outputB = DatasetFactory.createFromObject(sortedB);
+		
+		a.setSlice(s);
+		
+		return outputB;
+		
+	}
+	
 
 }

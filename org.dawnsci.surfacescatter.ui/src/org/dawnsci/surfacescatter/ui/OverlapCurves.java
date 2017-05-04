@@ -43,7 +43,6 @@ public class OverlapCurves extends Composite {
     					int style, 
     					ArrayList<IDataset> arrayILDy, 
     					ArrayList<IDataset> arrayILDx, 
-//    					String[] filepaths,
     					String title, 
     					OverlapUIModel model) {
     	
@@ -63,11 +62,9 @@ public class OverlapCurves extends Composite {
         this.createContents(arrayILDy, arrayILDx,  model);       
     }
      
-//    filepaths,
     
     public void createContents(ArrayList<IDataset> arrayILDy, 
     						   ArrayList<IDataset> arrayILDx, 
-//    						   String[] filepaths,
     						   OverlapUIModel model) {
     	
     	model.getROIList().clear();
@@ -134,7 +131,7 @@ public class OverlapCurves extends Composite {
 		}
 
 
-        plotSystem.getPlotComposite().setLayoutData(gd_secondField);
+       plotSystem.getPlotComposite().setLayoutData(gd_secondField);
 
        ArrayList<IRectangularROI> roiList = new ArrayList<IRectangularROI>();
        IRectangularROI nullROI = null;

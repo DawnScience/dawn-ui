@@ -192,6 +192,9 @@ public class TrackingHandler {
 																						 model, 
 																						 dm, 
 																						 gm, 
+
+//																						 plotSystem,
+//																						 ssvsPS,
 																						 correctionSelection, 
 																						 imagePosInOriginalDat[imageNumber], 
 																						 trackingMarker, 
@@ -273,6 +276,9 @@ public class TrackingHandler {
 																			 model, 
 																			 dm, 
 																			 gm, 
+
+//																			 plotSystem,
+//																			 ssvsPS,
 																			 correctionSelection, 
 																			 imagePosInOriginalDat[k], 
 																			 trackingMarker, 
@@ -333,6 +339,9 @@ public class TrackingHandler {
 																				 model, 
 																				 dm, 
 																				 gm, 
+
+//																				 plotSystem,
+//																				 ssvsPS,
 																				 correctionSelection, 
 																				 imagePosInOriginalDat[k], 
 																				 trackingMarker, 
@@ -609,6 +618,9 @@ class trackingJob2 {
 																				 model, 
 																				 dm, 
 																				 gm, 
+
+//																				 plotSystem,
+//																				 ssvsPS,
 																				 correctionSelection, 
 																				 imagePosInOriginalDat[k], 
 																				 trackingMarker, 
@@ -1127,6 +1139,9 @@ class trackingJob2 {
 																		 model, 
 																		 dm, 
 																		 gm, 
+
+//																		 plotSystem,
+//																		 ssvsPS,
 																		 correctionSelection, 
 																		 imagePosInOriginalDat[k], 
 																		 trackingMarker, 

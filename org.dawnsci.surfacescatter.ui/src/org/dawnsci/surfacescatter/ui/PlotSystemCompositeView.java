@@ -114,8 +114,7 @@ public class PlotSystemCompositeView extends Composite {
 					generalUpdate();
 					
 				}
-			});
-    	
+		});
     	
     	Display display = Display.getCurrent();
         Color gold = display.getSystemColor(SWT.COLOR_DARK_YELLOW);
@@ -451,7 +450,6 @@ public class PlotSystemCompositeView extends Composite {
 	    InputTileGenerator tile0 = new InputTileGenerator("Processing Method:", processing);
 	    processingMode = tile0.getCombo();
 
-	    
 	    for(ProccessingMethod  i: ProccessingMethod.values()){
 	    	processingMode.add(ProccessingMethod.toString(i));
 	    }
@@ -580,8 +578,6 @@ public class PlotSystemCompositeView extends Composite {
 			}
 		});
     	
-    	
-    	
     	accept.addSelectionListener(new SelectionListener() {
 			
 			@Override
@@ -599,9 +595,6 @@ public class PlotSystemCompositeView extends Composite {
 				
 			}
 		});
-    	
-    	
-    	
     	
     	increment.addSelectionListener(new SelectionListener() {
 			
