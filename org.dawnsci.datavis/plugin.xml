@@ -57,11 +57,30 @@
                </with>
             </visibleWhen>
          </menu>
+         <menu
+               id="org.dawnsci.datavis.plot"
+               label="Plot"
+               mnemonic="P">
+            <visibleWhen
+                  checkEnabled="false">
+               <with
+                     variable="activeWorkbenchWindow.activePerspective">
+                  <equals
+                        value="org.dawnsci.datavis.DataVisPerspective">
+                  </equals>
+               </with>
+            </visibleWhen>
+         </menu>
       </menuContribution>
       <menuContribution
             allPopups="false"
             class="org.dawnsci.datavis.RecentFoldersContributionFactory"
             locationURI="menu:org.dawnsci.datavis.file">
+      </menuContribution>
+      <menuContribution
+            allPopups="false"
+            class="org.dawnsci.datavis.PlotModifierContributionFactory"
+            locationURI="menu:org.dawnsci.datavis.plot">
       </menuContribution>
    </extension>
    <extension

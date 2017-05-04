@@ -8,7 +8,7 @@ public interface IPlotDataModifier {
 	
 	public void init();
 	
-	public int getSupportedRank();
+	public boolean supportsRank(int rank);
 	
 	public String getName();
 	
