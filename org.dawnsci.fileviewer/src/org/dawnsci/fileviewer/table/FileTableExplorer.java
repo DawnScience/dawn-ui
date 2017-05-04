@@ -19,6 +19,7 @@ import org.dawnsci.fileviewer.FileViewer;
 import org.dawnsci.fileviewer.FileViewerConstants;
 import org.dawnsci.fileviewer.Utils;
 import org.dawnsci.fileviewer.Utils.SortType;
+import org.dawnsci.fileviewer.Utils.SortDirection;
 import org.eclipse.core.runtime.jobs.IJobChangeEvent;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.core.runtime.jobs.JobChangeAdapter;
@@ -90,7 +91,7 @@ public class FileTableExplorer {
 	// Sort type
 	private volatile SortType sortType = SortType.NAME;
 	// Sort direction
-	private volatile int sortDirection = 0;
+	private volatile SortDirection sortDirection = SortDirection.NONE;
 
 	/*
 	 * Job used to retrieve the list of file/directory in a folder
@@ -238,9 +239,9 @@ public class FileTableExplorer {
 	 * Returns the selected files in the table
 	 * @return
 	 */
-	public File[] getSelectedFiles() {
+	public FileTableContent[] getSelectedFiles() {
 		StructuredSelection selection = (StructuredSelection) tviewer.getSelection();
-		return Arrays.copyOf(selection.toArray(), selection.size(), File[].class);
+		return Arrays.copyOf(selection.toArray(), selection.size(), FileTableContent[].class);
 	}
 
 	private void createColumns(int[] widths) {
@@ -294,8 +295,8 @@ public class FileTableExplorer {
 					return;
 				sourceNames = new String[dndSelection.length];
 				for (int i = 0; i < dndSelection.length; i++) {
-					File file = (File) dndSelection[i].getData();
-					sourceNames[i] = file.getAbsolutePath();
+					FileTableContent content = (FileTableContent) dndSelection[i].getData();
+					sourceNames[i] = content.getFile().getAbsolutePath();
 				}
 				event.data = sourceNames;
 			}
@@ -392,7 +393,7 @@ public class FileTableExplorer {
 	 * @param force
 	 *            if true causes a refresh even if the data is the same
 	 */
-	public void workerUpdate(File dir, boolean force, SortType type, int direction) {
+	public void workerUpdate(File dir, boolean force, SortType type, SortDirection direction) {
 		if (dir == null)
 			return;
 		if ((!force) && (workerNextDir != null) && (workerNextDir.equals(dir)))
@@ -443,7 +444,7 @@ public class FileTableExplorer {
 	/**
 	 * Updates the table's contents
 	 */
-	private void workerExecute(SortType sortType, int direction, String filter, boolean useRegex) {
+	private void workerExecute(SortType sortType, SortDirection direction, String filter, boolean useRegex) {
 		// Clear existing information
 		Display.getDefault().syncExec(new Runnable() {
 			@Override
@@ -456,12 +457,12 @@ public class FileTableExplorer {
 				if (retrieveDirJob != null && retrieveDirJob.getState() == Job.RUNNING) {
 					retrieveDirJob.cancel();
 				}
-				retrieveDirJob = new RetrieveFileListJob(workerStateDir, sortType, direction, filter, useRegex);
+				retrieveDirJob = new RetrieveFileListJob(workerStateDir, sortType, direction, filter, useRegex, false);
 				retrieveDirJob.setThread(workerThread);
 				retrieveDirJob.addJobChangeListener(new JobChangeAdapter() {
 					@Override
 					public void done(IJobChangeEvent event) {
-						File[] dirList = retrieveDirJob.getDirList();
+						FileTableContent[] dirList = retrieveDirJob.getDirList();
 						Display.getDefault().syncExec(new Runnable() {
 							public void run() {
 								if (tviewer != null && dirList != null) {
@@ -493,7 +494,7 @@ public class FileTableExplorer {
 		return sortType;
 	}
 
-	public int getSortDirection() {
+	public SortDirection getSortDirection() {
 		return sortDirection;
 	}
 

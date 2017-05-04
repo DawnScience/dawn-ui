@@ -11,7 +11,6 @@ package org.dawnsci.fileviewer.table;
 import java.io.File;
 
 import org.dawnsci.fileviewer.FileViewer;
-import org.dawnsci.fileviewer.Utils;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.program.Program;
@@ -29,9 +28,10 @@ public class FileTableColumnLabelProvider extends ColumnLabelProvider {
 	@Override
 	public Image getImage(Object element) {
 		Image iconImage = null;
-		if (element instanceof File && columnIndex == 0) {
-			File file = (File) element;
-			String nameString = file.getName();
+		if (element instanceof FileTableContent && columnIndex == 0) {
+			FileTableContent content = (FileTableContent) element;
+			File file = content.getFile();
+			String nameString = content.getFileName();
 			if (file.isDirectory()) {
 				iconImage = viewer.getIconCache().stockImages[viewer.getIconCache().iconClosedFolder];
 			} else {
@@ -58,18 +58,18 @@ public class FileTableColumnLabelProvider extends ColumnLabelProvider {
 
 	@Override
 	public String getText(Object element) {
-		File file = (File) element;
+		FileTableContent content = (FileTableContent) element;
 		switch (this.columnIndex) {
 		case 0:
-			return file.getName();
+			return content.getFileName();
 		case 1:
-			return Utils.getFileSizeString(file, viewer.isSizeSIUnit());
+			return viewer.isSizeSIUnit() ? content.getFileSizeSI() : content.getFileSizeReg();
 		case 2:
-			return Utils.getFileTypeString(file);
+			return content.getFileType();
 		case 3:
-			return Utils.getFileDateString(file);
+			return content.getFileDate();
 		case 4:
-			return Utils.getFileScanCmdString(file);
+			return content.getFileScanCmd();
 		default:
 			break;
 		}

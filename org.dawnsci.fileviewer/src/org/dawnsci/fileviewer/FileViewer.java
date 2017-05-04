@@ -13,18 +13,18 @@ package org.dawnsci.fileviewer;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.dawb.common.ui.util.EclipseUtils;
-import org.dawnsci.fileviewer.Utils.SortType;
 import org.dawnsci.fileviewer.handlers.ConvertHandler;
 import org.dawnsci.fileviewer.handlers.LayoutHandler;
 import org.dawnsci.fileviewer.handlers.OpenHandler;
 import org.dawnsci.fileviewer.handlers.ParentHandler;
 import org.dawnsci.fileviewer.handlers.PreferencesHandler;
 import org.dawnsci.fileviewer.handlers.RefreshHandler;
+import org.dawnsci.fileviewer.table.FileTableContent;
 import org.dawnsci.fileviewer.table.FileTableExplorer;
-import org.dawnsci.fileviewer.table.FileTableViewerComparator;
 import org.dawnsci.fileviewer.table.RetrieveFileListJob;
 import org.dawnsci.fileviewer.tree.FileTreeExplorer;
 import org.dawnsci.fileviewer.tree.TreeUtils;
@@ -334,7 +334,7 @@ public class FileViewer {
 				} else {
 					String directory = text.substring(0, text.lastIndexOf(File.separator));
 					// open file in editor
-					doDefaultFileAction(new File[] {new File(text)});
+					doDefaultFileAction(new FileTableContent[] {new FileTableContent(new File(text))});
 					// open directory
 					notifySelectedDirectory(new File(directory));
 				}
@@ -435,7 +435,7 @@ public class FileViewer {
 	 *            the files that were selected, null or empty array indicates no
 	 *            active selection
 	 */
-	public void notifySelectedFiles(File[] files) {
+	public void notifySelectedFiles(FileTableContent[] files) {
 		/*
 		 * Details: Update the details that are visible on screen.
 		 */
@@ -444,7 +444,7 @@ public class FileViewer {
 					new Object[] { new Integer(files.length) }));
 			long fileSize = 0L;
 			for (int i = 0; i < files.length; ++i) {
-				fileSize += files[i].length();
+				fileSize += files[i].getFile().length();
 			}
 			diskSpaceLabel.setText(Utils.getResourceString("details.FileSize.text", new Object[] { new Long(fileSize) }));
 		} else {
@@ -455,13 +455,12 @@ public class FileViewer {
 				if (retrieveDirJob != null && retrieveDirJob.getState() == Job.RUNNING) {
 					retrieveDirJob.cancel();
 				}
-				retrieveDirJob = new RetrieveFileListJob(currentDirectory, tableExplo.getSortType(), tableExplo.getSortDirection(), tableExplo.getFilter(), tableExplo.getUseRegex());
+				retrieveDirJob = new RetrieveFileListJob(currentDirectory, tableExplo.getSortType(), tableExplo.getSortDirection(), tableExplo.getFilter(), tableExplo.getUseRegex(), true);
 //				retrieveDirJob.setThread(workerThread);
 				retrieveDirJob.addJobChangeListener(new JobChangeAdapter() {
 					@Override
 					public void done(IJobChangeEvent event) {
-						File[] dirList = retrieveDirJob.getDirList();
-						int numObjects = dirList == null ? 0 : dirList.length;
+						int numObjects = retrieveDirJob.getDirListCount();
 						Display.getDefault().syncExec(new Runnable() {
 							public void run() {
 								numObjectsLabel.setText(Utils.getResourceString("details.DirNumberOfObjects.text", new Object[] { new Integer(numObjects) }));
@@ -590,11 +589,11 @@ public class FileViewer {
 	 * @param files
 	 *            the array of files to process
 	 */
-	public void doDefaultFileAction(File[] files) {
+	public void doDefaultFileAction(FileTableContent[] files) {
 		// only uses the 1st file (for now)
 		if (files.length == 0)
 			return;
-		final File file = files[0];
+		final File file = files[0].getFile();
 
 		if (file.isDirectory()) {
 			notifySelectedDirectory(file);
@@ -874,7 +873,7 @@ public class FileViewer {
 				}
 			}
 			File[] roots = list.toArray(new File[list.size()]);
-			Utils.sortFiles(roots, SortType.NAME, FileTableViewerComparator.ASC);
+			Arrays.sort(roots);
 			return roots;
 		}
 		File root = new File(File.separator);

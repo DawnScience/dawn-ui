@@ -12,7 +12,6 @@
 package org.dawnsci.fileviewer;
 
 import java.io.File;
-import java.io.FileFilter;
 import java.io.Serializable;
 import java.text.MessageFormat;
 import java.util.Collection;
@@ -20,17 +19,16 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
-import java.util.regex.Pattern;
-import java.util.regex.PatternSyntaxException;
 
-import org.apache.commons.io.filefilter.RegexFileFilter;
-import org.apache.commons.io.filefilter.WildcardFileFilter;
+import org.apache.commons.lang.ArrayUtils;
 import org.dawb.common.ui.util.EclipseUtils;
-import org.dawnsci.fileviewer.table.FileTableViewerComparator;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Platform;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.dawnsci.analysis.api.io.IDataHolder;
 import org.eclipse.dawnsci.analysis.api.io.ILoaderService;
 import org.eclipse.january.metadata.IMetadata;
@@ -50,6 +48,12 @@ public class Utils {
 		SCAN;
 	}
 
+	public enum SortDirection {
+		ASC,
+		NONE,
+		DESC;
+	}
+	
 	/**
 	 * Returns a string from the resource bundle. We don't want to crash because
 	 * of a missing String. Returns the key if not found.
@@ -76,150 +80,6 @@ public class Utils {
 		} catch (NullPointerException e) {
 			return "!" + key + "!";
 		}
-	}
-
-	/**
-	 * Sorts files lexicographically by name.
-	 * 
-	 * @param files
-	 *            the array of Files to be sorted
-	 */
-	public static void sortFiles(File[] files, SortType sortType, int direction) {
-		/* Very lazy merge sort algorithm */
-		sortBlock(files, 0, files.length - 1, new File[files.length], sortType, direction, null);
-	}
-
-	/**
-	 * Sorts files lexicographically by name.
-	 * 
-	 * @param files
-	 *            the array of Files to be sorted
-	 */
-	public static void sortFiles(File[] files, SortType sortType, int direction, IProgressMonitor monitor) {
-		/* Very lazy merge sort algorithm */
-		sortBlock(files, 0, files.length - 1, new File[files.length], sortType, direction, monitor);
-	}
-
-	private static void sortBlock(File[] files, int start, int end, File[] mergeTemp, SortType sortType, int direction, IProgressMonitor monitor) {
-		final int length = end - start + 1;
-		if (length < 8) {
-			for (int i = end; i > start; --i) {
-				for (int j = end; j > start; --j) {
-					if (compareFiles(files[j - 1], files[j], sortType, direction) > 0) {
-						final File temp = files[j];
-						files[j] = files[j - 1];
-						files[j - 1] = temp;
-						if (monitor != null && monitor.isCanceled())
-							return;
-					}
-				}
-			}
-			return;
-		}
-		final int mid = (start + end) / 2;
-		sortBlock(files, start, mid, mergeTemp, sortType, direction, monitor);
-		sortBlock(files, mid + 1, end, mergeTemp, sortType, direction, monitor);
-		int x = start;
-		int y = mid + 1;
-		for (int i = 0; i < length; ++i) {
-			if ((x > mid) || ((y <= end) && compareFiles(files[x], files[y], sortType, direction) > 0)) {
-				mergeTemp[i] = files[y++];
-			} else {
-				mergeTemp[i] = files[x++];
-			}
-			if (monitor != null && monitor.isCanceled())
-				return;
-		}
-		for (int i = 0; i < length; ++i)
-			files[i + start] = mergeTemp[i];
-	}
-
-	public static int compareFiles(File a, File b, SortType sortType, int direction) {
-		// boolean aIsDir = a.isDirectory();
-		// boolean bIsDir = b.isDirectory();
-		// if (aIsDir && ! bIsDir) return -1;
-		// if (bIsDir && ! aIsDir) return 1;
-
-		// sort case-sensitive files in a case-insensitive manner
-		int compare = 0;
-		switch (sortType) {
-		case NAME:
-			compare = a.getName().compareToIgnoreCase(b.getName());
-			if (compare == 0)
-				compare = a.getName().compareTo(b.getName());
-			break;
-		case SIZE:
-			long sizea = a.length(), sizeb = b.length();
-			compare = sizea < sizeb ? -1 : 1;
-			break;
-		case TYPE:
-			String typea = getFileTypeString(a), typeb = getFileTypeString(b);
-			compare = typea.compareToIgnoreCase(typeb);
-			if (compare == 0)
-				compare = typea.compareTo(typeb);
-			break;
-		case DATE:
-			Date date1 = new Date(a.lastModified());
-			Date date2 = new Date(b.lastModified());
-			compare = date1.compareTo(date2);
-			break;
-		case SCAN:
-			String scana = getFileScanCmdString(a), scanb = getFileScanCmdString(b);
-			compare = scana.compareToIgnoreCase(scanb);
-			if (compare == 0)
-				compare = scana.compareTo(scanb);
-			break;
-		default:
-			return 0;
-		}
-		if (FileTableViewerComparator.DESC == direction)
-			return (-1 * compare);
-		return compare;
-	}
-
-	/**
-	 * Gets a directory listing
-	 * 
-	 * @param file
-	 *            the directory to be listed
-	 * @param sort
-	 *            the sorting type
-	 * @return an array of files this directory contains, may be empty but not
-	 *         null
-	 */
-	public static File[] getDirectoryList(File file, SortType sortType, int direction, String filter, boolean useRegex) {
-		return getDirectoryList(file, sortType, direction, filter, useRegex, null);
-	}
-
-	/**
-	 * Gets a directory listing
-	 * 
-	 * @param file
-	 *            the directory to be listed
-	 * @param sort
-	 *            the sorting type
-	 * @return an array of files this directory contains, may be empty but not
-	 *         null
-	 */
-	public static File[] getDirectoryList(File file, SortType sortType, int direction, String filter, boolean useRegex, IProgressMonitor monitor) {
-		File[] list = null;
-		if (filter == null || filter.equals("*") || Pattern.matches("^\\s*$", filter)) {
-			list = file.listFiles();
-		}
-		else if (useRegex) {
-			try {
-				list = file.listFiles((FileFilter) new RegexFileFilter(filter));
-			} catch (PatternSyntaxException e) {
-				list = null;
-			}
-		}
-		else {
-			list = file.listFiles((FileFilter) new WildcardFileFilter(filter));
-		}
-		if (list == null)
-			return new File[0];
-		sortFiles(list, sortType, direction, monitor);
-		return list;
 	}
 
 	/**
@@ -306,6 +166,53 @@ public class Utils {
 		return FileViewerConstants.dateFormat.format(new Date(file.lastModified()));
 	}
 
+	static class ScanCmdJob extends Job {
+		private File file;
+		private String scanCmd = "";
+		
+		public ScanCmdJob() {
+			super("ScanCmdJob");
+		}
+
+		public void setFile(File file) {
+			this.file = file;
+			this.scanCmd = "";
+		}
+		
+		@Override
+		protected IStatus run(IProgressMonitor monitor) {
+			if (file.isFile()) {
+				String extension = getFileExtension(file);
+				if (ArrayUtils.contains(new String[]{"nxs", "hdf", "h5", "hdf5", "dat"}, extension)) {
+					String filePath = file.getAbsolutePath();
+					try {
+						ILoaderService loader = ServiceHolder.getLoaderService();
+						IDataHolder dh = loader.getData(filePath, null);
+						IMetadata meta = dh.getMetadata();
+						Collection<String> metanames = meta.getMetaNames();
+						for (Iterator<String> iterator = metanames.iterator(); iterator.hasNext();) {
+							if (monitor.isCanceled())
+								return Status.OK_STATUS;
+							String string = iterator.next();
+							if (string.contains("scan_command")) {
+								Serializable value = meta.getMetaValue(string);
+								scanCmd = (String) value;
+								return Status.OK_STATUS;
+							}
+						}
+					} catch (Exception e) {
+						return Status.OK_STATUS;
+					}
+				}
+			}
+			return Status.OK_STATUS;
+		}
+		
+		public String getScanCmd() {
+			return scanCmd;
+		}
+	}
+	
 	/**
 	 * Get the Scan Command if file contains one
 	 * 
@@ -320,10 +227,12 @@ public class Utils {
 				String filePath = file.getAbsolutePath();
 				try {
 					ILoaderService loader = ServiceHolder.getLoaderService();
-					IDataHolder dh = loader.getData(filePath, null);
+					IDataHolder dh = loader.getData(filePath, true, null);
 					IMetadata meta = dh.getMetadata();
 					Collection<String> metanames = meta.getMetaNames();
 					for (Iterator<String> iterator = metanames.iterator(); iterator.hasNext();) {
+						if (Thread.currentThread().isInterrupted())
+							return "";
 						String string = (String) iterator.next();
 						if (string.contains("scan_command")) {
 							Serializable value = meta.getMetaValue(string);
@@ -331,7 +240,7 @@ public class Utils {
 						}
 					}
 				} catch (Exception e) {
-				
+					return "";
 				}
 			}
 		}
