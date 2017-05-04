@@ -3,4 +3,5 @@
    <implementation class="org.dawnsci.datavis.ServiceManager"/>
    <reference bind="setEventAdmin" cardinality="1..1" interface="org.osgi.service.event.EventAdmin" name="EventAdmin" policy="static"/>
    <reference bind="setRecentPlaces" cardinality="1..1" interface="org.dawnsci.datavis.api.IRecentPlaces" name="IRecentPlaces" policy="static"/>
+   <reference bind="setPlotController" cardinality="1..1" interface="org.dawnsci.datavis.model.IPlotController" name="IPlotController" policy="static"/>
 </scr:component>

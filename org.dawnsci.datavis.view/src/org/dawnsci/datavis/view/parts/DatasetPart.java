@@ -11,14 +11,13 @@ import org.dawnsci.datavis.model.DataOptions;
 import org.dawnsci.datavis.model.FileControllerStateEvent;
 import org.dawnsci.datavis.model.FileControllerStateEventListener;
 import org.dawnsci.datavis.model.IFileController;
+import org.dawnsci.datavis.model.IPlotController;
 import org.dawnsci.datavis.model.IPlotMode;
 import org.dawnsci.datavis.model.LoadedFile;
-import org.dawnsci.datavis.model.PlotController;
 import org.dawnsci.datavis.model.PlotModeChangeEventListener;
 import org.dawnsci.datavis.model.PlotModeEvent;
 import org.dawnsci.datavis.view.table.DataConfigurationTable;
 import org.dawnsci.datavis.view.table.DataOptionTableViewer;
-import org.eclipse.dawnsci.plotting.api.IPlottingService;
 import org.eclipse.e4.ui.di.Focus;
 import org.eclipse.e4.ui.workbench.modeling.ESelectionService;
 import org.eclipse.jface.viewers.ArrayContentProvider;
@@ -43,10 +42,10 @@ public class DatasetPart {
 	ESelectionService selectionService;
 	
 	@Inject IFileController fileController;
+	@Inject IPlotController plotController;
 	
 	private DataConfigurationTable table;
 	private ComboViewer optionsViewer;
-	private PlotController plotManager;
 	
 	private DataOptionTableViewer viewer;
 	
@@ -56,9 +55,8 @@ public class DatasetPart {
 	
 	
 	@PostConstruct
-	public void createComposite(Composite parent, IPlottingService pService) {
-		
-		plotManager = new PlotController(pService);
+	public void createComposite(Composite parent) {
+		plotController.init();
 		fileController = ServiceManager.getFileController();
 
 		parent.setLayout(new FormLayout());
@@ -116,9 +114,9 @@ public class DatasetPart {
 				if (selection instanceof StructuredSelection) {
 					Object ob = ((StructuredSelection)selection).getFirstElement();
 						
-					if (ob instanceof IPlotMode && !ob.equals(plotManager.getCurrentMode())) {
-						plotManager.switchPlotMode((IPlotMode)ob);
-						table.setInput(plotManager.getPlottableObject().getNDimensions());
+					if (ob instanceof IPlotMode && !ob.equals(plotController.getCurrentMode())) {
+						plotController.switchPlotMode((IPlotMode)ob);
+						table.setInput(plotController.getPlottableObject().getNDimensions());
 						if (((IPlotMode)ob).supportsMultiple()) {
 							table.setMaxSliceNumber(50);
 						} else {
@@ -167,12 +165,11 @@ public class DatasetPart {
 			}
 		};
 		
-		plotManager.addPlotModeListener(plotModeListener);
+		plotController.addPlotModeListener(plotModeListener);
 		
 		if (fileController.getCurrentFile() != null) {
 			updateOnStateChange(true);
 		}
-		
 	}
 	
 	private void updateOnStateChange(boolean selectedFileChanged){
@@ -190,7 +187,7 @@ public class DatasetPart {
 			if (fileController.getCurrentDataOption() != null) {
 				DataOptions op = fileController.getCurrentDataOption();
 				viewer.setSelection(new StructuredSelection(op),true);
-				table.setInput(plotManager.getPlottableObject().getNDimensions());
+				table.setInput(plotController.getPlottableObject().getNDimensions());
 				
 			}
 			
@@ -202,13 +199,13 @@ public class DatasetPart {
 	@PreDestroy
 	public void dispose(){
 		viewer.dispose();
-		plotManager.removePlotModeListener(plotModeListener);
+		plotController.removePlotModeListener(plotModeListener);
 		fileController.removeStateListener(fileStateListener);
 	}
 	
 	private void updateOnSelectionChange(DataOptions op){
 		fileController.setCurrentData(op,op.isSelected());
-		table.setInput(plotManager.getPlottableObject().getNDimensions());
+		table.setInput(plotController.getPlottableObject().getNDimensions());
 	}
 	
 	@Focus

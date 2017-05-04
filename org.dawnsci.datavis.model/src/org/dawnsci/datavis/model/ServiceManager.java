@@ -2,6 +2,7 @@ package org.dawnsci.datavis.model;
 
 import org.dawnsci.datavis.api.IRecentPlaces;
 import org.eclipse.dawnsci.analysis.api.io.ILoaderService;
+import org.eclipse.dawnsci.plotting.api.IPlottingService;
 import org.osgi.service.event.EventAdmin;
 
 public class ServiceManager {
@@ -10,6 +11,7 @@ public class ServiceManager {
 	private static ILoaderService lService;
 	private static IFileController fController;
 	private static IRecentPlaces rPlaces;
+	private static IPlottingService plottingService;
 	
 	public static ILoaderService getLoaderService() {
 		return lService;
@@ -41,6 +43,14 @@ public class ServiceManager {
 
 	public static void setRecentPlaces(IRecentPlaces places) {
 		ServiceManager.rPlaces = places;
+	}
+
+	public static IPlottingService getPlottingService() {
+		return plottingService;
+	}
+
+	public static void setPlottingService(IPlottingService plottingService) {
+		ServiceManager.plottingService = plottingService;
 	}
 	
 }

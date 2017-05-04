@@ -15,7 +15,6 @@ import java.util.concurrent.atomic.AtomicReference;
 import org.eclipse.dawnsci.analysis.dataset.slicer.SliceFromSeriesMetadata;
 import org.eclipse.dawnsci.analysis.dataset.slicer.SliceInformation;
 import org.eclipse.dawnsci.analysis.dataset.slicer.SourceInformation;
-import org.eclipse.dawnsci.plotting.api.IPlottingService;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.axis.IAxis;
 import org.eclipse.dawnsci.plotting.api.trace.ITrace;
@@ -52,15 +51,17 @@ import org.slf4j.LoggerFactory;
  * 
  * @author jacobfilik
  */
-public class PlotController {
+public class PlotController implements IPlotController {
 	
-	private IPlottingService pService;
 	private IPlottingSystem<?> system;
 
 	private IPlotMode[] modes = new IPlotMode[]{new PlotModeXY(), new PlotModeImage(), new PlotModeSurface()};
 	private IPlotMode currentMode;
 	
-	private IFileController fileController = ServiceManager.getFileController();
+	private IPlotDataModifier[] modifiers = new IPlotDataModifier[]{new PlotDataModifierMinMax(), new PlotDataModifierOffset(), new PlotDataModifierStack()};
+	private IPlotDataModifier currentModifier;
+	
+	private IFileController fileController;
 	
 	private ISliceChangeListener sliceListener;
 	
@@ -79,16 +80,17 @@ public class PlotController {
 		init();
 	}
 	
-	public PlotController(IPlottingService p) {
-		this.pService = p;
+	public PlotController() {
 		this.currentMode = modes[0];
-		init();
-		
 	}
 	
-	private void init(){
+	public void init(){
+		
+		if (executor != null) return;
 		
 		executor = Executors.newSingleThreadExecutor();
+		
+		fileController = ServiceManager.getFileController();
 		
 		fileController.addStateListener(new FileControllerStateEventListener() {
 			
@@ -168,6 +170,10 @@ public class PlotController {
 			}
 		});
 		
+		IPlotMode localCurrentMode = currentMode;
+		IPlotDataModifier localModifier = currentModifier;
+		if (localModifier != null) localModifier.init();
+		
 		IPlottingSystem<?> system = getPlottingSystem();
 		
 		List<IAxis> axes = system.getAxes();
@@ -194,7 +200,6 @@ public class PlotController {
 			}
 		});
 		
-		
 		for (DataStateObject object : state) {
 
 			List<ITrace> list = updateMap.remove(object.getOption());
@@ -206,7 +211,7 @@ public class PlotController {
 					system.removeTrace(t);
 				}
 			} else if (object.isChecked()) {
-				updatePlottedData(object, list, currentMode);
+				updatePlottedData(object, list, localCurrentMode, localModifier);
 			}
 		}
 		
@@ -224,7 +229,7 @@ public class PlotController {
 		});
 	}
 	
-	private void updatePlottedData(DataStateObject stateObject,final List<ITrace> traces, IPlotMode mode) {
+	private void updatePlottedData(DataStateObject stateObject,final List<ITrace> traces, IPlotMode mode, IPlotDataModifier modifier) {
 		//remove traces if not the same as mode
 		//update the data in the plot
 		
@@ -257,7 +262,15 @@ public class PlotController {
 		SliceInformation s = new SliceInformation(slice, slice, new SliceND(dataOp.getLazyDataset().getShape()), mode.getDataDimensions(options), 1, 0);
 		SliceFromSeriesMetadata md = new SliceFromSeriesMetadata(si, s);
 		
-		for (IDataset d : data) d.setMetadata(md);
+		for (int i = 0; i < data.length ; i++) {
+			IDataset d = data[i];
+			if (modifier != null && modifier.supportsRank(mode.getMinimumRank())){
+				d = modifier.modifyForDisplay(d);
+			}
+			d.setMetadata(md);
+			data[i] = d;
+		}
+		
 	
 		final IDataset[] finalData = data;
 		
@@ -280,13 +293,36 @@ public class PlotController {
 	
 	
 	public IPlotMode[] getCurrentPlotModes() {
+		Integer rank = getDataRank();
+		if (rank == null) return null;
+
+		return getPlotModes(rank);
+	}
+	
+	public IPlotDataModifier[] getCurrentPlotModifiers() {
+		int minimumRank = currentMode.getMinimumRank();
+		return getPlotModifiers(minimumRank);
+	}
+	
+	private Integer getDataRank() {
 		if (fileController.getCurrentDataOption() == null) return null;
 		
 		int[] shape = fileController.getCurrentDataOption().getLazyDataset().getShape();
 		shape = ShapeUtils.squeezeShape(shape, false);
-		int rank = shape.length;
-
-		return getPlotModes(rank);
+		return shape.length;
+	}
+	
+	private IPlotDataModifier[] getPlotModifiers(int rank) {
+		
+		List<IPlotDataModifier> m = new ArrayList<>();
+		for (IPlotDataModifier mod : modifiers) {
+			if (mod.supportsRank(rank)) {
+				m.add(mod);
+			}
+		}
+		
+		return m.toArray(new IPlotDataModifier[m.size()]);
+		
 	}
 	
 	private IPlotMode[] getPlotModes(int rank) {
@@ -303,6 +339,19 @@ public class PlotController {
 	private IPlotMode getDefaultMode(int rank) {
 		if (rank > 1) return modes[1];
 		return modes[0];
+	}
+	
+	public void enablePlotModifier(IPlotDataModifier modifier) {
+		if (modifier == currentModifier) return;
+//		System.out.println("enabled " + modifier.getName());
+		currentModifier = modifier;
+		final List<DataStateObject> state = fileController.getImmutableFileState();
+		//update plot
+		updatePlotStateInJob(state, currentMode);
+	}
+	
+	public IPlotDataModifier getEnabledPlotModifier() {
+		return currentModifier;
 	}
 	
 	public void switchPlotMode(IPlotMode mode) {
@@ -402,7 +451,7 @@ public class PlotController {
 	
 	private IPlottingSystem<?> getPlottingSystem() {
 		if (system == null) {
-			system = pService.getPlottingSystem("Plot");
+			system = ServiceManager.getPlottingService().getPlottingSystem("Plot");
 		}
 		return system;
 	}
