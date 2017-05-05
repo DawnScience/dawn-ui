@@ -1179,7 +1179,6 @@ public class SurfaceScatterPresenter {
 													 models.get(j), 
 													 dms.get(j), 
 													 gm, 
-													 pS,
 													 MethodSetting.toInt(sm.getCorrectionSelection()), 
 													 imagePosInOriginalDat[selection], 
 													 trackingMarker,
