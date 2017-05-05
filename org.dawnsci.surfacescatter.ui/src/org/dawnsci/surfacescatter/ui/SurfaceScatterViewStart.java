@@ -3,7 +3,6 @@ package org.dawnsci.surfacescatter.ui;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
-
 import org.dawnsci.surfacescatter.AnalaysisMethodologies.Methodology;
 import org.dawnsci.surfacescatter.FittingParameters;
 import org.dawnsci.surfacescatter.IntensityDisplayEnum.IntensityDisplaySetting;
@@ -20,7 +19,6 @@ import org.eclipse.dawnsci.analysis.api.roi.IROI;
 import org.eclipse.dawnsci.analysis.api.roi.IRectangularROI;
 import org.eclipse.dawnsci.analysis.dataset.roi.RectangularROI;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
-import org.eclipse.dawnsci.plotting.api.PlotType;
 import org.eclipse.dawnsci.plotting.api.region.IROIListener;
 import org.eclipse.dawnsci.plotting.api.region.IRegion;
 import org.eclipse.dawnsci.plotting.api.region.IRegion.RegionType;
@@ -1000,7 +998,6 @@ public class SurfaceScatterViewStart extends Dialog {
 			
 			ssp.presenterDummyProcess(ssp.getSliderPos(), 
 									  ssp.getImage(ssp.getSliderPos()), 
-//									  customComposite.getPlotSystem(), 
 									  4);
 			
 			if (getSsps3c().getOutputCurves().isVisible() != true) {

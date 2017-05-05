@@ -111,10 +111,6 @@ public class TrackingHandler {
 	public void setSsp(SurfaceScatterPresenter ssp) {
 		this.ssp = ssp;
 	}
-
-//	public void setSsvsPS(IPlottingSystem<Composite> ssvsPS) {
-//		this.ssvsPS = ssvsPS;
-//	}
 	
 	public void setps(IPlottingSystem<Composite> plotSystem) {
 		this.plotSystem = plotSystem;
@@ -155,9 +151,7 @@ public class TrackingHandler {
 				dm.resetAll();
 			}
 			outputCurves.clear();
-
-			int k = 0;
-
+			
 			if (sm.getStartFrame() == 0) {
 												
 					t  = new Thread(){
@@ -177,7 +171,7 @@ public class TrackingHandler {
 									IDataset j = ssp.getImage(imageNumber);
 									int jok = sm.getFilepathsSortedArray()[imageNumber];
 									DataModel dm = dms.get(jok);
-//									GeometricParametersModel gm = gm;
+
 									ExampleModel model = models.get(jok);
 
 									dm.addxList(sm.getSortedX().getDouble(imageNumber));
@@ -192,9 +186,6 @@ public class TrackingHandler {
 																						 model, 
 																						 dm, 
 																						 gm, 
-
-//																						 plotSystem,
-//																						 ssvsPS,
 																						 correctionSelection, 
 																						 imagePosInOriginalDat[imageNumber], 
 																						 trackingMarker, 
@@ -208,7 +199,7 @@ public class TrackingHandler {
 									sm.addBackgroundDatArray(sm.getImages().length, imageNumber, output1);
 									IDataset tempImage = ssp.getImage(imageNumber);
 									double[] tempLoc = sm.getLocationList().get(imageNumber);
-									double[] tl = tempLoc;
+									
 									int[] sml =  sm.getInitialLenPt()[0];
 									sm.setSliderPos(imageNumber);
 									RectangularROI newROI = new RectangularROI(tempLoc[0],
@@ -275,10 +266,7 @@ public class TrackingHandler {
 																			 j, 
 																			 model, 
 																			 dm, 
-																			 gm, 
-
-//																			 plotSystem,
-//																			 ssvsPS,
+																			 gm,
 																			 correctionSelection, 
 																			 imagePosInOriginalDat[k], 
 																			 trackingMarker, 
@@ -617,10 +605,7 @@ class trackingJob2 {
 																				 j, 
 																				 model, 
 																				 dm, 
-																				 gm, 
-
-//																				 plotSystem,
-//																				 ssvsPS,
+																				 gm,
 																				 correctionSelection, 
 																				 imagePosInOriginalDat[k], 
 																				 trackingMarker, 
@@ -1138,10 +1123,7 @@ class trackingJob2 {
 																		 j, 
 																		 model, 
 																		 dm, 
-																		 gm, 
-
-//																		 plotSystem,
-//																		 ssvsPS,
+																		 gm,
 																		 correctionSelection, 
 																		 imagePosInOriginalDat[k], 
 																		 trackingMarker, 
