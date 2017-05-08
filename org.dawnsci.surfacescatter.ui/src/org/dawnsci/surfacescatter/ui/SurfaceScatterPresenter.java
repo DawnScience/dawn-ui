@@ -29,6 +29,7 @@ import org.dawnsci.surfacescatter.BoxSlicerRodScanUtilsForDialog;
 import org.dawnsci.surfacescatter.ClosestNoFinder;//private ArrayList<double[]> locationList; 
 import org.dawnsci.surfacescatter.CountUpToArray;
 import org.dawnsci.surfacescatter.DataModel;
+import org.dawnsci.surfacescatter.DirectoryModel;
 import org.dawnsci.surfacescatter.DummyProcessingClass;
 import org.dawnsci.surfacescatter.ExampleModel;
 import org.dawnsci.surfacescatter.FittingParameters;
@@ -98,6 +99,7 @@ public class SurfaceScatterPresenter {
 	private int DEBUG = 1;
 	private PrintWriter writer;
 	private Shell parentShell;
+	private DirectoryModel drm;
 	
 	public void surfaceScatterPresenterBuild(String[] filepaths,
 								   String xName,
@@ -112,6 +114,9 @@ public class SurfaceScatterPresenter {
 		sm.setCorrectionSelection(MethodSetting.toMethod(correctionSelection));
 		sm.setImageFolderPath(imageFolderPath);
 		fms = new ArrayList<FrameModel>();
+		drm = new DirectoryModel();
+		
+		ArrayList<ArrayList<Integer>> framesCorespondingToDats = new ArrayList<>();
 		
 		
 		ILazyDataset[] imageArray = new ILazyDataset[filepaths.length];
@@ -211,6 +216,10 @@ public class SurfaceScatterPresenter {
 						models.get(id).setTifNames(tifNamesDatasetOut);
 						tifNamesArray[id] = tifNamesDatasetOut;
 						tifPositionInDatArray[id] = tifPositionsInDatOut; 
+						
+						
+						framesCorespondingToDats.set(id, new ArrayList<>());
+						
 					}
 					
 					ILazyDataset ild = null;
@@ -420,6 +429,7 @@ public class SurfaceScatterPresenter {
 				fm.setRawImageData(imageSortedDat[f]);
 				fm.setTifFilePath( sortedTifNamesCon.getString(f));
 				fm.setDatFilePath(datNamesInOrder[f]);
+				fm.setDatNo(imagesToFilepathRefDat.getInt(f));
 				fm.setBackgroundMethdology(Methodology.TWOD);
 				fm.setFitPower(FitPower.ONE);
 				fm.setTrackingMethodolgy(TrackerType1.TLD);
@@ -447,9 +457,19 @@ public class SurfaceScatterPresenter {
 																		 .getDouble(imagesPositionsInDat.getInt(f));
 				
 				fm.setAreaCorrection(areaCorrection);
+				fm.setScannedVariable(xArrayCon.getDouble(f));
 				
 				
 			}
+			
+			
+			for(int r = 0; r< fms.size(); r++){
+				
+				framesCorespondingToDats.get(fms.get(r).getDatNo()).add((Integer)r);
+				
+			}
+			
+			drm.setFramesCorespondingToDats(framesCorespondingToDats);
 			
 			Dataset sortedDatNamesInOrderDataset = DatasetFactory.createFromObject(datNamesInOrder);
 			sm.setSortedDatNamesInOrderDataset(sortedDatNamesInOrderDataset);			
@@ -475,6 +495,14 @@ public class SurfaceScatterPresenter {
 		}
 	}
 	
+	public DirectoryModel getDrm() {
+		return drm;
+	}
+
+	public void setDrm(DirectoryModel drm) {
+		this.drm = drm;
+	}
+
 	public ArrayList<Double> getYList(){
 		return sm.getyList();
 	}
@@ -2712,6 +2740,15 @@ public class SurfaceScatterPresenter {
 		return outputB;
 		
 	}
+	
+	public ArrayList<FrameModel> getFms() {
+		return fms;
+	}
+
+	public void setFms(ArrayList<FrameModel> fms) {
+		this.fms = fms;
+	}
+
 	
 
 }
