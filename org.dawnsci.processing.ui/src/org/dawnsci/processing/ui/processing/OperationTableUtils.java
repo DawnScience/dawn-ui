@@ -177,7 +177,7 @@ public class OperationTableUtils {
 	public static Action getAddAction(final SeriesTable seriesTable) {
 		return new Action("Insert operation", Activator.getImageDescriptor("icons/clipboard-list.png")) {
 			public void run() {
-				seriesTable.addNew();
+				seriesTable.addNewBeforeSelected();
 			}
 		};
 	}
