@@ -184,7 +184,7 @@ public class PlottingSystemImpl<T> extends AbstractPlottingSystem<T> {
 							   final IWorkbenchPart part) {
 
 		super.createPlotPart(container, plotName, bars, hint, part);
-		this.plottingMode = hint;
+//		this.plottingMode = hint;
 		if (container instanceof IFigure) {
 			createFigurePlotPart((IFigure)container, plotName, bars, hint, part);
 		} else if (container instanceof Composite) {
@@ -217,7 +217,7 @@ public class PlottingSystemImpl<T> extends AbstractPlottingSystem<T> {
 			final String plotName, final IActionBars bars, final PlotType hint,
 			final IWorkbenchPart part) {
 		this.parent = (T)container;
-		createViewer(PlotType.XY);
+		createViewer(ILineTrace.class);
 	}
 
 	private void createCompositePlotPart(final Composite container,
@@ -243,7 +243,7 @@ public class PlottingSystemImpl<T> extends AbstractPlottingSystem<T> {
 
 		// We ignore hint, we create a light weight plot as default because
 		// it looks nice. We swap this for a 3D one if required.
-		IPlottingSystemViewer<T> lightWeightViewer = createViewer(PlotType.XY);
+		IPlottingSystemViewer<T> lightWeightViewer = createViewer(ILineTrace.class);
 		if (lightWeightViewer!=null && cparent.getLayout() instanceof StackLayout) {
 			final StackLayout layout = (StackLayout)cparent.getLayout();
 			layout.topControl = (Composite)lightWeightViewer.getControl();
@@ -294,11 +294,11 @@ public class PlottingSystemImpl<T> extends AbstractPlottingSystem<T> {
 	 * Does nothing if the viewer is already created.
 	 * @param type
 	 */
-	private IPlottingSystemViewer<T> createViewer(PlotType type) {
+	private IPlottingSystemViewer<T> createViewer(Class<? extends ITrace> clazz) {
 
-		IPlottingSystemViewer<T> viewer = getViewer(type);
+		IPlottingSystemViewer<T> viewer = getViewer(clazz);
 		if (viewer == null) {
-			logger.error("Cannot find a plot viewer for plot type "+type);
+			logger.error("Cannot find a plot viewer for plot type "+ clazz);
 			return null;
 		}
 		if (viewer.getControl()!=null) {
@@ -454,7 +454,7 @@ public class PlottingSystemImpl<T> extends AbstractPlottingSystem<T> {
 									final IProgressMonitor      monitor) {
 
 		if (monitor!=null) monitor.worked(1);
-
+		
 		// create index datasets if necessary
 		final List<ITrace> traces = new ArrayList<ITrace>(7);
 		final IDataset x;
@@ -491,7 +491,7 @@ public class PlottingSystemImpl<T> extends AbstractPlottingSystem<T> {
 					    final Number           yValue,
 					    final IProgressMonitor monitor) throws Exception  {
 
-		if (!this.plottingMode.is1D())
+		if (this.traceClazz == ILineTrace.class)
 			throw new Exception("Can only add in 1D mode!");
 		if (name == null || "".equals(name))
 			throw new IllegalArgumentException("The dataset name must not be null or empty string!");
@@ -511,7 +511,7 @@ public class PlottingSystemImpl<T> extends AbstractPlottingSystem<T> {
 		DisplayUtils.syncExec(new Runnable() {
 			@Override
 			public void run() {
-				switchPlottingType(mode);
+				switchPlottingType(getTraceClass(mode));
 			}
 		});
 	}
@@ -528,16 +528,18 @@ public class PlottingSystemImpl<T> extends AbstractPlottingSystem<T> {
 			 				   final List<? extends IDataset> axes,
 			 				   final String                dataName,
 				               final IProgressMonitor      monitor) {
-
-		if (plottingMode.is1D()) {
+		
+		if (traceClazz != IImageTrace.class && traceClazz != ISurfaceTrace.class) {
+			traceClazz = IImageTrace.class;
 			DisplayUtils.syncExec(new Runnable() {
 				@Override
 				public void run() {
-					switchPlottingType(PlotType.IMAGE);
+					switchPlottingType(IImageTrace.class);
 				}
 			});
 		}
-		final Collection<ITrace> traces = plottingMode.is3D()
+		
+		final Collection<ITrace> traces = traceClazz == ISurfaceTrace.class
 				                        ? getTraces(ISurfaceTrace.class)
 				                        : getTraces(IImageTrace.class);
 
@@ -629,8 +631,9 @@ public class PlottingSystemImpl<T> extends AbstractPlottingSystem<T> {
 										String                      dataName,
 										final IProgressMonitor      monitor) {
 		try {
-			if (plottingMode.is1D()) {
-				switchPlottingType(PlotType.IMAGE);
+			if (traceClazz != IImageTrace.class && traceClazz != ISurfaceTrace.class) {
+				traceClazz = IImageTrace.class;
+				switchPlottingType(traceClazz);
 			}
 			setAutoAspectRatio(data.getShape());
 
@@ -643,9 +646,9 @@ public class PlottingSystemImpl<T> extends AbstractPlottingSystem<T> {
 				traceName = part.getTitle();
 			}
 			if (monitor!=null&&monitor.isCanceled()) return null;
-
+			
 			ITrace trace=null;
-			if (plottingMode.is3D()) {
+			if (traceClazz == ISurfaceTrace.class) {
 				trace = createSurfaceTrace(traceName);
 				trace.setDataName(dataName);
 				((ISurfaceTrace)trace).setData(data, (List<IDataset>)axes);
@@ -742,6 +745,11 @@ public class PlottingSystemImpl<T> extends AbstractPlottingSystem<T> {
 
 		// Switch off error bars if very many plots.
 		IPreferenceStore store = getPreferenceStore();
+		
+		if (traceClazz != ILineTrace.class) {
+			traceClazz = ILineTrace.class;
+			switchPlottingType(traceClazz);
+		}
 
 		boolean errorBarEnabled = store.getBoolean(PlottingConstants.GLOBAL_SHOW_ERROR_BARS);
 		Collection<ITrace> existing = getTraces(ILineTrace.class);
@@ -760,16 +768,8 @@ public class PlottingSystemImpl<T> extends AbstractPlottingSystem<T> {
 			if (!foundErrors) errorBarEnabled = false;
 		}
 
-		PlotType newType = null;
-		if (plottingMode.is1Dor2D()) {
-		    newType = PlotType.XY;
-		} else if (plottingMode.isStacked3D()) {
-			newType = PlotType.XY_STACKED_3D;
-		} else if (plottingMode.isScatter3D()) {
-			newType = PlotType.XY_SCATTER_3D;
-		}
-		if (newType != null)
-			switchPlottingType(newType);
+		if (traceClazz != null)
+			switchPlottingType(traceClazz);
 
 		if (colorMap == null && getColorOption()!=ColorOption.NONE) {
 			if (getColorOption()==ColorOption.BY_NAME) {
@@ -780,16 +780,16 @@ public class PlottingSystemImpl<T> extends AbstractPlottingSystem<T> {
 		}
 		if (traceMap==null) traceMap = new LinkedHashMap<String, ITrace>(31);
 
-		final IPlottingSystemViewer<T> viewer = getViewer(plottingMode);
+		final IPlottingSystemViewer<T> viewer = getViewer(traceClazz);
 		List<ITrace> traces=null;
 
-		if (plottingMode.is1D()) {
+		if (traceClazz == ILineTrace.class) {
 			if (viewer.getControl()==null) return null;
 			List<ILineTrace> lines = viewer.createLineTraces(title, xIn, ysIn, dataNames, traceMap, colorMap, monitor);
 			traces = new ArrayList<ITrace>(lines.size());
 			traces.addAll(lines);
 
-		} else if (plottingMode.isScatter3D()) {
+		} else if (traceClazz == IScatter3DTrace.class) {
 			traceMap.clear();
 			IScatter3DTrace trace = (IScatter3DTrace)viewer.createTrace(title, IScatter3DTrace.class);
 			final IDataset x = DatasetUtils.convertToDataset(ysIn.get(0));
@@ -801,7 +801,7 @@ public class PlottingSystemImpl<T> extends AbstractPlottingSystem<T> {
 			traceMap.put(trace.getName(), trace);
 			traces = Arrays.asList((ITrace)trace);
 
-		} else if (plottingMode.isStacked3D()) {
+		} else if (traceClazz == ILineStackTrace.class) {
 			traceMap.clear();
 
 			ILineStackTrace trace = (ILineStackTrace)viewer.createTrace(title, ILineStackTrace.class);
@@ -923,23 +923,21 @@ public class PlottingSystemImpl<T> extends AbstractPlottingSystem<T> {
 		return trace;
 	}
 
-	protected void switchPlottingType(PlotType type) {
-		if (plottingMode != null && plottingMode.equals(type)) {
-			return;
-		}
-
-		PlotType previous = plottingMode;
-		plottingMode = type;
-		actionBarManager.switchActions(plottingMode);
+	protected void switchPlottingType(Class<? extends ITrace> clazz) {
+		
+		
+		Class<? extends ITrace>  previous = traceClazz;
+		traceClazz = clazz;
+		actionBarManager.switchActions(getPlotType(clazz));
 
 		T top = null;
 
-		IPlottingSystemViewer<T> viewer = createViewer(type);
+		IPlottingSystemViewer<T> viewer = createViewer(clazz);
 		if (viewer == null) return;
 
 		activeViewer = viewer;
 		top          = viewer.getControl();
-		viewer.updatePlottingRole(type);
+		viewer.updatePlottingRole(getPlotType(clazz));
 
 		if (parent instanceof Composite && top instanceof Control) {
 			Composite cparent = (Composite)parent;
@@ -950,12 +948,12 @@ public class PlottingSystemImpl<T> extends AbstractPlottingSystem<T> {
 			}
 		}
 
-		if (isAutoHideRegions() && previous!=plottingMode) {
+		if (isAutoHideRegions() && previous!=traceClazz) {
 			// We auto-hide regions that are different plot type.
 			final Collection<IRegion> regions = getRegions();
 			if (regions!=null) for (IRegion iRegion : regions) {
 				if (iRegion.isUserRegion())
-					iRegion.setVisible(iRegion.getPlotType()==null || iRegion.getPlotType()==type);
+					iRegion.setVisible(iRegion.getPlotType()==null || iRegion.getPlotType()==getPlotType(clazz));
 			}
 		}
 	}
@@ -968,6 +966,9 @@ public class PlottingSystemImpl<T> extends AbstractPlottingSystem<T> {
 	public void addTrace(ITrace trace) {
 
 		IPlottingSystemViewer<T> viewer = getViewer(trace.getClass());
+		
+		switchPlottingType(trace.getClass());
+		
 		boolean ok = viewer.addTrace(trace);
 		if (!ok) return; // it has not added.
 
@@ -1492,6 +1493,24 @@ public class PlottingSystemImpl<T> extends AbstractPlottingSystem<T> {
 
 	public void setKeepAspect(boolean checked){
 		activeViewer.setKeepAspect(checked);
+	}
+	
+	public List<Class<? extends ITrace>> getRegisteredTraceClasses() {
+		
+		List<Class<? extends ITrace>> traceClazz = new ArrayList<Class<? extends ITrace>>();
+		for (IPlottingSystemViewer<?> v : viewers) traceClazz.addAll(v.getSupportTraceTypes());
+		
+		return traceClazz;
+	}
+	
+	public <U extends ITrace> U createTrace(String traceName, Class<U> clazz) {
+		for (IPlottingSystemViewer<?> v : viewers) {
+			if (v.isTraceTypeSupported(clazz)) {
+				return v.createTrace(traceName, clazz);
+			}
+		}
+		
+		return null;
 	}
 
 	public Object getAdapter(@SuppressWarnings("rawtypes") Class adapter) {

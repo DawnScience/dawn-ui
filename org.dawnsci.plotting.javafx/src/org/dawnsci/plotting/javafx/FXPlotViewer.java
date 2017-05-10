@@ -172,17 +172,17 @@ public class FXPlotViewer extends IPlottingSystemViewer.Stub<Composite>
 	}
 
 	@Override
-	public ITrace createTrace(String name, Class<? extends ITrace> clazz)
+	public <U extends ITrace> U createTrace(String name, Class<? extends ITrace> clazz)
 	{
 		if (name == null || "".equals(name))
 			throw new RuntimeException("Cannot create trace with no name!");
 
 		if (IIsosurfaceTrace.class.isAssignableFrom(clazz)) {
-			return new IsosurfaceTrace(this, scene, name);
+			return (U)new IsosurfaceTrace(this, scene, name);
 		} else if (IVolumeRenderTrace.class.isAssignableFrom(clazz)) {
-			return new VolumeTrace(this, scene, name);
+			return (U)new VolumeTrace(this, scene, name);
 		} else if (IPlane3DTrace.class.isAssignableFrom(clazz)) {
-			return new PlaneTrace(this, scene, name);
+			return (U)new PlaneTrace(this, scene, name);
 		} else {
 			throw new RuntimeException("Trace type not supported " + clazz.getSimpleName());
 		}
