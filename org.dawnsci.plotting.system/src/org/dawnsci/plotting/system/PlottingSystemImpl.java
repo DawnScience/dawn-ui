@@ -491,7 +491,7 @@ public class PlottingSystemImpl<T> extends AbstractPlottingSystem<T> {
 					    final Number           yValue,
 					    final IProgressMonitor monitor) throws Exception  {
 
-		if (this.traceClazz == ILineTrace.class)
+		if (this.traceClazz != ILineTrace.class)
 			throw new Exception("Can only add in 1D mode!");
 		if (name == null || "".equals(name))
 			throw new IllegalArgumentException("The dataset name must not be null or empty string!");
