@@ -37,6 +37,8 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
+import org.eclipse.dawnsci.plotting.api.area.IPlotArea;
+import org.eclipse.dawnsci.plotting.api.area.ZoomOption;
 import org.eclipse.dawnsci.plotting.api.histogram.HistogramBound;
 import org.eclipse.dawnsci.plotting.api.preferences.BasePlottingConstants;
 import org.eclipse.dawnsci.plotting.api.preferences.PlottingConstants;
@@ -287,15 +289,17 @@ public class MaskingTool extends AbstractToolPage implements MouseListener {
 	}
 
 	private AbstractPlottingViewer viewer;
-	
+
+	private ShapeType previousshapeType = ShapeType.NONE;
+
 	protected final class MaskMouseListener extends MouseMotionListener.Stub implements org.eclipse.draw2d.MouseListener		 {
 
 		@Override
 		public void mousePressed(org.eclipse.draw2d.MouseEvent me) {	
-			if (me.button!=1) return;
+			if (me.button!=1 || isPanning(me)) return;
 			
 			if (viewer.getSelectedCursor()==null) {
-				ActionContributionItem item = (ActionContributionItem)directToolbar.find(ShapeType.NONE.getId());
+				ActionContributionItem item = (ActionContributionItem)directToolbar.find(previousshapeType.getId());
 				if (item!=null) item.getAction().setChecked(true);
 				return;
 			}
@@ -304,9 +308,9 @@ public class MaskingTool extends AbstractToolPage implements MouseListener {
 		}
 		@Override
 		public void mouseDragged(org.eclipse.draw2d.MouseEvent me) {
-			if (me.button!=0) return;
+			if (me.button!=0 || isPanning(me)) return;
 			if (viewer.getSelectedCursor()==null) {
-				ActionContributionItem item = (ActionContributionItem)directToolbar.find(ShapeType.NONE.getId());
+				ActionContributionItem item = (ActionContributionItem)directToolbar.find(previousshapeType.getId());
 				if (item!=null) item.getAction().setChecked(true);
 				return;
 			}
@@ -322,6 +326,26 @@ public class MaskingTool extends AbstractToolPage implements MouseListener {
 		@Override
 		public void mouseDoubleClicked(org.eclipse.draw2d.MouseEvent me) { }
 		
+	}
+
+	/**
+	 * This method is used to check if the panning zoomtype is on or off. This
+	 * check is useful in order to not go through the rest of the code in the
+	 * mouseDragged method. Otherwise, when panning with the middle mouse
+	 * button, it will set the masking pen brush to none, if there was one
+	 * selected.
+	 *
+	 * @param me
+	 * @return true if zoom type is panning
+	 */
+	private boolean isPanning(org.eclipse.draw2d.MouseEvent me) {
+		Object source = me.getSource();
+		if (source instanceof IPlotArea) {
+			ZoomOption zoomType = ((IPlotArea) source).getZoomOption();
+			if (zoomType == ZoomOption.PANNING)
+				return true;
+		}
+		return false;
 	}
 
 	public <T> void setPlottingSystem(IPlottingSystem<T> system) {
@@ -819,6 +843,7 @@ public class MaskingTool extends AbstractToolPage implements MouseListener {
 			public void run() {
 				int pensize = Activator.getPlottingPreferenceStore().getInt(PlottingConstants.MASK_PEN_SIZE);
 				ShapeType penShape = ShapeType.SQUARE;
+				previousshapeType = penShape;
 				viewer.setSelectedCursor(CursorUtils.getPenCursor(pensize, penShape));
 				Activator.getPlottingPreferenceStore().setValue(PlottingConstants.MASK_PEN_SHAPE, penShape.name());
 			}
@@ -831,6 +856,7 @@ public class MaskingTool extends AbstractToolPage implements MouseListener {
 			public void run() {
 				int pensize = Activator.getPlottingPreferenceStore().getInt(PlottingConstants.MASK_PEN_SIZE);
 				ShapeType penShape = ShapeType.TRIANGLE;
+				previousshapeType = penShape;
 				viewer.setSelectedCursor(CursorUtils.getPenCursor(pensize, penShape));
 				Activator.getPlottingPreferenceStore().setValue(PlottingConstants.MASK_PEN_SHAPE, penShape.name());
 			}
@@ -843,6 +869,7 @@ public class MaskingTool extends AbstractToolPage implements MouseListener {
 			public void run() {
 				int pensize = Activator.getPlottingPreferenceStore().getInt(PlottingConstants.MASK_PEN_SIZE);
 				ShapeType penShape = ShapeType.CIRCLE;
+				previousshapeType = penShape;
 				viewer.setSelectedCursor(CursorUtils.getPenCursor(pensize, penShape));
 				Activator.getPlottingPreferenceStore().setValue(PlottingConstants.MASK_PEN_SHAPE, penShape.name());
 			}
@@ -854,6 +881,7 @@ public class MaskingTool extends AbstractToolPage implements MouseListener {
 		action = new Action("None", IAction.AS_CHECK_BOX) {
 			public void run() {
 				ShapeType penShape = ShapeType.NONE;
+				previousshapeType = penShape;
 				Activator.getPlottingPreferenceStore().setValue(PlottingConstants.MASK_PEN_SHAPE, penShape.name());
 				viewer.setSelectedCursor(null);
 			}
