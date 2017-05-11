@@ -20,6 +20,7 @@ import org.eclipse.dawnsci.macro.api.MethodEventObject;
 import org.eclipse.dawnsci.plotting.api.axis.IAxis;
 import org.eclipse.dawnsci.plotting.api.histogram.ImageServiceBean.ImageOrigin;
 import org.eclipse.dawnsci.plotting.api.preferences.BasePlottingConstants;
+import org.eclipse.dawnsci.plotting.api.region.IRegion;
 import org.eclipse.dawnsci.plotting.api.region.IRegion.RegionType;
 import org.eclipse.dawnsci.plotting.api.region.IRegionListener;
 import org.eclipse.draw2d.geometry.Rectangle;
@@ -89,13 +90,13 @@ public class XYRegionGraph extends XYGraph {
 		return new RegionArea(this);
 	}
 
-	public void addRegion(final AbstractSelectionRegion<?> region) {
+	public void addRegion(final IRegion region) {
 		getRegionArea().addRegion(region);
 	}
-	public void removeRegion(final AbstractSelectionRegion<?> region) {
+	public void removeRegion(final IRegion region) {
 		getRegionArea().removeRegion(region);
 	}
-	public void renameRegion(final AbstractSelectionRegion<?> region, String name) {
+	public void renameRegion(final IRegion region, String name) {
 		if (region!=null && region.getName()!=null && region.getName().equals(name)) return; // nothing to change.
 		getRegionArea().renameRegion(region, name);
 	}
@@ -152,14 +153,14 @@ public class XYRegionGraph extends XYGraph {
 		return getRegionArea().removeRegionListener(l);
 	}
 
-	public AbstractSelectionRegion<?> getRegion(String name) {
+	public IRegion getRegion(String name) {
 		return getRegionArea().getRegion(name);
 	}
 
 	public void clearRegions(boolean force) {
 		getRegionArea().clearRegions(force);
 	}
-	public List<AbstractSelectionRegion<?>> getRegions() {
+	public List<IRegion> getRegions() {
 		return getRegionArea().getRegions();
 	}
 

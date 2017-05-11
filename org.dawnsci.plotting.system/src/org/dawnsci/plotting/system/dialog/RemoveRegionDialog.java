@@ -10,7 +10,7 @@ package org.dawnsci.plotting.system.dialog;
 
 import org.dawnsci.plotting.draw2d.swtxy.RegionArea;
 import org.dawnsci.plotting.draw2d.swtxy.XYRegionGraph;
-import org.dawnsci.plotting.draw2d.swtxy.selection.AbstractSelectionRegion;
+import org.eclipse.dawnsci.plotting.api.region.IRegion;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
@@ -29,7 +29,7 @@ public class RemoveRegionDialog extends Dialog {
 	
 	private XYRegionGraph xyGraph;
 	private Combo regionCombo;
-	private AbstractSelectionRegion<?> removedRegion;
+	private IRegion removedRegion;
 	
 	public RemoveRegionDialog(Shell parentShell, XYRegionGraph xyGraph) {
 		super(parentShell);	
@@ -60,7 +60,7 @@ public class RemoveRegionDialog extends Dialog {
 	        
 	        final RegionArea regArea = (RegionArea)xyGraph.getPlotArea();
 	        for (String name : regArea.getRegionNames()) {
-	        	final AbstractSelectionRegion<?> region = regArea.getRegion(name);
+	        	final IRegion region = regArea.getRegion(name);
 	        	if (!region.isUserRegion()) continue;
 	        	regionCombo.add(region.getName());
 	        }
@@ -84,7 +84,7 @@ public class RemoveRegionDialog extends Dialog {
 	/**
 	 * @return the annotation to be removed.
 	 */
-	public AbstractSelectionRegion<?> getRegion() {
+	public IRegion getRegion() {
 		return removedRegion;
 	}
 }

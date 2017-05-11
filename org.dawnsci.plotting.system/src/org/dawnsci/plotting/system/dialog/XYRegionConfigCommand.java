@@ -14,6 +14,7 @@ import org.dawnsci.plotting.draw2d.swtxy.RegionArea;
 import org.dawnsci.plotting.draw2d.swtxy.RegionBean;
 import org.dawnsci.plotting.draw2d.swtxy.XYRegionMemento;
 import org.dawnsci.plotting.draw2d.swtxy.selection.AbstractSelectionRegion;
+import org.eclipse.dawnsci.plotting.api.region.IRegion;
 import org.eclipse.nebula.visualization.internal.xygraph.undo.XYGraphConfigCommand;
 import org.eclipse.nebula.visualization.internal.xygraph.undo.XYGraphMemento;
 import org.eclipse.nebula.visualization.xygraph.figures.IXYGraph;
@@ -43,9 +44,9 @@ public class XYRegionConfigCommand extends XYGraphConfigCommand {
 		super.saveXYGraphPropsToMemento(xyGraph, memento);
 		
 		int i=0;
-		final List<AbstractSelectionRegion<?>>     regionList     = ((RegionArea)xyGraph.getPlotArea()).getRegions();
+		final List<IRegion>     regionList     = ((RegionArea)xyGraph.getPlotArea()).getRegions();
 		final List<RegionBean> regionBeanList = ((XYRegionMemento)memento).getRegionBeanList();
-		for(AbstractSelectionRegion<?> region : regionList) {
+		for(IRegion region : regionList) {
 			saveRegionPropsToMemento(region,regionBeanList.get(i));
 			++i;
 		}
@@ -63,11 +64,11 @@ public class XYRegionConfigCommand extends XYGraphConfigCommand {
 	}
 	
 	
-	private void saveRegionPropsToMemento(AbstractSelectionRegion<?> region, RegionBean memento){		
-		memento.sync(region.getBean());
+	private void saveRegionPropsToMemento(IRegion region, RegionBean memento){		
+		memento.sync(((AbstractSelectionRegion<?>)region).getBean());
 	}
 	
-	private void restoreRegionPropsFromMemento(AbstractSelectionRegion<?> region, RegionBean regionBean){		
-		region.sync(regionBean);	
+	private void restoreRegionPropsFromMemento(IRegion region, RegionBean regionBean){		
+		((AbstractSelectionRegion<?>)region).sync(regionBean);	
 	}
 }

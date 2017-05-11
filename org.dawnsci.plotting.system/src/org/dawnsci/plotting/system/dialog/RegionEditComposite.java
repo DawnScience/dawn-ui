@@ -22,6 +22,7 @@ import org.dawnsci.plotting.draw2d.swtxy.selection.AbstractSelectionRegion;
 import org.dawnsci.plotting.roi.ROIEditTable;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.region.IROIListener;
+import org.eclipse.dawnsci.plotting.api.region.IRegion;
 import org.eclipse.dawnsci.plotting.api.region.IRegion.RegionType;
 import org.eclipse.dawnsci.plotting.api.region.ROIEvent;
 import org.eclipse.dawnsci.plotting.api.trace.IImageTrace;
@@ -54,7 +55,7 @@ public class RegionEditComposite extends Composite {
 	private CCombo regionType;
 	private CCombo xCombo, yCombo;
 	private Button showPoints;
-	private AbstractSelectionRegion<?> editingRegion;
+	private IRegion editingRegion;
 	private ColorSelector colorSelector;
 	private Spinner alpha;
 	private Button mobile;
@@ -117,7 +118,7 @@ public class RegionEditComposite extends Composite {
 			nameText.addSelectionListener(new SelectionAdapter(){
 				@Override
 				public void widgetDefaultSelected(SelectionEvent e) {
-					AbstractSelectionRegion<?> region = getEditingRegion();
+					IRegion region = getEditingRegion();
 					region.repaint();
 				}
 			});
@@ -153,7 +154,7 @@ public class RegionEditComposite extends Composite {
 			colorSelector.addListener(new IPropertyChangeListener() {
 				@Override
 				public void propertyChange(PropertyChangeEvent event) {
-					AbstractSelectionRegion<?> region = getEditingRegion();
+					IRegion region = getEditingRegion();
 					region.repaint();
 				}
 			});
@@ -176,7 +177,7 @@ public class RegionEditComposite extends Composite {
 			alpha.addSelectionListener(new SelectionAdapter(){
 				@Override
 				public void widgetSelected(SelectionEvent e) {
-					AbstractSelectionRegion<?> region = getEditingRegion();
+					IRegion region = getEditingRegion();
 					region.repaint();
 				}
 			});
@@ -191,7 +192,7 @@ public class RegionEditComposite extends Composite {
 			mobile.addSelectionListener(new SelectionAdapter(){
 				@Override
 				public void widgetSelected(SelectionEvent e) {
-					AbstractSelectionRegion<?> region = getEditingRegion();
+					IRegion region = getEditingRegion();
 					region.repaint();
 				}
 			});
@@ -205,7 +206,7 @@ public class RegionEditComposite extends Composite {
 			showPoints.addSelectionListener(new SelectionAdapter(){
 				@Override
 				public void widgetSelected(SelectionEvent e) {
-					AbstractSelectionRegion<?> region = getEditingRegion();
+					IRegion region = getEditingRegion();
 					region.repaint();
 				}
 			});
@@ -220,7 +221,7 @@ public class RegionEditComposite extends Composite {
 			visible.addSelectionListener(new SelectionAdapter(){
 				@Override
 				public void widgetSelected(SelectionEvent e) {
-					AbstractSelectionRegion<?> region = getEditingRegion();
+					IRegion region = getEditingRegion();
 					region.repaint();
 				}
 			});
@@ -236,7 +237,7 @@ public class RegionEditComposite extends Composite {
 			showLabel.addSelectionListener(new SelectionAdapter(){
 				@Override
 				public void widgetSelected(SelectionEvent e) {
-					AbstractSelectionRegion<?> region = getEditingRegion();
+					IRegion region = getEditingRegion();
 					region.repaint();
 				}
 			});
@@ -251,7 +252,7 @@ public class RegionEditComposite extends Composite {
 			fillRegion.addSelectionListener(new SelectionAdapter(){
 				@Override
 				public void widgetSelected(SelectionEvent e) {
-					AbstractSelectionRegion<?> region = getEditingRegion();
+					IRegion region = getEditingRegion();
 					region.repaint();
 				}
 			});
@@ -329,7 +330,7 @@ public class RegionEditComposite extends Composite {
 	
 	private IROIListener roiListener;
 	
-	public void setEditingRegion(final AbstractSelectionRegion<?> region) {
+	public void setEditingRegion(final IRegion region) {
 		
         this.editingRegion = region;
         this.roiViewer.setRegion(region.getROI(), region.getRegionType(), region.getCoordinateSystem());
@@ -381,7 +382,7 @@ public class RegionEditComposite extends Composite {
 		super.dispose();
 	}
 	
-	public AbstractSelectionRegion<?> getEditingRegion() {
+	public IRegion getEditingRegion() {
 		
 		final String txt = nameText.getText();
 		try {
@@ -418,7 +419,7 @@ public class RegionEditComposite extends Composite {
 
 	public void applyChanges() {
 //		this.roiViewer.cancelEditing();
-		AbstractSelectionRegion<?> region = getEditingRegion();
+		IRegion region = getEditingRegion();
 		if (region.isVisible())
 			region.repaint();
 	}

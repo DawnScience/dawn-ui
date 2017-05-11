@@ -12,7 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.dawnsci.plotting.draw2d.swtxy.XYRegionGraph;
-import org.dawnsci.plotting.draw2d.swtxy.selection.AbstractSelectionRegion;
+import org.eclipse.dawnsci.plotting.api.region.IRegion;
 import org.eclipse.nebula.visualization.internal.xygraph.undo.IUndoableCommand;
 
 /**The undoable command to remove an annotation.
@@ -22,25 +22,25 @@ import org.eclipse.nebula.visualization.internal.xygraph.undo.IUndoableCommand;
 public class RemoveRegionCommand implements IUndoableCommand {
 	
 	private XYRegionGraph xyGraph;
-	private List<AbstractSelectionRegion<?>> regions;
-	
-	public RemoveRegionCommand(XYRegionGraph xyGraph, AbstractSelectionRegion<?> region) {
+	private List<IRegion> regions;
+
+	public RemoveRegionCommand(XYRegionGraph xyGraph, IRegion region) {
 		this.xyGraph = xyGraph;
-		this.regions = new ArrayList<AbstractSelectionRegion<?>>();
+		this.regions = new ArrayList<IRegion>();
 		regions.add(region);
 	}
 
-	public RemoveRegionCommand(XYRegionGraph xyGraph, List<AbstractSelectionRegion<?>> regions) {
+	public RemoveRegionCommand(XYRegionGraph xyGraph, List<IRegion> regions) {
 		this.xyGraph = xyGraph;
 		this.regions = regions;
 	}
 
 	public void redo() {
-		for (AbstractSelectionRegion<?> region : regions)  xyGraph.removeRegion(region);
+		for (IRegion region : regions)  xyGraph.removeRegion(region);
 	}
 
 	public void undo() {		
-		for (AbstractSelectionRegion<?> region : regions)  xyGraph.addRegion(region);
+		for (IRegion region : regions)  xyGraph.addRegion(region);
 	}
 	
 	@Override

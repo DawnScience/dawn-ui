@@ -1272,8 +1272,7 @@ public class LightWeightPlotViewer<T> extends AbstractPlottingViewer<T> implemen
 	 */
 	public Collection<IRegion> getRegions() {
 		if (xyGraph == null) return null;
-		List<AbstractSelectionRegion<?>> regions = xyGraph.getRegions();
-		return new ArrayList<IRegion>(regions);
+		return xyGraph.getRegions();
 	}
 	
 	/**

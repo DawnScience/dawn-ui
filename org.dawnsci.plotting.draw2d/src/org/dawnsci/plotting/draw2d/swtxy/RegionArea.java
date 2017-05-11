@@ -26,6 +26,9 @@ import org.dawnsci.plotting.draw2d.swtxy.selection.SelectionRegionFactory;
 import org.eclipse.dawnsci.macro.api.DeleteEventObject;
 import org.eclipse.dawnsci.macro.api.MacroEventObject;
 import org.eclipse.dawnsci.macro.api.RenameEventObject;
+import org.eclipse.dawnsci.plotting.api.annotation.IAnnotation;
+import org.eclipse.dawnsci.plotting.api.area.IPlotArea;
+import org.eclipse.dawnsci.plotting.api.area.ZoomOption;
 import org.eclipse.dawnsci.plotting.api.axis.ClickEvent;
 import org.eclipse.dawnsci.plotting.api.axis.IAxis;
 import org.eclipse.dawnsci.plotting.api.axis.IClickListener;
@@ -67,13 +70,13 @@ import org.eclipse.swt.graphics.PaletteData;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class RegionArea extends PlotArea {
+public class RegionArea extends PlotArea implements IPlotArea {
 
 	
 	private static final Logger logger = LoggerFactory.getLogger(RegionArea.class);
 	
 	protected ISelectionProvider                      selectionProvider;
-	private Map<String,AbstractSelectionRegion<?>>    regions;
+	private Map<String,IRegion>    regions;
 	private Map<String,ImageTrace>                    imageTraces;
 	private Map<String,VectorTrace>                   vectorTraces;
 	
@@ -84,7 +87,7 @@ public class RegionArea extends PlotArea {
 
 	public RegionArea(XYRegionGraph xyGraph) {
 		super((IXYGraph) xyGraph);
-		this.regions     = new LinkedHashMap<String,AbstractSelectionRegion<?>>();
+		this.regions     = new LinkedHashMap<String,IRegion>();
 		this.imageTraces = new LinkedHashMap<String,ImageTrace>();	
 		
 		this.positionListener = new MouseMotionListener.Stub() {
@@ -281,24 +284,24 @@ public class RegionArea extends PlotArea {
 	}
 
 
-	public void addRegion(final AbstractSelectionRegion<?> region) {
+	public void addRegion(final IRegion region) {
 		addRegion(region, true);
 	}
 
-	void addRegion(final AbstractSelectionRegion<?> region, boolean fireListeners) {
+	void addRegion(final IRegion region, boolean fireListeners) {
 		
 		regions.put(region.getName(), region);
-		region.setXyGraph(xyGraph);
-		region.createContents(this);
-		region.setSelectionProvider(selectionProvider);
+		((AbstractSelectionRegion<?>)region).setXyGraph(xyGraph);
+		((AbstractSelectionRegion<?>)region).createContents(this);
+		((AbstractSelectionRegion<?>)region).setSelectionProvider(selectionProvider);
 		if (fireListeners) fireRegionAdded(new RegionEvent(region));
 		clearRegionTool();
 		revalidate();
 	}
 
-	public boolean removeRegion(final AbstractSelectionRegion<?> region) {
+	public boolean removeRegion(final IRegion region) {
 		if (region==null) return false;
-	    final AbstractSelectionRegion<?> gone = regions.remove(region.getName());
+	    final IRegion gone = regions.remove(region.getName());
 		if (gone!=null){
 			gone.remove(); // Clears up children (you can live without this
 			fireRegionRemoved(new RegionEvent(gone));
@@ -308,15 +311,15 @@ public class RegionArea extends PlotArea {
 		return gone!=null;
 	}
 	
-	public void renameRegion(final AbstractSelectionRegion<?> region, String name) {
+	public void renameRegion(final IRegion region, String name) {
 		
 		if (regions.containsKey(name)) throw new RuntimeException("The name '"+name+"' already exists for a region!");
 		String oldName = region.getName();
 		// Fix http://jira.diamond.ac.uk/browse/SCI-1056, do not lose order on rename		
-		final Map<String, AbstractSelectionRegion<?>> sameOrder = new LinkedHashMap<String, AbstractSelectionRegion<?>>(regions.size());
+		final Map<String, IRegion> sameOrder = new LinkedHashMap<String, IRegion>(regions.size());
 
-		final Set<Entry<String,AbstractSelectionRegion<?>>> entries = regions.entrySet();
-		for (Entry<String, AbstractSelectionRegion<?>> entry : entries) {
+		final Set<Entry<String,IRegion>> entries = regions.entrySet();
+		for (Entry<String, IRegion> entry : entries) {
 			
 			if (entry.getKey().equals(oldName)) {
 			    region.setName(name);
@@ -342,7 +345,7 @@ public class RegionArea extends PlotArea {
 		
 		final Collection<String>  deleted = new HashSet<String>(5);
 		final Collection<IRegion> removed = new HashSet<IRegion>(5);
-		for (AbstractSelectionRegion<?> region : regions.values()) {
+		for (IRegion region : regions.values()) {
 			if (!region.isUserRegion() && !force) continue;
 			deleted.add(region.getName());
 			removed.add(region);
@@ -676,6 +679,7 @@ public class RegionArea extends PlotArea {
 	 * 
 	 * @param l
 	 */
+	@Override
 	public boolean addImageTraceListener(final ITraceListener l) {
 		if (imageTraceListeners == null) imageTraceListeners = new HashSet<ITraceListener>(7);
 		return imageTraceListeners.add(l);
@@ -685,6 +689,7 @@ public class RegionArea extends PlotArea {
 	 * 
 	 * @param l
 	 */
+	@Override
 	public boolean removeImageTraceListener(final ITraceListener l) {
 		if (imageTraceListeners == null) return true;
 		return imageTraceListeners.remove(l);
@@ -706,14 +711,17 @@ public class RegionArea extends PlotArea {
 		if (imageTraceListeners==null) return;
 		for (ITraceListener l : imageTraceListeners) l.traceRemoved(evt);
 	}
-	public List<AbstractSelectionRegion<?>> getRegions() {
-		List<AbstractSelectionRegion<?>> ret = new ArrayList<AbstractSelectionRegion<?>>(regions.size());
+
+	@Override
+	public List<IRegion> getRegions() {
+		List<IRegion> ret = new ArrayList<IRegion>(regions.size());
 		for (String key : regions.keySet()) {
 			ret.add(regions.get(key));
 		}
 		return ret;
 	}
 
+	@Override
 	public Collection<String> getRegionNames() {
 		return regions.keySet();
 	}
@@ -723,8 +731,8 @@ public class RegionArea extends PlotArea {
 		this.selectionProvider = provider;
 	}
 
-
-	public AbstractSelectionRegion<?> getRegion(String name) {
+	@Override
+	public IRegion getRegion(String name) {
 		if (regions==null) return null;
 		return regions.get(name);
 	}
@@ -792,7 +800,7 @@ public class RegionArea extends PlotArea {
 		}
 	}
 
-
+	@Override
 	public ImageTrace getImageTrace() {
 		if (imageTraces!=null && imageTraces.size()>0) return imageTraces.values().iterator().next();
 		return null;
@@ -899,5 +907,68 @@ public class RegionArea extends PlotArea {
 	public void setKeyEvent(KeyEvent keyEvent) {
 		this.keyEvent = keyEvent;
 	}
-	
+
+	@Override
+	public List<ITrace> getTraces() {
+		List<Trace> list = super.getTraceList();
+		List<ITrace> traces = new ArrayList<ITrace>(list.size());
+		for (ITrace iTrace : traces) {
+			traces.add((ITrace) iTrace);
+		}
+		return traces;
+	}
+
+	@Override
+	public void removeTrace(ITrace trace) {
+		super.removeTrace((Trace)trace);
+	}
+
+	@Override
+	public List<IAnnotation> getAnnotations() {
+		List<Annotation> list = super.getAnnotationList();
+		List<IAnnotation> annotations = new ArrayList<IAnnotation>(list.size());
+		for (IAnnotation annotation : annotations) {
+			annotations.add((IAnnotation) annotation);
+		}
+		return annotations;
+	}
+
+	@Override
+	public void removeAnnotation(IAnnotation annotation) {
+		super.removeAnnotation((Annotation) annotation);
+	}
+
+	@Override
+	public ZoomOption getZoomOption() {
+		ZoomType type = super.getZoomType();
+		switch (type) {
+		case DYNAMIC_ZOOM:
+			return ZoomOption.DYNAMIC_ZOOM;
+		case HORIZONTAL_ZOOM:
+			return ZoomOption.HORIZONTAL_ZOOM;
+		case VERTICAL_ZOOM:
+			return ZoomOption.VERTICAL_ZOOM;
+		case ZOOM_IN_HORIZONTALLY:
+			return ZoomOption.ZOOM_OUT_HORIZONTALLY;
+		case ZOOM_IN_VERTICALLY:
+			return ZoomOption.ZOOM_IN_VERTICALLY;
+		case PANNING:
+			return ZoomOption.PANNING;
+		case RUBBERBAND_ZOOM:
+			return ZoomOption.RUBBERBAND_ZOOM;
+		case ZOOM_IN:
+			return ZoomOption.ZOOM_IN;
+		case ZOOM_OUT:
+			return ZoomOption.ZOOM_OUT;
+		case ZOOM_OUT_HORIZONTALLY:
+			return ZoomOption.ZOOM_OUT_HORIZONTALLY;
+		case ZOOM_OUT_VERTICALLY:
+			return ZoomOption.ZOOM_OUT_VERTICALLY;
+		case NONE:
+			return ZoomOption.NONE;
+		default:
+			break;
+		}
+		return null;
+	}
 }
