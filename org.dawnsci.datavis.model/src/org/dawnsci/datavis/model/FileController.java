@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.dawnsci.datavis.api.IRecentPlaces;
+import org.dawnsci.datavis.model.fileconfig.XYEFileConfiguration;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.swt.widgets.Display;
@@ -20,6 +21,8 @@ public class FileController implements IFileController {
 	private LoadedFile currentFile;
 	private DataOptions currentData;
 	private ILiveFileListener listener;
+	
+	private boolean autoSelect = true;
 	
 	private Set<FileControllerStateEventListener> listeners = new HashSet<FileControllerStateEventListener>();
 	
@@ -240,7 +243,8 @@ public class FileController implements IFileController {
 				if (d.getPlottableObject() != null) {
 					PlottableObject p = d.getPlottableObject();
 					plotObject = new PlottableObject(p.getPlotMode(), new NDimensions(p.getNDimensions()));
-				} 
+				}
+				
 				if (f.isSelected() && d.isSelected()) {
 					DataStateObject dso = new DataStateObject(d, f.isSelected() && d.isSelected(), plotObject);
 					
@@ -296,7 +300,12 @@ public class FileController implements IFileController {
 				
 				if (monitor != null) monitor.worked(1);
 				
-				if (f != null) files.add(f);
+				if (f != null) {
+					f.setSelected(autoSelect);
+					XYEFileConfiguration fc = new XYEFileConfiguration();
+					fc.configure(f);
+					files.add(f);
+				}
 				
 			}
 			

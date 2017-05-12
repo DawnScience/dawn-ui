@@ -236,6 +236,7 @@ public class PlotController implements IPlotController {
 		IPlottingSystem<?> system = getPlottingSystem();
 		
 		PlottableObject plotObject = stateObject.getPlotObject();
+		
 		NDimensions nd = plotObject.getNDimensions();
 		
 		
@@ -397,7 +398,12 @@ public class PlotController implements IPlotController {
 			
 			@Override
 			public void run() {
-				updatePlotState(state, mode);
+				try {
+					updatePlotState(state, mode);
+				} catch (Exception e) {
+					logger.error("Error in plot controller runnable",e);
+				}
+				
 			}
 		};
 		
@@ -427,7 +433,15 @@ public class PlotController implements IPlotController {
 			for (DataOptions o : f.getDataOptions()) {
 				if (!o.isSelected()) continue;
 				if (option == o) continue;
-				if (o.getPlottableObject() == null) continue;
+				if (o.getPlottableObject() == null) {
+					PlottableObject po = getPlottableObject(o,mode);
+					if (po == null) {
+						f.setSelected(false); //cant plot in this mode
+						continue;
+					} else {
+						o.setPlottableObject(po);
+					}
+				}
 				if (!mode.supportsMultiple() || o.getPlottableObject().getPlotMode() != mode) {
 					if (thisFile) {
 						objects.add(o);
@@ -506,6 +520,30 @@ public class PlotController implements IPlotController {
 		
 		return po;
 		
+	}
+	
+	private PlottableObject getPlottableObject(DataOptions d, IPlotMode mode) {
+		
+		NDimensions nd = d.buildNDimensions();
+		int[] shape = ShapeUtils.squeezeShape(d.getLazyDataset().getShape(), false);
+		int rank = shape.length;
+		if (mode == null) {
+			IPlotMode defaultMode = getDefaultMode(rank);
+			nd.setOptions(defaultMode.getOptions());
+			PlottableObject po = new PlottableObject(defaultMode, nd);
+			return po;
+		} else {
+			IPlotMode[] plotModes = getPlotModes(rank);
+			for (IPlotMode m : plotModes) {
+				if (mode.equals(m)) {
+					nd.setOptions(m.getOptions());
+					PlottableObject po = new PlottableObject(m, nd);
+					return po;
+				}
+			}
+		}
+		
+		return null;
 	}
 	
 	public void waitOnJob(){
