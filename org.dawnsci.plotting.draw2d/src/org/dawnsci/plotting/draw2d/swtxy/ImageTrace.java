@@ -70,8 +70,10 @@ import org.eclipse.january.dataset.ShapeUtils;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.nebula.visualization.widgets.figureparts.ColorMapRamp;
 import org.eclipse.nebula.visualization.xygraph.figures.Axis;
+import org.eclipse.nebula.visualization.xygraph.figures.DAxis;
 import org.eclipse.nebula.visualization.xygraph.figures.IAxisListener;
 import org.eclipse.nebula.visualization.xygraph.linearscale.Range;
+import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.ImageData;
 import org.eclipse.swt.graphics.PaletteData;
@@ -153,12 +155,12 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 		xAxis.addListener(this);
 		yAxis.addListener(this);
 
-		xTicksAtEnd = xAxis.hasTicksAtEnds();
-		xAxis.setTicksAtEnds(false);
+		xTicksAtEnd = ((DAxis)xAxis).hasTicksAtEnds();
+		((DAxis)xAxis).setTicksAtEnds(false);
 		yTicksAtEnd = yAxis.hasTicksAtEnds();
-		yAxis.setTicksAtEnds(false);
-		xAxis.setTicksIndexBased(true);
-		yAxis.setTicksIndexBased(true);
+		((DAxis)yAxis).setTicksAtEnds(false);
+		((DAxis)xAxis).setTicksIndexBased(true);
+		((DAxis)yAxis).setTicksIndexBased(true);
 
 		if (xAxis instanceof AspectAxis && yAxis instanceof AspectAxis) {
 			
@@ -192,7 +194,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 
 	public void setXAxis(Axis xAxis) {
 		this.xAxis = xAxis;
-		xAxis.setTicksIndexBased(true);
+		((DAxis)xAxis).setTicksIndexBased(true);
 	}
 
 	public AspectAxis getYAxis() {
@@ -201,7 +203,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 
 	public void setYAxis(Axis yAxis) {
 		this.yAxis = yAxis;
-		yAxis.setTicksIndexBased(true);
+		((DAxis)yAxis).setTicksIndexBased(true);
 	}
 
 	public Dataset getImage() {
@@ -726,13 +728,13 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 
 	public void setGlobalRange(double[] globalRange) {
 		this.globalRange = globalRange;
-		yAxis.setTicksIndexBased(false);
-		xAxis.setTicksIndexBased(false);
+		if (yAxis instanceof DAxis)((DAxis)yAxis).setTicksIndexBased(false);
+		if (xAxis instanceof DAxis)((DAxis)xAxis).setTicksIndexBased(false);
 //		if (xAxis instanceof AspectAxis)((AspectAxis)xAxis).setMaximumRange(globalRange[0], globalRange[1]);
 //		if (yAxis instanceof AspectAxis)((AspectAxis)yAxis).setMaximumRange(globalRange[2], globalRange[3]);
 //		xAxis.setRange(lower, upper);
-		xAxis.setTicksAtEnds(false);
-		yAxis.setTicksAtEnds(false);
+		if (xAxis instanceof DAxis)((DAxis)xAxis).setTicksAtEnds(false);
+		if (yAxis instanceof DAxis)((DAxis)yAxis).setTicksAtEnds(false);
 		updateImageDirty(ImageScaleType.FORCE_REIMAGE);
 //		performAutoscale();
 	}
@@ -1143,10 +1145,10 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 		if (getParent()!=null) getParent().remove(this);
 		xAxis.removeListener(this);
 		yAxis.removeListener(this);
-		xAxis.setTicksAtEnds(xTicksAtEnd);
-		yAxis.setTicksAtEnds(yTicksAtEnd);
-		xAxis.setTicksIndexBased(false);
-		yAxis.setTicksIndexBased(false);
+		if (xAxis instanceof DAxis)((DAxis)xAxis).setTicksAtEnds(xTicksAtEnd);
+		if (yAxis instanceof DAxis)((DAxis)yAxis).setTicksAtEnds(yTicksAtEnd);
+		if (xAxis instanceof DAxis)((DAxis)xAxis).setTicksIndexBased(false);
+		if (yAxis instanceof DAxis)((DAxis)yAxis).setTicksIndexBased(false);
 		axisRedrawActive = false;
 		if (imageServiceBean!=null) imageServiceBean.dispose();
 		
@@ -2125,6 +2127,30 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 	@Override
 	public boolean hasTrueAxes(){
 		return globalRange != null;
+	}
+
+	@Override
+	public void axisForegroundColorChanged(Axis axis, Color oldColor, Color newColor) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void axisTitleChanged(Axis axis, String oldTitle, String newTitle) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void axisAutoScaleChanged(Axis axis, boolean oldAutoScale, boolean newAutoScale) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void axisLogScaleChanged(Axis axis, boolean old, boolean logScale) {
+		// TODO Auto-generated method stub
+		
 	}
 	
 }
