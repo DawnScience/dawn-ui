@@ -31,6 +31,7 @@ import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.nebula.visualization.widgets.figureparts.ColorMapRamp;
 import org.eclipse.nebula.visualization.xygraph.figures.Annotation;
 import org.eclipse.nebula.visualization.xygraph.figures.Axis;
+import org.eclipse.nebula.visualization.xygraph.figures.DAxis;
 import org.eclipse.nebula.visualization.xygraph.figures.IAnnotationLabelProvider;
 import org.eclipse.nebula.visualization.xygraph.figures.IAxesFactory;
 import org.eclipse.nebula.visualization.xygraph.figures.IXYGraph;
@@ -249,10 +250,10 @@ public class XYRegionGraph extends XYGraph {
 		}
 		
 		for(Axis axis : getXAxisList()){
-			axis.clear();
+			if (axis instanceof DAxis)((DAxis)axis).clear();
 		}
 		for(Axis axis : getYAxisList()){
-			axis.clear();
+			if (axis instanceof DAxis)((DAxis)axis).clear();
 		}
 		getRegionArea().clearTraces();
 		
