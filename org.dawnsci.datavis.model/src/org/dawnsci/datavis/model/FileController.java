@@ -7,6 +7,9 @@ import java.util.List;
 import java.util.Set;
 
 import org.dawnsci.datavis.api.IRecentPlaces;
+import org.dawnsci.datavis.model.fileconfig.ILoadedFileConfiguration;
+import org.dawnsci.datavis.model.fileconfig.ImageFileConfiguration;
+import org.dawnsci.datavis.model.fileconfig.NexusFileConfiguration;
 import org.dawnsci.datavis.model.fileconfig.XYEFileConfiguration;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.operation.IRunnableWithProgress;
@@ -23,6 +26,8 @@ public class FileController implements IFileController {
 	private ILiveFileListener listener;
 	
 	private boolean autoSelect = true;
+	
+	private ILoadedFileConfiguration[] fileConfigs = new ILoadedFileConfiguration[]{new NexusFileConfiguration(), new ImageFileConfiguration(), new XYEFileConfiguration()};
 	
 	private Set<FileControllerStateEventListener> listeners = new HashSet<FileControllerStateEventListener>();
 	
@@ -302,8 +307,13 @@ public class FileController implements IFileController {
 				
 				if (f != null) {
 					f.setSelected(autoSelect);
-					XYEFileConfiguration fc = new XYEFileConfiguration();
-					fc.configure(f);
+					
+					for (ILoadedFileConfiguration c : fileConfigs) {
+						if (c.configure(f)) {
+							break;
+						}
+					}
+					
 					files.add(f);
 				}
 				

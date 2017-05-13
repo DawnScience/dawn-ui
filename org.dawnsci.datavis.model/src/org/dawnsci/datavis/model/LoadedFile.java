@@ -108,6 +108,10 @@ public class LoadedFile implements IDataObject, IDataFilePackage {
 		return dataHolder.get().getLazyDataset(name);
 	}
 	
+	public Tree getTree() {
+		return dataHolder.get().getTree();
+	}
+	
 	public Map<String, int[]> getDataShapes(){
 		
 		Map<String, int[]> ds = dataHolder.get().getMetadata().getDataShapes();
