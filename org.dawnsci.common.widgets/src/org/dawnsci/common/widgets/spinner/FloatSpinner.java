@@ -188,7 +188,7 @@ public class FloatSpinner extends Composite {
 		value = Math.floor(Math.log10(Math.abs(value)));
 		int logInc = Math.min(MAX_DIGITS, Math.max(-MAX_DIGITS, (int) value));
 		setPrecision(Math.max(0, -logInc));
-		setIncrement(Math.pow(10, logInc));
+		setIncrement(Math.pow(10, logInc - 1));
 	}
 
 	/**

@@ -353,7 +353,7 @@ public class HistogramViewer extends ContentViewer {
 
 	private static double[] calculateIncrementAndPrecision(double value) {
 		int logInc = (int) Math.floor(Math.log10(value));
-		return new double[] {Math.pow(10, logInc), Math.max(0, -logInc)};
+		return new double[] {Math.pow(10, logInc - 1), Math.max(0, -logInc)};
 	}
 
 	private void installMinMaxListeners() {
@@ -568,14 +568,14 @@ public class HistogramViewer extends ContentViewer {
 	protected ILineTrace[] getRGBTraces() {
 		return new ILineTrace[] { redTrace, greenTrace, blueTrace };
 	}
-	
+
 	/**
-	 * For test purposes only. Return the max spinner. 
+	 * For test purposes only. Return the max spinner.
 	 */
 	protected FloatSpinner getMaxSpinner(){
 		return maxText;
 	}
-	
+
 	/**
 	 * For test purposes only. Return the min spinner
 	 */
