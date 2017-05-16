@@ -23,6 +23,8 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CLabel;
 import org.eclipse.swt.custom.StackLayout;
 import org.eclipse.swt.events.KeyListener;
+import org.eclipse.swt.events.ModifyEvent;
+import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
@@ -39,6 +41,8 @@ import org.slf4j.LoggerFactory;
 public class FloatSpinner extends Composite {
 	
 	private static final Logger logger = LoggerFactory.getLogger(FloatSpinner.class);
+
+	private static final int MAX_DIGITS = (int) (Math.ceil(Math.log10(Integer.MAX_VALUE)) - 1);
 
 	/**
 	 * prims
@@ -93,6 +97,13 @@ public class FloatSpinner extends Composite {
 		};
 		spinner.addSelectionListener(sListener);
 
+		spinner.addModifyListener(new ModifyListener() {
+			@Override
+			public void modifyText(ModifyEvent e) {
+				getParent().layout(); // automatically resize width
+			}
+		});
+
 		this.errorLabel = new CLabel(content, SWT.NONE);
 		errorLabel.setForeground(Display.getDefault().getSystemColor(SWT.COLOR_RED));
 		((StackLayout)content.getLayout()).topControl = spinner;
@@ -125,17 +136,14 @@ public class FloatSpinner extends Composite {
 	 * Set the precision
 	 * 
 	 * @param precision
-	 *            of value in decimal places
+	 *            as value in number of decimal places
+	 * @throws IllegalArgumentException if precision is negative
 	 */
 	public void setPrecision(int precision) {
-		this.precision = precision;
-		
-		// To guard against precision = 0, as this causes a stack overflow
-		if (precision < 1) {
-			this.precision = 1;
-			precision = 1;
+		if (precision < 0) {
+			throw new IllegalArgumentException("Precision must be zero or more");
 		}
-		
+		this.precision = precision;
 		factor = Math.pow(10, precision);
 		spinner.setDigits(precision);
 		setWidth(width);
@@ -161,13 +169,26 @@ public class FloatSpinner extends Composite {
 		}
 		maximumValue = Math.pow(10, width - precision);
 		if (maximumValue > Integer.MAX_VALUE) {
-			width = (int) Math.ceil(Math.log10(Integer.MAX_VALUE)) - 1 + precision;
+			width = MAX_DIGITS + precision;
 			maximumValue = Math.pow(10, width - precision);
 		}
 		this.width = width;
 		spinner.setMinimum((int) -(maximumValue*factor));
 		spinner.setMaximum((int) (maximumValue*factor));
 		spinner.setTextLimit(width + 1);
+
+		getParent().layout();
+	}
+
+	/**
+	 * Set precision and increment according to magnitude of given value
+	 * @param value
+	 */
+	public void setPrecisionAndIncrement(double value) {
+		value = Math.floor(Math.log10(Math.abs(value)));
+		int logInc = Math.min(MAX_DIGITS, Math.max(-MAX_DIGITS, (int) value));
+		setPrecision(Math.max(0, -logInc));
+		setIncrement(Math.pow(10, logInc));
 	}
 
 	/**
@@ -188,7 +209,7 @@ public class FloatSpinner extends Composite {
 		if (Double.isInfinite(value)||Double.isNaN(value)|| Math.abs(value) > maximumValue) {
 			((StackLayout)content.getLayout()).topControl = errorLabel;
 			errorLabel.setText(String.valueOf(value));
-			content.layout();
+			getParent().layout();
 			invalidValue = value;
 			return;
 		}
@@ -196,7 +217,7 @@ public class FloatSpinner extends Composite {
 
 		invalidValue = null;
 		spinner.setSelection((int) (value * factor));
-		content.layout();
+		getParent().layout();
 	}
 
 	/**
@@ -248,6 +269,7 @@ public class FloatSpinner extends Composite {
 	 * @param maximum
 	 */
 	public void setMaximum(double maximum) {
+		maximumValue = maximum;
 		spinner.setMaximum((int) (maximum * factor));
 	}
 
@@ -273,7 +295,9 @@ public class FloatSpinner extends Composite {
 	}
 	
 	public void setIncrement(double inc) {
-		spinner.setIncrement((int) (inc * factor));
+		int c = Math.max(1, (int) (inc * factor));
+		spinner.setIncrement(c);
+		spinner.setPageIncrement(5 * c);
 	}
 
 	public double getIncrement() {
