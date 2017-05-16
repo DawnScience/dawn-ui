@@ -394,15 +394,17 @@ public class MaskingTool extends AbstractToolPage implements MouseListener {
 		minEnabled.setText("Enable lower mask    ");
 		minEnabled.setToolTipText("Enable the lower bound mask, removing pixels with lower intensity.");
 		enableControls.add(minEnabled);
+
 		
+		double minValue = image == null ? 0 : getValue(image.getMin(), image.getMinCut(), 0);
+		double maxValue = image == null ? 100 : getValue(image.getMax(), image.getMaxCut(), Integer.MAX_VALUE);
+
 		this.minimum = new FloatSpinner(minMaxComp, SWT.NONE);
-		minimum.setIncrement(1d);
+		minimum.setFormat(9, 0);
+		minimum.setPrecisionAndIncrement(minValue);
 		minimum.setEnabled(false);
-		minimum.setMinimum(Integer.MIN_VALUE);
-		minimum.setMaximum(Integer.MAX_VALUE);
-		minimum.setWidth(String.valueOf(Integer.MAX_VALUE).length());
 		minimum.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
-		if (image!=null) minimum.setDouble(getValue(image.getMin(), image.getMinCut(), 0));
+		minimum.setDouble(minValue);
 		minimum.setToolTipText("Press enter to apply a full update of the mask.");
 		minimum.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
@@ -450,13 +452,11 @@ public class MaskingTool extends AbstractToolPage implements MouseListener {
 		});
 		
 		this.maximum = new FloatSpinner(minMaxComp, SWT.NONE);
-		maximum.setIncrement(1d);
+		maximum.setFormat(9, 0);
+		maximum.setPrecisionAndIncrement(maxValue);
 		maximum.setEnabled(false);
-		maximum.setMinimum(Integer.MIN_VALUE);
-		maximum.setMaximum(Integer.MAX_VALUE);
-		maximum.setWidth(String.valueOf(Integer.MAX_VALUE).length());
 		maximum.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
-		if (image!=null) maximum.setDouble(getValue(image.getMax(), image.getMaxCut(), Integer.MAX_VALUE));
+		maximum.setDouble(maxValue);
 		maximum.setToolTipText("Press enter to apply a full update of the mask.");
 		maximum.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
@@ -566,12 +566,10 @@ public class MaskingTool extends AbstractToolPage implements MouseListener {
 		enableControls.add(minThreshLabel);
 		
 		final FloatSpinner minThresh = new FloatSpinner(threshComp, SWT.NONE);
-		minThresh.setIncrement(1d);
-		minThresh.setMinimum(Integer.MIN_VALUE);
-		minThresh.setMaximum(Integer.MAX_VALUE);
-		minThresh.setWidth(String.valueOf(Integer.MAX_VALUE).length());
+		minThresh.setFormat(9, 0);
+		minThresh.setPrecisionAndIncrement(minValue);
 		minThresh.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
-		if (image!=null) minThresh.setDouble(getValue(image.getMin(), image.getMinCut(), 0));
+		minThresh.setDouble(minValue);
 		minThresh.setToolTipText("Press enter to set minimum threshold for brush.");
 		enableControls.add(minThresh);
 
@@ -581,12 +579,10 @@ public class MaskingTool extends AbstractToolPage implements MouseListener {
 		enableControls.add(maxThreshLabel);
 
 		final FloatSpinner maxThresh = new FloatSpinner(threshComp, SWT.NONE);
-		maxThresh.setIncrement(1d);
-		maxThresh.setMinimum(Integer.MIN_VALUE);
-		maxThresh.setMaximum(Integer.MAX_VALUE);
-		maxThresh.setWidth(String.valueOf(Integer.MAX_VALUE).length());
+		maxThresh.setFormat(9, 0);
+		maxThresh.setPrecisionAndIncrement(maxValue);
 		maxThresh.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
-		if (image!=null) maxThresh.setDouble(getValue(image.getMax(), image.getMaxCut(), Integer.MAX_VALUE));
+		maxThresh.setDouble(maxValue);
 		maxThresh.setToolTipText("Press enter to set maximum threshold for brush.");
 		enableControls.add(maxThresh);
 		

@@ -76,12 +76,13 @@ public class HistogramViewer extends ContentViewer {
 	private boolean firstUpdateTraces = true;
 
 	private IROIListener histogramRegionListener = new IROIListener.Stub() {
-		
+
 		@Override
 		public void roiDragged(ROIEvent evt) {
 			// Do nothing
 		}
 
+		@Override
 		public void update(ROIEvent evt) {
 			if (updatingROI) return;
 			try {
@@ -139,12 +140,12 @@ public class HistogramViewer extends ContentViewer {
 	 */
 	public HistogramViewer(final Composite parent, String title,
 			IPlottingSystem<Composite> plot, IActionBars site) throws Exception {
-		
+
 		composite = new Composite(parent, SWT.NONE);
 		composite.setLayout(GridLayoutFactory.fillDefaults().create());
-		
+
 		createMinMaxSettings(composite);
-		
+
 		if (plot != null) {
 			histogramPlottingSystem = plot;
 		} else {
@@ -242,24 +243,25 @@ public class HistogramViewer extends ContentViewer {
 	}
 
 	/**
-	 * Update the min widget if the value has changed. 
+	 * Update the min and max widgets if the value has changed.
 	 *
 	 * @param min the new minimum value
-	 */
-	private void updateMin(double min) {
-		if (minText.getDouble() != min) {
-			minText.setDouble(min);
-		}
-	}
-
-	/**
-	 * Update the max widget if the value has changed. 
-	 *
 	 * @param max the new maximum value
 	 */
-	private void updateMax(double max) {
+	private void updateMinMax(double min, double max) {
+		double[] values = calculateIncrementAndPrecision(Math.max(Math.abs(min), Math.abs(max)));
+		double increment = values[0];
+		int precision = (int) values[1];
 		if (maxText.getDouble() != max) {
+			maxText.setPrecision(precision);
+			maxText.setIncrement(increment);
 			maxText.setDouble(max);
+		}
+
+		if (minText.getDouble() != min) {
+			minText.setPrecision(precision);
+			minText.setIncrement(increment);
+			minText.setDouble(min);
 		}
 	}
 
@@ -338,15 +340,20 @@ public class HistogramViewer extends ContentViewer {
 		IAxis xAxis = histogramPlottingSystem.getSelectedXAxis();
 		double val1 = xAxis.getPositionValue(1);
 		double val2 = xAxis.getPositionValue(2);
-		double increment = Math.abs(val2 - val1);
 		// update precision too
-		int logInc = (int) Math.floor(Math.log10(increment));
-		increment = Math.pow(10, logInc);
-		int precision = Math.max(0, -logInc);
+		double[] values = calculateIncrementAndPrecision(Math.abs(val2 - val1));
+		double increment = values[0];
+		int precision = (int) values[1];
 		minText.setPrecision(Math.min(minText.getPrecision(), precision));
 		minText.setIncrement(increment);
 		maxText.setPrecision(Math.min(maxText.getPrecision(), precision));
 		maxText.setIncrement(increment);
+		maxText.getParent().layout();
+	}
+
+	private static double[] calculateIncrementAndPrecision(double value) {
+		int logInc = (int) Math.floor(Math.log10(value));
+		return new double[] {Math.pow(10, logInc), Math.max(0, -logInc)};
 	}
 
 	private void installMinMaxListeners() {
@@ -360,6 +367,7 @@ public class HistogramViewer extends ContentViewer {
 						updateRegion(minValue, getHistogramProvider().getMax());
 					}
 					maxText.setMinimum(minValue);
+					maxText.getParent().layout();
 					rescaleAxis(false);
 				}
 			}
@@ -375,6 +383,7 @@ public class HistogramViewer extends ContentViewer {
 						updateRegion(getHistogramProvider().getMin(), maxValue);
 					}
 					minText.setMaximum(maxValue);
+					minText.getParent().layout();
 					rescaleAxis(false);
 				}
 			}
@@ -393,24 +402,24 @@ public class HistogramViewer extends ContentViewer {
 					}
 				});
 	}
-	
+
 	/**
 	 * Check our minimum values are valid before
-	 * applying them 
+	 * applying them
 	 */
 	private boolean validateMin(double minValue) {
-		if (minValue > maxText.getDouble()){
+		if (minValue > maxText.getDouble()) {
 			return false;
 		}
-		return true;		
+		return true;
 	}
 
 	/**
 	 * Check our maximum values are valid before
-	 * applying them 
+	 * applying them
 	 */
-	private boolean validateMax(double maxValue){
-		if (!(maxValue > minText.getDouble())){
+	private boolean validateMax(double mainValue){
+		if (mainValue < minText.getDouble()) {
 			return false;
 		}
 		return true;
@@ -454,8 +463,7 @@ public class HistogramViewer extends ContentViewer {
 		if (!updatingROI) {
 			updateRegion(min, max);
 		}
-		updateMin(min);
-		updateMax(max);
+		updateMinMax(min, max);
 		updateTraces();
 	}
 
