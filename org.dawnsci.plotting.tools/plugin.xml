@@ -417,6 +417,7 @@
             label="Monitor tool">
       </plotting_tool_page>
       <plotting_tool_page
+            category="org.dawnsci.plotting.tools.category.Science"
             class="org.dawnsci.plotting.tools.powderlines.PowderLineTool"
             icon="icons/powderLines.png"
             id="org.dawnsci.plotting.tools.powderlines"
@@ -430,6 +431,15 @@
              label="Fast Mask"
              visible="false">
       </plotting_tool_page>
+       <plotting_tool_page
+             category="org.dawnsci.plotting.tools.category.Science"
+             class="org.dawnsci.plotting.tools.powderlines.EoSLineTool"
+             icon="icons/eosLines.png"
+             id="org.dawnsci.plotting.tools.eoslines"
+             label="Equation of State Powder Lines"
+             tooltip="Import reflections from a JCPDS file to vary with pressure"
+             visible="false">
+       </plotting_tool_page>
    </extension>
 
   <extension
