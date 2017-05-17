@@ -1,3 +1,12 @@
+/*
+ * Copyright (c) 2017 Diamond Light Source Ltd.
+ *
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ */
+
 package org.dawnsci.plotting.tools.powderlines;
 
 import java.text.DecimalFormat;
@@ -234,13 +243,13 @@ public class PowderLineTool extends AbstractToolPage {
 //		return this.plotCoordinate;
 //	}
 	
-	private void setLines(DoubleDataset novaLines) {
+	protected void setLines(DoubleDataset novaLines) {
 		this.lineLocations = novaLines;
 		this.lineTableViewer.setInput(this.lineLocations);
 		this.drawPowderLines();
 	}
 	
-	private void clearLines( ) {
+	protected void clearLines( ) {
 		this.setLines(DatasetFactory.createRange(0));
 	}
 	
@@ -340,41 +349,8 @@ public class PowderLineTool extends AbstractToolPage {
 	private void createActions() {
 		final Shell theShell = this.getSite().getShell();
 		final PowderLineTool theTool = this;
-		final Action loadAction = new Action("Load a list of lines from file", Activator.getImageDescriptor("icons/import_wiz.png")) {
-			@Override
-			public void run() {
-				FileDialog chooser = new FileDialog(theShell, SWT.OPEN);
-				String chosenFile = chooser.open();
-				
-				ILoaderService loaderService = ServiceLoader.getLoaderService();
-				IDataHolder dataHolder = null;
-				// Get the data from the file
-				try {
-					dataHolder = loaderService.getData(chosenFile, null);
-				
-				} catch (Exception e) {
-					if (chosenFile != null)
-						System.err.println("PowderLineTool: Could not read line data from " + chosenFile + ".");
-					return;
-				}
-				// Only one Dataset, get it, it is the first
-				Dataset theDataset= DatasetUtils.convertToDataset(dataHolder.getDataset(0));
-//				System.err.println("Dataset name is "+dataHolder.getName(0));
-				// Stop reading if there is no valid data
-				if (theDataset == null) {
-					logger.info("PowderLineTool: No valid data in file " + chosenFile + ".");
-					return;
-				}
-				if (theDataset.getDType() != Dataset.FLOAT) {
-					logger.info("PowderLineTool: No valid double data found in file " + chosenFile + ".");
-					return;
-				}
-					
-				DoubleDataset lines = (DoubleDataset) DatasetUtils.convertToDataset(dataHolder.getDataset(0));
-				theTool.setLines(lines);
-			}
-		};
-		getSite().getActionBars().getToolBarManager().add(loadAction);
+
+		getSite().getActionBars().getToolBarManager().add( new LoadAction(theShell, theTool));
 		
 		final Action coordinateAction = new Action("Set up the coordinates of the plot and lines", Activator.getImageDescriptor("icons/bullet_wrench.png")) {
 			@Override
@@ -399,6 +375,57 @@ public class PowderLineTool extends AbstractToolPage {
 		};
 		getSite().getActionBars().getToolBarManager().add(clearAction);
 	}
+	
+	protected class LoadAction extends Action {
+		protected Shell theShell;
+		protected PowderLineTool theTool;
+		
+		public LoadAction() {
+			super();
+			this.setText("Load a list of lines from file");
+			this.setImageDescriptor(Activator.getImageDescriptor("icons/import_wiz.png"));
+		}
+		
+		public LoadAction(Shell theShell, PowderLineTool theTool) {
+			this();
+			this.theShell = theShell;
+			this.theTool = theTool;
+		}
+		
+		@Override
+		public void run() {
+			FileDialog chooser = new FileDialog(theShell, SWT.OPEN);
+			String chosenFile = chooser.open();
+			
+			ILoaderService loaderService = ServiceLoader.getLoaderService();
+			IDataHolder dataHolder = null;
+			// Get the data from the file
+			try {
+				dataHolder = loaderService.getData(chosenFile, null);
+			
+			} catch (Exception e) {
+				if (chosenFile != null)
+					System.err.println("PowderLineTool: Could not read line data from " + chosenFile + ".");
+				return;
+			}
+			// Only one Dataset, get it, it is the first
+			Dataset theDataset= DatasetUtils.convertToDataset(dataHolder.getDataset(0));
+//			System.err.println("Dataset name is "+dataHolder.getName(0));
+			// Stop reading if there is no valid data
+			if (theDataset == null) {
+				logger.info("PowderLineTool: No valid data in file " + chosenFile + ".");
+				return;
+			}
+			if (theDataset.getDType() != Dataset.FLOAT) {
+				logger.info("PowderLineTool: No valid double data found in file " + chosenFile + ".");
+				return;
+			}
+				
+			DoubleDataset lines = (DoubleDataset) DatasetUtils.convertToDataset(dataHolder.getDataset(0));
+			theTool.setLines(lines);
+		}
+	}
+			
 	
 	public class PowderLineSettingsDialog extends Dialog {
 
