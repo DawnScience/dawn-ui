@@ -25,8 +25,6 @@ public class FileController implements IFileController {
 	private DataOptions currentData;
 	private ILiveFileListener listener;
 	
-	private boolean autoSelect = true;
-	
 	private ILoadedFileConfiguration[] fileConfigs = new ILoadedFileConfiguration[]{new NexusFileConfiguration(), new ImageFileConfiguration(), new XYEFileConfiguration()};
 	
 	private Set<FileControllerStateEventListener> listeners = new HashSet<FileControllerStateEventListener>();
@@ -306,7 +304,6 @@ public class FileController implements IFileController {
 				if (monitor != null) monitor.worked(1);
 				
 				if (f != null) {
-					f.setSelected(autoSelect);
 					
 					for (ILoadedFileConfiguration c : fileConfigs) {
 						if (c.configure(f)) {
