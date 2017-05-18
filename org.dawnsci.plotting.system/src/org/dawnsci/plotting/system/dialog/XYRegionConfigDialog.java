@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012 Diamond Light Source Ltd.
+ * Copyright (c) 2012, 2017 Diamond Light Source Ltd.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -14,7 +14,6 @@ import java.util.List;
 import org.dawnsci.plotting.draw2d.swtxy.ImageTrace;
 import org.dawnsci.plotting.draw2d.swtxy.RegionArea;
 import org.dawnsci.plotting.draw2d.swtxy.XYRegionGraph;
-import org.dawnsci.plotting.draw2d.swtxy.selection.AbstractSelectionRegion;
 import org.dawnsci.plotting.system.LineTraceImpl;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.region.IRegion;
@@ -54,7 +53,8 @@ public class XYRegionConfigDialog extends XYGraphConfigDialog {
 		regionList = new ArrayList<RegionEditComposite>();
 
 		this.regionGraph = (XYRegionGraph)xyGraph;
-		command = new XYRegionConfigCommand(xyGraph);
+		XYRegionConfigCommand command = new XYRegionConfigCommand(xyGraph);
+		setCommand(command);
 		command.savePreviousStates();
         this.isRescale = isRescale;
 	}
@@ -145,7 +145,7 @@ public class XYRegionConfigDialog extends XYGraphConfigDialog {
  	        for (IRegion region : ((RegionArea)regionGraph.getPlotArea()).getRegions()) {
 		        
  	        	if (!region.isUserRegion()) continue;
-		        RegionEditComposite regionPage = new RegionEditComposite(regionConfigComposite, plottingSystem, SWT.NONE, (XYRegionGraph)xyGraph, region.getRegionType(), false);
+		        RegionEditComposite regionPage = new RegionEditComposite(regionConfigComposite, plottingSystem, SWT.NONE, (XYRegionGraph)getXyGraph(), region.getRegionType(), false);
 		        regionList.add(regionPage);
 		        regionPage.setEditingRegion(region);
  	        }
@@ -176,16 +176,16 @@ public class XYRegionConfigDialog extends XYGraphConfigDialog {
         }
         
         if (selectedAnnotation!=null) {
-        	final int index = xyGraph.getPlotArea().getAnnotationList().indexOf(selectedAnnotation);
+        	final int index = getXyGraph().getPlotArea().getAnnotationList().indexOf(selectedAnnotation);
         	final TabItem[] items = tabFolder.getItems();
          	for (int i = 0; i < items.length; i++) {
 				if ("Annotations".equalsIgnoreCase(items[i].getText())) {
 					tabFolder.setSelection(i);
-					annotationsCombo.select(index);
+					getAnnotationsCombo().select(index);
 					Composite annoTabComposite = (Composite)items[i].getControl();
 					Composite annoConfigComposite = (Composite)annoTabComposite.getChildren()[1];
 					final StackLayout stackLayout = (StackLayout)annoConfigComposite.getLayout();
-					stackLayout.topControl = annotationConfigPageList.get(index).getComposite();
+					stackLayout.topControl = getAnnotationConfigPageList().get(index).getComposite();
         			annoConfigComposite.layout(true, true);
         			break;
 				}
@@ -197,8 +197,8 @@ public class XYRegionConfigDialog extends XYGraphConfigDialog {
         		tabFolder.setSelection(2);
         	   	int index = regionGraph.getRegionArea().getTraceList().indexOf(selectedTrace); 
         	   	if (index>0) {
-	        		Composite traceComp = traceConfigPageList.get(index).getComposite();
-		        	setTraceTabSelected(index, tabFolder, traceCombo, traceComp);
+	        		Composite traceComp = getTraceConfigPageList().get(index).getComposite();
+		        	setTraceTabSelected(index, tabFolder, getTraceCombo(), traceComp);
         	   	}
 	        	
         	} else {
@@ -211,7 +211,7 @@ public class XYRegionConfigDialog extends XYGraphConfigDialog {
         	}
         }
 		if (selectedAxis != null) {
-			final int index = xyGraph.getAxisList().indexOf(selectedAxis);
+			final int index = getXyGraph().getAxisList().indexOf(selectedAxis);
 			final TabItem[] items = tabFolder.getItems();
 			for (int i = 0; i < items.length; i++) {
 				if ("Axes".equalsIgnoreCase(items[i].getText())) {
@@ -219,7 +219,8 @@ public class XYRegionConfigDialog extends XYGraphConfigDialog {
 					Composite axisTabComposite = (Composite) items[i].getControl();
 					Composite axisConfigComposite = (Composite) axisTabComposite.getChildren()[1];
 					final StackLayout stackLayout = (StackLayout) axisConfigComposite.getLayout();
-					stackLayout.topControl = axisConfigPageList.get(index).getComposite();
+					stackLayout.topControl = getAxisConfigPageList().get(index).getComposite();
+					Combo traceCombo = getTraceCombo();
 					if (traceCombo != null)
 						traceCombo.select(index);
 					axisConfigComposite.layout(true, true);
@@ -232,7 +233,7 @@ public class XYRegionConfigDialog extends XYGraphConfigDialog {
 
 	@Override
 	protected ITraceConfigPage createTraceConfigPage(Trace trace) {
-		return new DTraceConfigPage(xyGraph, trace);
+		return new DTraceConfigPage(getXyGraph(), trace);
 	}
 
 	private static final void setTraceTabSelected(int index, TabFolder tabFolder, Combo combo, Composite composite) {
@@ -259,6 +260,7 @@ public class XYRegionConfigDialog extends XYGraphConfigDialog {
 		}
 		regionGraph.fireConfigurationPropertyChangeListeners();
 		if (isRescale) regionGraph.performAutoScale();
+		IXYGraph xyGraph = getXyGraph();
 		xyGraph.revalidate();
 		xyGraph.repaint();	
 	}
