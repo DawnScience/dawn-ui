@@ -14,6 +14,7 @@ import org.dawnsci.datavis.api.IDataFilePackage;
 import org.dawnsci.datavis.api.IDataPackage;
 import org.eclipse.dawnsci.analysis.api.io.IDataHolder;
 import org.eclipse.dawnsci.analysis.api.tree.DataNode;
+import org.eclipse.dawnsci.analysis.api.tree.Tree;
 import org.eclipse.dawnsci.analysis.api.tree.TreeUtils;
 import org.eclipse.january.dataset.Dataset;
 import org.eclipse.january.dataset.ILazyDataset;
@@ -93,6 +94,10 @@ public class LoadedFile implements IDataObject, IDataFilePackage {
 	public String getName() {
 		File f = new File(dataHolder.get().getFilePath());
 		return f.getName();
+	}
+	
+	public Tree getTree() {
+		return dataHolder.get().getTree();
 	}
 	
 	public String getFilePath() {
