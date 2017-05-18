@@ -55,7 +55,7 @@ public class DTraceConfigPage extends TraceConfigPage {
 					final ICommandService service = (ICommandService) PlatformUI.getWorkbench()
 							.getService(ICommandService.class);
 					final Command export = service.getCommand("org.dawnsci.plotting.export.line.trace.command");
-					final ExecutionEvent event = new ExecutionEvent(export, Collections.EMPTY_MAP, null, trace);
+					final ExecutionEvent event = new ExecutionEvent(export, Collections.EMPTY_MAP, null, getTrace());
 					export.executeWithChecks(event);
 				} catch (Exception ex) {
 					ex.printStackTrace();
