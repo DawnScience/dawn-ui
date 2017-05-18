@@ -170,6 +170,11 @@ public class DataOptions implements IDataObject, IDataPackage {
 	public NDimensions buildNDimensions() {
 		NDimensions ndims = new NDimensions(getLazyDataset().getShape());
 		ndims.setUpAxes((String)null, getAllPossibleAxes(), getPrimaryAxes());
+		if (axes != null) {
+			for (int i = 0 ; i < axes.length; i++){
+				ndims.setAxis(i, axes[i]);
+			}
+		}
 		return ndims;
 	}
 	
