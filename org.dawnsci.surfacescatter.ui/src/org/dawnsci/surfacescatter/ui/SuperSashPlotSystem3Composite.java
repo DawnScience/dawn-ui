@@ -416,7 +416,7 @@ public class SuperSashPlotSystem3Composite extends Composite{
 				
 				ssvs.getCustomComposite().generalCorrectionsUpdate();
 				
-				return;
+				
 		}
 		
 		

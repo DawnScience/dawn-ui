@@ -349,48 +349,48 @@ public class PlotSystemCompositeView extends Composite {
 			setAreaCorrection(subTile3.getText());
 			
 		}
-		
-		if (ssp.getCorrectionSelection() == MethodSetting.Reflectivity_with_Flux_Correction ){
-			
-			Group corrections = new Group(correctionsTabComposite, SWT.NONE);
-		    GridLayout 	correctionsLayout = new GridLayout(2,true);
-		    corrections.setLayout(correctionsLayout);
-			GridData correctionsData = new GridData(SWT.FILL, SWT.NULL, true, false);
-			corrections.setLayoutData(correctionsData);
-			
-			InputTileGenerator subTile0 = new InputTileGenerator("Raw Intensity:", String.valueOf(ssp.getCurrentRawIntensity()), corrections);
-			rawIntensity = subTile0.getText();
-			InputTileGenerator subTile1 = new InputTileGenerator("Area Correction:", String.valueOf(ssp.getCurrentLorentzCorrection()), corrections);
-			reflectivityAreaCorr= subTile1.getText();
-			InputTileGenerator subTile2 = new InputTileGenerator("Flux Correction:", String.valueOf(ssp.getCurrentPolarisationCorrection()), corrections);
-			reflectivityFluxCorr = subTile2.getText();
-		}
-		
-		if (ssp.getCorrectionSelection() == MethodSetting.Reflectivity_without_Flux_Correction ){
-			
-			Group corrections = new Group(correctionsTabComposite, SWT.NONE);
-		    GridLayout 	correctionsLayout = new GridLayout(2,true);
-		    corrections.setLayout(correctionsLayout);
-			GridData correctionsData = new GridData(SWT.FILL, SWT.NULL, true, false);
-			corrections.setLayoutData(correctionsData);
-			
-			InputTileGenerator subTile0 = new InputTileGenerator("Raw Intensity:", String.valueOf(ssp.getCurrentRawIntensity()), corrections);
-			rawIntensity = subTile0.getText();
-			InputTileGenerator subTile1 = new InputTileGenerator("Area Correction:", String.valueOf(ssp.getCurrentLorentzCorrection()), corrections);
-			reflectivityAreaCorr = subTile1.getText();
-		}
-		
-		if (ssp.getCorrectionSelection() == MethodSetting.Reflectivity_NO_Correction){
-			
-			Group corrections = new Group(correctionsTabComposite, SWT.NONE);
-		    GridLayout 	correctionsLayout = new GridLayout(2,true);
-		    corrections.setLayout(correctionsLayout);
-			GridData correctionsData = new GridData(SWT.FILL, SWT.NULL, true, false);
-			corrections.setLayoutData(correctionsData);
-			
-			InputTileGenerator subTile0 = new InputTileGenerator("Raw Intensity:", String.valueOf(ssp.getCurrentRawIntensity()), corrections);
-			rawIntensity = subTile0.getText();
-		}
+//		
+//		if (ssp.getCorrectionSelection() == MethodSetting.Reflectivity_with_Flux_Correction ){
+//			
+//			Group corrections = new Group(correctionsTabComposite, SWT.NONE);
+//		    GridLayout 	correctionsLayout = new GridLayout(2,true);
+//		    corrections.setLayout(correctionsLayout);
+//			GridData correctionsData = new GridData(SWT.FILL, SWT.NULL, true, false);
+//			corrections.setLayoutData(correctionsData);
+//			
+//			InputTileGenerator subTile0 = new InputTileGenerator("Raw Intensity:", String.valueOf(ssp.getCurrentRawIntensity()), corrections);
+//			rawIntensity = subTile0.getText();
+//			InputTileGenerator subTile1 = new InputTileGenerator("Area Correction:", String.valueOf(ssp.getCurrentLorentzCorrection()), corrections);
+//			reflectivityAreaCorr= subTile1.getText();
+//			InputTileGenerator subTile2 = new InputTileGenerator("Flux Correction:", String.valueOf(ssp.getCurrentPolarisationCorrection()), corrections);
+//			reflectivityFluxCorr = subTile2.getText();
+//		}
+//		
+//		if (ssp.getCorrectionSelection() == MethodSetting.Reflectivity_without_Flux_Correction ){
+//			
+//			Group corrections = new Group(correctionsTabComposite, SWT.NONE);
+//		    GridLayout 	correctionsLayout = new GridLayout(2,true);
+//		    corrections.setLayout(correctionsLayout);
+//			GridData correctionsData = new GridData(SWT.FILL, SWT.NULL, true, false);
+//			corrections.setLayoutData(correctionsData);
+//			
+//			InputTileGenerator subTile0 = new InputTileGenerator("Raw Intensity:", String.valueOf(ssp.getCurrentRawIntensity()), corrections);
+//			rawIntensity = subTile0.getText();
+//			InputTileGenerator subTile1 = new InputTileGenerator("Area Correction:", String.valueOf(ssp.getCurrentLorentzCorrection()), corrections);
+//			reflectivityAreaCorr = subTile1.getText();
+//		}
+//		
+//		if (ssp.getCorrectionSelection() == MethodSetting.Reflectivity_NO_Correction){
+//			
+//			Group corrections = new Group(correctionsTabComposite, SWT.NONE);
+//		    GridLayout 	correctionsLayout = new GridLayout(2,true);
+//		    corrections.setLayout(correctionsLayout);
+//			GridData correctionsData = new GridData(SWT.FILL, SWT.NULL, true, false);
+//			corrections.setLayoutData(correctionsData);
+//			
+//			InputTileGenerator subTile0 = new InputTileGenerator("Raw Intensity:", String.valueOf(ssp.getCurrentRawIntensity()), corrections);
+//			rawIntensity = subTile0.getText();
+//		}
 		
 		folder.pack();
 		
@@ -874,47 +874,47 @@ public class PlotSystemCompositeView extends Composite {
 			
 		}
 		
-		if (ssp.getCorrectionSelection() == MethodSetting.Reflectivity_with_Flux_Correction ){
-			
-			Group corrections = new Group(correctionsTabComposite, SWT.NONE);
-		    GridLayout 	correctionsLayout = new GridLayout(2,true);
-		    corrections.setLayout(correctionsLayout);
-			GridData correctionsData = new GridData(SWT.FILL, SWT.NULL, true, false);
-			corrections.setLayoutData(correctionsData);
-			
-			InputTileGenerator subTile0 = new InputTileGenerator("Raw Intensity:", String.valueOf(ssp.getCurrentRawIntensity()), corrections);
-			rawIntensity = subTile0.getText();
-			InputTileGenerator subTile1 = new InputTileGenerator("Area Correction:", String.valueOf(ssp.getCurrentLorentzCorrection()), corrections);
-			reflectivityAreaCorr= subTile1.getText();
-			InputTileGenerator subTile2 = new InputTileGenerator("Flux Correction:", String.valueOf(ssp.getCurrentPolarisationCorrection()), corrections);
-			reflectivityFluxCorr = subTile2.getText();
-		}
-		
-		if (ssp.getCorrectionSelection() == MethodSetting.Reflectivity_without_Flux_Correction ){
-			
-			Group corrections = new Group(correctionsTabComposite, SWT.NONE);
-		    GridLayout 	correctionsLayout = new GridLayout(2,true);
-		    corrections.setLayout(correctionsLayout);
-			GridData correctionsData = new GridData(SWT.FILL, SWT.NULL, true, false);
-			corrections.setLayoutData(correctionsData);
-			
-			InputTileGenerator subTile0 = new InputTileGenerator("Raw Intensity:", String.valueOf(ssp.getCurrentRawIntensity()), corrections);
-			rawIntensity = subTile0.getText();
-			InputTileGenerator subTile1 = new InputTileGenerator("Area Correction:", String.valueOf(ssp.getCurrentLorentzCorrection()), corrections);
-			reflectivityAreaCorr = subTile1.getText();
-		}
-		
-		if (ssp.getCorrectionSelection() == MethodSetting.Reflectivity_NO_Correction){
-			
-			Group corrections = new Group(correctionsTabComposite, SWT.NONE);
-		    GridLayout 	correctionsLayout = new GridLayout(2,true);
-		    corrections.setLayout(correctionsLayout);
-			GridData correctionsData = new GridData(SWT.FILL, SWT.NULL, true, false);
-			corrections.setLayoutData(correctionsData);
-			
-			InputTileGenerator subTile0 = new InputTileGenerator("Raw Intensity:", String.valueOf(ssp.getCurrentRawIntensity()), corrections);
-			rawIntensity = subTile0.getText();
-		}
+//		if (ssp.getCorrectionSelection() == MethodSetting.Reflectivity_with_Flux_Correction ){
+//			
+//			Group corrections = new Group(correctionsTabComposite, SWT.NONE);
+//		    GridLayout 	correctionsLayout = new GridLayout(2,true);
+//		    corrections.setLayout(correctionsLayout);
+//			GridData correctionsData = new GridData(SWT.FILL, SWT.NULL, true, false);
+//			corrections.setLayoutData(correctionsData);
+//			
+//			InputTileGenerator subTile0 = new InputTileGenerator("Raw Intensity:", String.valueOf(ssp.getCurrentRawIntensity()), corrections);
+//			rawIntensity = subTile0.getText();
+//			InputTileGenerator subTile1 = new InputTileGenerator("Area Correction:", String.valueOf(ssp.getCurrentLorentzCorrection()), corrections);
+//			reflectivityAreaCorr= subTile1.getText();
+//			InputTileGenerator subTile2 = new InputTileGenerator("Flux Correction:", String.valueOf(ssp.getCurrentPolarisationCorrection()), corrections);
+//			reflectivityFluxCorr = subTile2.getText();
+//		}
+//		
+//		if (ssp.getCorrectionSelection() == MethodSetting.Reflectivity_without_Flux_Correction ){
+//			
+//			Group corrections = new Group(correctionsTabComposite, SWT.NONE);
+//		    GridLayout 	correctionsLayout = new GridLayout(2,true);
+//		    corrections.setLayout(correctionsLayout);
+//			GridData correctionsData = new GridData(SWT.FILL, SWT.NULL, true, false);
+//			corrections.setLayoutData(correctionsData);
+//			
+//			InputTileGenerator subTile0 = new InputTileGenerator("Raw Intensity:", String.valueOf(ssp.getCurrentRawIntensity()), corrections);
+//			rawIntensity = subTile0.getText();
+//			InputTileGenerator subTile1 = new InputTileGenerator("Area Correction:", String.valueOf(ssp.getCurrentLorentzCorrection()), corrections);
+//			reflectivityAreaCorr = subTile1.getText();
+//		}
+//		
+//		if (ssp.getCorrectionSelection() == MethodSetting.Reflectivity_NO_Correction){
+//			
+//			Group corrections = new Group(correctionsTabComposite, SWT.NONE);
+//		    GridLayout 	correctionsLayout = new GridLayout(2,true);
+//		    corrections.setLayout(correctionsLayout);
+//			GridData correctionsData = new GridData(SWT.FILL, SWT.NULL, true, false);
+//			corrections.setLayoutData(correctionsData);
+//			
+//			InputTileGenerator subTile0 = new InputTileGenerator("Raw Intensity:", String.valueOf(ssp.getCurrentRawIntensity()), corrections);
+//			rawIntensity = subTile0.getText();
+//		}
 		
 		folder.pack();	
 		form.setWeights(new int[]{19, 45, 29, 7});
@@ -947,25 +947,25 @@ public class PlotSystemCompositeView extends Composite {
 			
 		}
 		
-		if (ssp.getCorrectionSelection() == MethodSetting.Reflectivity_with_Flux_Correction){
-			
-			rawIntensity.setText(String.valueOf(ssp.getCurrentRawIntensity()));
-			reflectivityFluxCorr.setText(String.valueOf(ssp.getCurrentReflectivityFluxCorrection()));
-			reflectivityAreaCorr.setText(String.valueOf(ssp.getCurrentReflectivityAreaCorrection()));
-			
-		}
-		
-		if (ssp.getCorrectionSelection() == MethodSetting.Reflectivity_without_Flux_Correction){
-			
-			rawIntensity.setText(String.valueOf(ssp.getCurrentRawIntensity()));
-			reflectivityAreaCorr.setText(String.valueOf(ssp.getCurrentReflectivityAreaCorrection()));
-			
-		}
-		
-		if (ssp.getCorrectionSelection() == MethodSetting.Reflectivity_NO_Correction){
-			
-			rawIntensity.setText(String.valueOf(ssp.getCurrentRawIntensity()));
-		}
+//		if (ssp.getCorrectionSelection() == MethodSetting.Reflectivity_with_Flux_Correction){
+//			
+//			rawIntensity.setText(String.valueOf(ssp.getCurrentRawIntensity()));
+//			reflectivityFluxCorr.setText(String.valueOf(ssp.getCurrentReflectivityFluxCorrection()));
+//			reflectivityAreaCorr.setText(String.valueOf(ssp.getCurrentReflectivityAreaCorrection()));
+//			
+//		}
+//		
+//		if (ssp.getCorrectionSelection() == MethodSetting.Reflectivity_without_Flux_Correction){
+//			
+//			rawIntensity.setText(String.valueOf(ssp.getCurrentRawIntensity()));
+//			reflectivityAreaCorr.setText(String.valueOf(ssp.getCurrentReflectivityAreaCorrection()));
+//			
+//		}
+//		
+//		if (ssp.getCorrectionSelection() == MethodSetting.Reflectivity_NO_Correction){
+//			
+//			rawIntensity.setText(String.valueOf(ssp.getCurrentRawIntensity()));
+//		}
 		
 		this.update();
 		
@@ -1015,6 +1015,7 @@ public class PlotSystemCompositeView extends Composite {
 		
 		plotSystem.updatePlot2D(ssp.getImage(ssp.getSliderPos()), null, null);
 		setRegion(ssp.getLenPt());
+		plotSystem.repaint();
 		
 	}
 	

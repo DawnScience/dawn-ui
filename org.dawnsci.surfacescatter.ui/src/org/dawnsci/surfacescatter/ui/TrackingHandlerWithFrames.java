@@ -505,7 +505,7 @@ public class TrackingHandlerWithFrames {
 			ssvs.getSsps3c().generalUpdate();
 			ssp.stitchAndPresentWithFrames(ssvs.getSsps3c().getOutputCurves(), ssvs.getIds());
 			
-			double[] location = ssp.getLocationList().get((imageNumber));
+			double[] location = ssp.getThisLocation();
 			
 			int[] len = new int[] {(int) (location[2]-location[0]),(int) (location[5]-location[1])};
 			int[] pt = new int[] {(int) location[0],(int) location[1]};
@@ -2034,7 +2034,7 @@ class trackingJob21 {
 		ssvs.getSsps3c().generalUpdate();
 		ssp.stitchAndPresent1(ssvs.getSsps3c().getOutputCurves(), ssvs.getIds());
 
-		double[] location = ssp.getLocationList().get((imageNumber));
+		double[] location = ssp.getThisLocation();
 		
 		int[] len = new int[] {(int) (location[2]-location[0]),(int) (location[5]-location[1])};
 		int[] pt = new int[] {(int) location[0],(int) location[1]};

@@ -123,15 +123,7 @@ public class StitchedOverlapCurves extends Composite {
 			@Override
 			public void propertyChange(PropertyChangeEvent evt) {
 						
-				attenuatedDatasets = ssp.curveStitchingOutput(plotSystem, 
-															  xArrayList,
-															  yArrayList,
-															  yArrayListError,
-															  yArrayListFhkl,
-															  yArrayListFhklError, 
-															  yArrayListRaw,
-															  yArrayListRawError,
-															  model);
+				attenuatedDatasets = ssp.curveStitchingOutput();
 				
 				Dataset[] sortedAttenuatedDatasets = new Dataset[2];
 										

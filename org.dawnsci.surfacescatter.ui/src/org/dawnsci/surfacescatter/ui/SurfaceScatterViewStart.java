@@ -95,9 +95,6 @@ public class SurfaceScatterViewStart extends Dialog {
 
 		this.ssp = new SurfaceScatterPresenter();
 		
-		this.stm = new SetupModel();
-		
-		ssp.setStm(stm);
 		
 		this.ssp.addStateListener(new IPresenterStateChangeEventListener() {
 
@@ -106,6 +103,8 @@ public class SurfaceScatterViewStart extends Dialog {
 				customComposite.getSlider().setSelection(ssp.getSliderPos());
 				updateIndicators(ssp.getSliderPos());
 				RectangularROI[] bgRegionROI = ssp.trackingRegionOfInterestSetter(ssp.getLenPt());
+				
+				customComposite.generalCorrectionsUpdate();
 				
 				if((Arrays.equals(ssp.getLenPt()[0], 
 						customComposite.getIRegion().getROI().getBounds().getIntLengths()) == false) ||
@@ -121,6 +120,7 @@ public class SurfaceScatterViewStart extends Dialog {
 				catch(Exception o){
 					
 				}
+				customComposite.generalUpdate();
 			}
 		});
 		
@@ -231,10 +231,6 @@ public class SurfaceScatterViewStart extends Dialog {
 				int[] test = correctionsDropDownArray;
 				int t = correctionsDropDown.getSelectionIndex();
 				
-//				SetupModel stm = new SetupModel();
-//				
-//				stm.setImageFolderPath(imageFolderPath);
-				
 				
 				ssp.surfaceScatterPresenterBuildWithFrames(filepaths,
 												datDisplayer.getSelectedOption(),
@@ -343,10 +339,14 @@ public class SurfaceScatterViewStart extends Dialog {
 				int sliderPos = customComposite.getSlider().getSelection();
 				ssp.sliderMovemementMainImage(sliderPos);
 				SurfaceScatterViewStart.this.updateIndicators(sliderPos);
-				IDataset image = ssp.getBackgroundImage(sliderPos);
-				customComposite.getSubImageBgPlotSystem().updatePlot2D(image, 
-																	   null,
-																	   null);
+				try{
+					IDataset image = ssp.getBackgroundImage(sliderPos);
+					customComposite.getSubImageBgPlotSystem().updatePlot2D(image, 
+																		   null,
+																		   null);
+				}catch(Exception cx){
+					
+				}
 			}
 
 			@Override
