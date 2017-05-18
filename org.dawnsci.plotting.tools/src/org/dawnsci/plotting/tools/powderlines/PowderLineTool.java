@@ -379,11 +379,13 @@ public class PowderLineTool extends AbstractToolPage {
 	protected class LoadAction extends Action {
 		protected Shell theShell;
 		protected PowderLineTool theTool;
-		
+		private String[] dSpacingNames;
 		public LoadAction() {
 			super();
 			this.setText("Load a list of lines from file");
 			this.setImageDescriptor(Activator.getImageDescriptor("icons/import_wiz.png"));
+			// names that a Dataset of d spacings might take
+			dSpacingNames = new String[]{"d", "d-spacing"};
 		}
 		
 		public LoadAction(Shell theShell, PowderLineTool theTool) {
@@ -405,23 +407,36 @@ public class PowderLineTool extends AbstractToolPage {
 			
 			} catch (Exception e) {
 				if (chosenFile != null)
-					System.err.println("PowderLineTool: Could not read line data from " + chosenFile + ".");
+					logger.info("PowderLineTool: Could not read line data from " + chosenFile + ".");
 				return;
 			}
-			// Only one Dataset, get it, it is the first
-			Dataset theDataset= DatasetUtils.convertToDataset(dataHolder.getDataset(0));
-//			System.err.println("Dataset name is "+dataHolder.getName(0));
-			// Stop reading if there is no valid data
-			if (theDataset == null) {
-				logger.info("PowderLineTool: No valid data in file " + chosenFile + ".");
-				return;
+			boolean haveData = false;
+			DoubleDataset lines = null;
+			// Try to read a named Dataset
+			for (String dName : dSpacingNames) {
+				Dataset theDataset= DatasetUtils.convertToDataset(dataHolder.getDataset(dName));
+				if (theDataset != null && theDataset.getDType() == Dataset.FLOAT) {
+					lines = (DoubleDataset) DatasetUtils.convertToDataset(theDataset);
+					haveData = true;
+				}
 			}
-			if (theDataset.getDType() != Dataset.FLOAT) {
-				logger.info("PowderLineTool: No valid double data found in file " + chosenFile + ".");
-				return;
+			
+			if (!haveData) {
+				// Only one Dataset, get it, it is the first
+				Dataset theDataset= DatasetUtils.convertToDataset(dataHolder.getDataset(0));
+				//			System.err.println("Dataset name is "+dataHolder.getName(0));
+				// Stop reading if there is no valid data
+				if (theDataset == null) {
+					logger.info("PowderLineTool: No valid data in file " + chosenFile + ".");
+					return;
+				}
+				if (theDataset.getDType() != Dataset.FLOAT) {
+					logger.info("PowderLineTool: No valid double data found in file " + chosenFile + ".");
+					return;
+				}
+
+				lines = (DoubleDataset) theDataset;
 			}
-				
-			DoubleDataset lines = (DoubleDataset) DatasetUtils.convertToDataset(dataHolder.getDataset(0));
 			theTool.setLines(lines);
 		}
 	}
