@@ -17,6 +17,7 @@ import org.dawnsci.plotting.draw2d.swtxy.selection.AbstractSelectionRegion;
 import org.eclipse.dawnsci.plotting.api.region.IRegion;
 import org.eclipse.nebula.visualization.internal.xygraph.undo.XYGraphConfigCommand;
 import org.eclipse.nebula.visualization.internal.xygraph.undo.XYGraphMemento;
+import org.eclipse.nebula.visualization.internal.xygraph.undo.XYGraphMementoUtil;
 import org.eclipse.nebula.visualization.xygraph.figures.IXYGraph;
 
 public class XYRegionConfigCommand extends XYGraphConfigCommand {
@@ -41,7 +42,7 @@ public class XYRegionConfigCommand extends XYGraphConfigCommand {
 
 	
 	protected void saveXYGraphPropsToMemento(IXYGraph xyGraph, XYGraphMemento memento){
-		super.saveXYGraphPropsToMemento(xyGraph, memento);
+		XYGraphMementoUtil.saveXYGraphPropsToMemento(xyGraph, memento);
 		
 		int i=0;
 		final List<IRegion>     regionList     = ((RegionArea)xyGraph.getPlotArea()).getRegions();
@@ -53,7 +54,7 @@ public class XYRegionConfigCommand extends XYGraphConfigCommand {
 	}
 	
 	protected void restoreXYGraphPropsFromMemento(IXYGraph xyGraph, XYGraphMemento memento){
-		super.restoreXYGraphPropsFromMemento(xyGraph, memento);
+		XYGraphMementoUtil.restoreXYGraphPropsFromMemento(xyGraph, memento);
 
 		int i=0;
 		for(RegionBean rb : ((XYRegionMemento)memento).getRegionBeanList()) {
