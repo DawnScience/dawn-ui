@@ -96,6 +96,10 @@ public class LoadedFile implements IDataObject, IDataFilePackage {
 		return f.getName();
 	}
 	
+	public Tree getTree() {
+		return dataHolder.get().getTree();
+	}
+	
 	public String getFilePath() {
 		return dataHolder.get().getFilePath();
 	}
