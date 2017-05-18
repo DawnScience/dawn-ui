@@ -10,6 +10,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.dawnsci.analysis.api.roi.IRectangularROI;
 import org.eclipse.dawnsci.analysis.dataset.roi.RectangularROI;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.PlottingFactory;
@@ -333,14 +334,24 @@ public class PlotSystem1CompositeView extends Composite {
     		   					  ssvs.getPlotSystemCompositeView().getCentreSecondBgRegion());
        
        
-       double[] bgRegionROI = ssp.regionOfInterestSetter(ssvs.getPlotSystemCompositeView().getPlotSystem().
-    			getRegion("myRegion").getROI());
-       
-       RectangularROI bgROI = new RectangularROI(bgRegionROI[0],
+       IRectangularROI greenRectangle = ssvs.getPlotSystemCompositeView().getPlotSystem().
+   			getRegion("myRegion").getROI().getBounds();
+		int[] len = greenRectangle.getIntLengths();
+		int[] pt = greenRectangle.getIntPoint();
+		
+		int[][] lenPt = { len, pt };
+		
+		double[] bgRegionROI = ssp.regionOfInterestSetter1(lenPt);
+		
+		RectangularROI bgROI = new RectangularROI(bgRegionROI[0],
 				  bgRegionROI[1],
 				  bgRegionROI[2],
 				  bgRegionROI[3],
 				  bgRegionROI[4]);
+       
+       
+       
+      
        
        
        ssvs.getPlotSystemCompositeView().getBgRegion().setROI(bgROI);

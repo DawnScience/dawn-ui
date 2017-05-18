@@ -24,7 +24,7 @@ public class TrackingProgressAndAbortView extends Dialog {
 	private int maximum;
 	private SurfaceScatterViewStart ssvs;
 	private SurfaceScatterPresenter ssp;
-	private TrackingHandler tj; 
+	private TrackingHandlerWithFrames tj; 
 	
 	
 	public TrackingProgressAndAbortView(Shell parentShell, 
@@ -77,13 +77,13 @@ public class TrackingProgressAndAbortView extends Dialog {
 		
 		try{
 			
-			tj = new TrackingHandler(); 
+			tj = new TrackingHandlerWithFrames(); 
 			
 			
 			tj.setProgress(progress);
 			tj.setSsvs(ssvs);
 			tj.setCorrectionSelection(MethodSetting.toInt(ssp.getCorrectionSelection()));
-			tj.setPlotSystem(ssvs.getPlotSystemCompositeView().getPlotSystem());
+//			tj.setPlotSystem(ssvs.getPlotSystemCompositeView().getPlotSystem());
 			tj.setOutputCurves(ssvs.getSsps3c().getOutputCurves().getPlotSystem());
 //			tj.setTimeStep(Math.round((2 / ssp.getNoImages())));
 			tj.setSsp(ssp);
