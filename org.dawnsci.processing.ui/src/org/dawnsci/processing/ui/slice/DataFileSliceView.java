@@ -788,7 +788,7 @@ public class DataFileSliceView extends ViewPart {
 
 //				lazyDataset.setMetadata(om);
 
-				sliceVisitor = getSliceVisitor(ops, lazyDataset, Slicer.getDataDimensions(lazyDataset.getShape(), context.getSliceDimensions()));
+				sliceVisitor = getSliceVisitor(ops, lazyDataset, Slicer.getDataDimensions(lazyDataset.getShape(), context.getSliceDimensions()),monitor);
 				sliceVisitor.setEndOperation(end);
 				long start = System.currentTimeMillis();
 				sliceVisitor.visit(firstSlice);
@@ -837,8 +837,8 @@ public class DataFileSliceView extends ViewPart {
 	}
 	
 	private EscapableSliceVisitor getSliceVisitor(IOperation<? extends IOperationModel, ? extends OperationData>[] series,ILazyDataset lz,  
-            int[] dataDims) {
-		return new EscapableSliceVisitor(lz,dataDims,series,getOperations(),null,fileManager.getContext(),output);
+            int[] dataDims, IProgressMonitor mon) {
+		return new EscapableSliceVisitor(lz,dataDims,series,getOperations(),mon,fileManager.getContext(),output);
 	}
 	
 	@Override

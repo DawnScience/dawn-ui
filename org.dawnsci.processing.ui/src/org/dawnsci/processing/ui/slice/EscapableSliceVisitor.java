@@ -70,6 +70,13 @@ public class EscapableSliceVisitor implements SliceVisitor {
 				op.init();
 
 			for (IOperation<? extends IOperationModel, ? extends OperationData> i : series) {
+				
+				if (monitor != null && monitor.isCanceled()) {
+					logger.debug("Cancelled");
+					inputData = null;
+					return;
+				}
+				
 				OperationMetadataImpl operationMeta = new OperationMetadataImpl(null, fullSeries, i);
 				data.getData().setMetadata(operationMeta);
 				if (i instanceof IExportOperation) {
