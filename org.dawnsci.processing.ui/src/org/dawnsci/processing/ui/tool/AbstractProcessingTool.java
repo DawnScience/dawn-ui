@@ -298,9 +298,21 @@ public abstract class AbstractProcessingTool extends AbstractToolPage {
 		updateData();
 	}
 	
-	@Override public void deactivate(){
+	@Override
+	public void deactivate(){
 		super.deactivate();
 		getPlottingSystem().removeTraceListener(listener);
+	}
+	
+	@Override 
+	public void dispose(){
+		try {
+			system.dispose();
+		} catch (Exception e) {
+			logger.error("Error disposing plotting system",e);
+		}
+		super.dispose();
+		
 	}
 	
 	protected abstract IDataset getData();

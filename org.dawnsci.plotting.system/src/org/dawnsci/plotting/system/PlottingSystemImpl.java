@@ -988,6 +988,15 @@ public class PlottingSystemImpl<T> extends AbstractPlottingSystem<T> {
 
 		IPlottingSystemViewer<T> viewer = getViewer(trace.getClass());
 		viewer.removeTrace(trace);
+		
+		if (colorMap!=null) {
+			if (getColorOption()==ColorOption.BY_NAME) {
+				colorMap.remove(trace.getName());
+			} else {
+				colorMap.remove(trace.getData());
+			}
+		}
+		
 		fireTraceRemoved(new TraceEvent(trace));
 	}
 
