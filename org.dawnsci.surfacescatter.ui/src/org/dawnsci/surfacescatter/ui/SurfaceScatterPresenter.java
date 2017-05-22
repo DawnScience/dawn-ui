@@ -89,8 +89,6 @@ import uk.ac.diamond.scisoft.analysis.io.LoaderFactory;
 public class SurfaceScatterPresenter {
 
 	private ArrayList<FrameModel> fms;
-//	private ArrayList<ExampleModel> models;
-//	private ArrayList<DataModel> dms;
 	private GeometricParametersModel gm;
 	private SetupModel stm;
 	private int noImages = 0;
@@ -109,400 +107,6 @@ public class SurfaceScatterPresenter {
 	private ProcessingMethodsEnum.ProccessingMethod processingMethodSelection = ProcessingMethodsEnum.ProccessingMethod.AUTOMATIC;;
 	
 	
-//	public void surfaceScatterPresenterBuild(String[] filepaths,
-//								   String xName,
-//								   String imageFolderPath,
-//								   String datFolderPath,
-//								   int correctionSelection) {
-//
-//		sm = new SuperModel();
-//		dms = new ArrayList<DataModel>();
-//		models = new ArrayList<ExampleModel>();
-//		sm.setFilepaths(filepaths);
-//		sm.setCorrectionSelection(MethodSetting.toMethod(correctionSelection));
-//		sm.setImageFolderPath(imageFolderPath);
-//		fms = new ArrayList<FrameModel>();
-//		drm = new DirectoryModel();
-//		
-//		ArrayList<ArrayList<Integer>> framesCorespondingToDats = new ArrayList<>();
-//		
-//		
-//		ILazyDataset[] imageArray = new ILazyDataset[filepaths.length];
-//		//////imageArray is an array of the image ILazyDatasets 
-//		
-//		IDataset[] xArray = new IDataset[filepaths.length];
-//		////xArray is an array of the l params (for a rod)
-//		
-//		IDataset[] tifNamesArray = new IDataset[filepaths.length];
-//		////tifNamesArray is an array of the tif names contained in each .dat (one dataset of tif names per dat in the array)
-//		IDataset[] tifPositionInDatArray = new IDataset[filepaths.length];
-//		////tifPositionInDatArray is an array of the positions (ints) of the tif's in each .dat (one dataset of tif positons per dat in the array)
-//		
-//		TreeMap<Integer, ILazyDataset> som = new TreeMap<Integer, ILazyDataset>();
-//		ArrayList<Integer> imageRefList = new ArrayList<>();
-//		/////imageRefList is the number that the image is read in at, i.e. the nth image to be read
-//		
-//		
-//		int imageRef = 0;
-//		ArrayList<Integer> imagesToFilepathRef = new ArrayList<Integer>();
-//		
-//		//////imagesToFilepathRef: once the images have been sorted into an ascending "array", the position on that array of an image
-//		//////corresponds to an integer in this list, which corresponds to the position of that image's dat file in String[] filepaths
-//		
-//		try {
-//		
-//			for (int id = 0; id < filepaths.length; id++) {
-//				
-//					models.add(new ExampleModel());
-//					dms.add(new DataModel());
-//					
-//					gm.setxName(xName);
-//					gm.setxNameRef(xName);
-//					
-//					if(imageFolderPath == null){
-//						dh1 = LoaderFactory.getData(filepaths[id]);
-//					}
-//					
-//					else{
-//						
-//						String datName = StringUtils.substringAfterLast(filepaths[id], File.separator);
-//						
-//						String localFilepathCopy = StringUtils.substringBeforeLast(datName, ".dat") + "_copy";	
-//						
-//						Path from = Paths.get(filepaths[id]);
-//						
-//						Path to = Paths.get(sm.getSaveFolder() + localFilepathCopy + ".dat");
-//						
-//						Files.copy(from, to, StandardCopyOption.REPLACE_EXISTING);
-//						
-//						Charset charset = StandardCharsets.UTF_8;
-//	
-//						String content = new String(Files.readAllBytes(to), charset);
-//						
-//						String firstTifName = StringUtils.substringBetween(content, File.separator, ".tif");
-//						
-//						if(firstTifName.contains(File.separator)){
-//							firstTifName = StringUtils.substringAfterLast(firstTifName, File.separator);
-//						}
-//						
-//						String pathNameToReplace = StringUtils.substringBetween(content, "\t", File.separator + firstTifName);
-//						
-//						if(pathNameToReplace.contains("\t")){
-//							pathNameToReplace = StringUtils.substringAfterLast(pathNameToReplace,"\t");
-//						}
-//						content = content.replaceAll(pathNameToReplace, imageFolderPath);
-//						
-//						Files.write(to, content.getBytes(charset));
-//						
-//						dh1 = LoaderFactory.getData(to.toString());
-//						
-//						
-//						//////////////////getting an array of .tifs
-//						
-//						String[] tifNames = StringUtils.substringsBetween(content, File.separator, ".tif");
-//						String[] tifNamesOut = new String[tifNames.length];
-//						int[] tifPositionsInDat = new int[tifNames.length];
-//						
-//						for(int w = 0; w<tifNames.length; w++){
-//							String t = tifNames[w];
-//							
-//							if(t.contains(File.separator)){
-//								t = StringUtils.substringAfterLast(t,File.separator);
-//							}
-//							
-//							t = imageFolderPath + File.separator + t +".tif";
-//							
-//							System.out.println(t);
-//							
-//							tifNamesOut[w] = t;
-//							tifPositionsInDat[w] = w; 
-//						}
-//						
-//						Dataset tifNamesDatasetOut = DatasetFactory.createFromObject(tifNamesOut);
-//						Dataset tifPositionsInDatOut = DatasetFactory.createFromObject(tifPositionsInDat);
-//						
-//						models.get(id).setTifNames(tifNamesDatasetOut);
-//						tifNamesArray[id] = tifNamesDatasetOut;
-//						tifPositionInDatArray[id] = tifPositionsInDatOut; 
-//						
-//						
-//						framesCorespondingToDats.set(id, new ArrayList<>());
-//						
-//					}
-//					
-//					ILazyDataset ild = null;
-//					
-//					ild = dh1.getLazyDataset(gm.getImageName());
-//					
-//					if(ild == null){
-//						ild = dh1.getLazyDataset("file_image");
-//					}
-//					
-//					if(ild == null){
-//						ild = dh1.getLazyDataset("file");
-//					}
-//					
-//					if(ild == null){
-//						imagesUnavailableWarning();
-//					}
-//					
-//					dms.get(id).setName(StringUtils.substringAfterLast(drm.getDatFilepaths()[id], File.separator));
-//					models.get(id).setDatImages(ild);
-//					models.get(id).setFilepath(filepaths[id]);
-//					imageArray[id] = ild;
-////					imageArray is an array of the images in read-in order
-//	
-//					for (int f = 0; f < (imageArray[id].getShape()[0]); f++) {
-//	
-//						SliceND slice2 = new SliceND(ild.getShape());
-//						slice2.setSlice(0, f, f + 1, 1);
-//						ILazyDataset nim = ild.getSliceView(slice2); //getSlice(slice2);
-//						som.put(imageRef, (ILazyDataset) nim);
-//						imageRefList.add(imageRef);
-//						imagesToFilepathRef.add(id);
-//						imageRef++;
-//					}
-//					
-//					
-//					if (MethodSetting.toInt(drm.getCorrectionSelection()) == 0) {
-//						
-//						try{
-//							ILazyDataset ildx = dh1.getLazyDataset(gm.getxName());
-//							models.get(id).setDatX(ildx);
-//							SliceND slice1 = new SliceND(ildx.getShape());
-//							IDataset xdat = ildx.getSlice(slice1);
-//							xArray[id] = xdat;
-//						}
-//						
-//						catch(NullPointerException r){
-//							
-//						}
-//						
-//					}
-//					else if(MethodSetting.toInt(drm.getCorrectionSelection()) == 1||
-//							MethodSetting.toInt(drm.getCorrectionSelection()) == 2||	
-//							MethodSetting.toInt(drm.getCorrectionSelection()) == 3){
-//						
-//						ILazyDataset ildx = dh1.getLazyDataset(gm.getxNameRef());
-//						models.get(id).setDatX(ildx);
-//	
-//						SliceND slice1 = new SliceND(ildx.getShape());
-//						IDataset xdat = ildx.getSlice(slice1);
-//						xArray[id] = xdat;
-//	
-//						ILazyDataset dcdtheta = dh1.getLazyDataset(ReflectivityMetadataTitlesForDialog.getdcdtheta());
-//						models.get(id).setDcdtheta(dcdtheta);
-//	
-//						ILazyDataset qdcd = dh1.getLazyDataset(ReflectivityMetadataTitlesForDialog.getqdcd());
-//						models.get(id).setQdcd(qdcd);
-//	
-//						if (dcdtheta == null) {
-//							try {
-//								dcdtheta = dh1.getLazyDataset(ReflectivityMetadataTitlesForDialog.getsdcdtheta());
-//								models.get(id).setDcdtheta(dcdtheta);
-//							} catch (Exception e2) {
-//								System.out.println("can't get dcdtheta");
-//							}
-//						} 
-//						else {
-//						}
-//						
-//						if (qdcd == null) {
-//							try {
-//								qdcd = dh1.getLazyDataset(ReflectivityMetadataTitlesForDialog.getqsdcd());
-//								models.get(id).setQdcd(qdcd);
-//							} catch (Exception e2) {
-//								System.out.println("can't get qdcd");
-//							}
-//						} 
-//						
-//						else {
-//						}
-//					}	
-//					else {
-//					}
-//			}
-//		}
-//
-//			catch (Exception e1) {
-//				e1.printStackTrace();
-//			}
-//		
-//			gm.addPropertyChangeListener(new PropertyChangeListener() {
-//
-//				public void propertyChange(PropertyChangeEvent evt) {
-//					for (int id = 0; id < filepaths.length; id++) {
-//						try {
-//							IDataHolder dh1 = LoaderFactory.getData(filepaths[id]);
-//							ILazyDataset ild = dh1.getLazyDataset(gm.getImageName());
-//							models.get(id).setDatImages(ild);
-//						}
-//
-//						catch (Exception e1) {
-//							// TODO Auto-generated catch block
-//							e1.printStackTrace();
-//						}
-//					}
-//				}
-//			});
-//		
-//
-//		updateAnalysisMethodology(0, 1, 0, "10");
-//		
-//		Dataset xArrayCon = DatasetFactory.zeros(1);
-//		Dataset tifNamesCon = DatasetFactory.zeros(1);
-//		Dataset tifPositionsCon = DatasetFactory.zeros(1);
-//		
-//		AggregateDataset imageCon = null;
-//		
-//		try{
-//			imageCon = new AggregateDataset(false, imageArray);
-//		}
-//		catch(Exception j){
-//			imageCon = new AggregateDataset(false, DatasetFactory.zeros(new int[] {2, 2}, Dataset.ARRAYFLOAT64));
-//		}
-//		
-//		int numberOfImages = 1; 
-//		
-//		try{
-//			xArrayCon = DatasetUtils.concatenate(xArray, 0);
-////			xArrayCon is an unsorted, but concatenated DoubleDataset of l values
-//			tifNamesCon = DatasetUtils.concatenate(tifNamesArray, 0);
-////			tifNamesCon is an unsorted, but concatenated DoubleDataset of l tif names
-//			tifPositionsCon = DatasetUtils.concatenate(tifPositionInDatArray, 0);
-////			tifPositionsCon is an unsorted, but concatenated DoubleDataset of the positions of tif names in .dats
-//			numberOfImages = xArrayCon.getSize();
-//		}
-//		catch(NullPointerException e){
-//			
-//		}
-//				
-//		Dataset imageRefDat = DatasetFactory.ones(imageRefList.size());
-//		
-////		imageRefDat is a dataset, equal in length  to imageRefList (list of the integer number of the image that is read in - the nth read in, for example), 
-////		and will be sorted based on the xArrayCon, which is the"l" values (for a rod)
-//		
-//		Dataset imagesToFilepathRefDat = DatasetFactory.ones(imageRefList.size());
-//		
-////		imagesToFilepathRefDat is a dataset, equal in length  to imagesToFilepathRef (list of the integer number of the dat (in String[] filepaths) of the image that is read in at that point- the nth read in, for example), 
-////		and will be sorted based on the xArrayCon, which is the"l" values (for a rod)
-//		
-//		Dataset imagesPositionsInDat = DatasetFactory.ones(imageRefList.size());
-//		
-////		imagesPositionsInDat is a dataset, equal in length to imagesToFilepathRef (list of the integer number of the position of a tif file in the originating .dat, currently in the order in which they were read in), 
-////		and will be sorted based on the xArrayCon, which is the"l" values (for a rod)
-//		
-//		
-//		for (int sd = 0; sd < imageRefList.size(); sd++) {
-//			imageRefDat.set(imageRefList.get(sd), sd);
-//			imagesToFilepathRefDat.set(imagesToFilepathRef.get(sd), sd);
-//			imagesPositionsInDat.set(tifPositionsCon.getInt(sd), sd);
-//		}
-//
-//		sm.setSortedDatIntsInOrderDataset(imagesToFilepathRefDat);
-//		
-//		Dataset xArrayConClone = xArrayCon.clone();
-//   
-//		DoubleDataset xArrayConCloneDouble = (DoubleDataset) xArrayConClone.clone();
-//		
-//		try{
-//			DatasetUtils.sort(xArrayCon, imageRefDat);
-////			so now we have the image number in imageArray (imageRefDat) sorted by "l" value xArrayCon
-//			DatasetUtils.sort(xArrayConClone, imagesToFilepathRefDat);
-////			so now we have the dat number in filepaths (imagesToFilepathRefDat) sorted by "l" value xArrayCon
-//			Dataset sortedTifNamesCon = this.sortStrings(xArrayConCloneDouble, tifNamesCon);
-////			so now we have the tif names sorted by "l" value xArrayCon
-//			DatasetUtils.sort(xArrayConClone, imagesPositionsInDat);
-////			so now we have the tif positions in their originating .dat files sorted by "l" value xArrayCon
-//			
-//			ILazyDataset[] imageSortedDat = new ILazyDataset[imageRefList.size()];
-////			imageSortedDat this is the array of sorted images - sorted according to "l"
-//			
-//			int[] filepathsSortedArray = new int[imageRefList.size()];
-////			filepathsSortedArray is the .dat positions in filepaths  - sorted by images "l" values
-//			noImages = imageRefList.size();
-//	
-//	
-//			String[] datNamesInOrder = new String[imageRefList.size()];
-//			
-//			for(int f = 0; f<imageRefList.size(); f++ ){
-//				datNamesInOrder[f] = filepaths[imagesToFilepathRefDat.getInt(f)];
-//				filepathsSortedArray[f] = imagesToFilepathRefDat.getInt(f);
-//				int pos = imageRefDat.getInt(f);
-//				imageSortedDat[f] = som.get(pos);
-//				
-//				FrameModel fm = new FrameModel();
-//				fms.add(fm);
-//				
-//				fm.setRawImageData(imageSortedDat[f]);
-//				fm.setTifFilePath( sortedTifNamesCon.getString(f));
-//				fm.setDatFilePath(datNamesInOrder[f]);
-//				fm.setDatNo(imagesToFilepathRefDat.getInt(f));
-//				fm.setBackgroundMethodology(Methodology.TWOD);
-//				fm.setFitPower(FitPower.ONE);
-//				fm.setTrackingMethodology(TrackerType1.TLD);
-//				
-//				double polarisation = SXRDGeometricCorrections.polarisation(datNamesInOrder[f], 
-//																			gm.getInplanePolarisation(), 
-//																			gm.getOutplanePolarisation())
-//																			.getDouble(imagesPositionsInDat.getInt(f));
-//				fm.setPolarisationCorrection(polarisation);
-//				
-//				double lorentz = SXRDGeometricCorrections.lorentz(datNamesInOrder[f])
-//														 .getDouble(imagesPositionsInDat.getInt(f));
-//
-//				fm.setLorentzianCorrection(lorentz);
-//				
-//				double areaCorrection = SXRDGeometricCorrections.areacor(datNamesInOrder[f], 
-//																		 gm.getBeamCorrection(), 
-//																		 gm.getSpecular(),  
-//																		 gm.getSampleSize(), 
-//																		 gm.getOutPlaneSlits(), 
-//																		 gm.getInPlaneSlits(), 
-//																		 gm.getBeamInPlane(), 
-//																		 gm.getBeamOutPlane(), 
-//																		 gm.getDetectorSlits())
-//																		 .getDouble(imagesPositionsInDat.getInt(f));
-//				
-//				fm.setAreaCorrection(areaCorrection);
-//				fm.setScannedVariable(xArrayCon.getDouble(f));
-//				
-//				
-//			}
-//			
-//			
-//			for(int r = 0; r< fms.size(); r++){
-//				
-//				framesCorespondingToDats.get(fms.get(r).getDatNo()).add((Integer)r);
-//				
-//			}
-//			
-//			drm.setFramesCorespondingToDats(framesCorespondingToDats);
-//			
-//			Dataset sortedDatNamesInOrderDataset = DatasetFactory.createFromObject(datNamesInOrder);
-//			sm.setSortedDatNamesInOrderDataset(sortedDatNamesInOrderDataset);			
-//	
-//			sm.setFilepathsSortedArray(filepathsSortedArray);
-//	
-//			sm.setImages(imageSortedDat);
-//			sm.setImageStack(imageCon);
-//			sm.setSortedX(xArrayCon);
-//			sm.setSortedTifFiles(sortedTifNamesCon);
-//	
-//			SliceND slice2 = new SliceND(imageCon.getShape());
-//			slice2.setSlice(0, 0, 1, 1);
-//			Dataset nullImage = (Dataset) imageCon.getSlice(slice2);
-//	
-//			sm.setNullImage((Dataset) imageCon.getSlice(slice2));
-//	
-//			sm.setNumberOfImages(numberOfImages);
-//			sm.setNullImage(nullImage);
-//		}
-//		catch(Exception e){
-//			System.out.println(e.getMessage());
-//		}
-//	}
-	
 	public SurfaceScatterPresenter(){
 		drm = new DirectoryModel();
 		stm = new SetupModel();
@@ -516,67 +120,14 @@ public class SurfaceScatterPresenter {
 										    int correctionSelection) {
 		
 	
-		
-//		sm = new SuperModel();
-//		dms = new ArrayList<DataModel>();
-//		models = new ArrayList<ExampleModel>();
-//		sm.setFilepaths(filepaths);
-//		sm.setCorrectionSelection(MethodSetting.toMethod(correctionSelection));
-//		sm.setImageFolderPath(imageFolderPath);
+
 		fms = new ArrayList<FrameModel>();
 		drm = new DirectoryModel();
-		
-		
-//		sspwf.setSm(sm);
-//		sspwf.setDms(dms);
-//		sspwf.setModels(models);
-//		sspwf.setFms(fms);
-//		sspwf.setDms(dms);
-//		sspwf.setGm(gm);
-//		sspwf.setDrm(drm);
-//		
 		drm.setFms(fms);
 		
 		drm.setDatFilepaths(filepaths);
-//		sm.setFilepaths(filepaths);
+
 		drm.setCorrectionSelection(MethodSetting.toMethod(correctionSelection));
-		
-		
-//		sspwf.surfaceScatterPresenterBuild(filepaths, 
-//										   xName, 
-//										   stm.getImageFolderPath(), 
-//										   datFolderPath, 
-//										   correctionSelection,
-//										   true,
-//										   stm);
-//		
-//	}
-//	
-//	
-//	public void surfaceScatterPresenterBuild(String[] filepaths,
-//											 String xName,
-//											 String imageFolderPath,
-//											 String datFolderPath,
-//											 int correctionSelection,
-//											 boolean inDevelopment,
-//											 SetupModel stm) {
-		
-		
-//		if(!inDevelopment){ 
-//			//sm = new SuperModel();
-////			dms = new ArrayList<DataModel>();
-////			models = new ArrayList<ExampleModel>();
-//			fms = new ArrayList<FrameModel>();
-//			drm = new DirectoryModel();
-//			
-//			drm.setDatFilepaths(filepaths);
-//			
-//			//sm.setFilepaths(filepaths);
-//			//sm.setCorrectionSelection(MethodSetting.toMethod(correctionSelection));
-//			//sm.setImageFolderPath(imageFolderPath);
-//		}
-		
-//		this.stm =stm; 
 		
 		ILazyDataset[] imageArray = new ILazyDataset[filepaths.length];
 		//////imageArray is an array of the image ILazyDatasets 
@@ -606,11 +157,7 @@ public class SurfaceScatterPresenter {
 		
 			for (int id = 0; id < filepaths.length; id++) {
 				
-//				models.add(new ExampleModel());
-//				dms.add(new DataModel());
-				
-				
-				
+
 				gm.setxName(xName);
 				gm.setxNameRef(xName);
 				
@@ -695,9 +242,6 @@ public class SurfaceScatterPresenter {
 					imagesUnavailableWarning();
 				}
 				
-//				dms.get(id).setName(StringUtils.substringAfterLast(drm.getDatFilepaths()[id], File.separator));
-//				models.get(id).setDatImages(ild);
-//				models.get(id).setFilepath(filepaths[id]);
 				imageArray[id] = ild;
 				//imageArray is an array of the images in read-in order
 				
@@ -718,12 +262,10 @@ public class SurfaceScatterPresenter {
 					imageNoInDat++;
 				}
 				
-				
 				if (MethodSetting.toInt(drm.getCorrectionSelection()) == 0) {
 				
 					try{
 						ILazyDataset ildx = dh1.getLazyDataset(gm.getxName());
-//						models.get(id).setDatX(ildx);
 						SliceND slice1 = new SliceND(ildx.getShape());
 						IDataset xdat = ildx.getSlice(slice1);
 						xArray[id] = xdat;
@@ -803,9 +345,6 @@ public class SurfaceScatterPresenter {
 			}
 		});
 		
-		
-	
-		
 		Dataset xArrayCon = DatasetFactory.zeros(1);
 		Dataset tifNamesCon = DatasetFactory.zeros(1);
 		
@@ -875,9 +414,7 @@ public class SurfaceScatterPresenter {
 				int pos = imageRefDat.getInt(f);
 				System.out.println("pos  ;   "+ pos);
 				imageSortedDat[f] = som.get(pos);
-				
-//				imageSortedDat[f].hashCode
-				
+			
 				FrameModel fm = new FrameModel();
 				fms.add(fm);
 				
@@ -888,17 +425,19 @@ public class SurfaceScatterPresenter {
 				fm.setBackgroundMethodology(Methodology.TWOD);
 				fm.setFitPower(FitPower.ONE);
 				fm.setTrackingMethodology(TrackerType1.TLD);
-				fm.setNoInOriginalDat(imageNoInDatList.get(f));
+				fm.setNoInOriginalDat(imageNoInDatList.get(pos));
+				fm.setDatNo(imagesToFilepathRefDat.getInt(f));
 				
+				System.out.println("imageNoInDatList.get(pos)" + imageNoInDatList.get(pos));
 
 				double polarisation = SXRDGeometricCorrections.polarisation(datNamesInOrder[f], 
 																			gm.getInplanePolarisation(), 
 																			gm.getOutplanePolarisation())
-																			.getDouble(imageNoInDatList.get(f));
+																			.getDouble(imageNoInDatList.get(pos));
 				fm.setPolarisationCorrection(polarisation);
 				
 				double lorentz = SXRDGeometricCorrections.lorentz(datNamesInOrder[f])
-														 .getDouble(imageNoInDatList.get(f));
+														 .getDouble(imageNoInDatList.get(pos));
 
 				fm.setLorentzianCorrection(lorentz);
 				
@@ -911,7 +450,7 @@ public class SurfaceScatterPresenter {
 																		 gm.getBeamInPlane(), 
 																		 gm.getBeamOutPlane(), 
 																		 gm.getDetectorSlits())
-																		 .getDouble(imageNoInDatList.get(f));
+																		 .getDouble(imageNoInDatList.get(pos));
 				
 				fm.setAreaCorrection(areaCorrection);
 				fm.setScannedVariable(xArrayCon.getDouble(f));
@@ -919,28 +458,17 @@ public class SurfaceScatterPresenter {
 			}
 		
 			Dataset sortedDatNamesInOrderDataset = DatasetFactory.createFromObject(datNamesInOrder);
-			//sm.setSortedDatNamesInOrderDataset(sortedDatNamesInOrderDataset);
-			//
-			//sm.setFilepathsSortedArray(filepathsSortedArray);
+
 			drm.setFilepathsSortedArray(filepathsSortedArray);
 			drm.setImageNoInDatList(imageNoInDatList);
 			
-			//sm.setImages(imageSortedDat);
-			//sm.setImageStack(imageCon);
 			drm.setSortedX(xArrayCon);
-//			drm.setSortedTifFiles(sortedTifNamesCon);
-			//
+
 			SliceND slice2 = new SliceND(imageCon.getShape());
 			slice2.setSlice(0, 0, 1, 1);
-			Dataset nullImage = (Dataset) imageCon.getSlice(slice2);
-			
 			
 			updateAnalysisMethodology(0, 1, 0, "10");
 			
-			//sm.setNullImage((Dataset) imageCon.getSlice(slice2));
-			
-			//sm.setNumberOfImages(numberOfImages);
-			//sm.setNullImage(nullImage);
 		}
 			
 		catch(Exception e){
@@ -1351,9 +879,7 @@ public class SurfaceScatterPresenter {
 	public double[] getThisLocation(){
 		
 		FrameModel f = fms.get(sliderPos);
-		
 
-		
 		return f.getRoiLocation();
 		
 	}
@@ -3203,15 +2729,17 @@ public class SurfaceScatterPresenter {
 		
 		CsdpGeneratorFromDrm csdpgfd = new CsdpGeneratorFromDrm();
 		
-		IDataset[] output = CurveStitchWithErrorsAndFrames.curveStitch4(csdpgfd.generateCsdpFromDrm(drm));
+		csdpgfd.generateCsdpFromDrm(drm);
 		
 		CurveStitchDataPackage csdp = csdpgfd.getCsdp();
+		
+		IDataset[] output = CurveStitchWithErrorsAndFrames.curveStitch4(csdp);
 		
 		drm.setCsdp(csdp);
 		
 		ILineTrace lt = pS.createLineTrace("progress");
 
-		IDataset X = DatasetFactory.createFromObject(drm.getCsdp().getSplicedCurveX());
+		IDataset X = DatasetFactory.createFromObject(csdp.getSplicedCurveX());
 		
 		if(outputCurves.getqAxis().getSelection()){
 			
@@ -3220,7 +2748,7 @@ public class SurfaceScatterPresenter {
 		}
 		
 		else{
-			X = drm.getCsdp().getSplicedCurveX();
+			X = csdp.getSplicedCurveX();
 		}
 		
 		
@@ -3455,31 +2983,21 @@ public class SurfaceScatterPresenter {
 		this.fms = fms;
 	}
 
-
-
 	public SetupModel getStm() {
 		return stm;
 	}
-
-
 
 	public void setStm(SetupModel stm) {
 		this.stm = stm;
 	}
 
-
-
 	public boolean isErrorDisplayFlag() {
 		return errorDisplayFlag;
 	}
-
-
 
 	public void setErrorDisplayFlag(boolean errorDisplayFlag) {
 		this.errorDisplayFlag = errorDisplayFlag;
 	}
 
-
-	
 
 }

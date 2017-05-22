@@ -15,7 +15,6 @@ public class MovieJob {
 
 	
 	private int time = 220;
-//	private IRegion background;
 	private IDataset tempImage;
 	private IDataset subTempImage;
 	private IDataset subIBgTempImage;
@@ -49,10 +48,6 @@ public class MovieJob {
 	public void setSliders(Slider sliders){
 		this.sliders = sliders;
 	}
-	
-//	public void setSliders(Slider sliders){
-//		this.sliders = sliders;
-//	}
 	
 	public void setSsvs(SurfaceScatterViewStart ssvs) {
 		this.ssvs = ssvs;

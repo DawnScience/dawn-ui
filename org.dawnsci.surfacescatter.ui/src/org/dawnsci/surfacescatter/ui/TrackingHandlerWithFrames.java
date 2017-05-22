@@ -28,17 +28,13 @@ import org.eclipse.swt.widgets.ProgressBar;
 
 public class TrackingHandlerWithFrames {
 	
-//	private ArrayList<DataModel> dms;
-//	private ArrayList<ExampleModel> models;
-//	private IPlottingSystem<Composite> plotSystem;
 	private IPlottingSystem<Composite> outputCurves;
 	private GeometricParametersModel gm;
-//	private SuperModel sm;
 	private SurfaceScatterViewStart ssvs;
 	private int correctionSelection;
 	private int noImages;
 	private SurfaceScatterPresenter ssp;
-	private int DEBUG = 0;
+	private int DEBUG = 1;
 	private ProgressBar progressBar;
 	private TrackingProgressAndAbortView tpaav;
 	private Thread t;
@@ -86,58 +82,29 @@ public class TrackingHandlerWithFrames {
 		this.correctionSelection = cS;
 	}
 
-//	public void setDms(ArrayList<DataModel> dms) {
-//		this.dms = dms;
-//	}
-//
-//	public void setModels(ArrayList<ExampleModel> models) {
-//		this.models = models;
-//	}
-//
-//	public void setSuperModel(SuperModel sm) {
-//		this.sm = sm;
-//	}
-
 	public void setGm(GeometricParametersModel gms) {
 		this.gm = gms;
 	}
 
-//	public void setPlotSystem(IPlottingSystem<Composite> plotSystem) {
-//		this.plotSystem = plotSystem;
-//	}
 
 	public void setSsp(SurfaceScatterPresenter ssp) {
 		this.ssp = ssp;
 	}
 	
-//	public void setps(IPlottingSystem<Composite> plotSystem) {
-//		this.plotSystem = plotSystem;
-//	}
 
 	@SuppressWarnings("unchecked")
 	
 	protected  void runTJ1(){
 
-//		this.sm = ssp.getSm();
-//		this.dms = ssp.getDms();
+
 		this.gm = ssp.getGm();
-//		this.models = ssp.getModels();
 		this.fms = ssp.getFms();
 		this.drm = ssp.getDrm();
 		
 		
 		drm.resetAll();
-//		sm.setStartFrame(sm.getSliderPos());
 
 		int startFrame = ssp.getSliderPos();
-		
-//		for(ExampleModel em: models){
-//			em.setInput(null);
-//		}
-//		
-//		for(DataModel dm :dms){
-//			dm.resetAll();
-//		}
 		
 		final Display display = Display.getCurrent();
 		int[] imagePosInOriginalDat = CountUpToArray.CountUpToArray1(drm.getFilepathsSortedArray());
@@ -154,9 +121,6 @@ public class TrackingHandlerWithFrames {
 
 			noImages = fms.size();
 				
-//			for (DataModel dm : dms) {
-//				dm.resetAll();
-//			}
 			outputCurves.clear();			
 			
 			if (startFrame  == 0) {
@@ -189,14 +153,7 @@ public class TrackingHandlerWithFrames {
 									}
 									
 									int jok = frame.getDatNo();
-//									DataModel dm = dms.get(jok);
-//
-//									ExampleModel model = models.get(jok);
-//
-//									dm.addxList(frame.getScannedVariable());
-//									
-//									sm.addxList(fms.size(), k,
-//											frame.getScannedVariable());
+
 									
 									drm.addxList(drm.getFms().size(), k,
 											frame.getScannedVariable());
@@ -222,15 +179,11 @@ public class TrackingHandlerWithFrames {
 									drm.addBackgroundDatArray(fms.size(), imageNumber, output1);
 									
 									drm.getOcdp().addBackgroundDatArray(fms.size(), imageNumber, output1);
-									
-//									IDataset tempImage = frame.getImage(imageNumber);
-//									double[] tempLoc = drm.getLocationList().get(frame.getDatNo()).get(frame.getNoInOriginalDat());
+
 									double[] tempLoc = frame.getRoiLocation();
 									int[] sml =  drm.getInitialLenPt()[0];
 									
-//									sm.setSliderPos(imageNumber);
-//									ssp.setSliderPos(imageNumber);
-									
+
 									RectangularROI newROI = new RectangularROI(tempLoc[0],
 																		       tempLoc[1],
 																		       drm.getInitialLenPt()[0][0],
@@ -270,8 +223,6 @@ public class TrackingHandlerWithFrames {
 					
 					public void run(){
 				
-//						int[] imagePosInOriginalDat = CountUpToArray.CountUpToArray1(sm.getFilepathsSortedArray());
-						
 						for (int k = startFrame; k >= 0; k--) {
 
 							
@@ -297,21 +248,13 @@ public class TrackingHandlerWithFrames {
 							}
 							
 							int jok = frame.getDatNo();
-//							DataModel dm = dms.get(jok);
-//	
-//							ExampleModel model = models.get(jok);
-//	
-//							dm.addxList(frame.getScannedVariable());
-							
-//							sm.addxList(fms.size(), k,
-//									frame.getScannedVariable());
-//							
+
 							drm.addxList(drm.getFms().size(), k,
 									frame.getScannedVariable());
 							
 							drm.addDmxList(frame.getDatNo(),  
-										   imagePosInOriginalDat[k],
-										   frame.getScannedVariable());
+									   frame.getNoInOriginalDat(),
+									   frame.getScannedVariable());
 							
 //							debug("value added to xList:  "   + drm.getSortedX().getDouble(k)  + "  k:   " + k);
 							
@@ -331,8 +274,6 @@ public class TrackingHandlerWithFrames {
 							
 							drm.addBackgroundDatArray(fms.size(), k, output1);
 							
-	//						IDataset tempImage = ssp.getImage(imageNumber);
-//							double[] tempLoc = drm.getLocationList().get(frame.getDatNo()).get(frame.getNoInOriginalDat());
 							double[] tempLoc = frame.getRoiLocation();
 							RectangularROI newROI = new RectangularROI(tempLoc[0],
 								       tempLoc[1],
@@ -383,21 +324,13 @@ public class TrackingHandlerWithFrames {
 							}
 							
 							int jok = frame.getDatNo();
-//							DataModel dm = dms.get(jok);
-//	
-//							ExampleModel model = models.get(jok);
-	
-//							dm.addxList(frame.getScannedVariable());
 							
-//							sm.addxList(fms.size(), k,
-//									frame.getScannedVariable());
-//							
 							drm.addxList(drm.getFms().size(), k,
 									frame.getScannedVariable());
 							
 							drm.addDmxList(frame.getDatNo(),  
-										   imagePosInOriginalDat[k],
-										   frame.getScannedVariable());
+									   frame.getNoInOriginalDat(),
+									   frame.getScannedVariable());
 							
 							debug("value added to xList:  "   + drm.getSortedX().getDouble(k)  + "  k:   " + k);
 							
@@ -417,8 +350,6 @@ public class TrackingHandlerWithFrames {
 //							
 							drm.addBackgroundDatArray(fms.size(), k, output1);
 							
-	//						IDataset tempImage = ssp.getImage(imageNumber);
-//							double[] tempLoc = drm.getLocationList().get(frame.getDatNo()).get(frame.getNoInOriginalDat());
 							double[] tempLoc = frame.getRoiLocation();
 							RectangularROI newROI = new RectangularROI(tempLoc[0],
 								       tempLoc[1],
@@ -458,22 +389,20 @@ public class TrackingHandlerWithFrames {
 			debug("tj2 invoked");
 			tj.setProgress(progressBar);
 			tj.setCorrectionSelection(MethodSetting.toInt(drm.getCorrectionSelection()));
-//			tj.setSuperModel(sm);
 			tj.setGm(gm);
-//			tj.setDms(dms);
-//			tj.setModels(models);
-//			tj.setPlotSystem(plotSystem);
 			tj.setOutputCurves(outputCurves);
 //			tj.setTimeStep(Math.round(2 / fms.size()));
 			tj.setSsp(ssp);
-//			tj.setSsvs(ssvs);
+			tj.setSsvs(ssvs);
 			tj.setTPAAV(tpaav);
+			tj.setDrm(drm);
+			tj.setFms(fms);
 			tj.runTJ2();
 		}
 		
 		
 		ssvs.getCustomComposite().getReplay().setEnabled(true);
-//		ssvs.getOutputCurves().addImageNoRegion(ssp.getXValue((ssp.getNumberOfImages())/2));
+
 	}
 		private void debug(String output) {
 		if (DEBUG == 1) {
@@ -486,7 +415,6 @@ public class TrackingHandlerWithFrames {
 			
 			ssvs.getPlotSystemCompositeView().getFolder().setSelection(2);
 			ssp.sliderMovemementMainImage(imageNumber);
-//			ssp.updateSliders(ssvs.getPlotSystemCompositeView().getSlider(), imageNumber);
 			ssvs.updateIndicators(imageNumber);
 			ssvs.getPlotSystemCompositeView().getPlotSystem().updatePlot2D(tempImage, null, null);
 			
@@ -540,17 +468,13 @@ public class TrackingHandlerWithFrames {
 
 class trackingJob21 {
 
-//	private ArrayList<DataModel> dms;
-//	private ArrayList<ExampleModel> models;
 	private IPlottingSystem<Composite> plotSystem;
 	private IPlottingSystem<Composite> outputCurves;
 	private GeometricParametersModel gm;
-//	private SuperModel sm;
 	private int correctionSelection;
 	private int noImages;
 	private int timeStep;
 	private SurfaceScatterPresenter ssp;
-//	private IPlottingSystem<Composite> ssvsPS; 
 	private SurfaceScatterViewStart ssvs;
 	private int DEBUG = 0;
 	private ProgressBar progressBar;
@@ -603,18 +527,6 @@ class trackingJob21 {
 		this.correctionSelection = cS;
 	}
 
-//	public void setDms(ArrayList<DataModel> dms) {
-//		this.dms = dms;
-//	}
-//
-//	public void setModels(ArrayList<ExampleModel> models) {
-//		this.models = models;
-//	}
-
-//	public void setSuperModel(SuperModel sm) {
-//		this.sm = sm;
-//	}
-
 	public void setGm(GeometricParametersModel gms) {
 		this.gm = gms;
 	}
@@ -641,26 +553,15 @@ class trackingJob21 {
 		final Display display = Display.getCurrent();
 	
 		debug("@@@@@@@@@@@~~~~~~~~~~~~~~~in the new tracker~~~~~~~~~~~~~~~~~~@@@@@@@@@@@@@@");
-//		drm.resetTrackers();
 		drm.resetAll();
 		
-		
-//		for(ExampleModel m : models){
-//			m.setInput(null);
-//		}
+
 		
 		noImages = fms.size();
 
 		int startFrame = ssp.getSliderPos();
 		
 		int[] imagePosInOriginalDat = CountUpToArray.CountUpToArray1(drm.getFilepathsSortedArray());
-
-//		for (DataModel dm : dms) {
-//			dm.resetAll();
-//		}
-
-//		int[] len = ssvs.getPlotSystemCompositeView().getPlotSystem().getRegion("myRegion").getROI().getBounds().getIntLengths();
-//		int[] pt = ssvs.getPlotSystemCompositeView().getPlotSystem().getRegion("myRegion").getROI().getBounds().getIntPoint();
 
 		int[][] lenPt = ssp.getInitialLenPt();
 		
@@ -709,16 +610,7 @@ class trackingJob21 {
 								e.printStackTrace();
 								System.out.println(e.getMessage());
 							}
-							
-//							DataModel dm = dms.get(jok);
-//						GeometricParametersModel gm = gms.get(jok);
-//							ExampleModel model = models.get(jok);
-		
-//							dm.addxList(drm.getSortedX().getDouble(k));
-							
-//							sm.addxList(fms.size(), k,
-//									drm.getSortedX().getDouble(k));
-//							
+												
 							
 							drm.addxList(drm.getFms().size(), k,
 									frame.getScannedVariable());
@@ -741,17 +633,7 @@ class trackingJob21 {
 									   trackingMarker, 
 									   k);
 							
-							
-//							IDataset output1 = DummyProcessingClass.DummyProcess(sm, 
-//																				 j, 
-//																				 model, 
-//																				 dm, 
-//																				 gm,
-//																				 correctionSelection, 
-//																				 imagePosInOriginalDat[k], 
-//																				 trackingMarker, 
-//																				 k);
-							
+													
 							
 							debug("Tracker should HAVE fired once");
 							
@@ -822,8 +704,6 @@ class trackingJob21 {
 								FrameModel frame = fms.get(k);
 								
 								if (drm.getFilepathsSortedArray()[k] == nextjok) {
-//									ssp.sliderMovemementMainImage(k, ssp.getSsvs().getPlotSystemCompositeView().getPlotSystem());
-
 
 									debug("l value: " + Double.toString(drm.getSortedX().getDouble(k)) + " , " + "local k:  " + Integer.toString(k)
 									+ " , " + "local nextjok:  " + Integer.toString(nextjok));
@@ -841,11 +721,7 @@ class trackingJob21 {
 										System.out.println(e.getMessage());
 									}
 									
-									int jokLocal = frame.getDatNo();
-//									DataModel dm = dms.get(jokLocal);
-//									GeometricParametersModel gm = gms.get(jokLocal);
-//									ExampleModel model = models.get(jokLocal);
-									
+									int jokLocal = frame.getDatNo();									
 									
 									if(drm.getLocationList() == null && 
 											fms.get(0).getTrackingMethodology() != TrackerType1.INTERPOLATION){
@@ -871,14 +747,6 @@ class trackingJob21 {
 											    }
 											}
 																		
-//											int seedIndex = 
-//													ClosestNoFinder.closestNoWithLocation(drm.getSortedX().getDouble(k),
-//																						  drm.getSortedX(), 
-//																						  drm.getLocationList());
-//					
-//											int nearestCompletedDatFileNo = drm.getFilepathsSortedArray()[seedIndex];
-											
-//											ArrayList<double[]> seedList = drm.getLocationList().get(nearestCompletedDatFileNo);;
 											ArrayList<double[]> seedList = drm.getLocationList().get(nearestCompletedDatFileNo);
 											ArrayList<Double> lList = drm.getDmxList().get(nearestCompletedDatFileNo);
 											
@@ -935,11 +803,13 @@ class trackingJob21 {
 										drm.addSeedLocation(frame.getDatNo(),seedLocation);
 									}
 									
-//									dm.addxList(drm.getSortedX().getDouble(k));
-									
 									drm.addxList(fms.size(), k,
 											drm.getSortedX().getDouble(k));
 									
+									
+									drm.addDmxList(frame.getDatNo(),  
+											   imagePosInOriginalDat[k],
+											   frame.getScannedVariable());
 //									debug("value added to xList:  "   + drm.getSortedX().getDouble(k)  + "  k:   " + k);
 									
 									IDataset output1 = 
@@ -1022,11 +892,6 @@ class trackingJob21 {
 									}
 									
 									
-//									IDataset j = ssp.getImage(k);
-//									DataModel dm = dms.get(nextjok);
-//									GeometricParametersModel gm = gms.get(nextjok);
-//									ExampleModel model = models.get(nextjok);
-									
 									if(drm.getLocationList() == null && frame.getTrackingMethodology() != TrackerType1.INTERPOLATION){
 										
 										
@@ -1095,12 +960,13 @@ class trackingJob21 {
 									drm.addxList(drm.getNoOfImagesInDatFile(frame.getDatNo()), 
 											imagePosInOriginalDat[k],
 											drm.getSortedX().getDouble(k));
-									
-									
-//									sm.addxList(fms.size(), k,
-//											drm.getSortedX().getDouble(k));
 //									
 //									debug("value added to xList:  "   + drm.getSortedX().getDouble(k)  + "  k:   " + k);
+									
+									drm.addDmxList(frame.getDatNo(),  
+											   imagePosInOriginalDat[k],
+											   frame.getScannedVariable());
+									
 									
 									IDataset output1 = 
 											DummyProcessWithFrames.DummyProcess1(drm, 
@@ -1173,14 +1039,7 @@ class trackingJob21 {
 											e.printStackTrace();
 											System.out.println(e.getMessage());
 										}
-										
-										
-										
-//										DataModel dm = dms.get(nextjok);
-//										GeometricParametersModel gm = gms.get(nextjok);
-//										ExampleModel model = models.get(nextjok);
-	
-										
+
 										if(drm.getLocationList() == null && frame.getTrackingMethodology()!= TrackerType1.INTERPOLATION){
 											
 											
@@ -1243,10 +1102,9 @@ class trackingJob21 {
 											drm.getSeedLocation()[frame.getDatNo()]=(seedLocation);
 										}
 										
-										
-										drm.addDmxList(drm.getNoOfImagesInDatFile(frame.getDatNo()), 
-													   frame.getNoInOriginalDat(),
-													   drm.getSortedX().getDouble(k));
+										drm.addDmxList(frame.getDatNo(),  
+												   frame.getNoInOriginalDat(),
+												   frame.getScannedVariable());
 										
 										drm.addxList(fms.size(), 
 													 k,
@@ -1345,12 +1203,13 @@ class trackingJob21 {
 						System.out.println(e.getMessage());
 					}
 					
-
 					
-					drm.addDmxList(drm.getNoOfImagesInDatFile(frame.getDatNo()), frame.getNoInOriginalDat(),
-							drm.getSortedX().getDouble(k));
+					int a = frame.getDatNo();
+					int b = drm.getNoOfImagesInDatFile(a);
+					int c = frame.getNoInOriginalDat();
+					double d = drm.getSortedX().getDouble(k);
 					
-					
+					drm.addDmxList(a, c, d);
 					
 					drm.addxList(fms.size(), k,
 							drm.getSortedX().getDouble(k));
@@ -1431,9 +1290,13 @@ class trackingJob21 {
 							System.out.println(e.getMessage());
 						}
 					
-						
-						drm.addDmxList(drm.getNoOfImagesInDatFile(frame.getDatNo()), frame.getNoInOriginalDat(),
-								drm.getSortedX().getDouble(k));
+						int a = frame.getDatNo();
+						int b = frame.getNoInOriginalDat();
+						double c = frame.getScannedVariable();
+					
+						drm.addDmxList(a,  
+								   b,
+								   c);
 
 						
 						
@@ -1453,9 +1316,9 @@ class trackingJob21 {
 						
 	
 						if(Arrays.equals(output1.getShape(),(new int[] {2,2}) )){
-							Display d =Display.getCurrent();
+							Display di =Display.getCurrent();
 							debug("Dummy Proccessing failure");
-							ssp.boundariesWarning("position 1, line ~1955, k: " + Integer.toString(k),d);
+							ssp.boundariesWarning("position 1, line ~1955, k: " + Integer.toString(k),di);
 						
 							break;	
 						}
@@ -1538,11 +1401,6 @@ class trackingJob21 {
 						}
 						
 						int jokLocal = frame.getDatNo();
-						
-//						DataModel dm = dms.get(jokLocal);
-////						GeometricParametersModel gm = gms.get(jokLocal);
-//						ExampleModel model = models.get(jokLocal);
-						
 						
 						if(drm.getLocationList() == null && frame.getTrackingMethodology() != TrackerType1.INTERPOLATION){
 							
@@ -1708,13 +1566,45 @@ class trackingJob21 {
 							System.out.println(e.getMessage());
 						}
 
+						ArrayList<Double[]> zero = new ArrayList<>();
 						
+//						zero.add(new Double[] {0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0});
 						
-//						DataModel dm = dms.get(nextjok);
-//						GeometricParametersModel gm = gms.get(nextjok);
-//						ExampleModel model = models.get(nextjok);
+						Double[] io = new Double[] {0.0,
+													0.0,
+													0.0,
+													0.0,
+													0.0,
+													0.0,
+													0.0,
+													0.0};
 						
-						if(drm.getLocationList() == null && frame.getTrackingMethodology() != TrackerType1.INTERPOLATION){
+						ArrayList<double[]> re = (ArrayList<double[]>) drm.getLocationList().get(frame.getDatNo()).clone();
+						
+						double[] lc = re.get(0);
+						
+						double ry = lc[0];
+						int w = re.size();
+						
+						ArrayList<double[]> removeR = new ArrayList<>();
+						
+						for(double[] iu : re){
+							
+							double g = 0.0;
+							for(int by = 0; by<iu.length; by++){
+								g =g+Double.compare(iu[by], 0.0);
+							
+							}
+							if(g==0.0){
+								removeR.add(iu);
+							}							
+						}
+						
+						for(double[] df : removeR){
+							re.remove(df);
+						}
+						
+						if(re.size() == 0 && frame.getTrackingMethodology() != TrackerType1.INTERPOLATION){
 							
 							double[] test = new double[] {0,0,0,0,0,0,0,0};
 							double myNum = drm.getSortedX().getDouble(k);
@@ -1801,7 +1691,7 @@ class trackingJob21 {
 									(double) (pt[1]), (double) pt[0], (double) pt[1] + len[1], (double) (pt[0] + len[0]),
 									(double) (pt[1] + len[1]) };
 							
-						
+							debug("!!!!!!!!!!!!!!!     }}}}}{{{{{{{{ seedlocation[0] : " + seedLocation[0] +" + " + "seedlocation[1] :" + seedLocation[1]);
 							
 							drm.addSeedLocation(frame.getDatNo(),seedLocation);
 						}
@@ -1814,7 +1704,7 @@ class trackingJob21 {
 						drm.addxList(fms.size(), k,
 								drm.getSortedX().getDouble(k));
 						
-//						debug("value added to xList:  "   + drm.getSortedX().getDouble(k)  + "  k:   " + k);
+						debug("value added to xList:  "   + drm.getSortedX().getDouble(k)  + "  k:   " + k);
 						
 						IDataset output1 = 
 								DummyProcessWithFrames.DummyProcess1(drm, 
@@ -1957,11 +1847,9 @@ class trackingJob21 {
 							
 							
 							drm.addDmxList(frame.getDatNo(),  
-									   imagePosInOriginalDat[frame.getNoInOriginalDat()],
+									   frame.getNoInOriginalDat(),
 									   frame.getScannedVariable());
-						
-//							sm.addxList(fms.size(), k,
-//									drm.getSortedX().getDouble(k));
+			
 							
 //							debug("value added to xList:  "   + drm.getSortedX().getDouble(k)  + "  k:   " + k);
 							
@@ -2025,9 +1913,8 @@ class trackingJob21 {
 
 		ssvs.getPlotSystemCompositeView().getFolder().setSelection(2);
 		ssp.sliderMovemementMainImage(imageNumber);
-//		ssp.updateSliders(ssvs.getPlotSystemCompositeView().getSlider(), imageNumber);
 		ssvs.updateIndicators(imageNumber);
-		ssvs.getPlotSystemCompositeView().getPlotSystem().updatePlot2D(tempImage, null, null);
+		ssvs.getPlotSystemCompositeView().getPlotSystem().updatePlot2D(tempImage.squeeze(), null, null);
 		ssvs.getPlotSystemCompositeView().getSubImageBgPlotSystem().updatePlot2D(drm.getBackgroundDatArray().get(imageNumber), null, null);
 		ssvs.getPlotSystemCompositeView().getPlotSystem().repaint(true);
 		ssvs.getPlotSystemCompositeView().getSubImageBgPlotSystem().repaint(true);
