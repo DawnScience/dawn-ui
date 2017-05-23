@@ -263,13 +263,22 @@ public class MapBeanBuilder {
 			bean.addBlock(b);
 		}
 		
+		
+		String name = bean.getBlocks().get(0).getName();
+		
+		for (MappedBlockBean b : bean.getBlocks()) {
+			if ("/entry/result/data".equals(b.getName())) {
+				name = b.getName();
+			}
+		}
+		
 		it = infoList.iterator();
 		
 		while (it.hasNext()) {
 			DataInfo d = it.next();
 			MapBean b = new MapBean();
 			b.setName(d.getFullName());
-			b.setParent(bean.getBlocks().get(0).getName());
+			b.setParent(name);
 			bean.addMap(b);
 		}
 		

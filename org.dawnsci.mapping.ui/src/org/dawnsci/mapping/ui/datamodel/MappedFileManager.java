@@ -238,6 +238,8 @@ public class MappedFileManager {
 			if (buildBean != null) {
 				buildBean.setLiveBean(bean);
 				importFile(path, buildBean, null,parentFile);
+			} else {
+				logger.error("Bean from live tree is null!");
 			}
 			
 			return;
