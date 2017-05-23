@@ -104,6 +104,7 @@ public class LiveLoadedFile extends LoadedFile implements IRefreshable {
 		
 		dh.setMetadata(md);
 		
+		dh.setTree(tree);
 		
 		return dh;
 	}
@@ -157,6 +158,8 @@ public class LiveLoadedFile extends LoadedFile implements IRefreshable {
 				DataOptions d = new DataOptions(name, this);
 				dataOptions.put(d.getName(),d);
 			}
+			
+			dataHolder.get().setTree(tree);
 			
 		}
 	}
