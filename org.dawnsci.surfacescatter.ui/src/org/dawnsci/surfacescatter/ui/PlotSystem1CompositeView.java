@@ -341,20 +341,16 @@ public class PlotSystem1CompositeView extends Composite {
 		
 		int[][] lenPt = { len, pt };
 		
-		double[] bgRegionROI = ssp.regionOfInterestSetter1(lenPt);
+		RectangularROI[] bgRegionROI = ssp.trackingRegionOfInterestSetter(lenPt);
 		
-		RectangularROI bgROI = new RectangularROI(bgRegionROI[0],
-				  bgRegionROI[1],
-				  bgRegionROI[2],
-				  bgRegionROI[3],
-				  bgRegionROI[4]);
+//		RectangularROI bgROI = new RectangularROI(bgRegionROI[0],
+//				  bgRegionROI[1],
+//				  bgRegionROI[2],
+//				  bgRegionROI[3],
+//				  bgRegionROI[4]);
+//        
        
-       
-       
-      
-       
-       
-       ssvs.getPlotSystemCompositeView().getBgRegion().setROI(bgROI);
+       ssvs.getPlotSystemCompositeView().getBgRegion().setROI(bgRegionROI[1]);
 
        
        if(ssp.getTrackerType() != TrackerType1.INTERPOLATION ||

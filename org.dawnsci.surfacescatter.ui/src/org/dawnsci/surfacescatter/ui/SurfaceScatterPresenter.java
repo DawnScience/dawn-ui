@@ -645,7 +645,7 @@ public class SurfaceScatterPresenter {
 		
 		if(drm.getFms().get(selection).getBackgroundSubtractedImage() !=null){
 			
-			return drm.getFms().get(selection).getBackgroundSubtractedImage();
+			return drm.getFms().get(selection).getBackgroundSubtractedImage().squeeze();
 		}
 		
 		else{
@@ -1159,6 +1159,16 @@ public class SurfaceScatterPresenter {
 												  bgRegionROI[2],
 												  bgRegionROI[3],
 												  bgRegionROI[4]);
+		
+		
+
+		if(Arrays.equals(drm.getInitialLenPt()[0],lenPt[0]) == false ||
+		   Arrays.equals(drm.getInitialLenPt()[1],lenPt[1]) == false){
+			
+			drm.setInitialLenPt(lenPt);
+		}
+		
+		
 
 		return new RectangularROI[] {newGreenROI, bgROI};
 		
@@ -1169,6 +1179,7 @@ public class SurfaceScatterPresenter {
 		return fms.get(sliderPos).getBackgroundMethdology();
 		
 	}
+	
 	
 	
 	public RectangularROI  generateOffsetBgROI(int[][] lenPt){
@@ -1262,25 +1273,17 @@ public class SurfaceScatterPresenter {
 												  lenPt[0][1],
 												  0);
 
-//		for (ExampleModel m : models) {
-//			m.setLenPt(lenPt);
-//			m.setROI(green);
-//		}
-//		
-//		for (DataModel dm :dms){
-//			dm.setInitialLenPt(lenPt);
-//		}
 		
 		if(Arrays.equals(drm.getInitialLenPt()[0],lenPt[0]) == false ||
 		   Arrays.equals(drm.getInitialLenPt()[1],lenPt[1]) == false){
 			
-			drm.setInitialLenPt(lenPt);
+//			drm.setInitialLenPt(lenPt);
 			drm.setInitialLenPt(lenPt);
 		}
 		
 		double[] bgRegionROI = BoxSlicerRodScanUtilsForDialog.backgroundBoxForDisplay(lenPt, 
-				fms.get(sliderPos).getBoundaryBox(), 
-				   fms.get(sliderPos).getBackgroundMethdology());
+							fms.get(sliderPos).getBoundaryBox(), 
+							fms.get(sliderPos).getBackgroundMethdology());
 
 		RectangularROI bgROI = new RectangularROI(bgRegionROI[0],
 											      bgRegionROI[1],
@@ -1564,30 +1567,7 @@ public class SurfaceScatterPresenter {
 										  int fitPowerSelection, 
 										  int trackerSelection,
 										  String boundaryBox) {
-//
-//		for (FrameModel model : fms) {
-//			
-//			if(methodologySelection !=-1){
-//				model.setBackgroundMethodology(Methodology.values()[methodologySelection]);
-//		       }
-//			if(fitPowerSelection !=-1){
-//				model.setFitPower(AnalaysisMethodologies.toFitPower(fitPowerSelection));
-//		       }
-//			if(trackerSelection !=-1){
-//				model.setTrackingMethodology(TrackingMethodology.intToTracker1(trackerSelection));
-//			}
-//			
-//			double r = 0;
-//			
-//			try{
-//				r = Double.parseDouble(boundaryBox);
-//			}
-//			catch (Exception e1){
-//				this.numberFormatWarning();
-//			}
-//			
-//			model.setBoundaryBox((int) Math.round(r));
-//		}
+
 		
 		for (FrameModel fm : fms) {
 			

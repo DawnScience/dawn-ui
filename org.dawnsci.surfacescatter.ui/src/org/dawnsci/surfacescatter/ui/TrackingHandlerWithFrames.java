@@ -11,6 +11,7 @@ import org.dawnsci.surfacescatter.DirectoryModel;
 import org.dawnsci.surfacescatter.DummyProcessWithFrames;
 import org.dawnsci.surfacescatter.FrameModel;
 import org.dawnsci.surfacescatter.GeometricParametersModel;
+import org.dawnsci.surfacescatter.LocationLenPtConverterUtils;
 import org.dawnsci.surfacescatter.MethodSettingEnum.MethodSetting;
 import org.dawnsci.surfacescatter.PolynomialOverlap;
 import org.dawnsci.surfacescatter.TrackerLocationInterpolation;
@@ -1607,15 +1608,17 @@ class trackingJob21 {
 						if(re.size() == 0 && frame.getTrackingMethodology() != TrackerType1.INTERPOLATION){
 							
 							double[] test = new double[] {0,0,0,0,0,0,0,0};
+							double[] test2 = new double[] {10,10,60,10,10,60,60,60};
 							double myNum = drm.getSortedX().getDouble(k);
 							double distance = Math.abs(drm.getSortedX().getDouble(0) - myNum);
 							int nearestCompletedDatFileNo = 0;
 							
 							for(int c = 0; c < drm.getSortedX().getSize(); c++){
 							   FrameModel fm = fms.get(c);
-							   double cdistance = fm.getScannedVariable()- myNum;
+							   double cdistance =  Math.abs(fm.getScannedVariable()- myNum);
 							    if((cdistance < distance) & 
 							       !Arrays.equals(fm.getRoiLocation(), test) & 
+							       !Arrays.equals(fm.getRoiLocation(), test2) &
 							       !Arrays.equals(fm.getRoiLocation(), null)){
 							        
 							    	nearestCompletedDatFileNo = fm.getDatNo();
@@ -1664,9 +1667,11 @@ class trackingJob21 {
 									double y = seedList.get(op)[0];
 									double l = lList.get(op);
 									
-									xValues.set(x, op);
-									yValues.set(y, op);
-									lValues.set(l, op);
+									if(x!=0.0 && y!=0.0){
+										xValues.set(x, op);
+										yValues.set(y, op);
+										lValues.set(l, op);
+									}
 			
 							}
 								
@@ -1697,23 +1702,23 @@ class trackingJob21 {
 						}
 						
 						drm.addDmxList(frame.getDatNo(),  
-								   frame.getNoInOriginalDat(),
-								   frame.getScannedVariable());
+								   	   frame.getNoInOriginalDat(),
+								   	   frame.getScannedVariable());
 					
 						
 						drm.addxList(fms.size(), k,
-								drm.getSortedX().getDouble(k));
+									 drm.getSortedX().getDouble(k));
 						
 						debug("value added to xList:  "   + drm.getSortedX().getDouble(k)  + "  k:   " + k);
 						
 						IDataset output1 = 
 								DummyProcessWithFrames.DummyProcess1(drm, 
-																   gm, 
-																   correctionSelection, 
-																   imagePosInOriginalDat[k], 
-																   trackingMarker, 
-																   k,
-																   drm.getSeedLocation()[frame.getDatNo()]);
+																	 gm, 
+																	 correctionSelection, 
+																	 imagePosInOriginalDat[k], 
+																	 trackingMarker, 
+																	 k,
+																	 drm.getSeedLocation()[frame.getDatNo()]);
 						
 						if(Arrays.equals(output1.getShape(), (new int[] {2,2}))){
 							Display d =Display.getCurrent();
@@ -1926,6 +1931,8 @@ class trackingJob21 {
 		int[] len = new int[] {(int) (location[2]-location[0]),(int) (location[5]-location[1])};
 		int[] pt = new int[] {(int) location[0],(int) location[1]};
 		int[][] lenPt = { len, pt };
+		
+		int[][] lenPt1= LocationLenPtConverterUtils.locationToLenPtConverter(location);
 		
 		
 		RectangularROI[] greenAndBg = ssp.trackingRegionOfInterestSetter(lenPt);

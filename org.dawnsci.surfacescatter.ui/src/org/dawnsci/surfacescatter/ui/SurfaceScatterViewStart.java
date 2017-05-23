@@ -60,6 +60,8 @@ import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.ui.PlatformUI;
+//import org.slf4j.Logger;
+//import org.slf4j.LoggerFactory;
 
 import uk.ac.diamond.scisoft.analysis.io.LoaderFactory;
 
@@ -89,6 +91,8 @@ public class SurfaceScatterViewStart extends Dialog {
 	private RodAnalysisWindow raw ;
 	private SetupModel stm;
 	
+//	private final static Logger logger = LoggerFactory.getLogger(SurfaceScatterViewStart.class);
+	
 	public SurfaceScatterViewStart (Shell parentShell){
 
 		super(parentShell);
@@ -100,27 +104,8 @@ public class SurfaceScatterViewStart extends Dialog {
 
 			@Override
 			public void update() {
-				customComposite.getSlider().setSelection(ssp.getSliderPos());
-				updateIndicators(ssp.getSliderPos());
-				RectangularROI[] bgRegionROI = ssp.trackingRegionOfInterestSetter(ssp.getLenPt());
 				
-				customComposite.generalCorrectionsUpdate();
-				
-				if((Arrays.equals(ssp.getLenPt()[0], 
-						customComposite.getIRegion().getROI().getBounds().getIntLengths()) == false) ||
-						(Arrays.equals(ssp.getLenPt()[1], 
-								customComposite.getIRegion().getROI().getBounds().getIntPoint()) == false)){
-			
-					customComposite.getIRegion().setROI(bgRegionROI[0]);				
-					customComposite.getBgRegion().setROI(bgRegionROI[1]);
-				}
-				try{
-					ssps3c.generalUpdate();
-				}
-				catch(Exception o){
-					
-				}
-				customComposite.generalUpdate();
+				updateDisplay();
 			}
 		});
 		
@@ -166,7 +151,7 @@ public class SurfaceScatterViewStart extends Dialog {
 
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-
+//				logger.debug("Widget selected");
 				datDisplayer.setOption(datDisplayer.getSelectedOption());
 				
 				IntensityDisplaySetting ids0 = IntensityDisplaySetting.toMethod(ssps3c.getOutputCurves().getIntensity().getSelectionIndex());
@@ -457,10 +442,14 @@ public class SurfaceScatterViewStart extends Dialog {
 							customComposite.getSubImagePlotSystem());
 
 					IDataset image = ssp.getBackgroundImage(k);
-					customComposite.getSubImageBgPlotSystem().updatePlot2D(image, 
-																		   null,
-																		   null);
-
+					try{
+						customComposite.getSubImageBgPlotSystem().updatePlot2D(image, 
+																			   null,
+																			   null);
+					}
+					catch(Exception h){
+						
+					}
 					SurfaceScatterViewStart.this.updateIndicators(k);
 
 					modify = true;
@@ -477,6 +466,8 @@ public class SurfaceScatterViewStart extends Dialog {
 					
 					customComposite.getGreenRegion().setROI(greenBgRoi[0]);
 					customComposite.getBgRegion().setROI(greenBgRoi[1]);
+
+					customComposite.getPlotSystem().repaint();
 					
 					ssp.backgroundBoxesManager(customComposite.getBgRegion(), 
 											   customComposite.getSecondBgRegion(),
@@ -513,11 +504,17 @@ public class SurfaceScatterViewStart extends Dialog {
 					ssp.sliderMovemementMainImage(k);
 					ssp.sliderZoomedArea(k, customComposite.getGreenRegion().getROI(),
 							customComposite.getSubImagePlotSystem());
-
-					IDataset image = ssp.getBackgroundImage(k);
-					customComposite.getSubImageBgPlotSystem().updatePlot2D(image, 
-																		   null,
-																		   null);
+					
+					try{
+						IDataset image = ssp.getBackgroundImage(k);
+						customComposite.getSubImageBgPlotSystem().updatePlot2D(image, 
+																			   null,
+																			   null);
+						
+					}
+					catch(Exception o){
+						
+					}
 					SurfaceScatterViewStart.this.updateIndicators(k);
 					modify = true;
 				}
@@ -867,6 +864,7 @@ public class SurfaceScatterViewStart extends Dialog {
 			customComposite.getPlotSystem1CompositeView().getAcceptLocation().setEnabled(true);
 			customComposite.getPlotSystem1CompositeView().getRejectLocation().setEnabled(true);
 		}
+
 		
 	}
 	
@@ -1672,6 +1670,49 @@ public class SurfaceScatterViewStart extends Dialog {
 	public void setStm(SetupModel stm) {
 		this.stm = stm;
 	}
+	
+	public void updateDisplay() {
+		
+		if(customComposite.getSlider().getSelection() != ssp.getSliderPos()){
+			customComposite.getSlider().setSelection(ssp.getSliderPos());
+			updateIndicators(ssp.getSliderPos());
+		}
+		
+		RectangularROI[] bgRegionROI = ssp.trackingRegionOfInterestSetter(ssp.getLenPt());
+		
+		customComposite.generalCorrectionsUpdate();
+		
+		int[] lp = bgRegionROI[0].getIntLengths();
+		int[] pp = bgRegionROI[0].getIntPoint();
+		
+		int[] ls = bgRegionROI[1].getIntLengths();
+		int[] ps = bgRegionROI[1].getIntPoint();
+		
+		if((Arrays.equals(lp, 
+			customComposite.getIRegion().getROI().getBounds().getIntLengths()) == false) ||
+			(Arrays.equals(pp, 
+			customComposite.getIRegion().getROI().getBounds().getIntPoint()) == false) ||
+			(Arrays.equals(ls, 
+			customComposite.getBgRegion().getROI().getBounds().getIntLengths()) == false) ||
+			(Arrays.equals(ps, 
+			customComposite.getBgRegion().getROI().getBounds().getIntPoint()) == false)	){
+	
+			customComposite.getIRegion().setROI(bgRegionROI[0]);				
+			customComposite.getBgRegion().setROI(bgRegionROI[1]);
+			
+			customComposite.getPlotSystem().repaint();
+		}
+		
+		
+		try{
+			ssps3c.generalUpdate();
+		}
+		catch(Exception o){
+			
+		}
+//		customComposite.generalUpdate();
+	}
+	
 }	
 
 

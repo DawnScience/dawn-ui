@@ -419,18 +419,28 @@ public class PlotSystemCompositeView extends Composite {
 				
 				int[][] lenPt = { len, pt };
 				
-				double[] bgRegionROI = ssp.regionOfInterestSetter1(lenPt);
+				RectangularROI[] bgRegionROI = ssp.trackingRegionOfInterestSetter(lenPt);
 				
-				RectangularROI bgROI = new RectangularROI(bgRegionROI[0],
-						  bgRegionROI[1],
-						  bgRegionROI[2],
-						  bgRegionROI[3],
-						  bgRegionROI[4]);
+				int[] ly = bgRegionROI[1].getIntLengths();
+				int[] py = bgRegionROI[1].getIntPoint();
 				
-				if(!Arrays.equals(pt, bgRegion.getROI().getBounds().getIntPoint()) &&
-						!Arrays.equals(len, bgRegion.getROI().getBounds().getIntLengths())){
+				IRectangularROI yellowRectangle = bgRegion.getROI().getBounds();
+				int[] ylen = yellowRectangle.getIntLengths();
+				int[] ypt = yellowRectangle.getIntPoint();
+				
+				
+				
+//				RectangularROI bgROI = new RectangularROI(bgRegionROI[0],
+//						  bgRegionROI[1],
+//						  bgRegionROI[2],
+//						  bgRegionROI[3],
+//						  bgRegionROI[4]);
+				
+				if(!Arrays.equals(ypt, py) ||
+						!Arrays.equals(ylen, ly)){
 					
-					bgRegion.setROI(bgROI);
+					bgRegion.setROI(bgRegionROI[1]);
+					ssvs.updateDisplay();
 				}
 				
 				else{
