@@ -14,13 +14,13 @@ import java.util.List;
 
 import org.apache.commons.math3.analysis.MultivariateFunction;
 import org.apache.commons.math3.optim.ConvergenceChecker;
-import org.apache.commons.math3.optim.nonlinear.scalar.GoalType;
-import org.apache.commons.math3.optim.nonlinear.scalar.ObjectiveFunction;
 import org.apache.commons.math3.optim.InitialGuess;
 import org.apache.commons.math3.optim.MaxEval;
 import org.apache.commons.math3.optim.PointValuePair;
 import org.apache.commons.math3.optim.SimpleBounds;
 import org.apache.commons.math3.optim.SimplePointChecker;
+import org.apache.commons.math3.optim.nonlinear.scalar.GoalType;
+import org.apache.commons.math3.optim.nonlinear.scalar.ObjectiveFunction;
 import org.apache.commons.math3.optim.nonlinear.scalar.noderiv.CMAESOptimizer;
 import org.apache.commons.math3.random.Well19937a;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -30,10 +30,9 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.dawnsci.analysis.api.diffraction.DetectorProperties;
 import org.eclipse.dawnsci.analysis.api.diffraction.DiffractionCrystalEnvironment;
 import org.eclipse.dawnsci.analysis.api.fitting.functions.IPeak;
-import org.eclipse.dawnsci.analysis.dataset.roi.SectorROI;
 import org.eclipse.dawnsci.analysis.api.metadata.IDiffractionMetadata;
+import org.eclipse.dawnsci.analysis.dataset.roi.SectorROI;
 import org.eclipse.january.dataset.Dataset;
-import org.eclipse.january.metadata.IMetadata;
 import org.eclipse.swt.widgets.Display;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -137,16 +136,15 @@ public class BeamCenterRefinement implements MultivariateFunction {
 		Display.getDefault().syncExec(new Runnable() {
 			@Override
 			public void run() {
-				((IDiffractionMetadata) dataset.getMetadata()).getDetector2DProperties().setBeamCentreCoords(
+				dataset.getFirstMetadata(IDiffractionMetadata.class).getDetector2DProperties().setBeamCentreCoords(
 						beamxy);
 			}
 		});
 		SectorROI tmpRoi = new SectorROI(sroi.getPointX(), sroi.getPointY(), sroi.getRadius(0), sroi.getRadius(1), sroi.getAngle(0),
 				sroi.getAngle(1), 1.0, true, sroi.getSymmetry());
 		QSpace qSpace = null;
-		IMetadata metadata = dataset.getMetadata();
-		if (metadata instanceof IDiffractionMetadata) {
-			IDiffractionMetadata dm = (IDiffractionMetadata)metadata;
+		IDiffractionMetadata dm = dataset.getFirstMetadata(IDiffractionMetadata.class);
+		if (dm != null) {
 			DetectorProperties detprops = dm.getDetector2DProperties();
 	    	DiffractionCrystalEnvironment diffexp = dm.getDiffractionCrystalEnvironment();
 	    	if (detprops != null && diffexp != null) {
@@ -236,7 +234,7 @@ public class BeamCenterRefinement implements MultivariateFunction {
 				Display.getDefault().syncExec(new Runnable() {
 					@Override
 					public void run() {
-						((IDiffractionMetadata) dataset.getMetadata()).getDetector2DProperties().setBeamCentreCoords(
+						dataset.getFirstMetadata(IDiffractionMetadata.class).getDetector2DProperties().setBeamCentreCoords(
 								newBeamPosition);
 					}
 				});

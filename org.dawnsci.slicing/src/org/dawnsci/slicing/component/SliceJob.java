@@ -30,6 +30,7 @@ import org.eclipse.dawnsci.slicing.api.util.SliceUtils;
 import org.eclipse.january.dataset.IDataset;
 import org.eclipse.january.dataset.ILazyDataset;
 import org.eclipse.january.dataset.Slice;
+import org.eclipse.january.metadata.IMetadata;
 import org.eclipse.swt.widgets.Display;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -73,7 +74,7 @@ class SliceJob extends Job {
 												monitor);
 
 				system.setSlice(slicedData);
-				system.setSliceMetadata(slicedData!=null ? slicedData.getMetadata() : null);
+				system.setSliceMetadata(slicedData!=null ? slicedData.getFirstMetadata(IMetadata.class) : null);
 			}
 
 		} catch (Exception e) {

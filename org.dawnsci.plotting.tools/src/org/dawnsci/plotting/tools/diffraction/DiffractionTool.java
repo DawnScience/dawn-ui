@@ -267,7 +267,8 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 			}
 		}
 	}
-	
+
+	@Override
 	public void deactivate() {
 		
 		if (!isActive()) {return;}
@@ -294,7 +295,8 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 			data.getDiffractionCrystalEnvironment().removeDiffractionCrystalEnvironmentListener(difcrysListener);
 		}
 	}
-	
+
+	@Override
 	public void dispose() {
 		super.dispose();
 		if (model!=null) model.dispose();
@@ -390,7 +392,8 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 		if (getSite() != null) getSite().setSelectionProvider(viewer);
 
 	}
-	
+
+	@Override
 	public void resetExpansion() {
 		try {
 			if (model == null) return;
@@ -402,7 +405,7 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 			// intentionally silent
 		}
 	}
-	
+
 	private IDiffractionMetadata getDiffractionMetaData() {
 		IDataset image = getImageTrace() == null ? null : getImageTrace().getData();
 		if (image == null) return null;
@@ -412,7 +415,7 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 			altPath = EclipseUtils.getFilePath(((IEditorPart) part).getEditorInput());
 		} else if (part instanceof IViewPart){
 			try {
-				IMetadata md = image.getMetadata();
+				IMetadata md = image.getFirstMetadata(IMetadata.class);
 				if(md != null)
 					altPath = md.getFilePath();
 			} catch (Exception e) {
@@ -489,6 +492,7 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 	private void createActions() {
 
 		final Action exportMeta = new Action("Export metadata to file", Activator.getImageDescriptor("icons/save-edit.png")) {
+			@Override
 			public void run() {
 				try {
 					IWizard wiz = EclipseUtils.openWizard(PersistenceExportWizard.ID, false);
@@ -498,10 +502,11 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 				} catch (Exception e) {
 					logger.error("Problem opening export!", e);
 				}
-			}			
+			}
 		};
 		
 		final Action importMeta = new Action("Import metadata from file", Activator.getImageDescriptor("icons/import-wiz.png")) {
+			@Override
 			public void run() {
 				try {
 					IWizard wiz = EclipseUtils.openWizard(PersistenceImportWizard.ID, false);
@@ -511,10 +516,11 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 				} catch (Exception e) {
 					logger.error("Problem opening import!", e);
 				}
-			}			
+			}
 		};
 		
 		final Action showDefault = new Action("Show the original/default value column", Activator.getImageDescriptor("icons/plot-tool-diffraction-default.gif")) {
+			@Override
 			public void run() {
 				defaultColumn.getColumn().setWidth(isChecked()?80:0);
 				defaultColumn.getColumn().setResizable(!isChecked());
@@ -1023,7 +1029,7 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 		int lpts;
 		do {
 			lpts = npts;
-			points = PowderRingsUtils.findPOIsNearEllipse(mon, image, mask, (EllipticalROI) efroi);
+			points = PowderRingsUtils.findPOIsNearEllipse(mon, image, mask, efroi);
 
 			efroi = PowderRingsUtils.fitAndTrimOutliers(mon, points, 2, circle);
 			npts = efroi.getPoints().getNumberOfPoints(); 
@@ -1043,6 +1049,7 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 		final boolean[] status = {true};
 		display.syncExec(new Runnable() {
 
+			@Override
 			public void run() {
 				try {
 					long t = - System.currentTimeMillis();
@@ -1079,6 +1086,7 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 		final boolean[] status = {true};
 		display.syncExec(new Runnable() {
 
+			@Override
 			public void run() {
 				try {
 					int emax = ells.size();
@@ -1152,6 +1160,7 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 		Action selectedAction=null;
 		for (final String calibrant : standards.getCalibrantList()) {
 			final Action calibrantAction = new Action(calibrant, IAction.AS_CHECK_BOX) {
+				@Override
 				public void run() {
 					standards.setSelectedCalibrant(calibrant, true);
 				}

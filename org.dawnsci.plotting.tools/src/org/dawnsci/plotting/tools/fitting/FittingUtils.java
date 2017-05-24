@@ -24,6 +24,7 @@ import org.eclipse.dawnsci.analysis.api.diffraction.DiffractionCrystalEnvironmen
 import org.eclipse.dawnsci.analysis.api.fitting.functions.IFunction;
 import org.eclipse.dawnsci.analysis.api.fitting.functions.IOperator;
 import org.eclipse.dawnsci.analysis.api.fitting.functions.IPeak;
+import org.eclipse.dawnsci.analysis.api.metadata.IDiffractionMetadata;
 import org.eclipse.dawnsci.analysis.dataset.roi.LinearROI;
 import org.eclipse.dawnsci.analysis.dataset.roi.RectangularROI;
 import org.eclipse.dawnsci.plotting.api.region.IRegion;
@@ -32,9 +33,8 @@ import org.eclipse.dawnsci.plotting.api.trace.ITrace;
 import org.eclipse.january.dataset.Dataset;
 import org.eclipse.january.dataset.DatasetFactory;
 import org.eclipse.january.dataset.DatasetUtils;
+import org.eclipse.january.dataset.DoubleDataset;
 import org.eclipse.january.dataset.IDataset;
-import org.eclipse.dawnsci.analysis.api.metadata.IDiffractionMetadata;
-import org.eclipse.january.metadata.IMetadata;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -274,11 +274,7 @@ public class FittingUtils {
 		final IImageTrace trace = traces!=null && traces.size()>0 ? (IImageTrace)traces.iterator().next() : null;
 		if (trace!=null) {
 			set = trace.getData();
-			final IMetadata      meta = set.getMetadata();
-			if (meta instanceof IDiffractionMetadata) {
-
-				dmeta = (IDiffractionMetadata)meta;
-			}
+			dmeta = set.getFirstMetadata(IDiffractionMetadata.class);
 		}
 		QSpace qSpace  = null;
 		Vector3dutil vectorUtil= null;
@@ -358,7 +354,7 @@ public class FittingUtils {
 		final double xmin = x.min().doubleValue();
 		final double xmax = x.max().doubleValue();
 		final double step = (xmax-xmin)/(x.getSize()*factor);
-		x = DatasetFactory.createRange(xmin, xmax, step, Dataset.FLOAT64);
+		x = DatasetFactory.createRange(DoubleDataset.class, xmin, xmax, step);
 
 		return new Dataset[]{x,peak.calculateValues(x)};
 		

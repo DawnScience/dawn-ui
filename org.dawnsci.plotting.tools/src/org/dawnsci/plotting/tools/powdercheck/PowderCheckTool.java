@@ -283,7 +283,7 @@ public class PowderCheckTool extends AbstractToolPage {
 		updatePlotJob.cancel();
 		updatePlotJob.setAxisMode(xAxis);
 		updatePlotJob.setCheckMode(PowderCheckMode.FullImage);
-		updatePlotJob.setData(ds, (IDiffractionMetadata)m);
+		updatePlotJob.setData(ds, m);
 		if (fullImage != null)	fullImage.run();
 		
 	}

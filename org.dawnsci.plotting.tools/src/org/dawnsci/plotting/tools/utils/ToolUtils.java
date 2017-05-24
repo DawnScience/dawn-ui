@@ -14,6 +14,7 @@ import org.dawb.common.ui.menu.MenuAction;
 import org.dawb.common.ui.plot.roi.data.LinearROIData;
 import org.dawb.common.ui.util.EclipseUtils;
 import org.dawnsci.plotting.tools.Activator;
+import org.eclipse.dawnsci.analysis.api.metadata.IDiffractionMetadata;
 import org.eclipse.dawnsci.analysis.dataset.roi.LinearROI;
 import org.eclipse.dawnsci.analysis.dataset.roi.RectangularROI;
 import org.eclipse.dawnsci.analysis.dataset.roi.RingROI;
@@ -21,10 +22,8 @@ import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.region.IRegion;
 import org.eclipse.dawnsci.plotting.api.region.IRegion.RegionType;
 import org.eclipse.dawnsci.plotting.api.trace.IImageTrace;
-import org.eclipse.january.dataset.Dataset;
 import org.eclipse.january.dataset.DatasetUtils;
 import org.eclipse.january.dataset.IDataset;
-import org.eclipse.dawnsci.analysis.api.metadata.IDiffractionMetadata;
 import org.eclipse.january.metadata.IMetadata;
 import org.eclipse.jface.action.Action;
 import org.eclipse.ui.IEditorPart;
@@ -185,7 +184,7 @@ public class ToolUtils {
 		int decimal = format.split("\\.").length > 1 ? format.split("\\.")[1].length() : 0;
 		double increment = 1;
 		for (int i = 0; i < decimal; i++) {
-			increment = (double) increment / 10;
+			increment = increment / 10;
 		}
 		return increment;
 	}
@@ -200,8 +199,8 @@ public class ToolUtils {
 		// and image traces were returning different metadata
 		IMetadata metaData = null;
 		if (trace != null && trace.getData() != null)
-			metaData = ((IDataset)trace.getData()).getMetadata();
-		
+			metaData = trace.getData().getFirstMetadata(IMetadata.class);
+
 		if (metaData != null) return metaData;
 		if (part instanceof IEditorPart) {
 			IEditorPart editor = (IEditorPart) part;
@@ -227,7 +226,7 @@ public class ToolUtils {
 	public static double[] getBeamCenter(IImageTrace trace,
 			IWorkbenchPart editor) {
 		IMetadata meta = getMetaData(trace, editor);
-		if (meta == null || !(meta instanceof IDiffractionMetadata)) {
+		if (!(meta instanceof IDiffractionMetadata)) {
 			return getImageCenter(trace);
 		}
 		IDiffractionMetadata dm = (IDiffractionMetadata) meta;
@@ -242,7 +241,7 @@ public class ToolUtils {
 	}
 
 	public static double[] getImageCenter(IImageTrace trace) {
-		final IDataset image = (IDataset) trace.getData();
+		final IDataset image = trace.getData();
 		return new double[] { image.getShape()[1] / 2d,
 				image.getShape()[0] / 2d };
 	}
@@ -256,6 +255,7 @@ public class ToolUtils {
 		if (regions!=null) for (final IRegion region : regions) {
 			if (isRegionFindCentreSupported(region.getRegionType())) {
 				final Action centerRegion = new Action("Center region '"+region.getName()+"'") {
+					@Override
 					public void run() {
 						menu.setSelectedAction(this);
 						final double[] cen = ToolUtils.getBeamCenter(image, part);
