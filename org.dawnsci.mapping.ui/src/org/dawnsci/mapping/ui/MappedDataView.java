@@ -51,6 +51,7 @@ import org.eclipse.scanning.api.event.core.ISubscriber;
 import org.eclipse.scanning.api.event.scan.IScanListener;
 import org.eclipse.scanning.api.event.scan.ScanEvent;
 import org.eclipse.scanning.api.event.core.IPropertyFilter.FilterAction;
+import org.eclipse.scanning.api.event.status.Status;
 import org.eclipse.scanning.api.event.status.StatusBean;
 import org.eclipse.scanning.api.ui.CommandConstants;
 import org.eclipse.swt.dnd.DND;
@@ -369,7 +370,7 @@ public class MappedDataView extends ViewPart {
 				public void beanChangePerformed(BeanEvent<StatusBean> evt) {
 					System.out.println("bean update " + evt.getBean().toString());
 					plotManager.updatePlot();
-					if (evt.getBean() instanceof IOperationBean && evt.getBean().getStatus().isRunning()) {
+					if (evt.getBean() instanceof IOperationBean && evt.getBean().getStatus().isRunning() && evt.getBean().getPreviousStatus().equals(Status.SUBMITTED)) {
 						String host = MappingScanNewStyleEventObserver.getDataServerHost();
 						int port = MappingScanNewStyleEventObserver.getDataServerPort();
 						final IOperationBean bean = (IOperationBean)evt.getBean();
@@ -418,6 +419,10 @@ public class MappedDataView extends ViewPart {
 			subscriber.addListener(new IScanListener() {
 
 				public void scanEventPerformed(ScanEvent evt) {
+					plotManager.updatePlot();
+				}
+				
+				public void scanStateChanged(ScanEvent evt) {
 					plotManager.updatePlot();
 				}
 
