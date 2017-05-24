@@ -7,9 +7,9 @@ import org.eclipse.january.dataset.IDataset;
 import org.eclipse.january.dataset.ILazyDataset;
 import org.eclipse.january.dataset.SliceND;
 
-public class PlotModeHyper implements IPlotMode {
+public class PlotModeHyper implements ILazyPlotMode {
 
-	private static final String[] options =  new String[]{"X", "Y", "Z"};
+	private static final String[] options =  new String[]{"Z", "X", "Y"};
 	private ILazyDataset view3d;
 	private int[] order = new int[]{0,1,2};
 	
@@ -25,11 +25,11 @@ public class PlotModeHyper implements IPlotMode {
 		int count = 0;
 		for (int j = 0; j <options.length; j++) {
 			if (options[j] != null) {
-				if (options[j].equals(PlotModeHyper.options[0])) {
+				if (options[j].equals(PlotModeHyper.options[1])) {
 					order[0] = count++;
-				} else if (options[j].equals(PlotModeHyper.options[1])) {
+				} else if (options[j].equals(PlotModeHyper.options[2])) {
 					order[1] = count++;
-				}else if (options[j].equals(PlotModeHyper.options[2])) {
+				}else if (options[j].equals(PlotModeHyper.options[0])) {
 					order[2] = count++;
 				}
 			}
@@ -40,13 +40,7 @@ public class PlotModeHyper implements IPlotMode {
 	@Override
 	public void displayData(IDataset[] data, ITrace[] update, IPlottingSystem<?> system, Object userObject)
 			throws Exception {
-		
-		IHyperTrace t = system.createTrace("Hyper Trace", IHyperTrace.class);
-		
-		t.setData(view3d, order);
-		
-		system.addTrace(t);
-
+		//does nothing for lazy plot modes
 	}
 
 	@Override
@@ -83,6 +77,16 @@ public class PlotModeHyper implements IPlotMode {
 			}
 		}
 		return dataDims;
+	}
+
+	@Override
+	public void displayData(ITrace[] update, IPlottingSystem<?> system, Object userObject) throws Exception {
+		IHyperTrace t = system.createTrace("Hyper Trace", IHyperTrace.class);
+
+		t.setData(view3d, order);
+
+		system.addTrace(t);
+
 	}
 
 }

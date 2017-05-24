@@ -257,14 +257,14 @@ public class PlotController implements IPlotController {
 			logger.error("Could not slice data for plotting", e);
 		}
 		
-		if (data == null) {
+		if (mode instanceof ILazyPlotMode) {
 			
 				Display.getDefault().syncExec(new Runnable() {
 					
 					@Override
 					public void run() {
 						try {
-				mode.displayData(null, traces.isEmpty() ? null : traces.toArray(new ITrace[traces.size()]), system, dataOp);
+				((ILazyPlotMode)mode).displayData(traces.isEmpty() ? null : traces.toArray(new ITrace[traces.size()]), system, dataOp);
 				getPlottingSystem().repaint();
 						} catch (Exception e) {
 							// TODO Auto-generated catch block
@@ -274,6 +274,8 @@ public class PlotController implements IPlotController {
 			
 			return;	
 		}
+		
+		if (data == null) return;
 		
 		SourceInformation si = new SourceInformation(dataOp.getFilePath(), dataOp.getName(), dataOp.getLazyDataset());
 		SliceInformation s = new SliceInformation(slice, slice, new SliceND(dataOp.getLazyDataset().getShape()), mode.getDataDimensions(options), 1, 0);
