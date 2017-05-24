@@ -339,8 +339,8 @@ public abstract class SectorProfileTool extends ProfileTool implements IDetector
 	
 	protected void registerMetadataListeners() {
 		IMetadata meta = getMetaData();
-		if (meta!=null && (meta instanceof IDiffractionMetadata)) {
-			IDiffractionMetadata dm = (IDiffractionMetadata)meta;
+		if (meta instanceof IDiffractionMetadata) {
+			IDiffractionMetadata dm = (IDiffractionMetadata) meta;
 			dm.getDetector2DProperties().addDetectorPropertyListener(this);
 			dm.getDiffractionCrystalEnvironment().addDiffractionCrystalEnvironmentListener(this);
 		}
@@ -348,8 +348,8 @@ public abstract class SectorProfileTool extends ProfileTool implements IDetector
 	
 	protected void unregisterMetadataListeners() {
 		IMetadata meta = getMetaData();
-		if (meta!=null && (meta instanceof IDiffractionMetadata)) {
-			IDiffractionMetadata dm = (IDiffractionMetadata)meta;
+		if (meta instanceof IDiffractionMetadata) {
+			IDiffractionMetadata dm = (IDiffractionMetadata) meta;
 			dm.getDetector2DProperties().removeDetectorPropertyListener(this);
 			dm.getDiffractionCrystalEnvironment().removeDiffractionCrystalEnvironmentListener(this);
 		}
@@ -414,7 +414,7 @@ public abstract class SectorProfileTool extends ProfileTool implements IDetector
 					if (profileAxis!=null) profileAxis.setEnabled(true);
 
 					if (isValidMetadata(meta)) {
-						updateSectorCenters(((IDiffractionMetadata)meta).getDetector2DProperties().getBeamCentreCoords());
+						updateSectorCenters(((IDiffractionMetadata) meta).getDetector2DProperties().getBeamCentreCoords());
 						registerMetadataListeners();
 						setMessage(true);
 					}
@@ -463,7 +463,7 @@ public abstract class SectorProfileTool extends ProfileTool implements IDetector
 	}
 	
 	protected boolean isValidMetadata(IMetadata meta) {
-		if (meta != null && (meta instanceof IDiffractionMetadata)) {
+		if (meta instanceof IDiffractionMetadata) {
 			IDiffractionMetadata idm = (IDiffractionMetadata) meta;
 			if (idm.getDiffractionCrystalEnvironment() == null)
 				return false;
@@ -492,10 +492,9 @@ public abstract class SectorProfileTool extends ProfileTool implements IDetector
 		
 		if (metaLock.isChecked()) {
 			if (isValidMetadata(meta)) {
-				updateSectorCenters(((IDiffractionMetadata)meta).getDetector2DProperties().getBeamCentreCoords());
+				updateSectorCenters(((IDiffractionMetadata) meta).getDetector2DProperties().getBeamCentreCoords());
 				registerMetadataListeners();
 			} else {
-				
 				metaLock.setChecked(false);
 				metaLock.run();
 				metaLock.setEnabled(false);
