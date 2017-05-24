@@ -9,16 +9,14 @@
 package org.dawnsci.plotting.tools.diffraction;
 
 import org.eclipse.dawnsci.analysis.api.io.ILoaderService;
+import org.eclipse.dawnsci.analysis.api.metadata.IDiffractionMetadata;
 import org.eclipse.january.DatasetException;
-import org.eclipse.january.dataset.IDataset;
 import org.eclipse.january.dataset.ILazyDataset;
 import org.eclipse.january.metadata.IMetadata;
-import org.eclipse.dawnsci.analysis.api.metadata.IDiffractionMetadata;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import uk.ac.diamond.scisoft.analysis.diffraction.DiffractionMetadataUtils;
-import uk.ac.diamond.scisoft.analysis.io.DiffractionMetadata;
 import uk.ac.diamond.scisoft.analysis.io.NexusDiffractionCalibrationReader;
 
 public class DiffractionUtils {
@@ -44,15 +42,14 @@ public class DiffractionUtils {
 
 		int[] shape = image.getShape();
 
-		IDiffractionMetadata mdImage = image.getFirstMetadata(IDiffractionMetadata.class);
+		IDiffractionMetadata dmd = image.getFirstMetadata(IDiffractionMetadata.class);
 
 		if (lockedMeta != null) {
-			if (mdImage != null) {
-				IDiffractionMetadata dmd = (IDiffractionMetadata) mdImage;
+			if (dmd != null) {
 				if (!dmd.getDiffractionCrystalEnvironment().equals(lockedMeta.getDiffractionCrystalEnvironment()) ||
 						!dmd.getDetector2DProperties().equals(lockedMeta.getDetector2DProperties())) {
 					try {
-						DiffractionMetadataUtils.copyNewOverOld(lockedMeta, (IDiffractionMetadata)mdImage);
+						DiffractionMetadataUtils.copyNewOverOld(lockedMeta, dmd);
 					} catch (IllegalArgumentException e) {
 						if (statusText != null)
 							statusText[0] = "Locked metadata does not match image dimensions!";
@@ -78,15 +75,15 @@ public class DiffractionUtils {
 		}
 
 		//If not see if the trace has diffraction meta data
-		if (mdImage instanceof IDiffractionMetadata) {
+		if (dmd != null) {
 			if (statusText != null && statusText[0] == null) {
 				statusText[0] = "Metadata loaded from image";
 			}
-			return (IDiffractionMetadata) mdImage;
+			return dmd;
 		}
 		
 		//Try and get the filename here, it will help later on
-		String filePath = mdImage == null ? null : mdImage.getFilePath();
+		String filePath = dmd == null ? null : dmd.getFilePath();
 		
 		if (filePath == null) {
 			filePath = altPath;
@@ -117,7 +114,7 @@ public class DiffractionUtils {
 		}
 
 		// if it is null try and get it from the loader service
-		if (mdImage == null && filePath != null) {
+		if (dmd == null && filePath != null) {
 			IMetadata md = null;
 			try {
 				md = service.getMetadata(filePath, null);
@@ -135,12 +132,12 @@ public class DiffractionUtils {
 		}
 		
 		// if there is no meta or is not nexus or IDiff create default IDiff and put it in the dataset
-		mdImage = DiffractionDefaultMetadata.getDiffractionMetadata(filePath, shape);
+		dmd = DiffractionDefaultMetadata.getDiffractionMetadata(filePath, shape);
 		//image.setMetadata(mdImage);
 		if (statusText != null && statusText[0] == null) {
 			statusText[0] = "No metadata found. Values loaded from preferences:";
 		}
-		return (IDiffractionMetadata) mdImage;
+		return dmd;
 	}
 
 }

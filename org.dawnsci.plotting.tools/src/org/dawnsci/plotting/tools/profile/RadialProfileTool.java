@@ -29,6 +29,7 @@ import org.eclipse.dawnsci.plotting.api.trace.IImageTrace;
 import org.eclipse.january.dataset.Dataset;
 import org.eclipse.january.dataset.DatasetFactory;
 import org.eclipse.january.dataset.DatasetUtils;
+import org.eclipse.january.dataset.DoubleDataset;
 import org.eclipse.january.dataset.IDataset;
 import org.eclipse.dawnsci.analysis.api.metadata.IDiffractionMetadata;
 import org.eclipse.january.metadata.IMetadata;
@@ -199,7 +200,7 @@ public class RadialProfileTool extends SectorProfileTool {
 			return new Dataset[]{integrals[2], integrals[3]};
 		}
 		
-		final Dataset xi = DatasetFactory.createLinearSpace(sroi.getRadius(0), sroi.getRadius(1), integrals[0].getSize(), Dataset.FLOAT64);
+		final Dataset xi = DatasetFactory.createLinearSpace(DoubleDataset.class, sroi.getRadius(0), sroi.getRadius(1), integrals[0].getSize());
 		xi.setName("Radius (pixel)");
 		
 		IMetadata meta = getMetaData();
@@ -208,19 +209,19 @@ public class RadialProfileTool extends SectorProfileTool {
 			
 			if (isValidMetadata(meta)) {
 				metaLock.setEnabled(true);
-				return new Dataset[]{pixelToValue(xi,(IDiffractionMetadata)meta)};
+				return new Dataset[]{pixelToValue(xi,(IDiffractionMetadata) meta)};
 			}
 			
 			return new Dataset[]{xi};
 			
 		} else {
 
-			final Dataset xii = DatasetFactory.createLinearSpace(sroi.getRadius(0), sroi.getRadius(1), integrals[1].getSize(), Dataset.FLOAT64);
+			final Dataset xii = DatasetFactory.createLinearSpace(DoubleDataset.class, sroi.getRadius(0), sroi.getRadius(1), integrals[1].getSize());
 			xii.setName("Radius (pixel)");
 			
 			if (isValidMetadata(meta)) {
 				metaLock.setEnabled(true);
-				return new Dataset[]{pixelToValue(xi,(IDiffractionMetadata)meta),pixelToValue(xii,(IDiffractionMetadata)meta)};
+				return new Dataset[]{pixelToValue(xi,(IDiffractionMetadata) meta),pixelToValue(xii,(IDiffractionMetadata) meta)};
 			}
 
 			return new Dataset[]{xi, xii};
@@ -291,7 +292,7 @@ public class RadialProfileTool extends SectorProfileTool {
 
 		try {
 			if (isValidMetadata(meta)) {
-				dm = (IDiffractionMetadata)meta;
+				dm = (IDiffractionMetadata) meta;
 				DetectorProperties detprops = dm.getDetector2DProperties().clone();
 				DiffractionCrystalEnvironment diffexp = dm.getDiffractionCrystalEnvironment().clone();
 				// Update metadata values for downsampled datasets
@@ -367,11 +368,12 @@ public class RadialProfileTool extends SectorProfileTool {
 	private SectorROI getFullSector() {
 		
 		int[] shape = new int[2];
+		IMetadata meta = getMetaData();
 
-		if (getMetaData() instanceof IDiffractionMetadata) {
-			shape[0] = ((IDiffractionMetadata)getMetaData()).getDetector2DProperties().getPx();
-			shape[1] = ((IDiffractionMetadata)getMetaData()).getDetector2DProperties().getPy();
-			
+		if (meta instanceof IDiffractionMetadata) {
+			DetectorProperties dp = ((IDiffractionMetadata) meta).getDetector2DProperties(); 
+			shape[0] = dp.getPx();
+			shape[1] = dp.getPy();
 		} else {
 			shape = getImageTrace().getData().getShape();
 			int temp = shape[0];

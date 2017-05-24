@@ -121,7 +121,8 @@ public class ImageTableTool extends AbstractToolPage  implements IROIListener {
 						evt.getRegion().addROIListener(ImageTableTool.this);
 					}
 				}
-				
+
+				@Override
 				protected void update(RegionEvent evt) {
 					ImageTableTool.this.update(null, null, false);
 				}
@@ -139,6 +140,7 @@ public class ImageTableTool extends AbstractToolPage  implements IROIListener {
 		final IPageSite site = getSite();
 		
 		final Action reselect = new Action("Create new profile.", getImageDescriptor()) {
+			@Override
 			public void run() {
 				createNewRegion();
 			}
@@ -167,7 +169,8 @@ public class ImageTableTool extends AbstractToolPage  implements IROIListener {
 	public void setFocus() {
 		if (table!=null && !table.isDisposed()) table.setFocus();
 	}
-	
+
+	@Override
 	public void activate() {
 		super.activate();
 		update(null, null, false);
@@ -214,7 +217,8 @@ public class ImageTableTool extends AbstractToolPage  implements IROIListener {
     protected RegionType getCreateRegionType() {
     	return RegionType.BOX;
     }
-    
+
+	@Override
 	public void deactivate() {
 		super.deactivate();
 		if (getPlottingSystem()!=null) {
@@ -238,7 +242,8 @@ public class ImageTableTool extends AbstractToolPage  implements IROIListener {
 		if (main==null || main.isDisposed()) return null;
 		return main;
 	}
-	
+
+	@Override
 	public void dispose() {
 		deactivate();
 		
@@ -282,6 +287,7 @@ public class ImageTableTool extends AbstractToolPage  implements IROIListener {
 		
 			removeTable();
 			Display.getDefault().syncExec(new Runnable() {
+				@Override
 				public void run() {
 					updateTable(slice);
 				}
@@ -314,6 +320,7 @@ public class ImageTableTool extends AbstractToolPage  implements IROIListener {
 		}
 		
 		table.addListener(SWT.SetData, new Listener() {
+			@Override
 			public void handleEvent(Event event) {
 				
 				TableItem line = (TableItem) event.item;
@@ -338,6 +345,7 @@ public class ImageTableTool extends AbstractToolPage  implements IROIListener {
 	private void removeTable() {
 		if (table!=null) {
 			Display.getDefault().syncExec(new Runnable() {
+				@Override
 				public void run() {
 					if (!table.isDisposed()) {
 						GridUtils.setVisible(table, false);
@@ -424,7 +432,7 @@ public class ImageTableTool extends AbstractToolPage  implements IROIListener {
 
 			if (!isActive()) return Status.CANCEL_STATUS;
 
-			final Collection<ITrace> traces= getPlottingSystem().getTraces(IImageTrace.class);	
+			final Collection<ITrace> traces= getPlottingSystem().getTraces(IImageTrace.class);
 			IImageTrace image = traces!=null && traces.size()>0 ? (IImageTrace)traces.iterator().next() : null;
 
 			if (monitor.isCanceled()) return  Status.CANCEL_STATUS;
@@ -489,7 +497,7 @@ public class ImageTableTool extends AbstractToolPage  implements IROIListener {
 				logger.error("Cannot get meta data for "+EclipseUtils.getFilePath(editor.getEditorInput()), e);
 			}
 		}
-		
-		return getImageTrace().getData().getMetadata();
+
+		return getImageTrace().getData().getFirstMetadata(IMetadata.class);
 	}
 }

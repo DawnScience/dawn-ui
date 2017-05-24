@@ -29,6 +29,7 @@ import java.text.DecimalFormat;
 import org.dawnsci.plotting.tools.preference.InfoPixelConstants;
 import org.eclipse.dawnsci.analysis.api.diffraction.DetectorProperties;
 import org.eclipse.dawnsci.analysis.api.diffraction.DiffractionCrystalEnvironment;
+import org.eclipse.dawnsci.analysis.api.metadata.IDiffractionMetadata;
 import org.eclipse.dawnsci.analysis.dataset.roi.PointROI;
 import org.eclipse.dawnsci.plotting.api.axis.ICoordinateSystem;
 import org.eclipse.dawnsci.plotting.api.region.IRegion;
@@ -37,8 +38,6 @@ import org.eclipse.dawnsci.plotting.api.tool.IToolPage.ToolPageRole;
 import org.eclipse.dawnsci.plotting.api.trace.IImageTrace;
 import org.eclipse.dawnsci.plotting.api.trace.TraceUtils;
 import org.eclipse.january.dataset.IDataset;
-import org.eclipse.dawnsci.analysis.api.metadata.IDiffractionMetadata;
-import org.eclipse.january.metadata.IMetadata;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.slf4j.Logger;
@@ -143,10 +142,7 @@ public class InfoPixelLabelProvider extends ColumnLabelProvider {
 
 		IDiffractionMetadata dmeta = null;
 		if (set!=null) {
-			final IMetadata      meta = set.getMetadata();
-			if (meta instanceof IDiffractionMetadata) {
-				dmeta = (IDiffractionMetadata)meta;
-			}
+			dmeta = set.getFirstMetadata(IDiffractionMetadata.class);
 		}
 
 		QSpace qSpace  = null;

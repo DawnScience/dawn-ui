@@ -416,7 +416,8 @@ public class PowderIntegrationTool extends AbstractToolPage implements IDataRedu
 	public Control getControl() {
 		return sashForm;
 	}
-	
+
+	@Override
 	public void dispose() {
 		//can hold lots of data so get rid of it
 		fullImageJob = null;
@@ -492,9 +493,8 @@ public class PowderIntegrationTool extends AbstractToolPage implements IDataRedu
 	private IDiffractionMetadata getUpdatedMetadata(IDataset ds, String[] statusString) {
 		
 		//look in data set
-		IDiffractionMetadata m = null;
-		if (ds.getMetadata() != null && ds.getMetadata() instanceof IDiffractionMetadata) {
-			m = (IDiffractionMetadata)ds.getMetadata();
+		IDiffractionMetadata m = ds.getFirstMetadata(IDiffractionMetadata.class);
+		if (m != null) {
 			statusMessage.setText("Metadata from data set");
 			statusMessage.setForeground(Display.getDefault().getSystemColor(SWT.COLOR_DARK_GRAY));
 		}
@@ -521,7 +521,7 @@ public class PowderIntegrationTool extends AbstractToolPage implements IDataRedu
 		} else if (part instanceof IViewPart){
 			try {
 				if (image == null) return null;
-				IMetadata md = image.getMetadata();
+				IMetadata md = image.getFirstMetadata(IMetadata.class);
 				if(md != null)
 					altPath = md.getFilePath();
 			} catch (Exception e) {
@@ -553,10 +553,11 @@ public class PowderIntegrationTool extends AbstractToolPage implements IDataRedu
 		
 		//dont want to fail reduction just because cant save filename - hence try-catch
 		try {
-			if (slice.getData().getMetadata() != null && slice.getData().getMetadata().getFilePath()!= null) {
+			IMetadata md = slice.getData().getFirstMetadata(IMetadata.class);
+			if (md != null && md.getFilePath()!= null) {
 				String collection = file.group("files", file.getParent(resultGroup));
 				file.setNexusAttribute(collection, "NXcollection");
-				String path = slice.getData().getMetadata().getFilePath();
+				String path = slice.getData().getFirstMetadata(IMetadata.class).getFilePath();
 				file.appendDataset("files", Dataset.STRING, new long[]{1}, path, collection);
 			}
 		} catch (Exception e) {

@@ -149,6 +149,7 @@ public class GridTool extends AbstractToolPage implements IResettableExpansion{
 		};
 		
 		this.traceListener = new ITraceListener.Stub() {
+			@Override
 			protected void update(TraceEvent evt) {
 				if (getImageTrace()!=null) {
 					updateGridPreferences();
@@ -187,6 +188,7 @@ public class GridTool extends AbstractToolPage implements IResettableExpansion{
 	public void createControl(Composite parent) {
 				
 		final Action reselect = new Action("Create new grid.", getImageDescriptor()) {
+			@Override
 			public void run() {
 				createNewRegion(true);
 			}
@@ -228,6 +230,7 @@ public class GridTool extends AbstractToolPage implements IResettableExpansion{
 		// Allow the colours to be drawn nicely.
 		final Tree tree = viewer.getTree();
 		tree.addListener(SWT.EraseItem, new Listener() {
+			@Override
 			public void handleEvent(Event event) {
 				if ((event.detail & SWT.SELECTED) != 0) {
 					GC gc = event.gc;
@@ -294,6 +297,7 @@ public class GridTool extends AbstractToolPage implements IResettableExpansion{
 		});
 		
 		tree.addMouseListener(new MouseAdapter() {
+			@Override
 			public void mouseDown(MouseEvent e) {
 				final TreeItem item = tree.getItem(new Point(e.x, e.y));
 				if (item==null) return;
@@ -435,6 +439,7 @@ public class GridTool extends AbstractToolPage implements IResettableExpansion{
 		getSite().getActionBars().getToolBarManager().add(new Separator());
 
 		final Action preferences = new Action("Preferences...") {
+			@Override
 			public void run() {
 				//if (!isActive()) return;
 				PreferenceDialog pref = PreferencesUtil.createPreferenceDialogOn(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(), "uk.ac.diamond.scisoft.analysis.rcp.gridScanPreferencePage", null, null);
@@ -502,7 +507,7 @@ public class GridTool extends AbstractToolPage implements IResettableExpansion{
 		}
 	
 		final LinearROI lroi = new LinearROI(length, 0);
-		double dbc[] = {(double)beamCentre[0], (double)beamCentre[1]};
+		double dbc[] = {beamCentre[0], beamCentre[1]};
 		lroi.setMidPoint(dbc);
 		lroi.setCrossHair(true);
 		region.setROI(lroi);
@@ -652,6 +657,7 @@ public class GridTool extends AbstractToolPage implements IResettableExpansion{
 	}
 
 
+	@Override
 	public void resetExpansion() {
 		try {
 			if (model == null) return;
@@ -666,7 +672,7 @@ public class GridTool extends AbstractToolPage implements IResettableExpansion{
 	
 	private GridPreferences getGridPreferences() {
 		try {
-			IMetadata m = getImageTrace().getData().getMetadata();
+			IMetadata m = getImageTrace().getData().getFirstMetadata(IMetadata.class);
 			if (m != null && m.getMetaNames().contains(GDA_GRID_METADATA)) {
 				Object ob = m.getMetaValue(GDA_GRID_METADATA);
 				if (ob instanceof GridPreferences) {
