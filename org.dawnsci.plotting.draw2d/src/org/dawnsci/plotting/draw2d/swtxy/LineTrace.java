@@ -16,6 +16,7 @@ import org.eclipse.draw2d.ColorConstants;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.nebula.visualization.xygraph.dataprovider.IDataProvider;
 import org.eclipse.nebula.visualization.xygraph.figures.Axis;
+import org.eclipse.nebula.visualization.xygraph.figures.IXYGraph;
 import org.eclipse.nebula.visualization.xygraph.figures.Trace;
 import org.eclipse.ui.preferences.ScopedPreferenceStore;
 
@@ -53,24 +54,24 @@ public class LineTrace extends Trace implements ITraceContainer {
 		if (getParent()!=null) getParent().remove(this);
 		removeAll();
 		getHotSampleList().clear();
-		name=null;
-		internalName=null;
-		traceDataProvider=null;
-		xAxis=null;	
-		yAxis=null;	
-		traceColor=null;
-		traceType=null;
-		baseLine=null;
-		pointStyle=null;
-		yErrorBarType=null;
-		xErrorBarType=null;
-		errorBarColor=null;
-		xyGraph=null;
-		traceDataProvider=null;
+		setName(null);
+		setInternalName(null);
+		setDataProvider(null);
+		setXAxis(null);	
+		setYAxis(null);	
+		setTraceColor(null);
+		setTraceType(null);
+		setBaseLine(null);
+		setPointStyle(null);
+		setYErrorBarType(null);
+		setXErrorBarType(null);
+		setErrorBarColor(null);
+		setXYGraph((IXYGraph)null);
+		setDataProvider(null);
 	}
 
 	public boolean isDisposed() {
-		return xyGraph==null;
+		return getIXYGraph()==null;
 	}
 
 
