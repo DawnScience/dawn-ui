@@ -88,7 +88,7 @@ public class XYRegionGraph extends XYGraph {
 	}
 
 	@Override
-	protected PlotArea createPlotArea(IXYGraph xyGraph) {
+	public PlotArea createPlotArea(IXYGraph xyGraph) {
 		return new RegionArea(this);
 	}
 
