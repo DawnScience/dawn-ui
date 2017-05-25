@@ -469,7 +469,7 @@ public class TrackingHandlerWithFrames {
 
 class trackingJob21 {
 
-	private IPlottingSystem<Composite> plotSystem;
+//	private IPlottingSystem<Composite> plotSystem;
 	private IPlottingSystem<Composite> outputCurves;
 	private GeometricParametersModel gm;
 	private int correctionSelection;
@@ -477,7 +477,7 @@ class trackingJob21 {
 	private int timeStep;
 	private SurfaceScatterPresenter ssp;
 	private SurfaceScatterViewStart ssvs;
-	private int DEBUG = 0;
+	private int DEBUG =1;
 	private ProgressBar progressBar;
 	private TrackingProgressAndAbortView tpaav;
 	private Thread t;
@@ -532,9 +532,9 @@ class trackingJob21 {
 		this.gm = gms;
 	}
 
-	public void setPlotSystem(IPlottingSystem<Composite> plotSystem) {
-		this.plotSystem = plotSystem;
-	}
+//	public void setPlotSystem(IPlottingSystem<Composite> plotSystem) {
+//		this.plotSystem = plotSystem;
+//	}
 
 	public void setTimeStep(int timeStep) {
 		this.timeStep = timeStep;
@@ -621,7 +621,7 @@ class trackingJob21 {
 										   frame.getScannedVariable());
 							
 							
-//							debug("value added to xList:  "   + drm.getSortedX().getDouble(k)  + "  k:   " + k);
+							debug("value added to xList:  "   + drm.getSortedX().getDouble(k)  + "  k:   " + k);
 							
 							debug("Tracker should fire once");
 							
@@ -1418,7 +1418,8 @@ class trackingJob21 {
 								   double cdistance = fm.getScannedVariable()- myNum;
 								    if((cdistance < distance) & 
 								       !Arrays.equals(fm.getRoiLocation(), test) & 
-								       !Arrays.equals(fm.getRoiLocation(), null)){
+								       !Arrays.equals(fm.getRoiLocation(), null) &
+								       doneArray[fm.getDatNo()] != null){
 								        
 								    	nearestCompletedDatFileNo = fm.getDatNo();
 								        distance = cdistance;
@@ -1453,7 +1454,7 @@ class trackingJob21 {
 																							   1);
 								drm.addSeedLocation(frame.getDatNo(),seedLocation);
 								
-								debug("!!!!!!!!!!!!!!!     }}}}}{{{{{{{{ seedlocation[0] : " + seedLocation[0] +" + " + "seedlocation[1] :" + seedLocation[1]);
+								debug("!!!!!!!!!!!!!!!     }}}}}{{{{{{{{ 1456   seedlocation[0] : " + seedLocation[0] +" + " + "seedlocation[1] :" + seedLocation[1]);
 						
 							}
 							else{
@@ -1932,7 +1933,7 @@ class trackingJob21 {
 		int[] pt = new int[] {(int) location[0],(int) location[1]};
 		int[][] lenPt = { len, pt };
 		
-		int[][] lenPt1= LocationLenPtConverterUtils.locationToLenPtConverter(location);
+//		int[][] lenPt1= LocationLenPtConverterUtils.locationToLenPtConverter(location);
 		
 		
 		RectangularROI[] greenAndBg = ssp.trackingRegionOfInterestSetter(lenPt);

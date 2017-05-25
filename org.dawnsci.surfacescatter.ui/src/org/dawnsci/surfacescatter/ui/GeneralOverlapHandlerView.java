@@ -24,7 +24,7 @@ import org.eclipse.ui.PlatformUI;
 
 public class GeneralOverlapHandlerView extends Dialog {
 	
-	private Shell parentShell;
+//	private Shell parentShell;
 	private SashForm right; 
 	private SashForm left;
 	private ArrayList<IDataset> xArrayList;
@@ -49,14 +49,14 @@ public class GeneralOverlapHandlerView extends Dialog {
 			ArrayList<IDataset> yArrayListFhklError,
 			ArrayList<IDataset> yArrayListRaw,
 			ArrayList<IDataset> yArrayListRawError,
-			IPlottingSystem<Composite> parentPs,
+//			IPlottingSystem<Composite> parentPs,
 			SurfaceScatterPresenter ssp,
 			SurfaceScatterViewStart ssvs){
 		
 		super(parentShell);
 		setShellStyle(getShellStyle() | SWT.RESIZE);
 		
-		this.parentShell = parentShell;
+//		this.parentShell = parentShell;
 		this.xArrayList = xArrayList;
 		this.yArrayList = yArrayList;
 	    this.yArrayListError = yArrayListError;
@@ -64,7 +64,8 @@ public class GeneralOverlapHandlerView extends Dialog {
 	    this.yArrayListFhklError = yArrayListFhklError;
 	    this.yArrayListRaw = yArrayListRaw;
 	    this.yArrayListRawError = yArrayListRawError;
-	    this.parentPs = parentPs;
+	    this.ssvs = ssvs;
+//	    this.parentPs = parentPs;
 	    this.ssp = ssp;
 	}
 
@@ -150,10 +151,8 @@ public class GeneralOverlapHandlerView extends Dialog {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				
-				IDataset xData = stitchedCurves.getLineTrace1().getXData();
-				IDataset yData = stitchedCurves.getLineTrace1().getYData();
-				
-				ssvs.export(parentPs, xData, yData);
+			
+				ssvs.export();
 				
 			}
 			

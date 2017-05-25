@@ -117,6 +117,8 @@ public class AttenuationCorrectedOutput {
 					
 					attenuationFactor = correctionRatio;
 					
+					model.setAttenuationFactors(k, attenuationFactor);
+					
 					yArrayCorrected[k+1] = Maths.multiply(yArray[k+1],attenuationFactor);
 					
 //					System.out.println("attenuation factor:  " + attenuationFactor + "   k:   " +k);
@@ -126,6 +128,29 @@ public class AttenuationCorrectedOutput {
 		output[1] = xArrayCorrected;
 		
 		return output;
+	}
+	
+	
+	public static double[][] maxMinArrayGenerator(ArrayList<IDataset> arrayILDx, 
+												  OverlapUIModel model) {
+	
+		
+		double[][] maxMinArray = new double[arrayILDx.size()][2];
+		
+		
+		for (int k=0; k<(arrayILDx.size()-1);k++){
+			
+			IRectangularROI box;
+//			System.out.println("k:  "+ k);
+			
+			box = model.getROIListElement(k).getBounds();
+			
+			
+			maxMinArray[k][0] = box.getPointX()+ box.getLength(0);
+			maxMinArray[k][1] = box.getPointX();
+		}
+		
+		return maxMinArray;
 	}
 	
 	

@@ -123,7 +123,17 @@ public class StitchedOverlapCurves extends Composite {
 			@Override
 			public void propertyChange(PropertyChangeEvent evt) {
 						
-				attenuatedDatasets = ssp.curveStitchingOutput();
+				
+				double[][] maxMinArray = AttenuationCorrectedOutput.maxMinArrayGenerator(xArrayList,
+																						 model);
+				
+				
+				
+				attenuatedDatasets = ssp.curveStitchingOutput(maxMinArray);
+				
+//				attenuatedDatasets =  AttenuationCorrectedOutput.StitchingOverlapProcessMethod(yArrayList, 
+//																								xArrayList, 
+//																								model);
 				
 				Dataset[] sortedAttenuatedDatasets = new Dataset[2];
 										

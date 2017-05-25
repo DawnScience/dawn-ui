@@ -244,7 +244,7 @@ public class SurfaceScatterViewStart extends Dialog {
 				folder.setSelection(1);
 		
 				ssp.setSelection(0);
-				ssp.setSliderPos(0);;
+				ssp.setSliderPos(0);
 				customComposite.getSlider().setSelection(0);
 				customComposite.getSlider().setMinimum(0);
 				customComposite.getSlider().setMaximum(ssp.getDrm().getFms().size());
@@ -1267,7 +1267,7 @@ public class SurfaceScatterViewStart extends Dialog {
 						xyArrays.get(0), xyArrays.get(1), 
 						xyArrays.get(2), xyArrays.get(3), 
 						xyArrays.get(4), xyArrays.get(5),
-						xyArrays.get(6), outputCurves.getPlotSystem(), 
+						xyArrays.get(6), 
 						ssp,
 						SurfaceScatterViewStart.this);
 
@@ -1536,6 +1536,23 @@ public class SurfaceScatterViewStart extends Dialog {
 		lt1.isErrorBarEnabled();
 		
 		parentPs.addTrace(lt1);
+		getSsps3c().getOutputCurves().getIntensity().select(0);;
+	}
+	
+	public void export(){
+
+		outputCurves.getPlotSystem().clear();
+		
+		ILineTrace lt1 = outputCurves.getPlotSystem().createLineTrace("Adjusted Spliced Curve");
+		
+		IDataset xData = ssp.getDrm().getCsdp().getSplicedCurveX();
+		IDataset yData = ssp.getDrm().getCsdp().getSplicedCurveY();
+		
+		lt1.setData(xData, yData);
+		lt1.isErrorBarEnabled();
+		
+		outputCurves.getPlotSystem().addTrace(lt1);
+		
 		getSsps3c().getOutputCurves().getIntensity().select(0);;
 	}
 	

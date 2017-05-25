@@ -163,6 +163,20 @@ public class SurfaceScatterPresenter {
 				
 				if(imageFolderPath == null){
 					dh1 = LoaderFactory.getData(filepaths[id]);
+					
+					Path from = Paths.get(filepaths[id]);
+					
+					
+					Charset charset = StandardCharsets.UTF_8;
+					
+					String content = new String(Files.readAllBytes(from), charset);
+					
+					String[] tifNames = StringUtils.substringsBetween(content, File.separator, ".tif");
+					
+					Dataset tifNamesDatasetOut = DatasetFactory.createFromObject(tifNames);
+					
+					tifNamesArray[id] = tifNamesDatasetOut;
+					
 				}
 				
 				else{
@@ -305,17 +319,17 @@ public class SurfaceScatterPresenter {
 					else {
 					}
 					
-//					if (qdcd == null) {
-//						try {
-//							qdcd = dh1.getLazyDataset(ReflectivityMetadataTitlesForDialog.getqsdcd());
+					if (qdcd == null) {
+						try {
+							qdcd = dh1.getLazyDataset(ReflectivityMetadataTitlesForDialog.getqsdcd());
 //							models.get(id).setQdcd(qdcd);
-//						} catch (Exception e2) {
-//							System.out.println("can't get qdcd");
-//						}
-//					} 
-//					
-//					else {
-//					}
+						} catch (Exception e2) {
+							System.out.println("can't get qdcd");
+						}
+					} 
+					
+					else {
+					}
 				}
 					
 				else {
@@ -408,6 +422,8 @@ public class SurfaceScatterPresenter {
 			
 			String[] datNamesInOrder = new String[imageRefList.size()];
 			
+			drm.setCorrectionSelection(MethodSetting.toMethod(correctionSelection));
+			
 			for(int f = 0; f<imageRefList.size(); f++ ){
 				datNamesInOrder[f] = filepaths[imagesToFilepathRefDat.getInt(f)];
 				filepathsSortedArray[f] = imagesToFilepathRefDat.getInt(f);
@@ -429,30 +445,98 @@ public class SurfaceScatterPresenter {
 				fm.setDatNo(imagesToFilepathRefDat.getInt(f));
 				
 				System.out.println("imageNoInDatList.get(pos)" + imageNoInDatList.get(pos));
-
-				double polarisation = SXRDGeometricCorrections.polarisation(datNamesInOrder[f], 
-																			gm.getInplanePolarisation(), 
-																			gm.getOutplanePolarisation())
-																			.getDouble(imageNoInDatList.get(pos));
-				fm.setPolarisationCorrection(polarisation);
 				
-				double lorentz = SXRDGeometricCorrections.lorentz(datNamesInOrder[f])
-														 .getDouble(imageNoInDatList.get(pos));
-
-				fm.setLorentzianCorrection(lorentz);
+				if(MethodSetting.toMethod(correctionSelection) == MethodSetting.SXRD){
+					
+					double polarisation = SXRDGeometricCorrections.polarisation(datNamesInOrder[f], 
+							gm.getInplanePolarisation(), 
+							gm.getOutplanePolarisation())
+							.getDouble(imageNoInDatList.get(pos));
+					
+					fm.setPolarisationCorrection(polarisation);
+					
+					double lorentz = SXRDGeometricCorrections.lorentz(datNamesInOrder[f])
+															 .getDouble(imageNoInDatList.get(pos));
+	
+					fm.setLorentzianCorrection(lorentz);
+					
+					double areaCorrection = SXRDGeometricCorrections.areacor(datNamesInOrder[f], 
+																			 gm.getBeamCorrection(), 
+																			 gm.getSpecular(),  
+																			 gm.getSampleSize(), 
+																			 gm.getOutPlaneSlits(), 
+																			 gm.getInPlaneSlits(), 
+																			 gm.getBeamInPlane(), 
+																			 gm.getBeamOutPlane(), 
+																			 gm.getDetectorSlits())
+																			 .getDouble(imageNoInDatList.get(pos));
+					
+					fm.setAreaCorrection(areaCorrection);
+				}
 				
-				double areaCorrection = SXRDGeometricCorrections.areacor(datNamesInOrder[f], 
-																		 gm.getBeamCorrection(), 
-																		 gm.getSpecular(),  
-																		 gm.getSampleSize(), 
-																		 gm.getOutPlaneSlits(), 
-																		 gm.getInPlaneSlits(), 
-																		 gm.getBeamInPlane(), 
-																		 gm.getBeamOutPlane(), 
-																		 gm.getDetectorSlits())
-																		 .getDouble(imageNoInDatList.get(pos));
+				if(MethodSetting.toMethod(correctionSelection) == MethodSetting.Reflectivity_with_Flux_Correction){
+					
+					double lorentz = SXRDGeometricCorrections.lorentz(datNamesInOrder[f])
+															 .getDouble(imageNoInDatList.get(pos));
+	
+					fm.setLorentzianCorrection(lorentz);
+					
+					double areaCorrection = SXRDGeometricCorrections.areacor(datNamesInOrder[f], 
+																			 gm.getBeamCorrection(), 
+																			 gm.getSpecular(),  
+																			 gm.getSampleSize(), 
+																			 gm.getOutPlaneSlits(), 
+																			 gm.getInPlaneSlits(), 
+																			 gm.getBeamInPlane(), 
+																			 gm.getBeamOutPlane(), 
+																			 gm.getDetectorSlits())
+																			 .getDouble(imageNoInDatList.get(pos));
+					
+					fm.setAreaCorrection(areaCorrection);
+				}
 				
-				fm.setAreaCorrection(areaCorrection);
+				else if(MethodSetting.toMethod(correctionSelection) == MethodSetting.Reflectivity_without_Flux_Correction){
+					
+					double lorentz = SXRDGeometricCorrections.lorentz(datNamesInOrder[f])
+															 .getDouble(imageNoInDatList.get(pos));
+	
+					fm.setLorentzianCorrection(lorentz);
+					
+					double areaCorrection = SXRDGeometricCorrections.areacor(datNamesInOrder[f], 
+																			 gm.getBeamCorrection(), 
+																			 gm.getSpecular(),  
+																			 gm.getSampleSize(), 
+																			 gm.getOutPlaneSlits(), 
+																			 gm.getInPlaneSlits(), 
+																			 gm.getBeamInPlane(), 
+																			 gm.getBeamOutPlane(), 
+																			 gm.getDetectorSlits())
+																			 .getDouble(imageNoInDatList.get(pos));
+					
+					fm.setAreaCorrection(areaCorrection);
+				}
+				
+				else if(MethodSetting.toMethod(correctionSelection) == MethodSetting.Reflectivity_NO_Correction){
+					
+					double lorentz = SXRDGeometricCorrections.lorentz(datNamesInOrder[f])
+															 .getDouble(imageNoInDatList.get(pos));
+	
+					fm.setLorentzianCorrection(lorentz);
+					
+					double areaCorrection = SXRDGeometricCorrections.areacor(datNamesInOrder[f], 
+																			 gm.getBeamCorrection(), 
+																			 gm.getSpecular(),  
+																			 gm.getSampleSize(), 
+																			 gm.getOutPlaneSlits(), 
+																			 gm.getInPlaneSlits(), 
+																			 gm.getBeamInPlane(), 
+																			 gm.getBeamOutPlane(), 
+																			 gm.getDetectorSlits())
+																			 .getDouble(imageNoInDatList.get(pos));
+					
+					fm.setAreaCorrection(areaCorrection);
+				}
+				
 				fm.setScannedVariable(xArrayCon.getDouble(f));
 			
 			}
@@ -2357,7 +2441,20 @@ public class SurfaceScatterPresenter {
 
 		CsdpGeneratorFromDrm csdpgfd = new CsdpGeneratorFromDrm();
 		
-		IDataset[] output = CurveStitchWithErrorsAndFrames.curveStitch4(csdpgfd.generateCsdpFromDrm(drm));
+		IDataset[] output = CurveStitchWithErrorsAndFrames.curveStitch4(csdpgfd.generateCsdpFromDrm(drm), null);
+		
+		CurveStitchDataPackage csdp = csdpgfd.getCsdp();
+		
+		drm.setCsdp(csdp);
+		
+		return output;
+	}
+	
+	public IDataset[] curveStitchingOutput (double[][] mm){
+
+		CsdpGeneratorFromDrm csdpgfd = new CsdpGeneratorFromDrm();
+		
+		IDataset[] output = CurveStitchWithErrorsAndFrames.curveStitch4(csdpgfd.generateCsdpFromDrm(drm), mm);
 		
 		CurveStitchDataPackage csdp = csdpgfd.getCsdp();
 		
@@ -2590,7 +2687,7 @@ public class SurfaceScatterPresenter {
 
 		CsdpGeneratorFromDrm csdpgfd = new CsdpGeneratorFromDrm();
 		
-		IDataset[] output = CurveStitchWithErrorsAndFrames.curveStitch4(csdpgfd.generateCsdpFromDrm(drm));
+		IDataset[] output = CurveStitchWithErrorsAndFrames.curveStitch4(csdpgfd.generateCsdpFromDrm(drm), null);
 		
 		ILineTrace lt = pS.createLineTrace("progress");
 		
@@ -2627,7 +2724,7 @@ public class SurfaceScatterPresenter {
 			
 			CsdpGeneratorFromDrm csdpgfd = new CsdpGeneratorFromDrm();
 			
-			IDataset[] output = CurveStitchWithErrorsAndFrames.curveStitch4(csdpgfd.generateCsdpFromDrm(drm));
+			IDataset[] output = CurveStitchWithErrorsAndFrames.curveStitch4(csdpgfd.generateCsdpFromDrm(drm), null);
 			
 			ILineTrace lt = pS.createLineTrace("progress");
 			
@@ -2704,16 +2801,13 @@ public class SurfaceScatterPresenter {
 
 		IPlottingSystem<Composite> pS = outputCurves.getPlotSystem();
 		
-//		IDataset[] output = StitchedOutputWithErrors.curveStitch4(dms, sm);
-
-		
 		CsdpGeneratorFromDrm csdpgfd = new CsdpGeneratorFromDrm();
 		
 		csdpgfd.generateCsdpFromDrm(drm);
 		
 		CurveStitchDataPackage csdp = csdpgfd.getCsdp();
 		
-		IDataset[] output = CurveStitchWithErrorsAndFrames.curveStitch4(csdp);
+		IDataset[] output = CurveStitchWithErrorsAndFrames.curveStitch4(csdp, null);
 		
 		drm.setCsdp(csdp);
 		
@@ -2776,6 +2870,27 @@ public class SurfaceScatterPresenter {
 		lt.setErrorBarEnabled(false);
 		
 	}
+	
+//	public Dataset[] stitchAndPresent2() {
+//
+//		
+//		CsdpGeneratorFromDrm csdpgfd = new CsdpGeneratorFromDrm();
+//		
+//		csdpgfd.generateCsdpFromDrm(drm);
+//		
+//		CurveStitchDataPackage csdp = csdpgfd.getCsdp();
+//		
+//		IDataset[] output = CurveStitchWithErrorsAndFrames.curveStitch4(csdp, null);
+//		
+//		drm.setCsdp(csdp);
+//		
+//		IDataset X = DatasetFactory.createFromObject(csdp.getSplicedCurveX());
+//		
+//		return 
+//		
+//	}
+//	
+	
 	
 	public void switchErrorDisplay(){
 		if (errorDisplayFlag ==true){
