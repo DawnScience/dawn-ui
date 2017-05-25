@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012 Diamond Light Source Ltd.
+ * Copyright (c) 2012, 2017 Diamond Light Source Ltd.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -24,22 +24,19 @@ public class XYRegionConfigCommand extends XYGraphConfigCommand {
 
 	@SuppressWarnings("unused")
 	public XYRegionConfigCommand(IXYGraph xyGraph) {
-		
 		super(xyGraph);
-		
-		previousXYGraphMem = new XYRegionMemento();		
-		afterXYGraphMem = new XYRegionMemento();
-		
-		createDefaultSettings();
-		
-		final RegionArea regionArea     = (RegionArea)xyGraph.getPlotArea();
-		for(String name : regionArea.getRegionNames()){
-			((XYRegionMemento)previousXYGraphMem).addRegionMemento(new RegionBean());
-			((XYRegionMemento)afterXYGraphMem).addRegionMemento(new RegionBean());
-		}	
 
+		final RegionArea regionArea = (RegionArea) xyGraph.getPlotArea();
+		for (String name : regionArea.getRegionNames()) {
+			((XYRegionMemento) previousXYGraphMem).addRegionMemento(new RegionBean());
+			((XYRegionMemento) afterXYGraphMem).addRegionMemento(new RegionBean());
+		}
 	}
 
+	@Override
+	public XYGraphMemento createXyGraphMemento() {
+		return new XYRegionMemento();
+	}
 	
 	protected void saveXYGraphPropsToMemento(IXYGraph xyGraph, XYGraphMemento memento){
 		XYGraphMementoUtil.saveXYGraphPropsToMemento(xyGraph, memento);
