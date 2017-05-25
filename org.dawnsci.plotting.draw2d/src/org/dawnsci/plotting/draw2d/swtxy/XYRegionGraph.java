@@ -40,6 +40,7 @@ import org.eclipse.nebula.visualization.xygraph.figures.PlotArea;
 import org.eclipse.nebula.visualization.xygraph.figures.Trace;
 import org.eclipse.nebula.visualization.xygraph.figures.XYGraph;
 import org.eclipse.nebula.visualization.xygraph.linearscale.AbstractScale.LabelSide;
+import org.eclipse.nebula.visualization.xygraph.util.XYGraphMediaFactory;
 import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.PaletteData;
@@ -444,8 +445,39 @@ public class XYRegionGraph extends XYGraph {
 	 * @param trace
 	 * @param toFront - if true, move regions to front
 	 */
-	public void addTrace(Trace trace, Axis xAsxis, Axis yAxis, boolean toFront) {
-		super.addTrace(trace, xAsxis, yAxis);
+	public void addTrace(Trace trace, Axis xAxis, Axis yAxis, boolean toFront) {
+		if (trace.getTraceColor() == null) { // Cycle through default colors
+			trace.setTraceColor(XYGraphMediaFactory.getInstance()
+					.getColor(DEFAULT_TRACES_COLOR[plotArea.getTraceList().size() % DEFAULT_TRACES_COLOR.length]));
+		}
+		if (legendMap.containsKey(trace.getYAxis()))
+			legendMap.get(trace.getYAxis()).addTrace(trace);
+		else {
+			legendMap.put(trace.getYAxis(), new Legend((IXYGraph) this));
+			legendMap.get(trace.getYAxis()).addTrace(trace);
+			add(legendMap.get(trace.getYAxis()));
+		}
+
+		if (xAxis == null || yAxis == null) {
+			try {
+				for (Axis axis : getAxisList()) {
+					axis.addTrace(trace);
+				}
+			} catch (Throwable ne) {
+				// Ignored, this is a bug fix for Dawn 1.0
+				// to make the plots rescale after a plot is deleted.
+			}
+		} else {
+			xAxis.addTrace(trace);
+			yAxis.addTrace(trace);
+		}
+
+		plotArea.addTrace(trace);
+		trace.setXYGraph((IXYGraph) this);
+		trace.dataChanged(null);
+		revalidate();
+		repaint();
+
 		getRegionArea().toFront();
 	}
 
