@@ -39,6 +39,7 @@ import org.dawnsci.surfacescatter.FittingParameters;
 import org.dawnsci.surfacescatter.FittingParametersInputReader;
 import org.dawnsci.surfacescatter.FittingParametersOutput;
 import org.dawnsci.surfacescatter.FrameModel;
+import org.dawnsci.surfacescatter.GeometricCorrectionsReflectivityMethod;
 import org.dawnsci.surfacescatter.GeometricParametersModel;
 import org.dawnsci.surfacescatter.IntensityDisplayEnum.IntensityDisplaySetting;
 import org.dawnsci.surfacescatter.InterpolationTracker;
@@ -49,6 +50,7 @@ import org.dawnsci.surfacescatter.PolynomialOverlap;
 import org.dawnsci.surfacescatter.ProcessingMethodsEnum;
 import org.dawnsci.surfacescatter.ReflectivityMetadataTitlesForDialog;
 import org.dawnsci.surfacescatter.ProcessingMethodsEnum.ProccessingMethod;
+import org.dawnsci.surfacescatter.ReflectivityFluxCorrectionsForDialog;
 import org.dawnsci.surfacescatter.RodObjectNexusBuilderModel;
 import org.dawnsci.surfacescatter.RodObjectNexusUtils;
 import org.dawnsci.surfacescatter.SXRDGeometricCorrections;
@@ -376,7 +378,7 @@ public class SurfaceScatterPresenter {
 		try{
 			xArrayCon = DatasetUtils.concatenate(xArray, 0);
 			//xArrayCon is an unsorted, but concatenated DoubleDataset of l values
-			tifNamesCon = DatasetUtils.concatenate(tifNamesArray, 0);;
+			tifNamesCon = DatasetUtils.concatenate(tifNamesArray, 0);
 			//tifNamesCon is an unsorted, but concatenated DoubleDataset of l tif names
 			numberOfImages = xArrayCon.getSize();
 		}
@@ -446,6 +448,11 @@ public class SurfaceScatterPresenter {
 				
 				System.out.println("imageNoInDatList.get(pos)" + imageNoInDatList.get(pos));
 				
+				
+				ILazyDataset dcdtheta = null;
+				ILazyDataset qdcd = null;
+				
+				
 				if(MethodSetting.toMethod(correctionSelection) == MethodSetting.SXRD){
 					
 					double polarisation = SXRDGeometricCorrections.polarisation(datNamesInOrder[f], 
@@ -474,68 +481,74 @@ public class SurfaceScatterPresenter {
 					fm.setAreaCorrection(areaCorrection);
 				}
 				
-				if(MethodSetting.toMethod(correctionSelection) == MethodSetting.Reflectivity_with_Flux_Correction){
+				else {
 					
-					double lorentz = SXRDGeometricCorrections.lorentz(datNamesInOrder[f])
-															 .getDouble(imageNoInDatList.get(pos));
-	
-					fm.setLorentzianCorrection(lorentz);
+
+					dcdtheta = dh1.getLazyDataset(ReflectivityMetadataTitlesForDialog.getdcdtheta());
+
+					qdcd = dh1.getLazyDataset(ReflectivityMetadataTitlesForDialog.getqdcd());
 					
-					double areaCorrection = SXRDGeometricCorrections.areacor(datNamesInOrder[f], 
-																			 gm.getBeamCorrection(), 
-																			 gm.getSpecular(),  
-																			 gm.getSampleSize(), 
-																			 gm.getOutPlaneSlits(), 
-																			 gm.getInPlaneSlits(), 
-																			 gm.getBeamInPlane(), 
-																			 gm.getBeamOutPlane(), 
-																			 gm.getDetectorSlits())
-																			 .getDouble(imageNoInDatList.get(pos));
+					if (dcdtheta == null) {
+						try {
+							dcdtheta = dh1.getLazyDataset(ReflectivityMetadataTitlesForDialog.getsdcdtheta());
+
+						} catch (Exception e2) {
+							System.out.println("can't get dcdtheta");
+						}
+					} 
+					else {
+					}
 					
-					fm.setAreaCorrection(areaCorrection);
+					if (qdcd == null) {
+						try {
+							qdcd = dh1.getLazyDataset(ReflectivityMetadataTitlesForDialog.getqsdcd());
+						} catch (Exception e2) {
+							System.out.println("can't get qdcd");
+						}
+					} 
+					
+					else {
+					}
+				}	
+				
+				
+				
+				if(MethodSetting.toMethod(correctionSelection) == MethodSetting.Reflectivity_without_Flux_Correction ||
+						MethodSetting.toMethod(correctionSelection) == MethodSetting.Reflectivity_with_Flux_Correction){
+					
+					double angularFudgeFactor = gm.getAngularFudgeFactor();
+					double beamHeight = gm.getBeamHeight();
+					double footprint = gm.getFootprint();
+					
+					double reflectivityAreaCorrection = GeometricCorrectionsReflectivityMethod.reflectivityCorrectionsBatch(dcdtheta, 
+																						fm.getNoInOriginalDat(), 
+																						angularFudgeFactor, 
+																						beamHeight, 
+																						footprint);
+					
+					
+					fm.setReflectivityAreaCorrection(reflectivityAreaCorrection);
 				}
 				
-				else if(MethodSetting.toMethod(correctionSelection) == MethodSetting.Reflectivity_without_Flux_Correction){
+				else if(MethodSetting.toMethod(correctionSelection) == MethodSetting.Reflectivity_with_Flux_Correction){
 					
-					double lorentz = SXRDGeometricCorrections.lorentz(datNamesInOrder[f])
-															 .getDouble(imageNoInDatList.get(pos));
-	
-					fm.setLorentzianCorrection(lorentz);
+				
+					String externalFlux = gm.getFluxPath();
 					
-					double areaCorrection = SXRDGeometricCorrections.areacor(datNamesInOrder[f], 
-																			 gm.getBeamCorrection(), 
-																			 gm.getSpecular(),  
-																			 gm.getSampleSize(), 
-																			 gm.getOutPlaneSlits(), 
-																			 gm.getInPlaneSlits(), 
-																			 gm.getBeamInPlane(), 
-																			 gm.getBeamOutPlane(), 
-																			 gm.getDetectorSlits())
-																			 .getDouble(imageNoInDatList.get(pos));
 					
-					fm.setAreaCorrection(areaCorrection);
+					SliceND sliceL = new SliceND(qdcd.getShape());
+					
+					Dataset qdcdLocal = (Dataset) qdcd.getSlice(sliceL);
+					
+					double reflectivityFluxCorrection = ReflectivityFluxCorrectionsForDialog.reflectivityFluxCorrectionsDouble(fm.getDatFilePath(), 
+																															qdcdLocal.getDouble(fm.getNoInOriginalDat()), 
+																															externalFlux);
+					
+					
+				
+					fm.setReflectivityFluxCorrection(reflectivityFluxCorrection);
 				}
 				
-				else if(MethodSetting.toMethod(correctionSelection) == MethodSetting.Reflectivity_NO_Correction){
-					
-					double lorentz = SXRDGeometricCorrections.lorentz(datNamesInOrder[f])
-															 .getDouble(imageNoInDatList.get(pos));
-	
-					fm.setLorentzianCorrection(lorentz);
-					
-					double areaCorrection = SXRDGeometricCorrections.areacor(datNamesInOrder[f], 
-																			 gm.getBeamCorrection(), 
-																			 gm.getSpecular(),  
-																			 gm.getSampleSize(), 
-																			 gm.getOutPlaneSlits(), 
-																			 gm.getInPlaneSlits(), 
-																			 gm.getBeamInPlane(), 
-																			 gm.getBeamOutPlane(), 
-																			 gm.getDetectorSlits())
-																			 .getDouble(imageNoInDatList.get(pos));
-					
-					fm.setAreaCorrection(areaCorrection);
-				}
 				
 				fm.setScannedVariable(xArrayCon.getDouble(f));
 			
@@ -672,21 +685,45 @@ public class SurfaceScatterPresenter {
 		 
 	}
 	
-//	public double getCurrentReflectivityFluxCorrection(){
-//		return sm.getCurrentReflectivityFluxCorrection();
-//	}
-//	
-//	public double getCurrentReflectivityAreaCorrection(){
-//		return sm.getCurrentReflectivityAreaCorrection();
-//	}
-//
-//	public void setCurrentReflectivityFluxCorrection(double l){
-//		sm.setCurrentReflectivityFluxCorrection(l);
-//	}
-//	
-//	public void setCurrentReflectivityAreaCorrection(double l){
-//		sm.setCurrentReflectivityAreaCorrection(l);
-//	}
+	public double getCurrentReflectivityFluxCorrection(){
+		try{
+			FrameModel f = fms.get(sliderPos);
+			return f.getReflectivityFluxCorrection();
+		}
+		catch(Exception i){
+			return 0.0;
+		}
+	}
+	
+	public double getCurrentReflectivityAreaCorrection(){
+		try{
+			FrameModel f = fms.get(sliderPos);
+			return f.getReflectivityAreaCorrection();
+		}
+		catch(Exception i){
+			return 0.0;
+		}
+	}
+
+	public void setCurrentReflectivityFluxCorrection(double l){
+		try{
+			FrameModel f = fms.get(sliderPos);
+			f.setReflectivityFluxCorrection(l);
+		}
+		catch(Exception i){
+		}
+		
+	}
+	
+	public void setCurrentReflectivityAreaCorrection(double l){
+		try{
+			FrameModel f = fms.get(sliderPos);
+			f.setReflectivityAreaCorrection(l);
+		}
+		catch(Exception i){
+		}
+		
+	}
 	
 	public IDataHolder copiedDatWithCorrectedTifs(String fp, String datFolderPath) {
 	

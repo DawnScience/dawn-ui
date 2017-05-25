@@ -151,8 +151,12 @@ public class SurfaceScatterViewStart extends Dialog {
 
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-//				logger.debug("Widget selected");
+
 				datDisplayer.setOption(datDisplayer.getSelectedOption());
+				
+				int gh = correctionsDropDown.getSelectionIndex();
+				
+				ssp.setCorrectionSelection(gh);
 				
 				IntensityDisplaySetting ids0 = IntensityDisplaySetting.toMethod(ssps3c.getOutputCurves().getIntensity().getSelectionIndex());
 				
@@ -161,7 +165,6 @@ public class SurfaceScatterViewStart extends Dialog {
 				setSms(SaveFormatSetting.toMethod(ssps3c.getOutputCurves().getOutputFormatSelection().getSelectionIndex()));
 				
 				ssp.createGm();
-				
 				
 				
 				paramField.geometricParametersUpdate();
@@ -243,8 +246,7 @@ public class SurfaceScatterViewStart extends Dialog {
 				
 				folder.setSelection(1);
 		
-				ssp.setSelection(0);
-				ssp.setSliderPos(0);
+				
 				customComposite.getSlider().setSelection(0);
 				customComposite.getSlider().setMinimum(0);
 				customComposite.getSlider().setMaximum(ssp.getDrm().getFms().size());
@@ -274,6 +276,8 @@ public class SurfaceScatterViewStart extends Dialog {
 				}
 				
 				ssps3c.resetCrossHairs();
+				ssp.setSelection(0);
+				ssp.setSliderPos(0);
 				
 			}
 
@@ -1714,8 +1718,10 @@ public class SurfaceScatterViewStart extends Dialog {
 			(Arrays.equals(ps, 
 			customComposite.getBgRegion().getROI().getBounds().getIntPoint()) == false)	){
 	
-			customComposite.getIRegion().setROI(bgRegionROI[0]);				
+			
 			customComposite.getBgRegion().setROI(bgRegionROI[1]);
+			customComposite.getIRegion().setROI(bgRegionROI[0]);				
+			
 			
 			customComposite.getPlotSystem().repaint();
 		}

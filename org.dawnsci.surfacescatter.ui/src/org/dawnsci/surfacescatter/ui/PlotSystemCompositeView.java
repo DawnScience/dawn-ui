@@ -440,12 +440,13 @@ public class PlotSystemCompositeView extends Composite {
 						!Arrays.equals(ylen, ly)){
 					
 					bgRegion.setROI(bgRegionROI[1]);
-					ssvs.updateDisplay();
+					plotSystem.repaint();
+					
 				}
 				
 				else{
 				}
-				
+				ssvs.updateDisplay();
 			}
 		});
         
@@ -957,25 +958,28 @@ public class PlotSystemCompositeView extends Composite {
 			
 		}
 		
-//		if (ssp.getCorrectionSelection() == MethodSetting.Reflectivity_with_Flux_Correction){
-//			
-//			rawIntensity.setText(String.valueOf(ssp.getCurrentRawIntensity()));
-//			reflectivityFluxCorr.setText(String.valueOf(ssp.getCurrentReflectivityFluxCorrection()));
-//			reflectivityAreaCorr.setText(String.valueOf(ssp.getCurrentReflectivityAreaCorrection()));
-//			
-//		}
-//		
-//		if (ssp.getCorrectionSelection() == MethodSetting.Reflectivity_without_Flux_Correction){
-//			
-//			rawIntensity.setText(String.valueOf(ssp.getCurrentRawIntensity()));
-//			reflectivityAreaCorr.setText(String.valueOf(ssp.getCurrentReflectivityAreaCorrection()));
-//			
-//		}
-//		
-//		if (ssp.getCorrectionSelection() == MethodSetting.Reflectivity_NO_Correction){
-//			
-//			rawIntensity.setText(String.valueOf(ssp.getCurrentRawIntensity()));
-//		}
+		if (ssp.getCorrectionSelection() == MethodSetting.Reflectivity_with_Flux_Correction){
+			
+			rawIntensity.setText(String.valueOf(ssp.getCurrentRawIntensity()));
+			
+			double f = ssp.getCurrentReflectivityFluxCorrection();
+			
+			reflectivityFluxCorr.setText(String.valueOf(f));
+			reflectivityAreaCorr.setText(String.valueOf(ssp.getCurrentReflectivityAreaCorrection()));
+			
+		}
+		
+		if (ssp.getCorrectionSelection() == MethodSetting.Reflectivity_without_Flux_Correction){
+			
+			rawIntensity.setText(String.valueOf(ssp.getCurrentRawIntensity()));
+			reflectivityAreaCorr.setText(String.valueOf(ssp.getCurrentReflectivityAreaCorrection()));
+			
+		}
+		
+		if (ssp.getCorrectionSelection() == MethodSetting.Reflectivity_NO_Correction){
+			
+			rawIntensity.setText(String.valueOf(ssp.getCurrentRawIntensity()));
+		}
 		
 		this.update();
 		
