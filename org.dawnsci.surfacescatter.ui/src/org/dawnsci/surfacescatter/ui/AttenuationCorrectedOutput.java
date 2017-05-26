@@ -135,19 +135,24 @@ public class AttenuationCorrectedOutput {
 												  OverlapUIModel model) {
 	
 		
-		double[][] maxMinArray = new double[arrayILDx.size() -1][2];
+		double[][] maxMinArray = new double[arrayILDx.size()][2];
+		
+		int k =0;
+		IRectangularROI box =  model.getROIListElement(k).getBounds();
+		
+		maxMinArray[k][0] = box.getPointX()+ box.getLength(0);
+		maxMinArray[k][1] = box.getPointX();
 		
 		
-		for (int k=0; k<(arrayILDx.size()-1);k++){
+		for (k=0; k<(arrayILDx.size()-1);k++){
 			
-			IRectangularROI box;
-//			System.out.println("k:  "+ k);
+
 			
 			box = model.getROIListElement(k).getBounds();
 			
 			
-			maxMinArray[k][0] = box.getPointX()+ box.getLength(0);
-			maxMinArray[k][1] = box.getPointX();
+			maxMinArray[k+1][0] = box.getPointX()+ box.getLength(0);
+			maxMinArray[k+1][1] = box.getPointX();
 		}
 		
 		return maxMinArray;

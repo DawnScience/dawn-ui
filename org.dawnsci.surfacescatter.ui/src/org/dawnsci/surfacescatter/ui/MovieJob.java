@@ -2,6 +2,8 @@ package org.dawnsci.surfacescatter.ui;
 
 import java.util.ArrayList;
 
+import org.dawnsci.surfacescatter.DirectoryModel;
+import org.dawnsci.surfacescatter.LocationLenPtConverterUtils;
 import org.dawnsci.surfacescatter.SuperModel;
 import org.eclipse.dawnsci.analysis.dataset.roi.RectangularROI;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
@@ -19,7 +21,7 @@ public class MovieJob {
 	private IDataset subTempImage;
 	private IDataset subIBgTempImage;
 	private double[] tempLoc;
-	private SuperModel sm;
+	private DirectoryModel drm;
 	private int noImages;
 	private int timeStep;
 	private int DEBUG = 0;
@@ -53,9 +55,9 @@ public class MovieJob {
 		this.ssvs = ssvs;
 	}
 	
-	public void setSuperModel(SuperModel sm) {
-		this.sm = sm;
-	}
+//	public void setSuperModel(SuperModel sm) {
+//		this.sm = sm;
+//	}
 	
 	public void setPS(IPlottingSystem<Composite> pS) {
 		this.pS = pS;
@@ -72,7 +74,7 @@ public class MovieJob {
 //	@Override
 	protected void run() {
 		
-		this.sm = ssp.getSm();
+		this.drm = ssp.getDrm();
 		
 		final Display display = Display.getCurrent();
 		
@@ -80,50 +82,52 @@ public class MovieJob {
 			@Override
 			public void run(){
 				
-				sm.setSliderPos(0);
+//				ssp.setSliderPos(0);
+//				
+//				int k = 0;
 				
-				int k = 0;
-				
-				for( k = 0; k<sm.getImages().length; k++){
+				for( int k = 0; k<drm.getFms().size(); k++){
 							
 					tempImage = ssp.getImage(k);
-					subTempImage = sm.getBackgroundDatArray().get(k);
-					tempLoc = sm.getLocationList().get(k);
+					subTempImage = drm.getBackgroundDatArray().get(k);
+					tempLoc = drm.getFms().get(k).getRoiLocation();
 					imageNumber =k;
-					sm.setSliderPos(k);
-					RectangularROI newROI = new RectangularROI(tempLoc[0],
-														       tempLoc[1],
-														       sm.getInitialLenPt()[0][0],
-														       sm.getInitialLenPt()[0][1],0);
+					
+//					int[][] tempLocLenPt = LocationLenPtConverterUtils.locationToLenPtConverter(tempLoc);
+					
+//					RectangularROI newROI = new RectangularROI(tempLoc[0],
+//														       tempLoc[1],
+//														       tempLocLenPt[0][0],
+//														       tempLocLenPt[0][1],0);
 						
 					display.syncExec(new Runnable() {
 							@Override
 							public void run() {
 								
 								folder.setSelection(folder.getItems().length -1);
-								ssp.sliderMovemementMainImage(imageNumber);
+								ssp.setSliderPos(imageNumber);
 								ssvs.updateIndicators(imageNumber);
 								pS.updatePlot2D(tempImage, null, null);
-								subIBgPS.updatePlot2D(sm.getBackgroundDatArray().get(imageNumber), null, null);
+								subIBgPS.updatePlot2D(drm.getBackgroundDatArray().get(imageNumber), null, null);
 								pS.repaint(true);
 								subIBgPS.repaint(true);
 								ssvs.getSsps3c().generalUpdate();
-								
-								double[] location = ssp.getLocationList().get(imageNumber);
-								
-								int[] len = new int[] {(int) (location[2]-location[0]),(int) (location[5]-location[1])};
-								int[] pt = new int[] {(int) location[0],(int) location[1]};
-								int[][] lenPt = { len, pt };
+//								
+//								double[] location = ssp.getLocationList().get(imageNumber);
+//								
+//								int[] len = new int[] {(int) (location[2]-location[0]),(int) (location[5]-location[1])};
+//								int[] pt = new int[] {(int) location[0],(int) location[1]};
+//								int[][] lenPt = { len, pt };
 
-								RectangularROI[] greenAndBg = ssp.trackingRegionOfInterestSetter(lenPt);
+								
+								int[][] tempLocLenPt = LocationLenPtConverterUtils.locationToLenPtConverter(tempLoc);
+								
+								RectangularROI[] greenAndBg = ssp.trackingRegionOfInterestSetter(tempLocLenPt);
 								
 								ssvs.getCustomComposite().getIRegion().setROI(greenAndBg[0]);
 								ssvs.getCustomComposite().getBgRegion().setROI(greenAndBg[1]);
 								
-								
-								
-								
-								ssp.trackingRegionOfInterestSetter(lenPt);
+								ssp.trackingRegionOfInterestSetter( tempLocLenPt);
 								
 								
 								return;

@@ -590,8 +590,7 @@ public class PlotSystemCompositeView extends Composite {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				ssvs.fireAccept();
-				slider.setSelection(slider.getSelection() -1);
-				ssp.setSliderPos(slider.getSelection());
+				ssp.setSliderPos(slider.getSelection() -1);
 				generalUpdate();
 				ssvs.sliderMovementGeneralUpdate();
 			}
@@ -608,8 +607,7 @@ public class PlotSystemCompositeView extends Composite {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				ssvs.fireAccept();
-				slider.setSelection(slider.getSelection() +1);
-				ssp.setSliderPos(slider.getSelection());
+				ssp.setSliderPos(slider.getSelection() +1);
 				generalUpdate();
 				ssvs.sliderMovementGeneralUpdate();
 			}
@@ -953,7 +951,9 @@ public class PlotSystemCompositeView extends Composite {
 				
 			lorentz.setText(String.valueOf(ssp.getCurrentLorentzCorrection()));
 			polarisation.setText(String.valueOf(ssp.getCurrentPolarisationCorrection()));
-			rawIntensity.setText(String.valueOf(ssp.getCurrentRawIntensity()));
+			
+			double raw = ssp.getCurrentRawIntensity();
+			rawIntensity.setText(String.valueOf(raw));
 			areaCorrection.setText(String.valueOf(ssp.getCurrentAreaCorrection()));
 			
 		}
@@ -1032,6 +1032,7 @@ public class PlotSystemCompositeView extends Composite {
 		plotSystem.updatePlot2D(ssp.getImage(ssp.getSliderPos()), null, null);
 		setRegion(ssp.getLenPt());
 		plotSystem.repaint();
+		generalCorrectionsUpdate();
 		
 	}
 	

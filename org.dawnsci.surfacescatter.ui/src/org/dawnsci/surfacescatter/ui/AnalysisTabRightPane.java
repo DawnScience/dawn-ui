@@ -26,9 +26,6 @@ public class AnalysisTabRightPane extends Dialog {
 
 	
 	private SuperSashPlotSystem3Composite customComposite2;
-//	private SashForm right;
-//	private SashForm left;
-//	private PlotSystem1CompositeView customComposite1;
 	private SurfaceScatterPresenter ssp;
 	private SurfaceScatterViewStart ssvs;
 	private boolean modify = true;

@@ -14,6 +14,7 @@ import org.eclipse.dawnsci.plotting.api.region.ROIEvent;
 import org.eclipse.dawnsci.plotting.api.trace.ILineTrace;
 import org.eclipse.january.dataset.Dataset;
 import org.eclipse.january.dataset.DatasetFactory;
+import org.eclipse.january.dataset.DatasetUtils;
 import org.eclipse.january.dataset.IDataset;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
@@ -40,25 +41,10 @@ public class SuperSashPlotSystem3Composite extends Composite{
     private Button resetCrossHairs;
 	private SurfaceScatterViewStart ssvs;
 	
-	
-	public SurfaceScatterPresenter getSsp() {
-		return ssp;
-	}
-
-	public void setSsp(SurfaceScatterPresenter ssp) {
-		this.ssp = ssp;
-	}
-
-	public SurfaceScatterViewStart getSsvs() {
-		return ssvs;
-	}
-
-	public void setSsvs(SurfaceScatterViewStart ssvs) {
-		this.ssvs = ssvs;
-	}
-
-	public SuperSashPlotSystem3Composite(Composite parent, int style,
-			SurfaceScatterViewStart ssvs, SurfaceScatterPresenter ssp) throws Exception {
+	public SuperSashPlotSystem3Composite(Composite parent, 
+										 int style,
+										 SurfaceScatterViewStart ssvs, 
+										 SurfaceScatterPresenter ssp) throws Exception {
         super(parent, style);
         
         
@@ -336,87 +322,10 @@ public class SuperSashPlotSystem3Composite extends Composite{
 		}
 		
 		public void generalUpdate(){
-		
-				plotSystem1.clear();
-				plotSystem3.clear();
 				
 				int[][] lenPt = ssp.getLenPt();
-				
-				IRectangularROI greenRectangle = new RectangularROI(lenPt[1][0], lenPt[1][1],
-																	lenPt[0][0], lenPt[0][1], 0);
-					
-				
-				int selection = ssp.getSliderPos();
-						
-				Dataset subImage =ssp.subImage(selection,greenRectangle);
-				
-				plotSystem2.updatePlot2D(subImage, null, null);
-				updateImage(subImage);
-				ILineTrace lt1 = VerticalHorizontalSlices.horizontalslice(
-								horizontalSlice.getROI().getBounds(),
-								plotSystem1, 
-								subImage, 
-								greenRectangle);
-				
-				plotSystem1.addTrace(lt1);
-				
-				ILineTrace lt2 = VerticalHorizontalSlices.verticalslice(
-								verticalSlice.getROI().getBounds(), 
-								subImage,
-								plotSystem3, 
-								greenRectangle);
-				
-				plotSystem3.addTrace(lt2);	
-				
-				@SuppressWarnings("unchecked")
-				IDataset output = ssp.presenterDummyProcess(selection,
-																ssp.getImage(selection),
-																3);
+				generalUpdate(lenPt);
 			
-				ILineTrace lt3 = VerticalHorizontalSlices.horizontalsliceBackgroundSubtracted(
-							horizontalSlice.getROI().getBounds(),
-							plotSystem1, 
-							ssp.getTemporaryBackground(),
-							greenRectangle);
-					
-				ILineTrace lt4 = VerticalHorizontalSlices.verticalsliceBackgroundSubtracted(
-							verticalSlice.getROI().getBounds(),
-							getPlotSystem3(),
-							ssp.getTemporaryBackground(),
-							greenRectangle);
-				
-				ILineTrace lt5 = VerticalHorizontalSlices.horizontalsliceBackgroundSubtracted(
-							horizontalSlice.getROI().getBounds(),
-							plotSystem1, 
-							output,
-							greenRectangle);
-					
-				ILineTrace lt6 = VerticalHorizontalSlices.verticalsliceBackgroundSubtracted(
-							verticalSlice.getROI().getBounds(),
-							plotSystem3,
-							output,
-							greenRectangle);
-					
-				lt3.setName("background Slice");
-				lt4.setName("background Slice");
-					
-				plotSystem1.addTrace(lt3);
-				plotSystem3.addTrace(lt4);
-				plotSystem1.addTrace(lt5);
-				plotSystem3.addTrace(lt6);
-				
-				plotSystem1.clearAnnotations();
-				plotSystem3.clearAnnotations();
-				
-				plotSystem1.autoscaleAxes();
-				plotSystem3.autoscaleAxes();
-			
-				plotSystem1.repaint();
-				plotSystem3.repaint();
-				
-				ssvs.getCustomComposite().generalCorrectionsUpdate();
-				
-				
 		}
 		
 		
@@ -428,10 +337,12 @@ public class SuperSashPlotSystem3Composite extends Composite{
 			IRectangularROI greenRectangle = new RectangularROI(lenPt[1][0], lenPt[1][1],
 																 lenPt[0][0], lenPt[0][1], 0);
 				
-			
 			int selection = ssp.getSliderPos();
 					
 			Dataset subImage =ssp.subImage(selection,greenRectangle);
+			
+			double rawIntensity= (double) DatasetUtils.cast(subImage,Dataset.FLOAT64).sum();
+			ssp.setCurrentRawIntensity(rawIntensity);
 			
 			plotSystem2.updatePlot2D(subImage, null, null);
 			updateImage(subImage);
@@ -454,8 +365,8 @@ public class SuperSashPlotSystem3Composite extends Composite{
 	
 			@SuppressWarnings("unchecked")
 			IDataset output = ssp.presenterDummyProcess(selection,
-						ssp.getImage(selection),
-						3);
+														ssp.getImage(selection),
+														3);
 		
 			ILineTrace lt3 = VerticalHorizontalSlices.horizontalsliceBackgroundSubtracted(
 						horizontalSlice.getROI().getBounds(),
@@ -583,6 +494,24 @@ public class SuperSashPlotSystem3Composite extends Composite{
         }
         topRight.setText("");
         topRight.redraw();
+	}
+	
+	
+	
+	public SurfaceScatterPresenter getSsp() {
+		return ssp;
+	}
+
+	public void setSsp(SurfaceScatterPresenter ssp) {
+		this.ssp = ssp;
+	}
+
+	public SurfaceScatterViewStart getSsvs() {
+		return ssvs;
+	}
+
+	public void setSsvs(SurfaceScatterViewStart ssvs) {
+		this.ssvs = ssvs;
 	}
 }
 		

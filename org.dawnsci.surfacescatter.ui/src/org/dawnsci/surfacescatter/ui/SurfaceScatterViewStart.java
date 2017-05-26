@@ -238,9 +238,16 @@ public class SurfaceScatterViewStart extends Dialog {
 				if(ssp.isqConvert()){
 					double  energy = Double.valueOf(paramField.getEnergy().getText());
 					ssp.setEnergy(energy);
-					ssp.qConversion();
+					
 					ssp.setTheta(paramField.getTheta().getSelectionIndex());
 					outputCurves.getqAxis().setEnabled(ssp.isqConvert());
+					
+					try{
+						ssp.qConversion();
+					}
+					catch(Exception g){
+			
+					}
 				}
 				
 				folder.setSelection(1);
@@ -728,24 +735,24 @@ public class SurfaceScatterViewStart extends Dialog {
 					
 					int state = getOutputCurves().getIntensity().getSelectionIndex();
 					
-//					ssp.qConversion();
-//					
-//					if(state == 0){
-//						lt1.setData(ssp.getSplicedCurveQ(), ssp.getSplicedCurveY()); 
-//						
-//						
-//					}
-//					
-//					else if(state == 1){
-//						lt1.setData(ssp.getSplicedCurveQ(), ssp.getSplicedCurveYFhkl()); 
-//						
-//					}
-//					
-//					
-//					else if(state == 2){
-//						lt1.setData(ssp.getSplicedCurveQ(), ssp.getSplicedCurveYRaw()); 
-//						
-//					}
+					ssp.qConversion();
+					
+					if(state == 0){
+						lt1.setData(ssp.getSplicedCurveQ(), ssp.getSplicedCurveY()); 
+						
+						
+					}
+					
+					else if(state == 1){
+						lt1.setData(ssp.getSplicedCurveQ(), ssp.getSplicedCurveYFhkl()); 
+						
+					}
+					
+					
+					else if(state == 2){
+						lt1.setData(ssp.getSplicedCurveQ(), ssp.getSplicedCurveYRaw()); 
+						
+					}
 					
 					pS.addTrace(lt1);
 					pS.repaint();
@@ -1013,6 +1020,21 @@ public class SurfaceScatterViewStart extends Dialog {
 		}
 	}
 	
+	public void interpolationTrackerBoxesReject(){
+		
+		if(ssp.getInterpolatorBoxes() != null){
+			for(int j = 0; j<ssp.getInterpolatorBoxes().size(); j++){
+				if(ssp.getInterpolatorBoxes().get(j)[2][0] == ssp.getSliderPos()){
+					ssp.getInterpolatorBoxes().remove(j);
+					customComposite.getPlotSystem().removeRegion(ssp.getInterpolatorRegions().get(j));
+					ssp.getInterpolatorRegions().remove(j);
+					customComposite.getPlotSystem().repaint(false);
+				}
+			}
+		}
+	}
+
+	
 	public void populateThetaOptionsDropDown(){
 		
 		Combo c = paramField.getSelectedOption();
@@ -1027,12 +1049,6 @@ public class SurfaceScatterViewStart extends Dialog {
 	}
 	
 	public void fireAccept(){
-		
-//		if(ssp.getQList()!=null){
-//			if(ssp.getQList().size()!=0){
-//				ssps3c.getOutputCurves().getqAxis().setEnabled(true);
-//			}
-//		}
 		
 		
 		if(ssp.getProcessingMethodSelection() ==ProccessingMethod.MANUAL){
@@ -1060,8 +1076,8 @@ public class SurfaceScatterViewStart extends Dialog {
 	
 			this.getSsps3c().getOutputCurves().getPlotSystem().repaint(false);
 			customComposite.getFolder().setSelection(0);
-			analysisSash.setWeights(new int[] { 40, 60 });
-			analysisSash.redraw();
+//			analysisSash.setWeights(new int[] { 40, 60 });
+//			analysisSash.redraw();
 			
 		}
 		
@@ -1324,12 +1340,12 @@ public class SurfaceScatterViewStart extends Dialog {
 
 					int xPos =0;
 					
-//					if(qConvert){
-//						xPos = ssp.qPositionFinder(outputCurves.getRegionNo().getROI().getPointX());
-//					}
-//					else{
+					if(qConvert){
+						xPos = ssp.qPositionFinder(outputCurves.getRegionNo().getROI().getPointX());
+					}
+					else{
 						xPos = ssp.xPositionFinder(outputCurves.getRegionNo().getROI().getPointX());
-//					}
+					}
 										
 					ssp.sliderMovemementMainImage(xPos);
 					ssp.sliderZoomedArea(xPos, customComposite.getGreenRegion().getROI(),
