@@ -135,7 +135,7 @@ public class AttenuationCorrectedOutput {
 												  OverlapUIModel model) {
 	
 		
-		double[][] maxMinArray = new double[arrayILDx.size()][2];
+		double[][] maxMinArray = new double[arrayILDx.size() -1][2];
 		
 		
 		for (int k=0; k<(arrayILDx.size()-1);k++){
