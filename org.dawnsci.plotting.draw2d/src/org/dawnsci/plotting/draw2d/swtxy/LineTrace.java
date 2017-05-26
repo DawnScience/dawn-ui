@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012 Diamond Light Source Ltd.
+ * Copyright (c) 2012, 2017 Diamond Light Source Ltd.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -29,14 +29,17 @@ import org.eclipse.ui.preferences.ScopedPreferenceStore;
 public class LineTrace extends Trace implements ITraceContainer {
 	
 	protected String internalName; 
-	
+
+	/**
+	 * {@link #init(Axis, Axis, IDataProvider)} needs to be called if a trace is
+	 * created with this constructor
+	 */
 	public LineTrace(String name) {
 		super(name);
 	}
-	
-	public void init(Axis xAxis, Axis yAxis, IDataProvider dataProvider) {
-		super.init(xAxis, yAxis, dataProvider);
-		
+
+	public LineTrace(String name, Axis xAxis, Axis yAxis, IDataProvider dataProvider) {
+		super(name, xAxis, yAxis, dataProvider);
 		if (dataProvider != null) {
 			if (dataProvider.hasErrors()) {
 				setErrorBarEnabled(getPreferenceStore().getBoolean(PlottingConstants.GLOBAL_SHOW_ERROR_BARS));
@@ -44,7 +47,7 @@ public class LineTrace extends Trace implements ITraceContainer {
 			}
 		}
 	}
-	
+
 	private IPreferenceStore getPreferenceStore() {
 		return new ScopedPreferenceStore(InstanceScope.INSTANCE, "org.dawnsci.plotting");
 	}
