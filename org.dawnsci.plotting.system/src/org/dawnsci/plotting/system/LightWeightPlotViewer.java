@@ -860,8 +860,7 @@ public class LightWeightPlotViewer<T> extends AbstractPlottingViewer<T> implemen
 		yAxis.setLabelDataAndTitle(null);
 
 		LightWeightDataProvider traceDataProvider = new LightWeightDataProvider();
-		final LineTrace   trace    = new LineTrace(traceName);
-		trace.init(xAxis, yAxis, traceDataProvider);
+		final LineTrace   trace    = new LineTrace(traceName, xAxis, yAxis, traceDataProvider);
 		final LineTraceImpl wrapper = new LineTraceImpl(getSystem(), trace);
 		return wrapper;
 	}
@@ -952,7 +951,7 @@ public class LightWeightPlotViewer<T> extends AbstractPlottingViewer<T> implemen
 			LightWeightDataProvider traceDataProvider = new LightWeightDataProvider(evt.getXData(), evt.getYData());
 			
 			//create the trace
-			trace.init(xAxis, yAxis, traceDataProvider);	
+			trace.init(xAxis, yAxis, traceDataProvider);
 			
 			if (y.getName()!=null && !"".equals(y.getName())) {
 				if (traceMap!=null) traceMap.put(y.getName(), wrapper);
