@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012 Diamond Light Source Ltd.
+ * Copyright (c) 2012, 2017 Diamond Light Source Ltd.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -74,9 +74,9 @@ public class XYRegionGraph extends XYGraph {
 		super(new XYRegionGraphAxesFactory());
 
 		try {
-			this.showLegend = getPreferenceStore().getBoolean(BasePlottingConstants.XY_SHOWLEGEND);
+			setShowLegend(getPreferenceStore().getBoolean(BasePlottingConstants.XY_SHOWLEGEND), false);
 		} catch (NullPointerException ne) {
-			this.showLegend = true;
+			setShowLegend(true, false);
 		}
 	}
 	
@@ -192,14 +192,10 @@ public class XYRegionGraph extends XYGraph {
 		}
 		
 	}
-	
-	public void setDefaultShowLegend(boolean showLeg) {
-		this.showLegend = showLeg;
-	}
-	
-	public void setShowLegend(boolean showLeg) {
+
+	private void internalSetShowLegend(boolean showLeg) {
 		
-		boolean orig = this.showLegend;
+		boolean orig = isShowLegend();
 		super.setShowLegend(showLeg);
 		getPreferenceStore().setValue(BasePlottingConstants.XY_SHOWLEGEND, showLeg);
 		if (orig!=showLeg && ServiceHolder.getMacroService()!=null) {
@@ -228,14 +224,6 @@ public class XYRegionGraph extends XYGraph {
 			ServiceHolder.getMacroService().publish(new ColorMacroEvent("ps", this, titleColor));
 		}
 	}
-
-	/**
-	 * @return the showLegend
-	 */
-	public boolean isShowLegend() {
-		return showLegend;
-	}
-
 
 	/**
 	 * Call from UI thread only!
