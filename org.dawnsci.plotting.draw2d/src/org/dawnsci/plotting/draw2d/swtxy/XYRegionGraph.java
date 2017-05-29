@@ -74,9 +74,9 @@ public class XYRegionGraph extends XYGraph {
 		super(new XYRegionGraphAxesFactory());
 
 		try {
-			setShowLegend(getPreferenceStore().getBoolean(BasePlottingConstants.XY_SHOWLEGEND), false);
+			setShowLegend(getPreferenceStore().getBoolean(BasePlottingConstants.XY_SHOWLEGEND));
 		} catch (NullPointerException ne) {
-			setShowLegend(true, false);
+			setShowLegend(true);
 		}
 	}
 	
