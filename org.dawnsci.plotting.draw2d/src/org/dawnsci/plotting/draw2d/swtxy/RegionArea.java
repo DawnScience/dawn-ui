@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012 Diamond Light Source Ltd.
+ * Copyright (c) 2012, 2017 Diamond Light Source Ltd.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -273,7 +273,7 @@ public class RegionArea extends PlotArea implements IPlotArea {
 			return;
 		}
 		if (getSelectedCursor()!=null) return;
-		if (zoomType!=ZoomType.NONE)   return;
+		if (getZoomType()!=ZoomType.NONE)   return;
 		
 
 		if (positionCursor!=null) positionCursor.dispose();
@@ -291,7 +291,7 @@ public class RegionArea extends PlotArea implements IPlotArea {
 	void addRegion(final IRegion region, boolean fireListeners) {
 		
 		regions.put(region.getName(), region);
-		((AbstractSelectionRegion<?>)region).setXyGraph(xyGraph);
+		((AbstractSelectionRegion<?>)region).setXyGraph(getXYGraph());
 		((AbstractSelectionRegion<?>)region).createContents(this);
 		((AbstractSelectionRegion<?>)region).setSelectionProvider(selectionProvider);
 		if (fireListeners) fireRegionAdded(new RegionEvent(region));
@@ -500,7 +500,7 @@ public class RegionArea extends PlotArea implements IPlotArea {
 		ICoordinateSystem       coords  = new RegionCoordinateSystem(getImageTrace(), x, y);
 		AbstractSelectionRegion<?> region  = SelectionRegionFactory.createSelectionRegion(name, coords, regionType);
 		if (startingWithMouseEvent) {
-			xyGraph.setZoomType(ZoomType.NONE);
+			getXYGraph().setZoomType(ZoomType.NONE);
 		    
 		    // Mouse listener for region bounds
 		    regionListener = new RegionMouseListener(regionLayer, this, region, region.getMinimumMousePresses(), region.getMaximumMousePresses());
@@ -751,7 +751,8 @@ public class RegionArea extends PlotArea implements IPlotArea {
 		if (traceList!=null) {
 			for (Trace trace : traceList) {
 				remove(trace);
-				if (trace instanceof LineTrace) ((LineTrace)trace).dispose();
+				if (trace instanceof LineTrace)
+					((LineTrace)trace).dispose();
 			}
 			traceList.clear();
 	    }
@@ -838,7 +839,7 @@ public class RegionArea extends PlotArea implements IPlotArea {
 	}
 
 	XYRegionGraph getRegionGraph() {
-		return (XYRegionGraph)xyGraph;
+		return (XYRegionGraph)getXYGraph();
 	}
 
 	public boolean isRequirePositionWithCursor() {
