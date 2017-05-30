@@ -324,7 +324,7 @@ public class TrackingHandlerWithFrames {
 								System.out.println(e.getMessage());
 							}
 							
-							int jok = frame.getDatNo();
+//							int jok = frame.getDatNo();
 							
 							drm.addxList(drm.getFms().size(), k,
 									frame.getScannedVariable());
@@ -434,7 +434,7 @@ public class TrackingHandlerWithFrames {
 			ssvs.getSsps3c().generalUpdate();
 			ssp.stitchAndPresentWithFrames(ssvs.getSsps3c().getOutputCurves(), ssvs.getIds());
 			
-			double[] location = ssp.getThisLocation();
+			double[] location = ssp.getThisLocation(imageNumber);
 			
 			int[] len = new int[] {(int) (location[2]-location[0]),(int) (location[5]-location[1])};
 			int[] pt = new int[] {(int) location[0],(int) location[1]};
@@ -446,10 +446,10 @@ public class TrackingHandlerWithFrames {
 			ssvs.getPlotSystemCompositeView().getBgRegion().setROI(greenAndBg[1]);
 			
 			if(ssp.getMethodology() == Methodology.OVERLAPPING_BACKGROUND_BOX){
-				ssvs.getPlotSystemCompositeView().getSecondBgRegion().setROI(ssp.generateOffsetBgROI(ssp.getLenPt()));
+				ssvs.getPlotSystemCompositeView().getSecondBgRegion().setROI(ssp.generateOffsetBgROI(lenPt));
 			}
 			
-			ssvs.getSsps3c().generalUpdate(ssp.getLenPt());
+			ssvs.getSsps3c().generalUpdate(lenPt);
 			
 			ssvs.getSsps3c().getOutputCurves().getIntensity().redraw();
 			
@@ -531,10 +531,6 @@ class trackingJob21 {
 	public void setGm(GeometricParametersModel gms) {
 		this.gm = gms;
 	}
-
-//	public void setPlotSystem(IPlottingSystem<Composite> plotSystem) {
-//		this.plotSystem = plotSystem;
-//	}
 
 	public void setTimeStep(int timeStep) {
 		this.timeStep = timeStep;
@@ -625,7 +621,6 @@ class trackingJob21 {
 							
 							debug("Tracker should fire once");
 							
-							///////////////////////////this is where I'm up to
 						
 							IDataset output1 = DummyProcessWithFrames.DummyProcess(drm, 
 									   gm, 
@@ -725,7 +720,8 @@ class trackingJob21 {
 									int jokLocal = frame.getDatNo();									
 									
 									if(drm.getLocationList() == null && 
-											fms.get(0).getTrackingMethodology() != TrackerType1.INTERPOLATION){
+									   fms.get(0).getTrackingMethodology() != TrackerType1.INTERPOLATION &&
+									   fms.get(0).getTrackingMethodology() != TrackerType1.SPLINE_INTERPOLATION){
 										
 										if (drm.getTrackerLocationList() == null  ){
 //											| sm.getTrackerLocationList().size() <= 10
@@ -792,7 +788,8 @@ class trackingJob21 {
 									}	
 									
 									
-									else if(frame.getTrackingMethodology()== TrackerType1.INTERPOLATION){
+									else if(frame.getTrackingMethodology()== TrackerType1.INTERPOLATION ||
+										    frame.getTrackingMethodology()== TrackerType1.SPLINE_INTERPOLATION){
 										
 										int[] len = new int[] {(int) Math.round(drm.getInterpolatedLenPts().get(k)[0][0]),(int) Math.round(drm.getInterpolatedLenPts().get(k)[0][1])};
 										int[]  pt = new int[] {(int) Math.round(drm.getInterpolatedLenPts().get(k)[1][0]),(int) Math.round(drm.getInterpolatedLenPts().get(k)[1][1])};
@@ -866,7 +863,7 @@ class trackingJob21 {
 
 						else if (imagePosInOriginalDat[nextk] != 0) {
 
-							for (int k = startFrame; k >= 0; k--) {
+							for (int k = nextk; k >= 0; k--) {
 
 								if(t.isInterrupted()){
 									break;
@@ -893,7 +890,9 @@ class trackingJob21 {
 									}
 									
 									
-									if(drm.getLocationList() == null && frame.getTrackingMethodology() != TrackerType1.INTERPOLATION){
+									if(drm.getLocationList() == null && 
+									   frame.getTrackingMethodology() != TrackerType1.INTERPOLATION &&
+									   frame.getTrackingMethodology() != TrackerType1.SPLINE_INTERPOLATION){
 										
 										
 										double[] test = new double[] {0,0,0,0,0,0,0,0};
@@ -946,7 +945,8 @@ class trackingJob21 {
 									
 									}
 									
-									else if(frame.getTrackingMethodology() == TrackerType1.INTERPOLATION){
+									else if(frame.getTrackingMethodology() == TrackerType1.INTERPOLATION ||
+											frame.getTrackingMethodology() == TrackerType1.SPLINE_INTERPOLATION){
 										
 										int[] len = new int[] {(int) Math.round(drm.getInterpolatedLenPts().get(k)[0][0]),(int) Math.round(drm.getInterpolatedLenPts().get(k)[0][1])};
 										int[]  pt = new int[] {(int) Math.round(drm.getInterpolatedLenPts().get(k)[1][0]),(int) Math.round(drm.getInterpolatedLenPts().get(k)[1][1])};
@@ -1014,8 +1014,8 @@ class trackingJob21 {
 							
 							drm.getInputForEachDat()[nextjok]=(null);
 							
-							if(startFrame != noImages-1){
-								for (int k = startFrame+1; k < noImages; k++) {
+							if(nextk != noImages-1){
+								for (int k = nextk+1; k < noImages; k++) {
 	
 									if(t.isInterrupted()){
 										break;
@@ -1041,7 +1041,9 @@ class trackingJob21 {
 											System.out.println(e.getMessage());
 										}
 
-										if(drm.getLocationList() == null && frame.getTrackingMethodology()!= TrackerType1.INTERPOLATION){
+										if(drm.getLocationList() == null && 
+										   frame.getTrackingMethodology()!= TrackerType1.INTERPOLATION &&
+										   frame.getTrackingMethodology() != TrackerType1.SPLINE_INTERPOLATION){
 											
 											
 											double[] test = new double[] {0,0,0,0,0,0,0,0};
@@ -1091,7 +1093,8 @@ class trackingJob21 {
 										
 										}	
 										
-										else if(frame.getTrackingMethodology() == TrackerType1.INTERPOLATION){
+										else if(frame.getTrackingMethodology() == TrackerType1.INTERPOLATION || 
+												frame.getTrackingMethodology() == TrackerType1.SPLINE_INTERPOLATION){
 											
 											int[] len = new int[] {(int) Math.round(drm.getInterpolatedLenPts().get(k)[0][0]),(int) Math.round(drm.getInterpolatedLenPts().get(k)[0][1])};
 											int[]  pt = new int[] {(int) Math.round(drm.getInterpolatedLenPts().get(k)[1][0]),(int) Math.round(drm.getInterpolatedLenPts().get(k)[1][1])};
@@ -1403,7 +1406,9 @@ class trackingJob21 {
 						
 						int jokLocal = frame.getDatNo();
 						
-						if(drm.getLocationList() == null && frame.getTrackingMethodology() != TrackerType1.INTERPOLATION){
+						if(drm.getLocationList() == null && 
+						   frame.getTrackingMethodology() != TrackerType1.INTERPOLATION &&
+						   frame.getTrackingMethodology() != TrackerType1.SPLINE_INTERPOLATION){
 							
 							if (drm.getTrackerLocationList() == null ){
 								
@@ -1467,7 +1472,8 @@ class trackingJob21 {
 						}	
 						
 						
-						else if(frame.getTrackingMethodology()== TrackerType1.INTERPOLATION){
+						else if(frame.getTrackingMethodology()== TrackerType1.INTERPOLATION ||
+								frame.getTrackingMethodology() == TrackerType1.SPLINE_INTERPOLATION){
 							
 							int[] len = new int[] {(int) Math.round(drm.getInterpolatedLenPts().get(k)[0][0]),(int) Math.round(drm.getInterpolatedLenPts().get(k)[0][1])};
 							int[]  pt = new int[] {(int) Math.round(drm.getInterpolatedLenPts().get(k)[1][0]),(int) Math.round(drm.getInterpolatedLenPts().get(k)[1][1])};
@@ -1536,9 +1542,11 @@ class trackingJob21 {
 			else if (imagePosInOriginalDat[nextk] != 0) {
 
 				debug("%%%%%%%%%%%%%%%%% switched the dat file");
-				debug("%%%%%%%%%%%%%%%%% sm.getStartFrame:  "  +  startFrame + "??????????????????" );
+				debug("%%%%%%%%%%%%%%%%% sm.getStartFrame:  "  +  nextk + "??????????????????" );
 				
-				for (int k = (startFrame); k >= 0; k--) {
+				
+//				startFrame = nextk;
+				for (int k = (nextk); k >= 0; k--) {
 
 					if(t.isInterrupted()){
 						break;
@@ -1553,21 +1561,12 @@ class trackingJob21 {
 						
 						
 						debug("%%%%%%%%%%%%%%%%% switched the dat file");
-						debug("%%%%%%%%%%%%%%%%% sm.getStartFrame:  "  +  startFrame + "??????????????????" );
+						debug("%%%%%%%%%%%%%%%%% sm.getStartFrame:  "  + nextjok + "??????????????????" );
 						
 						
 						int trackingMarker = 1;
 						
-						SliceND slice = new SliceND(frame.getRawImageData().getShape());
-						IDataset j = DatasetFactory.createFromObject(0);
-						try {
-							j = frame.getRawImageData().getSlice(slice);
-						} catch (DatasetException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
-							System.out.println(e.getMessage());
-						}
-
+						
 						ArrayList<Double[]> zero = new ArrayList<>();
 						
 //						zero.add(new Double[] {0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0});
@@ -1606,7 +1605,9 @@ class trackingJob21 {
 							re.remove(df);
 						}
 						
-						if(re.size() == 0 && frame.getTrackingMethodology() != TrackerType1.INTERPOLATION){
+						if(re.size() == 0 && 
+						   frame.getTrackingMethodology() != TrackerType1.INTERPOLATION &&
+						   frame.getTrackingMethodology() != TrackerType1.SPLINE_INTERPOLATION) {
 							
 							double[] test = new double[] {0,0,0,0,0,0,0,0};
 							double[] test2 = new double[] {10,10,60,10,10,60,60,60};
@@ -1688,7 +1689,8 @@ class trackingJob21 {
 							
 						}	
 						
-						else if(frame.getTrackingMethodology() == TrackerType1.INTERPOLATION){
+						else if(frame.getTrackingMethodology() == TrackerType1.INTERPOLATION ||
+							    frame.getTrackingMethodology() == TrackerType1.SPLINE_INTERPOLATION){
 							
 							int[] len = new int[] {(int) Math.round(drm.getInterpolatedLenPts().get(k)[0][0]),(int) Math.round(drm.getInterpolatedLenPts().get(k)[0][1])};
 							int[]  pt = new int[] {(int) Math.round(drm.getInterpolatedLenPts().get(k)[1][0]),(int) Math.round(drm.getInterpolatedLenPts().get(k)[1][1])};
@@ -1757,8 +1759,10 @@ class trackingJob21 {
 				drm.getInputForEachDat()[nextjok] = null;
 				
 				
-				if(startFrame != noImages-1){
-					for (int k = startFrame+1; k < noImages; k++) {
+				if(nextjok != noImages-1){
+					for (int k = nextjok+1; 
+					     k < noImages; 
+					     k++) {
 						
 						if(t.isInterrupted()){
 							break;
@@ -1784,14 +1788,11 @@ class trackingJob21 {
 								e.printStackTrace();
 								System.out.println(e.getMessage());
 							}
+
 							
-							
-//							DataModel dm = dms.get(nextjok);
-//							GeometricParametersModel gm = gms.get(nextjok);
-							//ExampleModel model = models.get(nextjok);
-	
-							
-							if(drm.getLocationList() == null && frame.getTrackingMethodology()!= TrackerType1.INTERPOLATION){
+							if(drm.getLocationList() == null && 
+							   frame.getTrackingMethodology()!= TrackerType1.INTERPOLATION &&
+							   frame.getTrackingMethodology() != TrackerType1.SPLINE_INTERPOLATION){
 								
 								double[] test = new double[] {0,0,0,0,0,0,0,0};
 								double myNum = drm.getSortedX().getDouble(k);
@@ -1839,7 +1840,8 @@ class trackingJob21 {
 							
 							}	
 							
-							else if(frame.getTrackingMethodology() == TrackerType1.INTERPOLATION){
+							else if(frame.getTrackingMethodology() == TrackerType1.INTERPOLATION ||
+									frame.getTrackingMethodology() == TrackerType1.SPLINE_INTERPOLATION){
 								
 								int[] len = new int[] {(int) Math.round(drm.getInterpolatedLenPts().get(k)[0][0]),(int) Math.round(drm.getInterpolatedLenPts().get(k)[0][1])};
 								int[]  pt = new int[] {(int) Math.round(drm.getInterpolatedLenPts().get(k)[1][0]),(int) Math.round(drm.getInterpolatedLenPts().get(k)[1][1])};
@@ -1881,12 +1883,7 @@ class trackingJob21 {
 							
 							int imageNumber =k;
 							IDataset tempImage = j;
-							double[] tempLoc = drm.getLocationList().get(frame.getDatNo()).get(frame.getNoInOriginalDat());
-							RectangularROI newROI = new RectangularROI(tempLoc[0],
-								       tempLoc[1],
-								       drm.getInitialLenPt()[0][0],
-								       drm.getInitialLenPt()[0][1],0);
-							
+
 							display.syncExec(new Runnable() {
 								@Override
 								public void run() {	
@@ -1927,16 +1924,15 @@ class trackingJob21 {
 		ssvs.getSsps3c().generalUpdate();
 		ssp.stitchAndPresent1(ssvs.getSsps3c().getOutputCurves(), ssvs.getIds());
 
-		double[] location = ssp.getThisLocation();
+		double[] location = ssp.getThisLocation(imageNumber);
 		
 		int[] len = new int[] {(int) (location[2]-location[0]),(int) (location[5]-location[1])};
 		int[] pt = new int[] {(int) location[0],(int) location[1]};
 		int[][] lenPt = { len, pt };
 		
-//		int[][] lenPt1= LocationLenPtConverterUtils.locationToLenPtConverter(location);
+		int[][] lenPt1= LocationLenPtConverterUtils.locationToLenPtConverter(location);
 		
-		
-		RectangularROI[] greenAndBg = ssp.trackingRegionOfInterestSetter(lenPt);
+		RectangularROI[] greenAndBg = ssp.trackingRegionOfInterestSetter(lenPt1);
 		
 		ssvs.getPlotSystemCompositeView().getIRegion().setROI(greenAndBg[0]);
 		ssvs.getPlotSystemCompositeView().getBgRegion().setROI(greenAndBg[1]);
@@ -1946,14 +1942,16 @@ class trackingJob21 {
 			ssvs.getPlotSystemCompositeView().getSecondBgRegion().setROI(ssp.generateOffsetBgROI(ssp.getLenPt()));
 		}
 		
-		ssvs.getSsps3c().generalUpdate(ssp.getLenPt());
+		ssvs.getSsps3c().generalUpdate(lenPt);
 
 		ssvs.getSsps3c().getOutputCurves().getIntensity().redraw();
 
 		
 		if(progressBar.isDisposed() != true){
+			System.out.println("progress bar start:  " +progressBar.getSelection());
 			progressBar.setSelection(progressBar.getSelection() +1);
-	
+			System.out.println("progress bar incremented:  " +progressBar.getSelection());
+			System.out.println("progress bar max:  " +progressBar.getMaximum());
 			if(progressBar.getSelection() == progressBar.getMaximum()){
 				tpaav.close();
 			}

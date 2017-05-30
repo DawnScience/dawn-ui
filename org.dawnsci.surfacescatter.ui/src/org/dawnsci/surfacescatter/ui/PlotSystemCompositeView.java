@@ -412,41 +412,8 @@ public class PlotSystemCompositeView extends Composite {
 			}
 			
 			public void roiStandard(ROIEvent evt) {
-				
-				IRectangularROI greenRectangle = region.getROI().getBounds();
-				int[] len = greenRectangle.getIntLengths();
-				int[] pt = greenRectangle.getIntPoint();
-				
-				int[][] lenPt = { len, pt };
-				
-				RectangularROI[] bgRegionROI = ssp.trackingRegionOfInterestSetter(lenPt);
-				
-				int[] ly = bgRegionROI[1].getIntLengths();
-				int[] py = bgRegionROI[1].getIntPoint();
-				
-				IRectangularROI yellowRectangle = bgRegion.getROI().getBounds();
-				int[] ylen = yellowRectangle.getIntLengths();
-				int[] ypt = yellowRectangle.getIntPoint();
-				
-				
-				
-//				RectangularROI bgROI = new RectangularROI(bgRegionROI[0],
-//						  bgRegionROI[1],
-//						  bgRegionROI[2],
-//						  bgRegionROI[3],
-//						  bgRegionROI[4]);
-				
-				if(!Arrays.equals(ypt, py) ||
-						!Arrays.equals(ylen, ly)){
-					
-					bgRegion.setROI(bgRegionROI[1]);
-					plotSystem.repaint();
-					
-				}
-				
-				else{
-				}
-				ssvs.updateDisplay();
+
+				PlotSystemCompositeView.this.roiStandard();
 			}
 		});
         
@@ -508,6 +475,40 @@ public class PlotSystemCompositeView extends Composite {
 		});
 	    
 	}
+    
+    public void roiStandard(){
+    	
+    	IRectangularROI greenRectangle = region.getROI().getBounds();
+		int[] len = greenRectangle.getIntLengths();
+		int[] pt = greenRectangle.getIntPoint();
+		
+		int[][] lenPt = { len, pt };
+		
+		RectangularROI[] bgRegionROI = ssp.trackingRegionOfInterestSetter(lenPt);
+		
+		int[] ly = bgRegionROI[1].getIntLengths();
+		int[] py = bgRegionROI[1].getIntPoint();
+		
+		IRectangularROI yellowRectangle = bgRegion.getROI().getBounds();
+		int[] ylen = yellowRectangle.getIntLengths();
+		int[] ypt = yellowRectangle.getIntPoint();
+		
+
+		if(!Arrays.equals(ypt, py) ||
+				!Arrays.equals(ylen, ly)){
+			
+			bgRegion.setROI(bgRegionROI[1]);
+			plotSystem.repaint();
+			
+		}
+		
+		else{
+		}
+		ssvs.updateDisplay();
+    	
+    	
+    }
+    
     
     public void changeProcessingMode(){
     	

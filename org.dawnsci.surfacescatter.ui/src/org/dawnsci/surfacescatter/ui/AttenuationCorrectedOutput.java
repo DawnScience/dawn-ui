@@ -133,8 +133,7 @@ public class AttenuationCorrectedOutput {
 	
 	public static double[][] maxMinArrayGenerator(ArrayList<IDataset> arrayILDx, 
 												  OverlapUIModel model) {
-	
-		
+
 		double[][] maxMinArray = new double[arrayILDx.size()][2];
 		
 		int k =0;
@@ -144,15 +143,14 @@ public class AttenuationCorrectedOutput {
 		maxMinArray[k][1] = box.getPointX();
 		
 		
-		for (k=0; k<(arrayILDx.size()-1);k++){
-			
+		for (k=0; k<(model.getROIList().size());k++){
+			if (model.getROIList().get(k) != null){
 
-			
-			box = model.getROIListElement(k).getBounds();
-			
-			
-			maxMinArray[k+1][0] = box.getPointX()+ box.getLength(0);
-			maxMinArray[k+1][1] = box.getPointX();
+				box = model.getROIListElement(k).getBounds();
+				
+				maxMinArray[k+1][0] = box.getPointX()+ box.getLength(0);
+				maxMinArray[k+1][1] = box.getPointX();
+			}
 		}
 		
 		return maxMinArray;

@@ -952,6 +952,15 @@ public class SurfaceScatterPresenter {
 		
 	}
 	
+	
+	public double[] getThisLocation(int k){
+		
+		FrameModel f = fms.get(k);
+
+		return f.getRoiLocation();
+		
+	}
+	
 	public void backgroundBoxesManager(IRegion r1, IRegion r2, Button centreButton){
 		
 		Display display = Display.getCurrent();
@@ -1085,7 +1094,7 @@ public class SurfaceScatterPresenter {
 					drm.setInterpolatedLenPts(interpolatedLenPts);
 
 					return interpolatedLenPts;
-			}
+		}
 
 		if(drm.getInterpolatorBoxes().size() > 1){
 				
@@ -2960,7 +2969,12 @@ public class SurfaceScatterPresenter {
 	}
 
 	public void setProcessingMethodSelection(ProcessingMethodsEnum.ProccessingMethod processingMethodSelection) {
+		
 		this.processingMethodSelection = (processingMethodSelection);
+		
+		for(FrameModel f :fms){
+			f.setProcessingMethodSelection(processingMethodSelection);
+		}
 	}
 
 	public String getImageName() {

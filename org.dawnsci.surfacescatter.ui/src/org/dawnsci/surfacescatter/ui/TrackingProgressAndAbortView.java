@@ -21,21 +21,18 @@ public class TrackingProgressAndAbortView extends Dialog {
 	
 	private Button abort;
 	private ProgressBar progress;
-	private int maximum;
 	private SurfaceScatterViewStart ssvs;
 	private SurfaceScatterPresenter ssp;
 	private TrackingHandlerWithFrames tj; 
 	
 	
 	public TrackingProgressAndAbortView(Shell parentShell, 
-										int maximum,
 										SurfaceScatterPresenter ssp,
 										SurfaceScatterViewStart ssvs) {
 		
 		
 		super(parentShell);
 		this.ssp =ssp;
-		this.maximum = maximum;		
 		this.ssvs = ssvs;
 		
 		setShellStyle(getShellStyle() | SWT.RESIZE | SWT.APPLICATION_MODAL);		
@@ -52,7 +49,8 @@ public class TrackingProgressAndAbortView extends Dialog {
 		progress = new ProgressBar(container, SWT.HORIZONTAL | SWT.SMOOTH);
 		progress.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		progress.setMinimum(0);
-		progress.setMaximum(maximum);
+		int max = (ssp.getFms().size()) - 1;
+		progress.setMaximum(max);
 		
 		abort = new Button (container, SWT.PUSH);
 		abort.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));

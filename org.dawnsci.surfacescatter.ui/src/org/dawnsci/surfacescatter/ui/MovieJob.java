@@ -82,10 +82,6 @@ public class MovieJob {
 			@Override
 			public void run(){
 				
-//				ssp.setSliderPos(0);
-//				
-//				int k = 0;
-				
 				for( int k = 0; k<drm.getFms().size(); k++){
 							
 					tempImage = ssp.getImage(k);
@@ -93,13 +89,8 @@ public class MovieJob {
 					tempLoc = drm.getFms().get(k).getRoiLocation();
 					imageNumber =k;
 					
-//					int[][] tempLocLenPt = LocationLenPtConverterUtils.locationToLenPtConverter(tempLoc);
+
 					
-//					RectangularROI newROI = new RectangularROI(tempLoc[0],
-//														       tempLoc[1],
-//														       tempLocLenPt[0][0],
-//														       tempLocLenPt[0][1],0);
-						
 					display.syncExec(new Runnable() {
 							@Override
 							public void run() {
@@ -112,12 +103,6 @@ public class MovieJob {
 								pS.repaint(true);
 								subIBgPS.repaint(true);
 								ssvs.getSsps3c().generalUpdate();
-//								
-//								double[] location = ssp.getLocationList().get(imageNumber);
-//								
-//								int[] len = new int[] {(int) (location[2]-location[0]),(int) (location[5]-location[1])};
-//								int[] pt = new int[] {(int) location[0],(int) location[1]};
-//								int[][] lenPt = { len, pt };
 
 								
 								int[][] tempLocLenPt = LocationLenPtConverterUtils.locationToLenPtConverter(tempLoc);

@@ -1053,6 +1053,8 @@ public class SurfaceScatterViewStart extends Dialog {
 		
 		if(ssp.getProcessingMethodSelection() ==ProccessingMethod.MANUAL){
 			
+			customComposite.roiStandard();
+			
 			ssp.addXValuesForFireAccept();
 			
 			ssp.presenterDummyProcess(ssp.getSliderPos(), 
@@ -1071,9 +1073,11 @@ public class SurfaceScatterViewStart extends Dialog {
 	
 			IDataset  s = ssp.getBackgroundDatArray().get(ssp.getSliderPos());
 			this.getPlotSystemCompositeView().getSubImageBgPlotSystem().updatePlot2D(s, null, null);
-			this.getSsps3c().generalUpdate();
+			
 			ssp.stitchAndPresent1(this.getSsps3c().getOutputCurves(), ids);
 	
+			this.getSsps3c().generalUpdate();
+			
 			this.getSsps3c().getOutputCurves().getPlotSystem().repaint(false);
 			customComposite.getFolder().setSelection(0);
 //			analysisSash.setWeights(new int[] { 40, 60 });
@@ -1093,8 +1097,7 @@ public class SurfaceScatterViewStart extends Dialog {
 		
 		if(ssp.getProcessingMethodSelection() == ProccessingMethod.AUTOMATIC){
 			
-//			ssp.setStartFrame(customComposite.getSlider().getSelection());
-//			ssp.resetDataModels();
+
 			ssp.triggerBoxOffsetTransfer();
 			
 			if (getSsps3c().getOutputCurves().isVisible() != true) {
@@ -1110,7 +1113,6 @@ public class SurfaceScatterViewStart extends Dialog {
 			
 			TrackingProgressAndAbortView tpaav 
 						= new TrackingProgressAndAbortView(getParentShell(), 
-														   ssp.getNumberOfImages(),
 														   ssp,
 														   SurfaceScatterViewStart.this);
 			tpaav.open();

@@ -255,7 +255,7 @@ public class PlotSystem1CompositeView extends Composite {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				
-				ssp.interpolationTrackerBoxesReject();
+			
 				
 				double u =(double) ssp.getSliderPos();
 				
