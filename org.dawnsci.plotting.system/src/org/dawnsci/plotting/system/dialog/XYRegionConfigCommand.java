@@ -28,8 +28,8 @@ public class XYRegionConfigCommand extends XYGraphConfigCommand {
 
 		final RegionArea regionArea = (RegionArea) xyGraph.getPlotArea();
 		for (String name : regionArea.getRegionNames()) {
-			((XYRegionMemento) getPreviousXYGraphMem()).addRegionMemento(new RegionBean());
-			((XYRegionMemento) getAfterXYGraphMem()).addRegionMemento(new RegionBean());
+			((XYRegionMemento) getPreviousXYGraphMemento()).addRegionMemento(new RegionBean());
+			((XYRegionMemento) getAfterXYGraphMemento()).addRegionMemento(new RegionBean());
 		}
 	}
 
