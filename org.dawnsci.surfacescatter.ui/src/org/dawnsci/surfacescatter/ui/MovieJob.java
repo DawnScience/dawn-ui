@@ -4,7 +4,6 @@ import java.util.ArrayList;
 
 import org.dawnsci.surfacescatter.DirectoryModel;
 import org.dawnsci.surfacescatter.LocationLenPtConverterUtils;
-import org.dawnsci.surfacescatter.SuperModel;
 import org.eclipse.dawnsci.analysis.dataset.roi.RectangularROI;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.january.dataset.IDataset;

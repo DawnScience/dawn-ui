@@ -7,7 +7,6 @@ import org.dawnsci.surfacescatter.IntensityDisplayEnum;
 import org.dawnsci.surfacescatter.IntensityDisplayEnum.IntensityDisplaySetting;
 import org.dawnsci.surfacescatter.SavingFormatEnum;
 import org.dawnsci.surfacescatter.SavingFormatEnum.SaveFormatSetting;
-import org.dawnsci.surfacescatter.SuperModel;
 import org.eclipse.dawnsci.analysis.dataset.roi.RectangularROI;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.PlotType;
@@ -194,7 +193,7 @@ public class MultipleOutputCurvesTableView extends Composite {
 
 	}
 
-	public void updateCurve(DataModel dm1, Boolean intensity, SuperModel sm) {
+	public void updateCurve(DataModel dm1, Boolean intensity) {
 
 		if (lt.getDataName() == null) {
 			lt = plotSystem4.createLineTrace("Output Curve");

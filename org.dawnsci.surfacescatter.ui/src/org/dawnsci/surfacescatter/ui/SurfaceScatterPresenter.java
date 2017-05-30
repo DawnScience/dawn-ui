@@ -1159,8 +1159,6 @@ public class SurfaceScatterPresenter {
 		}
 	}
 	
-	
-	
 	public AnalaysisMethodologies.Methodology getBackgroundSubtraction(){
 		return fms.get(sliderPos).getBackgroundMethdology();
 	}
@@ -1335,10 +1333,9 @@ public class SurfaceScatterPresenter {
 		
 		if(Arrays.equals(drm.getInitialLenPt()[0],lenPt[0]) == false ||
 		   Arrays.equals(drm.getInitialLenPt()[1],lenPt[1]) == false){
-			
-//			drm.setInitialLenPt(lenPt);
+		
 			drm.setInitialLenPt(lenPt);
-		}
+		}//			drm.setInitialLenPt(lenPt);
 		
 		double[] bgRegionROI = BoxSlicerRodScanUtilsForDialog.backgroundBoxForDisplay(lenPt, 
 							fms.get(sliderPos).getBoundaryBox(), 
@@ -1368,8 +1365,7 @@ public class SurfaceScatterPresenter {
 		
 		if((Arrays.equals(lenPt[0], getLenPt()[0]) == false) ||
 		   (Arrays.equals(lenPt[1], getLenPt()[1]) == false)){
-					
-//			drm.setInitialLenPt(lenPt);
+				
 			drm.setInitialLenPt(lenPt);
 					
 			try{
@@ -1715,13 +1711,7 @@ public class SurfaceScatterPresenter {
 		RodObjectNexusUtils ronu = new RodObjectNexusUtils(rnbm);
 		
 	}
-	
-	
-	
-	
-	
-	
-	
+
 	public void genXSave(String title){
 	
 		try {
@@ -1739,33 +1729,7 @@ public class SurfaceScatterPresenter {
 	    String strDate = sdfDate.format(now);
 	    writer.println("#Output file created: " + strDate);
 	    
-	    if (drm.getCorrectionSelection() == MethodSetting.SXRD){
-	    
-
-//		    IDataset[] hArray = new IDataset[drm.getDatFilepaths().length];
-//		    IDataset[] kArray = new IDataset[drm.getDatFilepaths().length];
-//		    IDataset[] lArray = new IDataset[drm.getDatFilepaths().length];
-//		    
-//		    for (int id = 0; id < drm.getDatFilepaths().length; id++) {
-//		    
-//		    	ILazyDataset h = SXRDGeometricCorrections.geth(models.get(id));
-//				ILazyDataset k = SXRDGeometricCorrections.getk(models.get(id));
-//				ILazyDataset l = SXRDGeometricCorrections.getl(models.get(id));
-//				
-//				hArray[id] = (IDataset) h;
-//				kArray[id] = (IDataset) k;
-//				lArray[id] = (IDataset) l;
-//				
-//		    }
-//		    
-//		    Dataset hArrayCon = DatasetUtils.concatenate(hArray, 0);
-//		    Dataset kArrayCon = DatasetUtils.concatenate(kArray, 0);
-//		    Dataset lArrayCon = DatasetUtils.concatenate(lArray, 0);	
-//				
-//		    hArrayCon.sort(0);
-//		    kArrayCon.sort(0);
-//		    lArrayCon.sort(0);
-		    
+	    if (drm.getCorrectionSelection() == MethodSetting.SXRD){		    
 			
 			for(int gh = 0 ; gh<fms.size(); gh++){
 				FrameModel f = fms.get(gh);
@@ -1776,40 +1740,6 @@ public class SurfaceScatterPresenter {
 	    }
 		
 		else{
-		    
-			
-//		    if (models.get(0).getQdcdDat() != null){
-//		    	 
-//		    	IDataset[] qdcd = new IDataset[drm.getDatFilepaths().length];
-//			    Dataset qdcdArrayCon = DatasetFactory.zeros(new int[] {1});
-//				
-//		    	
-//  		   	 	 for (int id = 0; id < drm.getDatFilepaths().length; id++) {
-//				    
-//		   	 		IDataset qdcdDat = (IDataset) models.get(id).getQdcdDat();
-//						
-//		   	 		qdcd[id] = (IDataset) qdcdDat;
-//					
-//		   	 		qdcdArrayCon = DatasetUtils.concatenate(qdcd, 0);
-//				 
-//				    qdcdArrayCon.sort(0);
-//				
-//		   	 	 }
-//			
-//			   	 writer.println("# Test file created: " + strDate);
-//				 writer.println("# Headers: ");
-//				 writer.println("#qdcd	I	Ie");
-//			
-//				 for(int gh = 0 ; gh<fms.size(); gh++){
-//							writer.println(qdcdArrayCon.getDouble(gh) +"	"+ 
-//						    drm.getCsdp().getSplicedCurveY().getDouble(gh)+ "	"+ 
-//							drm.getCsdp().getSplicedCurveY().getError(gh));
-//				 }
-//			
-//			
-//		    }
-//		    
-//		    else{
 		    	writer.println("#"+gm.getxName()+"	I	Ie");
 				
 				 for(int gh = 0 ; gh<fms.size(); gh++){
@@ -1817,10 +1747,6 @@ public class SurfaceScatterPresenter {
 						    drm.getCsdp().getSplicedCurveY().getDouble(gh)+ "	"+ 
 							drm.getCsdp().getSplicedCurveY().getError(gh));
 				 }
-			
-//		    }
-		    
-		 	
 	    }	
 		writer.close();
 	}	
@@ -1872,30 +1798,6 @@ public class SurfaceScatterPresenter {
 	    
 	    if (drm.getCorrectionSelection() == MethodSetting.SXRD){
 		    
-//		    IDataset[] hArray = new IDataset[drm.getDatFilepaths().length];
-//		    IDataset[] kArray = new IDataset[drm.getDatFilepaths().length];
-//		    IDataset[] lArray = new IDataset[drm.getDatFilepaths().length];
-//		    
-//		    for (int id = 0; id < drm.getDatFilepaths().length; id++) {
-//		    
-//		    	ILazyDataset h = SXRDGeometricCorrections.geth(models.get(id));
-//				ILazyDataset k = SXRDGeometricCorrections.getk(models.get(id));
-//				ILazyDataset l = SXRDGeometricCorrections.getl(models.get(id));
-//				
-//				hArray[id] = (IDataset) h;
-//				kArray[id] = (IDataset) k;
-//				lArray[id] = (IDataset) l;
-//				
-//		    }
-//		    
-//		    Dataset hArrayCon = DatasetUtils.concatenate(hArray, 0);
-//		    Dataset kArrayCon = DatasetUtils.concatenate(kArray, 0);
-//		    Dataset lArrayCon = DatasetUtils.concatenate(lArray, 0);	
-//				
-//		    hArrayCon.sort(0);
-//		    kArrayCon.sort(0);
-//		    lArrayCon.sort(0);
-		    
 			writer.println("# Test file created: " + strDate);
 			writer.println("# Headers: ");
 			writer.println("#h	k	l	F	Fe");
@@ -1913,22 +1815,6 @@ public class SurfaceScatterPresenter {
 			
 		    if (Double.isFinite(fms.get(0).getQ())){
 		    	 
-//		    	IDataset[] qdcd = new IDataset[drm.getDatFilepaths().length];
-//			    Dataset qdcdArrayCon = DatasetFactory.zeros(new int[] {1});
-//				
-//		    	
-////  		   	 	 for (int id = 0; id < drm.getDatFilepaths().length; id++) {
-//				    
-//		   	 		IDataset qdcdDat = (IDataset) models.get(id).getQdcdDat();
-//						
-//		   	 		qdcd[id] = (IDataset) qdcdDat;
-//					
-//		   	 		qdcdArrayCon = DatasetUtils.concatenate(qdcd, 0);
-//				 
-//				    qdcdArrayCon.sort(0);
-//				
-//		   	 	 }
-//			
 			   	 writer.println("# Test file created: " + strDate);
 				 writer.println("# Headers: ");
 				 writer.println("#qdcd	I	Ie");
@@ -1990,31 +1876,7 @@ public class SurfaceScatterPresenter {
 	    String strDate = sdfDate.format(now);
 	    
 	    if(drm.getCorrectionSelection() == MethodSetting.SXRD){
-	    
-//		    IDataset[] hArray = new IDataset[drm.getDatFilepaths().length];
-//		    IDataset[] kArray = new IDataset[drm.getDatFilepaths().length];
-//		    IDataset[] lArray = new IDataset[drm.getDatFilepaths().length];
-//		    
-//		    for (int id = 0; id < drm.getDatFilepaths().length; id++) {
-//		    
-//		    	ILazyDataset h = SXRDGeometricCorrections.geth(models.get(id));
-//				ILazyDataset k = SXRDGeometricCorrections.getk(models.get(id));
-//				ILazyDataset l = SXRDGeometricCorrections.getl(models.get(id));
-//				
-//				hArray[id] = (IDataset) h;
-//				kArray[id] = (IDataset) k;
-//				lArray[id] = (IDataset) l;
-//				
-//		    }
-//		    
-//		    Dataset hArrayCon = DatasetUtils.concatenate(hArray, 0);
-//		    Dataset kArrayCon = DatasetUtils.concatenate(kArray, 0);
-//		    Dataset lArrayCon = DatasetUtils.concatenate(lArray, 0);	
-//				
-//		    hArrayCon.sort(0);
-//		    kArrayCon.sort(0);
-//		    lArrayCon.sort(0);
-		    
+
 			writer.println("# Test file created: " + strDate);
 			writer.println("# Headers: ");
 			writer.println("#h	k	l	F	Fe	lorentz	correction 	polarisation correction		area correction");
@@ -2032,24 +1894,7 @@ public class SurfaceScatterPresenter {
 	    	 writer.println("# Test file created: " + strDate);
 			 writer.println("# Headers: ");
 
-		    if (Double.isFinite(fms.get(0).getQdcd())){
-//		    	 
-//		    	IDataset[] qdcd = new IDataset[drm.getDatFilepaths().length];
-//			    Dataset qdcdArrayCon = DatasetFactory.zeros(new int[] {1});
-//				
-//		    	
-//  		   	 	 for (int id = 0; id < drm.getDatFilepaths().length; id++) {
-//				    
-//		   	 		IDataset qdcdDat = (IDataset) models.get(id).getQdcdDat();
-//						
-//		   	 		qdcd[id] = (IDataset) qdcdDat;
-//					
-//		   	 		qdcdArrayCon = DatasetUtils.concatenate(qdcd, 0);
-//				 
-//				    qdcdArrayCon.sort(0);
-//				
-//		   	 	 }
-			
+		    if (Double.isFinite(fms.get(0).getQdcd())){			
 			   	
 				 writer.println("#qdcd	I	Ie	Area Correction	Flux Correction");
 				 
@@ -2133,20 +1978,6 @@ public class SurfaceScatterPresenter {
 	}	
 	
 	public void writeOutReflectivityDat(){
-		
-//		IDataset[] qdcd = new IDataset[drm.getDatFilepaths().length];
-//			
-//    	 for (int id = 0; id < drm.getDatFilepaths().length; id++) {
-//		    
-//    		IDataset qdcdDat = (IDataset) models.get(id).getQdcdDat();
-//					
-//		    qdcd[id] = (IDataset) qdcdDat;
-//				
-//		 }
-//		    
-//		 Dataset qdcdArrayCon = DatasetUtils.concatenate(qdcd, 0);
-//		 
-//		 qdcdArrayCon.sort(0);
 //		 
 		 SimpleDateFormat sdfDate = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");//dd/MM/yyyy
 		 Date now = new Date();
@@ -2227,10 +2058,6 @@ public class SurfaceScatterPresenter {
 	public void setSplicedCurveX(IDataset xData){
 		drm.getCsdp().setSplicedCurveX(xData);
 	}
-	
-//	public ArrayList<Double> getQList(){
-//		return sm.getqList();
-//	}
 //	
 	public void setSplicedCurveY(IDataset yData){
 		drm.getCsdp().setSplicedCurveY(yData);
@@ -2310,14 +2137,14 @@ public class SurfaceScatterPresenter {
 	}
 	
 	public void boundariesWarning(String note, Display d){
-//		RegionOutOfBoundsWarning roobw = new RegionOutOfBoundsWarning(parentShell,0, note);
-//		d.asyncExec(new Runnable() {
-//			@Override
-//			public void run() {	
-//				roobw.open();
+		RegionOutOfBoundsWarning roobw = new RegionOutOfBoundsWarning(parentShell,0, note);
+		d.asyncExec(new Runnable() {
+			@Override
+			public void run() {	
+				roobw.open();
 		return;
-//			}
-//		});
+			}
+		});
 	}
 	
 	public void numberFormatWarning(){
@@ -2669,8 +2496,6 @@ public class SurfaceScatterPresenter {
 		outputCurves.resetCurve();
 
 		IPlottingSystem<Composite> pS = outputCurves.getPlotSystem();
-		
-//		IDataset[] output = StitchedOutputWithErrors.curveStitch4(dms, sm);
 
 		CsdpGeneratorFromDrm csdpgfd = new CsdpGeneratorFromDrm();
 		
@@ -2864,28 +2689,6 @@ public class SurfaceScatterPresenter {
 		
 	}
 	
-	
-//	public Dataset[] stitchAndPresent2() {
-//
-//		
-//		CsdpGeneratorFromDrm csdpgfd = new CsdpGeneratorFromDrm();
-//		
-//		csdpgfd.generateCsdpFromDrm(drm);
-//		
-//		CurveStitchDataPackage csdp = csdpgfd.getCsdp();
-//		
-//		IDataset[] output = CurveStitchWithErrorsAndFrames.curveStitch4(csdp, null);
-//		
-//		drm.setCsdp(csdp);
-//		
-//		IDataset X = DatasetFactory.createFromObject(csdp.getSplicedCurveX());
-//		
-//		return 
-//		
-//	}
-//	
-	
-	
 	public void switchErrorDisplay(){
 		if (errorDisplayFlag ==true){
 			errorDisplayFlag = (false);
@@ -2929,12 +2732,7 @@ public class SurfaceScatterPresenter {
 		this.energy = energy;
 		gm.setEnergy(energy);
 	}
-	
-	
-//	public int getTheta() {
-//		return sm.getTheta();
-//	}
-//
+
 	public void setTheta(int theta) {
 	
 		gm.setTheta(theta);
@@ -2955,14 +2753,6 @@ public class SurfaceScatterPresenter {
 	public void setOptions(String[] options) {
 		this.options = options;
 	}
-
-//	public ArrayList<ExampleModel> getModels() {
-//		return models;
-//	}
-//
-//	public void setModels(ArrayList<ExampleModel> models) {
-//		this.models = models;
-//	}
 
 	public ProccessingMethod getProcessingMethodSelection() {
 		return processingMethodSelection;
@@ -2992,16 +2782,6 @@ public class SurfaceScatterPresenter {
 	public void setParentShell(Shell parentShell) {
 		this.parentShell = parentShell;
 	}
-
-
-	
-//	public void setDms(ArrayList<DataModel> dms) {
-//		this.dms = dms;
-//	}
-//
-//	public ArrayList<DataModel> getDms() {
-//		return  dms;
-//	}
 	
 	public void addStateListener(IPresenterStateChangeEventListener listener){
 		listeners.add(listener);
@@ -3011,10 +2791,6 @@ public class SurfaceScatterPresenter {
 		for (IPresenterStateChangeEventListener l : listeners) l.update();
 	}
 	
-//	public SurfaceScatterPresenter(){
-//		sm = new SuperModel();
-//	}
-//	
 	public void createGm(){
 		gm = new GeometricParametersModel();
 	}
@@ -3045,13 +2821,6 @@ public class SurfaceScatterPresenter {
 		for (int r = 0; r<l; r++){
 			positionsInB[r] = r;
 		}
-		
-//		String[][] y = new String[n][];
-//		for (int i = 0, j = 0; i < l; i++) {
-//			if (t[i] != null) {
-//				y[j++] = t[i].getObject();
-//			}
-//		}
 
 		MathArrays.sortInPlace(s.getData(), positionsInB);
 
@@ -3096,6 +2865,5 @@ public class SurfaceScatterPresenter {
 	public void setCurrentRawIntensity(double currentRawIntensity) {
 		this.currentRawIntensity = currentRawIntensity;
 	}
-
 
 }
