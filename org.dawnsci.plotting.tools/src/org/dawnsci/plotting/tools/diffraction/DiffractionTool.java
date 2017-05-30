@@ -491,7 +491,7 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 
 	private void createActions() {
 
-		final Action exportMeta = new Action("Export metadata to file", Activator.getImageDescriptor("icons/save-edit.png")) {
+		final Action exportMeta = new Action("Export metadata to file", Activator.getImageDescriptor("icons/save_edit.png")) {
 			@Override
 			public void run() {
 				try {
@@ -505,7 +505,7 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 			}
 		};
 		
-		final Action importMeta = new Action("Import metadata from file", Activator.getImageDescriptor("icons/import-wiz.png")) {
+		final Action importMeta = new Action("Import metadata from file", Activator.getImageDescriptor("icons/import_wiz.png")) {
 			@Override
 			public void run() {
 				try {
