@@ -280,7 +280,7 @@ public static MappedDataFileBean buildBeani08Energyin2016(Tree tree) {
 		MappedDataFileBean fb = null;
 		
 		MappedBlockBean sax = buildI22Block(I22SAX, tree.findNodeLink(I22SAX));
-		MappedBlockBean wax = buildI22Block(I22SAX, tree.findNodeLink(I22WAX));
+		MappedBlockBean wax = buildI22Block(I22WAX, tree.findNodeLink(I22WAX));
 		MappedBlockBean xrf = buildI22Block(I22XMAP, tree.findNodeLink(I22XMAP));
 		
 		int scanRank = 2;
