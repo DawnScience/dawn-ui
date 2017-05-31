@@ -49,6 +49,7 @@ public class PlotModeImage implements IPlotMode {
 		long t = System.currentTimeMillis();
 		Dataset data = DatasetUtils.convertToDataset(lz.getSlice(slice));
 		logger.info("Slice time {} ms for slice {} of {}", (System.currentTimeMillis()-t), slice.toString(), lz.getName());
+		data.setErrors(null);
 		data.squeeze();
 		if (data.getRank() != 2) return null;
 		if (transposeNeeded(options)) data = data.getTransposedView(null);

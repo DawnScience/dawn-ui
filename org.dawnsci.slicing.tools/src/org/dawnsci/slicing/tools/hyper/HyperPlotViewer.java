@@ -12,7 +12,6 @@ import org.eclipse.january.DatasetException;
 import org.eclipse.january.dataset.DatasetFactory;
 import org.eclipse.january.dataset.IDataset;
 import org.eclipse.january.dataset.ILazyDataset;
-import org.eclipse.january.dataset.SliceND;
 import org.eclipse.january.metadata.AxesMetadata;
 import org.eclipse.swt.widgets.Composite;
 
@@ -33,7 +32,6 @@ public class HyperPlotViewer extends IPlottingSystemViewer.Stub<Composite> {
 			IHyperTrace h = (IHyperTrace)trace;
 			ILazyDataset lazyDataset = h.getLazyDataset();
 			int[] order = h.getOrder();
-			SliceND s = new SliceND(lazyDataset.getShape());
 			
 			IDataset[] daxes = new IDataset[3];
 			
@@ -42,17 +40,17 @@ public class HyperPlotViewer extends IPlottingSystemViewer.Stub<Composite> {
 			if (md == null) {
 				
 				for (int i = 0; i < 3;i++) {
-					IDataset d = DatasetFactory.createRange(lazyDataset.getShape()[i]);
-					daxes[order[i]] = d;
+					IDataset d = DatasetFactory.createRange(lazyDataset.getShape()[order[i]]);
+					daxes[i] = d;
 				}
 				
 			} else {
 
 				for (int i = 0; i < 3;i++) {
-					ILazyDataset[] axis = md.getAxis(i);
+					ILazyDataset[] axis = md.getAxis(order[i]);
 					IDataset d = null;
 					if (axis == null || axis[0] == null) {
-						d = DatasetFactory.createRange(lazyDataset.getShape()[i]);
+						d = DatasetFactory.createRange(lazyDataset.getShape()[order[i]]);
 					} else {
 						try {
 							//TODO ndAxes
@@ -62,16 +60,16 @@ public class HyperPlotViewer extends IPlottingSystemViewer.Stub<Composite> {
 							d.setName(name);
 						} catch (DatasetException e) {
 							//TODO log
-							d = DatasetFactory.createRange(lazyDataset.getShape()[i]);
+							d = DatasetFactory.createRange(lazyDataset.getShape()[order[i]]);
 						}
 					}
 					
-					daxes[order[i]] = d;
+					daxes[i] = d;
 				}
 				
 			}
 			
-			hyper.setData(lazyDataset, Arrays.asList(daxes), s.convertToSlice(), order);
+			hyper.setData(lazyDataset, Arrays.asList(daxes), h.getSlice().convertToSlice(), order);
 			return true;
 		}
 		return false;

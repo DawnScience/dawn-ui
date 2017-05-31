@@ -2,11 +2,13 @@ package org.dawnsci.slicing.tools.hyper;
 
 import org.eclipse.january.dataset.IDataset;
 import org.eclipse.january.dataset.ILazyDataset;
+import org.eclipse.january.dataset.SliceND;
 
 public class HyperTrace implements IHyperTrace {
 
 	private ILazyDataset lazy;
 	private int[] order;
+	private SliceND slice;
 	
 	@Override
 	public String getDataName() {
@@ -93,9 +95,10 @@ public class HyperTrace implements IHyperTrace {
 	}
 
 	@Override
-	public void setData(ILazyDataset lazy, int[] order) {
+	public void setData(ILazyDataset lazy, int[] order, SliceND slice) {
 		this.lazy = lazy;
 		this.order = order;
+		this.slice = slice;
 	}
 
 	@Override
@@ -106,6 +109,11 @@ public class HyperTrace implements IHyperTrace {
 	@Override
 	public int[] getOrder() {
 		return order;
+	}
+	
+	@Override
+	public SliceND getSlice() {
+		return slice;
 	}
 
 }
