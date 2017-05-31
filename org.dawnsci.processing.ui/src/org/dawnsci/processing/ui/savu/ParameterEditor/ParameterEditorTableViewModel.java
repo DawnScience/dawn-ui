@@ -8,9 +8,12 @@ import java.util.List;
 import java.util.Map;
 
 import org.eclipse.core.resources.ResourcesPlugin;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ParameterEditorTableViewModel {
 	private List<ParameterEditorRowDataModel> rows = new ArrayList<ParameterEditorRowDataModel>();
+	private final static Logger logger = LoggerFactory.getLogger(ParameterEditorTableViewModel.class);
 
 	private Map<String, Object> pluginDict;
 
@@ -21,33 +24,26 @@ public class ParameterEditorTableViewModel {
 	}
 
 	public void updateModel(String pluginName, Map<String, Object> pluginDict) {
-//		this.pluginName = pluginName;
-		System.out.println(pluginName + " " + this.pluginName);
+		logger.debug(pluginName + " " + this.pluginName);
 
 		try {
 			if (pluginDict == null || this.pluginName !=pluginName){
 				this.pluginDict.clear();
-				System.out.println("Here");
 				this.pluginName = pluginName;
 				this.pluginDict = getMapFromFile();
-				System.out.println(this.pluginName + this.pluginDict);
+				logger.debug(this.pluginName + this.pluginDict);
 			}
 			
 			else if (this.pluginName == pluginName) {
-				System.out.println("things");
 			}
 			else {
 				this.pluginDict.clear();
-//				System.out.println("I'm in the else"+pluginDict.toString());
-				System.out.println("other things");
 				this.pluginDict = pluginDict;
 			}
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.error("Couldn't select a plugin",e);
 		}
 		rows.clear();
-//		System.out.println("plugindict is "+pluginDict.toString());
 		rebuildTable(this.pluginDict);
 		
 	}
@@ -119,8 +115,7 @@ public class ParameterEditorTableViewModel {
 			in.close();
 			fileIn.close();
 		} catch (ClassNotFoundException | IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.error("Error finding plugin info",e);
 		}
 		return pluginDict;
 	}

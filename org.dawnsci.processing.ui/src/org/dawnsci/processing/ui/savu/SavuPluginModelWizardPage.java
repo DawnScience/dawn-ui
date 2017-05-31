@@ -44,27 +44,25 @@ public class SavuPluginModelWizardPage extends AbstractOperationModelWizardPage 
 		setControl(container);
 		// create model and populate it
 		Map<String, Object> pluginDict = null;
-		Integer selectedItem = null;
+		Integer selectedItem = 0;
 		Boolean isMetaData = false;
 		try {
 			pluginDict = (Map<String, Object>) model.get("parameters");
 		} catch (Exception e2) {
-			// TODO Auto-generated catch block
-			e2.printStackTrace();
+			logger.error("Couldn't get the model parameters",e2);
 		}
 		
 		try {
 			selectedItem = (Integer) model.get("selectedItem");
 		} catch (Exception e2) {
 			// TODO Auto-generated catch block
-			e2.printStackTrace();
+			logger.error("Couldn't select an item",e2);
 		}
 		try {
 			isMetaData = (Boolean) model.get("MetaDataOnly");
-			System.out.println("I am here"+isMetaData.toString());
 		} catch (Exception e2) {
 			// TODO Auto-generated catch block
-			e2.printStackTrace();
+			logger.error("Couldn't select the metadata radar box",e2);
 		}
 		
 		ParameterEditorTableViewModel viewModel = new ParameterEditorTableViewModel("PaganinFilter", pluginDict);
@@ -79,7 +77,6 @@ public class SavuPluginModelWizardPage extends AbstractOperationModelWizardPage 
 		parameterEditor.initialiseTable(viewModel);
 		Button checkBox = new Button(container,SWT.CHECK); // to figure out if we want it as metadata or not
 		checkBox.setText("Save as metadata");
-		System.out.println(isMetaData.toString());
 		checkBox.setSelection(isMetaData);
 		checkBox.addSelectionListener(new SelectionListener() {
 			
@@ -88,7 +85,6 @@ public class SavuPluginModelWizardPage extends AbstractOperationModelWizardPage 
 				Button btn = (Button) e.getSource();
 				try {
 				model.set("MetaDataOnly", btn.getSelection());
-				System.out.println(btn.getSelection());
 				} catch (Exception e1) {
 					logger.error("Couldn't set the meta data switch", e1);
 				}
@@ -97,7 +93,7 @@ public class SavuPluginModelWizardPage extends AbstractOperationModelWizardPage 
 			
 			@Override
 			public void widgetDefaultSelected(SelectionEvent e) {
-				System.out.println("In default selection");
+				logger.debug("In default selection");
 
 				
 			}
@@ -135,7 +131,7 @@ public class SavuPluginModelWizardPage extends AbstractOperationModelWizardPage 
 				try {
 					viewModel.updateModel(pluginChooser.getPluginName(),(Map<String, Object>) model.get("parameters"));
 				} catch (Exception e2) {
-					e2.printStackTrace();
+					logger.error("Couldn't update model!",e2);
 				}
 				parameterEditor.update(viewModel);				
 				
@@ -152,7 +148,7 @@ public class SavuPluginModelWizardPage extends AbstractOperationModelWizardPage 
 			@Override
 			public void widgetDefaultSelected(SelectionEvent e) {
 //				// TODO Auto-generated method stub
-				System.out.println("In default selection");
+				logger.debug("In default selection");
 			}
 			
 		});
