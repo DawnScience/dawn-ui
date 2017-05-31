@@ -11,6 +11,7 @@ import org.dawnsci.surfacescatter.ProcessingMethodsEnum.ProccessingMethod;
 import org.dawnsci.surfacescatter.ReflectivityFluxCorrectionsForDialog;
 import org.dawnsci.surfacescatter.ReflectivityMetadataTitlesForDialog;
 import org.dawnsci.surfacescatter.SXRDNexusReader;
+import org.dawnsci.surfacescatter.SetupModel;
 import org.dawnsci.surfacescatter.SavingFormatEnum.SaveFormatSetting;
 import org.dawnsci.surfacescatter.TrackingMethodology;
 import org.dawnsci.surfacescatter.TrackingMethodology.TrackerType1;
@@ -59,6 +60,8 @@ import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.ui.PlatformUI;
+//import org.slf4j.Logger;
+//import org.slf4j.LoggerFactory;
 
 import uk.ac.diamond.scisoft.analysis.io.LoaderFactory;
 
@@ -86,35 +89,23 @@ public class SurfaceScatterViewStart extends Dialog {
 	private String option;
 	private boolean qConvert;
 	private RodAnalysisWindow raw ;
+	private SetupModel stm;
+	
+//	private final static Logger logger = LoggerFactory.getLogger(SurfaceScatterViewStart.class);
 	
 	public SurfaceScatterViewStart (Shell parentShell){
 
 		super(parentShell);
 
-		this.ssp = new SurfaceScatterPresenter();;
+		this.ssp = new SurfaceScatterPresenter();
+		
 		
 		this.ssp.addStateListener(new IPresenterStateChangeEventListener() {
 
 			@Override
 			public void update() {
-				customComposite.getSlider().setSelection(ssp.getSliderPos());
-				updateIndicators(ssp.getSliderPos());
-				RectangularROI[] bgRegionROI = ssp.trackingRegionOfInterestSetter(ssp.getLenPt());
 				
-				if((Arrays.equals(ssp.getLenPt()[0], 
-						customComposite.getIRegion().getROI().getBounds().getIntLengths()) == false) ||
-						(Arrays.equals(ssp.getLenPt()[1], 
-								customComposite.getIRegion().getROI().getBounds().getIntPoint()) == false)){
-			
-					customComposite.getIRegion().setROI(bgRegionROI[0]);				
-					customComposite.getBgRegion().setROI(bgRegionROI[1]);
-				}
-				try{
-					ssps3c.generalUpdate();
-				}
-				catch(Exception o){
-					
-				}
+				updateDisplay();
 			}
 		});
 		
@@ -163,6 +154,7 @@ public class SurfaceScatterViewStart extends Dialog {
 
 				datDisplayer.setOption(datDisplayer.getSelectedOption());
 				
+			
 				IntensityDisplaySetting ids0 = IntensityDisplaySetting.toMethod(ssps3c.getOutputCurves().getIntensity().getSelectionIndex());
 				
 				setIds(ids0);
@@ -170,6 +162,7 @@ public class SurfaceScatterViewStart extends Dialog {
 				setSms(SaveFormatSetting.toMethod(ssps3c.getOutputCurves().getOutputFormatSelection().getSelectionIndex()));
 				
 				ssp.createGm();
+				
 				
 				paramField.geometricParametersUpdate();
 				
@@ -223,11 +216,13 @@ public class SurfaceScatterViewStart extends Dialog {
 				int[] test = correctionsDropDownArray;
 				int t = correctionsDropDown.getSelectionIndex();
 				
-				ssp.surfaceScatterPresenterBuild(filepaths, 
-												 datDisplayer.getSelectedOption(),
-												 ssp.getImageFolderPath(), 
-												 datFolderPath, 
-												 test[t]);
+				customComposite.resetCorrectionsTab();
+				
+				
+				ssp.surfaceScatterPresenterBuildWithFrames(filepaths,
+												datDisplayer.getSelectedOption(),
+												datFolderPath, 
+												test[t]);
 				
 				try{
 					ssp.setLenPt(r);
@@ -243,21 +238,29 @@ public class SurfaceScatterViewStart extends Dialog {
 				if(ssp.isqConvert()){
 					double  energy = Double.valueOf(paramField.getEnergy().getText());
 					ssp.setEnergy(energy);
-					ssp.qConversion();
+					
 					ssp.setTheta(paramField.getTheta().getSelectionIndex());
 					outputCurves.getqAxis().setEnabled(ssp.isqConvert());
+					
+					try{
+						ssp.qConversion();
+					}
+					catch(Exception g){
+			
+					}
 				}
 				
 				folder.setSelection(1);
 		
-				ssp.setSelection(0);
-				ssp.setSliderPos(0);;
+				
 				customComposite.getSlider().setSelection(0);
 				customComposite.getSlider().setMinimum(0);
-				customComposite.getSlider().setMaximum(ssp.getNoImages());
+				customComposite.getSlider().setMaximum(ssp.getDrm().getFms().size());
 				customComposite.getSlider().setThumb(1);
 				customComposite.getPlotSystem1CompositeView().checkTrackerOnButton();
 				
+				
+				customComposite.resetCorrectionsTab();
 				customComposite.generalUpdate();
 				ssps3c.generalUpdate();
 				customComposite.generalCorrectionsUpdate();
@@ -266,12 +269,14 @@ public class SurfaceScatterViewStart extends Dialog {
 				getPlotSystemCompositeView().removeBackgroundSubtractedSubImage();
 				getSsps3c().isOutputCurvesVisible(false);
 				customComposite.getReplay().setEnabled(false);
-				customComposite.resetCorrectionsTab();
+				
 				ssps3c.isOutputCurvesVisible(false);
 				ssp.setProcessingMethodSelection(ProccessingMethod.toMethodology(customComposite.getProcessingMode().getSelectionIndex()));
 				
 				ssps3c.getOutputCurves().getIntensity().select(IntensityDisplaySetting.toInt(ids));
 				ssps3c.getOutputCurves().getOutputFormatSelection().select(SaveFormatSetting.toInt(sms));
+				
+				customComposite.resetCorrectionsTab();
 				
 				try{
 					customComposite.getPlotSystem().removeTrace(customComposite.getPlotSystem().getTrace("Interpolated trajectory"));	
@@ -281,6 +286,8 @@ public class SurfaceScatterViewStart extends Dialog {
 				}
 				
 				ssps3c.resetCrossHairs();
+				ssp.setSelection(0);
+				ssp.setSliderPos(0);
 				
 			}
 
@@ -331,7 +338,14 @@ public class SurfaceScatterViewStart extends Dialog {
 				int sliderPos = customComposite.getSlider().getSelection();
 				ssp.sliderMovemementMainImage(sliderPos);
 				SurfaceScatterViewStart.this.updateIndicators(sliderPos);
-				ssp.bgImageUpdate(customComposite.getSubImageBgPlotSystem(), sliderPos);
+				try{
+					IDataset image = ssp.getBackgroundImage(sliderPos);
+					customComposite.getSubImageBgPlotSystem().updatePlot2D(image, 
+																		   null,
+																		   null);
+				}catch(Exception cx){
+					
+				}
 			}
 
 			@Override
@@ -380,7 +394,13 @@ public class SurfaceScatterViewStart extends Dialog {
 					paramField.geometricParametersUpdate();
 					
 					
-					double[] bgRegionROI =ssp.regionOfInterestSetter(customComposite.getGreenRegion().getROI());
+					IRectangularROI greenRectangle = customComposite.getGreenRegion().getROI().getBounds();
+					int[] len = greenRectangle.getIntLengths();
+					int[] pt = greenRectangle.getIntPoint();
+
+					int[][] lenPt = { len, pt };
+					
+					double[] bgRegionROI =ssp.regionOfInterestSetter1(lenPt);
 					RectangularROI bgROI = new RectangularROI(bgRegionROI[0],
 							  bgRegionROI[1],
 							  bgRegionROI[2],
@@ -435,8 +455,15 @@ public class SurfaceScatterViewStart extends Dialog {
 					ssp.sliderZoomedArea(k, customComposite.getGreenRegion().getROI(),
 							customComposite.getSubImagePlotSystem());
 
-					ssp.bgImageUpdate(customComposite.getSubImageBgPlotSystem(), k);
-
+					IDataset image = ssp.getBackgroundImage(k);
+					try{
+						customComposite.getSubImageBgPlotSystem().updatePlot2D(image, 
+																			   null,
+																			   null);
+					}
+					catch(Exception h){
+						
+					}
 					SurfaceScatterViewStart.this.updateIndicators(k);
 
 					modify = true;
@@ -453,6 +480,8 @@ public class SurfaceScatterViewStart extends Dialog {
 					
 					customComposite.getGreenRegion().setROI(greenBgRoi[0]);
 					customComposite.getBgRegion().setROI(greenBgRoi[1]);
+
+					customComposite.getPlotSystem().repaint();
 					
 					ssp.backgroundBoxesManager(customComposite.getBgRegion(), 
 											   customComposite.getSecondBgRegion(),
@@ -489,9 +518,17 @@ public class SurfaceScatterViewStart extends Dialog {
 					ssp.sliderMovemementMainImage(k);
 					ssp.sliderZoomedArea(k, customComposite.getGreenRegion().getROI(),
 							customComposite.getSubImagePlotSystem());
-
-					ssp.bgImageUpdate(customComposite.getSubImageBgPlotSystem(), k);
-
+					
+					try{
+						IDataset image = ssp.getBackgroundImage(k);
+						customComposite.getSubImageBgPlotSystem().updatePlot2D(image, 
+																			   null,
+																			   null);
+						
+					}
+					catch(Exception o){
+						
+					}
 					SurfaceScatterViewStart.this.updateIndicators(k);
 					modify = true;
 				}
@@ -569,12 +606,6 @@ public class SurfaceScatterViewStart extends Dialog {
 
 				FittingParameters fp = ssp.loadParameters(title); 
 			
-				RectangularROI loadedROI = new RectangularROI(fp.getLenpt()[1][0],
-															  fp.getLenpt()[1][1],
-															  fp.getLenpt()[0][0],
-															  fp.getLenpt()[0][1],
-															  0);
-				
 				
 				customComposite.getPlotSystem1CompositeView().setMethodologyDropDown(fp.getBgMethod());
 				customComposite.getPlotSystem1CompositeView().setFitPowerDropDown(fp.getFitPower());
@@ -582,7 +613,8 @@ public class SurfaceScatterViewStart extends Dialog {
 				customComposite.getPlotSystem1CompositeView().setBoundaryBox(fp.getBoundaryBox());
 				
 				customComposite.setRegion(fp.getLenpt());
-				double[] bgRegionROI = ssp.regionOfInterestSetter(loadedROI);
+				
+				double[] bgRegionROI = ssp.regionOfInterestSetter1(fp.getLenpt());
 				
 				RectangularROI bgROI = new RectangularROI(bgRegionROI[0],
 						  bgRegionROI[1],
@@ -846,6 +878,7 @@ public class SurfaceScatterViewStart extends Dialog {
 			customComposite.getPlotSystem1CompositeView().getAcceptLocation().setEnabled(true);
 			customComposite.getPlotSystem1CompositeView().getRejectLocation().setEnabled(true);
 		}
+
 		
 	}
 	
@@ -892,8 +925,12 @@ public class SurfaceScatterViewStart extends Dialog {
 					newOffsetLenPt[1][0]  = -pt[0] + redPt[0];
 					newOffsetLenPt[1][1]  = -pt[1] + redPt[1];
 					
+					
+					if(!Arrays.equals(newOffsetLenPt[0], ssp.getBoxOffsetLenPt()[0]) ||
+							!Arrays.equals(newOffsetLenPt[1], ssp.getBoxOffsetLenPt()[1])){
 					 
-					ssp.setBoxOffsetLenPt(newOffsetLenPt);
+						ssp.setBoxOffsetLenPt(newOffsetLenPt);
+					}
 				}
 				
 				RectangularROI[] greenAndBg = ssp.trackingRegionOfInterestSetter(ssp.getLenPt());
@@ -901,15 +938,28 @@ public class SurfaceScatterViewStart extends Dialog {
 				customComposite.getIRegion().setROI(greenAndBg[0]);
 				customComposite.getBgRegion().setROI(greenAndBg[1]);
 				
-				
-				if(ssp.getMethodology() == Methodology.OVERLAPPING_BACKGROUND_BOX){
-					customComposite.getSecondBgRegion().setROI(ssp.generateOffsetBgROI(ssp.getLenPt()));
+//				
+//				if(ssp.getMethodology() == Methodology.OVERLAPPING_BACKGROUND_BOX){
+//					
+//					int [] currLengths = customComposite.getSecondBgRegion().getROI().getBounds().getIntLengths();
+//					int [] currPoints = customComposite.getSecondBgRegion().getROI().getBounds().getIntPoint();
+//					
+//					int[] newLen = ssp.getLenPt()[0];
+//					int[] newPts = ssp.getLenPt()[1];
+//					
+//					
+//					if(!Arrays.equals(currLengths, newLen) ||
+//							!Arrays.equals(currPoints, newPts)){
+//						
+//						customComposite.getSecondBgRegion().setROI(ssp.generateOffsetBgROI(ssp.getLenPt()));
+//						
+//						getSsps3c().generalUpdate(ssp.getLenPt());
+//						getSsps3c().generalUpdate();
+//					}
+
 				}
-				
-				getSsps3c().generalUpdate(ssp.getLenPt());
-				getSsps3c().generalUpdate();
-				
-			}
+			
+//			}
 		});				
 	}
 
@@ -970,6 +1020,21 @@ public class SurfaceScatterViewStart extends Dialog {
 		}
 	}
 	
+	public void interpolationTrackerBoxesReject(){
+		
+		if(ssp.getInterpolatorBoxes() != null){
+			for(int j = 0; j<ssp.getInterpolatorBoxes().size(); j++){
+				if(ssp.getInterpolatorBoxes().get(j)[2][0] == ssp.getSliderPos()){
+					ssp.getInterpolatorBoxes().remove(j);
+					customComposite.getPlotSystem().removeRegion(ssp.getInterpolatorRegions().get(j));
+					ssp.getInterpolatorRegions().remove(j);
+					customComposite.getPlotSystem().repaint(false);
+				}
+			}
+		}
+	}
+
+	
 	public void populateThetaOptionsDropDown(){
 		
 		Combo c = paramField.getSelectedOption();
@@ -985,14 +1050,10 @@ public class SurfaceScatterViewStart extends Dialog {
 	
 	public void fireAccept(){
 		
-		if(ssp.getQList()!=null){
-			if(ssp.getQList().size()!=0){
-				ssps3c.getOutputCurves().getqAxis().setEnabled(true);
-			}
-		}
-		
 		
 		if(ssp.getProcessingMethodSelection() ==ProccessingMethod.MANUAL){
+			
+			customComposite.roiStandard();
 			
 			ssp.addXValuesForFireAccept();
 			
@@ -1012,13 +1073,15 @@ public class SurfaceScatterViewStart extends Dialog {
 	
 			IDataset  s = ssp.getBackgroundDatArray().get(ssp.getSliderPos());
 			this.getPlotSystemCompositeView().getSubImageBgPlotSystem().updatePlot2D(s, null, null);
-			this.getSsps3c().generalUpdate();
+			
 			ssp.stitchAndPresent1(this.getSsps3c().getOutputCurves(), ids);
 	
+			this.getSsps3c().generalUpdate();
+			
 			this.getSsps3c().getOutputCurves().getPlotSystem().repaint(false);
 			customComposite.getFolder().setSelection(0);
-			analysisSash.setWeights(new int[] { 40, 60 });
-			analysisSash.redraw();
+//			analysisSash.setWeights(new int[] { 40, 60 });
+//			analysisSash.redraw();
 			
 		}
 		
@@ -1026,16 +1089,15 @@ public class SurfaceScatterViewStart extends Dialog {
 	
 	public void fireRun(){
 		
-		if(ssp.getQList()!=null){
-			if(ssp.getQList().size()!=0){
-				ssps3c.getOutputCurves().getqAxis().setEnabled(true); 
-			}
-		}
+//		if(ssp.getQList()!=null){
+//			if(ssp.getQList().size()!=0){
+//				ssps3c.getOutputCurves().getqAxis().setEnabled(true); 
+//			}
+//		}
 		
 		if(ssp.getProcessingMethodSelection() == ProccessingMethod.AUTOMATIC){
 			
-			ssp.setStartFrame(customComposite.getSlider().getSelection());
-			ssp.resetDataModels();
+
 			ssp.triggerBoxOffsetTransfer();
 			
 			if (getSsps3c().getOutputCurves().isVisible() != true) {
@@ -1051,7 +1113,6 @@ public class SurfaceScatterViewStart extends Dialog {
 			
 			TrackingProgressAndAbortView tpaav 
 						= new TrackingProgressAndAbortView(getParentShell(), 
-														   ssp.getNumberOfImages(),
 														   ssp,
 														   SurfaceScatterViewStart.this);
 			tpaav.open();
@@ -1088,7 +1149,10 @@ public class SurfaceScatterViewStart extends Dialog {
 		int sliderPos = customComposite.getSlider().getSelection();
 		ssp.sliderMovemementMainImage(sliderPos);
 		SurfaceScatterViewStart.this.updateIndicators(sliderPos);
-		ssp.bgImageUpdate(customComposite.getSubImageBgPlotSystem(), sliderPos);
+		IDataset image = ssp.getBackgroundImage(sliderPos);
+		customComposite.getSubImageBgPlotSystem().updatePlot2D(image, 
+															   null,
+															   null);
 	}
 	
 	public PlotSystemCompositeView getPlotSystemCompositeView() {
@@ -1121,10 +1185,10 @@ public class SurfaceScatterViewStart extends Dialog {
 		
 		double x = ssp.getXValue(k);
 		
-		if(outputCurves.getqAxis().getSelection()){
-			x = ssp.getQValue(k);
-		}
-		
+//		if(outputCurves.getqAxis().getSelection()){
+//			x = ssp.getQValue(k);
+//		}
+//		
 		RectangularROI r = new RectangularROI(x, 0.1, 0, 0.1, 0);
 		
 		try {
@@ -1245,7 +1309,7 @@ public class SurfaceScatterViewStart extends Dialog {
 						xyArrays.get(0), xyArrays.get(1), 
 						xyArrays.get(2), xyArrays.get(3), 
 						xyArrays.get(4), xyArrays.get(5),
-						xyArrays.get(6), outputCurves.getPlotSystem(), 
+						xyArrays.get(6), 
 						ssp,
 						SurfaceScatterViewStart.this);
 
@@ -1293,9 +1357,13 @@ public class SurfaceScatterViewStart extends Dialog {
 
 					SurfaceScatterViewStart.this.updateIndicators(xPos);
 
-					ssp.bgImageUpdate(customComposite.getSubImageBgPlotSystem(), xPos);
+					IDataset image = ssp.getBackgroundImage(xPos);
+					customComposite.getSubImageBgPlotSystem().updatePlot2D(image, 
+																		   null,
+																		   null);
 					
-					double[] location = ssp.getLocationList().get(xPos);
+					
+					double[] location = ssp.getThisLocation();
 					
 					int[][] lenPt = {new int[] {0,0}, 
 									 new int[] {0,0}};
@@ -1513,6 +1581,23 @@ public class SurfaceScatterViewStart extends Dialog {
 		getSsps3c().getOutputCurves().getIntensity().select(0);;
 	}
 	
+	public void export(){
+
+		outputCurves.getPlotSystem().clear();
+		
+		ILineTrace lt1 = outputCurves.getPlotSystem().createLineTrace("Adjusted Spliced Curve");
+		
+		IDataset xData = ssp.getDrm().getCsdp().getSplicedCurveX();
+		IDataset yData = ssp.getDrm().getCsdp().getSplicedCurveY();
+		
+		lt1.setData(xData, yData);
+		lt1.isErrorBarEnabled();
+		
+		outputCurves.getPlotSystem().addTrace(lt1);
+		
+		getSsps3c().getOutputCurves().getIntensity().select(0);;
+	}
+	
 	public void checkForFlux(String filepath){ 
 		try{
 			IDataHolder dh1 =null;
@@ -1636,6 +1721,66 @@ public class SurfaceScatterViewStart extends Dialog {
 	public MultipleOutputCurvesTableView getOutputCurves(){
 		return ssps3c.getOutputCurves();
 	}
+
+	public SetupModel getStm() {
+		return stm;
+	}
+
+	public void setStm(SetupModel stm) {
+		this.stm = stm;
+	}
+	
+	public void updateDisplay() {
+		
+		if(customComposite.getSlider().getSelection() != ssp.getSliderPos()){
+			customComposite.getSlider().setSelection(ssp.getSliderPos());
+			updateIndicators(ssp.getSliderPos());
+		}
+		
+		RectangularROI[] bgRegionROI = ssp.trackingRegionOfInterestSetter(ssp.getLenPt());
+		
+		customComposite.generalCorrectionsUpdate();
+		
+		int[] lp = bgRegionROI[0].getIntLengths();
+		int[] pp = bgRegionROI[0].getIntPoint();
+		
+		int[] ls = bgRegionROI[1].getIntLengths();
+		int[] ps = bgRegionROI[1].getIntPoint();
+		
+		if((Arrays.equals(lp, 
+			customComposite.getIRegion().getROI().getBounds().getIntLengths()) == false) ||
+			(Arrays.equals(pp, 
+			customComposite.getIRegion().getROI().getBounds().getIntPoint()) == false)){
+	
+	
+			customComposite.getIRegion().setROI(bgRegionROI[0]);		
+	
+		}
+		
+		if((Arrays.equals(ls, 
+			customComposite.getBgRegion().getROI().getBounds().getIntLengths()) == false) ||
+			(Arrays.equals(ps, 
+			customComposite.getBgRegion().getROI().getBounds().getIntPoint()) == false)	){
+	
+			
+			customComposite.getBgRegion().setROI(bgRegionROI[1]);
+		
+		}			
+			
+			
+			customComposite.getPlotSystem().repaint();
+		
+		
+		
+		try{
+			ssps3c.generalUpdate();
+		}
+		catch(Exception o){
+			
+		}
+//		customComposite.generalUpdate();
+	}
+	
 }	
 
 

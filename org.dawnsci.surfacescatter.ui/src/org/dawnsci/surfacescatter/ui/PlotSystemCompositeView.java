@@ -1,9 +1,12 @@
 package org.dawnsci.surfacescatter.ui;
 
+import java.util.Arrays;
+
 import org.dawb.common.ui.widgets.ActionBarWrapper;
 import org.dawnsci.surfacescatter.ExampleModel;
 import org.dawnsci.surfacescatter.MethodSettingEnum.MethodSetting;
 import org.dawnsci.surfacescatter.ProcessingMethodsEnum.ProccessingMethod;
+import org.eclipse.dawnsci.analysis.api.roi.IRectangularROI;
 import org.eclipse.dawnsci.analysis.dataset.roi.RectangularROI;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.PlotType;
@@ -409,16 +412,8 @@ public class PlotSystemCompositeView extends Composite {
 			}
 			
 			public void roiStandard(ROIEvent evt) {
-				double[] bgRegionROI = ssp.regionOfInterestSetter(region.getROI());
-				
-				RectangularROI bgROI = new RectangularROI(bgRegionROI[0],
-						  bgRegionROI[1],
-						  bgRegionROI[2],
-						  bgRegionROI[3],
-						  bgRegionROI[4]);
-				
-				bgRegion.setROI(bgROI);
-				
+
+				PlotSystemCompositeView.this.roiStandard();
 			}
 		});
         
@@ -428,9 +423,6 @@ public class PlotSystemCompositeView extends Composite {
 			public void widgetSelected(SelectionEvent e) {
 				
 				ssp.sliderMovemementMainImage(slider.getSelection());
-				
-				ssp.bgImageUpdate(subImageBgPlotSystem,
-									  slider.getSelection());
 					
 			}
 			
@@ -483,6 +475,40 @@ public class PlotSystemCompositeView extends Composite {
 		});
 	    
 	}
+    
+    public void roiStandard(){
+    	
+    	IRectangularROI greenRectangle = region.getROI().getBounds();
+		int[] len = greenRectangle.getIntLengths();
+		int[] pt = greenRectangle.getIntPoint();
+		
+		int[][] lenPt = { len, pt };
+		
+		RectangularROI[] bgRegionROI = ssp.trackingRegionOfInterestSetter(lenPt);
+		
+		int[] ly = bgRegionROI[1].getIntLengths();
+		int[] py = bgRegionROI[1].getIntPoint();
+		
+		IRectangularROI yellowRectangle = bgRegion.getROI().getBounds();
+		int[] ylen = yellowRectangle.getIntLengths();
+		int[] ypt = yellowRectangle.getIntPoint();
+		
+
+		if(!Arrays.equals(ypt, py) ||
+				!Arrays.equals(ylen, ly)){
+			
+			bgRegion.setROI(bgRegionROI[1]);
+			plotSystem.repaint();
+			
+		}
+		
+		else{
+		}
+		ssvs.updateDisplay();
+    	
+    	
+    }
+    
     
     public void changeProcessingMode(){
     	
@@ -565,8 +591,7 @@ public class PlotSystemCompositeView extends Composite {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				ssvs.fireAccept();
-				slider.setSelection(slider.getSelection() -1);
-				ssp.setSliderPos(slider.getSelection());
+				ssp.setSliderPos(slider.getSelection() -1);
 				generalUpdate();
 				ssvs.sliderMovementGeneralUpdate();
 			}
@@ -583,8 +608,7 @@ public class PlotSystemCompositeView extends Composite {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				ssvs.fireAccept();
-				slider.setSelection(slider.getSelection() +1);
-				ssp.setSliderPos(slider.getSelection());
+				ssp.setSliderPos(slider.getSelection() +1);
 				generalUpdate();
 				ssvs.sliderMovementGeneralUpdate();
 			}
@@ -674,7 +698,24 @@ public class PlotSystemCompositeView extends Composite {
 	}
 
 	public void getBoxPosition(){
-		ssp.regionOfInterestSetter(region.getROI());	
+		
+		IRectangularROI greenRectangle = region.getROI().getBounds();
+		int[] len = greenRectangle.getIntLengths();
+		int[] pt = greenRectangle.getIntPoint();
+		
+		int[][] lenPt = { len, pt };
+		
+		double[] bgRegionROI = ssp.regionOfInterestSetter1(lenPt);
+		
+//		RectangularROI bgROI = new RectangularROI(bgRegionROI[0],
+//				  bgRegionROI[1],
+//				  bgRegionROI[2],
+//				  bgRegionROI[3],
+//				  bgRegionROI[4]);
+//		
+//		
+//		
+//		ssp.regionOfInterestSetter(region.getROI());	
 	}
 	
 	public IPlottingSystem<Composite> getSubImagePlotSystem(){
@@ -730,7 +771,15 @@ public class PlotSystemCompositeView extends Composite {
 												   lenpt[0][0],
 												   lenpt[0][1],
 												   0);
-			region.setROI(newROI);
+			if(Arrays.equals(region.getROI().getBounds().getIntLengths(), lenpt[0]) &&
+					Arrays.equals(region.getROI().getBounds().getIntPoint(), lenpt[1])){
+				
+				
+				
+			}
+			else{
+				region.setROI(newROI);
+			}
 		}
 	}
 
@@ -903,7 +952,9 @@ public class PlotSystemCompositeView extends Composite {
 				
 			lorentz.setText(String.valueOf(ssp.getCurrentLorentzCorrection()));
 			polarisation.setText(String.valueOf(ssp.getCurrentPolarisationCorrection()));
-			rawIntensity.setText(String.valueOf(ssp.getCurrentRawIntensity()));
+			
+			double raw = ssp.getCurrentRawIntensity();
+			rawIntensity.setText(String.valueOf(raw));
 			areaCorrection.setText(String.valueOf(ssp.getCurrentAreaCorrection()));
 			
 		}
@@ -911,7 +962,12 @@ public class PlotSystemCompositeView extends Composite {
 		if (ssp.getCorrectionSelection() == MethodSetting.Reflectivity_with_Flux_Correction){
 			
 			rawIntensity.setText(String.valueOf(ssp.getCurrentRawIntensity()));
-			reflectivityFluxCorr.setText(String.valueOf(ssp.getCurrentReflectivityFluxCorrection()));
+			
+			double f = ssp.getCurrentReflectivityFluxCorrection();
+			
+			String fluxCorr = String.valueOf(f);
+			
+			reflectivityFluxCorr.setText(fluxCorr);
 			reflectivityAreaCorr.setText(String.valueOf(ssp.getCurrentReflectivityAreaCorrection()));
 			
 		}
@@ -976,6 +1032,8 @@ public class PlotSystemCompositeView extends Composite {
 		
 		plotSystem.updatePlot2D(ssp.getImage(ssp.getSliderPos()), null, null);
 		setRegion(ssp.getLenPt());
+		plotSystem.repaint();
+		generalCorrectionsUpdate();
 		
 	}
 	

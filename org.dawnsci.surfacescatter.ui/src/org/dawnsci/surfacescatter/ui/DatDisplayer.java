@@ -499,6 +499,8 @@ public class DatDisplayer extends Composite {
 				ssp.setImageFolderPath(null);
 				rodDisplayTable.removeAll();				
 			}
+			
+			
 
 			@Override
 			public void widgetDefaultSelected(SelectionEvent e) {

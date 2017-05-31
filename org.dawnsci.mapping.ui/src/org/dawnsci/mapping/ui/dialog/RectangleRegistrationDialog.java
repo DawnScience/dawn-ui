@@ -143,6 +143,8 @@ public class RectangleRegistrationDialog extends Dialog {
 		final FloatSpinner angle = new FloatSpinner(buttons,SWT.NONE);
 		angle.setLayoutData(new GridData(SWT.FILL,SWT.CENTER,true,false));
 		angle.setIncrement(0.1);
+		angle.setDouble(0);
+		angle.setPrecision(1);
 		angle.setMaximum(360);
 		angle.setMinimum(-360);
 		angle.addSelectionListener(new SelectionAdapter() {
@@ -187,6 +189,7 @@ public class RectangleRegistrationDialog extends Dialog {
 		doInitialMappingPoints();
 		doInitialMapping();
 		switchMode(true);
+		buttons.redraw();
 		return container;
 	}
 	
