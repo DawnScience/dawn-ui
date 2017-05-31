@@ -176,6 +176,7 @@ public class MaskingTool extends AbstractToolPage implements MouseListener {
 					final IImageTrace trace = evt.getImageTrace();
 					maskObject.setImageOrigin(trace.getImageOrigin());
 					Display.getDefault().syncExec(new Runnable() {
+						@Override
 						public void run() {
 							// NOTE the mask will have a reference kept and
 							// will downsample with the data.
@@ -217,6 +218,7 @@ public class MaskingTool extends AbstractToolPage implements MouseListener {
 
 				if (Activator.getPlottingPreferenceStore().getBoolean(PlottingConstants.MASK_DRAW_MULTIPLE)) {
 					Display.getDefault().asyncExec(new Runnable(){
+						@Override
 						public void run() {
 							try {
 								getPlottingSystem().createRegion(RegionUtils.getUniqueName(evt.getRegion().getRegionType().getName(), getPlottingSystem()),
@@ -269,6 +271,7 @@ public class MaskingTool extends AbstractToolPage implements MouseListener {
 
 				if (autoApplySavedMask && savedMask!=null) {
 					Display.getDefault().asyncExec(new Runnable() {
+						@Override
 						public void run() {
 							try {
 								mergeSavedMask();
@@ -306,6 +309,7 @@ public class MaskingTool extends AbstractToolPage implements MouseListener {
 			setLastActionRange(false);
 			maskJob.schedule(false, null, me.getLocation());
 		}
+
 		@Override
 		public void mouseDragged(org.eclipse.draw2d.MouseEvent me) {
 			if (me.button!=0 || isPanning(me)) return;
@@ -317,6 +321,7 @@ public class MaskingTool extends AbstractToolPage implements MouseListener {
 			setLastActionRange(false);
 			maskJob.schedule(false, null, me.getLocation());
 		}
+
 		@Override
 		public void mouseReleased(org.eclipse.draw2d.MouseEvent me) {
 			// record shift point
@@ -348,6 +353,7 @@ public class MaskingTool extends AbstractToolPage implements MouseListener {
 		return false;
 	}
 
+	@Override
 	public <T> void setPlottingSystem(IPlottingSystem<T> system) {
 		super.setPlottingSystem(system);
 		this.maskObject   = new MaskObject(); //TODO maybe make maskCreator by only processing visible regions.
@@ -407,12 +413,14 @@ public class MaskingTool extends AbstractToolPage implements MouseListener {
 		minimum.setDouble(minValue);
 		minimum.setToolTipText("Press enter to apply a full update of the mask.");
 		minimum.addSelectionListener(new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				processMask(true, false, null);
 				setLastActionRange(true);
 			}
 		});
 		minimum.addKeyListener(new KeyAdapter() {
+			@Override
 			public void keyPressed(KeyEvent e) {
 				if (e.character=='\n' || e.character=='\r') {
 					processMask(isLastActionRange(), true, null);
@@ -427,6 +435,7 @@ public class MaskingTool extends AbstractToolPage implements MouseListener {
 		enableControls.add(maxEnabled);
 	
 		minEnabled.addSelectionListener(new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				minimum.setEnabled(minEnabled.getSelection());
 				GridUtils.setVisible(warningMessage, minEnabled.getSelection()||maxEnabled.getSelection());
@@ -439,6 +448,7 @@ public class MaskingTool extends AbstractToolPage implements MouseListener {
 			}
 		});
 		maxEnabled.addSelectionListener(new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				maximum.setEnabled(maxEnabled.getSelection());
 				GridUtils.setVisible(warningMessage, minEnabled.getSelection()||maxEnabled.getSelection());
@@ -459,12 +469,14 @@ public class MaskingTool extends AbstractToolPage implements MouseListener {
 		maximum.setDouble(maxValue);
 		maximum.setToolTipText("Press enter to apply a full update of the mask.");
 		maximum.addSelectionListener(new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				processMask(true, false, null);
 				setLastActionRange(true);
 			}
 		});
 		maximum.addKeyListener(new KeyAdapter() {
+			@Override
 			public void keyPressed(KeyEvent e) {
 				if (e.character=='\n' || e.character=='\r') {
 					processMask(isLastActionRange(), true, null);
@@ -479,6 +491,7 @@ public class MaskingTool extends AbstractToolPage implements MouseListener {
 		ignoreAlreadyMasked.setToolTipText("When using bounds, pixels already masked can be ignored and not checked for range.\nThis setting is ignored when removing the bounds mask.");
 
 		ignoreAlreadyMasked.addSelectionListener(new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				maskObject.setIgnoreAlreadyMasked(ignoreAlreadyMasked.getSelection());
 			}
@@ -588,11 +601,13 @@ public class MaskingTool extends AbstractToolPage implements MouseListener {
 		
 		
 		minThresh.addSelectionListener(new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				maskObject.setBrushThreshold(new PrecisionPoint(minThresh.getDouble(), maxThresh.getDouble()));
 			}
 		});
 		minThresh.addKeyListener(new KeyAdapter() {
+			@Override
 			public void keyPressed(KeyEvent e) {
 				if (e.character=='\n' || e.character=='\r') {
 					maskObject.setBrushThreshold(new PrecisionPoint(minThresh.getDouble(), maxThresh.getDouble()));
@@ -600,11 +615,13 @@ public class MaskingTool extends AbstractToolPage implements MouseListener {
 			}
 		});
 		maxThresh.addSelectionListener(new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				maskObject.setBrushThreshold(new PrecisionPoint(minThresh.getDouble(), maxThresh.getDouble()));
 			}
 		});
 		maxThresh.addKeyListener(new KeyAdapter() {
+			@Override
 			public void keyPressed(KeyEvent e) {
 				if (e.character=='\n' || e.character=='\r') {
 					maskObject.setBrushThreshold(new PrecisionPoint(minThresh.getDouble(), maxThresh.getDouble()));
@@ -613,6 +630,7 @@ public class MaskingTool extends AbstractToolPage implements MouseListener {
 		});
 		
 		useThresh.addSelectionListener(new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				
 				GridUtils.setVisible(threshComp, useThresh.getSelection());
@@ -651,9 +669,11 @@ public class MaskingTool extends AbstractToolPage implements MouseListener {
 			@Override
 			public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {				
 			}			
+
 			@Override
 			public void dispose() {
-			}		
+			}
+
 			@Override
 			public Object[] getElements(Object inputElement) {
 				final Collection<IRegion> regions = getPlottingSystem().getRegions();
@@ -684,6 +704,7 @@ public class MaskingTool extends AbstractToolPage implements MouseListener {
 		apply.setImage(Activator.getImage("icons/apply.gif"));
 		apply.setText("Apply");
 		apply.addSelectionListener(new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				processMask(isLastActionRange(), true, null);
 			}
@@ -692,6 +713,7 @@ public class MaskingTool extends AbstractToolPage implements MouseListener {
 		enableControls.add(apply);
 		
 		autoApply.addSelectionListener(new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				Activator.getPlottingPreferenceStore().setValue(PlottingConstants.MASK_AUTO_APPLY, autoApply.getSelection());
 				apply.setEnabled(!autoApply.getSelection()); 
@@ -704,6 +726,7 @@ public class MaskingTool extends AbstractToolPage implements MouseListener {
 		reset.setImage(Activator.getImage("icons/reset.gif"));
 		reset.setText("Reset");
 		reset.addSelectionListener(new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				resetMask();
 			}
@@ -716,6 +739,7 @@ public class MaskingTool extends AbstractToolPage implements MouseListener {
 		final StackLayout layout = (StackLayout)drawContent.getLayout();
 		layout.topControl = directComp;
 		directDraw.addSelectionListener(new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				Activator.getPlottingPreferenceStore().setValue(PlottingConstants.MASK_DRAW_TYPE, "direct");
 				layout.topControl = directComp;
@@ -728,6 +752,7 @@ public class MaskingTool extends AbstractToolPage implements MouseListener {
 		});
 		
 		regionDraw.addSelectionListener(new SelectionAdapter() {
+			@Override
 			public void widgetSelected(SelectionEvent e) {
 				Activator.getPlottingPreferenceStore().setValue(PlottingConstants.MASK_DRAW_TYPE, "region");
 				layout.topControl = regionComp;
@@ -805,6 +830,7 @@ public class MaskingTool extends AbstractToolPage implements MouseListener {
 		for (final int pensize : pensizes) {
 			
 			final Action action = new Action("Pen size of "+String.valueOf(pensize), IAction.AS_CHECK_BOX) {
+				@Override
 				public void run() {
 					Activator.getPlottingPreferenceStore().setValue(PlottingConstants.MASK_PEN_SIZE, pensize);
 					penSize.setSelectedAction(this);
@@ -836,6 +862,7 @@ public class MaskingTool extends AbstractToolPage implements MouseListener {
 
 		group = new CheckableActionGroup();
 		Action action = new Action("Square brush", IAction.AS_CHECK_BOX) {
+			@Override
 			public void run() {
 				int pensize = Activator.getPlottingPreferenceStore().getInt(PlottingConstants.MASK_PEN_SIZE);
 				ShapeType penShape = ShapeType.SQUARE;
@@ -849,6 +876,7 @@ public class MaskingTool extends AbstractToolPage implements MouseListener {
 		man.add(action);
 		
 		action = new Action("Triangle brush", IAction.AS_CHECK_BOX) {
+			@Override
 			public void run() {
 				int pensize = Activator.getPlottingPreferenceStore().getInt(PlottingConstants.MASK_PEN_SIZE);
 				ShapeType penShape = ShapeType.TRIANGLE;
@@ -862,6 +890,7 @@ public class MaskingTool extends AbstractToolPage implements MouseListener {
 		man.add(action);
 		
 		action = new Action("Circular brush", IAction.AS_CHECK_BOX) {
+			@Override
 			public void run() {
 				int pensize = Activator.getPlottingPreferenceStore().getInt(PlottingConstants.MASK_PEN_SIZE);
 				ShapeType penShape = ShapeType.CIRCLE;
@@ -875,6 +904,7 @@ public class MaskingTool extends AbstractToolPage implements MouseListener {
 		man.add(action);
 		
 		action = new Action("None", IAction.AS_CHECK_BOX) {
+			@Override
 			public void run() {
 				ShapeType penShape = ShapeType.NONE;
 				previousshapeType = penShape;
@@ -892,6 +922,7 @@ public class MaskingTool extends AbstractToolPage implements MouseListener {
 		
 		group = new CheckableActionGroup();
 		final Action mask = new Action("Mask", IAction.AS_CHECK_BOX) {
+			@Override
 			public void run() {
 				Activator.getPlottingPreferenceStore().setValue(PlottingConstants.MASK_PEN_MASKOUT, true);
 				updateIcons(getImageTrace().getNanBound().getColor());
@@ -902,6 +933,7 @@ public class MaskingTool extends AbstractToolPage implements MouseListener {
 		man.add(mask);
 		
 		final Action unmask = new Action("Unmask", IAction.AS_CHECK_BOX) {
+			@Override
 			public void run() {
 				Activator.getPlottingPreferenceStore().setValue(PlottingConstants.MASK_PEN_MASKOUT, false);
 				updateIcons(null);
@@ -927,6 +959,7 @@ public class MaskingTool extends AbstractToolPage implements MouseListener {
 		}
 		
 		Display.getDefault().asyncExec(new Runnable() {
+			@Override
 			public void run() {
 
 				String savedShape = Activator.getPlottingPreferenceStore().getString(PlottingConstants.MASK_PEN_SHAPE);
@@ -987,6 +1020,7 @@ public class MaskingTool extends AbstractToolPage implements MouseListener {
 		createToolPageActions();
 		
 		final Action exportMask = new Action("Export mask to file", Activator.getImageDescriptor("icons/save_edit.png")) {
+			@Override
 			public void run() {
 				try {
 					IWizard wiz = EclipseUtils.openWizard(PersistenceExportWizard.ID, false);
@@ -1001,6 +1035,7 @@ public class MaskingTool extends AbstractToolPage implements MouseListener {
 		actionBars.getToolBarManager().add(exportMask);
 		
 		final Action importMask = new Action("Import mask from file", Activator.getImageDescriptor("icons/import_wiz.png")) {
+			@Override
 			public void run() {
 				try {
 					autoApply.setSelection(false);
@@ -1020,6 +1055,7 @@ public class MaskingTool extends AbstractToolPage implements MouseListener {
 		actionBars.getToolBarManager().add(new Separator());
 		
 		final Action invertMask = new Action("Invert mask", Activator.getImageDescriptor("icons/mask-invert.png")) {
+			@Override
 			public void run() {
 				try {
 					maskObject.invert();
@@ -1037,6 +1073,7 @@ public class MaskingTool extends AbstractToolPage implements MouseListener {
 
 
 		final Action undo = new Action("Undo mask operation", Activator.getImageDescriptor("icons/mask-undo.png")) {
+			@Override
 			public void run() {
 				maskObject.undo();
 				getImageTrace().setMask(maskObject.getMaskDataset());
@@ -1045,6 +1082,7 @@ public class MaskingTool extends AbstractToolPage implements MouseListener {
 		actionBars.getToolBarManager().add(undo);
 		undo.setEnabled(false);
 		final Action redo = new Action("Redo mask operation", Activator.getImageDescriptor("icons/mask-redo.png")) {
+			@Override
 			public void run() {
 				maskObject.redo();
 				getImageTrace().setMask(maskObject.getMaskDataset());
@@ -1064,6 +1102,7 @@ public class MaskingTool extends AbstractToolPage implements MouseListener {
 		});
 		
 		final Action reset = new Action("Reset Mask", Activator.getImageDescriptor("icons/reset.gif")) {
+			@Override
 			public void run() {
 				resetMask();
 			}
@@ -1072,13 +1111,15 @@ public class MaskingTool extends AbstractToolPage implements MouseListener {
 		actionBars.getToolBarManager().add(new Separator());
 		
 		final Action saveMask  = new Action("Export the mask into a temporary buffer", Activator.getImageDescriptor("icons/export_wiz.gif")) {
+			@Override
 			public void run() {
 				saveMaskBuffer();
 			}
 		};
 		actionBars.getToolBarManager().add(saveMask);
 		
-	    loadMask  = new Action("Import the mask from temporary buffer", Activator.getImageDescriptor("icons/import_wiz.gif")) {
+	    loadMask  = new Action("Import the mask from temporary buffer", Activator.getImageDescriptor("icons/import_wiz.png")) {
+			@Override
 			public void run() {
 				mergeSavedMask();
 			}
@@ -1088,6 +1129,7 @@ public class MaskingTool extends AbstractToolPage implements MouseListener {
 		
 		if (autoApplyMask==null) {
 			autoApplyMask  = new Action("Automatically apply the mask buffer to any image plotted.", IAction.AS_CHECK_BOX) {
+				@Override
 				public void run() {
 					autoApplySavedMask = isChecked();
 					if (autoApplySavedMask&&currentMaskingTool!=null) {
@@ -1111,6 +1153,7 @@ public class MaskingTool extends AbstractToolPage implements MouseListener {
 		if (alwaysSave==null) { // Needs to be static else you have to go back to all editors and
 			                       // uncheck each one.
 			alwaysSave  = new Action("Auto-save the mask to the buffer when it changes", IAction.AS_CHECK_BOX) {
+				@Override
 				public void run() {
 					Activator.getPlottingPreferenceStore().setValue(AUTO_SAVE_PROP, isChecked());
 				}
@@ -1249,11 +1292,14 @@ public class MaskingTool extends AbstractToolPage implements MouseListener {
 		}
 		
 		private int columnIndex;
+
+		@Override
 		public void update(ViewerCell cell) {
 			columnIndex = cell.getColumnIndex();
 			super.update(cell);
 		}
 		
+		@Override
 		public Image getImage(Object element) {
 			
 			if (columnIndex!=0) return null;
@@ -1261,7 +1307,8 @@ public class MaskingTool extends AbstractToolPage implements MouseListener {
 			final IRegion region = (IRegion)element;
 			return region.isMaskRegion() && regionTable.getTable().isEnabled() ? checkedIcon : uncheckedIcon;
 		}
-		
+
+		@Override
 		public String getText(Object element) {
 			
 			if (element instanceof String) return "";
@@ -1275,7 +1322,8 @@ public class MaskingTool extends AbstractToolPage implements MouseListener {
 			}
 			return "";
 		}
-		
+
+		@Override
 		public void dispose() {
 			super.dispose();
 			checkedIcon.dispose();
@@ -1299,6 +1347,7 @@ public class MaskingTool extends AbstractToolPage implements MouseListener {
 	private void createMaskingRegionActions(ToolBarManager man) {		
 		
 		final Action multipleRegion  = new Action("Continuously add the same region", IAction.AS_CHECK_BOX) {
+			@Override
 			public void run() {
 				Activator.getPlottingPreferenceStore().setValue(PlottingConstants.MASK_DRAW_MULTIPLE, isChecked());
 			}
@@ -1340,6 +1389,7 @@ public class MaskingTool extends AbstractToolPage implements MouseListener {
 			
 			final int width = iwidth;
 			final Action action = new Action("Draw width of "+String.valueOf(width), IAction.AS_CHECK_BOX) {
+				@Override
 				public void run() {
 					Activator.getPlottingPreferenceStore().setValue(PlottingConstants.FREE_DRAW_WIDTH, width);
 					widthChoice.setSelectedAction(this);
@@ -1456,7 +1506,7 @@ public class MaskingTool extends AbstractToolPage implements MouseListener {
 				}
 			}
 			
-			this.viewer = (AbstractPlottingViewer)getPlottingSystem().getAdapter(AbstractPlottingViewer.class);
+			this.viewer = getPlottingSystem().getAdapter(AbstractPlottingViewer.class);
 			if (viewer!=null) {
 				viewer.addMouseClickListener(clickListener);
 				viewer.addMouseMotionListener(clickListener);
@@ -1500,7 +1550,7 @@ public class MaskingTool extends AbstractToolPage implements MouseListener {
 				getImageTrace().removePaletteListener(paletteListener);
 			}
 
-			AbstractPlottingViewer viewer = (AbstractPlottingViewer)getPlottingSystem().getAdapter(AbstractPlottingViewer.class);
+			AbstractPlottingViewer viewer = getPlottingSystem().getAdapter(AbstractPlottingViewer.class);
 			viewer.removeMouseClickListener(clickListener);
 			viewer.removeMouseMotionListener(clickListener);
 			viewer.setSelectedCursor(null);
@@ -1613,6 +1663,7 @@ public class MaskingTool extends AbstractToolPage implements MouseListener {
 				}
 				
 				Display.getDefault().syncExec(new Runnable() {
+					@Override
 					public void run() {
 						// NOTE the mask will have a reference kept and
 						// will downsample with the data.
@@ -1710,6 +1761,7 @@ public class MaskingTool extends AbstractToolPage implements MouseListener {
 		MASK_REGION;
 	}
 
+	@Override
 	public void setToolData(Serializable toolData) {
 		if (toolData instanceof BooleanDataset) {
 			maskObject.setMaskDataset((BooleanDataset) toolData, false);
