@@ -4,7 +4,6 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Label;
 
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -13,9 +12,12 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.Map;
 import java.util.Set;
+
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.List;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -28,6 +30,8 @@ public class SavuWindow2 extends Composite {
 	 * @param parent
 	 * @param style
 	 */
+	
+	private final static Logger logger = LoggerFactory.getLogger(SavuWindow2.class);
 	public SavuWindow2(Composite parent, int style) throws FileNotFoundException {
 		super(parent, style);
 		final String wspacePath = ResourcesPlugin.getWorkspace().getRoot().getLocation().toString();
@@ -56,7 +60,7 @@ public class SavuWindow2 extends Composite {
 			list.setItems(stuff);
 		} catch (IOException | ClassNotFoundException e1) {
 			// TODO Auto-generated catch block
-			e1.printStackTrace();
+			logger.error("Couldn't populate the plugins", e1);
 		}
 
 		new Label(this, SWT.NONE);
@@ -72,7 +76,7 @@ public class SavuWindow2 extends Composite {
 					findme = new SavuPluginFinder();
 				} catch (Exception e2) {
 					// TODO Auto-generated catch block
-					e2.printStackTrace();
+					logger.error("Couldn't instantiate the savu plugin finder", e2);
 				}
 				try {
 					// run the finder. We should save this to file and update the input
@@ -90,7 +94,7 @@ public class SavuWindow2 extends Composite {
 						fileOut.close();
 						// I should here write out the parameter lists in files with a title of the plugin name.
 					} catch (IOException e1) {
-						e1.printStackTrace();
+						logger.error("Couldn't write object stream",e1);
 					}
 					Set<String> myset = pluginDict.keySet();			
 					String[] stuff = myset.toArray(new String[myset.size()]);
@@ -99,9 +103,9 @@ public class SavuWindow2 extends Composite {
 					try {
 						for (Map.Entry<String, Object> entry : pluginDict.entrySet()) {	
 							Map<String, Object> pluginparamDict = findme.getPluginParameters(entry.getKey());
-							System.out.println(entry.getKey());
+							logger.debug(entry.getKey());
 							String pluginFilePath = wspacePath+entry.getKey()+".ser";
-							System.out.println(pluginFilePath);
+							logger.debug("The plugin filepath is"+pluginFilePath);
 							fileOut = new FileOutputStream(pluginFilePath);
 							out = new ObjectOutputStream(fileOut);
 							out.writeObject(pluginparamDict);
@@ -109,12 +113,13 @@ public class SavuWindow2 extends Composite {
 							fileOut.close();
 						}
 					} catch (Exception e1) {
-						e1.printStackTrace();
+						logger.error("Could not find plugins",e1);
 					}
 					findme.stopPythonService();
 
 				} catch (Exception e1) {
 					// TODO Auto-generated catch block
+					logger.error("Could not run the plugin finder routine",e1);
 					e1.printStackTrace();
 				}
 			}

@@ -25,8 +25,7 @@ public class SavuProcessingPreferencePage extends PreferencePage implements
 		try {
 			savu = new SavuWindow2(parent, SWT.NONE);
 		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			
 		}
         
 		return savu;
