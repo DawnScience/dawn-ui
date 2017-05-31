@@ -145,7 +145,7 @@ public class XYRegionConfigDialog extends XYGraphConfigDialog {
  	        for (IRegion region : ((RegionArea)regionGraph.getPlotArea()).getRegions()) {
 		        
  	        	if (!region.isUserRegion()) continue;
-		        RegionEditComposite regionPage = new RegionEditComposite(regionConfigComposite, plottingSystem, SWT.NONE, (XYRegionGraph)getXyGraph(), region.getRegionType(), false);
+		        RegionEditComposite regionPage = new RegionEditComposite(regionConfigComposite, plottingSystem, SWT.NONE, (XYRegionGraph)getXYGraph(), region.getRegionType(), false);
 		        regionList.add(regionPage);
 		        regionPage.setEditingRegion(region);
  	        }
@@ -176,7 +176,7 @@ public class XYRegionConfigDialog extends XYGraphConfigDialog {
         }
         
         if (selectedAnnotation!=null) {
-        	final int index = getXyGraph().getPlotArea().getAnnotationList().indexOf(selectedAnnotation);
+        	final int index = getXYGraph().getPlotArea().getAnnotationList().indexOf(selectedAnnotation);
         	final TabItem[] items = tabFolder.getItems();
          	for (int i = 0; i < items.length; i++) {
 				if ("Annotations".equalsIgnoreCase(items[i].getText())) {
@@ -211,7 +211,7 @@ public class XYRegionConfigDialog extends XYGraphConfigDialog {
         	}
         }
 		if (selectedAxis != null) {
-			final int index = getXyGraph().getAxisList().indexOf(selectedAxis);
+			final int index = getXYGraph().getAxisList().indexOf(selectedAxis);
 			final TabItem[] items = tabFolder.getItems();
 			for (int i = 0; i < items.length; i++) {
 				if ("Axes".equalsIgnoreCase(items[i].getText())) {
@@ -233,7 +233,7 @@ public class XYRegionConfigDialog extends XYGraphConfigDialog {
 
 	@Override
 	protected ITraceConfigPage createTraceConfigPage(Trace trace) {
-		return new DTraceConfigPage(getXyGraph(), trace);
+		return new DTraceConfigPage(getXYGraph(), trace);
 	}
 
 	private static final void setTraceTabSelected(int index, TabFolder tabFolder, Combo combo, Composite composite) {
@@ -260,7 +260,7 @@ public class XYRegionConfigDialog extends XYGraphConfigDialog {
 		}
 		regionGraph.fireConfigurationPropertyChangeListeners();
 		if (isRescale) regionGraph.performAutoScale();
-		IXYGraph xyGraph = getXyGraph();
+		IXYGraph xyGraph = getXYGraph();
 		xyGraph.revalidate();
 		xyGraph.repaint();	
 	}
