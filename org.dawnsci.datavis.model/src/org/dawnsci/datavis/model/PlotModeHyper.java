@@ -12,6 +12,7 @@ public class PlotModeHyper implements ILazyPlotMode {
 	private static final String[] options =  new String[]{"Z", "X", "Y"};
 	private ILazyDataset view3d;
 	private int[] order = new int[]{0,1,2};
+	private SliceND slice;
 	
 	@Override
 	public String[] getOptions() {
@@ -21,7 +22,8 @@ public class PlotModeHyper implements ILazyPlotMode {
 	@Override
 	public IDataset[] sliceForPlot(ILazyDataset lz, SliceND slice, Object[] options) throws Exception {
 		
-		view3d = lz.getSliceView(slice);
+		view3d = lz.getSliceView();
+		this.slice = slice;
 		int count = 0;
 		for (int j = 0; j <options.length; j++) {
 			if (options[j] != null) {
@@ -31,6 +33,8 @@ public class PlotModeHyper implements ILazyPlotMode {
 					order[1] = count++;
 				}else if (options[j].equals(PlotModeHyper.options[0])) {
 					order[2] = count++;
+				} else {
+					count++;
 				}
 			}
 		}
@@ -83,7 +87,7 @@ public class PlotModeHyper implements ILazyPlotMode {
 	public void displayData(ITrace[] update, IPlottingSystem<?> system, Object userObject) throws Exception {
 		IHyperTrace t = system.createTrace("Hyper Trace", IHyperTrace.class);
 
-		t.setData(view3d, order);
+		t.setData(view3d, order, slice);
 
 		system.addTrace(t);
 
