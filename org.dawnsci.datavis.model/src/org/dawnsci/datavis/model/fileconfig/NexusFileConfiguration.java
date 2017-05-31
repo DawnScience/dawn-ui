@@ -12,6 +12,8 @@ import org.eclipse.dawnsci.analysis.api.tree.NodeLink;
 import org.eclipse.dawnsci.analysis.api.tree.Tree;
 import org.eclipse.dawnsci.analysis.api.tree.TreeUtils;
 
+import uk.ac.diamond.scisoft.analysis.io.NexusTreeUtils;
+
 public class NexusFileConfiguration implements ILoadedFileConfiguration {
 
 	@Override
@@ -25,10 +27,24 @@ public class NexusFileConfiguration implements ILoadedFileConfiguration {
 			@Override
 			public boolean found(NodeLink node) {
 				Node n = node.getDestination();
-				if (n.containsAttribute("signal")) {
-					return true;
+				if (n.containsAttribute("signal")){
+
+					if (n.containsAttribute(NexusTreeUtils.NX_CLASS)) {
+						if (n.getAttribute(NexusTreeUtils.NX_CLASS).getFirstElement().equals(NexusTreeUtils.NX_DATA)) {
+							return true;
+						}
+					}
+
+					n = node.getSource();
+
+					if (n.containsAttribute(NexusTreeUtils.NX_CLASS)) {
+						if (n.getAttribute(NexusTreeUtils.NX_CLASS).getFirstElement().equals(NexusTreeUtils.NX_DATA)) {
+							return true;
+						}
+					}
+
 				}
-				
+
 				return false;
 			}
 		};
@@ -48,7 +64,7 @@ public class NexusFileConfiguration implements ILoadedFileConfiguration {
 				if (r > max) {
 					max = r;
 					maxRank = path;
-					break;
+					continue;
 				}
 			}
 			
@@ -59,7 +75,7 @@ public class NexusFileConfiguration implements ILoadedFileConfiguration {
 					if (r > max) {
 						max = r;
 						maxRank = path+Node.SEPARATOR+signal;
-						break;
+						continue;
 					}
 				}
 			}
