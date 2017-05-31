@@ -57,7 +57,7 @@ public class LineTrace extends Trace implements ITraceContainer {
 	}
 
 	public boolean isDisposed() {
-		return getIXYGraph()==null;
+		return getXYGraph()==null;
 	}
 
 
