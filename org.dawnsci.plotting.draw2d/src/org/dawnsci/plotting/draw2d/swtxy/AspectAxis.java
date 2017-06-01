@@ -31,7 +31,7 @@ import org.eclipse.january.dataset.Dataset;
 import org.eclipse.january.dataset.DatasetUtils;
 import org.eclipse.january.dataset.IDataset;
 import org.eclipse.jface.preference.IPreferenceStore;
-import org.eclipse.nebula.visualization.xygraph.figures.Axis;
+import org.eclipse.nebula.visualization.xygraph.figures.DAxis;
 import org.eclipse.nebula.visualization.xygraph.linearscale.ITicksProvider;
 import org.eclipse.nebula.visualization.xygraph.linearscale.LinearScaleTickMarks;
 import org.eclipse.nebula.visualization.xygraph.linearscale.Range;
@@ -45,7 +45,7 @@ import org.eclipse.ui.preferences.ScopedPreferenceStore;
  * @author Matthew Gerring
  *
  */
-public class AspectAxis extends Axis implements IAxis {
+public class AspectAxis extends DAxis implements IAxis {
 
 	private AspectAxis relativeTo;
 	private Range      maximumRange;
@@ -514,7 +514,7 @@ public class AspectAxis extends Axis implements IAxis {
 	}
 
 	@Override
-	public boolean areLabelCustomised() {
+	public boolean isLabelCustomised() {
 		return labelData != null;
 	}
 	
