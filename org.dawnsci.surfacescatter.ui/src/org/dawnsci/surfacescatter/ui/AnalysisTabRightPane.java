@@ -243,6 +243,8 @@ public class AnalysisTabRightPane extends Dialog {
 			int[] len = ssp.getLenPt()[0];
 			int[] pt = ssp.getLenPt()[1];
 			
+			int[][] lenPt = new int[][] {len, pt};
+			
 			int selection = ssp.getSliderPos();
 						
 //			ssp.sliderMovemementMainImage(selection, 
@@ -279,7 +281,8 @@ public class AnalysisTabRightPane extends Dialog {
 				
 				IDataset output = ssp.presenterDummyProcess(selection,
 															ssp.getImage(selection),
-															3);
+															3,
+															lenPt);
 		
 				ILineTrace lt3 = VerticalHorizontalSlices.horizontalsliceBackgroundSubtracted(
 						customComposite2.getRegions()[0].getROI().getBounds(),

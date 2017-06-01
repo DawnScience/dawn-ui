@@ -1069,9 +1069,11 @@ public class SurfaceScatterPresenter {
 	public ArrayList<double[][]> interpolationTrackerBoxesAccept(IRegion r2){
 				
 		double[][] box = new double[3][];
+		
+		IRectangularROI r2ROI = r2.getROI().copy().getBounds();
 				
-		double[] lengths = new double[] {(double) r2.getROI().getBounds().getIntLengths()[0], (double) r2.getROI().getBounds().getIntLengths()[1]};
-		double[] pts = new double[] {(double) r2.getROI().getBounds().getIntPoint()[0], r2.getROI().getBounds().getIntPoint()[1]};
+		double[] lengths = new double[] {(double) r2ROI.getIntLengths()[0], (double) r2ROI.getIntLengths()[1]};
+		double[] pts = new double[] {(double) r2ROI.getIntPoint()[0], r2ROI.getIntPoint()[1]};
 		double[] xdata = new double[]{(double) sliderPos, (double) drm.getSortedX().getDouble(sliderPos)};
 				
 		box[0] = lengths;
@@ -1082,30 +1084,69 @@ public class SurfaceScatterPresenter {
 		
 		ArrayList<double[][]> interpolatedLenPts = new ArrayList<>();
 		
-
-		if(drm.getInterpolatorBoxes().size() > 2 
-				&& getTrackerType() == TrackerType1.SPLINE_INTERPOLATION ){
-			
-					SplineInterpolationTracker split = new SplineInterpolationTracker();
-					
-					interpolatedLenPts = split.interpolatedTrackerLenPtArray1(drm.getInterpolatorBoxes(),
-																			  drm.getSortedX());
-					
-					drm.setInterpolatedLenPts(interpolatedLenPts);
-
-					return interpolatedLenPts;
-		}
-
 		if(drm.getInterpolatorBoxes().size() > 1){
+			
+			interpolatedLenPts = InterpolationTracker.interpolatedTrackerLenPtArray(drm.getInterpolatorBoxes(), 
+										  drm.getSortedX());
+			drm.setInterpolatedLenPts(interpolatedLenPts);
+
+			if(drm.getInterpolatorBoxes().size() > 2 
+					&& getTrackerType() == TrackerType1.SPLINE_INTERPOLATION ){
 				
-					interpolatedLenPts = InterpolationTracker.interpolatedTrackerLenPtArray(drm.getInterpolatorBoxes(), 
-												  drm.getSortedX());
-					drm.setInterpolatedLenPts(interpolatedLenPts);
-		
-					return interpolatedLenPts;
+						SplineInterpolationTracker split = new SplineInterpolationTracker();
+						
+						interpolatedLenPts = split.interpolatedTrackerLenPtArray1(drm.getInterpolatorBoxes(),
+																				  drm.getSortedX());
+						
+						drm.setInterpolatedLenPts(interpolatedLenPts);
+	
+			}
+
+			int[] g = fms.get(0).getRawImageData().squeezeEnds().getShape();
+			
+			double[][] q = new double [][] {{(double) 0.0, (double) 0.0},
+											{(double) 0.0, (double) 0.0}};
+			
+			
+			for (int r  = 0; r<interpolatedLenPts.size(); r++){
+				
+				double[][] p = interpolatedLenPts.get(r);
+				
+				if((p[0][0] + p[1][0])<g[1] &&
+				   (p[0][1] + p[1][1])<g[0]){
+						
+					q=p;				
+				}
+				
+				if((p[0][0] + p[1][0])>g[1] ||
+				   (p[0][1] + p[1][1])>g[0]){
+				
+					interpolatedLenPts.set(r, q);
+				}
+			}
+		}	
+		if(interpolatedLenPts.size() > 0){
+			for(int f =0; f<fms.size();f++){
+				double[] lr = LocationLenPtConverterUtils.lenPtToLocationConverter(interpolatedLenPts.get(f));
+				if(lr == null){
+					System.out.println("it's fucked at  lr :  " + lr);
+				}
+				fms.get(f).setRoiLocation(lr);
+				if(f == 17){
+					System.out.println("this is ROI  at  17 :  " + lr);
+				}
+				
+			}
+			
+			
+			for(FrameModel g :fms){
+				if(g.getRoiLocation() == null){
+					System.out.println("it's fucked");
+				}
+			}
 		}
 		
-		return null;
+		return interpolatedLenPts;
 	}
 	
 	public ArrayList<double[][]> getInterpolatorBoxes(){
@@ -1222,7 +1263,8 @@ public class SurfaceScatterPresenter {
 		if(Arrays.equals(drm.getInitialLenPt()[0],lenPt[0]) == false ||
 		   Arrays.equals(drm.getInitialLenPt()[1],lenPt[1]) == false){
 			
-			drm.setInitialLenPt(lenPt);
+			drm.setInitialLenPt(sliderPos, 
+								lenPt);
 		}
 		
 		
@@ -1467,20 +1509,35 @@ public class SurfaceScatterPresenter {
 		return subImage;
 	}
 
+	public Dataset subImage(IDataset image, IROI box) {
+		Dataset subImage = (Dataset) PlotSystem2DataSetter.PlotSystem2DataSetter1(box, image);
+		return subImage;
+	}
+	
+	
 	public IDataset presenterDummyProcess(int selection, 
 										  IDataset image, 
-										  int trackingMarker) {
+										  int trackingMarker,
+										  int[][] lenPt) {
 
 		int j = fms.get(selection).getNoInOriginalDat();
 		
 		try{
+			
+			double [] lj = null;
+			
+			
+			if(lenPt != null){
+				lj = LocationLenPtConverterUtils.lenPtToLocationConverter(lenPt);
+			}
+			
 			IDataset output = DummyProcessWithFrames.DummyProcess(drm,
 													 gm, 
 													 MethodSetting.toInt(drm.getCorrectionSelection()), 
-													 fms.get(selection).getNoInOriginalDat(), 
+													 j, 
 													 trackingMarker,
-													 selection);	
-			
+													 selection,
+													 lj);	
 			
 			drm.addBackgroundDatArray(fms.size(), selection, output);
 			

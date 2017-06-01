@@ -505,6 +505,8 @@ public class PlotSystemCompositeView extends Composite {
 		else{
 		}
 		ssvs.updateDisplay();
+		
+		
     	
     	
     }
@@ -793,6 +795,11 @@ public class PlotSystemCompositeView extends Composite {
 		
 		RectangularROI newROI = new RectangularROI((int) Math.round(ad[1]*3/8),(int) Math.round(ad[0]*3/8),(int) Math.round(ad[1]*0.25),(int) Math.round(ad[0]*0.25),0);
 		re.setROI(newROI);
+		re.toFront();
+		re.setVisible(true);
+		generalUpdate();
+		
+		
 	}
 	
 	public Button getRun(){

@@ -35,7 +35,7 @@ public class TrackingHandlerWithFrames {
 	private int correctionSelection;
 	private int noImages;
 	private SurfaceScatterPresenter ssp;
-	private int DEBUG = 1;
+	private int DEBUG = 0;
 	private ProgressBar progressBar;
 	private TrackingProgressAndAbortView tpaav;
 	private Thread t;
@@ -170,7 +170,8 @@ public class TrackingHandlerWithFrames {
 																						   correctionSelection, 
 																						   imagePosInOriginalDat[imageNumber], 
 																						   trackingMarker, 
-																						   imageNumber);
+																						   imageNumber,
+																						   null);
 									
 									if(Arrays.equals(output1.getShape(),(new int[] {2,2}))){
 										ssp.boundariesWarning();
@@ -264,7 +265,8 @@ public class TrackingHandlerWithFrames {
 									   correctionSelection, 
 									   imagePosInOriginalDat[k], 
 									   trackingMarker, 
-									   k);
+									   k,
+									   null);
 							
 		
 							if(Arrays.equals(output1.getShape(), (new int[] {2,2}))){
@@ -340,7 +342,8 @@ public class TrackingHandlerWithFrames {
 									   correctionSelection, 
 									   imagePosInOriginalDat[k], 
 									   trackingMarker, 
-									   k);
+									   k,
+									   null);
 							
 		
 							if(Arrays.equals(output1.getShape(), (new int[] {2,2}))){
@@ -477,7 +480,7 @@ class trackingJob21 {
 	private int timeStep;
 	private SurfaceScatterPresenter ssp;
 	private SurfaceScatterViewStart ssvs;
-	private int DEBUG =1;
+	private int DEBUG =0;
 	private ProgressBar progressBar;
 	private TrackingProgressAndAbortView tpaav;
 	private Thread t;
@@ -627,7 +630,8 @@ class trackingJob21 {
 									   correctionSelection, 
 									   imagePosInOriginalDat[k], 
 									   trackingMarker, 
-									   k);
+									   k,
+									   null);
 							
 													
 							
@@ -1226,7 +1230,8 @@ class trackingJob21 {
 																		   correctionSelection, 
 																		   imagePosInOriginalDat[k], 
 																		   trackingMarker, 
-																		   k);
+																		   k,
+																		   null);
 					
 					
 
@@ -1918,7 +1923,7 @@ class trackingJob21 {
 		ssp.sliderMovemementMainImage(imageNumber);
 		ssvs.updateIndicators(imageNumber);
 		ssvs.getPlotSystemCompositeView().getPlotSystem().updatePlot2D(tempImage.squeeze(), null, null);
-		ssvs.getPlotSystemCompositeView().getSubImageBgPlotSystem().updatePlot2D(drm.getBackgroundDatArray().get(imageNumber), null, null);
+		ssvs.getPlotSystemCompositeView().getSubImageBgPlotSystem().updatePlot2D(drm.getFms().get(imageNumber).getBackgroundSubtractedImage(), null, null);
 		ssvs.getPlotSystemCompositeView().getPlotSystem().repaint(true);
 		ssvs.getPlotSystemCompositeView().getSubImageBgPlotSystem().repaint(true);
 		ssvs.getSsps3c().generalUpdate();
@@ -1948,10 +1953,10 @@ class trackingJob21 {
 
 		
 		if(progressBar.isDisposed() != true){
-			System.out.println("progress bar start:  " +progressBar.getSelection());
+//			System.out.println("progress bar start:  " +progressBar.getSelection());
 			progressBar.setSelection(progressBar.getSelection() +1);
-			System.out.println("progress bar incremented:  " +progressBar.getSelection());
-			System.out.println("progress bar max:  " +progressBar.getMaximum());
+//			System.out.println("progress bar incremented:  " +progressBar.getSelection());
+//			System.out.println("progress bar max:  " +progressBar.getMaximum());
 			if(progressBar.getSelection() == progressBar.getMaximum()){
 				tpaav.close();
 			}

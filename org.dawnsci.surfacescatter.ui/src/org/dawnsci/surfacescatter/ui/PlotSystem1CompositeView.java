@@ -14,6 +14,7 @@ import org.eclipse.dawnsci.analysis.api.roi.IRectangularROI;
 import org.eclipse.dawnsci.analysis.dataset.roi.RectangularROI;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.PlottingFactory;
+import org.eclipse.dawnsci.plotting.api.region.IRegion;
 import org.eclipse.january.dataset.IDataset;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
@@ -241,6 +242,12 @@ public class PlotSystem1CompositeView extends Composite {
 				
 				ssvs.interpolationTrackerBoxesAccept();
 				
+				
+//				customComposite.getPlotSystem().getRegion("myRegion").setActive(true);
+				
+//				ssvs.updateDisplay();
+				
+				
 			}
 			
 			@Override
@@ -358,7 +365,15 @@ public class PlotSystem1CompositeView extends Composite {
     	   
     	   button4.setEnabled(false);
     	   button5.setEnabled(false);
-       }
+    	   
+    	   try{
+    		   IRegion u = ssvs.getPlotSystemCompositeView().getPlotSystem().getRegion("Interpolated trajectory");
+    		   ssvs.getPlotSystemCompositeView().getPlotSystem().removeRegion(u);    	   
+    	   }
+    	   catch(Exception k){
+    		   
+    	   }
+       } 
        
        
        if((TrackingMethodology.intToTracker1(trackerSelection) == TrackerType1.INTERPOLATION 

@@ -335,7 +335,7 @@ public class SuperSashPlotSystem3Composite extends Composite{
 			plotSystem3.clear();
 			
 			IRectangularROI greenRectangle = new RectangularROI(lenPt[1][0], lenPt[1][1],
-																 lenPt[0][0], lenPt[0][1], 0);
+																lenPt[0][0], lenPt[0][1], 0);
 				
 			int selection = ssp.getSliderPos();
 					
@@ -366,7 +366,10 @@ public class SuperSashPlotSystem3Composite extends Composite{
 			@SuppressWarnings("unchecked")
 			IDataset output = ssp.presenterDummyProcess(selection,
 														ssp.getImage(selection),
-														3);
+														3,
+														lenPt);
+			
+//			Dataset subBackgroundSubImage = ssp.subImage(output,greenRectangle);
 		
 			ILineTrace lt3 = VerticalHorizontalSlices.horizontalsliceBackgroundSubtracted(
 						horizontalSlice.getROI().getBounds(),

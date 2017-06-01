@@ -18,6 +18,7 @@ import org.dawnsci.surfacescatter.TrackingMethodology.TrackerType1;
 import org.eclipse.dawnsci.analysis.api.io.IDataHolder;
 import org.eclipse.dawnsci.analysis.api.roi.IROI;
 import org.eclipse.dawnsci.analysis.api.roi.IRectangularROI;
+import org.eclipse.dawnsci.analysis.dataset.roi.PolylineROI;
 import org.eclipse.dawnsci.analysis.dataset.roi.RectangularROI;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.region.IROIListener;
@@ -967,22 +968,35 @@ public class SurfaceScatterViewStart extends Dialog {
 	public void interpolationTrackerBoxesAccept(){
 		
 		try{
-			Display display = Display.getCurrent();
+ 			Display display = Display.getCurrent();
 	        Color cyan = display.getSystemColor(SWT.COLOR_CYAN);
 	        
+	        
+	        IRegion greenRegion = customComposite.getGreenRegion();
 			
-			ArrayList<double[][]> jk = ssp.interpolationTrackerBoxesAccept(customComposite.getGreenRegion());
+			ArrayList<double[][]> jk = ssp.interpolationTrackerBoxesAccept(greenRegion);
 			
 			try {
-				IRegion region =customComposite.getPlotSystem().createRegion(("Interpolation Region: " + ssp.getSliderPos()), RegionType.BOX);
-				region.setROI(customComposite.getGreenRegion().getROI());
+				
+				String newRegionName = "Interpolation Region: " + ssp.getSliderPos();
+				
+				IRegion region =customComposite.getPlotSystem().getRegion(newRegionName);
+				
+				if(region == null){
+					region =customComposite.getPlotSystem().createRegion(newRegionName, RegionType.BOX);
+				}
+				
+				region.setROI(greenRegion.getROI().copy());
 				ssp.addToInterpolatorRegions(region);
 				region.setRegionColor(cyan);
 				region.setLineWidth(10);
 				region.setFill(true);
 				region.setUserRegion(false);
 				region.setMobile(false);
+				region.toBack();
+				
 				customComposite.getPlotSystem().addRegion(region);
+				greenRegion.toFront();
 
 			} catch (Exception e1) {
 						// TODO Auto-generated catch block
@@ -990,33 +1004,77 @@ public class SurfaceScatterViewStart extends Dialog {
 				debug("Box not accepted");
 			}
 
-			
-			
 			IPlottingSystem<Composite> pS = customComposite.getPlotSystem();
-			try{
-				pS.removeTrace(pS.getTrace("Interpolated trajectory"));	
-			}
-			catch(Exception g){
+			
+			if(jk.size() > 0){
 				
-			}
-			ILineTrace lt1 = pS.createLineTrace("Interpolated trajectory");
-			
-			Dataset xData = DatasetFactory.zeros(new int[] {jk.size()}, Dataset.ARRAYFLOAT64);
-			Dataset yData = DatasetFactory.zeros(new int[] {jk.size()}, Dataset.ARRAYFLOAT64);
-			
-			for(int ty = 0; ty<jk.size(); ty++){
-				double[][] consideredBox = jk.get(ty);
+				try{
+					IRegion n = pS.getRegion("Interpolated trajectory");
+					pS.removeRegion(n);
+				}
+				catch(Exception g){
+					
+				}
 				
-				xData.set(consideredBox[1][0], ty);
-				yData.set(consideredBox[1][1], ty);
+//				
+//				
+//				if(trajectoryRegion == null){
+////					lt1 = pS.createLineTrace("Interpolated trajectory");
+////					pS.addTrace(lt1);
+//					
+//					
+//					trajectoryRegion =  pS.createRegion("Interpolated trajectory", RegionType.POLYLINE);
+//					
+//					
+//					
+//				}	
+//				
+//				
+				IRegion trajectoryRegion = pS.createRegion("Interpolated trajectory", RegionType.POLYLINE);
+				
+				
+				
+				Dataset xData = DatasetFactory.zeros(new int[] {jk.size()}, Dataset.ARRAYFLOAT64);
+				Dataset yData = DatasetFactory.zeros(new int[] {jk.size()}, Dataset.ARRAYFLOAT64);
+				
+				
+				PolylineROI lt1 = new PolylineROI();
+				
+				
+				
+				for(int ty = 0; ty<jk.size(); ty++){
+					double[][] consideredBox = jk.get(ty);
+					double x = consideredBox[1][0];
+					double y = consideredBox[1][1];
+					xData.set(consideredBox[1][0], ty);
+					yData.set(consideredBox[1][1], ty);
+					
+					lt1.insertPoint(x, y);;
+					
+				}
+				
+//				trajectoryRegion.roi
+				trajectoryRegion.setROI(lt1);
+				
+				trajectoryRegion.setVisible(true);
+//				lt1.setData(xData, yData);
+				trajectoryRegion.setRegionColor(cyan);;
+				
+				
+				pS.addRegion(trajectoryRegion);
+				trajectoryRegion.setUserRegion(false);
+				trajectoryRegion.setMobile(false);
+	//			customComposite.getPlotSystem().getRegion("myRegion").toFront();
+	//			customComposite.getPlotSystem().getRegion("myRegion").setActive(true);
+				
+//				customComposite.setRegion(ssp.getInitialLenPt());
 			}
 			
-			lt1.setData(xData, yData);
-			lt1.setTraceColor(cyan);
-			pS.addTrace(lt1);
+			
 		}
+		
 		catch(Exception f){
-			
+			System.out.println("error at line 1069: "  + f.getMessage());
 		}
 	}
 	
@@ -1059,7 +1117,8 @@ public class SurfaceScatterViewStart extends Dialog {
 			
 			ssp.presenterDummyProcess(ssp.getSliderPos(), 
 									  ssp.getImage(ssp.getSliderPos()), 
-									  4);
+									  4,
+									  null);
 			
 			if (getSsps3c().getOutputCurves().isVisible() != true) {
 				getSsps3c().getOutputCurves().setVisible(true);
@@ -1768,7 +1827,7 @@ public class SurfaceScatterViewStart extends Dialog {
 		}			
 			
 			
-			customComposite.getPlotSystem().repaint();
+		customComposite.getPlotSystem().repaint();
 		
 		
 		
