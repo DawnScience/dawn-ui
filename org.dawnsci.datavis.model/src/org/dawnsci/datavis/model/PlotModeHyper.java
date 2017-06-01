@@ -88,7 +88,7 @@ public class PlotModeHyper implements ILazyPlotMode {
 		IHyperTrace t = system.createTrace("Hyper Trace", IHyperTrace.class);
 
 		t.setData(view3d, order, slice);
-
+		t.setUserObject(userObject);
 		system.addTrace(t);
 
 	}

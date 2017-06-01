@@ -9,6 +9,7 @@ public class HyperTrace implements IHyperTrace {
 	private ILazyDataset lazy;
 	private int[] order;
 	private SliceND slice;
+	private Object userObject;
 	
 	@Override
 	public String getDataName() {
@@ -55,12 +56,12 @@ public class HyperTrace implements IHyperTrace {
 	@Override
 	public Object getUserObject() {
 		// TODO Auto-generated method stub
-		return null;
+		return userObject;
 	}
 
 	@Override
 	public void setUserObject(Object userObject) {
-		// TODO Auto-generated method stub
+		this.userObject = userObject;
 
 	}
 
