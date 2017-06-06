@@ -106,7 +106,7 @@ public class SurfaceScatterViewStart extends Dialog {
 			@Override
 			public void update() {
 				
-				updateDisplay();
+				updateDisplay(null);
 			}
 		});
 		
@@ -242,6 +242,7 @@ public class SurfaceScatterViewStart extends Dialog {
 					
 					ssp.setTheta(paramField.getTheta().getSelectionIndex());
 					outputCurves.getqAxis().setEnabled(ssp.isqConvert());
+					customComposite.getPlotSystem1CompositeView().getUseQAxis().setEnabled(ssp.isqConvert());
 					
 					try{
 						ssp.qConversion();
@@ -252,14 +253,12 @@ public class SurfaceScatterViewStart extends Dialog {
 				}
 				
 				folder.setSelection(1);
-		
 				
 				customComposite.getSlider().setSelection(0);
 				customComposite.getSlider().setMinimum(0);
 				customComposite.getSlider().setMaximum(ssp.getDrm().getFms().size());
 				customComposite.getSlider().setThumb(1);
 				customComposite.getPlotSystem1CompositeView().checkTrackerOnButton();
-				
 				
 				customComposite.resetCorrectionsTab();
 				customComposite.generalUpdate();
@@ -938,29 +937,8 @@ public class SurfaceScatterViewStart extends Dialog {
 				
 				customComposite.getIRegion().setROI(greenAndBg[0]);
 				customComposite.getBgRegion().setROI(greenAndBg[1]);
-				
-//				
-//				if(ssp.getMethodology() == Methodology.OVERLAPPING_BACKGROUND_BOX){
-//					
-//					int [] currLengths = customComposite.getSecondBgRegion().getROI().getBounds().getIntLengths();
-//					int [] currPoints = customComposite.getSecondBgRegion().getROI().getBounds().getIntPoint();
-//					
-//					int[] newLen = ssp.getLenPt()[0];
-//					int[] newPts = ssp.getLenPt()[1];
-//					
-//					
-//					if(!Arrays.equals(currLengths, newLen) ||
-//							!Arrays.equals(currPoints, newPts)){
-//						
-//						customComposite.getSecondBgRegion().setROI(ssp.generateOffsetBgROI(ssp.getLenPt()));
-//						
-//						getSsps3c().generalUpdate(ssp.getLenPt());
-//						getSsps3c().generalUpdate();
-//					}
 
 				}
-			
-//			}
 		});				
 	}
 
@@ -970,7 +948,6 @@ public class SurfaceScatterViewStart extends Dialog {
 		try{
  			Display display = Display.getCurrent();
 	        Color cyan = display.getSystemColor(SWT.COLOR_CYAN);
-	        
 	        
 	        IRegion greenRegion = customComposite.getGreenRegion();
 			
@@ -1016,20 +993,6 @@ public class SurfaceScatterViewStart extends Dialog {
 					
 				}
 				
-//				
-//				
-//				if(trajectoryRegion == null){
-////					lt1 = pS.createLineTrace("Interpolated trajectory");
-////					pS.addTrace(lt1);
-//					
-//					
-//					trajectoryRegion =  pS.createRegion("Interpolated trajectory", RegionType.POLYLINE);
-//					
-//					
-//					
-//				}	
-//				
-//				
 				IRegion trajectoryRegion = pS.createRegion("Interpolated trajectory", RegionType.POLYLINE);
 				
 				
@@ -1111,7 +1074,7 @@ public class SurfaceScatterViewStart extends Dialog {
 		
 		if(ssp.getProcessingMethodSelection() ==ProccessingMethod.MANUAL){
 			
-			customComposite.roiStandard();
+			customComposite.roiStandard(null);
 			
 			ssp.addXValuesForFireAccept();
 			
@@ -1789,15 +1752,21 @@ public class SurfaceScatterViewStart extends Dialog {
 		this.stm = stm;
 	}
 	
-	public void updateDisplay() {
+	public void updateDisplay(int[][] lenPt) {
 		
 		if(customComposite.getSlider().getSelection() != ssp.getSliderPos()){
 			customComposite.getSlider().setSelection(ssp.getSliderPos());
 			updateIndicators(ssp.getSliderPos());
 		}
 		
-		RectangularROI[] bgRegionROI = ssp.trackingRegionOfInterestSetter(ssp.getLenPt());
+		RectangularROI[] bgRegionROI = new RectangularROI[2];
 		
+		if(lenPt == null){
+			bgRegionROI = ssp.trackingRegionOfInterestSetter(ssp.getLenPt());
+		}
+		else{
+			bgRegionROI = ssp.trackingRegionOfInterestSetter(lenPt);
+		}
 		customComposite.generalCorrectionsUpdate();
 		
 		int[] lp = bgRegionROI[0].getIntLengths();
@@ -1811,9 +1780,7 @@ public class SurfaceScatterViewStart extends Dialog {
 			(Arrays.equals(pp, 
 			customComposite.getIRegion().getROI().getBounds().getIntPoint()) == false)){
 	
-	
 			customComposite.getIRegion().setROI(bgRegionROI[0]);		
-	
 		}
 		
 		if((Arrays.equals(ls, 

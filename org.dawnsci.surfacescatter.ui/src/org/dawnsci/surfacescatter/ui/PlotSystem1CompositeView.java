@@ -48,6 +48,8 @@ public class PlotSystem1CompositeView extends Composite {
     private SurfaceScatterPresenter ssp;
     private Boolean trackerOn =false;
     private SurfaceScatterViewStart ssvs;
+	private Button useQAxis;
+    
 	
   
     public PlotSystem1CompositeView(Composite parent, 
@@ -234,6 +236,26 @@ public class PlotSystem1CompositeView extends Composite {
         button5.setText("Reject Position");
         button5.setEnabled(false);
         
+
+        useQAxis= new Button(this, SWT.CHECK);
+        useQAxis.setText("use q Axis");
+        useQAxis.setEnabled(false);
+        useQAxis.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+        
+        useQAxis.addSelectionListener(new SelectionListener() {
+			
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				ssp.setTrackWithQ(useQAxis.getSelection());
+			}
+			
+			@Override
+			public void widgetDefaultSelected(SelectionEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+		});
+        
         
         button4.addSelectionListener(new SelectionListener() {
 			
@@ -241,13 +263,7 @@ public class PlotSystem1CompositeView extends Composite {
 			public void widgetSelected(SelectionEvent e) {
 				
 				ssvs.interpolationTrackerBoxesAccept();
-				
-				
-//				customComposite.getPlotSystem().getRegion("myRegion").setActive(true);
-				
-//				ssvs.updateDisplay();
-				
-				
+		
 			}
 			
 			@Override
@@ -285,8 +301,6 @@ public class PlotSystem1CompositeView extends Composite {
 				
 			}
 		});
-        
-
         
     }
     
@@ -349,13 +363,6 @@ public class PlotSystem1CompositeView extends Composite {
 		int[][] lenPt = { len, pt };
 		
 		RectangularROI[] bgRegionROI = ssp.trackingRegionOfInterestSetter(lenPt);
-		
-//		RectangularROI bgROI = new RectangularROI(bgRegionROI[0],
-//				  bgRegionROI[1],
-//				  bgRegionROI[2],
-//				  bgRegionROI[3],
-//				  bgRegionROI[4]);
-//        
        
        ssvs.getPlotSystemCompositeView().getBgRegion().setROI(bgRegionROI[1]);
 
@@ -498,6 +505,15 @@ public class PlotSystem1CompositeView extends Composite {
 		this.button5 = button5;
 	}
 	
+
+	public Button getUseQAxis() {
+		return useQAxis;
+	}
+
+	public void setUseQAxis(Button useQAxis) {
+		this.useQAxis = useQAxis;
+	}
+
 
 class operationJob extends Job {
 

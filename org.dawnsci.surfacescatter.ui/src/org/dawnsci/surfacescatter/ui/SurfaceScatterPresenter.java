@@ -104,14 +104,13 @@ public class SurfaceScatterPresenter {
 	private ProcessingMethodsEnum.ProccessingMethod processingMethodSelection = ProcessingMethodsEnum.ProccessingMethod.AUTOMATIC;
 	private IDataHolder dh1;
 	private double currentRawIntensity;
+	private boolean trackWithQ = false;
 	
 	
 	public SurfaceScatterPresenter(){
 		drm = new DirectoryModel();
 		stm = new SetupModel();
 	}
-	
-	
 	
 	public void surfaceScatterPresenterBuildWithFrames(String[] filepaths,
 										    String xName,
@@ -1084,10 +1083,20 @@ public class SurfaceScatterPresenter {
 		
 		ArrayList<double[][]> interpolatedLenPts = new ArrayList<>();
 		
+		Dataset xDataset = DatasetFactory.createFromObject(0);
+		
+		if(trackWithQ){
+			xDataset = drm.getSortedQ();
+		}
+		
+		else{
+			xDataset = drm.getSortedX();
+		}
+		
 		if(drm.getInterpolatorBoxes().size() > 1){
 			
 			interpolatedLenPts = InterpolationTracker.interpolatedTrackerLenPtArray(drm.getInterpolatorBoxes(), 
-										  drm.getSortedX());
+																					xDataset);
 			drm.setInterpolatedLenPts(interpolatedLenPts);
 
 			if(drm.getInterpolatorBoxes().size() > 2 
@@ -1096,7 +1105,7 @@ public class SurfaceScatterPresenter {
 						SplineInterpolationTracker split = new SplineInterpolationTracker();
 						
 						interpolatedLenPts = split.interpolatedTrackerLenPtArray1(drm.getInterpolatorBoxes(),
-																				  drm.getSortedX());
+																				  xDataset);
 						
 						drm.setInterpolatedLenPts(interpolatedLenPts);
 	
@@ -1263,8 +1272,8 @@ public class SurfaceScatterPresenter {
 		if(Arrays.equals(drm.getInitialLenPt()[0],lenPt[0]) == false ||
 		   Arrays.equals(drm.getInitialLenPt()[1],lenPt[1]) == false){
 			
-			drm.setInitialLenPt(sliderPos, 
-								lenPt);
+			setLenPt(sliderPos, 
+                     lenPt);
 		}
 		
 		
@@ -1405,10 +1414,26 @@ public class SurfaceScatterPresenter {
 	
 	public void setLenPt(int[][] lenPt){
 		
-		if((Arrays.equals(lenPt[0], getLenPt()[0]) == false) ||
-		   (Arrays.equals(lenPt[1], getLenPt()[1]) == false)){
+		if(!Arrays.equals(lenPt[0], getLenPt()[0]) ||
+		   !Arrays.equals(lenPt[1], getLenPt()[1])){
 				
 			drm.setInitialLenPt(lenPt);
+					
+			try{
+				fireStateListeners();
+			}
+			catch(Exception f){			
+			}			
+		}
+	}
+	
+	public void setLenPt(int sliderpos,
+						int[][] lenPt){
+		
+		if(!Arrays.equals(lenPt[0], getLenPt()[0]) ||
+		   !Arrays.equals(lenPt[1], getLenPt()[1])){
+				
+			drm.setInitialLenPt(sliderpos, lenPt);
 					
 			try{
 				fireStateListeners();
@@ -2916,6 +2941,14 @@ public class SurfaceScatterPresenter {
 
 	public void setCurrentRawIntensity(double currentRawIntensity) {
 		this.currentRawIntensity = currentRawIntensity;
+	}
+
+	public boolean isTrackWithQ() {
+		return trackWithQ;
+	}
+
+	public void setTrackWithQ(boolean trackWithQ) {
+		this.trackWithQ = trackWithQ;
 	}
 
 }
