@@ -1045,7 +1045,7 @@ class trackingJob21 {
 											System.out.println(e.getMessage());
 										}
 
-										if(drm.getLocationList() == null && 
+										if(drm.getLocationList().get(jok) == null && 
 										   frame.getTrackingMethodology()!= TrackerType1.INTERPOLATION &&
 										   frame.getTrackingMethodology() != TrackerType1.SPLINE_INTERPOLATION){
 											
@@ -1327,6 +1327,8 @@ class trackingJob21 {
 						if(Arrays.equals(output1.getShape(),(new int[] {2,2}) )){
 							Display di =Display.getCurrent();
 							debug("Dummy Proccessing failure");
+							
+							System.out.println("problem");
 							ssp.boundariesWarning("position 1, line ~1955, k: " + Integer.toString(k),di);
 						
 							break;	
@@ -1411,7 +1413,7 @@ class trackingJob21 {
 						
 						int jokLocal = frame.getDatNo();
 						
-						if(drm.getLocationList() == null && 
+						if(drm.getLocationList().get(frame.getDatNo()) == null && 
 						   frame.getTrackingMethodology() != TrackerType1.INTERPOLATION &&
 						   frame.getTrackingMethodology() != TrackerType1.SPLINE_INTERPOLATION){
 							
@@ -1500,6 +1502,8 @@ class trackingJob21 {
 						
 //						debug("value added to xList:  "   + drm.getSortedX().getDouble(k)  + "  k:   " + k);
 						
+						double[] gV=  drm.getSeedLocation()[frame.getDatNo()];
+						
 						IDataset output1 = 
 								DummyProcessWithFrames.DummyProcess1(drm, 
 																   gm, 
@@ -1507,7 +1511,7 @@ class trackingJob21 {
 																   imagePosInOriginalDat[k], 
 																   trackingMarker, 
 																   k,
-																   drm.getSeedLocation()[frame.getDatNo()]);
+																   gV);
 
 						if(Arrays.equals(output1.getShape(), (new int[] {2,2}))){
 							Display d =Display.getCurrent();
@@ -1719,6 +1723,27 @@ class trackingJob21 {
 						
 						debug("value added to xList:  "   + drm.getSortedX().getDouble(k)  + "  k:   " + k);
 						
+						double[] gv =  drm.getSeedLocation()[frame.getDatNo()];
+						
+						int[][] gvLenPt = LocationLenPtConverterUtils.locationToLenPtConverter(gv);
+						
+						int[] g = fms.get(0).getRawImageData().squeezeEnds().getShape();
+							
+						if((gvLenPt[0][0] + gvLenPt[1][0])>g[0]){
+							
+								int x = (gvLenPt[0][0] + gvLenPt[1][0])-g[0];
+								
+								gvLenPt[1][0] -= x+1;
+						}
+						
+						if((gvLenPt[0][1] + gvLenPt[1][1])>g[1]){
+								int y = (gvLenPt[0][0] + gvLenPt[1][0])-g[0];
+								
+								gvLenPt[1][1] -= y+1;
+						}
+						
+						gv = LocationLenPtConverterUtils.lenPtToLocationConverter(gvLenPt);
+						
 						IDataset output1 = 
 								DummyProcessWithFrames.DummyProcess1(drm, 
 																	 gm, 
@@ -1726,7 +1751,7 @@ class trackingJob21 {
 																	 imagePosInOriginalDat[k], 
 																	 trackingMarker, 
 																	 k,
-																	 drm.getSeedLocation()[frame.getDatNo()]);
+																	 gv);
 						
 						if(Arrays.equals(output1.getShape(), (new int[] {2,2}))){
 							Display d =Display.getCurrent();
@@ -1795,7 +1820,7 @@ class trackingJob21 {
 							}
 
 							
-							if(drm.getLocationList() == null && 
+							if(drm.getLocationList().get(jok)  == null && 
 							   frame.getTrackingMethodology()!= TrackerType1.INTERPOLATION &&
 							   frame.getTrackingMethodology() != TrackerType1.SPLINE_INTERPOLATION){
 								

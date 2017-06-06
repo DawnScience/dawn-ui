@@ -2195,13 +2195,8 @@ public class SurfaceScatterPresenter {
 	
 	public void boundariesWarning(String note, Display d){
 		RegionOutOfBoundsWarning roobw = new RegionOutOfBoundsWarning(parentShell,0, note);
-		d.asyncExec(new Runnable() {
-			@Override
-			public void run() {	
-				roobw.open();
-		return;
-			}
-		});
+		roobw.open();
+		
 	}
 	
 	public void numberFormatWarning(){
