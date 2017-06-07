@@ -24,32 +24,20 @@ public class XYRegionConfigCommand extends XYGraphConfigCommand {
 
 	@SuppressWarnings("unused")
 	public XYRegionConfigCommand(IXYGraph xyGraph) {
-<<<<<<< Upstream, based on origin/master
 		super(xyGraph, XYRegionMemento::new);
-=======
-		super(xyGraph);
->>>>>>> ac49d9b Properly initialize memento in constructor
 
 		final RegionArea regionArea = (RegionArea) xyGraph.getPlotArea();
 		for (String name : regionArea.getRegionNames()) {
-<<<<<<< Upstream, based on origin/master
 			((XYRegionMemento) getPreviousXYGraphMemento()).addRegionMemento(new RegionBean());
 			((XYRegionMemento) getAfterXYGraphMemento()).addRegionMemento(new RegionBean());
-=======
-			((XYRegionMemento) previousXYGraphMem).addRegionMemento(new RegionBean());
-			((XYRegionMemento) afterXYGraphMem).addRegionMemento(new RegionBean());
->>>>>>> ac49d9b Properly initialize memento in constructor
 		}
 	}
 
-<<<<<<< Upstream, based on origin/master
-=======
 	@Override
 	public XYGraphMemento createXyGraphMemento() {
 		return new XYRegionMemento();
 	}
 	
->>>>>>> ac49d9b Properly initialize memento in constructor
 	protected void saveXYGraphPropsToMemento(IXYGraph xyGraph, XYGraphMemento memento){
 		XYGraphMementoUtil.saveXYGraphPropsToMemento(xyGraph, memento);
 		
