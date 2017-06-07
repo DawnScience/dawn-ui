@@ -61,15 +61,14 @@ public class PeakfindingOperation  extends AbstractOperationBase<PeakfindingMode
 //					                                                                  model.isAutostopping(), model.isBackgrounddominated(), monitor);
 //			
 //			
-			//model.peaksId
+//			//model.peaksId
 			
 	        // Same original data but with some fitted peaks added to auxillary data.
-			return new OperationData(d, (Serializable)fittedPeakList);
+			return null;
 		
 		} catch (Exception ne) {
 			throw new OperationException(this, ne);
 		}
-		return null;
 	}
 
 	
