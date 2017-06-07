@@ -37,7 +37,7 @@ public class XYRegionConfigCommand extends XYGraphConfigCommand {
 	public XYGraphMemento createXyGraphMemento() {
 		return new XYRegionMemento();
 	}
-	
+
 	protected void saveXYGraphPropsToMemento(IXYGraph xyGraph, XYGraphMemento memento){
 		XYGraphMementoUtil.saveXYGraphPropsToMemento(xyGraph, memento);
 		

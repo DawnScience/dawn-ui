@@ -74,9 +74,17 @@ public class XYRegionGraph extends XYGraph {
 		super(new XYRegionGraphAxesFactory());
 
 		try {
+<<<<<<< HEAD
 			setShowLegend(getPreferenceStore().getBoolean(BasePlottingConstants.XY_SHOWLEGEND), false);
+=======
+			setShowLegend(getPreferenceStore().getBoolean(BasePlottingConstants.XY_SHOWLEGEND));
+>>>>>>> branch 'SCI-5737-xy-graph-merge-with-upstream' of https://github.com/DawnScience/dawn-ui.git
 		} catch (NullPointerException ne) {
+<<<<<<< HEAD
 			setShowLegend(true, false);
+=======
+			setShowLegend(true);
+>>>>>>> branch 'SCI-5737-xy-graph-merge-with-upstream' of https://github.com/DawnScience/dawn-ui.git
 		}
 	}
 	
