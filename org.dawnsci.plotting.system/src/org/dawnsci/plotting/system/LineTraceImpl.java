@@ -24,9 +24,9 @@ import org.eclipse.dawnsci.plotting.api.trace.ITraceContainer;
 import org.eclipse.dawnsci.plotting.api.trace.TraceEvent;
 import org.eclipse.dawnsci.plotting.api.trace.TraceWillPlotEvent;
 import org.eclipse.draw2d.ColorConstants;
-import org.eclipse.january.dataset.Dataset;
 import org.eclipse.january.dataset.DatasetFactory;
 import org.eclipse.january.dataset.IDataset;
+import org.eclipse.january.dataset.IntegerDataset;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.nebula.visualization.xygraph.dataprovider.IDataProvider;
 import org.eclipse.nebula.visualization.xygraph.figures.Axis;
@@ -100,6 +100,8 @@ public class LineTraceImpl implements ILineTrace, ITraceListener{
 			return ILineTrace.TraceType.STEP_VERTICALLY;
 		case STEP_HORIZONTALLY:
 			return ILineTrace.TraceType.STEP_HORIZONTALLY;
+		default:
+			break;
 		}
 		return ILineTrace.TraceType.SOLID_LINE; 
 	}
@@ -387,7 +389,7 @@ public class LineTraceImpl implements ILineTrace, ITraceListener{
 			settingLineData = true;
 			
 			if (xData==null && yData!=null) {
-				xData = DatasetFactory.createRange(yData.getSize(), Dataset.INT);
+				xData = DatasetFactory.createRange(IntegerDataset.class, yData.getSize());
 			}
 			
 			LightWeightDataProvider prov = (LightWeightDataProvider)trace.getDataProvider();
