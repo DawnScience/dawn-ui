@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012 Diamond Light Source Ltd.
+ * Copyright (c) 2012, 2017 Diamond Light Source Ltd.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -11,7 +11,7 @@ package org.dawnsci.plotting.tools.preference.detector;
 import java.beans.XMLEncoder;
 import java.io.ByteArrayOutputStream;
 
-import javax.measure.unit.SI;
+import si.uom.SI;
 
 import org.dawnsci.plotting.tools.Activator;
 import org.eclipse.core.runtime.preferences.AbstractPreferenceInitializer;

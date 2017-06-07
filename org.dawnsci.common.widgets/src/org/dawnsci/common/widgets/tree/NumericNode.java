@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012 Diamond Light Source Ltd.
+ * Copyright (c) 2012, 2017 Diamond Light Source Ltd.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -13,10 +13,11 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 
-import javax.measure.quantity.Quantity;
-import javax.measure.unit.NonSI;
-import javax.measure.unit.Unit;
+import javax.measure.Quantity;
+import javax.measure.Unit;
 import javax.swing.tree.TreeNode;
+
+import si.uom.SI;
 
 import org.jscience.physics.amount.Amount;
 import org.jscience.physics.amount.Constants;

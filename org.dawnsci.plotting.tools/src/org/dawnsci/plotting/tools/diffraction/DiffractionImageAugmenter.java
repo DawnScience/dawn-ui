@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012 Diamond Light Source Ltd.
+ * Copyright (c) 2012, 2017 Diamond Light Source Ltd.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -15,7 +15,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import javax.measure.unit.NonSI;
+import si.uom.NonSI;
+
 import javax.vecmath.Vector3d;
 
 import org.dawb.common.ui.menu.MenuAction;
