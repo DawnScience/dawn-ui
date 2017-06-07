@@ -97,7 +97,7 @@ public class PeakFindingManager {
 		try {
 			//TODO: fix the formatter. have iterate over identified peaks 
 			for (IdentifiedPeak p : peaks){
-				writer.write(p.getPos() + "," + p.getHeight()+ "\n");
+				writer.write(p.getPos() + " " + p.getHeight()+ "\n");
 			}
 			
 		} finally {
@@ -123,31 +123,31 @@ public class PeakFindingManager {
 	
 	/*TRIGGERS*/
 	
-	public void setPeaksId(List<IdentifiedPeak> peaksId){
+	public void setPeaksId(List<IdentifiedPeak> peaksId) {
 		IPeakOpportunity peakOpp = new PeakOppurtunity();
 		peakOpp.setPeaksId(peaksId);
 		everythingChangesListeners(new PeakOpportunityEvent(this, peakOpp));
 	}
 	
-	public void setPeaks(Map<Integer,Double> peakpos,IDataset xData, IDataset yData){
+	public void setPeaks(Map<Integer,Double> peakpos,IDataset xData, IDataset yData) {
 		IPeakOpportunity peakOpp = new PeakOppurtunity();
 		peakOpp.setPeaksId(convertIntoPeaks(peakpos, (Dataset) xData, (Dataset) yData));
 		everythingChangesListeners(new PeakOpportunityEvent(this, peakOpp));
 	}
 	
-	public void setPeakSearching(){
+	public void setPeakSearching() {
 		IPeakOpportunity peakOpp = new PeakOppurtunity();
 		peakOpp.setPeakSearching(false);
 		everythingChangesListeners(new PeakOpportunityEvent(this, peakOpp));
 	}
 	
-	public void activateSearchRegion(){
+	public void activateSearchRegion() {
 		for(IPeakOpportunityListener listener : listeners) {
 			listener.activateSearchRegion();
 		}
 	}
 	
-	public void finishedPeakSearching(){
+	public void finishedPeakSearching() {
 		IPeakOpportunity peakOpp = new PeakOppurtunity();
 		peakOpp.setPeakSearching(true);
 		everythingChangesListeners(new PeakOpportunityEvent(this, peakOpp));
@@ -181,9 +181,6 @@ public class PeakFindingManager {
 					listener.isPeakFinding();
 				}
 			}
-			
-			
-			
 		}
 	}
 
@@ -217,8 +214,6 @@ public class PeakFindingManager {
 		for (Map.Entry<Integer, Double> peak : peakpos.entrySet()) {
 			peaksID.add(generateIdentifedPeak(peak.getKey(),xData,yData));
 		}
-		
-		
 		return peaksID;
 	}
 	

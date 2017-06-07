@@ -528,8 +528,8 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 
 	public void setSearchDataOnBounds(ILineTrace trace) {
 		// Obtain Upper and Lower Bounds
-		Dataset xDataRaw = DatasetUtils.convertToDataset(trace.getXData().squeeze());
-		Dataset yDataRaw = DatasetUtils.convertToDataset(trace.getYData().squeeze());
+		Dataset xDataRaw = DatasetUtils.convertToDataset(trace.getXData());
+		Dataset yDataRaw = DatasetUtils.convertToDataset(trace.getYData());
 
 		DoubleDataset xData = DatasetUtils.cast(DoubleDataset.class, xDataRaw);
 		DoubleDataset yData = DatasetUtils.cast(DoubleDataset.class, yDataRaw);

@@ -52,6 +52,7 @@ public class PeakFindingExportWizard extends Wizard implements IExportWizard {
 		exportPage.setDescription("Please choose the location of the file to export. This file will be in a .xy format");
 		addPage(exportPage);
 		setWindowTitle("Export Found Peaks");
+		
 		this.peaks = peaks;
 	}
 
@@ -60,6 +61,8 @@ public class PeakFindingExportWizard extends Wizard implements IExportWizard {
 	public void init(IWorkbench workbench, IStructuredSelection selection) {
 	}
 
+	
+	
 	@Override
 	public boolean performFinish() {
 

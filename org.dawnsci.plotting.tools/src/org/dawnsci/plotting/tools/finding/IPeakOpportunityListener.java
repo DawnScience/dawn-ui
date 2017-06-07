@@ -8,7 +8,6 @@ import org.eclipse.january.dataset.IDataset;
  * TODO: data pass for peaks
  * TODO: region bounds might be better off as separate
  * @author Dean P. Ottewell
- *
  */
 public interface IPeakOpportunityListener extends EventListener {
 
