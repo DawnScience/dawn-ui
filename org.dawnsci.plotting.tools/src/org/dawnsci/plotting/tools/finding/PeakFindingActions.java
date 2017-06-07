@@ -176,6 +176,7 @@ public class PeakFindingActions {
 				}
 			}
 		};
+		sendPeaks.setImageDescriptor(Activator.getImageDescriptor("icons/broadcastEvent.png"));
 		toolbar.add(sendPeaks);
 		
 		toolbar.update(true);
