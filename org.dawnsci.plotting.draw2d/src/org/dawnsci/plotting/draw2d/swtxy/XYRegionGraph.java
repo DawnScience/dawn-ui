@@ -74,17 +74,9 @@ public class XYRegionGraph extends XYGraph {
 		super(new XYRegionGraphAxesFactory());
 
 		try {
-<<<<<<< Upstream, based on origin/master
-			setShowLegend(getPreferenceStore().getBoolean(BasePlottingConstants.XY_SHOWLEGEND));
-=======
 			setShowLegend(getPreferenceStore().getBoolean(BasePlottingConstants.XY_SHOWLEGEND), false);
->>>>>>> a1165c0 Use getters and setters to access showLegend and xyGraph
 		} catch (NullPointerException ne) {
-<<<<<<< Upstream, based on origin/master
-			setShowLegend(true);
-=======
 			setShowLegend(true, false);
->>>>>>> a1165c0 Use getters and setters to access showLegend and xyGraph
 		}
 	}
 	
