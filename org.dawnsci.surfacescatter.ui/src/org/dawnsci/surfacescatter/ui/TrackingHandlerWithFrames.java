@@ -654,8 +654,6 @@ class trackingJob21 {
 								       drm.getInitialLenPt()[0][0],
 								       drm.getInitialLenPt()[0][1],0);
 							
-							
-							
 							display.syncExec(new Runnable() {
 								@Override
 								public void run() {																			
@@ -669,10 +667,6 @@ class trackingJob21 {
 									return;
 								}
 							});
-							
-							
-							
-							
 						}
 					}
 					//////bottom of k++ loop
@@ -833,15 +827,10 @@ class trackingJob21 {
 									
 									drm.addBackgroundDatArray(fms.size(), k, output1);
 									
-									
 									int imageNumber =k;
 									IDataset tempImage = j;
 									
-									
-									double[] tempLoc = drm.getLocationList().get(frame.getDatNo()).get(imageNumber);
-									
-									
-									
+									double[] tempLoc = drm.getLocationList().get(frame.getDatNo()).get(frame.getNoInOriginalDat());
 									
 									RectangularROI newROI = new RectangularROI(tempLoc[0],
 										       tempLoc[1],
@@ -959,7 +948,7 @@ class trackingJob21 {
 												(double) (pt[1]), (double) pt[0], (double) pt[1] + len[1], (double) (pt[0] + len[0]),
 												(double) (pt[1] + len[1]) };
 										
-										drm.getSeedLocation()[frame.getDatNo()] = (seedLocation);
+										drm.setSeedLocation(frame.getDatNo(), seedLocation);
 									}
 									
 									drm.addxList(drm.getNoOfImagesInDatFile(frame.getDatNo()), 
@@ -997,7 +986,7 @@ class trackingJob21 {
 									
 									int imageNumber =k;
 									IDataset tempImage = j;
-									double[] tempLoc = drm.getLocationList().get(frame.getDatNo()).get(frame.getImageNumber());
+									double[] tempLoc = drm.getLocationList().get(frame.getDatNo()).get(frame.getNoInOriginalDat());
 									RectangularROI newROI = new RectangularROI(tempLoc[0],
 										       tempLoc[1],
 										       drm.getInitialLenPt()[0][0],
@@ -1107,7 +1096,7 @@ class trackingJob21 {
 													(double) (pt[1]), (double) pt[0], (double) pt[1] + len[1], (double) (pt[0] + len[0]),
 													(double) (pt[1] + len[1]) };
 											
-											drm.getSeedLocation()[frame.getDatNo()]=(seedLocation);
+											drm.addSeedLocation(frame.getDatNo(),seedLocation);
 										}
 										
 										drm.addDmxList(frame.getDatNo(),  
@@ -1157,7 +1146,6 @@ class trackingJob21 {
 												return;
 											}
 										});
-	
 									}
 								}
 							}

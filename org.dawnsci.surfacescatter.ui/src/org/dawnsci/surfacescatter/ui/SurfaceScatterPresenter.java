@@ -1133,6 +1133,9 @@ public class SurfaceScatterPresenter {
 					interpolatedLenPts.set(r, q);
 				}
 			}
+			
+			drm.setInterpolatedLenPts(interpolatedLenPts);
+
 		}	
 		if(interpolatedLenPts.size() > 0){
 			for(int f =0; f<fms.size();f++){
@@ -2948,6 +2951,9 @@ public class SurfaceScatterPresenter {
 	}
 
 	public void setTrackWithQ(boolean trackWithQ) {
+		if(trackWithQ){
+			qConversion();
+		}
 		this.trackWithQ = trackWithQ;
 	}
 
