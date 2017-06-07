@@ -16,4 +16,9 @@ public interface IOperationSetupWizardPage extends IWizardPage {
 	public void setInputData(OperationData od);
 	
 	public void finishPage();
+	
+	public default boolean shouldSkipRemainingPages() {
+		return false;
+	}
+	
 }

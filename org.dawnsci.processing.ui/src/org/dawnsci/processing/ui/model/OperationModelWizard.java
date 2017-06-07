@@ -59,6 +59,17 @@ public class OperationModelWizard extends Wizard implements IOperationModelWizar
 		wizardPages.stream().forEachOrdered(this::addPage);
 		templateWizardPages.stream().forEachOrdered(this::addPage);
 	}
+	
+	@Override
+	public boolean canFinish() {
+		IWizardPage currentPage = getContainer().getCurrentPage();
+		if (currentPage instanceof IOperationSetupWizardPage &&
+				((IOperationSetupWizardPage) currentPage).shouldSkipRemainingPages()) {
+			return currentPage.isPageComplete();
+		}
+		
+		return super.canFinish();
+	}
 
 	@Override
 	public boolean performFinish() {
