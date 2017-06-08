@@ -168,67 +168,67 @@ public class PeakFindingSearchJob extends Job {
 		// TODO: tmp just wanted to see things play
 		// thread.stop();
 		/* Tmp place here, expand out later */
-		boolean limitNumber = false;
-		if (limitNumber) {
-			
-			//space peaks
-			TreeMap<Integer, Double> spacePos = new TreeMap<Integer, Double>();
-			
-			//Chpoose highest in range
-			int windowRange= 3;
-			int startPos = 0;
-			double rangeWidth =0.1;
-			
-			//Obnly bothered out x position
-			ArrayList<Integer> keys = new ArrayList<Integer>(peaksPos.keySet());
-			for (int idx = 0; idx < keys.size(); idx += windowRange){
-				int startKey = keys.get(idx);
-				
-				int endPos = idx + windowRange;
-				if(endPos >= peaksPos.size())
-					endPos = peaksPos.size()-1;
-				
-				boolean withinRange = true;
-
-				TreeMap<Integer, Double> interestKeyVal = new TreeMap<Integer, Double>();
-				interestKeyVal.put(startKey, peaksPos.get(startKey));
-				for (int aheadPos = idx+1; aheadPos < windowRange; ++aheadPos){
-					double diff = Math.abs(xData.getDouble(keys.get(idx)) -  xData.getDouble(keys.get(aheadPos)));
-					
-					//Looks like a lone wolf
-					if (diff > rangeWidth){
-						withinRange = false;
-						break;
-					}
-					
-					int interestKey = keys.get(aheadPos);
-					interestKeyVal.put(interestKey, peaksPos.get(interestKey));
-				}
-				
-				if (withinRange){
-					//Object theOneTheOnly = peaksPos.subMap(keys.get(idx), keys.get(endPos));
-					List<Entry<Integer, Double>> restrictedPos = findGreatest(interestKeyVal, 1);
-					for (Entry<Integer, Double> chosenOne : restrictedPos) {
-						spacePos.put(chosenOne.getKey(),chosenOne.getValue());
-					}
-					
-				} else {
-					//Lone wolf is a keeper
-					Integer key = keys.get(idx);
-					double val = peaksPos.get(key);
-					spacePos.put(key, val);
-					//Reset increment to just ahead of lone wolf
-					idx -= windowRange -1;
-				}
-			}
-			
-			List<Entry<Integer, Double>> restrictedPos = findGreatest(spacePos, 30);
-			peaksPos.clear();
-			
-			for (Entry<Integer, Double> chosenOne : restrictedPos) {
-				peaksPos.put(chosenOne.getKey(),chosenOne.getValue());
-			}
-		}
+//		boolean limitNumber = false;
+//		if (limitNumber) {
+//			
+//			//space peaks
+//			TreeMap<Integer, Double> spacePos = new TreeMap<Integer, Double>();
+//			
+//			//Chpoose highest in range
+//			int windowRange= 3;
+//			int startPos = 0;
+//			double rangeWidth =0.1;
+//			
+//			//Obnly bothered out x position
+//			ArrayList<Integer> keys = new ArrayList<Integer>(peaksPos.keySet());
+//			for (int idx = 0; idx < keys.size(); idx += windowRange){
+//				int startKey = keys.get(idx);
+//				
+//				int endPos = idx + windowRange;
+//				if(endPos >= peaksPos.size())
+//					endPos = peaksPos.size()-1;
+//				
+//				boolean withinRange = true;
+//
+//				TreeMap<Integer, Double> interestKeyVal = new TreeMap<Integer, Double>();
+//				interestKeyVal.put(startKey, peaksPos.get(startKey));
+//				for (int aheadPos = idx+1; aheadPos < windowRange; ++aheadPos){
+//					double diff = Math.abs(xData.getDouble(keys.get(idx)) -  xData.getDouble(keys.get(aheadPos)));
+//					
+//					//Looks like a lone wolf
+//					if (diff > rangeWidth){
+//						withinRange = false;
+//						break;
+//					}
+//					
+//					int interestKey = keys.get(aheadPos);
+//					interestKeyVal.put(interestKey, peaksPos.get(interestKey));
+//				}
+//				
+//				if (withinRange){
+//					//Object theOneTheOnly = peaksPos.subMap(keys.get(idx), keys.get(endPos));
+//					List<Entry<Integer, Double>> restrictedPos = findGreatest(interestKeyVal, 1);
+//					for (Entry<Integer, Double> chosenOne : restrictedPos) {
+//						spacePos.put(chosenOne.getKey(),chosenOne.getValue());
+//					}
+//					
+//				} else {
+//					//Lone wolf is a keeper
+//					Integer key = keys.get(idx);
+//					double val = peaksPos.get(key);
+//					spacePos.put(key, val);
+//					//Reset increment to just ahead of lone wolf
+//					idx -= windowRange -1;
+//				}
+//			}
+//			
+//			List<Entry<Integer, Double>> restrictedPos = findGreatest(spacePos, 30);
+//			peaksPos.clear();
+//			
+//			for (Entry<Integer, Double> chosenOne : restrictedPos) {
+//				peaksPos.put(chosenOne.getKey(),chosenOne.getValue());
+//			}
+//		}
 
 		updatePeak(peaksPos);
 

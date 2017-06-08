@@ -211,12 +211,17 @@ public class PeakFindingWidget {
 		runPeakSearch.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
+				
+				Double lower = lwrBndVal.getDouble();
+				Double upper = uprBndVal.getDouble();
 				//Bounds check 
-				if(lwrBndVal.getDouble() > uprBndVal.getDouble()){
+				if(upper > lower){
 					//Well they want a boudnd setup. So give them it swapped 
 					PeakOppurtunity peakOpp = new PeakOppurtunity();
 					peakOpp.setLowerBound(uprBndVal.getDouble());
 					peakOpp.setUpperBound(lwrBndVal.getDouble());
+					
+					manager.setSearchScaleIntensity(searchIntensity.getDouble());
 					manager.loadPeakOppurtunity(peakOpp);
 				} 	
 				

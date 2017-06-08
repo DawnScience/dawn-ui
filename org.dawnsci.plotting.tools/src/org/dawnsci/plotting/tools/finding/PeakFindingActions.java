@@ -172,7 +172,7 @@ public class PeakFindingActions {
 		final Action sendPeaks = new Action("SendPeaks...") {
 			public void run() {
 				if(peaksId != null ){
-					sendPeakfindingEvent();
+					manager.sendPeakfindingEvent(peaksId);
 				}
 			}
 		};
@@ -182,29 +182,4 @@ public class PeakFindingActions {
 		toolbar.update(true);
 	}
 	
-	
-	
-	private void sendPeakfindingEvent(){
-		//TODO:Spawn plug in view
-		
-		BundleContext ctx = FrameworkUtil.getBundle(Activator.class).getBundleContext();
-		ServiceReference<EventAdmin> ref = ctx.getServiceReference(EventAdmin.class);
-	    
-		EventAdmin eventAdmin = ctx.getService(ref);
-	    //The object in this case being a list of cell parametr
-		Map<String,Object> properties = new HashMap<String, Object>();
-		
-		/*
-		 * TMP cells pass
-		 * */
-		 //List<IdentifiedPeak> idPeaks = new ArrayList<IdentifiedPeak>();
-
-		//TODO: where to put this trigger line?
-	    properties.put("PEAKRESULTS", peaksId);
-	    
-	    //Going to be triggered on a button and would like to know its arrived. However, should check before beforeing this action the 
-	    //view is active... If thats the case maybe based to have it async...
-	    Event event = new Event("peakfinding/syncEvent", properties);
-	    eventAdmin.sendEvent(event);
-	}
 }

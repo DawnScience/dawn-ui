@@ -6,6 +6,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -16,6 +17,11 @@ import org.dawnsci.plotting.tools.preference.PeakFindingConstants;
 import org.eclipse.january.dataset.Dataset;
 import org.eclipse.january.dataset.DatasetUtils;
 import org.eclipse.january.dataset.IDataset;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.FrameworkUtil;
+import org.osgi.framework.ServiceReference;
+import org.osgi.service.event.Event;
+import org.osgi.service.event.EventAdmin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -115,9 +121,10 @@ public class PeakFindingManager {
 		String peakfinder = Activator.getPlottingPreferenceStore().getString(PeakFindingConstants.PeakAlgorithm);	
 		//TODO: tmp as only wavelet has the adjustment configured correctly
 		if(peakfinder.equals("Wavelet Transform")){
-			Activator.getPlottingPreferenceStore().setValue("Convole Width Size", searchScaleIntensity);
+			Activator.getPlottingPreferenceStore().setValue("Conolve Width Size", searchScaleIntensity);
+			
 		}
-		
+		String curVal = Activator.getPlottingPreferenceStore().getString("Conolve Width Size");
 		this.searchScaleIntensity = searchScaleIntensity;
 	}
 	
@@ -165,9 +172,11 @@ public class PeakFindingManager {
 	private void everythingChangesListeners(PeakOpportunityEvent evt) {
 		for(IPeakOpportunityListener listener : listeners) {
 			
-			if(evt.getPeakOpp().getPeaksId() != null)
+			if(evt.getPeakOpp().getPeaksId() != null){
+				
+				sendPeakfindingEvent(evt.getPeakOpp().getPeaksId()); //TODO: way to enable and disable this degree of sending
 				listener.peaksChanged(evt);
-			
+			}
 			if(evt.getPeakOpp().getLowerBound() != 0 && evt.getPeakOpp().getUpperBound() != 0)
 				listener.boundsChanged(evt.getPeakOpp().getUpperBound() , evt.getPeakOpp().getLowerBound());
 
@@ -298,5 +307,28 @@ public class PeakFindingManager {
 	}
 	
 	
+	public void sendPeakfindingEvent(List<IdentifiedPeak> peaksId){
+		//TODO:Spawn plug in view
+		
+		BundleContext ctx = FrameworkUtil.getBundle(Activator.class).getBundleContext();
+		ServiceReference<EventAdmin> ref = ctx.getServiceReference(EventAdmin.class);
+	    
+		EventAdmin eventAdmin = ctx.getService(ref);
+	    //The object in this case being a list of cell parametr
+		Map<String,Object> properties = new HashMap<String, Object>();
+		
+		/*
+		 * TMP cells pass
+		 * */
+		 //List<IdentifiedPeak> idPeaks = new ArrayList<IdentifiedPeak>();
+
+		//TODO: where to put this trigger line?
+	    properties.put("PEAKRESULTS", peaksId);
+	    
+	    //Going to be triggered on a button and would like to know its arrived. However, should check before beforeing this action the 
+	    //view is active... If thats the case maybe based to have it async...
+	    Event event = new Event("peakfinding/syncEvent", properties);
+	    eventAdmin.sendEvent(event);
+	}
 	
 }
