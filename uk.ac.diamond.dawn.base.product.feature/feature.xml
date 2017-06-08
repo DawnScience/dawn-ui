@@ -65,6 +65,14 @@
          id="org.dawnsci.python.feature"
          version="0.0.0"/>
 
+   <includes
+         id="uk.ac.diamond.scisoft.analysis.powder.indexer.feature"
+         version="0.0.0"/>
+
+   <includes
+         id="uk.ac.diamond.scisoft.analysis.powder.matcher.ccdc.feature"
+         version="0.0.0"/>
+
    <plugin
          id="uk.ac.diamond.scisoft.mx.rcp"
          os="linux"
