@@ -1562,28 +1562,8 @@ public class SurfaceScatterViewStart extends Dialog {
 				ssp.writeNexus(title);
 				
 				raw.getTabFolder().getTabList()[1].setEnabled(true);
-				
-//				IPlottingSystem<Composite> pS = raw.getPlotSystem();
-//				
-//				ILineTrace lt = pS.createLineTrace(title);
-//				
-//				IDataset[] ltData = SXRDNexusReader.getScannedVariableAndFhkl(title);
-//				
-//				lt.setData(ltData[0], ltData[1]);		
-//				
-//				pS.addTrace(lt);
-//				
-//				raw.getRtc().getRcm().addToCsdpList(ssp.getDrm().getCsdp());
-//				
-//				try{
-//					ITrace t = pS.getTrace("Blank Curve");
-//					pS.removeTrace(t);
-//				}
-//				catch(Exception n){
-//					
-//				}
-//				
-//				pS.autoscaleAxes();
+
+				raw.getRtc().getRcm().addToCsdpList(ssp.getDrm().getCsdp());
 					
 			}
 
