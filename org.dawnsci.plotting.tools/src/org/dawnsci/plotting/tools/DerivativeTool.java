@@ -41,6 +41,7 @@ import org.eclipse.dawnsci.plotting.api.trace.TraceEvent;
 import org.eclipse.january.dataset.Dataset;
 import org.eclipse.january.dataset.DatasetFactory;
 import org.eclipse.january.dataset.DatasetUtils;
+import org.eclipse.january.dataset.IntegerDataset;
 import org.eclipse.january.dataset.Maths;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionEvent;
@@ -288,7 +289,6 @@ public class DerivativeTool extends AbstractToolPage  {
 			logger.debug("Update plot called from deactivate");
 			updatePlot(true,false,false);
 		}
-
 	}
 
 	public void sync(IToolPage with) {
@@ -464,7 +464,7 @@ public class DerivativeTool extends AbstractToolPage  {
 		//Get x data if present or if not generate index range
 		final Dataset x = (trace instanceof ILineTrace) 
 				? DatasetUtils.convertToDataset(((ILineTrace)trace).getXData()) 
-			    : DatasetFactory.createRange(0, traceData.getSize(), 1, Dataset.INT32);
+			    : DatasetFactory.createRange(IntegerDataset.class, 0, traceData.getSize(), 1);
 
 		Dataset derv = null;
 		
