@@ -53,11 +53,13 @@ import org.eclipse.richbeans.widgets.cell.CComboCellEditor;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.TableColumn;
 
 /**
  * A widget for editing any ROI
@@ -74,37 +76,55 @@ public class ROIEditTable  {
 	private double      xLowerBound=Double.NaN, xUpperBound=Double.NaN; // Optional bounds
 	private double      yLowerBound=Double.NaN, yUpperBound=Double.NaN; // Optional bounds
 	private List<IRegionRow> rows;
-
+	
+	// preferences
+	private boolean roundButtonAndAsterisk;
+	private int height;
+	private int[] columnWidths;
+	
+	public ROIEditTable() {
+		// default preferences
+		roundButtonAndAsterisk = true;
+		height = 100;
+		columnWidths = new int[]{180,150};
+	}
+	
+	public ROIEditTable(int height, int[] columnWidths, boolean roundButtonAndAsterisk) {
+		this.roundButtonAndAsterisk = roundButtonAndAsterisk;
+		this.height = height;
+		this.columnWidths = columnWidths;
+	}
 
 	public Control createPartControl(Composite parent) {
 		
 		this.regionTable     = new TableViewer(parent, SWT.FULL_SELECTION | SWT.SINGLE | SWT.V_SCROLL | SWT.BORDER);
-		GridData tableData   = new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1);
-		tableData.heightHint = 100;
+		GridData tableData   = new GridData(SWT.FILL, SWT.FILL, false, false, 2, 1);
+		tableData.heightHint = height;
 		regionTable.getTable().setLayoutData(tableData);
-		
 		createColumns(regionTable);
 		
-		final Button round = new Button(parent, SWT.PUSH);
-		round.setText("Round");
-		round.setToolTipText("Round values of region to nearest integer");
-		round.setLayoutData(new GridData(SWT.LEFT, SWT.NONE, true, false));
-		round.addSelectionListener(new SelectionAdapter() {
-			public void widgetSelected(SelectionEvent e) {
-				for (IRegionRow row : rows) {
-					if (row instanceof RegionRow) {
-						((RegionRow)row).round();
+		if (roundButtonAndAsterisk) {
+			final Button round = new Button(parent, SWT.PUSH);
+			round.setText("Round");
+			round.setToolTipText("Round values of region to nearest integer");
+			round.setLayoutData(new GridData(SWT.LEFT, SWT.NONE, true, false));
+			round.addSelectionListener(new SelectionAdapter() {
+				public void widgetSelected(SelectionEvent e) {
+					for (IRegionRow row : rows) {
+						if (row instanceof RegionRow) {
+							((RegionRow)row).round();
+						}
 					}
+					regionTable.refresh();
+		            roi = createRoi(rows, null, coords);
+					fireROIListeners();
 				}
-				regionTable.refresh();
-	            roi = createRoi(rows, null, coords);
-				fireROIListeners();
-			}
-		});
-		
-		final Label clickToEdit = new Label(parent, SWT.RIGHT);
-		clickToEdit.setText("* Click to change");
-		clickToEdit.setLayoutData(new GridData(SWT.RIGHT, SWT.NONE, true, false));
+			});
+			
+			final Label clickToEdit = new Label(parent, SWT.RIGHT);
+			clickToEdit.setText("* Click to change");
+			clickToEdit.setLayoutData(new GridData(SWT.RIGHT, SWT.NONE, true, false));
+		}
 		
 		return regionTable.getTable();
 	}
@@ -150,29 +170,28 @@ public class ROIEditTable  {
 		viewer.setColumnProperties(new String[] { "Name", "x", "y" });
 
 		TableViewerColumn var = new TableViewerColumn(viewer, SWT.LEFT, 0);
-		var.getColumn().setWidth(180);
+		var.getColumn().setWidth(columnWidths[0]);
 		var.setLabelProvider(new ROILabelProvider(0));
 
 		
 		var = new TableViewerColumn(viewer, SWT.LEFT, 1);
-		var.getColumn().setWidth(150);
+		var.getColumn().setWidth(columnWidths[1]);
 		ROIEditingSupport roiEditor = new ROIEditingSupport(viewer, 1);
 		var.setEditingSupport(roiEditor);
 		var.setLabelProvider(new DelegatingStyledCellLabelProvider(new ROILabelProvider(1, roiEditor)));
 
 		
 		var = new TableViewerColumn(viewer, SWT.LEFT, 2);
-		var.getColumn().setWidth(150);
+		var.getColumn().setWidth(columnWidths[1]);
 		roiEditor = new ROIEditingSupport(viewer, 2);
 		var.setEditingSupport(roiEditor);
 		var.setLabelProvider(new DelegatingStyledCellLabelProvider(new ROILabelProvider(2, roiEditor)));
 		
 		regionTable.getTable().setHeaderVisible(false);
-
     }
     
     public void cancelEditing() {
-     	this.regionTable.cancelEditing();
+    	this.regionTable.cancelEditing();
     }
     
 	public class ROIEditingSupport extends EditingSupport {
@@ -227,7 +246,7 @@ public class ROIEditTable  {
 			});
 			return ed;
 		}
-
+		
 		@Override
 		protected boolean canEdit(Object element) {
 			double val;
@@ -355,7 +374,7 @@ public class ROIEditTable  {
 		@Override
 		public StyledString getStyledText(Object element) {
 			final StyledString ret = new StyledString(getText(element));
-			if (editor!=null && editor.canEdit(element)) {
+			if (editor!=null && editor.canEdit(element) && roundButtonAndAsterisk) {
 			    ret.append(new StyledString("*", StyledString.QUALIFIER_STYLER));
 			}
 			return ret;
