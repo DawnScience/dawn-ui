@@ -117,6 +117,15 @@
             tooltip="A tool for finding peaks on data currently plotted.">
       </plotting_tool_page>
       
+      <plotting_tool_page
+            category="org.dawnsci.plotting.tools.plotting_tool_category.fitting"
+            class="org.dawnsci.plotting.tools.IntegrationTool"
+            icon="icons/sum.png"
+            id="org.dawb.workbench.plotting.tools.IntegrationTool"
+            label="Integrate regions"
+            tooltip="A tool for integrating regions on data currently plotted.">
+      </plotting_tool_page>
+      
       
       <plotting_tool_page
             category="org.dawnsci.plotting.tools.plotting_tool_category.fitting"
