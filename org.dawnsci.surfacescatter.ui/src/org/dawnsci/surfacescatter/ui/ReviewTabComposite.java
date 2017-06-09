@@ -2,8 +2,10 @@ package org.dawnsci.surfacescatter.ui;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.io.File;
 
 import org.dawb.common.ui.widgets.ActionBarWrapper;
+import org.dawnsci.surfacescatter.CsdpFromNexusFile;
 import org.dawnsci.surfacescatter.CurveStitchDataPackage;
 import org.dawnsci.surfacescatter.ReviewCurvesModel;
 import org.dawnsci.surfacescatter.SXRDNexusReader;
@@ -21,6 +23,8 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.DirectoryDialog;
+import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Group;
 
 public class ReviewTabComposite extends Composite{
@@ -33,6 +37,7 @@ public class ReviewTabComposite extends Composite{
     private Button switchAxes;
     private IPlottingSystem<Composite> plotSystem;
     private ReviewCurvesModel rcm;
+	private String nexusFolderPath;
 	
 	public ReviewTabComposite(Composite parent, 
 							  int style) throws Exception {
@@ -114,6 +119,42 @@ public class ReviewTabComposite extends Composite{
         addCurve.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
         addCurve.setText("Add Curve");
         addCurve.setData(new GridData(SWT.FILL));
+        
+		addCurve.addSelectionListener(new SelectionListener() {
+
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				
+				FileDialog dlg = new FileDialog(ReviewTabComposite.this.getShell(), SWT.OPEN);
+				
+				if(nexusFolderPath != null){
+					dlg.setFilterPath(nexusFolderPath);
+				}
+
+		        dlg.setText("Find a Nexus File!");
+
+		        String stitle = "r";
+				String path = "p";
+
+				if (dlg.open() != null) {
+					stitle = dlg.getFileName();
+					path = dlg.getFilterPath();
+
+				}
+				
+				String title = path + File.separator + stitle;
+
+				CurveStitchDataPackage newCsdp = CsdpFromNexusFile.CsdpFromNexusFileGenerator(title);
+				
+				rcm.addToCsdpList(newCsdp);
+			}
+
+			@Override
+			public void widgetDefaultSelected(SelectionEvent e) {
+			}
+		});
+        
+        
         
         showErrors = new Button(methodSetting, SWT.PUSH);
         showErrors.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
@@ -229,6 +270,15 @@ public class ReviewTabComposite extends Composite{
 	public void setRcm(ReviewCurvesModel rcm) {
 		this.rcm = rcm;
 	}
+	
+	public String getNexusFolderPath() {
+		return nexusFolderPath;
+	}
+
+	public void setNexusFolderPath(String nexusFolderPath) {
+		this.nexusFolderPath = nexusFolderPath;
+	}
+
 	   
 }
 		
