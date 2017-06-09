@@ -105,6 +105,7 @@ public class SurfaceScatterPresenter {
 	private IDataHolder dh1;
 	private double currentRawIntensity;
 	private boolean trackWithQ = false;
+	private int bB = 10; //this is a false boundaryBox, used to avoid hitting edges
 	
 	
 	public SurfaceScatterPresenter(){
@@ -1097,8 +1098,7 @@ public class SurfaceScatterPresenter {
 			
 			interpolatedLenPts = InterpolationTracker.interpolatedTrackerLenPtArray(drm.getInterpolatorBoxes(), 
 																					xDataset);
-			drm.setInterpolatedLenPts(interpolatedLenPts);
-
+			
 			if(drm.getInterpolatorBoxes().size() > 2 
 					&& getTrackerType() == TrackerType1.SPLINE_INTERPOLATION ){
 				
@@ -1107,11 +1107,13 @@ public class SurfaceScatterPresenter {
 						interpolatedLenPts = split.interpolatedTrackerLenPtArray1(drm.getInterpolatorBoxes(),
 																				  xDataset);
 						
-						drm.setInterpolatedLenPts(interpolatedLenPts);
+						
 	
 			}
 
 			int[] g = fms.get(0).getRawImageData().squeezeEnds().getShape();
+			
+		
 			
 			double[][] q = new double [][] {{(double) 0.0, (double) 0.0},
 											{(double) 0.0, (double) 0.0}};
@@ -1121,14 +1123,14 @@ public class SurfaceScatterPresenter {
 				
 				double[][] p = interpolatedLenPts.get(r);
 				
-				if((p[0][0] + p[1][0])<g[1] &&
-				   (p[0][1] + p[1][1])<g[0]){
+				if((p[0][0] + p[1][0]+ bB+2)<g[1] &&
+				   (p[0][1] + p[1][1]+ bB+2)<g[0]){
 						
 					q=p;				
 				}
 				
-				if((p[0][0] + p[1][0])>g[1] ||
-				   (p[0][1] + p[1][1])>g[0]){
+				if((p[0][0] + p[1][0]+ bB+2)>g[1] ||
+				   (p[0][1] + p[1][1]+ bB+2)>g[0]){
 				
 					interpolatedLenPts.set(r, q);
 				}
@@ -1137,26 +1139,6 @@ public class SurfaceScatterPresenter {
 			drm.setInterpolatedLenPts(interpolatedLenPts);
 
 		}	
-		if(interpolatedLenPts.size() > 0){
-			for(int f =0; f<fms.size();f++){
-				double[] lr = LocationLenPtConverterUtils.lenPtToLocationConverter(interpolatedLenPts.get(f));
-				if(lr == null){
-					System.out.println("it's fucked at  lr :  " + lr);
-				}
-				fms.get(f).setRoiLocation(lr);
-				if(f == 17){
-					System.out.println("this is ROI  at  17 :  " + lr);
-				}
-				
-			}
-			
-			
-			for(FrameModel g :fms){
-				if(g.getRoiLocation() == null){
-					System.out.println("it's fucked");
-				}
-			}
-		}
 		
 		return interpolatedLenPts;
 	}
@@ -1715,6 +1697,7 @@ public class SurfaceScatterPresenter {
 										  int trackerSelection,
 										  String boundaryBox) {
 
+		bB = Integer.valueOf(boundaryBox);
 		
 		for (FrameModel fm : fms) {
 			
@@ -2955,6 +2938,14 @@ public class SurfaceScatterPresenter {
 			qConversion();
 		}
 		this.trackWithQ = trackWithQ;
+	}
+
+	public int getbB() {
+		return bB;
+	}
+
+	public void setbB(int bB) {
+		this.bB = bB;
 	}
 
 }

@@ -149,8 +149,6 @@ public class MultipleOutputCurvesTableView extends Composite {
 		storeAsNexus.setText("Store As Nexus");
 		storeAsNexus.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 	    
-		
-		
 		sashForm.setWeights(new int[]{10,7,75,8});
 	}
 

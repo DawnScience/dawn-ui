@@ -1,13 +1,8 @@
 package org.dawnsci.surfacescatter.ui;
 
-import org.dawb.common.ui.widgets.ActionBarWrapper;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
-import org.eclipse.dawnsci.plotting.api.PlotType;
-import org.eclipse.dawnsci.plotting.api.PlottingFactory;
-import org.eclipse.dawnsci.plotting.api.trace.ILineTrace;
 import org.eclipse.january.dataset.Dataset;
 import org.eclipse.january.dataset.DatasetFactory;
-import org.eclipse.january.dataset.IDataset;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CTabFolder;
 import org.eclipse.swt.custom.CTabItem;
@@ -15,7 +10,6 @@ import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.TabFolder;
 import org.eclipse.swt.widgets.TabItem;
 
@@ -24,10 +18,10 @@ public class RodAnalysisWindow {
 	private SashForm analysisSash;
 	private PlotSystemCompositeView customComposite;
 	private SuperSashPlotSystem3Composite ssps3c;
+	private ReviewTabComposite rtc;
 	private int numberOfImages;
 	private Dataset nullImage;
 	private TabFolder tabFolder;
-	private IPlottingSystem<Composite> plotSystem;
 	
 	public RodAnalysisWindow(CTabFolder folder,
 							SurfaceScatterPresenter ssp,
@@ -109,7 +103,7 @@ public class RodAnalysisWindow {
 		}
 		
 		TabItem reviewTab = new TabItem(tabFolder, SWT.NONE);
-		reviewTab.setText("Stored Curves");
+		reviewTab.setText("Review");
 		reviewTab.setData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
 		
@@ -119,42 +113,18 @@ public class RodAnalysisWindow {
 	       
 		reviewTab.setControl(reviewTabComposite);
 		
-		Group storedCurves = new Group(reviewTabComposite, SWT.NONE);
-        GridLayout storedCurvesLayout = new GridLayout();
-        storedCurves.setLayout(storedCurvesLayout);
-        
-        final GridData storedCurvesData = new GridData(SWT.FILL, SWT.FILL, true, true);
-        storedCurvesData.grabExcessVerticalSpace = true;
-        storedCurvesData.heightHint = 100;
-        storedCurves.setLayoutData(new GridData(GridData.FILL_HORIZONTAL | GridData.FILL_VERTICAL));
-	       
+		
 		try {
-			plotSystem = PlottingFactory.createPlottingSystem();
-				
-		} catch (Exception e2) {
-			e2.printStackTrace();
+			rtc = new ReviewTabComposite(reviewTabComposite, 
+										 SWT.FILL);
+
+			rtc.setLayout(new GridLayout());
+			rtc.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+			
+		} catch (Exception d) {
+
 		}
-	        
-		ActionBarWrapper actionBarComposite = ActionBarWrapper.createActionBars(storedCurves, 
-																				null);
-		  
-	    plotSystem.createPlotPart(storedCurves, 
-	        					  "Stored Curves", 
-	        					  actionBarComposite, 
-	        					  PlotType.IMAGE, 
-	        					  null);
-	        
-//	    ILineTrace lt = plotSystem.createLineTrace("Blank Curve");
-//		IDataset backup = DatasetFactory.createRange(0, 200, 1, Dataset.FLOAT64);
-//		lt.setData(backup, backup);		
-//
-//		plotSystem.addTrace(lt);
-	    
-	    plotSystem.getPlotComposite().setLayoutData(storedCurvesData);
-	    		
-//	    		new GridData(GridData.FILL_HORIZONTAL | GridData.FILL_VERTICAL));
-	       
-//	    plotSystem.createPlot1D(null, null, null, null);    
+		
 	    
 	    tabFolder.getTabList()[1].setEnabled(false);
 		
@@ -169,11 +139,7 @@ public class RodAnalysisWindow {
 	}
 
 	public IPlottingSystem<Composite> getPlotSystem() {
-		return plotSystem;
-	}
-
-	public void setPlotSystem(IPlottingSystem<Composite> plotSystem) {
-		this.plotSystem = plotSystem;
+		return rtc.getPlotSystem();
 	}
 
 	public SuperSashPlotSystem3Composite getSsps3c(){
@@ -183,8 +149,13 @@ public class RodAnalysisWindow {
 	public PlotSystemCompositeView getCustomComposite(){
 		return customComposite;
 	}
-		
-	private void setNumberOfImages(int n){
-		this.numberOfImages = n;
+	
+	public ReviewTabComposite getRtc() {
+		return rtc;
 	}
+
+	public void setRtc(ReviewTabComposite rtc) {
+		this.rtc = rtc;
+	}
+
 }

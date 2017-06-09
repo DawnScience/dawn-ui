@@ -74,7 +74,6 @@ public class SurfaceScatterViewStart extends Dialog {
 	private DatDisplayer datDisplayer;
 	private GeometricParametersWindows paramField;
 	private CTabFolder folder;
-	private SashForm analysisSash;
 	private SurfaceScatterPresenter ssp;
 	private int DEBUG = 1;
 	private boolean modify = true;
@@ -925,6 +924,23 @@ public class SurfaceScatterViewStart extends Dialog {
 					newOffsetLenPt[1][0]  = -pt[0] + redPt[0];
 					newOffsetLenPt[1][1]  = -pt[1] + redPt[1];
 					
+					int[] bB = new int[4];
+					
+					bB[0] = Math.abs(newOffsetLenPt[1][0]);
+					bB[1] = Math.abs(newOffsetLenPt[1][1]);
+					
+					bB[2] = Math.abs(newOffsetLenPt[1][0] + newOffsetLenPt[0][0] - pt[0]);
+					bB[3] = Math.abs(newOffsetLenPt[1][1] + newOffsetLenPt[0][1] - pt[1]);
+					
+					int probe = bB[0];
+					
+					for(int g: bB){
+						if(g>probe){
+							probe = g;
+						}
+					}
+					
+					ssp.setbB(probe);
 					
 					if(!Arrays.equals(newOffsetLenPt[0], ssp.getBoxOffsetLenPt()[0]) ||
 							!Arrays.equals(newOffsetLenPt[1], ssp.getBoxOffsetLenPt()[1])){
@@ -1547,26 +1563,27 @@ public class SurfaceScatterViewStart extends Dialog {
 				
 				raw.getTabFolder().getTabList()[1].setEnabled(true);
 				
-				IPlottingSystem<Composite> pS = raw.getPlotSystem();
-				
-				ILineTrace lt = pS.createLineTrace(title);
-				
-				IDataset[] ltData = SXRDNexusReader.getScannedVariableAndFhkl(title);
-				
-				lt.setData(ltData[0], ltData[1]);		
-				
-				pS.addTrace(lt);
-				
-				
-				try{
-					ITrace t = pS.getTrace("Blank Curve");
-					pS.removeTrace(t);
-				}
-				catch(Exception n){
-					
-				}
-				
-				pS.autoscaleAxes();
+//				IPlottingSystem<Composite> pS = raw.getPlotSystem();
+//				
+//				ILineTrace lt = pS.createLineTrace(title);
+//				
+//				IDataset[] ltData = SXRDNexusReader.getScannedVariableAndFhkl(title);
+//				
+//				lt.setData(ltData[0], ltData[1]);		
+//				
+//				pS.addTrace(lt);
+//				
+//				raw.getRtc().getRcm().addToCsdpList(ssp.getDrm().getCsdp());
+//				
+//				try{
+//					ITrace t = pS.getTrace("Blank Curve");
+//					pS.removeTrace(t);
+//				}
+//				catch(Exception n){
+//					
+//				}
+//				
+//				pS.autoscaleAxes();
 					
 			}
 

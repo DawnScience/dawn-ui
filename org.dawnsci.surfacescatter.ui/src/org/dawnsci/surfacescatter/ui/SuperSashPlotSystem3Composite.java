@@ -260,8 +260,6 @@ public class SuperSashPlotSystem3Composite extends Composite{
 
 		});
 
-
-		
 		plotSystem3.setShowLegend(false);
 		plotSystem1.setShowLegend(false);
 		
@@ -498,8 +496,6 @@ public class SuperSashPlotSystem3Composite extends Composite{
         topRight.setText("");
         topRight.redraw();
 	}
-	
-	
 	
 	public SurfaceScatterPresenter getSsp() {
 		return ssp;

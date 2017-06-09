@@ -367,8 +367,8 @@ public class PlotSystem1CompositeView extends Composite {
        ssvs.getPlotSystemCompositeView().getBgRegion().setROI(bgRegionROI[1]);
 
        
-       if(ssp.getTrackerType() != TrackerType1.INTERPOLATION ||
-    		   ssp.getTrackerType() != TrackerType1.SPLINE_INTERPOLATION){
+       if(ssp.getDrm().getFms().get(ssp.getSliderPos()).getTrackingMethodology() != TrackerType1.INTERPOLATION ||
+    		   ssp.getDrm().getFms().get(ssp.getSliderPos()).getTrackingMethodology() != TrackerType1.SPLINE_INTERPOLATION){
     	   
     	   button4.setEnabled(false);
     	   button5.setEnabled(false);

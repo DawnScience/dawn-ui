@@ -1295,8 +1295,6 @@ class trackingJob21 {
 								   b,
 								   c);
 
-						
-						
 						drm.addxList(fms.size(), k,
 								drm.getSortedX().getDouble(k));
 						
@@ -1304,11 +1302,11 @@ class trackingJob21 {
 						
 						IDataset output1 = 
 								DummyProcessWithFrames.DummyProcess0(drm, 
-														   		  gm,
-														   		  correctionSelection, 
-														   		  imagePosInOriginalDat[k], 
-														   		  trackingMarker, 
-														   		  k);
+															   		  gm,
+															   		  correctionSelection, 
+															   		  imagePosInOriginalDat[k], 
+															   		  trackingMarker, 
+															   		  k);
 	
 						
 	
@@ -1342,8 +1340,6 @@ class trackingJob21 {
 								return;
 							}
 						});
-						
-						
 					}
 				}
 			}
