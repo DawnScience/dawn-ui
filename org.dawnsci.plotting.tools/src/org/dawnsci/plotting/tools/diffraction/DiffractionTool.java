@@ -124,19 +124,19 @@ import uk.ac.diamond.scisoft.analysis.crystallography.HKL;
 import uk.ac.diamond.scisoft.analysis.diffraction.PowderRingsUtils;
 import uk.ac.diamond.scisoft.analysis.diffraction.QSpace;
 
-public class DiffractionTool extends AbstractToolPage implements CalibrantSelectedListener, IResettableExpansion, IROIListener {
+public class DiffractionTool<Q extends Quantity<Q>> extends AbstractToolPage implements CalibrantSelectedListener, IResettableExpansion, IROIListener {
 
 	private static final Logger logger = LoggerFactory.getLogger(DiffractionTool.class);
 	
 	private ClearableFilteredTree filteredTree;
 	private TreeViewer      viewer;
 	private Composite       control;
-	private DiffractionTreeModel model;
+	private DiffractionTreeModel<?> model;
 	private ILoaderService  service;
 	private Label statusMessage;
 	private String[] statusString = new String[1];
 	
-	private static DiffractionTool      activeDiffractionTool=null;
+	private static DiffractionTool<?>      activeDiffractionTool=null;
 	
 	//Region and region listener added for 1-click beam centring
 	private IRegion               tmpRegion;
@@ -571,7 +571,7 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 				if (copiedNode!=null) {
 					Object object = ((StructuredSelection)viewer.getSelection()).getFirstElement();
 					if (object instanceof NumericNode) {
-						NumericNode<Quantity> nn = (NumericNode<Quantity>)object;
+						NumericNode<Q> nn = (NumericNode<Q>)object;
 						if (!nn.isEditable()) {
 							MessageDialog.openWarning(Display.getDefault().getActiveShell(), "Cannot paste", "The item '"+nn.getLabel()+"' is not writable.\n\nPlease choose a different value to paste to.");
 							return;

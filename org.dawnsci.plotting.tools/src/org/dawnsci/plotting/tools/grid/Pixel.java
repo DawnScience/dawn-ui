@@ -8,22 +8,21 @@
  */
 package org.dawnsci.plotting.tools.grid;
 
-import javax.measure.Measure;
-import javax.measure.converter.UnitConverter;
-import javax.measure.quantity.Length;
-import javax.measure.unit.NonSI;
-import javax.measure.unit.SI;
-import javax.measure.unit.Unit;
-import javax.measure.unit.UnitFormat;
+import tec.units.ri.spi.Measurement;
 
-public class Pixel extends Unit<Length>{
+import javax.measure.UnitConverter;
+import javax.measure.quantity.Length;
+import javax.measure.Unit;
+import javax.measure.format.UnitFormat;
+
+public class Pixel implements Unit<Length>{
 
 	private static final long serialVersionUID = 1L;
 
 	public static void main(String[] args) {
 		
 		Unit<Resolution> ppmm = new PerMilliMetre();
-		Measure<Double, Resolution> res = Measure.valueOf(2.0, ppmm);
+		Measurement<Double, Resolution> res = Measure.valueOf(2.0, ppmm);
 		
 		Pixel pixel = new Pixel(res, 40);
 		Measure<Double, Length> distInPixels = Measure.valueOf(1000.0, pixel);

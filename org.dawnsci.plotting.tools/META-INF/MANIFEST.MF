@@ -34,7 +34,8 @@ Require-Bundle: org.eclipse.ui,
  uk.ac.diamond.scisoft.analysis.peakfinding;bundle-version="1.0.0",
  si.uom.si-units;bundle-version="0.6.6",
  javax.measure.unit-api;bundle-version="1.0.0",
- tec.units.unit-ri;bundle-version="1.0.2"
+ tec.units.unit-ri;bundle-version="1.0.2",
+ tec.uom.lib.uom-lib-common;bundle-version="1.0.2"
 Import-Package: javax.vecmath,
  org.apache.commons.collections4;version="4.0.0",
  org.apache.commons.collections4.bidimap;version="4.0.0",

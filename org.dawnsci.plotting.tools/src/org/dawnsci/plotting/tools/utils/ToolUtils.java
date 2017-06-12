@@ -10,6 +10,12 @@ package org.dawnsci.plotting.tools.utils;
 
 import java.util.Collection;
 
+import javax.measure.Unit;
+import javax.measure.quantity.Dimensionless;
+import javax.measure.quantity.Energy;
+import javax.measure.quantity.Length;
+import javax.measure.spi.ServiceProvider;
+
 import org.dawb.common.ui.menu.MenuAction;
 import org.dawb.common.ui.plot.roi.data.LinearROIData;
 import org.dawb.common.ui.util.EclipseUtils;
@@ -31,6 +37,9 @@ import org.eclipse.ui.IWorkbenchPart;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import si.uom.NonSI;
+import tec.units.ri.unit.MetricPrefix;
+import tec.units.ri.unit.Units;
 import uk.ac.diamond.scisoft.analysis.io.LoaderFactory;
 
 /**
@@ -41,6 +50,36 @@ import uk.ac.diamond.scisoft.analysis.io.LoaderFactory;
 public class ToolUtils {
 
 	private static Logger logger = LoggerFactory.getLogger(ToolUtils.class);
+
+	/**
+	 * Millimetre unit
+	 */
+	public static final Unit<Length> MILLIMETRE = MetricPrefix.MILLI(Units.METRE);
+
+	/**
+	 * Centimetre unit
+	 */
+	public static final Unit<Length> CENTIMETRE = MetricPrefix.CENTI(Units.METRE);
+
+	/**
+	 * Nanometre unit
+	 */
+	public final static Unit<Length> NANO = MetricPrefix.NANO(Units.METRE);
+
+	/**
+	 * Micrometre unit
+	 */
+	public final static Unit<Length> MICRO = MetricPrefix.MICRO(Units.METRE);
+
+	/**
+	 * kev unit
+	 */
+	public static final Unit<Energy> KILO_ELECTRON_VOLT = MetricPrefix.KILO(NonSI.ELECTRON_VOLT);
+
+	/**
+	 * Dimensionless unit
+	 */
+	public static final Unit<Dimensionless> DIMENSIONLESS_UNIT = ServiceProvider.current().getQuantityFactory(Dimensionless.class).getSystemUnit();
 
 	/**
 	 * 

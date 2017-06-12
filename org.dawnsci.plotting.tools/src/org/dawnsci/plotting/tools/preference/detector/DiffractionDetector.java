@@ -10,22 +10,26 @@ package org.dawnsci.plotting.tools.preference.detector;
 
 import java.io.Serializable;
 
+import javax.measure.Quantity;
+import javax.measure.Unit;
 import javax.measure.quantity.Length;
 
-import si.uom.SI;
-
-import org.jscience.physics.amount.Amount;
+import tec.units.ri.quantity.Quantities;
+import tec.units.ri.unit.MetricPrefix;
+import tec.units.ri.unit.Units;
 
 public class DiffractionDetector implements Serializable{
 
 	private static final long serialVersionUID = -1133345866155946034L;
 	
 	private String detectorName;
-	private Amount<Length> xPixelSize;
-	private Amount<Length> yPixelSize;
+	private Quantity<Length> xPixelSize;
+	private Quantity<Length> yPixelSize;
 	private int numberOfPixelsX;
 	private int numberOfPixelsY;
-	
+
+	private static final Unit<Length> MILLIMETRE = MetricPrefix.MILLI(Units.METRE);
+
 	public int getNumberOfPixelsX() {
 		return numberOfPixelsX;
 	}
@@ -47,37 +51,37 @@ public class DiffractionDetector implements Serializable{
 	public void setDetectorName(String name) {
 		this.detectorName = name;
 	}
-	public Amount<Length> getxPixelSize() {
+	public Quantity<Length> getxPixelSize() {
 		return xPixelSize;
 	}
-	public void setxPixelSize(Amount<Length> xPixelSize) {
+	public void setxPixelSize(Quantity<Length> xPixelSize) {
 		this.xPixelSize = xPixelSize;
 	}
 
 	
-	public Amount<Length> getPixelSize() {
+	public Quantity<Length> getPixelSize() {
 		return yPixelSize;
 	}
-	public void setyPixelSize(Amount<Length> yPixelSize) {
+	public void setyPixelSize(Quantity<Length> yPixelSize) {
 		this.yPixelSize = yPixelSize;
 	}
 	
 	public double getXPixelMM() {
 		if (xPixelSize ==  null) return Double.NaN;
-		return xPixelSize.doubleValue(SI.MILLIMETRE);
+		return xPixelSize.to(MILLIMETRE).getValue().doubleValue();
 	}
 	
 	public void setXPixelMM(double pixmm) {
-		xPixelSize = Amount.valueOf(pixmm, SI.MILLIMETRE);
+		xPixelSize = Quantities.getQuantity(pixmm, MILLIMETRE);
 	}
 	
 	public double getYPixelMM() {
 		if (yPixelSize ==  null) return Double.NaN;
-		return yPixelSize.doubleValue(SI.MILLIMETRE);
+		return yPixelSize.to(MILLIMETRE).getValue().doubleValue();
 	}
 	
 	public void setYPixelMM(double pixmm) {
-		yPixelSize = Amount.valueOf(pixmm, SI.MILLIMETRE);
+		yPixelSize = Quantities.getQuantity(pixmm, MILLIMETRE);
 	}
 	@Override
 	public int hashCode() {

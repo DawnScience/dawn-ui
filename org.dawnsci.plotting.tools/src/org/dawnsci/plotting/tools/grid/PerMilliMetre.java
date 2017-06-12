@@ -8,9 +8,11 @@
  */
 package org.dawnsci.plotting.tools.grid;
 
-import javax.measure.converter.RationalConverter;
-import javax.measure.converter.UnitConverter;
-import javax.measure.unit.Unit;
+import javax.measure.UnitConverter;
+
+import tec.units.ri.function.RationalConverter;
+
+import javax.measure.Unit;
 
 public class PerMilliMetre extends Unit<Resolution>{
 

@@ -13,25 +13,25 @@ import java.util.EventObject;
 import javax.measure.Quantity;
 import javax.measure.Unit;
 
-public class UnitEvent<E extends Quantity> extends EventObject {
+public class UnitEvent<Q extends Quantity<?>> extends EventObject {
 
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = 3954307816969836173L;
-	private Unit<E> unit;
+	private Unit<?> unit;
 
-	public UnitEvent(Object source, Unit<E> unit) {
+	public UnitEvent(Object source, Unit<?> unit) {
 		super(source);
 		this.unit = unit;
 		
 	}
 
-	public Unit<E> getUnit() {
+	public Unit<?> getUnit() {
 		return unit;
 	}
 
-	public void setUnit(Unit<E> unit) {
+	public void setUnit(Unit<?> unit) {
 		this.unit = unit;
 	}
 }

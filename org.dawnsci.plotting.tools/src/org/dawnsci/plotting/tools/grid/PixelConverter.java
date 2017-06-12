@@ -9,10 +9,10 @@
 package org.dawnsci.plotting.tools.grid;
 
 import javax.measure.Measure;
-import javax.measure.converter.ConversionException;
-import javax.measure.converter.UnitConverter;
+import javax.measure.ConversionException;
+import javax.measure.UnitConverter;
 
-public class PixelConverter extends UnitConverter {
+public class PixelConverter implements UnitConverter {
 
 	private static final long serialVersionUID = -245421741665077722L;
 	private Measure<Double, Resolution> resolution;

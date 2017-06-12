@@ -82,9 +82,10 @@ import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.PreferencesUtil;
 import org.eclipse.ui.preferences.ScopedPreferenceStore;
-import org.jscience.physics.amount.Amount;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import tec.units.ri.quantity.Quantities;
 
 /**
  * Tool to draw and configure a grid.
@@ -335,12 +336,12 @@ public class GridTool extends AbstractToolPage implements IResettableExpansion{
 		this.beamCenter = getBeamCenter();
 		@SuppressWarnings("unchecked")
 		final NumericNode<Length> x = (NumericNode<Length>)model.getNode("/Detector/Beam Centre/X");
-		x.setValueQuietly(Amount.valueOf(beamCenter[0], x.getUnit()));
+		x.setValueQuietly(Quantities.getQuantity(beamCenter[0], x.getUnit()));
 		viewer.update(x, new String[]{"Value"});
 		
 		@SuppressWarnings("unchecked")
 		final NumericNode<Length> y = (NumericNode<Length>)model.getNode("/Detector/Beam Centre/Y");
-		y.setValueQuietly(Amount.valueOf(beamCenter[1], y.getUnit()));
+		y.setValueQuietly(Quantities.getQuantity(beamCenter[1], y.getUnit()));
 		viewer.update(y, new String[]{"Value"});
 	}
 	
@@ -351,7 +352,7 @@ public class GridTool extends AbstractToolPage implements IResettableExpansion{
 		
 		@SuppressWarnings("unchecked")
 		final NumericNode<Length> x = (NumericNode<Length>)model.getNode("/Detector/Beam Centre/X");
-		x.setDefault(Amount.valueOf(beamCenter[0], x.getUnit()));
+		x.setDefault(Quantities.getQuantity(beamCenter[0], x.getUnit()));
 		x.setLowerBound(-1*Double.MAX_VALUE);
 		x.setUpperBound(Double.MAX_VALUE);
 		x.addAmountListener(new AmountListener<Length>() {		
@@ -364,7 +365,7 @@ public class GridTool extends AbstractToolPage implements IResettableExpansion{
 		
 		@SuppressWarnings("unchecked")
 		final NumericNode<Length> y = (NumericNode<Length>)model.getNode("/Detector/Beam Centre/Y");
-		y.setDefault(Amount.valueOf(beamCenter[1], y.getUnit()));
+		y.setDefault(Quantities.getQuantity(beamCenter[1], y.getUnit()));
 		y.setLowerBound(-1*Double.MAX_VALUE);
 		y.setUpperBound(Double.MAX_VALUE);
 		y.addAmountListener(new AmountListener<Length>() {		

@@ -20,7 +20,8 @@ Require-Bundle: org.eclipse.core.runtime;bundle-version="3.8.0",
  org.eclipse.dawnsci.analysis.api,
  javax.measure.unit-api;bundle-version="1.0.0",
  si.uom.si-units;bundle-version="0.6.6",
- tec.units.unit-ri;bundle-version="1.0.2"
+ tec.units.unit-ri;bundle-version="1.0.2",
+ tec.uom.lib.uom-lib-common;bundle-version="1.0.2"
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
 Service-Component: OSGI-INF/*.xml

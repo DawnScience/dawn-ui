@@ -10,7 +10,6 @@ package org.dawnsci.plotting.tools.diffraction;
 
 import java.text.DecimalFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -280,7 +279,7 @@ public class DiffractionImageAugmenter implements IDetectorPropertyListener, IDi
 	
 			int count = 0;
 			for (HKL hkl : spacing.getHKLs()) {
-				final double d = Double.valueOf(hkl.getD().doubleValue(NonSI.ANGSTROM));
+				final double d = Double.valueOf(hkl.getD().to(NonSI.ANGSTROM).getValue().doubleValue());
 				
 				boolean highlight = count >= maxRings;
 				if (rings != null && !rings.isEmpty()) highlight = rings.contains(count);

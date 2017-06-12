@@ -13,10 +13,10 @@ import java.io.ByteArrayInputStream;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.measure.Quantity;
 import javax.measure.quantity.Length;
 
 import org.dawnsci.plotting.tools.Activator;
-import org.jscience.physics.amount.Amount;
 
 public class DiffractionDetectorHelper {
 	
@@ -116,12 +116,12 @@ public class DiffractionDetectorHelper {
 		return names;
 	}
 	
-	public static List<Amount<Length>> getXYPixelSizeAmount(String name) {
+	public static List<Quantity<Length>> getXYPixelSizeAmount(String name) {
 		DiffractionDetectors detectors = getDetectorsFromPreferences();
 		for (DiffractionDetector dd : detectors.getDiffractionDetectors()) {
 			if (dd.getDetectorName().equals(name)) {
 				
-				List<Amount<Length>> out = new ArrayList<Amount<Length>>(2);
+				List<Quantity<Length>> out = new ArrayList<Quantity<Length>>(2);
 				out.add(dd.getxPixelSize());
 				out.add(dd.getPixelSize());
 				

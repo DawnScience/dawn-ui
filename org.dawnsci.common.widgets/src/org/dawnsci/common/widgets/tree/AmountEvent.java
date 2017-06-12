@@ -12,23 +12,21 @@ import java.util.EventObject;
 
 import javax.measure.Quantity;
 
-import org.jscience.physics.amount.Amount;
-
-public class AmountEvent<E extends Quantity> extends EventObject {
+public class AmountEvent<Q extends Quantity<Q>> extends EventObject {
 	private static final long serialVersionUID = -7433184477752660193L;
 
-	private Amount<E> amount;
+	private Quantity<Q> amount;
 
-	public AmountEvent(Object source, Amount<E> amount) {
+	public AmountEvent(Object source, Quantity<Q> amount) {
 		super(source);
 		this.amount = amount;
 	}
 
-	public Amount<E> getAmount() {
+	public Quantity<Q> getAmount() {
 		return amount;
 	}
 
-	public void setAmount(Amount<E> amount) {
+	public void setAmount(Quantity<Q> amount) {
 		this.amount = amount;
 	}
 }
