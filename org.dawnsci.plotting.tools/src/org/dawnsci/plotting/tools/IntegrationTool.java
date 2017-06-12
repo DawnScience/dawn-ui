@@ -152,7 +152,6 @@ public class IntegrationTool extends AbstractToolPage implements IROIListener, I
 		getPlottingSystem().addTraceListener(this);
 		try {
 			region = getPlottingSystem().createRegion("Integration range", RegionType.XAXIS);
-			//region.setROI(new XAxisBoxROI(ptx, pty, width, height, angle));
 			region.addROIListener(this);
 		} catch (Exception e) {
 			logger.error("Could not create region", e);
