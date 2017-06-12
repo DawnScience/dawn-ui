@@ -12,6 +12,7 @@ import javax.inject.Inject;
 
 import org.dawnsci.datavis.model.FileControllerStateEvent;
 import org.dawnsci.datavis.model.FileControllerStateEventListener;
+import org.dawnsci.datavis.model.IDataObject;
 import org.dawnsci.datavis.model.IFileController;
 import org.dawnsci.datavis.model.IRefreshable;
 import org.dawnsci.datavis.model.LoadedFile;
@@ -236,6 +237,25 @@ public class LoadedFilePart {
 							}
 						});
 					}
+					
+					manager.add(new Action("Deselect datasets") {
+						@Override
+						public void run() {
+							List<LoadedFile> collected = Arrays.stream(selection.toArray())
+									.filter(LoadedFile.class::isInstance)
+									.map(LoadedFile.class::cast)
+									.collect(Collectors.toList());
+							
+							List<IDataObject> options = collected.stream().flatMap(l -> l.getDataOptions().stream())
+							.filter(d -> d.isSelected()).map(IDataObject.class::cast).collect(Collectors.toList());;
+							
+							if (options.isEmpty()) return;
+							
+							fileController.deselect(options);
+						}
+					});
+					
+					manager.add(new Separator());
 					
 					manager.add(new Action("Close") {
 						@Override
