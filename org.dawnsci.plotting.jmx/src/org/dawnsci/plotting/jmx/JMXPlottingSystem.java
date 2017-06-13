@@ -640,4 +640,14 @@ public class JMXPlottingSystem<T> extends JMXSystemObject implements IPlottingSy
 	public void setShowValueLabels(boolean b) {
 		call(getMethodName(Thread.currentThread().getStackTrace()), b);
 	}
+
+	@Override
+	public <U extends ITrace> U createTrace(String traceName, Class<U> clazz) {
+		return (U) call(getMethodName(Thread.currentThread().getStackTrace()), traceName, clazz);
+	}
+
+	@Override
+	public List<Class<? extends ITrace>> getRegisteredTraceClasses() {
+		return (List<Class<? extends ITrace>>) call(getMethodName(Thread.currentThread().getStackTrace()));
+	}
 }
