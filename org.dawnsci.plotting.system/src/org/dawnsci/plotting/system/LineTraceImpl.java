@@ -84,8 +84,7 @@ public class LineTraceImpl implements ILineTrace, ITraceListener{
 
 	public ILineTrace.TraceType getTraceType() {
 		
-		org.eclipse.nebula.visualization.xygraph.figures.Trace.TraceType type = trace.getTraceType();
-		switch(type) {
+		switch(trace.getTraceType()) {
 		case SOLID_LINE:
 			return ILineTrace.TraceType.SOLID_LINE;
 		case DASH_LINE:
@@ -101,34 +100,34 @@ public class LineTraceImpl implements ILineTrace, ITraceListener{
 		case STEP_HORIZONTALLY:
 			return ILineTrace.TraceType.STEP_HORIZONTALLY;
 		default:
-			break;
+			return ILineTrace.TraceType.SOLID_LINE; 
 		}
-		return ILineTrace.TraceType.SOLID_LINE; 
 	}
+
 	public void setTraceType(ILineTrace.TraceType traceType) {
 		if (trace==null) return;
 		
 		switch(traceType) {
 		case SOLID_LINE:
-			trace.setTraceType(org.eclipse.nebula.visualization.xygraph.figures.Trace.TraceType.SOLID_LINE);
+			trace.setTraceType(Trace.TraceType.SOLID_LINE);
 			return;
 		case DASH_LINE:
-			trace.setTraceType(org.eclipse.nebula.visualization.xygraph.figures.Trace.TraceType.DASH_LINE);
+			trace.setTraceType(Trace.TraceType.DASH_LINE);
 			return;
 		case POINT:
-			trace.setTraceType(org.eclipse.nebula.visualization.xygraph.figures.Trace.TraceType.POINT);
+			trace.setTraceType(Trace.TraceType.POINT);
 			return;
 		case HISTO:
-			trace.setTraceType(org.eclipse.nebula.visualization.xygraph.figures.Trace.TraceType.BAR);
+			trace.setTraceType(Trace.TraceType.BAR);
 			return;
 		case AREA:
-			trace.setTraceType(org.eclipse.nebula.visualization.xygraph.figures.Trace.TraceType.AREA);
+			trace.setTraceType(Trace.TraceType.AREA);
 			return;
 		case STEP_VERTICALLY:
-			trace.setTraceType(org.eclipse.nebula.visualization.xygraph.figures.Trace.TraceType.STEP_VERTICALLY);
+			trace.setTraceType(Trace.TraceType.STEP_VERTICALLY);
 			return;
 		case STEP_HORIZONTALLY:
-			trace.setTraceType(org.eclipse.nebula.visualization.xygraph.figures.Trace.TraceType.STEP_HORIZONTALLY);
+			trace.setTraceType(Trace.TraceType.STEP_HORIZONTALLY);
 			return;
 		}
 	}
@@ -145,9 +144,7 @@ public class LineTraceImpl implements ILineTrace, ITraceListener{
 	public ILineTrace.PointStyle getPointStyle() {
 		if (trace==null) return ILineTrace.PointStyle.NONE;
 		
-		org.eclipse.nebula.visualization.xygraph.figures.Trace.PointStyle style = trace.getPointStyle();
-		
-		switch(style) {
+		switch(trace.getPointStyle()) {
 		case NONE:
 			return ILineTrace.PointStyle.NONE;
 		case POINT:
@@ -184,43 +181,43 @@ public class LineTraceImpl implements ILineTrace, ITraceListener{
 		
 		switch(pointStyle) {
 		case NONE:
-			trace.setPointStyle(org.eclipse.nebula.visualization.xygraph.figures.Trace.PointStyle.NONE);
+			trace.setPointStyle(Trace.PointStyle.NONE);
 			return;
 		case POINT:
-			trace.setPointStyle(org.eclipse.nebula.visualization.xygraph.figures.Trace.PointStyle.POINT);
+			trace.setPointStyle(Trace.PointStyle.POINT);
 			return;
 		case CIRCLE:
-			trace.setPointStyle(org.eclipse.nebula.visualization.xygraph.figures.Trace.PointStyle.CIRCLE);
+			trace.setPointStyle(Trace.PointStyle.CIRCLE);
 			return;
 		case FILLED_CIRCLE:
-			trace.setPointStyle(org.eclipse.nebula.visualization.xygraph.figures.Trace.PointStyle.FILLED_CIRCLE);
+			trace.setPointStyle(Trace.PointStyle.FILLED_CIRCLE);
 			return;
 		case TRIANGLE:
-			trace.setPointStyle(org.eclipse.nebula.visualization.xygraph.figures.Trace.PointStyle.TRIANGLE);
+			trace.setPointStyle(Trace.PointStyle.TRIANGLE);
 			return;
 		case FILLED_TRIANGLE:
-			trace.setPointStyle(org.eclipse.nebula.visualization.xygraph.figures.Trace.PointStyle.FILLED_TRIANGLE);
+			trace.setPointStyle(Trace.PointStyle.FILLED_TRIANGLE);
 			return;
 		case SQUARE:
-			trace.setPointStyle(org.eclipse.nebula.visualization.xygraph.figures.Trace.PointStyle.SQUARE);
+			trace.setPointStyle(Trace.PointStyle.SQUARE);
 			return;
 		case FILLED_SQUARE:
-			trace.setPointStyle(org.eclipse.nebula.visualization.xygraph.figures.Trace.PointStyle.FILLED_SQUARE);
+			trace.setPointStyle(Trace.PointStyle.FILLED_SQUARE);
 			return;
 		case DIAMOND:
-			trace.setPointStyle(org.eclipse.nebula.visualization.xygraph.figures.Trace.PointStyle.DIAMOND);
+			trace.setPointStyle(Trace.PointStyle.DIAMOND);
 			return;
 		case FILLED_DIAMOND:
-			trace.setPointStyle(org.eclipse.nebula.visualization.xygraph.figures.Trace.PointStyle.FILLED_DIAMOND);
+			trace.setPointStyle(Trace.PointStyle.FILLED_DIAMOND);
 			return;
 		case XCROSS:
-			trace.setPointStyle(org.eclipse.nebula.visualization.xygraph.figures.Trace.PointStyle.XCROSS);
+			trace.setPointStyle(Trace.PointStyle.XCROSS);
 			return;
 		case CROSS:
-			trace.setPointStyle(org.eclipse.nebula.visualization.xygraph.figures.Trace.PointStyle.CROSS);
+			trace.setPointStyle(Trace.PointStyle.CROSS);
 			return;
 		case BAR:
-			trace.setPointStyle(org.eclipse.nebula.visualization.xygraph.figures.Trace.PointStyle.BAR);
+			trace.setPointStyle(Trace.PointStyle.BAR);
 			return;
 		}
 	}
@@ -280,7 +277,7 @@ public class LineTraceImpl implements ILineTrace, ITraceListener{
 		trace.setYErrorBarType(getErrorType(errorBarType));
 	}
 
-	private ILineTrace.ErrorBarType getErrorType(org.eclipse.nebula.visualization.xygraph.figures.Trace.ErrorBarType ebt) {
+	private ILineTrace.ErrorBarType getErrorType(Trace.ErrorBarType ebt) {
 		switch(ebt) {
 		case NONE:
 			return ILineTrace.ErrorBarType.NONE;
@@ -290,21 +287,24 @@ public class LineTraceImpl implements ILineTrace, ITraceListener{
 			return ILineTrace.ErrorBarType.MINUS;
 		case BOTH:
 			return ILineTrace.ErrorBarType.BOTH;
+		default:
+			return ILineTrace.ErrorBarType.NONE;
 		}
-		return ILineTrace.ErrorBarType.NONE;
 	}
-	private org.eclipse.nebula.visualization.xygraph.figures.Trace.ErrorBarType getErrorType(ILineTrace.ErrorBarType ebt) {
+
+	private Trace.ErrorBarType getErrorType(ILineTrace.ErrorBarType ebt) {
 		switch(ebt) {
 		case NONE:
-			return org.eclipse.nebula.visualization.xygraph.figures.Trace.ErrorBarType.NONE;
+			return Trace.ErrorBarType.NONE;
 		case PLUS:
-			return org.eclipse.nebula.visualization.xygraph.figures.Trace.ErrorBarType.PLUS;
+			return Trace.ErrorBarType.PLUS;
 		case MINUS:
-			return org.eclipse.nebula.visualization.xygraph.figures.Trace.ErrorBarType.MINUS;
+			return Trace.ErrorBarType.MINUS;
 		case BOTH:
-			return org.eclipse.nebula.visualization.xygraph.figures.Trace.ErrorBarType.BOTH;
+			return Trace.ErrorBarType.BOTH;
+		default:
+			return Trace.ErrorBarType.NONE;
 		}
-		return org.eclipse.nebula.visualization.xygraph.figures.Trace.ErrorBarType.NONE;
 	}
 
 	public void setXErrorBarType(ILineTrace.ErrorBarType errorBarType) {
@@ -350,14 +350,14 @@ public class LineTraceImpl implements ILineTrace, ITraceListener{
 
 	@Override
 	public IDataset getYData() {
-		LightWeightDataProvider prov = (LightWeightDataProvider)trace.getDataProvider();
+		LightWeightDataProvider prov = (LightWeightDataProvider) trace.getDataProvider();
 		if (prov==null) return null;
 		return prov.getY();
 	}
 	
 	@Override
 	public IDataset getXData() {
-		LightWeightDataProvider prov = (LightWeightDataProvider)trace.getDataProvider();
+		LightWeightDataProvider prov = (LightWeightDataProvider) trace.getDataProvider();
 		if (prov==null) return null;
 		return prov.getX();
 	}
@@ -392,7 +392,7 @@ public class LineTraceImpl implements ILineTrace, ITraceListener{
 				xData = DatasetFactory.createRange(IntegerDataset.class, yData.getSize());
 			}
 			
-			LightWeightDataProvider prov = (LightWeightDataProvider)trace.getDataProvider();
+			LightWeightDataProvider prov = (LightWeightDataProvider) trace.getDataProvider();
 			if (prov!=null) {
 				prov.removeDataProviderListener(trace);
 			} else {
@@ -471,7 +471,7 @@ public class LineTraceImpl implements ILineTrace, ITraceListener{
 	}
 
 	public String toString() {
-		return trace.getName()+" (Internal name "+trace.getInternalName()+")";
+		return trace.getName() + " (Internal name " + trace.getInternalName() + ")";
 	}
 	
 	@Override
@@ -546,9 +546,7 @@ public class LineTraceImpl implements ILineTrace, ITraceListener{
 	}
 
 	@Override
-	public void traceTypeChanged(Trace trace,
-			org.eclipse.nebula.visualization.xygraph.figures.Trace.TraceType old,
-			org.eclipse.nebula.visualization.xygraph.figures.Trace.TraceType newTraceType) {
+	public void traceTypeChanged(Trace trace, Trace.TraceType old, Trace.TraceType newTraceType) {
 		
 		if (mservice!=null) {
 			TraceMacroEvent evt = new TraceMacroEvent(this, "setTraceType", newTraceType.name());
@@ -558,9 +556,7 @@ public class LineTraceImpl implements ILineTrace, ITraceListener{
 	}
 	
 	@Override
-	public void pointStyleChanged(Trace trace,
-			org.eclipse.nebula.visualization.xygraph.figures.Trace.PointStyle old,
-			org.eclipse.nebula.visualization.xygraph.figures.Trace.PointStyle newStyle) {
+	public void pointStyleChanged(Trace trace, Trace.PointStyle old, Trace.PointStyle newStyle) {
 		
 		if (mservice!=null) {
 			TraceMacroEvent evt = new TraceMacroEvent(this, "setPointStyle", newStyle.name());
