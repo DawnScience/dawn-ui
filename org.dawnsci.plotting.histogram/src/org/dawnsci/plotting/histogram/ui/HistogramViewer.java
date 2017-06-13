@@ -271,7 +271,7 @@ public class HistogramViewer extends ContentViewer {
 	private void createTraces() {
 		// Set up the histogram trace
 		histoTrace = histogramPlottingSystem.createLineTrace("Histogram");
-		histoTrace.setTraceType(TraceType.AREA);
+		histoTrace.setTraceType(TraceType.STEP_HORIZONTALLY);
 		histoTrace.setLineWidth(1);
 		histoTrace.setTraceColor(new Color(null, 0, 0, 0));
 

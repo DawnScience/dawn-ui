@@ -37,6 +37,9 @@ class LightWeightDataProvider implements IDataProvider {
 	private Dataset y;
 	private Dataset xerr;
 	private Dataset yerr;
+	private int size = 0;
+	private boolean hasExtraXPoint;
+
 	private Range cachedXRange, cachedYRange;
 	private double[] positiveMins = new double[2]; // zeros indicate need to update
 
@@ -49,14 +52,15 @@ class LightWeightDataProvider implements IDataProvider {
 
 	@Override
 	public int getSize() {
-		if (y==null) return 0;
-		if (y.getShape()==null || y.getShape().length<1) return 0;
-		return y.getSize();
+		return size;
 	}
 
 	@Override
 	public ISample getSample(int index) {
 		if (x==null||y==null) return null;
+		if (hasExtraXPoint && index == size-1) {
+			return new Sample(x.getDouble(index), y.getDouble(index-1));
+		}
 		try {
 			final double xDat = x.getDouble(index);
 			final double yDat = y.getDouble(index);
@@ -201,6 +205,20 @@ class LightWeightDataProvider implements IDataProvider {
 		}
 		this.cachedXRange = null;
 		this.cachedYRange = null;
+
+		hasExtraXPoint = false;
+		if (y==null || y.getShape()==null || y.getShape().length<1) {
+			size = 0;
+		} else {
+			size = y.getSize();
+		}
+
+		if (size > 0 && x != null) {
+			if (x.getSize() > size) {
+				size++;
+				hasExtraXPoint = true;
+			}
+		}
 	}
 
 	private void fireDataProviderListeners() {

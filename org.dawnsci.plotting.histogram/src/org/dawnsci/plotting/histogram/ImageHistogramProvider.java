@@ -13,7 +13,6 @@ import org.eclipse.january.dataset.DatasetUtils;
 import org.eclipse.january.dataset.DoubleDataset;
 import org.eclipse.january.dataset.IDataset;
 import org.eclipse.january.dataset.Maths;
-import org.eclipse.january.dataset.Slice;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.graphics.PaletteData;
 
@@ -30,8 +29,6 @@ public class ImageHistogramProvider implements IHistogramProvider {
 
 	private Dataset imageDataset;
 	private ImageServiceBean bean;
-
-	private IDataset[] histogramData = null;
 
 	public ImageHistogramProvider() {
 
@@ -147,8 +144,7 @@ public class ImageHistogramProvider implements IHistogramProvider {
 		Histogram hist = new Histogram(numBins, rangeMin, rangeMax, true);
 		List<? extends Dataset> histogram_values = hist.value(imageDataset);
 
-		Dataset histogramX = histogram_values.get(1).getSliceView(
-				new Slice(numBins));
+		Dataset histogramX = histogram_values.get(1);
 		histogramX.setName("Intensity");
 
 		Dataset histogramY = histogram_values.get(0);
