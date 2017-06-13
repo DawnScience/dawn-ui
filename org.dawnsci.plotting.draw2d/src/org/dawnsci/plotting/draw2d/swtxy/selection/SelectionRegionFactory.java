@@ -173,7 +173,7 @@ public class SelectionRegionFactory {
 				xyGraph.removeRegion((AbstractSelectionRegion<?>) region);
 			}
 		};
-		if (region instanceof AbstractSelectionRegion) manager.add(delete);
+		if (region instanceof AbstractSelectionRegion && region.isUserRegion()) manager.add(delete);
 		
 		final Action copy = new Action("Copy '"+region.getName()+"'", Activator.getImageDescriptor("icons/RegionCopy.png")) {
 			public void run() {
