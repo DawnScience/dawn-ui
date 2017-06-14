@@ -25,4 +25,29 @@ public class MappedDataViewState implements Serializable {
 	public String toString() {
 		return "MappedDataViewState [filesInView=" + filesInView + "]";
 	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((filesInView == null) ? 0 : filesInView.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		MappedDataViewState other = (MappedDataViewState) obj;
+		if (filesInView == null) {
+			if (other.filesInView != null)
+				return false;
+		} else if (!filesInView.equals(other.filesInView))
+			return false;
+		return true;
+	}
 }
