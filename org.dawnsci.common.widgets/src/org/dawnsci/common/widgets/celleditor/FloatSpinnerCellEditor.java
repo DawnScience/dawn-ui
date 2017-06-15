@@ -140,29 +140,6 @@ public class FloatSpinnerCellEditor extends CellEditor {
 		spinner.setFocus();
 	}
 
-	/**
-	 * The <code>ComboBoxCellEditor</code> implementation of this
-	 * <code>CellEditor</code> framework method sets the minimum width of the
-	 * cell. The minimum width is 10 characters if <code>comboBox</code> is
-	 * not <code>null</code> or <code>disposed</code> else it is 60 pixels
-	 * to make sure the arrow button and some text is visible. The list of
-	 * CCombo will be wide enough to show its longest item.
-	 * @return  layoutData
-	 */
-	@Override
-	public LayoutData getLayoutData() {
-		LayoutData layoutData = super.getLayoutData();
-		if ((spinner == null) || spinner.isDisposed()) {
-			layoutData.minimumWidth = 60;
-		} else {
-			// make the comboBox 10 characters wide
-			GC gc = new GC(spinner);
-			layoutData.minimumWidth = (gc.getFontMetrics()
-					.getAverageCharWidth() * 10) + 10;
-			gc.dispose();
-		}
-		return layoutData;
-	}
 
 	/**
 	 * The <code>ComboBoxCellEditor</code> implementation of this
