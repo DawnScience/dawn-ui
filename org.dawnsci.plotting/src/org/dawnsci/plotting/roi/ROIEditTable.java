@@ -53,13 +53,11 @@ import org.eclipse.richbeans.widgets.cell.CComboCellEditor;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.TableColumn;
 
 /**
  * A widget for editing any ROI
@@ -78,19 +76,20 @@ public class ROIEditTable  {
 	private List<IRegionRow> rows;
 	
 	// preferences
-	private boolean roundButtonAndAsterisk;
+	// hack: extras false for a) no rounding button, b) no asterisk marking editable cells, c) uneditable rotation fields
+	private boolean extras;
 	private int height;
 	private int[] columnWidths;
 	
 	public ROIEditTable() {
 		// default preferences
-		roundButtonAndAsterisk = true;
+		extras = true;
 		height = 100;
 		columnWidths = new int[]{180,150};
 	}
 	
-	public ROIEditTable(int height, int[] columnWidths, boolean roundButtonAndAsterisk) {
-		this.roundButtonAndAsterisk = roundButtonAndAsterisk;
+	public ROIEditTable(int height, int[] columnWidths, boolean extras) {
+		this.extras = extras;
 		this.height = height;
 		this.columnWidths = columnWidths;
 	}
@@ -103,7 +102,7 @@ public class ROIEditTable  {
 		regionTable.getTable().setLayoutData(tableData);
 		createColumns(regionTable);
 		
-		if (roundButtonAndAsterisk) {
+		if (extras) {
 			final Button round = new Button(parent, SWT.PUSH);
 			round.setText("Round");
 			round.setToolTipText("Round values of region to nearest integer");
@@ -221,7 +220,8 @@ public class ROIEditTable  {
 				return ed;
 			}
 			final FloatSpinnerCellEditor ed = new FloatSpinnerCellEditor(((TableViewer)getViewer()).getTable(),SWT.RIGHT);
-			ed.setFormat(7, 3);
+			if (extras) ed.setFormat(7, 3);
+			else ed.setFormat(6, 3);
 			ed.setIncrement(0.1d);
 
 			if (element instanceof LinearROI || element instanceof PointROI || element instanceof IPolylineROI
@@ -258,7 +258,7 @@ public class ROIEditTable  {
 				} else {
 					val = ((RegionRow)row).getyLikeVal();
 				}
-
+				if (row.getName().equals("Rotation (°)") && !extras) return false;
 				return !Double.isNaN(val);
 			}
 			if (column == 1) {
@@ -374,7 +374,7 @@ public class ROIEditTable  {
 		@Override
 		public StyledString getStyledText(Object element) {
 			final StyledString ret = new StyledString(getText(element));
-			if (editor!=null && editor.canEdit(element) && roundButtonAndAsterisk) {
+			if (editor!=null && editor.canEdit(element) && extras) {
 			    ret.append(new StyledString("*", StyledString.QUALIFIER_STYLER));
 			}
 			return ret;
@@ -798,6 +798,10 @@ public class ROIEditTable  {
 
 	public void setYUpperBound(double yUpperBound) {
 		this.yUpperBound = yUpperBound;
+	}
+	
+	public TableViewer getTableViewer() {
+		return regionTable;
 	}
 
 }
