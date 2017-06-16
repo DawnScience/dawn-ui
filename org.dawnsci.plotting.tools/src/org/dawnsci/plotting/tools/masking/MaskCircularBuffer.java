@@ -12,7 +12,6 @@ import org.eclipse.january.dataset.Dataset;
 import org.eclipse.january.dataset.DatasetFactory;
 import org.eclipse.january.dataset.IndexIterator;
 import org.eclipse.january.dataset.IntegerDataset;
-import org.eclipse.january.dataset.LongDataset;
 
 public class MaskCircularBuffer {
 
@@ -38,7 +37,7 @@ public class MaskCircularBuffer {
 				boolean cutsStart = roi.containsPoint(0, i);
 				boolean cutsEnd = roi.containsPoint(shape[1]-1, i);
 				
-				List<Integer> inters = new ArrayList<Integer>();
+				List<Integer> inters = new ArrayList<>();
 				if (cutsStart) inters.add(0);
 				for (double d : hi) {
 					if (!inters.contains((int)d) && d > 0 && d < shape[1]-1) inters.add((int)d);
