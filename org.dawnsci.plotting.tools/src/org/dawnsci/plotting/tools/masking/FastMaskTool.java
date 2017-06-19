@@ -11,14 +11,15 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.dawnsci.analysis.api.roi.IROI;
+import org.eclipse.dawnsci.analysis.dataset.mask.MaskCircularBuffer;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.region.IROIListener;
 import org.eclipse.dawnsci.plotting.api.region.IRegion;
-import org.eclipse.dawnsci.plotting.api.region.RegionUtils;
 import org.eclipse.dawnsci.plotting.api.region.IRegion.RegionType;
 import org.eclipse.dawnsci.plotting.api.region.ROIEvent;
+import org.eclipse.dawnsci.plotting.api.region.RegionUtils;
 import org.eclipse.dawnsci.plotting.api.tool.AbstractToolPage;
-import org.eclipse.dawnsci.plotting.api.tool.IToolPage.ToolPageRole;
 import org.eclipse.dawnsci.plotting.api.trace.IImageTrace;
 import org.eclipse.january.dataset.IDataset;
 import org.eclipse.jface.wizard.IWizard;
@@ -26,7 +27,6 @@ import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
@@ -40,8 +40,6 @@ public class FastMaskTool extends AbstractToolPage {
 	private MaskCircularBuffer buffer;
 	private List<NamedRegionType> regionTypes;
 	private FastMaskJob job;
-	
-	
 	
 	public FastMaskTool() {
 		regionTypes = new ArrayList<>();
@@ -78,12 +76,11 @@ public class FastMaskTool extends AbstractToolPage {
 				Optional<NamedRegionType> findFirst = regionTypes.stream().filter(r -> text.equals(r.name)).findFirst();
 				if (findFirst.isPresent()) {
 					NamedRegionType nrt = findFirst.get();
-					IPlottingSystem system = getPlottingSystem();
+					IPlottingSystem<?> system = getPlottingSystem();
 					try {
-						system.createRegion(RegionUtils.getUniqueName("MaskRegion", system, null), nrt.regionType);
+						system.createRegion(RegionUtils.getUniqueName("MaskRegion", system, (String)null), nrt.regionType);
 					} catch (Exception e1) {
-						// TODO Auto-generated catch block
-						e1.printStackTrace();
+						logger.error("Could not create region!",e1);
 					}
 				}
 			}
@@ -102,15 +99,11 @@ public class FastMaskTool extends AbstractToolPage {
 					if (buffer == null) buffer = new MaskCircularBuffer(data.getShape());
 					final Collection<IRegion> regions = getPlottingSystem().getRegions();
 					
-					Runnable r = new Runnable() {
-						
-						@Override
-						public void run() {
-							for (IRegion r : regions) buffer.maskROI(r.getROI());
-							
-						}
+					Runnable r = () -> {for (IRegion re: regions) {
+						buffer.maskROI(re.getROI());
+						};
 					};
-					
+						
 					job.setRunnable(r);
 					job.schedule();
 				}
@@ -126,9 +119,11 @@ public class FastMaskTool extends AbstractToolPage {
 
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				buffer.undo();
-				IImageTrace imageTrace = getImageTrace();
-				imageTrace.setMask(buffer.getMask());
+				if (buffer == null) return;
+				Runnable r = () -> buffer.undo();
+				
+				job.setRunnable(r);
+				job.schedule();
 			}
 
 
@@ -146,10 +141,27 @@ public class FastMaskTool extends AbstractToolPage {
 					wd.setTitle(wiz.getWindowTitle());
 					wd.open();
 				} catch (Exception e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
+					logger.error("Could not open wizard",e1);
 				}
 				
+			}
+
+
+		});
+		
+		
+		Button b3a = new Button(control, SWT.PUSH);
+		b3a.setText("Clear");
+		b3a.addSelectionListener(new SelectionAdapter() {
+
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				if (buffer == null) return;
+				
+				Runnable r = () -> buffer.clear();
+				
+				job.setRunnable(r);
+				job.schedule();
 			}
 
 
@@ -161,26 +173,22 @@ public class FastMaskTool extends AbstractToolPage {
 
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				if (b4.getSelection() == true) {
+				if (b4.getSelection()) {
 					Collection<IRegion> regions = getPlottingSystem().getRegions();
 					IRegion next = regions.iterator().next();
 					next.addROIListener(new IROIListener(){
 
 						@Override
 						public void roiDragged(ROIEvent evt) {
+							
 							IImageTrace imageTrace = getImageTrace();
 							if (imageTrace != null) {
 								IDataset data = imageTrace.getData();
 
+								final IROI roi = evt.getROI();
+								
 								if (buffer == null) buffer = new MaskCircularBuffer(data.getShape());
-								Runnable r = new Runnable() {
-									
-									@Override
-									public void run() {
-										for (IRegion r : regions) buffer.maskROI(r.getROI());
-										
-									}
-								};
+								Runnable r = () -> buffer.maskROI(roi);
 								
 								job.setRunnable(r);
 								job.schedule();
@@ -190,14 +198,12 @@ public class FastMaskTool extends AbstractToolPage {
 
 						@Override
 						public void roiChanged(ROIEvent evt) {
-							// TODO Auto-generated method stub
-							
+							//do nothing
 						}
 
 						@Override
 						public void roiSelected(ROIEvent evt) {
-							// TODO Auto-generated method stub
-							
+							//do nothing
 						}
 						
 					});
@@ -216,23 +222,6 @@ public class FastMaskTool extends AbstractToolPage {
 	@Override
 	public void setFocus() {
 		control.setFocus();
-	}
-
-	@Override
-	public void activate() {
-		super.activate();
-		// Now add any listeners to the plotting providing getPlottingSystem()!=null
-	}
-	
-	@Override
-	public void deactivate() {
-		super.deactivate();
-		// Now remove any listeners to the plotting providing getPlottingSystem()!=null
-	}
-	@Override
-	public void dispose() {
-		super.dispose();
-        // Anything to kill off? This page is part of a view which is now disposed and will not be used again.
 	}
 	
 	private static void removeMargins(Composite area) {
@@ -261,7 +250,6 @@ public class FastMaskTool extends AbstractToolPage {
 	private class FastMaskJob extends Job {
 
 		private Runnable runnable;
-		int count = 0;
 		
 		public FastMaskJob() {
 			super("Apply Mask");
@@ -275,22 +263,11 @@ public class FastMaskTool extends AbstractToolPage {
 		protected IStatus run(IProgressMonitor monitor) {
 			Runnable r = runnable;
 			r.run();
-			count++;
 			
-			if (count > 10) {
-				
-			count = 0;
+			Runnable rDisplay = () -> getImageTrace().setMask(buffer.getMask());
 			
-			Display.getDefault().syncExec(new Runnable() {
-				
-				@Override
-				public void run() {
-					long t = System.currentTimeMillis();
-					getImageTrace().setMask(buffer.getMask());
-					System.out.println(System.currentTimeMillis() - t);
-				}
-			});
-			}
+			Display.getDefault().syncExec(rDisplay);
+
 			return Status.OK_STATUS;
 		}
 		
