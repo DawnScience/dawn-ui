@@ -49,6 +49,7 @@ public class FastMaskTool extends AbstractToolPage {
 		regionTypes.add(new NamedRegionType("X-Axis", RegionType.XAXIS));
 		regionTypes.add(new NamedRegionType("Y-Axis", RegionType.YAXIS));
 		regionTypes.add(new NamedRegionType("Ring", RegionType.RING));
+		regionTypes.add(new NamedRegionType("Circle", RegionType.CIRCLE));
 	}
 
 	@Override
