@@ -47,13 +47,14 @@ import org.eclipse.scanning.api.event.EventConstants;
 import org.eclipse.scanning.api.event.EventException;
 import org.eclipse.scanning.api.event.bean.BeanEvent;
 import org.eclipse.scanning.api.event.bean.IBeanListener;
+import org.eclipse.scanning.api.event.core.IPropertyFilter.FilterAction;
 import org.eclipse.scanning.api.event.core.ISubscriber;
 import org.eclipse.scanning.api.event.scan.IScanListener;
 import org.eclipse.scanning.api.event.scan.ScanEvent;
-import org.eclipse.scanning.api.event.core.IPropertyFilter.FilterAction;
 import org.eclipse.scanning.api.event.status.Status;
 import org.eclipse.scanning.api.event.status.StatusBean;
 import org.eclipse.scanning.api.ui.CommandConstants;
+import org.eclipse.scanning.device.ui.ServiceHolder;
 import org.eclipse.swt.dnd.DND;
 import org.eclipse.swt.dnd.DropTarget;
 import org.eclipse.swt.dnd.DropTargetAdapter;
@@ -65,7 +66,9 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.ui.IActionBars;
+import org.eclipse.ui.IMemento;
 import org.eclipse.ui.IViewPart;
+import org.eclipse.ui.IViewSite;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.part.ResourceTransfer;
@@ -128,7 +131,8 @@ public class MappedDataView extends ViewPart {
 	
 	private TreeViewer viewer;
 	private MappedDataArea area;
-	private MapPlotManager plotManager; 
+	private MapPlotManager plotManager;
+	private MappedDataViewState initialState;
 	
 	@SuppressWarnings("unchecked")
 	@Override
@@ -346,6 +350,15 @@ public class MappedDataView extends ViewPart {
 		
 		subscribeToOperationStatusTopic();
 		subscribeToScanTopic();
+
+		// Restore state of view
+		if (initialState != null) {
+			logger.info("Loading view state: {}", initialState);
+			final MappedFileManager mappedFileManager = FileManagerSingleton.getFileManager();
+			for (String f : initialState.getFilesInView()) {
+				mappedFileManager.importFile(f);
+			}
+		}
 	}
 	
 	
@@ -458,7 +471,57 @@ public class MappedDataView extends ViewPart {
 		if (MappedFileManager.class == adapter) return FileManagerSingleton.getFileManager();
 		return super.getAdapter(adapter);
 	}
-	
+
+	@Override
+	public void init(IViewSite site, IMemento memento) throws PartInitException {
+		super.init(site, memento);
+		if (memento != null && isRunningInGDA()) {
+			try {
+				final String savedState = memento.getString(getSavedStateKey());
+				if (savedState != null) {
+					initialState = ServiceHolder.getMarshallerService().unmarshal(savedState,
+							MappedDataViewState.class);
+				}
+			} catch (Exception e) {
+				logger.error("Cannot restore view state", e);
+			}
+		}
+	}
+
+	@Override
+	public void saveState(IMemento memento) {
+		if (memento != null && isRunningInGDA()) {
+			try {
+				final int numFiles = area.count();
+				if (numFiles > 0) {
+					final List<String> filesInView = new ArrayList<>();
+					for (int i = 0; i < numFiles; i++) {
+						filesInView.add(area.getDataFile(i).getPath());
+					}
+					final MappedDataViewState state = new MappedDataViewState();
+					state.setFilesInView(filesInView);
+					logger.info("Saving view state: {}", state);
+
+					final String stateString = ServiceHolder.getMarshallerService().marshal(state);
+					memento.putString(getSavedStateKey(), stateString);
+				}
+			} catch (Exception e) {
+				logger.error("Cannot save view state", e);
+			}
+		}
+		super.saveState(memento);
+	}
+
+	private boolean isRunningInGDA() {
+		// gda.var should always be set to something, so it is a reliable test
+		// of whether we are running in GDA.
+		return System.getProperty("GDA/gda.var") != null;
+	}
+
+	private String getSavedStateKey() {
+		return ID + ".viewstate";
+	}
+
 	protected Properties                        idProperties;
 	
 	protected String getSecondaryIdAttribute(String key, String defaultValue) {
