@@ -74,22 +74,32 @@ public class ROIEditTable  {
 	private double      xLowerBound=Double.NaN, xUpperBound=Double.NaN; // Optional bounds
 	private double      yLowerBound=Double.NaN, yUpperBound=Double.NaN; // Optional bounds
 	private List<IRegionRow> rows;
+	private enabledCellConfigurator enabledCellConfigurator;
 	
 	// preferences
-	// hack: extras false for a) no rounding button, b) no asterisk marking editable cells, c) uneditable rotation fields
-	private boolean extras;
+	private boolean showRoundingButton;
 	private int height;
 	private int[] columnWidths;
 	
+	/**
+	 * Parameterless constructor has default table height of 100 pixels,
+	 * first column width of 180, and second and third widths of 150.
+	 * Table has button to round parameters to nearest integers 
+	 */
 	public ROIEditTable() {
-		// default preferences
-		extras = true;
+		showRoundingButton = true;
 		height = 100;
 		columnWidths = new int[]{180,150};
 	}
 	
-	public ROIEditTable(int height, int[] columnWidths, boolean extras) {
-		this.extras = extras;
+	/**
+	 * columnWidths is array of exactly 2 integers; second and third columns are of equal width
+	 * @param height
+	 * @param columnWidths
+	 * @param showRoundingButton
+	 */
+	public ROIEditTable(int height, int[] columnWidths, boolean showRoundingButton) {
+		this.showRoundingButton = showRoundingButton;
 		this.height = height;
 		this.columnWidths = columnWidths;
 	}
@@ -102,12 +112,13 @@ public class ROIEditTable  {
 		regionTable.getTable().setLayoutData(tableData);
 		createColumns(regionTable);
 		
-		if (extras) {
+		if (showRoundingButton) {
 			final Button round = new Button(parent, SWT.PUSH);
 			round.setText("Round");
 			round.setToolTipText("Round values of region to nearest integer");
 			round.setLayoutData(new GridData(SWT.LEFT, SWT.NONE, true, false));
 			round.addSelectionListener(new SelectionAdapter() {
+				@Override
 				public void widgetSelected(SelectionEvent e) {
 					for (IRegionRow row : rows) {
 						if (row instanceof RegionRow) {
@@ -119,11 +130,12 @@ public class ROIEditTable  {
 					fireROIListeners();
 				}
 			});
-			
-			final Label clickToEdit = new Label(parent, SWT.RIGHT);
-			clickToEdit.setText("* Click to change");
-			clickToEdit.setLayoutData(new GridData(SWT.RIGHT, SWT.NONE, true, false));
 		}
+		
+		final Label clickToEdit = new Label(parent, SWT.RIGHT);
+		clickToEdit.setText("* Click to change");
+		clickToEdit.setLayoutData(new GridData(SWT.RIGHT, SWT.NONE, true, false));
+	
 		
 		return regionTable.getTable();
 	}
@@ -206,12 +218,14 @@ public class ROIEditTable  {
 			
 			if (element instanceof SymmetryRow) {
 				Collection<String> values = SectorROI.getSymmetriesPossible().values();
-				final String[] items =  (String[]) values.toArray(new String[values.size()]);
+				final String[] items = values.toArray(new String[values.size()]);
 				final CComboCellEditor ed = new CComboCellEditor(((TableViewer)getViewer()).getTable(), items) {
+					@Override
 		    	    protected void doSetValue(Object value) {
 		                Integer ordinal = SectorROI.getSymmetry((String)value);
 		                super.doSetValue(ordinal);
 		    	    }
+					@Override
 		    		protected Object doGetValue() {
 		    			Integer ordinal = (Integer)super.doGetValue();
 		    			return items[ordinal];
@@ -220,7 +234,7 @@ public class ROIEditTable  {
 				return ed;
 			}
 			final FloatSpinnerCellEditor ed = new FloatSpinnerCellEditor(((TableViewer)getViewer()).getTable(),SWT.RIGHT);
-			if (extras) ed.setFormat(7, 3);
+			if (showRoundingButton) ed.setFormat(7, 3);
 			else ed.setFormat(6, 3);
 			ed.setIncrement(0.1d);
 
@@ -258,13 +272,9 @@ public class ROIEditTable  {
 				} else {
 					val = ((RegionRow)row).getyLikeVal();
 				}
-				if (row.getName().equals("Rotation (°)") && !extras) return false;
 				return !Double.isNaN(val);
 			}
-			if (column == 1) {
-				return true;
-			}
-			return false;
+			return column == 1;
 		}
 
 		@Override
@@ -324,7 +334,7 @@ public class ROIEditTable  {
 	}
 
 	public boolean addROIListener(final IROIListener l) {
-		if (roiListeners==null) roiListeners = new HashSet<IROIListener>(11);
+		if (roiListeners==null) roiListeners = new HashSet<>(11);
 		if (!roiListeners.contains(l)) return roiListeners.add(l);
 		return false;
 	}
@@ -349,6 +359,7 @@ public class ROIEditTable  {
             this.editor = editor;
 		}
 		
+		@Override
 		public String getText(Object element) {
 			
 			final IRegionRow row = (IRegionRow)element;
@@ -374,16 +385,22 @@ public class ROIEditTable  {
 		@Override
 		public StyledString getStyledText(Object element) {
 			final StyledString ret = new StyledString(getText(element));
-			if (editor!=null && editor.canEdit(element) && extras) {
+			if (editor!=null && editor.canEdit(element)) {
 			    ret.append(new StyledString("*", StyledString.QUALIFIER_STYLER));
 			}
 			return ret;
 		}
+		
+//		@Override
+//		public Color getForeground(Object element) {
+//			if (editor.canEdit(element))
+//			return Display.getCurrent().getSystemColor(SWT.COLOR_GRAY);
+//		}
 	}
 
 	private List<IRegionRow> createRegionRows(IROI roi, final ICoordinateSystem coords) {
     	
-		final List<IRegionRow> ret = new ArrayList<ROIEditTable.IRegionRow>();
+		final List<IRegionRow> ret = new ArrayList<>();
 		
 		if (roi instanceof LinearROI) {
 			final LinearROI lr = (LinearROI)roi;
@@ -470,6 +487,7 @@ public class ROIEditTable  {
 			ret.get(0).setEnabled(false);
 		}
 		
+		if (enabledCellConfigurator!=null) ret.forEach(enabledCellConfigurator::configure);		
 		return ret;
 	}
 	
@@ -486,6 +504,8 @@ public class ROIEditTable  {
 			return vals;
 		}
 	}
+	
+	
 
 	/**
 	 * Creates a roi from the current table data
@@ -650,20 +670,7 @@ public class ROIEditTable  {
 		rows=null;
     }
     
-	private abstract class IRegionRow {
-		protected String name;
-		protected boolean enabled=true;
-		public String getName() {
-			return name;
-		}
-		public boolean isEnabled() {
-			return enabled;
-		}
 
-		public void setEnabled(boolean enabled) {
-			this.enabled = enabled;
-		}
-	}
 	
 	private class SymmetryRow extends IRegionRow {
 		private String symmetryName;
@@ -746,10 +753,8 @@ public class ROIEditTable  {
 			if (Double.doubleToLongBits(xLikeVal) != Double
 					.doubleToLongBits(other.xLikeVal))
 				return false;
-			if (Double.doubleToLongBits(yLikeVal) != Double
-					.doubleToLongBits(other.yLikeVal))
-				return false;
-			return true;
+			return Double.doubleToLongBits(yLikeVal) == Double
+					.doubleToLongBits(other.yLikeVal);
 		}
 		@SuppressWarnings("unused")
 		public String getUnit() {
@@ -802,6 +807,10 @@ public class ROIEditTable  {
 	
 	public TableViewer getTableViewer() {
 		return regionTable;
+	}
+	
+	public void setEnabledCellConfigurator(enabledCellConfigurator config) {
+		enabledCellConfigurator = config;
 	}
 
 }
