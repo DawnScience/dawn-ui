@@ -41,8 +41,8 @@ public class PeakFindingWidget {
 	private FloatSpinner uprBndVal;
 	private FloatSpinner lwrBndVal;	
 
-	private FloatSpinner searchIntensity;
-	public double searchScaleVal;
+	private FloatSpinner searchThreshold;
+	public double searchThresVal;
 	private Scale searchScale;
 	
 	Button runPeakSearch;
@@ -116,19 +116,19 @@ public class PeakFindingWidget {
 		});
 
 		/* Adjust Peak Finding searchIntensity */
-		final Label searchIntensityLab = new Label(configureComposite, SWT.NONE);
-		searchIntensityLab.setText("Search Intensity");
-		searchIntensityLab.setToolTipText("Higher values tend to lead to less peaks");
+		final Label searchThresholdLab = new Label(configureComposite, SWT.NONE);
+		searchThresholdLab.setText("Search Threshold");
+		searchThresholdLab.setToolTipText("Higher values tend to lead to less peaks");
 
-		searchIntensity = new FloatSpinner(configureComposite, SWT.BORDER, 1000, 3);
-		searchIntensity.setMaximum(300);
-		searchIntensity.setMinimum(1);
-		searchIntensity.setLayoutData(new GridData(SWT.FILL, SWT.LEFT, true, false));
-		searchIntensity.addSelectionListener(new SelectionAdapter() {
+		searchThreshold = new FloatSpinner(configureComposite, SWT.BORDER, 1000, 3);
+		searchThreshold.setMaximum(300);
+		searchThreshold.setMinimum(1);
+		searchThreshold.setLayoutData(new GridData(SWT.FILL, SWT.LEFT, true, false));
+		searchThreshold.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
 				
-				searchScaleVal = searchIntensity.getDouble();
-				manager.setSearchScaleIntensity(searchScaleVal);
+				searchThresVal = searchThreshold.getDouble();
+				manager.setSearchThreshold(searchThresVal);
 			}
 		});	
 		
@@ -146,17 +146,17 @@ public class PeakFindingWidget {
 		searchScale.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
 				int perspectiveValue = searchScale.getSelection(); 
-				searchIntensity.setDouble(perspectiveValue); 
+				searchThreshold.setDouble(perspectiveValue); 
 				//TODO: need to change as changing the search intensity and using that trigger...
-				searchScaleVal = searchIntensity.getDouble();
-				manager.setSearchScaleIntensity(searchScaleVal);
+				searchThresVal = searchThreshold.getDouble();
+				manager.setSearchThreshold(searchThresVal);
 			}
 		});
 		
 		/*Default setups*/
-		searchScaleVal = searchIntensity.getDouble();
+		searchThresVal = searchThreshold.getDouble();
 
-		manager.setSearchScaleIntensity(searchScaleVal);
+		manager.setSearchThreshold(searchThresVal);
 		
 		/*
 		 * Swap out peak finders		
@@ -173,13 +173,13 @@ public class PeakFindingWidget {
 			public void widgetSelected(SelectionEvent e) {
 				//XXX: hot ui fix as wavelet only component that needs the intensity active
 				if(peakfinderCombo.getText().equals("Wavelet Transform")){
-					searchIntensity.setEnabled(true);
+					searchThreshold.setEnabled(true);
 					searchScale.setEnabled(true);
 					searchScale.setVisible(true);
-					searchIntensityLab.setForeground(Display.getDefault().getSystemColor(SWT.COLOR_BLACK));
+					searchThresholdLab.setForeground(Display.getDefault().getSystemColor(SWT.COLOR_BLACK));
 				} else {
-					searchIntensityLab.setForeground(Display.getDefault().getSystemColor(SWT.COLOR_GRAY));
-					searchIntensity.setEnabled(false);
+					searchThresholdLab.setForeground(Display.getDefault().getSystemColor(SWT.COLOR_GRAY));
+					searchThreshold.setEnabled(false);
 					searchScale.setEnabled(false);
 					searchScale.setVisible(false);
 				}

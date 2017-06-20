@@ -117,7 +117,7 @@ public class PeakFindingManager {
 		return searchScaleIntensity;
 	}
 
-	public void setSearchScaleIntensity(double searchScaleIntensity) {
+	public void setSearchThreshold(double searchScaleIntensity) {
 		String peakfinder = Activator.getPlottingPreferenceStore().getString(PeakFindingConstants.PeakAlgorithm);	
 		//TODO: tmp as only wavelet has the adjustment configured correctly
 		if(peakfinder.equals("Wavelet Transform")){
