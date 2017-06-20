@@ -168,6 +168,23 @@ public class FastMaskTool extends AbstractToolPage {
 
 		});
 		
+		Button b3b = new Button(control, SWT.PUSH);
+		b3b.setText("Invert");
+		b3b.addSelectionListener(new SelectionAdapter() {
+
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				if (buffer == null) return;
+				
+				Runnable r = () -> buffer.invert();
+				
+				job.setRunnable(r);
+				job.schedule();
+			}
+
+
+		});
+		
 		Button b4 = new Button(control, SWT.CHECK);
 		b4.setText("Draw");
 		b4.addSelectionListener(new SelectionAdapter() {
