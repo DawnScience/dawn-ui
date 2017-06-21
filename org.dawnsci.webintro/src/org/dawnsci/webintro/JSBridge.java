@@ -100,7 +100,7 @@ public class JSBridge {
 		if(version == null){
 			return "(unknown version)";
 		}
-		return BundleUtils.getDawnVersion();
+		return version;
 	}
 
 	/**
