@@ -8,6 +8,7 @@ import java.util.List;
 import org.dawb.common.ui.widgets.ActionBarWrapper;
 import org.dawnsci.spectrum.ui.file.IContain1DData;
 import org.dawnsci.spectrum.ui.utils.Contain1DDataImpl;
+import org.dawnsci.surfacescatter.CurveStitchDataPackage;
 import org.dawnsci.surfacescatter.OverlapUIModel;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.PlotType;
@@ -36,6 +37,7 @@ public class StitchedOverlapCurves extends Composite {
     private ILineTrace lt1;
     private SurfaceScatterPresenter ssp;
     private IDataset[] attenuatedDatasets;
+    private CurveStitchDataPackage csdp;
     
     public StitchedOverlapCurves(Composite parent, 
     		int style,
@@ -103,15 +105,15 @@ public class StitchedOverlapCurves extends Composite {
         plotSystem.createPlotPart(this, "ExamplePlot", actionBarComposite, PlotType.IMAGE, null);
     
 		lt1 = plotSystem.createLineTrace("Concatenated Curve Test");
+
+		csdp = ssp.curveStitchingOutput(null, false);
 		
-		attenuatedDatasets = ssp.curveStitchingOutput();
+//		Dataset[] sortedAttenuatedDatasets = new Dataset[2];
+								
+		lt1.setData(csdp.getSplicedCurveX(), csdp.getSplicedCurveY());
 		
-		Dataset[] sortedAttenuatedDatasets = new Dataset[2];
-	
-		lt1.setData(attenuatedDatasets[1], attenuatedDatasets[0]);
+//		output = sortedAttenuatedDatasets;
 		
-		
-		output = sortedAttenuatedDatasets;
 
 		plotSystem.addTrace(lt1);
 		plotSystem.repaint();
@@ -127,19 +129,13 @@ public class StitchedOverlapCurves extends Composite {
 				double[][] maxMinArray = AttenuationCorrectedOutput.maxMinArrayGenerator(xArrayList,
 																						 model);
 				
+				csdp = ssp.curveStitchingOutput(maxMinArray, false);
 				
-				
-				attenuatedDatasets = ssp.curveStitchingOutput(maxMinArray);
-				
-//				attenuatedDatasets =  AttenuationCorrectedOutput.StitchingOverlapProcessMethod(yArrayList, 
-//																								xArrayList, 
-//																								model);
-				
-				Dataset[] sortedAttenuatedDatasets = new Dataset[2];
+//				Dataset[] sortedAttenuatedDatasets = new Dataset[2];
 										
-				lt1.setData(attenuatedDatasets[1], attenuatedDatasets[0]);
+				lt1.setData(csdp.getSplicedCurveX(), csdp.getSplicedCurveY());
 				
-				output = sortedAttenuatedDatasets;
+//				output = sortedAttenuatedDatasets;
 				
 				plotSystem.clearTraces();
 				plotSystem.addTrace(lt1);
@@ -160,23 +156,31 @@ public class StitchedOverlapCurves extends Composite {
 	   return plotSystem;
    }
    
-   public List<IContain1DData> getOutput(){
-
-	output[1].setName("x");
-	output[0].setName("y");
-	
-	List<IContain1DData> output1 = new ArrayList<IContain1DData>();
-	output1.add(new Contain1DDataImpl(output[1], Arrays.asList(new IDataset[]{output[0]}), title +"_output", title +"_output_longname"));
-	
-	return output1;
-   }
+//   public List<IContain1DData> getOutput(){
+//
+//	output[1].setName("x");
+//	output[0].setName("y");
+//	
+//	List<IContain1DData> output1 = new ArrayList<IContain1DData>();
+//	output1.add(new Contain1DDataImpl(output[1], Arrays.asList(new IDataset[]{output[0]}), title +"_output", title +"_output_longname"));
+//	
+//	return output1;
+//   }
    
    public ILineTrace getLineTrace1(){
 	   return lt1;
    }
    
-   public IDataset[] getAttenuatedDatasets(){
-	   return attenuatedDatasets;
-   }
+//   public IDataset[] getAttenuatedDatasets(){
+//	   return attenuatedDatasets;
+//   }
+
+	public CurveStitchDataPackage getCsdp() {
+		return csdp;
+	}
+	
+	public void setCsdp(CurveStitchDataPackage csdp) {
+		this.csdp = csdp;
+	}
    
 }

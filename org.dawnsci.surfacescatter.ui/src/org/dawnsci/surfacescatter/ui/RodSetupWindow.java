@@ -89,9 +89,9 @@ public class RodSetupWindow {
 	
 			correctionsDropDown = new Combo(methodSetting, SWT.DROP_DOWN | SWT.BORDER | SWT.FILL);
 			
-			 for(org.dawnsci.surfacescatter.MethodSettingEnum.MethodSetting  t: MethodSettingEnum.MethodSetting.values()){
+			for(org.dawnsci.surfacescatter.MethodSettingEnum.MethodSetting  t: MethodSettingEnum.MethodSetting.values()){
 				 correctionsDropDown.add(org.dawnsci.surfacescatter.MethodSettingEnum.MethodSetting.toString(t));
-			    }
+			}
 	
 			correctionsDropDown.select(0);
 			correctionsDropDown.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));

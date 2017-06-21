@@ -2,6 +2,7 @@ package org.dawnsci.surfacescatter.ui;
 
 import java.util.ArrayList;
 
+import org.dawnsci.surfacescatter.CurveStitchDataPackage;
 import org.dawnsci.surfacescatter.OverlapUIModel;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.trace.ILineTrace;
@@ -37,8 +38,9 @@ public class GeneralOverlapHandlerView extends Dialog {
     private Button export;
     private SurfaceScatterPresenter ssp;
     private SurfaceScatterViewStart ssvs;
-    private IPlottingSystem<Composite> parentPs;
+//    private IPlottingSystem<Composite> parentPs;
     private StitchedOverlapCurves stitchedCurves;
+//    private CurveStitchDataPackage csdp;
     private boolean errorFlag =true;
 	
 	public GeneralOverlapHandlerView(Shell parentShell, int style, 
@@ -85,6 +87,8 @@ public class GeneralOverlapHandlerView extends Dialog {
 		final Composite container = (Composite) super.createDialogArea(parent);
 		
 		OverlapUIModel model = new OverlapUIModel();
+		
+		model.setCorrectionSelection(ssp.getDrm().getCorrectionSelection());
 		
 		SashForm sashForm= new SashForm(container, SWT.HORIZONTAL);
 		sashForm.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
@@ -152,7 +156,7 @@ public class GeneralOverlapHandlerView extends Dialog {
 			public void widgetSelected(SelectionEvent e) {
 				
 			
-				ssvs.export();
+				ssvs.export(stitchedCurves.getCsdp());
 				
 			}
 			

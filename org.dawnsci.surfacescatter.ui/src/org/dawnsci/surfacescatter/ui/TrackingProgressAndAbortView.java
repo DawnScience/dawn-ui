@@ -1,5 +1,6 @@
 package org.dawnsci.surfacescatter.ui;
 
+import org.dawnsci.surfacescatter.ReflectivityNormalisation;
 import org.dawnsci.surfacescatter.MethodSettingEnum.MethodSetting;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.swt.SWT;
@@ -87,6 +88,7 @@ public class TrackingProgressAndAbortView extends Dialog {
 			tj.setTPAAV(TrackingProgressAndAbortView.this);
 			tj.runTJ1();
 			
+			
 
 		}
 		catch(IndexOutOfBoundsException d){
@@ -96,7 +98,18 @@ public class TrackingProgressAndAbortView extends Dialog {
 		catch(OutOfMemoryError e){
 			ssp.outOfMemoryWarning();
 		}
-			
+		
+//		if(ssp.getDrm().getCorrectionSelection() == MethodSetting.Reflectivity_NO_Correction ||
+//				   ssp.getDrm().getCorrectionSelection() == MethodSetting.Reflectivity_with_Flux_Correction ||
+//				   ssp.getDrm().getCorrectionSelection() == MethodSetting.Reflectivity_without_Flux_Correction){
+//							
+//				   ReflectivityNormalisation.ReflectivityNormalisation1(ssp.getDrm().getCsdp());
+//							
+//					ssvs.getSsps3c().getOutputCurves().getPlotSystem().repaint(true);
+//									
+//		}
+		
+		
 		return container;
 	}
 

@@ -4,6 +4,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import org.dawnsci.surfacescatter.AnalaysisMethodologies.Methodology;
+import org.dawnsci.surfacescatter.CurveStitchDataPackage;
 import org.dawnsci.surfacescatter.FittingParameters;
 import org.dawnsci.surfacescatter.IntensityDisplayEnum.IntensityDisplaySetting;
 import org.dawnsci.surfacescatter.MethodSettingEnum.MethodSetting;
@@ -1603,11 +1604,13 @@ public class SurfaceScatterViewStart extends Dialog {
 		getSsps3c().getOutputCurves().getIntensity().select(0);;
 	}
 	
-	public void export(){
+	public void export(CurveStitchDataPackage csdpNew){
 
 		outputCurves.getPlotSystem().clear();
 		
 		ILineTrace lt1 = outputCurves.getPlotSystem().createLineTrace("Adjusted Spliced Curve");
+		
+		ssp.getDrm().setCsdp(csdpNew);
 		
 		IDataset xData = ssp.getDrm().getCsdp().getSplicedCurveX();
 		IDataset yData = ssp.getDrm().getCsdp().getSplicedCurveY();

@@ -7,6 +7,7 @@ import org.dawnsci.surfacescatter.AnalaysisMethodologies;
 import org.dawnsci.surfacescatter.AnalaysisMethodologies.Methodology;
 import org.dawnsci.surfacescatter.ClosestNoFinder;
 import org.dawnsci.surfacescatter.CountUpToArray;
+import org.dawnsci.surfacescatter.CurveStitchDataPackage;
 import org.dawnsci.surfacescatter.DirectoryModel;
 import org.dawnsci.surfacescatter.DummyProcessWithFrames;
 import org.dawnsci.surfacescatter.FrameModel;
@@ -14,6 +15,7 @@ import org.dawnsci.surfacescatter.GeometricParametersModel;
 import org.dawnsci.surfacescatter.LocationLenPtConverterUtils;
 import org.dawnsci.surfacescatter.MethodSettingEnum.MethodSetting;
 import org.dawnsci.surfacescatter.PolynomialOverlap;
+import org.dawnsci.surfacescatter.ReflectivityNormalisation;
 import org.dawnsci.surfacescatter.TrackerLocationInterpolation;
 import org.dawnsci.surfacescatter.TrackingMethodology.TrackerType1;
 import org.eclipse.dawnsci.analysis.dataset.roi.RectangularROI;
@@ -206,12 +208,45 @@ public class TrackingHandlerWithFrames {
 								
 						}
 								//////bottom of k++ loop
+								
+								if(drm.getCorrectionSelection() == MethodSetting.Reflectivity_NO_Correction ||
+										   drm.getCorrectionSelection() == MethodSetting.Reflectivity_with_Flux_Correction ||
+										   drm.getCorrectionSelection() == MethodSetting.Reflectivity_without_Flux_Correction){
+											
+											ReflectivityNormalisation.ReflectivityNormalisation1(drm.getCsdp());
+											
+											display.syncExec(new Runnable() {
+												@Override
+												public void run() {	
+															
+														try {
+															ssvs.getSsps3c().generalUpdate(lenPt);
+															ssvs.getSsps3c().getOutputCurves().getPlotSystem().repaint();
+															ssp.stitchAndPresent1(ssvs.getSsps3c().getOutputCurves(), ssvs.getIds());
+															
+														} catch (Exception e) {
+															// TODO Auto-generated catch block
+															e.printStackTrace();
+															System.out.println(e.getMessage());
+														}
+														
+														return;
+													}
+												});	
+								}
+								
 								return;
 					};
+					
+					
+					
 
 				}; ////Starts  the thread
 					
-					t.start();			
+					t.start();
+					
+
+//					}
 			}
 			
 		
@@ -379,11 +414,48 @@ public class TrackingHandlerWithFrames {
 							}
 						}
 					//////bottom of k++ loop
+					
+
+					
+					if(drm.getCorrectionSelection() == MethodSetting.Reflectivity_NO_Correction ||
+							   drm.getCorrectionSelection() == MethodSetting.Reflectivity_with_Flux_Correction ||
+							   drm.getCorrectionSelection() == MethodSetting.Reflectivity_without_Flux_Correction){
+								
+								ReflectivityNormalisation.ReflectivityNormalisation1(drm.getCsdp());
+								
+								display.syncExec(new Runnable() {
+									@Override
+									public void run() {	
+												
+											try {
+												ssvs.getSsps3c().generalUpdate(lenPt);
+												ssvs.getSsps3c().getOutputCurves().getPlotSystem().repaint();
+												ssp.stitchAndPresent1(ssvs.getSsps3c().getOutputCurves(), ssvs.getIds());
+												
+											} catch (Exception e) {
+												// TODO Auto-generated catch block
+												e.printStackTrace();
+												System.out.println(e.getMessage());
+											}
+											
+											return;
+										}
+									});	
+					}
+					
+					
 					return;
 					}
 					
+					
+					
 				};
+				
+				
+				
 			t.start();
+			
+//			
 			}	
 			
 		}
@@ -405,7 +477,11 @@ public class TrackingHandlerWithFrames {
 		}
 		
 		
+		
+		
 		ssvs.getCustomComposite().getReplay().setEnabled(true);
+
+
 
 	}
 		private void debug(String output) {
@@ -1154,10 +1230,39 @@ class trackingJob21 {
 						}
 					}
 					
+					
+					if(drm.getCorrectionSelection() == MethodSetting.Reflectivity_NO_Correction ||
+							   drm.getCorrectionSelection() == MethodSetting.Reflectivity_with_Flux_Correction ||
+							   drm.getCorrectionSelection() == MethodSetting.Reflectivity_without_Flux_Correction){
+								
+								ReflectivityNormalisation.ReflectivityNormalisation1(drm.getCsdp());
+								
+								display.syncExec(new Runnable() {
+									@Override
+									public void run() {	
+												
+											try {
+												ssvs.getSsps3c().generalUpdate(lenPt);
+												ssvs.getSsps3c().getOutputCurves().getPlotSystem().repaint();
+												ssp.stitchAndPresent1(ssvs.getSsps3c().getOutputCurves(), ssvs.getIds());
+												
+											} catch (Exception e) {
+												// TODO Auto-generated catch block
+												e.printStackTrace();
+												System.out.println(e.getMessage());
+											}
+											
+											return;
+										}
+									});	
+					}
+					
 					return;
 				}
 			};
 			t.start();
+			
+		
 		}
 
 		//////////////////////// inside second loop
@@ -1915,12 +2020,42 @@ class trackingJob21 {
 				doneArray[nextjok] = "done";
 			}
 		}
+		if(drm.getCorrectionSelection() == MethodSetting.Reflectivity_NO_Correction ||
+				   drm.getCorrectionSelection() == MethodSetting.Reflectivity_with_Flux_Correction ||
+				   drm.getCorrectionSelection() == MethodSetting.Reflectivity_without_Flux_Correction){
+					
+					ReflectivityNormalisation.ReflectivityNormalisation1(drm.getCsdp());
+					
+					display.syncExec(new Runnable() {
+						@Override
+						public void run() {	
+									
+								try {
+									ssvs.getSsps3c().generalUpdate(lenPt);
+									ssvs.getSsps3c().getOutputCurves().getPlotSystem().repaint();
+									ssp.stitchAndPresent1(ssvs.getSsps3c().getOutputCurves(), ssvs.getIds());
+									
+								} catch (Exception e) {
+									// TODO Auto-generated catch block
+									e.printStackTrace();
+									System.out.println(e.getMessage());
+								}
+								
+								return;
+							}
+						});	
+		}
+		
 		return;
-				}
+		}
 				
 		};
 		t.start();
+		
+	
 		}
+		
+		
 		
 		ssvs.getCustomComposite().getReplay().setEnabled(true);
 	}
@@ -1936,8 +2071,20 @@ class trackingJob21 {
 		ssvs.getPlotSystemCompositeView().getPlotSystem().repaint(true);
 		ssvs.getPlotSystemCompositeView().getSubImageBgPlotSystem().repaint(true);
 		ssvs.getSsps3c().generalUpdate();
+		
+		try{
+			if(drm.getCorrectionSelection() == MethodSetting.Reflectivity_NO_Correction ||
+					   drm.getCorrectionSelection() == MethodSetting.Reflectivity_with_Flux_Correction ||
+					   drm.getCorrectionSelection() == MethodSetting.Reflectivity_without_Flux_Correction){
+						
+						ReflectivityNormalisation.ReflectivityNormalisation1(drm.getCsdp());	
+			}
+		}
+		catch(Exception h){
+			
+		}
 		ssp.stitchAndPresent1(ssvs.getSsps3c().getOutputCurves(), ssvs.getIds());
-
+		
 		double[] location = ssp.getThisLocation(imageNumber);
 		
 		int[] len = new int[] {(int) (location[2]-location[0]),(int) (location[5]-location[1])};

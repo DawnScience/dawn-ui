@@ -45,6 +45,7 @@ import org.dawnsci.surfacescatter.PlotSystem2DataSetter;
 import org.dawnsci.surfacescatter.PolynomialOverlap;
 import org.dawnsci.surfacescatter.ProcessingMethodsEnum;
 import org.dawnsci.surfacescatter.ReflectivityMetadataTitlesForDialog;
+import org.dawnsci.surfacescatter.ReflectivityNormalisation;
 import org.dawnsci.surfacescatter.ProcessingMethodsEnum.ProccessingMethod;
 import org.dawnsci.surfacescatter.ReflectivityFluxCorrectionsForDialog;
 import org.dawnsci.surfacescatter.RodObjectNexusBuilderModel;
@@ -2337,8 +2338,10 @@ public class SurfaceScatterPresenter {
 		return output;
 	}
 	
-	public IDataset[] curveStitchingOutput (double[][] mm){
+	public CurveStitchDataPackage curveStitchingOutput (double[][] mm, boolean accept){
 
+//		IDataset[]
+		
 		CsdpGeneratorFromDrm csdpgfd = new CsdpGeneratorFromDrm();
 		
 		csdpgfd.generateCsdpFromDrm(drm);
@@ -2347,15 +2350,25 @@ public class SurfaceScatterPresenter {
 		
 		IDataset[] output = CurveStitchWithErrorsAndFrames.curveStitch4(csdp, mm);
 		
-		drm.setCsdp(csdp);
+		if(drm.getCorrectionSelection() == MethodSetting.Reflectivity_NO_Correction ||
+				   drm.getCorrectionSelection() == MethodSetting.Reflectivity_with_Flux_Correction ||
+				   drm.getCorrectionSelection() == MethodSetting.Reflectivity_without_Flux_Correction){
+					
+					ReflectivityNormalisation.ReflectivityNormalisation1(csdp);
+					
+		}
 		
+//		IDataset[] output = CurveStitchWithErrorsAndFrames.curveStitch4(csdp, mm);
+		if(accept){
+			drm.setCsdp(csdp);
+		}
 		try{
 			qConversion();
 		}
 		catch(Exception d){
 		}
 		
-		return output;
+		return csdp;
 	}
 
 	public void switchFhklIntensity(IPlottingSystem<Composite> pS, 
@@ -2696,7 +2709,20 @@ public class SurfaceScatterPresenter {
 		
 		CurveStitchDataPackage csdp = csdpgfd.getCsdp();
 		
-		IDataset[] output = CurveStitchWithErrorsAndFrames.curveStitch4(csdp, null);
+		IDataset[] output1 = CurveStitchWithErrorsAndFrames.curveStitch4(csdp, null);
+		try{
+			if(drm.getCorrectionSelection() == MethodSetting.Reflectivity_NO_Correction ||
+					   drm.getCorrectionSelection() == MethodSetting.Reflectivity_with_Flux_Correction ||
+					   drm.getCorrectionSelection() == MethodSetting.Reflectivity_without_Flux_Correction){
+						
+						ReflectivityNormalisation.ReflectivityNormalisation1(csdp);
+						
+			}
+		}
+		catch(Exception j){
+		
+		}
+//		IDataset[] output = CurveStitchWithErrorsAndFrames.curveStitch4(csdp, null);
 		
 		drm.setCsdp(csdp);
 		
