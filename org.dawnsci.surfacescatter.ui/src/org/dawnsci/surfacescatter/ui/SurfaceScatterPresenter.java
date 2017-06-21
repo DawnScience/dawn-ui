@@ -2431,6 +2431,14 @@ public class SurfaceScatterPresenter {
 		drm.setCorrectionSelection(MethodSetting.toMethod(correctionSelection));
 	}
 	
+	public void setRodName(String in){
+		drm.setRodName(in);
+	}
+	
+	public String getRodName(){
+		return drm.getRodName();
+	}
+	
 	public void setSelection (int selection){
 		sliderPos = selection;
 //		sm.setSelection(selection);

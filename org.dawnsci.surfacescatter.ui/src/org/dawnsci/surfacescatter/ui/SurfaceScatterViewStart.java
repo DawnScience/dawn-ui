@@ -1559,7 +1559,10 @@ public class SurfaceScatterViewStart extends Dialog {
 				
 				String title = path + File.separator + stitle + ".nxs";
 
+				ssp.setRodName(stitle);
+				
 				ssp.writeNexus(title);
+				
 				
 				raw.getTabFolder().getTabList()[1].setEnabled(true);
 
