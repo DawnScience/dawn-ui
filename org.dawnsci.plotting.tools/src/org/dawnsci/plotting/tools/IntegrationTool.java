@@ -1,7 +1,6 @@
 package org.dawnsci.plotting.tools;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 import org.eclipse.dawnsci.analysis.api.roi.IROI;
@@ -42,7 +41,7 @@ public class IntegrationTool extends AbstractToolPage implements IROIListener, I
 	private IRegion region;
 	private TableViewer integrationResultsTable;
 	
-	
+	private final ArrayList<ITrace> traces = new ArrayList<>();
 	
 	@Override
 	public ToolPageRole getToolPageRole() {
@@ -140,6 +139,7 @@ public class IntegrationTool extends AbstractToolPage implements IROIListener, I
 			}
 		});
 		
+		integrationResultsTable.setInput(traces);
 		
 		
 		super.createControl(parent);
@@ -153,6 +153,7 @@ public class IntegrationTool extends AbstractToolPage implements IROIListener, I
 		try {
 			region = getPlottingSystem().createRegion("Integration range", RegionType.XAXIS);
 			region.addROIListener(this);
+			region.setUserRegion(false);
 		} catch (Exception e) {
 			logger.error("Could not create region", e);
 		} 
@@ -172,12 +173,13 @@ public class IntegrationTool extends AbstractToolPage implements IROIListener, I
 		super.deactivate();
 	}
 	
-	private synchronized void update() {
+	protected synchronized void update() {
 		lowerBoundLabel.setText(String.format("%g", lowerBound));
 		upperBoundLabel.setText(String.format("%g", upperBound));
 		
-		Collection<ITrace> traces = getPlottingSystem().getTraces(ILineTrace.class);
-		integrationResultsTable.setInput(traces);
+		traces.clear();
+		traces.addAll(getPlottingSystem().getTraces(ILineTrace.class));
+		integrationResultsTable.refresh();
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -243,5 +245,17 @@ public class IntegrationTool extends AbstractToolPage implements IROIListener, I
 	@Override
 	public void traceWillPlot(TraceWillPlotEvent evt) {
 		// ignore
+	}
+
+	public List<ITrace> getTraces() {
+		return traces;
+	}
+
+	public double getLowerBound() {
+		return lowerBound;
+	}
+
+	public double getUpperBound() {
+		return upperBound;
 	}
 }
