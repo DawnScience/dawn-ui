@@ -168,7 +168,7 @@ public class ROIEditTable  {
 			}			
 		});
 		
-		regionTable.setInput(rows.get(0));
+		if (!rows.isEmpty()) regionTable.setInput(rows.get(0));
 	}
 
 
