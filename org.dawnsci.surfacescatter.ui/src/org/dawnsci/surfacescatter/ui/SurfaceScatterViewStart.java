@@ -760,6 +760,8 @@ public class SurfaceScatterViewStart extends Dialog {
 					
 					lt1.setErrorBarEnabled(ssp.getErrorFlag());
 					lt1.setErrorBarColor(red);
+					IDataset  xprobe = lt1.getXData();
+ 					
 					double start = lt1.getXData().getDouble(0);
 					double end = lt1.getXData().getDouble(lt1.getXData().getShape()[0]-1);
 					double range = end - start;

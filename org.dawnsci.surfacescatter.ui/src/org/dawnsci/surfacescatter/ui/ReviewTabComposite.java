@@ -408,13 +408,19 @@ public class ReviewTabComposite extends Composite{
 				isQPresent = false;
 			}
 			else{
-				for(int i =0; i<csdp.getSplicedCurveQ().getSize(); i++){
-					double d = csdp.getSplicedCurveQ().getDouble(i);
-					
-					if(d == -10000000000.0){
-						isQPresent = false;
-						break;
-					}			
+				try{
+					int g = csdp.getSplicedCurveQ().getSize();
+					for(int i =0; i<csdp.getSplicedCurveQ().getSize(); i++){
+						double d = csdp.getSplicedCurveQ().getDouble(i);
+						
+						if(d == -10000000000.0){
+							isQPresent = false;
+							break;
+						}			
+					}
+				}
+				catch(Exception z){
+					isQPresent = false;
 				}
 			}
 		}

@@ -12,6 +12,8 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.DirectoryDialog;
+import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.TabFolder;
@@ -44,18 +46,22 @@ public class GeometricParametersWindows extends Composite{
 	private Text energy;
 	private TabFolder folder;
 	private SurfaceScatterPresenter ssp;
+	private SurfaceScatterViewStart ssvs;
 	private GeometricParametersWindows gpw;
 	private Group geometricParametersSX;
 	private Combo theta;
 	private Combo selectedOption;
+	private String fluxpathStorage = " ";
 	
 	public GeometricParametersWindows(Composite parent, 
 									  int style,
-									  SurfaceScatterPresenter ssp){
+									  SurfaceScatterPresenter ssp,
+									  SurfaceScatterViewStart ssvs){
 		
 		super(parent, style);
         
         this.ssp = ssp;
+        this.ssvs = ssvs;
         this.gpw =this;
         
         this.createContents();
@@ -138,21 +144,62 @@ public class GeometricParametersWindows extends Composite{
 		new Label(geometricParametersReflec, SWT.LEFT).setText("beamHeight");
 		beamHeight = new Text(geometricParametersReflec, SWT.SINGLE);
 		beamHeight.setText("0.06");
+		beamHeight.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+	    
+		
 		new Label(geometricParametersReflec, SWT.LEFT).setText("footprint");
 		footprint = new Text(geometricParametersReflec, SWT.SINGLE);
 		footprint.setText("190");
+		footprint.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+	    
 		new Label(geometricParametersReflec, SWT.LEFT).setText("Angular Adjustment");
 		angularFudgeFactor = new Text(geometricParametersReflec, SWT.SINGLE);
-		angularFudgeFactor.setText("0");
-		new Label(geometricParametersReflec, SWT.LEFT).setText("fluxPath");
+		angularFudgeFactor.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+	    angularFudgeFactor.setText("0");
+		
+		Button fluxPathSelection = new Button(geometricParametersReflec, SWT.PUSH | SWT.FILL);
+		fluxPathSelection.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		fluxPathSelection.setText("Select flux correction file");
 		fluxPath = new Text (geometricParametersReflec, SWT.CHECK);
+		fluxPath.setText(fluxpathStorage);
+		fluxPath.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+	    
+		paramsReflec.setControl(geometricParametersReflec);
+	    
+	    fluxPathSelection.addSelectionListener(new SelectionListener() {
+			
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				
+				FileDialog dlg = new FileDialog(ssvs.getShell(), SWT.OPEN);
+				
+				if(fluxpathStorage != null){
+				
+					dlg.setFilterPath(fluxpathStorage);
+				}
 
-	    paramsReflec.setControl(geometricParametersReflec);
+		        dlg.setText("flux file");
+
+		        String dir = dlg.open();
+		        fluxpathStorage = dir;
+				
+				fluxPath.setText(fluxpathStorage);
+				
+			}
+			
+			@Override
+			public void widgetDefaultSelected(SelectionEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+		});
 	    
 	    fluxPath.addModifyListener(new ModifyListener(){
 
 			@Override
 			public void modifyText(ModifyEvent e) {
+				fluxpathStorage = fluxPath.getText();
+				
 				geometricParametersUpdate();
 			}
 	    	
@@ -633,7 +680,7 @@ public class GeometricParametersWindows extends Composite{
 	public void geometricParametersUpdate() {
 			
 		ssp.geometricParametersUpdate(
-				  fluxPath.getText(),
+				  fluxpathStorage,
 				  (Double.parseDouble(beamHeight.getText())),
 				  (Double.parseDouble(footprint.getText())),
 				  (Double.parseDouble(angularFudgeFactor.getText())),
@@ -660,7 +707,7 @@ public class GeometricParametersWindows extends Composite{
 	public void getGeometricParameters() {
 		
 		ssp.geometricParametersUpdate(
-				  fluxPath.getText(),
+				  fluxpathStorage,
 				  (Double.parseDouble(beamHeight.getText())),
 				  (Double.parseDouble(footprint.getText())),
 				  (Double.parseDouble(angularFudgeFactor.getText())),
@@ -687,7 +734,7 @@ public class GeometricParametersWindows extends Composite{
 	
 	public void localGeometricParametersUpdate(GeometricParametersModel gm) {
 		
-		gm.setFluxPath(fluxPath.getText());
+		gm.setFluxPath(fluxpathStorage);
 		gm.setBeamHeight( (Double.parseDouble(beamHeight.getText())));
 		gm.setFootprint(Double.parseDouble(footprint.getText()));
 		gm.setAngularFudgeFactor (Double.parseDouble(angularFudgeFactor.getText()));
