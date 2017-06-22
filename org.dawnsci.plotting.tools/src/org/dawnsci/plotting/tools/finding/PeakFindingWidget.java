@@ -221,7 +221,7 @@ public class PeakFindingWidget {
 					peakOpp.setLowerBound(uprBndVal.getDouble());
 					peakOpp.setUpperBound(lwrBndVal.getDouble());
 					
-					manager.setSearchScaleIntensity(searchIntensity.getDouble());
+					manager.setSearchThreshold(searchThreshold.getDouble());
 					manager.loadPeakOppurtunity(peakOpp);
 				} 	
 				

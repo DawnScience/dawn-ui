@@ -44,7 +44,7 @@ public class PeakFindingManager {
 	private static IPeakFindingService peakFindServ = (IPeakFindingService) Activator
 			.getService(IPeakFindingService.class);
 	
-	private Double searchScaleIntensity;
+	private Double searchScaleThreshold;
 	
 	private IPeakFindingData peakFindData; 
 	private String peakFinderID;
@@ -113,19 +113,19 @@ public class PeakFindingManager {
 		return file.getAbsolutePath();
 	}
 
-	public Double getSearchScaleIntensity() {
-		return searchScaleIntensity;
+	public Double getSearchScaleThreshold() {
+		return searchScaleThreshold;
 	}
 
-	public void setSearchThreshold(double searchScaleIntensity) {
+	public void setSearchThreshold(double searchScaleThreshold) {
 		String peakfinder = Activator.getPlottingPreferenceStore().getString(PeakFindingConstants.PeakAlgorithm);	
 		//TODO: tmp as only wavelet has the adjustment configured correctly
 		if(peakfinder.equals("Wavelet Transform")){
-			Activator.getPlottingPreferenceStore().setValue("Conolve Width Size", searchScaleIntensity);
+			Activator.getPlottingPreferenceStore().setValue("Conolve Width Size", searchScaleThreshold);
 			
 		}
 		String curVal = Activator.getPlottingPreferenceStore().getString("Conolve Width Size");
-		this.searchScaleIntensity = searchScaleIntensity;
+		this.searchScaleThreshold = searchScaleThreshold;
 	}
 	
 	/*TRIGGERS*/
