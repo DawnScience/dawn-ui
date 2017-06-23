@@ -1448,7 +1448,23 @@ public class SurfaceScatterViewStart extends Dialog {
 			}
 
 		});
-	
+		
+		outputCurves.getOutputFormatSelection().addSelectionListener(new SelectionListener() {
+			
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+
+				setSms(SaveFormatSetting.toMethod(outputCurves.getOutputFormatSelection().getSelectionIndex()));
+			
+			}
+			
+			@Override
+			public void widgetDefaultSelected(SelectionEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+		});
+		
 		outputCurves.getIntensity().addSelectionListener(new SelectionListener() {
 
 			@Override
@@ -1516,7 +1532,9 @@ public class SurfaceScatterViewStart extends Dialog {
 				}
 				
 				String title = path + File.separator + stitle;
-
+			
+				setSms(SaveFormatSetting.toMethod(outputCurves.getOutputFormatSelection().getSelectionIndex()));
+			
 				if (sms == SaveFormatSetting.GenX) {
 					ssp.genXSave(title);
 				}

@@ -99,11 +99,9 @@ public class TrackingHandlerWithFrames {
 	
 	protected  void runTJ1(){
 
-
 		this.gm = ssp.getGm();
 		this.fms = ssp.getFms();
 		this.drm = ssp.getDrm();
-		
 		
 		drm.resetAll();
 
@@ -120,7 +118,7 @@ public class TrackingHandlerWithFrames {
 		ssp.regionOfInterestSetter(lenPt);
 		
 		if (fms.get(startFrame).getBackgroundMethdology() != AnalaysisMethodologies.Methodology.TWOD_TRACKING &&
-				drm.isTrackerOn() != true) {
+			drm.isTrackerOn() != true) {
 
 			noImages = fms.size();
 				
@@ -415,8 +413,6 @@ public class TrackingHandlerWithFrames {
 						}
 					//////bottom of k++ loop
 					
-
-					
 					if(drm.getCorrectionSelection() == MethodSetting.Reflectivity_NO_Correction ||
 							   drm.getCorrectionSelection() == MethodSetting.Reflectivity_with_Flux_Correction ||
 							   drm.getCorrectionSelection() == MethodSetting.Reflectivity_without_Flux_Correction){
@@ -446,16 +442,10 @@ public class TrackingHandlerWithFrames {
 					
 					return;
 					}
-					
-					
-					
 				};
-				
-				
-				
+	
 			t.start();
 			
-//			
 			}	
 			
 		}
@@ -467,7 +457,6 @@ public class TrackingHandlerWithFrames {
 			tj.setCorrectionSelection(MethodSetting.toInt(drm.getCorrectionSelection()));
 			tj.setGm(gm);
 			tj.setOutputCurves(outputCurves);
-//			tj.setTimeStep(Math.round(2 / fms.size()));
 			tj.setSsp(ssp);
 			tj.setSsvs(ssvs);
 			tj.setTPAAV(tpaav);

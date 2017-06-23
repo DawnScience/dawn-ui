@@ -38,23 +38,28 @@ public class DatDisplayer extends Composite {
 	private Button selectFiles;
 	private SurfaceScatterPresenter ssp;
 	private Table rodDisplayTable;
+	private Table paramFileTable;
 	private Combo optionsDropDown;
 	private String[] options;
 	private ArrayList<String> datList;
+	private ArrayList<String> paramFileList;
 	private Table folderDisplayTable;
 	private Button buildRod;
 	private SashForm selectionSash;
 	private Button datFolderSelection;
+	private Button paramFileSelection;
 	private SurfaceScatterViewStart ssvs;
 	private String datFolderPath = null;
+	private String paramFolderPath = null;
 	private Button transferToRod;
-	private Group rodConstrucion;
+	private Group rodConstruction;
 	private Button deleteSelected;
 	private Button clearTable;
 	private Button clearRodTable;
 	private Group scannedVariableOptions;
 	private Group rodComponents;
 	private Text datFolderText;
+	private Text paramFileText;
 	private String imageName;
 	private Boolean promptedForImageFolder = false;
 	private boolean r;
@@ -62,6 +67,7 @@ public class DatDisplayer extends Composite {
 	private Button selectAll;
 	private String option;
 	private RodSetupWindow rsw;
+	private Group parameterFiles;
 
 
 	public String getOption() {
@@ -216,15 +222,15 @@ public class DatDisplayer extends Composite {
 		folderDisplayTable.getVerticalBar().setIncrement(1);
 		folderDisplayTable.getVerticalBar().setThumb(1);
 
-		rodConstrucion = new Group(right, SWT.V_SCROLL | SWT.FILL | SWT.FILL);
-		GridLayout rodConstrucionLayout = new GridLayout(1, true);
-		GridData rodConstrucionData = new GridData(GridData.FILL_BOTH);
-		rodConstrucion.setLayout(rodConstrucionLayout);
-		rodConstrucion.setLayoutData(rodConstrucionData);
-		rodConstrucion.setText("Rod Construcion");
-		rodConstrucion.setEnabled(false);
+		rodConstruction = new Group(right, SWT.V_SCROLL | SWT.FILL | SWT.FILL);
+		GridLayout rodConstructionLayout = new GridLayout(1, true);
+		GridData rodConstructionData = new GridData(GridData.FILL_BOTH);
+		rodConstruction.setLayout(rodConstructionLayout);
+		rodConstruction.setLayoutData(rodConstructionData);
+		rodConstruction.setText("Rod Construction, Tracking and Background Options");
+		rodConstruction.setEnabled(false);
 
-		scannedVariableOptions = new Group(rodConstrucion, SWT.NULL);
+		scannedVariableOptions = new Group(rodConstruction, SWT.NULL);
 		GridLayout scannedVariableOptionsLayout = new GridLayout(1, true);
 		GridData scannedVariableOptionsData = new GridData(GridData.FILL_HORIZONTAL);
 		scannedVariableOptions.setLayout(scannedVariableOptionsLayout);
@@ -238,7 +244,7 @@ public class DatDisplayer extends Composite {
 
 		optionsDropDown.select(0);
 
-		rodComponents = new Group(rodConstrucion, SWT.NULL | SWT.V_SCROLL | SWT.FILL);
+		rodComponents = new Group(rodConstruction, SWT.NULL | SWT.V_SCROLL | SWT.FILL);
 		GridLayout rodComponentsLayout = new GridLayout(1, true);
 		GridData rodComponentsData = new GridData(GridData.FILL_BOTH);
 		rodComponents.setLayout(rodComponentsLayout);
@@ -443,12 +449,15 @@ public class DatDisplayer extends Composite {
 					}
 					
 					clearRodTable.setEnabled(true);
-					rodConstrucion.setEnabled(true);
+					rodConstruction.setEnabled(true);
 					deleteSelected.setEnabled(true);
 					buildRod.setEnabled(true);
 					optionsDropDown.setEnabled(true);
 					rodDisplayTable.setEnabled(true);
 					rodComponents.setEnabled(true);
+					parameterFiles.setEnabled(true);
+					paramFileTable.setEnabled(true);
+					paramFileSelection.setEnabled(true);
 					scannedVariableOptions.setEnabled(true);
 					folderDisplayTable.getVerticalBar().setEnabled(true);
 					ssvs.setupRightEnabled(true);
@@ -587,8 +596,70 @@ public class DatDisplayer extends Composite {
 			}
 		});
 
+		parameterFiles = new Group(rodConstruction, SWT.NULL | SWT.V_SCROLL | SWT.FILL);
+		GridLayout parameterFilesLayout = new GridLayout(1, true);
+		GridData parameterFilesData = new GridData(GridData.FILL_BOTH);
+		parameterFiles.setLayout(parameterFilesLayout);
+		parameterFiles.setLayoutData(parameterFilesData);
+		parameterFiles.setText("Parameter Files");
+		parameterFiles.setEnabled(false);
+		
+		Group parameterFilesSelect = new Group(parameterFiles, SWT.NONE);
+		GridLayout parameterFilesSelectLayout = new GridLayout(2, true);
+		GridData parameterFilesSelectData = new GridData((GridData.FILL_HORIZONTAL));
+		parameterFilesSelect.setLayout(parameterFilesSelectLayout);
+		parameterFilesSelect.setLayoutData(parameterFilesSelectData);
 
-		selectionSash.setWeights(new int[] { 50, 50 });
+		paramFileSelection = new Button(parameterFilesSelect, SWT.PUSH | SWT.FILL);
+
+		paramFileSelection.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+
+		paramFileSelection.setText("Select Parameter File");
+		paramFileSelection.setEnabled(false);
+		
+		paramFileText = new Text(parameterFilesSelect, SWT.SINGLE | SWT.BORDER | SWT.FILL);
+		paramFileText.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		paramFileText.setEnabled(false);
+		paramFileText.setEditable(false);
+
+		paramFileTable = new Table(parameterFiles, SWT.CHECK | SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL);
+		GridData paramFileTableData = new GridData(GridData.FILL_BOTH);
+		paramFileTable.setLayoutData(paramFileTableData);
+		paramFileTable.setLayout(new GridLayout());
+		paramFileTable.setEnabled(false);
+
+		paramFileSelection.addSelectionListener(new SelectionListener() {
+
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				
+				FileDialog dlg = new FileDialog(ssvs.getShell(), SWT.OPEN);
+				
+				if(paramFolderPath != null){
+					dlg.setFilterPath(paramFolderPath);
+				}
+
+		        dlg.setText("parameter file");
+
+		        String dir = dlg.open();
+		        
+		        paramFolderPath = dir;
+		        
+		        paramFileText.setText(paramFolderPath);
+		        paramFileText.setEnabled(true);
+
+				
+				addToTable(dir);
+
+			}
+
+			@Override
+			public void widgetDefaultSelected(SelectionEvent e) {
+			}
+		});
+
+		
+//		selectionSash.setWeights(new int[] { 30, 30, 30 });
 	}
 
 	public Composite getComposite() {
@@ -602,7 +673,7 @@ public class DatDisplayer extends Composite {
 
 
 	public void enableRodConstruction(boolean enabled) {
-		rodConstrucion.setEnabled(enabled);
+		rodConstruction.setEnabled(enabled);
 		scannedVariableOptions.setEnabled(enabled);
 		rodComponents.setEnabled(enabled);
 		rodDisplayTable.setEnabled(enabled);
@@ -621,7 +692,7 @@ public class DatDisplayer extends Composite {
 		return selectFiles;
 	}
 
-	public void fillTable() {
+	private void fillTable() {
 
 		File folder = new File(datFolderPath);
 		File[] listOfFiles = folder.listFiles();
@@ -647,6 +718,41 @@ public class DatDisplayer extends Composite {
 		}
 
 		folderDisplayTable.getVerticalBar().setEnabled(true);
+
+	}
+	
+	public void addToTable(String in) {
+
+//		File folder = new File(datFolderPath);
+//		File[] listOfFiles = folder.listFiles();
+
+		if(paramFileList == null){
+			paramFileList = new ArrayList<String>();
+		}
+		//		datList = new ArrayList<>();
+//
+//		CharSequence dat = ".dat";
+
+//		for (int i = 0; i < listOfFiles.length; i++) {
+//			if (listOfFiles[i].isFile() && listOfFiles[i].getName().contains(dat)) {
+				paramFileList.add(in);
+//			}
+//		}
+
+		try {
+			java.util.Collections.sort(paramFileList);
+		} catch (Exception g) {
+
+		}
+
+		paramFileTable.clearAll();
+		
+		for (int j = 0; j < paramFileList.size(); j++) {
+			TableItem t = new TableItem(paramFileTable, SWT.NONE);
+			t.setText(paramFileList.get(j));
+		}
+
+		paramFileTable.getVerticalBar().setEnabled(true);
 
 	}
 

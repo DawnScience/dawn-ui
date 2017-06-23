@@ -1,6 +1,5 @@
 package org.dawnsci.surfacescatter.ui;
 
-import org.dawnsci.surfacescatter.ReflectivityNormalisation;
 import org.dawnsci.surfacescatter.MethodSettingEnum.MethodSetting;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.swt.SWT;
@@ -18,7 +17,6 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.PlatformUI;
 
 public class TrackingProgressAndAbortView extends Dialog {
-	
 	
 	private Button abort;
 	private ProgressBar progress;
@@ -97,18 +95,7 @@ public class TrackingProgressAndAbortView extends Dialog {
 		
 		catch(OutOfMemoryError e){
 			ssp.outOfMemoryWarning();
-		}
-		
-//		if(ssp.getDrm().getCorrectionSelection() == MethodSetting.Reflectivity_NO_Correction ||
-//				   ssp.getDrm().getCorrectionSelection() == MethodSetting.Reflectivity_with_Flux_Correction ||
-//				   ssp.getDrm().getCorrectionSelection() == MethodSetting.Reflectivity_without_Flux_Correction){
-//							
-//				   ReflectivityNormalisation.ReflectivityNormalisation1(ssp.getDrm().getCsdp());
-//							
-//					ssvs.getSsps3c().getOutputCurves().getPlotSystem().repaint(true);
-//									
-//		}
-		
+		}		
 		
 		return container;
 	}

@@ -58,7 +58,12 @@ import org.dawnsci.surfacescatter.TrackingMethodology.TrackerType1;
 import org.eclipse.dawnsci.analysis.api.io.IDataHolder;
 import org.eclipse.dawnsci.analysis.api.roi.IROI;
 import org.eclipse.dawnsci.analysis.api.roi.IRectangularROI;
+import org.eclipse.dawnsci.analysis.api.tree.Tree;
 import org.eclipse.dawnsci.analysis.dataset.roi.RectangularROI;
+import org.eclipse.dawnsci.hdf5.nexus.NexusFileFactoryHDF5;
+import org.eclipse.dawnsci.nexus.INexusFileFactory;
+import org.eclipse.dawnsci.nexus.NexusException;
+import org.eclipse.dawnsci.nexus.NexusFile;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.region.IRegion;
 import org.eclipse.dawnsci.plotting.api.trace.ILineTrace;
@@ -848,31 +853,68 @@ public class SurfaceScatterPresenter {
 	
 	
 	@SuppressWarnings("unchecked")
-	public FittingParameters loadParameters(String title
-							   ){
+	public FittingParameters loadParameters(String title){
 		
-		FittingParameters fp = FittingParametersInputReader.reader(title);
+		String fileType = StringUtils.substringAfterLast(title, ".");
 		
-		for( FrameModel m : fms){
+		FittingParameters fp = new FittingParameters();
 		
-			double[] location = LocationLenPtConverterUtils.lenPtToLocationConverter(fp.getLenpt());
+		if(!fileType.equals(".nxs")){
+		
+			fp = FittingParametersInputReader.reader(title);
 			
-			m.setRoiLocation(location);
-			m.setTrackingMethodology(fp.getTracker());
-			m.setFitPower(fp.getFitPower());
-			m.setBoundaryBox(fp.getBoundaryBox());
-			m.setBackgroundMethodology(fp.getBgMethod());
+			for( FrameModel m : fms){
+				
+				double[] location = LocationLenPtConverterUtils.lenPtToLocationConverter(fp.getLenpt());
+				
+				m.setRoiLocation(location);
+				m.setTrackingMethodology(fp.getTracker());
+				m.setFitPower(fp.getFitPower());
+				m.setBoundaryBox(fp.getBoundaryBox());
+				m.setBackgroundMethodology(fp.getBgMethod());
+			}
 		}
 		
-		drm.setInitialLenPt(fp.getLenpt());
-		int selection = this.closestImageNo(fp.getXValue());
+		else{
+			
+			try {
+				dh1 = LoaderFactory.getData(title);
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			
+			Tree tree = dh1.getTree();
+			
+			for(int n = 0; n<fms.size(); n++){
+				
+				FrameModel m = fms.get(n);
+				
+				
+				double[] location = LocationLenPtConverterUtils.lenPtToLocationConverter(fp.getLenpt());
+				
+				m.setRoiLocation(location);
+				m.setTrackingMethodology(fp.getTracker());
+				m.setFitPower(fp.getFitPower());
+				m.setBoundaryBox(fp.getBoundaryBox());
+				m.setBackgroundMethodology(fp.getBgMethod());
+			}
+			
+			fp = FittingParametersInputReader.fittingParametersFromFrameModel(fms.get(0));
+			
+		}
+		
 		
 		drm.setInitialLenPt(fp.getLenpt());
-		sliderPos = (this.closestImageNo(fp.getXValue()));
+	
+		try{
+			sliderPos = (this.closestImageNo(fp.getXValue()));
+		}
+		catch(Exception h){
+			sliderPos = 0;
+		}
 		
-		this.sliderMovemementMainImage(selection);
-		
-		
+		this.sliderMovemementMainImage(sliderPos);
 		
 		return fp;
 			
