@@ -784,7 +784,8 @@ class trackingJob21 {
 									
 									if(drm.getLocationList() == null && 
 									   fms.get(0).getTrackingMethodology() != TrackerType1.INTERPOLATION &&
-									   fms.get(0).getTrackingMethodology() != TrackerType1.SPLINE_INTERPOLATION){
+									   fms.get(0).getTrackingMethodology() != TrackerType1.SPLINE_INTERPOLATION &&
+									   fms.get(0).getTrackingMethodology() != TrackerType1.USE_SET_POSITIONS){
 										
 										if (drm.getTrackerLocationList() == null  ){
 //											| sm.getTrackerLocationList().size() <= 10
@@ -950,7 +951,8 @@ class trackingJob21 {
 									
 									if(drm.getLocationList() == null && 
 									   frame.getTrackingMethodology() != TrackerType1.INTERPOLATION &&
-									   frame.getTrackingMethodology() != TrackerType1.SPLINE_INTERPOLATION){
+									   frame.getTrackingMethodology() != TrackerType1.SPLINE_INTERPOLATION &&
+									   frame.getTrackingMethodology() != TrackerType1.USE_SET_POSITIONS){
 										
 										
 										double[] test = new double[] {0,0,0,0,0,0,0,0};
@@ -1051,7 +1053,14 @@ class trackingJob21 {
 									
 									int imageNumber =k;
 									IDataset tempImage = j;
-									double[] tempLoc = drm.getLocationList().get(frame.getDatNo()).get(frame.getNoInOriginalDat());
+									double[] tempLoc = new double[8];
+									
+									try{
+										tempLoc = drm.getLocationList().get(frame.getDatNo()).get(frame.getNoInOriginalDat());
+									}
+									catch(Exception hb){
+										tempLoc = frame.getRoiLocation();
+									}
 									RectangularROI newROI = new RectangularROI(tempLoc[0],
 										       tempLoc[1],
 										       drm.getInitialLenPt()[0][0],
@@ -1099,9 +1108,12 @@ class trackingJob21 {
 											System.out.println(e.getMessage());
 										}
 
+										
+										
 										if(drm.getLocationList().get(jok) == null && 
 										   frame.getTrackingMethodology()!= TrackerType1.INTERPOLATION &&
-										   frame.getTrackingMethodology() != TrackerType1.SPLINE_INTERPOLATION){
+										   frame.getTrackingMethodology() != TrackerType1.SPLINE_INTERPOLATION &&
+										   frame.getTrackingMethodology() != TrackerType1.USE_SET_POSITIONS){
 											
 											
 											double[] test = new double[] {0,0,0,0,0,0,0,0};
@@ -1493,7 +1505,8 @@ class trackingJob21 {
 						
 						if(drm.getLocationList().get(frame.getDatNo()) == null && 
 						   frame.getTrackingMethodology() != TrackerType1.INTERPOLATION &&
-						   frame.getTrackingMethodology() != TrackerType1.SPLINE_INTERPOLATION){
+						   frame.getTrackingMethodology() != TrackerType1.SPLINE_INTERPOLATION &&
+						   frame.getTrackingMethodology() != TrackerType1.USE_SET_POSITIONS){
 							
 							if (drm.getTrackerLocationList() == null ){
 								
@@ -1694,7 +1707,8 @@ class trackingJob21 {
 						
 						if(re.size() == 0 && 
 						   frame.getTrackingMethodology() != TrackerType1.INTERPOLATION &&
-						   frame.getTrackingMethodology() != TrackerType1.SPLINE_INTERPOLATION) {
+						   frame.getTrackingMethodology() != TrackerType1.SPLINE_INTERPOLATION &&
+						   frame.getTrackingMethodology() != TrackerType1.USE_SET_POSITIONS) {
 							
 							double[] test = new double[] {0,0,0,0,0,0,0,0};
 							double[] test2 = new double[] {10,10,60,10,10,60,60,60};

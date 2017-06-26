@@ -859,7 +859,7 @@ public class SurfaceScatterPresenter {
 		
 		FittingParameters fp = new FittingParameters();
 		
-		if(!fileType.equals(".nxs")){
+		if(!fileType.equals("nxs")){
 		
 			fp = FittingParametersInputReader.reader(title);
 			
@@ -884,20 +884,21 @@ public class SurfaceScatterPresenter {
 				e.printStackTrace();
 			}
 			
-			Tree tree = dh1.getTree();
+			Tree tree = dh1.getTree();			
 			
 			for(int n = 0; n<fms.size(); n++){
 				
 				FrameModel m = fms.get(n);
 				
+//				double[] location = LocationLenPtConverterUtils.lenPtToLocationConverter(fp.getLenpt());
+//				
+//				m.setRoiLocation(location);
+//				m.setTrackingMethodology(fp.getTracker());
+//				m.setFitPower(fp.getFitPower());
+//				m.setBoundaryBox(fp.getBoundaryBox());
+//				m.setBackgroundMethodology(fp.getBgMethod());
 				
-				double[] location = LocationLenPtConverterUtils.lenPtToLocationConverter(fp.getLenpt());
-				
-				m.setRoiLocation(location);
-				m.setTrackingMethodology(fp.getTracker());
-				m.setFitPower(fp.getFitPower());
-				m.setBoundaryBox(fp.getBoundaryBox());
-				m.setBackgroundMethodology(fp.getBgMethod());
+				FittingParametersInputReader.readerFromNexus (tree, n, m);
 			}
 			
 			fp = FittingParametersInputReader.fittingParametersFromFrameModel(fms.get(0));

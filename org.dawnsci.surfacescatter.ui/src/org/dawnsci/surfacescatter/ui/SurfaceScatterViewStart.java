@@ -262,7 +262,12 @@ public class SurfaceScatterViewStart extends Dialog {
 				
 				customComposite.resetCorrectionsTab();
 				customComposite.generalUpdate();
-				ssps3c.generalUpdate();
+				try{
+					ssps3c.generalUpdate();
+				}
+				catch(Exception u){
+					
+				}
 				customComposite.generalCorrectionsUpdate();
 				customComposite.getPlotSystem1CompositeView().generalUpdate();
 				updateIndicators(0);
@@ -288,6 +293,60 @@ public class SurfaceScatterViewStart extends Dialog {
 				ssps3c.resetCrossHairs();
 				ssp.setSelection(0);
 				ssp.setSliderPos(0);
+				
+				boolean isThereAParamFile = false;
+				String paramFile = " ";
+				
+				for(TableItem jh : datDisplayer.getParamFileTable().getItems()){
+					if(jh.getChecked()){
+						isThereAParamFile=true;
+						paramFile = jh.getText();
+					}
+				}
+				
+				if(isThereAParamFile){
+					FittingParameters fp = ssp.loadParameters(paramFile);
+					
+					customComposite.getPlotSystem1CompositeView().setMethodologyDropDown(fp.getBgMethod());
+					customComposite.getPlotSystem1CompositeView().setFitPowerDropDown(fp.getFitPower());
+					customComposite.getPlotSystem1CompositeView().setTrackerTypeDropDown(fp.getTracker());
+					customComposite.getPlotSystem1CompositeView().setBoundaryBox(fp.getBoundaryBox());
+					
+					customComposite.setRegion(fp.getLenpt());
+					
+					double[] bgRegionROI = ssp.regionOfInterestSetter1(fp.getLenpt());
+					
+					RectangularROI bgROI = new RectangularROI(bgRegionROI[0],
+							  bgRegionROI[1],
+							  bgRegionROI[2],
+							  bgRegionROI[3],
+							  bgRegionROI[4]);
+					
+					customComposite.getBgRegion().setROI(bgROI);
+					
+					customComposite.redraw();
+							
+					int selection = ssp.closestImageNo(fp.getXValue());
+					SurfaceScatterViewStart.this.updateIndicators(selection);
+					
+					
+					ssps3c.generalUpdate();
+					customComposite.getPlotSystem1CompositeView().generalUpdate();
+					RectangularROI[] greenAndBg = ssp.trackingRegionOfInterestSetter(ssp.getLenPt());
+					
+					customComposite.getIRegion().setROI(greenAndBg[0]);
+					customComposite.getBgRegion().setROI(greenAndBg[1]);
+					
+					
+					if(ssp.getMethodology() == Methodology.OVERLAPPING_BACKGROUND_BOX){
+						customComposite.getSecondBgRegion().setROI(ssp.generateOffsetBgROI(ssp.getLenPt()));
+					}
+					
+					getSsps3c().generalUpdate(ssp.getLenPt());
+					customComposite.generalCorrectionsUpdate();
+
+					
+				}
 				
 			}
 

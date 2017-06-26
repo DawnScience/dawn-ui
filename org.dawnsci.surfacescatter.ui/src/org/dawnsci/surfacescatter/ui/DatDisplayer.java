@@ -48,6 +48,7 @@ public class DatDisplayer extends Composite {
 	private SashForm selectionSash;
 	private Button datFolderSelection;
 	private Button paramFileSelection;
+	private Button clearParameterTable;
 	private SurfaceScatterViewStart ssvs;
 	private String datFolderPath = null;
 	private String paramFolderPath = null;
@@ -68,6 +69,8 @@ public class DatDisplayer extends Composite {
 	private String option;
 	private RodSetupWindow rsw;
 	private Group parameterFiles;
+	private ArrayList<TableItem> paramFilesChecked;
+	private SelectionListener timothy;
 
 
 	public String getOption() {
@@ -449,6 +452,7 @@ public class DatDisplayer extends Composite {
 					}
 					
 					clearRodTable.setEnabled(true);
+					clearParameterTable.setEnabled(true);
 					rodConstruction.setEnabled(true);
 					deleteSelected.setEnabled(true);
 					buildRod.setEnabled(true);
@@ -611,23 +615,10 @@ public class DatDisplayer extends Composite {
 		parameterFilesSelect.setLayoutData(parameterFilesSelectData);
 
 		paramFileSelection = new Button(parameterFilesSelect, SWT.PUSH | SWT.FILL);
-
 		paramFileSelection.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-
 		paramFileSelection.setText("Select Parameter File");
 		paramFileSelection.setEnabled(false);
 		
-		paramFileText = new Text(parameterFilesSelect, SWT.SINGLE | SWT.BORDER | SWT.FILL);
-		paramFileText.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-		paramFileText.setEnabled(false);
-		paramFileText.setEditable(false);
-
-		paramFileTable = new Table(parameterFiles, SWT.CHECK | SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL);
-		GridData paramFileTableData = new GridData(GridData.FILL_BOTH);
-		paramFileTable.setLayoutData(paramFileTableData);
-		paramFileTable.setLayout(new GridLayout());
-		paramFileTable.setEnabled(false);
-
 		paramFileSelection.addSelectionListener(new SelectionListener() {
 
 			@Override
@@ -648,6 +639,8 @@ public class DatDisplayer extends Composite {
 		        paramFileText.setText(paramFolderPath);
 		        paramFileText.setEnabled(true);
 
+		        
+		        clearParameterTable.setEnabled(true);
 				
 				addToTable(dir);
 
@@ -657,9 +650,93 @@ public class DatDisplayer extends Composite {
 			public void widgetDefaultSelected(SelectionEvent e) {
 			}
 		});
+		
+		paramFileText = new Text(parameterFilesSelect, SWT.SINGLE | SWT.BORDER | SWT.FILL);
+		paramFileText.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		paramFileText.setEnabled(false);
+		paramFileText.setEditable(false);
 
+		clearParameterTable = new Button(parameterFiles, SWT.PUSH | SWT.FILL);
+		clearParameterTable.setText("Clear Table");
+		clearParameterTable.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		clearParameterTable.setEnabled(false);
+		
+		clearParameterTable.addSelectionListener(new SelectionListener() {
+
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				
+				for(int cv = 0; cv<paramFileTable.getItems().length; cv++){
+					paramFileTable.remove(cv);
+				}
+				paramFileList.clear();
+				paramFileTable.removeAll();	
+				paramFilesChecked.clear();
+				clearParameterTable.setEnabled(false);
+			}
+			
+			@Override
+			public void widgetDefaultSelected(SelectionEvent e) {
+				// TODO Auto-generated method stub
+
+			}
+		});
+		
+		paramFileTable = new Table(parameterFiles, SWT.CHECK | SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL);
+		GridData paramFileTableData = new GridData(GridData.FILL_BOTH);
+		paramFileTable.setLayoutData(paramFileTableData);
+		paramFileTable.setLayout(new GridLayout());
+		paramFileTable.setEnabled(false);
+
+		timothy = new SelectionListener() {
+			
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				paramFileTable.removeSelectionListener(timothy);
+				thereCanBeOnlyOne();
+				paramFileTable.addSelectionListener(timothy);
+				
+			}
+			
+			@Override
+			public void widgetDefaultSelected(SelectionEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+		};
+		
+		
+//		paramFileTable.addSelectionListener(timothy);
+		
+		paramFileTable.addSelectionListener(new SelectionListener() {
+			
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				
+				Object r = e.item;
+				
+				for(TableItem yu : paramFileTable.getItems()){
+					if(yu != r){
+						yu.setChecked(false);
+					}
+
+				}
+				
+				return;
+			}
+			
+			@Override
+			public void widgetDefaultSelected(SelectionEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+		});
 		
 //		selectionSash.setWeights(new int[] { 30, 30, 30 });
+	}
+
+	public Table getParamFileTable() {
+		return paramFileTable;
 	}
 
 	public Composite getComposite() {
@@ -722,22 +799,19 @@ public class DatDisplayer extends Composite {
 	}
 	
 	public void addToTable(String in) {
-
-//		File folder = new File(datFolderPath);
-//		File[] listOfFiles = folder.listFiles();
+		
+		
+		for(int cv = 0; cv<paramFileTable.getItems().length; cv++){
+			paramFileTable.remove(cv);
+		}
+		
+		paramFileTable.removeAll();	
 
 		if(paramFileList == null){
 			paramFileList = new ArrayList<String>();
 		}
-		//		datList = new ArrayList<>();
-//
-//		CharSequence dat = ".dat";
-
-//		for (int i = 0; i < listOfFiles.length; i++) {
-//			if (listOfFiles[i].isFile() && listOfFiles[i].getName().contains(dat)) {
-				paramFileList.add(in);
-//			}
-//		}
+		
+		paramFileList.add(in);
 
 		try {
 			java.util.Collections.sort(paramFileList);
@@ -903,6 +977,27 @@ public class DatDisplayer extends Composite {
 		}
 		
 		return output;
+	}
+	
+	private void thereCanBeOnlyOne(){
+		if(paramFilesChecked == null){
+			paramFilesChecked = new ArrayList<>();
+		}
+		
+		if (paramFilesChecked.size()>0){
+			for(TableItem ti : paramFilesChecked){
+				ti.setChecked(false);
+			}
+		}
+		
+		paramFilesChecked = new ArrayList<>();
+		
+		for (TableItem ra : paramFileTable.getItems()) {
+			if(ra.getChecked() == true){
+				paramFilesChecked.add(ra);
+			}
+		}
+		
 	}
 	
 }
