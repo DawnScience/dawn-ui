@@ -67,8 +67,7 @@ public class FileTableExplorer {
 			Utils.getResourceString(FileViewerConstants.NAME_TITLE),
 			Utils.getResourceString(FileViewerConstants.SIZE_TITLE),
 			Utils.getResourceString(FileViewerConstants.TYPE_TITLE),
-			Utils.getResourceString(FileViewerConstants.MODIFIED_TITLE),
-			Utils.getResourceString(FileViewerConstants.SCAN_TITLE) };
+			Utils.getResourceString(FileViewerConstants.MODIFIED_TITLE)};
 	private String[] tableToolTips;
 
 	private Label tableContentsOfLabel;
@@ -167,7 +166,6 @@ public class FileTableExplorer {
 		boolean showSize = store.getBoolean(FileViewerConstants.SHOW_SIZE_COLUMN);
 		boolean showType = store.getBoolean(FileViewerConstants.SHOW_TYPE_COLUMN);
 		boolean showModified = store.getBoolean(FileViewerConstants.SHOW_MODIFIED_COLUMN);
-		boolean showScanCmd = store.getBoolean(FileViewerConstants.SHOW_SCANCMD_COLUMN);
 		isSizeSIUnits = store.getBoolean(FileViewerConstants.DISPLAY_WITH_SI_UNITS);
 		// set tooltip accordingly
 		tableToolTips = new String[] { Utils.getResourceString(FileViewerConstants.NAME_TIP),
@@ -180,7 +178,6 @@ public class FileTableExplorer {
 		final int sizeWidth = showSize ? 75 : 0;
 		final int typeWidth = showType ? 75 : 0;
 		final int modifiedWidth = showModified ? 150 : 0;
-		final int scanCmdWidth = showScanCmd ? 300 : 0;
 		store.addPropertyChangeListener(new IPropertyChangeListener() {
 			@Override
 			public void propertyChange(PropertyChangeEvent event) {
@@ -190,8 +187,6 @@ public class FileTableExplorer {
 					setColumnVisible(2, 75, (Boolean) event.getNewValue());
 				} else if (event.getProperty().equals(FileViewerConstants.SHOW_MODIFIED_COLUMN)) {
 					setColumnVisible(3, 150, (Boolean) event.getNewValue());
-				} else if (event.getProperty().equals(FileViewerConstants.SHOW_SCANCMD_COLUMN)) {
-					setColumnVisible(4, 300, (Boolean) event.getNewValue());
 				} else if (event.getProperty().equals(FileViewerConstants.DISPLAY_WITH_SI_UNITS)) {
 					isSizeSIUnits = (Boolean) event.getNewValue();
 					// change tooltip of size column
@@ -205,7 +200,7 @@ public class FileTableExplorer {
 				}
 			}
 		});
-		final int[] widths = { 150, sizeWidth, typeWidth, modifiedWidth, scanCmdWidth };
+		final int[] widths = { 150, sizeWidth, typeWidth, modifiedWidth};
 		createColumns(widths);
 
 		// make the selection available to other views

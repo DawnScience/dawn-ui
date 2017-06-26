@@ -68,8 +68,6 @@ public class FileTableColumnLabelProvider extends ColumnLabelProvider {
 			return content.getFileType();
 		case 3:
 			return content.getFileDate();
-		case 4:
-			return content.getFileScanCmd();
 		default:
 			break;
 		}

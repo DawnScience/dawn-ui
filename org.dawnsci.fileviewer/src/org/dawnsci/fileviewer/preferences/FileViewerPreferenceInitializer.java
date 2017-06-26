@@ -27,7 +27,6 @@ public class FileViewerPreferenceInitializer extends AbstractPreferenceInitializ
 		store.setDefault(FileViewerConstants.SHOW_SIZE_COLUMN, true);
 		store.setDefault(FileViewerConstants.SHOW_TYPE_COLUMN, true);
 		store.setDefault(FileViewerConstants.SHOW_MODIFIED_COLUMN, true);
-		store.setDefault(FileViewerConstants.SHOW_SCANCMD_COLUMN, false);
 		store.setDefault(FileViewerConstants.DISPLAY_WITH_SI_UNITS, false);
 	}
 }

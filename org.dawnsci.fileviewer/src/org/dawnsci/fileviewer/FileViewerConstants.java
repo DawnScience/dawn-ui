@@ -69,7 +69,6 @@ public class FileViewerConstants {
 	public static final String SHOW_SIZE_COLUMN = "org.dawnsci.fileviewer.showsize";
 	public static final String SHOW_TYPE_COLUMN = "org.dawnsci.fileviewer.showtype";
 	public static final String SHOW_MODIFIED_COLUMN = "org.dawnsci.fileviewer.showmodified";
-	public static final String SHOW_SCANCMD_COLUMN = "org.dawnsci.fileviewer.showscancmd";
 	public static final String DISPLAY_WITH_SI_UNITS = "org.dawnsci.fileviewer.displaySIUnits";
 
 	/**
@@ -104,6 +103,5 @@ public class FileViewerConstants {
 	public static final String SIZE_TITLE = "table.Size.title";
 	public static final String TYPE_TITLE = "table.Type.title";
 	public static final String MODIFIED_TITLE = "table.Modified.title";
-	public static final String SCAN_TITLE = "table.ScanCmd.title";
 
 }

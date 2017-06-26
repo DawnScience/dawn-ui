@@ -44,8 +44,6 @@ public class FileViewerPreferencePage extends FieldEditorPreferencePage implemen
 				getFieldEditorParent());
 		addField(showModified);
 
-		showScanCmd = new BooleanFieldEditor(FileViewerConstants.SHOW_SCANCMD_COLUMN,
-				"Show scan command column", getFieldEditorParent());
 		addField(showScanCmd);
 
 		displayWithSIUnit = new BooleanFieldEditor(FileViewerConstants.DISPLAY_WITH_SI_UNITS,

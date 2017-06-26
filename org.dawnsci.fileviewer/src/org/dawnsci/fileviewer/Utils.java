@@ -45,7 +45,6 @@ public class Utils {
 		SIZE,
 		TYPE,
 		DATE,
-		SCAN;
 	}
 
 	public enum SortDirection {
@@ -166,53 +165,6 @@ public class Utils {
 		return FileViewerConstants.dateFormat.format(new Date(file.lastModified()));
 	}
 
-	static class ScanCmdJob extends Job {
-		private File file;
-		private String scanCmd = "";
-		
-		public ScanCmdJob() {
-			super("ScanCmdJob");
-		}
-
-		public void setFile(File file) {
-			this.file = file;
-			this.scanCmd = "";
-		}
-		
-		@Override
-		protected IStatus run(IProgressMonitor monitor) {
-			if (file.isFile()) {
-				String extension = getFileExtension(file);
-				if (ArrayUtils.contains(new String[]{"nxs", "hdf", "h5", "hdf5", "dat"}, extension)) {
-					String filePath = file.getAbsolutePath();
-					try {
-						ILoaderService loader = ServiceHolder.getLoaderService();
-						IDataHolder dh = loader.getData(filePath, null);
-						IMetadata meta = dh.getMetadata();
-						Collection<String> metanames = meta.getMetaNames();
-						for (Iterator<String> iterator = metanames.iterator(); iterator.hasNext();) {
-							if (monitor.isCanceled())
-								return Status.OK_STATUS;
-							String string = iterator.next();
-							if (string.contains("scan_command")) {
-								Serializable value = meta.getMetaValue(string);
-								scanCmd = (String) value;
-								return Status.OK_STATUS;
-							}
-						}
-					} catch (Exception e) {
-						return Status.OK_STATUS;
-					}
-				}
-			}
-			return Status.OK_STATUS;
-		}
-		
-		public String getScanCmd() {
-			return scanCmd;
-		}
-	}
-	
 	/**
 	 * Get the Scan Command if file contains one
 	 * 
