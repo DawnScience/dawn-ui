@@ -250,10 +250,9 @@ public class ImageService extends AbstractServiceFactory implements IImageServic
 	 */
 	public double[] getFastStatistics(ImageServiceBean bean) {
 		
-		Dataset image    = getImageLoggedData(bean);
-		
-		if (bean.getHistogramType()==HistoType.OUTLIER_VALUES && !bean.isLogColorScale()) {
+		Dataset image = getImageLoggedData(bean);
 
+		if (bean.getHistogramType() == HistoType.OUTLIER_VALUES) {
 			double[] ret = null;
 			try {
 			    double[] stats = Stats.outlierValues(image, bean.getLo(), bean.getHi(), -1);
@@ -265,7 +264,7 @@ public class ImageService extends AbstractServiceFactory implements IImageServic
 			    ret = new double[]{stats[0], stats[1], -1};
 			}
 
-		    if (bean.isLogColorScale() && ret!=null) {
+		    if (bean.isLogColorScale() && ret != null) {
 		    	ret = new double[]{Math.pow(10, ret[0]), Math.pow(10, ret[1]), -1};
 			}
 
