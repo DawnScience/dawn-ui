@@ -276,7 +276,7 @@ public class WindowTool extends AbstractToolPage {
 		sliceSlider.addMouseMoveListener(new MouseMoveListener() {
 			@Override
 			public void mouseMove(MouseEvent e) {
-				if ((e.button & SWT.BUTTON1)==0) {
+				if (e.button == 1) {
 					final int lower = sliceSlider.getLowerValue();
 					final int upper = sliceSlider.getUpperValue();
 					if (lower<0 || upper<0)                   return;

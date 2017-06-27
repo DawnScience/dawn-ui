@@ -23,8 +23,19 @@ public class TranslationEvent extends EventObject {
 	private Point start;
 	private Point end;
 
+	private boolean ctrl;
+
 	public TranslationEvent(Object source) {
 		super(source);
+	}
+
+	/**
+	 * @param source
+	 * @param control true if a control key was pressed 
+	 */
+	public TranslationEvent(Object source, boolean control) {
+		super(source);
+		this.ctrl = control;
 	}
 	public TranslationEvent(Object source, Point start, Point end) {
 		super(source);
@@ -39,5 +50,12 @@ public class TranslationEvent extends EventObject {
 	public boolean mouseStationary() {
 		if (start==null || end==null) return false;
 		return start.equals(end);
+	}
+
+	/**
+	 * @return true if a control key was pressed during the translate
+	 */
+	public boolean controlKeyPressed() {
+		return ctrl;
 	}
 }

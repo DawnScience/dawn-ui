@@ -221,7 +221,8 @@ abstract public class ROIShape<T extends IROI> extends RegionFillFigure<T> imple
 					}
 					final IFigure handle = translator.getRedrawFigure();
 					final int h = handles.indexOf(handle);
-					HandleStatus status = h == roiHandler.getCentreHandle() ? HandleStatus.RMOVE : HandleStatus.RESIZE;
+					HandleStatus status = h == roiHandler.getCentreHandle() ? HandleStatus.RMOVE : 
+						(evt.controlKeyPressed() ? HandleStatus.REORIENT : HandleStatus.RESIZE);
 					roiHandler.configureDragging(h, status);
 				}
 			}
@@ -244,13 +245,16 @@ abstract public class ROIShape<T extends IROI> extends RegionFillFigure<T> imple
 						c[0] = Math.round(c[0]);
 						c[1] = Math.round(c[1]);
 					}
+
 					troi = roiHandler.interpretMouseDragging(spt, c);
-					roiHandler.setROI(troi);
-					intUpdateFromROI(troi);
-					roiHandler.setROI(croi);
-					
-					region.fireROIDragged(troi, roiHandler.getStatus() == HandleStatus.RESIZE ?
-							ROIEvent.DRAG_TYPE.RESIZE : ROIEvent.DRAG_TYPE.TRANSLATE);
+					if (troi != null) {
+						roiHandler.setROI(troi);
+						intUpdateFromROI(troi);
+						roiHandler.setROI(croi);
+						
+						region.fireROIDragged(troi, roiHandler.getStatus() == HandleStatus.RESIZE ?
+								ROIEvent.DRAG_TYPE.RESIZE : ROIEvent.DRAG_TYPE.TRANSLATE);
+					}
 				}
 			}
 
@@ -267,14 +271,18 @@ abstract public class ROIShape<T extends IROI> extends RegionFillFigure<T> imple
 						c[0] = Math.round(c[0]);
 						c[1] = Math.round(c[1]);
 					}
+
 					T croi = roiHandler.interpretMouseDragging(spt, c);
-
-					updateFromROI(croi);
-					roiHandler.unconfigureDragging();
-					region.createROI(true);
-
-					region.fireROIChanged(croi);
-					region.fireROISelection();
+					if (croi != null) {
+						updateFromROI(croi);
+						roiHandler.unconfigureDragging();
+						region.createROI(true);
+	
+						region.fireROIChanged(croi);
+						region.fireROISelection();
+					} else {
+						translator.getRedrawFigure().setLocation(translator.getStartLocation());
+					}
 				}
 			}
 		};
