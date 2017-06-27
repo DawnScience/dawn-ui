@@ -122,7 +122,7 @@ public class RodAnalysisWindow {
 			rtc.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 			
 		} catch (Exception d) {
-
+			System.out.println(d.getMessage());
 		}
 		
 	    

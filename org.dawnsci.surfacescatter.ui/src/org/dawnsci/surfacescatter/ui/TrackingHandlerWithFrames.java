@@ -1208,8 +1208,14 @@ class trackingJob21 {
 										
 										int imageNumber =k;
 										IDataset tempImage = j;
-										double[] tempLoc = drm.getLocationList().get(frame.getDatNo()).get(frame.getNoInOriginalDat());
-										RectangularROI newROI = new RectangularROI(tempLoc[0],
+										double[] tempLoc = new double[8];
+										try{
+											tempLoc = drm.getLocationList().get(frame.getDatNo()).get(frame.getNoInOriginalDat());
+										}
+										catch(Exception hj){
+											tempLoc = frame.getRoiLocation();
+										}
+											RectangularROI newROI = new RectangularROI(tempLoc[0],
 											       tempLoc[1],
 											       drm.getInitialLenPt()[0][0],
 											       drm.getInitialLenPt()[0][1],0);
@@ -1339,8 +1345,14 @@ class trackingJob21 {
 					
 					int imageNumber =k;
 					IDataset tempImage = j;
-					double[] tempLoc = drm.getLocationList().get(frame.getDatNo()).get(frame.getNoInOriginalDat());
-					RectangularROI newROI = new RectangularROI(tempLoc[0],
+					double[] tempLoc = new double[8];
+					try{
+						tempLoc = drm.getLocationList().get(frame.getDatNo()).get(frame.getNoInOriginalDat());
+					}
+					catch(Exception y){
+						tempLoc = frame.getRoiLocation();
+					}
+						RectangularROI newROI = new RectangularROI(tempLoc[0],
 						       tempLoc[1],
 						       drm.getInitialLenPt()[0][0],
 						       drm.getInitialLenPt()[0][1],0);

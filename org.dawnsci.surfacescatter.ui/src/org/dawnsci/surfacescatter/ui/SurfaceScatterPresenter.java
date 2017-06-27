@@ -2086,7 +2086,7 @@ public class SurfaceScatterPresenter {
 //				 }    	
 //		    }	    
 //	    }
-//		writer.close();
+		writer.close();
 	}	
 	
 	public void writeOutReflectivityDat(){

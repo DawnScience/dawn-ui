@@ -48,6 +48,7 @@ public class DatDisplayer extends Composite {
 	private SashForm selectionSash;
 	private Button datFolderSelection;
 	private Button paramFileSelection;
+	private Button refreshTable;
 	private Button clearParameterTable;
 	private SurfaceScatterViewStart ssvs;
 	private String datFolderPath = null;
@@ -73,37 +74,6 @@ public class DatDisplayer extends Composite {
 	private SelectionListener timothy;
 
 
-	public String getOption() {
-		return option;
-	}
-
-	public void setOption(String option) {
-		this.option = option;
-	}
-
-	public String[] getOptions() {
-		return options;
-	}
-
-	public void setOptions(String[] options) {
-		this.options = options;
-	}
-
-	public Boolean getPromptedForImageFolder() {
-		return promptedForImageFolder;
-	}
-
-	public void setPromptedForImageFolder(Boolean promptedForImageFolder) {
-		this.promptedForImageFolder = promptedForImageFolder;
-	}
-
-	public String getImageName() {
-		return imageName;
-	}
-
-	public void setImageName(String imageName) {
-		this.imageName = imageName;
-	}
 
 	public DatDisplayer(Composite parent, 
 						int style, 
@@ -177,6 +147,7 @@ public class DatDisplayer extends Composite {
 				if (datFolderPath != null) {
 
 					clearTable.setEnabled(true);
+					refreshTable.setEnabled(true);
 				}
 
 				datFolderText.setText(datFolderPath);
@@ -202,7 +173,29 @@ public class DatDisplayer extends Composite {
 		clearTable.setText("Clear Table");
 		clearTable.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		clearTable.setEnabled(false);
+		
+		refreshTable = new Button(datSelector, SWT.PUSH | SWT.FILL);
+		refreshTable.setText("Refresh Table");
+		refreshTable.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		refreshTable.setEnabled(false);
 
+		refreshTable.addSelectionListener(new SelectionListener() {
+			
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				clearTable();
+				fillTable();
+				
+			}
+			
+			@Override
+			public void widgetDefaultSelected(SelectionEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+		});
+		
+		
 		transferToRod = new Button(datSelector, SWT.PUSH);
 		transferToRod.setText("Transfer to Rod ->");
 		transferToRod.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
@@ -998,6 +991,38 @@ public class DatDisplayer extends Composite {
 			}
 		}
 		
+	}
+
+	public String getOption() {
+		return option;
+	}
+
+	public void setOption(String option) {
+		this.option = option;
+	}
+
+	public String[] getOptions() {
+		return options;
+	}
+
+	public void setOptions(String[] options) {
+		this.options = options;
+	}
+
+	public Boolean getPromptedForImageFolder() {
+		return promptedForImageFolder;
+	}
+
+	public void setPromptedForImageFolder(Boolean promptedForImageFolder) {
+		this.promptedForImageFolder = promptedForImageFolder;
+	}
+
+	public String getImageName() {
+		return imageName;
+	}
+
+	public void setImageName(String imageName) {
+		this.imageName = imageName;
 	}
 	
 }

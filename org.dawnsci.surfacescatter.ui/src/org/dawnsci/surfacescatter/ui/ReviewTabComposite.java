@@ -4,15 +4,15 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.util.ArrayList;
-
 import org.dawb.common.ui.widgets.ActionBarWrapper;
 import org.dawnsci.surfacescatter.AxisEnums;
 import org.dawnsci.surfacescatter.AxisEnums.xAxes;
 import org.dawnsci.surfacescatter.AxisEnums.yAxes;
+import org.dawnsci.surfacescatter.SavingFormatEnum.SaveFormatSetting;
 import org.dawnsci.surfacescatter.CsdpFromNexusFile;
 import org.dawnsci.surfacescatter.CurveStitchDataPackage;
 import org.dawnsci.surfacescatter.ReviewCurvesModel;
-import org.dawnsci.surfacescatter.SXRDNexusReader;
+import org.dawnsci.surfacescatter.SavingFormatEnum;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.PlotType;
 import org.eclipse.dawnsci.plotting.api.PlottingFactory;
@@ -25,33 +25,40 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
-import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.DirectoryDialog;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Group;
+import org.eclipse.swt.widgets.Table;
+import org.eclipse.swt.widgets.TableItem;
 
 public class ReviewTabComposite extends Composite{
 
     private Group methodSetting;
     private SashForm form;
+    private SashForm rightForm;
+    private SashForm leftForm;
     private Button clearCurves;
     private Button addCurve;
+    private Button selectAll;
+    private Button remove;
     private Button showErrors;
-    private Button switchAxes;
+    private Button save;
+	private Combo outputFormatSelection;
     private IPlottingSystem<Composite> plotSystem;
     private ReviewCurvesModel rcm;
 	private String nexusFolderPath;
 	private boolean errorDisplayFlag = true;
 	private Combo xAxis;
 	private Combo yAxis;
+	private Combo rodToSave;
 	private AxisEnums.xAxes xAxisSelection = xAxes.SCANNED_VARIABLE;
 	private AxisEnums.yAxes yAxisSelection = yAxes.SPLICEDY;
+	private Table rodDisplayTable;
+	private boolean selectDeslect = true;
 	
 	public ReviewTabComposite(Composite parent, 
 							  int style) throws Exception {
@@ -69,70 +76,58 @@ public class ReviewTabComposite extends Composite{
     }
 	
 	public void createContents() throws Exception {
+	
+		Composite setupComposite = new Composite(this, SWT.FILL);
+		setupComposite.setLayout(new GridLayout());
+		setupComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
-		Display display = Display.getCurrent();
-		Color red = display.getSystemColor(SWT.COLOR_RED);
-		
-		form = new SashForm(this, SWT.VERTICAL);
+		form = new SashForm(setupComposite, SWT.FILL);
 		form.setLayout(new GridLayout());
 		form.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
-		methodSetting = new Group(form, SWT.FILL | SWT.FILL);
-        GridLayout methodSettingLayout = new GridLayout(2, true);
-	    GridData methodSettingData = new GridData(GridData.FILL_HORIZONTAL);
-	    methodSetting.setLayout(methodSettingLayout);
-	    methodSetting.setLayoutData(methodSettingData);
+		form.setOrientation(SWT.HORIZONTAL);
 		
-	    Group storedCurves = new Group(form, SWT.NONE);
-        GridLayout storedCurvesLayout = new GridLayout();
-        storedCurves.setLayout(storedCurvesLayout);
-        
-        final GridData storedCurvesData = new GridData(SWT.FILL, SWT.FILL, true, true);
-        storedCurvesData.grabExcessVerticalSpace = true;
-        storedCurvesData.heightHint = 100;
-        storedCurves.setLayoutData(new GridData(GridData.FILL_HORIZONTAL | GridData.FILL_VERTICAL));
-	    
-	    try {
-			plotSystem = PlottingFactory.createPlottingSystem();
-				
-		} catch (Exception e2) {
-			e2.printStackTrace();
-		}
-	        
-		ActionBarWrapper actionBarComposite = ActionBarWrapper.createActionBars(storedCurves, 
-																				null);
-		  
-	    plotSystem.createPlotPart(storedCurves, 
-	        					  "Stored Curves", 
-	        					  actionBarComposite, 
-	        					  PlotType.IMAGE, 
-	        					  null);
+///////////////////////////left		
+		leftForm = new SashForm(form, SWT.VERTICAL);
+		leftForm.setLayout(new GridLayout());
+		leftForm.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
-	    
-	    plotSystem.getPlotComposite().setLayoutData(storedCurvesData);
-	    
-	    clearCurves = new Button (methodSetting, SWT.PUSH);
-	    clearCurves.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-	    clearCurves.setText("Clear Curves");
-	    clearCurves.setData(new GridData(SWT.FILL));
-	    
-	    clearCurves.addSelectionListener(new SelectionListener() {
-			
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				plotSystem.clear();
+		Group rodSelector = new Group(leftForm, SWT.V_SCROLL | SWT.FILL);
+		GridLayout rodSelectorLayout = new GridLayout(1, true);
+		GridData rodSelectorData = new GridData((GridData.FILL_BOTH));
+		rodSelector.setLayout(rodSelectorLayout);
+		rodSelector.setLayoutData(rodSelectorData);
+		rodSelector.setText("Rods");
+		
+		clearCurves = new Button(rodSelector, SWT.PUSH | SWT.FILL);
+		clearCurves.setText("Clear Curves");
+		clearCurves.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		
+		clearCurves.addSelectionListener(new SelectionListener() {
 				
-			}
-			
-			@Override
-			public void widgetDefaultSelected(SelectionEvent e) {
-				// TODO Auto-generated method stub
+				@Override
+				public void widgetSelected(SelectionEvent e) {
+					
+					for(int cv = 0; cv<rodDisplayTable.getItems().length; cv++){
+						rodDisplayTable.remove(cv);
+					}
+					
+					rodDisplayTable.removeAll();	
+					plotSystem.clear();
+					rcm.setCsdpList(null);
+					rcm.setCsdpLatest(null);
+					
+				}
 				
-			}
+				@Override
+				public void widgetDefaultSelected(SelectionEvent e) {
+					// TODO Auto-generated method stub
+					
+				}
 		});
-	    
-	    
-	    addCurve = new Button (methodSetting, SWT.PUSH);
+		
+
+	    addCurve = new Button (rodSelector, SWT.PUSH);
         addCurve.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
         addCurve.setText("Add Curve");
         addCurve.setData(new GridData(SWT.FILL));
@@ -170,7 +165,164 @@ public class ReviewTabComposite extends Composite{
 			public void widgetDefaultSelected(SelectionEvent e) {
 			}
 		});
+       
+		selectAll= new Button(rodSelector, SWT.PUSH | SWT.FILL);
+		selectAll.setText("Select All");
+		selectAll.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		
+		selectAll.addSelectionListener(new SelectionListener() {
+			
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+		
+				for(TableItem f :rodDisplayTable.getItems()){
+					f.setChecked(selectDeslect);
+				}				
+				
+				if(selectDeslect){
+					selectDeslect=false;
+					selectAll.setText("De-Select All");
+				}
+				else{
+					selectDeslect = true;
+					selectAll.setText("Select All");
+				}
+				
+				refreshCurvesFromTable();
+			}
+			
+			@Override
+			public void widgetDefaultSelected(SelectionEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+		});
+
+		remove= new Button(rodSelector, SWT.PUSH | SWT.FILL);
+		remove.setText("Remove Selected");
+		remove.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		
+		remove.addSelectionListener(new SelectionListener() {
+			
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				
+				for(TableItem f :rodDisplayTable.getItems()){
+					if(f.getChecked()){
+						CurveStitchDataPackage csdp = bringMeTheOneIWant(f.getText(), rcm.getCsdpList());
+						rcm.getCsdpList().remove(csdp);
+					}
+				}
+				
+				refreshTable();
+				refreshCurves();
+			}
+			
+			@Override
+			public void widgetDefaultSelected(SelectionEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+		});
+
+		
+		
+		rodDisplayTable = new Table(rodSelector, SWT.CHECK | SWT.V_SCROLL | SWT.H_SCROLL | SWT.BORDER);
+		rodDisplayTable.setEnabled(true);
+		
+		GridData rodDisplayTableData = new GridData(GridData.FILL_BOTH);
+
+		rodDisplayTable.setLayoutData(rodDisplayTableData);
+		rodDisplayTable.setLayout(new GridLayout());
+		rodDisplayTable.getVerticalBar().setEnabled(true);
+
+		rodDisplayTable.getVerticalBar().setEnabled(true);
+		rodDisplayTable.getVerticalBar().setIncrement(1);
+		rodDisplayTable.getVerticalBar().setThumb(1);
+		
+		rodDisplayTable.addSelectionListener(new SelectionListener() {
+			
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				refreshCurvesFromTable();
+				
+			}
+			
+			@Override
+			public void widgetDefaultSelected(SelectionEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+		});
+		
+		
+		
+////////////////////////////////right		
+		rightForm = new SashForm(form, SWT.VERTICAL);
+		rightForm.setLayout(new GridLayout());
+		rightForm.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		
+		methodSetting = new Group(rightForm, SWT.FILL | SWT.FILL);
+        GridLayout methodSettingLayout = new GridLayout(1, true);
+	    GridData methodSettingData = new GridData(GridData.FILL_HORIZONTAL);
+	    methodSetting.setLayout(methodSettingLayout);
+	    methodSetting.setLayoutData(methodSettingData);
+	    methodSetting.setText("Rod Display");
+		
+	    Group curveSettings = new Group(rightForm, SWT.NONE);
+        GridLayout curveSettingsLayout = new GridLayout(2, true);
+        curveSettings.setLayout(curveSettingsLayout);
         
+        final GridData curveSettingsData = new GridData(SWT.FILL, SWT.FILL, true, true);
+        curveSettingsData.grabExcessVerticalSpace = true;
+        curveSettingsData.heightHint = 100;
+        curveSettings.setLayoutData(new GridData(GridData.FILL_HORIZONTAL | GridData.FILL_VERTICAL));
+	    
+        Group saveSettings = new Group(rightForm, SWT.NONE);
+        GridLayout saveSettingsLayout = new GridLayout(1, true);
+        saveSettings.setLayout(saveSettingsLayout);
+        
+        final GridData saveSettingsData = new GridData(SWT.FILL, SWT.FILL, true, true);
+        saveSettingsData.grabExcessVerticalSpace = true;
+        saveSettingsData.heightHint = 100;
+        saveSettings.setLayoutData(new GridData(GridData.FILL_HORIZONTAL | GridData.FILL_VERTICAL));
+         
+        save = new Button(saveSettings, SWT.PUSH);
+        save.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+        save.setData(new GridData(SWT.FILL));
+        save.setText("Save Single Rod");
+        
+        Group storedCurves = new Group(rightForm, SWT.NONE);
+        GridLayout storedCurvesLayout = new GridLayout();
+        storedCurves.setLayout(storedCurvesLayout);
+        
+        final GridData storedCurvesData = new GridData(SWT.FILL, SWT.FILL, true, true);
+        storedCurvesData.grabExcessVerticalSpace = true;
+        storedCurvesData.heightHint = 100;
+        storedCurves.setLayoutData(new GridData(GridData.FILL_HORIZONTAL | GridData.FILL_VERTICAL));
+        
+        
+        
+	    try {
+			plotSystem = PlottingFactory.createPlottingSystem();
+				
+		} catch (Exception e2) {
+			e2.printStackTrace();
+		}
+	        
+		ActionBarWrapper actionBarComposite = ActionBarWrapper.createActionBars(storedCurves, 
+																				null);
+		  
+	    plotSystem.createPlotPart(storedCurves, 
+	        					  "Stored Curves", 
+	        					  actionBarComposite, 
+	        					  PlotType.IMAGE, 
+	        					  null);
+		
+	    
+	    plotSystem.getPlotComposite().setLayoutData(storedCurvesData);
+	    
+	   
         showErrors = new Button(methodSetting, SWT.PUSH);
         showErrors.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
         showErrors.setData(new GridData(SWT.FILL));
@@ -199,28 +351,7 @@ public class ReviewTabComposite extends Composite{
 			}
 		});
         
-        switchAxes = new Button(methodSetting, SWT.PUSH);
-        switchAxes.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-        switchAxes.setData(new GridData(SWT.FILL));
-        switchAxes.setText("Change Axes");
-        
-	    switchAxes.addSelectionListener(new SelectionListener() {
-			
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				
-				ArrayList<CurveStitchDataPackage> csdpList = rcm.getCsdpList();
-				
-			}
-			
-			@Override
-			public void widgetDefaultSelected(SelectionEvent e) {
-				// TODO Auto-generated method stub
-				
-			}
-		});
-        
-	    InputTileGenerator tile1 = new InputTileGenerator("X Axis:", methodSetting);
+	    InputTileGenerator tile1 = new InputTileGenerator("X Axis:", curveSettings);
 	    xAxis = tile1.getCombo();
 	    xAxis.select(0);;
 	   	
@@ -244,7 +375,7 @@ public class ReviewTabComposite extends Composite{
 			}
 		});
 	    
-	    InputTileGenerator tile2 = new InputTileGenerator("Y Axis:", methodSetting);
+	    InputTileGenerator tile2 = new InputTileGenerator("Y Axis:", curveSettings);
 	    yAxis = tile2.getCombo();
 	    yAxis.select(0);
 
@@ -268,8 +399,26 @@ public class ReviewTabComposite extends Composite{
 			}
 		});
 	    
+	    InputTileGenerator tile3 = new InputTileGenerator("Curve To Save:", curveSettings);
+	    rodToSave = tile3.getCombo();
+	    rodToSave.select(0);
 	    
-	    form.setWeights(new int[] {11, 79});
+	    outputFormatSelection = new Combo(curveSettings, SWT.DROP_DOWN | SWT.BORDER | SWT.FILL);
+		
+		for(SaveFormatSetting  t: SavingFormatEnum.SaveFormatSetting.values()){
+			outputFormatSelection.add(SaveFormatSetting.toString(t));
+		}
+	
+		outputFormatSelection.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		outputFormatSelection.select(0);
+		
+		save = new Button(curveSettings, SWT.PUSH |SWT.FILL);
+		save.setText("Save Spliced");
+		save.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+	    
+		
+	    
+	    rightForm.setWeights(new int[] {5,10, 5,80});
 		
 	    rcm.addPropertyChangeListener(new PropertyChangeListener() {
 			
@@ -294,6 +443,8 @@ public class ReviewTabComposite extends Composite{
 				yAxis.setText(AxisEnums.toString(yAxisSelection));
 				
 				refreshCurves();
+				refreshTable();
+//				crossCheckCurvesToTable();
 				
 				plotSystem.autoscaleAxes();
 				
@@ -301,6 +452,8 @@ public class ReviewTabComposite extends Composite{
 		});
 	    
 	    plotSystem.setShowLegend(true);
+	    
+	    form.setWeights(new int[] {20, 80});
 	    
 	}
 	   
@@ -323,6 +476,14 @@ public class ReviewTabComposite extends Composite{
 
 	public void setForm(SashForm form) {
 		this.form = form;
+	}
+	
+	public SashForm getRightForm() {
+		return rightForm;
+	}
+
+	public void setRightForm(SashForm form) {
+		this.rightForm = form;
 	}
 
 	public Button getClearCurves() {
@@ -347,14 +508,6 @@ public class ReviewTabComposite extends Composite{
 
 	public void setShowErrors(Button showErrors) {
 		this.showErrors = showErrors;
-	}
-
-	public Button getSwitchAxes() {
-		return switchAxes;
-	}
-
-	public void setSwitchAxes(Button switchAxes) {
-		this.switchAxes = switchAxes;
 	}
 
 	public IPlottingSystem<Composite> getPlotSystem() {
@@ -525,7 +678,67 @@ public class ReviewTabComposite extends Composite{
 		}
 		
 	}
-	  
+	
+	private void refreshTable(){
+		
+		ArrayList<String> checked = new ArrayList<>();
+		
+		for(TableItem de : rodDisplayTable.getItems()){
+			if(de.getChecked()){
+				checked.add(de.getText()); 
+			}
+		}
+		
+		for(int cv = 0; cv<rodDisplayTable.getItems().length; cv++){
+			rodDisplayTable.remove(cv);
+		}
+		
+		rodDisplayTable.removeAll();	
+		
+		for (int j = 0; j < rcm.getCsdpList().size(); j++) {
+			
+			TableItem t = new TableItem(rodDisplayTable, SWT.NONE);
+			t.setText(rcm.getCsdpList().get(j).getRodName());
+			String probe = rcm.getCsdpList().get(j).getRodName();
+			
+			for(String g : checked){
+				if(probe.equals(g)){
+					t.setChecked(true); 
+				}
+			}	
+		}	
+		
+		String latestAddition = rcm.getCsdpLatest().getRodName();
+		
+		for(TableItem ry : rodDisplayTable.getItems()){
+			
+			if(ry.getText().equals(latestAddition)){
+				ry.setChecked(true);
+			}
+			
+		}
+		
+		rodToSave.removeAll();
+		
+		for(TableItem fg :  rodDisplayTable.getItems()){
+			rodToSave.add(fg.getText());
+		}
+	}
+	
+	private void crossCheckCurvesToTable(){
+		
+		for(ITrace tr: plotSystem.getTraces()){
+			String probe = tr.getName();
+			for(TableItem ti : rodDisplayTable.getItems()){
+				if(probe.equals(ti.getText())){
+					if(!ti.getChecked()){
+						tr.dispose();
+					}
+				}
+			}		
+		}
+	}
+		
 	private void refreshCurves(){
 		
 		plotSystem.clear();
@@ -618,14 +831,149 @@ public class ReviewTabComposite extends Composite{
 			plotSystem.autoscaleAxes();
 			
 		}
-		
-//		for(int j = 0; j<rcm.getCsdpList().get(0).getSplicedCurveX().getSize(); j++){
-//			System.out.println("j: " + j + "  csdp.getSplicedCurveY() " + rcm.getCsdpList().get(0).getSplicedCurveY().getDouble(j) +
-//					"  csdp.getSplicedCurveYRaw() " + rcm.getCsdpList().get(0).getSplicedCurveYRaw().getDouble(j) + 
-//					"  csdp.getSplicedCurveYFhkl() " + rcm.getCsdpList().get(0).getSplicedCurveYFhkl().getDouble(j));
-//		}
-		
 	}
+	
+	public CurveStitchDataPackage bringMeTheOneIWant(String rodName,
+													 ArrayList<CurveStitchDataPackage> csdps){
+		
+		for(CurveStitchDataPackage csdp : csdps){
+			if(rodName.equals(csdp.getRodName())){
+				return csdp;
+			}
+			
+		}
+		
+		return null;
+	}
+	
+	private void refreshCurvesFromTable(){
+		
+		plotSystem.clear();
+		
+		for(TableItem fd : rodDisplayTable.getItems()){
+			if(fd.getChecked()){
+				
+				CurveStitchDataPackage csdp = bringMeTheOneIWant(fd.getText(), 
+																 rcm.getCsdpList());
+				
+				
+				ILineTrace lt =	plotSystem.createLineTrace(csdp.getRodName());
+				
+				IDataset x = DatasetFactory.zeros(new int[] {2,2}, Dataset.ARRAYFLOAT64);
+				IDataset y = DatasetFactory.zeros(new int[] {2,2}, Dataset.ARRAYFLOAT64);
+				
+				if(xAxisSelection == null){
+					xAxisSelection = xAxes.SCANNED_VARIABLE;
+					
+					boolean rg = true;
+					
+					for(String h :xAxis.getItems()){
+						if(AxisEnums.toString(xAxisSelection).equals(h)){
+							rg = false;
+						}
+					}
+					
+					if(rg){
+						xAxis.add(AxisEnums.toString(xAxisSelection));
+					}
+					
+				}
+				
+				if(yAxisSelection == null){
+					yAxisSelection = yAxes.SPLICEDY;
+					
+					boolean rg = true;
+					
+					for(String h :yAxis.getItems()){
+						if(AxisEnums.toString(yAxisSelection).equals(h)){
+							rg = false;
+						}
+					}
+					
+					if(rg){
+						yAxis.add(AxisEnums.toString(yAxisSelection));
+					}
+					
+				}
+				
+				switch(xAxisSelection){
+					case SCANNED_VARIABLE:
+						x = csdp.getSplicedCurveX();
+						break;
+					case Q:
+						x = csdp.getSplicedCurveQ();
+						break;
+				}
+				
+				switch(yAxisSelection){
+					case SPLICEDY:
+						y = csdp.getSplicedCurveY();
+						try{
+							y.setErrors(csdp.getSplicedCurveYError());
+						}
+						catch(Exception h){
+							
+						}
+						break;
+					case SPLICEDYRAW:
+						y = csdp.getSplicedCurveYRaw();
+						try{
+							y.setErrors(csdp.getSplicedCurveYRawError());
+						}
+						catch(Exception h){
+							
+						}
+						break;
+					case SPLICEDYFHKL:
+						y = csdp.getSplicedCurveYFhkl();
+						try{
+							y.setErrors(csdp.getSplicedCurveYFhklError());
+						}
+						catch(Exception h){
+							
+						}
+						break;
+				}
+				
+				lt.setData(x, y);
+				
+				lt.setErrorBarEnabled(errorDisplayFlag);
+				
+				plotSystem.addTrace(lt);
+				plotSystem.autoscaleAxes();
+			}
+		}
+	}
+	
+
+	public SashForm getLeftForm() {
+		return leftForm;
+	}
+
+	public void setLeftForm(SashForm leftForm) {
+		this.leftForm = leftForm;
+	}
+	
+	public Button getSave(){
+		return save;
+	}
+	
+	public Combo getRodToSave(){
+		return rodToSave;
+	}
+	
+	public Combo getOutputFormatSelection(){
+		return outputFormatSelection;
+	}
+	
+	public AxisEnums.yAxes getyAxisSelection() {
+		return yAxisSelection;
+	}
+
+	public void setyAxisSelection(AxisEnums.yAxes yAxisSelection) {
+		this.yAxisSelection = yAxisSelection;
+	}
+
 }
 		
 		
