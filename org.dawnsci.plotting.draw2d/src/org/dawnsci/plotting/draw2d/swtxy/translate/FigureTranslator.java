@@ -23,6 +23,7 @@ import org.eclipse.draw2d.geometry.Dimension;
 import org.eclipse.draw2d.geometry.Point;
 import org.eclipse.draw2d.geometry.Rectangle;
 import org.eclipse.nebula.visualization.xygraph.figures.IXYGraph;
+import org.eclipse.swt.SWT;
 
 /**
  * Class from SWT examples which allows a draw2D figure to move.
@@ -71,7 +72,7 @@ public class FigureTranslator implements MouseListener, MouseMotionListener {
 			if (location == null) return;
 			Point newLocation = event.getLocation();
 			if (newLocation == null) return;
-			
+
 			fireBeforeTranslation(new TranslationEvent(this));
 			this.cumulativeOffset = newLocation.getDifference(startLocation);
 	
@@ -151,7 +152,7 @@ public class FigureTranslator implements MouseListener, MouseMotionListener {
 
 		location = event.getLocation();
 		startLocation = event.getLocation();
-		fireOnActivate(new TranslationEvent(this));
+		fireOnActivate(new TranslationEvent(this, (event.getState() & SWT.CTRL) != 0));
 
 		event.consume();
 	}
