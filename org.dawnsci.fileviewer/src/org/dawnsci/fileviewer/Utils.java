@@ -26,6 +26,13 @@ import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.dawnsci.analysis.api.io.IDataHolder;
 import org.eclipse.dawnsci.analysis.api.io.ILoaderService;
+import org.eclipse.dawnsci.analysis.api.tree.DataNode;
+import org.eclipse.dawnsci.analysis.api.tree.GroupNode;
+import org.eclipse.dawnsci.nexus.NexusException;
+import org.eclipse.dawnsci.nexus.NexusFile;
+import org.eclipse.january.dataset.DatasetUtils;
+import org.eclipse.january.dataset.ILazyDataset;
+import org.eclipse.january.dataset.StringDataset;
 import org.eclipse.january.metadata.IMetadata;
 import org.eclipse.swt.program.Program;
 
@@ -169,9 +176,30 @@ public class Utils {
 	public static String getFileScanCmdString(File file) {
 		if (file.isFile()) {
 			String extension = getFileExtension(file);
-			if (extension.equals("nxs") || extension.equals("hdf") || extension.equals("h5")
-					|| extension.equals("hdf5") || extension.equals("dat")) {
-				String filePath = file.getAbsolutePath();
+			String filePath = file.getAbsolutePath();
+			if (extension.equals("nxs")) {
+				NexusFile nxsFile = ServiceHolder.getNexusFactory().newNexusFile(filePath);
+				try {
+					nxsFile.openToRead();
+					GroupNode entry1 = nxsFile.getGroup("/entry1", false);
+					if (entry1 == null)
+						return null;
+					DataNode scanCommandNode = entry1.getDataNode("scan_command");
+					if (scanCommandNode == null)
+						return null;
+					ILazyDataset scanCommandLazyDataset = scanCommandNode.getDataset();
+					StringDataset scanCommandDataset = DatasetUtils.cast(StringDataset.class, DatasetUtils.sliceAndConvertLazyDataset(scanCommandLazyDataset));
+					return scanCommandDataset.get();
+				} catch (Exception e) {
+					return null;
+				} finally {
+					try {
+						nxsFile.close();
+					} catch (NexusException e) {
+						return null;
+					}
+				}
+			} else if (extension.equals(".dat")){
 				try {
 					ILoaderService loader = ServiceHolder.getLoaderService();
 					IDataHolder dh = loader.getData(filePath, true, null);

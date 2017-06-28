@@ -9,11 +9,14 @@
 package org.dawnsci.fileviewer;
 
 import org.eclipse.dawnsci.analysis.api.io.ILoaderService;
+import org.eclipse.dawnsci.nexus.INexusFileFactory;
 
 public class ServiceHolder {
 
 	private static ILoaderService loaderService;
 
+	private static INexusFileFactory nexusFactory;
+	
 	public ServiceHolder() {
 		
 	}
@@ -26,4 +29,11 @@ public class ServiceHolder {
 		loaderService = ls;
 	}
 
+	public static INexusFileFactory getNexusFactory() {
+		return nexusFactory;
+	}
+
+	public static void setNexusFactory(INexusFileFactory nf) {
+		nexusFactory = nf;
+	}
 }
