@@ -43,13 +43,17 @@ import org.eclipse.jface.viewers.ColumnViewerToolTipSupport;
 import org.eclipse.jface.viewers.DelegatingStyledCellLabelProvider;
 import org.eclipse.jface.viewers.DelegatingStyledCellLabelProvider.IStyledLabelProvider;
 import org.eclipse.jface.viewers.EditingSupport;
+import org.eclipse.jface.viewers.ICellEditorListener;
 import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.StyledString;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
+import org.eclipse.jface.viewers.TextCellEditor;
 import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.jface.viewers.ViewerCell;
 import org.eclipse.jface.window.ToolTip;
 import org.eclipse.richbeans.widgets.cell.CComboCellEditor;
+import org.eclipse.richbeans.widgets.cell.NumberCellEditor;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -213,13 +217,14 @@ public class ROIEditTable  {
 			super(viewer);
             this.column = col;
   		}
+
 		@Override
 		protected CellEditor getCellEditor(final Object element) {
 			
 			if (element instanceof SymmetryRow) {
 				Collection<String> values = SectorROI.getSymmetriesPossible().values();
 				final String[] items = values.toArray(new String[values.size()]);
-				final CComboCellEditor ed = new CComboCellEditor(((TableViewer)getViewer()).getTable(), items) {
+				return new CComboCellEditor(((TableViewer)getViewer()).getTable(), items) {
 					@Override
 		    	    protected void doSetValue(Object value) {
 		                Integer ordinal = SectorROI.getSymmetry((String)value);
@@ -231,33 +236,30 @@ public class ROIEditTable  {
 		    			return items[ordinal];
 		    		}
 				};
-				return ed;
-			}
-			final FloatSpinnerCellEditor ed = new FloatSpinnerCellEditor(((TableViewer)getViewer()).getTable(),SWT.RIGHT);
-			if (showRoundingButton) ed.setFormat(7, 3);
-			else ed.setFormat(6, 3);
-			ed.setIncrement(0.1d);
 
-			if (element instanceof LinearROI || element instanceof PointROI || element instanceof IPolylineROI
-					|| element instanceof RectangularROI || element instanceof PerimeterBoxROI) {
-				if (column==1) {
-					if (!Double.isNaN(xLowerBound)) ed.setMinimum(xLowerBound);
-					if (!Double.isNaN(xUpperBound)) ed.setMaximum(xUpperBound);
-				} else {
-					if (!Double.isNaN(yLowerBound)) ed.setMinimum(yLowerBound);
-					if (!Double.isNaN(yUpperBound)) ed.setMaximum(yUpperBound);
-				}
-			} else {
-				ed.setMaximum(Double.MAX_VALUE);
-				ed.setMinimum(-Double.MAX_VALUE);
 			}
-
-			ed.addSelectionListener(new SelectionAdapter() {
+			final NumberCellEditor ed = new NumberCellEditor(((TableViewer)getViewer()).getTable(), double.class, null, null, null, SWT.RIGHT);
+			
+			ed.addListener(new ICellEditorListener() {
+				
 				@Override
-				public void widgetSelected(SelectionEvent e) {
+				public void editorValueChanged(boolean oldValidState, boolean newValidState) {
+					// If we want region to change as we are typing
+					// setValue(element, ed.getValue(), false);
+				}
+				
+				@Override
+				public void cancelEditor() {
+					// Do nothing
+				}
+				
+				@Override
+				public void applyEditorValue() {
 					setValue(element, ed.getValue(), false);
+					
 				}
 			});
+
 			return ed;
 		}
 		
@@ -302,11 +304,11 @@ public class ROIEditTable  {
 			
             final IRegionRow row = (IRegionRow)element;
             if (row instanceof RegionRow) {
-                final Number    val = (Number)value;
+                final double    val = Double.parseDouble((String) value);
             	if (column==1) {
-            		((RegionRow)row).setxLikeVal(val.doubleValue());
+            		((RegionRow)row).setxLikeVal(val);
             	} else {
-            		((RegionRow)row).setyLikeVal(val.doubleValue());
+            		((RegionRow)row).setyLikeVal(val);
             	}
             }
             else {
@@ -390,12 +392,6 @@ public class ROIEditTable  {
 			}
 			return ret;
 		}
-		
-//		@Override
-//		public Color getForeground(Object element) {
-//			if (editor.canEdit(element))
-//			return Display.getCurrent().getSystemColor(SWT.COLOR_GRAY);
-//		}
 	}
 
 	private List<IRegionRow> createRegionRows(IROI roi, final ICoordinateSystem coords) {
