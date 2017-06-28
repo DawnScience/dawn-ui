@@ -11,12 +11,17 @@ package org.dawnsci.fileviewer.table;
 import java.io.File;
 
 import org.dawnsci.fileviewer.FileViewer;
+import org.dawnsci.fileviewer.Utils;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.program.Program;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class FileTableColumnLabelProvider extends ColumnLabelProvider {
 
+	private static final Logger logger = LoggerFactory.getLogger(FileTableColumnLabelProvider.class);
+	
 	private FileViewer viewer;
 	private int columnIndex;
 
@@ -72,5 +77,32 @@ public class FileTableColumnLabelProvider extends ColumnLabelProvider {
 			break;
 		}
 		return null;
+	}
+	
+	
+	// ignore h5
+	// if NXS, read directly via Nexusfilefactory and look for scan_command in /entry1
+	
+	@Override
+	public String getToolTipText(Object element) {
+		File file = ((FileTableContent) element).getFile();
+		String scanCmd = Utils.getFileScanCmdString(file);
+		if (scanCmd != null) {
+			// remove everything that is between brackets
+			int indexOfFirstBracket = scanCmd.indexOf('(');
+			int indexOfLastBracket = scanCmd.lastIndexOf(')');
+			if (indexOfFirstBracket != -1 && indexOfLastBracket != -1) {
+				scanCmd = scanCmd.substring(0, indexOfFirstBracket) + scanCmd.substring(indexOfLastBracket+1);
+			}
+			// compress multiple spaces into a single one
+			scanCmd = scanCmd.replaceAll("\\s+", " ");
+			// now if scanCmd is still longer than 200 chars, consider it bad -> this will stop DAWN font rendering from going berserk
+			if (scanCmd.length() > 200) {
+				logger.warn("scanCmd too long for {}: {}", file.getAbsolutePath(), scanCmd.length());
+				return null;
+			}
+			return scanCmd;
+		}
+		return scanCmd;
 	}
 }

@@ -26,6 +26,7 @@ import org.eclipse.core.runtime.jobs.JobChangeAdapter;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
+import org.eclipse.jface.viewers.ColumnViewerToolTipSupport;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
@@ -202,6 +203,7 @@ public class FileTableExplorer {
 		});
 		final int[] widths = { 150, sizeWidth, typeWidth, modifiedWidth};
 		createColumns(widths);
+		ColumnViewerToolTipSupport.enableFor(tviewer);
 
 		// make the selection available to other views
 		tviewer.getTable().setHeaderVisible(true);

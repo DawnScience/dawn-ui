@@ -178,8 +178,6 @@ public class Utils {
 					IMetadata meta = dh.getMetadata();
 					Collection<String> metanames = meta.getMetaNames();
 					for (Iterator<String> iterator = metanames.iterator(); iterator.hasNext();) {
-						if (Thread.currentThread().isInterrupted())
-							return "";
 						String string = (String) iterator.next();
 						if (string.contains("scan_command")) {
 							Serializable value = meta.getMetaValue(string);
@@ -187,11 +185,11 @@ public class Utils {
 						}
 					}
 				} catch (Exception e) {
-					return "";
+					return null;
 				}
 			}
 		}
-		return "";
+		return null;
 	}
 
 	private static String getFileExtension(File file) {
