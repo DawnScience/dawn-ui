@@ -17,6 +17,7 @@ import java.text.MessageFormat;
 import java.util.Collection;
 import java.util.Date;
 import java.util.Iterator;
+import java.util.List;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 
@@ -28,6 +29,7 @@ import org.eclipse.dawnsci.analysis.api.io.IDataHolder;
 import org.eclipse.dawnsci.analysis.api.io.ILoaderService;
 import org.eclipse.dawnsci.analysis.api.tree.DataNode;
 import org.eclipse.dawnsci.analysis.api.tree.GroupNode;
+import org.eclipse.dawnsci.analysis.api.tree.Node;
 import org.eclipse.dawnsci.nexus.NexusException;
 import org.eclipse.dawnsci.nexus.NexusFile;
 import org.eclipse.january.dataset.DatasetUtils;
@@ -178,27 +180,28 @@ public class Utils {
 			String extension = getFileExtension(file);
 			String filePath = file.getAbsolutePath();
 			if (extension.equals("nxs")) {
-				NexusFile nxsFile = ServiceHolder.getNexusFactory().newNexusFile(filePath);
-				try {
+				try (NexusFile nxsFile = ServiceHolder.getNexusFactory().newNexusFile(filePath)) {
 					nxsFile.openToRead();
-					GroupNode entry1 = nxsFile.getGroup("/entry1", false);
-					if (entry1 == null)
+					GroupNode rootNode = nxsFile.getGroup("/", false);
+					if (rootNode == null)
 						return null;
-					DataNode scanCommandNode = entry1.getDataNode("scan_command");
-					if (scanCommandNode == null)
-						return null;
-					ILazyDataset scanCommandLazyDataset = scanCommandNode.getDataset();
-					StringDataset scanCommandDataset = DatasetUtils.cast(StringDataset.class, DatasetUtils.sliceAndConvertLazyDataset(scanCommandLazyDataset));
-					return scanCommandDataset.get();
+					
+					for (String name : rootNode.getNames()) {
+						GroupNode node = nxsFile.getGroup("/"+name, false);
+						DataNode scanCommandNode = node.getDataNode("scan_command");
+						if (scanCommandNode == null)
+							continue;
+						ILazyDataset scanCommandLazyDataset = scanCommandNode.getDataset();
+						try {
+							StringDataset scanCommandDataset = DatasetUtils.cast(StringDataset.class, DatasetUtils.sliceAndConvertLazyDataset(scanCommandLazyDataset));
+							return scanCommandDataset.get();
+						} catch(Exception e) {
+							continue;
+						}
+					}
 				} catch (Exception e) {
 					return null;
-				} finally {
-					try {
-						nxsFile.close();
-					} catch (NexusException e) {
-						return null;
-					}
-				}
+				} 
 			} else if (extension.equals(".dat")){
 				try {
 					ILoaderService loader = ServiceHolder.getLoaderService();
