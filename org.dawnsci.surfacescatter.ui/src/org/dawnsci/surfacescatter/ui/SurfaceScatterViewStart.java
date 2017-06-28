@@ -350,6 +350,9 @@ public class SurfaceScatterViewStart extends Dialog {
 					
 				}
 				
+				ssps3c.resetCrossHairs();
+				
+				
 			}
 
 			@Override
@@ -363,6 +366,7 @@ public class SurfaceScatterViewStart extends Dialog {
 		// Tab 2 Analysis
 		////////////////////////////////////////////////////// #
 
+		
 		raw = new RodAnalysisWindow(folder,
 														ssp,
 														this); 
@@ -884,6 +888,105 @@ public class SurfaceScatterViewStart extends Dialog {
 			}
 		});
 	
+		
+		raw.getRtc().getSave().addSelectionListener(new SelectionListener() {
+
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				System.out.println("Well this also works");
+				
+			}
+
+			@Override
+			public void widgetDefaultSelected(SelectionEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+			
+		});
+			
+	
+		
+		raw.getRtc().getSave().addSelectionListener(new SelectionListener() {
+
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+
+				FileDialog fd = new FileDialog(getParentShell(), SWT.SAVE);
+
+				if(ssp.getSaveFolder()!=null){
+					fd.setFilterPath(ssp.getSaveFolder());
+				}
+				
+				String stitle = "r";
+				String path = "p";
+
+				if (fd.open() != null) {
+					stitle = fd.getFileName();
+					path = fd.getFilterPath();
+
+				}
+				
+				if(ssp.getSaveFolder()==null){
+					ssp.setSaveFolder(path);;
+				}
+				
+				String title = path + File.separator + stitle;
+			
+				setSms(SaveFormatSetting.toMethod(outputCurves.getOutputFormatSelection().getSelectionIndex()));
+			
+				SavingUtils su = new SavingUtils();
+				String rodSaveName = raw.getRtc().getRodToSave().getText();
+				
+				CurveStitchDataPackage csdpToSave = raw.getRtc().bringMeTheOneIWant(rodSaveName, 
+						raw.getRtc().getRcm().getCsdpList());
+						
+				SaveFormatSetting sfs =SaveFormatSetting.toMethod(raw.getRtc().getOutputFormatSelection().getText());
+				
+				int saveIntensityState = AxisEnums.toInt(raw.getRtc().getyAxisSelection());
+				
+				if (sfs == SaveFormatSetting.GenX) {
+					su.genXSave(title,
+							csdpToSave,
+							ssp.getDrm(),
+							ssp.getDrm().getFms(),
+							ssp.getGm());
+				}
+				if (sfs == SaveFormatSetting.Anarod) {
+					su.anarodSave(title,
+							csdpToSave,
+							ssp.getDrm(),
+							ssp.getDrm().getFms(),
+							ssp.getGm());
+				}
+				if (sfs == SaveFormatSetting.int_format) {
+					su.intSave(title,
+							csdpToSave,
+							ssp.getDrm(),
+							ssp.getDrm().getFms(),
+							ssp.getGm());
+				}
+				if (sfs == SaveFormatSetting.ASCII) {
+					su.simpleXYYeSave(title,
+							saveIntensityState,
+							csdpToSave,
+							ssp.getDrm(),
+							ssp.getDrm().getFms(),
+							ssp.getGm());
+				}
+
+			}
+
+			@Override
+			public void widgetDefaultSelected(SelectionEvent e) {
+
+			}
+		});
+		
+		
+		
+		
+		
 		
 		return container;
 	}
@@ -1658,81 +1761,6 @@ public class SurfaceScatterViewStart extends Dialog {
 			}
 		});
 		
-		raw.getRtc().getSave().addSelectionListener(new SelectionListener() {
-
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-
-				FileDialog fd = new FileDialog(getParentShell(), SWT.SAVE);
-
-				if(ssp.getSaveFolder()!=null){
-					fd.setFilterPath(ssp.getSaveFolder());
-				}
-				
-				String stitle = "r";
-				String path = "p";
-
-				if (fd.open() != null) {
-					stitle = fd.getFileName();
-					path = fd.getFilterPath();
-
-				}
-				
-				if(ssp.getSaveFolder()==null){
-					ssp.setSaveFolder(path);;
-				}
-				
-				String title = path + File.separator + stitle;
-			
-				setSms(SaveFormatSetting.toMethod(outputCurves.getOutputFormatSelection().getSelectionIndex()));
-			
-				SavingUtils su = new SavingUtils();
-				String rodSaveName = raw.getRtc().getRodToSave().getText();
-				
-				CurveStitchDataPackage csdpToSave = raw.getRtc().bringMeTheOneIWant(rodSaveName, 
-						raw.getRtc().getRcm().getCsdpList());
-						
-				SaveFormatSetting sfs =SaveFormatSetting.toMethod(raw.getRtc().getOutputFormatSelection().getText());
-				
-				int saveIntensityState = AxisEnums.toInt(raw.getRtc().getyAxisSelection());
-				
-				if (sfs == SaveFormatSetting.GenX) {
-					su.genXSave(title,
-							csdpToSave,
-							ssp.getDrm(),
-							ssp.getDrm().getFms(),
-							ssp.getGm());
-				}
-				if (sfs == SaveFormatSetting.Anarod) {
-					su.anarodSave(title,
-							csdpToSave,
-							ssp.getDrm(),
-							ssp.getDrm().getFms(),
-							ssp.getGm());
-				}
-				if (sfs == SaveFormatSetting.int_format) {
-					su.intSave(title,
-							csdpToSave,
-							ssp.getDrm(),
-							ssp.getDrm().getFms(),
-							ssp.getGm());
-				}
-				if (sfs == SaveFormatSetting.ASCII) {
-					su.simpleXYYeSave(title,
-							saveIntensityState,
-							csdpToSave,
-							ssp.getDrm(),
-							ssp.getDrm().getFms(),
-							ssp.getGm());
-				}
-
-			}
-
-			@Override
-			public void widgetDefaultSelected(SelectionEvent e) {
-
-			}
-		});
 		
 		
 		

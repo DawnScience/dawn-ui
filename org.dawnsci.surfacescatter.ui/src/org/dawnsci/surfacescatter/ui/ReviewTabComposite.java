@@ -13,6 +13,7 @@ import org.dawnsci.surfacescatter.CsdpFromNexusFile;
 import org.dawnsci.surfacescatter.CurveStitchDataPackage;
 import org.dawnsci.surfacescatter.ReviewCurvesModel;
 import org.dawnsci.surfacescatter.SavingFormatEnum;
+import org.dawnsci.surfacescatter.SavingUtils;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.PlotType;
 import org.eclipse.dawnsci.plotting.api.PlottingFactory;
@@ -59,11 +60,19 @@ public class ReviewTabComposite extends Composite{
 	private AxisEnums.yAxes yAxisSelection = yAxes.SPLICEDY;
 	private Table rodDisplayTable;
 	private boolean selectDeslect = true;
+	private SurfaceScatterPresenter ssp;
+	private SurfaceScatterViewStart ssvs;
 	
 	public ReviewTabComposite(Composite parent, 
-							  int style) throws Exception {
+							  int style,
+							  SurfaceScatterPresenter ssp,
+							  SurfaceScatterViewStart ssvs) throws Exception {
         super(parent, style);
 
+        
+        this.ssvs = ssvs;
+        this.ssp = ssp;
+        
         try {
         	plotSystem = PlottingFactory.createPlottingSystem();
 			
@@ -291,6 +300,81 @@ public class ReviewTabComposite extends Composite{
         save.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
         save.setData(new GridData(SWT.FILL));
         save.setText("Save Single Rod");
+        
+        save.addSelectionListener(new SelectionListener() {
+
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+
+				FileDialog fd = new FileDialog(ssvs.getShell(), SWT.SAVE);
+
+				if(ssp.getSaveFolder()!=null){
+					fd.setFilterPath(ssp.getSaveFolder());
+				}
+				
+				String stitle = "r";
+				String path = "p";
+
+				if (fd.open() != null) {
+					stitle = fd.getFileName();
+					path = fd.getFilterPath();
+
+				}
+				
+				if(ssp.getSaveFolder()==null){
+					ssp.setSaveFolder(path);;
+				}
+				
+				String title = path + File.separator + stitle;
+			
+				
+				SavingUtils su = new SavingUtils();
+				String rodSaveName = rodToSave.getText();
+				
+				CurveStitchDataPackage csdpToSave = bringMeTheOneIWant(rodSaveName, 
+						rcm.getCsdpList());
+						
+				SaveFormatSetting sfs =SaveFormatSetting.toMethod(outputFormatSelection.getText());
+				
+				int saveIntensityState = AxisEnums.toInt(yAxisSelection);
+				
+				if (sfs == SaveFormatSetting.GenX) {
+					su.genXSave(title,
+							csdpToSave,
+							ssp.getDrm(),
+							ssp.getDrm().getFms(),
+							ssp.getGm());
+				}
+				if (sfs == SaveFormatSetting.Anarod) {
+					su.anarodSave(title,
+							csdpToSave,
+							ssp.getDrm(),
+							ssp.getDrm().getFms(),
+							ssp.getGm());
+				}
+				if (sfs == SaveFormatSetting.int_format) {
+					su.intSave(title,
+							csdpToSave,
+							ssp.getDrm(),
+							ssp.getDrm().getFms(),
+							ssp.getGm());
+				}
+				if (sfs == SaveFormatSetting.ASCII) {
+					su.simpleXYYeSave(title,
+							saveIntensityState,
+							csdpToSave,
+							ssp.getDrm(),
+							ssp.getDrm().getFms(),
+							ssp.getGm());
+				}
+
+			}
+
+			@Override
+			public void widgetDefaultSelected(SelectionEvent e) {
+
+			}
+		});
         
         Group storedCurves = new Group(rightForm, SWT.NONE);
         GridLayout storedCurvesLayout = new GridLayout();

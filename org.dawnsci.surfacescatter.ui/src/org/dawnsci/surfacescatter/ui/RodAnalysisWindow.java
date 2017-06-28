@@ -116,7 +116,9 @@ public class RodAnalysisWindow {
 		
 		try {
 			rtc = new ReviewTabComposite(reviewTabComposite, 
-										 SWT.FILL);
+										 SWT.FILL, 
+										 ssp,
+										 ssvs);
 
 			rtc.setLayout(new GridLayout());
 			rtc.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
