@@ -20,32 +20,36 @@ import java.util.Iterator;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 
-import org.apache.commons.lang.ArrayUtils;
 import org.dawb.common.ui.util.EclipseUtils;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Platform;
-import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.dawnsci.analysis.api.io.IDataHolder;
 import org.eclipse.dawnsci.analysis.api.io.ILoaderService;
+import org.eclipse.dawnsci.analysis.api.tree.DataNode;
+import org.eclipse.dawnsci.analysis.api.tree.GroupNode;
+import org.eclipse.dawnsci.nexus.NexusFile;
+import org.eclipse.january.DatasetException;
+import org.eclipse.january.dataset.DatasetUtils;
+import org.eclipse.january.dataset.ILazyDataset;
+import org.eclipse.january.dataset.StringDataset;
 import org.eclipse.january.metadata.IMetadata;
 import org.eclipse.swt.program.Program;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import uk.ac.diamond.sda.navigator.views.IOpenFileAction;
 
 public class Utils {
 
 	private static ResourceBundle resourceBundle = ResourceBundle.getBundle("file_viewer");
+	private static final Logger logger = LoggerFactory.getLogger(Utils.class);
 
 	public enum SortType {
 		NAME,
 		SIZE,
 		TYPE,
 		DATE,
-		SCAN;
 	}
 
 	public enum SortDirection {
@@ -100,7 +104,7 @@ public class Utils {
 			}
 			return null;
 		} catch (CoreException coreEx) {
-			coreEx.printStackTrace();
+			logger.debug("getFirstPertinentAction: {}", coreEx);
 			return null;
 		}
 	}
@@ -166,53 +170,57 @@ public class Utils {
 		return FileViewerConstants.dateFormat.format(new Date(file.lastModified()));
 	}
 
-	static class ScanCmdJob extends Job {
-		private File file;
-		private String scanCmd = "";
-		
-		public ScanCmdJob() {
-			super("ScanCmdJob");
-		}
-
-		public void setFile(File file) {
-			this.file = file;
-			this.scanCmd = "";
-		}
-		
-		@Override
-		protected IStatus run(IProgressMonitor monitor) {
-			if (file.isFile()) {
-				String extension = getFileExtension(file);
-				if (ArrayUtils.contains(new String[]{"nxs", "hdf", "h5", "hdf5", "dat"}, extension)) {
-					String filePath = file.getAbsolutePath();
-					try {
-						ILoaderService loader = ServiceHolder.getLoaderService();
-						IDataHolder dh = loader.getData(filePath, null);
-						IMetadata meta = dh.getMetadata();
-						Collection<String> metanames = meta.getMetaNames();
-						for (Iterator<String> iterator = metanames.iterator(); iterator.hasNext();) {
-							if (monitor.isCanceled())
-								return Status.OK_STATUS;
-							String string = iterator.next();
-							if (string.contains("scan_command")) {
-								Serializable value = meta.getMetaValue(string);
-								scanCmd = (String) value;
-								return Status.OK_STATUS;
-							}
-						}
-					} catch (Exception e) {
-						return Status.OK_STATUS;
-					}
-				}
+	private static String getScanCmd(ILazyDataset dataset) {
+			StringDataset scanCommandDataset;
+			try {
+				scanCommandDataset = DatasetUtils.cast(StringDataset.class, DatasetUtils.sliceAndConvertLazyDataset(dataset));
+			} catch (DatasetException e) {
+				return null;
 			}
-			return Status.OK_STATUS;
-		}
-		
-		public String getScanCmd() {
-			return scanCmd;
-		}
+			return scanCommandDataset.get();
 	}
 	
+	private static String getFileScanCmdStringNexus(String filePath) {
+		try (NexusFile nxsFile = ServiceHolder.getNexusFactory().newNexusFile(filePath)) {
+			nxsFile.openToRead();
+			GroupNode rootNode = nxsFile.getGroup("/", false);
+			if (rootNode == null)
+				return null;
+			
+			for (String name : rootNode.getNames()) {
+				GroupNode node = nxsFile.getGroup("/"+name, false);
+				DataNode scanCommandNode = node.getDataNode("scan_command");
+				if (scanCommandNode == null)
+					continue;
+				ILazyDataset scanCommandLazyDataset = scanCommandNode.getDataset();
+				String scanCmd = getScanCmd(scanCommandLazyDataset);
+				if (scanCmd != null)
+					return scanCmd;
+			}
+		} catch (Exception e) {
+			return null;
+		} 
+		return null;
+	}
+	
+	private static String getFileScanCmdStringDat(String filePath) {
+		try {
+			ILoaderService loader = ServiceHolder.getLoaderService();
+			IDataHolder dh = loader.getData(filePath, true, null);
+			IMetadata meta = dh.getMetadata();
+			Collection<String> metanames = meta.getMetaNames();
+			for (Iterator<String> iterator = metanames.iterator(); iterator.hasNext();) {
+				String string = iterator.next();
+				if (string.contains("scan_command")) {
+					Serializable value = meta.getMetaValue(string);
+					return (String) value;
+				}
+			}
+		} catch (Exception e) {
+			return null;
+		}
+		return null;
+	}
 	/**
 	 * Get the Scan Command if file contains one
 	 * 
@@ -220,37 +228,23 @@ public class Utils {
 	 * @return scan command
 	 */
 	public static String getFileScanCmdString(File file) {
-		if (file.isFile()) {
-			String extension = getFileExtension(file);
-			if (extension.equals("nxs") || extension.equals("hdf") || extension.equals("h5")
-					|| extension.equals("hdf5") || extension.equals("dat")) {
-				String filePath = file.getAbsolutePath();
-				try {
-					ILoaderService loader = ServiceHolder.getLoaderService();
-					IDataHolder dh = loader.getData(filePath, true, null);
-					IMetadata meta = dh.getMetadata();
-					Collection<String> metanames = meta.getMetaNames();
-					for (Iterator<String> iterator = metanames.iterator(); iterator.hasNext();) {
-						if (Thread.currentThread().isInterrupted())
-							return "";
-						String string = (String) iterator.next();
-						if (string.contains("scan_command")) {
-							Serializable value = meta.getMetaValue(string);
-							return (String) value;
-						}
-					}
-				} catch (Exception e) {
-					return "";
-				}
-			}
+		if (!file.isFile())
+			return null;
+		String extension = getFileExtension(file);
+		String filePath = file.getAbsolutePath();
+		String scanCmdString = null;
+		if (extension.equals("nxs")) {
+			scanCmdString = getFileScanCmdStringNexus(filePath);
+		} else if (extension.equals(".dat")){
+			scanCmdString = getFileScanCmdStringDat(filePath);
 		}
-		return "";
+		return scanCmdString;
 	}
 
 	private static String getFileExtension(File file) {
 		String name = file.getName();
 		try {
-			return name.substring(name.lastIndexOf(".") + 1);
+			return name.substring(name.lastIndexOf('.') + 1);
 		} catch (Exception e) {
 			return "";
 		}

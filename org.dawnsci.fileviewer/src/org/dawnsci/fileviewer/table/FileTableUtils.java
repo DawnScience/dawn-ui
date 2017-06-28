@@ -52,13 +52,6 @@ public class FileTableUtils {
 			Date date2 = new Date(b.getFile().lastModified());
 			compare = date1.compareTo(date2);
 			break;
-		case SCAN:
-			String scana = a.getFileScanCmd();
-			String scanb = b.getFileScanCmd();
-			compare = scana.compareToIgnoreCase(scanb);
-			if (compare == 0)
-				compare = scana.compareTo(scanb);
-			break;
 		default:
 			return 0;
 		}
