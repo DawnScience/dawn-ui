@@ -54,6 +54,15 @@ public class LegacyMapBeanBuilder {
 	private static final String I08DATA = "data";
 	public static final String I08CHECK = "/entry1/Counter1/data";
 	
+	public static final String EPSICCHECK = "MerlinData";
+	private static final String MERLIN = EPSICCHECK;
+	private static final String EPSICX = "xAxis";
+	private static final String EPSICY = "yAxis";
+	private static final String EPSICASN = "acquisitionSequenceNumber";
+	private static final String EPSICSIGNAL = "counter";
+	
+	
+	
 	
 	
 	public static MappedDataFileBean tryLegacyLoaders(IDataHolder dh) {
@@ -91,9 +100,19 @@ public class LegacyMapBeanBuilder {
 			}
 		}
 		
+		if (b == null && dh.getLazyDataset(LegacyMapBeanBuilder.EPSICCHECK) != null) {
+			try {
+			b = LegacyMapBeanBuilder.buildBeanEPSICMerlin(dh);
+			} catch (Exception e) {
+				//ignore
+			}
+		}
+		
 		return b;
 	}
 	
+
+
 public static MappedDataFileBean buildBeani08Energyin2016(Tree tree) {
 		
 		MappedDataFileBean fb = null;
@@ -364,5 +383,54 @@ public static MappedDataFileBean buildBeani08Energyin2016(Tree tree) {
 		
 		return null;
 	}
+	
+	private static MappedDataFileBean buildBeanEPSICMerlin(IDataHolder dh) {
+		
+		MappedDataFileBean fb = null;
+		
+		if (dh.contains(MERLIN) && 
+			dh.contains(EPSICX) &&
+			dh.contains(EPSICY) &&
+			dh.contains(EPSICASN) &&
+			dh.contains(EPSICSIGNAL)) {
+			
+			MappedBlockBean mbb = new MappedBlockBean();
+			mbb.setName(MERLIN);
+			mbb.setRank(4);
+			mbb.setxDim(1);
+			mbb.setyDim(0);
+			String[] axes = new String[4];
+			axes[0] = EPSICX;
+			axes[1] = EPSICY;
+			mbb.setAxes(axes);
+			
+			MapBean b1 = new MapBean();
+			b1.setName(EPSICASN);
+			b1.setParent(MERLIN);
+			
+			MapBean b2 = new MapBean();
+			b2.setName(EPSICSIGNAL);
+			b2.setParent(MERLIN);
+			
+			fb = new MappedDataFileBean();
+			fb.addBlock(mbb);
+			fb.addMap(b1);
+			fb.addMap(b2);
+			
+			fb.setScanRank(2);
+		}
+		
+		return fb;
+		
+//		ILazyDataset merlin = dh.getLazyDataset(MERLIN);
+//		ILazyDataset xAxis = dh.getLazyDataset(EPSICX);
+//		ILazyDataset yAxis = dh.getLazyDataset(EPSICY);
+		
+		
+		
+
+//		return null;
+	}
+	
 	
 }
