@@ -1,22 +1,19 @@
 package org.dawnsci.common.widgets.diffraction;
 
+import javax.measure.Unit;
 import javax.measure.quantity.Angle;
 import javax.measure.quantity.Length;
-import javax.measure.Unit;
-import javax.measure.format.UnitFormat;
+import javax.measure.spi.ServiceProvider;
 
+import org.dawnsci.common.widgets.tree.AbstractNodeModel;
+import org.dawnsci.common.widgets.tree.NumericNode;
+import org.eclipse.dawnsci.analysis.api.Constants;
+import org.eclipse.dawnsci.analysis.api.diffraction.DetectorProperties;
+
+import si.uom.NonSI;
 import si.uom.SI;
 import tec.units.ri.unit.MetricPrefix;
 import tec.units.ri.unit.Units;
-import si.uom.NonSI;
-
-import org.dawnsci.common.widgets.tree.AbstractNodeModel;
-import org.dawnsci.common.widgets.tree.AmountEvent;
-import org.dawnsci.common.widgets.tree.AmountListener;
-import org.dawnsci.common.widgets.tree.LabelNode;
-import org.dawnsci.common.widgets.tree.NumericNode;
-import org.eclipse.dawnsci.analysis.api.diffraction.DetectorProperties;
-import org.omg.PortableInterceptor.NON_EXISTENT;
 
 public class DetectorPropertiesTreeModel extends AbstractNodeModel {
 
@@ -64,21 +61,21 @@ public class DetectorPropertiesTreeModel extends AbstractNodeModel {
 	private void createBeamCentre(DetectorProperties detprop) {
 		double[] beamCentreCoords = detprop.getBeamCentreCoords();
 		
-		beamX = new NumericNode<Length>("X", null, NonSI.PIXEL, "");
+		beamX = new NumericNode<Length>("X", null, Constants.PIXEL, "");
 		setBeamCenterUnit(detprop.getHPxSize(),beamX,"pixel");
 		registerNode(beamX);
-		beamX.setValue(beamCentreCoords[0], NonSI.PIXEL);
+		beamX.setValue(beamCentreCoords[0], Constants.PIXEL);
 		beamX.setEditable(true);
 		beamX.setFormat("#0.##");
-		beamX.setUnits(NonSI.PIXEL,MILLIMETRE);
+		beamX.setUnits(Constants.PIXEL, MILLIMETRE);
 		
-		beamY = new NumericNode<Length>("Y", null, NonSI.PIXEL, "");
+		beamY = new NumericNode<Length>("Y", null, Constants.PIXEL, "");
 		setBeamCenterUnit(detprop.getVPxSize(),beamY,"pixel");
 		registerNode(beamY);
-		beamY.setValue(beamCentreCoords[1], NonSI.PIXEL);
+		beamY.setValue(beamCentreCoords[1], Constants.PIXEL);
 		beamY.setEditable(true);
 		beamY.setFormat("#0.##");
-		beamY.setUnits(NonSI.PIXEL,MILLIMETRE);
+		beamY.setUnits(Constants.PIXEL,MILLIMETRE);
 		
 	}
 	
@@ -87,7 +84,7 @@ public class DetectorPropertiesTreeModel extends AbstractNodeModel {
 			String unitName) {
 
 		Unit<Length> unit = MILLIMETRE.multiply(size);
-		UnitFormat.getInstance().label(unit, unitName);
+		ServiceProvider.current().getUnitFormatService().getUnitFormat().label(unit, unitName);
 		coord.setUnits(MILLIMETRE, unit);
 		return unit;
 	}

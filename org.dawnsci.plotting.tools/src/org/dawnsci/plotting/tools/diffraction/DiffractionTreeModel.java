@@ -733,7 +733,7 @@ public class DiffractionTreeModel<Q extends Quantity<Q>> extends AbstractNodeMod
 			                                 String unitName) {
 
 		Unit<Length> unit = ToolUtils.MILLIMETRE.multiply(size.getValue(ToolUtils.MILLIMETRE));
-		UnitFormat.getInstance().label(unit, unitName);
+		ServiceProvider.current().getUnitFormatService().getUnitFormat().label(unit, unitName);
 		coord.setUnits(ToolUtils.MILLIMETRE, unit);
 		if (viewer != null)
 			viewer.update(coord, new String[] { "Value", "Unit" });

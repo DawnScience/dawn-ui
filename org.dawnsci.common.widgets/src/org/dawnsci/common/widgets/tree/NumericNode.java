@@ -17,8 +17,9 @@ import javax.measure.Quantity;
 import javax.measure.Unit;
 import javax.swing.tree.TreeNode;
 
+import org.eclipse.dawnsci.analysis.api.Constants;
+
 import si.uom.NonSI;
-import si.uom.SI;
 import tec.units.ri.quantity.Quantities;
 
 /**
@@ -83,7 +84,7 @@ public class NumericNode<Q extends Quantity<Q>> extends LabelNode {
 	public double getValue(Unit requiredUnit) {
 		Quantity<Q> val=getValue();
 		if (isInAngstroms(val, requiredUnit)) {	
-			return Constants.ℎ.times(Constants.c).divide(val).doubleValue(requiredUnit);
+			return Constants.ℎ.multiply(Constants.c).divide(val).getValue().doubleValue();
 		} else {
 			if (val!=null) {
 				return val.to(requiredUnit).getValue().doubleValue();
@@ -331,7 +332,7 @@ public class NumericNode<Q extends Quantity<Q>> extends LabelNode {
 		if (value!=null) {
 			// BODGE for A and eV !
 			if (isInAngstroms(value, to)) {	
-				value = Constants.ℎ.times(Constants.c).divide(value).to(to); 
+				value = Quantities.getQuantity(Constants.ℎ.multiply(Constants.c).divide(value).getValue().doubleValue(), to); 
 			} else {
 			    value = value.to(to);
 			}

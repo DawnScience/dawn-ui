@@ -14,6 +14,7 @@ import java.io.File;
 import java.util.List;
 
 import javax.measure.format.UnitFormat;
+import javax.measure.spi.ServiceProvider;
 
 import si.uom.NonSI;
 
@@ -572,7 +573,7 @@ public class PowderIntegrationTool extends AbstractToolPage implements IDataRedu
 		if (firstExportIteration) {
 			axis = axis.squeeze();
 			String s = file.createDataset(axis.getName(),  axis, resultGroup);
-			UnitFormat unitFormat = UnitFormat.getUCUMInstance();
+			UnitFormat unitFormat = ServiceProvider.current().getUnitFormatService().getUnitFormat();
 			
 			switch (model.getAxisType()) {
 			case Q:
