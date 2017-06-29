@@ -10,8 +10,10 @@ package org.dawnsci.plotting;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 
 import org.dawb.common.services.ISystemService;
@@ -826,6 +828,21 @@ public abstract class AbstractPlottingSystem<T> implements IPlottingSystem<T>, I
 		return ret; // may be empty
 	}
 
+	@Override
+	public <Y extends ITrace> Collection<Y> getTracesByClass(Class<Y> clazz) {
+		final Collection<ITrace> traces = getTraces();
+		if (traces == null)
+			return Collections.emptyList();
+		
+		List<Y> l = new ArrayList<>();
+		
+		for (ITrace t : traces) {
+			if (clazz.isInstance(t)) l.add(clazz.cast(t));
+		}
+		
+		return l;
+	}
+	
 	@Override
 	public IActionBars getActionBars() {
 		return bars;
