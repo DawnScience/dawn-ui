@@ -454,7 +454,9 @@ public class LightWeightPlotViewer<T> extends AbstractPlottingViewer<T> implemen
  				} else if (e.keyCode==127) {//Delete
 					IFigure fig = getFigureAtCurrentMousePosition(IRegionContainer.class);
  					if (fig!=null && fig instanceof IRegionContainer) {
- 						xyGraph.removeRegion((AbstractSelectionRegion<?>) ((IRegionContainer)fig).getRegion());
+ 						final IRegion region = (AbstractSelectionRegion<?>) ((IRegionContainer)fig).getRegion();
+ 						if (region.isUserRegion())
+ 							xyGraph.removeRegion(region);
  					}
  				}
 				if (e.keyCode == 131072) { // SHIFT
