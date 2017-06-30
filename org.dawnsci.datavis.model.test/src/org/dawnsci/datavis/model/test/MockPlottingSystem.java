@@ -159,6 +159,17 @@ public class MockPlottingSystem implements IPlottingSystem<Object> {
 	}
 
 	@Override
+	public <T extends ITrace> Collection<T> getTracesByClass(Class<T> clazz) {
+		List<T> l = new ArrayList<>();
+		
+		for (ITrace t : traces) {
+			if (clazz.isInstance(t)) l.add(clazz.cast(t));
+		}
+		
+		return l;
+	}
+	
+	@Override
 	public void addTraceListener(ITraceListener l) {
 		// TODO Auto-generated method stub
 		
