@@ -20,11 +20,9 @@ import javax.measure.spi.ServiceProvider;
 import javax.measure.quantity.Length;
 import javax.measure.Quantity;
 import javax.measure.Unit;
-import javax.measure.format.UnitFormat;
 
 import si.uom.SI;
 import tec.units.ri.quantity.Quantities;
-import tec.units.ri.unit.MetricPrefix;
 import tec.units.ri.unit.Units;
 import si.uom.NonSI;
 
@@ -178,7 +176,7 @@ public class DiffractionTreeModel<Q extends Quantity<Q>> extends AbstractNodeMod
         	beamX.addAmountListener(new AmountListener<Length>() {		
     			@Override
     			public void amountChanged(AmountEvent<Length> evt) {
-    				setBeamX(detprop, evt.getAmount());
+    				setBeamX(detprop, (Quantity<Length>) evt.getAmount());
     			}
     		});
         }
@@ -194,7 +192,7 @@ public class DiffractionTreeModel<Q extends Quantity<Q>> extends AbstractNodeMod
         	beamY.addAmountListener(new AmountListener<Length>() {		
     			@Override
     			public void amountChanged(AmountEvent<Length> evt) {
-    				setBeamY(detprop, evt.getAmount());
+    				setBeamY(detprop, (Quantity<Length>) evt.getAmount());
     			}
     		});
         }
@@ -299,7 +297,7 @@ public class DiffractionTreeModel<Q extends Quantity<Q>> extends AbstractNodeMod
 				@Override
 				public void amountChanged(AmountEvent<Length> evt) {
 					setDetectorNameToDefault(detectorName);
-					setXDetectorSize(detprop, evt.getAmount());
+					setXDetectorSize(detprop, (Quantity<Length>) evt.getAmount());
 				}
 			});
 		}
@@ -318,8 +316,7 @@ public class DiffractionTreeModel<Q extends Quantity<Q>> extends AbstractNodeMod
 				@Override
 				public void amountChanged(AmountEvent<Length> evt) {
 					setDetectorNameToDefault(detectorName);
-					setYDetectorSize(detprop, evt.getAmount());
-					
+					setYDetectorSize(detprop, (Quantity<Length>) evt.getAmount());
 				}
 			});
 		}
@@ -448,7 +445,7 @@ public class DiffractionTreeModel<Q extends Quantity<Q>> extends AbstractNodeMod
 			dist.addAmountListener(new AmountListener<Length>() {
 				@Override
 				public void amountChanged(AmountEvent<Length> evt) {
-					setDistance(detprop, evt.getAmount());
+					setDistance(detprop, (Quantity<Length>) evt.getAmount());
 				}
 			});
 		}
@@ -509,7 +506,7 @@ public class DiffractionTreeModel<Q extends Quantity<Q>> extends AbstractNodeMod
 			@Override
 			public void amountChanged(AmountEvent<Angle> evt) {
 				double[] ori = getDetectorProperties().getNormalAnglesInDegrees();
-				ori[index]   = evt.getAmount().to(NonSI.DEGREE_ANGLE).getValue().doubleValue();
+				ori[index]   = Quantities.getQuantity(evt.getAmount().getValue().doubleValue(), NonSI.DEGREE_ANGLE).getValue().doubleValue();
 //				System.err.printf("Node %d amount set: %f\n", index, ori[index]);
 				getDetectorProperties().setNormalAnglesInDegrees(ori);
 			}
@@ -701,11 +698,11 @@ public class DiffractionTreeModel<Q extends Quantity<Q>> extends AbstractNodeMod
 	private void updateBeamCentre(DetectorProperties detprop) {
 		double[]     cen = detprop.getBeamCentreCoords();
 		Quantity<Length> x = Quantities.getQuantity(cen[0], xpixel);
-		beamX.setValueQuietly(x.to(beamX.getValue().getUnit()));
+		beamX.setValueQuietly(Quantities.getQuantity(x.getValue().doubleValue(), beamX.getValue().getUnit()));
 		if (viewer!=null) viewer.update(beamX, null); // Cancels cell editing.
 		
 		Quantity<Length> y = Quantities.getQuantity(cen[1], ypixel);
-		beamY.setValueQuietly(y.to(beamY.getValue().getUnit()));
+		beamY.setValueQuietly(Quantities.getQuantity(y.getValue().doubleValue(), beamY.getValue().getUnit()));
 		if (viewer!=null) viewer.update(beamY, null);  // Cancels cell editing.
 	}
 

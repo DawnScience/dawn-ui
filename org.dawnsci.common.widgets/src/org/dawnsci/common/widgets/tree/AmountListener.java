@@ -12,7 +12,7 @@ import java.util.EventListener;
 
 import javax.measure.Quantity;
 
-public interface AmountListener<Q extends Quantity<Q>> extends EventListener {
+public interface AmountListener<Q extends Quantity<?>> extends EventListener {
 
 	void amountChanged(AmountEvent<Q> evt);
 }

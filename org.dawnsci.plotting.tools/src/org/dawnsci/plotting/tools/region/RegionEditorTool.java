@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.Map;
 
 import javax.measure.quantity.Dimensionless;
+import javax.measure.spi.ServiceProvider;
 import javax.measure.Unit;
 import javax.swing.tree.TreeNode;
 
@@ -42,6 +43,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.dawnsci.analysis.api.Constants;
 import org.eclipse.dawnsci.analysis.api.roi.IROI;
 import org.eclipse.dawnsci.analysis.dataset.roi.LinearROI;
 import org.eclipse.dawnsci.analysis.dataset.roi.PointROI;
@@ -458,7 +460,7 @@ public class RegionEditorTool extends AbstractToolPage implements IResettableExp
 						if (child instanceof NumericNode<?>) {
 							NumericNode<?> numNode = (NumericNode<?>) child;
 							Unit<?> unit = numNode.getUnit();
-							if (unit.equals(Dimensionless.UNIT)) {
+							if (unit.equals(ServiceProvider.current().getQuantityFactory(Dimensionless.class).getSystemUnit())) {
 								if (numNode.getLabel().contains(RegionEditorNodeFactory.INTENSITY))
 									numNode.setFormat(maxIntensityFormat);
 								else if (numNode.getLabel().contains(RegionEditorNodeFactory.SUM))
@@ -467,7 +469,7 @@ public class RegionEditorTool extends AbstractToolPage implements IResettableExp
 									|| unit.equals(SI.RADIAN)) {
 								numNode.setIncrement(ToolUtils.getDecimal(angleFormat));
 								numNode.setFormat(angleFormat);
-							} else if (unit.equals(NonSI.PIXEL)) {
+							} else if (unit.equals(Constants.PIXEL)) {
 								numNode.setIncrement(ToolUtils.getDecimal(pointFormat));
 								numNode.setFormat(pointFormat);
 							}

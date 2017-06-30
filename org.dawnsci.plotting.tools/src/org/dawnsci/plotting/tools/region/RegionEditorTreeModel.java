@@ -17,6 +17,7 @@ import java.util.Set;
 import javax.measure.quantity.Angle;
 import javax.measure.quantity.Dimensionless;
 import javax.measure.quantity.Length;
+import javax.measure.spi.ServiceProvider;
 import javax.measure.Quantity;
 import javax.measure.Unit;
 import javax.swing.tree.TreeNode;
@@ -36,6 +37,7 @@ import org.dawnsci.common.widgets.tree.ValueListener;
 import org.dawnsci.plotting.tools.Activator;
 import org.dawnsci.plotting.tools.preference.RegionEditorConstants;
 import org.dawnsci.plotting.tools.utils.ToolUtils;
+import org.eclipse.dawnsci.analysis.api.Constants;
 import org.eclipse.dawnsci.analysis.api.roi.IROI;
 import org.eclipse.dawnsci.analysis.dataset.roi.CircularROI;
 import org.eclipse.dawnsci.analysis.dataset.roi.LinearROI;
@@ -109,19 +111,20 @@ public class RegionEditorTreeModel extends AbstractNodeModel {
 		Set<Entry<String,Object>> set = roiInfos.entrySet();
 		for (Entry<String, Object> entry : set) {
 			String key = entry.getKey();
+			Unit<Dimensionless> dimensionLess = ServiceProvider.current().getQuantityFactory(Dimensionless.class).getSystemUnit();
 			if (key.contains(RegionEditorNodeFactory.ANGLE)) {
 				if (node.isAngleInRadian())
 					createAngleNode(node, entry.getKey(), true, incrementAngle, pointFormat, SI.RADIAN, Math.toRadians((Double)entry.getValue()));
 				else
 					createAngleNode(node, entry.getKey(), true, incrementAngle, angleFormat, NonSI.DEGREE_ANGLE, (Double)entry.getValue());
 			} else if (key.contains(RegionEditorNodeFactory.INTENSITY))
-				createLengthNode(node, key, false, increment, intensityFormat, Dimensionless.UNIT, maxIntensity);
+				createLengthNode(node, key, false, increment, intensityFormat, dimensionLess, maxIntensity);
 			else if (key.contains(RegionEditorNodeFactory.SUM))
-				createLengthNode(node, key, false, increment, sumFormat, Dimensionless.UNIT, sum);
+				createLengthNode(node, key, false, increment, sumFormat, dimensionLess, sum);
 			else if (key.contains(RegionEditorNodeFactory.SYMMETRY))
 				createSymmetryNode(node, key, true, (Integer)entry.getValue());
 			else
-				createLengthNode(node, key, true, increment, pointFormat, NonSI.PIXEL, (Double)entry.getValue());
+				createLengthNode(node, key, true, increment, pointFormat, Constants.PIXEL, (Double)entry.getValue());
 		}
 		return node;
 	}
@@ -190,7 +193,7 @@ public class RegionEditorTreeModel extends AbstractNodeModel {
 
 	private void createLengthNode(final RegionEditorNode regionNode, String nodeName, boolean editable,
 			double increment, String pointFormat, Unit<?> unit, double value) {
-		if (unit.isCompatible(NonSI.PIXEL)) {
+		if (unit.isCompatible(Constants.PIXEL)) {
 			NumericNode<Length> node = new NumericNode<Length>(nodeName, regionNode, (Unit<Length>) unit);
 			registerNode(node);
 			node.setEditable(editable);
@@ -212,7 +215,7 @@ public class RegionEditorTreeModel extends AbstractNodeModel {
 					}
 				});
 			}
-		} else if (unit.isCompatible(Dimensionless.UNIT)) {
+		} else if (unit.isCompatible(ServiceProvider.current().getQuantityFactory(Dimensionless.class).getSystemUnit())) {
 			NumericNode<Dimensionless> node = new NumericNode<Dimensionless>(nodeName, regionNode, (Unit<Dimensionless>) unit);
 			registerNode(node);
 			node.setEditable(editable);

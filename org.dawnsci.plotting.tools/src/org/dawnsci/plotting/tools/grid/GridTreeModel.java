@@ -143,7 +143,9 @@ public class GridTreeModel extends AbstractNodeModel {
 				if (groi==null || region==null) return;
 				try {
 					adjustingValue = true;
-					double xspacing = groi.getGridPreferences().getXPixelsFromMicronsLen(evt.getAmount().to(ToolUtils.MICRO).getValue().doubleValue());
+					double xspacing = groi.getGridPreferences().getXPixelsFromMicronsLen(
+							Quantities.getQuantity(evt.getAmount().getValue().doubleValue(), ToolUtils.MICRO).getValue()
+									.doubleValue());
 					groi.setxSpacing(xspacing);
 					region.setROI(groi);
 					region.repaint();
@@ -168,7 +170,9 @@ public class GridTreeModel extends AbstractNodeModel {
 				if (groi==null || region==null) return;
 				try {
 					adjustingValue = true;
-					double yspacing = groi.getGridPreferences().getYPixelsFromMicronsLen(evt.getAmount().to(ToolUtils.MICRO).getValue().doubleValue());
+					double yspacing = groi.getGridPreferences().getYPixelsFromMicronsLen(
+							Quantities.getQuantity(evt.getAmount().getValue().doubleValue(), ToolUtils.MICRO).getValue()
+									.doubleValue());
 					groi.setySpacing(yspacing);
 					region.setROI(groi);
 					region.repaint();
@@ -413,7 +417,7 @@ public class GridTreeModel extends AbstractNodeModel {
 	}
 
 	private void updateNode(NumericNode<Length> node, double newValue) {
-		node.setValueQuietly(Quantities.getQuantity(newValue, node.getDefaultUnit()).to(node.getUnit()));
+		node.setValueQuietly(Quantities.getQuantity(newValue, node.getUnit()));
 		viewer.update(node, new String[]{"Value"});
 	}
 	
@@ -433,12 +437,11 @@ public class GridTreeModel extends AbstractNodeModel {
 		((Pixel) yDimPixel).setPixelsPerMm(yPPMm);
 	}
 	
-	@SuppressWarnings("unchecked")
 	private double changeAmount(AmountEvent<Length> evt) {
 		if (groi==null || region==null) return 0;
 		try {
-			Quantity<Length> amt = evt.getAmount();
-			return amt.to(((NumericNode<Length>) evt.getSource()).getDefaultUnit()).getValue().doubleValue();
+			Quantity<Length> amt = (Quantity<Length>) evt.getAmount();
+			return amt.getValue().doubleValue();
 		} finally {
 		}
 	}
