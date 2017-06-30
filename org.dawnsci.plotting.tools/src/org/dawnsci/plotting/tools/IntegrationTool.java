@@ -4,6 +4,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.dawnsci.analysis.api.roi.IROI;
+import org.eclipse.dawnsci.analysis.dataset.roi.XAxisBoxROI;
+import org.eclipse.dawnsci.plotting.api.axis.AxisEvent;
+import org.eclipse.dawnsci.plotting.api.axis.IAxis;
+import org.eclipse.dawnsci.plotting.api.axis.IAxisListener;
 import org.eclipse.dawnsci.plotting.api.region.IROIListener;
 import org.eclipse.dawnsci.plotting.api.region.IRegion;
 import org.eclipse.dawnsci.plotting.api.region.IRegion.RegionType;
@@ -21,11 +25,13 @@ import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Spinner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,16 +39,23 @@ public class IntegrationTool extends AbstractToolPage implements IROIListener, I
 	private static final Logger logger = LoggerFactory.getLogger(IntegrationTool.class);
 	
 	private Composite composite;
-	private Label lowerBoundLabel;
-	private Label upperBoundLabel;
+	private Spinner lowerBoundSpinner;
+	private Spinner upperBoundSpinner;
 	private double lowerBound;
 	private double upperBound;
 
 	private IRegion region;
 	private TableViewer integrationResultsTable;
 	
-	private final ArrayList<ITrace> traces = new ArrayList<>();
+	private final ArrayList<ILineTrace> traces = new ArrayList<>();
+
+	private ModifyListener lowerBoundModifyListener;
+	private ModifyListener upperBoundModifyListener;
+
+	private double lowerRange;
+	private double upperRange;
 	
+
 	@Override
 	public ToolPageRole getToolPageRole() {
 		return ToolPageRole.ROLE_1D;
@@ -60,11 +73,14 @@ public class IntegrationTool extends AbstractToolPage implements IROIListener, I
 	}
 
 	private void roiEventHandler(ROIEvent evt) {
+		lowerBoundSpinner.setEnabled(true);
+		upperBoundSpinner.setEnabled(true);
 		IROI roi = evt.getROI();
 		double[] point = roi.getBounds().getPoint();
 		double[] endPoint = roi.getBounds().getEndPoint();
-		lowerBound = point[0];
-		upperBound = endPoint[0];
+		lowerBound = (int) point[0];
+		upperBound = (int) endPoint[0];
+		updateSpinnerRanges();
 		update();
 	}
 	
@@ -85,18 +101,45 @@ public class IntegrationTool extends AbstractToolPage implements IROIListener, I
 
 	@Override
 	public void createControl(Composite parent) {
-		composite = new Composite(parent, SWT.NULL);
+		composite = new Composite(parent, SWT.NONE);
 		composite.setLayout(new GridLayout(2, false));
 		Label tempLabel = new Label(composite, SWT.NONE);
-		tempLabel.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false));
+		tempLabel.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false));
 		tempLabel.setText("Lower bound");
-		lowerBoundLabel = new Label(composite, SWT.NONE);
-		lowerBoundLabel.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
+		lowerBoundSpinner = new Spinner(composite, SWT.NONE);
+		lowerBoundSpinner.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
+		lowerBoundModifyListener = e -> {
+			String text = lowerBoundSpinner.getText();
+			int value = lowerBoundSpinner.getSelection();
+			if (text.length() == 0)
+				return;
+			if (value < lowerBoundSpinner.getMinimum() || value > lowerBoundSpinner.getMaximum())
+				return;
+			IROI newRoi = new XAxisBoxROI(value, 0.0, upperBound-value, 0.0, 0.0);
+			region.setROI(newRoi);
+		}; 
+	
+		lowerBoundSpinner.addModifyListener(lowerBoundModifyListener);
 		tempLabel = new Label(composite, SWT.NONE);
-		tempLabel.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false));
+		tempLabel.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false));
 		tempLabel.setText("Upper bound");
-		upperBoundLabel = new Label(composite, SWT.NONE);
-		upperBoundLabel.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
+		upperBoundSpinner = new Spinner(composite, SWT.NONE);
+		upperBoundSpinner.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
+		upperBoundModifyListener = e -> {
+			String text = upperBoundSpinner.getText();
+			int value = upperBoundSpinner.getSelection();
+			if (text.length() == 0)
+				return;
+			if (value < upperBoundSpinner.getMinimum() || value > upperBoundSpinner.getMaximum())
+				return;
+			IROI newRoi = new XAxisBoxROI(lowerBound, 0.0, value-lowerBound, 0.0, 0.0);
+			region.setROI(newRoi);
+		}; 
+		upperBoundSpinner.addModifyListener(upperBoundModifyListener);
+
+		// disable spinners until region is available
+		lowerBoundSpinner.setEnabled(false);
+		upperBoundSpinner.setEnabled(false);
 	
 		integrationResultsTable = new TableViewer(composite);
 		integrationResultsTable.getTable().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));
@@ -144,12 +187,46 @@ public class IntegrationTool extends AbstractToolPage implements IROIListener, I
 		
 		super.createControl(parent);
 	}
+
+	private void updateSpinnerRanges() {
+		lowerBoundSpinner.removeModifyListener(lowerBoundModifyListener);
+		upperBoundSpinner.removeModifyListener(upperBoundModifyListener);
+		lowerBoundSpinner.setMinimum((int) Math.min(lowerRange, lowerBound));
+		lowerBoundSpinner.setMaximum((int) upperBound);
+		upperBoundSpinner.setMinimum((int) lowerBound);
+		upperBoundSpinner.setMaximum((int) Math.max(upperRange, upperBound));
+		lowerBoundSpinner.addModifyListener(lowerBoundModifyListener);
+		upperBoundSpinner.addModifyListener(upperBoundModifyListener);
+	}
 	
 	@Override
 	public void activate() {
 		if (isActive()) return;
 		if (getPlottingSystem() ==  null) return;
 		getPlottingSystem().addTraceListener(this);
+		List<IAxis> axes = getPlottingSystem().getAxes();
+		IAxis axisX = axes.get(0);
+
+		lowerRange = axisX.getLower();
+		upperRange = axisX.getUpper();
+		
+		updateSpinnerRanges();
+		
+		axisX.addAxisListener(new IAxisListener() {
+			
+			@Override
+			public void revalidated(AxisEvent evt) {
+				// will not be used
+			}
+			
+			@Override
+			public void rangeChanged(AxisEvent evt) {
+				// whenever the Xrange changes, I need to update the bounds
+				lowerRange = (int) evt.getNewLower();
+				upperRange = (int) evt.getNewUpper();
+				updateSpinnerRanges();
+			}
+		});
 		try {
 			region = getPlottingSystem().createRegion("Integration range", RegionType.XAXIS);
 			region.addROIListener(this);
@@ -173,12 +250,16 @@ public class IntegrationTool extends AbstractToolPage implements IROIListener, I
 		super.deactivate();
 	}
 	
-	protected synchronized void update() {
-		lowerBoundLabel.setText(String.format("%g", lowerBound));
-		upperBoundLabel.setText(String.format("%g", upperBound));
+	protected void update() {
+		lowerBoundSpinner.removeModifyListener(lowerBoundModifyListener);
+		upperBoundSpinner.removeModifyListener(upperBoundModifyListener);
+		lowerBoundSpinner.setSelection((int) lowerBound);
+		upperBoundSpinner.setSelection((int) upperBound);
+		lowerBoundSpinner.addModifyListener(lowerBoundModifyListener);
+		upperBoundSpinner.addModifyListener(upperBoundModifyListener);
 		
 		traces.clear();
-		traces.addAll(getPlottingSystem().getTraces(ILineTrace.class));
+		traces.addAll(getPlottingSystem().getTracesByClass(ILineTrace.class));
 		integrationResultsTable.refresh();
 	}
 	
@@ -247,7 +328,7 @@ public class IntegrationTool extends AbstractToolPage implements IROIListener, I
 		// ignore
 	}
 
-	public List<ITrace> getTraces() {
+	public List<ILineTrace> getTraces() {
 		return traces;
 	}
 
