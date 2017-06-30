@@ -396,7 +396,7 @@ public class Draw2DUtils {
 			if (dx == 0 && dy == 0)
 				continue; // ignore null segment
 
-			if (first) { // find first segment that is (partly) in bounds
+			if (first) { // first point may be outside bounds
 				if (clip(xl - x0, dx, t) && clip(x0 - xh, -dx, t)
 						&& clip(yl - y0, dy, t) && clip(y0 - yh, -dy, t)) {
 					if (t[0] > 0) {
@@ -404,24 +404,25 @@ public class Draw2DUtils {
 					} else {
 						p0 = new Point((int) Math.round(x0), (int) Math.round(y0));
 					}
-					list.removeAllPoints();
 					list.addPoint(p0);
 					if (t[1] < 1) {
 						Point p = new Point((int) Math.round(x0 + t[1] * dx), (int) Math.round(y0 + t[1] * dy));
 						list.addPoint(p);
 						g.drawPolyline(list);
+						list.removeAllPoints();
 					} else {
-						first = false;
+						first = false; // next point is inside bounds
 						list.addPoint(new Point((int) Math.round(p1.preciseX()), (int) Math.round(p1.preciseY())));
 					}
 				}
 			} else { // given that p0 is in bounds
 				if (clip2(xl - x0, dx, t) && clip2(x0 - xh, -dx, t) && clip2(yl - y0, dy, t) && clip2(y0 - yh, -dy, t)) {
 					if (t[1] < 1) {
-						first = true;
 						Point p = new Point((int) Math.round(x0 + t[1] * dx), (int) Math.round(y0 + t[1] * dy));
 						list.addPoint(p);
 						g.drawPolyline(list);
+						list.removeAllPoints();
+						first = true; // next point is outside bounds
 					} else {
 						list.addPoint(new Point((int) Math.round(p1.preciseX()), (int) Math.round(p1.preciseY())));
 					}
@@ -434,30 +435,55 @@ public class Draw2DUtils {
 		}
 	}
 
+	/**
+	 * Check for clipping of first line segment.
+	 * <p>
+	 * Equation of line is:
+	 * <p>
+	 * p = p0 + t*d
+	 * <p>
+	 * where p, p0, d are vectors and t is a scalar parameter.
+	 * We solve for t to find intersection with a line x=constant or y=constant
+	 * <p>
+	 * There is no assumption that the starting point is within the bounds
+	 * @param n numerator (p1 - p0)
+	 * @param d denominator (d)
+	 * @param t parameter limits which get updated on clipping
+	 * @return true if clipped
+	 */
 	private static boolean clip(double n, double d, double[] t) {
-		if (d == 0) {
-			return n <= 0;
+		if (d == 0) { // on border
+			return n <= 0; // reject if before
 		}
 
 		double v = n/d;
 		if (d > 0) {
 			if (v > t[1])
-				return false;
+				return false; // whole segment lies outside
 			if (v > t[0])
-				t[0] = v;
+				t[0] = v; // clip start
 		} else {
 			if (v < t[0])
-				return false;
+				return false; // whole segment lies outside
 			if (v < t[1])
-				t[1] = v;
+				t[1] = v; // clip end
 		}
 
 		return true;
 	}
 
+	/**
+	 * Check for clipping of line segment.
+	 * <p>
+	 * It is assumed that the starting point is within the bounds
+	 * @param n numerator
+	 * @param d denominator
+	 * @param t parameter limits which get updated on clipping
+	 * @return true if clip
+	 */
 	private static boolean clip2(double n, double d, double[] t) {
-		if (d == 0) {
-			return n <= 0;
+		if (d == 0) { // on border
+			return n <= 0; // reject if before
 		}
 
 		double v = n/d;
@@ -509,13 +535,17 @@ public class Draw2DUtils {
 
 		Point p1 = points.getPoint(0);
 		PointList list = new PointList();
-		int i = 1;
 		double[] t = new double[2];
 		PointList oobers = new PointList(); // out-of-bound points
-		Point ooba = null;
+		Point ooba = null; // last out-of-bound point
+
+		if (!bounds.contains(p1)) {
+			oobers.addPoint(p1);
+			ooba = p1;
+		}
 
 		boolean first = true;
-		for (; i <= pts; i++) {
+		for (int i = 1; i <= pts; i++) {
 			p0 = p1;
 			p1 = points.getPoint(i % pts);
 
@@ -529,18 +559,20 @@ public class Draw2DUtils {
 			if (dx == 0 && dy == 0)
 				continue; // ignore null segment
 
-			if (first) { // find first segment that is (partly) in bounds
+			if (first) {  // first point may be outside bounds
 				if (clip(xl - x0, dx, t) && clip(x0 - xh, -dx, t)
 						&& clip(yl - y0, dy, t) && clip(y0 - yh, -dy, t)) {
+					Point p;
+					
 					if (t[0] > 0) {
-						p0 = new Point((int) Math.round(x0 + t[0] * dx), (int) Math.round(y0 + t[0] * dy));
+						p = new Point((int) Math.round(x0 + t[0] * dx), (int) Math.round(y0 + t[0] * dy));
 					} else {
-						p0 = new Point((int) Math.round(x0), (int) Math.round(y0));
+						p = new Point((int) Math.round(x0), (int) Math.round(y0));
 					}
 
 					// add possible corner points
 					if (oobers.size() > 1) {
-						oobers.addPoint(p0);
+						oobers.addPoint(p1); // add end-point to complete polygon
 						for (int j = 0, jmax = corners.size(); j < jmax; j++) {
 							Point c = corners.getPoint(j);
 							if (oobers.polygonContainsPoint(c.x(), c.y())) {
@@ -549,10 +581,10 @@ public class Draw2DUtils {
 						}
 					}
 					oobers.removeAllPoints();
-					list.addPoint(p0);
+					list.addPoint(p);
 
 					if (t[1] < 1) {
-						Point p = new Point((int) Math.round(x0 + t[1] * dx), (int) Math.round(y0 + t[1] * dy));
+						p = new Point((int) Math.round(x0 + t[1] * dx), (int) Math.round(y0 + t[1] * dy));
 						oobers.addPoint(p);
 						oobers.addPoint(p1);
 						list.addPoint(p);
@@ -562,8 +594,7 @@ public class Draw2DUtils {
 					}
 				} else {
 					if (list.size() == 0) {
-//						System.err.println("Set " + p1 + " : " + i);
-						ooba = p1;
+						ooba = p1; // overwrite last out-of-bound point
 					}
 					oobers.addPoint(p1);
 				}
