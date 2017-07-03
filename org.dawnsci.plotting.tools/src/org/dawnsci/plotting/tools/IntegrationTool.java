@@ -54,7 +54,6 @@ public class IntegrationTool extends AbstractToolPage implements IROIListener, I
 
 	private double lowerRange;
 	private double upperRange;
-	
 
 	@Override
 	public ToolPageRole getToolPageRole() {
@@ -245,8 +244,10 @@ public class IntegrationTool extends AbstractToolPage implements IROIListener, I
 			if (region != null) {
 				region.removeROIListener(this);
 				getPlottingSystem().removeRegion(region);
+				region = null;
 			}
 		}
+		traces.clear();
 		super.deactivate();
 	}
 	
