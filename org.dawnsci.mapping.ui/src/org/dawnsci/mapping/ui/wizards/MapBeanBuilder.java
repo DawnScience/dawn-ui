@@ -153,6 +153,7 @@ public class MapBeanBuilder {
 				if (name.endsWith(NexusTreeUtils.NX_AXES_SET +NexusTreeUtils.NX_INDICES_SUFFIX)) {
 					IDataset value = next.getValue();
 					if (value.getSize() != 1) continue;
+					value.squeeze();
 					index = Integer.parseInt(value.getString());
 					if (nameDimMap.containsKey(index)) {
 						indexKey = index;
