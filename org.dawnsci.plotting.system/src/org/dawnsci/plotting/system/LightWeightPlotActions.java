@@ -649,44 +649,60 @@ class LightWeightPlotActions {
         actionBarManager.registerAction(ToolbarConfigurationConstants.ZOOM.getId(), autoScale, ActionType.XYANDIMAGE);
         
         final CheckableActionGroup zoomG = new CheckableActionGroup();
-        final MenuAction zoomMenu = new MenuAction("Zoom Types");
+//        final MenuAction zoomMenu = new MenuAction("Zoom Types");
  		
-        Action rubberBand = null;
-        for(final ZoomType zoomType : ZoomType.values()){
-		    if (! zoomType.useWithFlags(flags)) continue;
-		    if (!zoomType.isZoom()) continue;
-		 		
-			final ImageDescriptor icon = new ImageDescriptor() {				
-				@Override
-				public ImageData getImageData() {
-					return zoomType.getIconImage().getImageData();
-				}
-			};
-			final Action zoomAction = new Action(zoomType.getDescription(), IAction.AS_PUSH_BUTTON) {
-				public void run() {
-					xyGraph.setZoomType(zoomType);
-					zoomMenu.setSelectedAction(this);
-					zoomMenu.setId(zoomType.getId());
-				}
-			};
-			zoomAction.setImageDescriptor(icon);
-			zoomAction.setId(zoomType.getId());
-			zoomG.add(zoomAction);
-			zoomMenu.add(zoomAction);
-			if (zoomType==ZoomType.RUBBERBAND_ZOOM) rubberBand = zoomAction;
-		}
-		if (rubberBand!=null) {
-			zoomMenu.setSelectedAction(rubberBand);
-			zoomMenu.setId(rubberBand.getId());
-		}
-        actionBarManager.registerAction(ToolbarConfigurationConstants.ZOOM.getId(), zoomMenu, ActionType.XYANDIMAGE);
+        Action rubberBand = new Action(ZoomType.RUBBERBAND_ZOOM.getDescription(), IAction.AS_PUSH_BUTTON) {
+        	public void run() {
+        		xyGraph.setZoomType(ZoomType.RUBBERBAND_ZOOM);
+        	}
+        };
+        
+        final ImageDescriptor icon = new ImageDescriptor() {				
+			@Override
+			public ImageData getImageData() {
+				return ZoomType.RUBBERBAND_ZOOM.getIconImage().getImageData();
+			}
+		};
+        
+        rubberBand.setId(ZoomType.RUBBERBAND_ZOOM.getId());
+        rubberBand.setImageDescriptor(icon);
+        
+        
+//        for(final ZoomType zoomType : ZoomType.values()){
+//		    if (! zoomType.useWithFlags(flags)) continue;
+//		    if (!zoomType.isZoom()) continue;
+//		 		
+//			final ImageDescriptor icon = new ImageDescriptor() {				
+//				@Override
+//				public ImageData getImageData() {
+//					return zoomType.getIconImage().getImageData();
+//				}
+//			};
+//			final Action zoomAction = new Action(zoomType.getDescription(), IAction.AS_PUSH_BUTTON) {
+//				public void run() {
+//					xyGraph.setZoomType(zoomType);
+//					zoomMenu.setSelectedAction(this);
+//					zoomMenu.setId(zoomType.getId());
+//				}
+//			};
+//			zoomAction.setImageDescriptor(icon);
+//			zoomAction.setId(zoomType.getId());
+//			zoomG.add(zoomAction);
+//			zoomMenu.add(zoomAction);
+//			if (zoomType==ZoomType.RUBBERBAND_ZOOM) rubberBand = zoomAction;
+//		}
+//		if (rubberBand!=null) {
+//			zoomMenu.setSelectedAction(rubberBand);
+//			zoomMenu.setId(rubberBand.getId());
+//		}
+        actionBarManager.registerAction(ToolbarConfigurationConstants.ZOOM.getId(), rubberBand, ActionType.XYANDIMAGE);
 		
         Action none = null;
         for(final ZoomType zoomType : ZoomType.values()){
 		    if (! zoomType.useWithFlags(flags)) continue;
 		    if (zoomType.isZoom()) continue;
 		 		
-			final ImageDescriptor icon = new ImageDescriptor() {				
+			final ImageDescriptor iconRubber = new ImageDescriptor() {				
 				@Override
 				public ImageData getImageData() {
 					return zoomType.getIconImage().getImageData();
@@ -697,7 +713,7 @@ class LightWeightPlotActions {
 					xyGraph.setZoomType(zoomType);
 				}
 			};
-			zoomAction.setImageDescriptor(icon);
+			zoomAction.setImageDescriptor(iconRubber);
 			zoomAction.setId(zoomType.getId());
 			zoomG.add(zoomAction);	
 			
