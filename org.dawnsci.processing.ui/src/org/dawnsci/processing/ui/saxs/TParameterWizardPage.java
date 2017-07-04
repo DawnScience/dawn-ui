@@ -49,6 +49,7 @@ import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Label;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import java.util.Arrays;
@@ -79,6 +80,7 @@ public class TParameterWizardPage extends AbstractOperationModelWizardPage imple
 	private Dataset kratkyData;
 	private Dataset kratkyFit;
 	private Dataset xAxis;
+	private Label porodGradientLabel;
 	
 	// As well as the ranges over which to perform our fitting
 	private double[] porodRange;
@@ -139,7 +141,7 @@ public class TParameterWizardPage extends AbstractOperationModelWizardPage imple
 		
 		// Complete with subhomes for the graphs and model
 		SashForm inputSash = new SashForm(container, SWT.VERTICAL);
-		inputSash.setLayout(new GridLayout(3, false));
+		inputSash.setLayout(new GridLayout(4, false));
 		inputSash.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 				
 		SashForm processingSash = new SashForm(container, SWT.VERTICAL);
@@ -172,9 +174,14 @@ public class TParameterWizardPage extends AbstractOperationModelWizardPage imple
 		modelViewer.createPartControl(inputSash);
 		modelViewer.setOperation(operation);
 		
+		// Finally, the gradient should be displayed for data fitting
+		porodGradientLabel = new Label(inputSash, SWT.HORIZONTAL);
+		// Let's set this label up with some placeholder text
+		porodGradientLabel.setText("Porod line gradient is: NaN");
+		
 		// Set the default GUI weightings
 		container.setWeights(new int[]{35, 65});
-		inputSash.setWeights(new int[]{5, 70, 25});
+		inputSash.setWeights(new int[]{5, 70, 25, 5});
 		processingSash.setWeights(new int[]{5, 45, 5, 45});
 
 		// Set the controls
@@ -218,9 +225,13 @@ public class TParameterWizardPage extends AbstractOperationModelWizardPage imple
 						} catch (Exception kratkyError) {
 							logger.warn("Couldn't set the Porod region from the Wizard: ", kratkyError);
 						}
+						
 						// Set this in the model viewer and update
 						modelViewer.setModel(model);
 						regionChange();
+						
+						//porodGradientLabel.setText("Porod Gradient is: ");
+						porodFit.getDouble(0);
 					}
 				});
 			} catch (Exception regionError) {
@@ -333,6 +344,16 @@ public class TParameterWizardPage extends AbstractOperationModelWizardPage imple
 		this.kratkyData = (Dataset) outputAuxillaryData[2];
 		this.kratkyFit = (Dataset) outputAuxillaryData[3];
 		this.xAxis = (Dataset) outputAuxillaryData[4];
+		
+		// It is useful for the operator to know what the Porod gradient is as, for these calculations
+		// it should be 4, so let's give them this information
+		String porodGradient = String.format("%.2f", ((Double) outputAuxillaryData[6]));
+		
+		if (this.porodGradientLabel != null) {
+			this.porodGradientLabel.setText("Porod gradient is: " + porodGradient);
+
+		}
+		
 		this.plotRangeFinder();
 
 		// If we're doing this for the first time, i.e. startup, we should populate the wizard
