@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.eclipse.dawnsci.analysis.api.roi.IROI;
 import org.eclipse.dawnsci.analysis.dataset.roi.XAxisBoxROI;
+import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.axis.AxisEvent;
 import org.eclipse.dawnsci.plotting.api.axis.IAxis;
 import org.eclipse.dawnsci.plotting.api.axis.IAxisListener;
@@ -200,10 +201,13 @@ public class IntegrationTool extends AbstractToolPage implements IROIListener, I
 	
 	@Override
 	public void activate() {
-		if (isActive()) return;
-		if (getPlottingSystem() ==  null) return;
-		getPlottingSystem().addTraceListener(this);
-		List<IAxis> axes = getPlottingSystem().getAxes();
+		if (isActive() && !getTraces().isEmpty())
+			return;
+		IPlottingSystem<Composite> plottingSystem = getPlottingSystem();
+		if (plottingSystem ==  null)
+			return;
+		plottingSystem.addTraceListener(this);
+		List<IAxis> axes = plottingSystem.getAxes();
 		IAxis axisX = axes.get(0);
 
 		lowerRange = axisX.getLower();
@@ -227,7 +231,7 @@ public class IntegrationTool extends AbstractToolPage implements IROIListener, I
 			}
 		});
 		try {
-			region = getPlottingSystem().createRegion("Integration range", RegionType.XAXIS);
+			region = plottingSystem.createRegion("Integration range", RegionType.XAXIS);
 			region.addROIListener(this);
 			region.setUserRegion(false);
 		} catch (Exception e) {
@@ -239,6 +243,7 @@ public class IntegrationTool extends AbstractToolPage implements IROIListener, I
 
 	@Override
 	public void deactivate() {
+		logger.debug("IntegrationTool deactivate called");
 		if (getPlottingSystem() != null) {
 			getPlottingSystem().removeTraceListener(this);
 			if (region != null) {
