@@ -15,10 +15,11 @@ import java.util.Set;
 import org.dawb.common.ui.util.DatasetNameUtils;
 import org.dawb.common.ui.widgets.ActionBarWrapper;
 import org.dawb.common.util.io.FileUtils;
+import org.dawnsci.conversion.schemes.ProcessConversionScheme;
 import org.dawnsci.processing.ui.ServiceHolder;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.dawnsci.analysis.api.conversion.IConversionContext;
-import org.eclipse.dawnsci.analysis.api.conversion.IConversionContext.ConversionScheme;
+import org.eclipse.dawnsci.analysis.api.conversion.IConversionScheme;
 import org.eclipse.dawnsci.analysis.api.io.IDataHolder;
 import org.eclipse.dawnsci.analysis.dataset.slicer.Slicer;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
@@ -86,7 +87,7 @@ public class SetUpProcessWizardPage extends WizardPage {
 		setDescription("Select dataset, axes, whether to process as images [2D] or lines [1D] and which dimensions of the array are the data dimensions");
 		setTitle("Set up data for processing");
 		this.context = context;
-		context.setConversionScheme(ConversionScheme.PROCESS);
+		context.setConversionScheme(new ProcessConversionScheme());
 	}
 	
 	@Override
@@ -348,7 +349,7 @@ public class SetUpProcessWizardPage extends WizardPage {
 	
 	private Map<String, int[]> getDatasetInfo() throws Exception{
 		
-		final ConversionScheme scheme = context.getConversionScheme();
+		final IConversionScheme scheme = context.getConversionScheme();
 		final Map<String, int[]>     names = DatasetNameUtils.getDatasetInfo(context.getFilePaths().get(0), scheme);
 
         rootName = FileUtils.getRootName(names.keySet());

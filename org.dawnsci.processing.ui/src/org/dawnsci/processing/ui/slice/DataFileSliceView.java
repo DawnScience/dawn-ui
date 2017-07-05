@@ -22,6 +22,7 @@ import java.util.Map;
 import org.dawb.common.services.ServiceManager;
 import org.dawb.common.ui.monitor.ProgressMonitorWrapper;
 import org.dawnsci.common.widgets.dialog.FileSelectionDialog;
+import org.dawnsci.conversion.schemes.ProcessConversionScheme;
 import org.dawnsci.processing.ui.Activator;
 import org.dawnsci.processing.ui.ServiceHolder;
 import org.dawnsci.processing.ui.preference.ProcessingConstants;
@@ -33,7 +34,6 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.dawnsci.analysis.api.EventTracker;
 import org.eclipse.dawnsci.analysis.api.conversion.IConversionContext;
-import org.eclipse.dawnsci.analysis.api.conversion.IConversionContext.ConversionScheme;
 import org.eclipse.dawnsci.analysis.api.conversion.IProcessingConversionInfo;
 import org.eclipse.dawnsci.analysis.api.conversion.ProcessingOutputType;
 import org.eclipse.dawnsci.analysis.api.io.IDataHolder;
@@ -960,7 +960,7 @@ public class DataFileSliceView extends ViewPart {
 			final WizardDialog wd = new WizardDialog(getSite().getShell(),wiz);
 			wd.setPageSize(new Point(900, 500));
 			wd.create();
-			context.setConversionScheme(ConversionScheme.PROCESS);
+			context.setConversionScheme(new ProcessConversionScheme());
 
 			if (wd.open() == WizardDialog.OK) return context;
 			
