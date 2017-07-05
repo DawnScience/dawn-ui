@@ -1,0 +1,10 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Api
+Bundle-SymbolicName: org.dawnsci.conversion.ui.api
+Bundle-Version: 1.0.0.qualifier
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Require-Bundle: org.eclipse.january,
+ org.eclipse.jface,
+ org.eclipse.dawnsci.analysis.api
+Export-Package: org.dawnsci.conversion.ui.api
