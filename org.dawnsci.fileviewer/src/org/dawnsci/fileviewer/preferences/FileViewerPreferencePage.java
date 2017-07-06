@@ -22,7 +22,6 @@ public class FileViewerPreferencePage extends FieldEditorPreferencePage implemen
 	private BooleanFieldEditor showSize;
 	private BooleanFieldEditor showType;
 	private BooleanFieldEditor showModified;
-	private BooleanFieldEditor showScanCmd;
 	private BooleanFieldEditor displayWithSIUnit;
 
 	public FileViewerPreferencePage() {
@@ -43,8 +42,6 @@ public class FileViewerPreferencePage extends FieldEditorPreferencePage implemen
 		showModified = new BooleanFieldEditor(FileViewerConstants.SHOW_MODIFIED_COLUMN, "Show modified column",
 				getFieldEditorParent());
 		addField(showModified);
-
-		addField(showScanCmd);
 
 		displayWithSIUnit = new BooleanFieldEditor(FileViewerConstants.DISPLAY_WITH_SI_UNITS,
 				"Display file size with SI Units", getFieldEditorParent());
