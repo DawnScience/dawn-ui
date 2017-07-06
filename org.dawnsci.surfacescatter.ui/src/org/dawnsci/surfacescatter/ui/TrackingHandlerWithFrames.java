@@ -638,6 +638,8 @@ class trackingJob21 {
 
 		String[] doneArray = new String[drm.getDatFilepaths().length];
 		
+		drm.setDoneArray(doneArray);
+		
 		if (startFrame == 0) {
 			
 			
@@ -948,8 +950,15 @@ class trackingJob21 {
 										System.out.println(e.getMessage());
 									}
 									
+									boolean seedRequired = true;
 									
-									if(drm.getLocationList() == null && 
+									for(double[] o : drm.getLocationList().get(frame.getDatNo())){
+										if(!Arrays.equals(o, new double[] {0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0})){
+											seedRequired = false;
+										}
+									}
+									
+									if(seedRequired && 
 									   frame.getTrackingMethodology() != TrackerType1.INTERPOLATION &&
 									   frame.getTrackingMethodology() != TrackerType1.SPLINE_INTERPOLATION &&
 									   frame.getTrackingMethodology() != TrackerType1.USE_SET_POSITIONS){
@@ -1515,7 +1524,16 @@ class trackingJob21 {
 						
 						int jokLocal = frame.getDatNo();
 						
-						if(drm.getLocationList().get(frame.getDatNo()) == null && 
+						boolean seedRequired = true;
+						
+						for(double[] o : drm.getLocationList().get(frame.getDatNo())){
+							if(!Arrays.equals(o, new double[] {0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0})){
+								seedRequired = false;
+							}
+							
+						}
+						
+						if(seedRequired && 
 						   frame.getTrackingMethodology() != TrackerType1.INTERPOLATION &&
 						   frame.getTrackingMethodology() != TrackerType1.SPLINE_INTERPOLATION &&
 						   frame.getTrackingMethodology() != TrackerType1.USE_SET_POSITIONS){
@@ -1683,41 +1701,15 @@ class trackingJob21 {
 						
 //						zero.add(new Double[] {0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0});
 						
-						Double[] io = new Double[] {0.0,
-													0.0,
-													0.0,
-													0.0,
-													0.0,
-													0.0,
-													0.0,
-													0.0};
+						boolean seedRequired = true;
 						
-						ArrayList<double[]> re = (ArrayList<double[]>) drm.getLocationList().get(frame.getDatNo()).clone();
-						
-						double[] lc = re.get(0);
-						
-						double ry = lc[0];
-						int w = re.size();
-						
-						ArrayList<double[]> removeR = new ArrayList<>();
-						
-						for(double[] iu : re){
-							
-							double g = 0.0;
-							for(int by = 0; by<iu.length; by++){
-								g =g+Double.compare(iu[by], 0.0);
-							
+						for(double[] o : drm.getLocationList().get(frame.getDatNo())){
+							if(!Arrays.equals(o, new double[] {0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0})){
+								seedRequired = false;
 							}
-							if(g==0.0){
-								removeR.add(iu);
-							}							
+							
 						}
-						
-						for(double[] df : removeR){
-							re.remove(df);
-						}
-						
-						if(re.size() == 0 && 
+						if(seedRequired && 
 						   frame.getTrackingMethodology() != TrackerType1.INTERPOLATION &&
 						   frame.getTrackingMethodology() != TrackerType1.SPLINE_INTERPOLATION &&
 						   frame.getTrackingMethodology() != TrackerType1.USE_SET_POSITIONS) {
@@ -1924,55 +1916,74 @@ class trackingJob21 {
 							}
 
 							
-							if(drm.getLocationList().get(jok)  == null && 
+							
+							boolean seedRequired = true;
+							
+							for(double[] o : drm.getLocationList().get(frame.getDatNo())){
+								if(!Arrays.equals(o, new double[] {0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0})){
+									seedRequired = false;
+								}
+								
+							}
+							
+							if(seedRequired && 
 							   frame.getTrackingMethodology()!= TrackerType1.INTERPOLATION &&
 							   frame.getTrackingMethodology() != TrackerType1.SPLINE_INTERPOLATION){
 								
-								double[] test = new double[] {0,0,0,0,0,0,0,0};
-								double myNum = drm.getSortedX().getDouble(k);
-								double distance = Math.abs(drm.getSortedX().getDouble(0) - myNum);
-								int nearestCompletedDatFileNo = 0;
-								
-								for(int c = 0; c < drm.getSortedX().getSize(); c++){
-								   FrameModel fm = fms.get(c);
-								   double cdistance = fm.getScannedVariable()- myNum;
-								    if((cdistance < distance) & 
-								       !Arrays.equals(fm.getRoiLocation(), test) & 
-								       !Arrays.equals(fm.getRoiLocation(), null)){
-								        
-								    	nearestCompletedDatFileNo = fm.getDatNo();
-								        distance = cdistance;
-								    }
-								}
-								
-								ArrayList<double[]> seedList = drm.getLocationList().get(nearestCompletedDatFileNo);;
-								ArrayList<Double> lList = drm.getDmxList().get(nearestCompletedDatFileNo);
-								
-								Dataset yValues = DatasetFactory.zeros(seedList.size());
-								Dataset xValues = DatasetFactory.zeros(seedList.size());
-								Dataset lValues = DatasetFactory.zeros(seedList.size());
-								
-								for(int op = 0; op<seedList.size(); op++){
-									
-									double x = seedList.get(op)[1];
-									double y = seedList.get(op)[0];
-									double l = lList.get(op);
-									
-									xValues.set(x, op);
-									yValues.set(y, op);
-									lValues.set(l, op);
-			
-								}
-								
-								double[] seedLocation = PolynomialOverlap.extrapolatedLocation(drm.getSortedX().getDouble(k),
-																							   lValues, 
-																							   xValues, 
-																							   yValues, 
-																							   drm.getInitialLenPt()[0],
-																							   1);
+//								double[] test = new double[] {0,0,0,0,0,0,0,0};
+//								double myNum = drm.getSortedX().getDouble(k);
+//								double distance = Math.abs(drm.getSortedX().getDouble(0) - myNum);
+//								int nearestCompletedDatFileNo = 0;
+//								
+//								for(int c = 0; c < drm.getSortedX().getSize(); c++){
+//								   FrameModel fm = fms.get(c);
+//								   double cdistance = fm.getScannedVariable()- myNum;
+//								    if((cdistance < distance) & 
+//								       !Arrays.equals(fm.getRoiLocation(), test) & 
+//								       !Arrays.equals(fm.getRoiLocation(), null)){
+//								        
+//								    	nearestCompletedDatFileNo = fm.getDatNo();
+//								        distance = cdistance;
+//								    }
+//								}
+//								
+//								ArrayList<double[]> seedList = drm.getLocationList().get(nearestCompletedDatFileNo);;
+//								ArrayList<Double> lList = drm.getDmxList().get(nearestCompletedDatFileNo);
+//								
+//								Dataset yValues = DatasetFactory.zeros(seedList.size());
+//								Dataset xValues = DatasetFactory.zeros(seedList.size());
+//								Dataset lValues = DatasetFactory.zeros(seedList.size());
+//								
+//								for(int op = 0; op<seedList.size(); op++){
+//									
+//									double x = seedList.get(op)[1];
+//									double y = seedList.get(op)[0];
+//									double l = lList.get(op);
+//									
+//									xValues.set(x, op);
+//									yValues.set(y, op);
+//									lValues.set(l, op);
+//			
+//								}
+//								
+//								double[] seedLocation = PolynomialOverlap.extrapolatedLocation(drm.getSortedX().getDouble(k),
+//																							   lValues, 
+//																							   xValues, 
+//																							   yValues, 
+//																							   drm.getInitialLenPt()[0],
+//																							   1);
+//							}
+//							
+//							else{
+//								
+								double[] seedLocation = TrackerLocationInterpolation.trackerInterpolationInterpolator0(drm.getTrackerLocationList(), 
+																								   drm.getSortedX(), 
+																								   drm.getInitialLenPt()[0],
+																								   k);
 								drm.addSeedLocation(frame.getDatNo(),seedLocation);
-							
-							}	
+							}
+						
+								
 							
 							else if(frame.getTrackingMethodology() == TrackerType1.INTERPOLATION ||
 									frame.getTrackingMethodology() == TrackerType1.SPLINE_INTERPOLATION){

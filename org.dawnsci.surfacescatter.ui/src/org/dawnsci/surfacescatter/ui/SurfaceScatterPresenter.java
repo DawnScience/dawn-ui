@@ -448,6 +448,7 @@ public class SurfaceScatterPresenter {
 				fm.setTrackingMethodology(TrackerType1.TLD);
 				fm.setNoInOriginalDat(imageNoInDatList.get(pos));
 				fm.setDatNo(imagesToFilepathRefDat.getInt(f));
+				fm.setImageNumber(f);
 				
 				System.out.println("imageNoInDatList.get(pos)" + imageNoInDatList.get(pos));
 				
