@@ -387,17 +387,9 @@ public class FileController implements IFileController {
 					getLoadedFiles().stream()
 					.filter(IRefreshable.class::isInstance)
 					.map(IRefreshable.class::cast)
-					.forEach(d -> d.refresh());
+					.forEach(IRefreshable::refresh);
 
-					Display.getDefault().syncExec(new Runnable() {
-
-						@Override
-						public void run() {
-
-							fireStateChangeListeners(false, true);
-
-						}
-					});
+					Display.getDefault().syncExec( () -> fireStateChangeListeners(true, true));
 
 				}
 			};
