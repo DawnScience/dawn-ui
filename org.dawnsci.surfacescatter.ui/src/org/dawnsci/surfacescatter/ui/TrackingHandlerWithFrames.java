@@ -2109,6 +2109,7 @@ class trackingJob21 {
 		catch(Exception h){
 			
 		}
+		
 		ssp.stitchAndPresent1(ssvs.getSsps3c().getOutputCurves(), ssvs.getIds());
 		
 		double[] location = ssp.getThisLocation(imageNumber);

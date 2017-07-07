@@ -495,12 +495,6 @@ public class ReviewTabComposite extends Composite{
 	
 		outputFormatSelection.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		outputFormatSelection.select(0);
-		
-		save = new Button(curveSettings, SWT.PUSH |SWT.FILL);
-		save.setText("Save Spliced");
-		save.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-	    
-		
 	    
 	    rightForm.setWeights(new int[] {5,10, 5,80});
 		
@@ -1038,9 +1032,6 @@ public class ReviewTabComposite extends Composite{
 		this.leftForm = leftForm;
 	}
 	
-	public Button getSave(){
-		return save;
-	}
 	
 	public Combo getRodToSave(){
 		return rodToSave;

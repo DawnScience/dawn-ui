@@ -40,6 +40,7 @@ import org.dawnsci.surfacescatter.GeometricParametersModel;
 import org.dawnsci.surfacescatter.IntensityDisplayEnum.IntensityDisplaySetting;
 import org.dawnsci.surfacescatter.InterpolationTracker;
 import org.dawnsci.surfacescatter.LocationLenPtConverterUtils;
+import org.dawnsci.surfacescatter.OverlapAttenuationObject;
 import org.dawnsci.surfacescatter.MethodSettingEnum.MethodSetting;
 import org.dawnsci.surfacescatter.PlotSystem2DataSetter;
 import org.dawnsci.surfacescatter.PolynomialOverlap;
@@ -2382,7 +2383,9 @@ public class SurfaceScatterPresenter {
 		return output;
 	}
 	
-	public CurveStitchDataPackage curveStitchingOutput (double[][] mm, boolean accept){
+	public CurveStitchDataPackage curveStitchingOutput (double[][] mm, 
+														boolean accept,
+														OverlapAttenuationObject oAo){
 
 //		IDataset[]
 		
@@ -2392,7 +2395,7 @@ public class SurfaceScatterPresenter {
 		
 		CurveStitchDataPackage csdp = csdpgfd.getCsdp();
 		
-		IDataset[] output = CurveStitchWithErrorsAndFrames.curveStitch4(csdp, mm);
+		IDataset[] output = CurveStitchWithErrorsAndFrames.curveStitch4(csdp, mm, oAo);
 		
 		if(drm.getCorrectionSelection() == MethodSetting.Reflectivity_NO_Correction ||
 				   drm.getCorrectionSelection() == MethodSetting.Reflectivity_with_Flux_Correction ||

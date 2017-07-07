@@ -2,9 +2,7 @@ package org.dawnsci.surfacescatter.ui;
 
 import java.util.ArrayList;
 
-import org.dawnsci.surfacescatter.CurveStitchDataPackage;
 import org.dawnsci.surfacescatter.OverlapUIModel;
-import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.trace.ILineTrace;
 import org.eclipse.january.dataset.IDataset;
 import org.eclipse.jface.dialogs.Dialog;
@@ -25,7 +23,6 @@ import org.eclipse.ui.PlatformUI;
 
 public class GeneralOverlapHandlerView extends Dialog {
 	
-//	private Shell parentShell;
 	private SashForm right; 
 	private SashForm left;
 	private ArrayList<IDataset> xArrayList;
@@ -38,27 +35,24 @@ public class GeneralOverlapHandlerView extends Dialog {
     private Button export;
     private SurfaceScatterPresenter ssp;
     private SurfaceScatterViewStart ssvs;
-//    private IPlottingSystem<Composite> parentPs;
     private StitchedOverlapCurves stitchedCurves;
-//    private CurveStitchDataPackage csdp;
     private boolean errorFlag =true;
 	
-	public GeneralOverlapHandlerView(Shell parentShell, int style, 
-			ArrayList<IDataset> xArrayList,
-			ArrayList<IDataset> yArrayList,
-			ArrayList<IDataset> yArrayListError,
-			ArrayList<IDataset> yArrayListFhkl,
-			ArrayList<IDataset> yArrayListFhklError,
-			ArrayList<IDataset> yArrayListRaw,
-			ArrayList<IDataset> yArrayListRawError,
-//			IPlottingSystem<Composite> parentPs,
-			SurfaceScatterPresenter ssp,
-			SurfaceScatterViewStart ssvs){
+	public GeneralOverlapHandlerView(Shell parentShell, 
+									 int style, 
+									 ArrayList<IDataset> xArrayList,
+									 ArrayList<IDataset> yArrayList,
+									 ArrayList<IDataset> yArrayListError,
+									 ArrayList<IDataset> yArrayListFhkl,
+									 ArrayList<IDataset> yArrayListFhklError,
+									 ArrayList<IDataset> yArrayListRaw,
+									 ArrayList<IDataset> yArrayListRawError,
+									 SurfaceScatterPresenter ssp,
+									 SurfaceScatterViewStart ssvs){
 		
 		super(parentShell);
 		setShellStyle(getShellStyle() | SWT.RESIZE);
-		
-//		this.parentShell = parentShell;
+	
 		this.xArrayList = xArrayList;
 		this.yArrayList = yArrayList;
 	    this.yArrayListError = yArrayListError;
@@ -67,7 +61,6 @@ public class GeneralOverlapHandlerView extends Dialog {
 	    this.yArrayListRaw = yArrayListRaw;
 	    this.yArrayListRawError = yArrayListRawError;
 	    this.ssvs = ssvs;
-//	    this.parentPs = parentPs;
 	    this.ssp = ssp;
 	}
 
@@ -106,8 +99,6 @@ public class GeneralOverlapHandlerView extends Dialog {
 		topImage.setLayout(topImageLayout);
 		GridData topImageData= new GridData(SWT.FILL, SWT.FILL, true, true);
 		topImage.setLayoutData(topImageData);
-		
-//		GridData ld1 = new GridData(SWT.FILL, SWT.FILL, true, true);
 		
 		OverlapCurves customComposite = new OverlapCurves(topImage, 
 														  SWT.NONE, 
@@ -218,7 +209,6 @@ public class GeneralOverlapHandlerView extends Dialog {
 	  protected boolean isResizable() {
 	    return true;
 	}
-
 	
 	public Button getExport(){
 		return export;
