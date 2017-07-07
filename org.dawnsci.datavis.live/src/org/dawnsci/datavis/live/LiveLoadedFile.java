@@ -3,6 +3,7 @@ package org.dawnsci.datavis.live;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import org.dawnsci.datavis.model.DataOptions;
@@ -24,6 +25,7 @@ import org.eclipse.january.dataset.IDynamicDataset;
 import org.eclipse.january.dataset.ILazyDataset;
 import org.eclipse.january.dataset.IRemoteData;
 import org.eclipse.january.dataset.LazyDatasetBase;
+import org.eclipse.january.metadata.IMetadata;
 import org.eclipse.january.metadata.Metadata;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -49,6 +51,7 @@ public class LiveLoadedFile extends LoadedFile implements IRefreshable {
 		super(dh);
 	}
 	
+	@Override
 	public List<DataOptions> getDataOptions() {
 		
 		return new ArrayList<>(dataOptions.values());
@@ -57,111 +60,128 @@ public class LiveLoadedFile extends LoadedFile implements IRefreshable {
 	private static IDataHolder createDataHolder(String path, String host, int port) {
 		DataHolder dh = new DataHolder();
 		dh.setFilePath(path);
+		Tree tree = getTree(path,host,port);
 		
-		IRemoteData rd = ServiceManager.getRemoteDatasetService().createRemoteData(host, port);
-		rd.setPath(path);
-		Map<String, Object> map = null;
-		try {
-			map = rd.getTree();
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		if (tree == null) return dh;
 		
-		if (map == null) return dh;
+		Map<String, NodeLink> result = findNodes(tree);
 		
-		Tree tree = TreeToMapUtils.mapToTree(map, path);
-		IFindInTree finder = new IFindInTree() {
+		if (result == null) return dh;
+		dh.setMetadata(new Metadata());
+		fillDataHolder(dh, result, tree, null,null, path, host, port);
+		
+		return dh;
+	}
+	
+	private static void fillDataHolder(IDataHolder dh, Map<String, NodeLink> result, Tree tree, Map<String, DataOptions> options, LoadedFile file, String path, String host, int port) {
+		IMetadata md = dh.getMetadata();
+		
+		for (Entry<String, NodeLink> s : result.entrySet()) {
 			
-			@Override
-			public boolean found(NodeLink node) {
-				Node d = node.getDestination();
-				if (d instanceof DataNode) {
-					return true;
-				}
-				return false;
+			String name = "/"+s.getKey();
+			
+			if (options != null && options.containsKey(name)) continue;
+			
+			IDynamicDataset dataset = buildDataset(s.getKey(),path,host,port);
+			
+			long[] maxShape = ((DataNode)s.getValue().getDestination()).getMaxShape();
+			
+			if (allOnes(maxShape)) {
+				continue;
 			}
-		};
-		Map<String, NodeLink> result = TreeUtils.treeBreadthFirstSearch(tree.getGroupNode(), finder, false, null);
-		
-		Metadata md = new Metadata();
-		
-		for (String s : result.keySet()) {
-			String name = "/"+s;
-			IDatasetConnector r = ServiceManager.getRemoteDatasetService().createRemoteDataset(host, port);
-			r.setPath(path);
-			r.setDatasetName(name);
-			IDynamicDataset dataset = (IDynamicDataset)r.getDataset();
-			dataset.refreshShape();
-			dataset.setName(name);
-			dh.addDataset(name, dataset);
-			long[] maxShape = ((DataNode)result.get(s).getDestination()).getMaxShape();
-			int[] max = new int[maxShape.length];
-			for (int i = 0; i < maxShape.length; i++) max[i] = (int)maxShape[i];
-			md.addDataInfo(name, max);
 			
+			addDataset(dataset,maxShape,dh,md);
+			
+			if ( options != null && ((LazyDatasetBase)dataset).getDType() != Dataset.STRING) {
+				DataOptions d = new DataOptions(name, file);
+				options.put(d.getName(),d);
+			}
+		
 		}
 		
 		dh.setMetadata(md);
 		
 		dh.setTree(tree);
-		
-		return dh;
 	}
 	
-	private void updateDataHolder() {
-
+//	private static void addAxesMetadata(IDynamicDataset d, NodeLink l){
+//		Node s = l.getSource();
+//		//should axes be found in Finder?
+////		if (s instanceof GroupNode) {
+////			((GroupNode)s).
+////		}
+//	}
+	
+	private static Tree getTree(String path, String host, int port){
 		IRemoteData rd = ServiceManager.getRemoteDatasetService().createRemoteData(host, port);
-		String path = getFilePath();
 		rd.setPath(path);
 		Map<String, Object> map = null;
 		try {
 			map = rd.getTree();
 		} catch (Exception e) {
-			logger.warn("Could not get remote NeXus tree from {}!", path);
+			logger.error("Error reading tree",e);
 		}
 		
-		if (map == null) return;
+		if (map == null) return null;
 		
-		Tree tree = TreeToMapUtils.mapToTree(map, path);
+		return TreeToMapUtils.mapToTree(map, path);
+	}
+	
+	private static Map<String, NodeLink> findNodes(Tree tree){
+
 		IFindInTree finder = new IFindInTree() {
 			
 			@Override
 			public boolean found(NodeLink node) {
 				Node d = node.getDestination();
-				if (d instanceof DataNode) {
-					return true;
-				}
-				return false;
+				return d instanceof DataNode;
 			}
 		};
-		Map<String, NodeLink> result = TreeUtils.treeBreadthFirstSearch(tree.getGroupNode(), finder, false, null);
+		return TreeUtils.treeBreadthFirstSearch(tree.getGroupNode(), finder, false, null);
+
+	}
+	
+	
+	private static void addDataset(IDynamicDataset dataset, long[] maxShape, IDataHolder dh, IMetadata md){
+		String name = dataset.getName();
 		
-		for (String s : result.keySet()) {
-			String name = "/"+s;
-			
-			if (dataOptions.containsKey(name)) continue;
-			
-			IDatasetConnector r = ServiceManager.getRemoteDatasetService().createRemoteDataset(host, port);
-			r.setPath(path);
-			r.setDatasetName(name);
-			IDynamicDataset dataset = (IDynamicDataset)r.getDataset();
-			dataset.refreshShape();
-			dataset.setName(name);
-			dataHolder.get().addDataset(name, dataset);
-			long[] maxShape = ((DataNode)result.get(s).getDestination()).getMaxShape();
-			int[] max = new int[maxShape.length];
-			for (int i = 0; i < maxShape.length; i++) max[i] = (int)maxShape[i];
-			dataHolder.get().getMetadata().addDataInfo(name, max);
-			
-			if (((LazyDatasetBase)dataset).getDType() != Dataset.STRING) {
-				DataOptions d = new DataOptions(name, this);
-				dataOptions.put(d.getName(),d);
-			}
-			
-			dataHolder.get().setTree(tree);
-			
+		dh.addDataset(name, dataset);
+		int[] max = new int[maxShape.length];
+		for (int i = 0; i < maxShape.length; i++) max[i] = (int)maxShape[i];
+		md.addDataInfo(name, max);
+	}
+	
+	private static IDynamicDataset buildDataset(String s, String path, String host, int port){
+		String name = "/"+s;
+		IDatasetConnector r = ServiceManager.getRemoteDatasetService().createRemoteDataset(host, port);
+		r.setPath(path);
+		r.setDatasetName(name);
+		IDynamicDataset dataset = (IDynamicDataset)r.getDataset();
+		dataset.refreshShape();
+		dataset.setName(name);
+		return dataset;
+	}
+	
+	private static boolean allOnes(long[] shape) {
+		for (long l : shape) {
+			if (l != 1) return false;
 		}
+		
+		return true;
+	}
+	
+	private void updateDataHolder() {
+
+		String path = getFilePath();
+		
+		Tree tree = getTree(path, host, port);
+		
+		if (tree == null) return;
+		
+		Map<String, NodeLink> result = findNodes(tree);
+		
+		fillDataHolder(dataHolder.get(), result, tree, dataOptions, this, path, host, port);
+		
 	}
 	
 	private void updateOptionsNonLiveDataHolder() {
@@ -179,6 +199,42 @@ public class LiveLoadedFile extends LoadedFile implements IRefreshable {
 		}
 	}
 	
+	private void addNonStringDataset(ILazyDataset lazyDataset, String name){
+		if (lazyDataset instanceof IDynamicDataset) {
+			((IDynamicDataset)lazyDataset).refreshShape();
+		}
+		if (lazyDataset != null && ((LazyDatasetBase)lazyDataset).getDType() != Dataset.STRING) {
+			DataOptions d = new DataOptions(name, this);
+			dataOptions.put(d.getName(),d);
+		}
+	}
+	
+	private void refreshAllDatasets(){
+		IDataHolder dh = dataHolder.get();
+		String[] names = dh.getNames();
+		for (String n : names) {
+			ILazyDataset lazyDataset = dh.getLazyDataset(n);
+			if (lazyDataset instanceof IDynamicDataset) {
+				((IDynamicDataset)lazyDataset).refreshShape();
+			}
+		}
+	}
+
+	private void updateDataOptions() {
+		DataOptions[] array = dataOptions.values().stream()
+				.filter(d -> d.getPlottableObject() != null && d.getPlottableObject().getNDimensions() != null).toArray(size ->new DataOptions[size]);
+
+		for (DataOptions o : array) {
+			NDimensions nDimensions = o.getPlottableObject().getNDimensions();
+			o.setAxes(null);
+			int[] shape = o.getLazyDataset().getShape();
+			if (nDimensions.getRank() != shape.length) {
+				o.setPlottableObject(null);
+			} else {
+				nDimensions.updateShape(shape);
+			}
+		}
+	}
 
 	@Override
 	public void refresh() {
@@ -200,38 +256,15 @@ public class LiveLoadedFile extends LoadedFile implements IRefreshable {
 			String[] names = dataHolder.get().getNames();
 			for (String n : names) {
 				ILazyDataset lazyDataset = dataHolder.get().getLazyDataset(n);
-				if (lazyDataset instanceof IDynamicDataset) {
-					((IDynamicDataset)lazyDataset).refreshShape();
-				}
-				if (lazyDataset != null && ((LazyDatasetBase)lazyDataset).getDType() != Dataset.STRING) {
-					DataOptions d = new DataOptions(n, this);
-					dataOptions.put(d.getName(),d);
-				}
+				addNonStringDataset(lazyDataset, n);
 			}
-			
 			return;
 		} else {
 			updateDataHolder();
 		}
 		
-		String[] names = dataHolder.get().getNames();
-		for (String n : names) {
-			ILazyDataset lazyDataset = dataHolder.get().getLazyDataset(n);
-			if (lazyDataset instanceof IDynamicDataset) {
-				((IDynamicDataset)lazyDataset).refreshShape();
-			}
-		}
-		
-		
-		DataOptions[] array = dataOptions.values().stream()
-		.filter(d -> d.getPlottableObject() != null && d.getPlottableObject().getNDimensions() != null).toArray(size ->new DataOptions[size]);
-		
-		for (DataOptions o : array) {
-			NDimensions nDimensions = o.getPlottableObject().getNDimensions();
-			o.setAxes(null);
-			int[] shape = o.getLazyDataset().getShape();
-			nDimensions.updateShape(shape);
-		}
+		refreshAllDatasets();
+		updateDataOptions();
 		
 	}
 
@@ -256,13 +289,7 @@ public class LiveLoadedFile extends LoadedFile implements IRefreshable {
 				String[] names = dataHolder.get().getNames();
 				for (String n : names) {
 					ILazyDataset lazyDataset = dataHolder.get().getLazyDataset(n);
-					if (lazyDataset instanceof IDynamicDataset) {
-						((IDynamicDataset)lazyDataset).refreshShape();
-					}
-					if (lazyDataset != null && ((LazyDatasetBase)lazyDataset).getDType() != Dataset.STRING) {
-						DataOptions d = new DataOptions(n, this);
-						dataOptions.put(d.getName(),d);
-					}
+					addNonStringDataset(lazyDataset, n);
 				}
 				
 				return;
@@ -280,7 +307,7 @@ public class LiveLoadedFile extends LoadedFile implements IRefreshable {
 			}
 			
 		} catch (Exception e) {
-			logger.error("Could not locally load data!");
+			logger.error("Could not locally load data!",e);
 		}
 		live = false;
 		
