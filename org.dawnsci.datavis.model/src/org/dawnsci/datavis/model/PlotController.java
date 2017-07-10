@@ -135,6 +135,10 @@ public class PlotController implements IPlotController {
 		
 		if (plotObject != null && plotObject.getPlotMode() != currentMode && selected) {
 			currentMode = plotObject.getPlotMode();
+			if (currentMode != localMode) {
+				getPlottingSystem().reset();
+				getPlottingSystem().setTitle("");
+			}
 			localMode = currentMode;
 		} else if (plotObject == null) {
 			plotObject = getPlottableObject();
@@ -175,6 +179,7 @@ public class PlotController implements IPlotController {
 		if (localModifier != null) localModifier.init();
 		
 		IPlottingSystem<?> system = getPlottingSystem();
+		if (localCurrentMode != mode) system.reset();
 
 		final Map<DataOptions, List<ITrace>> traceMap = collectTracesFromPlot();
 
@@ -380,6 +385,9 @@ public class PlotController implements IPlotController {
 		
 		boolean selected =  dOption.isSelected() && fileController.getCurrentDataOption().isSelected();
 		if (!selected) return;
+		
+		getPlottingSystem().reset();
+		getPlottingSystem().setTitle("");
 		
 		currentMode = mode;
 		PlottableObject po = getPlottableObject();
