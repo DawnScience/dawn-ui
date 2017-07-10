@@ -2,9 +2,9 @@ package org.dawnsci.mapping.ui;
 
 import org.eclipse.dawnsci.analysis.api.io.ILoaderService;
 import org.eclipse.dawnsci.analysis.api.io.IRemoteDatasetService;
+import org.eclipse.dawnsci.analysis.api.persistence.IMarshallerService;
 import org.eclipse.dawnsci.analysis.api.persistence.IPersistenceService;
 import org.eclipse.dawnsci.nexus.INexusFileFactory;
-import org.eclipse.scanning.api.event.IEventService;
 import org.osgi.service.event.EventAdmin;
 
 public class LocalServiceManager {
@@ -14,7 +14,8 @@ public class LocalServiceManager {
 	private static IRemoteDatasetService dservice;
 	private static INexusFileFactory nexusFactory;
 	private static EventAdmin eventAdmin;
-	
+	private static IMarshallerService marshallerService;
+
 	public static void setLoaderService(ILoaderService s) {
 		lservice = s;
 	}
@@ -53,6 +54,14 @@ public class LocalServiceManager {
 
 	public static void setEventAdmin(EventAdmin eventAdmin) {
 		LocalServiceManager.eventAdmin = eventAdmin;
+	}
+
+	public static IMarshallerService getMarshallerService() {
+		return marshallerService;
+	}
+
+	public static void setMarshallerService(IMarshallerService marshallerService) {
+		LocalServiceManager.marshallerService = marshallerService;
 	}
 	
 }

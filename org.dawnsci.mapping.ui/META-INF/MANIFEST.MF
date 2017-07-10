@@ -19,8 +19,7 @@ Require-Bundle: org.eclipse.ui,
  org.dawnsci.slicing.tools;bundle-version="1.0.0",
  org.eclipse.dawnsci.nexus,
  org.dawnsci.common.widgets,
- org.eclipse.scanning.api;bundle-version="1.0.0",
- org.eclipse.scanning.device.ui
+ org.eclipse.scanning.api;bundle-version="1.0.0"
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-ActivationPolicy: lazy
 Service-Component: OSGI-INF/*.xml
