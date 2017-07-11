@@ -528,7 +528,7 @@ public class CrossHairProfileTool extends AbstractToolPage implements IROIListen
 
 			final IDataset data = image.getData();
 			IDataset slice=null, sliceIndex=null;
-			if (monitor.isCanceled())return  false;
+			if (data == null || monitor.isCanceled()) return false;
 			try {
 				int[] shape = data.getShape();
 				if (isRegionXAxis) {

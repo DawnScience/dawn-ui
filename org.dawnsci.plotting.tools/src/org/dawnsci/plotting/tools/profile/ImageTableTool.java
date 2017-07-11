@@ -267,7 +267,7 @@ public class ImageTableTool extends AbstractToolPage  implements IROIListener {
 		
 		if (isDrag) return; // Table tool slow to be that live.
 		if (monitor.isCanceled()) return;
-		if (image==null) return;
+		if (image==null || image.getData() == null) return;
 		
 		if (region.getRegionType()!=RegionType.BOX) return;
 

@@ -541,7 +541,7 @@ public abstract class ProfileTool extends AbstractToolPage  implements IROIListe
 			IImageTrace image = traces!=null && traces.size()>0 ? (IImageTrace)traces.iterator().next() : null;
 
 			if (monitor.isCanceled()) return  Status.CANCEL_STATUS;
-			if (image==null) {
+			if (image==null || image.getData() == null) {
 				profilePlottingSystem.clear();
 				return Status.OK_STATUS;
 			}
