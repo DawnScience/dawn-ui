@@ -17,7 +17,9 @@ import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.region.IROIListener;
 import org.eclipse.dawnsci.plotting.api.region.IRegion;
 import org.eclipse.dawnsci.plotting.api.region.IRegion.RegionType;
+import org.eclipse.dawnsci.plotting.api.region.IRegionListener;
 import org.eclipse.dawnsci.plotting.api.region.ROIEvent;
+import org.eclipse.dawnsci.plotting.api.region.RegionEvent;
 import org.eclipse.dawnsci.plotting.api.region.RegionUtils;
 import org.eclipse.dawnsci.plotting.api.tool.AbstractToolPage;
 import org.eclipse.dawnsci.plotting.api.trace.IImageTrace;
@@ -40,6 +42,10 @@ public class FastMaskTool extends AbstractToolPage {
 	private MaskCircularBuffer buffer;
 	private List<NamedRegionType> regionTypes;
 	private FastMaskJob job;
+	private boolean paintMode = false;
+	
+	private IROIListener iroiListener;
+	
 	
 	public FastMaskTool() {
 		regionTypes = new ArrayList<>();
@@ -69,7 +75,10 @@ public class FastMaskTool extends AbstractToolPage {
 		String[] array = regionTypes.stream().map(r -> r.name).toArray(String[]::new);
 		combo.setItems(array);
 		combo.select(0);
-		combo.addSelectionListener(new SelectionAdapter() {
+		
+		Button draw = new Button(control, SWT.PUSH);
+		draw.setText("Draw");
+		draw.addSelectionListener(new SelectionAdapter() {
 			
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -84,9 +93,13 @@ public class FastMaskTool extends AbstractToolPage {
 						logger.error("Could not create region!",e1);
 					}
 				}
+				
 			}
 			
+
 		});
+		
+		
 		
 		Button b = new Button(control, SWT.PUSH);
 		b.setText("Apply");
@@ -186,50 +199,105 @@ public class FastMaskTool extends AbstractToolPage {
 		});
 		
 		Button b4 = new Button(control, SWT.CHECK);
-		b4.setText("Draw");
+		b4.setText("Paint");
 		b4.addSelectionListener(new SelectionAdapter() {
 
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				if (b4.getSelection()) {
+				paintMode = b4.getSelection();
+
 					Collection<IRegion> regions = getPlottingSystem().getRegions();
-					IRegion next = regions.iterator().next();
-					next.addROIListener(new IROIListener(){
+					IROIListener roiListener = getROIListener();
+					for (IRegion next : regions) {
 
-						@Override
-						public void roiDragged(ROIEvent evt) {
-							
-							IImageTrace imageTrace = getImageTrace();
-							if (imageTrace != null) {
-								IDataset data = imageTrace.getData();
-
-								final IROI roi = evt.getROI();
-								
-								if (buffer == null) buffer = new MaskCircularBuffer(data.getShape());
-								Runnable r = () -> buffer.maskROI(roi);
-								
-								job.setRunnable(r);
-								job.schedule();
-							}
-
+						if (paintMode) {
+							next.addROIListener(roiListener);
+						} else {
+							next.removeROIListener(iroiListener);
 						}
-
-						@Override
-						public void roiChanged(ROIEvent evt) {
-							//do nothing
-						}
-
-						@Override
-						public void roiSelected(ROIEvent evt) {
-							//do nothing
-						}
-						
-					});
-				}
+					}
+				
 			}
 
 
 		});
+		
+		getPlottingSystem().addRegionListener(new IRegionListener() {
+			
+			@Override
+			public void regionsRemoved(RegionEvent evt) {
+				Collection<IRegion> regions = evt.getRegions();
+				for (IRegion r : regions) r.removeROIListener(getROIListener());
+				
+			}
+			
+			@Override
+			public void regionRemoved(RegionEvent evt) {
+				evt.getRegion().removeROIListener(getROIListener());
+				
+			}
+			
+			@Override
+			public void regionNameChanged(RegionEvent evt, String oldName) {
+				
+			}
+			
+			@Override
+			public void regionCreated(RegionEvent evt) {
+				
+			}
+			
+			@Override
+			public void regionCancelled(RegionEvent evt) {
+				
+			}
+			
+			@Override
+			public void regionAdded(RegionEvent evt) {
+				if (paintMode) evt.getRegion().addROIListener(getROIListener());
+				
+			}
+		});
+	}
+	
+	private IROIListener getROIListener() {
+		if (iroiListener != null) {
+			return iroiListener;
+		}
+		
+		iroiListener = new IROIListener(){
+
+			@Override
+			public void roiDragged(ROIEvent evt) {
+
+				IImageTrace imageTrace = getImageTrace();
+				if (imageTrace != null) {
+					IDataset data = imageTrace.getData();
+
+					final IROI roi = evt.getROI();
+
+					if (buffer == null) buffer = new MaskCircularBuffer(data.getShape());
+					Runnable r = () -> buffer.maskROI(roi);
+
+					job.setRunnable(r);
+					job.schedule();
+				}
+
+			}
+
+			@Override
+			public void roiChanged(ROIEvent evt) {
+				//do nothing
+			}
+
+			@Override
+			public void roiSelected(ROIEvent evt) {
+				//do nothing
+			}
+
+		};
+		
+		return iroiListener;
 	}
 
 	@Override
