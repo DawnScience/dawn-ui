@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.dawnsci.datavis.api.IRecentPlaces;
+import org.dawnsci.datavis.model.fileconfig.I11MacConfiguration;
 import org.dawnsci.datavis.model.fileconfig.ILoadedFileConfiguration;
 import org.dawnsci.datavis.model.fileconfig.ImageFileConfiguration;
 import org.dawnsci.datavis.model.fileconfig.NexusFileConfiguration;
@@ -25,7 +26,7 @@ public class FileController implements IFileController {
 	private DataOptions currentData;
 	private ILiveFileListener listener;
 	
-	private ILoadedFileConfiguration[] fileConfigs = new ILoadedFileConfiguration[]{new NexusFileConfiguration(), new ImageFileConfiguration(), new XYEFileConfiguration()};
+	private ILoadedFileConfiguration[] fileConfigs = new ILoadedFileConfiguration[]{new NexusFileConfiguration(), new ImageFileConfiguration(),new I11MacConfiguration(), new XYEFileConfiguration()};
 	
 	private Set<FileControllerStateEventListener> listeners = new HashSet<FileControllerStateEventListener>();
 	
