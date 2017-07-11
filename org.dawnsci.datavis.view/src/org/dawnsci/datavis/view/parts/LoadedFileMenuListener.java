@@ -15,16 +15,18 @@ import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.StructuredViewer;
+import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 
 public class LoadedFileMenuListener implements IMenuListener {
 
 
-	private StructuredViewer viewer;
+	private TableViewer viewer;
 	private IFileController fileController;
 
-	public LoadedFileMenuListener(IFileController fileController, StructuredViewer viewer) {
+	public LoadedFileMenuListener(IFileController fileController, TableViewer viewer) {
 		this.fileController = fileController;
 		this.viewer = viewer;
 	}
@@ -47,18 +49,18 @@ public class LoadedFileMenuListener implements IMenuListener {
 	
 	private abstract class LoadedFileMenuAction extends Action {
 		
-		private StructuredViewer viewer;
-		private IFileController fileController;
+		protected TableViewer view;
+		protected IFileController file;
 		
-		public LoadedFileMenuAction(String text, ImageDescriptor image, IFileController fileController, StructuredViewer viewer) {
+		public LoadedFileMenuAction(String text, ImageDescriptor image, IFileController fileController, TableViewer viewer) {
 			super(text,image);
-			this.viewer = viewer;
-			this.fileController = fileController;
+			this.view = viewer;
+			this.file = fileController;
 		}
 		
 		protected List<LoadedFile> getLoadedFiles(){
-			if (viewer.getSelection() instanceof IStructuredSelection) {
-				final IStructuredSelection selection = (IStructuredSelection) viewer.getSelection();
+			if (view.getSelection() instanceof IStructuredSelection) {
+				final IStructuredSelection selection = (IStructuredSelection) view.getSelection();
 
 
 				return Arrays.stream(selection.toArray())
@@ -76,7 +78,7 @@ public class LoadedFileMenuListener implements IMenuListener {
 	
 	private class CheckAction extends LoadedFileMenuAction {
 
-		public CheckAction(IFileController fileController, StructuredViewer viewer) {
+		public CheckAction(IFileController fileController, TableViewer viewer) {
 			super("Check",AbstractUIPlugin.imageDescriptorFromPlugin("org.dawnsci.datavis.view", "icons/ticked.png"), fileController, viewer);
 		}
 
@@ -84,14 +86,14 @@ public class LoadedFileMenuListener implements IMenuListener {
 		public void run() {
 			List<LoadedFile> loadedFiles = getLoadedFiles();
 			if (loadedFiles.isEmpty()) return;
-			fileController.selectFiles(loadedFiles, true);
-			viewer.refresh();
+			file.selectFiles(loadedFiles, true);
+			view.refresh();
 		}
 	}
 	
 	private class UncheckAction extends LoadedFileMenuAction {
 
-		public UncheckAction(IFileController fileController, StructuredViewer viewer) {
+		public UncheckAction(IFileController fileController, TableViewer viewer) {
 			super("Uncheck",AbstractUIPlugin.imageDescriptorFromPlugin("org.dawnsci.datavis.view", "icons/unticked.gif"), fileController, viewer);
 		}
 
@@ -99,14 +101,14 @@ public class LoadedFileMenuListener implements IMenuListener {
 		public void run() {
 			List<LoadedFile> loadedFiles = getLoadedFiles();
 			if (loadedFiles.isEmpty()) return;
-			fileController.selectFiles(loadedFiles, false);
-			viewer.refresh();
+			file.selectFiles(loadedFiles, false);
+			view.refresh();
 		}
 	}
 	
 	private class DeselectAction extends LoadedFileMenuAction {
 
-		public DeselectAction(IFileController fileController, StructuredViewer viewer) {
+		public DeselectAction(IFileController fileController, TableViewer viewer) {
 			super("Deselect datasets",null, fileController, viewer);
 		}
 
@@ -120,15 +122,15 @@ public class LoadedFileMenuListener implements IMenuListener {
 
 			if (options.isEmpty()) return;
 
-			fileController.deselect(options);
+			file.deselect(options);
 			
-			viewer.refresh();
+			view.refresh();
 		}
 	}
 	
-	private class CloseAction extends LoadedFileMenuAction {
+	public class CloseAction extends LoadedFileMenuAction {
 
-		public CloseAction(IFileController fileController, StructuredViewer viewer) {
+		public CloseAction(IFileController fileController, TableViewer viewer) {
 			super("Close",null, fileController, viewer);
 		}
 
@@ -136,8 +138,15 @@ public class LoadedFileMenuListener implements IMenuListener {
 		public void run() {
 			List<LoadedFile> loadedFiles = getLoadedFiles();
 			if (loadedFiles.isEmpty()) return;
-			fileController.unloadFiles(loadedFiles);
-			viewer.refresh();
+			file.unloadFiles(loadedFiles);
+			
+			int i = view.getTable().getItemCount();
+			
+			if (i > 0) {
+				Object ob = viewer.getTable().getItem(i-1).getData();
+				viewer.setSelection(new StructuredSelection(ob),true);
+			}
+			view.refresh();
 		}
 	}
 }
