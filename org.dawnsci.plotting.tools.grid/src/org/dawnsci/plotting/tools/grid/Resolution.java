@@ -8,12 +8,11 @@
  */
 package org.dawnsci.plotting.tools.grid;
 
-import javax.measure.Quantity;
+import javax.measure.quantity.Quantity;
+import javax.measure.unit.ProductUnit;
+import javax.measure.unit.SI;
 
-import tec.units.ri.unit.ProductUnit;
-import tec.units.ri.unit.Units;
-
-public interface Resolution<Q extends Quantity<Q>> extends Quantity<Q> {
+public interface Resolution extends Quantity {
 	public static final ProductUnit<Resolution> UNIT
-		= new ProductUnit<Resolution>(Units.METRE.pow(-1));
+		= new ProductUnit<Resolution>(SI.METRE.pow(-1));
 }

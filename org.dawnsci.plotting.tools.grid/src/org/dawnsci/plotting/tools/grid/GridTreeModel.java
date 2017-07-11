@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012 Diamond Light Source Ltd.
+ * Copyright (c) 2017 Diamond Light Source Ltd.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -10,22 +10,19 @@ package org.dawnsci.plotting.tools.grid;
 
 import javax.measure.quantity.Dimensionless;
 import javax.measure.quantity.Length;
-import javax.measure.spi.ServiceProvider;
-import javax.measure.Quantity;
-import javax.measure.Unit;
+import javax.measure.unit.SI;
+import javax.measure.unit.Unit;
 
 import org.dawnsci.common.widgets.tree.AbstractNodeModel;
-import org.dawnsci.common.widgets.tree.AmountEvent;
-import org.dawnsci.common.widgets.tree.AmountListener;
 import org.dawnsci.common.widgets.tree.BooleanNode;
 import org.dawnsci.common.widgets.tree.ColorNode;
 import org.dawnsci.common.widgets.tree.LabelNode;
-import org.dawnsci.common.widgets.tree.NumericNode;
 import org.dawnsci.common.widgets.tree.ObjectNode;
 import org.dawnsci.common.widgets.tree.ValueEvent;
 import org.dawnsci.common.widgets.tree.ValueListener;
-import org.dawnsci.plotting.tools.diffraction.DiffractionUtils;
-import org.dawnsci.plotting.tools.utils.ToolUtils;
+import org.dawnsci.plotting.tools.grid.tree.AmountEvent;
+import org.dawnsci.plotting.tools.grid.tree.AmountListener;
+import org.dawnsci.plotting.tools.grid.tree.GridNumericNode;
 import org.eclipse.dawnsci.analysis.dataset.roi.GridPreferences;
 import org.eclipse.dawnsci.analysis.dataset.roi.GridROI;
 import org.eclipse.dawnsci.plotting.api.region.IGridSelection;
@@ -33,8 +30,7 @@ import org.eclipse.dawnsci.plotting.api.region.IRegion;
 import org.eclipse.dawnsci.plotting.api.region.IRegion.RegionType;
 import org.eclipse.draw2d.ColorConstants;
 import org.eclipse.swt.graphics.Color;
-
-import tec.units.ri.quantity.Quantities;
+import org.jscience.physics.amount.Amount;
 
 /**
  * A Grid Model used to edit any GridROI.
@@ -54,11 +50,11 @@ public class GridTreeModel extends AbstractNodeModel {
 	}
 
 	// All the nodes member data, not great
-	private NumericNode<Length> xres, yres;
+	private GridNumericNode<Length> xres, yres;
 	private ObjectNode  roiName, gridDims;
 	private ColorNode   regionColor, spotColor, gridColor;
 	private BooleanNode midPoints,   gridLines;
-	private NumericNode<Length> x, y, width, height;
+	private GridNumericNode<Length> x, y, width, height;
 	private Unit<Length> xPosPixel = new Pixel();
 	private Unit<Length> xDimPixel = new Pixel();
 	private Unit<Length> yPosPixel = new Pixel();
@@ -130,12 +126,12 @@ public class GridTreeModel extends AbstractNodeModel {
 		grid.setDefaultExpanded(true);
 		registerNode(grid);
 
-		this.xres = new NumericNode<Length>("X-axis Resolution", grid, ToolUtils.MICRO);
-		xres.setDefault(Quantities.getQuantity(0.01, ToolUtils.MICRO));
-		xres.setUnits(ToolUtils.MICRO, ToolUtils.MILLIMETRE);
+		this.xres = new GridNumericNode<Length>("X-axis Resolution", grid, SI.MICRO(SI.METRE));
+		xres.setDefault(Amount.valueOf(0.01, SI.MICRO(SI.METRE)));
+		xres.setUnits(SI.MICRO(SI.METRE), SI.MILLIMETRE);
 		xres.setEditable(true);
-		xres.setLowerBound(Quantities.getQuantity(0.01, ToolUtils.MICRO));
-		xres.setUpperBound(Quantities.getQuantity(2000, ToolUtils.MILLIMETRE));
+		xres.setLowerBound(Amount.valueOf(0.01, SI.MICRO(SI.METRE)));
+		xres.setUpperBound(Amount.valueOf(2000, SI.MILLIMETRE));
 		xres.setIncrement(0.1);
 		xres.addAmountListener(new AmountListener<Length>() {		
 			@Override
@@ -143,9 +139,7 @@ public class GridTreeModel extends AbstractNodeModel {
 				if (groi==null || region==null) return;
 				try {
 					adjustingValue = true;
-					double xspacing = groi.getGridPreferences().getXPixelsFromMicronsLen(
-							Quantities.getQuantity(evt.getAmount().getValue().doubleValue(), ToolUtils.MICRO).getValue()
-									.doubleValue());
+					double xspacing = groi.getGridPreferences().getXPixelsFromMicronsLen(evt.getAmount().doubleValue(SI.MICRO(SI.METRE)));
 					groi.setxSpacing(xspacing);
 					region.setROI(groi);
 					region.repaint();
@@ -157,12 +151,12 @@ public class GridTreeModel extends AbstractNodeModel {
 		});
 		registerNode(xres);
 
-		this.yres = new NumericNode<Length>("Y-axis Resolution", grid, ToolUtils.MICRO);
-		yres.setDefault(Quantities.getQuantity(0.01, ToolUtils.MICRO));
-		yres.setUnits(ToolUtils.MICRO, ToolUtils.MILLIMETRE);
+		this.yres = new GridNumericNode<Length>("Y-axis Resolution", grid, SI.MICRO(SI.METRE));
+		yres.setDefault(Amount.valueOf(0.01, SI.MICRO(SI.METRE)));
+		yres.setUnits(SI.MICRO(SI.METRE), SI.MILLIMETRE);
 		yres.setEditable(true);
-		yres.setLowerBound(Quantities.getQuantity(0.01, ToolUtils.MICRO));
-		yres.setUpperBound(Quantities.getQuantity(2000, ToolUtils.MILLIMETRE));
+		yres.setLowerBound(Amount.valueOf(0.01, SI.MICRO(SI.METRE)));
+		yres.setUpperBound(Amount.valueOf(2000, SI.MILLIMETRE));
 		yres.setIncrement(0.1);
 		yres.addAmountListener(new AmountListener<Length>() {		
 			@Override
@@ -170,9 +164,7 @@ public class GridTreeModel extends AbstractNodeModel {
 				if (groi==null || region==null) return;
 				try {
 					adjustingValue = true;
-					double yspacing = groi.getGridPreferences().getYPixelsFromMicronsLen(
-							Quantities.getQuantity(evt.getAmount().getValue().doubleValue(), ToolUtils.MICRO).getValue()
-									.doubleValue());
+					double yspacing = groi.getGridPreferences().getYPixelsFromMicronsLen(evt.getAmount().doubleValue(SI.MICRO(SI.METRE)));
 					groi.setySpacing(yspacing);
 					region.setROI(groi);
 					region.repaint();
@@ -228,13 +220,13 @@ public class GridTreeModel extends AbstractNodeModel {
 		registerNode(pos);
 
 
-		this.x = new NumericNode<Length>("x", pos, xPosPixel);
-		x.setDefault(Quantities.getQuantity(0, ToolUtils.MILLIMETRE));
-		x.setUnits(xPosPixel, ToolUtils.MILLIMETRE);
+		this.x = new GridNumericNode<Length>("x", pos, xPosPixel);
+		x.setDefault(Amount.valueOf(0, SI.MILLI(SI.METRE)));
+		x.setUnits(xPosPixel, SI.MILLI(SI.METRE));
 		x.setEditable(true);
 		x.setFormat("#####0.##");
-		x.setLowerBound(Quantities.getQuantity(-10000, xPosPixel));
-		x.setUpperBound(Quantities.getQuantity(10000, xPosPixel));
+		x.setLowerBound(Amount.valueOf(-10000, xPosPixel));
+		x.setUpperBound(Amount.valueOf(10000, xPosPixel));
 		x.setIncrement(0.1);
 		x.addAmountListener(new AmountListener<Length>() {		
 			@Override
@@ -248,13 +240,13 @@ public class GridTreeModel extends AbstractNodeModel {
 		});
 		registerNode(x);
 
-		this.y = new NumericNode<Length>("y", pos, yPosPixel);
-		y.setDefault(Quantities.getQuantity(0, ToolUtils.MILLIMETRE));
-		y.setUnits(yPosPixel, ToolUtils.MILLIMETRE);
+		this.y = new GridNumericNode<Length>("y", pos, yPosPixel);
+		y.setDefault(Amount.valueOf(0, SI.MILLI(SI.METRE)));
+		y.setUnits(yPosPixel, SI.MILLI(SI.METRE));
 		y.setFormat("#####0.##");
 		y.setEditable(true);
-		y.setLowerBound(Quantities.getQuantity(-1000, yPosPixel));
-		y.setUpperBound(Quantities.getQuantity(10000, yPosPixel));
+		y.setLowerBound(Amount.valueOf(-1000, yPosPixel));
+		y.setUpperBound(Amount.valueOf(10000, yPosPixel));
 		y.setIncrement(0.1);
 		y.addAmountListener(new AmountListener<Length>() {		
 			@Override
@@ -268,13 +260,13 @@ public class GridTreeModel extends AbstractNodeModel {
 		});
 		registerNode(y);
 
-		this.width = new NumericNode<Length>("width", pos, xDimPixel);
-		width.setDefault(Quantities.getQuantity(0, ToolUtils.MILLIMETRE));
-		width.setUnits(xDimPixel, ToolUtils.MILLIMETRE);
+		this.width = new GridNumericNode<Length>("width", pos, xDimPixel);
+		width.setDefault(Amount.valueOf(0, SI.MILLI(SI.METRE)));
+		width.setUnits(xDimPixel, SI.MILLI(SI.METRE));
 		width.setFormat("#####0.##");
 		width.setEditable(true);
-		width.setLowerBound(Quantities.getQuantity(0, xDimPixel));
-		width.setUpperBound(Quantities.getQuantity(10000, xDimPixel));
+		width.setLowerBound(Amount.valueOf(0, xDimPixel));
+		width.setUpperBound(Amount.valueOf(10000, xDimPixel));
 		width.setIncrement(0.1);
 		width.addAmountListener(new AmountListener<Length>() {		
 			@Override
@@ -288,13 +280,13 @@ public class GridTreeModel extends AbstractNodeModel {
 		});
 		registerNode(width);
 
-		this.height = new NumericNode<Length>("height", pos, yDimPixel);
-		height.setDefault(Quantities.getQuantity(0, ToolUtils.MILLIMETRE));
-		height.setUnits(yDimPixel, ToolUtils.MILLIMETRE);
+		this.height = new GridNumericNode<Length>("height", pos, yDimPixel);
+		height.setDefault(Amount.valueOf(0, SI.MILLI(SI.METRE)));
+		height.setUnits(yDimPixel, SI.MILLI(SI.METRE));
 		height.setFormat("#####0.##");
 		height.setEditable(true);
-		height.setLowerBound(Quantities.getQuantity(0, yDimPixel));
-		height.setUpperBound(Quantities.getQuantity(10000, yDimPixel));
+		height.setLowerBound(Amount.valueOf(0, yDimPixel));
+		height.setUpperBound(Amount.valueOf(10000, yDimPixel));
 		height.setIncrement(0.1);
 		height.addAmountListener(new AmountListener<Length>() {		
 			@Override
@@ -338,10 +330,10 @@ public class GridTreeModel extends AbstractNodeModel {
 		if (!adjustingValue) viewer.cancelEditing();
 
 		if (this.groi != groi) { // Grid spacings may have changed.
-			xres.setValueQuietly(Quantities.getQuantity(groi.getGridPreferences().getXMicronsFromPixelsLen(groi.getxSpacing()), ToolUtils.MICRO));
+			xres.setValueQuietly(Amount.valueOf(groi.getGridPreferences().getXMicronsFromPixelsLen(groi.getxSpacing()), SI.MICRO(SI.METRE)));
 			viewer.update(xres, new String[]{"Value"});
 			
-			yres.setValueQuietly(Quantities.getQuantity(groi.getGridPreferences().getYMicronsFromPixelsLen(groi.getySpacing()), ToolUtils.MICRO));
+			yres.setValueQuietly(Amount.valueOf(groi.getGridPreferences().getYMicronsFromPixelsLen(groi.getySpacing()), SI.MICRO(SI.METRE)));
 			viewer.update(yres, new String[]{"Value"});
 			
 			roiName.setValue(region.getName());
@@ -368,7 +360,7 @@ public class GridTreeModel extends AbstractNodeModel {
 	}
 	
 	private void createDetector() {
-		Unit<?> dimensionLessUnit = ServiceProvider.current().getQuantityFactory(Dimensionless.class).getSystemUnit();
+	       
 		// Detector Meta
         final LabelNode detectorMeta = new LabelNode("Detector", root);
         registerNode(detectorMeta);
@@ -380,13 +372,13 @@ public class GridTreeModel extends AbstractNodeModel {
         registerNode(beamCen);
         beamCen.setDefaultExpanded(true);
 
-        NumericNode<Dimensionless> beamX = new NumericNode<Dimensionless>("X", beamCen, dimensionLessUnit);
-        beamX.setUnits(dimensionLessUnit);
+        GridNumericNode<Dimensionless> beamX = new GridNumericNode<Dimensionless>("X", beamCen, Dimensionless.UNIT);
+        beamX.setUnits(Dimensionless.UNIT);
         registerNode(beamX);
         beamX.setEditable(true);
 
-        NumericNode<Dimensionless> beamY = new NumericNode<Dimensionless>("Y", beamCen, dimensionLessUnit);
-        beamY.setUnits(dimensionLessUnit);
+        GridNumericNode<Dimensionless> beamY = new GridNumericNode<Dimensionless>("Y", beamCen, Dimensionless.UNIT);
+        beamY.setUnits(Dimensionless.UNIT);
         registerNode(beamY);
         beamY.setEditable(true);
 
@@ -416,8 +408,8 @@ public class GridTreeModel extends AbstractNodeModel {
 		setGridROI(groi);
 	}
 
-	private void updateNode(NumericNode<Length> node, double newValue) {
-		node.setValueQuietly(Quantities.getQuantity(newValue, node.getUnit()));
+	private void updateNode(GridNumericNode<Length> node, double newValue) {
+		node.setValueQuietly(Amount.valueOf(newValue, node.getDefaultUnit()).to(node.getUnit()));
 		viewer.update(node, new String[]{"Value"});
 	}
 	
@@ -437,11 +429,12 @@ public class GridTreeModel extends AbstractNodeModel {
 		((Pixel) yDimPixel).setPixelsPerMm(yPPMm);
 	}
 	
+	@SuppressWarnings("unchecked")
 	private double changeAmount(AmountEvent<Length> evt) {
 		if (groi==null || region==null) return 0;
 		try {
-			Quantity<Length> amt = (Quantity<Length>) evt.getAmount();
-			return amt.getValue().doubleValue();
+			Amount<Length> amt = evt.getAmount();
+			return amt.doubleValue(((GridNumericNode<Length>) evt.getSource()).getDefaultUnit());
 		} finally {
 		}
 	}

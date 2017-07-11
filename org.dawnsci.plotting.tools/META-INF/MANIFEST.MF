@@ -107,13 +107,6 @@ Export-Package: org.dawnsci.plotting.tools;
    org.eclipse.swt.widgets,
    org.eclipse.dawnsci.plotting.api.tool,
    org.eclipse.dawnsci.plotting.api.trace",
- org.dawnsci.plotting.tools.grid;
-  uses:="uk.ac.diamond.scisoft.analysis.roi,
-   org.eclipse.dawnsci.plotting.api.region,
-   org.eclipse.swt.graphics,
-   org.eclipse.swt.widgets,
-   org.eclipse.dawnsci.plotting.api.tool,
-   org.dawnsci.common.widgets.tree",
  org.dawnsci.plotting.tools.history;
   uses:="uk.ac.diamond.scisoft.analysis.dataset,
    org.eclipse.swt.events,

@@ -17,8 +17,6 @@ import javax.measure.quantity.Length;
 
 import org.dawb.common.ui.util.GridUtils;
 import org.dawb.common.ui.viewers.TreeNodeContentProvider;
-import org.dawnsci.common.widgets.tree.AmountEvent;
-import org.dawnsci.common.widgets.tree.AmountListener;
 import org.dawnsci.common.widgets.tree.BooleanNode;
 import org.dawnsci.common.widgets.tree.ClearableFilteredTree;
 import org.dawnsci.common.widgets.tree.ColorNode;
@@ -27,10 +25,12 @@ import org.dawnsci.common.widgets.tree.IResettableExpansion;
 import org.dawnsci.common.widgets.tree.LabelNode;
 import org.dawnsci.common.widgets.tree.NodeFilter;
 import org.dawnsci.common.widgets.tree.NodeLabelProvider;
-import org.dawnsci.common.widgets.tree.NumericNode;
 import org.dawnsci.common.widgets.tree.UnitEditingSupport;
 import org.dawnsci.common.widgets.tree.ValueEditingSupport;
-import org.dawnsci.plotting.tools.Activator;
+import org.dawnsci.plotting.tools.grid.Activator;
+import org.dawnsci.plotting.tools.grid.tree.AmountEvent;
+import org.dawnsci.plotting.tools.grid.tree.AmountListener;
+import org.dawnsci.plotting.tools.grid.tree.GridNumericNode;
 import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.dawnsci.analysis.dataset.roi.GridPreferences;
 import org.eclipse.dawnsci.analysis.dataset.roi.GridROI;
@@ -82,10 +82,9 @@ import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.PreferencesUtil;
 import org.eclipse.ui.preferences.ScopedPreferenceStore;
+import org.jscience.physics.amount.Amount;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import tec.units.ri.quantity.Quantities;
 
 /**
  * Tool to draw and configure a grid.
@@ -335,13 +334,13 @@ public class GridTool extends AbstractToolPage implements IResettableExpansion{
 	private void updateBeamCentre() {
 		this.beamCenter = getBeamCenter();
 		@SuppressWarnings("unchecked")
-		final NumericNode<Length> x = (NumericNode<Length>)model.getNode("/Detector/Beam Centre/X");
-		x.setValueQuietly(Quantities.getQuantity(beamCenter[0], x.getUnit()));
+		final GridNumericNode<Length> x = (GridNumericNode<Length>)model.getNode("/Detector/Beam Centre/X");
+		x.setValueQuietly(Amount.valueOf(beamCenter[0], x.getUnit()));
 		viewer.update(x, new String[]{"Value"});
 		
 		@SuppressWarnings("unchecked")
-		final NumericNode<Length> y = (NumericNode<Length>)model.getNode("/Detector/Beam Centre/Y");
-		y.setValueQuietly(Quantities.getQuantity(beamCenter[1], y.getUnit()));
+		final GridNumericNode<Length> y = (GridNumericNode<Length>)model.getNode("/Detector/Beam Centre/Y");
+		y.setValueQuietly(Amount.valueOf(beamCenter[1], y.getUnit()));
 		viewer.update(y, new String[]{"Value"});
 	}
 	
@@ -351,8 +350,8 @@ public class GridTool extends AbstractToolPage implements IResettableExpansion{
 		this.beamCenter = getBeamCenter();
 		
 		@SuppressWarnings("unchecked")
-		final NumericNode<Length> x = (NumericNode<Length>)model.getNode("/Detector/Beam Centre/X");
-		x.setDefault(Quantities.getQuantity(beamCenter[0], x.getUnit()));
+		final GridNumericNode<Length> x = (GridNumericNode<Length>)model.getNode("/Detector/Beam Centre/X");
+		x.setDefault(Amount.valueOf(beamCenter[0], x.getUnit()));
 		x.setLowerBound(-1*Double.MAX_VALUE);
 		x.setUpperBound(Double.MAX_VALUE);
 		x.addAmountListener(new AmountListener<Length>() {		
@@ -364,8 +363,8 @@ public class GridTool extends AbstractToolPage implements IResettableExpansion{
 		});
 		
 		@SuppressWarnings("unchecked")
-		final NumericNode<Length> y = (NumericNode<Length>)model.getNode("/Detector/Beam Centre/Y");
-		y.setDefault(Quantities.getQuantity(beamCenter[1], y.getUnit()));
+		final GridNumericNode<Length> y = (GridNumericNode<Length>)model.getNode("/Detector/Beam Centre/Y");
+		y.setDefault(Amount.valueOf(beamCenter[1], y.getUnit()));
 		y.setLowerBound(-1*Double.MAX_VALUE);
 		y.setUpperBound(Double.MAX_VALUE);
 		y.addAmountListener(new AmountListener<Length>() {		

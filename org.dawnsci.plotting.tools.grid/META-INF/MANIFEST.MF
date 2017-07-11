@@ -1,0 +1,32 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Grid Tool
+Bundle-SymbolicName: org.dawnsci.plotting.tools.grid;singleton:=true
+Bundle-Version: 1.0.0.qualifier
+Bundle-Activator: org.dawnsci.plotting.tools.grid.Activator
+Bundle-Vendor: Diamond Light Source
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Bundle-ClassPath: .
+Export-Package: org.dawnsci.plotting.tools.grid;
+  uses:="uk.ac.diamond.scisoft.analysis.roi,
+   org.eclipse.dawnsci.plotting.api.region,
+   org.eclipse.swt.graphics,
+   org.eclipse.swt.widgets,
+   org.eclipse.dawnsci.plotting.api.tool,
+   org.dawnsci.common.widgets.tree"
+Import-Package: org.slf4j
+Require-Bundle: org.eclipse.swt,
+ org.eclipse.jface,
+ org.dawnsci.common.widgets,
+ org.eclipse.dawnsci.plotting.api,
+ org.dawb.common.ui,
+ org.eclipse.draw2d,
+ org.eclipse.dawnsci.analysis.dataset,
+ org.eclipse.equinox.preferences,
+ org.eclipse.ui.workbench,
+ uk.ac.diamond.jscience;bundle-version="4.3.1",
+ org.eclipse.osgi,
+ org.eclipse.equinox.registry,
+ org.eclipse.core.runtime;bundle-version="3.11.1",
+ org.eclipse.january;bundle-version="2.0.2",
+ org.eclipse.dawnsci.analysis.api

@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+   <extension
+         point="org.eclipse.dawnsci.plotting.api.toolPage">
+      <plotting_tool_page
+            category="org.dawnsci.plotting.tools.category.Profile"
+            cheat_sheet_id="org.dawb.workbench.plotting.cheatsheet.grid"
+            class="org.dawnsci.plotting.tools.grid.GridTool"
+            icon="icons/plot-tool-box-grid.png"
+            id="org.dawb.workbench.plotting.tools.gridTool"
+            label="Grid"
+            tooltip="A tool for showing a grid"
+            visible="true">
+      </plotting_tool_page>
+   </extension>
+</plugin>
