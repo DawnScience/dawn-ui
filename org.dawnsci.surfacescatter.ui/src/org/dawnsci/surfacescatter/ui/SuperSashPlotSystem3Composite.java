@@ -66,7 +66,6 @@ public class SuperSashPlotSystem3Composite extends Composite{
 			plotSystem3.setShowLegend(false);
         } 
         catch (Exception e2) {
-			e2.printStackTrace();
 		}
 
         this.createContents(); 
@@ -111,10 +110,7 @@ public class SuperSashPlotSystem3Composite extends Composite{
 		GridData topImageData= new GridData(SWT.FILL, SWT.FILL, true, true);
 		topImage.setLayoutData(topImageData);
 	
-		GridData ld1 = new GridData(SWT.FILL, SWT.FILL, true, true);
-
-//		ActionBarWrapper actionBarCompositeTop = ActionBarWrapper.createActionBars(topImage, null);;
-        
+		GridData ld1 = new GridData(SWT.FILL, SWT.FILL, true, true);        
 		plotSystem1.createPlotPart(topImage, "Horizontal Slice", null, PlotType.IMAGE, null);
 		plotSystem1.getPlotComposite().setLayoutData(ld1);
 		
@@ -149,7 +145,6 @@ public class SuperSashPlotSystem3Composite extends Composite{
 			
 			@Override
 			public void widgetDefaultSelected(SelectionEvent e) {
-				// TODO Auto-generated method stub
 				
 			}
 		});
@@ -164,7 +159,6 @@ public class SuperSashPlotSystem3Composite extends Composite{
 		topRight.setLayoutData(topRightData);
 		
 		addOutPutCurvesWindow();
-//		ssvs.appendListenersToOutputCurves();
 		isOutputCurvesVisible(false);
 		
         Group sideImage = new Group(right, SWT.NONE);
@@ -367,8 +361,6 @@ public class SuperSashPlotSystem3Composite extends Composite{
 														3,
 														lenPt);
 			
-//			Dataset subBackgroundSubImage = ssp.subImage(output,greenRectangle);
-		
 			ILineTrace lt3 = VerticalHorizontalSlices.horizontalsliceBackgroundSubtracted(
 						horizontalSlice.getROI().getBounds(),
 						plotSystem1, 

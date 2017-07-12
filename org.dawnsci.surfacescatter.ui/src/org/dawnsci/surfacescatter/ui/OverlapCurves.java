@@ -1,10 +1,10 @@
 package org.dawnsci.surfacescatter.ui;
 import java.util.ArrayList;
-import java.util.Iterator;
-
 import org.dawb.common.ui.widgets.ActionBarWrapper;
+import org.dawnsci.surfacescatter.CurveStitchDataPackage;
+import org.dawnsci.surfacescatter.IntensityDisplayEnum;
+import org.dawnsci.surfacescatter.IntensityDisplayEnum.IntensityDisplaySetting;
 import org.dawnsci.surfacescatter.OverlapUIModel;
-import org.eclipse.dawnsci.analysis.api.roi.IROI;
 import org.eclipse.dawnsci.analysis.api.roi.IRectangularROI;
 import org.eclipse.dawnsci.analysis.dataset.roi.RectangularROI;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
@@ -15,17 +15,16 @@ import org.eclipse.dawnsci.plotting.api.region.IRegion;
 import org.eclipse.dawnsci.plotting.api.region.IRegion.RegionType;
 import org.eclipse.dawnsci.plotting.api.region.ROIEvent;
 import org.eclipse.dawnsci.plotting.api.trace.ILineTrace;
-import org.eclipse.january.DatasetException;
 import org.eclipse.january.dataset.IDataset;
-import org.eclipse.january.dataset.ILazyDataset;
 import org.eclipse.january.dataset.SliceND;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.events.SelectionListener;
+import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 
@@ -37,7 +36,7 @@ public class OverlapCurves extends Composite {
     private Group controls;
     private Button errors;
     private ArrayList<ILineTrace> ltList;
-    
+	private Combo intensitySelect;
      
     public OverlapCurves(Composite parent, 
     					int style, 
@@ -74,13 +73,25 @@ public class OverlapCurves extends Composite {
         setLayout(gridLayout);
         
         controls = new Group(this, SWT.NULL);
-        GridLayout controlsSelectionLayout = new GridLayout();
-		GridData controlsSelectionData = new GridData(GridData.HORIZONTAL_ALIGN_FILL);
+        GridLayout controlsSelectionLayout  = new GridLayout(2,true);
+		GridData controlsSelectionData = new GridData(SWT.FILL, SWT.NULL, true, false);
         controls.setLayoutData(controlsSelectionData);
         controls.setLayout(controlsSelectionLayout);
 
 		errors = new Button(controls, SWT.PUSH);
 		errors.setText("Errors");
+		errors.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		
+		InputTileGenerator displayValue = new InputTileGenerator("Display Value: ", controls);
+		
+		intensitySelect = displayValue.getCombo();
+		
+		for(IntensityDisplaySetting  t: IntensityDisplayEnum.IntensityDisplaySetting.values()){
+			intensitySelect.add(IntensityDisplaySetting.toString(t));
+		}
+	
+		intensitySelect.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		intensitySelect.select(0);
 		
         ActionBarWrapper actionBarComposite = ActionBarWrapper.createActionBars(this, null);;
         
@@ -112,11 +123,9 @@ public class OverlapCurves extends Composite {
 				arrayIDy.add(i);
 				j = arrayILDx.get(r).getSlice(slice);
 				arrayIDx.add(j);
-				//}
 			} 
 			
 			catch (Exception e1) {
-				// TODO Auto-generated catch block
 				e1.printStackTrace();
 			}
 			
@@ -200,13 +209,11 @@ public class OverlapCurves extends Composite {
         }
 
         
-    
-        
     }
 		
-    public Composite getComposite(){
+   public Composite getComposite(){
    	
-   	return this;
+	   return this;
    }
    
    public IPlottingSystem<Composite> getPlotSystem(){
@@ -220,5 +227,78 @@ public class OverlapCurves extends Composite {
 	public ArrayList<ILineTrace> getILineTraceList(){
 		return ltList;
 	}
+	
+	public Combo getIntensity(){
+		return intensitySelect;
+	}
+	
+	public void changeCurves(int selector,
+							 CurveStitchDataPackage csdp){
+
+		Display display = Display.getCurrent();
+		
+		Color blue = display.getSystemColor(SWT.COLOR_BLUE);
+		Color green = display.getSystemColor(SWT.COLOR_GREEN);
+		Color black = display.getSystemColor(SWT.COLOR_BLACK);
+		
+		switch(selector){
+			case 0:
+				
+				for(int i =0; i<ltList.size();i++){
+					
+					ILineTrace lt = getILineTraceList().get(i);
+					
+					lt.setName("Corrected Curve " + i);
+				
+					lt.setData(csdp.getxIDataset()[i],
+							   csdp.getyIDataset()[i]);
+					
+				
+					
+					lt.setTraceColor(blue);
+				}
+				break;
+		
+			case 1:
+				
+				for(int i =0; i<ltList.size();i++){
+					
+					ILineTrace lt = getILineTraceList().get(i);
+					
+					lt.setName("Fhkl Curve " + i);
+				
+					lt.setData(csdp.getxIDataset()[i],
+							   csdp.getyIDatasetFhkl()[i]);
+					
+					
+					lt.setTraceColor(green);
+				}
+				break;
+		
+			case 2:
+				
+				for(int i =0; i<ltList.size();i++){
+					
+					ILineTrace lt = getILineTraceList().get(i);
+					
+					lt.setName("Raw Intensity Curve " + i);
+				
+					lt.setData(csdp.getxIDataset()[i],
+							   csdp.getyRawIDataset()[i]);
+					
+				
+					lt.setTraceColor(black);
+				}
+					
+				break;
+				
+			default:
+				// Purely defensive
+				break;
+		}
+		
+	}
+	
+	
 }
 

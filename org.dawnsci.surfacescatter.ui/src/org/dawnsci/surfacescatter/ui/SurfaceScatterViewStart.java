@@ -1898,6 +1898,8 @@ public class SurfaceScatterViewStart extends Dialog {
 //		customComposite.generalUpdate();
 	}
 	
+	
+	
 }	
 
 

@@ -163,16 +163,11 @@ public class PlotSystemCompositeView extends Composite {
 		InputTileGenerator tile6 = new InputTileGenerator("y len:",  String.valueOf(ssp.getLenPt()[0][1]), indicators);
 		yLen = tile6.getText();
 		
-		Label outputControlLabel = new Label(indicators, SWT.NULL);
-		outputControlLabel.setText("Take Ouput Marker:");
-		outputControlLabel.setVisible(false);
-		
 		outputControl = new Button (indicators, SWT.CHECK);
         outputControl.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
         outputControl.setSelection(true);
         outputControl.setVisible(false);
-        
-        outputControlLabel.dispose();
+       
         outputControl.dispose();
         
         Group buttons = new Group (mainImage,SWT.NONE);  

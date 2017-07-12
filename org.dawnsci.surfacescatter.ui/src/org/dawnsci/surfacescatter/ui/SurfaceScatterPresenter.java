@@ -773,7 +773,6 @@ public class SurfaceScatterPresenter {
 			return dh1 = LoaderFactory.getData(to.toString());
 		}
 		catch(Exception n1){
-			n1.printStackTrace();
 			return null;
 		}
 	
@@ -823,7 +822,7 @@ public class SurfaceScatterPresenter {
 		
 		drm.setTrackerCoordinates(localLocation);
 		drm.addTrackerLocationList(sliderPos, localLocation);
-//		
+	
 		if(qConvert){
 			qConversion();
 		}
@@ -834,7 +833,7 @@ public class SurfaceScatterPresenter {
 	public void saveParameters(String title){
 		
 		FrameModel m = fms.get(sliderPos);
-//		
+		
 		int[][] lenPt=  LocationLenPtConverterUtils.locationToLenPtConverter(m.getRoiLocation());
 		
 		FittingParametersOutput.FittingParametersOutputTest(title, 
@@ -882,8 +881,7 @@ public class SurfaceScatterPresenter {
 			try {
 				dh1 = LoaderFactory.getData(title);
 			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+
 			}
 			
 			Tree tree = dh1.getTree();			
@@ -891,14 +889,6 @@ public class SurfaceScatterPresenter {
 			for(int n = 0; n<fms.size(); n++){
 				
 				FrameModel m = fms.get(n);
-				
-//				double[] location = LocationLenPtConverterUtils.lenPtToLocationConverter(fp.getLenpt());
-//				
-//				m.setRoiLocation(location);
-//				m.setTrackingMethodology(fp.getTracker());
-//				m.setFitPower(fp.getFitPower());
-//				m.setBoundaryBox(fp.getBoundaryBox());
-//				m.setBackgroundMethodology(fp.getBgMethod());
 				
 				FittingParametersInputReader.readerFromNexus (tree, n, m);
 			}
@@ -936,9 +926,7 @@ public class SurfaceScatterPresenter {
 			return (IDataset) j;
 			
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-			System.out.println(e.getMessage());
+			
 			
 			return DatasetFactory.zeros(new int[] {2,2}, Dataset.ARRAYFLOAT64);
 		}
@@ -948,8 +936,6 @@ public class SurfaceScatterPresenter {
 	
 	
 	public double[] regionOfInterestSetter1(int[][] lenPt) {
-		
-		int [][] test = getLenPt();
 		
 		if((Arrays.equals(lenPt[0], getLenPt()[0]) == false) ||
 		   (Arrays.equals(lenPt[1], getLenPt()[1]) == false)){
@@ -2271,7 +2257,6 @@ public class SurfaceScatterPresenter {
 			
 			@Override
 			public void widgetDefaultSelected(SelectionEvent e) {
-				// TODO Auto-generated method stub
 				
 			}
 		}); 
@@ -2295,12 +2280,10 @@ public class SurfaceScatterPresenter {
 			
 			@Override
 			public void widgetDefaultSelected(SelectionEvent e) {
-				// TODO Auto-generated method stub
 				
 			}
 		}); 
 		
-//		ssvs.getFolder().setSelection(0);
 		
 		return;
 	}
@@ -2320,7 +2303,6 @@ public class SurfaceScatterPresenter {
 			
 			@Override
 			public void widgetDefaultSelected(SelectionEvent e) {
-				// TODO Auto-generated method stub
 				
 			}
 		}); 
@@ -2344,7 +2326,6 @@ public class SurfaceScatterPresenter {
 			
 			@Override
 			public void widgetDefaultSelected(SelectionEvent e) {
-				// TODO Auto-generated method stub
 				
 			}
 		}); 
@@ -2385,17 +2366,15 @@ public class SurfaceScatterPresenter {
 	
 	public CurveStitchDataPackage curveStitchingOutput (double[][] mm, 
 														boolean accept,
-														OverlapAttenuationObject oAo){
+														ArrayList<OverlapAttenuationObject> oAos){
 
-//		IDataset[]
-		
 		CsdpGeneratorFromDrm csdpgfd = new CsdpGeneratorFromDrm();
 		
 		csdpgfd.generateCsdpFromDrm(drm);
 		
 		CurveStitchDataPackage csdp = csdpgfd.getCsdp();
 		
-		IDataset[] output = CurveStitchWithErrorsAndFrames.curveStitch4(csdp, mm, oAo);
+		CurveStitchWithErrorsAndFrames.curveStitch4(csdp, mm, oAos);
 		
 		if(drm.getCorrectionSelection() == MethodSetting.Reflectivity_NO_Correction ||
 				   drm.getCorrectionSelection() == MethodSetting.Reflectivity_with_Flux_Correction ||
@@ -2405,7 +2384,6 @@ public class SurfaceScatterPresenter {
 					
 		}
 		
-//		IDataset[] output = CurveStitchWithErrorsAndFrames.curveStitch4(csdp, mm);
 		if(accept){
 			drm.setCsdp(csdp);
 		}
@@ -2486,6 +2464,81 @@ public class SurfaceScatterPresenter {
 
 		
 	}
+	
+	public void switchFhklIntensityUnStitchedCurves(IPlottingSystem<Composite> pS, 
+			int selector,
+			boolean qAxis){
+		
+		pS.clear();
+		
+		ILineTrace lt = 
+		pS.createLineTrace("Corrected Intensity Curve");
+		
+		Display display = Display.getCurrent();
+		
+		IDataset x = DatasetFactory.zeros(new int[] {2,2}, Dataset.ARRAYFLOAT64);
+		
+		if(qAxis){
+			x = getSplicedCurveQ();
+		}
+		else{
+			x = getSplicedCurveX();
+		}
+		
+		ArrayList<ILineTrace> ltList = new ArrayList<ILineTrace>();
+		
+		
+		if(selector ==0){
+			
+			lt.setData(x,drm.getCsdp().getSplicedCurveY());
+			
+			Color blue = display.getSystemColor(SWT.COLOR_BLUE);
+			
+			lt.setTraceColor(blue);
+		}
+		
+		if(selector ==1){
+		
+			lt.setName("Fhkl Curve");
+			
+			lt.setData(x,drm.getCsdp().getSplicedCurveYFhkl());
+			
+			Color green = display.getSystemColor(SWT.COLOR_GREEN);
+			
+			lt.setTraceColor(green);
+		}
+		
+		if(selector ==2){
+		
+			lt.setName("Raw Intensity Curve");
+			
+			lt.setData(x,drm.getCsdp().getSplicedCurveYRaw());
+			
+			Color black = display.getSystemColor(SWT.COLOR_BLACK);
+			
+			lt.setTraceColor(black);
+		}
+		
+		lt.setErrorBarEnabled(errorDisplayFlag);
+		
+		Color red = display.getSystemColor(SWT.COLOR_RED);
+		
+		lt.setErrorBarColor(red);
+		
+		pS.addTrace(lt);
+		pS.autoscaleAxes();
+		
+		double start = lt.getXData().getDouble(0);
+		double end = lt.getXData().getDouble(lt.getXData().getShape()[0]-1);
+		double range = end - start;
+		
+		pS.getAxes().get(0).setRange((start - 0.1*range), (end) + 0.1*range);
+		
+		
+	}
+	
+	
+	
 	
 	public void setCorrectionSelection(int correctionSelection){
 		drm.setCorrectionSelection(MethodSetting.toMethod(correctionSelection));

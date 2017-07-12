@@ -94,7 +94,7 @@ public class GeneralOverlapHandlerView extends Dialog {
 		
 		/////////////////Left SashForm///////////////////////////////////////////////////
 		Group topImage = new Group(left, SWT.NONE);
-		topImage.setText("Top Image");
+//		topImage.setText("Top Image");
 		GridLayout topImageLayout = new GridLayout();
 		topImage.setLayout(topImageLayout);
 		GridData topImageData= new GridData(SWT.FILL, SWT.FILL, true, true);
@@ -104,7 +104,7 @@ public class GeneralOverlapHandlerView extends Dialog {
 														  SWT.NONE, 
 														  yArrayList, 
 														  xArrayList,
-														  "Title", 
+														  "Unstitched Curves", 
 														  model);
 		customComposite.setLayout(new GridLayout());
 		customComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
@@ -114,8 +114,7 @@ public class GeneralOverlapHandlerView extends Dialog {
 		///////////////////////////////////////////////////////////////////////////////
 		/////////////////Right sashform////////////////////////////////////////////////
 		///////////////////////////////////////////////////////////////////////////////
-		
-		
+	
 		stitchedCurves = new StitchedOverlapCurves(right, 
 												   SWT.NONE, 
 												   xArrayList,
@@ -125,7 +124,7 @@ public class GeneralOverlapHandlerView extends Dialog {
 												   yArrayListFhklError,
 												   yArrayListRaw,
 												   yArrayListRawError,
-												   "Overlap Test", 
+												   "Stitched Curves", 
 												   model,
 												   ssp);
 		
@@ -137,7 +136,7 @@ public class GeneralOverlapHandlerView extends Dialog {
 		export.setText("Export Curve");
 		export.setSize(export.computeSize(100, 20, true));
 		
-		right.setWeights(new int[] {90,10});
+		right.setWeights(new int[] {95,5});
 		
 		//////////////////////////////////////////////////////////////////////////////////
 		
@@ -156,6 +155,27 @@ public class GeneralOverlapHandlerView extends Dialog {
 				
 			}
 		});
+		
+		customComposite.getIntensity().addSelectionListener(new SelectionListener() {
+
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				
+				int selector = customComposite.getIntensity().getSelectionIndex();
+				
+				customComposite.changeCurves(selector, ssp.getDrm().getCsdp());
+				stitchedCurves.changeCurves(selector);
+
+			}
+
+			@Override
+			public void widgetDefaultSelected(SelectionEvent e) {
+				// TODO Auto-generated method stub
+
+			}
+		});
+		
+		
     
 		customComposite.getErrorsButton().addSelectionListener(new SelectionListener() {
 			
