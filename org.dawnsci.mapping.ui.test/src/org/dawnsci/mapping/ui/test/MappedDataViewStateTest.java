@@ -9,10 +9,8 @@ import java.util.Arrays;
 import org.dawnsci.mapping.ui.MappedDataViewState;
 import org.eclipse.dawnsci.analysis.api.persistence.IMarshallerService;
 import org.eclipse.dawnsci.json.MarshallerService;
-import org.eclipse.scanning.example.classregistry.ScanningExampleClassRegistry;
 import org.eclipse.scanning.points.classregistry.ScanningAPIClassRegistry;
 import org.eclipse.scanning.points.serialization.PointsModelMarshaller;
-import org.eclipse.scanning.test.ScanningTestClassRegistry;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -141,9 +139,7 @@ public class MappedDataViewStateTest {
 	private IMarshallerService getService() {
 		// Non-OSGi for test - do not copy!
 		return new MarshallerService(
-				Arrays.asList(new ScanningAPIClassRegistry(),
-						new ScanningExampleClassRegistry(),
-						new ScanningTestClassRegistry()),
+				Arrays.asList(new ScanningAPIClassRegistry()),
 				Arrays.asList(new PointsModelMarshaller()));
 	}
 }
