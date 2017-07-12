@@ -53,6 +53,7 @@ public class Hyper2DTool extends AbstractToolPage {
 
 	HyperComponent component;
 	ITraceListener traceListener;
+	private boolean updating = false;
 	
 	public Hyper2DTool() {
 		this.traceListener = new ITraceListener.Stub() {
@@ -179,19 +180,28 @@ public class Hyper2DTool extends AbstractToolPage {
 		}
 	}
 	
-	private void updateROI(IROI roi, double x, boolean right,IRegion region, boolean isMainPlotUpdate) {
+	private void updateROI(IROI roi, double x, boolean right,IRegion region, boolean isMainPlotUpdate, boolean origin) {
+		if (updating) return;
+		updating = true;
 		roi = roi.copy();
 		try {
 			if (!isMainPlotUpdate) { // if update happens on the tool plotting systems
 				IImageTrace next = (IImageTrace)getPlottingSystem().getTraces().iterator().next();
+				
+				double[] coOrd = new double[]{x,Double.NaN};
+				
+				if (!right) coOrd = new double[]{Double.NaN,x};
+				
+				double[] im = ((IImageTrace)next).getPointInImageCoordinates(coOrd);
+				
+				if (!origin) right = !right;
+				
 				if (right) {
-					double[] im = ((IImageTrace)next).getPointInImageCoordinates(new double[]{x,Double.NaN});
 					roi.setPoint(im[0], 0);
-					region.setROI(roi);
-					return;
+				} else {
+					roi.setPoint(0, im[1]);
 				}
-				double[] im = ((IImageTrace)next).getPointInImageCoordinates(new double[] { Double.NaN, x });
-				roi.setPoint(0, im[1]);
+
 				region.setROI(roi);
 			} else { // if update happens on the main plotting system
 				roi.setPoint(x, 0);
@@ -200,6 +210,7 @@ public class Hyper2DTool extends AbstractToolPage {
 		} catch (Exception e) {
 			logger.error("Could not update roi!",e);
 		}
+		updating = false;
 	}
 	
 	private void updateRoiEvent(ROIEvent evt, boolean right, boolean isMainPlotUpdate){
@@ -220,21 +231,23 @@ public class Hyper2DTool extends AbstractToolPage {
 			if (re.getName().equals(r.getName())) {
 				double value = 0;
 				IImageTrace next = (IImageTrace)getPlottingSystem().getTraces().iterator().next();
+				boolean origin = next.getImageOrigin().isOnLeadingDiagonal();
+
 				try {
 					if (isMainPlotUpdate && !right){
 						value = evt.getROI().getPointY();
 						double[] im = ((IImageTrace) next).getPointInAxisCoordinates(new double[] { Double.NaN, value });
 						IROI roi = re.getROI();
-						updateROI(roi, im[1], right, re, isMainPlotUpdate);
+						updateROI(roi, im[1], right, re, isMainPlotUpdate, origin);
 					} else if (isMainPlotUpdate && right){
 						value = evt.getROI().getPointX();
 						double[] im = ((IImageTrace) next).getPointInAxisCoordinates(new double[] { value, Double.NaN });
 						IROI roi = re.getROI();
-						updateROI(roi, im[0], right,re, isMainPlotUpdate);
+						updateROI(roi, im[0], right,re, isMainPlotUpdate, origin);
 					} else if (!isMainPlotUpdate) {
 						value = evt.getROI().getPointX();
 						IROI roi = re.getROI();
-						updateROI(roi, value, right,re, isMainPlotUpdate);
+						updateROI(roi, value, right,re, isMainPlotUpdate, origin);
 					}
 				} catch (Exception e) {
 					logger.error("Could not update roi!",e);
@@ -304,11 +317,14 @@ public class Hyper2DTool extends AbstractToolPage {
 				if (source.getROI() == null) return;
 				
 				try {
-					IRegion r = getPlottingSystem().createRegion(source.getName(), RegionType.YAXIS_LINE);
-					YAxisBoxROI roi = new YAxisBoxROI();
-					double x = source.getROI().getPointX();
-					
-					updateROI(roi,x,false,r, false);
+//					IRegion r = getPlottingSystem().createRegion(source.getName(), RegionType.YAXIS_LINE);
+//					YAxisBoxROI roi = new YAxisBoxROI();
+//					double x = source.getROI().getPointX();
+//					
+//					updateROI(roi,x,false,r, false);
+					boolean origin = getImageTrace().getImageOrigin().isOnLeadingDiagonal();
+//					boolean origin = true;
+					IRegion r = createRegion(source, origin);
 					r.setRegionColor(ColorConstants.blue);
 					r.setName(source.getName());
 					r.addROIListener(mainPlotLeftRegionListener);
@@ -325,6 +341,15 @@ public class Hyper2DTool extends AbstractToolPage {
 		};
 	}
 
+	private IRegion createRegion(IRegion source, boolean isY) throws Exception{
+		IRegion r = getPlottingSystem().createRegion(source.getName(), isY ? RegionType.YAXIS_LINE : RegionType.XAXIS_LINE);
+		IROI roi = isY ? new YAxisBoxROI() : new XAxisBoxROI();
+		double x = source.getROI().getPointX();
+		
+		updateROI(roi,x,!isY,r, false,getImageTrace().getImageOrigin().isOnLeadingDiagonal());
+		return r;
+	}
+	
 	private IROIListener mainPlotRightRegionListener = new IROIListener.Stub() {
 		@Override
 		public void roiDragged(ROIEvent evt) {
@@ -357,11 +382,14 @@ public class Hyper2DTool extends AbstractToolPage {
 				if (source.getROI() == null) return;
 				
 				try {
-					IRegion r = getPlottingSystem().createRegion(source.getName(), RegionType.XAXIS_LINE);
-					XAxisBoxROI roi = new XAxisBoxROI();
-					double x = source.getROI().getPointX();
-					
-					updateROI(roi,x,true,r, false);
+//					IRegion r = getPlottingSystem().createRegion(source.getName(), RegionType.XAXIS_LINE);
+//					XAxisBoxROI roi = new XAxisBoxROI();
+//					double x = source.getROI().getPointX();
+//					
+//					updateROI(roi,x,true,r, false);
+					boolean origin = getImageTrace().getImageOrigin().isOnLeadingDiagonal();
+//					boolean origin = true;
+					IRegion r = createRegion(source, !origin);
 					r.setRegionColor(ColorConstants.blue);
 					r.setName(source.getName());
 					r.addROIListener(mainPlotRightRegionListener);
