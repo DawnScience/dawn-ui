@@ -201,6 +201,7 @@ public class DatasetPart {
 		viewer.dispose();
 		plotController.removePlotModeListener(plotModeListener);
 		fileController.removeStateListener(fileStateListener);
+		plotController.dispose();
 	}
 	
 	private void updateOnSelectionChange(DataOptions op){

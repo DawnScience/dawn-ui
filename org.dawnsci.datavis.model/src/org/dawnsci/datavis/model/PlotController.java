@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -64,6 +65,7 @@ public class PlotController implements IPlotController {
 	private IFileController fileController;
 	
 	private ISliceChangeListener sliceListener;
+	private FileControllerStateEventListener fileStateListener;
 	
 	private Set<PlotModeChangeEventListener> listeners = new HashSet<PlotModeChangeEventListener>();
 	
@@ -92,15 +94,16 @@ public class PlotController implements IPlotController {
 		
 		fileController = ServiceManager.getFileController();
 		
-		fileController.addStateListener(new FileControllerStateEventListener() {
-			
+		fileStateListener  = new FileControllerStateEventListener() {
+
 			@Override
 			public void stateChanged(FileControllerStateEvent event) {
-				
 				if (!event.isSelectedDataChanged() && !event.isSelectedFileChanged()) return;
 				updateOnFileStateChange();	
 			}
-		});
+		};
+		
+		fileController.addStateListener(fileStateListener);
 		
 		sliceListener = new ISliceChangeListener() {
 
@@ -567,5 +570,10 @@ public class PlotController implements IPlotController {
 			} 
 		}
 		
+	}
+
+	@Override
+	public void dispose() {
+		system = null;
 	}
 }

@@ -19,5 +19,7 @@ public interface IPlotController {
 	public void enablePlotModifier(IPlotDataModifier modifier);
 	
 	public IPlotDataModifier getEnabledPlotModifier();
+	
+	public void dispose();
 
 }
