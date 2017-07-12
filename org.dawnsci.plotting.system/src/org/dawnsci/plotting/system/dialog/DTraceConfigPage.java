@@ -9,12 +9,12 @@ package org.dawnsci.plotting.system.dialog;
 
 import java.util.Collections;
 
+import org.dawnsci.plotting.system.PlottingSystemActivator;
 import org.eclipse.core.commands.Command;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.nebula.visualization.internal.xygraph.toolbar.TraceConfigPage;
 import org.eclipse.nebula.visualization.xygraph.figures.IXYGraph;
 import org.eclipse.nebula.visualization.xygraph.figures.Trace;
-import org.eclipse.nebula.visualization.xygraph.util.XYGraphMediaFactory;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -41,7 +41,7 @@ public class DTraceConfigPage extends TraceConfigPage {
 		Button export = new Button(composite, SWT.NONE);
 		export.setText("Export data...");
 		export.setToolTipText("Export trace to ascii (dat file)");
-		export.setImage(XYGraphMediaFactory.getInstance().getImage("images/data-export.png"));
+		export.setImage(PlottingSystemActivator.getImageDescriptor("icons/data-export.png").createImage());
 		export.setLayoutData(new GridData(SWT.BEGINNING, SWT.BEGINNING, false, false, 2, 1));
 		export.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
