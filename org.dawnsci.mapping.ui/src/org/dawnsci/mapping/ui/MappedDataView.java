@@ -54,7 +54,6 @@ import org.eclipse.scanning.api.event.scan.ScanEvent;
 import org.eclipse.scanning.api.event.status.Status;
 import org.eclipse.scanning.api.event.status.StatusBean;
 import org.eclipse.scanning.api.ui.CommandConstants;
-import org.eclipse.scanning.device.ui.ServiceHolder;
 import org.eclipse.swt.dnd.DND;
 import org.eclipse.swt.dnd.DropTarget;
 import org.eclipse.swt.dnd.DropTargetAdapter;
@@ -479,7 +478,7 @@ public class MappedDataView extends ViewPart {
 			try {
 				final String savedState = memento.getString(getSavedStateKey());
 				if (savedState != null) {
-					initialState = ServiceHolder.getMarshallerService().unmarshal(savedState,
+					initialState = LocalServiceManager.getMarshallerService().unmarshal(savedState,
 							MappedDataViewState.class);
 				}
 			} catch (Exception e) {
@@ -502,7 +501,7 @@ public class MappedDataView extends ViewPart {
 					state.setFilesInView(filesInView);
 					logger.info("Saving view state: {}", state);
 
-					final String stateString = ServiceHolder.getMarshallerService().marshal(state);
+					final String stateString = LocalServiceManager.getMarshallerService().marshal(state);
 					memento.putString(getSavedStateKey(), stateString);
 				}
 			} catch (Exception e) {
