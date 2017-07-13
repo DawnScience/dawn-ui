@@ -1,7 +1,6 @@
 package org.dawnsci.common.widgets.filedataset;
 
 import java.io.File;
-import java.io.FileFilter;
 import java.util.Arrays;
 import java.util.Comparator;
 
@@ -12,12 +11,12 @@ public class FileDatasetTreeContentProvider implements ITreeContentProvider {
 
 	@Override
 	public void dispose() {
-
+		// unused
 	}
 
 	@Override
 	public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
-
+		// unused
 	}
 
 	@Override
@@ -29,15 +28,9 @@ public class FileDatasetTreeContentProvider implements ITreeContentProvider {
 	public Object[] getChildren(Object parentElement) {
 		File file = (File) parentElement;
 		// exclude hidden files
-		File[] ls = file.listFiles(new FileFilter() {
-			
-			@Override
-			public boolean accept(File pathname) {
-				return !pathname.isHidden();
-			}
-		});
+		File[] ls = file.listFiles(pathname -> !pathname.isHidden());
 		if (ls == null)
-			return null;
+			return new File[0];
 		// comparator chaining can be achieved with org.apache.commons.collections4.ComparatorUtils,
 		// but seems like an unnecessary heavy dependency here...
 		// alphabetic sort

@@ -9,11 +9,7 @@ import org.dawnsci.common.widgets.statuscomposite.StatusComposite;
 import org.eclipse.january.dataset.ILazyDataset;
 import org.eclipse.jface.viewers.AbstractTreeViewer;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
-import org.eclipse.jface.viewers.DoubleClickEvent;
-import org.eclipse.jface.viewers.IDoubleClickListener;
-import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
@@ -24,8 +20,6 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.TreeItem;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /*
  * After http://blog.vogella.com/2009/06/23/eclipse-rcp-file-browser/
@@ -36,7 +30,6 @@ public class FileDatasetComposite extends StatusComposite {
 	private final TreeViewer treeViewer;
 	private final TableViewer tableViewer;
 	private final FileDatasetTreeContentProvider contentProvider = new FileDatasetTreeContentProvider();
-	private final static Logger logger = LoggerFactory.getLogger(FileDatasetComposite.class);
 	private volatile File currentSelectedFile = null;
 	private volatile ILazyDataset currentSelectedDataset = null;
 	
@@ -53,12 +46,7 @@ public class FileDatasetComposite extends StatusComposite {
 		
 		if (filter == null) {
 			// default filter allows for everything to get through
-			filter = new IFileDatasetFilter() {
-				@Override
-				public boolean accept(ILazyDataset dataset) {
-					return true;
-				}
-			};
+			filter = FileDatasetFilterFactory.FILTER_TRUE;
 		}
 		
 		this.setLayout(new GridLayout(1, true));
@@ -78,44 +66,38 @@ public class FileDatasetComposite extends StatusComposite {
 		treeViewer.setContentProvider(contentProvider);
 		treeViewer.setLabelProvider(new FileDatasetTreeLabelProvider());
 		treeViewer.setInput(File.listRoots());
-		treeViewer.addSelectionChangedListener(new ISelectionChangedListener() {
-			@Override
-			public void selectionChanged(SelectionChangedEvent event) {
-				File selectedFile = (File) treeViewer.getStructuredSelection().getFirstElement();
-				if (selectedFile != null) {
-					logger.debug("new selection: {}", selectedFile.toString());
-					currentSelectedFile = selectedFile;
-					tableViewer.setInput(selectedFile);
-				}
-				// changes in the treeViewer always set the status to false
-				fireListeners(false);
-			}
-		});
-		// taken from http://stackoverflow.com/a/22453339
-		treeViewer.addDoubleClickListener(new IDoubleClickListener() {
-			@Override
-			public void doubleClick(DoubleClickEvent event) {
-				final IStructuredSelection selection = (IStructuredSelection)event.getSelection();
-			    if (selection == null || selection.isEmpty())
-			      return;
-
-			    final Object sel = selection.getFirstElement();
-
-			    if (!contentProvider.hasChildren(sel))
-			      return;
-
-			    if (treeViewer.getExpandedState(sel))
-			      treeViewer.collapseToLevel(sel, AbstractTreeViewer.ALL_LEVELS);
-			    else
-			      treeViewer.expandToLevel(sel, 1);
-			}
-		});
 		
 		tableViewer = new TableViewer(sashForm, SWT.H_SCROLL | SWT.V_SCROLL | SWT.BORDER | SWT.FULL_SELECTION);
 		tableViewer.getTable().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		tableViewer.getTable().setHeaderVisible(true);
 		tableViewer.getTable().setLinesVisible(true);
 		tableViewer.setContentProvider(new FileDatasetTableContentProvider(filter));
+		
+		treeViewer.addSelectionChangedListener(event -> {
+			File selectedFile = (File) treeViewer.getStructuredSelection().getFirstElement();
+			if (selectedFile != null) {
+				currentSelectedFile = selectedFile;
+				tableViewer.setInput(selectedFile);
+			}
+			// changes in the treeViewer always set the status to false
+			fireListeners(false);
+		});
+		// taken from http://stackoverflow.com/a/22453339
+		treeViewer.addDoubleClickListener(event -> {
+			final IStructuredSelection selection = (IStructuredSelection)event.getSelection();
+			if (selection == null || selection.isEmpty())
+			    return;
+
+			final Object sel = selection.getFirstElement();
+
+			if (!contentProvider.hasChildren(sel))
+			    return;
+
+			if (treeViewer.getExpandedState(sel))
+			    treeViewer.collapseToLevel(sel, AbstractTreeViewer.ALL_LEVELS);
+			else
+			    treeViewer.expandToLevel(sel, 1);
+		});
 		
 		TableViewerColumn datasetNameColumn = new TableViewerColumn(tableViewer, SWT.NONE);
 		datasetNameColumn.getColumn().setText("Name");
@@ -142,18 +124,13 @@ public class FileDatasetComposite extends StatusComposite {
 			}
 		});
 		
-		tableViewer.addSelectionChangedListener(new ISelectionChangedListener() {
-			
-			@Override
-			public void selectionChanged(SelectionChangedEvent event) {
-				ILazyDataset selectedDataset = (ILazyDataset) tableViewer.getStructuredSelection().getFirstElement();
-				if (selectedDataset != null) {
-					logger.debug("new dataset: {}", selectedDataset.toString());
-					currentSelectedDataset = selectedDataset;
-					fireListeners(true);
-				} else {
-					fireListeners(false);
-				}
+		tableViewer.addSelectionChangedListener(event -> {
+			ILazyDataset selectedDataset = (ILazyDataset) tableViewer.getStructuredSelection().getFirstElement();
+			if (selectedDataset != null) {
+				currentSelectedDataset = selectedDataset;
+				fireListeners(true);
+			} else {
+				fireListeners(false);
 			}
 		});
 		
