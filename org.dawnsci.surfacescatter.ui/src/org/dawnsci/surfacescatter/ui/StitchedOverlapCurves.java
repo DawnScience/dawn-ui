@@ -2,7 +2,6 @@ package org.dawnsci.surfacescatter.ui;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
-
 import org.dawb.common.ui.widgets.ActionBarWrapper;
 import org.dawnsci.surfacescatter.CurveStitchDataPackage;
 import org.dawnsci.surfacescatter.OverlapAttenuationObject;
@@ -54,6 +53,8 @@ public class StitchedOverlapCurves extends Composite {
     private TableViewer viewer;
     private int selector;
     private OverlapDisplayObjects odo;
+    private Group overlapSelector;
+    private ArrayList<IDataset> xArrayList;
     
     public StitchedOverlapCurves(Composite parent, 
 					    		int style,
@@ -71,7 +72,7 @@ public class StitchedOverlapCurves extends Composite {
         super(parent, style);
         
         new Label(this, SWT.NONE).setText(title);
-        
+        this.xArrayList = xArrayList;
         try {
 			plotSystem = PlottingFactory.createPlottingSystem();
 		} catch (Exception e2) {
@@ -80,8 +81,7 @@ public class StitchedOverlapCurves extends Composite {
         
         this.ssp = ssp;
         
-        this.createContents(xArrayList,
-    			yArrayList,
+        this.createContents(yArrayList,
     			yArrayListError,
     			yArrayListFhkl,
     			yArrayListFhklError,
@@ -92,8 +92,7 @@ public class StitchedOverlapCurves extends Composite {
         
     }
      
-    public void createContents(ArrayList<IDataset> xArrayList,
-										ArrayList<IDataset> yArrayList,
+    public void createContents(ArrayList<IDataset> yArrayList,
 										ArrayList<IDataset> yArrayListError,
 										ArrayList<IDataset> yArrayListFhkl,
 										ArrayList<IDataset> yArrayListFhklError, 
@@ -117,11 +116,11 @@ public class StitchedOverlapCurves extends Composite {
 		
 ///////////////////////////TOP		
 		
-		SashForm rightForm = new SashForm(form, SWT.VERTICAL);
-		rightForm.setLayout(new GridLayout());
-		rightForm.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		SashForm topForm = new SashForm(form, SWT.VERTICAL);
+		topForm.setLayout(new GridLayout());
+		topForm.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
-		Group stitchedCurves = new Group(rightForm, SWT.FILL | SWT.FILL);
+		Group stitchedCurves = new Group(topForm, SWT.FILL | SWT.FILL);
         GridLayout stitchedCurvesLayout = new GridLayout(1, true);
 	    GridData stitchedCurvesData = new GridData(GridData.FILL_HORIZONTAL);
 	    stitchedCurves.setLayout(stitchedCurvesLayout);
@@ -130,9 +129,9 @@ public class StitchedOverlapCurves extends Composite {
 		
         ActionBarWrapper actionBarComposite = ActionBarWrapper.createActionBars(stitchedCurves, null);;
         
-        final GridData gd_secondField = new GridData(SWT.FILL, SWT.FILL, true, true);
-        gd_secondField.grabExcessVerticalSpace = true;
-        gd_secondField.grabExcessVerticalSpace = true;
+        final GridData gdSecondField = new GridData(SWT.FILL, SWT.FILL, true, true);
+        gdSecondField.grabExcessVerticalSpace = true;
+        gdSecondField.grabExcessVerticalSpace = true;
         
         plotSystem.createPlotPart(stitchedCurves, "Stitched Curves", actionBarComposite, PlotType.IMAGE, null);
     
@@ -165,23 +164,20 @@ public class StitchedOverlapCurves extends Composite {
 				plotSystem.addTrace(lt1);
 				plotSystem.repaint();
 				
-				updateTable(odos,
-							xArrayList, 
-							viewer);
 				
 			}
 		});
 		
 
-        plotSystem.getPlotComposite().setLayoutData(gd_secondField);
+        plotSystem.getPlotComposite().setLayoutData(gdSecondField);
         
 /////////////BOTTOM
        
-        SashForm leftForm = new SashForm(form, SWT.VERTICAL);
-		leftForm.setLayout(new GridLayout());
-		leftForm.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+        SashForm bottomForm = new SashForm(form, SWT.VERTICAL);
+		bottomForm.setLayout(new GridLayout());
+		bottomForm.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
-		Group overlapSelector = new Group(leftForm, SWT.V_SCROLL | SWT.BORDER | SWT.MULTI);
+		overlapSelector = new Group(bottomForm, SWT.V_SCROLL | SWT.BORDER | SWT.MULTI);
 		GridLayout overlapSelectorLayout = new GridLayout(1, true);
 		GridData overlapSelectorData = new GridData(GridData.FILL_BOTH);
 		overlapSelector.setLayout(overlapSelectorLayout);
@@ -200,7 +196,7 @@ public class StitchedOverlapCurves extends Composite {
 		viewer.getTable().setLayout(overlapSelectorLayout);
 		viewer.getTable().setLayoutData(overlapSelectorData);
 		
-		resetAll = new Button(leftForm, SWT.PUSH);
+		resetAll = new Button(bottomForm, SWT.PUSH);
 		 
 		resetAll.setText("Reset All");
 		
@@ -216,9 +212,8 @@ public class StitchedOverlapCurves extends Composite {
 					oAo.setModified(false);
 				}
 				
-				resetAttenuationFactors(overlapSelector, xArrayList);
-				
-//				updateTable(odos, xArrayList, viewer);
+				resetAttenuationFactors(overlapSelector, xArrayList,true);
+
 			}
 			
 			@Override
@@ -227,7 +222,7 @@ public class StitchedOverlapCurves extends Composite {
 			}
 		});
 		
-		go = new Button(leftForm, SWT.PUSH);
+		go = new Button(bottomForm, SWT.PUSH);
 		 
 	    go.setText("Go");
 		
@@ -237,10 +232,7 @@ public class StitchedOverlapCurves extends Composite {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				updateAttenuationFactors(xArrayList);
-				
-//				updateTable(odos, xArrayList, viewer);
-				
-//				viewer.setInput(odos);
+			
 			}
 			
 			@Override
@@ -249,7 +241,7 @@ public class StitchedOverlapCurves extends Composite {
 			}
 		});
 	    
-	    leftForm.setWeights(new int[]{70,15,15});
+	    bottomForm.setWeights(new int[]{70,15,15});
 	    
 	    form.setWeights(new int[]{70,30});
 	  
@@ -281,30 +273,7 @@ public class StitchedOverlapCurves extends Composite {
 	   for(int i =0; i<odos.size();i++ ){
 		   
 		   String test =odos.get(i).getTextCorrected().getText();
-		   
-		   
-		   if(!odos.get(i).getTextCorrected().getText().equals(String.valueOf(oAos.get(i).getAttenuationFactorCorrected()))){
-				modify = false;
-				oAos.get(i).setAttenuationFactorCorrected(Double.valueOf(odos.get(i).getTextCorrected().getText()));
-				
-				
-//				odos.get(i).getTextCorrected().setText(String.valueOf(oAos.get(i).getAttenuationFactorCorrected()));
-				modify = true;
-			}
-			if(!odos.get(i).getTextRaw().getText().equals(String.valueOf(oAos.get(i).getAttenuationFactorRaw()))){
-				modify = false;
-				oAos.get(i).setAttenuationFactorRaw(Double.valueOf(odos.get(i).getTextRaw().getText()));
-				
-//				odos.get(i).getTextRaw().setText(String.valueOf(oAos.get(i).getAttenuationFactorRaw()));
-				modify = true;
-			}
-			if(!odos.get(i).getTextFhkl().getText().equals(String.valueOf(oAos.get(i).getAttenuationFactorFhkl()))){
-				modify = false;
-				oAos.get(i).setAttenuationFactorFhkl(Double.valueOf(odos.get(i).getTextFhkl().getText()));
-				
-//				odos.get(i).getTextFhkl().setText(String.valueOf(oAos.get(i).getAttenuationFactorFhkl()));
-				modify = true;
-			}
+		  
 	   }
 	   
 	   for(OverlapDisplayObjects odo :odos){
@@ -324,11 +293,15 @@ public class StitchedOverlapCurves extends Composite {
    
    
    private void resetAttenuationFactors(Group group,
-//		   								ArrayList<OverlapDisplayObjects> odos,
-		   								ArrayList<IDataset> xArrayList){
+		   								ArrayList<IDataset> xArrayList,
+		   								boolean globalReset){
 
-	   	csdp = ssp.curveStitchingOutput(maxMinArray, true, null);
-
+	   if(globalReset){
+	   		csdp = ssp.curveStitchingOutput(maxMinArray, true, null);
+	   }
+	   else{
+		   csdp = ssp.curveStitchingOutput(maxMinArray, true, oAos);
+	   }
 		
 		getTheRightCurve();
 		
@@ -341,61 +314,45 @@ public class StitchedOverlapCurves extends Composite {
 			OverlapDisplayObjects odo = odos.get(i);
 			OverlapDataModel odm = odms.get(i);
 			
-			double l = odm.getAttenuationFactor(); 
-			odo.getTextCorrected().setText(String.valueOf(l));
-			odo.setTextCorrectedContent(l);
-			
-			double m = odm.getAttenuationFactorRaw(); 
-			odo.getTextRaw().setText(String.valueOf(m));
-			odo.setTextRawContent(m);
-			
-			double n = odm.getAttenuationFactorFhkl(); 
-			odo.getTextFhkl().setText(String.valueOf(n));
-			odo.setTextFhklContent(n);
-			
-			odo.setModified(false);
-			
-		}
-		
-		oAos = new ArrayList<>();
-		
-		for(int i =0; i<odos.size(); i++){
 			OverlapAttenuationObject oAo = odo.getOAo();
-			oAo.setModified(false);
-			oAos.add(oAo);
+			
+			if(!globalReset){
+			
+				if(odo.isButtonPushed()){
+					
+					settingOdoFromOdm(odm, odo, oAo);
+				}
+			}
+			else{
+				settingOdoFromOdm(odm, odo, oAo);
+			}
+			oAos.set(odo.getOdoNumber(),oAo);
 		}
-		
 
 	}
 	   
-   
-   private void updateTable(ArrayList<OverlapDisplayObjects> odos,
-		   					ArrayList<IDataset> xArrayList, 
-		   					TableViewer table){
+   private void settingOdoFromOdm(OverlapDataModel odm,
+		   						  OverlapDisplayObjects odo,
+		   						  OverlapAttenuationObject oAo){
+	   
 
-//	   csdp = ssp.getDrm().getCsdp();
-//	   odms = csdp.getOverlapDataModels();
-////	   
-////	   table.removeAll();
-////	  
-////	   for(int cv = 0; cv<table.getItems().length; cv++){
-////			table.remove(cv);
-////	   }
-////	  
-////	   table.removeAll();
-////		  
-////	   buildTable(table, xArrayList);
-////	   
-////	   table.redraw();
-//	   
-//	   table.refresh();
-//	   
-////	   if(!odos.get(0).getTextCorrected().getText().equals(String.valueOf(oAos.get(0).getAttenuationFactorCorrected()))){
-////		   System.out.println("why not");
-////
-////	   }
-	}
-   
+		double l = odm.getAttenuationFactor(); 
+		odo.getTextCorrected().setText(String.valueOf(l));
+		odo.setTextCorrectedContent(l);
+		
+		double m = odm.getAttenuationFactorRaw(); 
+		odo.getTextRaw().setText(String.valueOf(m));
+		odo.setTextRawContent(m);
+		
+		double n = odm.getAttenuationFactorFhkl(); 
+		odo.getTextFhkl().setText(String.valueOf(n));
+		odo.setTextFhklContent(n);
+		
+		oAo.setModified(false);
+		odo.setModified(false);
+		odo.setButtonPushed(false);
+	   
+   }
 
    
    private void generateOdosFromOdms(ArrayList<IDataset> xArrayList){
@@ -437,7 +394,6 @@ public class StitchedOverlapCurves extends Composite {
 				
 						
 						if(odo.isButtonPushed()){
-							odo.setButtonPushed(false);
 							odo.setModified(false);
 							try{
 								oAos.get(odo.getOdoNumber()).setModified(false);
@@ -450,7 +406,6 @@ public class StitchedOverlapCurves extends Composite {
 						updateAttenuationFactors(//odos, 
 												 xArrayList);
 						
-						updateTable(odos, xArrayList, viewer);
 					}
 				}
 			});
@@ -502,7 +457,6 @@ public class StitchedOverlapCurves extends Composite {
 				
 						
 						if(odo.isButtonPushed()){
-							odo.setButtonPushed(false);
 							odo.setModified(false);
 							try{
 								oAos.get(odo.getOdoNumber()).setModified(false);
@@ -512,10 +466,8 @@ public class StitchedOverlapCurves extends Composite {
 							}
 						}
 						
-						updateAttenuationFactors(//odos, 
-												 xArrayList);
+						resetAttenuationFactors(overlapSelector ,xArrayList, false);
 						
-						updateTable(odos, xArrayList, viewer);
 					}
 				}
 			});
@@ -548,7 +500,7 @@ public class StitchedOverlapCurves extends Composite {
 			    		   "Fhkl Attenuation: ", 
 			    		   "Local Reset: " };
        
-       int[] bounds = { 100, 100, 100, 100, 100 };
+       int[] bounds = { 100, 100, 100, 100, 50 };
 
        // first column is for the overlap name
        TableViewerColumn col = createTableViewerColumn(viewer, 
@@ -754,6 +706,19 @@ public class StitchedOverlapCurves extends Composite {
 			//purely defensive
 	   }
 	
+   }
+   
+   public void resetAll(){
+	   
+	   
+	   for(OverlapDisplayObjects odo: odos){
+			odo.setModified(false);
+		}
+		for(OverlapAttenuationObject oAo: oAos){
+			oAo.setModified(false);
+		}
+		
+		resetAttenuationFactors(overlapSelector, xArrayList,true);
    }
    
 }

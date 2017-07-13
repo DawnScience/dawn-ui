@@ -18,6 +18,9 @@ import org.eclipse.dawnsci.plotting.api.trace.ILineTrace;
 import org.eclipse.january.dataset.IDataset;
 import org.eclipse.january.dataset.SliceND;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.SashForm;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -37,18 +40,21 @@ public class OverlapCurves extends Composite {
     private Button errors;
     private ArrayList<ILineTrace> ltList;
 	private Combo intensitySelect;
+	private GeneralOverlapHandlerView gohv;
      
     public OverlapCurves(Composite parent, 
     					int style, 
     					ArrayList<IDataset> arrayILDy, 
     					ArrayList<IDataset> arrayILDx, 
     					String title, 
-    					OverlapUIModel model) {
+    					OverlapUIModel model,
+    					GeneralOverlapHandlerView gohv) {
     	
         super(parent, style);
         
         new Label(this, SWT.NONE).setText(title);
         
+        this.gohv = gohv;
         
         regionArray = new IRegion[arrayILDy.size()-1];
         
@@ -72,7 +78,20 @@ public class OverlapCurves extends Composite {
         gridLayout.numColumns = 1;
         setLayout(gridLayout);
         
-        controls = new Group(this, SWT.NULL);
+        Composite setupComposite = new Composite(this, SWT.FILL);
+		setupComposite.setLayout(new GridLayout());
+		setupComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+	
+        
+    	SashForm form = new SashForm(setupComposite, SWT.FILL);
+		form.setLayout(new GridLayout());
+		form.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		
+		form.setOrientation(SWT.VERTICAL);
+		
+        
+        
+        controls = new Group(form, SWT.NULL);
         GridLayout controlsSelectionLayout  = new GridLayout(2,true);
 		GridData controlsSelectionData = new GridData(SWT.FILL, SWT.NULL, true, false);
         controls.setLayoutData(controlsSelectionData);
@@ -93,19 +112,26 @@ public class OverlapCurves extends Composite {
 		intensitySelect.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		intensitySelect.select(0);
 		
-        ActionBarWrapper actionBarComposite = ActionBarWrapper.createActionBars(this, null);;
+		
+		Group unstitchedCurves = new Group(form, SWT.FILL | SWT.FILL);
+        GridLayout stitchedCurvesLayout = new GridLayout(1, true);
+	    GridData stitchedCurvesData = new GridData(GridData.FILL_HORIZONTAL);
+	    unstitchedCurves.setLayout(stitchedCurvesLayout);
+	    unstitchedCurves.setLayoutData(stitchedCurvesData);
+	    unstitchedCurves.setText("Stitched Curves");
+		
+        ActionBarWrapper actionBarComposite = ActionBarWrapper.createActionBars(unstitchedCurves, null);;
         
         final GridData gd_secondField = new GridData(SWT.FILL, SWT.FILL, true, true);
         gd_secondField.grabExcessVerticalSpace = true;
         gd_secondField.grabExcessVerticalSpace = true;
         
-        plotSystem.createPlotPart(this, "ExamplePlot", actionBarComposite, PlotType.IMAGE, null);
+        plotSystem.createPlotPart(unstitchedCurves, "ExamplePlot", actionBarComposite, PlotType.IMAGE, null);
         
         SliceND slice = new SliceND(arrayILDy.get(0).getShape());
         
 		IDataset i = null;
 		IDataset j = null;
-
 		
 		ltList = new ArrayList<ILineTrace>();
 		
@@ -138,7 +164,6 @@ public class OverlapCurves extends Composite {
 			plotSystem.repaint();
 			
 		}
-
 
        plotSystem.getPlotComposite().setLayoutData(gd_secondField);
 
@@ -208,7 +233,36 @@ public class OverlapCurves extends Composite {
         	}
         }
 
-        
+    	Group resetGroup = new Group(form, SWT.FILL | SWT.FILL);
+        GridLayout resetGroupLayout = new GridLayout(1, true);
+	    GridData resetGroupData = new GridData(GridData.FILL_HORIZONTAL);
+	    resetGroup.setLayout(resetGroupLayout);
+	    resetGroup.setLayoutData(resetGroupData);
+	   
+	    Button resetButton = new Button(resetGroup, SWT.PUSH);
+	    resetButton.setLayoutData (new GridData(GridData.FILL_HORIZONTAL));
+	    resetButton.setText("Reset Overlaps");
+		
+		//////////////////////////////////////////////////////////////////////////////////
+		
+	    resetButton.addSelectionListener(new SelectionListener() {
+			
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				buildAndSetOverlapRegions(model,
+						                  arrayILDx,
+						                  arrayILDy);
+				
+				gohv.getStitchedCurves().resetAll();
+			}
+			
+			@Override
+			public void widgetDefaultSelected(SelectionEvent e) {
+				
+			}
+		});
+		
+	    form.setWeights(new int[] {5,90,5});
     }
 		
    public Composite getComposite(){
@@ -231,6 +285,84 @@ public class OverlapCurves extends Composite {
 	public Combo getIntensity(){
 		return intensitySelect;
 	}
+	
+	private void buildAndSetOverlapRegions(OverlapUIModel model,
+										   ArrayList<IDataset> arrayILDx,
+										   ArrayList<IDataset> arrayILDy){
+		
+		plotSystem.clearRegions();
+		
+		ArrayList<IRectangularROI> roiList = new ArrayList<IRectangularROI>();
+	    IRectangularROI nullROI = null;
+	    regionArray = new IRegion[arrayILDy.size()-1];    
+	        
+	        for(int yr =0; yr<regionArray.length;yr++){
+	        	roiList.add(nullROI);
+	        }
+
+	        model.setROIList(roiList);
+	        
+	        String root = "RegionNo:";
+	        int k=0;
+	        
+	     
+		 
+		 double[][] overlap = OverlapFinder.overlapFinderOperation(arrayILDx);
+	        
+	        for (k=0;k<(model.getROIList().size());k++){
+	        	
+	        	if(overlap[k][1]<999999){
+	        		
+	        		if(DEBUG ==1 ){
+	        			System.out.println("k in overlapCurves: " + k);
+	        			System.out.println("overlap[k][1]: " + overlap[k][1]);
+	        			System.out.println("overlap[k][0]: " + overlap[k][0]);
+	        			System.out.println("roiList.size() : " + roiList.size());
+	        		}
+	        		
+	        		
+	        		roiList.set(k,  new RectangularROI(overlap[k][1],0.1,overlap[k][0]-overlap[k][1],0.1,0));
+
+		        	String regionName = root +  Integer.toString(k);
+		        
+			        try {
+						regionArray[k] =plotSystem.createRegion(regionName, RegionType.XAXIS);
+						regionArray[k].setROI(roiList.get(k));
+						plotSystem.addRegion(regionArray[k]);
+						
+			        }
+			        catch (Exception e1) {
+						e1.printStackTrace();
+					}
+			       
+			        model.setROIList(roiList);
+			        
+			        int ktemp =k;
+			        ((IRegion) regionArray[k]).addROIListener(new IROIListener() {
+			
+						@Override
+						public void roiDragged(ROIEvent evt) {
+							model.setROIListElementEst(regionArray[ktemp].getROI().getBounds(), ktemp);
+						}
+			
+						@Override
+						public void roiChanged(ROIEvent evt) {
+							model.setROIListElementEst(regionArray[ktemp].getROI().getBounds(), ktemp);
+							
+						}
+			
+						@Override
+						public void roiSelected(ROIEvent evt) {
+							model.setROIListElementEst(regionArray[ktemp].getROI().getBounds(), ktemp);
+						}
+					
+					});
+	        	}
+	        }
+
+	        model.setROIListElementEst(regionArray[1].getROI().getBounds(), 1);
+	}
+	
 	
 	public void changeCurves(int selector,
 							 CurveStitchDataPackage csdp){

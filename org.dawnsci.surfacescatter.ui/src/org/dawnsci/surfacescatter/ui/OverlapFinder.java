@@ -45,12 +45,12 @@ public class OverlapFinder{
 			//if (xArray[k+1] != null){
 				if (maxMinArray[k][0]>maxMinArray[k+1][1]){
 					for(int l=0; l<xArray[k].getSize();l++){
-						if (xArray[k].getDouble(l)>maxMinArray[k+1][1]){
+						if (xArray[k].getDouble(l)>0.99*maxMinArray[k+1][1]){
 							overlapLower.add(l);
 						}
 					}
 					for(int m=0; m<xArray[k+1].getSize();m++){
-						if (xArray[k+1].getDouble(m)<maxMinArray[k][0]){
+						if (xArray[k+1].getDouble(m)<1.01*maxMinArray[k][0]){
 							overlapHigher.add(m);
 						}
 					}

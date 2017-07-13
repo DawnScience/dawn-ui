@@ -105,7 +105,8 @@ public class GeneralOverlapHandlerView extends Dialog {
 														  yArrayList, 
 														  xArrayList,
 														  "Unstitched Curves", 
-														  model);
+														  model,
+														  this);
 		customComposite.setLayout(new GridLayout());
 		customComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
@@ -210,6 +211,16 @@ public class GeneralOverlapHandlerView extends Dialog {
 	    return container;
 	}
 	
+	public StitchedOverlapCurves getStitchedCurves() {
+		return stitchedCurves;
+	}
+
+
+	public void setStitchedCurves(StitchedOverlapCurves stitchedCurves) {
+		this.stitchedCurves = stitchedCurves;
+	}
+
+
 	@Override
 	protected void configureShell(Shell newShell) {
 		super.configureShell(newShell);
