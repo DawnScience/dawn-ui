@@ -25,6 +25,7 @@ import org.eclipse.draw2d.ColorConstants;
 import org.eclipse.draw2d.Graphics;
 import org.eclipse.draw2d.IFigure;
 import org.eclipse.draw2d.geometry.Dimension;
+import org.eclipse.draw2d.geometry.Point;
 import org.eclipse.draw2d.geometry.PointList;
 import org.eclipse.draw2d.geometry.Rectangle;
 import org.eclipse.january.dataset.Dataset;
@@ -33,7 +34,6 @@ import org.eclipse.january.dataset.IDataset;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.nebula.visualization.xygraph.figures.DAxis;
 import org.eclipse.nebula.visualization.xygraph.linearscale.ITicksProvider;
-import org.eclipse.nebula.visualization.xygraph.linearscale.LinearScaleTickMarks;
 import org.eclipse.nebula.visualization.xygraph.linearscale.Range;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.ui.preferences.ScopedPreferenceStore;
@@ -156,55 +156,52 @@ public class AspectAxis extends DAxis implements IAxis {
         	final int[] shape  = trace.getData().getShape();
         	final Range range  = getRange();
         	
-        	LinearScaleTickMarks marks = getScaleTickMarks();
-   			final int height = marks.getBounds().height;
+        	Rectangle bnds = graph.getRegionArea().getBounds();
    			
    			graphics.pushState();
 			graphics.setBackgroundColor(ColorConstants.red);
 			graphics.setAlpha(100);
         	if (isYAxis()) {
-       			final int x      = marks.getBounds().x;
-       			final int y      = marks.getBounds().y;
+        		Point c = bnds.getTopLeft();
+       			final int x = c.x - 1; 
+       			int y = c.y;
        		    if (range.getUpper()>0) { // Zoom at top not to edge
         			final PointList triangle = new PointList();
-          			triangle.addPoint(x+6,  y+9);
-           			triangle.addPoint(x+11, y+15);
-           			triangle.addPoint(x+1,  y+15);
+          			triangle.addPoint(x, y);
+           			triangle.addPoint(x+5, y+6);
+           			triangle.addPoint(x-5, y+6);
         			graphics.fillPolygon(triangle);
-        			
          		} 
         		
         		if (range.getLower()<shape[0]) {
-         			
         			final PointList triangle = new PointList();
-         			triangle.addPoint(x+6,  y+height-9);
-           			triangle.addPoint(x+11, y+height-15);
-           			triangle.addPoint(x+1,  y+height-15);
+        			y += bnds.height;
+         			triangle.addPoint(x, y);
+           			triangle.addPoint(x+5, y-6);
+           			triangle.addPoint(x-5, y-6);
            			graphics.fillPolygon(triangle);
          		}
         	} else {
-        		
-       			final int x      = getValuePosition(range.getLower());
-       			final int y      = marks.getBounds().y;
- 
+        		Point c = bnds.getBottomLeft();
+       			int x = c.x;
+       			final int y = c.y + 1;
+
         		if (range.getLower()>0) { // Zoom at top not to edge
         			final PointList triangle = new PointList();
           			triangle.addPoint(x, y);
-           			triangle.addPoint(x+6, y+6);
-           			triangle.addPoint(x+6, y-6);
+           			triangle.addPoint(x+6, y+5);
+           			triangle.addPoint(x+6, y-5);
         			graphics.fillPolygon(triangle);
-        			
          		} 
         		
         		if (range.getUpper()<shape[1]) {
-          			final int width  = getValuePosition(range.getUpper());
+          			x += bnds.width;
         			final PointList triangle = new PointList();
-          			triangle.addPoint(width,   y);
-           			triangle.addPoint(width-6, y+6);
-           			triangle.addPoint(width-6, y-6);
+          			triangle.addPoint(x,   y);
+           			triangle.addPoint(x-6, y+5);
+           			triangle.addPoint(x-6, y-5);
         			graphics.fillPolygon(triangle);
          		}
-
         	}
    
          	graphics.popState();
