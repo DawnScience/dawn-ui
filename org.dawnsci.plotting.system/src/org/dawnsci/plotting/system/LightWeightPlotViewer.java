@@ -118,6 +118,7 @@ import org.eclipse.nebula.visualization.widgets.figureparts.ColorMapRamp;
 import org.eclipse.nebula.visualization.widgets.figures.ScaledSliderFigure;
 import org.eclipse.nebula.visualization.xygraph.figures.Annotation;
 import org.eclipse.nebula.visualization.xygraph.figures.Axis;
+import org.eclipse.nebula.visualization.xygraph.figures.DAxis;
 import org.eclipse.nebula.visualization.xygraph.figures.IXYGraph;
 import org.eclipse.nebula.visualization.xygraph.figures.ZoomType;
 import org.eclipse.nebula.visualization.xygraph.linearscale.AbstractScale.LabelSide;
@@ -241,7 +242,7 @@ public class LightWeightPlotViewer<T> extends AbstractPlottingViewer<T> implemen
         plotContents.add(xyGraph, new GridData(SWT.FILL, SWT.FILL, true, true));
         graphLayer.add(plotContents, BorderLayout.CENTER);
         
-		this.intensity = new ColorMapRamp();
+		this.intensity = new ColorMapRamp(new DAxis());
 		Color bgdColor = parent instanceof Composite? ((Composite)parent).getBackground():null;
  		intensity.setBorder(new LineBorder(bgdColor != null ? bgdColor : ColorConstants.white, 5));
         graphLayer.add(intensity, BorderLayout.RIGHT);
