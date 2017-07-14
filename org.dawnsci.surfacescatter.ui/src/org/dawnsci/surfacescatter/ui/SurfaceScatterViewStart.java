@@ -1099,21 +1099,14 @@ public class SurfaceScatterViewStart extends Dialog {
 					
 				}
 				
-//				trajectoryRegion.roi
 				trajectoryRegion.setROI(lt1);
-				
 				trajectoryRegion.setVisible(true);
-//				lt1.setData(xData, yData);
 				trajectoryRegion.setRegionColor(cyan);;
-				
 				
 				pS.addRegion(trajectoryRegion);
 				trajectoryRegion.setUserRegion(false);
 				trajectoryRegion.setMobile(false);
-	//			customComposite.getPlotSystem().getRegion("myRegion").toFront();
-	//			customComposite.getPlotSystem().getRegion("myRegion").setActive(true);
-				
-//				customComposite.setRegion(ssp.getInitialLenPt());
+
 			}
 			
 			
@@ -1185,20 +1178,12 @@ public class SurfaceScatterViewStart extends Dialog {
 			
 			this.getSsps3c().getOutputCurves().getPlotSystem().repaint(false);
 			customComposite.getFolder().setSelection(0);
-//			analysisSash.setWeights(new int[] { 40, 60 });
-//			analysisSash.redraw();
 			
 		}
 		
 	}
 	
 	public void fireRun(){
-		
-//		if(ssp.getQList()!=null){
-//			if(ssp.getQList().size()!=0){
-//				ssps3c.getOutputCurves().getqAxis().setEnabled(true); 
-//			}
-//		}
 		
 		if(ssp.getProcessingMethodSelection() == ProccessingMethod.AUTOMATIC){
 			
@@ -1290,10 +1275,6 @@ public class SurfaceScatterViewStart extends Dialog {
 		
 		double x = ssp.getXValue(k);
 		
-//		if(outputCurves.getqAxis().getSelection()){
-//			x = ssp.getQValue(k);
-//		}
-//		
 		RectangularROI r = new RectangularROI(x, 0.1, 0, 0.1, 0);
 		
 		try {
@@ -1661,10 +1642,6 @@ public class SurfaceScatterViewStart extends Dialog {
 			}
 		});
 		
-		
-		
-		
-		
 	}
 
 	public int[] getCorrectionsDropDownArray() {
@@ -1895,7 +1872,7 @@ public class SurfaceScatterViewStart extends Dialog {
 		catch(Exception o){
 			
 		}
-//		customComposite.generalUpdate();
+
 	}
 	
 	

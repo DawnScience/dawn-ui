@@ -709,6 +709,10 @@ public class StitchedOverlapCurves extends Composite {
    }
    
    public void resetAll(){
+	   resetAll(true);
+   }
+   
+   public void resetAll(boolean global){
 	   
 	   
 	   for(OverlapDisplayObjects odo: odos){
@@ -718,7 +722,7 @@ public class StitchedOverlapCurves extends Composite {
 			oAo.setModified(false);
 		}
 		
-		resetAttenuationFactors(overlapSelector, xArrayList,true);
+		resetAttenuationFactors(overlapSelector, xArrayList,global);
    }
    
 }

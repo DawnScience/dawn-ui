@@ -1513,21 +1513,6 @@ public class SurfaceScatterPresenter {
 		}
 	}
 	
-//	public double getQValue(int k){
-//		
-//		if(sm != null){
-//			if(sm.getSortedQ() != null){
-//				return sm.getSortedQ().getDouble(k);
-//			}
-//			else{
-//				return 0;
-//			}
-//		}
-//		else{
-//			return 0;
-//		}
-//	}
-	
 	public double getXValue(double r){
 		
 		int k = (int) Math.round(r);
@@ -1651,25 +1636,6 @@ public class SurfaceScatterPresenter {
 		ArrayList<IDataset> yArrayListRaw= new ArrayList<>();
 		ArrayList<IDataset> yArrayListRawError = new ArrayList<>();
 		
-//		for(int p = 0;p<drm.getDatFilepaths().length;p++){
-//								
-//			if (drm.getOcdp().getyList() == null || drm.getxList() == null) {
-//				
-//			} 
-//			
-//			else {
-//				
-//				
-//					xArrayList.add(dms.get(p).xIDataset());
-//					yArrayList.add(dms.get(p).yIDataset());
-//					yArrayListError.add(dms.get(p).yIDatasetError());
-//					yArrayListFhkl.add(dms.get(p).yIDatasetFhkl());
-//					yArrayListFhklError.add(dms.get(p).yIDatasetFhklError());
-//					yArrayListRaw.add(dms.get(p).yRawIDataset());
-//					yArrayListRawError.add(dms.get(p).yRawIDatasetError());
-//				}	
-//		}
-		
 		CsdpGeneratorFromDrm csdpgfd = new CsdpGeneratorFromDrm();
 		csdpgfd.generateCsdpFromDrm(drm);
 		CurveStitchDataPackage csdp = csdpgfd.getCsdp();
@@ -1712,9 +1678,16 @@ public class SurfaceScatterPresenter {
 
 	public int xPositionFinder(double myNum) {
 
-		int xPos = ClosestNoFinder.closestNoPos(myNum, drm.getSortedX());
-
-		return xPos;
+		return  ClosestNoFinder.closestNoPos(myNum, drm.getSortedX());
+		
+	}
+	
+	public int xPositionFinderInDat(int i,double myNum) {
+		
+		Dataset xIn = DatasetFactory.createFromList(drm.getDmxList().get(i));
+		
+		return ClosestNoFinder.closestNoPos(myNum, xIn);
+		
 	}
 	
 	public int qPositionFinder(double myNum) {
@@ -2040,40 +2013,6 @@ public class SurfaceScatterPresenter {
 		    }
 	    }
 		    		    
-//		    else{
-//		    	writer.println("#"+gm.getxName()+"	I	Ie	Area Correction	Flux Correction");
-//				
-//		    	if(drm.getCorrectionSelection() == MethodSetting.Reflectivity_with_Flux_Correction){
-//
-//					 for(int gh = 0 ; gh<fms.size(); gh++){
-//						 	writer.println(sm.getxList().get(gh) +"	"+ 
-//						    drm.getCsdp().getSplicedCurveY().getDouble(gh)+ "	"+ 
-//						    drm.getCsdp().getSplicedCurveY().getError(gh)+ "	"+ 
-//						    sm.getReflectivityAreaCorrection().get(gh)+ "	"+
-//						    sm.getReflectivityFluxCorrection().get(gh));
-//					}
-//				 }
-//				 
-//				 if(drm.getCorrectionSelection() == MethodSetting.Reflectivity_without_Flux_Correction){
-//
-//					 for(int gh = 0 ; gh<fms.size(); gh++){
-//						 	writer.println(sm.getxList().get(gh) +"	"+ 
-//						    drm.getCsdp().getSplicedCurveY().getDouble(gh)+ "	"+ 
-//						    drm.getCsdp().getSplicedCurveY().getError(gh)+ "	"+ 
-//						    sm.getReflectivityAreaCorrection().get(gh));
-//					}
-//				 }
-				 
-//				 if(drm.getCorrectionSelection() == MethodSetting.Reflectivity_NO_Correction){
-//
-//					 for(int gh = 0 ; gh<fms.size(); gh++){
-//						 	writer.println(sm.getxList().get(gh) +"	"+ 
-//						    drm.getCsdp().getSplicedCurveY().getDouble(gh)+ "	"+ 
-//						    drm.getCsdp().getSplicedCurveY().getError(gh));
-//					 }
-//				 }    	
-//		    }	    
-//	    }
 		writer.close();
 	}	
 	
@@ -3082,4 +3021,40 @@ public class SurfaceScatterPresenter {
 		this.bB = bB;
 	}
 
+	public String[] getDatFilepaths(){
+		return drm.getDatFilepaths();
+	}
+	
+	public double getUnsplicedCorrectedIntensityFromFm(int datNo, int pos){
+//		return drm.getFms().get(i).getUnspliced_Corrected_Intensity();
+		
+		return drm.getOcdp().getyListForEachDat().get(datNo).get(pos);
+		
+	}
+	
+	public double getUnsplicedRawIntensityFromFm(int datNo, int pos){
+//		return drm.getFms().get(i).getUnspliced_Raw_Intensity();
+		
+		return drm.getOcdp().getyListRawIntensityErrorForEachDat().get(datNo).get(pos);
+		
+	}
+	
+	public double getUnsplicedFhklIntensityFromFm(int datNo, int pos){
+		return drm.getOcdp().getyListFhklErrorForEachDat().get(datNo).get(pos);
+		
+	}
+	
+	public void setGoodPoint(int i, boolean u){
+		drm.getFms().get(i).setGoodPoint(u);
+	}
+	
+	public boolean isGoodPoint(int i){
+		return drm.getFms().get(i).isGoodPoint();
+	}
+	
+	public void allGoodPoints(){
+		for(FrameModel fm: drm.getFms()){
+			fm.setGoodPoint(true);
+		}
+	}
 }

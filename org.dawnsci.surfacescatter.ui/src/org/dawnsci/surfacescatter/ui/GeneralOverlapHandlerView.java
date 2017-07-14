@@ -106,7 +106,8 @@ public class GeneralOverlapHandlerView extends Dialog {
 														  xArrayList,
 														  "Unstitched Curves", 
 														  model,
-														  this);
+														  this,
+														  ssp);
 		customComposite.setLayout(new GridLayout());
 		customComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		

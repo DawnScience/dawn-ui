@@ -1,10 +1,13 @@
 package org.dawnsci.surfacescatter.ui;
 import java.util.ArrayList;
+
+import org.apache.commons.lang.time.DateFormatUtils;
 import org.dawb.common.ui.widgets.ActionBarWrapper;
 import org.dawnsci.surfacescatter.CurveStitchDataPackage;
 import org.dawnsci.surfacescatter.IntensityDisplayEnum;
 import org.dawnsci.surfacescatter.IntensityDisplayEnum.IntensityDisplaySetting;
 import org.dawnsci.surfacescatter.OverlapUIModel;
+import org.eclipse.dawnsci.analysis.api.roi.IROI;
 import org.eclipse.dawnsci.analysis.api.roi.IRectangularROI;
 import org.eclipse.dawnsci.analysis.dataset.roi.RectangularROI;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
@@ -30,17 +33,25 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Text;
 
 public class OverlapCurves extends Composite {
 
     private IPlottingSystem<Composite> plotSystem;
     private IRegion[] regionArray;
-    private int DEBUG =1;
+    private int DEBUG =0;
     private Group controls;
     private Button errors;
     private ArrayList<ILineTrace> ltList;
 	private Combo intensitySelect;
 	private GeneralOverlapHandlerView gohv;
+	private IRegion imageNo;
+	private SurfaceScatterPresenter ssp;
+	private Combo activeCurveCombo;
+	private Button disregardPoint; 
+	private Text yValueText;
+	private Text frameNoText;
+	
      
     public OverlapCurves(Composite parent, 
     					int style, 
@@ -48,13 +59,15 @@ public class OverlapCurves extends Composite {
     					ArrayList<IDataset> arrayILDx, 
     					String title, 
     					OverlapUIModel model,
-    					GeneralOverlapHandlerView gohv) {
+    					GeneralOverlapHandlerView gohv,
+    					SurfaceScatterPresenter ssp) {
     	
         super(parent, style);
         
         new Label(this, SWT.NONE).setText(title);
         
         this.gohv = gohv;
+        this.ssp =ssp;
         
         regionArray = new IRegion[arrayILDy.size()-1];
         
@@ -89,8 +102,6 @@ public class OverlapCurves extends Composite {
 		
 		form.setOrientation(SWT.VERTICAL);
 		
-        
-        
         controls = new Group(form, SWT.NULL);
         GridLayout controlsSelectionLayout  = new GridLayout(2,true);
 		GridData controlsSelectionData = new GridData(SWT.FILL, SWT.NULL, true, false);
@@ -113,18 +124,98 @@ public class OverlapCurves extends Composite {
 		intensitySelect.select(0);
 		
 		
+		InputTileGenerator activeCurve = new InputTileGenerator("activeCurve: ", controls);
+		
+		for(String datName : ssp.getDatFilepaths()){
+			activeCurve.getCombo().add(datName);
+		}
+		
+		activeCurveCombo = activeCurve.getCombo();
+		activeCurveCombo.select(0);
+		
+		Group includeControls = new Group(controls, SWT.NULL);
+        GridLayout includeControlsLayout  = new GridLayout(2,true);
+		GridData includeControlsData = new GridData(SWT.FILL, SWT.NULL, true, false);
+		includeControls.setLayoutData(includeControlsData);
+        includeControls.setLayout(includeControlsLayout);
+		
+		
+		disregardPoint = new Button(includeControls, SWT.PUSH);
+		disregardPoint.setText("Disregard Point");
+		disregardPoint.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		
+		disregardPoint.addSelectionListener(new SelectionListener() {
+			
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				
+				int xPos = ssp.xPositionFinder(OverlapCurves.this.imageNo.getROI().getPointX());
+				
+				if(ssp.isGoodPoint(xPos)){
+					ssp.setGoodPoint(xPos, false);
+				}
+				else{
+					ssp.setGoodPoint(xPos, true);
+				}
+				
+				if(ssp.isGoodPoint(xPos)){
+					disregardPoint.setText("Disregard Point");
+				}
+				else{
+					disregardPoint.setText("Include Point");
+				}
+				
+				
+				gohv.getStitchedCurves().resetAll(false);
+			}
+			
+			@Override
+			public void widgetDefaultSelected(SelectionEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+		});
+		
+		Button includeAll = new Button(includeControls, SWT.PUSH);
+		includeAll.setText("Include All");
+		includeAll.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		
+		includeAll.addSelectionListener(new SelectionListener() {
+			
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				ssp.allGoodPoints();
+				gohv.getStitchedCurves().resetAll(false);
+				disregardPoint.setText("Disregard Point");
+			}
+			
+			@Override
+			public void widgetDefaultSelected(SelectionEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+		});
+		
+		
+		InputTileGenerator scannedPoint = new InputTileGenerator("Image Number", "0" ,controls);
+		frameNoText = scannedPoint.getText();
+		
+		
+		InputTileGenerator yPoint = new InputTileGenerator("Y Value", "0" ,controls);
+		yValueText = yPoint.getText();
+		
 		Group unstitchedCurves = new Group(form, SWT.FILL | SWT.FILL);
         GridLayout stitchedCurvesLayout = new GridLayout(1, true);
 	    GridData stitchedCurvesData = new GridData(GridData.FILL_HORIZONTAL);
 	    unstitchedCurves.setLayout(stitchedCurvesLayout);
 	    unstitchedCurves.setLayoutData(stitchedCurvesData);
-	    unstitchedCurves.setText("Stitched Curves");
+	    unstitchedCurves.setText("Unstitched Curves");
 		
         ActionBarWrapper actionBarComposite = ActionBarWrapper.createActionBars(unstitchedCurves, null);;
         
-        final GridData gd_secondField = new GridData(SWT.FILL, SWT.FILL, true, true);
-        gd_secondField.grabExcessVerticalSpace = true;
-        gd_secondField.grabExcessVerticalSpace = true;
+        final GridData gdSecondField = new GridData(SWT.FILL, SWT.FILL, true, true);
+        gdSecondField.grabExcessVerticalSpace = true;
+        gdSecondField.grabExcessVerticalSpace = true;
         
         plotSystem.createPlotPart(unstitchedCurves, "ExamplePlot", actionBarComposite, PlotType.IMAGE, null);
         
@@ -165,7 +256,7 @@ public class OverlapCurves extends Composite {
 			
 		}
 
-       plotSystem.getPlotComposite().setLayoutData(gd_secondField);
+       plotSystem.getPlotComposite().setLayoutData(gdSecondField);
 
        ArrayList<IRectangularROI> roiList = new ArrayList<IRectangularROI>();
        IRectangularROI nullROI = null;
@@ -192,7 +283,6 @@ public class OverlapCurves extends Composite {
         			System.out.println("overlap[k][0]: " + overlap[k][0]);
         			System.out.println("roiList.size() : " + roiList.size());
         		}
-        		
         		
         		roiList.set(k,  new RectangularROI(overlap[k][1],0.1,overlap[k][0]-overlap[k][1],0.1,0));
 
@@ -233,6 +323,16 @@ public class OverlapCurves extends Composite {
         	}
         }
 
+		try {
+			imageNo = plotSystem.createRegion("Point Selector", RegionType.XAXIS_LINE);
+		} catch (Exception e1) {
+			
+		}
+		imageNo.setShowPosition(true);
+		plotSystem.addRegion(imageNo);
+		
+		imageNoAddListener();
+        
     	Group resetGroup = new Group(form, SWT.FILL | SWT.FILL);
         GridLayout resetGroupLayout = new GridLayout(1, true);
 	    GridData resetGroupData = new GridData(GridData.FILL_HORIZONTAL);
@@ -262,7 +362,7 @@ public class OverlapCurves extends Composite {
 			}
 		});
 		
-	    form.setWeights(new int[] {5,90,5});
+	    form.setWeights(new int[] {15,80,5});
     }
 		
    public Composite getComposite(){
@@ -286,11 +386,87 @@ public class OverlapCurves extends Composite {
 		return intensitySelect;
 	}
 	
+	private void imageNoAddListener(){
+		imageNo.addROIListener(new IROIListener() {
+			
+			@Override
+			public void roiSelected(ROIEvent evt) {
+			}
+			
+			@Override
+			public void roiDragged(ROIEvent evt) {
+			}
+			
+			@Override
+			public void roiChanged(ROIEvent evt) {
+				
+				int xPos =ssp.xPositionFinder(imageNo.getROI().getPointX());
+				
+				int datNo = activeCurveCombo.getSelectionIndex();
+				
+				int xPosInDat = ssp.xPositionFinderInDat(activeCurveCombo.getSelectionIndex() ,imageNo.getROI().getPointX());
+		
+				frameNoText.setText(String.valueOf(xPos));
+				
+				double yValue = 0;
+				
+				int k = intensitySelect.getSelectionIndex();
+				
+				switch(IntensityDisplaySetting.toMethod(k)){
+					case Fhkl:
+						yValue = ssp.getUnsplicedFhklIntensityFromFm(activeCurveCombo.getSelectionIndex(),
+								 									 xPosInDat);
+					
+						break;
+					case Corrected_Intensity:
+						yValue = ssp.getUnsplicedCorrectedIntensityFromFm(activeCurveCombo.getSelectionIndex(),
+																		  xPosInDat);
+						break;
+					case Raw_Intensity:
+						yValue = ssp.getUnsplicedRawIntensityFromFm(activeCurveCombo.getSelectionIndex(),
+																	xPosInDat);
+						break;
+					default:
+						//defensive only
+				}
+				
+				yValueText.setText(String.valueOf(yValue));
+				
+				if(ssp.isGoodPoint(xPos)){
+					disregardPoint.setText("Disregard Point");
+				}
+				else{
+					disregardPoint.setText("Include Point");
+				}
+			}
+		});
+		
+		
+	}
+	
+	
 	private void buildAndSetOverlapRegions(OverlapUIModel model,
 										   ArrayList<IDataset> arrayILDx,
 										   ArrayList<IDataset> arrayILDy){
 		
+		IROI imN = imageNo.getROI().copy();
+		
 		plotSystem.clearRegions();
+		
+		try {
+			imageNo = plotSystem.createRegion("Point Selector", RegionType.XAXIS_LINE);
+		} catch (Exception e1) {
+			
+		}
+		
+		imageNo.setROI(imN);
+		
+		imageNo.setShowPosition(true);
+		plotSystem.addRegion(imageNo);
+		
+		imageNo.toFront();
+		
+		imageNoAddListener();
 		
 		ArrayList<IRectangularROI> roiList = new ArrayList<IRectangularROI>();
 	    IRectangularROI nullROI = null;
@@ -430,7 +606,47 @@ public class OverlapCurves extends Composite {
 		}
 		
 	}
+
+
+	public IRegion getImageNo() {
+		return imageNo;
+	}
+
+
+	public void setImageNo(IRegion imageNo) {
+		this.imageNo = imageNo;
+	}
 	
+	public void addImageNoRegion(double j){
+
+		RectangularROI r = new RectangularROI(j ,0.1,0,0.1,0);
+
+		if(plotSystem.getRegion("Image")== null){
+			
+		try{
+			imageNo = plotSystem.createRegion("Image", RegionType.XAXIS_LINE);
+		}
+		catch(Exception x){
+			
+		}
+		
+		
+		imageNo.setShowPosition(true);
+		imageNo.setROI(r);
+		
+		plotSystem.addRegion(imageNo);
+		imageNo.setShowPosition(true);
+		}
+		
+		else{
+			moveImageNoRegion(j);
+		}
+	}
 	
+	public void moveImageNoRegion(double j){
+		
+		RectangularROI r = new RectangularROI(j ,0.1,0,0.1,0);
+		imageNo.setROI(r);
+	}
 }
 

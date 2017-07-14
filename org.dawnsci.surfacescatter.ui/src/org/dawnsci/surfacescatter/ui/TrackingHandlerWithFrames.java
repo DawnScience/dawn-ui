@@ -1930,52 +1930,6 @@ class trackingJob21 {
 							   frame.getTrackingMethodology()!= TrackerType1.INTERPOLATION &&
 							   frame.getTrackingMethodology() != TrackerType1.SPLINE_INTERPOLATION){
 								
-//								double[] test = new double[] {0,0,0,0,0,0,0,0};
-//								double myNum = drm.getSortedX().getDouble(k);
-//								double distance = Math.abs(drm.getSortedX().getDouble(0) - myNum);
-//								int nearestCompletedDatFileNo = 0;
-//								
-//								for(int c = 0; c < drm.getSortedX().getSize(); c++){
-//								   FrameModel fm = fms.get(c);
-//								   double cdistance = fm.getScannedVariable()- myNum;
-//								    if((cdistance < distance) & 
-//								       !Arrays.equals(fm.getRoiLocation(), test) & 
-//								       !Arrays.equals(fm.getRoiLocation(), null)){
-//								        
-//								    	nearestCompletedDatFileNo = fm.getDatNo();
-//								        distance = cdistance;
-//								    }
-//								}
-//								
-//								ArrayList<double[]> seedList = drm.getLocationList().get(nearestCompletedDatFileNo);;
-//								ArrayList<Double> lList = drm.getDmxList().get(nearestCompletedDatFileNo);
-//								
-//								Dataset yValues = DatasetFactory.zeros(seedList.size());
-//								Dataset xValues = DatasetFactory.zeros(seedList.size());
-//								Dataset lValues = DatasetFactory.zeros(seedList.size());
-//								
-//								for(int op = 0; op<seedList.size(); op++){
-//									
-//									double x = seedList.get(op)[1];
-//									double y = seedList.get(op)[0];
-//									double l = lList.get(op);
-//									
-//									xValues.set(x, op);
-//									yValues.set(y, op);
-//									lValues.set(l, op);
-//			
-//								}
-//								
-//								double[] seedLocation = PolynomialOverlap.extrapolatedLocation(drm.getSortedX().getDouble(k),
-//																							   lValues, 
-//																							   xValues, 
-//																							   yValues, 
-//																							   drm.getInitialLenPt()[0],
-//																							   1);
-//							}
-//							
-//							else{
-//								
 								double[] seedLocation = TrackerLocationInterpolation.trackerInterpolationInterpolator0(drm.getTrackerLocationList(), 
 																								   drm.getSortedX(), 
 																								   drm.getInitialLenPt()[0],
@@ -2003,9 +1957,7 @@ class trackingJob21 {
 									   frame.getNoInOriginalDat(),
 									   frame.getScannedVariable());
 			
-							
-//							debug("value added to xList:  "   + drm.getSortedX().getDouble(k)  + "  k:   " + k);
-							
+						
 							IDataset output1 = 
 									DummyProcessWithFrames.DummyProcess1(drm, 
 																	   gm, 
@@ -2136,10 +2088,8 @@ class trackingJob21 {
 
 		
 		if(progressBar.isDisposed() != true){
-//			System.out.println("progress bar start:  " +progressBar.getSelection());
 			progressBar.setSelection(progressBar.getSelection() +1);
-//			System.out.println("progress bar incremented:  " +progressBar.getSelection());
-//			System.out.println("progress bar max:  " +progressBar.getMaximum());
+
 			if(progressBar.getSelection() == progressBar.getMaximum()){
 				tpaav.close();
 			}

@@ -104,10 +104,10 @@ public class MultipleOutputCurvesTableView extends Composite {
 		
 		ActionBarWrapper actionBarComposite = ActionBarWrapper.createActionBars(sashForm, null);
 		
-		final GridData gd_secondField = new GridData(SWT.FILL, SWT.FILL, true, true);
-		gd_secondField.grabExcessVerticalSpace = true;
-		gd_secondField.grabExcessVerticalSpace = true;
-		gd_secondField.heightHint = 100;
+		final GridData gdSecondField = new GridData(SWT.FILL, SWT.FILL, true, true);
+		gdSecondField.grabExcessVerticalSpace = true;
+		gdSecondField.grabExcessVerticalSpace = true;
+		gdSecondField.heightHint = 100;
 
 		plotSystem4.createPlotPart(sashForm,
 								   "ExamplePlot", 
@@ -128,7 +128,7 @@ public class MultipleOutputCurvesTableView extends Composite {
 			e.printStackTrace();
 		}
 
-		plotSystem4.getPlotComposite().setLayoutData(gd_secondField);
+		plotSystem4.getPlotComposite().setLayoutData(gdSecondField);
 
 		Group extraButtons = new Group(sashForm, SWT.NULL);
 		GridLayout extraButtonsLayout = new GridLayout(3,true);
