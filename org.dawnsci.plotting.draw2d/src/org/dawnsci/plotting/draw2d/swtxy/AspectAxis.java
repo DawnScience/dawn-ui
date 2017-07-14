@@ -135,79 +135,92 @@ public class AspectAxis extends DAxis implements IAxis {
 			relBounds.y = getBounds().y + yAxisSize.height - 10;
 			relativeTo.setBounds(relBounds);
 		}
-
 	}
-	
+
+	private static boolean isTopOrRightOn(Range r, int[] limits) {
+		return testLimit(r.isMinBigger(), r.getUpper(), limits);
+	}
+
+	private static boolean isBottomOrLeftOn(Range r, int[] limits) {
+		return testLimit(!r.isMinBigger(), r.getLower(), limits);
+	}
+
+	private static boolean testLimit(boolean first, double v, int[] limits) {
+		return first ? v > limits[0] : v < limits[1];
+	}
+
 	@Override
 	protected void paintClientArea(final Graphics graphics) {
-        if (!isVisible()) return;
-        
-        super.paintClientArea(graphics);
-        
-        
-        /** HACK WARNING **/
-        // If data is greater than zoom, extends give visual clue to Claire P.
-        // Hack for http://jira.diamond.ac.uk/browse/DAWNSCI-552
-        
-        final XYRegionGraph graph = getGraph();
-        final IImageTrace   trace = graph.getRegionArea().getImageTrace();
-        if (trace!=null && trace.getImageOrigin()==ImageOrigin.TOP_LEFT) {
-        	// TODO FIXME not for other orientations!
-        	final int[] shape  = trace.getData().getShape();
-        	final Range range  = getRange();
-        	
-        	Rectangle bnds = graph.getRegionArea().getBounds();
-   			
-   			graphics.pushState();
-			graphics.setBackgroundColor(ColorConstants.red);
-			graphics.setAlpha(100);
-        	if (isYAxis()) {
-        		Point c = bnds.getTopLeft();
-       			final int x = c.x - 1; 
-       			int y = c.y;
-       		    if (range.getUpper()>0) { // Zoom at top not to edge
-        			final PointList triangle = new PointList();
-          			triangle.addPoint(x, y);
-           			triangle.addPoint(x+5, y+6);
-           			triangle.addPoint(x-5, y+6);
-        			graphics.fillPolygon(triangle);
-         		} 
-        		
-        		if (range.getLower()<shape[0]) {
-        			final PointList triangle = new PointList();
-        			y += bnds.height;
-         			triangle.addPoint(x, y);
-           			triangle.addPoint(x+5, y-6);
-           			triangle.addPoint(x-5, y-6);
-           			graphics.fillPolygon(triangle);
-         		}
-        	} else {
-        		Point c = bnds.getBottomLeft();
-       			int x = c.x;
-       			final int y = c.y + 1;
+		if (!isVisible())
+			return;
 
-        		if (range.getLower()>0) { // Zoom at top not to edge
-        			final PointList triangle = new PointList();
-          			triangle.addPoint(x, y);
-           			triangle.addPoint(x+6, y+5);
-           			triangle.addPoint(x+6, y-5);
-        			graphics.fillPolygon(triangle);
-         		} 
-        		
-        		if (range.getUpper()<shape[1]) {
-          			x += bnds.width;
-        			final PointList triangle = new PointList();
-          			triangle.addPoint(x,   y);
-           			triangle.addPoint(x-6, y+5);
-           			triangle.addPoint(x-6, y-5);
-        			graphics.fillPolygon(triangle);
-         		}
-        	}
-   
-         	graphics.popState();
-        }
-        /** HACK OVER **/
-		
+		super.paintClientArea(graphics);
+
+		/** HACK WARNING **/
+		// If data is greater than zoom, extends give visual clue to Claire P.
+		// Hack for http://jira.diamond.ac.uk/browse/DAWNSCI-552
+
+		final XYRegionGraph graph = getGraph();
+		final IImageTrace trace = graph.getRegionArea().getImageTrace();
+		if (trace == null) {
+			return;
+		}
+		final Range range = getRange();
+		final int[] shape = trace.getData().getShape();
+		ImageOrigin origin = trace.getImageOrigin();
+		int[] limits = new int[2];
+		limits[1] = shape[origin.isOnLeadingDiagonal() ^ isYAxis() ? 1 : 0];
+
+		Rectangle bnds = graph.getRegionArea().getBounds();
+
+		graphics.pushState();
+		graphics.setBackgroundColor(ColorConstants.red);
+		graphics.setAlpha(100);
+		if (isYAxis()) {
+			Point c = bnds.getTopLeft();
+			final int x = c.x - 1;
+			int y = c.y;
+			if (isTopOrRightOn(range, limits)) { // Zoom at top not to edge
+				final PointList triangle = new PointList();
+				triangle.addPoint(x, y);
+				triangle.addPoint(x + 5, y + 6);
+				triangle.addPoint(x - 5, y + 6);
+				graphics.fillPolygon(triangle);
+			}
+
+			if (isBottomOrLeftOn(range, limits)) { // at bottom
+				final PointList triangle = new PointList();
+				y += bnds.height;
+				triangle.addPoint(x, y);
+				triangle.addPoint(x + 5, y - 6);
+				triangle.addPoint(x - 5, y - 6);
+				graphics.fillPolygon(triangle);
+			}
+		} else {
+			Point c = bnds.getBottomLeft();
+			int x = c.x;
+			final int y = c.y + 1;
+
+			if (isBottomOrLeftOn(range, limits)) { // Zoom at left not to edge
+				final PointList triangle = new PointList();
+				triangle.addPoint(x, y);
+				triangle.addPoint(x + 6, y + 5);
+				triangle.addPoint(x + 6, y - 5);
+				graphics.fillPolygon(triangle);
+			}
+
+			if (isTopOrRightOn(range, limits)) { // at right
+				x += bnds.width;
+				final PointList triangle = new PointList();
+				triangle.addPoint(x, y);
+				triangle.addPoint(x - 6, y + 5);
+				triangle.addPoint(x - 6, y - 5);
+				graphics.fillPolygon(triangle);
+			}
+		}
+
+		graphics.popState();
+		/** HACK OVER **/
 	}
 
 	private XYRegionGraph getGraph() {
