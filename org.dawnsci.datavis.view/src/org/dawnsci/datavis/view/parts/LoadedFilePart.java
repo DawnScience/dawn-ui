@@ -28,6 +28,7 @@ import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.layout.TableColumnLayout;
 import org.eclipse.jface.util.LocalSelectionTransfer;
 import org.eclipse.jface.viewers.CellEditor;
@@ -225,11 +226,11 @@ public class LoadedFilePart {
 					}
 					
 					if (!paths.isEmpty()) {
-						fileController.loadFiles(paths.toArray(new String[paths.size()]),(IProgressService) PlatformUI.getWorkbench().getService(IProgressService.class));
+						loadData(paths.toArray(new String[paths.size()]));
 					}
 					
 				} else if (dropData instanceof String[]) {
-					fileController.loadFiles((String[])dropData,(IProgressService) PlatformUI.getWorkbench().getService(IProgressService.class));
+					loadData((String[])dropData);
 				}
 			}
 		};
@@ -255,6 +256,18 @@ public class LoadedFilePart {
 			}
 		});
 
+	}
+	
+	private void loadData(String[] paths){
+		List<String> loadFiles = fileController.loadFiles(paths,(IProgressService) PlatformUI.getWorkbench().getService(IProgressService.class));
+		
+		if (loadFiles != null && !loadFiles.isEmpty()) {
+			MessageDialog.openError(
+					Display.getCurrent().getActiveShell(),
+					"File Loading Error",
+					"An error occured during data loading: " + loadFiles.size() + " files could not be opened!");
+		}
+		
 	}
 	
 	private void updateOnStateChange(final FileControllerStateEvent event) {
@@ -297,8 +310,7 @@ public class LoadedFilePart {
 		
 		if (data.getProperty("live_bean") != null) return;
 		
-		IProgressService service = (IProgressService) PlatformUI.getWorkbench().getService(IProgressService.class);
-		fileController.loadFiles(paths,service);
+		loadData(paths);
 
 	} 
 	

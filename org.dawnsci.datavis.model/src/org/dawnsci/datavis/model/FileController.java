@@ -40,7 +40,7 @@ public class FileController implements IFileController {
 	 * @see org.dawnsci.datavis.model.IFileController#loadFiles(java.lang.String[], org.eclipse.ui.progress.IProgressService)
 	 */
 	@Override
-	public void loadFiles(String[] paths, IProgressService progressService) {
+	public List<String> loadFiles(String[] paths, IProgressService progressService) {
 		
 		FileLoadingRunnable runnable = new FileLoadingRunnable(paths);
 		
@@ -53,6 +53,9 @@ public class FileController implements IFileController {
 				logger.debug("Busy while interrupted", e);
 			} 
 		}
+		
+		List<String> failed = runnable.getFailedLoadingFiles();
+		return failed;
 	}
 	
 	
@@ -280,9 +283,11 @@ public class FileController implements IFileController {
 	private class FileLoadingRunnable implements IRunnableWithProgress {
 
 		String[] paths;
+		List<String> failedPaths;
 		
 		public FileLoadingRunnable(String[] paths) {
 			this.paths = paths;
+			failedPaths = new ArrayList<String>();
 		}
 		
 		@Override
@@ -290,7 +295,9 @@ public class FileController implements IFileController {
 			
 			List<LoadedFile> files = new ArrayList<>();
 			
-			if (monitor != null) monitor.beginTask("Loading files", paths.length);
+			if (monitor != null) {
+				monitor.beginTask("Loading files", paths.length);
+			}
 			
 			for (String path : paths) {
 				if (loadedFiles.contains(path)) continue;
@@ -299,6 +306,7 @@ public class FileController implements IFileController {
 				try {
 					f = new LoadedFile(ServiceManager.getLoaderService().getData(path, null));
 				} catch (Exception e) {
+					failedPaths.add(path);
 					logger.error("Exception loading file",e);
 				}
 				
@@ -315,6 +323,11 @@ public class FileController implements IFileController {
 					files.add(f);
 				}
 				
+				monitor.worked(1);
+				if (monitor.isCanceled()) {
+					break;
+				}
+				
 			}
 			
 			if (!files.isEmpty()) {
@@ -326,6 +339,10 @@ public class FileController implements IFileController {
 			
 			fireStateChangeListeners(false,false);
 			
+		}
+		
+		public List<String> getFailedLoadingFiles(){
+			return failedPaths;
 		}
 	}
 
