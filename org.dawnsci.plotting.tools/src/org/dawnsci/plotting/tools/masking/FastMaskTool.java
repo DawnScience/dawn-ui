@@ -10,6 +10,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import org.dawb.common.ui.util.EclipseUtils;
 import org.dawb.common.ui.wizard.persistence.PersistenceExportWizard;
+import org.dawnsci.plotting.roi.ROIEditTable;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -34,8 +35,6 @@ import org.eclipse.january.dataset.IndexIterator;
 import org.eclipse.jface.wizard.IWizard;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.ModifyEvent;
-import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.TraverseEvent;
@@ -61,6 +60,8 @@ public class FastMaskTool extends AbstractToolPage {
 	private boolean paintMode = false;
 	private AtomicReference<Double> lowerValue;
 	private AtomicReference<Double> upperValue;
+	
+	private MaskRegionComposite maskRegionComposite;
 	
 	private IROIListener iroiListener;
 	
@@ -91,7 +92,7 @@ public class FastMaskTool extends AbstractToolPage {
 		control.setLayout(new GridLayout(1, false));
 		removeMargins(control);
 		
-		MaskRegionComposite maskRegionComposite = new MaskRegionComposite(control, SWT.None);
+		maskRegionComposite = new MaskRegionComposite(control, SWT.None);
 		maskRegionComposite.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 		
 		ThresholdMaskComposite thresholdMaskComposite = new ThresholdMaskComposite(control, SWT.None);
@@ -168,9 +169,6 @@ public class FastMaskTool extends AbstractToolPage {
 
 		});
 		
-		
-
-		
 		getPlottingSystem().addRegionListener(new IRegionListener() {
 			
 			@Override
@@ -205,6 +203,25 @@ public class FastMaskTool extends AbstractToolPage {
 			public void regionAdded(RegionEvent evt) {
 				if (paintMode) evt.getRegion().addROIListener(getROIListener());
 				
+				IRegion region = (IRegion)evt.getSource();
+				maskRegionComposite.setROI(evt.getRegion().getROI(), region);
+				
+				evt.getRegion().addROIListener(new IROIListener.Stub() {
+					@Override
+					public void roiSelected(ROIEvent evt) {
+						IRegion region = (IRegion)evt.getSource();
+						maskRegionComposite.setROI(evt.getROI(), region);
+					}
+					
+					@Override
+					public void roiChanged(ROIEvent evt) {
+						IRegion region = (IRegion)evt.getSource();
+						maskRegionComposite.setROI(evt.getROI(),region);
+
+					}
+					
+				});
+				
 			}
 		});
 	}
@@ -218,7 +235,7 @@ public class FastMaskTool extends AbstractToolPage {
 
 			@Override
 			public void roiDragged(ROIEvent evt) {
-
+				
 				IImageTrace imageTrace = getImageTrace();
 				if (imageTrace != null) {
 					IDataset data = imageTrace.getData();
@@ -236,7 +253,7 @@ public class FastMaskTool extends AbstractToolPage {
 
 			@Override
 			public void roiChanged(ROIEvent evt) {
-				//do nothing
+				//Do nothing
 			}
 
 			@Override
@@ -412,9 +429,28 @@ public class FastMaskTool extends AbstractToolPage {
 	
 	private class MaskRegionComposite extends Composite {
 
+		private ROIEditTable roiEditTable;
+		private AtomicReference<IRegion> regionRef;
+		private IROIListener roiListener;
+		
 		public MaskRegionComposite(Composite parent, int style) {
 			super(parent, style);
-			
+			regionRef = new AtomicReference<IRegion>(null);
+			roiListener = new IROIListener.Stub() {			
+				@Override
+				public void roiChanged(ROIEvent evt) {
+					IRegion iRegion = regionRef.get();
+					IROI roi = evt.getROI();
+					if (iRegion != null) {
+						try {
+							iRegion.setROI(roi);
+						} catch (Exception e) {
+							logger.debug("error setting roi",e);
+						}
+					}
+					
+				}
+			};
 			this.setLayout(new FillLayout());
 			Group group = new Group(this, SWT.NONE);
 			group.setLayout(new GridLayout(2, false));
@@ -502,8 +538,19 @@ public class FastMaskTool extends AbstractToolPage {
 
 			});
 			
+			roiEditTable = new ROIEditTable();
+			roiEditTable.createPartControl(group);
+			roiEditTable.addROIListener(roiListener);
+			
 		}
 		
+		public void setROI(IROI roi, final IRegion region){
+			regionRef.set(region);
+			roiEditTable.setRegion(roi, region.getRegionType(), region.getCoordinateSystem());
+			roiEditTable.getTableViewer().refresh();
+//			this.roiViewer.setRegion(region.getROI(), region.getRegionType(), region.getCoordinateSystem());
+
+		}
 		
 	}
 }
