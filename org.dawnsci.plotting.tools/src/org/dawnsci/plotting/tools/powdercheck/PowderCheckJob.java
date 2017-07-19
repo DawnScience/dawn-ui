@@ -38,7 +38,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import uk.ac.diamond.scisoft.analysis.crystallography.CalibrationFactory;
-import uk.ac.diamond.scisoft.analysis.crystallography.HKL;
+import uk.ac.diamond.scisoft.analysis.crystallography.IHKL;
 import uk.ac.diamond.scisoft.analysis.diffraction.powder.NonPixelSplittingIntegration;
 import uk.ac.diamond.scisoft.analysis.diffraction.powder.NonPixelSplittingIntegration2D;
 import uk.ac.diamond.scisoft.analysis.diffraction.powder.PixelSplittingIntegration2D;
@@ -273,7 +273,7 @@ public class PowderCheckJob extends Job {
 
 		resultList.clear();
 		
-		List<HKL> spacings = CalibrationFactory.getCalibrationStandards().getCalibrant().getHKLs();
+		List<IHKL> spacings = CalibrationFactory.getCalibrationStandards().getCalibrant().getHKLs();
 		final double[] qVals = new double[spacings.size()];
 
 		for (int i = 0 ; i < spacings.size(); i++) {
@@ -477,7 +477,7 @@ public class PowderCheckJob extends Job {
 	
 	public void updateCalibrantLines() {
 
-		List<HKL> spacings = CalibrationFactory.getCalibrationStandards().getCalibrant().getHKLs();
+		List<IHKL> spacings = CalibrationFactory.getCalibrationStandards().getCalibrant().getHKLs();
 		final double[] qVals = new double[spacings.size()];
 
 		for (int i = 0 ; i < spacings.size(); i++) {

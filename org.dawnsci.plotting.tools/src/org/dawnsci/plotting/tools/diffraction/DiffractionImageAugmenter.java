@@ -58,6 +58,7 @@ import uk.ac.diamond.scisoft.analysis.crystallography.CalibrantSpacing;
 import uk.ac.diamond.scisoft.analysis.crystallography.CalibrationFactory;
 import uk.ac.diamond.scisoft.analysis.crystallography.CalibrationStandards;
 import uk.ac.diamond.scisoft.analysis.crystallography.HKL;
+import uk.ac.diamond.scisoft.analysis.crystallography.IHKL;
 import uk.ac.diamond.scisoft.analysis.diffraction.DSpacing;
 import uk.ac.diamond.sda.meta.page.DiffractionMetadataCompositeEvent;
 import uk.ac.diamond.sda.meta.page.IDiffractionMetadataCompositeListener;
@@ -278,8 +279,8 @@ public class DiffractionImageAugmenter implements IDetectorPropertyListener, IDi
 			List<ResolutionRing> calibrantRingsList = new ArrayList<ResolutionRing>(7);
 	
 			int count = 0;
-			for (HKL hkl : spacing.getHKLs()) {
-				final double d = Double.valueOf(hkl.getD().to(NonSI.ANGSTROM).getValue().doubleValue());
+			for (IHKL hkl : spacing.getHKLs()) {
+				final double d = Double.valueOf(((HKL)hkl).getD().to(NonSI.ANGSTROM).getValue().doubleValue());
 				
 				boolean highlight = count >= maxRings;
 				if (rings != null && !rings.isEmpty()) highlight = rings.contains(count);

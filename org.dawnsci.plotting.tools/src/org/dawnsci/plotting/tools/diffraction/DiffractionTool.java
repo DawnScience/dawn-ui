@@ -120,7 +120,7 @@ import uk.ac.diamond.scisoft.analysis.crystallography.CalibrantSelectedListener;
 import uk.ac.diamond.scisoft.analysis.crystallography.CalibrantSelectionEvent;
 import uk.ac.diamond.scisoft.analysis.crystallography.CalibrationFactory;
 import uk.ac.diamond.scisoft.analysis.crystallography.CalibrationStandards;
-import uk.ac.diamond.scisoft.analysis.crystallography.HKL;
+import uk.ac.diamond.scisoft.analysis.crystallography.IHKL;
 import uk.ac.diamond.scisoft.analysis.diffraction.PowderRingsUtils;
 import uk.ac.diamond.scisoft.analysis.diffraction.QSpace;
 
@@ -824,7 +824,7 @@ public class DiffractionTool<Q extends Quantity<Q>> extends AbstractToolPage imp
 				String name = standards.getSelectedCalibrant();
 				if (name != null) {
 					logger.debug("Calibrating against {}", name);
-					final List<HKL> spacings = standards.getCalibrationPeakMap(name).getHKLs();
+					final List<IHKL> spacings = standards.getCalibrationPeakMap(name).getHKLs();
 
 					final IPlottingSystem<Composite> plotter = getPlottingSystem();
 					final IImageTrace t = getImageTrace();
@@ -1116,7 +1116,7 @@ public class DiffractionTool<Q extends Quantity<Q>> extends AbstractToolPage imp
 		return status[0] ? Status.OK_STATUS : Status.CANCEL_STATUS;
 	}
 
-	private IStatus runCalibrateDetector(final IProgressMonitor monitor, Display display, final IPlottingSystem<Composite> plotter, List<HKL> spacings) {
+	private IStatus runCalibrateDetector(final IProgressMonitor monitor, Display display, final IPlottingSystem<Composite> plotter, List<IHKL> spacings) {
 		final ProgressMonitorWrapper mon = new ProgressMonitorWrapper(monitor);
 		monitor.beginTask("Calibrate detector from rings", IProgressMonitor.UNKNOWN);
 		monitor.subTask("Find rings");
