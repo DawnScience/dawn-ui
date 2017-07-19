@@ -7,7 +7,9 @@ import org.dawnsci.surfacescatter.AnalaysisMethodologies;
 import org.dawnsci.surfacescatter.AnalaysisMethodologies.Methodology;
 import org.dawnsci.surfacescatter.ClosestNoFinder;
 import org.dawnsci.surfacescatter.CountUpToArray;
+import org.dawnsci.surfacescatter.CsdpGeneratorFromDrm;
 import org.dawnsci.surfacescatter.CurveStitchDataPackage;
+import org.dawnsci.surfacescatter.CurveStitchWithErrorsAndFrames;
 import org.dawnsci.surfacescatter.DirectoryModel;
 import org.dawnsci.surfacescatter.DummyProcessWithFrames;
 import org.dawnsci.surfacescatter.FrameModel;
@@ -528,6 +530,21 @@ public class TrackingHandlerWithFrames {
 					tpaav.close();
 				}
 			}
+			
+
+			CsdpGeneratorFromDrm csdpgfd = new CsdpGeneratorFromDrm();
+			
+			csdpgfd.generateCsdpFromDrm(drm);
+			
+			CurveStitchDataPackage csdp = csdpgfd.getCsdp();
+			
+			csdp.setRodName("Current Track");
+			
+			CurveStitchWithErrorsAndFrames.curveStitch4(csdp, null);
+			
+			ssvs.getRaw().getRtc().addCurrentTrace(csdp);
+			
+			
 		}
 }
 
@@ -2071,6 +2088,18 @@ class trackingJob21 {
 		}
 		
 		ssp.stitchAndPresent1(ssvs.getSsps3c().getOutputCurves(), ssvs.getIds());
+		
+		CsdpGeneratorFromDrm csdpgfd = new CsdpGeneratorFromDrm();
+		
+		csdpgfd.generateCsdpFromDrm(drm);
+		
+		CurveStitchDataPackage csdp = csdpgfd.getCsdp();
+		
+		csdp.setRodName("Current Track");
+		
+		CurveStitchWithErrorsAndFrames.curveStitch4(csdp, null);
+		
+		ssvs.getRaw().getRtc().addCurrentTrace(csdp);
 		
 		double[] location = ssp.getThisLocation(imageNumber);
 		

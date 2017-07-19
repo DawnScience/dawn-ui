@@ -11,6 +11,7 @@ import org.dawnsci.surfacescatter.AxisEnums.yAxes;
 import org.dawnsci.surfacescatter.SavingFormatEnum.SaveFormatSetting;
 import org.dawnsci.surfacescatter.CsdpFromNexusFile;
 import org.dawnsci.surfacescatter.CurveStitchDataPackage;
+import org.dawnsci.surfacescatter.GoodPointStripper;
 import org.dawnsci.surfacescatter.ReviewCurvesModel;
 import org.dawnsci.surfacescatter.SavingFormatEnum;
 import org.dawnsci.surfacescatter.SavingUtils;
@@ -48,6 +49,7 @@ public class ReviewTabComposite extends Composite{
     private Button remove;
     private Button showErrors;
     private Button save;
+    private Button saveGoodPoints;
 	private Combo outputFormatSelection;
     private IPlottingSystem<Composite> plotSystem;
     private ReviewCurvesModel rcm;
@@ -62,6 +64,8 @@ public class ReviewTabComposite extends Composite{
 	private boolean selectDeslect = true;
 	private SurfaceScatterPresenter ssp;
 	private SurfaceScatterViewStart ssvs;
+	private boolean useGoodPointsOnly = false;
+	private Button showOnlyGoodPoints;
 	
 	public ReviewTabComposite(Composite parent, 
 							  int style,
@@ -288,7 +292,7 @@ public class ReviewTabComposite extends Composite{
         curveSettings.setLayoutData(new GridData(GridData.FILL_HORIZONTAL | GridData.FILL_VERTICAL));
 	    
         Group saveSettings = new Group(rightForm, SWT.NONE);
-        GridLayout saveSettingsLayout = new GridLayout(1, true);
+        GridLayout saveSettingsLayout = new GridLayout(2, true);
         saveSettings.setLayout(saveSettingsLayout);
         
         final GridData saveSettingsData = new GridData(SWT.FILL, SWT.FILL, true, true);
@@ -305,11 +309,70 @@ public class ReviewTabComposite extends Composite{
 
 			@Override
 			public void widgetSelected(SelectionEvent e) {
+				saveRod(false);
 
+			}
+
+			@Override
+			public void widgetDefaultSelected(SelectionEvent e) {
+
+			}
+		});
+        
+        saveGoodPoints = new Button(saveSettings, SWT.PUSH);
+        saveGoodPoints.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+        saveGoodPoints.setData(new GridData(SWT.FILL));
+        saveGoodPoints.setText("Save Only Good Points");
+        
+        saveGoodPoints.addSelectionListener(new SelectionListener() {
+			
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				saveRod(true);
+				
+			}
+			
+			@Override
+			public void widgetDefaultSelected(SelectionEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+		});
+        
+        showOnlyGoodPoints = new Button(saveSettings, SWT.PUSH);
+        showOnlyGoodPoints.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+        showOnlyGoodPoints.setData(new GridData(SWT.FILL));
+        showOnlyGoodPoints.setText("Show Only Good Points");
+        
+        showOnlyGoodPoints.addSelectionListener(new SelectionListener() {
+			
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				flipUseGoodPointsOnly();
+				refreshCurvesFromTable();
+			}
+			
+			@Override
+			public void widgetDefaultSelected(SelectionEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+		});
+        
+        Button storeAsNexus = new Button(saveSettings, SWT.PUSH);
+        storeAsNexus.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+        storeAsNexus.setData(new GridData(SWT.FILL));
+        storeAsNexus.setText("Store As Nexus");
+        
+        storeAsNexus.addSelectionListener(new SelectionListener() {
+			
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				
 				FileDialog fd = new FileDialog(ssvs.getShell(), SWT.SAVE);
 
-				if(ssp.getSaveFolder()!=null){
-					fd.setFilterPath(ssp.getSaveFolder());
+				if(ssp.getNexusPath()!=null){
+					fd.setFilterPath(ssp.getNexusPath());
 				}
 				
 				String stitle = "r";
@@ -321,58 +384,20 @@ public class ReviewTabComposite extends Composite{
 
 				}
 				
-				if(ssp.getSaveFolder()==null){
-					ssp.setSaveFolder(path);;
-				}
+				ssp.setNexusPath(path);
 				
-				String title = path + File.separator + stitle;
-			
-				
-				SavingUtils su = new SavingUtils();
-				String rodSaveName = rodToSave.getText();
-				
-				CurveStitchDataPackage csdpToSave = bringMeTheOneIWant(rodSaveName, 
-						rcm.getCsdpList());
-						
-				SaveFormatSetting sfs =SaveFormatSetting.toMethod(outputFormatSelection.getText());
-				
-				int saveIntensityState = AxisEnums.toInt(yAxisSelection);
-				
-				if (sfs == SaveFormatSetting.GenX) {
-					su.genXSave(title,
-							csdpToSave,
-							ssp.getDrm(),
-							ssp.getDrm().getFms(),
-							ssp.getGm());
-				}
-				if (sfs == SaveFormatSetting.Anarod) {
-					su.anarodSave(title,
-							csdpToSave,
-							ssp.getDrm(),
-							ssp.getDrm().getFms(),
-							ssp.getGm());
-				}
-				if (sfs == SaveFormatSetting.int_format) {
-					su.intSave(title,
-							csdpToSave,
-							ssp.getDrm(),
-							ssp.getDrm().getFms(),
-							ssp.getGm());
-				}
-				if (sfs == SaveFormatSetting.ASCII) {
-					su.simpleXYYeSave(title,
-							saveIntensityState,
-							csdpToSave,
-							ssp.getDrm(),
-							ssp.getDrm().getFms(),
-							ssp.getGm());
-				}
+				String title = path + File.separator + stitle + ".nxs";
 
+				ssp.setRodName(stitle);
+				
+				ssp.writeNexus(title);
+				
 			}
-
+			
 			@Override
 			public void widgetDefaultSelected(SelectionEvent e) {
-
+				// TODO Auto-generated method stub
+				
 			}
 		});
         
@@ -503,29 +528,36 @@ public class ReviewTabComposite extends Composite{
 			@Override
 			public void propertyChange(PropertyChangeEvent evt) {
 				// TODO Auto-generated method stub
-				
-				String[] yAxes = setYAxes();
-				String[] xAxes = setXAxes();
-				
-				xAxis.removeAll();
-				yAxis.removeAll();
-				
-				for(String f : yAxes){
-					yAxis.add(f);
+				try{
+					String[] yAxes = setYAxes();
+					String[] xAxes = setXAxes();
+					
+					xAxis.removeAll();
+					yAxis.removeAll();
+					try{
+						for(String f : yAxes){
+							yAxis.add(f);
+						}
+						for(String g : xAxes){
+							xAxis.add(g);
+						}
+					}
+					catch(Exception i){
+						
+					}
+					
+					xAxis.setText(AxisEnums.toString(xAxisSelection));
+					yAxis.setText(AxisEnums.toString(yAxisSelection));
+					
+					refreshCurves();
+					refreshTable();
+	//				crossCheckCurvesToTable();
+					
+					plotSystem.autoscaleAxes();
 				}
-				for(String g : xAxes){
-					xAxis.add(g);
+				catch(Exception b){
+					System.out.println(b.getMessage());
 				}
-				
-				xAxis.setText(AxisEnums.toString(xAxisSelection));
-				yAxis.setText(AxisEnums.toString(yAxisSelection));
-				
-				refreshCurves();
-				refreshTable();
-//				crossCheckCurvesToTable();
-				
-				plotSystem.autoscaleAxes();
-				
 			}
 		});
 	    
@@ -611,6 +643,78 @@ public class ReviewTabComposite extends Composite{
 	public void setNexusFolderPath(String nexusFolderPath) {
 		this.nexusFolderPath = nexusFolderPath;
 	}
+	
+	
+	private void saveRod(boolean writeOnlyGoodPoints){
+		
+		FileDialog fd = new FileDialog(ssvs.getShell(), SWT.SAVE);
+
+		if(ssp.getSaveFolder()!=null){
+			fd.setFilterPath(ssp.getSaveFolder());
+		}
+		
+		String stitle = "r";
+		String path = "p";
+
+		if (fd.open() != null) {
+			stitle = fd.getFileName();
+			path = fd.getFilterPath();
+
+		}
+		
+		if(ssp.getSaveFolder()==null){
+			ssp.setSaveFolder(path);;
+		}
+		
+		String title = path + File.separator + stitle;
+	
+		
+		SavingUtils su = new SavingUtils();
+		String rodSaveName = rodToSave.getText();
+		
+		CurveStitchDataPackage csdpToSave = bringMeTheOneIWant(rodSaveName, 
+				rcm.getCsdpList());
+				
+		SaveFormatSetting sfs =SaveFormatSetting.toMethod(outputFormatSelection.getText());
+		
+		int saveIntensityState = AxisEnums.toInt(yAxisSelection);
+		
+		if (sfs == SaveFormatSetting.GenX) {
+			su.genXSave(writeOnlyGoodPoints,
+					title,
+					csdpToSave,
+					ssp.getDrm(),
+					ssp.getDrm().getFms(),
+					ssp.getGm());
+		}
+		if (sfs == SaveFormatSetting.Anarod) {
+			su.anarodSave(writeOnlyGoodPoints,
+					title,
+					csdpToSave,
+					ssp.getDrm(),
+					ssp.getDrm().getFms(),
+					ssp.getGm());
+		}
+		if (sfs == SaveFormatSetting.int_format) {
+			su.intSave(writeOnlyGoodPoints,
+					title,
+					csdpToSave,
+					ssp.getDrm(),
+					ssp.getDrm().getFms(),
+					ssp.getGm());
+		}
+		if (sfs == SaveFormatSetting.ASCII) {
+			su.simpleXYYeSave(writeOnlyGoodPoints,
+					title,
+					saveIntensityState,
+					csdpToSave,
+					ssp.getDrm(),
+					ssp.getDrm().getFms(),
+					ssp.getGm());
+		}
+
+	}
+
 
 	private String[] setXAxes(){
 		
@@ -761,39 +865,47 @@ public class ReviewTabComposite extends Composite{
 		
 		ArrayList<String> checked = new ArrayList<>();
 		
-		for(TableItem de : rodDisplayTable.getItems()){
-			if(de.getChecked()){
-				checked.add(de.getText()); 
-			}
-		}
 		
-		for(int cv = 0; cv<rodDisplayTable.getItems().length; cv++){
-			rodDisplayTable.remove(cv);
-		}
-		
-		rodDisplayTable.removeAll();	
-		
-		for (int j = 0; j < rcm.getCsdpList().size(); j++) {
-			
-			TableItem t = new TableItem(rodDisplayTable, SWT.NONE);
-			t.setText(rcm.getCsdpList().get(j).getRodName());
-			String probe = rcm.getCsdpList().get(j).getRodName();
-			
-			for(String g : checked){
-				if(probe.equals(g)){
-					t.setChecked(true); 
+		if(rodDisplayTable.getItems().length>0){
+			for(TableItem de : rodDisplayTable.getItems()){
+				if(de.getChecked()){
+					checked.add(de.getText()); 
 				}
-			}	
-		}	
-		
-		String latestAddition = rcm.getCsdpLatest().getRodName();
-		
-		for(TableItem ry : rodDisplayTable.getItems()){
-			
-			if(ry.getText().equals(latestAddition)){
-				ry.setChecked(true);
 			}
+		
+		
+			for(int cv = 0; cv<rodDisplayTable.getItems().length; cv++){
+				rodDisplayTable.remove(cv);
+			}
+		
+			rodDisplayTable.removeAll();	
+		
+		}
+		
+		if(rcm.getCsdpList().size()>0){
+			for (int j = 0; j < rcm.getCsdpList().size(); j++) {
+				
+				TableItem t = new TableItem(rodDisplayTable, SWT.NONE);
+				t.setText(rcm.getCsdpList().get(j).getRodName());
+				String probe = rcm.getCsdpList().get(j).getRodName();
+				
+				for(String g : checked){
+					if(probe.equals(g)){
+						t.setChecked(true); 
+					}
+				}	
+			}	
 			
+			String latestAddition = rcm.getCsdpLatest().getRodName();
+		
+		
+			for(TableItem ry : rodDisplayTable.getItems()){
+				
+				if(ry.getText().equals(latestAddition)){
+					ry.setChecked(true);
+				}
+				
+			}
 		}
 		
 		rodToSave.removeAll();
@@ -816,98 +928,77 @@ public class ReviewTabComposite extends Composite{
 			}		
 		}
 	}
+	
+	private ILineTrace buildLineTrace(CurveStitchDataPackage csdp){
+
+		ILineTrace lt =	plotSystem.createLineTrace(csdp.getRodName());
+		
+		IDataset x = DatasetFactory.zeros(new int[] {2,2}, Dataset.ARRAYFLOAT64);
+		IDataset y[] = new IDataset[2];
+		
+		if(xAxisSelection == null){
+			xAxisSelection = xAxes.SCANNED_VARIABLE;
+			
+			boolean rg = true;
+			
+			for(String h :xAxis.getItems()){
+				if(AxisEnums.toString(xAxisSelection).equals(h)){
+					rg = false;
+				}
+			}
+			
+			if(rg){
+				xAxis.add(AxisEnums.toString(xAxisSelection));
+			}
+			
+		}
+		
+		if(yAxisSelection == null){
+			yAxisSelection = yAxes.SPLICEDY;
+			
+			boolean rg = true;
+			
+			for(String h :yAxis.getItems()){
+				if(AxisEnums.toString(yAxisSelection).equals(h)){
+					rg = false;
+				}
+			}
+			
+			if(rg){
+				yAxis.add(AxisEnums.toString(yAxisSelection));
+			}
+			
+		}
+		
+		GoodPointStripper gps = new GoodPointStripper();
+
+		y = gps.splicedYGoodPointStripper(csdp, 
+							  yAxisSelection,
+							  !useGoodPointsOnly);
+					
+		y[0].setErrors(y[1]);
+		
+		lt.setData(x, y[0]);
+		
+		lt.setErrorBarEnabled(errorDisplayFlag);
+		
+		
+		return lt;
+	}
 		
 	private void refreshCurves(){
 		
 		plotSystem.clear();
 		
-		for(CurveStitchDataPackage csdp : rcm.getCsdpList()){
-			
-			ILineTrace lt =	plotSystem.createLineTrace(csdp.getRodName());
-			
-			IDataset x = DatasetFactory.zeros(new int[] {2,2}, Dataset.ARRAYFLOAT64);
-			IDataset y = DatasetFactory.zeros(new int[] {2,2}, Dataset.ARRAYFLOAT64);
-			
-			if(xAxisSelection == null){
-				xAxisSelection = xAxes.SCANNED_VARIABLE;
+		if(rcm.getCsdpList().size() >0){
+			for(CurveStitchDataPackage csdp : rcm.getCsdpList()){
 				
-				boolean rg = true;
+				ILineTrace lt = buildLineTrace(csdp);
 				
-				for(String h :xAxis.getItems()){
-					if(AxisEnums.toString(xAxisSelection).equals(h)){
-						rg = false;
-					}
-				}
-				
-				if(rg){
-					xAxis.add(AxisEnums.toString(xAxisSelection));
-				}
+				plotSystem.addTrace(lt);
+				plotSystem.autoscaleAxes();
 				
 			}
-			
-			if(yAxisSelection == null){
-				yAxisSelection = yAxes.SPLICEDY;
-				
-				boolean rg = true;
-				
-				for(String h :yAxis.getItems()){
-					if(AxisEnums.toString(yAxisSelection).equals(h)){
-						rg = false;
-					}
-				}
-				
-				if(rg){
-					yAxis.add(AxisEnums.toString(yAxisSelection));
-				}
-				
-			}
-			
-			switch(xAxisSelection){
-				case SCANNED_VARIABLE:
-					x = csdp.getSplicedCurveX();
-					break;
-				case Q:
-					x = csdp.getSplicedCurveQ();
-					break;
-			}
-			
-			switch(yAxisSelection){
-				case SPLICEDY:
-					y = csdp.getSplicedCurveY();
-					try{
-						y.setErrors(csdp.getSplicedCurveYError());
-					}
-					catch(Exception h){
-						
-					}
-					break;
-				case SPLICEDYRAW:
-					y = csdp.getSplicedCurveYRaw();
-					try{
-						y.setErrors(csdp.getSplicedCurveYRawError());
-					}
-					catch(Exception h){
-						
-					}
-					break;
-				case SPLICEDYFHKL:
-					y = csdp.getSplicedCurveYFhkl();
-					try{
-						y.setErrors(csdp.getSplicedCurveYFhklError());
-					}
-					catch(Exception h){
-						
-					}
-					break;
-			}
-			
-			lt.setData(x, y);
-			
-			lt.setErrorBarEnabled(errorDisplayFlag);
-			
-			plotSystem.addTrace(lt);
-			plotSystem.autoscaleAxes();
-			
 		}
 	}
 	
@@ -934,88 +1025,9 @@ public class ReviewTabComposite extends Composite{
 				CurveStitchDataPackage csdp = bringMeTheOneIWant(fd.getText(), 
 																 rcm.getCsdpList());
 				
+				buildLineTrace(csdp);
 				
-				ILineTrace lt =	plotSystem.createLineTrace(csdp.getRodName());
-				
-				IDataset x = DatasetFactory.zeros(new int[] {2,2}, Dataset.ARRAYFLOAT64);
-				IDataset y = DatasetFactory.zeros(new int[] {2,2}, Dataset.ARRAYFLOAT64);
-				
-				if(xAxisSelection == null){
-					xAxisSelection = xAxes.SCANNED_VARIABLE;
-					
-					boolean rg = true;
-					
-					for(String h :xAxis.getItems()){
-						if(AxisEnums.toString(xAxisSelection).equals(h)){
-							rg = false;
-						}
-					}
-					
-					if(rg){
-						xAxis.add(AxisEnums.toString(xAxisSelection));
-					}
-					
-				}
-				
-				if(yAxisSelection == null){
-					yAxisSelection = yAxes.SPLICEDY;
-					
-					boolean rg = true;
-					
-					for(String h :yAxis.getItems()){
-						if(AxisEnums.toString(yAxisSelection).equals(h)){
-							rg = false;
-						}
-					}
-					
-					if(rg){
-						yAxis.add(AxisEnums.toString(yAxisSelection));
-					}
-					
-				}
-				
-				switch(xAxisSelection){
-					case SCANNED_VARIABLE:
-						x = csdp.getSplicedCurveX();
-						break;
-					case Q:
-						x = csdp.getSplicedCurveQ();
-						break;
-				}
-				
-				switch(yAxisSelection){
-					case SPLICEDY:
-						y = csdp.getSplicedCurveY();
-						try{
-							y.setErrors(csdp.getSplicedCurveYError());
-						}
-						catch(Exception h){
-							
-						}
-						break;
-					case SPLICEDYRAW:
-						y = csdp.getSplicedCurveYRaw();
-						try{
-							y.setErrors(csdp.getSplicedCurveYRawError());
-						}
-						catch(Exception h){
-							
-						}
-						break;
-					case SPLICEDYFHKL:
-						y = csdp.getSplicedCurveYFhkl();
-						try{
-							y.setErrors(csdp.getSplicedCurveYFhklError());
-						}
-						catch(Exception h){
-							
-						}
-						break;
-				}
-				
-				lt.setData(x, y);
-				
-				lt.setErrorBarEnabled(errorDisplayFlag);
+				ILineTrace lt =	buildLineTrace(csdp);
 				
 				plotSystem.addTrace(lt);
 				plotSystem.autoscaleAxes();
@@ -1049,6 +1061,27 @@ public class ReviewTabComposite extends Composite{
 		this.yAxisSelection = yAxisSelection;
 	}
 
+	public void addCurrentTrace(CurveStitchDataPackage csdp){
+			
+		rcm.removeFromCsdpList(csdp);
+		rcm.addToCsdpList(csdp);
+		 
+		 
+	}
+	
+	private void flipUseGoodPointsOnly(){
+		
+		useGoodPointsOnly  = !useGoodPointsOnly;
+		
+		if(useGoodPointsOnly){
+			showOnlyGoodPoints.setText("Include All Points");
+		}
+		else{
+			showOnlyGoodPoints.setText("Disregard Bad Points");
+		}
+	}
+	
+	
 }
 		
 		

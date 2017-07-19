@@ -368,8 +368,8 @@ public class SurfaceScatterViewStart extends Dialog {
 
 		
 		raw = new RodAnalysisWindow(folder,
-														ssp,
-														this); 
+									ssp,
+									this); 
 		
 		this.customComposite = raw.getCustomComposite();
 		this.ssps3c = raw.getSsps3c();
@@ -1685,7 +1685,10 @@ public class SurfaceScatterViewStart extends Dialog {
 		
 		outputCurves.getPlotSystem().addTrace(lt1);
 		
-		getSsps3c().getOutputCurves().getIntensity().select(0);;
+		getSsps3c().getOutputCurves().getIntensity().select(0);
+		
+		csdpNew.setRodName("Current Track");
+		raw.getRtc().addCurrentTrace(csdpNew);
 	}
 	
 	public void checkForFlux(String filepath){ 
@@ -1882,6 +1885,9 @@ public class SurfaceScatterViewStart extends Dialog {
 
 	}
 	
+	public RodAnalysisWindow getRaw(){
+		return raw;
+	}
 	
 	
 }	
