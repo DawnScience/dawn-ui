@@ -323,8 +323,8 @@ public class FileController implements IFileController {
 					files.add(f);
 				}
 				
-				monitor.worked(1);
-				if (monitor.isCanceled()) {
+				if (monitor != null) monitor.worked(1);
+				if (monitor != null && monitor.isCanceled()) {
 					break;
 				}
 				
