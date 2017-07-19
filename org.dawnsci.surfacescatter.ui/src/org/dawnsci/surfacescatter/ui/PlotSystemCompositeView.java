@@ -4,6 +4,7 @@ import java.util.Arrays;
 
 import org.dawb.common.ui.widgets.ActionBarWrapper;
 import org.dawnsci.surfacescatter.ExampleModel;
+import org.dawnsci.surfacescatter.FrameModel;
 import org.dawnsci.surfacescatter.MethodSettingEnum.MethodSetting;
 import org.dawnsci.surfacescatter.ProcessingMethodsEnum.ProccessingMethod;
 import org.eclipse.dawnsci.analysis.api.roi.IRectangularROI;
@@ -72,6 +73,8 @@ public class PlotSystemCompositeView extends Composite {
 	private TabItem correctionsTab;
 	private Button centreRegion;
 	private Button centreSecondBgRegion;
+	private Button disregardFrame;
+	private Button includeAllFrames;
 	private Button increment;
 	private Button decrement;
 	private Group manualControls;
@@ -83,7 +86,7 @@ public class PlotSystemCompositeView extends Composite {
     public PlotSystemCompositeView(Composite parent, 
     							   int style,
     							   IDataset image, 
-    							   int extra,
+//    							   int extra,
     							   int numberOfImages,
     							   Dataset nullImage,
     							   SurfaceScatterPresenter ssp,
@@ -255,7 +258,53 @@ public class PlotSystemCompositeView extends Composite {
 				
 			}
 		});
-		
+        
+        disregardFrame = new Button(centringButtons, SWT.PUSH | SWT.FILL);
+        disregardFrame.setText("Disregard Frame");
+        disregardFrame.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+        disregardFrame.setEnabled(true);
+        	
+        disregardFrame.addSelectionListener(new SelectionListener() {
+			
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				ssp.flipGoodPoint(slider.getSelection());
+				if(ssp.getDrm().getFms().get(ssp.getSliderPos()).isGoodPoint()){
+					disregardFrame.setText("Disregard Frame");
+				}
+				else{
+					disregardFrame.setText("Include Frame");
+				}
+			}
+			
+			@Override
+			public void widgetDefaultSelected(SelectionEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+		});
+        
+        includeAllFrames = new Button(centringButtons, SWT.PUSH | SWT.FILL);
+        includeAllFrames.setText("Include All Frames");
+        includeAllFrames.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+        includeAllFrames.setEnabled(true);
+        	
+        includeAllFrames.addSelectionListener(new SelectionListener() {
+			
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				for(FrameModel fm: ssp.getDrm().getFms()){
+					fm.setGoodPoint(true);
+				}
+				disregardFrame.setText("Disregard Frame");
+			}
+			
+			@Override
+			public void widgetDefaultSelected(SelectionEvent e) {
+			}
+		});
+        		
+        		
         folder = new TabFolder(form, SWT.BORDER | SWT.CLOSE);
     	folder.setLayout(new GridLayout());
     		
@@ -447,7 +496,7 @@ public class PlotSystemCompositeView extends Composite {
 	   
 	    addChangeProcessingMethodListeners();
 
-		form.setWeights(new int[]{19, 45, 29, 7});
+		form.setWeights(new int[]{10, 46, 29, 7});
     }
 	
     
@@ -1187,6 +1236,10 @@ public class PlotSystemCompositeView extends Composite {
 
 	public void setAcceptBack(Button acceptBack) {
 		this.acceptBack = acceptBack;
+	}
+	
+	public Button getDisregardFrame(){
+		return disregardFrame;
 	}
 
 }

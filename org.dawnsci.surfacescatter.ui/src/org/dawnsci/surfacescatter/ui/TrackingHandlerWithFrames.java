@@ -1820,9 +1820,15 @@ class trackingJob21 {
 						debug("value added to xList:  "   + drm.getSortedX().getDouble(k)  + "  k:   " + k);
 						
 						double[] gv =  drm.getSeedLocation()[frame.getDatNo()];
+						int[][] gvLenPt  =new int[2][];
 						
-						int[][] gvLenPt = LocationLenPtConverterUtils.locationToLenPtConverter(gv);
+						if (frame.getTrackingMethodology() != TrackerType1.USE_SET_POSITIONS){
 						
+							gvLenPt = LocationLenPtConverterUtils.locationToLenPtConverter(gv);
+						}
+						else{
+							gvLenPt =  LocationLenPtConverterUtils.locationToLenPtConverter(frame.getRoiLocation());
+						}
 						int[] g = fms.get(0).getRawImageData().squeezeEnds().getShape();
 							
 						if((gvLenPt[0][0] + gvLenPt[1][0])>g[0]){
@@ -1928,7 +1934,9 @@ class trackingJob21 {
 							
 							if(seedRequired && 
 							   frame.getTrackingMethodology()!= TrackerType1.INTERPOLATION &&
-							   frame.getTrackingMethodology() != TrackerType1.SPLINE_INTERPOLATION){
+							   frame.getTrackingMethodology() != TrackerType1.SPLINE_INTERPOLATION &&
+							   frame.getTrackingMethodology()!= TrackerType1.USE_SET_POSITIONS
+							   ){
 								
 								double[] seedLocation = TrackerLocationInterpolation.trackerInterpolationInterpolator0(drm.getTrackerLocationList(), 
 																								   drm.getSortedX(), 

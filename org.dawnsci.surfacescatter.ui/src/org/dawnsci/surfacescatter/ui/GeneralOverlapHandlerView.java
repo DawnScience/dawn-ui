@@ -111,8 +111,6 @@ public class GeneralOverlapHandlerView extends Dialog {
 		customComposite.setLayout(new GridLayout());
 		customComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
-		//////////////////////////////////////////////////////////////////////////////
-
 		///////////////////////////////////////////////////////////////////////////////
 		/////////////////Right sashform////////////////////////////////////////////////
 		///////////////////////////////////////////////////////////////////////////////
@@ -146,8 +144,7 @@ public class GeneralOverlapHandlerView extends Dialog {
 			
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				
-			
+		
 				ssvs.export(stitchedCurves.getCsdp());
 				
 			}
@@ -177,8 +174,6 @@ public class GeneralOverlapHandlerView extends Dialog {
 			}
 		});
 		
-		
-    
 		customComposite.getErrorsButton().addSelectionListener(new SelectionListener() {
 			
 			@Override

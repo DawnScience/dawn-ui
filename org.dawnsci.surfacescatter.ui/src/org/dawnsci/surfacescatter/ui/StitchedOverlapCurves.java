@@ -165,6 +165,8 @@ public class StitchedOverlapCurves extends Composite {
 				plotSystem.repaint();
 				
 				
+				resetAttenuationFactors(overlapSelector, xArrayList,true);
+//				resetAll(true);
 			}
 		});
 		
@@ -270,19 +272,39 @@ public class StitchedOverlapCurves extends Composite {
    private void updateAttenuationFactors(//ArrayList<OverlapDisplayObjects> odos,
 		   								 ArrayList<IDataset> xArrayList){
 	  
-	   for(int i =0; i<odos.size();i++ ){
-		   
-		   String test =odos.get(i).getTextCorrected().getText();
-		  
-	   }
 	   
-	   for(OverlapDisplayObjects odo :odos){
+	   for(OverlapDisplayObjects odo : odos){
 		   if(odo.isModified()){
-			   oAos.set(odo.getOdoNumber(), odo.getOAo());
+			   OverlapAttenuationObject oAo = odo.getOAo(); 
+			   oAos.set(odo.getOdoNumber(), oAo);
 		   }
 	   }
 	   
 	   csdp = ssp.curveStitchingOutput(maxMinArray, true, oAos);
+	   odms = csdp.getOverlapDataModels();
+
+	   for(int i =0; i<odos.size(); i++){
+		   
+		   OverlapDisplayObjects odo = odos.get(i);
+		   OverlapDataModel odm = odms.get(i);
+		   OverlapAttenuationObject oAo = oAos.get(i);
+		   
+		   if(odo.isModified()){
+			  settingOdoFromOdm(odm, odo, oAo);
+			  oAo = odo.getOAo();
+			  odo.setModified(true); 
+			  oAos.set(odo.getOdoNumber(), odo.getOAo());
+			   
+		   }
+		   else{
+			   settingOdoFromOdm(odm, odo, oAo);
+			   oAo = odo.getOAo();
+			   oAos.set(odo.getOdoNumber(), odo.getOAo());
+				   
+		   }
+	   }
+	   
+	  
 		
 	   getTheRightCurve();
 		
@@ -308,6 +330,9 @@ public class StitchedOverlapCurves extends Composite {
 		plotSystem.clearTraces();
 		plotSystem.addTrace(lt1);
 		plotSystem.repaint();
+		
+//		csdp = ssp.curveStitchingOutput(null, false, null);
+		odms = csdp.getOverlapDataModels();
 	   
 		for(int i =0; i<odos.size(); i++){
 			
@@ -321,10 +346,12 @@ public class StitchedOverlapCurves extends Composite {
 				if(odo.isButtonPushed()){
 					
 					settingOdoFromOdm(odm, odo, oAo);
+					oAo = odo.getOAo();
 				}
 			}
 			else{
 				settingOdoFromOdm(odm, odo, oAo);
+				oAo = odo.getOAo();
 			}
 			oAos.set(odo.getOdoNumber(),oAo);
 		}

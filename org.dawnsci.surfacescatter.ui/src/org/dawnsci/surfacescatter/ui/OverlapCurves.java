@@ -1,9 +1,10 @@
 package org.dawnsci.surfacescatter.ui;
-import java.util.ArrayList;
 
-import org.apache.commons.lang.time.DateFormatUtils;
+import java.util.ArrayList;
 import org.dawb.common.ui.widgets.ActionBarWrapper;
+import org.dawnsci.surfacescatter.CsdpGeneratorFromDrm;
 import org.dawnsci.surfacescatter.CurveStitchDataPackage;
+import org.dawnsci.surfacescatter.GoodPointStripper;
 import org.dawnsci.surfacescatter.IntensityDisplayEnum;
 import org.dawnsci.surfacescatter.IntensityDisplayEnum.IntensityDisplaySetting;
 import org.dawnsci.surfacescatter.OverlapUIModel;
@@ -18,8 +19,8 @@ import org.eclipse.dawnsci.plotting.api.region.IRegion;
 import org.eclipse.dawnsci.plotting.api.region.IRegion.RegionType;
 import org.eclipse.dawnsci.plotting.api.region.ROIEvent;
 import org.eclipse.dawnsci.plotting.api.trace.ILineTrace;
+import org.eclipse.dawnsci.plotting.api.trace.ITrace;
 import org.eclipse.january.dataset.IDataset;
-import org.eclipse.january.dataset.SliceND;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.events.SelectionEvent;
@@ -33,10 +34,12 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Slider;
 import org.eclipse.swt.widgets.Text;
 
 public class OverlapCurves extends Composite {
 
+	private Slider slider;
     private IPlottingSystem<Composite> plotSystem;
     private IRegion[] regionArray;
     private int DEBUG =0;
@@ -51,6 +54,7 @@ public class OverlapCurves extends Composite {
 	private Button disregardPoint; 
 	private Text yValueText;
 	private Text frameNoText;
+	private CurveStitchDataPackage csdp;
 	
      
     public OverlapCurves(Composite parent, 
@@ -68,6 +72,10 @@ public class OverlapCurves extends Composite {
         
         this.gohv = gohv;
         this.ssp =ssp;
+        
+        CsdpGeneratorFromDrm d = new CsdpGeneratorFromDrm();
+        
+        this.csdp= d.generateCsdpFromDrm(ssp.getDrm());
         
         regionArray = new IRegion[arrayILDy.size()-1];
         
@@ -133,6 +141,38 @@ public class OverlapCurves extends Composite {
 		activeCurveCombo = activeCurve.getCombo();
 		activeCurveCombo.select(0);
 		
+		activeCurveCombo.addSelectionListener(new SelectionListener() {
+			
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+
+				
+				int ui = activeCurveCombo.getSelectionIndex();
+				
+				int rg = ssp.getDrm().getDmxList().get(ui).size()/2;
+				int rf = ssp.getDrm().getDmxList().get(ui).size();
+				
+				
+		        slider.setMinimum(0);
+			    slider.setMaximum(rf);
+			    slider.setIncrement(1);
+			    slider.setThumb(1);
+			    
+			    slider.setSelection(ui);
+			    
+			    double hj = ssp.xValueFromDat(ui,rg);
+			    moveImageNoRegion(hj);
+			    
+				
+			}
+			
+			@Override
+			public void widgetDefaultSelected(SelectionEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+		});
+		
 		Group includeControls = new Group(controls, SWT.NULL);
         GridLayout includeControlsLayout  = new GridLayout(2,true);
 		GridData includeControlsData = new GridData(SWT.FILL, SWT.NULL, true, false);
@@ -149,29 +189,32 @@ public class OverlapCurves extends Composite {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				
-				int xPos = ssp.xPositionFinder(OverlapCurves.this.imageNo.getROI().getPointX());
+				double xValue = OverlapCurves.this.imageNo.getROI().getPointX();
+				int datNo = activeCurveCombo.getSelectionIndex();
 				
-				if(ssp.isGoodPoint(xPos)){
-					ssp.setGoodPoint(xPos, false);
+				int frameNo = ssp.absoluteFrameNumberUsingXValueFromSpecifiedDatNo(datNo, xValue);
+				
+				if(ssp.isGoodPoint(frameNo)){
+					ssp.setGoodPoint(frameNo, false);
 				}
 				else{
-					ssp.setGoodPoint(xPos, true);
+					ssp.setGoodPoint(frameNo, true);
 				}
 				
-				if(ssp.isGoodPoint(xPos)){
+				if(ssp.isGoodPoint(frameNo)){
 					disregardPoint.setText("Disregard Point");
 				}
 				else{
 					disregardPoint.setText("Include Point");
 				}
 				
+				addCurves();
 				
-				gohv.getStitchedCurves().resetAll(false);
+				gohv.getStitchedCurves().resetAll(true);
 			}
 			
 			@Override
 			public void widgetDefaultSelected(SelectionEvent e) {
-				// TODO Auto-generated method stub
 				
 			}
 		});
@@ -185,8 +228,10 @@ public class OverlapCurves extends Composite {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				ssp.allGoodPoints();
-				gohv.getStitchedCurves().resetAll(false);
+				
 				disregardPoint.setText("Disregard Point");
+				addCurves();
+				gohv.getStitchedCurves().resetAll(true);
 			}
 			
 			@Override
@@ -197,13 +242,25 @@ public class OverlapCurves extends Composite {
 		});
 		
 		
-		InputTileGenerator scannedPoint = new InputTileGenerator("Image Number", "0" ,controls);
+		InputTileGenerator scannedPoint = new InputTileGenerator("X Value:  ", "0" ,controls);
 		frameNoText = scannedPoint.getText();
 		
 		
-		InputTileGenerator yPoint = new InputTileGenerator("Y Value", "0" ,controls);
+		InputTileGenerator yPoint = new InputTileGenerator("Y Value:  ", "0" ,controls);
 		yValueText = yPoint.getText();
 		
+		slider = new Slider(form, SWT.HORIZONTAL);
+        
+		int rg = ssp.getDrm().getDmxList().get(0).size()/2;
+		int rf = ssp.getDrm().getDmxList().get(0).size();
+		
+		
+        slider.setMinimum(0);
+	    slider.setMaximum(rf);
+	    slider.setIncrement(1);
+	    slider.setThumb(1);
+	    
+	    
 		Group unstitchedCurves = new Group(form, SWT.FILL | SWT.FILL);
         GridLayout stitchedCurvesLayout = new GridLayout(1, true);
 	    GridData stitchedCurvesData = new GridData(GridData.FILL_HORIZONTAL);
@@ -218,43 +275,8 @@ public class OverlapCurves extends Composite {
         gdSecondField.grabExcessVerticalSpace = true;
         
         plotSystem.createPlotPart(unstitchedCurves, "ExamplePlot", actionBarComposite, PlotType.IMAGE, null);
-        
-        SliceND slice = new SliceND(arrayILDy.get(0).getShape());
-        
-		IDataset i = null;
-		IDataset j = null;
-		
-		ltList = new ArrayList<ILineTrace>();
-		
-		int r=0;
-	
-		for (r =0; r < arrayILDy.size(); r++){
-			
-			ArrayList<IDataset> arrayIDy =new ArrayList<>();
-			ArrayList<IDataset> arrayIDx =new ArrayList<>();
-			
-			slice = new SliceND(arrayILDy.get(r).getShape());
-			
-			try {
-				i = arrayILDy.get(r);
-				arrayIDy.add(i);
-				j = arrayILDx.get(r).getSlice(slice);
-				arrayIDx.add(j);
-			} 
-			
-			catch (Exception e1) {
-				e1.printStackTrace();
-			}
-			
-			ILineTrace lt = plotSystem.createLineTrace(Double.toString(arrayIDx.get(0).getDouble(0)) +"-" +Double.toString(arrayIDx.get(0).getDouble(arrayIDx.size()-1)));
-			lt.setData(j, i);
-			
-			ltList.add(lt);
-			
-			plotSystem.addTrace(lt);
-			plotSystem.repaint();
-			
-		}
+          
+		addCurves();
 
        plotSystem.getPlotComposite().setLayoutData(gdSecondField);
 
@@ -323,15 +345,30 @@ public class OverlapCurves extends Composite {
         	}
         }
 
-		try {
-			imageNo = plotSystem.createRegion("Point Selector", RegionType.XAXIS_LINE);
-		} catch (Exception e1) {
+        double f = (double) (ssp.getDrm().getDmxList().get(activeCurveCombo.getSelectionIndex()).size()/2);
+        addImageNoRegion(f);
+        imageNoAddListener();
+        
+        slider.setSelection((int) f);
+        
+        slider.addSelectionListener(new SelectionListener() {
 			
-		}
-		imageNo.setShowPosition(true);
-		plotSystem.addRegion(imageNo);
-		
-		imageNoAddListener();
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				double xsl =(double) slider.getSelection();
+				int datNo = activeCurveCombo.getSelectionIndex();
+
+				double xval = ssp.xValueFromDat(datNo, xsl);
+				moveImageNoRegion(xval);
+				
+			}
+			
+			@Override
+			public void widgetDefaultSelected(SelectionEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+		});
         
     	Group resetGroup = new Group(form, SWT.FILL | SWT.FILL);
         GridLayout resetGroupLayout = new GridLayout(1, true);
@@ -362,7 +399,7 @@ public class OverlapCurves extends Composite {
 			}
 		});
 		
-	    form.setWeights(new int[] {15,80,5});
+	    form.setWeights(new int[] {15,3,77,5});
     }
 		
    public Composite getComposite(){
@@ -386,6 +423,44 @@ public class OverlapCurves extends Composite {
 		return intensitySelect;
 	}
 	
+	private void addCurves(){
+		
+		CsdpGeneratorFromDrm csdpg = new CsdpGeneratorFromDrm();
+		csdp = csdpg.generateCsdpFromDrm(ssp.getDrm());
+		
+		for(ITrace it :plotSystem.getTraces()){
+			plotSystem.removeTrace(it);
+		}
+		
+		IDataset i = null;
+		IDataset j = null;
+		IDataset l = null;
+		
+		ltList = new ArrayList<ILineTrace>();
+		
+		GoodPointStripper gps = new GoodPointStripper();
+		IDataset coordinateDatasets[][] = gps.goodPointStripper(csdp, IntensityDisplaySetting.toMethod(intensitySelect.getSelectionIndex()));
+		
+		
+		for (int r =0; r < coordinateDatasets.length; r++){
+			
+			j = coordinateDatasets[r][0];
+			i = coordinateDatasets[r][1];
+			l = coordinateDatasets[r][2];
+			
+			i.setErrors(l);
+			
+			ILineTrace lt = plotSystem.createLineTrace(Double.toString(j.getDouble(0)) +"-" +Double.toString(j.getDouble(j.getSize()-1)));
+			lt.setData(j, i);
+			
+			ltList.add(lt);
+			
+			plotSystem.addTrace(lt);
+			plotSystem.repaint();
+			
+	   }		
+	}
+	
 	private void imageNoAddListener(){
 		imageNo.addROIListener(new IROIListener() {
 			
@@ -403,10 +478,12 @@ public class OverlapCurves extends Composite {
 				int xPos =ssp.xPositionFinder(imageNo.getROI().getPointX());
 				
 				int datNo = activeCurveCombo.getSelectionIndex();
+				double xPoint = imageNo.getROI().getPointX();
 				
-				int xPosInDat = ssp.xPositionFinderInDat(activeCurveCombo.getSelectionIndex() ,imageNo.getROI().getPointX());
-		
-				frameNoText.setText(String.valueOf(xPos));
+				int xPosInDat = ssp.xPositionFinderInDat(datNo, xPoint);
+				double xX = ssp.xValueFromDat(datNo, xPosInDat);
+				
+				frameNoText.setText(String.valueOf(xX));
 				
 				double yValue = 0;
 				
@@ -441,7 +518,6 @@ public class OverlapCurves extends Composite {
 			}
 		});
 		
-		
 	}
 	
 	
@@ -465,27 +541,25 @@ public class OverlapCurves extends Composite {
 		plotSystem.addRegion(imageNo);
 		
 		imageNo.toFront();
-		
+
 		imageNoAddListener();
 		
 		ArrayList<IRectangularROI> roiList = new ArrayList<IRectangularROI>();
 	    IRectangularROI nullROI = null;
 	    regionArray = new IRegion[arrayILDy.size()-1];    
 	        
-	        for(int yr =0; yr<regionArray.length;yr++){
-	        	roiList.add(nullROI);
-	        }
+	    for(int yr =0; yr<regionArray.length;yr++){
+	        roiList.add(nullROI);
+	    }
 
-	        model.setROIList(roiList);
+	    
+	    String root = "RegionNo:";
+	    int k=0;
+	      
+		double[][] overlap = OverlapFinder.overlapFinderOperation(arrayILDx);
 	        
-	        String root = "RegionNo:";
-	        int k=0;
-	        
-	     
-		 
-		 double[][] overlap = OverlapFinder.overlapFinderOperation(arrayILDx);
-	        
-	        for (k=0;k<(model.getROIList().size());k++){
+
+		for (k=0;k<(roiList.size());k++){
 	        	
 	        	if(overlap[k][1]<999999){
 	        		
@@ -504,6 +578,7 @@ public class OverlapCurves extends Composite {
 			        try {
 						regionArray[k] =plotSystem.createRegion(regionName, RegionType.XAXIS);
 						regionArray[k].setROI(roiList.get(k));
+						regionArray[k].toBack();
 						plotSystem.addRegion(regionArray[k]);
 						
 			        }
@@ -511,7 +586,7 @@ public class OverlapCurves extends Composite {
 						e1.printStackTrace();
 					}
 			       
-			        model.setROIList(roiList);
+			      
 			        
 			        int ktemp =k;
 			        ((IRegion) regionArray[k]).addROIListener(new IROIListener() {
@@ -535,7 +610,8 @@ public class OverlapCurves extends Composite {
 					});
 	        	}
 	        }
-
+		  	
+			model.setROIList(roiList);
 	        model.setROIListElementEst(regionArray[1].getROI().getBounds(), 1);
 	}
 	
@@ -620,28 +696,30 @@ public class OverlapCurves extends Composite {
 	public void addImageNoRegion(double j){
 
 		RectangularROI r = new RectangularROI(j ,0.1,0,0.1,0);
-
+		
 		if(plotSystem.getRegion("Image")== null){
 			
-		try{
-			imageNo = plotSystem.createRegion("Image", RegionType.XAXIS_LINE);
-		}
-		catch(Exception x){
+			try{
+				imageNo = plotSystem.createRegion("Image", RegionType.XAXIS_LINE);
+			}
+			catch(Exception x){
+				
+			}
 			
-		}
-		
-		
-		imageNo.setShowPosition(true);
-		imageNo.setROI(r);
-		
-		plotSystem.addRegion(imageNo);
-		imageNo.setShowPosition(true);
+			
+			imageNo.toFront();
+			imageNo.setShowPosition(true);
+			imageNo.setROI(r);
+			
+			plotSystem.addRegion(imageNo);
+			imageNo.setShowPosition(true);
 		}
 		
 		else{
 			moveImageNoRegion(j);
 		}
 	}
+	
 	
 	public void moveImageNoRegion(double j){
 		

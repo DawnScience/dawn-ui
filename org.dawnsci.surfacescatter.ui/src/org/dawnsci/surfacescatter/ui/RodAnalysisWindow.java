@@ -60,7 +60,7 @@ public class RodAnalysisWindow {
 		customComposite = new PlotSystemCompositeView(anaLeft, 
 													  SWT.FILL, 
 													  noImage, 
-													  1, 
+//													  1, 
 													  numberOfImages, 
 													  nullImage,
 													  ssp, 

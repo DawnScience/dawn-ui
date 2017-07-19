@@ -19,6 +19,7 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.TreeMap;
+
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.math3.util.MathArrays;
 import org.dawnsci.surfacescatter.AnalaysisMethodologies;
@@ -40,15 +41,15 @@ import org.dawnsci.surfacescatter.GeometricParametersModel;
 import org.dawnsci.surfacescatter.IntensityDisplayEnum.IntensityDisplaySetting;
 import org.dawnsci.surfacescatter.InterpolationTracker;
 import org.dawnsci.surfacescatter.LocationLenPtConverterUtils;
-import org.dawnsci.surfacescatter.OverlapAttenuationObject;
 import org.dawnsci.surfacescatter.MethodSettingEnum.MethodSetting;
+import org.dawnsci.surfacescatter.OverlapAttenuationObject;
 import org.dawnsci.surfacescatter.PlotSystem2DataSetter;
 import org.dawnsci.surfacescatter.PolynomialOverlap;
 import org.dawnsci.surfacescatter.ProcessingMethodsEnum;
-import org.dawnsci.surfacescatter.ReflectivityMetadataTitlesForDialog;
-import org.dawnsci.surfacescatter.ReflectivityNormalisation;
 import org.dawnsci.surfacescatter.ProcessingMethodsEnum.ProccessingMethod;
 import org.dawnsci.surfacescatter.ReflectivityFluxCorrectionsForDialog;
+import org.dawnsci.surfacescatter.ReflectivityMetadataTitlesForDialog;
+import org.dawnsci.surfacescatter.ReflectivityNormalisation;
 import org.dawnsci.surfacescatter.RodObjectNexusBuilderModel;
 import org.dawnsci.surfacescatter.RodObjectNexusUtils;
 import org.dawnsci.surfacescatter.SXRDGeometricCorrections;
@@ -61,10 +62,6 @@ import org.eclipse.dawnsci.analysis.api.roi.IROI;
 import org.eclipse.dawnsci.analysis.api.roi.IRectangularROI;
 import org.eclipse.dawnsci.analysis.api.tree.Tree;
 import org.eclipse.dawnsci.analysis.dataset.roi.RectangularROI;
-import org.eclipse.dawnsci.hdf5.nexus.NexusFileFactoryHDF5;
-import org.eclipse.dawnsci.nexus.INexusFileFactory;
-import org.eclipse.dawnsci.nexus.NexusException;
-import org.eclipse.dawnsci.nexus.NexusFile;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.region.IRegion;
 import org.eclipse.dawnsci.plotting.api.trace.ILineTrace;
@@ -141,6 +138,12 @@ public class SurfaceScatterPresenter {
 		IDataset[] xArray = new IDataset[filepaths.length];
 		////xArray is an array of the l params (for a rod)
 		
+		IDataset[] hArray = new IDataset[filepaths.length];
+		IDataset[] kArray = new IDataset[filepaths.length];
+		IDataset[] lArray = new IDataset[filepaths.length];
+		
+		
+		
 		IDataset[] tifNamesArray = new IDataset[filepaths.length];
 		////tifNamesArray is an array of the tif names contained in each .dat (one dataset of tif names per dat in the array)
 		
@@ -150,7 +153,6 @@ public class SurfaceScatterPresenter {
 		/////imageRefList is the number that the image is read in at, i.e. the nth image to be read
 		ArrayList<Integer> imageNoInDatList = new ArrayList<>();
 		/////imageNoInDatList is the number that the image is at in the Dat
-		
 		
 		int imageRef = 0;
 		ArrayList<Integer> imagesToFilepathRef = new ArrayList<Integer>();
@@ -163,7 +165,6 @@ public class SurfaceScatterPresenter {
 		
 			for (int id = 0; id < filepaths.length; id++) {
 				
-
 				gm.setxName(xName);
 				gm.setxNameRef(xName);
 				
@@ -171,7 +172,6 @@ public class SurfaceScatterPresenter {
 					dh1 = LoaderFactory.getData(filepaths[id]);
 					
 					Path from = Paths.get(filepaths[id]);
-					
 					
 					Charset charset = StandardCharsets.UTF_8;
 					
@@ -218,7 +218,6 @@ public class SurfaceScatterPresenter {
 					
 					dh1 = LoaderFactory.getData(to.toString());
 					
-					
 					//////////////////getting an array of .tifs
 					
 					String[] tifNames = StringUtils.substringsBetween(content, File.separator, ".tif");
@@ -240,8 +239,7 @@ public class SurfaceScatterPresenter {
 				
 					
 					Dataset tifNamesDatasetOut = DatasetFactory.createFromObject(tifNamesOut);
-					
-//					models.get(id).setTifNames(tifNamesDatasetOut);
+
 					tifNamesArray[id] = tifNamesDatasetOut;
 				
 				}
@@ -264,7 +262,6 @@ public class SurfaceScatterPresenter {
 				
 				imageArray[id] = ild;
 				//imageArray is an array of the images in read-in order
-				
 				
 				int imageNoInDat = 0;
 				//number of the image in the dat, i.e. the 10th image in the dat
@@ -289,6 +286,25 @@ public class SurfaceScatterPresenter {
 						SliceND slice1 = new SliceND(ildx.getShape());
 						IDataset xdat = ildx.getSlice(slice1);
 						xArray[id] = xdat;
+						
+						if(MethodSetting.toMethod(correctionSelection) == MethodSetting.SXRD){
+							try{
+								ILazyDataset ildl = dh1.getLazyDataset("l");
+								SliceND slicel = new SliceND(ildl.getShape());
+								lArray[id] = ildl.getSlice(slicel);
+								
+								ILazyDataset ildh = dh1.getLazyDataset("h");
+								SliceND sliceh = new SliceND(ildl.getShape());
+								hArray[id] = ildh.getSlice(sliceh);
+								
+								ILazyDataset ildk = dh1.getLazyDataset("k");
+								SliceND slicek = new SliceND(ildk.getShape());
+								kArray[id] = ildl.getSlice(slicek);
+							}
+							catch(Exception h){
+								
+							}
+						}
 					}
 				
 					catch(NullPointerException r){
@@ -302,22 +318,18 @@ public class SurfaceScatterPresenter {
 					MethodSetting.toInt(drm.getCorrectionSelection()) == 3){
 					
 					ILazyDataset ildx = dh1.getLazyDataset(gm.getxNameRef());
-//					models.get(id).setDatX(ildx);
 					
 					SliceND slice1 = new SliceND(ildx.getShape());
 					IDataset xdat = ildx.getSlice(slice1);
 					xArray[id] = xdat;
 					
 					ILazyDataset dcdtheta = dh1.getLazyDataset(ReflectivityMetadataTitlesForDialog.getdcdtheta());
-//					models.get(id).setDcdtheta(dcdtheta);
 					
 					ILazyDataset qdcd = dh1.getLazyDataset(ReflectivityMetadataTitlesForDialog.getqdcd());
-//					models.get(id).setQdcd(qdcd);
 					
 					if (dcdtheta == null) {
 						try {
 							dcdtheta = dh1.getLazyDataset(ReflectivityMetadataTitlesForDialog.getsdcdtheta());
-//							models.get(id).setDcdtheta(dcdtheta);
 						} catch (Exception e2) {
 							System.out.println("can't get dcdtheta");
 						}
@@ -328,17 +340,10 @@ public class SurfaceScatterPresenter {
 					if (qdcd == null) {
 						try {
 							qdcd = dh1.getLazyDataset(ReflectivityMetadataTitlesForDialog.getqsdcd());
-//							models.get(id).setQdcd(qdcd);
 						} catch (Exception e2) {
 							System.out.println("can't get qdcd");
 						}
 					} 
-					
-					else {
-					}
-				}
-					
-				else {
 				}
 			}
 		}
@@ -366,6 +371,10 @@ public class SurfaceScatterPresenter {
 		});
 		
 		Dataset xArrayCon = DatasetFactory.zeros(1);
+		Dataset hArrayCon = DatasetFactory.zeros(1);
+		Dataset kArrayCon = DatasetFactory.zeros(1);
+		Dataset lArrayCon = DatasetFactory.zeros(1);
+		
 		Dataset tifNamesCon = DatasetFactory.zeros(1);
 		
 		AggregateDataset imageCon = null;
@@ -377,14 +386,24 @@ public class SurfaceScatterPresenter {
 			imageCon = new AggregateDataset(false, DatasetFactory.zeros(new int[] {2, 2}, Dataset.ARRAYFLOAT64));
 		}
 		
-		int numberOfImages = 1; 
 		
 		try{
 			xArrayCon = DatasetUtils.concatenate(xArray, 0);
 			//xArrayCon is an unsorted, but concatenated DoubleDataset of l values
+			if(MethodSetting.toMethod(correctionSelection) == MethodSetting.SXRD){
+				try{
+					hArrayCon = DatasetUtils.concatenate(hArray, 0);
+					kArrayCon = DatasetUtils.concatenate(kArray, 0);
+					lArrayCon = DatasetUtils.concatenate(lArray, 0);
+				}
+				catch(Exception h){
+					
+				}
+			}
+			
+			
 			tifNamesCon = DatasetUtils.concatenate(tifNamesArray, 0);
 			//tifNamesCon is an unsorted, but concatenated DoubleDataset of l tif names
-			numberOfImages = xArrayCon.getSize();
 		}
 		catch(NullPointerException e){
 		
@@ -411,11 +430,28 @@ public class SurfaceScatterPresenter {
 		
 		DoubleDataset xArrayConCloneDouble = (DoubleDataset) xArrayConClone.clone();
 		
+		Dataset xArrayConCloneForh = xArrayCon.clone();
+		Dataset xArrayConCloneFork = xArrayCon.clone();
+		Dataset xArrayConCloneForl = xArrayCon.clone();
+		
 		try{
 			DatasetUtils.sort(xArrayCon, imageRefDat);
 			//so now we have the image number in imageArray (imageRefDat) sorted by "l" value xArrayCon
 			DatasetUtils.sort(xArrayConClone, imagesToFilepathRefDat);
 			//so now we have the dat number in filepaths (imagesToFilepathRefDat) sorted by "l" value xArrayCon
+			
+			if(MethodSetting.toMethod(correctionSelection) == MethodSetting.SXRD){
+				try{
+					DatasetUtils.sort(xArrayConCloneForh, hArrayCon);
+					DatasetUtils.sort(xArrayConCloneFork, kArrayCon);
+					DatasetUtils.sort(xArrayConCloneForl, lArrayCon);
+				}
+				catch(Exception h){
+					
+				}
+			}
+			
+			
 			Dataset sortedTifNamesCon = this.sortStrings(xArrayConCloneDouble, tifNamesCon);
 			//so now we have the tif names sorted by "l" value xArrayCon
 			
@@ -429,6 +465,32 @@ public class SurfaceScatterPresenter {
 			String[] datNamesInOrder = new String[imageRefList.size()];
 			
 			drm.setCorrectionSelection(MethodSetting.toMethod(correctionSelection));
+			
+			IDataset hdat = DatasetFactory.createFromObject(0);
+			IDataset kdat = DatasetFactory.createFromObject(0);
+			IDataset ldat = DatasetFactory.createFromObject(0);
+			
+			if(MethodSetting.toMethod(correctionSelection) == MethodSetting.SXRD){
+				try{
+					ILazyDataset ildl = dh1.getLazyDataset("l");
+					SliceND slicel = new SliceND(ildl.getShape());
+					ldat = ildl.getSlice(slicel);
+					
+					ILazyDataset ildh = dh1.getLazyDataset("h");
+					SliceND sliceh = new SliceND(ildl.getShape());
+					hdat = ildh.getSlice(sliceh);
+					
+					ILazyDataset ildk = dh1.getLazyDataset("k");
+					SliceND slicek = new SliceND(ildk.getShape());
+					kdat = ildl.getSlice(slicek);
+				}
+				catch(Exception h){
+					
+				}
+				
+				
+			}
+			
 			
 			for(int f = 0; f<imageRefList.size(); f++ ){
 				datNamesInOrder[f] = filepaths[imagesToFilepathRefDat.getInt(f)];
@@ -484,6 +546,12 @@ public class SurfaceScatterPresenter {
 																			 .getDouble(imageNoInDatList.get(pos));
 					
 					fm.setAreaCorrection(areaCorrection);
+					
+					fm.setH(hArrayCon.getDouble(f));
+					fm.setK(kArrayCon.getDouble(f));
+					fm.setL(lArrayCon.getDouble(f));
+					
+					
 				}
 				
 				else {
@@ -1685,8 +1753,39 @@ public class SurfaceScatterPresenter {
 	public int xPositionFinderInDat(int i,double myNum) {
 		
 		Dataset xIn = DatasetFactory.createFromList(drm.getDmxList().get(i));
+		int d = ClosestNoFinder.closestNoPos(myNum, xIn);
+		return d;
 		
-		return ClosestNoFinder.closestNoPos(myNum, xIn);
+	}
+	
+	public int absoluteFrameNumberUsingXValueFromSpecifiedDatNo(int i,double myNum){
+		
+		int d = xPositionFinderInDat(i, myNum);
+		
+		int e= 0;
+		
+		for(FrameModel fm: drm.getFms()){
+			if (fm.getDatNo() == i&& fm.getNoInOriginalDat() == d){
+				e = fm.getImageNumber();
+			}
+		}
+		
+		return e;
+	}
+	
+	public double xValueFinderInDat(int i,double myNum) {
+		
+		Dataset xIn = DatasetFactory.createFromList(drm.getDmxList().get(i));
+		double f =ClosestNoFinder.closestNo(myNum, xIn);
+		return f;
+		
+	}
+	
+	public double xValueFromDat(int i,double myNum) {
+		
+		Dataset xIn = DatasetFactory.createFromList(drm.getDmxList().get(i));
+		double f =xIn.getDouble((int) myNum);
+		return f;
 		
 	}
 	
@@ -3026,14 +3125,13 @@ public class SurfaceScatterPresenter {
 	}
 	
 	public double getUnsplicedCorrectedIntensityFromFm(int datNo, int pos){
-//		return drm.getFms().get(i).getUnspliced_Corrected_Intensity();
 		
 		return drm.getOcdp().getyListForEachDat().get(datNo).get(pos);
 		
 	}
 	
 	public double getUnsplicedRawIntensityFromFm(int datNo, int pos){
-//		return drm.getFms().get(i).getUnspliced_Raw_Intensity();
+
 		
 		return drm.getOcdp().getyListRawIntensityErrorForEachDat().get(datNo).get(pos);
 		
@@ -3055,6 +3153,15 @@ public class SurfaceScatterPresenter {
 	public void allGoodPoints(){
 		for(FrameModel fm: drm.getFms()){
 			fm.setGoodPoint(true);
+		}
+	}
+	
+	public void flipGoodPoint(int i){
+		if(drm.getFms().get(i).isGoodPoint()){
+			drm.getFms().get(i).setGoodPoint(false);
+		}
+		else{
+			drm.getFms().get(i).setGoodPoint(true);
 		}
 	}
 }

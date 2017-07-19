@@ -1822,6 +1822,13 @@ public class SurfaceScatterViewStart extends Dialog {
 	
 	public void updateDisplay(int[][] lenPt) {
 		
+		if(ssp.getDrm().getFms().get(ssp.getSliderPos()).isGoodPoint()){
+			customComposite.getDisregardFrame().setText("Disregard Frame");
+		}
+		else{
+			customComposite.getDisregardFrame().setText("Include Frame");
+		}
+		
 		if(customComposite.getSlider().getSelection() != ssp.getSliderPos()){
 			customComposite.getSlider().setSelection(ssp.getSliderPos());
 			updateIndicators(ssp.getSliderPos());
