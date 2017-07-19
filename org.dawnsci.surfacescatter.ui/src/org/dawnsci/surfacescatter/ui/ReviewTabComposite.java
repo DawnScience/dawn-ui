@@ -4,22 +4,22 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.util.ArrayList;
+
 import org.dawb.common.ui.widgets.ActionBarWrapper;
 import org.dawnsci.surfacescatter.AxisEnums;
 import org.dawnsci.surfacescatter.AxisEnums.xAxes;
 import org.dawnsci.surfacescatter.AxisEnums.yAxes;
-import org.dawnsci.surfacescatter.SavingFormatEnum.SaveFormatSetting;
 import org.dawnsci.surfacescatter.CsdpFromNexusFile;
 import org.dawnsci.surfacescatter.CurveStitchDataPackage;
 import org.dawnsci.surfacescatter.GoodPointStripper;
 import org.dawnsci.surfacescatter.ReviewCurvesModel;
 import org.dawnsci.surfacescatter.SavingFormatEnum;
+import org.dawnsci.surfacescatter.SavingFormatEnum.SaveFormatSetting;
 import org.dawnsci.surfacescatter.SavingUtils;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.PlotType;
 import org.eclipse.dawnsci.plotting.api.PlottingFactory;
 import org.eclipse.dawnsci.plotting.api.trace.ILineTrace;
-import org.eclipse.dawnsci.plotting.api.trace.ITrace;
 import org.eclipse.january.dataset.Dataset;
 import org.eclipse.january.dataset.DatasetFactory;
 import org.eclipse.january.dataset.IDataset;
@@ -233,7 +233,6 @@ public class ReviewTabComposite extends Composite{
 			
 			@Override
 			public void widgetDefaultSelected(SelectionEvent e) {
-				// TODO Auto-generated method stub
 				
 			}
 		});
@@ -263,7 +262,6 @@ public class ReviewTabComposite extends Composite{
 			
 			@Override
 			public void widgetDefaultSelected(SelectionEvent e) {
-				// TODO Auto-generated method stub
 				
 			}
 		});
@@ -396,7 +394,6 @@ public class ReviewTabComposite extends Composite{
 			
 			@Override
 			public void widgetDefaultSelected(SelectionEvent e) {
-				// TODO Auto-generated method stub
 				
 			}
 		});
@@ -455,7 +452,6 @@ public class ReviewTabComposite extends Composite{
 			
 			@Override
 			public void widgetDefaultSelected(SelectionEvent e) {
-				// TODO Auto-generated method stub
 				
 			}
 		});
@@ -479,8 +475,7 @@ public class ReviewTabComposite extends Composite{
 			
 			@Override
 			public void widgetDefaultSelected(SelectionEvent e) {
-				// TODO Auto-generated method stub
-				
+
 			}
 		});
 	    
@@ -503,7 +498,6 @@ public class ReviewTabComposite extends Composite{
 			
 			@Override
 			public void widgetDefaultSelected(SelectionEvent e) {
-				// TODO Auto-generated method stub
 				
 			}
 		});
@@ -527,7 +521,7 @@ public class ReviewTabComposite extends Composite{
 			
 			@Override
 			public void propertyChange(PropertyChangeEvent evt) {
-				// TODO Auto-generated method stub
+	
 				try{
 					String[] yAxes = setYAxes();
 					String[] xAxes = setXAxes();
@@ -551,8 +545,6 @@ public class ReviewTabComposite extends Composite{
 					
 					refreshCurves();
 					refreshTable();
-	//				crossCheckCurvesToTable();
-					
 					plotSystem.autoscaleAxes();
 				}
 				catch(Exception b){
@@ -744,7 +736,7 @@ public class ReviewTabComposite extends Composite{
 			}
 			else{
 				try{
-					int g = csdp.getSplicedCurveQ().getSize();
+
 					for(int i =0; i<csdp.getSplicedCurveQ().getSize(); i++){
 						double d = csdp.getSplicedCurveQ().getDouble(i);
 						
@@ -845,7 +837,7 @@ public class ReviewTabComposite extends Composite{
 			outputList.add(AxisEnums.toString(yAxes.SPLICEDYFHKL));
 		}
 		
-		if (outputList.size()>0){
+		if(!outputList.isEmpty()){
 			String[] output = new String[outputList.size()];
 			
 			for(int y = 0; y<outputList.size(); y++){
@@ -882,7 +874,7 @@ public class ReviewTabComposite extends Composite{
 		
 		}
 		
-		if(rcm.getCsdpList().size()>0){
+		if(!rcm.getCsdpList().isEmpty()){
 			for (int j = 0; j < rcm.getCsdpList().size(); j++) {
 				
 				TableItem t = new TableItem(rodDisplayTable, SWT.NONE);
@@ -912,20 +904,6 @@ public class ReviewTabComposite extends Composite{
 		
 		for(TableItem fg :  rodDisplayTable.getItems()){
 			rodToSave.add(fg.getText());
-		}
-	}
-	
-	private void crossCheckCurvesToTable(){
-		
-		for(ITrace tr: plotSystem.getTraces()){
-			String probe = tr.getName();
-			for(TableItem ti : rodDisplayTable.getItems()){
-				if(probe.equals(ti.getText())){
-					if(!ti.getChecked()){
-						tr.dispose();
-					}
-				}
-			}		
 		}
 	}
 	
@@ -990,7 +968,7 @@ public class ReviewTabComposite extends Composite{
 		
 		plotSystem.clear();
 		
-		if(rcm.getCsdpList().size() >0){
+		if(!rcm.getCsdpList().isEmpty()){
 			for(CurveStitchDataPackage csdp : rcm.getCsdpList()){
 				
 				ILineTrace lt = buildLineTrace(csdp);
@@ -1009,7 +987,6 @@ public class ReviewTabComposite extends Composite{
 			if(rodName.equals(csdp.getRodName())){
 				return csdp;
 			}
-			
 		}
 		
 		return null;
