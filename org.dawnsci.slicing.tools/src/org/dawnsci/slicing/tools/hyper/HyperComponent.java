@@ -121,6 +121,16 @@ public class HyperComponent {
     public Control getControl() {
     	return sashForm;
     }
+    
+    public void updateData(ILazyDataset lazy, List<IDataset> daxes, Slice[] slices, int[] order) {
+    	leftJob.cancel();
+    	rightJob.cancel();
+    	leftJob.updateData(lazy, daxes, slices, order);
+    	rightJob.updateData(lazy, daxes, slices, order);
+    	leftJob.schedule();
+    	rightJob.schedule();
+    	
+    }
 	
 	public void setData(ILazyDataset lazy, List<IDataset> daxes, Slice[] slices, int[] order) {
 		this.setData(lazy, daxes, slices, order, new TraceReducer(), new ImageTrapeziumBaselineReducer());
@@ -629,6 +639,16 @@ public class HyperComponent {
 			this.currentROI    = rb;
 	        
           	schedule();		
+		}
+		
+		public void updateData(ILazyDataset data,
+				List<IDataset> axes,
+				Slice[] slices,
+				int[] order){
+			this.data = data;
+			this.axes = axes;
+			this.order = order;
+			this.slices = slices;
 		}
 		
 		public IDatasetROIReducer getReducer() {
