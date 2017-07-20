@@ -22,29 +22,30 @@ import org.eclipse.january.dataset.Maths;
 public class PowderLineModel {
 
 	// Q in per Angstrom, ANGLE in degrees, D_SPACING in angstroms
-	public enum PowderLineUnit {
+	public enum PowderLineCoord {
 		Q, ANGLE, D_SPACING
 	}
 
+	// hc in keV angstroms
 	final private static double hc_keVAA = 12.398_419_739;
 	
 	
 	private double wavelength; // in angstroms
-	private PowderLineUnit dataUnits;
+	private PowderLineCoord dataCoords;
 	private DoubleDataset lineLocations;
 	
 	/**
-	 * @return the units of the line data
+	 * @return the coordinates of the line data
 	 */
-	public PowderLineUnit getUnits() {
-		return dataUnits;
+	public PowderLineCoord getCoords() {
+		return dataCoords;
 	}
 	/**
-	 * @param dataUnits
-	 * 				the units to set for the line data
+	 * @param dataCoords
+	 * 				the coordinates to set for the line data
 	 */
-	public void setUnits(PowderLineUnit units) {
-		this.dataUnits = units;
+	public void setCoords(PowderLineCoord coords) {
+		this.dataCoords = coords;
 	}
 	/**
 	 * @param energy_keV
@@ -87,37 +88,39 @@ public class PowderLineModel {
 		this.setLines(DatasetFactory.createRange(0));
 	}
 	/**
-	 * @return the line data in whatever units they are in
+	 * @return the line data in whatever coordinates they are in
 	 */
 	public DoubleDataset getLines() {
-		return this.getLines(this.dataUnits);
+		return this.getLines(this.dataCoords);
 	}
 	/**
-	 * @param requestedUnits
+	 * @param requestedCoords
 	 * 						the coordinates in which to return the line positions
 	 * @return the line positions in the requested coordinates
 	 */
-	public DoubleDataset getLines(PowderLineUnit requestedUnits) {
-		return convertLinePositions(lineLocations, dataUnits, requestedUnits);
+	public DoubleDataset getLines(PowderLineCoord requestedCoords) {
+		// if the data coords are not defined (probably a there are no actual line positions), just return the raw line positions
+		if (dataCoords == null) return lineLocations;
+		return convertLinePositions(lineLocations, dataCoords, requestedCoords);
 	}
 	
 	/**
 	 * Convert between different coordinates of the line positions.
 	 * @param lines
 	 * 		line positions to convert		
-	 * @param sourceUnits
+	 * @param sourceCoords
 	 * 					coordinates of the lines to be converted
-	 * @param targetUnits
+	 * @param targetCoords
 	 * 					coordinates for the lines to be converted to
 	 * @return the converted values of the line positions
 	 */
-	public DoubleDataset convertLinePositions(DoubleDataset lines, PowderLineUnit sourceUnits, PowderLineUnit targetUnits) {
-		if (targetUnits == sourceUnits) {
+	public DoubleDataset convertLinePositions(DoubleDataset lines, PowderLineCoord sourceCoords, PowderLineCoord targetCoords) {
+		if (targetCoords == sourceCoords) {
 			return lines;
 		} else {
 			// convert everything to D spacing
 			DoubleDataset dSpaceValues;
-			switch(sourceUnits) {
+			switch(sourceCoords) {
 			case Q :
 				dSpaceValues = (DoubleDataset) Maths.divide(2*Math.PI, lines);
 				break;
@@ -128,8 +131,8 @@ public class PowderLineModel {
 			default:
 				dSpaceValues = lines;
 			}
-			// Convert from d spacing to the requested units
-			switch(targetUnits) {
+			// Convert from d spacing to the requested coords
+			switch(targetCoords) {
 			case Q:
 				return (DoubleDataset) Maths.divide(2*Math.PI, dSpaceValues);
 			case ANGLE:
@@ -142,7 +145,7 @@ public class PowderLineModel {
 		}
 	}
 	
-	public double convertLinePositions(double line, PowderLineUnit sourceUnits, PowderLineUnit targetUnits) {
-		return this.convertLinePositions((DoubleDataset) DatasetFactory.createFromObject(line, new int[]{1}), sourceUnits, targetUnits).get(0);
+	public double convertLinePositions(double line, PowderLineCoord sourceCoords, PowderLineCoord targetCoords) {
+		return this.convertLinePositions((DoubleDataset) DatasetFactory.createFromObject(line, new int[]{1}), sourceCoords, targetCoords).get(0);
 	}
 }

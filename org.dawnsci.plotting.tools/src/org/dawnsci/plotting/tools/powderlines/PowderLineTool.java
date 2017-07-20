@@ -17,7 +17,7 @@ import java.util.List;
 import org.apache.commons.lang.ArrayUtils;
 import org.dawnsci.plotting.tools.Activator;
 import org.dawnsci.plotting.tools.ServiceLoader;
-import org.dawnsci.plotting.tools.powderlines.PowderLineModel.PowderLineUnit;
+import org.dawnsci.plotting.tools.powderlines.PowderLineModel.PowderLineCoord;
 import org.eclipse.dawnsci.analysis.api.io.IDataHolder;
 import org.eclipse.dawnsci.analysis.api.io.ILoaderService;
 import org.eclipse.dawnsci.analysis.dataset.roi.XAxisLineBoxROI;
@@ -59,14 +59,12 @@ public class PowderLineTool extends AbstractToolPage {
 	private Composite composite; // root Composite of the tool
 	private TableViewer lineTableViewer; // TableViewer holding the list of lines
 	private ITraceListener tracerListener; // The trace on which the tool listens
-	private PowderLineModel.PowderLineUnit plotCoordinate = PowderLineModel.PowderLineUnit.Q; // The coordinate of the input data
-//	private double energy; // Energy of the scattered radiation
-//	private DoubleDataset lineLocations; // Locations of the lines in d spacing
+	private PowderLineModel.PowderLineCoord plotCoordinate = PowderLineModel.PowderLineCoord.Q; // The coordinate of the input data
 	private List<IRegion> currentLineRegions;
 	
 	private PowderLineModel model;
 	
-	static final PowderLineModel.PowderLineUnit defaultUnits = PowderLineUnit.D_SPACING;
+	static final PowderLineModel.PowderLineCoord defaultCoords = PowderLineCoord.D_SPACING;
 	
 	public PowderLineTool() {
 		try{
@@ -83,12 +81,10 @@ public class PowderLineTool extends AbstractToolPage {
 		}
 		
 		model = new PowderLineModel();
+		// Default data
 		model.clearLines();
 		model.setEnergy(76.6);
 		
-		// Example data
-//		lineLocations = DatasetFactory.createRange(0);
-//		energy = 76.6;
 	}
 	
 	@Override
@@ -134,7 +130,7 @@ public class PowderLineTool extends AbstractToolPage {
 			}
 		});
 		
-		lineTableViewer.setInput(model.getLines(defaultUnits));
+		lineTableViewer.setInput(model.getLines(defaultCoords));
 		
 		activate();
 		
@@ -165,7 +161,6 @@ public class PowderLineTool extends AbstractToolPage {
 	public void deactivate() {
 		// Clear the lines on exit
 		model.clearLines();
-//		lineLocations = DatasetFactory.createRange(0);
 		drawPowderLines();
 		
 		super.deactivate();
@@ -191,106 +186,52 @@ public class PowderLineTool extends AbstractToolPage {
 		colvarTheMagnificent = new TableViewerColumn(lineTableViewer, SWT.CENTER, iCol++);
 		colvarTheMagnificent.getColumn().setText("d spacing (Å)");
 		colvarTheMagnificent.getColumn().setWidth(300); // a reasonable width
-		colvarTheMagnificent.setLabelProvider(new PowderLineLabelProvider(PowderLineModel.PowderLineUnit.D_SPACING));
+		colvarTheMagnificent.setLabelProvider(new PowderLineLabelProvider(PowderLineModel.PowderLineCoord.D_SPACING));
 
 		colvarTheMagnificent = new TableViewerColumn(lineTableViewer, SWT.CENTER, iCol++);
 		colvarTheMagnificent.getColumn().setText("Q (Å⁻¹)");
 		colvarTheMagnificent.getColumn().setWidth(300); // a reasonable width
-		colvarTheMagnificent.setLabelProvider(new PowderLineLabelProvider(PowderLineModel.PowderLineUnit.Q));
+		colvarTheMagnificent.setLabelProvider(new PowderLineLabelProvider(PowderLineModel.PowderLineCoord.Q));
 		
 		colvarTheMagnificent = new TableViewerColumn(lineTableViewer, SWT.CENTER, iCol++);
 		colvarTheMagnificent.getColumn().setText("2θ (°)");
 		colvarTheMagnificent.getColumn().setWidth(300); // a reasonable width
-		colvarTheMagnificent.setLabelProvider(new PowderLineLabelProvider(PowderLineModel.PowderLineUnit.ANGLE));
+		colvarTheMagnificent.setLabelProvider(new PowderLineLabelProvider(PowderLineModel.PowderLineCoord.ANGLE));
 		
 	}
 	
-//	public enum PowderLineUnit {
-//		Q, ANGLE, D_SPACING
-//	}
-	
 	private class PowderLineLabelProvider extends ColumnLabelProvider {
-		private PowderLineModel.PowderLineUnit /*dataCoordinate = PowderLineUnit.D_SPACING,*/ columnCoordinate;
+		private PowderLineModel.PowderLineCoord columnCoordinate;
 		private DecimalFormat format = new DecimalFormat("#.###");
 		
-		public PowderLineLabelProvider(PowderLineModel.PowderLineUnit columnCoordinate/*, double energy*/) {
+		public PowderLineLabelProvider(PowderLineModel.PowderLineCoord columnCoordinate/*, double energy*/) {
 			this.columnCoordinate = columnCoordinate;
 		}
 		
 		@Override
 		public String getText(Object element) {
 			double value = (double) element;
-//			DoubleDataset ddValue = (DoubleDataset) DatasetFactory.createFromObject(new Double[]{value});
-//
-//			switch (columnCoordinate) {
-//			case Q:
-			return format.format(model.convertLinePositions(value, defaultUnits, columnCoordinate));
-//			case ANGLE:
-//				return format.format(twoThetaFromD(ddValue, energy).getDouble(0));
-//			case D_SPACING:
-//				return format.format(value);
-//			default:
-//				return "";
-//			}
+			return format.format(model.convertLinePositions(value, defaultCoords, columnCoordinate));
 		}
 	}
 	
-//	private void setEnergy(double energy) {
-//		this.energy = energy;
-//	}
-	
-//	private double getEnergy( ) {
-//		return this.energy;
-//	}
-	
-	private void setUnit(PowderLineModel.PowderLineUnit unit) {
-		this.plotCoordinate = unit;
+	private void setCoords(PowderLineModel.PowderLineCoord coord) {
+		this.plotCoordinate = coord;
 	}
 	
-//	private PowderLineModel.PowderLineUnit getUnit( ) {
-//		return this.plotCoordinate;
-//	}
-	
 	protected void setLines(DoubleDataset novaLines) {
-//		this.lineLocations = novaLines;
 		model.setLines(novaLines);
+		model.setCoords(defaultCoords);
 		this.lineTableViewer.setInput(model.getLines());
 		this.drawPowderLines();
 	}
 	
-//	protected void clearLines( ) {
-//		this.setLines(DatasetFactory.createRange(0));
-//	}
-	
-//	// Coordinate conversions
-//	private static DoubleDataset qFromD(DoubleDataset d) {
-//		return (d.getSize() > 0) ? (DoubleDataset) Maths.divide(Math.PI*2, d) : d;
-//	}
-//
-//	private static DoubleDataset twoThetaFromD(DoubleDataset d, double energy) {
-//		final double hc_keVAA = 12.398_419_739;
-//		double wavelength = hc_keVAA/energy;
-//		
-//		return (d.getSize() > 0) ? (DoubleDataset) Maths.toDegrees(Maths.multiply(2, Maths.arcsin(Maths.divide(wavelength/2, d)))) : d;
-//	}
-	
 	private void drawPowderLines() {
-		// Correct the stored lines for the plot units
+		// Correct the stored lines for the plot coordinates
 		
 		
 		
 		DoubleDataset plotLineLocations = model.getLines(plotCoordinate);
-//		switch (plotCoordinate) {
-//		case Q:
-//			plotLineLocations = model.qFromD(lineLocations);
-//			break;
-//		case ANGLE:
-//			plotLineLocations = twoThetaFromD(lineLocations, energy);
-//			break;
-//		case D_SPACING:
-//		default:
-//			plotLineLocations = lineLocations;
-//		}
 		
 		final XAxisLineBoxROI[] novalines = makeROILines(plotLineLocations);
 		final List<IRegion> viejoRegions = (currentLineRegions != null) ? new ArrayList<IRegion>(currentLineRegions) : null;
@@ -368,7 +309,7 @@ public class PowderLineTool extends AbstractToolPage {
 				dialog.setCurrentValues(theTool.model.getEnergy(), plotCoordinate);
 				if (dialog.open() == Window.OK) {
 					theTool.model.setEnergy(dialog.getEnergy());
-					theTool.setUnit(dialog.getUnit());
+					theTool.setCoords(dialog.getCoords());
 					
 					theTool.refresh();
 				}
@@ -454,10 +395,10 @@ public class PowderLineTool extends AbstractToolPage {
 	public class PowderLineSettingsDialog extends Dialog {
 
 		private double energy;
-		private PowderLineModel.PowderLineUnit unit;
+		private PowderLineModel.PowderLineCoord coords;
 		
 		private Text energyText;
-		private Combo unitCombo;
+		private Combo coordCombo;
 		
 		public PowderLineSettingsDialog(Shell parent) {
 			super(parent);
@@ -484,19 +425,19 @@ public class PowderLineTool extends AbstractToolPage {
 		}
 		
 		private void createCoordinateDropdown(Composite container) {
-			Label unitLabel = new Label(container, SWT.NONE);
-			unitLabel.setText("Plot units");
+			Label coordLabel = new Label(container, SWT.NONE);
+			coordLabel.setText("Plot coordinates");
 			
-			unitCombo = new Combo(container, SWT.BORDER);
-			String[] unitItems = new String[]{
-					PowderLineModel.PowderLineUnit.Q.name(),
-					PowderLineModel.PowderLineUnit.ANGLE.name(),
-					PowderLineModel.PowderLineUnit.D_SPACING.name()
+			coordCombo = new Combo(container, SWT.BORDER);
+			String[] coordsItems = new String[]{
+					PowderLineModel.PowderLineCoord.Q.name(),
+					PowderLineModel.PowderLineCoord.ANGLE.name(),
+					PowderLineModel.PowderLineCoord.D_SPACING.name()
 			};
-			unitCombo.setItems(unitItems);
-			// Select the current unit
-			int currentIndex = Arrays.asList(unitItems).indexOf(unit.name()); 
-			unitCombo.select(currentIndex);
+			coordCombo.setItems(coordsItems);
+			// Select the current coordinates
+			int currentIndex = Arrays.asList(coordsItems).indexOf(coords.name()); 
+			coordCombo.select(currentIndex);
 			
 		}
 		
@@ -509,23 +450,23 @@ public class PowderLineTool extends AbstractToolPage {
 			
 		}
 		
-		public void setCurrentValues(double energy, PowderLineModel.PowderLineUnit unit) {
+		public void setCurrentValues(double energy, PowderLineModel.PowderLineCoord coords) {
 			this.energy = energy;
-			this.unit = unit;
+			this.coords = coords;
 		}
 		
 		public double getEnergy() {
 			return this.energy;
 		}
 		
-		public PowderLineModel.PowderLineUnit getUnit() {
-			return this.unit;
+		public PowderLineModel.PowderLineCoord getCoords() {
+			return this.coords;
 		}
 		
 		@Override
 		protected void okPressed() {
 			this.energy = Double.parseDouble(energyText.getText());
-			this.unit = PowderLineModel.PowderLineUnit.valueOf(unitCombo.getItems()[unitCombo.getSelectionIndex()]);
+			this.coords = PowderLineModel.PowderLineCoord.valueOf(coordCombo.getItems()[coordCombo.getSelectionIndex()]);
 			super.okPressed();
 		}
 		
