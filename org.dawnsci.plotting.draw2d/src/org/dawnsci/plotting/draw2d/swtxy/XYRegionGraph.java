@@ -261,33 +261,30 @@ public class XYRegionGraph extends XYGraph {
 	public void layout() {
 		
 		super.layout();
-		List<Trace> traces = getPlotArea().getTraceList();
-		// If there is no trace this means we are in 2d mode and that the
-		// following code has to be run to keep aspect ratio on images
-		// displayed. If not, it means we are in 1d mode and then there is no
-		// need to override the layout of figures in xygraph, in particular the
-		// axes.
-		if (traces.isEmpty()) {
-
-			for (Axis axis : getXAxisList()) {
-				if (axis instanceof AspectAxis) {
-					((AspectAxis) axis).checkBounds();
-				}
-			}
-			for (Axis axis : getYAxisList()) {
-				if (axis instanceof AspectAxis) {
-					((AspectAxis) axis).checkBounds();
-				}
-			}
-
-			if (getPlotArea() != null && getPlotArea().isVisible()) {
-				Rectangle plotAreaBound = new Rectangle(getPrimaryXAxis().getBounds().x + getPrimaryXAxis().getMargin(),
-						getPrimaryYAxis().getBounds().y + getPrimaryYAxis().getMargin(),
-						getPrimaryXAxis().getTickLength(), getPrimaryYAxis().getTickLength());
-				getPlotArea().setBounds(plotAreaBound);
-
+		
+		for (Axis axis : getXAxisList()) {
+			if (axis instanceof AspectAxis) {
+				((AspectAxis)axis).checkBounds();
 			}
 		}
+		for (Axis axis : getYAxisList()) {
+			if (axis instanceof AspectAxis) {
+				((AspectAxis)axis).checkBounds();
+			}
+		}
+		
+		if(getPlotArea() != null && getPlotArea().isVisible()){
+
+			Rectangle plotAreaBound = new Rectangle(
+					getPrimaryXAxis().getBounds().x + getPrimaryXAxis().getMargin(),
+					getPrimaryYAxis().getBounds().y + getPrimaryYAxis().getMargin(),
+					getPrimaryXAxis().getTickLength(),
+					getPrimaryYAxis().getTickLength()
+					);
+			getPlotArea().setBounds(plotAreaBound);
+
+		}
+		
 	}
 
 	public void setKeepAspect(boolean checked) {
