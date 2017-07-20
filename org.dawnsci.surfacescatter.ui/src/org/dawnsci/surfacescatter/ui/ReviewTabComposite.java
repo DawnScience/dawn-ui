@@ -537,7 +537,7 @@ public class ReviewTabComposite extends Composite{
 						}
 					}
 					catch(Exception i){
-						
+						System.out.println(i.getMessage());
 					}
 					
 					xAxis.setText(AxisEnums.toString(xAxisSelection));
@@ -555,7 +555,7 @@ public class ReviewTabComposite extends Composite{
 	    
 	    plotSystem.setShowLegend(true);
 	    
-	    form.setWeights(new int[] {20, 80});
+	    form.setWeights(new int[] {25, 75});
 	    
 	}
 	   
@@ -950,6 +950,11 @@ public class ReviewTabComposite extends Composite{
 		
 		GoodPointStripper gps = new GoodPointStripper();
 
+		x  = gps.splicedXGoodPointStripper(csdp, 
+				  xAxisSelection,
+				  !useGoodPointsOnly);
+
+		
 		y = gps.splicedYGoodPointStripper(csdp, 
 							  yAxisSelection,
 							  !useGoodPointsOnly);

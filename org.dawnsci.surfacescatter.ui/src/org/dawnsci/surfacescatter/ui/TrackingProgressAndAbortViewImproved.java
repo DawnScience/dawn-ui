@@ -16,7 +16,7 @@ import org.eclipse.swt.widgets.ProgressBar;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.PlatformUI;
 
-public class TrackingProgressAndAbortView extends Dialog {
+public class TrackingProgressAndAbortViewImproved extends Dialog {
 	
 	private Button abort;
 	private ProgressBar progress;
@@ -25,7 +25,7 @@ public class TrackingProgressAndAbortView extends Dialog {
 	private TrackingHandlerWithFramesImproved tj; 
 	
 	
-	public TrackingProgressAndAbortView(Shell parentShell, 
+	public TrackingProgressAndAbortViewImproved(Shell parentShell, 
 										SurfaceScatterPresenter ssp,
 										SurfaceScatterViewStart ssvs) {
 		
@@ -74,17 +74,17 @@ public class TrackingProgressAndAbortView extends Dialog {
 		
 		try{
 			
-			tj = new TrackingHandlerWithFramesImproved(); 
-			
-			
-			tj.setProgress(progress);
-			tj.setSsvs(ssvs);
-			tj.setCorrectionSelection(MethodSetting.toInt(ssp.getCorrectionSelection()));
-			tj.setOutputCurves(ssvs.getSsps3c().getOutputCurves().getPlotSystem());
-//			tj.setTimeStep(Math.round((2 / ssp.getNoImages())));
-			tj.setSsp(ssp);
-			tj.setTPAAV(TrackingProgressAndAbortView.this);
-			tj.runTJ1();
+//			tj = new TrackingHandlerWithFramesImproved(); 
+//			
+//			
+//			tj.setProgress(progress);
+//			tj.setSsvs(ssvs);
+//			tj.setCorrectionSelection(MethodSetting.toInt(ssp.getCorrectionSelection()));
+//			tj.setOutputCurves(ssvs.getSsps3c().getOutputCurves().getPlotSystem());
+////			tj.setTimeStep(Math.round((2 / ssp.getNoImages())));
+//			tj.setSsp(ssp);
+//			tj.setTPAAV(TrackingProgressAndAbortViewImproved.this);
+//			tj.runTJ1();
 			
 			
 
