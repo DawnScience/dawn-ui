@@ -78,13 +78,6 @@
          unpack="false"/>
 
    <plugin
-         id="org.eclipse.nebula.visualization.xygraph.preference"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
          id="org.dawnsci.plotting.histogram"
          download-size="0"
          install-size="0"
@@ -120,6 +113,13 @@
 
    <plugin
          id="uk.ac.diamond.org.mihalis.opal"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="org.dawnsci.nebula.visualization.xygraph.preferences"
          download-size="0"
          install-size="0"
          version="0.0.0"
