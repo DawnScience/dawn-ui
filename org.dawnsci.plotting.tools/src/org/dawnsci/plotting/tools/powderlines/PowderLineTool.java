@@ -226,6 +226,13 @@ public class PowderLineTool extends AbstractToolPage {
 		this.drawPowderLines();
 	}
 	
+	protected void clearLines() {
+		model.clearLines();
+		model.setCoords(defaultCoords);
+		this.lineTableViewer.setInput(model.getLines());
+		this.drawPowderLines();
+	}
+	
 	private void drawPowderLines() {
 		// Correct the stored lines for the plot coordinates
 		
@@ -291,9 +298,15 @@ public class PowderLineTool extends AbstractToolPage {
 	 * Refreshes the table and line locations
 	 */
 	private void refresh() {
-		lineTableViewer.refresh();
-		drawPowderLines();
+		this.drawPowderLines();
+		// It is ugly, but it works
+		DoubleDataset lines = model.getLines(defaultCoords);
+		this.model.clearLines();
+		this.model.setLines(lines);
+		this.model.setCoords(defaultCoords);
 		
+		this.lineTableViewer.setInput(model.getLines());
+
 	}
 	
 	private void createActions() {
@@ -320,7 +333,7 @@ public class PowderLineTool extends AbstractToolPage {
 		final Action clearAction = new Action("Clear the lines", Activator.getImageDescriptor("icons/delete.gif")) {
 			@Override
 			public void run() {
-				theTool.model.clearLines();
+				theTool.clearLines();
 			}
 		};
 		getSite().getActionBars().getToolBarManager().add(clearAction);
@@ -387,6 +400,7 @@ public class PowderLineTool extends AbstractToolPage {
 
 				lines = (DoubleDataset) theDataset;
 			}
+			theTool.clearLines();
 			theTool.setLines(lines);
 		}
 	}

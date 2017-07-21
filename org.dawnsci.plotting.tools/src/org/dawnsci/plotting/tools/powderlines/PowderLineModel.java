@@ -115,7 +115,7 @@ public class PowderLineModel {
 	 * @return the converted values of the line positions
 	 */
 	public DoubleDataset convertLinePositions(DoubleDataset lines, PowderLineCoord sourceCoords, PowderLineCoord targetCoords) {
-		if (targetCoords == sourceCoords) {
+		if (targetCoords == sourceCoords || lines.getSize() == 0) {
 			return lines;
 		} else {
 			// convert everything to D spacing
