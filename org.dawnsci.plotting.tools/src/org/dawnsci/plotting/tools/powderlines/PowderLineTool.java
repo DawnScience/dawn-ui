@@ -27,10 +27,12 @@ import org.eclipse.dawnsci.plotting.api.region.RegionUtils;
 import org.eclipse.dawnsci.plotting.api.tool.AbstractToolPage;
 import org.eclipse.dawnsci.plotting.api.trace.ITraceListener;
 import org.eclipse.dawnsci.plotting.api.trace.TraceEvent;
+import org.eclipse.january.MetadataException;
 import org.eclipse.january.dataset.Dataset;
 import org.eclipse.january.dataset.DatasetUtils;
 import org.eclipse.january.dataset.DoubleDataset;
 import org.eclipse.january.dataset.IndexIterator;
+import org.eclipse.january.metadata.IMetadata;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
@@ -400,8 +402,20 @@ public class PowderLineTool extends AbstractToolPage {
 
 				lines = (DoubleDataset) theDataset;
 			}
+			
+			// Now check for metadata
+			IMetadata metadata = dataHolder.getMetadata();
+			if (metadata != null) 
+				System.err.println("PowderLineTool: Metadata found!");
+			try {
+				if (metadata.getMetaNames().contains("K0"))
+				System.err.println("PowderLineTool: Equation of State metadata found!");
+				theTool.model = new EoSLineModel();
+			} catch (MetadataException mE) { ;}//do nothing
+
 			theTool.clearLines();
 			theTool.setLines(lines);
+
 		}
 	}
 			
