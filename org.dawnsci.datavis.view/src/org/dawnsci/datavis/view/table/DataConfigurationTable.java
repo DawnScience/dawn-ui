@@ -21,6 +21,7 @@ public class DataConfigurationTable {
 	private NDimensions nDimension;
 	
 	private SliceEditingSupport sliceSupport;
+	private DimensionEditSupport dimensionSupport;
 	
 	private Composite tableComposite;
 	
@@ -78,6 +79,9 @@ public class DataConfigurationTable {
 			  return description == null ? "" : description;
 			}
 		});
+		dimensionSupport = new DimensionEditSupport(tableViewer,null);
+		options.setEditingSupport(new DimensionEditSupport(tableViewer,null));
+		
 		
 		slice = new TableViewerColumn(tableViewer, SWT.CENTER, 2);
 		slice.getColumn().setText("Start:Stop:Step");
@@ -124,7 +128,8 @@ public class DataConfigurationTable {
 	
 	public void setInput(NDimensions ndims) {
 		nDimension = ndims;
-		options.setEditingSupport(new DimensionEditSupport(tableViewer,ndims));
+		dimensionSupport.setNDimensions(ndims);
+//		options.setEditingSupport(new DimensionEditSupport(tableViewer,ndims));
 		tableViewer.setInput(ndims);
 		tableViewer.getTable().getParent().layout();
 	}

@@ -40,6 +40,10 @@ public class DimensionEditSupport extends EditingSupport {
 			}
 		});
 	}
+	
+	public void setNDimensions(NDimensions d){
+		dimensionEditor.setInput(d);
+	}
 
 	@Override
 	protected CellEditor getCellEditor(Object element) {
