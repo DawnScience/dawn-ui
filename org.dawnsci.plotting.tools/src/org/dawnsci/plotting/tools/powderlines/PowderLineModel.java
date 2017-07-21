@@ -40,6 +40,14 @@ public class PowderLineModel {
 	public PowderLineCoord getCoords() {
 		return dataCoords;
 	}
+	
+	/**
+	 * @return false, no equation of state metadata is present
+	 */
+	public boolean hasEoSMetadata() {
+		return false;
+	}
+	
 	/**
 	 * @param dataCoords
 	 * 				the coordinates to set for the line data
