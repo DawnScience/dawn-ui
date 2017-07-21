@@ -341,6 +341,12 @@ class trackingJob21Improved {
 								break;
 							}
 							
+							if(k ==28){
+								
+								System.out.println("break2");
+								
+							}
+							
 							FrameModel frame = fms.get(k);
 							
 							if (frame.getDatNo() == nextjok) {
@@ -492,20 +498,20 @@ class trackingJob21Improved {
 								}
 								int[] g = fms.get(0).getRawImageData().squeezeEnds().getShape();
 									
-								if((gvLenPt[0][0] + gvLenPt[1][0])>g[0]){
-									
-										int x = (gvLenPt[0][0] + gvLenPt[1][0])-g[0];
-										
-										gvLenPt[1][0] -= x+1;
-								}
-								
-								if((gvLenPt[0][1] + gvLenPt[1][1])>g[1]){
-										int y = (gvLenPt[0][0] + gvLenPt[1][0])-g[0];
-										
-										gvLenPt[1][1] -= y+1;
-								}
-								
-								gv = LocationLenPtConverterUtils.lenPtToLocationConverter(gvLenPt);
+//								if((gvLenPt[0][0] + gvLenPt[1][0])>g[0]){
+//									
+//										int x = (gvLenPt[0][0] + gvLenPt[1][0])-g[0];
+//										
+//										gvLenPt[1][0] -= x+1;
+//								}
+//								
+//								if((gvLenPt[0][1] + gvLenPt[1][1])>g[1]){
+//										int y = (gvLenPt[0][0] + gvLenPt[1][0])-g[0];
+//										
+//										gvLenPt[1][1] -= y+1;
+//								}
+//								
+//								gv = LocationLenPtConverterUtils.lenPtToLocationConverter(gvLenPt);
 								
 								IDataset output1 = 
 										DummyProcessWithFrames.DummyProcess1(drm, 
@@ -550,12 +556,13 @@ class trackingJob21Improved {
 						
 						drm.getInputForEachDat()[nextjok] = null;
 						
-						if(nextjok != noImages-1){
-							for (int k = nextjok+1; 
+						
+							
+						for (int k = nextk+1; 
 							     k < noImages; 
 							     k++) {
 								
-								if(k ==28){
+								if(k ==29){
 									
 									System.out.println("break");
 									
@@ -666,7 +673,7 @@ class trackingJob21Improved {
 			
 								}
 							}
-						}
+						
 						//////bottom of k++ loop	
 						doneArray[nextjok] = "done";
 					}
