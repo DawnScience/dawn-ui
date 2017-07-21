@@ -515,7 +515,7 @@ public class ReviewTabComposite extends Composite{
 		outputFormatSelection.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		outputFormatSelection.select(0);
 	    
-	    rightForm.setWeights(new int[] {5,10, 5,80});
+	    rightForm.setWeights(new int[] {5,10, 10,75});
 		
 	    rcm.addPropertyChangeListener(new PropertyChangeListener() {
 			

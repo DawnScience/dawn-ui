@@ -2,7 +2,6 @@ package org.dawnsci.surfacescatter.ui;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-
 import org.dawnsci.surfacescatter.AnalaysisMethodologies.Methodology;
 import org.dawnsci.surfacescatter.ClosestNoFinder;
 import org.dawnsci.surfacescatter.CountUpToArray;
@@ -42,17 +41,8 @@ public class TrackingHandlerWithFramesImproved {
 	private ProgressBar progressBar;
 	private TrackingProgressAndAbortView tpaav;
 	private Thread t;
-//	private trackingJob21Improved tj;
 	private ArrayList<FrameModel> fms;
 	private DirectoryModel drm;
-
-//	public Thread getT() {
-//		if(tj != null){
-//			t = tj.getT();
-//		}
-//		
-//		return t;
-//	}
 
 	public void setT(Thread t) {
 		this.t = t;
@@ -90,13 +80,9 @@ public class TrackingHandlerWithFramesImproved {
 		this.gm = gms;
 	}
 
-
 	public void setSsp(SurfaceScatterPresenter ssp) {
 		this.ssp = ssp;
 	}
-	
-
-	@SuppressWarnings("unchecked")
 	
 	protected  void runTJ1(){
 
@@ -118,190 +104,7 @@ public class TrackingHandlerWithFramesImproved {
 		
 		ssp.regionOfInterestSetter(lenPt);
 		
-
-//
-//			trackingJob21Improved tj = new trackingJob21Improved();
-//			debug("tj2 invoked");
-//			tj.setProgress(progressBar);
-//			tj.setCorrectionSelection(MethodSetting.toInt(drm.getCorrectionSelection()));
-//			tj.setGm(gm);
-//			tj.setOutputCurves(outputCurves);
-//			tj.setSsp(ssp);
-//			tj.setSsvs(ssvs);
-//			tj.setTPAAV(tpaav);
-//			tj.setDrm(drm);
-//			tj.setFms(fms);
-//			tj.runTJ2();
-////		}
-//		
-//		ssvs.getCustomComposite().getReplay().setEnabled(true);
-//
-//	}
-//		private void debug(String output) {
-//		if (DEBUG == 1) {
-//			System.out.println(output);
-//		}
-//	}
-//		
-//		
-//		public void updateTrackingDisplay(IDataset tempImage, int imageNumber){
-//			
-//			ssvs.getPlotSystemCompositeView().getFolder().setSelection(2);
-//			ssp.sliderMovemementMainImage(imageNumber);
-//			ssvs.updateIndicators(imageNumber);
-//			ssvs.getPlotSystemCompositeView().getPlotSystem().updatePlot2D(tempImage, null, null);
-//			
-//			ArrayList<IDataset>  kl =new ArrayList<>();
-//			
-//			try{
-//				kl = drm.getBackgroundDatArray();
-//				ssvs.getPlotSystemCompositeView().getSubImageBgPlotSystem().updatePlot2D(kl.get(imageNumber), null, null);
-//			}
-//			catch(Exception t){
-//				System.out.println(t.getMessage());
-//			}
-//			
-//			ssvs.getPlotSystemCompositeView().getPlotSystem().repaint(true);
-//			ssvs.getPlotSystemCompositeView().getSubImageBgPlotSystem().repaint(true);
-//			ssvs.getSsps3c().generalUpdate();
-//			ssp.stitchAndPresentWithFrames(ssvs.getSsps3c().getOutputCurves(), ssvs.getIds());
-//			
-//			double[] location = ssp.getThisLocation(imageNumber);
-//			
-//			int[] len = new int[] {(int) (location[2]-location[0]),(int) (location[5]-location[1])};
-//			int[] pt = new int[] {(int) location[0],(int) location[1]};
-//			int[][] lenPt = { len, pt };
-//			
-//			RectangularROI[] greenAndBg = ssp.trackingRegionOfInterestSetter(lenPt);
-//			
-//			ssvs.getPlotSystemCompositeView().getIRegion().setROI(greenAndBg[0]);
-//			ssvs.getPlotSystemCompositeView().getBgRegion().setROI(greenAndBg[1]);
-//			
-//			if(ssp.getMethodology() == Methodology.OVERLAPPING_BACKGROUND_BOX){
-//				ssvs.getPlotSystemCompositeView().getSecondBgRegion().setROI(ssp.generateOffsetBgROI(lenPt));
-//			}
-//			
-//			ssvs.getSsps3c().generalUpdate(lenPt);
-//			
-//			ssvs.getSsps3c().getOutputCurves().getIntensity().redraw();
-//			
-//			if(progressBar.isDisposed() != true){
-//				progressBar.setSelection(progressBar.getSelection() +1);
-//				
-//				if(progressBar.getSelection() == progressBar.getMaximum()){
-//					tpaav.close();
-//				}
-//			}
-//			
-//
-//			CsdpGeneratorFromDrm csdpgfd = new CsdpGeneratorFromDrm();
-//			
-//			csdpgfd.generateCsdpFromDrm(drm);
-//			
-//			CurveStitchDataPackage csdp = csdpgfd.getCsdp();
-//			
-//			csdp.setRodName("Current Track");
-//			
-//			CurveStitchWithErrorsAndFrames.curveStitch4(csdp, null);
-//			
-//			ssvs.getRaw().getRtc().addCurrentTrace(csdp);
-//			
-//			
-//		}
-//}
-//
-///////////////////////////////////////////////////////////////////////
-/////////////////////// Tracking Job2////////////////////////////////////
-///////////////////////////////////////////////////////////////////////
-//
-//class trackingJob21Improved {
-//
-//	
-//	private IPlottingSystem<Composite> outputCurves;
-//	private GeometricParametersModel gm;
-//	private int correctionSelection;
-//	private int noImages;
-//	private SurfaceScatterPresenter ssp;
-//	private SurfaceScatterViewStart ssvs;
-//	private int DEBUG =0;
-//	private ProgressBar progressBar;
-//	private TrackingProgressAndAbortView tpaav;
-//	private Thread t;
-//	private ArrayList<FrameModel> fms;
-//	
-//	public ArrayList<FrameModel> getFms() {
-//		return fms;
-//	}
-//
-//	public void setFms(ArrayList<FrameModel> fms) {
-//		this.fms = fms;
-//	}
-//
-//	public DirectoryModel getDrm() {
-//		return drm;
-//	}
-//
-//	public void setDrm(DirectoryModel drm) {
-//		this.drm = drm;
-//	}
-//
-//	private DirectoryModel drm;
-//
-//	public Thread getT() {
-//		return t;
-//	}
-//
-//	public void setT(Thread t) {
-//		this.t = t;
-//	}
-//
-//	public TrackingProgressAndAbortView getTPAAV() {
-//		return tpaav;
-//	}
-//
-//	public void setTPAAV(TrackingProgressAndAbortView tpaav) {
-//		this.tpaav = tpaav;
-//	}
-//
-//	public void setProgress(ProgressBar progress){
-//		this.progressBar = progress;
-//	}
-//
-//	public void setOutputCurves(IPlottingSystem<Composite> outputCurves) {
-//		this.outputCurves = outputCurves;
-//	}
-//
-//	public void setCorrectionSelection(int cS) {
-//		this.correctionSelection = cS;
-//	}
-//
-//	public void setGm(GeometricParametersModel gms) {
-//		this.gm = gms;
-//	}
-//
-//	
-//	public void setSsp(SurfaceScatterPresenter ssp) {
-//		this.ssp = ssp;
-//	}
-//	
-//	public void setSsvs (SurfaceScatterViewStart ssvs) {
-//		this.ssvs =  ssvs;
-//	}
-//		
-//	protected void runTJ2() {
-
-//		final Display display = Display.getCurrent();
-	
-		debug("@@@@@@@@@@@~~~~~~~~~~~~~~~in the new tracker~~~~~~~~~~~~~~~~~~@@@@@@@@@@@@@@");
-		drm.resetAll();
-		
 		noImages = fms.size();
-
-//		int startFrame = ssp.getSliderPos();
-//		
-//		int[] imagePosInOriginalDat = CountUpToArray.CountUpToArray1(drm.getFilepathsSortedArray());
-//
-//		int[][] lenPt = ssp.getInitialLenPt();
 		
 		ssp.regionOfInterestSetter(lenPt);
 		
@@ -341,12 +144,6 @@ public class TrackingHandlerWithFramesImproved {
 								break;
 							}
 							
-							if(k ==28){
-								
-								System.out.println("break2");
-								
-							}
-							
 							FrameModel frame = fms.get(k);
 							
 							if (frame.getDatNo() == nextjok) {
@@ -356,96 +153,28 @@ public class TrackingHandlerWithFramesImproved {
 										
 								int trackingMarker = 1;
 								
-								boolean seedRequired = true;
-								
-								if(k==startFrame){
-									seedRequired = false;
-								}
-								
-								for(double[] o : drm.getLocationList().get(frame.getDatNo())){
-									if(!Arrays.equals(o, new double[] {0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0})){
-										seedRequired = false;
-									}	
-								}
+								boolean seedRequired =  doINeedASeedArray(k,
+										  startFrame,
+										  frame.getDatNo());
 								
 								if(seedRequired && 
 								   frame.getTrackingMethodology() != TrackerType1.INTERPOLATION &&
 								   frame.getTrackingMethodology() != TrackerType1.SPLINE_INTERPOLATION &&
 								   frame.getTrackingMethodology() != TrackerType1.USE_SET_POSITIONS &&
 								   drm.isTrackerOn()) {
-									
-									double[] test = new double[] {0,0,0,0,0,0,0,0};
-									double[] test2 = new double[] {10,10,60,10,10,60,60,60};
+
 									double myNum = drm.getSortedX().getDouble(k);
 									double distance = Math.abs(drm.getSortedX().getDouble(0) - myNum);
-									int nearestCompletedDatFileNo = 0;
+									int nearestCompletedDatFileNo = findNearestDatNo(distance,
+																					 myNum);
 									
-									for(int c = 0; c < drm.getSortedX().getSize(); c++){
-									   FrameModel fm = fms.get(c);
-									   double cdistance =  Math.abs(fm.getScannedVariable()- myNum);
-									    if((cdistance < distance) & 
-									       !Arrays.equals(fm.getRoiLocation(), test) & 
-									       !Arrays.equals(fm.getRoiLocation(), test2) &
-									       !Arrays.equals(fm.getRoiLocation(), null)){
-									        
-									    	nearestCompletedDatFileNo = fm.getDatNo();
-									        distance = cdistance;
-									    }
-									}
-			
-									ArrayList<double[]> seedList = drm.getLocationList().get(nearestCompletedDatFileNo);;
-									ArrayList<Double> lList = drm.getDmxList().get(nearestCompletedDatFileNo);
 									
-									double[] seedLocation =null;
-									Dataset yValues = DatasetFactory.zeros(new int[] {1});
-									Dataset xValues = DatasetFactory.zeros(new int[] {1});
-									Dataset lValues = DatasetFactory.zeros(new int[] {1});
-									
-									try{
-										yValues = DatasetFactory.zeros(seedList.size());
-										xValues = DatasetFactory.zeros(seedList.size());
-										lValues = DatasetFactory.zeros(seedList.size());
-									}
-									
-									catch(Exception r){
+									Dataset[] xly = makeXLYArraysForInterpolator(nearestCompletedDatFileNo); 
 										
-										boolean f = true;
-										
-										while(f){
-											
-											for(ArrayList<double[]> kr : drm.getLocationList()){
-												if(kr != null){
-													
-													seedList = kr;
-													
-													yValues = DatasetFactory.zeros(seedList.size());
-													xValues = DatasetFactory.zeros(seedList.size());
-													lValues = DatasetFactory.zeros(seedList.size());
-													
-													f = false;
-												}
-											}
-										}
-									}
-									
-									for(int op = 0; op<seedList.size(); op++){
-											
-											double x = seedList.get(op)[1];
-											double y = seedList.get(op)[0];
-											double l = lList.get(op);
-											
-											if(x!=0.0 && y!=0.0){
-												xValues.set(x, op);
-												yValues.set(y, op);
-												lValues.set(l, op);
-											}
-					
-									}
-										
-									seedLocation = PolynomialOverlap.extrapolatedLocation(drm.getSortedX().getDouble(k),
-																									   lValues, 
-																									   xValues, 
-																									   yValues, 
+									double[] seedLocation = PolynomialOverlap.extrapolatedLocation(drm.getSortedX().getDouble(k),
+																									   xly[1],
+																									   xly[0],
+																									   xly[2],
 																									   drm.getInitialLenPt()[0],
 																									   1);
 									drm.addSeedLocation(frame.getDatNo(),seedLocation);
@@ -487,31 +216,17 @@ public class TrackingHandlerWithFramesImproved {
 								debug("value added to xList:  "   + drm.getSortedX().getDouble(k)  + "  k:   " + k);
 								
 								double[] gv =  drm.getSeedLocation()[frame.getDatNo()];
-								int[][] gvLenPt  =new int[2][];
-								
-								if (frame.getTrackingMethodology() != TrackerType1.USE_SET_POSITIONS){
-								
-									gvLenPt = LocationLenPtConverterUtils.locationToLenPtConverter(gv);
-								}
-								else{
-									gvLenPt =  LocationLenPtConverterUtils.locationToLenPtConverter(frame.getRoiLocation());
-								}
-								int[] g = fms.get(0).getRawImageData().squeezeEnds().getShape();
-									
-//								if((gvLenPt[0][0] + gvLenPt[1][0])>g[0]){
-//									
-//										int x = (gvLenPt[0][0] + gvLenPt[1][0])-g[0];
-//										
-//										gvLenPt[1][0] -= x+1;
+//								int[][] gvLenPt  =new int[2][];
+//								
+//								if (frame.getTrackingMethodology() != TrackerType1.USE_SET_POSITIONS){
+//								
+//									gvLenPt = LocationLenPtConverterUtils.locationToLenPtConverter(gv);
+//								}
+//								else{
+//									gvLenPt =  LocationLenPtConverterUtils.locationToLenPtConverter(frame.getRoiLocation());
 //								}
 //								
-//								if((gvLenPt[0][1] + gvLenPt[1][1])>g[1]){
-//										int y = (gvLenPt[0][0] + gvLenPt[1][0])-g[0];
-//										
-//										gvLenPt[1][1] -= y+1;
-//								}
-//								
-//								gv = LocationLenPtConverterUtils.lenPtToLocationConverter(gvLenPt);
+//								int[] g = fms.get(0).getRawImageData().squeezeEnds().getShape();
 								
 								IDataset output1 = 
 										DummyProcessWithFrames.DummyProcess1(drm, 
@@ -536,11 +251,8 @@ public class TrackingHandlerWithFramesImproved {
 								
 								int imageNumber =k;
 								IDataset tempImage = ssp.getImage(imageNumber);
-								double[] tempLoc = drm.getLocationList().get(frame.getDatNo()).get(frame.getNoInOriginalDat());
-								RectangularROI newROI = new RectangularROI(tempLoc[0],
-									       tempLoc[1],
-									       drm.getInitialLenPt()[0][0],
-									       drm.getInitialLenPt()[0][1],0);
+//								double[] tempLoc = drm.getLocationList().get(frame.getDatNo()).get(frame.getNoInOriginalDat());
+							
 								
 								display.syncExec(new Runnable() {
 									@Override
@@ -562,12 +274,6 @@ public class TrackingHandlerWithFramesImproved {
 							     k < noImages; 
 							     k++) {
 								
-								if(k ==29){
-									
-									System.out.println("break");
-									
-								}
-								
 								if(t.isInterrupted()){
 									break;
 								}
@@ -588,26 +294,18 @@ public class TrackingHandlerWithFramesImproved {
 									try {
 										j = frame.getRawImageData().getSlice(slice);
 									} catch (DatasetException e) {
-										// TODO Auto-generated catch block
 										e.printStackTrace();
 										System.out.println(e.getMessage());
 									}
-		
 									
+									boolean seedRequired = doINeedASeedArray(k, startFrame, frame.getDatNo());
 									
-									boolean seedRequired = true;
-									
-									for(double[] o : drm.getLocationList().get(frame.getDatNo())){
-										if(!Arrays.equals(o, new double[] {0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0})){
-											seedRequired = false;
-										}
-										
-									}
 									
 									if(seedRequired && 
 									   frame.getTrackingMethodology()!= TrackerType1.INTERPOLATION &&
 									   frame.getTrackingMethodology() != TrackerType1.SPLINE_INTERPOLATION &&
-									   frame.getTrackingMethodology()!= TrackerType1.USE_SET_POSITIONS
+									   frame.getTrackingMethodology()!= TrackerType1.USE_SET_POSITIONS &&
+									   drm.isTrackerOn()
 									   ){
 										
 										double[] seedLocation = TrackerLocationInterpolation.trackerInterpolationInterpolator0(drm.getTrackerLocationList(), 
@@ -670,13 +368,12 @@ public class TrackingHandlerWithFramesImproved {
 											return;
 										}
 									});
-			
 								}
 							}
 						
-						//////bottom of k++ loop	
-						doneArray[nextjok] = "done";
-					}
+					//////bottom of k++ loop	
+					doneArray[nextjok] = "done";
+				}
 				
 				if(drm.getCorrectionSelection() == MethodSetting.Reflectivity_NO_Correction ||
 						   
@@ -706,16 +403,12 @@ public class TrackingHandlerWithFramesImproved {
 				}
 				
 				return;
-		}
+			}
 				
 		};
 		t.start();
 		
 	
-		
-		
-		
-		
 		ssvs.getCustomComposite().getReplay().setEnabled(true);
 	}
 	
@@ -789,6 +482,107 @@ public class TrackingHandlerWithFramesImproved {
 		}	
 	}
 
+	private int findNearestDatNo(double distance,
+								 double myNum){
+		
+		int nearestCompletedDatFileNo = 0;
+		
+		double[] test = new double[] {0,0,0,0,0,0,0,0};
+		double[] test2 = new double[] {10,10,60,10,10,60,60,60};
+		
+		for(int c = 0; c < drm.getSortedX().getSize(); c++){
+			   FrameModel fm = fms.get(c);
+			   double cdistance =  Math.abs(fm.getScannedVariable()- myNum);
+			    if((cdistance < distance) && 
+			       !Arrays.equals(fm.getRoiLocation(), test) && 
+			       !Arrays.equals(fm.getRoiLocation(), test2) &&
+			       !Arrays.equals(fm.getRoiLocation(), null)){
+			        
+			    	nearestCompletedDatFileNo = fm.getDatNo();
+			        distance = cdistance;
+			    }
+			}
+		
+		return nearestCompletedDatFileNo;
+		
+	}
+	
+	
+	private Dataset[] makeXLYArraysForInterpolator(int nearestCompletedDatFileNo){
+		
+		ArrayList<double[]> seedList = drm.getLocationList().get(nearestCompletedDatFileNo);
+		ArrayList<Double> lList = drm.getDmxList().get(nearestCompletedDatFileNo);
+		
+		Dataset yValues = DatasetFactory.zeros(new int[] {1});
+		Dataset xValues = DatasetFactory.zeros(new int[] {1});
+		Dataset lValues = DatasetFactory.zeros(new int[] {1});
+		
+		try{
+			yValues = DatasetFactory.zeros(seedList.size());
+			xValues = DatasetFactory.zeros(seedList.size());
+			lValues = DatasetFactory.zeros(seedList.size());
+		}
+		
+		catch(Exception r){
+			
+			boolean f = true;
+			
+			while(f){
+				
+				for(ArrayList<double[]> kr : drm.getLocationList()){
+					if(kr != null){
+						
+						seedList = kr;
+						
+						yValues = DatasetFactory.zeros(seedList.size());
+						xValues = DatasetFactory.zeros(seedList.size());
+						lValues = DatasetFactory.zeros(seedList.size());
+						
+						f = false;
+					}
+				}
+			}
+		}
+		
+		for(int op = 0; op<seedList.size(); op++){
+				
+				double x = seedList.get(op)[1];
+				double y = seedList.get(op)[0];
+				double l = lList.get(op);
+				
+				if(x!=0.0 && y!=0.0){
+					xValues.set(x, op);
+					yValues.set(y, op);
+					lValues.set(l, op);
+				}
+
+		}
+		
+		return new Dataset[] {xValues, lValues, yValues};
+		
+	}
+	
+	
+	private boolean doINeedASeedArray(int k,
+									  int startFrame,
+									  int frameDatNo){
+		
+		boolean seedRequired = true;
+		
+		if(k==startFrame){
+			seedRequired = false;
+		}
+		
+		for(double[] o : drm.getLocationList().get(frameDatNo)){
+			if(!Arrays.equals(o, new double[] {0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0})){
+				seedRequired = false;
+			}	
+		}
+		
+		return seedRequired;
+		
+	}
+	
 	private void debug (String output) {
 		if (DEBUG == 1) {
 			System.out.println(output);
