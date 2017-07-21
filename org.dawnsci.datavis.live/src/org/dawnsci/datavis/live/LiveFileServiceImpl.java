@@ -2,8 +2,10 @@ package org.dawnsci.datavis.live;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
 import java.util.EventListener;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -20,6 +22,7 @@ import org.eclipse.scanning.api.event.IEventService;
 import org.eclipse.scanning.api.event.bean.BeanEvent;
 import org.eclipse.scanning.api.event.bean.IBeanListener;
 import org.eclipse.scanning.api.event.core.IPropertyFilter.FilterAction;
+import org.eclipse.scanning.api.event.core.ISubmitter;
 import org.eclipse.scanning.api.event.core.ISubscriber;
 import org.eclipse.scanning.api.event.scan.IScanListener;
 import org.eclipse.scanning.api.event.scan.ScanBean;
@@ -27,9 +30,13 @@ import org.eclipse.scanning.api.event.scan.ScanEvent;
 import org.eclipse.scanning.api.event.status.Status;
 import org.eclipse.scanning.api.event.status.StatusBean;
 import org.eclipse.scanning.api.ui.CommandConstants;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class LiveFileServiceImpl implements ILiveFileService {
 
+	private static final String PROCESSING_QUEUE_NAME = "scisoft.operation.SUBMISSION_QUEUE";
+	
 	private Set<ILiveFileListener> listeners = new HashSet<>();
 	private ISubscriber<EventListener> scanSubscriber;
 	private ISubscriber<EventListener> procSubscriber;
@@ -39,6 +46,8 @@ public class LiveFileServiceImpl implements ILiveFileService {
 	private IBeanListener<StatusBean> beanListener;
 	
 	private static long MIN_REFRESH_TIME = 2000;
+	
+	private static final Logger logger = LoggerFactory.getLogger(LiveFileServiceImpl.class);
 	
 	private UpdateJob job;
 	
@@ -96,8 +105,72 @@ public class LiveFileServiceImpl implements ILiveFileService {
 //			logger.info("Created subscriber");
 			
 		} catch (URISyntaxException | EventException e) {
-//			logger.error("Could not subscribe to the event service", e);
+			logger.error("Could not subscribe to the event service", e);
 		}
+	}
+	
+	private List<String> getAllRunningFiles(){
+		List<String> scan = getRunningFiles(new LiveFileServiceImpl.BeanFileExtractor() {
+			
+			@Override
+			public String getQueueName() {
+				return EventConstants.SUBMISSION_QUEUE;
+			}
+			
+			@Override
+			public String getFileNameFromBean(StatusBean bean) {
+				return bean instanceof ScanBean ? ((ScanBean)bean).getFilePath() : null;
+			}
+		});
+		
+		List<String> processing = getRunningFiles(new LiveFileServiceImpl.BeanFileExtractor() {
+			
+			@Override
+			public String getQueueName() {
+				return PROCESSING_QUEUE_NAME;
+			}
+			
+			@Override
+			public String getFileNameFromBean(StatusBean bean) {
+				return bean instanceof IOperationBean ? ((IOperationBean)bean).getOutputFilePath() : null;
+			}
+		});
+		
+		scan.addAll(processing);
+		
+		return scan;
+	}
+	
+	private List<String> getRunningFiles(BeanFileExtractor extractor){
+		
+		List<String> output = new ArrayList<>();
+		
+		IEventService eService = ServiceManager.getIEventService();
+		final String suri = CommandConstants.getScanningBrokerUri();
+		if (suri==null) return output; // Nothing to start, standard DAWN.
+
+
+		try {
+			final URI uri = new URI(suri);
+
+			ISubmitter<StatusBean> queueConnection = eService.createSubmitter(uri, extractor.getQueueName());
+			queueConnection.setStatusTopicName(EventConstants.STATUS_TOPIC);
+
+			List<StatusBean> queue = queueConnection.getQueue();
+
+			for (StatusBean b : queue) {
+				if (b.getStatus().isActive()) {
+
+					String filePath = extractor.getFileNameFromBean(b);
+					if (filePath != null) output.add(filePath);
+				}
+			}
+
+		} catch (Exception e) {
+			logger.error("Could not get running files", e);
+		}
+
+		return output;
 	}
 	
 	private void detach() {
@@ -119,7 +192,6 @@ public class LiveFileServiceImpl implements ILiveFileService {
 		return name;
 	}
 
-	// TODO put this in global place?
 	public static int getDataServerPort() {
 		int port = Integer.getInteger("org.eclipse.dawnsci.data.server.port", -1);
 		if (port<=0) port = Integer.getInteger("GDA/gda.dataserver.port", -1);
@@ -129,7 +201,7 @@ public class LiveFileServiceImpl implements ILiveFileService {
 	
 	private class UpdateJob extends Job {
 
-		private final AtomicReference<Runnable> task =new AtomicReference<Runnable>();
+		private final AtomicReference<Runnable> task =new AtomicReference<>();
 		
 		public UpdateJob(String name) {
 			super(name);
@@ -158,8 +230,17 @@ public class LiveFileServiceImpl implements ILiveFileService {
 		
 	}
 	
+	interface BeanFileExtractor {
+		
+		public String getQueueName();
+		
+		public String getFileNameFromBean(StatusBean bean);
+		
+	}
+	
 	private class ScanListener implements IScanListener {
 		
+		@Override
 		public void scanEventPerformed(ScanEvent evt) {
 			for (ILiveFileListener l : listeners) {
 				l.refreshRequest();
@@ -179,7 +260,7 @@ public class LiveFileServiceImpl implements ILiveFileService {
 			
 			final String filePath = beanNoScanReq.getFilePath();
 			// Scan started
-			if (beanNoScanReq.scanStart() == true) {
+			if (beanNoScanReq.scanStart()) {
 
 				// Recent change to GDA means that its configuration may be read without
 				// making a dependency on it.
@@ -193,7 +274,7 @@ public class LiveFileServiceImpl implements ILiveFileService {
 
 			}
 			
-			if (beanNoScanReq.scanEnd() == true) {
+			if (beanNoScanReq.scanEnd()) {
 
 				for (ILiveFileListener l : listeners) l.localReload(filePath);
 			}
@@ -238,6 +319,7 @@ public class LiveFileServiceImpl implements ILiveFileService {
 			}
 		}
 		
+		@Override
 		public Class<StatusBean> getBeanClass() {
 			return StatusBean.class;
 		}
