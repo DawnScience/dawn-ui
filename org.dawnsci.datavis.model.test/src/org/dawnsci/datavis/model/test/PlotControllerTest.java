@@ -8,6 +8,7 @@ import org.dawnsci.datavis.model.DataOptions;
 import org.dawnsci.datavis.model.FileController;
 import org.dawnsci.datavis.model.IFileController;
 import org.dawnsci.datavis.model.IPlotMode;
+import org.dawnsci.datavis.model.LiveServiceManager;
 import org.dawnsci.datavis.model.LoadedFile;
 import org.dawnsci.datavis.model.NDimensions;
 import org.dawnsci.datavis.model.PlotController;
@@ -36,6 +37,7 @@ public class PlotControllerTest extends AbstractTestModel {
 			AbstractTestModel.buildData();
 			plottingSystem = new MockPlottingSystem();
 			ServiceManager.setLoaderService(new LoaderServiceImpl());
+			LiveServiceManager.setILiveFileService(null);
 			fileController = new FileController();
 			ServiceManager.setFileController(fileController);
 			plotManager = new PlotController(plottingSystem);
