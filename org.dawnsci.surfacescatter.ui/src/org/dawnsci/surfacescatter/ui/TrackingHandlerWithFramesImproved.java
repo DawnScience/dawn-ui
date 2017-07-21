@@ -42,17 +42,17 @@ public class TrackingHandlerWithFramesImproved {
 	private ProgressBar progressBar;
 	private TrackingProgressAndAbortView tpaav;
 	private Thread t;
-	private trackingJob21Improved tj;
+//	private trackingJob21Improved tj;
 	private ArrayList<FrameModel> fms;
 	private DirectoryModel drm;
 
-	public Thread getT() {
-		if(tj != null){
-			t = tj.getT();
-		}
-		
-		return t;
-	}
+//	public Thread getT() {
+//		if(tj != null){
+//			t = tj.getT();
+//		}
+//		
+//		return t;
+//	}
 
 	public void setT(Thread t) {
 		this.t = t;
@@ -119,189 +119,189 @@ public class TrackingHandlerWithFramesImproved {
 		ssp.regionOfInterestSetter(lenPt);
 		
 
-
-			trackingJob21Improved tj = new trackingJob21Improved();
-			debug("tj2 invoked");
-			tj.setProgress(progressBar);
-			tj.setCorrectionSelection(MethodSetting.toInt(drm.getCorrectionSelection()));
-			tj.setGm(gm);
-			tj.setOutputCurves(outputCurves);
-			tj.setSsp(ssp);
-			tj.setSsvs(ssvs);
-			tj.setTPAAV(tpaav);
-			tj.setDrm(drm);
-			tj.setFms(fms);
-			tj.runTJ2();
+//
+//			trackingJob21Improved tj = new trackingJob21Improved();
+//			debug("tj2 invoked");
+//			tj.setProgress(progressBar);
+//			tj.setCorrectionSelection(MethodSetting.toInt(drm.getCorrectionSelection()));
+//			tj.setGm(gm);
+//			tj.setOutputCurves(outputCurves);
+//			tj.setSsp(ssp);
+//			tj.setSsvs(ssvs);
+//			tj.setTPAAV(tpaav);
+//			tj.setDrm(drm);
+//			tj.setFms(fms);
+//			tj.runTJ2();
+////		}
+//		
+//		ssvs.getCustomComposite().getReplay().setEnabled(true);
+//
+//	}
+//		private void debug(String output) {
+//		if (DEBUG == 1) {
+//			System.out.println(output);
 //		}
-		
-		ssvs.getCustomComposite().getReplay().setEnabled(true);
+//	}
+//		
+//		
+//		public void updateTrackingDisplay(IDataset tempImage, int imageNumber){
+//			
+//			ssvs.getPlotSystemCompositeView().getFolder().setSelection(2);
+//			ssp.sliderMovemementMainImage(imageNumber);
+//			ssvs.updateIndicators(imageNumber);
+//			ssvs.getPlotSystemCompositeView().getPlotSystem().updatePlot2D(tempImage, null, null);
+//			
+//			ArrayList<IDataset>  kl =new ArrayList<>();
+//			
+//			try{
+//				kl = drm.getBackgroundDatArray();
+//				ssvs.getPlotSystemCompositeView().getSubImageBgPlotSystem().updatePlot2D(kl.get(imageNumber), null, null);
+//			}
+//			catch(Exception t){
+//				System.out.println(t.getMessage());
+//			}
+//			
+//			ssvs.getPlotSystemCompositeView().getPlotSystem().repaint(true);
+//			ssvs.getPlotSystemCompositeView().getSubImageBgPlotSystem().repaint(true);
+//			ssvs.getSsps3c().generalUpdate();
+//			ssp.stitchAndPresentWithFrames(ssvs.getSsps3c().getOutputCurves(), ssvs.getIds());
+//			
+//			double[] location = ssp.getThisLocation(imageNumber);
+//			
+//			int[] len = new int[] {(int) (location[2]-location[0]),(int) (location[5]-location[1])};
+//			int[] pt = new int[] {(int) location[0],(int) location[1]};
+//			int[][] lenPt = { len, pt };
+//			
+//			RectangularROI[] greenAndBg = ssp.trackingRegionOfInterestSetter(lenPt);
+//			
+//			ssvs.getPlotSystemCompositeView().getIRegion().setROI(greenAndBg[0]);
+//			ssvs.getPlotSystemCompositeView().getBgRegion().setROI(greenAndBg[1]);
+//			
+//			if(ssp.getMethodology() == Methodology.OVERLAPPING_BACKGROUND_BOX){
+//				ssvs.getPlotSystemCompositeView().getSecondBgRegion().setROI(ssp.generateOffsetBgROI(lenPt));
+//			}
+//			
+//			ssvs.getSsps3c().generalUpdate(lenPt);
+//			
+//			ssvs.getSsps3c().getOutputCurves().getIntensity().redraw();
+//			
+//			if(progressBar.isDisposed() != true){
+//				progressBar.setSelection(progressBar.getSelection() +1);
+//				
+//				if(progressBar.getSelection() == progressBar.getMaximum()){
+//					tpaav.close();
+//				}
+//			}
+//			
+//
+//			CsdpGeneratorFromDrm csdpgfd = new CsdpGeneratorFromDrm();
+//			
+//			csdpgfd.generateCsdpFromDrm(drm);
+//			
+//			CurveStitchDataPackage csdp = csdpgfd.getCsdp();
+//			
+//			csdp.setRodName("Current Track");
+//			
+//			CurveStitchWithErrorsAndFrames.curveStitch4(csdp, null);
+//			
+//			ssvs.getRaw().getRtc().addCurrentTrace(csdp);
+//			
+//			
+//		}
+//}
+//
+///////////////////////////////////////////////////////////////////////
+/////////////////////// Tracking Job2////////////////////////////////////
+///////////////////////////////////////////////////////////////////////
+//
+//class trackingJob21Improved {
+//
+//	
+//	private IPlottingSystem<Composite> outputCurves;
+//	private GeometricParametersModel gm;
+//	private int correctionSelection;
+//	private int noImages;
+//	private SurfaceScatterPresenter ssp;
+//	private SurfaceScatterViewStart ssvs;
+//	private int DEBUG =0;
+//	private ProgressBar progressBar;
+//	private TrackingProgressAndAbortView tpaav;
+//	private Thread t;
+//	private ArrayList<FrameModel> fms;
+//	
+//	public ArrayList<FrameModel> getFms() {
+//		return fms;
+//	}
+//
+//	public void setFms(ArrayList<FrameModel> fms) {
+//		this.fms = fms;
+//	}
+//
+//	public DirectoryModel getDrm() {
+//		return drm;
+//	}
+//
+//	public void setDrm(DirectoryModel drm) {
+//		this.drm = drm;
+//	}
+//
+//	private DirectoryModel drm;
+//
+//	public Thread getT() {
+//		return t;
+//	}
+//
+//	public void setT(Thread t) {
+//		this.t = t;
+//	}
+//
+//	public TrackingProgressAndAbortView getTPAAV() {
+//		return tpaav;
+//	}
+//
+//	public void setTPAAV(TrackingProgressAndAbortView tpaav) {
+//		this.tpaav = tpaav;
+//	}
+//
+//	public void setProgress(ProgressBar progress){
+//		this.progressBar = progress;
+//	}
+//
+//	public void setOutputCurves(IPlottingSystem<Composite> outputCurves) {
+//		this.outputCurves = outputCurves;
+//	}
+//
+//	public void setCorrectionSelection(int cS) {
+//		this.correctionSelection = cS;
+//	}
+//
+//	public void setGm(GeometricParametersModel gms) {
+//		this.gm = gms;
+//	}
+//
+//	
+//	public void setSsp(SurfaceScatterPresenter ssp) {
+//		this.ssp = ssp;
+//	}
+//	
+//	public void setSsvs (SurfaceScatterViewStart ssvs) {
+//		this.ssvs =  ssvs;
+//	}
+//		
+//	protected void runTJ2() {
 
-	}
-		private void debug(String output) {
-		if (DEBUG == 1) {
-			System.out.println(output);
-		}
-	}
-		
-		
-		public void updateTrackingDisplay(IDataset tempImage, int imageNumber){
-			
-			ssvs.getPlotSystemCompositeView().getFolder().setSelection(2);
-			ssp.sliderMovemementMainImage(imageNumber);
-			ssvs.updateIndicators(imageNumber);
-			ssvs.getPlotSystemCompositeView().getPlotSystem().updatePlot2D(tempImage, null, null);
-			
-			ArrayList<IDataset>  kl =new ArrayList<>();
-			
-			try{
-				kl = drm.getBackgroundDatArray();
-				ssvs.getPlotSystemCompositeView().getSubImageBgPlotSystem().updatePlot2D(kl.get(imageNumber), null, null);
-			}
-			catch(Exception t){
-				System.out.println(t.getMessage());
-			}
-			
-			ssvs.getPlotSystemCompositeView().getPlotSystem().repaint(true);
-			ssvs.getPlotSystemCompositeView().getSubImageBgPlotSystem().repaint(true);
-			ssvs.getSsps3c().generalUpdate();
-			ssp.stitchAndPresentWithFrames(ssvs.getSsps3c().getOutputCurves(), ssvs.getIds());
-			
-			double[] location = ssp.getThisLocation(imageNumber);
-			
-			int[] len = new int[] {(int) (location[2]-location[0]),(int) (location[5]-location[1])};
-			int[] pt = new int[] {(int) location[0],(int) location[1]};
-			int[][] lenPt = { len, pt };
-			
-			RectangularROI[] greenAndBg = ssp.trackingRegionOfInterestSetter(lenPt);
-			
-			ssvs.getPlotSystemCompositeView().getIRegion().setROI(greenAndBg[0]);
-			ssvs.getPlotSystemCompositeView().getBgRegion().setROI(greenAndBg[1]);
-			
-			if(ssp.getMethodology() == Methodology.OVERLAPPING_BACKGROUND_BOX){
-				ssvs.getPlotSystemCompositeView().getSecondBgRegion().setROI(ssp.generateOffsetBgROI(lenPt));
-			}
-			
-			ssvs.getSsps3c().generalUpdate(lenPt);
-			
-			ssvs.getSsps3c().getOutputCurves().getIntensity().redraw();
-			
-			if(progressBar.isDisposed() != true){
-				progressBar.setSelection(progressBar.getSelection() +1);
-				
-				if(progressBar.getSelection() == progressBar.getMaximum()){
-					tpaav.close();
-				}
-			}
-			
-
-			CsdpGeneratorFromDrm csdpgfd = new CsdpGeneratorFromDrm();
-			
-			csdpgfd.generateCsdpFromDrm(drm);
-			
-			CurveStitchDataPackage csdp = csdpgfd.getCsdp();
-			
-			csdp.setRodName("Current Track");
-			
-			CurveStitchWithErrorsAndFrames.curveStitch4(csdp, null);
-			
-			ssvs.getRaw().getRtc().addCurrentTrace(csdp);
-			
-			
-		}
-}
-
-/////////////////////////////////////////////////////////////////////
-///////////////////// Tracking Job2////////////////////////////////////
-/////////////////////////////////////////////////////////////////////
-
-class trackingJob21Improved {
-
-	
-	private IPlottingSystem<Composite> outputCurves;
-	private GeometricParametersModel gm;
-	private int correctionSelection;
-	private int noImages;
-	private SurfaceScatterPresenter ssp;
-	private SurfaceScatterViewStart ssvs;
-	private int DEBUG =0;
-	private ProgressBar progressBar;
-	private TrackingProgressAndAbortView tpaav;
-	private Thread t;
-	private ArrayList<FrameModel> fms;
-	
-	public ArrayList<FrameModel> getFms() {
-		return fms;
-	}
-
-	public void setFms(ArrayList<FrameModel> fms) {
-		this.fms = fms;
-	}
-
-	public DirectoryModel getDrm() {
-		return drm;
-	}
-
-	public void setDrm(DirectoryModel drm) {
-		this.drm = drm;
-	}
-
-	private DirectoryModel drm;
-
-	public Thread getT() {
-		return t;
-	}
-
-	public void setT(Thread t) {
-		this.t = t;
-	}
-
-	public TrackingProgressAndAbortView getTPAAV() {
-		return tpaav;
-	}
-
-	public void setTPAAV(TrackingProgressAndAbortView tpaav) {
-		this.tpaav = tpaav;
-	}
-
-	public void setProgress(ProgressBar progress){
-		this.progressBar = progress;
-	}
-
-	public void setOutputCurves(IPlottingSystem<Composite> outputCurves) {
-		this.outputCurves = outputCurves;
-	}
-
-	public void setCorrectionSelection(int cS) {
-		this.correctionSelection = cS;
-	}
-
-	public void setGm(GeometricParametersModel gms) {
-		this.gm = gms;
-	}
-
-	
-	public void setSsp(SurfaceScatterPresenter ssp) {
-		this.ssp = ssp;
-	}
-	
-	public void setSsvs (SurfaceScatterViewStart ssvs) {
-		this.ssvs =  ssvs;
-	}
-		
-	protected void runTJ2() {
-
-		final Display display = Display.getCurrent();
+//		final Display display = Display.getCurrent();
 	
 		debug("@@@@@@@@@@@~~~~~~~~~~~~~~~in the new tracker~~~~~~~~~~~~~~~~~~@@@@@@@@@@@@@@");
 		drm.resetAll();
 		
 		noImages = fms.size();
 
-		int startFrame = ssp.getSliderPos();
-		
-		int[] imagePosInOriginalDat = CountUpToArray.CountUpToArray1(drm.getFilepathsSortedArray());
-
-		int[][] lenPt = ssp.getInitialLenPt();
+//		int startFrame = ssp.getSliderPos();
+//		
+//		int[] imagePosInOriginalDat = CountUpToArray.CountUpToArray1(drm.getFilepathsSortedArray());
+//
+//		int[][] lenPt = ssp.getInitialLenPt();
 		
 		ssp.regionOfInterestSetter(lenPt);
 		
