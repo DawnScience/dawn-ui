@@ -235,7 +235,8 @@ public class TrackingHandlerWithFramesImproved {
 																			 imagePosInOriginalDat[k], 
 																			 trackingMarker, 
 																			 k,
-																			 gv);
+																			 gv,
+																			 ssp.getLenPt());
 								
 								if(Arrays.equals(output1.getShape(), (new int[] {2,2}))){
 									Display d =Display.getCurrent();
@@ -343,7 +344,8 @@ public class TrackingHandlerWithFramesImproved {
 																			   imagePosInOriginalDat[k], 
 																			   trackingMarker, 
 																			   k,
-																			   drm.getSeedLocation()[frame.getDatNo()]);
+																			   drm.getSeedLocation()[frame.getDatNo()],
+																			   ssp.getLenPt());
 			
 									if(Arrays.equals(output1.getShape(), (new int[] {2,2}))){
 										Display d =Display.getCurrent();
@@ -587,6 +589,10 @@ public class TrackingHandlerWithFramesImproved {
 		if (DEBUG == 1) {
 			System.out.println(output);
 		}
+	}
+	
+	public Thread getT() {
+		return t;
 	}
 }
 	

@@ -711,7 +711,8 @@ public class GeometricParametersWindows extends Composite{
 				  (Double.parseDouble(sampleSize.getText())),
 				  (Double.parseDouble(normalisationFactor.getText())),
 				  (specular.getSelection()),
-				  (imageName.getText())
+				  (imageName.getText()),
+				  selectedOption.getText()
 				  );
 		
 	}
@@ -738,7 +739,8 @@ public class GeometricParametersWindows extends Composite{
 				  (Double.parseDouble(sampleSize.getText())),
 				  (Double.parseDouble(normalisationFactor.getText())),
 				  (specular.getSelection()),
-				  (imageName.getText())
+				  (imageName.getText()),
+				  selectedOption.getText()
 				  );
 		
 	}

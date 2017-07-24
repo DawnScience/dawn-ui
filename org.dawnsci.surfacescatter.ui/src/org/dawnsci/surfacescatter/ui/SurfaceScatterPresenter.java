@@ -26,7 +26,7 @@ import org.dawnsci.surfacescatter.AnalaysisMethodologies;
 import org.dawnsci.surfacescatter.AnalaysisMethodologies.FitPower;
 import org.dawnsci.surfacescatter.AnalaysisMethodologies.Methodology;
 import org.dawnsci.surfacescatter.BoxSlicerRodScanUtilsForDialog;
-import org.dawnsci.surfacescatter.ClosestNoFinder;//private ArrayList<double[]> locationList; 
+import org.dawnsci.surfacescatter.ClosestNoFinder; 
 import org.dawnsci.surfacescatter.CsdpGeneratorFromDrm;
 import org.dawnsci.surfacescatter.CurveStitchDataPackage;
 import org.dawnsci.surfacescatter.CurveStitchWithErrorsAndFrames;
@@ -136,8 +136,9 @@ public class SurfaceScatterPresenter {
 		//////imageArray is an array of the image ILazyDatasets 
 		
 		IDataset[] xArray = new IDataset[filepaths.length];
+		IDataset[] thetaArray = new IDataset[filepaths.length];
 		////xArray is an array of the l params (for a rod)
-		
+		////thetaArray is an array of the "theta" params (for refecltivity)
 		IDataset[] hArray = new IDataset[filepaths.length];
 		IDataset[] kArray = new IDataset[filepaths.length];
 		IDataset[] lArray = new IDataset[filepaths.length];
@@ -161,12 +162,19 @@ public class SurfaceScatterPresenter {
 		//////imagesToFilepathRef: once the images have been sorted into an ascending "array", the position on that array of an image
 		//////corresponds to an integer in this list, which corresponds to the position of that image's dat file in String[] filepaths
 		
+		
+		Dataset xArrayCon = DatasetFactory.zeros(1);
+		Dataset hArrayCon = DatasetFactory.zeros(1);
+		Dataset kArrayCon = DatasetFactory.zeros(1);
+		Dataset lArrayCon = DatasetFactory.zeros(1);
+		Dataset thetaArrayCon = DatasetFactory.zeros(1);
+		
 		try {
 		
 			for (int id = 0; id < filepaths.length; id++) {
 				
 				gm.setxName(xName);
-				gm.setxNameRef(xName);
+//				gm.setxNameRef(xName);
 				
 				if(imageFolderPath == null){
 					dh1 = LoaderFactory.getData(filepaths[id]);
@@ -317,11 +325,17 @@ public class SurfaceScatterPresenter {
 					MethodSetting.toInt(drm.getCorrectionSelection()) == 2||	
 					MethodSetting.toInt(drm.getCorrectionSelection()) == 3){
 					
-					ILazyDataset ildx = dh1.getLazyDataset(gm.getxNameRef());
+					ILazyDataset ildx = dh1.getLazyDataset(gm.getxName());
+					ILazyDataset ildtheta = dh1.getLazyDataset(gm.getxNameRef());
+					
 					
 					SliceND slice1 = new SliceND(ildx.getShape());
 					IDataset xdat = ildx.getSlice(slice1);
 					xArray[id] = xdat;
+					
+					SliceND slice2 = new SliceND(ildtheta.getShape());
+					IDataset thetadat = ildtheta.getSlice(slice2);
+					thetaArray[id] = thetadat;
 					
 					ILazyDataset dcdtheta = dh1.getLazyDataset(ReflectivityMetadataTitlesForDialog.getdcdtheta());
 					
@@ -344,6 +358,21 @@ public class SurfaceScatterPresenter {
 							System.out.println("can't get qdcd");
 						}
 					} 
+					
+					
+					//xArrayCon is an unsorted, but concatenated DoubleDataset of l values
+					if(MethodSetting.toMethod(correctionSelection) != MethodSetting.SXRD){
+						try{
+							thetaArrayCon = DatasetUtils.concatenate(thetaArray, 0);
+							xArrayCon = DatasetUtils.concatenate(xArray, 0);
+							
+						}
+						catch(Exception g){
+							
+						}
+					}
+					
+					
 				}
 			}
 		}
@@ -370,10 +399,7 @@ public class SurfaceScatterPresenter {
 			}
 		});
 		
-		Dataset xArrayCon = DatasetFactory.zeros(1);
-		Dataset hArrayCon = DatasetFactory.zeros(1);
-		Dataset kArrayCon = DatasetFactory.zeros(1);
-		Dataset lArrayCon = DatasetFactory.zeros(1);
+		
 		
 		Dataset tifNamesCon = DatasetFactory.zeros(1);
 		
@@ -450,6 +476,9 @@ public class SurfaceScatterPresenter {
 					
 				}
 			}
+			else{
+				DatasetUtils.sort(xArrayConCloneForh, thetaArrayCon);
+			}
 			
 			
 			Dataset sortedTifNamesCon = this.sortStrings(xArrayConCloneDouble, tifNamesCon);
@@ -465,32 +494,6 @@ public class SurfaceScatterPresenter {
 			String[] datNamesInOrder = new String[imageRefList.size()];
 			
 			drm.setCorrectionSelection(MethodSetting.toMethod(correctionSelection));
-			
-			IDataset hdat = DatasetFactory.createFromObject(0);
-			IDataset kdat = DatasetFactory.createFromObject(0);
-			IDataset ldat = DatasetFactory.createFromObject(0);
-			
-			if(MethodSetting.toMethod(correctionSelection) == MethodSetting.SXRD){
-				try{
-					ILazyDataset ildl = dh1.getLazyDataset("l");
-					SliceND slicel = new SliceND(ildl.getShape());
-					ldat = ildl.getSlice(slicel);
-					
-					ILazyDataset ildh = dh1.getLazyDataset("h");
-					SliceND sliceh = new SliceND(ildl.getShape());
-					hdat = ildh.getSlice(sliceh);
-					
-					ILazyDataset ildk = dh1.getLazyDataset("k");
-					SliceND slicek = new SliceND(ildk.getShape());
-					kdat = ildl.getSlice(slicek);
-				}
-				catch(Exception h){
-					
-				}
-				
-				
-			}
-			
 			
 			for(int f = 0; f<imageRefList.size(); f++ ){
 				datNamesInOrder[f] = filepaths[imagesToFilepathRefDat.getInt(f)];
@@ -555,33 +558,38 @@ public class SurfaceScatterPresenter {
 				}
 				
 				else {
-					IDataHolder dh2 = LoaderFactory.getData(fm.getDatFilePath());
-
-					dcdtheta = dh2.getLazyDataset(ReflectivityMetadataTitlesForDialog.getdcdtheta());
-
-					qdcd = dh2.getLazyDataset(ReflectivityMetadataTitlesForDialog.getqdcd());
+//					IDataHolder dh2 = LoaderFactory.getData(fm.getDatFilePath());
+//
+//					dcdtheta = dh2.getLazyDataset(ReflectivityMetadataTitlesForDialog.getdcdtheta());
+//
+//					qdcd = dh2.getLazyDataset(ReflectivityMetadataTitlesForDialog.getqdcd());
+//					
+//					if (dcdtheta == null) {
+//						try {
+//							dcdtheta = dh2.getLazyDataset(ReflectivityMetadataTitlesForDialog.getsdcdtheta());
+//
+//						} catch (Exception e2) {
+//							System.out.println("can't get dcdtheta");
+//						}
+//					} 
+//					else {
+//					}
+//					
+//					if (qdcd == null) {
+//						try {
+//							qdcd = dh2.getLazyDataset(ReflectivityMetadataTitlesForDialog.getqsdcd());
+//						} catch (Exception e2) {
+//							System.out.println("can't get qdcd");
+//						}
+//					} 
+//					
+//					else {
+//					}
 					
-					if (dcdtheta == null) {
-						try {
-							dcdtheta = dh2.getLazyDataset(ReflectivityMetadataTitlesForDialog.getsdcdtheta());
-
-						} catch (Exception e2) {
-							System.out.println("can't get dcdtheta");
-						}
-					} 
-					else {
-					}
 					
-					if (qdcd == null) {
-						try {
-							qdcd = dh2.getLazyDataset(ReflectivityMetadataTitlesForDialog.getqsdcd());
-						} catch (Exception e2) {
-							System.out.println("can't get qdcd");
-						}
-					} 
 					
-					else {
-					}
+					drm.setSortedTheta( thetaArrayCon);
+					
 				}	
 				
 				try{
@@ -643,6 +651,7 @@ public class SurfaceScatterPresenter {
 				catch(Exception i ){
 					System.out.println("problem doing flux corr");
 				}
+				
 				fm.setScannedVariable(xArrayCon.getDouble(f));
 			
 			}
@@ -1632,7 +1641,8 @@ public class SurfaceScatterPresenter {
 													 j, 
 													 trackingMarker,
 													 selection,
-													 lj);	
+													 lj,
+													 getLenPt());	
 			
 			drm.addBackgroundDatArray(fms.size(), selection, output);
 			
@@ -1666,7 +1676,8 @@ public class SurfaceScatterPresenter {
 										  double sampleSize,
 										  double normalisationFactor,
 										  boolean specular,
-										  String imageName
+										  String imageName,
+										  String xNameRef
 										  ){
 											
 		
@@ -1689,6 +1700,7 @@ public class SurfaceScatterPresenter {
 			gm.setNormalisationFactor(normalisationFactor);
 			gm.setSpecular(specular);
 			gm.setImageName(imageName);
+			gm.setxNameRef(xNameRef);
 			
 	}
 	
