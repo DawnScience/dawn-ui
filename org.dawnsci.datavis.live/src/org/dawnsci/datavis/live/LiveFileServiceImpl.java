@@ -35,7 +35,7 @@ import org.slf4j.LoggerFactory;
 
 public class LiveFileServiceImpl implements ILiveFileService {
 
-	private static final String PROCESSING_QUEUE_NAME = "scisoft.operation.SUBMISSION_QUEUE";
+	private static final String PROCESSING_QUEUE_NAME = "scisoft.operation.STATUS_QUEUE";
 	
 	private Set<ILiveFileListener> listeners = new HashSet<>();
 	private ISubscriber<EventListener> scanSubscriber;
@@ -53,8 +53,8 @@ public class LiveFileServiceImpl implements ILiveFileService {
 	
 	@Override
 	public void addLiveFileListener(ILiveFileListener l) {
-		if (!attached) attach();
 		listeners.add(l);
+		if (!attached) attach();
 	}
 
 	@Override
@@ -104,6 +104,30 @@ public class LiveFileServiceImpl implements ILiveFileService {
 			
 //			logger.info("Created subscriber");
 			
+			Job loadRunningScan = new Job("Load running scans") {
+				
+				@Override
+				protected IStatus run(IProgressMonitor monitor) {
+					List<String> allRunningFiles = getAllRunningFiles();
+					String host = getDataServerHost();
+					int port    = getDataServerPort();
+					
+					for (String fname : allRunningFiles){
+						try {
+							LiveLoadedFile f = new LiveLoadedFile(fname, host, port);
+							fireListeners(f);
+						} catch (Exception e) {
+							logger.error("Could not load running file {}",fname,e);
+						}
+						
+					}
+
+					return org.eclipse.core.runtime.Status.OK_STATUS;
+				}
+			};
+			
+			loadRunningScan.schedule();
+			
 		} catch (URISyntaxException | EventException e) {
 			logger.error("Could not subscribe to the event service", e);
 		}
@@ -114,13 +138,14 @@ public class LiveFileServiceImpl implements ILiveFileService {
 			
 			@Override
 			public String getQueueName() {
-				return EventConstants.SUBMISSION_QUEUE;
+				return EventConstants.STATUS_SET;
 			}
 			
 			@Override
 			public String getFileNameFromBean(StatusBean bean) {
 				return bean instanceof ScanBean ? ((ScanBean)bean).getFilePath() : null;
 			}
+
 		});
 		
 		List<String> processing = getRunningFiles(new LiveFileServiceImpl.BeanFileExtractor() {
@@ -134,6 +159,8 @@ public class LiveFileServiceImpl implements ILiveFileService {
 			public String getFileNameFromBean(StatusBean bean) {
 				return bean instanceof IOperationBean ? ((IOperationBean)bean).getOutputFilePath() : null;
 			}
+
+			
 		});
 		
 		scan.addAll(processing);
@@ -156,7 +183,7 @@ public class LiveFileServiceImpl implements ILiveFileService {
 			ISubmitter<StatusBean> queueConnection = eService.createSubmitter(uri, extractor.getQueueName());
 			queueConnection.setStatusTopicName(EventConstants.STATUS_TOPIC);
 
-			List<StatusBean> queue = queueConnection.getQueue();
+			List<StatusBean> queue = queueConnection.getQueue(extractor.getQueueName(), null);
 
 			for (StatusBean b : queue) {
 				if (b.getStatus().isActive()) {
@@ -235,7 +262,7 @@ public class LiveFileServiceImpl implements ILiveFileService {
 		public String getQueueName();
 		
 		public String getFileNameFromBean(StatusBean bean);
-		
+
 	}
 	
 	private class ScanListener implements IScanListener {
