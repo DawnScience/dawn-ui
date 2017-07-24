@@ -19,7 +19,55 @@ import org.eclipse.january.dataset.Maths;
  */
 public class EoSLineModel extends PowderLineModel {
 
+	private double bulkModulus, bulkModulus_p; 
+
+	private double pressure;
 	
+
+	/**
+	 * @return the bulk modulus of the material
+	 */
+	public double getBulkModulus() {
+		return bulkModulus;
+	}
+
+	/**
+	 * @param bulkModulus
+	 * 					the bulk modulus of the material to set
+	 */
+	public void setBulkModulus(double bulkModulus) {
+		this.bulkModulus = bulkModulus;
+	}
+
+	/**
+	 * @return the pressure derivative of the bulk modulus
+	 */
+	public double getBulkModulus_p() {
+		return bulkModulus_p;
+	}
+
+	/**
+	 * @param bulkModulus_p
+	 * 						the pressure derivative of the bulk modulus to set
+	 */
+	public void setBulkModulus_p(double bulkModulus_p) {
+		this.bulkModulus_p = bulkModulus_p;
+	}
+
+	/**
+	 * @return the pressure
+	 */
+	public double getPressure() {
+		return pressure;
+	}
+
+	/**
+	 * @param pressure the pressure to set
+	 */
+	public void setPressure(double pressure) {
+		this.pressure = pressure;
+	}
+
 	@Override
 	public boolean hasEoSMetadata() {
 		return true;
@@ -32,7 +80,7 @@ public class EoSLineModel extends PowderLineModel {
 	
 	@Override
 	public DoubleDataset getLines(PowderLineCoord coords) {
-		double volumeRatio = 1.;
+		double volumeRatio = this.getVolumeRatio();
 		double linearRatio = Math.cbrt(volumeRatio);
 		System.err.println("Will one day apply EoS");
 		DoubleDataset lines = super.getLines(coords);
@@ -40,4 +88,7 @@ public class EoSLineModel extends PowderLineModel {
 		
 	}
 	
+	private double getVolumeRatio() {
+		return 1.0;
+	}
 }
