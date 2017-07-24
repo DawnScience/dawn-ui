@@ -35,6 +35,15 @@ public class PowderLineModel {
 	private PowderLineCoord dataCoords;
 	private DoubleDataset lineLocations;
 	
+	public PowderLineModel() {
+		// default to the typical wavelength of I15-1
+		this.wavelength = hc_keVAA/76.6;
+		// Probably d-spacing
+		this.dataCoords = PowderLineCoord.D_SPACING;
+		// and empty dataset of zeros
+		this.lineLocations = DatasetFactory.zeros(0);
+	}
+	
 	/**
 	 * @return the coordinates of the line data
 	 */
