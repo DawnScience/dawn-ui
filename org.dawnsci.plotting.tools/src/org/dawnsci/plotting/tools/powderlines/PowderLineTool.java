@@ -65,7 +65,9 @@ public class PowderLineTool extends AbstractToolPage {
 	private PowderLineModel.PowderLineCoord plotCoordinate = PowderLineModel.PowderLineCoord.Q; // The coordinate of the input data
 	private List<IRegion> currentLineRegions;
 	
-	private Composite domainCompo;
+	private SashForm sashForm;
+	// sub composites, needed to set the relative size for the different domains
+	private Composite tableCompo, domainCompo;
 	
 	private PowderLineModel model;
 	
@@ -113,11 +115,11 @@ public class PowderLineTool extends AbstractToolPage {
 		composite.setLayout(new FillLayout());
 		
 		// Add a SashForm to show both the table and the domain specific pane
-		SashForm sashGordon = new SashForm(composite, SWT.VERTICAL);
+		sashForm = new SashForm(composite, SWT.VERTICAL);
 		
 		
 		// Create the table of lines
-		Composite tableCompo = new Composite(sashGordon, SWT.NONE);
+		tableCompo = new Composite(sashForm, SWT.NONE);
 		tableCompo.setLayout(new FillLayout());
 		lineTableViewer = new TableViewer(tableCompo, SWT.FULL_SELECTION | SWT.SINGLE | SWT.H_SCROLL | SWT.V_SCROLL | SWT.BORDER);
 //		lineTableViewer = new TableViewer(composite, SWT.FULL_SELECTION | SWT.SINGLE | SWT.H_SCROLL | SWT.V_SCROLL | SWT.BORDER);
@@ -150,9 +152,9 @@ public class PowderLineTool extends AbstractToolPage {
 		lineTableViewer.setInput(model.getLines(defaultCoords));
 		
 		// The domain specific part of the interface
-		domainCompo = new Composite(sashGordon, SWT.NONE);
+		domainCompo = new Composite(sashForm, SWT.NONE);
 		// maximize the table until told otherwise
-		sashGordon.setMaximizedControl(tableCompo);
+		sashForm.setMaximizedControl(tableCompo);
 		
 		activate();
 		
@@ -360,6 +362,35 @@ public class PowderLineTool extends AbstractToolPage {
 		};
 		getSite().getActionBars().getToolBarManager().add(clearAction);
 	}
+
+	public void drawDomainSpecific(PowderDomains domain) {
+		if (domain == PowderDomains.EQUATION_OF_STATE) {
+			sashForm.setMaximizedControl(null);
+		} else {
+			sashForm.setMaximizedControl(tableCompo);
+		}
+	}
+	
+	protected class EoSComposite extends Composite {
+		
+		Text pressure, v, v0;
+		PowderLineModel Model;
+		
+		public EoSComposite(Composite parent, int style) {
+			super(parent, style);
+			
+			GridLayout layout = new GridLayout(2, false);
+			this.setLayout(layout);
+			Label pressureLabel = new Label(this, SWT.NONE);
+			pressureLabel.setText("Pressure (hPa)");
+			pressure.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+			pressure = new Text(this, SWT.BORDER);
+			
+		}
+		
+		
+
+	}
 	
 	protected class LoadAction extends Action {
 		protected Shell theShell;
@@ -435,10 +466,12 @@ public class PowderLineTool extends AbstractToolPage {
 
 			theTool.clearLines();
 			theTool.setLines(lines);
+			
+			theTool.drawDomainSpecific(theTool.model.getDomain());
 
 		}
 	}
-			
+	
 	
 	public class PowderLineSettingsDialog extends Dialog {
 
