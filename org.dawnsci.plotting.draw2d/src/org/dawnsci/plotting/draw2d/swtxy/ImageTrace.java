@@ -1470,8 +1470,16 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 			this.image = im;
 			this.axes  = (List<IDataset>)axes;
 			// is this enough?
-			if (imageServiceBean==null) imageServiceBean = new ImageServiceBean();
+			if (imageServiceBean==null){ 
+				imageServiceBean = new ImageServiceBean();
+			}
+			
 			imageServiceBean.setImage(im);
+			
+			imageServiceBean.setLogColorScale(getPreferenceStore().getBoolean(PlottingConstants.CM_LOGSCALE));
+			if(imageServiceBean.isLogColorScale())
+				rehistogram();
+			
 			return false;
 		}
 

@@ -38,7 +38,7 @@ public class HistogramPreferencePage extends PreferencePage implements IWorkbenc
 	private IPaletteService pservice = (IPaletteService)PlatformUI.getWorkbench().getService(IPaletteService.class);
 	private String schemeName;
 
-	private Button invertedCheck;
+	private Button invertedCheck, logScaleCheck;
 
 	public HistogramPreferencePage() {
 	}
@@ -78,6 +78,10 @@ public class HistogramPreferencePage extends PreferencePage implements IWorkbenc
 		invertedCheck = new Button(comp, SWT.CHECK);
 		invertedCheck.setText("Colour map inverted");
 		invertedCheck.setSelection(getColourMapInvertedPreference());
+		
+		logScaleCheck = new Button(comp, SWT.CHECK);
+		logScaleCheck.setText("Log Scale set");
+		logScaleCheck.setSelection(getColourMapLogScalePreference());
 
 		initializePage();
 
@@ -113,6 +117,7 @@ public class HistogramPreferencePage extends PreferencePage implements IWorkbenc
 	private void loadDefaultPreferences() {
 		cmbColourMap.select(cmbColourMap.indexOf(getDefaultColourMapChoicePreference()));
 		invertedCheck.setSelection(getDefaultColourMapInvertedPreference());
+		logScaleCheck.setSelection(getDefaultColourMapLogScalePreference());
 	}
 
 	private String getColourMapChoicePreference() {
@@ -128,6 +133,13 @@ public class HistogramPreferencePage extends PreferencePage implements IWorkbenc
 		}
 		return Activator.getPlottingPreferenceStore().getBoolean(PlottingConstants.CM_INVERTED);
 	}
+	
+	private boolean getColourMapLogScalePreference(){
+		if(Activator.getPlottingPreferenceStore().isDefault(PlottingConstants.CM_LOGSCALE)){
+			return Activator.getPlottingPreferenceStore().getDefaultBoolean(PlottingConstants.CM_LOGSCALE);
+		}
+		return Activator.getPlottingPreferenceStore().getBoolean(PlottingConstants.CM_LOGSCALE);
+	}
 
 	/**
 	 * Store the resolution value
@@ -135,6 +147,7 @@ public class HistogramPreferencePage extends PreferencePage implements IWorkbenc
 	private void storePreferences() {
 		Activator.getPlottingPreferenceStore().setValue(PlottingConstants.COLOUR_SCHEME, cmbColourMap.getItem(cmbColourMap.getSelectionIndex()));
 		Activator.getPlottingPreferenceStore().setValue(PlottingConstants.CM_INVERTED, invertedCheck.getSelection());
+		Activator.getPlottingPreferenceStore().setValue(PlottingConstants.CM_LOGSCALE, logScaleCheck.getSelection());
 	}
 
 	private String getDefaultColourMapChoicePreference() {
@@ -143,5 +156,9 @@ public class HistogramPreferencePage extends PreferencePage implements IWorkbenc
 
 	private boolean getDefaultColourMapInvertedPreference() {
 		return Activator.getPlottingPreferenceStore().getDefaultBoolean(PlottingConstants.CM_INVERTED);
+	}
+	
+	private boolean getDefaultColourMapLogScalePreference(){
+		return Activator.getPlottingPreferenceStore().getDefaultBoolean(PlottingConstants.CM_LOGSCALE);
 	}
 }
