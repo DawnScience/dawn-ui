@@ -48,10 +48,6 @@ public class TrackingHandlerWithFramesImproved {
 		this.t = t;
 	}
 
-	public Thread getT() {
-		return t;
-	}
-
 	public TrackingProgressAndAbortView getTPAAV() {
 		return tpaav;
 	}
