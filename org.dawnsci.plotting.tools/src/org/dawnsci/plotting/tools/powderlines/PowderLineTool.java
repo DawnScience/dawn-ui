@@ -44,6 +44,7 @@ import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.window.ToolTip;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -64,9 +65,16 @@ public class PowderLineTool extends AbstractToolPage {
 	private PowderLineModel.PowderLineCoord plotCoordinate = PowderLineModel.PowderLineCoord.Q; // The coordinate of the input data
 	private List<IRegion> currentLineRegions;
 	
+	private Composite domainCompo;
+	
 	private PowderLineModel model;
 	
 	static final PowderLineModel.PowderLineCoord defaultCoords = PowderLineCoord.D_SPACING;
+	
+	public enum PowderDomains {
+			POWDER,
+			EQUATION_OF_STATE
+	};
 	
 	public PowderLineTool() {
 		try{
@@ -104,8 +112,15 @@ public class PowderLineTool extends AbstractToolPage {
 		this.composite = new Composite(parent, SWT.NONE);
 		composite.setLayout(new FillLayout());
 		
+		// Add a SashForm to show both the table and the domain specific pane
+		SashForm sashGordon = new SashForm(composite, SWT.VERTICAL);
+		
+		
 		// Create the table of lines
-		lineTableViewer = new TableViewer(composite, SWT.FULL_SELECTION | SWT.SINGLE | SWT.H_SCROLL | SWT.V_SCROLL | SWT.BORDER);
+		Composite tableCompo = new Composite(sashGordon, SWT.NONE);
+		tableCompo.setLayout(new FillLayout());
+		lineTableViewer = new TableViewer(tableCompo, SWT.FULL_SELECTION | SWT.SINGLE | SWT.H_SCROLL | SWT.V_SCROLL | SWT.BORDER);
+//		lineTableViewer = new TableViewer(composite, SWT.FULL_SELECTION | SWT.SINGLE | SWT.H_SCROLL | SWT.V_SCROLL | SWT.BORDER);
 		createColumns(lineTableViewer);
 		lineTableViewer.getTable().setLinesVisible(true);
 		lineTableViewer.getTable().setHeaderVisible(true);
@@ -133,6 +148,11 @@ public class PowderLineTool extends AbstractToolPage {
 		});
 		
 		lineTableViewer.setInput(model.getLines(defaultCoords));
+		
+		// The domain specific part of the interface
+		domainCompo = new Composite(sashGordon, SWT.NONE);
+		// maximize the table until told otherwise
+		sashGordon.setMaximizedControl(tableCompo);
 		
 		activate();
 		

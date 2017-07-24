@@ -9,6 +9,7 @@
 
 package org.dawnsci.plotting.tools.powderlines;
 
+import org.dawnsci.plotting.tools.powderlines.PowderLineTool.PowderDomains;
 import org.eclipse.january.dataset.DatasetFactory;
 import org.eclipse.january.dataset.DoubleDataset;
 import org.eclipse.january.dataset.Maths;
@@ -46,6 +47,13 @@ public class PowderLineModel {
 	 */
 	public boolean hasEoSMetadata() {
 		return false;
+	}
+	
+	/**
+	 * @return the domain specific data to display with models of this type
+	 */
+	public PowderLineTool.PowderDomains getDomain() {
+		return PowderDomains.POWDER;
 	}
 	
 	/**

@@ -8,6 +8,7 @@
  */
 package org.dawnsci.plotting.tools.powderlines;
 
+import org.dawnsci.plotting.tools.powderlines.PowderLineTool.PowderDomains;
 import org.eclipse.january.dataset.DoubleDataset;
 import org.eclipse.january.dataset.Maths;
 
@@ -22,6 +23,11 @@ public class EoSLineModel extends PowderLineModel {
 	@Override
 	public boolean hasEoSMetadata() {
 		return true;
+	}
+	
+	@Override
+	public PowderLineTool.PowderDomains getDomain() {
+		return PowderDomains.EQUATION_OF_STATE;
 	}
 	
 	@Override
