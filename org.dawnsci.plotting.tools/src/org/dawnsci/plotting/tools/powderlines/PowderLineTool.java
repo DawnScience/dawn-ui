@@ -461,7 +461,12 @@ public class PowderLineTool extends AbstractToolPage {
 			try {
 				if (metadata.getMetaNames().contains("K0"))
 				System.err.println("PowderLineTool: Equation of State metadata found!");
-				theTool.model = new EoSLineModel();
+				EoSLineModel eosModel = new EoSLineModel();
+				eosModel.setBulkModulus(Double.parseDouble((String) metadata.getMetaValue("K0")));
+				eosModel.setBulkModulus(Double.parseDouble((String) metadata.getMetaValue("K0P")));
+				eosModel.setPressure(0.);
+				theTool.model = eosModel;
+				
 			} catch (MetadataException mE) { ;}//do nothing
 
 			theTool.clearLines();
