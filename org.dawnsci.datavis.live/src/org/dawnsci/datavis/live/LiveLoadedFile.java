@@ -98,7 +98,7 @@ public class LiveLoadedFile extends LoadedFile implements IRefreshable {
 			
 			long[] maxShape = ((DataNode)s.getValue().getDestination()).getMaxShape();
 			
-			if (allOnes(maxShape)) {
+			if (maxShape.length == 0 || allOnes(maxShape)) {
 				continue;
 			}
 			
@@ -257,6 +257,14 @@ public class LiveLoadedFile extends LoadedFile implements IRefreshable {
 		return true;
 	}
 	
+	private static boolean allOnes(int[] shape) {
+		for (int l : shape) {
+			if (l != 1) return false;
+		}
+		
+		return true;
+	}
+	
 	private void updateDataHolder() {
 
 		String path = getFilePath();
@@ -301,7 +309,13 @@ public class LiveLoadedFile extends LoadedFile implements IRefreshable {
 				logger.error("Could not refresh dataset:" + lazyDataset.getName(),e);
 			}
 		}
+		
+		int[] shape = lazyDataset.getShape();
+		
+		if (shape.length == 0 || allOnes(shape)) return;
+		
 		if (lazyDataset != null && ((LazyDatasetBase)lazyDataset).getDType() != Dataset.STRING) {
+			
 			DataOptions d = new DataOptions(name, this);
 			dataOptions.put(d.getName(),d);
 		}
@@ -393,6 +407,7 @@ public class LiveLoadedFile extends LoadedFile implements IRefreshable {
 			dataHolder.set(tmp);
 			
 			if (dataOptions.isEmpty()) {
+				logger.debug("Data options empty on local reload");
 				String[] names = dataHolder.get().getNames();
 				for (String n : names) {
 					ILazyDataset lazyDataset = dataHolder.get().getLazyDataset(n);
