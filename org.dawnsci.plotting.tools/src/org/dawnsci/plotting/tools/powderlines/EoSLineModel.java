@@ -14,7 +14,7 @@ import org.eclipse.january.dataset.Maths;
 
 /**
  * A specialization of {@link PowderLineModel}, additionally holding equation of state data
- * @author rkl37156
+ * @author Timothy Spain, timothy.spain@diamond.ac.uk
  *
  */
 public class EoSLineModel extends PowderLineModel {
