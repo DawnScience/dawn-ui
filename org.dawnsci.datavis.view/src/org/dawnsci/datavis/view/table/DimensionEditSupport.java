@@ -10,6 +10,7 @@ import org.eclipse.jface.viewers.EditingSupport;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.StructuredSelection;
+import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CCombo;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -17,38 +18,36 @@ import org.eclipse.swt.widgets.Composite;
 
 public class DimensionEditSupport extends EditingSupport {
 
-	private ComboBoxViewerCellEditor dimensionEditor = null;
 	
-	public DimensionEditSupport(ColumnViewer viewer, NDimensions ndims) {
+	public DimensionEditSupport(ColumnViewer viewer) {
 		super(viewer);
-		dimensionEditor = new ComboBoxViewerCellEditor((Composite) getViewer().getControl());
-		dimensionEditor.setLabelProvider(new LabelProvider());
-		dimensionEditor.setContentProvider(new ArrayContentProvider());
-		dimensionEditor.setActivationStyle(ComboBoxViewerCellEditor.DROP_DOWN_ON_MOUSE_ACTIVATION);
-		setNDimensions(ndims);
-		dimensionEditor.getViewer().getCCombo().addSelectionListener(new SelectionAdapter() {
-
-			@Override
-			public void widgetSelected(SelectionEvent event) {
-				ISelection selection = viewer.getSelection();
-				if (!selection.isEmpty()) {
-					CCombo cCombo = dimensionEditor.getViewer().getCCombo();
-					String text = cCombo.getText();
-					DimensionEditSupport.this.setValue(((StructuredSelection)selection).getFirstElement(), text);
-					
-				}
-			}
-		});
-	}
-	
-	public void setNDimensions(NDimensions d){
-		if (d == null || d.getOptions() == null) return;
-		dimensionEditor.setInput(d.getOptions());
 	}
 
 	@Override
 	protected CellEditor getCellEditor(Object element) {
-		return dimensionEditor;
+		final ComboBoxViewerCellEditor dimEditor = new ComboBoxViewerCellEditor((Composite) getViewer().getControl(), SWT.READ_ONLY);
+		dimEditor.setLabelProvider(new LabelProvider());
+		dimEditor.setContentProvider(new ArrayContentProvider());
+		dimEditor.setActivationStyle(ComboBoxViewerCellEditor.DROP_DOWN_ON_MOUSE_ACTIVATION);
+		Object[] dataOptions =((NDimensions)getViewer().getInput()).getOptions();
+		dimEditor.setInput(dataOptions);
+		
+		dimEditor.getViewer().getCCombo().addSelectionListener(new SelectionAdapter() {
+
+			@Override
+			public void widgetSelected(SelectionEvent event) {
+				ISelection selection = getViewer().getSelection();
+				if (!selection.isEmpty()) {
+					CCombo cCombo = dimEditor.getViewer().getCCombo();
+					String text = cCombo.getText();
+					DimensionEditSupport.this.setValue(((StructuredSelection)selection).getFirstElement(), text);
+					getViewer().refresh();
+					
+				}
+			}
+		});
+		
+		return dimEditor;
 	}
 
 	@Override
