@@ -12,6 +12,8 @@ import org.dawnsci.plotting.tools.powderlines.PowderLineTool.PowderDomains;
 import org.eclipse.january.dataset.DoubleDataset;
 import org.eclipse.january.dataset.Maths;
 
+import uk.ac.diamond.scisoft.analysis.crystallography.BirchMurnaghanSolver;
+
 /**
  * A specialization of {@link PowderLineModel}, additionally holding equation of state data
  * @author Timothy Spain, timothy.spain@diamond.ac.uk
