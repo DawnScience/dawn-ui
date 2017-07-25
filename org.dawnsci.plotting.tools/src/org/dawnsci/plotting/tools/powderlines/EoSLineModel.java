@@ -80,49 +80,10 @@ public class EoSLineModel extends PowderLineModel {
 	
 	@Override
 	public DoubleDataset getLines(PowderLineCoord coords) {
-//		double volumeRatio = this.getVolumeRatio();
-		double linearRatio = solveBirchMurnaghan();
+		double linearRatio = BirchMurnaghanSolver.birchMurnaghanLinear(pressure, bulkModulus, bulkModulus_p);
 		System.err.println("Will one day apply EoS");
 		DoubleDataset lines = super.getLines(coords);
 		return (lines.getSize() > 0) ? (DoubleDataset) Maths.multiply(linearRatio, lines) : lines;
 		
 	}
-
-	// In the below, x is the linear unit cell size as a function of pressure x = (V/V0)^(1/3)
-	private double term1(double x) {
-		return 3./2 * bulkModulus * (Math.pow(x, -7.) - Math.pow(x, -5.));
-	}
-	private double dTerm1_dx(double x) {
-		return 3./2. * bulkModulus * (-7. * Math.pow(x, 8.) + 5. * Math.pow(x,  6.));
-	}
-	
-	private double term2(double x) {
-		return ( 1 + 3./4.*(bulkModulus_p - 4)*(Math.pow(x, -2.) - 1));
-	}
-
-	private double dTerm2_dx(double x) {
-		return 3./4. * (bulkModulus_p - 4) * -2. * Math.pow(x, -3.);
-	}
-	
-	private double fBirchMurnaghan(double x) {
-		return  term1(x) * term2(x);
-	}
-	
-	private double dBirchMurnaghan(double x) {
-		return term1(x) * dTerm1_dx(x) + term1(x) * dTerm2_dx(x);
-	}
-	
-	private double solveBirchMurnaghan() {
-		// Solve the Birch-Murnaghan equation of state to get the linear ratio at the current pressure
-		final double error = 1e-6;
-		double x0, x1 = 1;
-		
-		do {
-			x0 = x1;
-			x1 = x0 - fBirchMurnaghan(x0)/dBirchMurnaghan(x0);
-		} while (Math.abs(x1/x0 - 1) > error);
-		
-		return x1;
-	}
-	
 }
