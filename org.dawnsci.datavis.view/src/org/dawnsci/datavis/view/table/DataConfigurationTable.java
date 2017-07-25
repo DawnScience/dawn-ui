@@ -80,7 +80,7 @@ public class DataConfigurationTable {
 			}
 		});
 		dimensionSupport = new DimensionEditSupport(tableViewer,null);
-		options.setEditingSupport(new DimensionEditSupport(tableViewer,null));
+		options.setEditingSupport(dimensionSupport);
 		
 		
 		slice = new TableViewerColumn(tableViewer, SWT.CENTER, 2);

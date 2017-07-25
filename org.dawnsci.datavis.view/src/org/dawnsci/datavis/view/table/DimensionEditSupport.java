@@ -25,7 +25,7 @@ public class DimensionEditSupport extends EditingSupport {
 		dimensionEditor.setLabelProvider(new LabelProvider());
 		dimensionEditor.setContentProvider(new ArrayContentProvider());
 		dimensionEditor.setActivationStyle(ComboBoxViewerCellEditor.DROP_DOWN_ON_MOUSE_ACTIVATION);
-		dimensionEditor.setInput(ndims != null ? ndims.getDimensionOptions() : null);
+		setNDimensions(ndims);
 		dimensionEditor.getViewer().getCCombo().addSelectionListener(new SelectionAdapter() {
 
 			@Override
@@ -42,7 +42,8 @@ public class DimensionEditSupport extends EditingSupport {
 	}
 	
 	public void setNDimensions(NDimensions d){
-		dimensionEditor.setInput(d);
+		if (d == null || d.getOptions() == null) return;
+		dimensionEditor.setInput(d.getOptions());
 	}
 
 	@Override
