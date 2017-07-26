@@ -24,7 +24,7 @@
    <includes
          id="org.dawnsci.miniconda.feature"
          version="0.0.0"
-         os="linux,win32"
-         arch="x86,x86_64"/>
+         os="linux,macosx,win32"
+         arch="x86_64"/>
 
 </feature>
