@@ -91,6 +91,9 @@ Additional Ant tasks for Buckminster build. Based on http://www.ralfebert.de/blo
         <condition property="productIsWindows" value="true">
             <equals arg1="${product.os}" arg2="win32" />
         </condition>
+        <condition property="productIsMacOS" value="true">
+            <equals arg1="${product.osname}" arg2="mac" />
+        </condition>
 
         <property name="destination.parent" location="${sp:destination.parent}"/>
         <property.expand property="destination.directory" definition="${product.directory.name}"/>
@@ -116,7 +119,13 @@ Additional Ant tasks for Buckminster build. Based on http://www.ralfebert.de/blo
         </antcall>
     </target>
 
-    <target name="install-product" depends="get-product-description, make_product_dir">
+    <target name="make_product_dir_MacOS_extra" depends="make_product_dir" if="productIsMacOS">
+        <antcall target="setup.directory">
+            <param name="setup.directory.name" value="${destination.parent}/MacOS/Dawn" />
+        </antcall>
+    </target>
+
+    <target name="install-product" depends="get-product-description, make_product_dir, make_product_dir_MacOS_extra">
         <makeurl property="repository" file="${sp:repository}"/>
 
         <pathconvert property="equinox.launcher.jar">
