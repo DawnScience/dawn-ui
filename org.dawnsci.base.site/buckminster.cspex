@@ -12,28 +12,6 @@
     </artifacts>
     <actions>
 
-        <public name="create.product-linux.gtk.x86" actor="ant">
-            <actorProperties>
-                <property key="buildFile" value="buckminster.ant" />
-                <property key="targets" value="create.product" />
-            </actorProperties>
-            <properties>
-                <property key="product.os" value="linux" />
-                <property key="product.ws" value="gtk" />
-                <property key="product.arch" value="x86" />
-                <property key="profile" value="DawnVanillaProfile" />
-                <property key="iu" value="org.dawnsci.base.product" />
-            </properties>
-            <prerequisites>
-                <attribute name="create.product.setup" />
-                <attribute name="manifest" alias="manifest" component="org.dawnsci.base.product.feature" />
-                <attribute name="site.p2" alias="repository" />
-            </prerequisites>
-            <products alias="destination.parent"
-                base="${product.parent.directory.location}">
-            </products>
-        </public>
-
         <public name="create.product-linux.gtk.x86_64" actor="ant">
             <actorProperties>
                 <property key="buildFile" value="buckminster.ant" />
@@ -43,28 +21,6 @@
                 <property key="product.os" value="linux" />
                 <property key="product.ws" value="gtk" />
                 <property key="product.arch" value="x86_64" />
-                <property key="profile" value="DawnVanillaProfile" />
-                <property key="iu" value="org.dawnsci.base.product" />
-            </properties>
-            <prerequisites>
-                <attribute name="create.product.setup" />
-                <attribute name="manifest" alias="manifest" component="org.dawnsci.base.product.feature" />
-                <attribute name="site.p2" alias="repository" />
-            </prerequisites>
-            <products alias="destination.parent"
-                base="${product.parent.directory.location}">
-            </products>
-        </public>
-
-        <public name="create.product-win32.win32.x86" actor="ant">
-            <actorProperties>
-                <property key="buildFile" value="buckminster.ant" />
-                <property key="targets" value="create.product" />
-            </actorProperties>
-            <properties>
-                <property key="product.os" value="win32" />
-                <property key="product.ws" value="win32" />
-                <property key="product.arch" value="x86" />
                 <property key="profile" value="DawnVanillaProfile" />
                 <property key="iu" value="org.dawnsci.base.product" />
             </properties>
@@ -122,28 +78,6 @@
             </products>
         </public>
 
-        <public name="create.product.zip-linux.gtk.x86" actor="ant">
-            <actorProperties>
-                <property key="buildFile" value="buckminster.ant" />
-                <property key="targets" value="create.product create.product.zip" />
-            </actorProperties>
-            <properties>
-                <property key="product.os" value="linux" />
-                <property key="product.ws" value="gtk" />
-                <property key="product.arch" value="x86" />
-                <property key="profile" value="DawnVanillaProfile" />
-                <property key="iu" value="org.dawnsci.base.product" />
-            </properties>
-            <prerequisites>
-                <attribute name="create.product.setup" />
-                <attribute name="manifest" alias="manifest" component="org.dawnsci.base.product.feature" />
-                <attribute name="site.p2" alias="repository" />
-            </prerequisites>
-            <products alias="destination.parent"
-                base="${product.parent.directory.location}">
-            </products>
-        </public>
-
         <public name="create.product.zip-linux.gtk.x86_64" actor="ant">
             <actorProperties>
                 <property key="buildFile" value="buckminster.ant" />
@@ -153,28 +87,6 @@
                 <property key="product.os" value="linux" />
                 <property key="product.ws" value="gtk" />
                 <property key="product.arch" value="x86_64" />
-                <property key="profile" value="DawnVanillaProfile" />
-                <property key="iu" value="org.dawnsci.base.product" />
-            </properties>
-            <prerequisites>
-                <attribute name="create.product.setup" />
-                <attribute name="manifest" alias="manifest" component="org.dawnsci.base.product.feature" />
-                <attribute name="site.p2" alias="repository" />
-            </prerequisites>
-            <products alias="destination.parent"
-                base="${product.parent.directory.location}">
-            </products>
-        </public>
-
-        <public name="create.product.zip-win32.win32.x86" actor="ant">
-            <actorProperties>
-                <property key="buildFile" value="buckminster.ant" />
-                <property key="targets" value="create.product create.product.zip" />
-            </actorProperties>
-            <properties>
-                <property key="product.os" value="win32" />
-                <property key="product.ws" value="win32" />
-                <property key="product.arch" value="x86" />
                 <property key="profile" value="DawnVanillaProfile" />
                 <property key="iu" value="org.dawnsci.base.product" />
             </properties>
@@ -245,9 +157,7 @@
 
     <groups>
         <public name="create.product.zip-all">
-            <attribute name="create.product.zip-linux.gtk.x86" />
             <attribute name="create.product.zip-linux.gtk.x86_64" />
-            <attribute name="create.product.zip-win32.win32.x86" />
             <attribute name="create.product.zip-win32.win32.x86_64" />
             <attribute name="create.product.zip-macosx.cocoa.x86_64" />
         </public>
