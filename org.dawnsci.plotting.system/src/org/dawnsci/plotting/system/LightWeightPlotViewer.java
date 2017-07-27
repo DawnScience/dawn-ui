@@ -12,10 +12,8 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -885,6 +883,14 @@ public class LightWeightPlotViewer<T> extends AbstractPlottingViewer<T> implemen
 		return trace;
 	}
 
+	private List<IDataset> getLineTracesData() {
+		Collection<ILineTrace> traces = system.getTracesByClass(ILineTrace.class);
+		List<IDataset> data = new ArrayList<>();
+		for (ILineTrace line : traces) {
+			data.add(line.getData());
+		}
+		return data;
+	}
 
 	/**
 	 * Internal usage only
@@ -914,8 +920,7 @@ public class LightWeightPlotViewer<T> extends AbstractPlottingViewer<T> implemen
 		yAxis.setVisible(true);
 
 		if (title==null) {
-			// TODO Fix titles for multiple calls to create1DPlot(...)
-			setTitle(getTitle(x, ys, true, rootName));
+			setTitle(getTitle(x, ys, getLineTracesData(), true, rootName));
 		} else {
 			setTitle(title);
 		}
@@ -1619,17 +1624,15 @@ public class LightWeightPlotViewer<T> extends AbstractPlottingViewer<T> implemen
 		return xyGraph.isEnabled();
 	}
 
-	public static String getTitle(final IDataset xIn, 
-			final List<IDataset> ysIn, 
-			final boolean isFileName) {
-		return getTitle(xIn,ysIn,isFileName,null);
+	public static String getTitle(final IDataset xIn, final List<IDataset> ysIn, final boolean isFileName) {
+		return getTitle(xIn, ysIn, null, isFileName, null);
 	}
 
 	@SuppressWarnings("unchecked")
 	public static String getTitle(final IDataset xIn, 
 			final List<? extends IDataset> ysIn, 
-			final boolean isFileName,
-			final String  rootName) {
+			final List<? extends IDataset> list,
+			final boolean isFileName, final String  rootName) {
 
 		final IDataset       x;
 		final List<IDataset> ys;
@@ -1643,32 +1646,49 @@ public class LightWeightPlotViewer<T> extends AbstractPlottingViewer<T> implemen
 			ys = (List<IDataset>) ysIn;
 		}
 
+		final String[] names = new String[2]; // store first and last name
+		final Pattern pattern = isFileName ? Pattern.compile("(.*) \\(.*\\)") : null;
+		int total = ys.size();
+		int i = 0; // number of names contributing to title
+		if (list != null) {
+			total += list.size();
+			i = getTitleNames(list, rootName, names, pattern, i);
+		}
+		i = getTitleNames(ys, rootName, names, pattern, i);
+
 		final StringBuilder buf = new StringBuilder();
 		buf.append("Plot of ");
-		final Set<String> used = new HashSet<String>(7);
-		int i=0;
-		int dataSetSize=ys.size();
-		for (IDataset dataSet : ys) {
-			String name = getName(dataSet,rootName);
-
-			if (isFileName && name!=null) {
-				// Strip off file name
-				final Matcher matcher = Pattern.compile("(.*) \\(.*\\)").matcher(name);
-				if (matcher.matches()) name = matcher.group(1);
-			}
-
-			if (used.contains(name)) continue;			
-			if(i==0) buf.append(name);
-			if (ys.size()<2) break;
-			if(i==1 && 1==dataSetSize-1) buf.append(","+name);
-			if(i==dataSetSize-1 && dataSetSize-1!=1) buf.append("..."+name);
-			i++;
+		buf.append(names[0]);
+		if (i > 0 && total > 1) {
+			buf.append(total == 2 ? "," : "...");
+			buf.append(names[1]);
 		}
 		buf.append(" against ");
 		buf.append((x != null && x.getName() != null && !x.getName().isEmpty()) ? x.getName() : XAXIS_DEFAULT_NAME);
 		return buf.toString();
 	}
 
+	private static int getTitleNames(final List<? extends IDataset> list, final String rootName, final String[] names,
+			final Pattern pattern, int i) {
+		for (IDataset dataset : list) {
+			String name = getName(dataset, rootName);
+			if (name == null) {
+				continue;
+			}
+			if (pattern != null) {
+				// Strip off file name
+				final Matcher matcher = pattern.matcher(name);
+				if (matcher.matches()) name = matcher.group(1);
+			}
+			if (i == 0) {
+				names[i++] = name;
+			} else if (!name.equals(names[0])) {
+				names[1] = name; // overwrite second name
+			}
+		}
+		return i;
+	}
+	
 	/**
 	 * 
 	 * @param x

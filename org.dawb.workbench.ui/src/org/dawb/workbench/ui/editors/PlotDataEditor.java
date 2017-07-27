@@ -368,7 +368,7 @@ public class PlotDataEditor extends EditorPart implements IReusableEditor, ISlic
 
 			final IDataset x;
 			if (plottingSystem.isXFirst() && sels.size()>1) {
-				x  = data;
+				x = data;
 				sels.remove(0);
 			} else {
 				x = null;
@@ -449,6 +449,10 @@ public class PlotDataEditor extends EditorPart implements IReusableEditor, ISlic
 		final List<ITrace> traces = new ArrayList<ITrace>();
 		Display.getDefault().syncExec(new Runnable() {
 			public void run() {
+				IAxis ax = plottingSystem.getSelectedXAxis();
+				if (ax != null) {
+					ax.setTitle(x == null ? "X-Axis" : x.getName());
+				}
 				List<IAxis> yAxes = getYAxes();
 				try { // TODO magic constant!!!
 					for (int i = 1; i <= 4; i++) {
@@ -509,6 +513,13 @@ public class PlotDataEditor extends EditorPart implements IReusableEditor, ISlic
 						}
 					}
 					plottingSystem.removeTrace(iTrace);
+				}
+
+				// ensure selected y is visible and has a default name if plotting more than one 
+				IAxis ay = plottingSystem.getSelectedYAxis();
+				if (!ay.isVisible() || traces.size() > 1) {
+					ay.setTitle("Y-Axis");
+					ay.setVisible(true);
 				}
         	}
         });

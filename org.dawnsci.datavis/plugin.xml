@@ -23,11 +23,13 @@
             <command
                   commandId="org.dawnsci.datavis.model.fileopen"
                   label="Open File..."
+                  mnemonic="."
                   style="push">
             </command>
             <command
                   commandId="org.dawnsci.datavis.model.fileclose"
                   label="Close"
+                  mnemonic="C"
                   style="push">
             </command>
             <separator
@@ -45,7 +47,8 @@
             </separator>
             <command
                   commandId="org.eclipse.ui.file.exit"
-                  label="Exit">
+                  label="Exit"
+                  mnemonic="x">
             </command>
             <visibleWhen
                   checkEnabled="false">

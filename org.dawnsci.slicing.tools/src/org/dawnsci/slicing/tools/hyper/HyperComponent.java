@@ -153,6 +153,10 @@ public class HyperComponent {
 	
 	public void setData(ILazyDataset lazy, List<IDataset> daxes, Slice[] slices, int[] order,
 			IDatasetROIReducer mainReducer, IDatasetROIReducer sideReducer) {
+		
+		if (leftJob != null) leftJob.cancel();
+		if (rightJob != null) rightJob.cancel();
+		
 		//FIXME needs to be made more generic
 		this.leftJob = new HyperDelegateJob("Left update",
 				sideSystem,
@@ -245,6 +249,11 @@ public class HyperComponent {
 
 	public void setMyRoi(IROI myRoi) {
 		this.myRoi = myRoi;
+	}
+	
+	public void clear() {
+		mainSystem.reset();
+		sideSystem.reset();
 	}
 
 	public void setFocus() {

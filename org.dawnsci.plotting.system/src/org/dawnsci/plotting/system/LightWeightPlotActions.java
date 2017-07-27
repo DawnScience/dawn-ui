@@ -108,7 +108,7 @@ class LightWeightPlotActions {
 	private PlotActionsManagerImpl actionBarManager;
 	private XYRegionGraph          xyGraph;
 	private LightWeightPlotViewer<?>  viewer;
-	private boolean                datasetChoosingRequired = true;
+	private boolean                datasetChoosingRequired = false;
 	private Action                 plotIndex, plotX, lockHisto;
 	
 	private Shell fullScreenShell;
@@ -1039,7 +1039,16 @@ class LightWeightPlotActions {
 	 * @param rightClick
 	 */
 	protected void createAdditionalActions(final XYRegionGraph xyGraph, final IContributionManager rightClick) {
-						
+
+		final Action autoHideRegions = new Action("Automatically hide regions", IAction.AS_CHECK_BOX) {
+			public void run() {
+				viewer.getSystem().setAutoHideRegions(isChecked());
+			}
+		};
+		autoHideRegions.setChecked(viewer.getSystem().isAutoHideRegions());
+		autoHideRegions.setToolTipText("Automatically hide regions when the plot dimensionality changes.");
+		actionBarManager.registerAction(autoHideRegions, ActionType.ALL, ManagerType.MENUBAR);
+
 		if (datasetChoosingRequired) {
 			// By index or using x 
 			final CheckableActionGroup group = new CheckableActionGroup();
@@ -1075,31 +1084,10 @@ class LightWeightPlotActions {
 				plotIndex.setChecked(true);
 				viewer.getSystem().setXFirst(false);
 			}
-			
-			final Action autoHideRegions = new Action("Automatically hide regions", IAction.AS_CHECK_BOX) {
-				public void run() {
-					viewer.getSystem().setAutoHideRegions(isChecked());
-				}
-			};
-			autoHideRegions.setChecked(viewer.getSystem().isAutoHideRegions());
-			autoHideRegions.setToolTipText("Automatically hide regions when the plot dimensionality changes.");
-			actionBarManager.registerAction(autoHideRegions, ActionType.ALL, ManagerType.MENUBAR);
-			
-			MenuAction filters = PlotFilterActions.getXYFilterActions(actionBarManager.getSystem());
-			
 			actionBarManager.addXYSeparator();
 			actionBarManager.addXYAction(plotX);
 			actionBarManager.addXYAction(plotIndex);
-			actionBarManager.addXYSeparator();
-			actionBarManager.addXYAction(filters);
-			actionBarManager.addXYSeparator();
 
-			
-			actionBarManager.registerToolBarGroup(ToolbarConfigurationConstants.XYPLOT.getId());
-		    actionBarManager.registerAction(ToolbarConfigurationConstants.XYPLOT.getId(), plotIndex, ActionType.XY);
-		    actionBarManager.registerAction(ToolbarConfigurationConstants.XYPLOT.getId(), plotX,     ActionType.XY);
-			
-			
 			if (rightClick!=null){
 				rightClick.add(new Separator(plotIndex.getId()+".group"));
 				rightClick.add(new Separator(plotX.getId()+".group"));
@@ -1107,9 +1095,18 @@ class LightWeightPlotActions {
 				rightClick.add(plotX);
 				rightClick.add(new Separator());
 			}
+
+			actionBarManager.registerToolBarGroup(ToolbarConfigurationConstants.XYPLOT.getId());
+		    actionBarManager.registerAction(ToolbarConfigurationConstants.XYPLOT.getId(), plotIndex, ActionType.XY);
+		    actionBarManager.registerAction(ToolbarConfigurationConstants.XYPLOT.getId(), plotX,     ActionType.XY);
 		}
+
+		MenuAction filters = PlotFilterActions.getXYFilterActions(actionBarManager.getSystem());
 		
-				
+		actionBarManager.addXYSeparator();
+		actionBarManager.addXYAction(filters);
+		actionBarManager.addXYSeparator();
+
 	}
 	
 	public void dispose() {

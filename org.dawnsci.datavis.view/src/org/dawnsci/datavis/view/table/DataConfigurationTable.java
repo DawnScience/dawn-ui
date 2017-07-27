@@ -79,8 +79,8 @@ public class DataConfigurationTable {
 			  return description == null ? "" : description;
 			}
 		});
-		dimensionSupport = new DimensionEditSupport(tableViewer,null);
-		options.setEditingSupport(new DimensionEditSupport(tableViewer,null));
+		dimensionSupport = new DimensionEditSupport(tableViewer);
+		options.setEditingSupport(dimensionSupport);
 		
 		
 		slice = new TableViewerColumn(tableViewer, SWT.CENTER, 2);
@@ -128,7 +128,7 @@ public class DataConfigurationTable {
 	
 	public void setInput(NDimensions ndims) {
 		nDimension = ndims;
-		dimensionSupport.setNDimensions(ndims);
+//		dimensionSupport.setNDimensions(ndims);
 //		options.setEditingSupport(new DimensionEditSupport(tableViewer,ndims));
 		tableViewer.setInput(ndims);
 		tableViewer.getTable().getParent().layout();
