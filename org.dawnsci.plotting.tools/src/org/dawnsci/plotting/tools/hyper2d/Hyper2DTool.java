@@ -247,6 +247,7 @@ public class Hyper2DTool extends AbstractToolPage {
 					} else if (!isMainPlotUpdate) {
 						value = evt.getROI().getPointX();
 						IROI roi = re.getROI();
+						if (!origin) right = !right;
 						updateROI(roi, value, right,re, isMainPlotUpdate, origin);
 					}
 				} catch (Exception e) {
