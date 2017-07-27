@@ -1,5 +1,7 @@
 package org.dawnsci.slicing.tools.hyper;
 
+import java.util.Arrays;
+
 import org.eclipse.january.dataset.IDataset;
 import org.eclipse.january.dataset.ILazyDataset;
 import org.eclipse.january.dataset.SliceND;
@@ -10,6 +12,8 @@ public class HyperTrace implements IHyperTrace {
 	private int[] order;
 	private SliceND slice;
 	private Object userObject;
+	
+	private HyperPlotViewer viewer;
 	
 	@Override
 	public String getDataName() {
@@ -95,11 +99,23 @@ public class HyperTrace implements IHyperTrace {
 
 	}
 
+	public void setViewer(HyperPlotViewer viewer) {
+		this.viewer = viewer;
+	}
+	
 	@Override
 	public void setData(ILazyDataset lazy, int[] order, SliceND slice) {
+		
+		boolean keepRegions = false;
+		
+		if (this.lazy != null && this.order != null && this.slice != null) {
+			keepRegions = Arrays.equals(lazy.getShape(), this.lazy.getShape()) && Arrays.equals(order, this.order);
+		}
+		
 		this.lazy = lazy;
 		this.order = order;
 		this.slice = slice;
+		if (viewer != null) viewer.update(keepRegions);
 	}
 
 	@Override

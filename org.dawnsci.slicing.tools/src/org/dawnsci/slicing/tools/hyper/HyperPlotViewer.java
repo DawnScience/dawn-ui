@@ -19,25 +19,49 @@ import org.eclipse.swt.widgets.Composite;
 public class HyperPlotViewer extends IPlottingSystemViewer.Stub<Composite> {
 
 	private HyperComponent hyper;
+	//Can only show one trace;
+	private HyperTrace trace;
 	
 	public void createControl(final Composite parent) {
 		hyper = new HyperComponent();
 		hyper.createControl(parent);
-		
-		
 	}
 	
 	@Override
 	public boolean addTrace(ITrace trace){
-		if (trace instanceof IHyperTrace) {
-			IHyperTrace h = (IHyperTrace)trace;
+		if (trace instanceof HyperTrace) {
+			HyperTrace h = (HyperTrace)trace;
+			this.trace = h;
 			
 			HyperDataPackage dp = buildDataPackage(h);
 			
 			hyper.setData(dp.lazyDataset, dp.axes, dp.slices, dp.order);
+			((HyperTrace) trace).setViewer(this);
 			return true;
 		}
 		return false;
+	}
+	
+	@Override
+	public void removeTrace(ITrace trace) {
+		if (this.trace == trace){
+			trace = null;
+			hyper.clear();
+		}
+		
+	}
+	
+	public void update(boolean keepRegions) {
+		if (trace != null) {
+			HyperDataPackage dp = buildDataPackage(trace);
+			if (keepRegions){
+				hyper.updateData(dp.lazyDataset, dp.axes, dp.slices, dp.order);
+			} else {
+				hyper.setData(dp.lazyDataset, dp.axes, dp.slices, dp.order);
+			}
+			
+		}
+		
 	}
 	
 	private HyperDataPackage buildDataPackage(IHyperTrace hyperTrace) {
