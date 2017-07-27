@@ -6,6 +6,7 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Spinner;
@@ -21,8 +22,9 @@ public class InputTileGenerator {
 	private Spinner spinner;
 	private Combo comboDropDownTheta;
 	private Button radio;
+	boolean stateOfText = false;
 	
-	
+
 	public InputTileGenerator(String l, String t, Composite parent){
 		
 		tile = new Group(parent, SWT.NONE);
@@ -32,10 +34,10 @@ public class InputTileGenerator {
 		GridData tileData = new GridData(SWT.FILL, SWT.NULL, true, false);
 		tile.setLayoutData(tileData);
 		
-		label = new Label(tile, SWT.NULL);
+		label = new Label(tile,  SWT.SINGLE |  SWT.BORDER| SWT.FILL);
 		label.setText(l);
 		
-		text = new Text(tile,SWT.SINGLE);
+		text = new Text(tile, SWT.SINGLE |  SWT.BORDER| SWT.FILL);
 		text.setText(t);
 	    
 	}
@@ -59,6 +61,31 @@ public class InputTileGenerator {
 	    
 	}
 	
+	public InputTileGenerator(String l,
+							  String d,
+							  Composite parent,
+							  boolean in){
+
+		tile = new Group(parent, SWT.NONE);
+		GridLayout 	tileLayout = new GridLayout(2,true);
+		
+		tile.setLayout(tileLayout);
+		GridData tileData = new GridData(SWT.FILL, SWT.NULL, true, false);
+		tile.setLayoutData(tileData);
+		
+		radio = new Button(tile, SWT.PUSH);
+		radio.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		radio.setText(d);
+		
+		text = new Text(tile,  SWT.SINGLE |  SWT.BORDER| SWT.FILL);
+		text.setText(l);
+		if(in){
+			text.setEnabled(stateOfText);	
+		}
+		
+		
+	}
+	
 	public Button getRadio() {
 		return radio;
 	}
@@ -76,7 +103,7 @@ public class InputTileGenerator {
 		GridData tileData = new GridData(SWT.FILL, SWT.NULL, true, false);
 		tile.setLayoutData(tileData);
 		
-		label = new Label(tile, SWT.NULL);
+		label = new Label(tile,  SWT.SINGLE |  SWT.BORDER| SWT.FILL);
 		label.setText(l);
 		
 		text = new Text(tile,SWT.SINGLE | SWT.BORDER | SWT.FILL);
@@ -112,12 +139,12 @@ public class InputTileGenerator {
 		GridData tileData = new GridData(GridData.FILL_HORIZONTAL);
 		tile.setLayoutData(tileData);
 		
-		label = new Label(tile, SWT.NULL);
+		label = new Label(tile, SWT.NULL | SWT.BORDER | SWT.FILL);
 		GridData labelData = new GridData(GridData.FILL_HORIZONTAL);
 		label.setLayoutData(labelData);
 		label.setText(l);
 		
-		text = new Text(tile,SWT.SINGLE);
+		text = new Text(tile,SWT.SINGLE | SWT.BORDER | SWT.FILL);
 		GridData textData = new GridData(GridData.FILL_HORIZONTAL);
 		text.setLayoutData(textData);
 		text.setText(t);
@@ -134,10 +161,10 @@ public class InputTileGenerator {
 		GridData tileData = new GridData(SWT.FILL, SWT.NULL, true, false);
 		tile.setLayoutData(tileData);
 		
-		label = new Label(tile, SWT.NULL);
+		label = new Label(tile, SWT.SINGLE| SWT.BORDER | SWT.FILL);
 		label.setText(l);
 		
-		spinner = new Spinner(tile, SWT.SINGLE |  SWT.BORDER);;
+		spinner = new Spinner(tile, SWT.SINGLE |  SWT.BORDER| SWT.FILL);
 		spinner.setMinimum(min);
 		spinner.setMaximum(max);
 		spinner.setIncrement(inc);
@@ -165,7 +192,7 @@ public class InputTileGenerator {
 		GridData leftData = new GridData(SWT.FILL, SWT.NULL, true, false);
 		left.setLayoutData(leftData);
         
-		label = new Label(left, SWT.NULL);
+		label = new Label(left, SWT.SINGLE |  SWT.BORDER| SWT.FILL);
 		label.setText(l);
 		
 		comboDropDownTheta = new Combo (left,SWT.DROP_DOWN| SWT.BORDER | SWT.FILL);
@@ -180,7 +207,7 @@ public class InputTileGenerator {
 		GridData rightData = new GridData(SWT.FILL, SWT.NULL, true, false);
 		right.setLayoutData(rightData);
 		
-		label1 = new Label(right, SWT.NULL);
+		label1 = new Label(right,  SWT.SINGLE |  SWT.BORDER| SWT.FILL);
 		label1.setText(k);
 		
 		comboDropDown = new Combo (right,SWT.DROP_DOWN| SWT.BORDER | SWT.FILL);
@@ -206,7 +233,7 @@ public class InputTileGenerator {
 		GridData tileData = new GridData(SWT.FILL, SWT.NULL, true, false);
 		tile.setLayoutData(tileData);
 		
-		label = new Label(tile, SWT.NULL);
+		label = new Label(tile, SWT.SINGLE |  SWT.BORDER| SWT.FILL);
 		label.setText(l);
 		
 		comboDropDown = new Combo (tile,SWT.DROP_DOWN| SWT.BORDER | SWT.FILL);
@@ -249,4 +276,24 @@ public class InputTileGenerator {
 	public Text getText(){
 		return text;
 	}
+	
+	public void setEnabled(boolean in, boolean g){
+		for(Control cl :tile.getChildren()){
+			cl.setEnabled(in);
+		}
+		
+		if(g){
+			text.setEnabled(stateOfText);
+		}
+	}
+	
+	
+	public boolean isStateOfText() {
+		return stateOfText;
+	}
+
+	public void setStateOfText(boolean stateOfText) {
+		this.stateOfText = stateOfText;
+	}
+
 }

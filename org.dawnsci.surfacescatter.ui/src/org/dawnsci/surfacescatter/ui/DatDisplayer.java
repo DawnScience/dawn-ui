@@ -5,6 +5,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import javax.naming.TimeLimitExceededException;
+
 import org.apache.commons.lang.StringUtils;
 import org.dawnsci.surfacescatter.GeometricCorrectionsReflectivityMethod;
 import org.dawnsci.surfacescatter.MethodSettingEnum.MethodSetting;
@@ -17,6 +19,8 @@ import org.eclipse.january.dataset.ILazyDataset;
 import org.eclipse.january.dataset.SliceND;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
+import org.eclipse.swt.events.ModifyEvent;
+import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.GridData;
@@ -24,12 +28,15 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.DirectoryDialog;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.swt.widgets.Text;
+
+import jdk.internal.org.objectweb.asm.tree.TableSwitchInsnNode;
 import uk.ac.diamond.scisoft.analysis.io.LoaderFactory;
 
 public class DatDisplayer extends Composite {
@@ -72,6 +79,9 @@ public class DatDisplayer extends Composite {
 	private Group parameterFiles;
 	private ArrayList<TableItem> paramFilesChecked;
 	private SelectionListener timothy;
+	private Group numericalDatSelection; 
+	private InputTileGenerator[] itgArray;
+	private Button transferUsingIncrement;
 
 
 
@@ -157,6 +167,19 @@ public class DatDisplayer extends Composite {
 				folderDisplayTable.setEnabled(true);
 				transferToRod.setEnabled(true);
 				clearTable.setEnabled(true);
+				for(Control c: numericalDatSelection.getChildren()){
+					c.setEnabled(true);
+				}
+				
+				numericalDatSelection.setEnabled(true);
+				
+				for(InputTileGenerator itg :itgArray){
+					itg.setEnabled(true, false);
+				}
+				
+				sortOutEnabling(itgArray[2],itgArray[1]);
+				sortOutEnabling(itgArray[2],itgArray[1]);
+				transferUsingIncrement.setEnabled(true);
 			}
 
 			@Override
@@ -218,6 +241,132 @@ public class DatDisplayer extends Composite {
 		folderDisplayTable.getVerticalBar().setIncrement(1);
 		folderDisplayTable.getVerticalBar().setThumb(1);
 
+		numericalDatSelection = new Group(left,SWT.NONE);  
+	    GridLayout numericalDatSelectionLayout = new GridLayout(2,true);
+	    numericalDatSelection.setLayout(numericalDatSelectionLayout);
+	    GridData numericalDatSelectionData = new GridData(SWT.FILL, SWT.NULL, true, false);
+	    numericalDatSelection.setLayoutData(numericalDatSelectionData);
+	    numericalDatSelection.setEnabled(false);
+	    
+	    for(Control c :numericalDatSelection.getChildren()){
+	    	c.setEnabled(false);
+	    }
+	    
+	    
+	    InputTileGenerator startDat = new InputTileGenerator("Starting .Dat: ","", numericalDatSelection,0);
+	    startDat.setEnabled(false, false);
+	    InputTileGenerator endDat = new InputTileGenerator("Ending .Dat: ", "",numericalDatSelection,0);
+	    endDat.setEnabled(false, false);
+	    InputTileGenerator increment = new InputTileGenerator("","Apply Increment: ", numericalDatSelection, true); 
+	    increment.setEnabled(false, false);
+
+	    itgArray = new InputTileGenerator[] {startDat, endDat, increment};
+	    
+	    increment.getText().addModifyListener(new ModifyListener() {
+			
+			@Override
+			public void modifyText(ModifyEvent e) {
+				if(increment.isStateOfText()){
+					int inc = Integer.valueOf(increment.getText().getText());
+					int start =  Integer.valueOf(startDat.getText().getText());
+					
+					endDat.getText().setText(String.valueOf(start+inc));
+				}
+			}
+		});
+
+
+		
+		increment.getRadio().addSelectionListener(new SelectionListener() {
+			
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				increment.setStateOfText(!increment.isStateOfText());
+				
+				increment.getText().setEnabled(true);
+				
+				increment.getRadio().setText("Apply Increment: ");
+				
+				if(increment.isStateOfText()){
+					increment.getRadio().setText("Deactivate Increment");
+					
+				}
+				
+				endDat.setEnabled(!increment.isStateOfText(), false);
+			}
+			
+			@Override
+			public void widgetDefaultSelected(SelectionEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+		});
+		
+		transferUsingIncrement = new Button(numericalDatSelection, SWT.PUSH);
+	    transferUsingIncrement.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+	    transferUsingIncrement.setText("Transfer to Rod");
+	    transferUsingIncrement.setEnabled(false);
+	    
+	    transferUsingIncrement.addSelectionListener(new SelectionListener() {
+			
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				
+				String startDatString = startDat.getText().getText()+".dat";
+				String endDatString = endDat.getText().getText()+".dat";
+				
+				boolean checkStart = false;
+				boolean checkEnd = false;
+				
+				int startDatInt = 0;
+				int endDatInt = 0;
+				
+				ArrayList<TableItem> tidiedTransferList = new ArrayList<>();
+						
+				for (int i= 0; i<folderDisplayTable.getItems().length; i++) {
+					
+					TableItem d = folderDisplayTable.getItems()[i];
+					
+					if (d.getText().equals(startDatString)) {
+						startDatInt = i;
+						checkStart = true;
+					}
+					
+					if (d.getText().equals(endDatString)) {
+						endDatInt = i;
+						checkEnd = true;
+					}
+					
+					if(checkEnd && checkStart){
+						break;
+					}
+					
+					
+					
+				}
+				
+				rodDisplayTable.clearAll();
+				
+				for(int j = startDatInt; j<=endDatInt; j++) {
+					tidiedTransferList.add(folderDisplayTable.getItems()[j]);
+				}
+				
+				r=true;
+				
+				prepareToBuildRod(tidiedTransferList);
+				
+				
+			}
+			
+			@Override
+			public void widgetDefaultSelected(SelectionEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+		});
+
+		
+		
 		rodConstruction = new Group(right, SWT.V_SCROLL | SWT.FILL | SWT.FILL);
 		GridLayout rodConstructionLayout = new GridLayout(1, true);
 		GridData rodConstructionData = new GridData(GridData.FILL_BOTH);
@@ -304,8 +453,7 @@ public class DatDisplayer extends Composite {
 							itemsToRemove.add(cd.getText());
 						}
 					}
-				}
-
+				}	
 				if (itemsToRemove.size() != 0) {
 					for (String ti : itemsToRemove) {
 						for (TableItem it1 : chosenDats) {
@@ -322,149 +470,9 @@ public class DatDisplayer extends Composite {
 					}
 				}
 				
-				IDataHolder dh1 = null;
-				ILazyDataset ild = null;
 				
-				try {
+				prepareToBuildRod(tidiedTransferList);
 
-					String filename = tidiedTransferList.get(0).getText();
-					String filepath1 = datFolderPath + File.separator + filename;
-					filepath = filepath1;
-					dh1 = LoaderFactory.getData(filepath);
-
-				} catch (Exception e2) {
-					e2.printStackTrace();
-				}
-				
-				optionsDropDown.removeAll();
-
-				options = dh1.getNames();
-				
-				ssp.setOptions(options);
-				ssvs.populateThetaOptionsDropDown();
-				ssvs.getParamField().getSelectedOption().select(0);
-				ssvs.getParamField().getTheta().select(0);
-				
-				List<String> pb = Arrays.asList(options);
-				
-				while(r){
-					
-					ild = null;
-					
-					if(pb.contains(ssp.getImageName())){
-				
-						ild = dh1.getLazyDataset(ssp.getImageName());
-						
-						if(ild == null){
-							ssp.dialogToChangeImageFolder(promptedForImageFolder, DatDisplayer.this);	
-							
-							try {
-
-								dh1 = ssp.copiedDatWithCorrectedTifs(tidiedTransferList.get(0).getText(), datFolderPath);
-								ild = dh1.getLazyDataset(ssp.getImageName());
-								
-							} catch (Exception e2) {
-								e2.printStackTrace();
-								ssp.dialogToChangeImageFolder(promptedForImageFolder, DatDisplayer.this);	
-							}
-						}
-					}
-					
-					if (ild == null && r ==true && ssp.getImageFolderPath() != null ){
-						
-						try {
-							
-							dh1 = ssp.copiedDatWithCorrectedTifs(tidiedTransferList.get(0).getText(), datFolderPath);
-							ild = dh1.getLazyDataset(ssp.getImageName());
-	
-						} catch (Exception e2) {
-							e2.printStackTrace();
-						}
-						
-					}
-					
-					if(ild == null && r ==true){
-						
-						ssp.dialogToChangeImageFolder(promptedForImageFolder, DatDisplayer.this);
-						
-						try {
-	
-							dh1 = ssp.copiedDatWithCorrectedTifs(tidiedTransferList.get(0).getText(), datFolderPath);
-							ild = dh1.getLazyDataset(ssp.getImageName());
-	
-						} catch (Exception e2) {
-							e2.printStackTrace();
-						}	
-					}
-					
-					if(ild != null){
-						r=false;
-						promptedForImageFolder = false;
-					}
-				}
-				
-				if(ild != null){
-					
-					
-					for (int k = 0; k < tidiedTransferList.size(); k++) {
-						TableItem t = new TableItem(rodDisplayTable, SWT.NONE);
-						t.setText(tidiedTransferList.get(k).getText());
-					}
-					
-					
-					try {
-
-						String filename = rodDisplayTable.getItem(0).getText();
-						String filep = datFolderPath + File.separator + filename;
-						dh1 = LoaderFactory.getData(filep);
-
-					} catch (Exception e2) {
-						e2.printStackTrace();
-					}
-					
-					for (int t = 0; t < options.length; t++) {
-						optionsDropDown.add(options[t]);
-					}
-
-					boolean isThePreviousOptionAvailable = false;
-					
-					if(option != null){
-						for(int y = 0; y<options.length; y++){
-							if(StringUtils.equals(options[y], option)){
-								isThePreviousOptionAvailable =true;
-								optionsDropDown.select(y);
-							}
-						}
-					}
-					else{
-						optionsDropDown.select(0);
-					}
-					
-					if (isThePreviousOptionAvailable == false){
-						optionsDropDown.select(0);
-					}
-					
-					clearRodTable.setEnabled(true);
-					clearParameterTable.setEnabled(true);
-					rodConstruction.setEnabled(true);
-					deleteSelected.setEnabled(true);
-					buildRod.setEnabled(true);
-					optionsDropDown.setEnabled(true);
-					rodDisplayTable.setEnabled(true);
-					rodComponents.setEnabled(true);
-					parameterFiles.setEnabled(true);
-					paramFileTable.setEnabled(true);
-					paramFileSelection.setEnabled(true);
-					scannedVariableOptions.setEnabled(true);
-					folderDisplayTable.getVerticalBar().setEnabled(true);
-					ssvs.setupRightEnabled(true);
-					enableRodConstruction(true);
-					rsw.setupRightEnabled(true);
-				}
-				
-				ArrayList<MethodSetting> cC = checkCorrections();
-				
-				ssvs.resetSXRDReflectivityCombo(comboPositionToEnumInt(cC));
 			}
 
 			@Override
@@ -503,7 +511,24 @@ public class DatDisplayer extends Composite {
 				transferToRod.setEnabled(false);
 				clearTable.setEnabled(false);
 				ssp.setImageFolderPath(null);
-				rodDisplayTable.removeAll();				
+				rodDisplayTable.removeAll();	
+				for(Control c: numericalDatSelection.getChildren()){
+					c.setEnabled(false);
+				}
+				numericalDatSelection.setEnabled(false);
+				
+				for(InputTileGenerator itg :itgArray){
+					if(itg.getRadio() != null){
+						itg.setEnabled(false, false);
+					}
+					else{
+						itg.setEnabled(false, true);
+					}
+				}
+				sortOutEnabling(itgArray[2],itgArray[1]);
+				sortOutEnabling(itgArray[2],itgArray[1]);
+				transferUsingIncrement.setEnabled(false);
+				refreshTable.setEnabled(false);
 			}
 			
 			
@@ -724,6 +749,9 @@ public class DatDisplayer extends Composite {
 				
 			}
 		});
+		
+		
+		
 		
 //		selectionSash.setWeights(new int[] { 30, 30, 30 });
 	}
@@ -1025,4 +1053,172 @@ public class DatDisplayer extends Composite {
 		this.imageName = imageName;
 	}
 	
+	
+	private void prepareToBuildRod(ArrayList<TableItem> tidiedTransferList){
+		
+		
+		IDataHolder dh1 = null;
+		ILazyDataset ild = null;
+		
+		String filename = tidiedTransferList.get(0).getText();
+		
+		try {
+			String filepath1 = datFolderPath + File.separator + filename;
+			filepath = filepath1;
+			dh1 = LoaderFactory.getData(filepath);
+
+		} catch (Exception e2) {
+			e2.printStackTrace();
+		}
+		
+		optionsDropDown.removeAll();
+
+		options = dh1.getNames();
+		
+		ssp.setOptions(options);
+		ssvs.populateThetaOptionsDropDown();
+		ssvs.getParamField().getSelectedOption().select(0);
+		ssvs.getParamField().getTheta().select(0);
+		
+		List<String> pb = Arrays.asList(options);
+		
+		while(r){
+			
+			ild = null;
+			
+			if(pb.contains(ssp.getImageName())){
+		
+				ild = dh1.getLazyDataset(ssp.getImageName());
+				
+				if(ild == null){
+					ssp.dialogToChangeImageFolder(promptedForImageFolder, DatDisplayer.this);	
+					
+					try {
+
+						dh1 = ssp.copiedDatWithCorrectedTifs(filename, datFolderPath);
+						ild = dh1.getLazyDataset(ssp.getImageName());
+						
+					} catch (Exception e2) {
+						e2.printStackTrace();
+						ssp.dialogToChangeImageFolder(promptedForImageFolder, DatDisplayer.this);	
+					}
+				}
+			}
+			
+			if (ild == null && r ==true && ssp.getImageFolderPath() != null ){
+				
+				try {
+					
+					dh1 = ssp.copiedDatWithCorrectedTifs(filename, datFolderPath);
+					ild = dh1.getLazyDataset(ssp.getImageName());
+
+				} catch (Exception e2) {
+					e2.printStackTrace();
+				}
+				
+			}
+			
+			if(ild == null && r ==true){
+				
+				ssp.dialogToChangeImageFolder(promptedForImageFolder, DatDisplayer.this);
+				
+				try {
+
+					dh1 = ssp.copiedDatWithCorrectedTifs(filename, datFolderPath);
+					ild = dh1.getLazyDataset(ssp.getImageName());
+
+				} catch (Exception e2) {
+					e2.printStackTrace();
+				}	
+			}
+			
+			if(ild != null){
+				r=false;
+				promptedForImageFolder = false;
+			}
+		}
+		
+		if(ild != null){
+			
+			
+			for (int k = 0; k < tidiedTransferList.size(); k++) {
+				TableItem t = new TableItem(rodDisplayTable, SWT.NONE);
+				t.setText(tidiedTransferList.get(k).getText());
+			}
+			
+			
+			try {
+
+				String filename2 = rodDisplayTable.getItem(0).getText();
+				String filep = datFolderPath + File.separator + filename2;
+				dh1 = LoaderFactory.getData(filep);
+
+			} catch (Exception e2) {
+				e2.printStackTrace();
+			}
+			
+			for (int t = 0; t < options.length; t++) {
+				optionsDropDown.add(options[t]);
+			}
+
+			boolean isThePreviousOptionAvailable = false;
+			
+			if(option != null){
+				for(int y = 0; y<options.length; y++){
+					if(StringUtils.equals(options[y], option)){
+						isThePreviousOptionAvailable =true;
+						optionsDropDown.select(y);
+					}
+				}
+			}
+			else{
+				optionsDropDown.select(0);
+			}
+			
+			if (isThePreviousOptionAvailable == false){
+				optionsDropDown.select(0);
+			}
+			
+			clearRodTable.setEnabled(true);
+			clearParameterTable.setEnabled(true);
+			rodConstruction.setEnabled(true);
+			deleteSelected.setEnabled(true);
+			buildRod.setEnabled(true);
+			optionsDropDown.setEnabled(true);
+			rodDisplayTable.setEnabled(true);
+			rodComponents.setEnabled(true);
+			parameterFiles.setEnabled(true);
+			paramFileTable.setEnabled(true);
+			paramFileSelection.setEnabled(true);
+			scannedVariableOptions.setEnabled(true);
+			folderDisplayTable.getVerticalBar().setEnabled(true);
+			ssvs.setupRightEnabled(true);
+			enableRodConstruction(true);
+			rsw.setupRightEnabled(true);
+		}
+		
+		ArrayList<MethodSetting> cC = checkCorrections();
+		
+		ssvs.resetSXRDReflectivityCombo(comboPositionToEnumInt(cC));
+		
+	}
+	
+	private void sortOutEnabling(InputTileGenerator increment,
+								 InputTileGenerator endDat){
+		
+		increment.setStateOfText(!increment.isStateOfText());
+		
+		increment.getText().setEnabled(true);
+		
+		increment.getRadio().setText("Apply Increment: ");
+		
+		if(increment.isStateOfText()){
+			increment.getRadio().setText("Deactivate Increment");
+			
+		}
+		
+		endDat.setEnabled(!increment.isStateOfText(), false);
+		
+	}
+			
 }
