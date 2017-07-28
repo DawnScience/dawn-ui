@@ -16,7 +16,7 @@ Require-Bundle: org.eclipse.ui,
  uk.ac.diamond.scisoft.analysis.plotclient;bundle-version="1.0.0",
  org.eclipse.core.resources,
  org.eclipse.ui.ide,
- uk.ac.diamond.org.mihalis.opal,
+ org.mihalis.opal,
  org.dawnsci.common.widgets,
  org.eclipse.ui.navigator,
  org.eclipse.swt
