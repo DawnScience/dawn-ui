@@ -5,18 +5,28 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 
+import org.apache.commons.math3.geometry.spherical.twod.Circle;
 import org.dawb.common.ui.util.EclipseUtils;
 import org.dawb.common.ui.wizard.persistence.PersistenceExportWizard;
+import org.dawnsci.common.widgets.dialog.FileSelectionDialog;
+import org.dawnsci.common.widgets.file.SelectorWidget;
 import org.dawnsci.plotting.roi.ROIEditTable;
+import org.dawnsci.plotting.tools.ServiceLoader;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.dawnsci.analysis.api.metadata.IDiffractionMetadata;
+import org.eclipse.dawnsci.analysis.api.persistence.IPersistenceService;
+import org.eclipse.dawnsci.analysis.api.persistence.IPersistentFile;
 import org.eclipse.dawnsci.analysis.api.roi.IROI;
 import org.eclipse.dawnsci.analysis.dataset.mask.MaskCircularBuffer;
+import org.eclipse.dawnsci.analysis.dataset.roi.CircularROI;
+import org.eclipse.dawnsci.analysis.dataset.roi.RingROI;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.region.IROIListener;
 import org.eclipse.dawnsci.plotting.api.region.IRegion;
@@ -27,18 +37,24 @@ import org.eclipse.dawnsci.plotting.api.region.RegionEvent;
 import org.eclipse.dawnsci.plotting.api.region.RegionUtils;
 import org.eclipse.dawnsci.plotting.api.tool.AbstractToolPage;
 import org.eclipse.dawnsci.plotting.api.trace.IImageTrace;
+import org.eclipse.january.DatasetException;
 import org.eclipse.january.dataset.BooleanDataset;
 import org.eclipse.january.dataset.Dataset;
 import org.eclipse.january.dataset.DatasetUtils;
 import org.eclipse.january.dataset.IDataset;
 import org.eclipse.january.dataset.IndexIterator;
+import org.eclipse.january.dataset.SliceND;
+import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.wizard.IWizard;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.CLabel;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.events.TraverseEvent;
 import org.eclipse.swt.events.TraverseListener;
+import org.eclipse.swt.events.TypedEvent;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -51,6 +67,8 @@ import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 
+import uk.ac.diamond.scisoft.analysis.io.NexusDiffractionCalibrationReader;
+
 public class FastMaskTool extends AbstractToolPage {
 
 	private Composite control;
@@ -60,6 +78,10 @@ public class FastMaskTool extends AbstractToolPage {
 	private boolean paintMode = false;
 	private AtomicReference<Double> lowerValue;
 	private AtomicReference<Double> upperValue;
+	
+	private IDiffractionMetadata metadata;
+	private String lastPath = null;
+	
 	
 	private MaskRegionComposite maskRegionComposite;
 	
@@ -88,7 +110,6 @@ public class FastMaskTool extends AbstractToolPage {
 	public void createControl(Composite parent) {
 		this.job = new FastMaskJob();
 		this.control = new Composite(parent, SWT.NONE);
-		control.setBackground(Display.getDefault().getSystemColor(SWT.COLOR_WHITE));
 		control.setLayout(new GridLayout(1, false));
 		removeMargins(control);
 		
@@ -98,76 +119,14 @@ public class FastMaskTool extends AbstractToolPage {
 		ThresholdMaskComposite thresholdMaskComposite = new ThresholdMaskComposite(control, SWT.None);
 		thresholdMaskComposite.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 		
-		Button b3b = new Button(control, SWT.PUSH);
-		b3b.setText("Invert");
-		b3b.addSelectionListener(new SelectionAdapter() {
-
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				if (buffer == null) return;
-				
-				Runnable r = () -> buffer.invert();
-				
-				job.setRunnable(r);
-				job.schedule();
-			}
-
-
-		});
+		DiffractionComposite difComposite = new DiffractionComposite(control, SWT.None);
+		difComposite.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 		
-		Button b2 = new Button(control, SWT.PUSH);
-		b2.setText("Undo");
-		b2.addSelectionListener(new SelectionAdapter() {
-
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				if (buffer == null) return;
-				Runnable r = () -> buffer.undo();
-				
-				job.setRunnable(r);
-				job.schedule();
-			}
-
-
-		});
+		ImageComposite imageProcessingComposite = new ImageComposite(control, SWT.None);
+		imageProcessingComposite.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 		
-		Button b3 = new Button(control, SWT.PUSH);
-		b3.setText("Save");
-		b3.addSelectionListener(new SelectionAdapter() {
-
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				try {
-					IWizard wiz = EclipseUtils.openWizard(PersistenceExportWizard.ID, false);
-					WizardDialog wd = new  WizardDialog(Display.getCurrent().getActiveShell(), wiz);
-					wd.setTitle(wiz.getWindowTitle());
-					wd.open();
-				} catch (Exception e1) {
-					logger.error("Could not open wizard",e1);
-				}
-				
-			}
-
-
-		});
-		
-		
-		Button b3a = new Button(control, SWT.PUSH);
-		b3a.setText("Clear");
-		b3a.addSelectionListener(new SelectionAdapter() {
-
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				if (buffer == null) return;
-				
-				Runnable r = () -> buffer.clear();
-				
-				job.setRunnable(r);
-				job.schedule();
-			}
-
-
-		});
+		UtilitiesComposite utilitiesComposite = new UtilitiesComposite(control, SWT.NONE);
+		utilitiesComposite.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 		
 		getPlottingSystem().addRegionListener(new IRegionListener() {
 			
@@ -276,6 +235,19 @@ public class FastMaskTool extends AbstractToolPage {
 		control.setFocus();
 	}
 	
+	private String getFileName(){
+		FileSelectionDialog dialog = new FileSelectionDialog(getPart().getSite().getShell());
+		dialog.setExtensions(new String[]{"nxs"});
+		dialog.setFiles(new String[]{"Nexus files"});
+		dialog.setNewFile(false);
+		dialog.setFolderSelector(false);
+		if (lastPath != null) dialog.setPath(lastPath);
+		
+		dialog.create();
+		if (dialog.open() == Dialog.CANCEL) return null;
+		return dialog.getPath();
+	}
+	
 	private static void removeMargins(Composite area) {
 		final GridLayout layout = (GridLayout)area.getLayout();
 		if (layout==null) return;
@@ -315,6 +287,8 @@ public class FastMaskTool extends AbstractToolPage {
 		protected IStatus run(IProgressMonitor monitor) {
 			Runnable r = runnable;
 			r.run();
+			
+			if (buffer == null) return Status.OK_STATUS;
 			
 			BooleanDataset mask = buffer.getMask();
 			
@@ -357,6 +331,264 @@ public class FastMaskTool extends AbstractToolPage {
 		
 	}
 	
+	private class UtilitiesComposite extends Composite {
+
+		public UtilitiesComposite(Composite parent, int style) {
+			super(parent, style);
+			this.setLayout(new FillLayout());
+			Group group = new Group(this, SWT.NONE);
+			group.setLayout(new GridLayout(4, false));
+			Button b2 = new Button(group, SWT.PUSH);
+			b2.setText("Undo");
+			b2.addSelectionListener(new SelectionAdapter() {
+
+				@Override
+				public void widgetSelected(SelectionEvent e) {
+					if (buffer == null) return;
+					Runnable r = () -> buffer.undo();
+					
+					job.setRunnable(r);
+					job.schedule();
+				}
+
+
+			});
+			
+			
+			Button b3a = new Button(group, SWT.PUSH);
+			b3a.setText("Clear");
+			b3a.addSelectionListener(new SelectionAdapter() {
+
+				@Override
+				public void widgetSelected(SelectionEvent e) {
+					if (buffer == null) return;
+					
+					Runnable r = () -> buffer.clear();
+					
+					job.setRunnable(r);
+					job.schedule();
+				}
+
+
+			});
+			
+			Button b3 = new Button(group, SWT.PUSH);
+			b3.setText("Save");
+			b3.addSelectionListener(new SelectionAdapter() {
+
+				@Override
+				public void widgetSelected(SelectionEvent e) {
+					try {
+						IWizard wiz = EclipseUtils.openWizard(PersistenceExportWizard.ID, false);
+						WizardDialog wd = new  WizardDialog(Display.getCurrent().getActiveShell(), wiz);
+						wd.setTitle(wiz.getWindowTitle());
+						wd.open();
+					} catch (Exception e1) {
+						logger.error("Could not open wizard",e1);
+					}
+					
+				}
+
+
+			});
+			
+			Button b3l = new Button(group, SWT.PUSH);
+			b3l.setText("Load");
+			b3l.addSelectionListener(new SelectionAdapter() {
+
+				@Override
+				public void widgetSelected(SelectionEvent e) {
+					String path = getFileName();
+					if (path == null) return;
+					lastPath = path;
+					
+					IImageTrace imageTrace = getImageTrace();
+					if (imageTrace != null) {
+						IDataset data = imageTrace.getData();
+						
+						if (buffer == null) buffer = new MaskCircularBuffer(data.getShape());
+					}
+					
+					if (buffer == null) return;
+					
+					final String fileName = path;
+					
+					Runnable r = () -> {
+						
+						try {
+							IPersistenceService ps = ServiceLoader.getPersistenceService();
+							IPersistentFile f = ps.getPersistentFile(fileName);
+							Map<String, IDataset> masks = f.getMasks(null);
+							for (IDataset m : masks.values()) buffer.merge(DatasetUtils.convertToDataset(m));
+
+						} catch (Exception e1) {
+							logger.error("Could not load mask",e1);
+						}
+					};
+
+					job.setRunnable(r);
+					job.schedule();
+				}
+
+
+			});
+			
+		}
+		
+		
+		
+	}
+	
+	private class DiffractionComposite extends Composite {
+		
+		public DiffractionComposite(Composite parent, int style) {
+			super(parent, style);
+			
+			this.setLayout(new FillLayout());
+			Group group = new Group(this, SWT.NONE);
+			group.setLayout(new GridLayout(2, false));
+			group.setText("Detector Geometry");
+			
+			Button load = new Button(group, SWT.PUSH);
+			load.setText("Load Calibration");
+			
+			final CLabel currentPath = new CLabel(group, SWT.None);
+			
+			
+			load.addSelectionListener(new SelectionAdapter() {
+				
+				@Override
+				public void widgetSelected(SelectionEvent e) {
+					final String fileName = getFileName();
+					if (fileName == null) return;
+					
+					Runnable r = () ->  {
+						try {
+							IDiffractionMetadata meta = NexusDiffractionCalibrationReader.getDiffractionMetadataFromNexus(fileName, null);
+							if (meta != null) {
+								metadata = meta;
+								Display.getDefault().asyncExec(() -> {
+									currentPath.setText(fileName);
+									currentPath.getParent().layout();
+								});
+							}
+						} catch (DatasetException e1) {
+							logger.error("Could not read calibration");
+						}
+					};
+					
+					job.setRunnable(r);
+					job.schedule();
+					
+				}
+				
+			});
+			
+			Button center = new Button(group, SWT.PUSH);
+			center.setText("Centre Sectors, Rings and Circles");
+			center.addSelectionListener(new SelectionAdapter() {
+				
+				@Override
+				public void widgetSelected(SelectionEvent e) {
+					if (metadata != null) {
+						double[] point = metadata.getDetector2DProperties().getBeamCentreCoords();
+						getPlottingSystem().getRegions().stream()
+						.map(IRegion::getROI)
+						.filter(RingROI.class::isInstance)
+						.map(RingROI.class::cast)
+						.forEach(r -> r.setPoint(point));
+						
+						getPlottingSystem().getRegions().stream()
+						.map(IRegion::getROI)
+						.filter(CircularROI.class::isInstance)
+						.map(CircularROI.class::cast)
+						.forEach(r -> r.setPoint(point));
+						
+						getPlottingSystem().repaint();
+					}
+					
+				}
+			});
+		}
+		
+	}
+	
+	private class ImageComposite extends Composite {
+
+		public ImageComposite(Composite parent, int style) {
+			super(parent, style);
+
+			this.setLayout(new FillLayout());
+			Group group = new Group(this, SWT.NONE);
+			group.setLayout(new GridLayout(3, false));
+			group.setText("Mask Processing");
+			
+			Button b1 = new Button(group, SWT.PUSH);
+			b1.setText("Invert");
+			b1.addSelectionListener(new SelectionAdapter() {
+
+				@Override
+				public void widgetSelected(SelectionEvent e) {
+					if (buffer == null) return;
+					
+					Runnable r = () -> buffer.invert();
+					
+					job.setRunnable(r);
+					job.schedule();
+				}
+
+
+			});
+			
+			Button b2 = new Button(group, SWT.PUSH);
+			b2.setText("Flip H");
+			b2.addSelectionListener(new SelectionAdapter() {
+
+				@Override
+				public void widgetSelected(SelectionEvent e) {
+					if (buffer == null) return;
+					
+					Runnable r = () -> {
+						BooleanDataset mask = buffer.getMask();
+						SliceND s = new SliceND(mask.getShape());
+						s.flip(0);
+						buffer.clear();
+						buffer.merge(mask.getSlice(s));
+					};
+					
+					job.setRunnable(r);
+					job.schedule();
+				}
+
+
+			});
+			
+			Button b3 = new Button(group, SWT.PUSH);
+			b3.setText("Flip V");
+			b3.addSelectionListener(new SelectionAdapter() {
+
+				@Override
+				public void widgetSelected(SelectionEvent e) {
+					if (buffer == null) return;
+					
+					Runnable r = () -> {
+						BooleanDataset mask = buffer.getMask();
+						SliceND s = new SliceND(mask.getShape());
+						s.flip(1);
+						buffer.clear();
+						buffer.merge(mask.getSlice(s));
+					};
+					
+					job.setRunnable(r);
+					job.schedule();
+				}
+
+
+			});
+		}
+
+	}
+
 	private class ThresholdMaskComposite extends Composite {
 
 		public ThresholdMaskComposite(Composite parent, int style) {
@@ -453,7 +685,7 @@ public class FastMaskTool extends AbstractToolPage {
 			};
 			this.setLayout(new FillLayout());
 			Group group = new Group(this, SWT.NONE);
-			group.setLayout(new GridLayout(2, false));
+			group.setLayout(new GridLayout(3, false));
 			group.setText("Draw Regions");
 			
 			Combo combo = new Combo(group, SWT.READ_ONLY);
@@ -486,6 +718,18 @@ public class FastMaskTool extends AbstractToolPage {
 
 			});
 			
+			Button b1 = new Button(group, SWT.PUSH);
+			b1.setText("Remove All");
+			b1.addSelectionListener(new SelectionAdapter() {
+
+				@Override
+				public void widgetSelected(SelectionEvent e) {
+					IPlottingSystem<?> plottingSystem = getPlottingSystem();
+					Collection<IRegion> regions = plottingSystem.getRegions();
+					regions.stream().forEach(plottingSystem::removeRegion);
+				}
+
+			});
 			
 			
 			Button b = new Button(group, SWT.PUSH);
@@ -537,9 +781,12 @@ public class FastMaskTool extends AbstractToolPage {
 
 
 			});
-			
+			Composite editComposite = new Composite(group, SWT.None);
+			editComposite.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false,3,1));
+			editComposite.setLayout(new GridLayout(2, false));
 			roiEditTable = new ROIEditTable();
-			roiEditTable.createPartControl(group);
+			roiEditTable.createPartControl(editComposite);
+			
 			roiEditTable.addROIListener(roiListener);
 			
 		}

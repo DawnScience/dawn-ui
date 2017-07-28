@@ -4,6 +4,7 @@ import org.eclipse.dawnsci.analysis.api.conversion.IConversionService;
 import org.eclipse.dawnsci.analysis.api.image.IImageFilterService;
 import org.eclipse.dawnsci.analysis.api.image.IImageTransform;
 import org.eclipse.dawnsci.analysis.api.io.ILoaderService;
+import org.eclipse.dawnsci.analysis.api.persistence.IPersistenceService;
 import org.eclipse.dawnsci.plotting.api.expressions.IExpressionObjectService;
 
 public class ServiceLoader {
@@ -13,6 +14,7 @@ public class ServiceLoader {
 	private static ILoaderService loaderservice;
 	private static IExpressionObjectService expressiononbjectservice;
 	private static IConversionService conversionservice;
+	private static IPersistenceService persistenceService;
 
 	public ServiceLoader() {
 		
@@ -66,5 +68,13 @@ public class ServiceLoader {
 
 	public static void setConversionService(IConversionService cservice) {
 		conversionservice = cservice;
+	}
+	
+	public static IPersistenceService getPersistenceService() {
+		return persistenceService;
+	}
+
+	public static void setPersistenceService(IPersistenceService pservice) {
+		persistenceService = pservice;
 	}
 }
