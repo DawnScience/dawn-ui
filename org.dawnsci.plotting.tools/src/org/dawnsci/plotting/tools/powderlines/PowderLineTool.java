@@ -243,6 +243,14 @@ public class PowderLineTool extends AbstractToolPage {
 		this.plotCoordinate = coord;
 	}
 	
+	protected void setModel(PowderLineModel model) {
+		this.model = model;
+		if (this.lineTableViewer != null)
+			lineTableViewer.setInput(model.getLines(defaultCoords));
+			
+	}
+	
+	
 	protected void setLines(DoubleDataset novaLines) {
 		model.setLines(novaLines);
 		model.setCoords(defaultCoords);
@@ -374,7 +382,7 @@ public class PowderLineTool extends AbstractToolPage {
 	protected class EoSComposite extends Composite {
 		
 		Text pressure, v, v0;
-		PowderLineModel Model;
+		PowderLineModel model;
 		
 		public EoSComposite(Composite parent, int style) {
 			super(parent, style);
@@ -456,19 +464,22 @@ public class PowderLineTool extends AbstractToolPage {
 			
 			// Now check for metadata
 			IMetadata metadata = dataHolder.getMetadata();
-			if (metadata != null) 
+			if (metadata != null) { 
 				System.err.println("PowderLineTool: Metadata found!");
-			try {
-				if (metadata.getMetaNames().contains("K0"))
-				System.err.println("PowderLineTool: Equation of State metadata found!");
-				EoSLineModel eosModel = new EoSLineModel();
-				eosModel.setBulkModulus(Double.parseDouble((String) metadata.getMetaValue("K0")));
-				eosModel.setBulkModulus(Double.parseDouble((String) metadata.getMetaValue("K0P")));
-				eosModel.setPressure(0.);
-				theTool.model = eosModel;
-				
-			} catch (MetadataException mE) { ;}//do nothing
+				try {
+					if (metadata.getMetaNames().contains("K0"))
+						System.err.println("PowderLineTool: Equation of State metadata found!");
+					EoSLineModel eosModel = new EoSLineModel();
+					eosModel.setBulkModulus(Double.parseDouble((String) metadata.getMetaValue("K0")));
+					eosModel.setBulkModulus(Double.parseDouble((String) metadata.getMetaValue("K0P")));
+					eosModel.setPressure(0.);
+					theTool.setModel(eosModel);
 
+				} catch (MetadataException mE) {
+					; // do nothing, the model has not been overwritten
+				}
+			}
+			
 			theTool.clearLines();
 			theTool.setLines(lines);
 			
