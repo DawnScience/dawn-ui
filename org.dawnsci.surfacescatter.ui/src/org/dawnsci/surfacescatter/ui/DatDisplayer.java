@@ -304,7 +304,7 @@ public class DatDisplayer extends Composite {
 		
 		transferUsingIncrement = new Button(numericalDatSelection, SWT.PUSH);
 	    transferUsingIncrement.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-	    transferUsingIncrement.setText("Transfer to Rod");
+	    transferUsingIncrement.setText("Transfer to Rod ->");
 	    transferUsingIncrement.setEnabled(false);
 	    
 	    transferUsingIncrement.addSelectionListener(new SelectionListener() {
@@ -344,6 +344,13 @@ public class DatDisplayer extends Composite {
 					
 					
 				}
+				
+				
+				for(int cv = 0; cv<rodDisplayTable.getItems().length; cv++){
+					rodDisplayTable.remove(cv);
+				}
+				
+				rodDisplayTable.removeAll();
 				
 				rodDisplayTable.clearAll();
 				
