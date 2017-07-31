@@ -49,6 +49,7 @@ import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.ui.IActionBars;
@@ -197,6 +198,7 @@ public class HistogramToolPage2 extends AbstractToolPage implements IToolPage {
 		});
 
 		logScaleCheck = toolkit.createButton(colourComposite, "Log Scale", SWT.CHECK);
+		logScaleCheck.setSelection(Activator.getPlottingPreferenceStore().getBoolean(PlottingConstants.CM_LOGSCALE));
 		logScaleCheck.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -216,10 +218,11 @@ public class HistogramToolPage2 extends AbstractToolPage implements IToolPage {
 						image.setPaletteData(image.getPaletteData());
 					}
 				}
+				Activator.getPlottingPreferenceStore().setValue(PlottingConstants.CM_LOGSCALE, logScaleCheck.getSelection());
 			}
 
 		});
-
+		
 		invertedCheck = toolkit.createButton(colourComposite, "Inverted", SWT.CHECK);
 		// get the value from the preference store
 		invertedCheck.setSelection(Activator.getPlottingPreferenceStore().getBoolean(PlottingConstants.CM_INVERTED));
