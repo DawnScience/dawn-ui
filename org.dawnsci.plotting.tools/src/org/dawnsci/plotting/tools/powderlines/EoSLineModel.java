@@ -81,11 +81,10 @@ public class EoSLineModel extends PowderLineModel {
 	}
 	
 	@Override
-	public DoubleDataset getLines(PowderLineCoord coords) {
-		double linearRatio = BirchMurnaghanSolver.birchMurnaghanLinear(pressure, bulkModulus, bulkModulus_p);
+	public DoubleDataset getLines(PowderLineCoord requestedCoords) {
+		double linearRatio = 1.0;//BirchMurnaghanSolver.birchMurnaghanLinear(pressure, bulkModulus, bulkModulus_p);
 		System.err.println("Will one day apply EoS");
-		DoubleDataset lines = super.getLines(coords);
+		DoubleDataset lines = super.getLines(requestedCoords);
 		return (lines.getSize() > 0) ? (DoubleDataset) Maths.multiply(linearRatio, lines) : lines;
-		
 	}
 }
