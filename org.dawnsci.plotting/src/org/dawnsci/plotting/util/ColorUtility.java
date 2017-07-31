@@ -28,10 +28,10 @@ public class ColorUtility {
 	public static final Color[] GRAPH_DEFAULT_COLORS = { 
 
 			/* My primaries, secondaries and tertiaries, of varying shade */
-		new Color(0,0,0),			// black (dark)
+			new Color(0, 0, 255),		// blue (dark)
 		new Color(255, 0, 0),		// red (mid)
 		new Color(0, 220, 0),		// green (bright)
-		new Color(0, 0, 255),		// blue (dark)
+		new Color(0,0,0),			// black (dark)
 		new Color(170, 104, 0), 	// sienna (mid)
 		new Color(0, 191, 191), 	// cyan (bright)
 		new Color(141, 0, 134), 	// murex (dark)
