@@ -315,7 +315,7 @@ public class MockPlottingSystem implements IPlottingSystem<Object> {
 	@Override
 	public IAxis getSelectedYAxis() {
 		// TODO Auto-generated method stub
-		return null;
+		return new MockAxis();
 	}
 
 	@Override
@@ -327,7 +327,7 @@ public class MockPlottingSystem implements IPlottingSystem<Object> {
 	@Override
 	public IAxis getSelectedXAxis() {
 		// TODO Auto-generated method stub
-		return null;
+		return new MockAxis();
 	}
 
 	@Override

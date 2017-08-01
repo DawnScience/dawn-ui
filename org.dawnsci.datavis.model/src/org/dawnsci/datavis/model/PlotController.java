@@ -121,7 +121,8 @@ public class PlotController implements IPlotController {
 	}
 	
 	private void updateOnFileStateChange() {
-		if (getPlottingSystem() == null) return;
+		IPlottingSystem<?> system = getPlottingSystem();
+		if (system == null) return;
 		
 		DataOptions dOption = fileController.getCurrentDataOption();
 		LoadedFile file = fileController.getCurrentFile();
@@ -139,8 +140,10 @@ public class PlotController implements IPlotController {
 		if (plotObject != null && plotObject.getPlotMode() != currentMode && selected) {
 			currentMode = plotObject.getPlotMode();
 			if (currentMode != localMode) {
-				getPlottingSystem().reset();
-				getPlottingSystem().setTitle("");
+				system.reset();
+				system.getSelectedXAxis().setTitle("");
+				system.getSelectedYAxis().setTitle("");
+				system.setTitle("");
 			}
 			localMode = currentMode;
 		} else if (plotObject == null) {
@@ -155,6 +158,13 @@ public class PlotController implements IPlotController {
 		//make immutable state object
 		final List<DataStateObject> state = fileController.getImmutableFileState();
 		//update plot
+		
+		if (state.isEmpty()) {
+			system.reset();
+			system.getSelectedXAxis().setTitle("");
+			system.getSelectedYAxis().setTitle("");
+			system.setTitle("");
+		}
 		updatePlotStateInJob(state, currentMode);
 		
 	}
