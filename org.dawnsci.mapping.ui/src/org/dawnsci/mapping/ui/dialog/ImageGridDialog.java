@@ -227,7 +227,7 @@ public class ImageGridDialog extends Dialog{
 	@Override
 	public boolean close() {
 		unsubscribe();
-		job.cancel();
+		if (job != null) job.cancel();
 		job = null;
 		for (IPlottingSystem<Composite> system : systems) if (system != null && !system.isDisposed()) system.dispose();
 		return super.close();
