@@ -1,14 +1,17 @@
 package org.dawnsci.datavis.model;
 
+import org.eclipse.dawnsci.analysis.dataset.slicer.SliceFromSeriesMetadata;
 import org.eclipse.dawnsci.analysis.dataset.slicer.SliceViewIterator;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.trace.ILineTrace;
 import org.eclipse.dawnsci.plotting.api.trace.ITrace;
 import org.eclipse.dawnsci.plotting.api.trace.MetadataPlotUtils;
 import org.eclipse.january.DatasetException;
+import org.eclipse.january.dataset.Dataset;
 import org.eclipse.january.dataset.DatasetUtils;
 import org.eclipse.january.dataset.IDataset;
 import org.eclipse.january.dataset.ILazyDataset;
+import org.eclipse.january.dataset.Slice;
 import org.eclipse.january.dataset.SliceND;
 import org.eclipse.january.metadata.AxesMetadata;
 import org.slf4j.Logger;
@@ -59,10 +62,54 @@ public class PlotModeXY implements IPlotMode {
 		int count = 0;
 		while (it.hasNext()) {
 			ILazyDataset next = it.next();
-			all[count++] = DatasetUtils.sliceAndConvertLazyDataset(next).squeeze();
+			Dataset d = DatasetUtils.sliceAndConvertLazyDataset(next);
+			updateName(lz.getName(), d, slice, getDataDimensions(options)[0]);
+			all[count++] = d.squeeze();
 			
 		}
 		return all;
+	}
+	
+	private void updateName(String name, IDataset data, SliceND slice, int dataDim){
+		data.setName(name);
+		
+		if (data.getRank() == 1) {
+			return;
+		}
+		
+		try {
+			
+			SliceFromSeriesMetadata sm = data.getFirstMetadata(SliceFromSeriesMetadata.class);
+			IDataset[] md =MetadataPlotUtils.getAxesAsIDatasetArray(data);
+			if (md == null) return;
+
+			StringBuilder builder = new StringBuilder(name);
+
+			builder.append("[");
+			SliceND combined = SliceNDUtils.getRootSlice(slice, new SliceND(slice.getShape(),sm.getSliceFromInput()));
+			Slice[] s = combined.convertToSlice();
+			
+			for (int i = 0 ; i < md.length; i++){
+				IDataset d = md[i];
+				if (d == null || i == dataDim){
+					builder.append(s[i].toString());
+				} else {
+					if (d.getSize() == 1) d.setShape(new int[]{1});
+					double val = DatasetUtils.convertToDataset(d).getElementDoubleAbs(0);
+					builder.append(Double.toString(val));
+				}
+				builder.append(",");
+			}
+			
+			builder.deleteCharAt(builder.length()-1);
+			builder.append("]");
+			builder.append("[");
+			builder.append(combined.toString());
+			builder.append("]");
+			data.setName(builder.toString());
+		} catch (Exception e) {
+			logger.error("Could not build name");
+		}
 	}
 
 	@Override

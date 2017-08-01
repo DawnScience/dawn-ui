@@ -12,6 +12,7 @@ import org.eclipse.january.dataset.Dataset;
 import org.eclipse.january.dataset.DatasetUtils;
 import org.eclipse.january.dataset.IDataset;
 import org.eclipse.january.dataset.ILazyDataset;
+import org.eclipse.january.dataset.Slice;
 import org.eclipse.january.dataset.SliceND;
 import org.eclipse.january.metadata.AxesMetadata;
 import org.slf4j.Logger;
@@ -50,10 +51,48 @@ public class PlotModeImage implements IPlotMode {
 		Dataset data = DatasetUtils.convertToDataset(lz.getSlice(slice));
 		logger.info("Slice time {} ms for slice {} of {}", (System.currentTimeMillis()-t), slice.toString(), lz.getName());
 		data.setErrors(null);
+		updateName(lz.getName(),data,slice);
 		data.squeeze();
 		if (data.getRank() != 2) return null;
 		if (transposeNeeded(options)) data = data.getTransposedView(null);
 		return new IDataset[]{data};
+	}
+	
+	private void updateName(String name, IDataset data, SliceND slice){
+		
+		data.setName(name);
+		
+		if (data.getRank() == 2) {
+			return;
+		}
+		
+		try {
+
+			IDataset[] md =MetadataPlotUtils.getAxesAsIDatasetArray(data);
+			if (md == null) return;
+
+			StringBuilder builder = new StringBuilder(name);
+
+			builder.append("[");
+			Slice[] s = slice.convertToSlice();
+			for (int i = 0 ; i < md.length; i++){
+				IDataset d = md[i];
+				if (d == null || d.getSize() != 1){
+					builder.append(s[i].toString());
+				} else {
+					d.setShape(new int[]{1});
+					double val = d.getDouble(0);
+					builder.append(Double.toString(val));
+				}
+				builder.append(",");
+			}
+			
+			builder.deleteCharAt(builder.length()-1);
+			builder.append("]");
+			data.setName(builder.toString());
+		} catch (Exception e) {
+			logger.error("Could not build name");
+		}
 	}
 	
 	public void displayData(IDataset[] data, ITrace[] update, IPlottingSystem<?> system, Object userObject) throws Exception {

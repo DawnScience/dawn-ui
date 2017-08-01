@@ -1,12 +1,12 @@
 package org.dawnsci.datavis.model;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -258,7 +258,8 @@ public class PlotController implements IPlotController {
 		IDataset[] data = null;
 		try {
 			ILazyDataset view = dataOp.getLazyDataset().getSliceView();
-			view.setName(dataOp.getFilePath() + ":" + dataOp.getName());
+			File f = new File(dataOp.getFilePath());
+			view.setName(f.getName() + ":" + dataOp.getName());
 
 			data = mode.sliceForPlot(view, slice,options);
 		} catch (Exception e) {
