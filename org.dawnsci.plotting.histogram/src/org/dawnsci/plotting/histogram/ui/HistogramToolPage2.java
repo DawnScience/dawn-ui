@@ -1,7 +1,10 @@
 package org.dawnsci.plotting.histogram.ui;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 
 import org.dawnsci.plotting.histogram.Activator;
 import org.dawnsci.plotting.histogram.ColourMapProvider;
@@ -12,6 +15,7 @@ import org.dawnsci.plotting.histogram.functions.ColourCategoryContribution;
 import org.dawnsci.plotting.histogram.preferences.HistogramPreferencePage;
 import org.dawnsci.plotting.histogram.service.PaletteService;
 import org.eclipse.core.runtime.Assert;
+import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.histogram.IPaletteService;
 import org.eclipse.dawnsci.plotting.api.preferences.PlottingConstants;
 import org.eclipse.dawnsci.plotting.api.tool.AbstractToolPage;
@@ -19,6 +23,7 @@ import org.eclipse.dawnsci.plotting.api.tool.IToolPage;
 import org.eclipse.dawnsci.plotting.api.trace.IImageTrace;
 import org.eclipse.dawnsci.plotting.api.trace.IPaletteListener;
 import org.eclipse.dawnsci.plotting.api.trace.IPaletteTrace;
+import org.eclipse.dawnsci.plotting.api.trace.ITrace;
 import org.eclipse.dawnsci.plotting.api.trace.ITraceListener;
 import org.eclipse.dawnsci.plotting.api.trace.PaletteEvent;
 import org.eclipse.dawnsci.plotting.api.trace.TraceEvent;
@@ -87,6 +92,8 @@ public class HistogramToolPage2 extends AbstractToolPage implements IToolPage {
 	private SelectionAdapter colourSchemeListener;
 
 	private IPaletteService pservice;
+	
+	private AtomicReference<IPaletteTrace> activePaletteTrace = new AtomicReference<IPaletteTrace>(null);
 
 	@Override
 	public ToolPageRole getToolPageRole() {
@@ -202,20 +209,22 @@ public class HistogramToolPage2 extends AbstractToolPage implements IToolPage {
 		logScaleCheck.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				IImageTrace image = getImageTrace();
-				if (image != null) {
+				
+				IPaletteTrace p = activePaletteTrace.get();
+				
+				if (p != null) {
 					// TODO: There should be a method on image to
 					// setLogColorScale so that
 					// it just does the right thing.
-					image.getImageServiceBean().setLogColorScale(logScaleCheck.getSelection());
-					if (image.isRescaleHistogram()) {
-						image.rehistogram();
+					p.getImageServiceBean().setLogColorScale(logScaleCheck.getSelection());
+					if (p.isRescaleHistogram() && activePaletteTrace instanceof IImageTrace) {
+						((IImageTrace)activePaletteTrace).rehistogram();
 					} else {
 						// XXX: Doing a image.repaint() is not sufficient, force
 						// more
 						// work to be done by resetting the palette data to what
 						// it already has
-						image.setPaletteData(image.getPaletteData());
+						p.setPaletteData(p.getPaletteData());
 					}
 				}
 				Activator.getPlottingPreferenceStore().setValue(PlottingConstants.CM_LOGSCALE, logScaleCheck.getSelection());
@@ -229,8 +238,7 @@ public class HistogramToolPage2 extends AbstractToolPage implements IToolPage {
 		invertedCheck.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				IImageTrace image = getImageTrace();
-				if (image != null) {
+				if (activePaletteTrace != null) {
 					getPaletteService().setInverted(invertedCheck.getSelection());
 					setPalette();
 				}
@@ -325,9 +333,9 @@ public class HistogramToolPage2 extends AbstractToolPage implements IToolPage {
 				"Rehistogram and restore histogram plot to default zoom",
 				IAction.AS_PUSH_BUTTON) {
 			public void run() {
-				IImageTrace imageTrace = getImageTrace();
-				if (imageTrace != null) {
-					imageTrace.rehistogram();
+				
+				if (activePaletteTrace != null && activePaletteTrace instanceof IImageTrace) {
+					((IImageTrace)activePaletteTrace).rehistogram();
 					histogramWidget.rescaleAxis();
 				}
 			}
@@ -339,8 +347,9 @@ public class HistogramToolPage2 extends AbstractToolPage implements IToolPage {
 
 		lockAction = new Action("Lock histogram range", IAction.AS_CHECK_BOX) {
 			public void run() {
-				IImageTrace image = getImageTrace();
-				image.setRescaleHistogram(!isChecked());
+				IPaletteTrace p = activePaletteTrace.get();
+				if (p == null) return;
+				p.setRescaleHistogram(!isChecked());
 			}
 		};
 		lockAction.setImageDescriptor(Activator.getImageDescriptor("icons/lock.png"));
@@ -362,15 +371,40 @@ public class HistogramToolPage2 extends AbstractToolPage implements IToolPage {
 				+ getPlottingSystem().hashCode());
 		getPlottingSystem().addTraceListener(traceListener);
 
-		IPaletteTrace paletteTrace = getPaletteTrace();
-		if (paletteTrace != null) {
-			paletteTrace.addPaletteListener(paletteListener);
-			logger.debug("HistogramToolPage: activate - palette trace " + paletteTrace.hashCode());
-			updateHistogramUIElements(paletteTrace);
+		IPaletteTrace p = getLastPaletteTrace();
+		
+		activePaletteTrace.set(p);
+		if (p != null) {
+			p.addPaletteListener(paletteListener);
+			logger.debug("HistogramToolPage: activate - palette trace " + p.hashCode());
+			updateHistogramUIElements(p);
 		} else {
 			logger.debug("HistogramToolPage: activate - palette trace is null.");
 		}
 
+	}
+
+	private IPaletteTrace getLastPaletteTrace() {
+		
+		return getLastTrace(IPaletteTrace.class);
+		
+	}
+	
+	private <T extends ITrace> T getLastTrace(Class<T> clazz) {
+		
+		IPlottingSystem<?> system = getPlottingSystem();
+		if (system == null) return null;
+		
+		Collection<T> ts = system.getTracesByClass(clazz);
+		if (ts.isEmpty()) return null;
+		
+		T t = null;
+		
+		Iterator<T> iterator = ts.iterator();
+		
+		while (iterator.hasNext()) t = iterator.next();
+		
+		return t;
 	}
 
 	@Override
@@ -380,12 +414,21 @@ public class HistogramToolPage2 extends AbstractToolPage implements IToolPage {
 		if (getPlottingSystem() != null){
 			logger.debug("HistogramToolPage: deactivate. Plotting System " + getPlottingSystem().hashCode());
 			getPlottingSystem().removeTraceListener(traceListener);
+			
+			Collection<IPaletteTrace> traces = getPlottingSystem().getTracesByClass(IPaletteTrace.class);
+			
+			if (traces != null) {
+				for (IPaletteTrace p : traces) {
+					p.removePaletteListener(paletteListener);
+				}
+			}
 		}
+		
 
 		//palette trace is not always set in the activate stage, so could be null
-		if (getPaletteTrace() != null){
-			getPaletteTrace().removePaletteListener(paletteListener);
-		}	
+//		if (getPaletteTrace() != null){
+//			getPaletteTrace().removePaletteListener(paletteListener);
+//		}	
 	}
 
 	/**
@@ -433,10 +476,10 @@ public class HistogramToolPage2 extends AbstractToolPage implements IToolPage {
 	 * the selected colour scheme
 	 */
 	private void setPalette() {
-		IPaletteTrace paletteTrace = getPaletteTrace();
-		if (paletteTrace != null) {
+		IPaletteTrace p = activePaletteTrace.get();
+		if (p != null) {
 			String selectedColormap = colourMapViewer.getCombo().getText();
-			paletteTrace.setPalette(selectedColormap);
+			p.setPalette(selectedColormap);
 		}
 	}
 
@@ -471,6 +514,7 @@ public class HistogramToolPage2 extends AbstractToolPage implements IToolPage {
 		List<String> colours = getPaletteService().getColoursByCategory(category);
 		colourMapViewer.setInput(colours.toArray());
 		setColourScheme(it);
+		if (lockAction != null && it != null) lockAction.setChecked(!it.isRescaleHistogram());
 	}
 
 	private final class TraceListener implements ITraceListener {
@@ -483,7 +527,9 @@ public class HistogramToolPage2 extends AbstractToolPage implements IToolPage {
 			// When we get this notification, the data is not ready in the trace
 			// e.g. min gets set but not max/
 			// we would have to turn off listeners or something
+			if (!(evt.getSource() instanceof IPaletteTrace)) return;
 			IPaletteTrace it = (IPaletteTrace) evt.getSource();
+			activePaletteTrace.set(it);
 			histogramWidget.setInput(it);
 		}
 
@@ -497,15 +543,18 @@ public class HistogramToolPage2 extends AbstractToolPage implements IToolPage {
 
 		@Override
 		public void traceUpdated(TraceEvent evt) {
+			if (!(evt.getSource() instanceof IPaletteTrace)) return;
 			IPaletteTrace it = (IPaletteTrace) evt.getSource();
+			activePaletteTrace.set(it);
 			updateHistogramUIElements(it);
 		}
 
 		@Override
 		public void traceAdded(TraceEvent evt) {
-			IPaletteTrace it = (IPaletteTrace) evt.getSource();
-			updateHistogramUIElements(it);
-			it.addPaletteListener(paletteListener);
+			IPaletteTrace p = (IPaletteTrace) evt.getSource();
+			activePaletteTrace.set(p);
+			updateHistogramUIElements(p);
+			p.addPaletteListener(paletteListener);
 		}
 
 		@Override

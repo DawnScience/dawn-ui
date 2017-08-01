@@ -928,12 +928,28 @@ public class PlottingSystemImpl<T> extends AbstractPlottingSystem<T> {
 		
 		Class<? extends ITrace>  previous = traceClazz;
 		traceClazz = clazz;
-		actionBarManager.switchActions(getPlotType(clazz));
+//		actionBarManager.switchActions(getPlotType(clazz));
 
 		T top = null;
 
 		IPlottingSystemViewer<T> viewer = createViewer(clazz);
-		if (viewer == null) return;
+		if (viewer == null) {
+			actionBarManager.switchActions(getPlotType(clazz));
+			return;
+		} else {
+			boolean mixedTraceMode = false;
+			if (viewer == activeViewer) {
+				Collection<ITrace> traces = getTraces();
+				for (ITrace t : traces) {
+					if (!t.getClass().equals(clazz)) {
+						mixedTraceMode = true;
+						break;
+					}
+				}
+				
+			}
+			if (!mixedTraceMode) actionBarManager.switchActions(getPlotType(clazz));
+		}
 
 		activeViewer = viewer;
 		top          = viewer.getControl();

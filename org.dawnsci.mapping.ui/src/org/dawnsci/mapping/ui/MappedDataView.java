@@ -145,32 +145,32 @@ public class MappedDataView extends ViewPart {
 			final IViewPart view = page.showView(getSecondaryIdAttribute("mapview", "org.dawnsci.mapping.ui.mapview"));
 			map = (IPlottingSystem<Composite>)view.getAdapter(IPlottingSystem.class);
 			map.setPlotType(PlotType.IMAGE);
-			// remove unwanted tool & menu contribution
-			IActionBars bar = map.getActionBars();
-			IToolBarManager tbm = bar.getToolBarManager();
-			tbm.remove(ToolPageRole.ROLE_2D.getId());
-			tbm.remove(BasePlottingConstants.SNAP_TO_GRID);
-			IMenuManager mm = bar.getMenuManager();
-			mm.remove(BasePlottingConstants.XY_PLOT_MENU_ID);
-			mm.remove(BasePlottingConstants.IMAGE_PLOT_MENU_ID);
-			mm.remove(BasePlottingConstants.IMAGE_ORIGIN_MENU_ID);
-			// add histogram action
-			IAction histogramAction = new Action() {
-				@Override
-				public void run() {
-					try {
-						if (map.getTraces().iterator().hasNext()) {
-							final IToolPageSystem system = (IToolPageSystem) map.getAdapter(IToolPageSystem.class);
-							system.setToolVisible(BasePlottingConstants.HISTO_TOOL_ID,
-									ToolPageRole.ROLE_2D, ToolPageView.TOOLPAGE_2D_VIEW_ID);
-						}
-					} catch (Exception e1) {
-						logger.error("Cannot show histogram tool programatically!", e1);
-					}
-				}
-			};
-			histogramAction.setImageDescriptor(Activator.getImageDescriptor("icons/color_wheel.png"));
-			tbm.insertBefore(BasePlottingConstants.CONFIG_SETTINGS, histogramAction);
+//			// remove unwanted tool & menu contribution
+//			IActionBars bar = map.getActionBars();
+//			IToolBarManager tbm = bar.getToolBarManager();
+//			tbm.remove(ToolPageRole.ROLE_2D.getId());
+//			tbm.remove(BasePlottingConstants.SNAP_TO_GRID);
+//			IMenuManager mm = bar.getMenuManager();
+//			mm.remove(BasePlottingConstants.XY_PLOT_MENU_ID);
+//			mm.remove(BasePlottingConstants.IMAGE_PLOT_MENU_ID);
+//			mm.remove(BasePlottingConstants.IMAGE_ORIGIN_MENU_ID);
+//			// add histogram action
+//			IAction histogramAction = new Action() {
+//				@Override
+//				public void run() {
+//					try {
+//						if (map.getTraces().iterator().hasNext()) {
+//							final IToolPageSystem system = (IToolPageSystem) map.getAdapter(IToolPageSystem.class);
+//							system.setToolVisible(BasePlottingConstants.HISTO_TOOL_ID,
+//									ToolPageRole.ROLE_2D, ToolPageView.TOOLPAGE_2D_VIEW_ID);
+//						}
+//					} catch (Exception e1) {
+//						logger.error("Cannot show histogram tool programatically!", e1);
+//					}
+//				}
+//			};
+//			histogramAction.setImageDescriptor(Activator.getImageDescriptor("icons/color_wheel.png"));
+//			tbm.insertBefore(BasePlottingConstants.CONFIG_SETTINGS, histogramAction);
 		} catch (PartInitException e) {
 			throw new RuntimeException("Could not create the map view", e);
 		}

@@ -32,7 +32,8 @@ public class ColourMapProvider implements IStructuredContentProvider{
 	public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
 		this.colourMapViewer = (ComboViewer) viewer;
 
-		if (newInput != oldInput){
+		if (newInput != oldInput && newInput != null){
+			
 			colourMapViewer.setSelection(new StructuredSelection(newInput), true);
 		}
 	}
