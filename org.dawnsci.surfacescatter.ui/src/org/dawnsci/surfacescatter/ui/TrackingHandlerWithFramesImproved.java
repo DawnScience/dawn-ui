@@ -174,49 +174,6 @@ public class TrackingHandlerWithFramesImproved {
 												   myNum,
 												   distance);
 								
-//								if(seedRequired && 
-//								   frame.getTrackingMethodology() != TrackerType1.INTERPOLATION &&
-//								   frame.getTrackingMethodology() != TrackerType1.SPLINE_INTERPOLATION &&
-//								   frame.getTrackingMethodology() != TrackerType1.USE_SET_POSITIONS &&
-//								   drm.isTrackerOn()) {
-//
-////									int nearestCompletedDatFileNo = findNearestDatNo(distance,
-////																					 myNum);
-//									
-//								
-//									double[] seedLocation = TrackerLocationInterpolation.trackerInterpolationInterpolator0(drm.getTrackerLocationList(), 
-//											   drm.getSortedX(), 
-//											   drm.getInitialLenPt()[0],
-//											   k);
-//									
-//									drm.addSeedLocation(frame.getDatNo(),seedLocation);
-//										
-//									debug("!!!!!!!!!!!!!!!     }}}}}{{{{{{{{ seedlocation[0] : " + seedLocation[0] +" + " + "seedlocation[1] :" + seedLocation[1]);
-//									
-//								}	
-//								
-//								else if(frame.getTrackingMethodology() == TrackerType1.INTERPOLATION ||
-//									    frame.getTrackingMethodology() == TrackerType1.SPLINE_INTERPOLATION){
-//									
-//									int[] len = new int[] {(int) Math.round(drm.getInterpolatedLenPts().get(k)[0][0]),(int) Math.round(drm.getInterpolatedLenPts().get(k)[0][1])};
-//									int[]  pt = new int[] {(int) Math.round(drm.getInterpolatedLenPts().get(k)[1][0]),(int) Math.round(drm.getInterpolatedLenPts().get(k)[1][1])};
-//									
-//									double[] seedLocation = new double[] { (double) pt[0], (double) pt[1], (double) (pt[0] + len[0]),
-//											(double) (pt[1]), (double) pt[0], (double) pt[1] + len[1], (double) (pt[0] + len[0]),
-//											(double) (pt[1] + len[1]) };
-//									
-//									debug("!!!!!!!!!!!!!!!     }}}}}{{{{{{{{ seedlocation[0] : " + seedLocation[0] +" + " + "seedlocation[1] :" + seedLocation[1]);
-//									
-//									drm.addSeedLocation(frame.getDatNo(),seedLocation);
-//								}
-//								
-//								
-//								if(k == startFrame){
-//									int[][] lenPt = ssp.getInitialLenPt();
-//									double[] seedLocation = LocationLenPtConverterUtils.lenPtToLocationConverter(lenPt);
-//									drm.addSeedLocation(frame.getDatNo(),seedLocation);
-//								}
-								
 								drm.addDmxList(frame.getDatNo(),  
 										   	   frame.getNoInOriginalDat(),
 										   	   frame.getScannedVariable());
@@ -242,7 +199,16 @@ public class TrackingHandlerWithFramesImproved {
 								if(Arrays.equals(output1.getShape(), (new int[] {2,2}))){
 									Display d =Display.getCurrent();
 									debug("Dummy Proccessing failure");
-									ssp.boundariesWarning("position 1, line ~2245, k: " + Integer.toString(k),d);
+									
+									display.syncExec(new Runnable() {
+										@Override
+										public void run() {	
+											
+											ssp.boundariesWarning("position 1, line ~207",d);
+											return;
+										}
+									});
+									
 									
 									break;
 								}
@@ -316,36 +282,6 @@ public class TrackingHandlerWithFramesImproved {
 													   tt1,
 													   myNum,
 													   distance);
-									
-									
-//									if(seedRequired && 
-//									   frame.getTrackingMethodology()!= TrackerType1.INTERPOLATION &&
-//									   frame.getTrackingMethodology() != TrackerType1.SPLINE_INTERPOLATION &&
-//									   frame.getTrackingMethodology()!= TrackerType1.USE_SET_POSITIONS &&
-//									   drm.isTrackerOn()
-//									   ){
-//										
-//										double[] seedLocation = TrackerLocationInterpolation.trackerInterpolationInterpolator0(drm.getTrackerLocationList(), 
-//																										   drm.getSortedX(), 
-//																										   drm.getInitialLenPt()[0],
-//																										   k);
-//										drm.addSeedLocation(frame.getDatNo(),seedLocation);
-//									}
-//								
-//										
-//									
-//									else if(frame.getTrackingMethodology() == TrackerType1.INTERPOLATION ||
-//											frame.getTrackingMethodology() == TrackerType1.SPLINE_INTERPOLATION){
-//										
-//										int[] len = new int[] {(int) Math.round(drm.getInterpolatedLenPts().get(k)[0][0]),(int) Math.round(drm.getInterpolatedLenPts().get(k)[0][1])};
-//										int[]  pt = new int[] {(int) Math.round(drm.getInterpolatedLenPts().get(k)[1][0]),(int) Math.round(drm.getInterpolatedLenPts().get(k)[1][1])};
-//										
-//										double[] seedLocation = new double[] { (double) pt[0], (double) pt[1], (double) (pt[0] + len[0]),
-//												(double) (pt[1]), (double) pt[0], (double) pt[1] + len[1], (double) (pt[0] + len[0]),
-//												(double) (pt[1] + len[1]) };
-//										
-//										drm.addSeedLocation(frame.getDatNo(),seedLocation);
-//									}
 //									
 									
 									drm.addDmxList(frame.getDatNo(),  
@@ -366,7 +302,16 @@ public class TrackingHandlerWithFramesImproved {
 									if(Arrays.equals(output1.getShape(), (new int[] {2,2}))){
 										Display d =Display.getCurrent();
 										debug("Dummy Proccessing failure");
-										ssp.boundariesWarning(Integer.toString(k),d);
+										
+										display.syncExec(new Runnable() {
+											@Override
+											public void run() {	
+												
+												ssp.boundariesWarning("position 1, line ~310",d);
+												return;
+											}
+										});
+										
 										
 										break;
 									}
@@ -526,59 +471,6 @@ public class TrackingHandlerWithFramesImproved {
 	}
 	
 	
-	private Dataset[] makeXLYArraysForInterpolator(int nearestCompletedDatFileNo){
-		
-		ArrayList<double[]> seedList = drm.getLocationList().get(nearestCompletedDatFileNo);
-		ArrayList<Double> lList = drm.getDmxList().get(nearestCompletedDatFileNo);
-		
-		Dataset yValues = DatasetFactory.zeros(new int[] {1});
-		Dataset xValues = DatasetFactory.zeros(new int[] {1});
-		Dataset lValues = DatasetFactory.zeros(new int[] {1});
-		
-		try{
-			yValues = DatasetFactory.zeros(seedList.size());
-			xValues = DatasetFactory.zeros(seedList.size());
-			lValues = DatasetFactory.zeros(seedList.size());
-		}
-		
-		catch(Exception r){
-			
-			boolean f = true;
-			
-			while(f){
-				
-				for(ArrayList<double[]> kr : drm.getLocationList()){
-					if(kr != null){
-						
-						seedList = kr;
-						
-						yValues = DatasetFactory.zeros(seedList.size());
-						xValues = DatasetFactory.zeros(seedList.size());
-						lValues = DatasetFactory.zeros(seedList.size());
-						
-						f = false;
-					}
-				}
-			}
-		}
-		
-		for(int op = 0; op<seedList.size(); op++){
-				
-				double x = seedList.get(op)[1];
-				double y = seedList.get(op)[0];
-				double l = lList.get(op);
-				
-				if(x!=0.0 && y!=0.0){
-					xValues.set(x, op);
-					yValues.set(y, op);
-					lValues.set(l, op);
-				}
-
-		}
-		
-		return new Dataset[] {xValues, lValues, yValues};
-		
-	}
 	
 	
 	private boolean doINeedASeedArray(int k,
@@ -618,7 +510,7 @@ public class TrackingHandlerWithFramesImproved {
 
 
 		if(seedRequired && 
-			tt1 != TrackerType1.INTERPOLATION &&
+			//tt1 != TrackerType1.INTERPOLATION &&
 			tt1 != TrackerType1.SPLINE_INTERPOLATION &&
 			tt1 != TrackerType1.USE_SET_POSITIONS &&
 			drm.isTrackerOn()) {
@@ -634,7 +526,7 @@ public class TrackingHandlerWithFramesImproved {
 			
 		}	
 		
-		else if(tt1 == TrackerType1.INTERPOLATION ||
+		else if(//tt1 == TrackerType1.INTERPOLATION ||
 			    tt1 == TrackerType1.SPLINE_INTERPOLATION){
 			
 			int[] len = new int[] {(int) Math.round(drm.getInterpolatedLenPts().get(k)[0][0]),(int) Math.round(drm.getInterpolatedLenPts().get(k)[0][1])};

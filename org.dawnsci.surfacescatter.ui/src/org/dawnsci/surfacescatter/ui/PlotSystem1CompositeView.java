@@ -55,7 +55,7 @@ public class PlotSystem1CompositeView extends Composite {
     public PlotSystem1CompositeView(Composite parent, 
     		int style, 
     		int trackingMarker, 
-    		int extra,
+//    		int extra,
     		SurfaceScatterPresenter ssp,
     		SurfaceScatterViewStart ssvs){
     	
@@ -182,36 +182,34 @@ public class PlotSystem1CompositeView extends Composite {
 			
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				if(trackerOn){
-					trackerOn = false;
-				}
 				
-				else{
-					trackerOn= true;
-				}
+				trackerOn = !trackerOn;
 				
 				if(trackerOn){
-					trackerOnButton.setText("Tracker On");
-					if((ssp.getTrackerType() == TrackerType1.INTERPOLATION ||
-							ssp.getTrackerType() == TrackerType1.SPLINE_INTERPOLATION)){
+					trackerOnButton.setText("Turn Tracker Off");
+					if(//(ssp.getTrackerType() == TrackerType1.INTERPOLATION ||
+							ssp.getTrackerType() == TrackerType1.SPLINE_INTERPOLATION){
 						button4.setEnabled(true);
 						button5.setEnabled(true);
 					}
 				}
 				
 				else{
-					trackerOnButton.setText("Tracker Off");
+					trackerOnButton.setText("Turn Tracker On");
 					button4.setEnabled(false);
 					button5.setEnabled(false);
 				}
 				
 				ssp.setTrackerOn(trackerOn);
+				PlotSystem1CompositeView.this.redraw();
 			}
 			
 			@Override
 			public void widgetDefaultSelected(SelectionEvent e) {
-				// TODO Auto-generated method stub	
+
 			}
+			
+			
 		});
 
         button2 = new Button (methodSetting, SWT.PUSH);
@@ -251,7 +249,7 @@ public class PlotSystem1CompositeView extends Composite {
 			
 			@Override
 			public void widgetDefaultSelected(SelectionEvent e) {
-				// TODO Auto-generated method stub
+
 				
 			}
 		});
@@ -342,6 +340,8 @@ public class PlotSystem1CompositeView extends Composite {
 	   int methodologySelection = comboDropDown0.getSelectionIndex();
 	   int fitPowerSelection = comboDropDown1.getSelectionIndex();
 	   int trackerSelection = comboDropDown2.getSelectionIndex();
+	   
+	   
        
 	   String boundaryBox = String.valueOf(boundaryBoxText.getSelection());
 	   
@@ -367,7 +367,7 @@ public class PlotSystem1CompositeView extends Composite {
        ssvs.getPlotSystemCompositeView().getBgRegion().setROI(bgRegionROI[1]);
 
        
-       if(ssp.getDrm().getFms().get(ssp.getSliderPos()).getTrackingMethodology() != TrackerType1.INTERPOLATION ||
+       if(//ssp.getDrm().getFms().get(ssp.getSliderPos()).getTrackingMethodology() != TrackerType1.INTERPOLATION ||
     		   ssp.getDrm().getFms().get(ssp.getSliderPos()).getTrackingMethodology() != TrackerType1.SPLINE_INTERPOLATION){
     	   
     	   button4.setEnabled(false);
@@ -383,13 +383,32 @@ public class PlotSystem1CompositeView extends Composite {
        } 
        
        
-       if((TrackingMethodology.intToTracker1(trackerSelection) == TrackerType1.INTERPOLATION 
-				|| TrackingMethodology.intToTracker1(trackerSelection) == TrackerType1.SPLINE_INTERPOLATION)
+       if((//TrackingMethodology.intToTracker1(trackerSelection) == TrackerType1.INTERPOLATION 
+//				|| 
+				TrackingMethodology.intToTracker1(trackerSelection) == TrackerType1.SPLINE_INTERPOLATION)
 						&& ssp.getTrackerOn()){
 	
     	   button4.setEnabled(true);
     	   button5.setEnabled(true);
 		}
+       
+       if(ssp.getTrackerOn()){
+ 
+				trackerOnButton.setText("Tracker On");
+				
+			if(//(ssp.getTrackerType() == TrackerType1.INTERPOLATION ||
+				ssp.getTrackerType() == TrackerType1.SPLINE_INTERPOLATION){
+				button4.setEnabled(true);
+				button5.setEnabled(true);
+			}
+			
+			
+			trackerOnButton.setText("Tracker Off");
+			button4.setEnabled(false);
+			button5.setEnabled(false);
+			
+			ssp.setTrackerOn(trackerOn);
+       }
       
    }
    
@@ -479,13 +498,13 @@ public class PlotSystem1CompositeView extends Composite {
    
    public void checkTrackerOnButton(){
 	 
-	   if(ssp.getTrackerOn() ==false){
-		   trackerOnButton.setText("Tracker Off");
+	   if(!ssp.getTrackerOn()){
+		   trackerOnButton.setText("Turn Tracker On");
 		   button4.setEnabled(false);
 		   button5.setEnabled(false);
 	   }
 	   else{
-		   trackerOnButton.setText("Tracker On");
+		   trackerOnButton.setText("Turn Tracker Off");
 	    }
 	    
    }
@@ -533,9 +552,9 @@ class operationJob extends Job {
 
 			@Override
 			public void run() {
-			plotSystem1.clear();
-			plotSystem1.updatePlot2D(input, null, monitor);
-    		plotSystem1.repaint(true);
+				plotSystem1.clear();
+				plotSystem1.updatePlot2D(input, null, monitor);
+	    		plotSystem1.repaint(true);
 			}
     	
 		});	

@@ -271,9 +271,13 @@ public class PlotSystemCompositeView extends Composite {
 				ssp.flipGoodPoint(slider.getSelection());
 				if(ssp.getDrm().getFms().get(ssp.getSliderPos()).isGoodPoint()){
 					disregardFrame.setText("Disregard Frame");
+					if(ssp.areAllPointsGood()){
+						includeAllFrames.setEnabled(false);
+					}
 				}
 				else{
 					disregardFrame.setText("Include Frame");
+					includeAllFrames.setEnabled(true);
 				}
 			}
 			
@@ -287,7 +291,7 @@ public class PlotSystemCompositeView extends Composite {
         includeAllFrames = new Button(centringButtons, SWT.PUSH | SWT.FILL);
         includeAllFrames.setText("Include All Frames");
         includeAllFrames.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-        includeAllFrames.setEnabled(true);
+        includeAllFrames.setEnabled(false);
         	
         includeAllFrames.addSelectionListener(new SelectionListener() {
 			
@@ -297,6 +301,7 @@ public class PlotSystemCompositeView extends Composite {
 					fm.setGoodPoint(true);
 				}
 				disregardFrame.setText("Disregard Frame");
+				includeAllFrames.setEnabled(false);
 			}
 			
 			@Override
@@ -329,7 +334,7 @@ public class PlotSystemCompositeView extends Composite {
     	customComposite1 = new PlotSystem1CompositeView(subIComposite,
     												    SWT.NONE,
     												    0, 
-    												    0, 
+//    												    0, 
     												    ssp,
     												    ssvs);
     		

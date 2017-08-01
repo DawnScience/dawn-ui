@@ -558,35 +558,6 @@ public class SurfaceScatterPresenter {
 				}
 				
 				else {
-//					IDataHolder dh2 = LoaderFactory.getData(fm.getDatFilePath());
-//
-//					dcdtheta = dh2.getLazyDataset(ReflectivityMetadataTitlesForDialog.getdcdtheta());
-//
-//					qdcd = dh2.getLazyDataset(ReflectivityMetadataTitlesForDialog.getqdcd());
-//					
-//					if (dcdtheta == null) {
-//						try {
-//							dcdtheta = dh2.getLazyDataset(ReflectivityMetadataTitlesForDialog.getsdcdtheta());
-//
-//						} catch (Exception e2) {
-//							System.out.println("can't get dcdtheta");
-//						}
-//					} 
-//					else {
-//					}
-//					
-//					if (qdcd == null) {
-//						try {
-//							qdcd = dh2.getLazyDataset(ReflectivityMetadataTitlesForDialog.getqsdcd());
-//						} catch (Exception e2) {
-//							System.out.println("can't get qdcd");
-//						}
-//					} 
-//					
-//					else {
-//					}
-					
-					
 					
 					drm.setSortedTheta( thetaArrayCon);
 					
@@ -1262,8 +1233,9 @@ public class SurfaceScatterPresenter {
 	
 	public void illuminateCorrectInterpolationBox(){
 		
-		if((getTrackerType() == TrackerType1.INTERPOLATION 
-				|| getTrackerType() == TrackerType1.SPLINE_INTERPOLATION)
+		if((//getTrackerType() == TrackerType1.INTERPOLATION 
+//				|| 
+				getTrackerType() == TrackerType1.SPLINE_INTERPOLATION)
 				&& drm.getInterpolatorRegions()!= null){
 			
 			double u =(double) sliderPos;
@@ -1286,8 +1258,9 @@ public class SurfaceScatterPresenter {
 	
 	public void illuminateCorrectInterpolationBox(int k){
 		
-		if((getTrackerType() == TrackerType1.INTERPOLATION 
-				|| getTrackerType() == TrackerType1.SPLINE_INTERPOLATION)
+		if((//getTrackerType() == TrackerType1.INTERPOLATION 
+//				|| 
+				getTrackerType() == TrackerType1.SPLINE_INTERPOLATION)
 				&& drm.getInterpolatorRegions()!= null){
 			
 			double u =(double) k;
@@ -3176,4 +3149,20 @@ public class SurfaceScatterPresenter {
 			drm.getFms().get(i).setGoodPoint(true);
 		}
 	}
+	
+	
+	public boolean areAllPointsGood(){
+		boolean output = true;
+		
+		for(FrameModel fm : fms){
+			if(!fm.isGoodPoint()){
+				output = false;
+			}
+		}
+			
+		return output;
+	}
+	
 }
+
+

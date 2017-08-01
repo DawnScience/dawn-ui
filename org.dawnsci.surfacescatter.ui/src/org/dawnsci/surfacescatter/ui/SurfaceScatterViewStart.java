@@ -66,6 +66,7 @@ import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.ui.PlatformUI;
 //import org.slf4j.Logger;
 //import org.slf4j.LoggerFactory;
+import org.omg.PortableInterceptor.USER_EXCEPTION;
 
 import uk.ac.diamond.scisoft.analysis.io.LoaderFactory;
 
@@ -101,6 +102,8 @@ public class SurfaceScatterViewStart extends Dialog {
 		super(parentShell);
 
 		this.ssp = new SurfaceScatterPresenter();
+		
+		ssp.setParentShell(this.getParentShell());
 		
 		
 		this.ssp.addStateListener(new IPresenterStateChangeEventListener() {
@@ -219,8 +222,6 @@ public class SurfaceScatterViewStart extends Dialog {
 				int[] test = correctionsDropDownArray;
 				int t = correctionsDropDown.getSelectionIndex();
 				
-				customComposite.resetCorrectionsTab();
-				
 				
 				ssp.surfaceScatterPresenterBuildWithFrames(filepaths,
 												datDisplayer.getSelectedOption(),
@@ -261,8 +262,7 @@ public class SurfaceScatterViewStart extends Dialog {
 				customComposite.getSlider().setMaximum(ssp.getDrm().getFms().size());
 				customComposite.getSlider().setThumb(1);
 				customComposite.getPlotSystem1CompositeView().checkTrackerOnButton();
-				
-				customComposite.resetCorrectionsTab();
+			
 				customComposite.generalUpdate();
 				try{
 					ssps3c.generalUpdate();
@@ -352,7 +352,17 @@ public class SurfaceScatterViewStart extends Dialog {
 				
 				ssps3c.resetCrossHairs();
 				
-				
+				if(!isThereAParamFile){
+					
+					customComposite.getPlotSystem1CompositeView().getCombos()[2].removeAll();
+					
+					for(TrackerType1 f: TrackerType1.values()){
+						if(f != TrackerType1.USE_SET_POSITIONS){
+							customComposite.getPlotSystem1CompositeView().getCombos()[2].add(f.getTrackerName(), f.getTrackerNo());
+						}
+					}
+					
+				}
 			}
 
 			@Override
@@ -903,8 +913,9 @@ public class SurfaceScatterViewStart extends Dialog {
 									  boundaryBox);
 		
 		
-		if(TrackingMethodology.intToTracker1(trackerSelection) != TrackerType1.INTERPOLATION 
-				&& TrackingMethodology.intToTracker1(trackerSelection) != TrackingMethodology.TrackerType1.SPLINE_INTERPOLATION
+		if(//TrackingMethodology.intToTracker1(trackerSelection) != TrackerType1.INTERPOLATION 
+				//&& 
+				TrackingMethodology.intToTracker1(trackerSelection) != TrackingMethodology.TrackerType1.SPLINE_INTERPOLATION
 				&& ssp.getInterpolatorRegions() != null){
 			
 			for(IRegion g : ssp.getInterpolatorRegions()){
@@ -937,8 +948,9 @@ public class SurfaceScatterViewStart extends Dialog {
 			customComposite.getPlotSystem1CompositeView().getRejectLocation().setEnabled(false);
 		}
 		
-		else if((TrackingMethodology.intToTracker1(trackerSelection) == TrackerType1.INTERPOLATION 
-				|| TrackingMethodology.intToTracker1(trackerSelection) == TrackerType1.SPLINE_INTERPOLATION)
+		else if((//TrackingMethodology.intToTracker1(trackerSelection) == TrackerType1.INTERPOLATION 
+				//|| 
+				TrackingMethodology.intToTracker1(trackerSelection) == TrackerType1.SPLINE_INTERPOLATION)
 						&& ssp.getTrackerOn()){
 	
 			customComposite.getPlotSystem1CompositeView().getAcceptLocation().setEnabled(true);
@@ -1287,8 +1299,9 @@ public class SurfaceScatterViewStart extends Dialog {
 		
 		ssp.illuminateCorrectInterpolationBox(k);
 		
-		if((ssp.getTrackerType() == TrackerType1.INTERPOLATION 
-				|| ssp.getTrackerType() == TrackerType1.SPLINE_INTERPOLATION)
+		if((//ssp.getTrackerType() == TrackerType1.INTERPOLATION 
+				//|| 
+				ssp.getTrackerType() == TrackerType1.SPLINE_INTERPOLATION)
 				&& ssp.getInterpolatedLenPts()!= null){
 			
 			double[][] lf =ssp.getInterpolatedLenPts().get(ssp.getSliderPos());

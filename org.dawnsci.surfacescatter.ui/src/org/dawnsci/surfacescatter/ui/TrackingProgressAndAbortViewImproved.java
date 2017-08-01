@@ -75,12 +75,10 @@ public class TrackingProgressAndAbortViewImproved extends Dialog {
 			
 			tj = new TrackingHandlerWithFramesImproved(); 
 			
-			
 			tj.setProgress(progress);
 			tj.setSsvs(ssvs);
 			tj.setCorrectionSelection(MethodSetting.toInt(ssp.getCorrectionSelection()));
 			tj.setOutputCurves(ssvs.getSsps3c().getOutputCurves().getPlotSystem());
-//			tj.setTimeStep(Math.round((2 / ssp.getNoImages())));
 			tj.setSsp(ssp);
 			tj.setTPAAV(TrackingProgressAndAbortViewImproved.this);
 			tj.runTJ1();
@@ -112,7 +110,7 @@ public class TrackingProgressAndAbortViewImproved extends Dialog {
 		int h = rect.height;
 		int w = rect.width;
 		
-		return new Point((int) Math.round(0.2*w), (int) Math.round(0.4*h));
+		return new Point((int) Math.round(0.3*w), (int) Math.round(0.2*h));
 	}
 	
 	
