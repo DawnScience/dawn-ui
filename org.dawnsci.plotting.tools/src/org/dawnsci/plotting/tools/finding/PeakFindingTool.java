@@ -90,6 +90,9 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 	private IDataset interestXData;
 	private IDataset interestYData;
 
+	private ITraceListener traceListener;
+	private IClickListener clickListener;
+	
 	public IDataset gettingXData() {
 		return this.interestXData;
 	}
@@ -228,8 +231,7 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 		};
 		manager.addPeakListener(listener);
 
-		// Control Peak Removal + Addition
-		getPlottingSystem().addClickListener(new IClickListener() {
+		clickListener = new IClickListener() {
 			@Override
 			public void doubleClickPerformed(ClickEvent evt) {
 				// TODO Auto-generated method stub
@@ -244,9 +246,14 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 						removePeakValue(evt.getxValue(), evt.getyValue());
 				}
 			}
-		});
+		};
+		
+		
+		// Control Peak Removal + Addition
+		getPlottingSystem().addClickListener(clickListener);
 
-		getPlottingSystem().addTraceListener(new ITraceListener() {
+		
+		traceListener = new ITraceListener() {
 
 			@Override
 			public void tracesUpdated(TraceEvent evt) {
@@ -307,7 +314,9 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 					runTraceSearch(traceUpdate);
 				}
 			}
-		});
+		};
+		
+		getPlottingSystem().addTraceListener(traceListener);
 
 		// Begin with the search tool ready to then run on
 		createNewSearch();
@@ -705,15 +714,20 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 		super.deactivate();
 		// Now remove any listeners to the plotting providing
 		// getPlottingSystem()!=null
+		
+		IPlottingSystem<?> system = getPlottingSystem();
 		if (getPlottingSystem() != null) {
 			if (searchRegion != null)
-				getPlottingSystem().removeRegion(searchRegion);
+				system.removeRegion(searchRegion);
 
 			if (regionBndsTrace != null)
-				getPlottingSystem().removeTrace(regionBndsTrace);
+				system.removeTrace(regionBndsTrace);
 
 			if (peaksTrace != null)
-				getPlottingSystem().removeTrace(peaksTrace);
+				system.removeTrace(peaksTrace);
+			
+			system.removeTraceListener(traceListener);
+			system.removeClickListener(clickListener);
 
 		}
 
