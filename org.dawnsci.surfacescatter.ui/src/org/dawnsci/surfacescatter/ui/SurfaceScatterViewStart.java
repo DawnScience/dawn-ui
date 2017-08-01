@@ -1201,10 +1201,10 @@ public class SurfaceScatterViewStart extends Dialog {
 	
 			}
 			
-			TrackingProgressAndAbortView tpaav 
-						= new TrackingProgressAndAbortView(getParentShell(), 
+			TrackingProgressAndAbortViewImproved tpaav 
+						= new TrackingProgressAndAbortViewImproved(getParentShell(), 
 														   ssp,
-														   SurfaceScatterViewStart.this);
+														   this);
 			tpaav.open();
 			
 		}
