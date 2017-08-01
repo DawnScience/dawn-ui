@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012 Diamond Light Source Ltd.
+ * Copyright (c) 2012, 2017 Diamond Light Source Ltd.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -17,31 +17,24 @@ import org.dawnsci.plotting.draw2d.swtxy.selection.AbstractSelectionRegion;
 import org.eclipse.dawnsci.plotting.api.region.IRegion;
 import org.eclipse.nebula.visualization.internal.xygraph.undo.XYGraphConfigCommand;
 import org.eclipse.nebula.visualization.internal.xygraph.undo.XYGraphMemento;
+import org.eclipse.nebula.visualization.internal.xygraph.undo.XYGraphMementoUtil;
 import org.eclipse.nebula.visualization.xygraph.figures.IXYGraph;
 
 public class XYRegionConfigCommand extends XYGraphConfigCommand {
 
 	@SuppressWarnings("unused")
 	public XYRegionConfigCommand(IXYGraph xyGraph) {
-		
-		super(xyGraph);
-		
-		previousXYGraphMem = new XYRegionMemento();		
-		afterXYGraphMem = new XYRegionMemento();
-		
-		createDefaultSettings();
-		
-		final RegionArea regionArea     = (RegionArea)xyGraph.getPlotArea();
-		for(String name : regionArea.getRegionNames()){
-			((XYRegionMemento)previousXYGraphMem).addRegionMemento(new RegionBean());
-			((XYRegionMemento)afterXYGraphMem).addRegionMemento(new RegionBean());
-		}	
+		super(xyGraph, XYRegionMemento::new);
 
+		final RegionArea regionArea = (RegionArea) xyGraph.getPlotArea();
+		for (String name : regionArea.getRegionNames()) {
+			((XYRegionMemento) getPreviousXYGraphMemento()).addRegionMemento(new RegionBean());
+			((XYRegionMemento) getAfterXYGraphMemento()).addRegionMemento(new RegionBean());
+		}
 	}
 
-	
 	protected void saveXYGraphPropsToMemento(IXYGraph xyGraph, XYGraphMemento memento){
-		super.saveXYGraphPropsToMemento(xyGraph, memento);
+		XYGraphMementoUtil.saveXYGraphPropsToMemento(xyGraph, memento);
 		
 		int i=0;
 		final List<IRegion>     regionList     = ((RegionArea)xyGraph.getPlotArea()).getRegions();
@@ -53,7 +46,7 @@ public class XYRegionConfigCommand extends XYGraphConfigCommand {
 	}
 	
 	protected void restoreXYGraphPropsFromMemento(IXYGraph xyGraph, XYGraphMemento memento){
-		super.restoreXYGraphPropsFromMemento(xyGraph, memento);
+		XYGraphMementoUtil.restoreXYGraphPropsFromMemento(xyGraph, memento);
 
 		int i=0;
 		for(RegionBean rb : ((XYRegionMemento)memento).getRegionBeanList()) {

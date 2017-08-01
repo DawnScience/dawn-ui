@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012 Diamond Light Source Ltd.
+ * Copyright (c) 2012, 2017 Diamond Light Source Ltd.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -31,6 +31,7 @@ import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.nebula.visualization.widgets.figureparts.ColorMapRamp;
 import org.eclipse.nebula.visualization.xygraph.figures.Annotation;
 import org.eclipse.nebula.visualization.xygraph.figures.Axis;
+import org.eclipse.nebula.visualization.xygraph.figures.DAxis;
 import org.eclipse.nebula.visualization.xygraph.figures.IAnnotationLabelProvider;
 import org.eclipse.nebula.visualization.xygraph.figures.IAxesFactory;
 import org.eclipse.nebula.visualization.xygraph.figures.IXYGraph;
@@ -39,6 +40,7 @@ import org.eclipse.nebula.visualization.xygraph.figures.PlotArea;
 import org.eclipse.nebula.visualization.xygraph.figures.Trace;
 import org.eclipse.nebula.visualization.xygraph.figures.XYGraph;
 import org.eclipse.nebula.visualization.xygraph.linearscale.AbstractScale.LabelSide;
+import org.eclipse.nebula.visualization.xygraph.util.XYGraphMediaFactory;
 import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.PaletteData;
@@ -72,9 +74,9 @@ public class XYRegionGraph extends XYGraph {
 		super(new XYRegionGraphAxesFactory());
 
 		try {
-			this.showLegend = getPreferenceStore().getBoolean(BasePlottingConstants.XY_SHOWLEGEND);
+			setShowLegend(getPreferenceStore().getBoolean(BasePlottingConstants.XY_SHOWLEGEND));
 		} catch (NullPointerException ne) {
-			this.showLegend = true;
+			setShowLegend(true);
 		}
 	}
 	
@@ -190,14 +192,10 @@ public class XYRegionGraph extends XYGraph {
 		}
 		
 	}
-	
-	public void setDefaultShowLegend(boolean showLeg) {
-		this.showLegend = showLeg;
-	}
-	
-	public void setShowLegend(boolean showLeg) {
+
+	private void internalSetShowLegend(boolean showLeg) {
 		
-		boolean orig = this.showLegend;
+		boolean orig = isShowLegend();
 		super.setShowLegend(showLeg);
 		getPreferenceStore().setValue(BasePlottingConstants.XY_SHOWLEGEND, showLeg);
 		if (orig!=showLeg && ServiceHolder.getMacroService()!=null) {
@@ -228,14 +226,6 @@ public class XYRegionGraph extends XYGraph {
 	}
 
 	/**
-	 * @return the showLegend
-	 */
-	public boolean isShowLegend() {
-		return showLegend;
-	}
-
-
-	/**
 	 * Call from UI thread only!
 	 */
 	public void clearTraces() {
@@ -249,10 +239,10 @@ public class XYRegionGraph extends XYGraph {
 		}
 		
 		for(Axis axis : getXAxisList()){
-			axis.clear();
+			if (axis instanceof DAxis)((DAxis)axis).clear();
 		}
 		for(Axis axis : getYAxisList()){
-			axis.clear();
+			if (axis instanceof DAxis)((DAxis)axis).clear();
 		}
 		getRegionArea().clearTraces();
 		
@@ -443,8 +433,39 @@ public class XYRegionGraph extends XYGraph {
 	 * @param trace
 	 * @param toFront - if true, move regions to front
 	 */
-	public void addTrace(Trace trace, Axis xAsxis, Axis yAxis, boolean toFront) {
-		super.addTrace(trace, xAsxis, yAxis);
+	public void addTrace(Trace trace, Axis xAxis, Axis yAxis, boolean toFront) {
+		if (trace.getTraceColor() == null) { // Cycle through default colors
+			trace.setTraceColor(XYGraphMediaFactory.getInstance()
+					.getColor(DEFAULT_TRACES_COLOR[plotArea.getTraceList().size() % DEFAULT_TRACES_COLOR.length]));
+		}
+		if (legendMap.containsKey(trace.getYAxis()))
+			legendMap.get(trace.getYAxis()).addTrace(trace);
+		else {
+			legendMap.put(trace.getYAxis(), new Legend((IXYGraph) this));
+			legendMap.get(trace.getYAxis()).addTrace(trace);
+			add(legendMap.get(trace.getYAxis()));
+		}
+
+		if (xAxis == null || yAxis == null) {
+			try {
+				for (Axis axis : getAxisList()) {
+					axis.addTrace(trace);
+				}
+			} catch (Throwable ne) {
+				// Ignored, this is a bug fix for Dawn 1.0
+				// to make the plots rescale after a plot is deleted.
+			}
+		} else {
+			xAxis.addTrace(trace);
+			yAxis.addTrace(trace);
+		}
+
+		plotArea.addTrace(trace);
+		trace.setXYGraph((IXYGraph) this);
+		trace.dataChanged(null);
+		revalidate();
+		repaint();
+
 		getRegionArea().toFront();
 	}
 
