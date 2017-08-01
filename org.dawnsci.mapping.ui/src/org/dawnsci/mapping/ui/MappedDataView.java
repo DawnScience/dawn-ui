@@ -18,22 +18,16 @@ import org.dawnsci.mapping.ui.datamodel.MappedDataBlock;
 import org.dawnsci.mapping.ui.datamodel.MappedDataFile;
 import org.dawnsci.mapping.ui.datamodel.MappedFileManager;
 import org.dawnsci.mapping.ui.datamodel.PlottableMapObject;
-import org.dawnsci.plotting.views.ToolPageView;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.dawnsci.analysis.api.processing.IOperationBean;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.PlotType;
 import org.eclipse.dawnsci.plotting.api.axis.ClickEvent;
 import org.eclipse.dawnsci.plotting.api.axis.IClickListener;
-import org.eclipse.dawnsci.plotting.api.preferences.BasePlottingConstants;
-import org.eclipse.dawnsci.plotting.api.tool.IToolPage.ToolPageRole;
-import org.eclipse.dawnsci.plotting.api.tool.IToolPageSystem;
-import org.eclipse.jface.action.Action;
-import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
-import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.action.MenuManager;
+import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.util.LocalSelectionTransfer;
 import org.eclipse.jface.viewers.ColumnViewerToolTipSupport;
 import org.eclipse.jface.viewers.DoubleClickEvent;
@@ -64,7 +58,6 @@ import org.eclipse.swt.dnd.Transfer;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Menu;
-import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IMemento;
 import org.eclipse.ui.IViewPart;
 import org.eclipse.ui.IViewSite;
@@ -315,6 +308,18 @@ public class MappedDataView extends ViewPart {
 					}
 					
 					if (mdfs.size() > 1) manager.add(MapActionUtils.getFilesRemoveAction(FileManagerSingleton.getFileManager(),mdfs));
+					
+					
+					
+					if (!maps.isEmpty()) {
+						manager.add(new Separator());
+						manager.add(MapActionUtils.getUnPlotAllAction(plotManager, viewer));
+					}
+					
+					if (!mdfs.isEmpty()) {
+						manager.add(new Separator());
+						manager.add(MapActionUtils.getFilesRemoveAllAction(FileManagerSingleton.getFileManager()));
+					}
 				}
 			}
 		});

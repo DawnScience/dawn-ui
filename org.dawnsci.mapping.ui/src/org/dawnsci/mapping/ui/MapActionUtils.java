@@ -116,7 +116,7 @@ public class MapActionUtils {
 	}
 	
 	public static IAction getMapPropertiesAction(final AbstractMapData map, final MapPlotManager manager, final MappedDataArea area) {
-		IAction trans = new Action("Properties...") {
+		return new Action("Properties...") {
 			@Override
 			public void run() {
 				
@@ -133,46 +133,63 @@ public class MapActionUtils {
 			}
 		};
 		
-		return trans;
 		
 	}
 	
 	public static IAction getFileRemoveAction(final MappedFileManager manager, final MappedDataFile file) {
-		IAction trans = new Action("Clear") {
+		return new Action("Clear") {
 			@Override
 			public void run() {
 				manager.removeFile(file);
 			}
 		};
 		
-		return trans;
 		
 	}
 	
 	public static IAction getFilesRemoveAction(final MappedFileManager manager, final List<MappedDataFile> files) {
-		IAction trans = new Action("Clear files") {
+		return new Action("Clear files") {
 			@Override
 			public void run() {
 				for (MappedDataFile file :files) manager.removeFile(file);
 			}
 		};
 		
-		return trans;
 	}
 	
-	public static IAction getFilesRemoveAction(final MappedFileManager manager) {
-		IAction trans = new Action("Clear all") {
+	public static IAction getFilesRemoveAllAction(final MappedFileManager manager) {
+		return new Action("Clear all files") {
 			@Override
 			public void run() {
 				manager.clearAll();
 			}
 		};
 		
-		return trans;
+	}
+	
+	public static IAction getFilesRemoveAction(final MappedFileManager manager) {
+		return new Action("Clear all") {
+			@Override
+			public void run() {
+				manager.clearAll();
+			}
+		};
+		
+	}
+	
+	public static IAction getUnPlotAllAction(final MapPlotManager manager, final TreeViewer viewer) {
+		return new Action("Clear plot") {
+			@Override
+			public void run() {
+				manager.clearAll();
+				viewer.refresh();
+			}
+		};
+
 	}
 	
 	public static IAction getDynamicViewerAction(final MappedDataBlock block) {
-		IAction trans = new Action("Dynamic Viewer...") {
+		return new Action("Dynamic Viewer...") {
 			@Override
 			public void run() {
 				
@@ -189,12 +206,10 @@ public class MapActionUtils {
 			}
 		};
 		
-		return trans;
-		
 	}
 	
 	public static IAction getSaveImageAction(final AssociatedImage image) {
-		IAction save = new Action("Save image...") {
+		return new Action("Save image...") {
 			@Override
 			public void run() {
 				
@@ -203,7 +218,6 @@ public class MapActionUtils {
 				dialog.setFolderSelector(false);
 
 				dialog.setPath(System.getProperty("user.home")+ File.separator + "image.nxs");
-				
 			
 				dialog.create();
 				
@@ -212,8 +226,6 @@ public class MapActionUtils {
 				}
 			}
 		};
-		
-		return save;
 		
 	}
 }
