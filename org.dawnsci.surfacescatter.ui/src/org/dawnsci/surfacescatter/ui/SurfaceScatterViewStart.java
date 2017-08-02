@@ -346,8 +346,7 @@ public class SurfaceScatterViewStart extends Dialog {
 					
 					getSsps3c().generalUpdate(ssp.getLenPt());
 					customComposite.generalCorrectionsUpdate();
-
-					
+	
 				}
 				
 				ssps3c.resetCrossHairs();
