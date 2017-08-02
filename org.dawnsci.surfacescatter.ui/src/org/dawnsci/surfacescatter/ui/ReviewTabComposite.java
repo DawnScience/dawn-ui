@@ -229,6 +229,7 @@ public class ReviewTabComposite extends Composite{
 				
 				refreshTable();
 				refreshCurves();
+				plotSystem.autoscaleAxes();
 			}
 			
 			@Override
@@ -979,7 +980,7 @@ public class ReviewTabComposite extends Composite{
 				ILineTrace lt = buildLineTrace(csdp);
 				
 				plotSystem.addTrace(lt);
-				plotSystem.autoscaleAxes();
+//				plotSystem.autoscaleAxes();
 				
 			}
 		}

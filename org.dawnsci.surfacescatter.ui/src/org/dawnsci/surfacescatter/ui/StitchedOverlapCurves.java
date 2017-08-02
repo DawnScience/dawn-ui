@@ -3,15 +3,21 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
 import org.dawb.common.ui.widgets.ActionBarWrapper;
+import org.dawnsci.surfacescatter.AxisEnums;
 import org.dawnsci.surfacescatter.CurveStitchDataPackage;
+import org.dawnsci.surfacescatter.GoodPointStripper;
 import org.dawnsci.surfacescatter.OverlapAttenuationObject;
 import org.dawnsci.surfacescatter.OverlapDataModel;
 import org.dawnsci.surfacescatter.OverlapDisplayObjects;
 import org.dawnsci.surfacescatter.OverlapUIModel;
+import org.dawnsci.surfacescatter.AxisEnums.xAxes;
+import org.dawnsci.surfacescatter.AxisEnums.yAxes;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.PlotType;
 import org.eclipse.dawnsci.plotting.api.PlottingFactory;
 import org.eclipse.dawnsci.plotting.api.trace.ILineTrace;
+import org.eclipse.january.dataset.Dataset;
+import org.eclipse.january.dataset.DatasetFactory;
 import org.eclipse.january.dataset.IDataset;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
@@ -55,6 +61,9 @@ public class StitchedOverlapCurves extends Composite {
     private OverlapDisplayObjects odo;
     private Group overlapSelector;
     private ArrayList<IDataset> xArrayList;
+    private boolean useGoodPointsOnly = false;
+	private Button showOnlyGoodPoints;
+	private boolean errorDisplayFlag = true;
     
     public StitchedOverlapCurves(Composite parent, 
 					    		int style,
@@ -114,6 +123,37 @@ public class StitchedOverlapCurves extends Composite {
 		
 		form.setOrientation(SWT.VERTICAL);
 		
+		 Group saveSettings = new Group(form, SWT.NONE);
+	     GridLayout saveSettingsLayout = new GridLayout(2, true);
+	     saveSettings.setLayout(saveSettingsLayout);
+	        
+	     final GridData saveSettingsData = new GridData(SWT.FILL, SWT.FILL, true, true);
+	     saveSettingsData.grabExcessVerticalSpace = true;
+	     saveSettingsData.heightHint = 100;
+	     saveSettings.setLayoutData(new GridData(GridData.FILL_HORIZONTAL | GridData.FILL_VERTICAL));
+	       
+		
+	     showOnlyGoodPoints = new Button(saveSettings, SWT.PUSH);
+	     showOnlyGoodPoints.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+	     showOnlyGoodPoints.setData(new GridData(SWT.FILL));
+	     showOnlyGoodPoints.setText("Show Only Good Points");
+	        
+	     showOnlyGoodPoints.addSelectionListener(new SelectionListener() {
+				
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				flipUseGoodPointsOnly();
+				refreshCurvesFromTable();
+			}
+				
+			@Override
+			public void widgetDefaultSelected(SelectionEvent e) {
+					// TODO Auto-generated method stub
+					
+			}
+		});
+	     
+	     
 ///////////////////////////TOP		
 		
 		SashForm topForm = new SashForm(form, SWT.VERTICAL);
@@ -245,7 +285,7 @@ public class StitchedOverlapCurves extends Composite {
 	    
 	    bottomForm.setWeights(new int[]{70,15,15});
 	    
-	    form.setWeights(new int[]{70,30});
+	    form.setWeights(new int[]{10, 70,20});
 	  
     } 
 		
@@ -751,5 +791,98 @@ public class StitchedOverlapCurves extends Composite {
 		
 		resetAttenuationFactors(overlapSelector, xArrayList,global);
    }
+   
+   private void flipUseGoodPointsOnly(){
+		
+		useGoodPointsOnly  = !useGoodPointsOnly;
+		
+		if(useGoodPointsOnly){
+			showOnlyGoodPoints.setText("Include All Points");
+		}
+		else{
+			showOnlyGoodPoints.setText("Disregard Bad Points");
+		}
+	}
+   
+   private ILineTrace buildLineTrace(){
+
+		ILineTrace lt =	plotSystem.createLineTrace(csdp.getRodName());
+		
+		IDataset x = DatasetFactory.zeros(new int[] {2,2}, Dataset.ARRAYFLOAT64);
+		IDataset y[] = new IDataset[2];
+//		
+//		if(xAxisSelection == null){
+//			xAxisSelection = xAxes.SCANNED_VARIABLE;
+//			
+//			boolean rg = true;
+//			
+//			for(String h :xAxis.getItems()){
+//				if(AxisEnums.toString(xAxisSelection).equals(h)){
+//					rg = false;
+//				}
+//			}
+//			
+//			if(rg){
+//				xAxis.add(AxisEnums.toString(xAxisSelection));
+//			}
+//			
+//		}
+//		
+//		if(yAxisSelection == null){
+//			yAxisSelection = yAxes.SPLICEDY;
+//			
+//			boolean rg = true;
+//			
+//			for(String h :yAxis.getItems()){
+//				if(AxisEnums.toString(yAxisSelection).equals(h)){
+//					rg = false;
+//				}
+//			}
+//			
+//			if(rg){
+//				yAxis.add(AxisEnums.toString(yAxisSelection));
+//			}
+//			
+//		}
+		
+		GoodPointStripper gps = new GoodPointStripper();
+
+		x  = gps.splicedXGoodPointStripper(csdp, 
+					xAxes.SCANNED_VARIABLE,
+				  !useGoodPointsOnly);
+
+		
+		y = gps.splicedYGoodPointStripper(csdp, 
+							  yAxes.SPLICEDY,
+							  !useGoodPointsOnly);
+					
+		y[0].setErrors(y[1]);
+		
+		lt.setData(x, y[0]);
+		
+		lt.setErrorBarEnabled(errorDisplayFlag);
+		
+		
+		return lt;
+	}
+   
+   
+   private void refreshCurvesFromTable(){
+		
+		plotSystem.clear();
+		
+//		for(TableItem fd : rodDisplayTable.getItems()){
+//			if(fd.getChecked()){
+//				
+//				CurveStitchDataPackage csdp = bringMeTheOneIWant(fd.getText(), 
+//																 rcm.getCsdpList());
+//				
+				ILineTrace lt =	buildLineTrace();
+				
+				plotSystem.addTrace(lt);
+				plotSystem.autoscaleAxes();
+			}
+//		}
+//	}
    
 }
