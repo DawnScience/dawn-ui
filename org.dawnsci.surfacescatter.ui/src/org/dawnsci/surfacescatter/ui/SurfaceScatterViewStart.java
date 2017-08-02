@@ -351,17 +351,17 @@ public class SurfaceScatterViewStart extends Dialog {
 				
 				ssps3c.resetCrossHairs();
 				
-				if(!isThereAParamFile){
+//				if(!isThereAParamFile){
 					
 					customComposite.getPlotSystem1CompositeView().getCombos()[2].removeAll();
 					
 					for(TrackerType1 f: TrackerType1.values()){
-						if(f != TrackerType1.USE_SET_POSITIONS){
+						if(f != TrackerType1.USE_SET_POSITIONS || isThereAParamFile){
 							customComposite.getPlotSystem1CompositeView().getCombos()[2].add(f.getTrackerName(), f.getTrackerNo());
 						}
 					}
 					
-				}
+//				}
 			}
 
 			@Override
