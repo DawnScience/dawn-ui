@@ -385,8 +385,8 @@ public class SuperSashPlotSystem3Composite extends Composite{
 						output,
 						greenRectangle);
 				
-			lt3.setName("background Slice");
-			lt4.setName("background Slice");
+//			lt3.setName("background Slice");
+//			lt4.setName("background Slice");
 				
 			plotSystem1.addTrace(lt3);
 			plotSystem3.addTrace(lt4);

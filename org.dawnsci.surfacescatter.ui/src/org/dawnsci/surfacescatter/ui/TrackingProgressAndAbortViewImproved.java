@@ -18,10 +18,9 @@ import org.eclipse.ui.PlatformUI;
 
 public class TrackingProgressAndAbortViewImproved extends Dialog {
 	
-	private Button abort;
 	private ProgressBar progress;
-	private SurfaceScatterViewStart ssvs;
 	private SurfaceScatterPresenter ssp;
+	private SurfaceScatterViewStart ssvs;
 	private TrackingHandlerWithFramesImproved tj; 
 	
 	
@@ -51,7 +50,7 @@ public class TrackingProgressAndAbortViewImproved extends Dialog {
 		int max = (ssp.getFms().size()) - 1;
 		progress.setMaximum(max);
 		
-		abort = new Button (container, SWT.PUSH);
+		Button abort = new Button (container, SWT.PUSH);
 		abort.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		abort.setText("Abort");		
 		
@@ -74,17 +73,16 @@ public class TrackingProgressAndAbortViewImproved extends Dialog {
 		
 		try{
 			
-//			tj = new TrackingHandlerWithFramesImproved(); 
-//			
-//			
-//			tj.setProgress(progress);
-//			tj.setSsvs(ssvs);
-//			tj.setCorrectionSelection(MethodSetting.toInt(ssp.getCorrectionSelection()));
-//			tj.setOutputCurves(ssvs.getSsps3c().getOutputCurves().getPlotSystem());
-////			tj.setTimeStep(Math.round((2 / ssp.getNoImages())));
-//			tj.setSsp(ssp);
-//			tj.setTPAAV(TrackingProgressAndAbortViewImproved.this);
-//			tj.runTJ1();
+			tj = new TrackingHandlerWithFramesImproved(); 
+			
+			tj.setProgress(progress);
+			tj.setSsvs(ssvs);
+			tj.setCorrectionSelection(MethodSetting.toInt(ssp.getCorrectionSelection()));
+			tj.setOutputCurves(ssvs.getSsps3c().getOutputCurves().getPlotSystem());
+			tj.setSsp(ssp);
+			tj.setTPAAV(TrackingProgressAndAbortViewImproved.this);
+			tj.runTJ1();
+			tj = new TrackingHandlerWithFramesImproved(); 
 			
 			
 
@@ -98,6 +96,7 @@ public class TrackingProgressAndAbortViewImproved extends Dialog {
 		}		
 		
 		return container;
+	
 	}
 
 	@Override
@@ -112,7 +111,7 @@ public class TrackingProgressAndAbortViewImproved extends Dialog {
 		int h = rect.height;
 		int w = rect.width;
 		
-		return new Point((int) Math.round(0.2*w), (int) Math.round(0.4*h));
+		return new Point((int) Math.round(0.3*w), (int) Math.round(0.2*h));
 	}
 	
 	
@@ -121,7 +120,6 @@ public class TrackingProgressAndAbortViewImproved extends Dialog {
 		Control c = super.createButtonBar(parent);
 		getShell().setDefaultButton(null);
 		c.setVisible(true);
-//		c.dispose();
 		return c;
 	}
 	
