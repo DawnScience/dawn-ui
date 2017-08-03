@@ -1,34 +1,34 @@
 package org.dawnsci.datavis.view.parts;
 
 
+import java.io.File;
+import java.io.FilenameFilter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.inject.Inject;
 
+import org.apache.commons.io.filefilter.WildcardFileFilter;
+import org.dawnsci.datavis.api.IRecentPlaces;
 import org.dawnsci.datavis.model.FileControllerStateEvent;
 import org.dawnsci.datavis.model.FileControllerStateEventListener;
-import org.dawnsci.datavis.model.IDataObject;
 import org.dawnsci.datavis.model.IFileController;
 import org.dawnsci.datavis.model.IPlotController;
 import org.dawnsci.datavis.model.IRefreshable;
 import org.dawnsci.datavis.model.LoadedFile;
 import org.dawnsci.datavis.view.Activator;
+import org.dawnsci.datavis.view.quickfile.IQuickFileWidgetListener;
+import org.dawnsci.datavis.view.quickfile.QuickFileWidget;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.dawnsci.analysis.api.io.ILoaderService;
 import org.eclipse.e4.core.di.annotations.Optional;
 import org.eclipse.e4.ui.di.Focus;
 import org.eclipse.e4.ui.di.UIEventTopic;
 import org.eclipse.e4.ui.workbench.modeling.ESelectionService;
-import org.eclipse.jface.action.Action;
-import org.eclipse.jface.action.IMenuListener;
-import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.MenuManager;
-import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.layout.TableColumnLayout;
 import org.eclipse.jface.util.LocalSelectionTransfer;
@@ -60,7 +60,9 @@ import org.eclipse.swt.dnd.Transfer;
 import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.events.KeyListener;
 import org.eclipse.swt.graphics.Image;
-import org.eclipse.swt.layout.FillLayout;
+import org.eclipse.swt.layout.FormAttachment;
+import org.eclipse.swt.layout.FormData;
+import org.eclipse.swt.layout.FormLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Menu;
@@ -90,17 +92,63 @@ public class LoadedFilePart {
 
 	@PostConstruct
 	public void createComposite(Composite parent) {
-		FillLayout fillLayout = new FillLayout();
-		fillLayout.type = SWT.VERTICAL;
-		parent.setLayout(fillLayout);
-		
-		
+		parent.setLayout(new FormLayout());
+		FormData checkForm = new FormData();
+		checkForm.top = new FormAttachment(0,0);
+		checkForm.left = new FormAttachment(0,0);
+		checkForm.right = new FormAttachment(100,0);
 		
 		Composite tableComposite = new Composite(parent, SWT.NONE);
-		
+		tableComposite.setLayoutData(checkForm);
 		
 		viewer = new TableViewer(tableComposite, SWT.MULTI |SWT.FULL_SELECTION | SWT.BORDER);
 		viewer.getTable().setHeaderVisible(true);
+		
+		QuickFileWidget qfw = null;
+		
+		if (ServiceManager.getRecentPlaces() != null) {
+			qfw = new QuickFileWidget(parent);
+			FormData comboForm = new FormData();
+			checkForm.bottom = new FormAttachment(qfw);
+			comboForm.left = new FormAttachment(0,0);
+			comboForm.right = new FormAttachment(100,0);
+			comboForm.bottom = new FormAttachment(100,0);
+			comboForm.height = 32;
+			qfw.setLayoutData(comboForm);
+			
+			IRecentPlaces recentPlaces = ServiceManager.getRecentPlaces();
+			List<String> p = recentPlaces.getRecentPlaces();
+			if (p.isEmpty()) {
+				qfw.setDirectoryPath(System.getProperty("user.home"));
+			} else {
+				qfw.setDirectoryPath(p.get(0));
+			}
+			
+		} else {
+			checkForm.bottom = new FormAttachment(100,0);
+		}
+		
+		final QuickFileWidget quickFileWidget = qfw;
+		
+		if (quickFileWidget != null) {
+			qfw.addListener(new IQuickFileWidgetListener() {
+				
+				@Override
+				public void fileSelected(String directory, String name) {
+					String match = name;
+					File folder = new File(directory);
+					File[] files = folder.listFiles((FilenameFilter)new WildcardFileFilter(match));
+					
+					String[] names = Arrays.stream(files)
+							.filter(f -> !f.isDirectory())
+							.map(File::getAbsolutePath)
+							.toArray(String[]::new);
+					
+					loadData(names);
+					
+				}
+			});
+		}
 		
 		ticked = AbstractUIPlugin.imageDescriptorFromPlugin("org.dawnsci.datavis.view", "icons/ticked.png").createImage();
 		unticked = AbstractUIPlugin.imageDescriptorFromPlugin("org.dawnsci.datavis.view", "icons/unticked.gif").createImage();
@@ -204,7 +252,10 @@ public class LoadedFilePart {
 			public void stateChanged(FileControllerStateEvent event) {
 				updateOnStateChange(event);
 				
-				
+				if (quickFileWidget != null) {
+					Display.getDefault().asyncExec(() ->quickFileWidget.setDirectoryPath(ServiceManager.getRecentPlaces().getRecentPlaces().get(0)));
+					
+				}
 			}
 		};
 		
