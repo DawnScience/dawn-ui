@@ -131,12 +131,12 @@ public class GeneralOverlapHandlerView extends Dialog {
 		stitchedCurves.setLayout(new GridLayout());
 		stitchedCurves.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
-		export = new Button(right, SWT.PUSH);
-		export.setLayoutData (new GridData(GridData.FILL_HORIZONTAL));
-		export.setText("Export Curve");
-		export.setSize(export.computeSize(100, 20, true));
-		
-		right.setWeights(new int[] {95,5});
+		export = stitchedCurves.getExport();
+//		export.setLayoutData (new GridData(GridData.FILL_HORIZONTAL));
+//		export.setText("Export Curve");
+//		export.setSize(export.computeSize(100, 20, true));
+//		
+		right.setWeights(new int[] {100});
 		
 		//////////////////////////////////////////////////////////////////////////////////
 		

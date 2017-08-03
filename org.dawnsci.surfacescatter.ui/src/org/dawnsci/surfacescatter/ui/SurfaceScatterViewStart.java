@@ -3,8 +3,8 @@ package org.dawnsci.surfacescatter.ui;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
+
 import org.dawnsci.surfacescatter.AnalaysisMethodologies.Methodology;
-import org.dawnsci.surfacescatter.AxisEnums;
 import org.dawnsci.surfacescatter.CurveStitchDataPackage;
 import org.dawnsci.surfacescatter.FittingParameters;
 import org.dawnsci.surfacescatter.IntensityDisplayEnum.IntensityDisplaySetting;
@@ -12,10 +12,8 @@ import org.dawnsci.surfacescatter.MethodSettingEnum.MethodSetting;
 import org.dawnsci.surfacescatter.ProcessingMethodsEnum.ProccessingMethod;
 import org.dawnsci.surfacescatter.ReflectivityFluxCorrectionsForDialog;
 import org.dawnsci.surfacescatter.ReflectivityMetadataTitlesForDialog;
-import org.dawnsci.surfacescatter.SXRDNexusReader;
-import org.dawnsci.surfacescatter.SavingUtils;
-import org.dawnsci.surfacescatter.SetupModel;
 import org.dawnsci.surfacescatter.SavingFormatEnum.SaveFormatSetting;
+import org.dawnsci.surfacescatter.SetupModel;
 import org.dawnsci.surfacescatter.TrackingMethodology;
 import org.dawnsci.surfacescatter.TrackingMethodology.TrackerType1;
 import org.eclipse.dawnsci.analysis.api.io.IDataHolder;
@@ -29,7 +27,6 @@ import org.eclipse.dawnsci.plotting.api.region.IRegion;
 import org.eclipse.dawnsci.plotting.api.region.IRegion.RegionType;
 import org.eclipse.dawnsci.plotting.api.region.ROIEvent;
 import org.eclipse.dawnsci.plotting.api.trace.ILineTrace;
-import org.eclipse.dawnsci.plotting.api.trace.ITrace;
 import org.eclipse.january.DatasetException;
 import org.eclipse.january.dataset.Dataset;
 import org.eclipse.january.dataset.DatasetFactory;
@@ -43,7 +40,6 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CTabFolder;
 import org.eclipse.swt.custom.CTabFolder2Adapter;
 import org.eclipse.swt.custom.CTabFolderEvent;
-import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.events.FocusEvent;
 import org.eclipse.swt.events.FocusListener;
 import org.eclipse.swt.events.SelectionEvent;
@@ -64,9 +60,6 @@ import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.ui.PlatformUI;
-//import org.slf4j.Logger;
-//import org.slf4j.LoggerFactory;
-import org.omg.PortableInterceptor.USER_EXCEPTION;
 
 import uk.ac.diamond.scisoft.analysis.io.LoaderFactory;
 
@@ -94,6 +87,7 @@ public class SurfaceScatterViewStart extends Dialog {
 	private boolean qConvert;
 	private RodAnalysisWindow raw ;
 	private SetupModel stm;
+	private String paramFile;
 	
 //	private final static Logger logger = LoggerFactory.getLogger(SurfaceScatterViewStart.class);
 	
@@ -263,13 +257,15 @@ public class SurfaceScatterViewStart extends Dialog {
 				customComposite.getSlider().setThumb(1);
 				customComposite.getPlotSystem1CompositeView().checkTrackerOnButton();
 			
-				customComposite.generalUpdate();
+				
 				try{
 					ssps3c.generalUpdate();
 				}
 				catch(Exception u){
 					
 				}
+				
+				customComposite.resetCorrectionsTab();
 				customComposite.generalCorrectionsUpdate();
 				customComposite.getPlotSystem1CompositeView().generalUpdate();
 				updateIndicators(0);
@@ -283,7 +279,7 @@ public class SurfaceScatterViewStart extends Dialog {
 				ssps3c.getOutputCurves().getIntensity().select(IntensityDisplaySetting.toInt(ids));
 				ssps3c.getOutputCurves().getOutputFormatSelection().select(SaveFormatSetting.toInt(sms));
 				
-				customComposite.resetCorrectionsTab();
+				customComposite.generalUpdate();
 				
 				try{
 					customComposite.getPlotSystem().removeTrace(customComposite.getPlotSystem().getTrace("Interpolated trajectory"));	
@@ -292,12 +288,12 @@ public class SurfaceScatterViewStart extends Dialog {
 					
 				}
 				
-				ssps3c.resetCrossHairs();
+				
 				ssp.setSelection(0);
 				ssp.setSliderPos(0);
 				
 				boolean isThereAParamFile = false;
-				String paramFile = " ";
+				paramFile = " ";
 				
 				for(TableItem jh : datDisplayer.getParamFileTable().getItems()){
 					if(jh.getChecked()){
@@ -307,62 +303,23 @@ public class SurfaceScatterViewStart extends Dialog {
 				}
 				
 				if(isThereAParamFile){
-					FittingParameters fp = ssp.loadParameters(paramFile);
-					
-					customComposite.getPlotSystem1CompositeView().setMethodologyDropDown(fp.getBgMethod());
-					customComposite.getPlotSystem1CompositeView().setFitPowerDropDown(fp.getFitPower());
-					customComposite.getPlotSystem1CompositeView().setTrackerTypeDropDown(fp.getTracker());
-					customComposite.getPlotSystem1CompositeView().setBoundaryBox(fp.getBoundaryBox());
-					
-					customComposite.setRegion(fp.getLenpt());
-					
-					double[] bgRegionROI = ssp.regionOfInterestSetter1(fp.getLenpt());
-					
-					RectangularROI bgROI = new RectangularROI(bgRegionROI[0],
-							  bgRegionROI[1],
-							  bgRegionROI[2],
-							  bgRegionROI[3],
-							  bgRegionROI[4]);
-					
-					customComposite.getBgRegion().setROI(bgROI);
-					
-					customComposite.redraw();
-							
-					int selection = ssp.closestImageNo(fp.getXValue());
-					SurfaceScatterViewStart.this.updateIndicators(selection);
-					
-					
-					ssps3c.generalUpdate();
-					customComposite.getPlotSystem1CompositeView().generalUpdate();
-					RectangularROI[] greenAndBg = ssp.trackingRegionOfInterestSetter(ssp.getLenPt());
-					
-					customComposite.getIRegion().setROI(greenAndBg[0]);
-					customComposite.getBgRegion().setROI(greenAndBg[1]);
-					
-					
-					if(ssp.getMethodology() == Methodology.OVERLAPPING_BACKGROUND_BOX){
-						customComposite.getSecondBgRegion().setROI(ssp.generateOffsetBgROI(ssp.getLenPt()));
-					}
-					
-					getSsps3c().generalUpdate(ssp.getLenPt());
-					customComposite.generalCorrectionsUpdate();
+					setParametersFromFile(paramFile);
 	
 				}
 				
-				ssps3c.resetCrossHairs();
-				
-//				if(!isThereAParamFile){
 					
-					customComposite.getPlotSystem1CompositeView().getCombos()[2].removeAll();
+				customComposite.getPlotSystem1CompositeView().getCombos()[2].removeAll();
 					
-					for(TrackerType1 f: TrackerType1.values()){
-						if(f != TrackerType1.USE_SET_POSITIONS || isThereAParamFile){
-							customComposite.getPlotSystem1CompositeView().getCombos()[2].add(f.getTrackerName(), f.getTrackerNo());
-						}
+				for(TrackerType1 f: TrackerType1.values()){
+					if(f != TrackerType1.USE_SET_POSITIONS || isThereAParamFile){
+						customComposite.getPlotSystem1CompositeView().getCombos()[2].add(f.getTrackerName(), f.getTrackerNo());
 					}
-					
-//				}
+				}
+				
+				ssps3c.resetCrossHairs();
 			}
+
+			
 
 			@Override
 			public void widgetDefaultSelected(SelectionEvent e) {		
@@ -390,7 +347,7 @@ public class SurfaceScatterViewStart extends Dialog {
 
 				MovieJob mJ = new MovieJob();
 				mJ.setPS(customComposite.getPlotSystem());
-				mJ.setTime(220);
+
 				mJ.setSsp(ssp);
 				mJ.setSsvs(SurfaceScatterViewStart.this);
 				mJ.setSliders(customComposite.getSlider());
@@ -947,13 +904,18 @@ public class SurfaceScatterViewStart extends Dialog {
 			customComposite.getPlotSystem1CompositeView().getRejectLocation().setEnabled(false);
 		}
 		
-		else if((//TrackingMethodology.intToTracker1(trackerSelection) == TrackerType1.INTERPOLATION 
+		if((//TrackingMethodology.intToTracker1(trackerSelection) == TrackerType1.INTERPOLATION 
 				//|| 
 				TrackingMethodology.intToTracker1(trackerSelection) == TrackerType1.SPLINE_INTERPOLATION)
 						&& ssp.getTrackerOn()){
 	
 			customComposite.getPlotSystem1CompositeView().getAcceptLocation().setEnabled(true);
 			customComposite.getPlotSystem1CompositeView().getRejectLocation().setEnabled(true);
+		}
+		
+		else if(TrackingMethodology.intToTracker1(trackerSelection) == TrackerType1.USE_SET_POSITIONS
+				&& ssp.getTrackerOn()){
+			setParametersFromFile(paramFile);
 		}
 
 		
@@ -1198,6 +1160,7 @@ public class SurfaceScatterViewStart extends Dialog {
 		
 		if(ssp.getProcessingMethodSelection() == ProccessingMethod.AUTOMATIC){
 			
+			
 
 			ssp.triggerBoxOffsetTransfer();
 			
@@ -1223,6 +1186,10 @@ public class SurfaceScatterViewStart extends Dialog {
 	}
 	
 
+	
+	
+	
+	
 	@Override
 	protected void configureShell(Shell newShell) {
 		super.configureShell(newShell);
@@ -1899,6 +1866,55 @@ public class SurfaceScatterViewStart extends Dialog {
 	
 	public RodAnalysisWindow getRaw(){
 		return raw;
+	}
+	
+	private void setParametersFromFile(String paramFile) {
+		setParametersFromFile(paramFile, false);
+	}
+	
+	private void setParametersFromFile(String paramFile, boolean setTheTrackerType) {
+		
+		FittingParameters fp = ssp.loadParameters(paramFile);
+		
+		customComposite.getPlotSystem1CompositeView().setMethodologyDropDown(fp.getBgMethod());
+		customComposite.getPlotSystem1CompositeView().setFitPowerDropDown(fp.getFitPower());
+		if(setTheTrackerType){
+			customComposite.getPlotSystem1CompositeView().setTrackerTypeDropDown(fp.getTracker());
+		}
+		customComposite.getPlotSystem1CompositeView().setBoundaryBox(fp.getBoundaryBox());
+		
+		customComposite.setRegion(fp.getLenpt());
+		
+		double[] bgRegionROI = ssp.regionOfInterestSetter1(fp.getLenpt());
+		
+		RectangularROI bgROI = new RectangularROI(bgRegionROI[0],
+				  bgRegionROI[1],
+				  bgRegionROI[2],
+				  bgRegionROI[3],
+				  bgRegionROI[4]);
+		
+		customComposite.getBgRegion().setROI(bgROI);
+		
+		customComposite.redraw();
+				
+		int selection = ssp.closestImageNo(fp.getXValue());
+		SurfaceScatterViewStart.this.updateIndicators(selection);
+		
+		
+		ssps3c.generalUpdate();
+		customComposite.getPlotSystem1CompositeView().generalUpdate();
+		RectangularROI[] greenAndBg = ssp.trackingRegionOfInterestSetter(ssp.getLenPt());
+		
+		customComposite.getIRegion().setROI(greenAndBg[0]);
+		customComposite.getBgRegion().setROI(greenAndBg[1]);
+		
+		
+		if(ssp.getMethodology() == Methodology.OVERLAPPING_BACKGROUND_BOX){
+			customComposite.getSecondBgRegion().setROI(ssp.generateOffsetBgROI(ssp.getLenPt()));
+		}
+		
+		getSsps3c().generalUpdate(ssp.getLenPt());
+		customComposite.generalCorrectionsUpdate();
 	}
 	
 	

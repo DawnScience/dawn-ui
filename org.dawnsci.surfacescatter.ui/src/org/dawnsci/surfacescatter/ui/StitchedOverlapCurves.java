@@ -63,6 +63,7 @@ public class StitchedOverlapCurves extends Composite {
     private ArrayList<IDataset> xArrayList;
     private boolean useGoodPointsOnly = false;
 	private Button showOnlyGoodPoints;
+	private Button export;
 	private boolean errorDisplayFlag = true;
     
     public StitchedOverlapCurves(Composite parent, 
@@ -152,6 +153,11 @@ public class StitchedOverlapCurves extends Composite {
 					
 			}
 		});
+	     
+	    export = new Button(saveSettings, SWT.PUSH);
+		export.setLayoutData (new GridData(GridData.FILL_HORIZONTAL));
+		export.setText("Export Curve");
+		export.setSize(export.computeSize(100, 20, true));
 	     
 	     
 ///////////////////////////TOP		
@@ -864,8 +870,13 @@ public class StitchedOverlapCurves extends Composite {
 		
 		
 		return lt;
-	}
+   }
    
+   public Button getExport() {
+		return export;
+	}
+
+
    
    private void refreshCurvesFromTable(){
 		

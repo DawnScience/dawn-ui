@@ -1004,12 +1004,13 @@ public class SurfaceScatterPresenter {
 		Methodology meth = Methodology.TWOD;
 		
 		try{
-			
-		}
-		catch(Exception n){
 			 boundaryBox = drm.getFms().get(sliderPos).getBoundaryBox(); 
 			 meth = drm.getFms().get(sliderPos).getBackgroundMethdology();
 		}
+		catch(Exception n){
+			
+		}
+		
 		double[] bgRegionROI = BoxSlicerRodScanUtilsForDialog.backgroundBoxForDisplay(lenPt, 
 															   boundaryBox, 
 															   meth);
