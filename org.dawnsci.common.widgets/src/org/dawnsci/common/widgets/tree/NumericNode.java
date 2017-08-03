@@ -20,7 +20,7 @@ import javax.swing.tree.TreeNode;
 import org.eclipse.dawnsci.analysis.api.Constants;
 
 import si.uom.NonSI;
-import tec.units.ri.quantity.Quantities;
+import tec.uom.se.quantity.Quantities;
 
 /**
  * This class may be used with TreeNodeContentProvider to create a Tree of editable

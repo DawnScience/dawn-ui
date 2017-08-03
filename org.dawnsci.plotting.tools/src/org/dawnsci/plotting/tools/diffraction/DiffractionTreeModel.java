@@ -22,8 +22,8 @@ import javax.measure.Quantity;
 import javax.measure.Unit;
 
 import si.uom.SI;
-import tec.units.ri.quantity.Quantities;
-import tec.units.ri.unit.Units;
+import tec.uom.se.quantity.Quantities;
+import tec.uom.se.unit.Units;
 import si.uom.NonSI;
 
 import org.dawnsci.common.widgets.tree.AbstractNodeModel;

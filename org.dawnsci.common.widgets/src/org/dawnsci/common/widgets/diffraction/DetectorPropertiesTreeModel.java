@@ -12,8 +12,8 @@ import org.eclipse.dawnsci.analysis.api.diffraction.DetectorProperties;
 
 import si.uom.NonSI;
 import si.uom.SI;
-import tec.units.ri.unit.MetricPrefix;
-import tec.units.ri.unit.Units;
+import tec.uom.se.unit.MetricPrefix;
+import tec.uom.se.unit.Units;
 
 public class DetectorPropertiesTreeModel extends AbstractNodeModel {
 

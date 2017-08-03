@@ -11,12 +11,12 @@ package org.dawnsci.plotting.tools.preference.detector;
 import java.beans.XMLEncoder;
 import java.io.ByteArrayOutputStream;
 
-import tec.units.ri.quantity.Quantities;
-
 import org.dawnsci.plotting.tools.Activator;
 import org.dawnsci.plotting.tools.utils.ToolUtils;
 import org.eclipse.core.runtime.preferences.AbstractPreferenceInitializer;
 import org.eclipse.jface.preference.IPreferenceStore;
+
+import tec.uom.se.quantity.Quantities;
 
 public class DiffractionDetectorPreferenceInitializer extends AbstractPreferenceInitializer  {
 

@@ -38,8 +38,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import si.uom.NonSI;
-import tec.units.ri.unit.MetricPrefix;
-import tec.units.ri.unit.Units;
+import tec.uom.se.unit.MetricPrefix;
+import tec.uom.se.unit.Units;
 import uk.ac.diamond.scisoft.analysis.io.LoaderFactory;
 
 /**

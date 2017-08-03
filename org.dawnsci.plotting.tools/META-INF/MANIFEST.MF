@@ -32,10 +32,10 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.richbeans.widgets;bundle-version="1.0.0",
  uk.ac.diamond.org.mihalis.opal;bundle-version="0.9.5",
  uk.ac.diamond.scisoft.analysis.peakfinding;bundle-version="1.0.0",
- si.uom.si-units;bundle-version="0.6.6",
  javax.measure.unit-api;bundle-version="1.0.0",
- tec.units.unit-ri;bundle-version="1.0.2",
- tec.uom.lib.uom-lib-common;bundle-version="1.0.2"
+ tec.uom.lib.uom-lib-common;bundle-version="1.0.2",
+ tec.uom.se;bundle-version="1.0.8",
+ si.uom.si-units-java8;bundle-version="0.6.6"
 Import-Package: javax.vecmath,
  org.apache.commons.collections4;version="4.0.0",
  org.apache.commons.collections4.bidimap;version="4.0.0",
