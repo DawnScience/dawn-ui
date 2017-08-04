@@ -35,8 +35,10 @@ import org.eclipse.january.dataset.IndexIterator;
 import org.eclipse.january.metadata.IMetadata;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.dialogs.Dialog;
+import org.eclipse.jface.layout.TableColumnLayout;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.ColumnViewerToolTipSupport;
+import org.eclipse.jface.viewers.ColumnWeightData;
 import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
@@ -134,10 +136,9 @@ public class PowderLineTool extends AbstractToolPage {
 		
 		// Create the table of lines
 		tableCompo = new Composite(sashForm, SWT.NONE);
-		tableCompo.setLayout(new FillLayout());
 		lineTableViewer = new TableViewer(tableCompo, SWT.FULL_SELECTION | SWT.SINGLE | SWT.H_SCROLL | SWT.V_SCROLL | SWT.BORDER);
-//		lineTableViewer = new TableViewer(composite, SWT.FULL_SELECTION | SWT.SINGLE | SWT.H_SCROLL | SWT.V_SCROLL | SWT.BORDER);
 		createColumns(lineTableViewer);
+		
 		lineTableViewer.getTable().setLinesVisible(true);
 		lineTableViewer.getTable().setHeaderVisible(true);
 		// Create the Actions
@@ -216,7 +217,9 @@ public class PowderLineTool extends AbstractToolPage {
 		// Set the tooltip to not created more than once in the same area
 		ColumnViewerToolTipSupport.enableFor(viewer, ToolTip.NO_RECREATE);
 		
-
+		TableColumnLayout tcl = new TableColumnLayout();
+		viewer.getControl().getParent().setLayout(tcl);
+		
 		
 		// Create the columns
 		TableViewerColumn colvarTheMagnificent;
@@ -226,16 +229,19 @@ public class PowderLineTool extends AbstractToolPage {
 		colvarTheMagnificent.getColumn().setText("d spacing (Å)");
 		colvarTheMagnificent.getColumn().setWidth(300); // a reasonable width
 		colvarTheMagnificent.setLabelProvider(new PowderLineLabelProvider(PowderLineModel.PowderLineCoord.D_SPACING));
-
+		tcl.setColumnData(colvarTheMagnificent.getColumn(), new ColumnWeightData(1));
+		
 		colvarTheMagnificent = new TableViewerColumn(lineTableViewer, SWT.CENTER, iCol++);
 		colvarTheMagnificent.getColumn().setText("Q (Å⁻¹)");
 		colvarTheMagnificent.getColumn().setWidth(300); // a reasonable width
 		colvarTheMagnificent.setLabelProvider(new PowderLineLabelProvider(PowderLineModel.PowderLineCoord.Q));
+		tcl.setColumnData(colvarTheMagnificent.getColumn(), new ColumnWeightData(1));
 		
 		colvarTheMagnificent = new TableViewerColumn(lineTableViewer, SWT.CENTER, iCol++);
 		colvarTheMagnificent.getColumn().setText("2θ (°)");
 		colvarTheMagnificent.getColumn().setWidth(300); // a reasonable width
 		colvarTheMagnificent.setLabelProvider(new PowderLineLabelProvider(PowderLineModel.PowderLineCoord.ANGLE));
+		tcl.setColumnData(colvarTheMagnificent.getColumn(), new ColumnWeightData(1));
 		
 	}
 	
