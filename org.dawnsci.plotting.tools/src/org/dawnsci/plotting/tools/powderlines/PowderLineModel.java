@@ -113,12 +113,13 @@ public class PowderLineModel {
 		this.setLines(DatasetFactory.createRange(0));
 	}
 	/**
-	 * @return the line data in whatever coordinates they are in
+	 * @return the raw line data
 	 */
 	public DoubleDataset getLines() {
-		return this.getLines(this.dataCoords);
+		return lineLocations;
 	}
 	/**
+	 * Return the lines in the requested coordinates with any corrections applied 
 	 * @param requestedCoords
 	 * 						the coordinates in which to return the line positions
 	 * @return the line positions in the requested coordinates
