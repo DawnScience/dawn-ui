@@ -397,6 +397,7 @@ public class PowderLineTool extends AbstractToolPage {
 			
 			domainCompo.setLayout(new FillLayout());
 			sashForm.setMaximizedControl(null);
+			sashForm.setWeights(new int[]{2,1});
 			domainCompo.layout();
 			
 			eosCompo.setModel((EoSLineModel) model);
@@ -457,7 +458,8 @@ public class PowderLineTool extends AbstractToolPage {
 		@Override
 		public void redraw() {
 			// Text and Labels
-			GridLayout layout = new GridLayout(3, false);
+			GridLayout layout = new GridLayout(7, false);
+			
 			
 			this.setLayout(layout);
 
@@ -473,6 +475,9 @@ public class PowderLineTool extends AbstractToolPage {
 			modulusUnits.setText(pressureUnits);
 			modulusUnits.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false));
 			
+			// Empty text for a spacer
+			Text spacer = new Text(this, SWT.SINGLE);
+			spacer.setEditable(false);
 			
 			Label derivLabel = new Label(this, SWT.RIGHT);
 			derivLabel.setText(modulusSymbol + "₀′");
@@ -497,7 +502,12 @@ public class PowderLineTool extends AbstractToolPage {
 			Label pressureUnitsLabel = new Label(this, SWT.LEFT);
 			pressureUnitsLabel.setText(pressureUnits);
 			pressureUnitsLabel.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false));
-			
+
+
+			// Empty text for a spacer
+			spacer = new Text(this, SWT.SINGLE);
+			spacer.setEditable(false);
+
 			
 			Label ll0Label = new Label(this, SWT.RIGHT);
 			ll0Label.setText("l/l₀");
