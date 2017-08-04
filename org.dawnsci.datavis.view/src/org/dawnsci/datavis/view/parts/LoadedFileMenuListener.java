@@ -16,7 +16,6 @@ import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredSelection;
-import org.eclipse.jface.viewers.StructuredViewer;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 
@@ -43,6 +42,14 @@ public class LoadedFileMenuListener implements IMenuListener {
 			manager.add(new DeselectAction(fileController,viewer));
 			manager.add(new Separator());
 			manager.add(new CloseAction(fileController, viewer));
+			
+			
+			
+			if (((IStructuredSelection)viewer.getSelection()).size()==1) {
+				manager.add(new Separator());
+				manager.add(new ApplyToAllAction(fileController, viewer));
+			}
+			
 		}
 	}
 
@@ -105,6 +112,25 @@ public class LoadedFileMenuListener implements IMenuListener {
 			view.refresh();
 		}
 	}
+	
+	private class ApplyToAllAction extends LoadedFileMenuAction {
+
+		public ApplyToAllAction(IFileController fileController,
+				TableViewer viewer) {
+			super("Apply to all", null, fileController, viewer);
+		}
+		
+		@Override
+		public void run() {
+			List<LoadedFile> loadedFiles = getLoadedFiles();
+			if (loadedFiles.isEmpty()) return;
+			
+			fileController.applyToAll(loadedFiles.get(0));
+
+		}
+		
+	}
+	
 	
 	private class DeselectAction extends LoadedFileMenuAction {
 
