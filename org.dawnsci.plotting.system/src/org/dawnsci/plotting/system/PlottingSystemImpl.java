@@ -988,7 +988,7 @@ public class PlottingSystemImpl<T> extends AbstractPlottingSystem<T> {
 		boolean ok = viewer.addTrace(trace);
 		if (!ok) return; // it has not added.
 
-		if (traceMap==null) this.traceMap = new HashMap<String, ITrace>(7);
+		if (traceMap==null) this.traceMap = new LinkedHashMap<>();
 		traceMap.put(trace.getName(), trace);
 
 		fireTraceAdded(new TraceEvent(trace));
