@@ -5,6 +5,7 @@ import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.StringJoiner;
 
+import org.apache.commons.math3.util.Pair;
 import org.dawnsci.common.widgets.statuscomposite.StatusComposite;
 import org.eclipse.january.dataset.ILazyDataset;
 import org.eclipse.jface.viewers.AbstractTreeViewer;
@@ -32,6 +33,7 @@ public class FileDatasetComposite extends StatusComposite {
 	private final FileDatasetTreeContentProvider contentProvider = new FileDatasetTreeContentProvider();
 	private volatile File currentSelectedFile = null;
 	private volatile ILazyDataset currentSelectedDataset = null;
+	private volatile String currentSelectedDatasetName = null;
 	
 	
 	public FileDatasetComposite(Composite parent, IFileDatasetFilter filter, int style) {
@@ -105,8 +107,9 @@ public class FileDatasetComposite extends StatusComposite {
 		datasetNameColumn.setLabelProvider(new ColumnLabelProvider() {
 			@Override
 			public String getText(Object element) {
-				ILazyDataset dataset = (ILazyDataset) element;
-				return dataset.getName();
+				@SuppressWarnings("unchecked")
+				Pair<String, ILazyDataset> pair = (Pair<String, ILazyDataset>) element;
+				return pair.getKey();
 			}
 		});
 		TableViewerColumn datasetShapeColumn = new TableViewerColumn(tableViewer, SWT.NONE);
@@ -115,7 +118,9 @@ public class FileDatasetComposite extends StatusComposite {
 		datasetShapeColumn.setLabelProvider(new ColumnLabelProvider() {
 			@Override
 			public String getText(Object element) {
-				ILazyDataset dataset = (ILazyDataset) element;
+				@SuppressWarnings("unchecked")
+				Pair<String, ILazyDataset> pair = (Pair<String, ILazyDataset>) element;
+				ILazyDataset dataset = pair.getValue();
 				int[] shape = dataset.getShape();
 				StringJoiner joiner = new StringJoiner(", ", "[", "]");
 				for (int s : shape)
@@ -125,9 +130,18 @@ public class FileDatasetComposite extends StatusComposite {
 		});
 		
 		tableViewer.addSelectionChangedListener(event -> {
-			ILazyDataset selectedDataset = (ILazyDataset) tableViewer.getStructuredSelection().getFirstElement();
+			Object firstElement = tableViewer.getStructuredSelection().getFirstElement();
+			if (firstElement == null) {
+				fireListeners(false);
+				return;
+			}
+			@SuppressWarnings("unchecked")
+			ILazyDataset selectedDataset = ((Pair<String, ILazyDataset>) firstElement).getValue();
+			@SuppressWarnings("unchecked")
+			String selectedDatasetName = ((Pair<String, ILazyDataset>) firstElement).getKey();
 			if (selectedDataset != null) {
 				currentSelectedDataset = selectedDataset;
+				currentSelectedDatasetName = selectedDatasetName;
 				fireListeners(true);
 			} else {
 				fireListeners(false);
@@ -160,6 +174,10 @@ public class FileDatasetComposite extends StatusComposite {
 	
 	public ILazyDataset getSelectedDataset() {
 		return currentSelectedDataset;
+	}
+
+	public String getSelectedDatasetName() {
+		return currentSelectedDatasetName;
 	}
 
 	private boolean checkItems(TreeItem[] items, Deque<File> path, File lastFile) {

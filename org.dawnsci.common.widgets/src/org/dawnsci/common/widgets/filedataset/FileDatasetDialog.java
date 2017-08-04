@@ -45,6 +45,10 @@ public class FileDatasetDialog extends Dialog {
 		return composite.getSelectedDataset();
 	}
 	
+	public String getSelectedDatasetName() {
+		return composite.getSelectedDatasetName();
+	}
+	
 	@Override
 	protected void configureShell(Shell newShell) {
 		super.configureShell(newShell);
