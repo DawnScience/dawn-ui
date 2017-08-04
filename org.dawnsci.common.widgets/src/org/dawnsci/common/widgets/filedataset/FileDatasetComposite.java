@@ -35,7 +35,6 @@ public class FileDatasetComposite extends StatusComposite {
 	private volatile ILazyDataset currentSelectedDataset = null;
 	private volatile String currentSelectedDatasetName = null;
 	
-	
 	public FileDatasetComposite(Composite parent, IFileDatasetFilter filter, int style) {
 		this(parent, null, filter, style);
 	}
@@ -44,12 +43,15 @@ public class FileDatasetComposite extends StatusComposite {
 		super(parent, style);
 		
 		if (initialFile == null)
-			initialFile = new File(System.getProperty("user.home"));
-		
+			initialFile = FileDatasetPreferences.getInitialFileFromPreferences();
+			
 		if (filter == null) {
 			// default filter allows for everything to get through
 			filter = FileDatasetFilterFactory.FILTER_TRUE;
 		}
+
+		// on dispose, ensure that the current selected file is saved in preferencestore
+		this.addDisposeListener(e -> FileDatasetPreferences.setInitialFileInPreferences(currentSelectedFile));
 		
 		this.setLayout(new GridLayout(1, true));
 		GridData gridData = new GridData(SWT.FILL, SWT.FILL, true, true);
@@ -208,5 +210,4 @@ public class FileDatasetComposite extends StatusComposite {
 		}
 		return false;
 	}
-
 }
