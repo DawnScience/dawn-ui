@@ -45,6 +45,8 @@ import org.eclipse.jface.window.ToolTip;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
+import org.eclipse.swt.events.ModifyEvent;
+import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -54,6 +56,7 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 
@@ -68,6 +71,7 @@ public class PowderLineTool extends AbstractToolPage {
 	private SashForm sashForm;
 	// sub composites, needed to set the relative size for the different domains
 	private Composite tableCompo, domainCompo;
+	private EoSComposite eosCompo;
 	
 	private PowderLineModel model;
 	
@@ -75,7 +79,17 @@ public class PowderLineTool extends AbstractToolPage {
 	
 	public enum PowderDomains {
 			POWDER,
-			EQUATION_OF_STATE
+			EQUATION_OF_STATE;
+		
+//		public Composite getComposite(Composite parent, int style) {
+//			switch(this) {
+//			case EQUATION_OF_STATE:
+//				return new EoSComposite(parent, style); 
+//			case POWDER:
+//			default:
+//				return null;
+//			}
+//		}
 	};
 	
 	public PowderLineTool() {
@@ -149,10 +163,11 @@ public class PowderLineTool extends AbstractToolPage {
 			}
 		});
 		
-		lineTableViewer.setInput(model.getLines(defaultCoords));
+		lineTableViewer.setInput(model.getLines());
 		
 		// The domain specific part of the interface
 		domainCompo = new Composite(sashForm, SWT.NONE);
+		eosCompo = new EoSComposite(domainCompo, SWT.NONE);
 		// maximize the table until told otherwise
 		sashForm.setMaximizedControl(tableCompo);
 		
@@ -246,7 +261,7 @@ public class PowderLineTool extends AbstractToolPage {
 	protected void setModel(PowderLineModel model) {
 		this.model = model;
 		if (this.lineTableViewer != null)
-			lineTableViewer.setInput(model.getLines(defaultCoords));
+			lineTableViewer.setInput(model.getLines());
 			
 	}
 	
@@ -270,7 +285,7 @@ public class PowderLineTool extends AbstractToolPage {
 		
 		
 		
-		DoubleDataset plotLineLocations = model.getLines(plotCoordinate);
+		DoubleDataset plotLineLocations = model.convertLinePositions(model.getLines(), defaultCoords, plotCoordinate);
 		
 		final XAxisLineBoxROI[] novalines = makeROILines(plotLineLocations);
 		final List<IRegion> viejoRegions = (currentLineRegions != null) ? new ArrayList<IRegion>(currentLineRegions) : null;
@@ -332,7 +347,7 @@ public class PowderLineTool extends AbstractToolPage {
 	private void refresh() {
 		this.drawPowderLines();
 		// It is ugly, but it works
-		DoubleDataset lines = model.getLines(defaultCoords);
+		DoubleDataset lines = model.getLines();
 		this.model.clearLines();
 		this.model.setLines(lines);
 		this.model.setCoords(defaultCoords);
@@ -371,29 +386,144 @@ public class PowderLineTool extends AbstractToolPage {
 		getSite().getActionBars().getToolBarManager().add(clearAction);
 	}
 
-	public void drawDomainSpecific(PowderDomains domain) {
-		if (domain == PowderDomains.EQUATION_OF_STATE) {
+	public void drawDomainSpecific(PowderLineModel model) {
+		for (Control ctrl : domainCompo.getChildren()) {
+			ctrl.setVisible(false);
+		};
+		domainCompo.layout();
+		if (model.getDomain() == PowderDomains.EQUATION_OF_STATE) {
+
+			eosCompo.setVisible(true);
+			
+			domainCompo.setLayout(new FillLayout());
 			sashForm.setMaximizedControl(null);
+			domainCompo.layout();
+			
+			eosCompo.setModel((EoSLineModel) model);
+			
 		} else {
 			sashForm.setMaximizedControl(tableCompo);
 		}
+		
 	}
 	
+	private void setLengthScale(double lengthScale) {
+		refresh();
+	}
 	protected class EoSComposite extends Composite {
 		
-		Text pressure, v, v0;
-		PowderLineModel model;
+		Text pressure, k0, k0prime, v, v0, ll0;
+		EoSLineModel model;
+		final double pressureMultiplier = 1e9;
+		final String pressureUnits = "GPa";
+		final String modulusSymbol = "B"; // Could instead be K
 		
 		public EoSComposite(Composite parent, int style) {
-			super(parent, style);
+			super(parent, style | SWT.BORDER);
 			
-			GridLayout layout = new GridLayout(2, false);
+			this.redraw();
+			
+			pressure.addModifyListener(new ModifyListener() {
+				
+				@Override
+				public void modifyText(ModifyEvent e) {
+					double newPressure;
+					try {
+						newPressure = Double.parseDouble(pressure.getText());
+					} catch (NumberFormatException nFE) {
+						return; // Having done nothing
+					}
+					model.setPressure(newPressure);
+					double lengthRatio = model.convertLinePositions(1.0, defaultCoords, defaultCoords);
+					ll0.setText(Double.toString(lengthRatio));
+					setLengthScale(lengthRatio);
+				}
+			});
+		}
+		
+		
+		@Override
+		public void dispose() {
+			this.clearListeners();
+		};
+	
+		private void clearListeners() {
+			// Clear all listeners
+			// pressure modify listener
+			for (Listener listener : pressure.getListeners(SWT.Modify))
+				pressure.removeListener(SWT.Modify, listener);
+		}
+		
+		@Override
+		public void redraw() {
+			// Text and Labels
+			GridLayout layout = new GridLayout(3, false);
+			
 			this.setLayout(layout);
-			Label pressureLabel = new Label(this, SWT.NONE);
-			pressureLabel.setText("Pressure (hPa)");
-			pressure.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-			pressure = new Text(this, SWT.BORDER);
+
+			Label modulusLabel = new Label(this, SWT.RIGHT);
+			modulusLabel.setText(modulusSymbol + "₀");
+			modulusLabel.setLayoutData(new GridData(SWT.RIGHT, SWT.TOP, false, false));
 			
+			k0 = new Text(this, SWT.SINGLE | SWT.LEFT);
+			k0.setLayoutData(new GridData(SWT.BEGINNING, SWT.TOP, false, false));
+			k0.setEditable(false);
+			
+			Label modulusUnits = new Label(this, SWT.LEFT);
+			modulusUnits.setText(pressureUnits);
+			modulusUnits.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false));
+			
+			
+			Label derivLabel = new Label(this, SWT.RIGHT);
+			derivLabel.setText(modulusSymbol + "₀′");
+			derivLabel.setLayoutData(new GridData(SWT.RIGHT, SWT.TOP, false, false));
+			
+			k0prime = new Text(this, SWT.SINGLE | SWT.LEFT);
+			k0prime.setLayoutData(new GridData(SWT.BEGINNING, SWT.TOP, false, false));
+			k0prime.setEditable(false);
+
+			Label derivUnits = new Label(this, SWT.LEFT);
+			derivUnits.setText("");
+			derivUnits.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false));
+			
+			
+			Label pressureLabel = new Label(this, SWT.RIGHT);
+			pressureLabel.setText("Pressure");
+			pressureLabel.setLayoutData(new GridData(SWT.RIGHT, SWT.TOP, false, false));
+			
+			pressure = new Text(this, SWT.BORDER | SWT.SINGLE | SWT.LEFT);
+			pressure.setLayoutData(new GridData(SWT.BEGINNING, SWT.TOP, false, false));
+
+			Label pressureUnitsLabel = new Label(this, SWT.LEFT);
+			pressureUnitsLabel.setText(pressureUnits);
+			pressureUnitsLabel.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false));
+			
+			
+			Label ll0Label = new Label(this, SWT.RIGHT);
+			ll0Label.setText("l/l₀");
+			ll0Label.setLayoutData(new GridData(SWT.RIGHT, SWT.TOP, false, false));
+			
+			ll0 = new Text(this, SWT.SINGLE | SWT.LEFT);
+			ll0.setLayoutData(new GridData(SWT.BEGINNING, SWT.TOP, false, false));
+			ll0.setEditable(false);
+			
+			Label ll0Units = new Label(this, SWT.LEFT);
+			ll0Units.setText("");
+			ll0Units.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false));
+
+			super.redraw();
+		};
+		
+		public void setModel(EoSLineModel model) {
+			this.model = model;
+			
+			k0.setText(Double.toString(this.model.getBulkModulus()));
+			k0prime.setText(Double.toString(this.model.getBulkModulus_p()));
+			pressure.setText(Double.toString(model.getPressure()));
+			
+			double lengthRatio = model.convertLinePositions(1.0, defaultCoords, defaultCoords);
+			ll0.setText(Double.toString(lengthRatio));
+
 		}
 		
 		
@@ -471,7 +601,7 @@ public class PowderLineTool extends AbstractToolPage {
 						System.err.println("PowderLineTool: Equation of State metadata found!");
 					EoSLineModel eosModel = new EoSLineModel();
 					eosModel.setBulkModulus(Double.parseDouble((String) metadata.getMetaValue("K0")));
-					eosModel.setBulkModulus(Double.parseDouble((String) metadata.getMetaValue("K0P")));
+					eosModel.setBulkModulus_p(Double.parseDouble((String) metadata.getMetaValue("K0P")));
 					eosModel.setPressure(0.);
 					theTool.setModel(eosModel);
 
@@ -483,7 +613,7 @@ public class PowderLineTool extends AbstractToolPage {
 			theTool.clearLines();
 			theTool.setLines(lines);
 			
-			theTool.drawDomainSpecific(theTool.model.getDomain());
+			theTool.drawDomainSpecific(theTool.model);
 
 		}
 	}
@@ -568,4 +698,5 @@ public class PowderLineTool extends AbstractToolPage {
 		}
 		
 	}
+
 }
