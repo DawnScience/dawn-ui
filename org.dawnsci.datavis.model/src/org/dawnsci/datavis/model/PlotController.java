@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -198,7 +199,7 @@ public class PlotController implements IPlotController {
 
 		if (state == null) state = new ArrayList<DataStateObject>();
 		
-		Map<DataOptions, List<ITrace>> updateMap = new HashMap<>();
+		Map<DataOptions, List<ITrace>> updateMap = new LinkedHashMap<>();
 		//have to do multiple iterations so image traces arent removed after correct
 		// one added
 		for (DataStateObject object : state) {
@@ -485,7 +486,7 @@ public class PlotController implements IPlotController {
 		
 		Collection<ITrace> traces = system.getTraces();
 		
-		Map<DataOptions, List<ITrace>> optionTraceMap = new HashMap<>();
+		Map<DataOptions, List<ITrace>> optionTraceMap = new LinkedHashMap<>();
 		
 		for (ITrace t : traces) {
 			if (t.getUserObject() instanceof DataOptions) {
