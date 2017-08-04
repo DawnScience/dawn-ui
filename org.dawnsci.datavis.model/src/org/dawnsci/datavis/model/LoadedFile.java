@@ -114,7 +114,8 @@ public class LoadedFile implements IDataObject, IDataFilePackage {
 		ds = new HashMap<>(ds);
 		for (String s : ds.keySet()) {
 			if (ds.get(s) == null) {
-				ds.put(s, dataHolder.get().getLazyDataset(s).getShape());
+				ILazyDataset lazyDataset = dataHolder.get().getLazyDataset(s);
+				if (lazyDataset != null) ds.put(s, lazyDataset.getShape());
 			}
 		}
 		
