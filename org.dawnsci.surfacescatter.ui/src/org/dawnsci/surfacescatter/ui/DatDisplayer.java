@@ -5,8 +5,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import javax.naming.TimeLimitExceededException;
-
 import org.apache.commons.lang.StringUtils;
 import org.dawnsci.surfacescatter.FittingParametersInputReader;
 import org.dawnsci.surfacescatter.GeometricCorrectionsReflectivityMethod;
@@ -38,7 +36,6 @@ import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.swt.widgets.Text;
 
-import jdk.internal.org.objectweb.asm.tree.TableSwitchInsnNode;
 import uk.ac.diamond.scisoft.analysis.io.LoaderFactory;
 
 public class DatDisplayer extends Composite {
@@ -80,7 +77,6 @@ public class DatDisplayer extends Composite {
 	private RodSetupWindow rsw;
 	private Group parameterFiles;
 	private ArrayList<TableItem> paramFilesChecked;
-//	private SelectionListener timothy;
 	private Group numericalDatSelection; 
 	private InputTileGenerator[] itgArray;
 	private Button transferUsingIncrement;

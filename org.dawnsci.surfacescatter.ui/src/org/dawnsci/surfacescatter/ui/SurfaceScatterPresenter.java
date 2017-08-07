@@ -2852,7 +2852,7 @@ public class SurfaceScatterPresenter {
 			}
 		}
 		catch(Exception j){
-		
+		 System.out.println(j.getMessage());
 		}
 //		IDataset[] output = CurveStitchWithErrorsAndFrames.curveStitch4(csdp, null);
 		

@@ -3,12 +3,10 @@ package org.dawnsci.surfacescatter.ui;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
-
 import org.dawnsci.surfacescatter.AnalaysisMethodologies.Methodology;
 import org.dawnsci.surfacescatter.CurveStitchDataPackage;
 import org.dawnsci.surfacescatter.FittingParameters;
 import org.dawnsci.surfacescatter.FittingParametersInputReader;
-import org.dawnsci.surfacescatter.GeometricParametersModel;
 import org.dawnsci.surfacescatter.IntensityDisplayEnum.IntensityDisplaySetting;
 import org.dawnsci.surfacescatter.MethodSettingEnum.MethodSetting;
 import org.dawnsci.surfacescatter.ProcessingMethodsEnum.ProccessingMethod;

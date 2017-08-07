@@ -386,29 +386,31 @@ public class TrackingHandlerWithFramesImproved {
 		ssvs.getPlotSystemCompositeView().getSubImageBgPlotSystem().repaint(true);
 		ssvs.getSsps3c().generalUpdate();
 		
+		ssp.stitchAndPresent1(ssvs.getSsps3c().getOutputCurves(), ssvs.getIds());
+		CsdpGeneratorFromDrm csdpgfd = new CsdpGeneratorFromDrm();
+		csdpgfd.generateCsdpFromDrm(drm);
+		CurveStitchDataPackage csdp = csdpgfd.getCsdp();
+		CurveStitchWithErrorsAndFrames.curveStitch4(csdp, null);
+		
+		
 		try{
 			if(drm.getCorrectionSelection() == MethodSetting.Reflectivity_NO_Correction ||
 					   drm.getCorrectionSelection() == MethodSetting.Reflectivity_with_Flux_Correction ||
 					   drm.getCorrectionSelection() == MethodSetting.Reflectivity_without_Flux_Correction){
 						
-						ReflectivityNormalisation.ReflectivityNormalisation1(drm.getCsdp());	
+						ReflectivityNormalisation.ReflectivityNormalisation1(drm.getCsdp());
+						ReflectivityNormalisation.ReflectivityNormalisation1(csdp);
 			}
 		}
 		catch(Exception h){
 			
 		}
 		
-		ssp.stitchAndPresent1(ssvs.getSsps3c().getOutputCurves(), ssvs.getIds());
 		
-		CsdpGeneratorFromDrm csdpgfd = new CsdpGeneratorFromDrm();
-		
-		csdpgfd.generateCsdpFromDrm(drm);
-		
-		CurveStitchDataPackage csdp = csdpgfd.getCsdp();
 		
 		csdp.setRodName("Current Track");
 		
-		CurveStitchWithErrorsAndFrames.curveStitch4(csdp, null);
+		
 		
 		ssvs.getRaw().getRtc().addCurrentTrace(csdp);
 		
