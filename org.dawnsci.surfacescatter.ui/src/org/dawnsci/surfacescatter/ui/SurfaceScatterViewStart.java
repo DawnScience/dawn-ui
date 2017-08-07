@@ -7,6 +7,8 @@ import java.util.Arrays;
 import org.dawnsci.surfacescatter.AnalaysisMethodologies.Methodology;
 import org.dawnsci.surfacescatter.CurveStitchDataPackage;
 import org.dawnsci.surfacescatter.FittingParameters;
+import org.dawnsci.surfacescatter.FittingParametersInputReader;
+import org.dawnsci.surfacescatter.GeometricParametersModel;
 import org.dawnsci.surfacescatter.IntensityDisplayEnum.IntensityDisplaySetting;
 import org.dawnsci.surfacescatter.MethodSettingEnum.MethodSetting;
 import org.dawnsci.surfacescatter.ProcessingMethodsEnum.ProccessingMethod;
@@ -19,6 +21,7 @@ import org.dawnsci.surfacescatter.TrackingMethodology.TrackerType1;
 import org.eclipse.dawnsci.analysis.api.io.IDataHolder;
 import org.eclipse.dawnsci.analysis.api.roi.IROI;
 import org.eclipse.dawnsci.analysis.api.roi.IRectangularROI;
+import org.eclipse.dawnsci.analysis.api.tree.Tree;
 import org.eclipse.dawnsci.analysis.dataset.roi.PolylineROI;
 import org.eclipse.dawnsci.analysis.dataset.roi.RectangularROI;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
@@ -166,6 +169,32 @@ public class SurfaceScatterViewStart extends Dialog {
 				
 				paramField.geometricParametersUpdate();
 				
+				boolean isThereAParamFile = false;
+				paramFile = " ";
+				
+				for(TableItem jh : datDisplayer.getParamFileTable().getItems()){
+					if(jh.getChecked()){
+						isThereAParamFile=true;
+						paramFile = jh.getText();
+					}
+				}
+				
+				if(isThereAParamFile){
+					
+					try {
+					
+						IDataHolder dh1 = LoaderFactory.getData(paramFile);
+						Tree tree = dh1.getTree();			
+						FittingParametersInputReader.geometricalParametersReaderFromNexus(tree, ssp.getGm());
+						rsw.getParamField().setUpdateOn(false);
+						rsw.getParamField().updateDisplayFromGm(ssp.getGm());
+						rsw.getParamField().setUpdateOn(true);
+					} catch (Exception e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
+				}
+				
 				try{
 					for(IRegion g : ssp.getInterpolatorRegions()){
 						customComposite.getPlotSystem().removeRegion(g);
@@ -292,19 +321,11 @@ public class SurfaceScatterViewStart extends Dialog {
 				ssp.setSelection(0);
 				ssp.setSliderPos(0);
 				
-				boolean isThereAParamFile = false;
-				paramFile = " ";
 				
-				for(TableItem jh : datDisplayer.getParamFileTable().getItems()){
-					if(jh.getChecked()){
-						isThereAParamFile=true;
-						paramFile = jh.getText();
-					}
-				}
 				
 				if(isThereAParamFile){
 					setParametersFromFile(paramFile);
-	
+					
 				}
 				
 					

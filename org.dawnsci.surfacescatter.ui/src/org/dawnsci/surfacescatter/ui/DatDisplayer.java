@@ -8,11 +8,13 @@ import java.util.List;
 import javax.naming.TimeLimitExceededException;
 
 import org.apache.commons.lang.StringUtils;
+import org.dawnsci.surfacescatter.FittingParametersInputReader;
 import org.dawnsci.surfacescatter.GeometricCorrectionsReflectivityMethod;
 import org.dawnsci.surfacescatter.MethodSettingEnum.MethodSetting;
 import org.dawnsci.surfacescatter.ReflectivityMetadataTitlesForDialog;
 import org.dawnsci.surfacescatter.SXRDGeometricCorrections;
 import org.eclipse.dawnsci.analysis.api.io.IDataHolder;
+import org.eclipse.dawnsci.analysis.api.tree.Tree;
 import org.eclipse.january.DatasetException;
 import org.eclipse.january.dataset.Dataset;
 import org.eclipse.january.dataset.ILazyDataset;
@@ -78,7 +80,7 @@ public class DatDisplayer extends Composite {
 	private RodSetupWindow rsw;
 	private Group parameterFiles;
 	private ArrayList<TableItem> paramFilesChecked;
-	private SelectionListener timothy;
+//	private SelectionListener timothy;
 	private Group numericalDatSelection; 
 	private InputTileGenerator[] itgArray;
 	private Button transferUsingIncrement;
@@ -281,6 +283,12 @@ public class DatDisplayer extends Composite {
 			
 			@Override
 			public void widgetSelected(SelectionEvent e) {
+				
+				int inc = Integer.valueOf(increment.getText().getText());
+				int start =  Integer.valueOf(startDat.getText().getText());
+				
+				endDat.getText().setText(String.valueOf(start+inc));
+				
 				increment.setStateOfText(!increment.isStateOfText());
 				
 				increment.getText().setEnabled(true);
@@ -340,8 +348,6 @@ public class DatDisplayer extends Composite {
 					if(checkEnd && checkStart){
 						break;
 					}
-					
-					
 					
 				}
 				
@@ -712,41 +718,37 @@ public class DatDisplayer extends Composite {
 		paramFileTable.setLayoutData(paramFileTableData);
 		paramFileTable.setLayout(new GridLayout());
 		paramFileTable.setEnabled(false);
-
-		timothy = new SelectionListener() {
-			
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				paramFileTable.removeSelectionListener(timothy);
-				thereCanBeOnlyOne();
-				paramFileTable.addSelectionListener(timothy);
-				
-			}
-			
-			@Override
-			public void widgetDefaultSelected(SelectionEvent e) {
-				// TODO Auto-generated method stub
-				
-			}
-		};
-		
-		
-//		paramFileTable.addSelectionListener(timothy);
 		
 		paramFileTable.addSelectionListener(new SelectionListener() {
 			
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				
-				Object r = e.item;
+				TableItem ip = (TableItem) e.item;
 				
 				for(TableItem yu : paramFileTable.getItems()){
-					if(yu != r){
+					if(yu != ip){
 						yu.setChecked(false);
 					}
 
 				}
 				
+				
+				try {
+					
+				IDataHolder dh1 = LoaderFactory.getData(ip.getText());
+				
+				Tree tree = dh1.getTree();			
+				FittingParametersInputReader.geometricalParametersReaderFromNexus(tree, ssp.getGm());
+				
+				rsw.getParamField().setUpdateOn(false);
+				rsw.getParamField().updateDisplayFromGm(ssp.getGm());
+				rsw.getParamField().setUpdateOn(true);
+				
+				} catch (Exception e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
 				return;
 			}
 			

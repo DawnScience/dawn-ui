@@ -169,6 +169,10 @@ public class SurfaceScatterPresenter {
 		Dataset lArrayCon = DatasetFactory.zeros(1);
 		Dataset thetaArrayCon = DatasetFactory.zeros(1);
 		
+		ILazyDataset dcdtheta = null;
+		ILazyDataset qdcd = null;
+		
+		
 		try {
 		
 			for (int id = 0; id < filepaths.length; id++) {
@@ -337,9 +341,9 @@ public class SurfaceScatterPresenter {
 					IDataset thetadat = ildtheta.getSlice(slice2);
 					thetaArray[id] = thetadat;
 					
-					ILazyDataset dcdtheta = dh1.getLazyDataset(ReflectivityMetadataTitlesForDialog.getdcdtheta());
+					dcdtheta = dh1.getLazyDataset(ReflectivityMetadataTitlesForDialog.getdcdtheta());
 					
-					ILazyDataset qdcd = dh1.getLazyDataset(ReflectivityMetadataTitlesForDialog.getqdcd());
+					qdcd = dh1.getLazyDataset(ReflectivityMetadataTitlesForDialog.getqdcd());
 					
 					if (dcdtheta == null) {
 						try {
@@ -519,9 +523,7 @@ public class SurfaceScatterPresenter {
 				System.out.println("imageNoInDatList.get(pos)" + imageNoInDatList.get(pos));
 				
 				
-				ILazyDataset dcdtheta = null;
-				ILazyDataset qdcd = null;
-				
+//				
 				
 				if(MethodSetting.toMethod(correctionSelection) == MethodSetting.SXRD){
 					
@@ -942,6 +944,10 @@ public class SurfaceScatterPresenter {
 			}
 			
 			fp = FittingParametersInputReader.fittingParametersFromFrameModel(fms.get(0));
+			
+			
+			FittingParametersInputReader.geometricalParametersReaderFromNexus(tree, gm);
+			
 			
 		}
 		
@@ -2938,6 +2944,10 @@ public class SurfaceScatterPresenter {
 	}
 
 	public GeometricParametersModel getGm() {
+		if(gm == null){
+			gm = new GeometricParametersModel();
+		}
+		
 		return gm;
 	}
 

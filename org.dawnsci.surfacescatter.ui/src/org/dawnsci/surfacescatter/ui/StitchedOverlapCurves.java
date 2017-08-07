@@ -816,40 +816,6 @@ public class StitchedOverlapCurves extends Composite {
 		
 		IDataset x = DatasetFactory.zeros(new int[] {2,2}, Dataset.ARRAYFLOAT64);
 		IDataset y[] = new IDataset[2];
-//		
-//		if(xAxisSelection == null){
-//			xAxisSelection = xAxes.SCANNED_VARIABLE;
-//			
-//			boolean rg = true;
-//			
-//			for(String h :xAxis.getItems()){
-//				if(AxisEnums.toString(xAxisSelection).equals(h)){
-//					rg = false;
-//				}
-//			}
-//			
-//			if(rg){
-//				xAxis.add(AxisEnums.toString(xAxisSelection));
-//			}
-//			
-//		}
-//		
-//		if(yAxisSelection == null){
-//			yAxisSelection = yAxes.SPLICEDY;
-//			
-//			boolean rg = true;
-//			
-//			for(String h :yAxis.getItems()){
-//				if(AxisEnums.toString(yAxisSelection).equals(h)){
-//					rg = false;
-//				}
-//			}
-//			
-//			if(rg){
-//				yAxis.add(AxisEnums.toString(yAxisSelection));
-//			}
-//			
-//		}
 		
 		GoodPointStripper gps = new GoodPointStripper();
 
@@ -882,18 +848,11 @@ public class StitchedOverlapCurves extends Composite {
 		
 		plotSystem.clear();
 		
-//		for(TableItem fd : rodDisplayTable.getItems()){
-//			if(fd.getChecked()){
-//				
-//				CurveStitchDataPackage csdp = bringMeTheOneIWant(fd.getText(), 
-//																 rcm.getCsdpList());
-//				
-				ILineTrace lt =	buildLineTrace();
+			
+		ILineTrace lt =	buildLineTrace();
 				
-				plotSystem.addTrace(lt);
-				plotSystem.autoscaleAxes();
-			}
-//		}
-//	}
+		plotSystem.addTrace(lt);
+		plotSystem.autoscaleAxes();
+	}
    
 }

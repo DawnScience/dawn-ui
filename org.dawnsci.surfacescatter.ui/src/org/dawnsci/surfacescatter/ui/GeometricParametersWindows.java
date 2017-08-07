@@ -12,7 +12,6 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.DirectoryDialog;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
@@ -52,6 +51,7 @@ public class GeometricParametersWindows extends Composite{
 	private Combo theta;
 	private Combo selectedOption;
 	private String fluxpathStorage = " ";
+	private boolean updateOn = true;
 	
 	public GeometricParametersWindows(Composite parent, 
 									  int style,
@@ -691,30 +691,30 @@ public class GeometricParametersWindows extends Composite{
 	}
 	
 	public void geometricParametersUpdate() {
-			
-		ssp.geometricParametersUpdate(
-				  fluxpathStorage,
-				  (Double.parseDouble(beamHeight.getText())),
-				  (Double.parseDouble(footprint.getText())),
-				  (Double.parseDouble(angularFudgeFactor.getText())),
-				  beamCorrection.getSelection(),
-				  (Double.parseDouble(beamInPlane.getText())),
-				  (Double.parseDouble(beamOutPlane.getText())),
-				  (Double.parseDouble(covar.getText())),
-				  (Double.parseDouble(detectorSlits.getText())),
-				  (Double.parseDouble(inPlaneSlits.getText())),
-				  (Double.parseDouble(inplanePolarisation.getText())),
-				  (Double.parseDouble(outPlaneSlits.getText())),
-				  (Double.parseDouble(outplanePolarisation.getText())),
-				  (Double.parseDouble(scalingFactor.getText())),
-				  (Double.parseDouble(reflectivityA.getText())),
-				  (Double.parseDouble(sampleSize.getText())),
-				  (Double.parseDouble(normalisationFactor.getText())),
-				  (specular.getSelection()),
-				  (imageName.getText()),
-				  selectedOption.getText()
-				  );
-		
+		if(updateOn){	
+			ssp.geometricParametersUpdate(
+					  fluxpathStorage,
+					  (Double.parseDouble(beamHeight.getText())),
+					  (Double.parseDouble(footprint.getText())),
+					  (Double.parseDouble(angularFudgeFactor.getText())),
+					  beamCorrection.getSelection(),
+					  (Double.parseDouble(beamInPlane.getText())),
+					  (Double.parseDouble(beamOutPlane.getText())),
+					  (Double.parseDouble(covar.getText())),
+					  (Double.parseDouble(detectorSlits.getText())),
+					  (Double.parseDouble(inPlaneSlits.getText())),
+					  (Double.parseDouble(inplanePolarisation.getText())),
+					  (Double.parseDouble(outPlaneSlits.getText())),
+					  (Double.parseDouble(outplanePolarisation.getText())),
+					  (Double.parseDouble(scalingFactor.getText())),
+					  (Double.parseDouble(reflectivityA.getText())),
+					  (Double.parseDouble(sampleSize.getText())),
+					  (Double.parseDouble(normalisationFactor.getText())),
+					  (specular.getSelection()),
+					  (imageName.getText()),
+					  selectedOption.getText()
+					  );
+		}
 	}
 	
 	
@@ -772,6 +772,33 @@ public class GeometricParametersWindows extends Composite{
 		
 	}
 
+	public void updateDisplayFromGm(GeometricParametersModel gm){
+		
+	
+		beamHeight.setText(String.valueOf(gm.getBeamHeight()));
+		angularFudgeFactor.setText(String.valueOf(gm.getAngularFudgeFactor()));
+		footprint.setText(String.valueOf(gm.getFootprint()));
+		beamCorrection.setSelection(gm.getBeamCorrection());
+		beamInPlane.setText(String.valueOf(gm.getBeamInPlane()));
+		beamOutPlane.setText(String.valueOf(gm.getBeamOutPlane()));
+		covar.setText(String.valueOf(gm.getCovar()));
+		detectorSlits.setText(String.valueOf(gm.getDetectorSlits()));
+		inPlaneSlits.setText(String.valueOf(gm.getInPlaneSlits()));
+		inplanePolarisation.setText(String.valueOf(gm.getInplanePolarisation()));
+		outplanePolarisation.setText(String.valueOf(gm.getOutplanePolarisation()));
+		scalingFactor.setText(String.valueOf(gm.getScalingFactor()));
+		reflectivityA.setText(String.valueOf(gm.getReflectivityA()));
+		sampleSize.setText(String.valueOf(gm.getSampleSize()));
+		normalisationFactor.setText(String.valueOf(gm.getNormalisationFactor()));
+		specular.setSelection(gm.getSpecular());
+		imageName.setText(gm.getImageName());
+		fluxPath.setText(gm.getFluxPath());
+		selectedOption.setText(gm.getxNameRef());
+				
+			
+	}
+	
+	
 	public Text getEnergy() {
 		return energy;
 	}
@@ -780,4 +807,7 @@ public class GeometricParametersWindows extends Composite{
 		this.energy = energy;
 	}
 	
+	public void setUpdateOn(boolean b){
+		this.updateOn  =b;
+	}
 }
