@@ -156,6 +156,14 @@ public class DiffractionDetectorPreferenceInitializer extends AbstractPreference
 		dd13.setNumberOfPixelsX(4096);
 		dd13.setNumberOfPixelsY(4096);
 		dds.addDiffractionDetector(dd13);
+		
+		DiffractionDetector dd15 = new DiffractionDetector();
+		dd13.setDetectorName("Perkin Elmer XRD 4343 CT");
+		dd13.setxPixelSize(Amount.valueOf(150, SI.MICRO(SI.METRE)));
+		dd13.setyPixelSize(Amount.valueOf(150, SI.MICRO(SI.METRE)));
+		dd13.setNumberOfPixelsX(2880);
+		dd13.setNumberOfPixelsY(2880);
+		dds.addDiffractionDetector(dd15);
 
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		XMLEncoder xmlEncoder = new XMLEncoder(baos);
