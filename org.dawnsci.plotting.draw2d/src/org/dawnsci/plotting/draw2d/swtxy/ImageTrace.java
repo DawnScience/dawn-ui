@@ -1139,16 +1139,21 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 		if (downsampleListeners!=null) downsampleListeners.clear();
 		downsampleListeners = null;
 		
-        clearAspect(xAxis);
-        clearAspect(yAxis);
-        
 		if (getParent()!=null) getParent().remove(this);
 		xAxis.removeListener(this);
 		yAxis.removeListener(this);
-		if (xAxis instanceof DAxis)((DAxis)xAxis).setTicksAtEnds(xTicksAtEnd);
-		if (yAxis instanceof DAxis)((DAxis)yAxis).setTicksAtEnds(yTicksAtEnd);
-		if (xAxis instanceof DAxis)((DAxis)xAxis).setTicksIndexBased(false);
-		if (yAxis instanceof DAxis)((DAxis)yAxis).setTicksIndexBased(false);
+		
+		Collection<ITrace> traces = plottingSystem.getTraces(IImageTrace.class);
+		
+		if (traces == null || traces.isEmpty()) {
+			clearAspect(xAxis);
+	        clearAspect(yAxis);
+			if (xAxis instanceof DAxis)((DAxis)xAxis).setTicksAtEnds(xTicksAtEnd);
+			if (yAxis instanceof DAxis)((DAxis)yAxis).setTicksAtEnds(yTicksAtEnd);
+			if (xAxis instanceof DAxis)((DAxis)xAxis).setTicksIndexBased(false);
+			if (yAxis instanceof DAxis)((DAxis)yAxis).setTicksIndexBased(false);
+		}
+		
 		axisRedrawActive = false;
 		if (imageServiceBean!=null) imageServiceBean.dispose();
 		
