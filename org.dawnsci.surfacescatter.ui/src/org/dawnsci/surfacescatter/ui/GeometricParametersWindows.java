@@ -710,6 +710,7 @@ public class GeometricParametersWindows extends Composite{
 					  (Double.parseDouble(reflectivityA.getText())),
 					  (Double.parseDouble(sampleSize.getText())),
 					  (Double.parseDouble(normalisationFactor.getText())),
+					  (Double.parseDouble(energy.getText())),
 					  (specular.getSelection()),
 					  (imageName.getText()),
 					  selectedOption.getText()
@@ -738,6 +739,7 @@ public class GeometricParametersWindows extends Composite{
 				  (Double.parseDouble(reflectivityA.getText())),
 				  (Double.parseDouble(sampleSize.getText())),
 				  (Double.parseDouble(normalisationFactor.getText())),
+				  (Double.parseDouble(energy.getText())),
 				  (specular.getSelection()),
 				  (imageName.getText()),
 				  selectedOption.getText()
@@ -794,6 +796,8 @@ public class GeometricParametersWindows extends Composite{
 		imageName.setText(gm.getImageName());
 		fluxPath.setText(gm.getFluxPath());
 		selectedOption.setText(gm.getxNameRef());
+		energy.setText(String.valueOf(gm.getEnergy()));
+		theta.select(gm.getTheta());
 				
 			
 	}

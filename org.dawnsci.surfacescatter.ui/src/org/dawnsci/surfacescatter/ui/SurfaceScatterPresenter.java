@@ -1655,6 +1655,7 @@ public class SurfaceScatterPresenter {
 										  double reflectivityA,
 										  double sampleSize,
 										  double normalisationFactor,
+										  double energy1,
 										  boolean specular,
 										  String imageName,
 										  String xNameRef
@@ -1681,6 +1682,7 @@ public class SurfaceScatterPresenter {
 			gm.setSpecular(specular);
 			gm.setImageName(imageName);
 			gm.setxNameRef(xNameRef);
+			gm.setEnergy(energy1);
 			
 	}
 	
