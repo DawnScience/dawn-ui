@@ -340,6 +340,56 @@ public class PlotActionsManagerImpl extends PlottingActionBarManager {
 						return PlottingConstants.COLOUR_SCHEME.equals(propName);
 					}
 		});
+		
+		
+		final Action logColorScale = new Action("Log color scale", IAction.AS_CHECK_BOX) {
+			public void run() {
+				Collection<IPaletteTrace> ps = system.getTracesByClass(IPaletteTrace.class);
+				
+				if (ps != null && !ps.isEmpty()) {
+					for (IPaletteTrace p : ps) {
+					// TODO: There should be a method on image to
+					// setLogColorScale so that
+					// it just does the right thing.
+					p.getImageServiceBean().setLogColorScale(this.isChecked());
+					if (p.isRescaleHistogram() && p instanceof IImageTrace) {
+						((IImageTrace)p).rehistogram();
+					} else {
+						// XXX: Doing a image.repaint() is not sufficient, force
+						// more
+						// work to be done by resetting the palette data to what
+						// it already has
+						p.setPaletteData(p.getPaletteData());
+					}
+					}
+				}
+				PlottingSystemActivator.getPlottingPreferenceStore().setValue(PlottingConstants.CM_LOGSCALE, this.isChecked());
+			}
+		};
+		
+		logColorScale.setId(getClass().getName()+".logColorScale");
+		logColorScale.setChecked(PlottingSystemActivator.getPlottingPreferenceStore().getBoolean(PlottingConstants.CM_LOGSCALE));
+		registerAction(lutCombo.getId()+".group",logColorScale, ActionType.IMAGE, ManagerType.MENUBAR);
+		
+		final Action invertColorScale = new Action("Invert color scale", IAction.AS_CHECK_BOX) {
+			public void run() {
+				ServiceLoader.getPaletteService().setInverted(this.isChecked());
+				Collection<IPaletteTrace> ps = system.getTracesByClass(IPaletteTrace.class);
+
+				if (ps != null && !ps.isEmpty()) {
+					for (IPaletteTrace p : ps) {
+						p.setPalette(p.getPaletteName());
+					}
+					PlottingSystemActivator.getPlottingPreferenceStore().setValue(PlottingConstants.CM_INVERTED, this.isChecked());
+				}
+			}
+		};
+		
+		invertColorScale.setId(getClass().getName()+".invertColorScale");
+		invertColorScale.setChecked(PlottingSystemActivator.getPlottingPreferenceStore().getBoolean(PlottingConstants.CM_INVERTED));
+		registerAction(lutCombo.getId()+".group",invertColorScale, ActionType.IMAGE, ManagerType.MENUBAR);
+
+		
 	}
 
 	public void dispose() {
