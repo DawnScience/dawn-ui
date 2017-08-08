@@ -739,6 +739,7 @@ public class DatDisplayer extends Composite {
 				
 				rsw.getParamField().setUpdateOn(false);
 				rsw.getParamField().updateDisplayFromGm(ssp.getGm());
+				rsw.getAnglesAliasWindow().setFluxPath(ssp.getGm().getFluxPath());
 				rsw.getParamField().setUpdateOn(true);
 				
 				} catch (Exception e1) {
@@ -901,6 +902,12 @@ public class DatDisplayer extends Composite {
 	
 		ArrayList<MethodSetting> output = new ArrayList<>();
 		
+		for(MethodSetting m :MethodSetting.values()){
+			output.add(m);
+		}
+		
+		boolean notCaught = true;
+		
 		try{
 			
 			double lorentz = SXRDGeometricCorrections.lorentz(filepath).getDouble(0);
@@ -919,12 +926,12 @@ public class DatDisplayer extends Composite {
 					 												    Double.valueOf(ssvs.getParamField().getInplanePolarisation().getText()), 
 					 												    Double.valueOf(ssvs.getParamField().getOutplanePolarisation().getText())).getDouble(0);
 			
-			
-			output.add(MethodSetting.SXRD);
+			notCaught = false;
+			output.set(0,MethodSetting.SXRD);
 			
 		}
 		catch(Exception i){
-			
+			output.set(3,MethodSetting.SXRD);
 		}
 		
 		
@@ -979,16 +986,32 @@ public class DatDisplayer extends Composite {
 																					  Double.valueOf(ssvs.getParamField().getBeamHeight().getText()), 
 																					  Double.valueOf(ssvs.getParamField().getFootprint().getText()));
 			
-			
-			output.add(MethodSetting.Reflectivity_with_Flux_Correction);
-			output.add(MethodSetting.Reflectivity_without_Flux_Correction);
+			notCaught = false;
+			output.set(0,MethodSetting.Reflectivity_with_Flux_Correction);
+			output.set(1,MethodSetting.Reflectivity_without_Flux_Correction);
 			
 		}
 		catch(Exception i){
-			
+			output.set(1,MethodSetting.Reflectivity_with_Flux_Correction);
+			output.set(2,MethodSetting.Reflectivity_without_Flux_Correction);
 		}
 		
-		output.add(MethodSetting.Reflectivity_NO_Correction);
+		
+		if(notCaught){
+			output.set(0,MethodSetting.Reflectivity_NO_Correction);
+		}
+		else{
+			output.add(2,MethodSetting.Reflectivity_NO_Correction);
+		}
+		
+		for(MethodSetting m : output){
+			for(MethodSetting n : output){
+				if(m==n){
+					output.remove(n);
+				}
+			}
+			
+		}
 		
 		
 		return output;
@@ -1079,6 +1102,8 @@ public class DatDisplayer extends Composite {
 		optionsDropDown.removeAll();
 
 		options = dh1.getNames();
+		
+		rsw.getAnglesAliasWindow().updateAllWithOptions(options, true);
 		
 		ssp.setOptions(options);
 		ssvs.populateThetaOptionsDropDown();
@@ -1205,6 +1230,15 @@ public class DatDisplayer extends Composite {
 		ArrayList<MethodSetting> cC = checkCorrections();
 		
 		ssvs.resetSXRDReflectivityCombo(comboPositionToEnumInt(cC));
+		
+		if(cC.get(0) == MethodSetting.SXRD){
+			rsw.getAnglesAliasWindow().getFolder().setSelection(0);
+			rsw.getParamField().getFolder().setSelection(0);
+		}
+		else{
+			rsw.getAnglesAliasWindow().getFolder().setSelection(1);
+			rsw.getParamField().getFolder().setSelection(1);
+		}
 		
 	}
 	

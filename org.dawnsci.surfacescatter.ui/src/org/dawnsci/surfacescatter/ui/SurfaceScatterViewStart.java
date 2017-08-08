@@ -164,6 +164,7 @@ public class SurfaceScatterViewStart extends Dialog {
 				
 				ssp.createGm();
 				
+				rsw.getAnglesAliasWindow().writeOutValues();
 				
 				paramField.geometricParametersUpdate();
 				
@@ -177,21 +178,22 @@ public class SurfaceScatterViewStart extends Dialog {
 					}
 				}
 				
-				if(isThereAParamFile){
-					
-					try {
-					
-						IDataHolder dh1 = LoaderFactory.getData(paramFile);
-						Tree tree = dh1.getTree();			
-						FittingParametersInputReader.geometricalParametersReaderFromNexus(tree, ssp.getGm());
-						rsw.getParamField().setUpdateOn(false);
-						rsw.getParamField().updateDisplayFromGm(ssp.getGm());
-						rsw.getParamField().setUpdateOn(true);
-					} catch (Exception e1) {
-						// TODO Auto-generated catch block
-						e1.printStackTrace();
-					}
-				}
+//				if(isThereAParamFile){
+//					
+//					try {
+//					
+//						IDataHolder dh1 = LoaderFactory.getData(paramFile);
+//						Tree tree = dh1.getTree();			
+//						FittingParametersInputReader.geometricalParametersReaderFromNexus(tree, ssp.getGm());
+//						rsw.getParamField().setUpdateOn(false);
+//						rsw.getParamField().updateDisplayFromGm(ssp.getGm());
+//						rsw.getAnglesAliasWindow().setFluxPath(ssp.getGm().getFluxPath());
+//						rsw.getParamField().setUpdateOn(true);
+//					} catch (Exception e1) {
+//						// TODO Auto-generated catch block
+//						e1.printStackTrace();
+//					}
+//				}
 				
 				try{
 					for(IRegion g : ssp.getInterpolatorRegions()){
@@ -1576,7 +1578,9 @@ public class SurfaceScatterViewStart extends Dialog {
 				
 				String title = path + File.separator + stitle;
 			
-				setSms(SaveFormatSetting.toMethod(outputCurves.getOutputFormatSelection().getSelectionIndex()));
+				SaveFormatSetting sfs = SaveFormatSetting.toMethod(outputCurves.getOutputFormatSelection().getSelectionIndex());
+				
+				setSms(sfs);
 			
 				if (sms == SaveFormatSetting.GenX) {
 					ssp.genXSave(title);
@@ -1726,9 +1730,10 @@ public class SurfaceScatterViewStart extends Dialog {
 			}
 		
 			double ref = 
-					ReflectivityFluxCorrectionsForDialog.reflectivityFluxCorrectionsDouble(SurfaceScatterViewStart.this.getParamField().getFluxPath().getText(), 
+					ReflectivityFluxCorrectionsForDialog.reflectivityFluxCorrectionsDouble(//SurfaceScatterViewStart.this.getParamField().getFluxPath().getText(), 
 																				 	   	   QdcdDat.getDouble(0), 
-																				 	   	   filepath);
+																				 	   	   //filepath
+																				 	   	ssp.getGm().getFluxPath());
 			
 		}
 		catch(Exception h){

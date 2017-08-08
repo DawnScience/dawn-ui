@@ -2,7 +2,6 @@ package org.dawnsci.surfacescatter.ui;
 
 import org.dawb.common.ui.widgets.ActionBarWrapper;
 import org.dawnsci.surfacescatter.DataModel;
-import org.dawnsci.surfacescatter.ExampleModel;
 import org.dawnsci.surfacescatter.IntensityDisplayEnum;
 import org.dawnsci.surfacescatter.IntensityDisplayEnum.IntensityDisplaySetting;
 import org.dawnsci.surfacescatter.SavingFormatEnum;
@@ -32,7 +31,6 @@ public class MultipleOutputCurvesTableView extends Composite {
 	private IPlottingSystem<Composite> plotSystem4;
 	private IRegion imageNo;
 	private ILineTrace lt;
-	private ExampleModel model;
 	private Button sc;
 	private Button save;
 	private Combo intensitySelect;
@@ -56,11 +54,11 @@ public class MultipleOutputCurvesTableView extends Composite {
 			e2.printStackTrace();
 		}
 
-		this.createContents(model);
+		this.createContents();
 
 	}
 
-	public void createContents(ExampleModel model) {
+	public void createContents() {
 		
 		SashForm sashForm= new SashForm(this, SWT.VERTICAL);
 		sashForm.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));

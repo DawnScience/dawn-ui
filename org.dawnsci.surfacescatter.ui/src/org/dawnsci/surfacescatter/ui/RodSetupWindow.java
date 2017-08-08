@@ -20,6 +20,7 @@ public class RodSetupWindow {
 	private Group experimentalSetup;
 	private Group methodSetting;
 	private Group parametersSetting;
+	private AnglesAliasWindow anglesAliasWindow;
 		
 	public RodSetupWindow(CTabFolder folder,
 			SurfaceScatterViewStart ssvs,
@@ -93,9 +94,24 @@ public class RodSetupWindow {
 				 correctionsDropDown.add(org.dawnsci.surfacescatter.MethodSettingEnum.MethodSetting.toString(t));
 			}
 	
+			
 			correctionsDropDown.select(0);
 			correctionsDropDown.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 	
+			
+			Group parametersAlias = new Group(experimentalSetup, SWT.FILL);
+			GridLayout parametersAliasLayout = new GridLayout(1, true);
+			GridData parametersAliasData = new GridData(GridData.FILL_BOTH);
+			parametersAliasData.minimumWidth = 50;
+			parametersAlias.setLayout(parametersAliasLayout);
+			parametersAlias.setLayoutData(parametersAliasData);
+			parametersAlias.setText("Parameter Aliases");
+			
+			anglesAliasWindow = new AnglesAliasWindow(parametersAlias, SWT.FILL, ssp, ssvs);
+			anglesAliasWindow.setLayout(new GridLayout());
+			anglesAliasWindow.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+			
+		
 			parametersSetting = new Group(experimentalSetup, SWT.FILL);
 			GridLayout parametersSettingLayout = new GridLayout(1, true);
 			GridData parametersSettingData = new GridData(GridData.FILL_BOTH);
@@ -114,6 +130,10 @@ public class RodSetupWindow {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+	}
+
+	public AnglesAliasWindow getAnglesAliasWindow() {
+		return anglesAliasWindow;
 	}
 
 	public void setupRightEnabled(boolean enabled){
