@@ -155,21 +155,33 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 		xAxis.addListener(this);
 		yAxis.addListener(this);
 
-		xTicksAtEnd = ((DAxis)xAxis).hasTicksAtEnds();
-		((DAxis)xAxis).setTicksAtEnds(false);
-		yTicksAtEnd = yAxis.hasTicksAtEnds();
-		((DAxis)yAxis).setTicksAtEnds(false);
-		((DAxis)xAxis).setTicksIndexBased(true);
-		((DAxis)yAxis).setTicksIndexBased(true);
+		xTicksAtEnd = setupTicks(xAxis);
+		yTicksAtEnd = setupTicks(yAxis);
 
 		if (xAxis instanceof AspectAxis && yAxis instanceof AspectAxis) {
-			
-			AspectAxis x = (AspectAxis)xAxis;
-			AspectAxis y = (AspectAxis)yAxis;
+			AspectAxis x = (AspectAxis) xAxis;
+			AspectAxis y = (AspectAxis) yAxis;
 			x.setKeepAspectWith(y);
-			y.setKeepAspectWith(x);		
+			y.setKeepAspectWith(x);
 		}
-				
+	}
+
+	private boolean setupTicks(Axis a) {
+		boolean hasTicksAtEnd = a.hasTicksAtEnds();
+		if (xAxis instanceof DAxis) {
+			DAxis da = (DAxis) a;
+			da.setTicksAtEnds(false);
+			da.setTicksIndexBased(true);
+		}
+		return hasTicksAtEnd;
+	}
+
+	private void resetAxisTicks(Axis a, boolean hasTicksAtEnd) {
+		if (a instanceof DAxis) {
+			DAxis da = (DAxis) a;
+			da.setTicksAtEnds(hasTicksAtEnd);
+			da.setTicksIndexBased(false);
+		}
 	}
 
 	private IPreferenceStore store;
@@ -1142,18 +1154,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 		if (getParent()!=null) getParent().remove(this);
 		xAxis.removeListener(this);
 		yAxis.removeListener(this);
-		
-		Collection<ITrace> traces = plottingSystem.getTraces(IImageTrace.class);
-		
-		if (traces == null || traces.isEmpty()) {
-			clearAspect(xAxis);
-	        clearAspect(yAxis);
-			if (xAxis instanceof DAxis)((DAxis)xAxis).setTicksAtEnds(xTicksAtEnd);
-			if (yAxis instanceof DAxis)((DAxis)yAxis).setTicksAtEnds(yTicksAtEnd);
-			if (xAxis instanceof DAxis)((DAxis)xAxis).setTicksIndexBased(false);
-			if (yAxis instanceof DAxis)((DAxis)yAxis).setTicksIndexBased(false);
-		}
-		
+
 		axisRedrawActive = false;
 		if (imageServiceBean!=null) imageServiceBean.dispose();
 		
@@ -1171,17 +1172,11 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 		this.rgbDataset       = null;
 		this.fullMask         = null;
 	}
-	
+
+	@Override
 	public void dispose() {
 		remove();
-	}
-
-	private void clearAspect(Axis axis) {
-        if (axis instanceof AspectAxis ) {			
-			AspectAxis aaxis = (AspectAxis)axis;
-			aaxis.setKeepAspectWith(null);
-			aaxis.setMaximumRange(null);
-		}
+		resetAxes();
 	}
 
 	@Override
@@ -2165,5 +2160,23 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 		// TODO Auto-generated method stub
 		
 	}
-	
+
+	private void clearAspect(Axis axis) {
+		if (axis instanceof AspectAxis) {
+			AspectAxis aaxis = (AspectAxis) axis;
+			aaxis.setKeepAspectWith(null);
+			aaxis.setMaximumRange(null);
+		}
+	}
+
+	/**
+	 * Reset axes back to not keep aspect ratio and original ticks settings
+	 */
+	public void resetAxes() {
+		clearAspect(xAxis);
+		clearAspect(yAxis);
+
+		resetAxisTicks(xAxis, xTicksAtEnd);
+		resetAxisTicks(yAxis, yTicksAtEnd);
+	}
 }

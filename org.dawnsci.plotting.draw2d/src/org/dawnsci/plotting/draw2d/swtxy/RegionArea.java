@@ -446,23 +446,17 @@ public class RegionArea extends PlotArea implements IPlotArea {
 	}
 
 	public void clearImageTraces() {
-		if (imageTraces==null) return;
-		for (ImageTrace trace : imageTraces.values()) {
-			trace.remove();
-			fireImageTraceRemoved(new TraceEvent(trace));
-		}
-		imageTraces.clear();
+		internalClearImageTraces();
 		revalidate();
 	}
 
-	
 	@Override
 	protected void layout() {
-		setFigureBounds(imageTraces);		
-		setFigureBounds(vectorTraces);			
-        super.layout();
+		setFigureBounds(imageTraces);
+		setFigureBounds(vectorTraces);
+		super.layout();
 	}
-		
+
     private void setFigureBounds(Map<String, ? extends Figure> traces) {
     	if (traces == null) return;
 	    final Rectangle clientArea = getClientArea();
@@ -757,20 +751,7 @@ public class RegionArea extends PlotArea implements IPlotArea {
 			traceList.clear();
 	    }
 		
-		if (imageTraces!=null) {
-			final Collection<ImageTrace> its = new HashSet<ImageTrace>(imageTraces.values());
-			for (ImageTrace trace : its) {
-				final ImageTrace gone = imageTraces.remove(trace.getName());
-				if (gone!=null){
-					trace.remove();
-					fireImageTraceRemoved(new TraceEvent(trace));
-				}
-			}
-
-			imageTraces.clear();
-
-		}
-		
+		internalClearImageTraces();
 		
 		// Catch all needed for fix to http://jira.diamond.ac.uk/browse/SCI-1318
 		try {
@@ -787,6 +768,27 @@ public class RegionArea extends PlotArea implements IPlotArea {
 
 	}
 
+	private void internalClearImageTraces() {
+		if (imageTraces==null || imageTraces.size() == 0) {
+			return;
+		}
+
+		final Collection<ImageTrace> its = new HashSet<ImageTrace>(imageTraces.values());
+		ImageTrace last = null;
+		for (ImageTrace trace : its) {
+			final ImageTrace gone = imageTraces.remove(trace.getName());
+			if (gone != null) {
+				trace.remove();
+				fireImageTraceRemoved(new TraceEvent(trace));
+				last = gone;
+			}
+		}
+
+		if (last != null) {
+			last.resetAxes();
+		}
+		imageTraces.clear();
+	}
 
 	public void setPaletteData(PaletteData data) {
 		if (imageTraces!=null) for (ImageTrace trace : imageTraces.values()) {
