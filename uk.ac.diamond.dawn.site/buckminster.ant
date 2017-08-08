@@ -126,6 +126,7 @@ Additional Ant tasks for Buckminster build. Based on http://www.ralfebert.de/blo
     </target>
 
     <target name="install-product" depends="get-product-description, make_product_dir, make_product_dir_MacOS_extra">
+        <concat destfile="${destination}/product_version_number.txt">${product.version.full}</concat>
         <makeurl property="repository" file="${sp:repository}"/>
 
         <pathconvert property="equinox.launcher.jar">
