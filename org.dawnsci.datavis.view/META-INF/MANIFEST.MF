@@ -26,7 +26,8 @@ Import-Package: javax.annotation;version="1.2.0",
  org.eclipse.ui.progress,
  org.eclipse.ui.services,
  org.osgi.framework;version="1.8.0",
- org.osgi.service.event
+ org.osgi.service.event,
+ org.slf4j;version="1.7.25"
 Service-Component: OSGI-INF/*.xml
 Bundle-Activator: org.dawnsci.datavis.view.Activator
 Bundle-Vendor: Diamond Light Source

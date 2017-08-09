@@ -71,9 +71,13 @@ import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.eclipse.ui.progress.IProgressService;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class LoadedFilePart {
 
+	private static final Logger logger = LoggerFactory.getLogger(LoadedFilePart.class);
+	
 	private final Image icon = Activator.getImage("icons/document-block.png");
 	private final Image iconLive = Activator.getImage("icons/document-light.png");
 	
@@ -145,7 +149,7 @@ public class LoadedFilePart {
 							.toArray(String[]::new);
 					
 					loadData(names);
-					
+					logger.debug("Loaded files using quickwidget");
 				}
 			});
 		}
