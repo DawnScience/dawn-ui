@@ -8,9 +8,13 @@ import org.eclipse.january.MetadataException;
 import org.eclipse.january.dataset.IDataset;
 import org.eclipse.january.metadata.AxesMetadata;
 import org.eclipse.january.metadata.MetadataFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ProcessingXYTool extends AbstractProcessingTool {
 
+	private final static Logger logger = LoggerFactory.getLogger(ProcessingXYTool.class);
+	
 	@Override
 	public ToolPageRole getToolPageRole() {
 		return ToolPageRole.ROLE_1D;
