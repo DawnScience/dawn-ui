@@ -409,12 +409,12 @@ public class ReviewTabComposite extends Composite{
         
         
         
-	    try {
-			plotSystem = PlottingFactory.createPlottingSystem();
-				
-		} catch (Exception e2) {
-			e2.printStackTrace();
-		}
+//	    try {
+//			plotSystem = PlottingFactory.createPlottingSystem();
+//				
+//		} catch (Exception e2) {
+//			e2.printStackTrace();
+//		}
 	        
 		ActionBarWrapper actionBarComposite = ActionBarWrapper.createActionBars(storedCurves, 
 																				null);

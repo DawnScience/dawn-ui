@@ -16,10 +16,10 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.EnumMap;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.TreeMap;
-
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.math3.util.MathArrays;
 import org.dawnsci.surfacescatter.AnalaysisMethodologies;
@@ -46,12 +46,15 @@ import org.dawnsci.surfacescatter.OverlapAttenuationObject;
 import org.dawnsci.surfacescatter.PlotSystem2DataSetter;
 import org.dawnsci.surfacescatter.PolynomialOverlap;
 import org.dawnsci.surfacescatter.ProcessingMethodsEnum;
+import org.dawnsci.surfacescatter.ReflectivityAngleAliasEnum;
 import org.dawnsci.surfacescatter.ProcessingMethodsEnum.ProccessingMethod;
 import org.dawnsci.surfacescatter.ReflectivityFluxCorrectionsForDialog;
+import org.dawnsci.surfacescatter.ReflectivityFluxParametersAliasEnum;
 import org.dawnsci.surfacescatter.ReflectivityMetadataTitlesForDialog;
 import org.dawnsci.surfacescatter.ReflectivityNormalisation;
 import org.dawnsci.surfacescatter.RodObjectNexusBuilderModel;
 import org.dawnsci.surfacescatter.RodObjectNexusUtils;
+import org.dawnsci.surfacescatter.SXRDAngleAliasEnum;
 import org.dawnsci.surfacescatter.SXRDGeometricCorrections;
 import org.dawnsci.surfacescatter.SetupModel;
 import org.dawnsci.surfacescatter.SplineInterpolationTracker;
@@ -81,6 +84,7 @@ import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
@@ -611,7 +615,7 @@ public class SurfaceScatterPresenter {
 						
 						Dataset qdcdLocal = (Dataset) qdcd.getSlice(sliceL);
 						
-						double reflectivityFluxCorrection = ReflectivityFluxCorrectionsForDialog.reflectivityFluxCorrectionsDouble(fm.getDatFilePath(), 
+						double reflectivityFluxCorrection = ReflectivityFluxCorrectionsForDialog.reflectivityFluxCorrectionsDouble(//fm.getDatFilePath(), 
 																																qdcdLocal.getDouble(fm.getNoInOriginalDat()), 
 																																externalFlux);
 						
@@ -1638,7 +1642,7 @@ public class SurfaceScatterPresenter {
 	}
 
 	public void geometricParametersUpdate(
-										  String fluxPath,
+										  //String fluxPath,
 										  double beamHeight,
 										  double footprint,
 										  double angularFudgeFactor,
@@ -1662,7 +1666,7 @@ public class SurfaceScatterPresenter {
 										  ){
 											
 		
-			gm.setFluxPath(fluxPath);
+			//gm.setFluxPath(fluxPath);
 			gm.setBeamHeight(beamHeight);
 			gm.setFootprint(footprint);
 			gm.setAngularFudgeFactor(angularFudgeFactor);
@@ -2517,9 +2521,6 @@ public class SurfaceScatterPresenter {
 			x = getSplicedCurveX();
 		}
 		
-		ArrayList<ILineTrace> ltList = new ArrayList<ILineTrace>();
-		
-		
 		if(selector ==0){
 			
 			lt.setData(x,drm.getCsdp().getSplicedCurveY());
@@ -2568,9 +2569,6 @@ public class SurfaceScatterPresenter {
 		
 		
 	}
-	
-	
-	
 	
 	public void setCorrectionSelection(int correctionSelection){
 		drm.setCorrectionSelection(MethodSetting.toMethod(correctionSelection));
@@ -3176,6 +3174,19 @@ public class SurfaceScatterPresenter {
 		return output;
 	}
 	
+	public void writeOutAngleAliases(EnumMap<SXRDAngleAliasEnum, String> sXRDMap,
+									 EnumMap<ReflectivityAngleAliasEnum, String> reflectivityMap,
+									 EnumMap<ReflectivityFluxParametersAliasEnum, String> reflectivityFluxMap){
+		
+		gm.setsXRDMap(sXRDMap);
+		gm.setReflectivityFluxMap(reflectivityFluxMap);
+		gm.setReflectivityFluxMap(reflectivityFluxMap);
+		
+	}
+	
+	public void writeFluxFilePathToGeometricModel(String f){
+		gm.setFluxPath(f);
+	}
 }
 
 

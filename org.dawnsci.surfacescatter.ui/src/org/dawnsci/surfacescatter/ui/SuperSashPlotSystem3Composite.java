@@ -451,7 +451,7 @@ public class SuperSashPlotSystem3Composite extends Composite{
 			outputCurves.setLayout(new GridLayout());
 			outputCurves.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		} catch (Exception e) {
-			e.printStackTrace();
+			System.out.println(e.getMessage());
 		}
 	    
 	           

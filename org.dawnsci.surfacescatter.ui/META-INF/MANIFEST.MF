@@ -21,7 +21,9 @@ Require-Bundle: org.eclipse.jface;bundle-version="3.11.1",
  org.eclipse.swt
 Bundle-ActivationPolicy: lazy
 Bundle-Vendor: Diamond Light Source
-Import-Package: org.apache.commons.io;version="1.4.0",
+Import-Package: org.apache.commons.collections.iterators;version="3.2.2",
+ org.apache.commons.collections4.iterators;version="4.1.0",
+ org.apache.commons.io;version="1.4.0",
  org.eclipse.jdt.launching,
  uk.ac.diamond.scisoft.analysis.io
 Export-Package: org.dawnsci.surfacescatter.ui
