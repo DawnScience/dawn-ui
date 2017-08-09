@@ -38,15 +38,6 @@ public class ProcessingPreferencePage extends PreferencePage implements
 		
 		forceSeries = new Button(main,SWT.CHECK);
 		forceSeries.setText("Disable parallel processing");
-		
-
-//		try {
-//			Composite savu = new SavuWindow2(parent, SWT.NONE);
-//		} catch (FileNotFoundException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		}
-
         
 		setUpFromPreferences();
 		

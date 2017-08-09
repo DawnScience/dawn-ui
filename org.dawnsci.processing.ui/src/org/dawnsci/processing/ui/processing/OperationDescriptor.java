@@ -27,9 +27,13 @@ import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.richbeans.widgets.table.ISeriesItemDescriptor;
 import org.eclipse.swt.graphics.Image;
 import org.osgi.framework.Bundle;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class OperationDescriptor implements ISeriesItemDescriptor {
 
+	private static final Logger logger = LoggerFactory.getLogger(OperationDescriptor.class);
+	
 	// We never dispose these static images. They are small
 	// in number and we just leave the VM to tidy them up...
 	private static Map<String, Image>   icons;
@@ -100,7 +104,7 @@ public class OperationDescriptor implements ISeriesItemDescriptor {
 			try {
 				return ModelUtils.getModelFields(getModel());
 			} catch (Exception e) {
-				e.printStackTrace();
+				logger.error("Could not get model fields",e);
 				return null;
 			} 
 		}
@@ -118,7 +122,7 @@ public class OperationDescriptor implements ISeriesItemDescriptor {
 			return model;
 			
 		} catch (Exception e) {
-			e.printStackTrace();
+			logger.error("Could not set model to operation",e);
 			return null;
 		}
         
@@ -216,7 +220,7 @@ public class OperationDescriptor implements ISeriesItemDescriptor {
 			return op.getOutputRank().isCompatibleWith(ot.getInputRank());
 			
 		} catch (Exception ne) {
-			ne.printStackTrace();
+			logger.error("Could not determine compatilbility",ne);
 			return false;
 		}
 

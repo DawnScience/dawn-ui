@@ -19,9 +19,12 @@ import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Display;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 final class OperationLabelProvider extends SeriesItemLabelProvider implements IStyledLabelProvider {
 
+	private static final Logger logger = LoggerFactory.getLogger(OperationLabelProvider.class);
 
 	public OperationLabelProvider(int column) {
 		super(column);
@@ -78,8 +81,7 @@ final class OperationLabelProvider extends SeriesItemLabelProvider implements IS
 
 
 		} catch (InstantiationException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.error("Could not append pass/save", e);
 		}
 
 		return buf.toString();
@@ -106,8 +108,7 @@ final class OperationLabelProvider extends SeriesItemLabelProvider implements IS
 			
 
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.error("Could not get font",e);
 		}
 		return null;
 	}

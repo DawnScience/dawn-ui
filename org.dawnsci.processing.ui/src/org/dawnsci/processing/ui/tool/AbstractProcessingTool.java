@@ -19,7 +19,6 @@ import org.dawnsci.processing.ui.Activator;
 import org.dawnsci.processing.ui.EventServiceHolder;
 import org.dawnsci.processing.ui.ServiceHolder;
 import org.dawnsci.processing.ui.api.IOperationSetupWizardPage;
-import org.dawnsci.processing.ui.model.ConfigureOperationModelWizardPage;
 import org.dawnsci.processing.ui.model.OperationModelViewer;
 import org.dawnsci.processing.ui.model.OperationModelWizard;
 import org.dawnsci.processing.ui.model.OperationModelWizardDialog;
@@ -91,6 +90,8 @@ import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.part.IPageSite;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import uk.ac.diamond.scisoft.analysis.processing.visitor.NexusFileExecutionVisitor;
 
@@ -111,11 +112,13 @@ public abstract class AbstractProcessingTool extends AbstractToolPage {
 	private SliceFromSeriesMetadata parentMeta;
 	private IOperationInputData inputData;
 	
+	private static final Logger logger = LoggerFactory.getLogger(AbstractProcessingTool.class);
+	
 	public AbstractProcessingTool() {
 		try {
 			system = PlottingFactory.createPlottingSystem();
 		} catch (Exception e) {
-			e.printStackTrace();
+			logger.error("Could not create plotting system",e);
 			return;
 		}
 		this.seriesTable    = new SeriesTable(){
@@ -341,22 +344,6 @@ public abstract class AbstractProcessingTool extends AbstractToolPage {
 		job.update(info);
 		job.schedule();
 
-//		SliceND slice = new SliceND(ds.getShape());
-//		int[] dataDims = new int[]{0, 1};
-//		
-//		SliceInformation si = new SliceInformation(slice, slice, slice, dataDims, 1, 1);
-//		SourceInformation so = new SourceInformation("", "", ds);
-//		ds.setMetadata( new SliceFromSeriesMetadata(so, si));
-//		
-//		EscapableSliceVisitor vis = new EscapableSliceVisitor(null, dataDims,operations,null,null,system);
-//		vis.setEndOperation(selection);
-//		
-//		try {
-//			vis.visit(ds);
-//		} catch (Exception e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		}
 	}
 	
 	private IOperation[] getOperations() {
@@ -373,7 +360,7 @@ public abstract class AbstractProcessingTool extends AbstractToolPage {
 			try {
 				pipeline[i] = (IOperation<? extends IOperationModel, ? extends OperationData>)desi.get(i).getSeriesObject();
 			} catch (Exception e) {
-				e.printStackTrace();
+				logger.error("Could not get series object",e);
 				return null;
 			}
 			}
@@ -631,8 +618,7 @@ public abstract class AbstractProcessingTool extends AbstractToolPage {
 			
 			service.execute(cc);
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.error("Could no run processing",e);
 		}
 	}
 	

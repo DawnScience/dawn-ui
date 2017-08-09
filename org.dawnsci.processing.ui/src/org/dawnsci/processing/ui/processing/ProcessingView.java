@@ -204,7 +204,7 @@ public class ProcessingView extends ViewPart {
 			try {
 				pipeline[i] = (IOperation<? extends IOperationModel, ? extends OperationData>)desi.get(i).getSeriesObject();
 			} catch (Exception e) {
-				e.printStackTrace();
+				logger.error("Could not get series object");
 				return null;
 			}
 			}
@@ -349,8 +349,7 @@ public class ProcessingView extends ViewPart {
 						((OperationDescriptor)current).getSeriesObject().setStoreOutput(isChecked());
 						seriesTable.refreshTable();
 					} catch (InstantiationException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
+						logger.error("Could not series object",e);
 					}
 				}
 			}
@@ -368,8 +367,7 @@ public class ProcessingView extends ViewPart {
 						((OperationDescriptor)current).getSeriesObject().setPassUnmodifiedData(isChecked());
 						seriesTable.refreshTable();
 					} catch (InstantiationException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
+						logger.error("Could not build series object",e);
 					}
 				}
 			}

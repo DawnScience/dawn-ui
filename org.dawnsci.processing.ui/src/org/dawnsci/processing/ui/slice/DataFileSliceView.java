@@ -475,7 +475,7 @@ public class DataFileSliceView extends ViewPart {
 					if (tracker != null)
 						tracker.trackActionEvent("Processing_Run");
 				} catch (Exception e) {
-					e.printStackTrace();
+					logger.debug("Could not track event",e);
 				}
 			}
 		};

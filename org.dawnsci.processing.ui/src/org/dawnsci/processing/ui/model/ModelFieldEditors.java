@@ -86,7 +86,7 @@ public class ModelFieldEditors {
 		try {
 			value = field.get();
 		} catch (Exception e) {
-			e.printStackTrace();
+			logger.error("Could not get field value", e);
 			return null;
 		}
 		
@@ -97,8 +97,7 @@ public class ModelFieldEditors {
 			try {
 				clazz = field.getType();
 			} catch (NoSuchFieldException | SecurityException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				logger.error("Could not get field type", e);
 			}
 			
 		}
