@@ -158,12 +158,20 @@ public class DiffractionDetectorPreferenceInitializer extends AbstractPreference
 		dds.addDiffractionDetector(dd13);
 		
 		DiffractionDetector dd15 = new DiffractionDetector();
-		dd13.setDetectorName("Perkin Elmer XRD 4343 CT");
-		dd13.setxPixelSize(Amount.valueOf(150, SI.MICRO(SI.METRE)));
-		dd13.setyPixelSize(Amount.valueOf(150, SI.MICRO(SI.METRE)));
-		dd13.setNumberOfPixelsX(2880);
-		dd13.setNumberOfPixelsY(2880);
+		dd15.setDetectorName("Perkin Elmer XRD 4343 CT");
+		dd15.setxPixelSize(Amount.valueOf(150, SI.MICRO(SI.METRE)));
+		dd15.setyPixelSize(Amount.valueOf(150, SI.MICRO(SI.METRE)));
+		dd15.setNumberOfPixelsX(2880);
+		dd15.setNumberOfPixelsY(2880);
 		dds.addDiffractionDetector(dd15);
+		
+		DiffractionDetector dd16 = new DiffractionDetector();
+		dd16.setDetectorName("EXCALIBUR");
+		dd16.setxPixelSize(Amount.valueOf(55, SI.MICRO(SI.METRE)));
+		dd16.setyPixelSize(Amount.valueOf(55, SI.MICRO(SI.METRE)));
+		dd16.setNumberOfPixelsX(1796);
+		dd16.setNumberOfPixelsY(2069);
+		dds.addDiffractionDetector(dd16);
 
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		XMLEncoder xmlEncoder = new XMLEncoder(baos);
