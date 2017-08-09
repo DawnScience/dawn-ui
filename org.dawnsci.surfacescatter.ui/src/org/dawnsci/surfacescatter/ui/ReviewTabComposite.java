@@ -14,7 +14,6 @@ import org.dawnsci.surfacescatter.GoodPointStripper;
 import org.dawnsci.surfacescatter.ReviewCurvesModel;
 import org.dawnsci.surfacescatter.SavingFormatEnum;
 import org.dawnsci.surfacescatter.SavingFormatEnum.SaveFormatSetting;
-import org.dawnsci.surfacescatter.SavingUtils;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.PlotType;
 import org.eclipse.dawnsci.plotting.api.PlottingFactory;
@@ -33,6 +32,7 @@ import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Group;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableItem;
 
@@ -407,15 +407,6 @@ public class ReviewTabComposite extends Composite{
         storedCurvesData.heightHint = 100;
         storedCurves.setLayoutData(new GridData(GridData.FILL_HORIZONTAL | GridData.FILL_VERTICAL));
         
-        
-        
-//	    try {
-//			plotSystem = PlottingFactory.createPlottingSystem();
-//				
-//		} catch (Exception e2) {
-//			e2.printStackTrace();
-//		}
-	        
 		ActionBarWrapper actionBarComposite = ActionBarWrapper.createActionBars(storedCurves, 
 																				null);
 		  
@@ -639,71 +630,82 @@ public class ReviewTabComposite extends Composite{
 	
 	private void saveRod(boolean writeOnlyGoodPoints){
 		
-		FileDialog fd = new FileDialog(ssvs.getShell(), SWT.SAVE);
-
-		if(ssp.getSaveFolder()!=null){
-			fd.setFilterPath(ssp.getSaveFolder());
-		}
+		SaveFormatSetting sfs =SaveFormatSetting.toMethod(outputFormatSelection.getText());
+		Shell shell = ssvs.getShell();
 		
-		String stitle = "r";
-		String path = "p";
-
-		if (fd.open() != null) {
-			stitle = fd.getFileName();
-			path = fd.getFilterPath();
-
-		}
-		
-		if(ssp.getSaveFolder()==null){
-			ssp.setSaveFolder(path);;
-		}
-		
-		String title = path + File.separator + stitle;
-	
-		
-		SavingUtils su = new SavingUtils();
 		String rodSaveName = rodToSave.getText();
-		
 		CurveStitchDataPackage csdpToSave = bringMeTheOneIWant(rodSaveName, 
 				rcm.getCsdpList());
-				
-		SaveFormatSetting sfs =SaveFormatSetting.toMethod(outputFormatSelection.getText());
 		
-		int saveIntensityState = AxisEnums.toInt(yAxisSelection);
 		
-		if (sfs == SaveFormatSetting.GenX) {
-			su.genXSave(writeOnlyGoodPoints,
-					title,
-					csdpToSave,
-					ssp.getDrm(),
-					ssp.getDrm().getFms(),
-					ssp.getGm());
-		}
-		if (sfs == SaveFormatSetting.Anarod) {
-			su.anarodSave(writeOnlyGoodPoints,
-					title,
-					csdpToSave,
-					ssp.getDrm(),
-					ssp.getDrm().getFms(),
-					ssp.getGm());
-		}
-		if (sfs == SaveFormatSetting.int_format) {
-			su.intSave(writeOnlyGoodPoints,
-					title,
-					csdpToSave,
-					ssp.getDrm(),
-					ssp.getDrm().getFms(),
-					ssp.getGm());
-		}
-		if (sfs == SaveFormatSetting.ASCII) {
-			su.simpleXYYeSave(writeOnlyGoodPoints,
-					title,
-					saveIntensityState,
-					csdpToSave,
-					ssp.getDrm(),
-					ssp.getDrm().getFms(),
-					ssp.getGm());
-		}
+		ssp.arbitrarySavingMethod(false, 
+								  writeOnlyGoodPoints, 
+								  shell, 
+								  sfs, 
+								  rodSaveName, 
+								  csdpToSave, 
+								  yAxisSelection);
+		
+//		FileDialog fd = new FileDialog(shell, SWT.SAVE);
+//
+//		if(ssp.getSaveFolder()!=null){
+//			fd.setFilterPath(ssp.getSaveFolder());
+//		}
+//		
+//		String stitle = "r";
+//		String path = "p";
+//
+//		if (fd.open() != null) {
+//			stitle = fd.getFileName();
+//			path = fd.getFilterPath();
+//
+//		}
+//		
+//		if(ssp.getSaveFolder()==null){
+//			ssp.setSaveFolder(path);;
+//		}
+//		
+//		String title = path + File.separator + stitle;
+//	
+//		
+//		SavingUtils su = new SavingUtils();
+//		
+//		
+//		int saveIntensityState = AxisEnums.toInt(yAxisSelection);
+//		
+//		if (sfs == SaveFormatSetting.GenX) {
+//			su.genXSave(writeOnlyGoodPoints,
+//					title,
+//					csdpToSave,
+//					ssp.getDrm(),
+//					ssp.getDrm().getFms(),
+//					ssp.getGm());
+//		}
+//		if (sfs == SaveFormatSetting.Anarod) {
+//			su.anarodSave(writeOnlyGoodPoints,
+//					title,
+//					csdpToSave,
+//					ssp.getDrm(),
+//					ssp.getDrm().getFms(),
+//					ssp.getGm());
+//		}
+//		if (sfs == SaveFormatSetting.int_format) {
+//			su.intSave(writeOnlyGoodPoints,
+//					title,
+//					csdpToSave,
+//					ssp.getDrm(),
+//					ssp.getDrm().getFms(),
+//					ssp.getGm());
+//		}
+//		if (sfs == SaveFormatSetting.ASCII) {
+//			su.simpleXYYeSave(writeOnlyGoodPoints,
+//					title,
+//					saveIntensityState,
+//					csdpToSave,
+//					ssp.getDrm(),
+//					ssp.getDrm().getFms(),
+//					ssp.getGm());
+//		}
 
 	}
 

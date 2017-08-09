@@ -1,6 +1,8 @@
 package org.dawnsci.surfacescatter.ui;
 
 import org.dawb.common.ui.widgets.ActionBarWrapper;
+import org.dawnsci.surfacescatter.AxisEnums;
+import org.dawnsci.surfacescatter.CurveStitchDataPackage;
 import org.dawnsci.surfacescatter.DataModel;
 import org.dawnsci.surfacescatter.IntensityDisplayEnum;
 import org.dawnsci.surfacescatter.IntensityDisplayEnum.IntensityDisplaySetting;
@@ -18,6 +20,8 @@ import org.eclipse.january.dataset.DatasetFactory;
 import org.eclipse.january.dataset.IDataset;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -25,6 +29,7 @@ import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Group;
+import org.eclipse.swt.widgets.Shell;
 
 public class MultipleOutputCurvesTableView extends Composite {
 
@@ -41,13 +46,17 @@ public class MultipleOutputCurvesTableView extends Composite {
 	private Button qAxis;
 	private Button storeAsNexus;
 	private IRegion marker;
+	private SurfaceScatterPresenter ssp;
 	
 	public MultipleOutputCurvesTableView (Composite parent, 
 										  int style, 
-										  int extra) {
+										  int extra,
+										  SurfaceScatterPresenter ssp) {
 
 		super(parent, style);	
 		
+		this.ssp = ssp;
+		 
 		try {
 			plotSystem4 = PlottingFactory.createPlottingSystem();
 		} catch (Exception e2) {
@@ -76,8 +85,8 @@ public class MultipleOutputCurvesTableView extends Composite {
 		
 		intensitySelect = new Combo(overlapSelection, SWT.DROP_DOWN | SWT.BORDER |SWT.FILL);
 		
-		for(IntensityDisplaySetting  t: IntensityDisplayEnum.IntensityDisplaySetting.values()){
-			intensitySelect.add(IntensityDisplaySetting.toString(t));
+		for(AxisEnums.yAxes  t: AxisEnums.yAxes.values()){
+			intensitySelect.add(t.getYAxisName(), t.getYAxisNumber());
 		}
 	
 		intensitySelect.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
@@ -95,6 +104,21 @@ public class MultipleOutputCurvesTableView extends Composite {
 		save = new Button(overlapSelection, SWT.PUSH |SWT.FILL);
 		save.setText("Save Spliced");
 		save.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		
+		  save.addSelectionListener(new SelectionListener() {
+
+				@Override
+				public void widgetSelected(SelectionEvent e) {
+					saveRod(false);
+
+				}
+
+				@Override
+				public void widgetDefaultSelected(SelectionEvent e) {
+
+				}
+			});
+		
 		
 		final GridLayout gridLayout = new GridLayout();
 		gridLayout.numColumns = 1;
@@ -296,5 +320,31 @@ public class MultipleOutputCurvesTableView extends Composite {
 		this.storeAsNexus = storeAsNexus;
 	}
 
+	private void saveRod(boolean writeOnlyGoodPoints){
+		
+		SaveFormatSetting sfs =SaveFormatSetting.toMethod(outputFormatSelection.getText());
+		Shell shell = this.getShell();
+		
+		AxisEnums.yAxes yAxisSelection =AxisEnums.yAxes.SPLICEDY; 
+		
+		for(AxisEnums.yAxes t :AxisEnums.yAxes.values()){
+			if(intensitySelect.getText().equals(t.getYAxisName())){
+				yAxisSelection = t;
+			}
+		}
+		
+		CurveStitchDataPackage csdpToSave = ssp.getDrm().getCsdp();
+		String rodSaveName = csdpToSave.getName();
+		
+		boolean useQ = qAxis.getSelection();
+		
+		ssp.arbitrarySavingMethod(useQ, 
+								  writeOnlyGoodPoints, 
+								  shell, 
+								  sfs, 
+								  rodSaveName, 
+								  csdpToSave, 
+								  yAxisSelection);
+	}
 	
 }

@@ -25,8 +25,9 @@ import org.apache.commons.math3.util.MathArrays;
 import org.dawnsci.surfacescatter.AnalaysisMethodologies;
 import org.dawnsci.surfacescatter.AnalaysisMethodologies.FitPower;
 import org.dawnsci.surfacescatter.AnalaysisMethodologies.Methodology;
+import org.dawnsci.surfacescatter.AxisEnums;
 import org.dawnsci.surfacescatter.BoxSlicerRodScanUtilsForDialog;
-import org.dawnsci.surfacescatter.ClosestNoFinder; 
+import org.dawnsci.surfacescatter.ClosestNoFinder;
 import org.dawnsci.surfacescatter.CsdpGeneratorFromDrm;
 import org.dawnsci.surfacescatter.CurveStitchDataPackage;
 import org.dawnsci.surfacescatter.CurveStitchWithErrorsAndFrames;
@@ -46,8 +47,8 @@ import org.dawnsci.surfacescatter.OverlapAttenuationObject;
 import org.dawnsci.surfacescatter.PlotSystem2DataSetter;
 import org.dawnsci.surfacescatter.PolynomialOverlap;
 import org.dawnsci.surfacescatter.ProcessingMethodsEnum;
-import org.dawnsci.surfacescatter.ReflectivityAngleAliasEnum;
 import org.dawnsci.surfacescatter.ProcessingMethodsEnum.ProccessingMethod;
+import org.dawnsci.surfacescatter.ReflectivityAngleAliasEnum;
 import org.dawnsci.surfacescatter.ReflectivityFluxCorrectionsForDialog;
 import org.dawnsci.surfacescatter.ReflectivityFluxParametersAliasEnum;
 import org.dawnsci.surfacescatter.ReflectivityMetadataTitlesForDialog;
@@ -56,6 +57,8 @@ import org.dawnsci.surfacescatter.RodObjectNexusBuilderModel;
 import org.dawnsci.surfacescatter.RodObjectNexusUtils;
 import org.dawnsci.surfacescatter.SXRDAngleAliasEnum;
 import org.dawnsci.surfacescatter.SXRDGeometricCorrections;
+import org.dawnsci.surfacescatter.SavingFormatEnum.SaveFormatSetting;
+import org.dawnsci.surfacescatter.SavingUtils;
 import org.dawnsci.surfacescatter.SetupModel;
 import org.dawnsci.surfacescatter.SplineInterpolationTracker;
 import org.dawnsci.surfacescatter.TrackingMethodology;
@@ -84,9 +87,9 @@ import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.widgets.Button;
-import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Shell;
 
 import uk.ac.diamond.scisoft.analysis.io.LoaderFactory;
@@ -3186,6 +3189,85 @@ public class SurfaceScatterPresenter {
 	
 	public void writeFluxFilePathToGeometricModel(String f){
 		gm.setFluxPath(f);
+	}
+	
+	public void arbitrarySavingMethod(boolean useQ,
+									  boolean writeOnlyGoodPoints,
+									  Shell shell,
+								      SaveFormatSetting sfs,
+								      String rodSaveName,
+								      CurveStitchDataPackage csdpToSave,
+								      AxisEnums.yAxes yAxis
+//								      AxisEnums.xAxes xAxis
+								      ){
+		
+		FileDialog fd = new FileDialog(shell, SWT.SAVE);
+
+		if(this.getSaveFolder()!=null){
+			fd.setFilterPath(this.getSaveFolder());
+		}
+		
+		String stitle = "r";
+		String path = "p";
+
+		if (fd.open() != null) {
+			stitle = fd.getFileName();
+			path = fd.getFilterPath();
+
+		}
+		
+		if(this.getSaveFolder()==null){
+			this.setSaveFolder(path);;
+		}
+		
+		String title = path + File.separator + stitle;
+	
+		
+		SavingUtils su = new SavingUtils();
+//		String rodSaveName = rodToSave.getText();
+		
+//		CurveStitchDataPackage csdpToSave = bringMeTheOneIWant(rodSaveName, 
+//				rcm.getCsdpList());
+//				
+//		SaveFormatSetting sfs =SaveFormatSetting.toMethod(outputFormatSelection.getText());
+		
+		int saveIntensityState = yAxis.getYAxisNumber();
+		
+		if (sfs == SaveFormatSetting.GenX) {
+			su.genXSave(writeOnlyGoodPoints,
+					title,
+					csdpToSave,
+					this.getDrm(),
+					this.getDrm().getFms(),
+					this.getGm());
+		}
+		if (sfs == SaveFormatSetting.Anarod) {
+			su.anarodSave(writeOnlyGoodPoints,
+					title,
+					csdpToSave,
+					this.getDrm(),
+					this.getDrm().getFms(),
+					this.getGm());
+		}
+		if (sfs == SaveFormatSetting.int_format) {
+			su.intSave(writeOnlyGoodPoints,
+					title,
+					csdpToSave,
+					this.getDrm(),
+					this.getDrm().getFms(),
+					this.getGm());
+		}
+		if (sfs == SaveFormatSetting.ASCII) {
+			su.simpleXYYeSave(useQ,
+					writeOnlyGoodPoints,
+					title,
+					saveIntensityState,
+					csdpToSave,
+					this.getDrm().getFms(),
+					this.getGm());
+		}
+
+		
 	}
 }
 

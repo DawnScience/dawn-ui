@@ -1552,56 +1552,66 @@ public class SurfaceScatterViewStart extends Dialog {
 			}
 		});
 
-		outputCurves.getSave().addSelectionListener(new SelectionListener() {
-
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-
-				FileDialog fd = new FileDialog(getParentShell(), SWT.SAVE);
-
-				if(ssp.getSaveFolder()!=null){
-					fd.setFilterPath(ssp.getSaveFolder());
-				}
-				
-				String stitle = "r";
-				String path = "p";
-
-				if (fd.open() != null) {
-					stitle = fd.getFileName();
-					path = fd.getFilterPath();
-
-				}
-				
-				if(ssp.getSaveFolder()==null){
-					ssp.setSaveFolder(path);;
-				}
-				
-				String title = path + File.separator + stitle;
-			
-				SaveFormatSetting sfs = SaveFormatSetting.toMethod(outputCurves.getOutputFormatSelection().getSelectionIndex());
-				
-				setSms(sfs);
-			
-				if (sms == SaveFormatSetting.GenX) {
-					ssp.genXSave(title);
-				}
-				if (sms == SaveFormatSetting.Anarod) {
-					ssp.anarodSave(title);
-				}
-				if (sms == SaveFormatSetting.int_format) {
-					ssp.intSave(title);
-				}
-				if (sms == SaveFormatSetting.ASCII) {
-					ssp.simpleXYYeSave(title, getOutputCurves().getIntensity().getSelectionIndex());
-				}
-
-			}
-
-			@Override
-			public void widgetDefaultSelected(SelectionEvent e) {
-
-			}
-		});
+//		outputCurves.getSave().addSelectionListener(new SelectionListener() {
+//
+//			@Override
+//			public void widgetSelected(SelectionEvent e) {
+//
+//				boolean useQ = outputCurves.getqAxis().getSelection();
+//				
+//				ssp.arbitrarySavingMethod(useQ, 
+//										  false, 
+//										  sfs, 
+//										  rodSaveName, 
+//										  csdpToSave, 
+//										  yAxis, 
+//										  xAxis);
+//				
+//				FileDialog fd = new FileDialog(getParentShell(), SWT.SAVE);
+//
+//				if(ssp.getSaveFolder()!=null){
+//					fd.setFilterPath(ssp.getSaveFolder());
+//				}
+//				
+//				String stitle = "r";
+//				String path = "p";
+//
+//				if (fd.open() != null) {
+//					stitle = fd.getFileName();
+//					path = fd.getFilterPath();
+//
+//				}
+//				
+//				if(ssp.getSaveFolder()==null){
+//					ssp.setSaveFolder(path);;
+//				}
+//				
+//				String title = path + File.separator + stitle;
+//			
+//				SaveFormatSetting sfs = SaveFormatSetting.toMethod(outputCurves.getOutputFormatSelection().getSelectionIndex());
+//				
+//				setSms(sfs);
+//			
+//				if (sms == SaveFormatSetting.GenX) {
+//					ssp.genXSave(title);
+//				}
+//				if (sms == SaveFormatSetting.Anarod) {
+//					ssp.anarodSave(title);
+//				}
+//				if (sms == SaveFormatSetting.int_format) {
+//					ssp.intSave(title);
+//				}
+//				if (sms == SaveFormatSetting.ASCII) {
+//					ssp.simpleXYYeSave(title, getOutputCurves().getIntensity().getSelectionIndex());
+//				}
+//
+//			}
+//
+//			@Override
+//			public void widgetDefaultSelected(SelectionEvent e) {
+//
+//			}
+//		});
 		
 		outputCurves.getStoreAsNexus().addSelectionListener(new SelectionListener() {
 
