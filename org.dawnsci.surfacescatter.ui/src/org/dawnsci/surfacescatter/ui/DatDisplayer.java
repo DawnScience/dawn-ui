@@ -1004,14 +1004,29 @@ public class DatDisplayer extends Composite {
 			output.add(2,MethodSetting.Reflectivity_NO_Correction);
 		}
 		
-		for(MethodSetting m : output){
-			for(MethodSetting n : output){
-				if(m==n){
-					output.remove(n);
-				}
-			}
-			
-		}
+		
+		
+//		for(MethodSetting m : output){
+//			int pos1 = output.indexOf(m);
+//			
+//			for(MethodSetting n : output){
+//				
+//				int pos2 = output.indexOf(n);
+//				
+//				for(int i = output.size()-1; i>=0; i--){
+//					if(output.get(i)==n){
+//						pos2 = i;
+//						break;
+//					}
+//				}
+//				
+//				if(m==n &&(pos1 != pos2)){
+//					output.remove(n);
+//					break;
+//				}
+//			}
+//			
+//		}
 		
 		
 		return output;
