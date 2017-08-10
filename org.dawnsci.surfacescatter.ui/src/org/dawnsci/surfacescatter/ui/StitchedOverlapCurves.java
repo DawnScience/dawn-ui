@@ -65,7 +65,7 @@ public class StitchedOverlapCurves extends Composite {
     private Button resetAll;
     private Table overlapDisplayTable;
     private TableViewer viewer;
-    private int selector;
+    private AxisEnums.yAxes selector;
     private OverlapDisplayObjects odo;
     private Group overlapSelector;
     private ArrayList<IDataset> xArrayList;
@@ -155,7 +155,7 @@ public class StitchedOverlapCurves extends Composite {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				flipUseGoodPointsOnly();
-				refreshCurvesFromTable();
+				refreshCurvesFromTable(model.getxAxis(), model.getyAxis());
 			}
 				
 			@Override
@@ -190,7 +190,9 @@ public class StitchedOverlapCurves extends Composite {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				
-				AxisEnums.yAxes k = AxisEnums.yAxes.SPLICEDY;
+				plotSystem.clear();
+				
+				AxisEnums.yAxes k = model.getyAxis();
 				
 				double normalisationPoint = normalisationValue(k);
 				
@@ -198,7 +200,14 @@ public class StitchedOverlapCurves extends Composite {
 																			k, 
 																			normalisationPoint);
 				
-				lt1.setData(csdp.getSplicedCurveX(), csdp.getSplicedCurveY());
+				lt1 = plotSystem.createLineTrace("Concatenated Curve Test");
+				
+				IDataset x = getXIDataset(model.getxAxis());
+				IDataset y = getYIDataset(model.getyAxis());
+				
+				lt1.setData(x, y);
+				
+				plotSystem.addTrace(lt1);
 				plotSystem.repaint();
 			}
 			
@@ -257,7 +266,10 @@ public class StitchedOverlapCurves extends Composite {
     
 		lt1 = plotSystem.createLineTrace("Concatenated Curve Test");
 						
-		lt1.setData(csdp.getSplicedCurveX(), csdp.getSplicedCurveY());
+		IDataset x = getXIDataset(model.getxAxis());
+		IDataset y = getYIDataset(model.getyAxis());
+		
+		lt1.setData(x, y);
 		
 		plotSystem.addTrace(lt1);
 		plotSystem.repaint();
@@ -280,14 +292,14 @@ public class StitchedOverlapCurves extends Composite {
 				
 				plotSystem.clear();
 				
-				getTheRightCurve();
+//				getTheRightCurve(model.getyAxis(), model.getxAxis());
+//				
+//				plotSystem.clearTraces();
+//				plotSystem.addTrace(lt1);
+//				plotSystem.repaint();
 				
-				plotSystem.clearTraces();
-				plotSystem.addTrace(lt1);
-				plotSystem.repaint();
 				
-				
-				resetAttenuationFactors(overlapSelector, xArrayList,true);
+				resetAttenuationFactors(model.getxAxis(),model.getyAxis(), overlapSelector, xArrayList,true);
 				
 				slider.setMinimum(0);
 				slider.setMaximum(csdp.getSplicedCurveX().getSize());
@@ -295,10 +307,13 @@ public class StitchedOverlapCurves extends Composite {
 				slider.setThumb(1);
 				slider.setSelection(g);
 
-				IDataset y = getYIDataset(model.getyAxis());
-				IDataset x = getXIDataset(model.getxAxis());
 				
-				lt1.setData(x, y);
+				
+				buildLineTrace(model.getyAxis(),model.getxAxis());
+//				IDataset y = getYIDataset(model.getyAxis());
+//				IDataset x = getXIDataset(model.getxAxis());
+//				
+//				lt1.setData(x, y);
 			}
 		});
 		
@@ -324,7 +339,9 @@ public class StitchedOverlapCurves extends Composite {
 		
 		oAos = new ArrayList<OverlapAttenuationObject>();
 		
-		viewer = buildTable1(overlapSelector,
+		viewer = buildTable1(model.getxAxis(),
+							 model.getyAxis(), 
+							 overlapSelector,
 				   			 xArrayList);
 		
 		viewer.getTable().setLayout(overlapSelectorLayout);
@@ -346,7 +363,7 @@ public class StitchedOverlapCurves extends Composite {
 					oAo.setModified(false);
 				}
 				
-				resetAttenuationFactors(overlapSelector, xArrayList,true);
+				resetAttenuationFactors(model.getxAxis(),model.getyAxis(), overlapSelector, xArrayList,true);
 
 			}
 			
@@ -365,7 +382,9 @@ public class StitchedOverlapCurves extends Composite {
 			
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				updateAttenuationFactors(xArrayList);
+				updateAttenuationFactors(model.getxAxis(),
+										 model.getyAxis(), 
+										 xArrayList);
 			
 			}
 			
@@ -451,7 +470,8 @@ public class StitchedOverlapCurves extends Composite {
 	   this.csdp = csdp;
    }
    
-   private void updateAttenuationFactors(//ArrayList<OverlapDisplayObjects> odos,
+   private void updateAttenuationFactors(AxisEnums.xAxes x,
+		   								 AxisEnums.yAxes y,
 		   								 ArrayList<IDataset> xArrayList){
 	  
 	   
@@ -488,7 +508,7 @@ public class StitchedOverlapCurves extends Composite {
 	   
 	  
 		
-	   getTheRightCurve();
+	   getTheRightCurve(y, x);
 		
 	   plotSystem.clearTraces();
 	   plotSystem.addTrace(lt1);
@@ -496,7 +516,9 @@ public class StitchedOverlapCurves extends Composite {
    }
    
    
-   private void resetAttenuationFactors(Group group,
+   private void resetAttenuationFactors(AxisEnums.xAxes x,
+		   								AxisEnums.yAxes y,
+		   								Group group,
 		   								ArrayList<IDataset> xArrayList,
 		   								boolean globalReset){
 
@@ -507,11 +529,11 @@ public class StitchedOverlapCurves extends Composite {
 		   csdp = ssp.curveStitchingOutput(maxMinArray, true, oAos);
 	   }
 		
-		getTheRightCurve();
+		buildLineTrace(y, x);
 		
-		plotSystem.clearTraces();
-		plotSystem.addTrace(lt1);
-		plotSystem.repaint();
+//		plotSystem.clearTraces();
+//		plotSystem.addTrace(lt1);
+//		plotSystem.repaint();
 		
 //		csdp = ssp.curveStitchingOutput(null, false, null);
 		odms = csdp.getOverlapDataModels();
@@ -564,7 +586,7 @@ public class StitchedOverlapCurves extends Composite {
    }
 
    
-   private void generateOdosFromOdms(ArrayList<IDataset> xArrayList){
+   private void generateOdosFromOdms(AxisEnums.xAxes x,AxisEnums.yAxes y , ArrayList<IDataset> xArrayList){
 	   
 	   ArrayList<OverlapAttenuationObject> oAos1= new ArrayList<>();
 //	   odos = new ArrayList<>();
@@ -612,9 +634,8 @@ public class StitchedOverlapCurves extends Composite {
 							}
 						}
 						
-						updateAttenuationFactors(//odos, 
+						updateAttenuationFactors(x,y, 
 												 xArrayList);
-						
 					}
 				}
 			});
@@ -624,7 +645,9 @@ public class StitchedOverlapCurves extends Composite {
    }
    
    
-   private TableViewer buildTable1(Group overlapSelector,
+   private TableViewer buildTable1(AxisEnums.xAxes x,
+		   							AxisEnums.yAxes y,
+		   							Group overlapSelector,
 			   					   ArrayList<IDataset> xArrayList){
 	
 		ArrayList<OverlapAttenuationObject> oAos1= new ArrayList<>();
@@ -675,7 +698,7 @@ public class StitchedOverlapCurves extends Composite {
 							}
 						}
 						
-						resetAttenuationFactors(overlapSelector ,xArrayList, false);
+						resetAttenuationFactors(x,y,overlapSelector ,xArrayList, false);
 						
 					}
 				}
@@ -841,10 +864,9 @@ public class StitchedOverlapCurves extends Composite {
    }
 	
 	
-   public void changeCurves(int selector){
-		
-	   this.selector =selector;
-	   
+   public void changeCurves(AxisEnums.yAxes y,
+		   					AxisEnums.xAxes x){
+	 
 		Display display = Display.getCurrent();
 		
 		Color blue = display.getSystemColor(SWT.COLOR_BLUE);
@@ -853,75 +875,67 @@ public class StitchedOverlapCurves extends Composite {
 		
 		plotSystem.clear();
 		
-		switch(selector){
-			case 0:
-				ILineTrace lt = plotSystem.createLineTrace("Spliced Corrected Intensity Curve");
-			
-				lt.setData(csdp.getSplicedCurveX(),
-						   csdp.getSplicedCurveY());
-					
-				lt.setTraceColor(blue);
-				plotSystem.addTrace(lt);
-			
+		
+		IDataset xD = getXIDataset(x);
+		IDataset yD = getYIDataset(y);
+		   
+		   
+		switch(y){
+			case SPLICEDY:
+				lt1 = plotSystem.createLineTrace("Spliced Corrected Curve");
+				lt1.setTraceColor(blue);
 				break;
-			
-			case 1:
-				
-				ILineTrace lt1 = plotSystem.createLineTrace("Spliced Fhkl Intensity Curve");
-			
-				lt1.setData(csdp.getSplicedCurveX(),
-						   csdp.getSplicedCurveYFhkl());
-				
-				
+			case SPLICEDYFHKL:
+				lt1 = plotSystem.createLineTrace("Spliced Fhkl Curve");
 				lt1.setTraceColor(green);
-				plotSystem.addTrace(lt1);
-				
 				break;
-			
-			case 2:
-			
-				ILineTrace lt2 = plotSystem.createLineTrace("Spliced Raw Intensity Curve");
-			
-				lt2.setData(csdp.getSplicedCurveX(),
-						   	csdp.getSplicedCurveYRaw());
-				
-				lt2.setTraceColor(black);
-				plotSystem.addTrace(lt2);
-
+			case SPLICEDYRAW:
+				lt1 = plotSystem.createLineTrace("Spliced Raw Curve");
+				lt1.setTraceColor(black);
 				break;
-			
 			default:
-				// Purely defensive
-				break;
+				//purely defensive
+		   
 		}
+		   
+		lt1.setData(xD, yD);
+		plotSystem.addTrace(lt1);
+		
    }
    
-   private void getTheRightCurve(){
+   private void getTheRightCurve(AxisEnums.yAxes y,
+		   						 AxisEnums.xAxes x){
 	  
-	   switch(selector){
-		case 0:
+	   
+	   IDataset xD = getXIDataset(x);
+	   IDataset yD = getYIDataset(y);
+	   
+	   
+	   switch(y){
+		case SPLICEDY:
 			lt1 = plotSystem.createLineTrace("Spliced Corrected Curve");
-			lt1.setData(csdp.getSplicedCurveX(), csdp.getSplicedCurveY());
 			break;
-		case 1:
+		case SPLICEDYFHKL:
 			lt1 = plotSystem.createLineTrace("Spliced Fhkl Curve");
-			lt1.setData(csdp.getSplicedCurveX(), csdp.getSplicedCurveYFhkl());
 			break;
-		case 2:
+		case SPLICEDYRAW:
 			lt1 = plotSystem.createLineTrace("Spliced Raw Curve");
-			lt1.setData(csdp.getSplicedCurveX(), csdp.getSplicedCurveYRaw());
 			break;
 		default:
 			//purely defensive
 	   }
+	   
+	   lt1.setData(xD, yD);
 	
    }
    
-   public void resetAll(){
-	   resetAll(true);
+   public void resetAll(AxisEnums.xAxes x,AxisEnums.yAxes y){
+	   resetAll(x,y, true);
    }
    
-   public void resetAll(boolean global){
+   public void resetAll(AxisEnums.xAxes x,
+		   				AxisEnums.yAxes y,
+		   				boolean global){
 	   
 	   
 	   for(OverlapDisplayObjects odo: odos){
@@ -931,7 +945,7 @@ public class StitchedOverlapCurves extends Composite {
 			oAo.setModified(false);
 		}
 		
-		resetAttenuationFactors(overlapSelector, xArrayList,global);
+		resetAttenuationFactors(x, y, overlapSelector, xArrayList,global);
    }
    
    private void flipUseGoodPointsOnly(){
@@ -946,9 +960,11 @@ public class StitchedOverlapCurves extends Composite {
 		}
 	}
    
-   private ILineTrace buildLineTrace(){
+   private void buildLineTrace(AxisEnums.yAxes yA, AxisEnums.xAxes xA){
 
-		ILineTrace lt =	plotSystem.createLineTrace(csdp.getRodName());
+	   plotSystem.clear();
+	   
+		lt1 =	plotSystem.createLineTrace(csdp.getRodName());
 		
 		IDataset x = DatasetFactory.zeros(new int[] {2,2}, Dataset.ARRAYFLOAT64);
 		IDataset y[] = new IDataset[2];
@@ -956,22 +972,22 @@ public class StitchedOverlapCurves extends Composite {
 		GoodPointStripper gps = new GoodPointStripper();
 
 		x  = gps.splicedXGoodPointStripper(csdp, 
-					xAxes.SCANNED_VARIABLE,
+					xA,
 				  !useGoodPointsOnly);
 
 		
 		y = gps.splicedYGoodPointStripper(csdp, 
-							  yAxes.SPLICEDY,
+							  yA,
 							  !useGoodPointsOnly);
 					
 		y[0].setErrors(y[1]);
 		
-		lt.setData(x, y[0]);
+		lt1.setData(x, y[0]);
 		
-		lt.setErrorBarEnabled(errorDisplayFlag);
+		lt1.setErrorBarEnabled(errorDisplayFlag);
 		
 		
-		return lt;
+		plotSystem.addTrace(lt1);
    }
    
    public Button getExport() {
@@ -980,14 +996,12 @@ public class StitchedOverlapCurves extends Composite {
 
 
    
-   private void refreshCurvesFromTable(){
+   private void refreshCurvesFromTable(AxisEnums.xAxes x,AxisEnums.yAxes y){
 		
 		plotSystem.clear();
-		
 			
-		ILineTrace lt =	buildLineTrace();
-				
-		plotSystem.addTrace(lt);
+		buildLineTrace(y,x);
+		
 		plotSystem.autoscaleAxes();
 	}
    

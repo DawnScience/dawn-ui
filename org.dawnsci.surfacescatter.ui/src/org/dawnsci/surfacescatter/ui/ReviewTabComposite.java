@@ -271,8 +271,6 @@ public class ReviewTabComposite extends Composite{
 			}
 		});
 		
-		
-		
 ////////////////////////////////right		
 		rightForm = new SashForm(form, SWT.VERTICAL);
 		rightForm.setLayout(new GridLayout());
@@ -421,10 +419,8 @@ public class ReviewTabComposite extends Composite{
 	        					  PlotType.IMAGE, 
 	        					  null);
 		
-	    
 	    plotSystem.getPlotComposite().setLayoutData(storedCurvesData);
 	    
-	   
         showErrors = new Button(methodSetting, SWT.PUSH);
         showErrors.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
         showErrors.setData(new GridData(SWT.FILL));
@@ -536,8 +532,8 @@ public class ReviewTabComposite extends Composite{
 						System.out.println(i.getMessage());
 					}
 					
-					xAxis.setText(AxisEnums.toString(xAxisSelection));
-					yAxis.setText(AxisEnums.toString(yAxisSelection));
+					xAxis.setText(xAxisSelection.getXAxisName());
+					yAxis.setText(yAxisSelection.getYAxisName());
 					
 					refreshCurves();
 					refreshTable();
@@ -560,7 +556,6 @@ public class ReviewTabComposite extends Composite{
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-	    
 	    
 	}
 	   
@@ -747,10 +742,10 @@ public class ReviewTabComposite extends Composite{
 		}
 			
 		if(isXPresent){
-			outputList.add(AxisEnums.toString(xAxes.SCANNED_VARIABLE));
+			outputList.add(xAxes.SCANNED_VARIABLE.getXAxisName());
 		}
 		if(isQPresent){
-			outputList.add(AxisEnums.toString(xAxes.Q));
+			outputList.add(xAxes.Q.getXAxisName());
 		}
 		
 		if (outputList.size()>0){
@@ -914,13 +909,13 @@ public class ReviewTabComposite extends Composite{
 			boolean rg = true;
 			
 			for(String h :xAxis.getItems()){
-				if(AxisEnums.toString(xAxisSelection).equals(h)){
+				if(xAxisSelection.getXAxisName().equals(h)){
 					rg = false;
 				}
 			}
 			
 			if(rg){
-				xAxis.add(AxisEnums.toString(xAxisSelection));
+				xAxis.add(xAxisSelection.getXAxisName());
 			}
 			
 		}
