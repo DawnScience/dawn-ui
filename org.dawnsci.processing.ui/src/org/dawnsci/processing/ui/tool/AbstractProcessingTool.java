@@ -112,6 +112,9 @@ public abstract class AbstractProcessingTool extends AbstractToolPage {
 	private SliceFromSeriesMetadata parentMeta;
 	private IOperationInputData inputData;
 	
+	private final static String PROCESSED = "_processed";
+	private final static String EXT= ".nxs";
+	
 	private static final Logger logger = LoggerFactory.getLogger(AbstractProcessingTool.class);
 	
 	public AbstractProcessingTool() {
@@ -453,19 +456,24 @@ public abstract class AbstractProcessingTool extends AbstractToolPage {
 		if (parentMeta == null) return;
 	
 		String p = getPathNoExtension(parentMeta.getFilePath());
-		
+
+		Date date = new Date() ;
+		SimpleDateFormat dateFormat = new SimpleDateFormat("yyMMdd_HHmmss") ;
+		String timeStamp = "_" +dateFormat.format(date);
+		String full = p + PROCESSED+ timeStamp + EXT;
 		
 		FileSelectionDialog fsd = new FileSelectionDialog(this.getViewPart().getSite().getShell());
 		fsd.setNewFile(true);
 		fsd.setFolderSelector(false);
 		fsd.setHasResourceButton(true);
 		fsd.setBlockOnOpen(true);
-		fsd.setPath(p +"_processed.nxs");
+		fsd.setPath(full);
 		
 		if (fsd.open() == FileSelectionDialog.CANCEL) return;
 		
 		final String path = fsd.getPath();
-		path.toString();
+		File fh = new File(path);
+		fh.getParentFile().mkdirs();
 		
 		ProgressMonitorDialog dia = new ProgressMonitorDialog(Display.getCurrent().getActiveShell());
 
