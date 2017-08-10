@@ -99,6 +99,7 @@ public class PlotSystemCompositeView extends Composite {
         
         try {
 			plotSystem = PlottingFactory.createPlottingSystem();
+			plotSystem.setTitle("Raw Image");
 			
 		} catch (Exception e2) {
 			e2.printStackTrace();

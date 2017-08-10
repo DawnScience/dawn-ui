@@ -65,6 +65,7 @@ public class PlotSystem1CompositeView extends Composite {
 
         try {
 			plotSystem1 = PlottingFactory.createPlottingSystem();
+			plotSystem1.setTitle("Background Subtracted Image");
 		} catch (Exception e2) {
 			
 		}

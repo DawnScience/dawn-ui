@@ -14,9 +14,12 @@ import org.dawnsci.surfacescatter.GoodPointStripper;
 import org.dawnsci.surfacescatter.ReviewCurvesModel;
 import org.dawnsci.surfacescatter.SavingFormatEnum;
 import org.dawnsci.surfacescatter.SavingFormatEnum.SaveFormatSetting;
+import org.eclipse.dawnsci.analysis.dataset.roi.RectangularROI;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.PlotType;
 import org.eclipse.dawnsci.plotting.api.PlottingFactory;
+import org.eclipse.dawnsci.plotting.api.region.IRegion;
+import org.eclipse.dawnsci.plotting.api.region.IRegion.RegionType;
 import org.eclipse.dawnsci.plotting.api.trace.ILineTrace;
 import org.eclipse.january.dataset.Dataset;
 import org.eclipse.january.dataset.DatasetFactory;
@@ -65,6 +68,7 @@ public class ReviewTabComposite extends Composite{
 	private SurfaceScatterViewStart ssvs;
 	private boolean useGoodPointsOnly = false;
 	private Button showOnlyGoodPoints;
+	private IRegion imageNo;
 	
 	public ReviewTabComposite(Composite parent, 
 							  int style,
@@ -78,6 +82,7 @@ public class ReviewTabComposite extends Composite{
         
         try {
         	plotSystem = PlottingFactory.createPlottingSystem();
+        	plotSystem.setTitle("Review Plot");
 			
         } 
         catch (Exception e2) {
@@ -547,9 +552,26 @@ public class ReviewTabComposite extends Composite{
 	    plotSystem.setShowLegend(true);
 	    
 	    form.setWeights(new int[] {25, 75});
+	   
+	    try {
+			imageNo = plotSystem.createRegion("Image", RegionType.XAXIS_LINE);
+			imageNo.setShowPosition(true);
+			plotSystem.addRegion(imageNo);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	    
 	    
 	}
 	   
+	public IRegion getImageNo() {
+		return imageNo;
+	}
+
+	public void setImageNo(IRegion imageNo) {
+		this.imageNo = imageNo;
+	}
+
 	public Composite getComposite(){ 
 		
 	   	return this;
@@ -645,68 +667,38 @@ public class ReviewTabComposite extends Composite{
 								  rodSaveName, 
 								  csdpToSave, 
 								  yAxisSelection);
-		
-//		FileDialog fd = new FileDialog(shell, SWT.SAVE);
-//
-//		if(ssp.getSaveFolder()!=null){
-//			fd.setFilterPath(ssp.getSaveFolder());
-//		}
-//		
-//		String stitle = "r";
-//		String path = "p";
-//
-//		if (fd.open() != null) {
-//			stitle = fd.getFileName();
-//			path = fd.getFilterPath();
-//
-//		}
-//		
-//		if(ssp.getSaveFolder()==null){
-//			ssp.setSaveFolder(path);;
-//		}
-//		
-//		String title = path + File.separator + stitle;
-//	
-//		
-//		SavingUtils su = new SavingUtils();
-//		
-//		
-//		int saveIntensityState = AxisEnums.toInt(yAxisSelection);
-//		
-//		if (sfs == SaveFormatSetting.GenX) {
-//			su.genXSave(writeOnlyGoodPoints,
-//					title,
-//					csdpToSave,
-//					ssp.getDrm(),
-//					ssp.getDrm().getFms(),
-//					ssp.getGm());
-//		}
-//		if (sfs == SaveFormatSetting.Anarod) {
-//			su.anarodSave(writeOnlyGoodPoints,
-//					title,
-//					csdpToSave,
-//					ssp.getDrm(),
-//					ssp.getDrm().getFms(),
-//					ssp.getGm());
-//		}
-//		if (sfs == SaveFormatSetting.int_format) {
-//			su.intSave(writeOnlyGoodPoints,
-//					title,
-//					csdpToSave,
-//					ssp.getDrm(),
-//					ssp.getDrm().getFms(),
-//					ssp.getGm());
-//		}
-//		if (sfs == SaveFormatSetting.ASCII) {
-//			su.simpleXYYeSave(writeOnlyGoodPoints,
-//					title,
-//					saveIntensityState,
-//					csdpToSave,
-//					ssp.getDrm(),
-//					ssp.getDrm().getFms(),
-//					ssp.getGm());
-//		}
+	}
+	
+	public void addImageNoRegion(double j){
 
+		RectangularROI r = new RectangularROI(j ,0.1,0,0.1,0);
+
+		if(plotSystem.getRegion("Image")== null){
+			
+			try{
+				imageNo = plotSystem.createRegion("Image", RegionType.XAXIS_LINE);
+			}
+			catch(Exception x){
+				
+			}
+			
+			
+			imageNo.setShowPosition(true);
+			imageNo.setROI(r);
+			
+			plotSystem.addRegion(imageNo);
+			imageNo.setShowPosition(true);
+		}
+		
+		else{
+			moveImageNoRegion(j);
+		}
+	}
+	
+	public void moveImageNoRegion(double j){
+		
+		RectangularROI r = new RectangularROI(j ,0.1,0,0.1,0);
+		imageNo.setROI(r);
 	}
 
 
@@ -981,7 +973,7 @@ public class ReviewTabComposite extends Composite{
 				ILineTrace lt = buildLineTrace(csdp);
 				
 				plotSystem.addTrace(lt);
-//				plotSystem.autoscaleAxes();
+
 				
 			}
 		}

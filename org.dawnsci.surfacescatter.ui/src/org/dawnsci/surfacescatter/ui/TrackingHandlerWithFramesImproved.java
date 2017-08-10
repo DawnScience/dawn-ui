@@ -342,7 +342,7 @@ public class TrackingHandlerWithFramesImproved {
 					drm.getCorrectionSelection() == MethodSetting.Reflectivity_with_Flux_Correction ||
 					drm.getCorrectionSelection() == MethodSetting.Reflectivity_without_Flux_Correction){
 							
-					ReflectivityNormalisation.ReflectivityNormalisation1(drm.getCsdp());
+					ReflectivityNormalisation.reflectivityNormalisation1(drm.getCsdp());
 							
 					display.syncExec(new Runnable() {
 							@Override
@@ -398,8 +398,8 @@ public class TrackingHandlerWithFramesImproved {
 					   drm.getCorrectionSelection() == MethodSetting.Reflectivity_with_Flux_Correction ||
 					   drm.getCorrectionSelection() == MethodSetting.Reflectivity_without_Flux_Correction){
 						
-						ReflectivityNormalisation.ReflectivityNormalisation1(drm.getCsdp());
-						ReflectivityNormalisation.ReflectivityNormalisation1(csdp);
+						ReflectivityNormalisation.reflectivityNormalisation1(drm.getCsdp());
+						ReflectivityNormalisation.reflectivityNormalisation1(csdp);
 			}
 		}
 		catch(Exception h){

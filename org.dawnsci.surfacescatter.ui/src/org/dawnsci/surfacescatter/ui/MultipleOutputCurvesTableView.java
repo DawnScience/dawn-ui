@@ -4,8 +4,6 @@ import org.dawb.common.ui.widgets.ActionBarWrapper;
 import org.dawnsci.surfacescatter.AxisEnums;
 import org.dawnsci.surfacescatter.CurveStitchDataPackage;
 import org.dawnsci.surfacescatter.DataModel;
-import org.dawnsci.surfacescatter.IntensityDisplayEnum;
-import org.dawnsci.surfacescatter.IntensityDisplayEnum.IntensityDisplaySetting;
 import org.dawnsci.surfacescatter.SavingFormatEnum;
 import org.dawnsci.surfacescatter.SavingFormatEnum.SaveFormatSetting;
 import org.eclipse.dawnsci.analysis.dataset.roi.RectangularROI;
@@ -105,7 +103,7 @@ public class MultipleOutputCurvesTableView extends Composite {
 		save.setText("Save Spliced");
 		save.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		
-		  save.addSelectionListener(new SelectionListener() {
+		save.addSelectionListener(new SelectionListener() {
 
 				@Override
 				public void widgetSelected(SelectionEvent e) {
@@ -132,7 +130,7 @@ public class MultipleOutputCurvesTableView extends Composite {
 		gdSecondField.heightHint = 100;
 
 		plotSystem4.createPlotPart(sashForm,
-								   "ExamplePlot", 
+								   "Progress Plot", 
 								   actionBarComposite, 
 								   PlotType.IMAGE, 
 								   null);
@@ -286,19 +284,19 @@ public class MultipleOutputCurvesTableView extends Composite {
 
 		if(plotSystem4.getRegion("Image")== null){
 			
-		try{
-			imageNo = plotSystem4.createRegion("Image", RegionType.XAXIS_LINE);
-		}
-		catch(Exception x){
+			try{
+				imageNo = plotSystem4.createRegion("Image", RegionType.XAXIS_LINE);
+			}
+			catch(Exception x){
+				
+			}
 			
-		}
-		
-		
-		imageNo.setShowPosition(true);
-		imageNo.setROI(r);
-		
-		plotSystem4.addRegion(imageNo);
-		imageNo.setShowPosition(true);
+			
+			imageNo.setShowPosition(true);
+			imageNo.setROI(r);
+			
+			plotSystem4.addRegion(imageNo);
+			imageNo.setShowPosition(true);
 		}
 		
 		else{
