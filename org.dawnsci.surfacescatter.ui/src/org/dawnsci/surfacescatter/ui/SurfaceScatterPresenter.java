@@ -16,17 +16,18 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.EnumMap;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.TreeMap;
-
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.math3.util.MathArrays;
 import org.dawnsci.surfacescatter.AnalaysisMethodologies;
 import org.dawnsci.surfacescatter.AnalaysisMethodologies.FitPower;
 import org.dawnsci.surfacescatter.AnalaysisMethodologies.Methodology;
+import org.dawnsci.surfacescatter.AxisEnums;
 import org.dawnsci.surfacescatter.BoxSlicerRodScanUtilsForDialog;
-import org.dawnsci.surfacescatter.ClosestNoFinder; 
+import org.dawnsci.surfacescatter.ClosestNoFinder;
 import org.dawnsci.surfacescatter.CsdpGeneratorFromDrm;
 import org.dawnsci.surfacescatter.CurveStitchDataPackage;
 import org.dawnsci.surfacescatter.CurveStitchWithErrorsAndFrames;
@@ -47,12 +48,17 @@ import org.dawnsci.surfacescatter.PlotSystem2DataSetter;
 import org.dawnsci.surfacescatter.PolynomialOverlap;
 import org.dawnsci.surfacescatter.ProcessingMethodsEnum;
 import org.dawnsci.surfacescatter.ProcessingMethodsEnum.ProccessingMethod;
+import org.dawnsci.surfacescatter.ReflectivityAngleAliasEnum;
 import org.dawnsci.surfacescatter.ReflectivityFluxCorrectionsForDialog;
+import org.dawnsci.surfacescatter.ReflectivityFluxParametersAliasEnum;
 import org.dawnsci.surfacescatter.ReflectivityMetadataTitlesForDialog;
 import org.dawnsci.surfacescatter.ReflectivityNormalisation;
 import org.dawnsci.surfacescatter.RodObjectNexusBuilderModel;
 import org.dawnsci.surfacescatter.RodObjectNexusUtils;
+import org.dawnsci.surfacescatter.SXRDAngleAliasEnum;
 import org.dawnsci.surfacescatter.SXRDGeometricCorrections;
+import org.dawnsci.surfacescatter.SavingFormatEnum.SaveFormatSetting;
+import org.dawnsci.surfacescatter.SavingUtils;
 import org.dawnsci.surfacescatter.SetupModel;
 import org.dawnsci.surfacescatter.SplineInterpolationTracker;
 import org.dawnsci.surfacescatter.TrackingMethodology;
@@ -83,6 +89,7 @@ import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Shell;
 
 import uk.ac.diamond.scisoft.analysis.io.LoaderFactory;
@@ -611,7 +618,7 @@ public class SurfaceScatterPresenter {
 						
 						Dataset qdcdLocal = (Dataset) qdcd.getSlice(sliceL);
 						
-						double reflectivityFluxCorrection = ReflectivityFluxCorrectionsForDialog.reflectivityFluxCorrectionsDouble(fm.getDatFilePath(), 
+						double reflectivityFluxCorrection = ReflectivityFluxCorrectionsForDialog.reflectivityFluxCorrectionsDouble(//fm.getDatFilePath(), 
 																																qdcdLocal.getDouble(fm.getNoInOriginalDat()), 
 																																externalFlux);
 						
@@ -1638,7 +1645,7 @@ public class SurfaceScatterPresenter {
 	}
 
 	public void geometricParametersUpdate(
-										  String fluxPath,
+										  //String fluxPath,
 										  double beamHeight,
 										  double footprint,
 										  double angularFudgeFactor,
@@ -1662,7 +1669,7 @@ public class SurfaceScatterPresenter {
 										  ){
 											
 		
-			gm.setFluxPath(fluxPath);
+			//gm.setFluxPath(fluxPath);
 			gm.setBeamHeight(beamHeight);
 			gm.setFootprint(footprint);
 			gm.setAngularFudgeFactor(angularFudgeFactor);
@@ -2517,9 +2524,6 @@ public class SurfaceScatterPresenter {
 			x = getSplicedCurveX();
 		}
 		
-		ArrayList<ILineTrace> ltList = new ArrayList<ILineTrace>();
-		
-		
 		if(selector ==0){
 			
 			lt.setData(x,drm.getCsdp().getSplicedCurveY());
@@ -2568,9 +2572,6 @@ public class SurfaceScatterPresenter {
 		
 		
 	}
-	
-	
-	
 	
 	public void setCorrectionSelection(int correctionSelection){
 		drm.setCorrectionSelection(MethodSetting.toMethod(correctionSelection));
@@ -3176,6 +3177,98 @@ public class SurfaceScatterPresenter {
 		return output;
 	}
 	
+	public void writeOutAngleAliases(EnumMap<SXRDAngleAliasEnum, String> sXRDMap,
+									 EnumMap<ReflectivityAngleAliasEnum, String> reflectivityMap,
+									 EnumMap<ReflectivityFluxParametersAliasEnum, String> reflectivityFluxMap){
+		
+		gm.setsXRDMap(sXRDMap);
+		gm.setReflectivityFluxMap(reflectivityFluxMap);
+		gm.setReflectivityFluxMap(reflectivityFluxMap);
+		
+	}
+	
+	public void writeFluxFilePathToGeometricModel(String f){
+		gm.setFluxPath(f);
+	}
+	
+	public void arbitrarySavingMethod(boolean useQ,
+									  boolean writeOnlyGoodPoints,
+									  Shell shell,
+								      SaveFormatSetting sfs,
+								      String rodSaveName,
+								      CurveStitchDataPackage csdpToSave,
+								      AxisEnums.yAxes yAxis
+//								      AxisEnums.xAxes xAxis
+								      ){
+		
+		FileDialog fd = new FileDialog(shell, SWT.SAVE);
+
+		if(this.getSaveFolder()!=null){
+			fd.setFilterPath(this.getSaveFolder());
+		}
+		
+		String stitle = "r";
+		String path = "p";
+
+		if (fd.open() != null) {
+			stitle = fd.getFileName();
+			path = fd.getFilterPath();
+
+		}
+		
+		if(this.getSaveFolder()==null){
+			this.setSaveFolder(path);;
+		}
+		
+		String title = path + File.separator + stitle;
+	
+		
+		SavingUtils su = new SavingUtils();
+//		String rodSaveName = rodToSave.getText();
+		
+//		CurveStitchDataPackage csdpToSave = bringMeTheOneIWant(rodSaveName, 
+//				rcm.getCsdpList());
+//				
+//		SaveFormatSetting sfs =SaveFormatSetting.toMethod(outputFormatSelection.getText());
+		
+		int saveIntensityState = yAxis.getYAxisNumber();
+		
+		if (sfs == SaveFormatSetting.GenX) {
+			su.genXSave(writeOnlyGoodPoints,
+					title,
+					csdpToSave,
+					this.getDrm(),
+					this.getDrm().getFms(),
+					this.getGm());
+		}
+		if (sfs == SaveFormatSetting.Anarod) {
+			su.anarodSave(writeOnlyGoodPoints,
+					title,
+					csdpToSave,
+					this.getDrm(),
+					this.getDrm().getFms(),
+					this.getGm());
+		}
+		if (sfs == SaveFormatSetting.int_format) {
+			su.intSave(writeOnlyGoodPoints,
+					title,
+					csdpToSave,
+					this.getDrm(),
+					this.getDrm().getFms(),
+					this.getGm());
+		}
+		if (sfs == SaveFormatSetting.ASCII) {
+			su.simpleXYYeSave(useQ,
+					writeOnlyGoodPoints,
+					title,
+					saveIntensityState,
+					csdpToSave,
+					this.getDrm().getFms(),
+					this.getGm());
+		}
+
+		
+	}
 }
 
 

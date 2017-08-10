@@ -446,12 +446,13 @@ public class SuperSashPlotSystem3Composite extends Composite{
         try {
 			outputCurves = new MultipleOutputCurvesTableView(topRight, 
 															SWT.FILL, 
-															0);
+															0,
+															ssp);
 			
 			outputCurves.setLayout(new GridLayout());
 			outputCurves.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		} catch (Exception e) {
-			e.printStackTrace();
+			System.out.println(e.getMessage());
 		}
 	    
 	           

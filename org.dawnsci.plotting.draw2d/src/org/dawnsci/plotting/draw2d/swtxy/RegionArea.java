@@ -411,7 +411,12 @@ public class RegionArea extends PlotArea implements IPlotArea {
 			trace.remove();
 			fireImageTraceRemoved(new TraceEvent(trace));
 			revalidate();
-		}
+			
+			if (imageTraces.isEmpty()) {
+				gone.resetAxes();
+			}
+		}	
+		
 		return gone!=null;
 	}
 	

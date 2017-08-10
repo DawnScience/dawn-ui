@@ -3,7 +3,6 @@ package org.dawnsci.surfacescatter.ui;
 import java.util.Arrays;
 
 import org.dawb.common.ui.widgets.ActionBarWrapper;
-import org.dawnsci.surfacescatter.ExampleModel;
 import org.dawnsci.surfacescatter.FrameModel;
 import org.dawnsci.surfacescatter.MethodSettingEnum.MethodSetting;
 import org.dawnsci.surfacescatter.ProcessingMethodsEnum.ProccessingMethod;
@@ -805,12 +804,12 @@ public class PlotSystemCompositeView extends Composite {
 		plotSystem.updatePlot2D(image, null, null);
 	}
 	 
-	public void sliderReset(ExampleModel model1){
-		slider.setMinimum(0);
-	    slider.setMaximum(model1.getDatImages().getShape()[0]);
-	    slider.setIncrement(1);
-	    slider.setThumb(1);
-	}
+//	public void sliderReset(ExampleModel model1){
+//		slider.setMinimum(0);
+//	    slider.setMaximum(model1.getDatImages().getShape()[0]);
+//	    slider.setIncrement(1);
+//	    slider.setThumb(1);
+//	}
 	
 	public IRegion getIRegion(){
 		return region;
