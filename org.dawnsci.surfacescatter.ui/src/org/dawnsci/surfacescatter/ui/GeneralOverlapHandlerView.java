@@ -3,6 +3,7 @@ package org.dawnsci.surfacescatter.ui;
 import java.util.ArrayList;
 
 import org.dawnsci.surfacescatter.OverlapUIModel;
+import org.eclipse.dawnsci.plotting.api.region.IRegion;
 import org.eclipse.dawnsci.plotting.api.trace.ILineTrace;
 import org.eclipse.january.dataset.IDataset;
 import org.eclipse.jface.dialogs.Dialog;
@@ -19,6 +20,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.Slider;
 import org.eclipse.ui.PlatformUI;
 
 public class GeneralOverlapHandlerView extends Dialog {
@@ -37,6 +39,7 @@ public class GeneralOverlapHandlerView extends Dialog {
     private SurfaceScatterViewStart ssvs;
     private StitchedOverlapCurves stitchedCurves;
     private boolean errorFlag =true;
+	
 	
 	public GeneralOverlapHandlerView(Shell parentShell, 
 									 int style, 

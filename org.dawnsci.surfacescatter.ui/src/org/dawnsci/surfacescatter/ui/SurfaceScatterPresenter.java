@@ -26,6 +26,7 @@ import org.dawnsci.surfacescatter.AnalaysisMethodologies;
 import org.dawnsci.surfacescatter.AnalaysisMethodologies.FitPower;
 import org.dawnsci.surfacescatter.AnalaysisMethodologies.Methodology;
 import org.dawnsci.surfacescatter.AxisEnums;
+import org.dawnsci.surfacescatter.AxisEnums.yAxes;
 import org.dawnsci.surfacescatter.BoxSlicerRodScanUtilsForDialog;
 import org.dawnsci.surfacescatter.ClosestNoFinder;
 import org.dawnsci.surfacescatter.CsdpGeneratorFromDrm;
@@ -39,7 +40,6 @@ import org.dawnsci.surfacescatter.FittingParametersOutput;
 import org.dawnsci.surfacescatter.FrameModel;
 import org.dawnsci.surfacescatter.GeometricCorrectionsReflectivityMethod;
 import org.dawnsci.surfacescatter.GeometricParametersModel;
-import org.dawnsci.surfacescatter.IntensityDisplayEnum.IntensityDisplaySetting;
 import org.dawnsci.surfacescatter.InterpolationTracker;
 import org.dawnsci.surfacescatter.LocationLenPtConverterUtils;
 import org.dawnsci.surfacescatter.MethodSettingEnum.MethodSetting;
@@ -69,6 +69,7 @@ import org.eclipse.dawnsci.analysis.api.roi.IRectangularROI;
 import org.eclipse.dawnsci.analysis.api.tree.Tree;
 import org.eclipse.dawnsci.analysis.dataset.roi.RectangularROI;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
+import org.eclipse.dawnsci.plotting.api.jreality.core.AxisMode;
 import org.eclipse.dawnsci.plotting.api.region.IRegion;
 import org.eclipse.dawnsci.plotting.api.trace.ILineTrace;
 import org.eclipse.january.dataset.AggregateDataset;
@@ -2419,7 +2420,7 @@ public class SurfaceScatterPresenter {
 				   drm.getCorrectionSelection() == MethodSetting.Reflectivity_with_Flux_Correction ||
 				   drm.getCorrectionSelection() == MethodSetting.Reflectivity_without_Flux_Correction){
 					
-					ReflectivityNormalisation.ReflectivityNormalisation1(csdp);
+					ReflectivityNormalisation.reflectivityNormalisation1(csdp);
 					
 		}
 		
@@ -2436,13 +2437,23 @@ public class SurfaceScatterPresenter {
 	}
 
 	public void switchFhklIntensity(IPlottingSystem<Composite> pS, 
-									int selector,
+									String selectorName,
 									boolean qAxis){
+		
+		AxisEnums.yAxes selector = AxisEnums.yAxes.SPLICEDY;
+		
+		for(AxisEnums.yAxes yA : AxisEnums.yAxes.values()){
+			if(yA.getYAxisName().equals(selectorName)){
+				selector = yA;
+			}
+		}
 		
 		pS.clear();
 		
 		ILineTrace lt = 
 				pS.createLineTrace("Corrected Intensity Curve");
+		
+		pS.addTrace(lt);
 		
 		Display display = Display.getCurrent();
 		
@@ -2455,35 +2466,43 @@ public class SurfaceScatterPresenter {
 			x = getSplicedCurveX();
 		}
 		
-		if(selector ==0){
+		switch(selector){
+			case SPLICEDY:
 					
-			lt.setData(x,drm.getCsdp().getSplicedCurveY());
-		
-			Color blue = display.getSystemColor(SWT.COLOR_BLUE);
+				lt.setData(x,drm.getCsdp().getSplicedCurveY());
 			
-			lt.setTraceColor(blue);
-		}
+				Color blue = display.getSystemColor(SWT.COLOR_BLUE);
+				
+				lt.setTraceColor(blue);
+				break;
+		
 
-		if(selector ==1){
+			case SPLICEDYFHKL:
 			
-			lt.setName("Fhkl Curve");
+				lt.setName("Fhkl Curve");
+				
+				lt.setData(x,drm.getCsdp().getSplicedCurveYFhkl());
+				
+				Color green = display.getSystemColor(SWT.COLOR_GREEN);
 			
-			lt.setData(x,drm.getCsdp().getSplicedCurveYFhkl());
-			
-			Color green = display.getSystemColor(SWT.COLOR_GREEN);
+				lt.setTraceColor(green);
+				break;
 		
-			lt.setTraceColor(green);
-		}
 		
-		if(selector ==2){
+			case SPLICEDYRAW:
+				
 			
-			lt.setName("Raw Intensity Curve");
+				lt.setName("Raw Intensity Curve");
+				
+				lt.setData(x,drm.getCsdp().getSplicedCurveYRaw());
+				
+				Color black = display.getSystemColor(SWT.COLOR_BLACK);
 			
-			lt.setData(x,drm.getCsdp().getSplicedCurveYRaw());
-			
-			Color black = display.getSystemColor(SWT.COLOR_BLACK);
-		
-			lt.setTraceColor(black);
+				lt.setTraceColor(black);
+				break;
+				
+			default:
+				//
 		}
 		
 		lt.setErrorBarEnabled(errorDisplayFlag);
@@ -2492,7 +2511,6 @@ public class SurfaceScatterPresenter {
 		
 		lt.setErrorBarColor(red);
 	
-		pS.addTrace(lt);
 		pS.autoscaleAxes();
 		
 		double start = lt.getXData().getDouble(0);
@@ -2749,7 +2767,7 @@ public class SurfaceScatterPresenter {
 	}
 	
 	public void stitchAndPresentWithFrames(MultipleOutputCurvesTableView outputCurves,
-			   							   IntensityDisplaySetting ids) {
+			   							  AxisEnums.yAxes ids) {
 
 			Display display = Display.getCurrent();
 			
@@ -2785,20 +2803,20 @@ public class SurfaceScatterPresenter {
 				lt.setTraceColor(blue);
 			}
 			
-			else if(ids == IntensityDisplaySetting.Corrected_Intensity){
+			else if(ids == yAxes.SPLICEDY){
 			
 				lt.setData(X, csdp.getSplicedCurveY());
 				Color blue = display.getSystemColor(SWT.COLOR_BLUE);
 				lt.setTraceColor(blue);
 			
 			}
-			else if(ids == IntensityDisplaySetting.Fhkl){
+			else if(ids == yAxes.SPLICEDYFHKL){
 			
 				lt.setData(X, csdp.getSplicedCurveYFhkl());
 				Color green = display.getSystemColor(SWT.COLOR_GREEN);
 				lt.setTraceColor(green);
 			}
-			else if(ids == IntensityDisplaySetting.Raw_Intensity){
+			else if(ids == yAxes.SPLICEDYRAW){
 				
 				lt.setData(X, csdp.getSplicedCurveYRaw());
 			Color black = display.getSystemColor(SWT.COLOR_BLACK);
@@ -2828,7 +2846,7 @@ public class SurfaceScatterPresenter {
 
 	
 	public void stitchAndPresent1(MultipleOutputCurvesTableView outputCurves,
-								  IntensityDisplaySetting ids) {
+								  AxisEnums.yAxes ids) {
 
 		Display display = Display.getCurrent();
 		
@@ -2848,7 +2866,7 @@ public class SurfaceScatterPresenter {
 					   drm.getCorrectionSelection() == MethodSetting.Reflectivity_with_Flux_Correction ||
 					   drm.getCorrectionSelection() == MethodSetting.Reflectivity_without_Flux_Correction){
 						
-						ReflectivityNormalisation.ReflectivityNormalisation1(csdp);
+						ReflectivityNormalisation.reflectivityNormalisation1(csdp);
 						
 			}
 		}
@@ -2881,20 +2899,20 @@ public class SurfaceScatterPresenter {
 			lt.setTraceColor(blue);
 		}
 		
-		else if(ids == IntensityDisplaySetting.Corrected_Intensity){
+		else if(ids == yAxes.SPLICEDY){
 
 			lt.setData(X, drm.getCsdp().getSplicedCurveY());
 			Color blue = display.getSystemColor(SWT.COLOR_BLUE);
 			lt.setTraceColor(blue);
 			
 		}
-		else if(ids == IntensityDisplaySetting.Fhkl){
+		else if(ids == yAxes.SPLICEDYFHKL){
 
 			lt.setData(X, drm.getCsdp().getSplicedCurveYFhkl());
 			Color green = display.getSystemColor(SWT.COLOR_GREEN);
 			lt.setTraceColor(green);
 		}
-		else if(ids == IntensityDisplaySetting.Raw_Intensity){
+		else if(ids == yAxes.SPLICEDYRAW){
 
 			lt.setData(X, drm.getCsdp().getSplicedCurveYRaw());
 			Color black = display.getSystemColor(SWT.COLOR_BLACK);

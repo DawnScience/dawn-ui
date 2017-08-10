@@ -2,11 +2,10 @@ package org.dawnsci.surfacescatter.ui;
 
 import java.util.ArrayList;
 import org.dawb.common.ui.widgets.ActionBarWrapper;
+import org.dawnsci.surfacescatter.AxisEnums;
 import org.dawnsci.surfacescatter.CsdpGeneratorFromDrm;
 import org.dawnsci.surfacescatter.CurveStitchDataPackage;
 import org.dawnsci.surfacescatter.GoodPointStripper;
-import org.dawnsci.surfacescatter.IntensityDisplayEnum;
-import org.dawnsci.surfacescatter.IntensityDisplayEnum.IntensityDisplaySetting;
 import org.dawnsci.surfacescatter.OverlapUIModel;
 import org.eclipse.dawnsci.analysis.api.roi.IROI;
 import org.eclipse.dawnsci.analysis.api.roi.IRectangularROI;
@@ -124,8 +123,8 @@ public class OverlapCurves extends Composite {
 		
 		intensitySelect = displayValue.getCombo();
 		
-		for(IntensityDisplaySetting  t: IntensityDisplayEnum.IntensityDisplaySetting.values()){
-			intensitySelect.add(IntensityDisplaySetting.toString(t));
+		for(AxisEnums.yAxes  t: AxisEnums.yAxes.values()){
+			intensitySelect.add(t.getYAxisName(), t.getYAxisNumber());
 		}
 	
 		intensitySelect.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
@@ -274,7 +273,7 @@ public class OverlapCurves extends Composite {
         gdSecondField.grabExcessVerticalSpace = true;
         gdSecondField.grabExcessVerticalSpace = true;
         
-        plotSystem.createPlotPart(unstitchedCurves, "ExamplePlot", actionBarComposite, PlotType.IMAGE, null);
+        plotSystem.createPlotPart(unstitchedCurves, "Seperate Data Curves", actionBarComposite, PlotType.IMAGE, null);
           
 		addCurves();
 
@@ -439,7 +438,18 @@ public class OverlapCurves extends Composite {
 		ltList = new ArrayList<ILineTrace>();
 		
 		GoodPointStripper gps = new GoodPointStripper();
-		IDataset coordinateDatasets[][] = gps.goodPointStripper(csdp, IntensityDisplaySetting.toMethod(intensitySelect.getSelectionIndex()));
+		
+		String k = intensitySelect.getText();
+		
+		AxisEnums.yAxes yM = AxisEnums.yAxes.SPLICEDY;
+		
+		for(AxisEnums.yAxes yA : AxisEnums.yAxes.values()){
+			if(yA.getYAxisName().equals(k)){
+				yM = yA;
+			}
+		}
+		
+		IDataset coordinateDatasets[][] = gps.goodPointStripper(csdp, yM);
 		
 		
 		for (int r =0; r < coordinateDatasets.length; r++){
@@ -487,19 +497,27 @@ public class OverlapCurves extends Composite {
 				
 				double yValue = 0;
 				
-				int k = intensitySelect.getSelectionIndex();
+				String k = intensitySelect.getText();
 				
-				switch(IntensityDisplaySetting.toMethod(k)){
-					case Fhkl:
+				AxisEnums.yAxes yM = AxisEnums.yAxes.SPLICEDY;
+				
+				for(AxisEnums.yAxes yA : AxisEnums.yAxes.values()){
+					if(yA.getYAxisName().equals(k)){
+						yM = yA;
+					}
+				}
+				
+				switch(yM){
+					case SPLICEDYFHKL:
 						yValue = ssp.getUnsplicedFhklIntensityFromFm(activeCurveCombo.getSelectionIndex(),
 								 									 xPosInDat);
 					
 						break;
-					case Corrected_Intensity:
+					case SPLICEDY:
 						yValue = ssp.getUnsplicedCorrectedIntensityFromFm(activeCurveCombo.getSelectionIndex(),
 																		  xPosInDat);
 						break;
-					case Raw_Intensity:
+					case SPLICEDYRAW:
 						yValue = ssp.getUnsplicedRawIntensityFromFm(activeCurveCombo.getSelectionIndex(),
 																	xPosInDat);
 						break;

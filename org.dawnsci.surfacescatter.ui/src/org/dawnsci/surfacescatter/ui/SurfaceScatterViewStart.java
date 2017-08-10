@@ -4,10 +4,10 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import org.dawnsci.surfacescatter.AnalaysisMethodologies.Methodology;
+import org.dawnsci.surfacescatter.AxisEnums;
+import org.dawnsci.surfacescatter.AxisEnums.yAxes;
 import org.dawnsci.surfacescatter.CurveStitchDataPackage;
 import org.dawnsci.surfacescatter.FittingParameters;
-import org.dawnsci.surfacescatter.FittingParametersInputReader;
-import org.dawnsci.surfacescatter.IntensityDisplayEnum.IntensityDisplaySetting;
 import org.dawnsci.surfacescatter.MethodSettingEnum.MethodSetting;
 import org.dawnsci.surfacescatter.ProcessingMethodsEnum.ProccessingMethod;
 import org.dawnsci.surfacescatter.ReflectivityFluxCorrectionsForDialog;
@@ -19,10 +19,10 @@ import org.dawnsci.surfacescatter.TrackingMethodology.TrackerType1;
 import org.eclipse.dawnsci.analysis.api.io.IDataHolder;
 import org.eclipse.dawnsci.analysis.api.roi.IROI;
 import org.eclipse.dawnsci.analysis.api.roi.IRectangularROI;
-import org.eclipse.dawnsci.analysis.api.tree.Tree;
 import org.eclipse.dawnsci.analysis.dataset.roi.PolylineROI;
 import org.eclipse.dawnsci.analysis.dataset.roi.RectangularROI;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
+import org.eclipse.dawnsci.plotting.api.jreality.core.AxisMode;
 import org.eclipse.dawnsci.plotting.api.region.IROIListener;
 import org.eclipse.dawnsci.plotting.api.region.IRegion;
 import org.eclipse.dawnsci.plotting.api.region.IRegion.RegionType;
@@ -82,7 +82,7 @@ public class SurfaceScatterViewStart extends Dialog {
 	private Group methodSetting;
 	private Group parametersSetting;
 	private int[] correctionsDropDownArray;
-	private IntensityDisplaySetting ids;
+	private AxisEnums.yAxes ids = AxisEnums.yAxes.SPLICEDY;
 	private SaveFormatSetting sms;
 	private String option;
 	private boolean qConvert;
@@ -156,7 +156,9 @@ public class SurfaceScatterViewStart extends Dialog {
 				datDisplayer.setOption(datDisplayer.getSelectedOption());
 				
 			
-				IntensityDisplaySetting ids0 = IntensityDisplaySetting.toMethod(ssps3c.getOutputCurves().getIntensity().getSelectionIndex());
+				String k = outputCurves.getIntensity().getText();
+				AxisEnums.yAxes ids0 = AxisEnums.toYAxis(k);
+				
 				
 				setIds(ids0);
 				
@@ -177,24 +179,7 @@ public class SurfaceScatterViewStart extends Dialog {
 						paramFile = jh.getText();
 					}
 				}
-				
-//				if(isThereAParamFile){
-//					
-//					try {
-//					
-//						IDataHolder dh1 = LoaderFactory.getData(paramFile);
-//						Tree tree = dh1.getTree();			
-//						FittingParametersInputReader.geometricalParametersReaderFromNexus(tree, ssp.getGm());
-//						rsw.getParamField().setUpdateOn(false);
-//						rsw.getParamField().updateDisplayFromGm(ssp.getGm());
-//						rsw.getAnglesAliasWindow().setFluxPath(ssp.getGm().getFluxPath());
-//						rsw.getParamField().setUpdateOn(true);
-//					} catch (Exception e1) {
-//						// TODO Auto-generated catch block
-//						e1.printStackTrace();
-//					}
-//				}
-				
+
 				try{
 					for(IRegion g : ssp.getInterpolatorRegions()){
 						customComposite.getPlotSystem().removeRegion(g);
@@ -305,7 +290,11 @@ public class SurfaceScatterViewStart extends Dialog {
 				ssps3c.isOutputCurvesVisible(false);
 				ssp.setProcessingMethodSelection(ProccessingMethod.toMethodology(customComposite.getProcessingMode().getSelectionIndex()));
 				
-				ssps3c.getOutputCurves().getIntensity().select(IntensityDisplaySetting.toInt(ids));
+				if(ids == null){
+					ids = yAxes.SPLICEDY;
+				}
+				
+				ssps3c.getOutputCurves().getIntensity().select(ids.getYAxisNumber());
 				ssps3c.getOutputCurves().getOutputFormatSelection().select(SaveFormatSetting.toInt(sms));
 				
 				customComposite.generalUpdate();
@@ -812,7 +801,7 @@ public class SurfaceScatterViewStart extends Dialog {
 					
 					lt1.setErrorBarEnabled(ssp.getErrorFlag());
 					lt1.setErrorBarColor(red);
-					IDataset  xprobe = lt1.getXData();
+//					IDataset xprobe = lt1.getXData();
  					
 					double start = lt1.getXData().getDouble(0);
 					double end = lt1.getXData().getDouble(lt1.getXData().getShape()[0]-1);
@@ -1206,11 +1195,6 @@ public class SurfaceScatterViewStart extends Dialog {
 		
 	}
 	
-
-	
-	
-	
-	
 	@Override
 	protected void configureShell(Shell newShell) {
 		super.configureShell(newShell);
@@ -1274,14 +1258,9 @@ public class SurfaceScatterViewStart extends Dialog {
 		
 		double x = ssp.getXValue(k);
 		
-		RectangularROI r = new RectangularROI(x, 0.1, 0, 0.1, 0);
+		outputCurves.addImageNoRegion(x);
+		raw.getRtc().addImageNoRegion(x);
 		
-		try {
-			outputCurves.getRegionNo().setROI(r);
-		} catch (NullPointerException f) {
-
-		}
-
 		modify = true;
 		
 		ssp.illuminateCorrectInterpolationBox(k);
@@ -1516,9 +1495,14 @@ public class SurfaceScatterViewStart extends Dialog {
 			public void widgetSelected(SelectionEvent e) {
 
 				IPlottingSystem<Composite> pS = outputCurves.getPlotSystem();
-				ssp.switchFhklIntensity(pS, outputCurves.getIntensity().getSelectionIndex(),
-						outputCurves.getqAxis().getSelection());
-				ids = IntensityDisplaySetting.toMethod(ssps3c.getOutputCurves().getIntensity().getSelectionIndex());
+				String selectorName = outputCurves.getIntensity().getText();
+				
+				ssp.switchFhklIntensity(pS, 
+										selectorName,
+										outputCurves.getqAxis().getSelection());
+				
+				String k = outputCurves.getIntensity().getText();
+				ids = AxisEnums.toYAxis(k);
 
 			}
 
@@ -1537,9 +1521,11 @@ public class SurfaceScatterViewStart extends Dialog {
 				ssp.switchErrorDisplay();
 
 				IPlottingSystem<Composite> pS = outputCurves.getPlotSystem();
-				int selector = outputCurves.getIntensity().getSelectionIndex();
+				
+				String selectorName = outputCurves.getIntensity().getText();
+				
 				ssp.switchFhklIntensity(pS, 
-										selector,
+										selectorName,
 										outputCurves.getqAxis().getSelection());
 				
 				
@@ -1551,67 +1537,6 @@ public class SurfaceScatterViewStart extends Dialog {
 
 			}
 		});
-
-//		outputCurves.getSave().addSelectionListener(new SelectionListener() {
-//
-//			@Override
-//			public void widgetSelected(SelectionEvent e) {
-//
-//				boolean useQ = outputCurves.getqAxis().getSelection();
-//				
-//				ssp.arbitrarySavingMethod(useQ, 
-//										  false, 
-//										  sfs, 
-//										  rodSaveName, 
-//										  csdpToSave, 
-//										  yAxis, 
-//										  xAxis);
-//				
-//				FileDialog fd = new FileDialog(getParentShell(), SWT.SAVE);
-//
-//				if(ssp.getSaveFolder()!=null){
-//					fd.setFilterPath(ssp.getSaveFolder());
-//				}
-//				
-//				String stitle = "r";
-//				String path = "p";
-//
-//				if (fd.open() != null) {
-//					stitle = fd.getFileName();
-//					path = fd.getFilterPath();
-//
-//				}
-//				
-//				if(ssp.getSaveFolder()==null){
-//					ssp.setSaveFolder(path);;
-//				}
-//				
-//				String title = path + File.separator + stitle;
-//			
-//				SaveFormatSetting sfs = SaveFormatSetting.toMethod(outputCurves.getOutputFormatSelection().getSelectionIndex());
-//				
-//				setSms(sfs);
-//			
-//				if (sms == SaveFormatSetting.GenX) {
-//					ssp.genXSave(title);
-//				}
-//				if (sms == SaveFormatSetting.Anarod) {
-//					ssp.anarodSave(title);
-//				}
-//				if (sms == SaveFormatSetting.int_format) {
-//					ssp.intSave(title);
-//				}
-//				if (sms == SaveFormatSetting.ASCII) {
-//					ssp.simpleXYYeSave(title, getOutputCurves().getIntensity().getSelectionIndex());
-//				}
-//
-//			}
-//
-//			@Override
-//			public void widgetDefaultSelected(SelectionEvent e) {
-//
-//			}
-//		});
 		
 		outputCurves.getStoreAsNexus().addSelectionListener(new SelectionListener() {
 
@@ -1800,11 +1725,11 @@ public class SurfaceScatterViewStart extends Dialog {
 		this.sms = sms;
 	}
 
-	public IntensityDisplaySetting getIds() {
+	public AxisEnums.yAxes getIds() {
 		return ids;
 	}
 
-	public void setIds(IntensityDisplaySetting ids) {
+	public void setIds(AxisEnums.yAxes ids) {
 		this.ids = ids;
 	}
 
