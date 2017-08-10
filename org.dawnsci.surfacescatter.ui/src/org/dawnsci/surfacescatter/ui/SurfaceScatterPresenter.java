@@ -1752,6 +1752,8 @@ public class SurfaceScatterPresenter {
 		
 	}
 	
+	
+	
 	public int xPositionFinderInDat(int i,double myNum) {
 		
 		Dataset xIn = DatasetFactory.createFromList(drm.getDmxList().get(i));

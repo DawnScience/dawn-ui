@@ -1,6 +1,8 @@
 package org.dawnsci.surfacescatter.ui;
 
 import java.util.ArrayList;
+import java.util.Collection;
+
 import org.dawb.common.ui.widgets.ActionBarWrapper;
 import org.dawnsci.surfacescatter.AxisEnums;
 import org.dawnsci.surfacescatter.CsdpGeneratorFromDrm;
@@ -46,6 +48,7 @@ public class OverlapCurves extends Composite {
     private Button errors;
     private ArrayList<ILineTrace> ltList;
 	private Combo intensitySelect;
+	private Combo xAxisSelect;
 	private GeneralOverlapHandlerView gohv;
 	private IRegion imageNo;
 	private SurfaceScatterPresenter ssp;
@@ -102,7 +105,6 @@ public class OverlapCurves extends Composite {
 		setupComposite.setLayout(new GridLayout());
 		setupComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 	
-        
     	SashForm form = new SashForm(setupComposite, SWT.FILL);
 		form.setLayout(new GridLayout());
 		form.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
@@ -114,12 +116,43 @@ public class OverlapCurves extends Composite {
 		GridData controlsSelectionData = new GridData(SWT.FILL, SWT.NULL, true, false);
         controls.setLayoutData(controlsSelectionData);
         controls.setLayout(controlsSelectionLayout);
-
-		errors = new Button(controls, SWT.PUSH);
-		errors.setText("Errors");
-		errors.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+        
+        InputTileGenerator xAxisValue = new InputTileGenerator("X Axis: ", controls);
 		
-		InputTileGenerator displayValue = new InputTileGenerator("Display Value: ", controls);
+		xAxisSelect = xAxisValue.getCombo();
+		
+		for(AxisEnums.xAxes  t: AxisEnums.xAxes.values()){
+			
+			if(t != AxisEnums.xAxes.Q){
+				xAxisSelect.add(t.getXAxisName(), t.getXAxisNumber());
+			}
+			
+			else if(t == AxisEnums.xAxes.Q && csdp.getqIDataset() != null){
+				xAxisSelect.add(t.getXAxisName(), t.getXAxisNumber());
+			}
+		}
+	
+		xAxisSelect.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		xAxisSelect.select(0);
+		
+		xAxisSelect.addSelectionListener(new SelectionListener() {
+			
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				
+				model.setxAxis(AxisEnums.toXAxis(xAxisSelect.getText()));
+				
+			}
+			
+			@Override
+			public void widgetDefaultSelected(SelectionEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+		});
+	
+		
+		InputTileGenerator displayValue = new InputTileGenerator("Y Axis: ", controls);
 		
 		intensitySelect = displayValue.getCombo();
 		
@@ -130,6 +163,21 @@ public class OverlapCurves extends Composite {
 		intensitySelect.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		intensitySelect.select(0);
 		
+		intensitySelect.addSelectionListener(new SelectionListener() {
+			
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				
+				model.setyAxis(AxisEnums.toYAxis(intensitySelect.getText()));
+				
+			}
+			
+			@Override
+			public void widgetDefaultSelected(SelectionEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+		});
 		
 		InputTileGenerator activeCurve = new InputTileGenerator("activeCurve: ", controls);
 		
@@ -209,7 +257,9 @@ public class OverlapCurves extends Composite {
 				
 				addCurves();
 				
-				gohv.getStitchedCurves().resetAll(true);
+				model.poke();
+				
+				gohv.getStitchedCurves().resetAll(model.getxAxis(),model.getyAxis(),true);
 			}
 			
 			@Override
@@ -230,7 +280,7 @@ public class OverlapCurves extends Composite {
 				
 				disregardPoint.setText("Disregard Point");
 				addCurves();
-				gohv.getStitchedCurves().resetAll(true);
+				gohv.getStitchedCurves().resetAll(model.getxAxis(),model.getyAxis(),true);
 			}
 			
 			@Override
@@ -248,7 +298,16 @@ public class OverlapCurves extends Composite {
 		InputTileGenerator yPoint = new InputTileGenerator("Y Value:  ", "0" ,controls);
 		yValueText = yPoint.getText();
 		
-		slider = new Slider(form, SWT.HORIZONTAL);
+		Group normGroup= new Group(form, SWT.NONE);
+	    GridLayout normGroupLayout = new GridLayout(1, true);
+	    normGroup.setLayout(normGroupLayout);    
+	    GridData normGroupData = new GridData(SWT.FILL, SWT.FILL, true, true);
+	    normGroupData.grabExcessVerticalSpace = true;
+	    normGroupData.heightHint = 100;
+	    normGroup.setLayoutData(new GridData(GridData.FILL_HORIZONTAL | GridData.FILL_VERTICAL));
+	
+		
+		slider = new Slider(normGroup, SWT.HORIZONTAL);
         
 		int rg = ssp.getDrm().getDmxList().get(0).size()/2;
 		int rf = ssp.getDrm().getDmxList().get(0).size();
@@ -258,7 +317,11 @@ public class OverlapCurves extends Composite {
 	    slider.setMaximum(rf);
 	    slider.setIncrement(1);
 	    slider.setThumb(1);
+	    slider.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 	    
+	    errors = new Button(normGroup, SWT.PUSH);
+		errors.setText("Errors");
+		errors.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 	    
 		Group unstitchedCurves = new Group(form, SWT.FILL | SWT.FILL);
         GridLayout stitchedCurvesLayout = new GridLayout(1, true);
@@ -389,7 +452,7 @@ public class OverlapCurves extends Composite {
 						                  arrayILDx,
 						                  arrayILDy);
 				
-				gohv.getStitchedCurves().resetAll();
+				gohv.getStitchedCurves().resetAll(model.getxAxis(),model.getyAxis());
 			}
 			
 			@Override
@@ -398,10 +461,20 @@ public class OverlapCurves extends Composite {
 			}
 		});
 		
-	    form.setWeights(new int[] {15,3,77,5});
+	    form.setWeights(new int[] {15,8,72,5});
     }
 		
-   public Composite getComposite(){
+   public Combo getxAxisSelect() {
+		return xAxisSelect;
+	}
+
+
+	public void setxAxisSelect(Combo xAxisSelect) {
+		this.xAxisSelect = xAxisSelect;
+	}
+
+
+public Composite getComposite(){
    	
 	   return this;
    }
@@ -439,17 +512,12 @@ public class OverlapCurves extends Composite {
 		
 		GoodPointStripper gps = new GoodPointStripper();
 		
-		String k = intensitySelect.getText();
+		AxisEnums.yAxes yM = AxisEnums.toYAxis(intensitySelect.getText());
+		AxisEnums.xAxes xM = AxisEnums.toXAxis(xAxisSelect.getText());
 		
-		AxisEnums.yAxes yM = AxisEnums.yAxes.SPLICEDY;
-		
-		for(AxisEnums.yAxes yA : AxisEnums.yAxes.values()){
-			if(yA.getYAxisName().equals(k)){
-				yM = yA;
-			}
-		}
-		
-		IDataset coordinateDatasets[][] = gps.goodPointStripper(csdp, yM);
+		IDataset coordinateDatasets[][] = gps.goodPointStripper(csdp, 
+														        yM, 
+														        xM);
 		
 		
 		for (int r =0; r < coordinateDatasets.length; r++){
@@ -485,7 +553,18 @@ public class OverlapCurves extends Composite {
 			@Override
 			public void roiChanged(ROIEvent evt) {
 				
-				int xPos =ssp.xPositionFinder(imageNo.getROI().getPointX());
+				int xPos = 0;
+				
+				AxisEnums.xAxes xM = AxisEnums.toXAxis(xAxisSelect.getText());
+
+				switch(xM){
+					case SCANNED_VARIABLE:
+						xPos =ssp.xPositionFinder(imageNo.getROI().getPointX());
+						break;
+					case Q:
+						xPos =ssp.qPositionFinder(imageNo.getROI().getPointX());
+				}
+
 				
 				int datNo = activeCurveCombo.getSelectionIndex();
 				double xPoint = imageNo.getROI().getPointX();
@@ -499,13 +578,7 @@ public class OverlapCurves extends Composite {
 				
 				String k = intensitySelect.getText();
 				
-				AxisEnums.yAxes yM = AxisEnums.yAxes.SPLICEDY;
-				
-				for(AxisEnums.yAxes yA : AxisEnums.yAxes.values()){
-					if(yA.getYAxisName().equals(k)){
-						yM = yA;
-					}
-				}
+				AxisEnums.yAxes yM = AxisEnums.toYAxis(k);
 				
 				switch(yM){
 					case SPLICEDYFHKL:
@@ -634,71 +707,68 @@ public class OverlapCurves extends Composite {
 	}
 	
 	
-	public void changeCurves(int selector,
+	public void changeCurves(AxisEnums.xAxes x,
+							 AxisEnums.yAxes y,
 							 CurveStitchDataPackage csdp){
 
-		Display display = Display.getCurrent();
+//		Display display = Display.getCurrent();
+//		
+//		Color blue = display.getSystemColor(SWT.COLOR_BLUE);
+//		Color green = display.getSystemColor(SWT.COLOR_GREEN);
+//		Color black = display.getSystemColor(SWT.COLOR_BLACK);
+//		
+//		Collection<ITrace> tr = plotSystem.getTraces();
+//		for(ITrace t: tr){
+//			plotSystem.removeTrace(t);
+//		}
+//		
+//		for(int i =0; i<csdp.getyIDataset().length;i++){
+//			
+//			IDataset yD= csdp.getyIDataset()[i];
+//			IDataset xD = csdp.getxIDataset()[i];
+//			
+//			ILineTrace lt = getILineTraceList().get(i);
+//			
+//			switch(x){
+//				case Q:
+//					xD = csdp.getqIDataset()[i];
+//					break;
+//				case SCANNED_VARIABLE:
+//					xD = csdp.getxIDataset()[i];
+//					break;
+//				default:
+//				//
+//			}
+//			
+//			switch(y){
+//				case SPLICEDY:
+//					lt.setName("Corrected Curve " + i);
+//					yD = csdp.getyIDataset()[i];
+//					lt.setTraceColor(blue);
+//					break;
+//			
+//				case SPLICEDYFHKL:	
+//					lt.setName("Fhkl Curve " + i);
+//					yD = csdp.getyIDatasetFhkl()[i];
+//					lt.setTraceColor(green);
+//					break;
+//			
+//				case SPLICEDYRAW:
+//					lt.setName("Raw Intensity Curve " + i);
+//					yD = csdp.getyRawIDataset()[i];
+//					lt.setTraceColor(black);
+//					break;
+//					
+//				default:
+//					// Purely defensive
+//					break;
+//			}
+//			
+//			lt.setData(xD, yD);
+//			plotSystem.addTrace(lt);
+//		}
 		
-		Color blue = display.getSystemColor(SWT.COLOR_BLUE);
-		Color green = display.getSystemColor(SWT.COLOR_GREEN);
-		Color black = display.getSystemColor(SWT.COLOR_BLACK);
-		
-		switch(selector){
-			case 0:
-				
-				for(int i =0; i<ltList.size();i++){
-					
-					ILineTrace lt = getILineTraceList().get(i);
-					
-					lt.setName("Corrected Curve " + i);
-				
-					lt.setData(csdp.getxIDataset()[i],
-							   csdp.getyIDataset()[i]);
-					
-				
-					
-					lt.setTraceColor(blue);
-				}
-				break;
-		
-			case 1:
-				
-				for(int i =0; i<ltList.size();i++){
-					
-					ILineTrace lt = getILineTraceList().get(i);
-					
-					lt.setName("Fhkl Curve " + i);
-				
-					lt.setData(csdp.getxIDataset()[i],
-							   csdp.getyIDatasetFhkl()[i]);
-					
-					
-					lt.setTraceColor(green);
-				}
-				break;
-		
-			case 2:
-				
-				for(int i =0; i<ltList.size();i++){
-					
-					ILineTrace lt = getILineTraceList().get(i);
-					
-					lt.setName("Raw Intensity Curve " + i);
-				
-					lt.setData(csdp.getxIDataset()[i],
-							   csdp.getyRawIDataset()[i]);
-					
-				
-					lt.setTraceColor(black);
-				}
-					
-				break;
-				
-			default:
-				// Purely defensive
-				break;
-		}
-		
+		addCurves();
 	}
 
 

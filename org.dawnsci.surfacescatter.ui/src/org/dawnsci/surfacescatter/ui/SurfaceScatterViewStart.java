@@ -863,7 +863,7 @@ public class SurfaceScatterViewStart extends Dialog {
 				
 			}
 		});
-		
+		container.layout();
 		return container;
 	}
 

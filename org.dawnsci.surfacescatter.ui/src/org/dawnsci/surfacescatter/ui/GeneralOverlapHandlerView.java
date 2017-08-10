@@ -1,9 +1,8 @@
 package org.dawnsci.surfacescatter.ui;
 
 import java.util.ArrayList;
-
+import org.dawnsci.surfacescatter.AxisEnums;
 import org.dawnsci.surfacescatter.OverlapUIModel;
-import org.eclipse.dawnsci.plotting.api.region.IRegion;
 import org.eclipse.dawnsci.plotting.api.trace.ILineTrace;
 import org.eclipse.january.dataset.IDataset;
 import org.eclipse.jface.dialogs.Dialog;
@@ -20,7 +19,6 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Shell;
-import org.eclipse.swt.widgets.Slider;
 import org.eclipse.ui.PlatformUI;
 
 public class GeneralOverlapHandlerView extends Dialog {
@@ -97,7 +95,6 @@ public class GeneralOverlapHandlerView extends Dialog {
 		
 		/////////////////Left SashForm///////////////////////////////////////////////////
 		Group topImage = new Group(left, SWT.NONE);
-//		topImage.setText("Top Image");
 		GridLayout topImageLayout = new GridLayout();
 		topImage.setLayout(topImageLayout);
 		GridData topImageData= new GridData(SWT.FILL, SWT.FILL, true, true);
@@ -135,10 +132,6 @@ public class GeneralOverlapHandlerView extends Dialog {
 		stitchedCurves.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
 		export = stitchedCurves.getExport();
-//		export.setLayoutData (new GridData(GridData.FILL_HORIZONTAL));
-//		export.setText("Export Curve");
-//		export.setSize(export.computeSize(100, 20, true));
-//		
 		right.setWeights(new int[] {100});
 		
 		//////////////////////////////////////////////////////////////////////////////////
@@ -161,12 +154,30 @@ public class GeneralOverlapHandlerView extends Dialog {
 		customComposite.getIntensity().addSelectionListener(new SelectionListener() {
 
 			@Override
-			public void widgetSelected(SelectionEvent e) {
+			public void widgetSelected(SelectionEvent e) {	
+				AxisEnums.yAxes y = AxisEnums.toYAxis(customComposite.getIntensity().getText());
+				AxisEnums.xAxes x = model.getxAxis();
 				
-				int selector = customComposite.getIntensity().getSelectionIndex();
 				
-				customComposite.changeCurves(selector, ssp.getDrm().getCsdp());
-				stitchedCurves.changeCurves(selector);
+				customComposite.changeCurves(model.getxAxis(),y, ssp.getDrm().getCsdp());
+				stitchedCurves.changeCurves(y, model.getxAxis());
+
+			}
+
+			@Override
+			public void widgetDefaultSelected(SelectionEvent e) {
+				// TODO Auto-generated method stub
+
+			}
+		});
+		
+		customComposite.getxAxisSelect().addSelectionListener(new SelectionListener() {
+
+			@Override
+			public void widgetSelected(SelectionEvent e) {	
+				
+				customComposite.changeCurves(model.getxAxis(),model.getyAxis(), ssp.getDrm().getCsdp());
+				stitchedCurves.changeCurves(model.getyAxis(), model.getxAxis());
 
 			}
 
