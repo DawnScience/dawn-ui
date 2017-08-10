@@ -941,7 +941,7 @@ public class PlottingSystemImpl<T> extends AbstractPlottingSystem<T> {
 			if (viewer == activeViewer) {
 				Collection<ITrace> traces = getTraces();
 				for (ITrace t : traces) {
-					if (!t.getClass().equals(clazz)) {
+					if (t != null && !t.getClass().equals(clazz)) {
 						mixedTraceMode = true;
 						break;
 					}
