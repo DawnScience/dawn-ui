@@ -1581,7 +1581,7 @@ public class LightWeightPlotViewer<T> extends AbstractPlottingViewer<T> implemen
 	}
 
 	public void updatePlottingRole(PlotType type) {
-		intensity.setVisible(type.is2D()&&showIntensity);
+		intensity.setVisible(type == null ? false : (type.is2D() && showIntensity));
 	}
 
 	public boolean isShowIntensity() {
