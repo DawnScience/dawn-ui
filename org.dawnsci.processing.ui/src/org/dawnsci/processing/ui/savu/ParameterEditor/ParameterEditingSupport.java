@@ -2,6 +2,7 @@ package org.dawnsci.processing.ui.savu.ParameterEditor;
 
 import java.util.Map;
 
+import org.apache.commons.lang.StringUtils;
 import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.ColumnViewer;
 import org.eclipse.jface.viewers.EditingSupport;
@@ -14,6 +15,8 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.widgets.Spinner;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * EditingSupport Class
@@ -23,118 +26,140 @@ class ParameterEditingSupport extends EditingSupport {
 
 	private int column;
 	private ParameterEditorTableViewModel viewModel;
+	private final static Logger logger = LoggerFactory.getLogger(ParameterEditingSupport.class);
 
 	public ParameterEditingSupport(ParameterEditorTableViewModel viewModel, ColumnViewer viewer, int col) {
 		super(viewer);
 		this.column = col;
-		this.viewModel = viewModel;
+		this.viewModel = viewModel;				
+
 	}
 
 	@Override
 	protected CellEditor getCellEditor(final Object element) {
-		System.out.println(this.getValue(element).getClass());
 		FieldComponentCellEditor ed = null;
 		if (this.getValue(element) instanceof Double) {
-			try {
-
-				ed = new FieldComponentCellEditor(((TableViewer) getViewer()).getTable(),
-						FloatSpinnerWrapper.class.getName(), SWT.RIGHT);
-			} catch (ClassNotFoundException e) {
-				e.printStackTrace();
-				return null;
-			}
-
-			final FloatSpinnerWrapper rb = (FloatSpinnerWrapper) ed.getFieldWidget();
-
-			rb.setFormat(rb.getWidth(), 0);
-			rb.setFormat(rb.getWidth(), 3);
-			rb.setMaximum(Double.MAX_VALUE);
-			rb.setMinimum(-Double.MAX_VALUE);
-			rb.setButtonVisible(false);
-			rb.setActive(true);
-
-			((Spinner) rb.getControl()).addSelectionListener(new SelectionAdapter() {
-				@Override
-				public void widgetSelected(SelectionEvent e) {
-					try {
-						System.out.println(rb.getValue());
-						setValue(element, rb.getValue(), false);
-					} catch (Exception e1) {
-						// TODO Auto-generated catch block
-						e1.printStackTrace();
-					}
-				}
-			});
+			ed = createDoubleEditor(element, ed);
 			return ed;
 
 		}
 		if (this.getValue(element) instanceof Integer) {
-			try {
-
-				ed = new FieldComponentCellEditor(((TableViewer) getViewer()).getTable(),
-						FloatSpinnerWrapper.class.getName(), SWT.RIGHT);
-			} catch (ClassNotFoundException e) {
-				e.printStackTrace();
-				return null;
-			}
-
-			final FloatSpinnerWrapper rb = (FloatSpinnerWrapper) ed.getFieldWidget();
-
-			rb.setFormat(rb.getWidth(), 0);
-			rb.setFormat(rb.getWidth(), 0);
-			rb.setMaximum(Integer.MAX_VALUE);
-			rb.setMinimum(-Integer.MAX_VALUE);
-			rb.setButtonVisible(false);
-			rb.setActive(true);
-
-			((Spinner) rb.getControl()).addSelectionListener(new SelectionAdapter() {
-				@Override
-				public void widgetSelected(SelectionEvent e) {
-					try {
-						setValue(element, rb.getValue(), false);
-					} catch (Exception e1) {
-						// TODO Auto-generated catch block
-						e1.printStackTrace();
-					}
-				}
-			});
+			ed = createIntegerEditor(element, ed);
 			return ed;
 
 		}
 
 		if (this.getValue(element) instanceof Boolean) {
-			try {
-
-				ed = new FieldComponentCellEditor(((TableViewer) getViewer()).getTable(),
-						BooleanWrapper.class.getName(), SWT.RIGHT);
-			} catch (ClassNotFoundException e) {
-				e.printStackTrace();
-				return null;
-			}
-
-			final BooleanWrapper rb = (BooleanWrapper) ed.getFieldWidget();
-			
-			rb.setActive(true);
-
+			ed = createBooleanEditor(ed);
 			return ed;
 		}
 
 		if (this.getValue(element) instanceof String) {
-			try {
 
-				ed = new FieldComponentCellEditor(((TableViewer) getViewer()).getTable(),
-						TextWrapper.class.getName(), SWT.RIGHT);
-			} catch (ClassNotFoundException e) {
-				e.printStackTrace();
-				return null;
+			String theString = (String) this.getValue(element);
+			Integer numSlashes = StringUtils.countMatches(theString, "/");
+			Integer numDots = StringUtils.countMatches(theString, ".");
+			// At some point I will use the above to make this a file browser if I think it's a path
+			ed = createStringEditor(ed);
 			}
-
-			final TextWrapper rb = (TextWrapper) ed.getFieldWidget();
-
-			rb.setActive(true);
-		}
 		return ed;
 
+	}
+
+
+	private FieldComponentCellEditor createStringEditor(FieldComponentCellEditor ed) {
+		try {
+			ed = new FieldComponentCellEditor(((TableViewer) getViewer()).getTable(),
+					TextWrapper.class.getName(), SWT.RIGHT);
+		} catch (ClassNotFoundException e) {
+			logger.error("Could not create string editor!",e);
+			return null;
+		}
+
+		final TextWrapper rb = (TextWrapper) ed.getFieldWidget();
+
+		rb.setActive(true);
+		return ed;
+	}
+
+	private FieldComponentCellEditor createBooleanEditor(FieldComponentCellEditor ed) {
+		try {
+
+			ed = new FieldComponentCellEditor(((TableViewer) getViewer()).getTable(),
+					BooleanWrapper.class.getName(), SWT.RIGHT);
+		} catch (ClassNotFoundException e) {
+			logger.error("Could not create boolean editor!",e);
+			return null;
+		}
+
+		final BooleanWrapper rb = (BooleanWrapper) ed.getFieldWidget();
+		
+		rb.setActive(true);
+		return ed;
+	}
+
+	private FieldComponentCellEditor createIntegerEditor(final Object element, FieldComponentCellEditor ed) {
+		try {
+
+			ed = new FieldComponentCellEditor(((TableViewer) getViewer()).getTable(),
+					FloatSpinnerWrapper.class.getName(), SWT.RIGHT);
+		} catch (ClassNotFoundException e) {
+			logger.error("Could not create integer editor!",e);
+			return null;
+		}
+
+		final FloatSpinnerWrapper rb = (FloatSpinnerWrapper) ed.getFieldWidget();
+
+		rb.setFormat(rb.getWidth(), 0);
+		rb.setFormat(rb.getWidth(), 0);
+		rb.setMaximum(Integer.MAX_VALUE);
+		rb.setMinimum(-Integer.MAX_VALUE);
+		rb.setButtonVisible(false);
+		rb.setActive(true);
+
+		((Spinner) rb.getControl()).addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				try {
+					setValue(element, rb.getValue(), false);
+				} catch (Exception e1) {
+					logger.error("Could not set integer value!",e);
+				}
+			}
+		});
+		return ed;
+	}
+
+	private FieldComponentCellEditor createDoubleEditor(final Object element, FieldComponentCellEditor ed) {
+		try {
+
+			ed = new FieldComponentCellEditor(((TableViewer) getViewer()).getTable(),
+					FloatSpinnerWrapper.class.getName(), SWT.RIGHT);
+		} catch (ClassNotFoundException e) {
+			logger.error("Could not create double editor!",e);
+			return null;
+		}
+
+		final FloatSpinnerWrapper rb = (FloatSpinnerWrapper) ed.getFieldWidget();
+
+		rb.setFormat(rb.getWidth(), 0);
+		rb.setFormat(rb.getWidth(), 2);
+		rb.setMaximum(Double.MAX_VALUE);
+		rb.setMinimum(-Double.MAX_VALUE);
+		rb.setButtonVisible(false);
+		rb.setActive(true);
+
+		((Spinner) rb.getControl()).addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				try {
+					setValue(element, rb.getValue(), false);
+				} catch (Exception e1) {
+					logger.error("Could not set double value!",e1);;
+				}
+			}
+		});
+		return ed;
 	}
 
 	@Override
@@ -152,8 +177,7 @@ class ParameterEditingSupport extends EditingSupport {
 		try {
 			return getRowValue(element);
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.error("Could not set row value!",e);
 			return null;
 		}
 	}
@@ -178,8 +202,7 @@ class ParameterEditingSupport extends EditingSupport {
 		try {
 			this.setValue(element, value, true);
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.debug("Couldn't set value:",e);
 		}
 	}
 
@@ -210,14 +233,10 @@ class ParameterEditingSupport extends EditingSupport {
 	}
 
 	private void setPluginDictValues(ParameterEditorRowDataModel row) {
-		// TODO Auto-generated method stub
 		Map<String, Object> pluginDict = this.viewModel.getPluginDict();
-		System.out.println(pluginDict.keySet().toString());
-		System.out.println(row.getKey());
 		Map<String, Object> entryGroup = (Map<String, Object>) pluginDict.get(row.getKey());
 		entryGroup.put("value", row.getValue());
 		pluginDict.put(row.getKey(), entryGroup);
 		this.viewModel.setPluginDict(pluginDict);
-		System.out.println(this.viewModel.getPluginDict());
 	}
 }

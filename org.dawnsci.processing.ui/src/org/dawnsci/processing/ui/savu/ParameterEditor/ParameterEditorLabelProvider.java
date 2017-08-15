@@ -14,7 +14,6 @@ class ParameterEditorLabelProvider extends ColumnLabelProvider {
 	private int column;
 
 	public ParameterEditorLabelProvider(ParameterEditorTableViewModel viewModel, int column) {
-		// TODO Auto-generated constructor stub
 		this.column = column;
 	}
 
@@ -26,7 +25,7 @@ class ParameterEditorLabelProvider extends ColumnLabelProvider {
 	@Override
 	public String getText(Object element) {
 		final ParameterEditorRowDataModel model = (ParameterEditorRowDataModel)element;
-		DecimalFormat pointFormat = new DecimalFormat("##0.00###");
+		DecimalFormat pointFormat = new DecimalFormat("##0.0###");
 		switch (column) {
 		case 0:
 
@@ -55,7 +54,7 @@ class ParameterEditorLabelProvider extends ColumnLabelProvider {
 
 			return model.getDescription();
 		default:
-			return "No cheese";
+			return "Index out of bounds";
 		}
 	}
 

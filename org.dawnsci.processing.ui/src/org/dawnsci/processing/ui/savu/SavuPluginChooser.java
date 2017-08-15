@@ -11,14 +11,17 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
+import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class SavuPluginChooser extends Composite {
-
+	private final static Logger logger = LoggerFactory.getLogger(SavuPluginChooser.class);
 	public String pluginName;
 	public String pluginPath;
 	public Integer pluginRank;
@@ -53,50 +56,21 @@ public class SavuPluginChooser extends Composite {
 	public void setPluginRank(Integer pluginRank) {
 		this.pluginRank = pluginRank;
 	}
-
-
-	/**
-	 * Create the composite.
-	 * 
-	 * @param parent
-	 * @param style
-	 */
-
-	public static void main(String[] args) {
-		final Display display = new Display();
-		final Shell shell = new Shell(display);
-		shell.setText("Tester");
-		shell.setLayout(new GridLayout());
-
-		new SavuPluginChooser(shell, SWT.NONE);
-		shell.pack();
-		shell.setSize(600, 300);
-		shell.open();
-
-		shell.layout(true, true);
-
-		while (!shell.isDisposed()) {
-			if (!display.readAndDispatch())
-				display.sleep();
-		}
-		display.dispose();
-	}
-
 	
 	public SavuPluginChooser(Composite parent, int style) {
 		super(parent, style);
+		setLayout(new GridLayout(1, true));
 	}
 
 
 	public void initialiseCombo(Integer selectedItem) {
-		this.c = new Combo(this.getParent(), SWT.READ_ONLY);
+		this.c = new Combo(this, SWT.READ_ONLY);
+		this.c.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		Map<String, Object> pluginInfo = null;
-	    this.c.setBounds(50, 50, 150, 65);
 	    try {
 			pluginInfo = getMapFromFile();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.warn("Couldn't get the map from file.",e);
 		}
 		Set<String> myset = pluginInfo.keySet();			
 		String[] stuff = myset.toArray(new String[myset.size()]);
@@ -145,8 +119,7 @@ public class SavuPluginChooser extends Composite {
 			in.close();
 			fileIn.close();
 		} catch (ClassNotFoundException | IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.warn("Couldn't open the file for "+wspacePath + "savu_plugin_info.ser",e);
 		}
 		return pluginDict;
 	

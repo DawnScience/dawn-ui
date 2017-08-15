@@ -1,6 +1,7 @@
 package org.dawnsci.processing.ui.savu.ParameterEditor;
 
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.util.ArrayList;
@@ -17,7 +18,7 @@ public class ParameterEditorTableViewModel {
 
 	private Map<String, Object> pluginDict;
 
-	private static String pluginName="PaganinFilter";
+	private static String pluginName=null;
 
 	public static String getPluginName() {
 		return pluginName;
@@ -25,13 +26,14 @@ public class ParameterEditorTableViewModel {
 
 	public void updateModel(String pluginName, Map<String, Object> pluginDict) {
 		logger.debug(pluginName + " " + this.pluginName);
-
 		try {
 			if (pluginDict == null || this.pluginName !=pluginName){
-				this.pluginDict.clear();
+				if (this.pluginDict != null){
+					this.pluginDict.clear();// this is the case at the start of the model build
+				}
+				
 				this.pluginName = pluginName;
 				this.pluginDict = getMapFromFile();
-				logger.debug(this.pluginName + this.pluginDict);
 			}
 			
 			else if (this.pluginName == pluginName) {
@@ -50,31 +52,38 @@ public class ParameterEditorTableViewModel {
 
 	private static String wspacePath;
 
-	public ParameterEditorTableViewModel(String pluginName) {
-		this(pluginName, null);
-	}
-
-	public ParameterEditorTableViewModel(String pluginName, Map<String, Object> pluginDict) {
+	public ParameterEditorTableViewModel() {
 		wspacePath = ResourcesPlugin.getWorkspace().getRoot().getLocation().toString();
-		this.pluginName = pluginName;
+		this.pluginName = null;
 		try {
 			if (pluginDict == null) {
-				pluginDict = getMapFromFile();
-			this.pluginDict = pluginDict;}
+				
+				try {
+					pluginDict = getMapFromFile();
+					this.pluginDict = pluginDict;
+				} catch (FileNotFoundException e) {
+					logger.warn("Haven't found a file associated with plugin name " + this.pluginName.toString() + ". This should only happen on startup.");
+					this.pluginDict = null;
+				}}
 
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.error("Could not find a map file!",e);
 		}
 		rebuildTable(pluginDict);
 
 	}
 
 	public void rebuildTable(Map<String, Object> pluginDict) {
-		for (Map.Entry<String, Object> entry : pluginDict.entrySet()) {
-			Map<String, Object> info = (Map<String, Object>) entry.getValue();
-			rows.add(new ParameterEditorRowDataModel(entry.getKey(), info.get("value"), (String) info.get("hint")));
+		if (pluginDict == null) {
+			rows.add(new ParameterEditorRowDataModel("", "", ""));
+		} else {
+			for (Map.Entry<String, Object> entry : pluginDict.entrySet()) {
+				Map<String, Object> info = (Map<String, Object>) entry.getValue();
+				rows.add(new ParameterEditorRowDataModel(entry.getKey(), info.get("value"), (String) info.get("hint")));
+				
+		}	
 		}
+
 	}
 
 	public void addEntry(ParameterEditorRowDataModel model) {
@@ -115,7 +124,7 @@ public class ParameterEditorTableViewModel {
 			in.close();
 			fileIn.close();
 		} catch (ClassNotFoundException | IOException e) {
-			logger.error("Error finding plugin info",e);
+			logger.warn("Error finding plugin info",e);
 		}
 		return pluginDict;
 	}
