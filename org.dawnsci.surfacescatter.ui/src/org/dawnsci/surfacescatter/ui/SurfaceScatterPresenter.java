@@ -812,13 +812,13 @@ public class SurfaceScatterPresenter {
 			Charset charset = StandardCharsets.UTF_8;
 			String content = new String(Files.readAllBytes(to), charset);
 			
-			String firstTifName = StringUtils.substringBetween(content, File.separator, ".tif");
+			String firstTifName = StringUtils.substringBetween(content, "/", ".tif");
 			
-			if(firstTifName.contains(File.separator)){
-				firstTifName = StringUtils.substringAfterLast(firstTifName, File.separator);
+			if(firstTifName.contains("/")){
+				firstTifName = StringUtils.substringAfterLast(firstTifName, "/");
 			}
 			
-			String pathNameToReplace = StringUtils.substringBetween(content, "\t", File.separator + firstTifName);
+			String pathNameToReplace = StringUtils.substringBetween(content, "\t", "/" + firstTifName);
 			
 			if(pathNameToReplace.contains("\t")){
 				pathNameToReplace = StringUtils.substringAfterLast(pathNameToReplace,"\t");
