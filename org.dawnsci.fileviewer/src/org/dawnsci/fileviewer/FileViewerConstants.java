@@ -8,13 +8,9 @@
  */
 package org.dawnsci.fileviewer;
 
-import java.io.File;
 import java.text.DateFormat;
 
 public class FileViewerConstants {
-
-	public final static String DRIVE_A = "a:" + File.separator;
-	public final static String DRIVE_B = "b:" + File.separator;
 
 	/**
 	 * File[]: Array of files whose paths are currently displayed in the combo
