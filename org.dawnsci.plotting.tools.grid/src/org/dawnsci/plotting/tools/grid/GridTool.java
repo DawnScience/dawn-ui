@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012 Diamond Light Source Ltd.
+ * Copyright (c) 2012, 2017 Diamond Light Source Ltd.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -18,19 +18,19 @@ import javax.measure.quantity.Length;
 import org.dawb.common.ui.util.GridUtils;
 import org.dawb.common.ui.viewers.TreeNodeContentProvider;
 import org.dawnsci.common.widgets.tree.BooleanNode;
-import org.dawnsci.common.widgets.tree.ClearableFilteredTree;
 import org.dawnsci.common.widgets.tree.ColorNode;
 import org.dawnsci.common.widgets.tree.DelegatingProviderWithTooltip;
 import org.dawnsci.common.widgets.tree.IResettableExpansion;
 import org.dawnsci.common.widgets.tree.LabelNode;
-import org.dawnsci.common.widgets.tree.NodeFilter;
-import org.dawnsci.common.widgets.tree.NodeLabelProvider;
-import org.dawnsci.common.widgets.tree.UnitEditingSupport;
-import org.dawnsci.common.widgets.tree.ValueEditingSupport;
 import org.dawnsci.plotting.tools.grid.Activator;
 import org.dawnsci.plotting.tools.grid.tree.AmountEvent;
 import org.dawnsci.plotting.tools.grid.tree.AmountListener;
+import org.dawnsci.plotting.tools.grid.tree.ClearableGridFilteredTree;
 import org.dawnsci.plotting.tools.grid.tree.GridNumericNode;
+import org.dawnsci.plotting.tools.grid.tree.GridNodeFilter;
+import org.dawnsci.plotting.tools.grid.tree.NodeLabelProvider;
+import org.dawnsci.plotting.tools.grid.tree.UnitEditingSupport;
+import org.dawnsci.plotting.tools.grid.tree.ValueEditingSupport;
 import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.dawnsci.analysis.dataset.roi.GridPreferences;
 import org.eclipse.dawnsci.analysis.dataset.roi.GridROI;
@@ -110,7 +110,7 @@ public class GridTool extends AbstractToolPage implements IResettableExpansion{
 	protected Composite           control;
 	private TreeViewer            viewer;
 	private GridTreeModel         model;
-	private ClearableFilteredTree filteredTree;
+	private ClearableGridFilteredTree filteredTree;
 	private IRegionListener       regionListener;
 	private IROIListener          roiListener;
 	private ITraceListener        traceListener;
@@ -206,7 +206,7 @@ public class GridTool extends AbstractToolPage implements IResettableExpansion{
 		control.setLayout(new GridLayout(1, false));
 		GridUtils.removeMargins(control);
 
-		this.filteredTree = new ClearableFilteredTree(control, SWT.FULL_SELECTION | SWT.H_SCROLL | SWT.V_SCROLL | SWT.BORDER, new NodeFilter(this), true, "Enter search string to filter the tree.\nThis will match on name, value or units");		
+		this.filteredTree = new ClearableGridFilteredTree(control, SWT.FULL_SELECTION | SWT.H_SCROLL | SWT.V_SCROLL | SWT.BORDER, new GridNodeFilter(this), true, "Enter search string to filter the tree.\nThis will match on name, value or units");		
 		viewer = filteredTree.getViewer();
 		viewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		createColumns(viewer);
