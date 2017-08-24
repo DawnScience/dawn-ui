@@ -14,7 +14,6 @@ import java.io.File;
 import java.util.List;
 
 import javax.measure.format.UnitFormat;
-import javax.measure.spi.ServiceProvider;
 
 import si.uom.NonSI;
 
@@ -26,6 +25,7 @@ import org.dawnsci.common.widgets.dialog.FileSelectionDialog;
 import org.dawnsci.plotting.tools.Activator;
 import org.dawnsci.plotting.tools.ServiceLoader;
 import org.dawnsci.plotting.tools.diffraction.DiffractionUtils;
+import org.dawnsci.plotting.tools.utils.ToolUtils;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.dawnsci.analysis.api.diffraction.DetectorProperties;
 import org.eclipse.dawnsci.analysis.api.io.ILoaderService;
@@ -573,7 +573,7 @@ public class PowderIntegrationTool extends AbstractToolPage implements IDataRedu
 		if (firstExportIteration) {
 			axis = axis.squeeze();
 			String s = file.createDataset(axis.getName(),  axis, resultGroup);
-			UnitFormat unitFormat = ServiceProvider.current().getUnitFormatService().getUnitFormat();
+			UnitFormat unitFormat = ToolUtils.getUOMServiceProvider().getUnitFormatService().getUnitFormat();
 			
 			switch (model.getAxisType()) {
 			case Q:

@@ -16,7 +16,6 @@ import java.util.List;
 import javax.measure.quantity.Angle;
 import javax.measure.quantity.Dimensionless;
 import javax.measure.quantity.Time;
-import javax.measure.spi.ServiceProvider;
 import javax.measure.quantity.Length;
 import javax.measure.Quantity;
 import javax.measure.Unit;
@@ -730,7 +729,7 @@ public class DiffractionTreeModel<Q extends Quantity<Q>> extends AbstractNodeMod
 			                                 String unitName) {
 
 		Unit<Length> unit = ToolUtils.MILLIMETRE.multiply(size.getValue(ToolUtils.MILLIMETRE));
-		ServiceProvider.current().getUnitFormatService().getUnitFormat().label(unit, unitName);
+		ToolUtils.getUOMServiceProvider().getUnitFormatService().getUnitFormat().label(unit, unitName);
 		coord.setUnits(ToolUtils.MILLIMETRE, unit);
 		if (viewer != null)
 			viewer.update(coord, new String[] { "Value", "Unit" });

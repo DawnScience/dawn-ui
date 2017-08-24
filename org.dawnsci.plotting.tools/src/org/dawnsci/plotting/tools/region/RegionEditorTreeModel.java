@@ -17,7 +17,6 @@ import java.util.Set;
 import javax.measure.quantity.Angle;
 import javax.measure.quantity.Dimensionless;
 import javax.measure.quantity.Length;
-import javax.measure.spi.ServiceProvider;
 import javax.measure.Quantity;
 import javax.measure.Unit;
 import javax.swing.tree.TreeNode;
@@ -111,7 +110,7 @@ public class RegionEditorTreeModel extends AbstractNodeModel {
 		Set<Entry<String,Object>> set = roiInfos.entrySet();
 		for (Entry<String, Object> entry : set) {
 			String key = entry.getKey();
-			Unit<Dimensionless> dimensionLess = ServiceProvider.current().getQuantityFactory(Dimensionless.class).getSystemUnit();
+			Unit<Dimensionless> dimensionLess = ToolUtils.getUOMServiceProvider().getQuantityFactory(Dimensionless.class).getSystemUnit();
 			if (key.contains(RegionEditorNodeFactory.ANGLE)) {
 				if (node.isAngleInRadian())
 					createAngleNode(node, entry.getKey(), true, incrementAngle, pointFormat, SI.RADIAN, Math.toRadians((Double)entry.getValue()));
@@ -215,7 +214,7 @@ public class RegionEditorTreeModel extends AbstractNodeModel {
 					}
 				});
 			}
-		} else if (unit.isCompatible(ServiceProvider.current().getQuantityFactory(Dimensionless.class).getSystemUnit())) {
+		} else if (unit.isCompatible(ToolUtils.getUOMServiceProvider().getQuantityFactory(Dimensionless.class).getSystemUnit())) {
 			NumericNode<Dimensionless> node = new NumericNode<Dimensionless>(nodeName, regionNode, (Unit<Dimensionless>) unit);
 			registerNode(node);
 			node.setEditable(editable);

@@ -38,6 +38,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import si.uom.NonSI;
+import tec.uom.se.spi.DefaultServiceProvider;
 import tec.uom.se.unit.MetricPrefix;
 import tec.uom.se.unit.Units;
 import uk.ac.diamond.scisoft.analysis.io.LoaderFactory;
@@ -79,7 +80,17 @@ public class ToolUtils {
 	/**
 	 * Dimensionless unit
 	 */
-	public static final Unit<Dimensionless> DIMENSIONLESS_UNIT = ServiceProvider.current().getQuantityFactory(Dimensionless.class).getSystemUnit();
+	public static final Unit<Dimensionless> DIMENSIONLESS_UNIT = getUOMServiceProvider().getQuantityFactory(Dimensionless.class).getSystemUnit();
+
+	public static ServiceProvider getUOMServiceProvider() {
+		ServiceProvider serviceProvider = null;
+		try {
+			serviceProvider = ServiceProvider.current();
+		} catch (IllegalStateException e) {
+			serviceProvider = new DefaultServiceProvider();
+		}
+		return serviceProvider;
+	}
 
 	/**
 	 * 

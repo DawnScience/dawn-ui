@@ -12,6 +12,7 @@ import org.eclipse.dawnsci.analysis.api.diffraction.DetectorProperties;
 
 import si.uom.NonSI;
 import si.uom.SI;
+import tec.uom.se.spi.DefaultServiceProvider;
 import tec.uom.se.unit.MetricPrefix;
 import tec.uom.se.unit.Units;
 
@@ -84,11 +85,21 @@ public class DetectorPropertiesTreeModel extends AbstractNodeModel {
 			String unitName) {
 
 		Unit<Length> unit = MILLIMETRE.multiply(size);
-		ServiceProvider.current().getUnitFormatService().getUnitFormat().label(unit, unitName);
+		getUOMServiceProvider().getUnitFormatService().getUnitFormat().label(unit, unitName);
 		coord.setUnits(MILLIMETRE, unit);
 		return unit;
 	}
-	
+
+	private ServiceProvider getUOMServiceProvider() {
+		ServiceProvider serviceProvider = null;
+		try {
+			serviceProvider = ServiceProvider.current();
+		} catch (IllegalStateException e) {
+			serviceProvider = new DefaultServiceProvider();
+		}
+		return serviceProvider;
+	}
+
 	private NumericNode<Angle> createOrientationNode(String label, 
 			double[] orientation, 
 			final int index) {

@@ -15,7 +15,6 @@ import java.util.List;
 import java.util.Map;
 
 import javax.measure.quantity.Dimensionless;
-import javax.measure.spi.ServiceProvider;
 import javax.measure.Unit;
 import javax.swing.tree.TreeNode;
 
@@ -460,7 +459,7 @@ public class RegionEditorTool extends AbstractToolPage implements IResettableExp
 						if (child instanceof NumericNode<?>) {
 							NumericNode<?> numNode = (NumericNode<?>) child;
 							Unit<?> unit = numNode.getUnit();
-							if (unit.equals(ServiceProvider.current().getQuantityFactory(Dimensionless.class).getSystemUnit())) {
+							if (unit.equals(ToolUtils.getUOMServiceProvider().getQuantityFactory(Dimensionless.class).getSystemUnit())) {
 								if (numNode.getLabel().contains(RegionEditorNodeFactory.INTENSITY))
 									numNode.setFormat(maxIntensityFormat);
 								else if (numNode.getLabel().contains(RegionEditorNodeFactory.SUM))
