@@ -256,9 +256,13 @@ public class LoadedFilePart {
 			public void stateChanged(FileControllerStateEvent event) {
 				updateOnStateChange(event);
 				
-				if (quickFileWidget != null) {
-					Display.getDefault().asyncExec(() ->quickFileWidget.setDirectoryPath(ServiceManager.getRecentPlaces().getRecentPlaces().get(0)));
-					
+				if (quickFileWidget != null && ServiceManager.getRecentPlaces() != null) {
+
+					List<String> recentPlaces = ServiceManager.getRecentPlaces().getRecentPlaces();
+					if (recentPlaces != null && !recentPlaces.isEmpty()) {
+						Display.getDefault().asyncExec(() ->quickFileWidget.setDirectoryPath(ServiceManager.getRecentPlaces().getRecentPlaces().get(0)));
+					}
+
 				}
 			}
 		};
