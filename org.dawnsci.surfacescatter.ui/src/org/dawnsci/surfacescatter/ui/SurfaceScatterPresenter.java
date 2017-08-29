@@ -196,7 +196,7 @@ public class SurfaceScatterPresenter {
 					
 					String content = new String(Files.readAllBytes(from), charset);
 					
-					String[] tifNames = StringUtils.substringsBetween(content, File.separator, ".tif");
+					String[] tifNames = StringUtils.substringsBetween(content, "/", ".tif");
 					
 					Dataset tifNamesDatasetOut = DatasetFactory.createFromObject(tifNames);
 					
@@ -220,17 +220,22 @@ public class SurfaceScatterPresenter {
 					
 					String content = new String(Files.readAllBytes(to), charset);
 					
-					String firstTifName = StringUtils.substringBetween(content, File.separator, ".tif");
+					String firstTifName = StringUtils.substringBetween(content, "/", ".tif");
 					
-					if(firstTifName.contains(File.separator)){
-						firstTifName = StringUtils.substringAfterLast(firstTifName, File.separator);
+					if(firstTifName.contains("/")){
+						firstTifName = StringUtils.substringAfterLast(firstTifName, "/");
 					}
 					
-					String pathNameToReplace = StringUtils.substringBetween(content, "\t", File.separator + firstTifName);
+					String pathNameToReplace = StringUtils.substringBetween(content, "\t", "/" + firstTifName);
 					
 					if(pathNameToReplace.contains("\t")){
 						pathNameToReplace = StringUtils.substringAfterLast(pathNameToReplace,"\t");
 					}
+					
+					//Dont mix linux and windows paths!
+					
+					imageFolderPath = imageFolderPath.replace("\\", "/");
+
 					content = content.replaceAll(pathNameToReplace, imageFolderPath);
 					
 					Files.write(to, content.getBytes(charset));
@@ -239,17 +244,17 @@ public class SurfaceScatterPresenter {
 					
 					//////////////////getting an array of .tifs
 					
-					String[] tifNames = StringUtils.substringsBetween(content, File.separator, ".tif");
+					String[] tifNames = StringUtils.substringsBetween(content, "/", ".tif");
 					String[] tifNamesOut = new String[tifNames.length];
 					
 					for(int w = 0; w<tifNames.length; w++){
 						String t = tifNames[w];
 						
-						if(t.contains(File.separator)){
-							t = StringUtils.substringAfterLast(t,File.separator);
+						if(t.contains("/")){
+							t = StringUtils.substringAfterLast(t,"/");
 						}
 						
-						t = imageFolderPath + File.separator + t +".tif";
+						t = imageFolderPath + "/" + t +".tif";
 						
 						System.out.println(t);
 						
@@ -823,7 +828,13 @@ public class SurfaceScatterPresenter {
 			if(pathNameToReplace.contains("\t")){
 				pathNameToReplace = StringUtils.substringAfterLast(pathNameToReplace,"\t");
 			}
-			content = content.replaceAll(pathNameToReplace, stm.getImageFolderPath());
+			
+			String imFolPath = stm.getImageFolderPath();
+			//Dont mix linux and windows paths!
+			
+			imFolPath = imFolPath.replace("\\", "/");
+			
+			content = content.replaceAll(pathNameToReplace, imFolPath);
 			
 			Files.write(to, content.getBytes(charset));
 			
