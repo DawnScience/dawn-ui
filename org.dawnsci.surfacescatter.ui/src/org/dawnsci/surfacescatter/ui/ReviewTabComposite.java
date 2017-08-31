@@ -4,17 +4,11 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.util.ArrayList;
+
 import org.dawb.common.ui.widgets.ActionBarWrapper;
-import org.dawnsci.plotting.draw2d.swtxy.ImageTrace;
-import org.dawnsci.plotting.draw2d.swtxy.XYRegionGraph;
-import org.dawnsci.plotting.draw2d.swtxy.*;
-import org.dawnsci.plotting.draw2d.swtxy.selection.AbstractSelectionRegion;
-import org.dawnsci.plotting.system.LightWeightPlotViewer;
-import org.dawnsci.plotting.system.ServiceLoader;
 import org.dawnsci.surfacescatter.AxisEnums;
 import org.dawnsci.surfacescatter.AxisEnums.xAxes;
 import org.dawnsci.surfacescatter.AxisEnums.yAxes;
-import org.dawnsci.surfacescatter.ProcessingMethodsEnum.ProccessingMethod;
 import org.dawnsci.surfacescatter.CsdpFromNexusFile;
 import org.dawnsci.surfacescatter.CurveStitchDataPackage;
 import org.dawnsci.surfacescatter.GoodPointStripper;
@@ -26,26 +20,16 @@ import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.PlotType;
 import org.eclipse.dawnsci.plotting.api.PlottingFactory;
 import org.eclipse.dawnsci.plotting.api.axis.IAxis;
-import org.eclipse.dawnsci.plotting.api.histogram.IPaletteService;
-import org.eclipse.dawnsci.plotting.api.histogram.functions.FunctionContainer;
 import org.eclipse.dawnsci.plotting.api.region.IRegion;
-import org.eclipse.dawnsci.plotting.api.region.IRegionContainer;
 import org.eclipse.dawnsci.plotting.api.region.IRegion.RegionType;
 import org.eclipse.dawnsci.plotting.api.trace.ILineTrace;
-import org.eclipse.draw2d.IFigure;
 import org.eclipse.january.dataset.Dataset;
 import org.eclipse.january.dataset.DatasetFactory;
 import org.eclipse.january.dataset.IDataset;
-import org.eclipse.jface.action.ActionContributionItem;
-import org.eclipse.jface.action.IContributionItem;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
-import org.eclipse.swt.events.KeyAdapter;
-import org.eclipse.swt.events.KeyEvent;
-import org.eclipse.swt.events.KeyListener;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
-import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -59,10 +43,6 @@ import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableItem;
-import org.eclipse.ui.IActionBars;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.eclipse.draw2d.IFigure;
 
 public class ReviewTabComposite extends Composite{
 
@@ -78,7 +58,7 @@ public class ReviewTabComposite extends Composite{
     private Button save;
     private Button saveGoodPoints;
 	private Combo outputFormatSelection;
-    private IPlottingSystem<Composite> plotSystem;
+    private IPlottingSystem<Composite> plotSystemReview;
     private ReviewCurvesModel rcm;
 	private String nexusFolderPath;
 	private boolean errorDisplayFlag = true;
@@ -94,8 +74,6 @@ public class ReviewTabComposite extends Composite{
 	private boolean useGoodPointsOnly = false;
 	private Button showOnlyGoodPoints;
 	private IRegion imageNo;
-	
-//	private static final Logger logger = LoggerFactory.getLogger(LightWeightPlotViewer.class);
 
 	
 	public ReviewTabComposite(Composite parent, 
@@ -109,8 +87,8 @@ public class ReviewTabComposite extends Composite{
         this.ssp = ssp;
         
         try {
-        	plotSystem = PlottingFactory.createPlottingSystem();
-        	plotSystem.setTitle("Review Plot");
+        	plotSystemReview = PlottingFactory.createPlottingSystem();
+        	plotSystemReview.setTitle("Review Plot");
 			
         } 
         catch (Exception e2) {
@@ -158,7 +136,7 @@ public class ReviewTabComposite extends Composite{
 					}
 					
 					rodDisplayTable.removeAll();	
-					plotSystem.clear();
+					plotSystemReview.clear();
 					rcm.setCsdpList(null);
 					rcm.setCsdpLatest(null);
 					
@@ -261,7 +239,7 @@ public class ReviewTabComposite extends Composite{
 				
 				refreshTable();
 				refreshCurves();
-				plotSystem.autoscaleAxes();
+				plotSystemReview.autoscaleAxes();
 			}
 			
 			@Override
@@ -270,8 +248,6 @@ public class ReviewTabComposite extends Composite{
 			}
 		});
 
-		
-		
 		rodDisplayTable = new Table(rodSelector, SWT.CHECK | SWT.V_SCROLL | SWT.H_SCROLL | SWT.BORDER);
 		rodDisplayTable.setEnabled(true);
 		
@@ -441,13 +417,18 @@ public class ReviewTabComposite extends Composite{
 		ActionBarWrapper actionBarComposite = ActionBarWrapper.createActionBars(storedCurves, 
 																				null);
 		  
-	    plotSystem.createPlotPart(storedCurves, 
+	    plotSystemReview.createPlotPart(storedCurves, 
 	        					  "Stored Curves", 
 	        					  actionBarComposite, 
 	        					  PlotType.IMAGE, 
 	        					  null);
 		
-	    plotSystem.getPlotComposite().setLayoutData(storedCurvesData);
+	    plotSystemReview.getPlotComposite().setLayoutData(storedCurvesData);
+	    
+	    IAxis yAxisR = plotSystemReview.getSelectedYAxis();
+		if (yAxisR != null) {
+			yAxisR.setLog10(true);
+		}
 	    
         showErrors = new Button(methodSetting, SWT.PUSH);
         showErrors.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
@@ -565,7 +546,7 @@ public class ReviewTabComposite extends Composite{
 					
 					refreshCurves();
 					refreshTable();
-					plotSystem.autoscaleAxes();
+					plotSystemReview.autoscaleAxes();
 				}
 				catch(Exception b){
 					System.out.println(b.getMessage());
@@ -573,41 +554,41 @@ public class ReviewTabComposite extends Composite{
 			}
 		});
 	    
-	    plotSystem.setShowLegend(true);
+	    plotSystemReview.setShowLegend(true);
 	    
 	    form.setWeights(new int[] {25, 75});
 	   
 	    try {
-			imageNo = plotSystem.createRegion("Image", RegionType.XAXIS_LINE);
+			imageNo = plotSystemReview.createRegion("Image", RegionType.XAXIS_LINE);
 			imageNo.setShowPosition(true);
-			plotSystem.addRegion(imageNo);
+			plotSystemReview.addRegion(imageNo);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 
-	     
-	    Display.getCurrent().addFilter(SWT.KeyDown, new Listener(){
+	    Display.getCurrent().addFilter(SWT.ALL, new Listener(){
 	        @Override
 	        public void handleEvent(Event event){
 	        	
 				char key = event.character;
 				
-				
 				switch(key){
+				
 				case 'y':
-					if (plotSystem.getPlotType().is1D()) {
-		        		IAxis yAxis = plotSystem.getSelectedYAxis();
-						if (yAxis != null) {
-							yAxis.setLog10(!yAxis.isLog10());
+					if (plotSystemReview.getPlotType().is1D()) {
+		        		IAxis yAxisR = plotSystemReview.getSelectedYAxis();
+						if (yAxisR != null) {
+							yAxisR.setLog10(!yAxisR.isLog10());
 						}
 		        	}
 					break;
 					
 				case 'x':
-					if (plotSystem.getPlotType().is1D()) {
-		        		IAxis xAxis = plotSystem.getSelectedXAxis();
-		        		if (xAxis != null) {
-		        			xAxis.setLog10(!xAxis.isLog10());
+					if (plotSystemReview.getPlotType().is1D()){
+//							&& plotSystemReview.getPlotComposite().isFocusControl()) {
+		        		IAxis xAxisR = plotSystemReview.getSelectedXAxis();
+		        		if (xAxisR != null) {
+		        			xAxisR.setLog10(!xAxisR.isLog10());
 		        		}
 		        	}
 					break;
@@ -684,11 +665,11 @@ public class ReviewTabComposite extends Composite{
 	}
 
 	public IPlottingSystem<Composite> getPlotSystem() {
-		return plotSystem;
+		return plotSystemReview;
 	}
 
 	public void setPlotSystem(IPlottingSystem<Composite> plotSystem) {
-		this.plotSystem = plotSystem;
+		this.plotSystemReview = plotSystem;
 	}
 
 	public ReviewCurvesModel getRcm() {
@@ -733,10 +714,10 @@ public class ReviewTabComposite extends Composite{
 
 		RectangularROI r = new RectangularROI(j ,0.1,0,0.1,0);
 
-		if(plotSystem.getRegion("Image")== null){
+		if(plotSystemReview.getRegion("Image")== null){
 			
 			try{
-				imageNo = plotSystem.createRegion("Image", RegionType.XAXIS_LINE);
+				imageNo = plotSystemReview.createRegion("Image", RegionType.XAXIS_LINE);
 			}
 			catch(Exception x){
 				
@@ -746,7 +727,7 @@ public class ReviewTabComposite extends Composite{
 			imageNo.setShowPosition(true);
 			imageNo.setROI(r);
 			
-			plotSystem.addRegion(imageNo);
+			plotSystemReview.addRegion(imageNo);
 			imageNo.setShowPosition(true);
 		}
 		
@@ -963,7 +944,7 @@ public class ReviewTabComposite extends Composite{
 	
 	private ILineTrace buildLineTrace(CurveStitchDataPackage csdp){
 
-		ILineTrace lt =	plotSystem.createLineTrace(csdp.getRodName());
+		ILineTrace lt =	plotSystemReview.createLineTrace(csdp.getRodName());
 		
 		IDataset x = DatasetFactory.zeros(new int[] {2,2}, Dataset.ARRAYFLOAT64);
 		IDataset y[] = new IDataset[2];
@@ -1025,14 +1006,14 @@ public class ReviewTabComposite extends Composite{
 		
 	private void refreshCurves(){
 		
-		plotSystem.clear();
+		plotSystemReview.clear();
 		
 		if(!rcm.getCsdpList().isEmpty()){
 			for(CurveStitchDataPackage csdp : rcm.getCsdpList()){
 				
 				ILineTrace lt = buildLineTrace(csdp);
 				
-				plotSystem.addTrace(lt);
+				plotSystemReview.addTrace(lt);
 
 				
 			}
@@ -1053,7 +1034,7 @@ public class ReviewTabComposite extends Composite{
 	
 	private void refreshCurvesFromTable(){
 		
-		plotSystem.clear();
+		plotSystemReview.clear();
 		
 		for(TableItem fd : rodDisplayTable.getItems()){
 			if(fd.getChecked()){
@@ -1065,8 +1046,8 @@ public class ReviewTabComposite extends Composite{
 				
 				ILineTrace lt =	buildLineTrace(csdp);
 				
-				plotSystem.addTrace(lt);
-				plotSystem.autoscaleAxes();
+				plotSystemReview.addTrace(lt);
+				plotSystemReview.autoscaleAxes();
 			}
 		}
 	}
