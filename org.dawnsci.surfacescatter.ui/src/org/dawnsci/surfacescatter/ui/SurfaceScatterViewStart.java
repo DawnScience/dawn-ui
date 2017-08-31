@@ -747,6 +747,9 @@ public class SurfaceScatterViewStart extends Dialog {
 						
 					}
 					break;
+					
+				default:
+					break;
 			
 				}
 	        }

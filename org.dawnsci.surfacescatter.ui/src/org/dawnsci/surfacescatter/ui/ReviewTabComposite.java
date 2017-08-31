@@ -5,9 +5,16 @@ import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.util.ArrayList;
 import org.dawb.common.ui.widgets.ActionBarWrapper;
+import org.dawnsci.plotting.draw2d.swtxy.ImageTrace;
+import org.dawnsci.plotting.draw2d.swtxy.XYRegionGraph;
+import org.dawnsci.plotting.draw2d.swtxy.*;
+import org.dawnsci.plotting.draw2d.swtxy.selection.AbstractSelectionRegion;
+import org.dawnsci.plotting.system.LightWeightPlotViewer;
+import org.dawnsci.plotting.system.ServiceLoader;
 import org.dawnsci.surfacescatter.AxisEnums;
 import org.dawnsci.surfacescatter.AxisEnums.xAxes;
 import org.dawnsci.surfacescatter.AxisEnums.yAxes;
+import org.dawnsci.surfacescatter.ProcessingMethodsEnum.ProccessingMethod;
 import org.dawnsci.surfacescatter.CsdpFromNexusFile;
 import org.dawnsci.surfacescatter.CurveStitchDataPackage;
 import org.dawnsci.surfacescatter.GoodPointStripper;
@@ -18,26 +25,44 @@ import org.eclipse.dawnsci.analysis.dataset.roi.RectangularROI;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.PlotType;
 import org.eclipse.dawnsci.plotting.api.PlottingFactory;
+import org.eclipse.dawnsci.plotting.api.axis.IAxis;
+import org.eclipse.dawnsci.plotting.api.histogram.IPaletteService;
+import org.eclipse.dawnsci.plotting.api.histogram.functions.FunctionContainer;
 import org.eclipse.dawnsci.plotting.api.region.IRegion;
+import org.eclipse.dawnsci.plotting.api.region.IRegionContainer;
 import org.eclipse.dawnsci.plotting.api.region.IRegion.RegionType;
 import org.eclipse.dawnsci.plotting.api.trace.ILineTrace;
+import org.eclipse.draw2d.IFigure;
 import org.eclipse.january.dataset.Dataset;
 import org.eclipse.january.dataset.DatasetFactory;
 import org.eclipse.january.dataset.IDataset;
+import org.eclipse.jface.action.ActionContributionItem;
+import org.eclipse.jface.action.IContributionItem;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
+import org.eclipse.swt.events.KeyAdapter;
+import org.eclipse.swt.events.KeyEvent;
+import org.eclipse.swt.events.KeyListener;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Group;
+import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableItem;
+import org.eclipse.ui.IActionBars;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.eclipse.draw2d.IFigure;
 
 public class ReviewTabComposite extends Composite{
 
@@ -69,6 +94,9 @@ public class ReviewTabComposite extends Composite{
 	private boolean useGoodPointsOnly = false;
 	private Button showOnlyGoodPoints;
 	private IRegion imageNo;
+	
+//	private static final Logger logger = LoggerFactory.getLogger(LightWeightPlotViewer.class);
+
 	
 	public ReviewTabComposite(Composite parent, 
 							  int style,
@@ -556,6 +584,41 @@ public class ReviewTabComposite extends Composite{
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+
+	     
+	    Display.getCurrent().addFilter(SWT.KeyDown, new Listener(){
+	        @Override
+	        public void handleEvent(Event event){
+	        	
+				char key = event.character;
+				
+				
+				switch(key){
+				case 'y':
+					if (plotSystem.getPlotType().is1D()) {
+		        		IAxis yAxis = plotSystem.getSelectedYAxis();
+						if (yAxis != null) {
+							yAxis.setLog10(!yAxis.isLog10());
+						}
+		        	}
+					break;
+					
+				case 'x':
+					if (plotSystem.getPlotType().is1D()) {
+		        		IAxis xAxis = plotSystem.getSelectedXAxis();
+		        		if (xAxis != null) {
+		        			xAxis.setLog10(!xAxis.isLog10());
+		        		}
+		        	}
+					break;
+					
+				default:
+					break;
+			
+				}
+	        }
+	    });
+
 	    
 	}
 	   
@@ -643,6 +706,8 @@ public class ReviewTabComposite extends Composite{
 	public void setNexusFolderPath(String nexusFolderPath) {
 		this.nexusFolderPath = nexusFolderPath;
 	}
+	
+	
 	
 	
 	private void saveRod(boolean writeOnlyGoodPoints){
