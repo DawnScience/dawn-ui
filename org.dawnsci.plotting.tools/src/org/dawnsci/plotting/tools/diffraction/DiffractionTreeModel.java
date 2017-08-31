@@ -22,6 +22,7 @@ import javax.measure.Unit;
 
 import si.uom.SI;
 import tec.uom.se.quantity.Quantities;
+import tec.uom.se.spi.DefaultServiceProvider;
 import tec.uom.se.unit.Units;
 import si.uom.NonSI;
 
@@ -729,7 +730,7 @@ public class DiffractionTreeModel<Q extends Quantity<Q>> extends AbstractNodeMod
 			                                 String unitName) {
 
 		Unit<Length> unit = ToolUtils.MILLIMETRE.multiply(size.getValue(ToolUtils.MILLIMETRE));
-		ToolUtils.getUOMServiceProvider().getUnitFormatService().getUnitFormat().label(unit, unitName);
+		new DefaultServiceProvider().getUnitFormatService().getUnitFormat().label(unit, unitName);
 		coord.setUnits(ToolUtils.MILLIMETRE, unit);
 		if (viewer != null)
 			viewer.update(coord, new String[] { "Value", "Unit" });

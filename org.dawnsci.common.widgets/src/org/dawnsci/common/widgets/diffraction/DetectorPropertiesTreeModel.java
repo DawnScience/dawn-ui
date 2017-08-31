@@ -3,7 +3,6 @@ package org.dawnsci.common.widgets.diffraction;
 import javax.measure.Unit;
 import javax.measure.quantity.Angle;
 import javax.measure.quantity.Length;
-import javax.measure.spi.ServiceProvider;
 
 import org.dawnsci.common.widgets.tree.AbstractNodeModel;
 import org.dawnsci.common.widgets.tree.NumericNode;
@@ -85,19 +84,9 @@ public class DetectorPropertiesTreeModel extends AbstractNodeModel {
 			String unitName) {
 
 		Unit<Length> unit = MILLIMETRE.multiply(size);
-		getUOMServiceProvider().getUnitFormatService().getUnitFormat().label(unit, unitName);
+		new DefaultServiceProvider().getUnitFormatService().getUnitFormat().label(unit, unitName);
 		coord.setUnits(MILLIMETRE, unit);
 		return unit;
-	}
-
-	private ServiceProvider getUOMServiceProvider() {
-		ServiceProvider serviceProvider = null;
-		try {
-			serviceProvider = ServiceProvider.current();
-		} catch (IllegalStateException e) {
-			serviceProvider = new DefaultServiceProvider();
-		}
-		return serviceProvider;
 	}
 
 	private NumericNode<Angle> createOrientationNode(String label, 

@@ -19,6 +19,7 @@ import javax.measure.Unit;
 import javax.swing.tree.TreeNode;
 
 import si.uom.SI;
+import tec.uom.se.unit.Units;
 import si.uom.NonSI;
 
 import org.dawb.common.ui.menu.MenuAction;
@@ -459,7 +460,7 @@ public class RegionEditorTool extends AbstractToolPage implements IResettableExp
 						if (child instanceof NumericNode<?>) {
 							NumericNode<?> numNode = (NumericNode<?>) child;
 							Unit<?> unit = numNode.getUnit();
-							if (unit.equals(ToolUtils.getUOMServiceProvider().getQuantityFactory(Dimensionless.class).getSystemUnit())) {
+							if (unit.equals(Units.getInstance().getUnit(Dimensionless.class).getSystemUnit())) {
 								if (numNode.getLabel().contains(RegionEditorNodeFactory.INTENSITY))
 									numNode.setFormat(maxIntensityFormat);
 								else if (numNode.getLabel().contains(RegionEditorNodeFactory.SUM))

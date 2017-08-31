@@ -14,7 +14,6 @@ import javax.measure.Unit;
 import javax.measure.quantity.Dimensionless;
 import javax.measure.quantity.Energy;
 import javax.measure.quantity.Length;
-import javax.measure.spi.ServiceProvider;
 
 import org.dawb.common.ui.menu.MenuAction;
 import org.dawb.common.ui.plot.roi.data.LinearROIData;
@@ -80,17 +79,7 @@ public class ToolUtils {
 	/**
 	 * Dimensionless unit
 	 */
-	public static final Unit<Dimensionless> DIMENSIONLESS_UNIT = getUOMServiceProvider().getQuantityFactory(Dimensionless.class).getSystemUnit();
-
-	public static ServiceProvider getUOMServiceProvider() {
-		ServiceProvider serviceProvider = null;
-		try {
-			serviceProvider = ServiceProvider.current();
-		} catch (IllegalStateException e) {
-			serviceProvider = new DefaultServiceProvider();
-		}
-		return serviceProvider;
-	}
+	public static final Unit<Dimensionless> DIMENSIONLESS_UNIT = Units.getInstance().getUnit(Dimensionless.class).getSystemUnit();
 
 	/**
 	 * 

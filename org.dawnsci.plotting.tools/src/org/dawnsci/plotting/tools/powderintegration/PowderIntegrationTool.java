@@ -16,6 +16,7 @@ import java.util.List;
 import javax.measure.format.UnitFormat;
 
 import si.uom.NonSI;
+import tec.uom.se.spi.DefaultServiceProvider;
 
 import org.dawb.common.ui.menu.MenuAction;
 import org.dawb.common.ui.plot.tools.IDataReductionToolPage;
@@ -573,7 +574,7 @@ public class PowderIntegrationTool extends AbstractToolPage implements IDataRedu
 		if (firstExportIteration) {
 			axis = axis.squeeze();
 			String s = file.createDataset(axis.getName(),  axis, resultGroup);
-			UnitFormat unitFormat = ToolUtils.getUOMServiceProvider().getUnitFormatService().getUnitFormat();
+			UnitFormat unitFormat = new DefaultServiceProvider().getUnitFormatService().getUnitFormat();
 			
 			switch (model.getAxisType()) {
 			case Q:

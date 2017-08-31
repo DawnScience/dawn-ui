@@ -22,6 +22,7 @@ import javax.measure.Unit;
 import javax.swing.tree.TreeNode;
 
 import si.uom.SI;
+import tec.uom.se.unit.Units;
 import si.uom.NonSI;
 
 import org.dawnsci.common.widgets.tree.AbstractNodeModel;
@@ -110,7 +111,7 @@ public class RegionEditorTreeModel extends AbstractNodeModel {
 		Set<Entry<String,Object>> set = roiInfos.entrySet();
 		for (Entry<String, Object> entry : set) {
 			String key = entry.getKey();
-			Unit<Dimensionless> dimensionLess = ToolUtils.getUOMServiceProvider().getQuantityFactory(Dimensionless.class).getSystemUnit();
+			Unit<Dimensionless> dimensionLess = Units.getInstance().getUnit(Dimensionless.class).getSystemUnit();
 			if (key.contains(RegionEditorNodeFactory.ANGLE)) {
 				if (node.isAngleInRadian())
 					createAngleNode(node, entry.getKey(), true, incrementAngle, pointFormat, SI.RADIAN, Math.toRadians((Double)entry.getValue()));
@@ -214,7 +215,7 @@ public class RegionEditorTreeModel extends AbstractNodeModel {
 					}
 				});
 			}
-		} else if (unit.isCompatible(ToolUtils.getUOMServiceProvider().getQuantityFactory(Dimensionless.class).getSystemUnit())) {
+		} else if (unit.isCompatible(Units.getInstance().getUnit(Dimensionless.class).getSystemUnit())) {
 			NumericNode<Dimensionless> node = new NumericNode<Dimensionless>(nodeName, regionNode, (Unit<Dimensionless>) unit);
 			registerNode(node);
 			node.setEditable(editable);
