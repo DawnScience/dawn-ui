@@ -142,8 +142,8 @@ public class PlotController implements IPlotController {
 			currentMode = plotObject.getPlotMode();
 			if (currentMode != localMode) {
 				system.reset();
-				system.getSelectedXAxis().setTitle("");
-				system.getSelectedYAxis().setTitle("");
+				if (system.getSelectedXAxis() != null) system.getSelectedXAxis().setTitle("");
+				if (system.getSelectedYAxis() != null) system.getSelectedYAxis().setTitle("");
 				system.setTitle("");
 			}
 			localMode = currentMode;
@@ -162,8 +162,8 @@ public class PlotController implements IPlotController {
 		
 		if (state.isEmpty()) {
 			system.reset();
-			system.getSelectedXAxis().setTitle("");
-			system.getSelectedYAxis().setTitle("");
+			if (system.getSelectedXAxis() != null) system.getSelectedXAxis().setTitle("");
+			if (system.getSelectedYAxis() != null) system.getSelectedYAxis().setTitle("");
 			system.setTitle("");
 		}
 		updatePlotStateInJob(state, currentMode);
