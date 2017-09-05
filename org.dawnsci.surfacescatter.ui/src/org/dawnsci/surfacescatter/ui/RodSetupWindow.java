@@ -19,6 +19,7 @@ public class RodSetupWindow {
 	private Combo correctionsDropDown;
 	private Group experimentalSetup;
 	private Group methodSetting;
+	private Group parametersAlias;
 	private Group parametersSetting;
 	private AnglesAliasWindow anglesAliasWindow;
 		
@@ -99,18 +100,21 @@ public class RodSetupWindow {
 			correctionsDropDown.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 	
 			
-			Group parametersAlias = new Group(experimentalSetup, SWT.FILL);
+			parametersAlias = new Group(experimentalSetup, SWT.FILL);
 			GridLayout parametersAliasLayout = new GridLayout(1, true);
 			GridData parametersAliasData = new GridData(GridData.FILL_BOTH);
 			parametersAliasData.minimumWidth = 50;
 			parametersAlias.setLayout(parametersAliasLayout);
 			parametersAlias.setLayoutData(parametersAliasData);
 			parametersAlias.setText("Parameter Aliases");
+			parametersAlias.setEnabled(false);
+			
 			
 			anglesAliasWindow = new AnglesAliasWindow(parametersAlias, SWT.FILL, ssp, ssvs);
 			anglesAliasWindow.setLayout(new GridLayout());
 			anglesAliasWindow.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-			
+			anglesAliasWindow.setEnabled(false);
+			anglesAliasWindow.switchEnbaled(false);
 		
 			parametersSetting = new Group(experimentalSetup, SWT.FILL);
 			GridLayout parametersSettingLayout = new GridLayout(1, true);
@@ -148,9 +152,20 @@ public class RodSetupWindow {
 			r.setEnabled(enabled);
 		}
 		
+		for (Control r: parametersAlias.getChildren()){
+			r.setEnabled(enabled);
+		}
+		
+		for (Control r: anglesAliasWindow.getChildren()){
+			r.setEnabled(enabled);
+		}
+		
+		
 		paramField.setEnabled(enabled);
 		parametersSetting.setEnabled(enabled);
-		
+		parametersAlias.setEnabled(enabled);
+		anglesAliasWindow.setEnabled(enabled);
+		anglesAliasWindow.switchEnbaled(enabled);
 	}
 	
 	public DatDisplayer getDatDisplayer() {

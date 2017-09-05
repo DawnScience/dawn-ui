@@ -1,5 +1,6 @@
 package org.dawnsci.surfacescatter.ui;
 
+import java.util.ArrayList;
 import java.util.EnumMap;
 import org.apache.commons.lang.ArrayUtils;
 import org.dawnsci.surfacescatter.ReflectivityAngleAliasEnum;
@@ -38,6 +39,8 @@ public class AnglesAliasWindow extends Composite{
 	private Text fluxPath;
 	private String fluxpathStorage = " ";
 	private SurfaceScatterViewStart ssvs;
+	private ArrayList<InputTileGenerator> sxrdFields;
+	private ArrayList<InputTileGenerator> reflectivityFields;
 
 	public AnglesAliasWindow(Composite parent, 
 									  int style,
@@ -70,6 +73,10 @@ public class AnglesAliasWindow extends Composite{
 		sXRDMap = new EnumMap<SXRDAngleAliasEnum, Combo>(SXRDAngleAliasEnum.class);
 		angleCombosSXRD = new Combo[SXRDAngleAliasEnum.values().length-1];
 	    
+		sxrdFields = new ArrayList<>();
+		reflectivityFields= new ArrayList<>();
+
+
 		for(int i = 0; i<angleCombosSXRD.length; i++){
 			SXRDAngleAliasEnum key = SXRDAngleAliasEnum.values()[i];
 			if(key != SXRDAngleAliasEnum.NULL){
@@ -90,6 +97,8 @@ public class AnglesAliasWindow extends Composite{
 						
 					}
 				});
+				
+				sxrdFields.add(aT);
 			}	
 		}
 		
@@ -174,6 +183,8 @@ public class AnglesAliasWindow extends Composite{
 						
 					}
 				});
+				
+				reflectivityFields.add(aT);
 			}
 		}
 		
@@ -226,6 +237,14 @@ public class AnglesAliasWindow extends Composite{
 	
 	public TabFolder getTabFolder(){
 		return folder;
+	}
+	
+	public void switchEnbaled(boolean en){
+		
+		for(InputTileGenerator a : sxrdFields){
+			a.setEnabled(en, false);
+		}
+		
 	}
 	
 	public void updateAllWithOptions(String[] options,
