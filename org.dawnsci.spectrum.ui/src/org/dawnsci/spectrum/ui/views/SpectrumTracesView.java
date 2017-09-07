@@ -120,7 +120,7 @@ public class SpectrumTracesView extends ViewPart {
 
 	@Override
 	public void createPartControl(Composite parent) {
-		
+		logger.info("Perspective Created: Trace");
 		//Create table
 		viewer = CheckboxTableViewer.newCheckList(parent, SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL);
 		viewer.setContentProvider(new ViewContentProvider());

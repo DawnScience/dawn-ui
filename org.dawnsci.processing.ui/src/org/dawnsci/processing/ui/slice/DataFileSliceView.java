@@ -143,7 +143,7 @@ public class DataFileSliceView extends ViewPart {
 
 	@Override
 	public void createPartControl(Composite parent) {
-		
+		logger.info("Perspective Created: Processing");
 		fileManager = new FileManager(new SetupContextHelper());
 		
 		parent.setLayout(new GridLayout());

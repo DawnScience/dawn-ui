@@ -1216,6 +1216,7 @@ public class ToolPageView extends ViewPart implements IPartListener, IToolChange
 		final Action cloneAction = new Action("Open '"+tool.getTitle()+"' in dedicated view") {
 			public void run() {
 				try {
+					logger.info("Tool opened in dedicated view : " + tool.getTitle());
 					createToolInDedicatedView(tool);
 				} catch (Exception e) {
 					logger.error("Cannot open tool on its own page!", e);

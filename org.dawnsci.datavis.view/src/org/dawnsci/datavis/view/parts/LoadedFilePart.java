@@ -96,6 +96,7 @@ public class LoadedFilePart {
 
 	@PostConstruct
 	public void createComposite(Composite parent) {
+		logger.info("Perspective Created: DataVis");
 		parent.setLayout(new FormLayout());
 		FormData checkForm = new FormData();
 		checkForm.top = new FormAttachment(0,0);
