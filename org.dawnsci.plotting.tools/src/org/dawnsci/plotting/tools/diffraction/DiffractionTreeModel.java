@@ -8,6 +8,8 @@
  */
 package org.dawnsci.plotting.tools.diffraction;
 
+import static tec.uom.se.unit.Units.METRE;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -42,6 +44,7 @@ import org.dawnsci.plotting.tools.preference.DiffractionToolConstants;
 import org.dawnsci.plotting.tools.preference.detector.DiffractionDetector;
 import org.dawnsci.plotting.tools.preference.detector.DiffractionDetectorHelper;
 import org.dawnsci.plotting.tools.utils.ToolUtils;
+import org.eclipse.dawnsci.analysis.api.Constants;
 import org.eclipse.dawnsci.analysis.api.diffraction.DetectorProperties;
 import org.eclipse.dawnsci.analysis.api.diffraction.DetectorPropertyEvent;
 import org.eclipse.dawnsci.analysis.api.diffraction.DiffractionCrystalEnvironment;
@@ -397,11 +400,12 @@ public class DiffractionTreeModel<Q extends Quantity<Q>> extends AbstractNodeMod
         experimentalInfo.setDefaultExpanded(true);
        
 		final String format = Activator.getPlottingPreferenceStore().getString(DiffractionToolConstants.NUMBER_FORMAT);
-        lambda = new NumericNode<Length>("Wavelength", experimentalInfo, NonSI.ANGSTROM, format);
+
+        lambda = new NumericNode<Length>("Wavelength", experimentalInfo, Constants.ANGSTROM, format);
         registerNode(lambda);
         if (dce!=null) {
-           	lambda.setDefault(odce.getWavelength(), NonSI.ANGSTROM);
-           	lambda.setValue(dce.getWavelength(), NonSI.ANGSTROM);
+           	lambda.setDefault(odce.getWavelength(), Constants.ANGSTROM);
+           	lambda.setValue(dce.getWavelength(), Constants.ANGSTROM);
         	lambda.addAmountListener(new AmountListener<Length>() {		
 				@Override
 				public void amountChanged(AmountEvent<Length> evt) {
@@ -414,11 +418,11 @@ public class DiffractionTreeModel<Q extends Quantity<Q>> extends AbstractNodeMod
         lambda.setFormat("#0.####");
         lambda.setLowerBound(0);
         lambda.setUpperBound(1000); // It can be ev as well.
-        lambda.setUnits(NonSI.ANGSTROM, NonSI.ELECTRON_VOLT, ToolUtils.KILO_ELECTRON_VOLT);
+        lambda.setUnits(Constants.ANGSTROM, NonSI.ELECTRON_VOLT, ToolUtils.KILO_ELECTRON_VOLT);
         lambda.addUnitListener(new UnitListener() {	
 			@Override
 			public void unitChanged(UnitEvent<? extends Quantity> evt) {
-				if (evt.getUnit().equals(NonSI.ANGSTROM)) {
+				if (evt.getUnit().equals(Constants.ANGSTROM)) {
 			        lambda.setIncrement(0.01);
 			        lambda.setFormat("#0.####");
 			        lambda.setLowerBound(0);
@@ -629,7 +633,7 @@ public class DiffractionTreeModel<Q extends Quantity<Q>> extends AbstractNodeMod
 	}
 
 	private void setWavelength(DiffractionCrystalEnvironment dce) {
-		double wave = lambda.getValue(NonSI.ANGSTROM);
+		double wave = lambda.getValue(Constants.ANGSTROM);
 		try {
 			canUpdate = false;
 			dce.setWavelength(wave);
@@ -686,7 +690,7 @@ public class DiffractionTreeModel<Q extends Quantity<Q>> extends AbstractNodeMod
 				if (!canUpdate)        return;
 				if (evt.hasWavelengthChanged()) {
 					int unit = lambda.getUnitIndex();
-					lambda.setValueQuietly(dce.getWavelength(), NonSI.ANGSTROM);
+					lambda.setValueQuietly(dce.getWavelength(), Constants.ANGSTROM);
 					lambda.setUnitIndex(unit);
 					
 					if (viewer!=null) viewer.refresh(lambda);

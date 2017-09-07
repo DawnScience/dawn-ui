@@ -22,6 +22,7 @@ import org.dawb.common.ui.menu.MenuAction;
 import org.dawb.common.ui.plot.roi.ResolutionRing;
 import org.dawnsci.plotting.tools.Activator;
 import org.dawnsci.plotting.tools.ServiceLoader;
+import org.eclipse.dawnsci.analysis.api.Constants;
 import org.eclipse.dawnsci.analysis.api.diffraction.DetectorProperties;
 import org.eclipse.dawnsci.analysis.api.diffraction.DetectorPropertyEvent;
 import org.eclipse.dawnsci.analysis.api.diffraction.DetectorPropertyEvent.EventType;
@@ -280,7 +281,7 @@ public class DiffractionImageAugmenter implements IDetectorPropertyListener, IDi
 	
 			int count = 0;
 			for (IHKL hkl : spacing.getHKLs()) {
-				final double d = Double.valueOf(((HKL)hkl).getD().to(NonSI.ANGSTROM).getValue().doubleValue());
+				final double d = Double.valueOf(((HKL)hkl).getD().to(Constants.ANGSTROM).getValue().doubleValue());
 				
 				boolean highlight = count >= maxRings;
 				if (rings != null && !rings.isEmpty()) highlight = rings.contains(count);

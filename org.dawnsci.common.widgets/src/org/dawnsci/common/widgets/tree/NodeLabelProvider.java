@@ -11,6 +11,7 @@ package org.dawnsci.common.widgets.tree;
 import java.text.DecimalFormat;
 
 import javax.measure.Quantity;
+import javax.measure.Unit;
 
 import org.dawnsci.common.widgets.Activator;
 import org.dawnsci.common.widgets.tree.LabelNode;
@@ -116,10 +117,12 @@ public class NodeLabelProvider extends ColumnLabelProvider implements IStyledLab
 			return ret;
 			
 		case 3: // Unit
+			Unit<?> unit = node.getUnit();
+			String symbol = unit.getSymbol() != null ? unit.getSymbol() : unit.toString();
 			if (node.isEditable()) {
-				return ret.append(node.getUnit().toString());
+				return ret.append(symbol);
 			} else {
-				return ret.append(node.getUnit().toString(), StyledString.DECORATIONS_STYLER);
+				return ret.append(symbol, StyledString.DECORATIONS_STYLER);
 			}
 
 		}

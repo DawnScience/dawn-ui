@@ -34,7 +34,7 @@ import tec.uom.se.quantity.Quantities;
  *
  */
 @SuppressWarnings({"rawtypes", "unchecked"})
-public class NumericNode<Q extends Quantity<?>> extends LabelNode {
+public class NumericNode<Q extends Quantity<Q>> extends LabelNode {
 			
 	private Quantity     value;  // Intentionally not E
 	private Quantity<?>  defaultValue;
@@ -325,14 +325,14 @@ public class NumericNode<Q extends Quantity<?>> extends LabelNode {
 
 	public void setUnitIndex(int index) {
 		if (allowedUnits==null) return;
-		final Unit<?> to = allowedUnits.get(index);
+		final Unit to = allowedUnits.get(index);
 		if (value==null&&defaultValue!=null) {
 			value = Quantities.getQuantity(defaultValue.getValue(), defaultValue.getUnit());
 		}
 		if (value!=null) {
 			// BODGE for A and eV !
-			if (isInAngstroms(value, to)) {	
-				value = Quantities.getQuantity(Constants.ℎ.multiply(Constants.c).divide(value).getValue().doubleValue(), to); 
+			if (isInAngstroms(value, to)) {
+				value = Constants.ℎ.multiply(Constants.c).divide(value).to(to);
 			} else {
 			    value = value.to(to);
 			}
@@ -341,7 +341,7 @@ public class NumericNode<Q extends Quantity<?>> extends LabelNode {
 	}
 
 	private boolean isInAngstroms(Quantity val, Unit to) {
-		boolean isAngstrom = allowedUnits!=null && allowedUnits.contains(NonSI.ANGSTROM) && allowedUnits.contains(NonSI.ELECTRON_VOLT);
+		boolean isAngstrom = allowedUnits!=null && allowedUnits.contains(Constants.ANGSTROM) && allowedUnits.contains(NonSI.ELECTRON_VOLT);
 	    if (!isAngstrom) return false;
 	    return !val.getUnit().isCompatible(to); // Only convert incompatible.
 	}
@@ -404,7 +404,6 @@ public class NumericNode<Q extends Quantity<?>> extends LabelNode {
 	}
 	public void setUnits(Unit... allowedUnits) {
 		this.allowedUnits = Arrays.asList(allowedUnits);
-		
 		if (value!=null)        {
 			value = convertToNewSet(value, allowedUnits);
 			fireAmountChanged(value);
@@ -426,7 +425,10 @@ public class NumericNode<Q extends Quantity<?>> extends LabelNode {
 
 	public String[] getUnitsString() {
 		final String[] ret = new String[allowedUnits.size()];
-		for (int i = 0; i < ret.length; i++) ret[i] = allowedUnits.get(i).toString();
+		for (int i = 0; i < ret.length; i++) {
+			Unit<?> unit = allowedUnits.get(i);
+			ret[i] = unit.getSymbol() != null ? unit.getSymbol() : unit.toString();
+		}
 		return ret;
 	}
 

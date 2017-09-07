@@ -26,8 +26,8 @@ import org.dawnsci.common.widgets.dialog.FileSelectionDialog;
 import org.dawnsci.plotting.tools.Activator;
 import org.dawnsci.plotting.tools.ServiceLoader;
 import org.dawnsci.plotting.tools.diffraction.DiffractionUtils;
-import org.dawnsci.plotting.tools.utils.ToolUtils;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.dawnsci.analysis.api.Constants;
 import org.eclipse.dawnsci.analysis.api.diffraction.DetectorProperties;
 import org.eclipse.dawnsci.analysis.api.io.ILoaderService;
 import org.eclipse.dawnsci.hdf.object.IHierarchicalDataFile;
@@ -578,7 +578,7 @@ public class PowderIntegrationTool extends AbstractToolPage implements IDataRedu
 			
 			switch (model.getAxisType()) {
 			case Q:
-				String angstrom = unitFormat.format(NonSI.ANGSTROM.inverse());
+				String angstrom = unitFormat.format(Constants.ANGSTROM.inverse());
 				file.setAttribute(s, "units", angstrom);
 				break;
 			case ANGLE:
@@ -586,7 +586,7 @@ public class PowderIntegrationTool extends AbstractToolPage implements IDataRedu
 				file.setAttribute(s, "units", degrees);
 				break;
 			case RESOLUTION:
-				String ang = unitFormat.format(NonSI.ANGSTROM);
+				String ang = unitFormat.format(Constants.ANGSTROM);
 				file.setAttribute(s, "units", ang);
 				break;
 			case PIXEL:
