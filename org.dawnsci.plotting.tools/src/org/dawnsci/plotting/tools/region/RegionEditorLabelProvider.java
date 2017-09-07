@@ -11,6 +11,7 @@ package org.dawnsci.plotting.tools.region;
 import java.text.DecimalFormat;
 
 import javax.measure.Quantity;
+import javax.measure.Unit;
 
 import org.dawnsci.common.widgets.Activator;
 import org.dawnsci.common.widgets.tree.ComboNode;
@@ -75,11 +76,10 @@ public class RegionEditorLabelProvider extends ColumnLabelProvider implements IS
 
 	private StyledString getStyledText(StyledString ret, NumericNode<? extends Quantity> node) {
 
-		
 		String pattern = node.getFormat();
 		DecimalFormat format = new DecimalFormat(pattern);
 		
-        switch(column) {
+		switch(column) {
 		case 0: // Name
 			return ret.append(node.getLabel(), StyledString.QUALIFIER_STYLER);
 		case 1: // Value
@@ -101,10 +101,12 @@ public class RegionEditorLabelProvider extends ColumnLabelProvider implements IS
 			}
 			return ret;
 		case 2: // Unit
+			Unit<?> unit = node.getUnit();
+			String symbol = unit.getSymbol() != null ? unit.getSymbol() : unit.toString();
 			if (node.isEditable()) {
-				return ret.append(node.getUnit().toString());
+				return ret.append(symbol);
 			} else {
-				return ret.append(node.getUnit().toString(), StyledString.DECORATIONS_STYLER);
+				return ret.append(symbol, StyledString.DECORATIONS_STYLER);
 			}
 		}
 		return ret;
