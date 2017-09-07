@@ -14,8 +14,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import si.uom.NonSI;
-
 import javax.vecmath.Vector3d;
 
 import org.dawb.common.ui.menu.MenuAction;

@@ -8,8 +8,6 @@
  */
 package org.dawnsci.plotting.tools.diffraction;
 
-import static tec.uom.se.unit.Units.METRE;
-
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
