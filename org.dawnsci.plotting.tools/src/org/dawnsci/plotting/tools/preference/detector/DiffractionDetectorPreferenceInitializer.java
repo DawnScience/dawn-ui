@@ -41,7 +41,6 @@ public class DiffractionDetectorPreferenceInitializer extends AbstractPreference
 	public static DiffractionDetectors getDefaultDetectors(){
 		DiffractionDetectors dds = new DiffractionDetectors();
 		
-		
 		// Pilatus 2M
 		DiffractionDetector dd0 = new DiffractionDetector();
 		dd0.setDetectorName("Pilatus P3-2M");
