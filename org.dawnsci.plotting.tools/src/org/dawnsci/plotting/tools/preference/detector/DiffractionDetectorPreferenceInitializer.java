@@ -56,7 +56,6 @@ public class DiffractionDetectorPreferenceInitializer extends AbstractPreference
 		dds.addDiffractionDetector(dd0);
 		dds.setDiffractionDetector(dd0);
 		
-		
 		// Pilatus 2M for WAXS - Pilatus 2M with 3 modules missing
 		DiffractionDetector dd1 = new DiffractionDetector();
 		dd1.setDetectorName("Pilatus P3-2M-DLS-L (for WAXS)");
@@ -72,7 +71,6 @@ public class DiffractionDetectorPreferenceInitializer extends AbstractPreference
 		missingModules.addAll(Arrays.asList(17, 20, 23));
 		dd1.setMissingModules(missingModules);
 		dds.addDiffractionDetector(dd1);
-		
 		
 		// Pilatus 6M
 		DiffractionDetector dd2 = new DiffractionDetector();
