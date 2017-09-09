@@ -123,7 +123,7 @@ public class DiffractionDetectorHelper {
 				
 				List<Amount<Length>> out = new ArrayList<Amount<Length>>(2);
 				out.add(dd.getxPixelSize());
-				out.add(dd.getPixelSize());
+				out.add(dd.getyPixelSize());
 				
 				return out;
 			}
@@ -131,7 +131,7 @@ public class DiffractionDetectorHelper {
 		return null;
 	}
 	
-	private static DiffractionDetectors getDetectorsFromPreferences() {
+	public static DiffractionDetectors getDetectorsFromPreferences() {
 		String xml = Activator.getPlottingPreferenceStore().getString(DiffractionDetectorConstants.DETECTOR);
 		XMLDecoder xmlDecoder =new XMLDecoder(new ByteArrayInputStream(xml.getBytes()));
 		DiffractionDetectors dd = (DiffractionDetectors) xmlDecoder.readObject();

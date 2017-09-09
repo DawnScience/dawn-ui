@@ -246,7 +246,7 @@ public class DiffractionTreeModel extends AbstractNodeModel {
 					px.add(Amount.valueOf(dp.getVPxSize(),SI.MILLIMETRE));
 				} else if (det != null && name.equals(det.getDetectorName())){
 					px.add(det.getxPixelSize());
-					px.add(det.getPixelSize());
+					px.add(det.getyPixelSize());
 				} else {
 					px =DiffractionDetectorHelper.getXYPixelSizeAmount(name);
 				}

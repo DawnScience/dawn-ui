@@ -9,13 +9,15 @@
 package org.dawnsci.plotting.tools.preference.detector;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.measure.quantity.Length;
 import javax.measure.unit.SI;
 
 import org.jscience.physics.amount.Amount;
 
-public class DiffractionDetector implements Serializable{
+public class DiffractionDetector implements Serializable {
 
 	private static final long serialVersionUID = -1133345866155946034L;
 	
@@ -24,7 +26,72 @@ public class DiffractionDetector implements Serializable{
 	private Amount<Length> yPixelSize;
 	private int numberOfPixelsX;
 	private int numberOfPixelsY;
+	private int numberOfHorizontalModules;
+	private int numberOfVerticalModules;
+	private int xGap; // in pixels
+	private int yGap; // in pixels
+	private List<Integer> missingModules;
 	
+	
+	public DiffractionDetector() {
+		missingModules = new ArrayList<>();
+	}
+	
+	
+	/**
+	 * Copy constructor. Creates a deep copy of the given detector.
+	 * @throws NullPointerException if the given detector is null.
+	 */
+	public DiffractionDetector(DiffractionDetector detector){
+		if(detector == null) throw new NullPointerException();
+		detectorName = detector.getDetectorName();
+		xPixelSize = (detector.getxPixelSize() == null) ? null : detector.getxPixelSize().copy();
+		yPixelSize = (detector.getyPixelSize() == null) ? null : detector.getyPixelSize().copy();
+		numberOfPixelsX = detector.getNumberOfPixelsX();
+		numberOfPixelsY = detector.getNumberOfPixelsY();
+		numberOfHorizontalModules = detector.getNumberOfHorizontalModules();
+		numberOfVerticalModules = detector.getNumberOfVerticalModules();
+		xGap = detector.getXGap();
+		yGap = detector.getYGap();
+		// This creates only a shallow copy of the List, but the elements are Integers, hence immutable, so it shouldn't matter.
+		missingModules = (detector.getMissingModules() == null) ? null : new ArrayList<>(detector.getMissingModules()); 
+	}
+	
+	
+	public int getNumberOfHorizontalModules(){
+		return numberOfHorizontalModules;
+	}
+	
+	public void setNumberOfHorizontalModules(int numberOfHorizontalModules){
+		this.numberOfHorizontalModules = numberOfHorizontalModules;
+	}
+	
+	
+	public int getNumberOfVerticalModules() {
+		return numberOfVerticalModules;
+	}
+
+	public void setNumberOfVerticalModules(int numberOfVerticalModules) {
+		this.numberOfVerticalModules = numberOfVerticalModules;
+	}
+
+	
+	public int getXGap() {
+		return xGap;
+	}
+
+	public void setXGap(int xGap) {
+		this.xGap = xGap;
+	}
+	
+	public int getYGap() {
+		return yGap;
+	}
+	
+	public void setYGap(int yGap) {
+		this.yGap = yGap;
+	}
+
 	public int getNumberOfPixelsX() {
 		return numberOfPixelsX;
 	}
@@ -52,9 +119,8 @@ public class DiffractionDetector implements Serializable{
 	public void setxPixelSize(Amount<Length> xPixelSize) {
 		this.xPixelSize = xPixelSize;
 	}
-
 	
-	public Amount<Length> getPixelSize() {
+	public Amount<Length> getyPixelSize() {
 		return yPixelSize;
 	}
 	public void setyPixelSize(Amount<Length> yPixelSize) {
@@ -78,6 +144,18 @@ public class DiffractionDetector implements Serializable{
 	public void setYPixelMM(double pixmm) {
 		yPixelSize = Amount.valueOf(pixmm, SI.MILLIMETRE);
 	}
+	
+	
+	public List<Integer> getMissingModules(){
+		return missingModules;
+	}
+	
+	
+	public void setMissingModules(List<Integer> missingModules){
+		this.missingModules = missingModules;
+	}
+	
+	
 	@Override
 	public int hashCode() {
 		final int prime = 31;
@@ -86,11 +164,17 @@ public class DiffractionDetector implements Serializable{
 				+ ((detectorName == null) ? 0 : detectorName.hashCode());
 		result = prime * result + numberOfPixelsX;
 		result = prime * result + numberOfPixelsY;
+		result = prime * result + numberOfHorizontalModules;
+		result = prime * result + numberOfVerticalModules;
+		result = prime * result + xGap;
+		result = prime * result + yGap;
 		result = prime * result + ((units == null) ? 0 : units.hashCode());
 		result = prime * result
 				+ ((xPixelSize == null) ? 0 : xPixelSize.hashCode());
 		result = prime * result
 				+ ((yPixelSize == null) ? 0 : yPixelSize.hashCode());
+		result = prime * result
+				+ ((missingModules == null) ? 0 : missingModules.hashCode());
 		return result;
 	}
 	@Override
@@ -111,6 +195,14 @@ public class DiffractionDetector implements Serializable{
 			return false;
 		if (numberOfPixelsY != other.numberOfPixelsY)
 			return false;
+		if (numberOfHorizontalModules != other.numberOfHorizontalModules)
+			return false;
+		if (numberOfVerticalModules != other.numberOfVerticalModules)
+			return false;
+		if (xGap != other.xGap)
+			return false;
+		if (yGap != other.yGap)
+			return false;
 		if (units == null) {
 			if (other.units != null)
 				return false;
@@ -126,7 +218,17 @@ public class DiffractionDetector implements Serializable{
 				return false;
 		} else if (!yPixelSize.equals(other.yPixelSize))
 			return false;
+		if (missingModules == null) {
+			if (other.missingModules != null)
+				return false;
+		} else if (!missingModules.equals(other.missingModules))
+			return false;
 		return true;
 	}
 	
+	
+	@Override
+	public String toString(){
+		return detectorName;
+	}
 }

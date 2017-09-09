@@ -17,7 +17,12 @@ public class DiffractionDetectors implements Serializable {
 
 	private static final long serialVersionUID = 7297838000309018668L;
 	
-	private List<DiffractionDetector> diffractionDetectors = new ArrayList<DiffractionDetector>();
+	private List<DiffractionDetector> diffractionDetectors;
+	
+	public DiffractionDetectors() {
+		diffractionDetectors = new ArrayList<DiffractionDetector>();
+	}
+	
 	public List<DiffractionDetector> getDiffractionDetectors() {
 		return diffractionDetectors;
 	}

@@ -10,6 +10,9 @@ package org.dawnsci.plotting.tools.preference.detector;
 
 import java.beans.XMLEncoder;
 import java.io.ByteArrayOutputStream;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 import javax.measure.unit.SI;
 
@@ -24,17 +27,53 @@ public class DiffractionDetectorPreferenceInitializer extends AbstractPreference
 	public void initializeDefaultPreferences() {
 		IPreferenceStore store = Activator.getPlottingPreferenceStore();
 		
+		DiffractionDetectors dds = getDefaultDetectors();
+		
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		XMLEncoder xmlEncoder = new XMLEncoder(baos);
+		xmlEncoder.writeObject(dds);
+		xmlEncoder.close();
+		
+		store.setDefault(DiffractionDetectorConstants.DETECTOR, baos.toString());	
+	}
+
+	
+	public static DiffractionDetectors getDefaultDetectors(){
 		DiffractionDetectors dds = new DiffractionDetectors();
 		
+		
 		// Pilatus 2M
-		DiffractionDetector dd = new DiffractionDetector();
-		dd.setDetectorName("Pilatus2m");
-		dd.setxPixelSize(Amount.valueOf(0.172, SI.MILLIMETRE));
-		dd.setyPixelSize(Amount.valueOf(0.172, SI.MILLIMETRE));
-		dd.setNumberOfPixelsX(1475);
-		dd.setNumberOfPixelsY(1679);
-		dds.addDiffractionDetector(dd);
-		dds.setDiffractionDetector(dd);
+		DiffractionDetector dd0 = new DiffractionDetector();
+		dd0.setDetectorName("Pilatus P3-2M");
+		dd0.setxPixelSize(Amount.valueOf(0.172, SI.MILLIMETRE));
+		dd0.setyPixelSize(Amount.valueOf(0.172, SI.MILLIMETRE));
+		dd0.setNumberOfPixelsX(1475);
+		dd0.setNumberOfPixelsY(1679);
+		dd0.setNumberOfHorizontalModules(3);
+		dd0.setNumberOfVerticalModules(8);
+		dd0.setXGap(7);
+		dd0.setYGap(17);
+		
+		dds.addDiffractionDetector(dd0);
+		dds.setDiffractionDetector(dd0);
+		
+		
+		// Pilatus 2M for WAXS - Pilatus 2M with 3 modules missing
+		DiffractionDetector dd1 = new DiffractionDetector();
+		dd1.setDetectorName("Pilatus P3-2M-DLS-L (for WAXS)");
+		dd1.setxPixelSize(Amount.valueOf(0.172, SI.MILLIMETRE));
+		dd1.setyPixelSize(Amount.valueOf(0.172, SI.MILLIMETRE));
+		dd1.setNumberOfPixelsX(1475);
+		dd1.setNumberOfPixelsY(1679);
+		dd1.setNumberOfHorizontalModules(3);
+		dd1.setNumberOfVerticalModules(8);
+		dd1.setXGap(7);
+		dd1.setYGap(17);
+		List<Integer> missingModules = new ArrayList<>();
+		missingModules.addAll(Arrays.asList(17, 20, 23));
+		dd1.setMissingModules(missingModules);
+		dds.addDiffractionDetector(dd1);
+		
 		
 		// Pilatus 6M
 		DiffractionDetector dd2 = new DiffractionDetector();
@@ -43,6 +82,10 @@ public class DiffractionDetectorPreferenceInitializer extends AbstractPreference
 		dd2.setyPixelSize(Amount.valueOf(0.172, SI.MILLIMETRE));
 		dd2.setNumberOfPixelsX(2527);
 		dd2.setNumberOfPixelsY(2463);
+		dd2.setNumberOfHorizontalModules(12);
+		dd2.setNumberOfVerticalModules(5);
+		dd2.setXGap(17);
+		dd2.setYGap(7);
 		dds.addDiffractionDetector(dd2);
 		
 		// Pilatus 100k
@@ -52,6 +95,10 @@ public class DiffractionDetectorPreferenceInitializer extends AbstractPreference
 		dd3.setyPixelSize(Amount.valueOf(0.172, SI.MILLIMETRE));
 		dd3.setNumberOfPixelsX(195);
 		dd3.setNumberOfPixelsY(487);
+		dd3.setNumberOfHorizontalModules(1);
+		dd3.setNumberOfVerticalModules(1);
+		dd3.setXGap(0);
+		dd3.setYGap(0);
 		dds.addDiffractionDetector(dd3);
 
 		// Pilatus 300k
@@ -61,6 +108,10 @@ public class DiffractionDetectorPreferenceInitializer extends AbstractPreference
 		dd4.setyPixelSize(Amount.valueOf(0.172, SI.MILLIMETRE));
 		dd4.setNumberOfPixelsX(619);
 		dd4.setNumberOfPixelsY(487);
+		dd4.setNumberOfHorizontalModules(3);
+		dd4.setNumberOfVerticalModules(1);
+		dd4.setXGap(17);
+		dd4.setYGap(0);
 		dds.addDiffractionDetector(dd4);
 		
 		// Pilatus 300k-W
@@ -70,6 +121,10 @@ public class DiffractionDetectorPreferenceInitializer extends AbstractPreference
 		dd4w.setyPixelSize(Amount.valueOf(0.172, SI.MILLIMETRE));
 		dd4w.setNumberOfPixelsX(195);
 		dd4w.setNumberOfPixelsY(1495); // 3*487 + (3-1)*17
+		dd4w.setNumberOfHorizontalModules(1);
+		dd4w.setNumberOfVerticalModules(3);
+		dd4w.setXGap(0);
+		dd4w.setYGap(7);
 		dds.addDiffractionDetector(dd4w);
 		
 		// Pixium RF4343
@@ -180,6 +235,6 @@ public class DiffractionDetectorPreferenceInitializer extends AbstractPreference
 		
 		store.setDefault(DiffractionDetectorConstants.DETECTOR, baos.toString());
 		
+		return dds;
 	}
-
 }

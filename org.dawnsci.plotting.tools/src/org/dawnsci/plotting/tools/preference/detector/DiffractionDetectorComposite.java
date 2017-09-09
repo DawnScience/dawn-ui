@@ -24,7 +24,12 @@ public class DiffractionDetectorComposite extends Composite  {
 	private NumberBox      yPixelSize;
 	private NumberBox      numberOfPixelsX;
 	private NumberBox      numberOfPixelsY;
-
+	private NumberBox      numberOfHorizontalModules;
+	private NumberBox      numberOfVerticalModules;
+	private NumberBox      xGap;
+	private NumberBox      yGap;
+	private MissingDetectorModulesSelectorWrapper missingModules;
+	
 	public DiffractionDetectorComposite(Composite par, int config) {
 		super(par, config);
 		
@@ -33,7 +38,7 @@ public class DiffractionDetectorComposite extends Composite  {
 		Label label = new Label(this, SWT.NONE);
 		label.setText("Name");
 		
-		this.detectorName = new TextWrapper(this, SWT.BORDER);
+		detectorName = new TextWrapper(this, SWT.BORDER);
 		detectorName.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 		detectorName.setTextLimit(64);
 		
@@ -52,7 +57,24 @@ public class DiffractionDetectorComposite extends Composite  {
 		numberOfPixelsY = createRangeBox("number of pixels Y", 0, 1000000, "pixels");
 		numberOfPixelsY.setDecimalPlaces(0);
 		numberOfPixelsY.setName("No of Pixels (Y)");
-
+		
+		numberOfHorizontalModules = createRangeBox("Number of modules in the horizontal direction", 0, 100, "");
+		numberOfHorizontalModules.setDecimalPlaces(0);
+		numberOfHorizontalModules.setName("Number of modules in the horizontal direction");
+		
+		numberOfVerticalModules = createRangeBox("Number of modules in the vertical direction", 0, 100, "");
+		numberOfVerticalModules.setDecimalPlaces(0);
+		numberOfVerticalModules.setName("Number of modules in the vertical direction");
+		
+		xGap = createRangeBox("Horizontal gap", 0, 1000, "");
+		xGap.setDecimalPlaces(0);
+		xGap.setName("Horizontal gap");
+		
+		yGap = createRangeBox("Vertical gap", 0, 1000, "");
+		yGap.setDecimalPlaces(0);
+		yGap.setName("Vertical gap");
+		
+		missingModules = new MissingDetectorModulesSelectorWrapper(this, SWT.NONE);
 	}
 
 	private NumberBox createRangeBox(String label, double lower, double upper, String unit) {
@@ -91,4 +113,24 @@ public class DiffractionDetectorComposite extends Composite  {
 		return numberOfPixelsY;
 	}
 	
+	public NumberBox getNumberOfHorizontalModules(){
+		return numberOfHorizontalModules;
+	}
+	
+
+	public NumberBox getNumberOfVerticalModules(){
+		return numberOfVerticalModules;
+	}
+
+	public NumberBox getXGap(){
+		return xGap;
+	}
+	
+	public NumberBox getYGap(){
+		return yGap;
+	}
+	
+	public MissingDetectorModulesSelectorWrapper getMissingModules(){
+		return missingModules;
+	}
 }

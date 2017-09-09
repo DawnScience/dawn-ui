@@ -41,7 +41,6 @@ public class DiffractionDetectorPreferencePage extends PreferencePage implements
 	public void init(IWorkbench workbench) {
 		setPreferenceStore(Activator.getPlottingPreferenceStore());
 		getDetectorsFromPreference();
-		
 	}
 
 	@Override
@@ -64,9 +63,14 @@ public class DiffractionDetectorPreferencePage extends PreferencePage implements
 		// TODO make editor UI
 		detectorEditor.setEditorUI(detectorComposite);
 		detectorEditor.setNameField("detectorName");
-		detectorEditor.setAdditionalFields(new String[]{"XPixelMM","YPixelMM","NumberOfPixelsX","NumberOfPixelsY"});
-		detectorEditor.setColumnWidths(80,80,80,80,80);
-		detectorEditor.setColumnNames("Name", "X Pixel (mm)", "Y Pixel (mm)","X (pixels)", "Y (pixels");
+		detectorEditor.setAdditionalFields(new String[]{"XPixelMM","YPixelMM","NumberOfPixelsX","NumberOfPixelsY", 
+				                                        "NumberOfHorizontalModules", "NumberOfVerticalModules",
+				                                        "XGap", "YGap", "MissingModules"});
+		detectorEditor.setColumnWidths(80,80,80,80,80, 150, 150, 150, 150, 120);
+		detectorEditor.setColumnNames("Name", "X Pixel (mm)", "Y Pixel (mm)","X (pixels)", "Y (pixels)",
+		                              "Horizontal number of modules", 
+		                              "Vertical number of modules", 
+		                              "Horizontal gap size (pixels)", "Vertical gap size (pixels)", "Missing modules");
 		detectorEditor.setColumnFormat("##0.####");
 		detectorEditor.setListHeight(150);
 		detectorEditor.setAddButtonText("Add Detector");
@@ -115,10 +119,9 @@ public class DiffractionDetectorPreferencePage extends PreferencePage implements
 	@SuppressWarnings("resource")
 	private void getDetectorsFromPreference() {
 		String xml = getPreferenceStore().getString(DiffractionDetectorConstants.DETECTOR);
-		XMLDecoder xmlDecoder =new XMLDecoder(new ByteArrayInputStream(xml.getBytes()));
+		XMLDecoder xmlDecoder = new XMLDecoder(new ByteArrayInputStream(xml.getBytes()));
 		detectors = (DiffractionDetectors) xmlDecoder.readObject();
 		setBean(detectors);
-
 	}
 	
 	@SuppressWarnings("resource")
@@ -128,8 +131,9 @@ public class DiffractionDetectorPreferencePage extends PreferencePage implements
 		xmlEncoder.writeObject(detectors);
 		xmlEncoder.close();
 		String xml = getPreferenceStore().getDefaultString(DiffractionDetectorConstants.DETECTOR);
-		XMLDecoder xmlDecoder =new XMLDecoder(new ByteArrayInputStream(xml.getBytes()));
+		XMLDecoder xmlDecoder = new XMLDecoder(new ByteArrayInputStream(xml.getBytes()));
 		detectors = (DiffractionDetectors) xmlDecoder.readObject();
+		setDetectorsToPreference();
 		setBean(detectors);
 
 	}
