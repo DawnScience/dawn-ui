@@ -216,6 +216,8 @@ public class PlotController implements IPlotController {
 			}
 		});
 		
+		final List<Runnable> uiRunnables = new ArrayList<>();
+		
 		for (DataStateObject object : state) {
 
 			List<ITrace> list = updateMap.remove(object.getOption());
@@ -227,17 +229,20 @@ public class PlotController implements IPlotController {
 					system.removeTrace(t);
 				}
 			} else if (object.isChecked()) {
-				updatePlottedData(object, list, localCurrentMode, localModifier);
+				uiRunnables.add(updatePlottedData(object, list, localCurrentMode, localModifier));
 			}
 		}
-		
-		List<IAxis> axes = system.getAxes();
-		if (axes != null) for (IAxis axis : axes) if (axis != null) axis.setAxisAutoscaleTight(true);
 		
 		Display.getDefault().syncExec(new Runnable() {
 			
 			@Override
 			public void run() {
+				for (Runnable r : uiRunnables) {
+					r.run();
+				}
+				
+				getPlottingSystem().repaint();
+				
 				Shell[] shells = Display.getCurrent().getShells();
 				for (Shell s : shells) {
 					if (s!= null && id.equals(s.getData())) {
@@ -246,9 +251,12 @@ public class PlotController implements IPlotController {
 				}
 			}
 		});
+		
+		List<IAxis> axes = system.getAxes();
+		if (axes != null) for (IAxis axis : axes) if (axis != null) axis.setAxisAutoscaleTight(true);
 	}
 	
-	private void updatePlottedData(DataStateObject stateObject,final List<ITrace> traces, IPlotMode mode, IPlotDataModifier modifier) {
+	private Runnable updatePlottedData(DataStateObject stateObject,final List<ITrace> traces, IPlotMode mode, IPlotDataModifier modifier) {
 		//remove traces if not the same as mode
 		//update the data in the plot
 		
@@ -278,24 +286,20 @@ public class PlotController implements IPlotController {
 		}
 		
 		if (mode instanceof ILazyPlotMode) {
-			
-				Display.getDefault().syncExec(new Runnable() {
-					
-					@Override
-					public void run() {
-						try {
-				((ILazyPlotMode)mode).displayData(traces.isEmpty() ? null : traces.toArray(new ITrace[traces.size()]), system, dataOp);
-				getPlottingSystem().repaint();
-						} catch (Exception e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
-						}
-					}});
-			
-			return;	
+
+			return ()->  {
+
+				try {
+					((ILazyPlotMode)mode).displayData(traces.isEmpty() ? null : traces.toArray(new ITrace[traces.size()]), system, dataOp);
+					getPlottingSystem().repaint();
+				} catch (Exception e) {
+					logger.error("Error plotting", e);
+				}
+			};
 		}
+	
 		
-		if (data == null) return;
+		if (data == null) return null;
 		
 		SourceInformation si = new SourceInformation(dataOp.getFilePath(), dataOp.getName(), dataOp.getLazyDataset());
 		SliceInformation s = new SliceInformation(slice, slice, new SliceND(dataOp.getLazyDataset().getShape()), mode.getDataDimensions(options), 1, 0);
@@ -313,20 +317,14 @@ public class PlotController implements IPlotController {
 	
 		final IDataset[] finalData = data;
 		
-		Display.getDefault().syncExec(new Runnable() {
-			
-			@Override
-			public void run() {
-					
-					try {
-						mode.displayData(finalData, traces.isEmpty() ? null : traces.toArray(new ITrace[traces.size()]), system, dataOp);
-					} catch (Exception e) {
-						logger.error("Error displaying data", e);
-					}
-				
-			getPlottingSystem().repaint();
+		return () -> {
+
+			try {
+				mode.displayData(finalData, traces.isEmpty() ? null : traces.toArray(new ITrace[traces.size()]), system, dataOp);
+			} catch (Exception e) {
+				logger.error("Error displaying data", e);
 			}
-		});
+		};
 		
 	}
 	
