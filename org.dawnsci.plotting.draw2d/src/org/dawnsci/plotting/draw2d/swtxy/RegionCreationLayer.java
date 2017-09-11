@@ -55,15 +55,21 @@ public class RegionCreationLayer extends Layer {
 	}
 
 	public void setMouseListenerActive(final RegionMouseListener rl, final boolean isActive) {
-		this.regionListener = rl;
+		// About to create a new region so remove existing region listener if any so a reference can be held here
+		// TODO This seems really messy a better solution would be to create a new RegionCreationLayer when you are about to draw a region.
+		if (regionListener != null) {
+			regionOverlayArea.removeMouseListener(regionListener);
+			regionOverlayArea.removeMouseMotionListener(regionListener);
+		}
+		this.regionListener = rl; // Here we update our reference to the regionListener used for mouse events
 		if (isActive) {
 			List<?> children = layeredPane.getChildren();
 			if (children != null && !children.contains(this))
 				layeredPane.add(this);
 			this.regionListener = rl;
 			regionOverlayArea.setOpaque(true);
-			regionOverlayArea.addMouseListener(rl);
-			regionOverlayArea.addMouseMotionListener(rl);
+			regionOverlayArea.addMouseListener(regionListener);
+			regionOverlayArea.addMouseMotionListener(regionListener);
 			final AbstractSelectionRegion<?> regionBeingAdded = regionListener.getRegionBeingAdded();
 			if (regionBeingAdded!=null) {
 				regionOverlayArea.setCursor(regionBeingAdded.getRegionCursor());
@@ -75,8 +81,8 @@ public class RegionCreationLayer extends Layer {
 				layeredPane.remove(this);
 			this.regionListener = null;
 			regionOverlayArea.setOpaque(false);
-			regionOverlayArea.removeMouseListener(rl);
-			regionOverlayArea.removeMouseMotionListener(rl);
+			regionOverlayArea.removeMouseListener(regionListener);
+			regionOverlayArea.removeMouseMotionListener(regionListener);
 			regionOverlayArea.setCursor(null);
 		}
 	}
