@@ -383,6 +383,7 @@ public class SurfaceScatterPresenter {
 							thetaArrayCon = DatasetUtils.concatenate(thetaArray, 0);
 							xArrayCon = DatasetUtils.concatenate(xArray, 0);
 							
+						
 						}
 						catch(Exception g){
 							
@@ -511,6 +512,12 @@ public class SurfaceScatterPresenter {
 			String[] datNamesInOrder = new String[imageRefList.size()];
 			
 			drm.setCorrectionSelection(MethodSetting.toMethod(correctionSelection));
+			
+			if(gm.isUseNegativeQ()){
+				thetaArrayCon = Maths.multiply(thetaArrayCon, -1);
+				xArrayCon = Maths.multiply(xArrayCon, -1);
+			}
+			
 			
 			for(int f = 0; f<imageRefList.size(); f++ ){
 				datNamesInOrder[f] = filepaths[imagesToFilepathRefDat.getInt(f)];
@@ -1677,7 +1684,8 @@ public class SurfaceScatterPresenter {
 										  double energy1,
 										  boolean specular,
 										  String imageName,
-										  String xNameRef
+										  String xNameRef,
+										  boolean useNegativeQ
 										  ){
 											
 		
@@ -1702,6 +1710,7 @@ public class SurfaceScatterPresenter {
 			gm.setImageName(imageName);
 			gm.setxNameRef(xNameRef);
 			gm.setEnergy(energy1);
+			gm.setUseNegativeQ(useNegativeQ);
 			
 	}
 	

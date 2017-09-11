@@ -4,6 +4,7 @@ import org.dawnsci.surfacescatter.GeometricParametersModel;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
+import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.GridData;
@@ -52,7 +53,10 @@ public class GeometricParametersWindows extends Composite{
 	private Combo selectedOption;
 //	private String fluxpathStorage = " ";
 	private boolean updateOn = true;
+	private boolean useNegativeQ = false;
+	private Button useNegativeQButton;
 	
+
 	public GeometricParametersWindows(Composite parent, 
 									  int style,
 									  SurfaceScatterPresenter ssp,
@@ -170,54 +174,19 @@ public class GeometricParametersWindows extends Composite{
 		angularFudgeFactor.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 	    angularFudgeFactor.setText("0");
 		
-//		Button fluxPathSelection = new Button(geometricParametersReflec, SWT.PUSH | SWT.FILL);
-//		fluxPathSelection.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-//		fluxPathSelection.setText("Select flux correction file");
-//		fluxPath = new Text (geometricParametersReflec, SWT.CHECK);
-//		fluxPath.setText(fluxpathStorage);
-//		fluxPath.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-//	    
-//		paramsReflec.setControl(geometricParametersReflec);
-//	    
-//	    fluxPathSelection.addSelectionListener(new SelectionListener() {
-//			
-//			@Override
-//			public void widgetSelected(SelectionEvent e) {
-//				
-//				FileDialog dlg = new FileDialog(ssvs.getShell(), SWT.OPEN);
-//				
-//				if(fluxpathStorage != null){
-//				
-//					dlg.setFilterPath(fluxpathStorage);
-//				}
-//
-//		        dlg.setText("flux file");
-//
-//		        String dir = dlg.open();
-//		        fluxpathStorage = dir;
-//				
-//				fluxPath.setText(fluxpathStorage);
-//				
-//			}
-//			
-//			@Override
-//			public void widgetDefaultSelected(SelectionEvent e) {
-//				// TODO Auto-generated method stub
-//				
-//			}
-//		});
-//	    
-//	    fluxPath.addModifyListener(new ModifyListener(){
-//
-//			@Override
-//			public void modifyText(ModifyEvent e) {
-//				fluxpathStorage = fluxPath.getText();
-//				
-//				geometricParametersUpdate();
-//			}
-//	    	
-//	    });
+		new Label(geometricParametersReflec, SWT.LEFT).setText("Use Negative q?");
+		useNegativeQButton = new Button(geometricParametersReflec, SWT.CHECK);
+		useNegativeQButton.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 	    
+
+		useNegativeQButton.addSelectionListener(new SelectionAdapter() {
+		
+			private void buttonSelected(SelectionEvent e){
+				GeometricParametersWindows.this.useNegativeQ = !GeometricParametersWindows.this.useNegativeQ;
+			}
+			
+		});
+			
 	    beamHeight.addModifyListener(new ModifyListener(){
 
 			@Override
@@ -715,7 +684,8 @@ public class GeometricParametersWindows extends Composite{
 					  (Double.parseDouble(energy.getText())),
 					  (specular.getSelection()),
 					  (imageName.getText()),
-					  selectedOption.getText()
+					  selectedOption.getText(),
+					  useNegativeQButton.getSelection()
 					  );
 		}
 	}
@@ -744,7 +714,8 @@ public class GeometricParametersWindows extends Composite{
 				  (Double.parseDouble(energy.getText())),
 				  (specular.getSelection()),
 				  (imageName.getText()),
-				  selectedOption.getText()
+				  selectedOption.getText(),
+				  useNegativeQButton.getSelection()
 				  );
 		
 	}
@@ -772,6 +743,7 @@ public class GeometricParametersWindows extends Composite{
 		gm.setNormalisationFactor (Double.parseDouble(sampleSize.getText()));
 		gm.setSpecular(specular.getSelection());
 		gm.setImageName (imageName.getText());		
+		gm.setUseNegativeQ(useNegativeQButton.getSelection());
 		
 		
 	}
@@ -800,6 +772,7 @@ public class GeometricParametersWindows extends Composite{
 		selectedOption.setText(gm.getxNameRef());
 		energy.setText(String.valueOf(gm.getEnergy()));
 		theta.select(gm.getTheta());
+		useNegativeQButton.setEnabled(gm.isUseNegativeQ());
 				
 			
 	}
@@ -816,4 +789,13 @@ public class GeometricParametersWindows extends Composite{
 	public void setUpdateOn(boolean b){
 		this.updateOn  =b;
 	}
+	
+	public boolean isUseNegativeQ() {
+		return useNegativeQ;
+	}
+
+	public void setUseNegativeQ(boolean useNegativeQ) {
+		this.useNegativeQ = useNegativeQ;
+	}
+
 }
