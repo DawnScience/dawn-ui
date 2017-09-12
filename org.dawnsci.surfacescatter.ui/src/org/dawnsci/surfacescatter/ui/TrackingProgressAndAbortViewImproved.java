@@ -82,7 +82,7 @@ public class TrackingProgressAndAbortViewImproved extends Dialog {
 			tj.setSsp(ssp);
 			tj.setTPAAV(TrackingProgressAndAbortViewImproved.this);
 			tj.runTJ1();
-			tj = new TrackingHandlerWithFramesImproved(); 
+//			tj = new TrackingHandlerWithFramesImproved(); 
 			
 			
 
@@ -93,7 +93,9 @@ public class TrackingProgressAndAbortViewImproved extends Dialog {
 		
 		catch(OutOfMemoryError e){
 			ssp.outOfMemoryWarning();
-		}		
+		}
+		
+		
 		
 		return container;
 	

@@ -90,6 +90,7 @@ public class SurfaceScatterViewStart extends Dialog {
 	private RodAnalysisWindow raw ;
 	private SetupModel stm;
 	private String paramFile;
+	private IRegion r2;
 	
 //	private final static Logger logger = LoggerFactory.getLogger(SurfaceScatterViewStart.class);
 	
@@ -938,7 +939,9 @@ public class SurfaceScatterViewStart extends Dialog {
 	
 	
 	public void addSecondBgRegionListeners(IRegion r2){
-				
+			
+		this.r2= r2;
+	
 		r2.addROIListener(new IROIListener() {
 			
 			@Override
@@ -958,61 +961,131 @@ public class SurfaceScatterViewStart extends Dialog {
 			
 			public void roiStandard(ROIEvent evt) {
 				
-				int[] len = ssp.getInitialLenPt()[0]; 
-				int[] pt = ssp.getInitialLenPt()[1];
-				
-				IRectangularROI bounds = r2.getROI().getBounds();
-				int[] redLen = bounds.getIntLengths();
-				int[] redPt = bounds.getIntPoint();
-				int[][] redLenPt = {redLen, redPt};
-				
-				ssp.setBackgroundLenPt(redLenPt);
-				
-				if (ssp.getMethodology() == Methodology.OVERLAPPING_BACKGROUND_BOX){
-					
-					int [][] newOffsetLenPt = new int[2][2];
-					
-					newOffsetLenPt[0][0]  =  -len[0] + redLen[0];
-					newOffsetLenPt[0][1]  =  -len[1] + redLen[1];
-					
-					
-					newOffsetLenPt[1][0]  = -pt[0] + redPt[0];
-					newOffsetLenPt[1][1]  = -pt[1] + redPt[1];
-					
-					int[] bB = new int[4];
-					
-					bB[0] = Math.abs(newOffsetLenPt[1][0]);
-					bB[1] = Math.abs(newOffsetLenPt[1][1]);
-					
-					bB[2] = Math.abs(newOffsetLenPt[1][0] + newOffsetLenPt[0][0] - pt[0]);
-					bB[3] = Math.abs(newOffsetLenPt[1][1] + newOffsetLenPt[0][1] - pt[1]);
-					
-					int probe = bB[0];
-					
-					for(int g: bB){
-						if(g>probe){
-							probe = g;
-						}
-					}
-					
-					ssp.setbB(probe);
-					
-					if(!Arrays.equals(newOffsetLenPt[0], ssp.getBoxOffsetLenPt()[0]) ||
-							!Arrays.equals(newOffsetLenPt[1], ssp.getBoxOffsetLenPt()[1])){
-					 
-						ssp.setBoxOffsetLenPt(newOffsetLenPt);
-					}
-				}
-				
-				RectangularROI[] greenAndBg = ssp.trackingRegionOfInterestSetter(ssp.getLenPt());
-				
-				customComposite.getIRegion().setROI(greenAndBg[0]);
-				customComposite.getBgRegion().setROI(greenAndBg[1]);
-
-				}
+				probeSecondBackgroundRegion();
+			}
+//				
+//				int[] len = ssp.getInitialLenPt()[0]; 
+//				int[] pt = ssp.getInitialLenPt()[1];
+//				
+//				IRectangularROI bounds = r2.getROI().getBounds();
+//				int[] redLen = bounds.getIntLengths();
+//				int[] redPt = bounds.getIntPoint();
+//				int[][] redLenPt = {redLen, redPt};
+//				
+//				ssp.setBackgroundLenPt(redLenPt);
+//				
+//				if (ssp.getMethodology() == Methodology.OVERLAPPING_BACKGROUND_BOX){
+//					
+//					int [][] newOffsetLenPt = new int[2][2];
+//					
+//					newOffsetLenPt[0][0]  =  -len[0] + redLen[0];
+//					newOffsetLenPt[0][1]  =  -len[1] + redLen[1];
+//					
+//					
+//					newOffsetLenPt[1][0]  = -pt[0] + redPt[0];
+//					newOffsetLenPt[1][1]  = -pt[1] + redPt[1];
+//					
+//					int[] bB = new int[4];
+//					
+//					bB[0] = Math.abs(newOffsetLenPt[1][0]);
+//					bB[1] = Math.abs(newOffsetLenPt[1][1]);
+//					
+//					bB[2] = Math.abs(newOffsetLenPt[1][0] + newOffsetLenPt[0][0] - pt[0]);
+//					bB[3] = Math.abs(newOffsetLenPt[1][1] + newOffsetLenPt[0][1] - pt[1]);
+//					
+//					int probe = bB[0];
+//					
+//					for(int g: bB){
+//						if(g>probe){
+//							probe = g;
+//						}
+//					}
+//					
+//					ssp.setbB(probe);
+//					
+//					if(!Arrays.equals(newOffsetLenPt[0], ssp.getBoxOffsetLenPt()[0]) ||
+//							!Arrays.equals(newOffsetLenPt[1], ssp.getBoxOffsetLenPt()[1])){
+//					 
+//						ssp.setBoxOffsetLenPt(newOffsetLenPt);
+//					}
+//				}
+//				
+//				RectangularROI[] greenAndBg = ssp.trackingRegionOfInterestSetter(ssp.getLenPt());
+//				
+//				customComposite.getIRegion().setROI(greenAndBg[0]);
+//				customComposite.getBgRegion().setROI(greenAndBg[1]);
+//
+//				}
 		});				
 	}
 
+	public void probeSecondBackgroundRegion(){
+		if(r2 != null){
+			int[] len = ssp.getInitialLenPt()[0]; 
+			int[] pt = ssp.getInitialLenPt()[1];
+
+			IRectangularROI bounds = r2.getROI().getBounds();
+			int[] redLen = bounds.getIntLengths();
+			int[] redPt = bounds.getIntPoint();
+			int[][] redLenPt = {redLen, redPt};
+
+			ssp.setBackgroundLenPt(redLenPt);
+
+			if (ssp.getMethodology() == Methodology.OVERLAPPING_BACKGROUND_BOX){
+
+				int [][] newOffsetLenPt = new int[2][2];
+
+				newOffsetLenPt[0][0]  =  -len[0] + redLen[0];
+				newOffsetLenPt[0][1]  =  -len[1] + redLen[1];
+
+
+				newOffsetLenPt[1][0]  = -pt[0] + redPt[0];
+				newOffsetLenPt[1][1]  = -pt[1] + redPt[1];
+
+				int[] bB = new int[4];
+
+				bB[0] = Math.abs(newOffsetLenPt[1][0]);
+				bB[1] = Math.abs(newOffsetLenPt[1][1]);
+
+				bB[2] = Math.abs(newOffsetLenPt[1][0] + newOffsetLenPt[0][0] - pt[0]);
+				bB[3] = Math.abs(newOffsetLenPt[1][1] + newOffsetLenPt[0][1] - pt[1]);
+
+				int probe = bB[0];
+
+				for(int g: bB){
+					if(g>probe){
+						probe = g;
+					}
+				}
+
+				ssp.setbB(probe);
+
+				if(!Arrays.equals(newOffsetLenPt[0], ssp.getBoxOffsetLenPt()[0]) ||
+						!Arrays.equals(newOffsetLenPt[1], ssp.getBoxOffsetLenPt()[1])){
+
+					ssp.setBoxOffsetLenPt(newOffsetLenPt);
+				}
+			}
+
+			RectangularROI[] greenAndBg = ssp.trackingRegionOfInterestSetter(ssp.getLenPt());
+			
+			if(!Arrays.equals(customComposite.getIRegion().getROI().getBounds().getIntPoint(), greenAndBg[0].getIntPoint()) ||
+					!Arrays.equals(customComposite.getIRegion().getROI().getBounds().getIntLengths(), greenAndBg[0].getIntLengths())){  
+
+				customComposite.getIRegion().setROI(greenAndBg[0]);
+			}
+
+			if(!Arrays.equals(customComposite.getBgRegion().getROI().getBounds().getIntPoint(), greenAndBg[0].getIntPoint()) ||
+					!Arrays.equals(customComposite.getBgRegion().getROI().getBounds().getIntLengths(), greenAndBg[0].getIntLengths())){  
+
+				customComposite.getBgRegion().setROI(greenAndBg[1]);
+			}
+			
+		}
+
+	}
+
+	
 	@SuppressWarnings("deprecation")
 	public void interpolationTrackerBoxesAccept(){
 		
@@ -1172,6 +1245,8 @@ public class SurfaceScatterViewStart extends Dialog {
 	}
 	
 	public void fireRun(){
+		
+		ssp.triggerBoxOffsetTransfer();
 		
 		if(ssp.getProcessingMethodSelection() == ProccessingMethod.AUTOMATIC){
 			

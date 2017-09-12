@@ -119,7 +119,6 @@ public class SurfaceScatterPresenter {
 	private boolean trackWithQ = false;
 	private int bB = 10; //this is a false boundaryBox, used to avoid hitting edges
 	
-	
 	public SurfaceScatterPresenter(){
 		drm = new DirectoryModel();
 		stm = new SetupModel();
@@ -180,12 +179,12 @@ public class SurfaceScatterPresenter {
 		ILazyDataset dcdtheta = null;
 		ILazyDataset qdcd = null;
 		
+		gm.setxName(xName);
 		
 		try {
 		
 			for (int id = 0; id < filepaths.length; id++) {
 				
-				gm.setxName(xName);
 //				gm.setxNameRef(xName);
 				
 				if(imageFolderPath == null){
@@ -478,6 +477,11 @@ public class SurfaceScatterPresenter {
 		Dataset xArrayConCloneFork = xArrayCon.clone();
 		Dataset xArrayConCloneForl = xArrayCon.clone();
 		
+		if(gm.isUseNegativeQ()){
+			thetaArrayCon = Maths.multiply(thetaArrayCon, -1);
+			xArrayCon = Maths.multiply(xArrayCon, -1);
+		}
+		
 		try{
 			DatasetUtils.sort(xArrayCon, imageRefDat);
 			//so now we have the image number in imageArray (imageRefDat) sorted by "l" value xArrayCon
@@ -513,10 +517,6 @@ public class SurfaceScatterPresenter {
 			
 			drm.setCorrectionSelection(MethodSetting.toMethod(correctionSelection));
 			
-			if(gm.isUseNegativeQ()){
-				thetaArrayCon = Maths.multiply(thetaArrayCon, -1);
-				xArrayCon = Maths.multiply(xArrayCon, -1);
-			}
 			
 			
 			for(int f = 0; f<imageRefList.size(); f++ ){
@@ -1318,7 +1318,8 @@ public class SurfaceScatterPresenter {
 		
 		if(fms.get(sliderPos).getBackgroundMethdology() == Methodology.OVERLAPPING_BACKGROUND_BOX){
 			try{
-				drm.setPermanentBoxOffsetLenPt(drm.getBoxOffsetLenPt());
+				int[][] inspect = drm.getBoxOffsetLenPt();
+				drm.setPermanentBoxOffsetLenPt(inspect);
 			}
 			catch(Exception j){
 				
@@ -2883,18 +2884,18 @@ public class SurfaceScatterPresenter {
 		CurveStitchDataPackage csdp = csdpgfd.getCsdp();
 		
 		IDataset[] output1 = CurveStitchWithErrorsAndFrames.curveStitch4(csdp, null);
-		try{
-			if(drm.getCorrectionSelection() == MethodSetting.Reflectivity_NO_Correction ||
-					   drm.getCorrectionSelection() == MethodSetting.Reflectivity_with_Flux_Correction ||
-					   drm.getCorrectionSelection() == MethodSetting.Reflectivity_without_Flux_Correction){
-						
-						ReflectivityNormalisation.reflectivityNormalisation1(csdp);
-						
-			}
-		}
-		catch(Exception j){
-		 System.out.println(j.getMessage());
-		}
+//		try{
+//			if(drm.getCorrectionSelection() == MethodSetting.Reflectivity_NO_Correction ||
+//					   drm.getCorrectionSelection() == MethodSetting.Reflectivity_with_Flux_Correction ||
+//					   drm.getCorrectionSelection() == MethodSetting.Reflectivity_without_Flux_Correction){
+//						
+//						ReflectivityNormalisation.reflectivityNormalisation1(csdp);
+//						
+//			}
+////		}
+//		catch(Exception j){
+//		 System.out.println(j.getMessage());
+//		}
 //		IDataset[] output = CurveStitchWithErrorsAndFrames.curveStitch4(csdp, null);
 		
 		drm.setCsdp(csdp);
@@ -2958,6 +2959,81 @@ public class SurfaceScatterPresenter {
 		lt.setErrorBarEnabled(false);
 		
 	}
+	
+	
+	public void stitchAndPresentFromCsdp(MultipleOutputCurvesTableView outputCurves,
+			AxisEnums.yAxes ids,
+			CurveStitchDataPackage csdp) {
+
+		Display display = Display.getCurrent();
+
+		outputCurves.resetCurve();
+
+		IPlottingSystem<Composite> pS = outputCurves.getPlotSystem();
+
+		drm.setCsdp(csdp);
+
+		ILineTrace lt = pS.createLineTrace("progress");
+
+		IDataset X = DatasetFactory.createFromObject(csdp.getSplicedCurveX());
+
+		if(outputCurves.getqAxis().getSelection()){
+
+			qConversion();
+			X = drm.getCsdp().getSplicedCurveQ();
+		}
+
+		else{
+			X = csdp.getSplicedCurveX();
+		}
+
+
+		if(ids == null){
+
+			lt.setData(X, drm.getCsdp().getSplicedCurveY());
+			Color blue = display.getSystemColor(SWT.COLOR_BLUE);
+			lt.setTraceColor(blue);
+		}
+
+		else if(ids == yAxes.SPLICEDY){
+
+			lt.setData(X, drm.getCsdp().getSplicedCurveY());
+			Color blue = display.getSystemColor(SWT.COLOR_BLUE);
+			lt.setTraceColor(blue);
+
+		}
+		else if(ids == yAxes.SPLICEDYFHKL){
+
+			lt.setData(X, drm.getCsdp().getSplicedCurveYFhkl());
+			Color green = display.getSystemColor(SWT.COLOR_GREEN);
+			lt.setTraceColor(green);
+		}
+		else if(ids == yAxes.SPLICEDYRAW){
+
+			lt.setData(X, drm.getCsdp().getSplicedCurveYRaw());
+			Color black = display.getSystemColor(SWT.COLOR_BLACK);
+			lt.setTraceColor(black);
+
+		}
+
+
+		pS.clear();
+		pS.addTrace(lt);
+
+		pS.repaint();
+		pS.autoscaleAxes();
+
+		double start = lt.getXData().getDouble(0);
+		double end = lt.getXData().getDouble(lt.getXData().getShape()[0]-1);
+		double range = end - start;
+
+		pS.getAxes().get(0).setRange((start - 0.1*range), (end) + 0.1*range);
+
+		lt.setErrorBarEnabled(false);
+
+	}
+	
+	
 	
 	public void switchErrorDisplay(){
 		if (errorDisplayFlag ==true){

@@ -592,7 +592,12 @@ public class PlotSystemCompositeView extends Composite {
 			
 			
 		}
-
+		try{
+			ssvs.probeSecondBackgroundRegion();
+		}
+		catch(Exception g){
+			System.out.println(g.getMessage());
+		}
 
 	}
 
