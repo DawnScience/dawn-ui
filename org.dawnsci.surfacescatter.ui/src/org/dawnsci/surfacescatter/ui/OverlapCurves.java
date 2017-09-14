@@ -331,12 +331,14 @@ public class OverlapCurves extends Composite {
 		removeNegativeIntensities.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 
 		removeNegativeIntensities.addSelectionListener(new SelectionAdapter() {
-			
-			private void dt(){
+
+			@Override
+			public void widgetSelected(SelectionEvent e) {
 				ssp.disregardNegativeIntensities();
 				model.poke();
+				addCurves();
 			}
-			
+
 		});
 		
 		

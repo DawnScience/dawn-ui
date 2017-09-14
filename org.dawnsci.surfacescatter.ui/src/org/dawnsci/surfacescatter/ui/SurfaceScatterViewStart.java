@@ -108,7 +108,7 @@ public class SurfaceScatterViewStart extends Dialog {
 			@Override
 			public void update() {
 				
-				updateDisplay(null);
+				updateDisplay(null, ssp.isUpdateSvs());
 			}
 		});
 		
@@ -1788,7 +1788,13 @@ public class SurfaceScatterViewStart extends Dialog {
 	public void setStm(SetupModel stm) {
 		this.stm = stm;
 	}
-	
+
+	public void updateDisplay(int[][] lenPt, boolean goNoGo) {
+		if(goNoGo){
+			updateDisplay(lenPt);
+		}
+	}
+
 	public void updateDisplay(int[][] lenPt) {
 		
 		if(ssp.getDrm().getFms().get(ssp.getSliderPos()).isGoodPoint()){
