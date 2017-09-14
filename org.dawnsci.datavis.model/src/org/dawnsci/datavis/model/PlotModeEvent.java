@@ -9,7 +9,7 @@ public class PlotModeEvent extends EventObject {
 	private IPlotMode mode;
 	private IPlotMode[] possibleModes;
 
-	public PlotModeEvent(PlotController source, IPlotMode mode, IPlotMode[] possibleModes) {
+	public PlotModeEvent(IPlotController source, IPlotMode mode, IPlotMode[] possibleModes) {
 		super(source);
 		
 		this.mode = mode;

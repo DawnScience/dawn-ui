@@ -85,6 +85,11 @@
             class="org.dawnsci.datavis.PlotModifierContributionFactory"
             locationURI="menu:org.dawnsci.datavis.plot">
       </menuContribution>
+      <menuContribution
+            allPopups="false"
+            class="org.dawnsci.datavis.LineTraceColorContributionFactory"
+            locationURI="menu:org.dawnsci.datavis.plot">
+      </menuContribution>
    </extension>
    <extension
          point="org.eclipse.ui.perspectiveExtensions">
