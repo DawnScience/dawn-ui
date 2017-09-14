@@ -25,6 +25,7 @@ import org.eclipse.dawnsci.plotting.api.trace.ITrace;
 import org.eclipse.january.dataset.IDataset;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
+import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Color;
@@ -323,7 +324,22 @@ public class OverlapCurves extends Composite {
 		errors = new Button(normGroup, SWT.PUSH);
 		errors.setText("Errors");
 		errors.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		
+		
+		Button removeNegativeIntensities = new Button(normGroup, SWT.PUSH);
+		removeNegativeIntensities.setText("Remove Negative Intensities");
+		removeNegativeIntensities.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 
+		removeNegativeIntensities.addSelectionListener(new SelectionAdapter() {
+			
+			private void dt(){
+				ssp.disregardNegativeIntensities();
+				model.poke();
+			}
+			
+		});
+		
+		
 		Group unstitchedCurves = new Group(form, SWT.FILL | SWT.FILL);
 		GridLayout stitchedCurvesLayout = new GridLayout(1, true);
 		GridData stitchedCurvesData = new GridData(GridData.FILL_HORIZONTAL);
@@ -462,7 +478,7 @@ public class OverlapCurves extends Composite {
 			}
 		});
 
-		form.setWeights(new int[] {15,8,72,5});
+		form.setWeights(new int[] {15,9,72,4});
 
 		IAxis yAxisR = plotSystem.getSelectedYAxis();
 

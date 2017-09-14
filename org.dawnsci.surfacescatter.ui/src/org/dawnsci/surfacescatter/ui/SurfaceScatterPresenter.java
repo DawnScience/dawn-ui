@@ -3418,8 +3418,20 @@ public class SurfaceScatterPresenter {
 					this.getDrm().getFms());
 		}
 
-		
 	}
+	
+	public void disregardNegativeIntensities(){
+		
+		for(FrameModel fm:fms){
+			if(fm.getUnspliced_Corrected_Intensity() > 0 ||
+					fm.getUnspliced_Raw_Intensity() > 0){
+				
+				fm.setGoodPoint(false);
+			}
+		}
+	}
+	
+	
 }
 
 
