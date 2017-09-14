@@ -210,29 +210,6 @@ public class MultipleOutputCurvesTableView extends Composite {
 
 	}
 
-//	public void updateCurve(DataModel dm1, Boolean intensity) {
-//
-//		if (lt.getDataName() == null) {
-//			lt = plotSystem4.createLineTrace("Output Curve");
-//		}
-//
-//		if (dm1.getyList() == null || dm1.getxList() == null) {
-//			lt.setData(dm1.backupDataset(), dm1.backupDataset());
-//		} else if (intensity == true) {
-//			lt.setData(dm1.xIDataset(), dm1.yIDataset());
-//			lt.setName(dm1.getName()+ "_Intensity");
-//		
-//		}else{
-//			lt.setData(dm1.xIDataset(), dm1.yIDatasetFhkl());
-//			lt.setName(dm1.getName()+ "_Fhkl");
-//		}
-//		
-//		plotSystem4.clear();
-//		plotSystem4.addTrace(lt);
-//		plotSystem4.repaint();
-//
-//	}
-		
 	public void addToDatSelector(){
 		if(this.getSc() == null){
 			sc = new Button(overlapSelection, SWT.CHECK);
@@ -287,10 +264,9 @@ public class MultipleOutputCurvesTableView extends Composite {
 				imageNo = plotSystem4.createRegion("Image", RegionType.XAXIS_LINE);
 			}
 			catch(Exception x){
-				
+				System.out.println(x.getMessage());
 			}
-			
-			
+				
 			imageNo.setShowPosition(true);
 			imageNo.setROI(r);
 			

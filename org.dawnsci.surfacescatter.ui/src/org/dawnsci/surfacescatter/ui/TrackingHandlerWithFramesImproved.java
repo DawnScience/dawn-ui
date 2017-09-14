@@ -117,7 +117,6 @@ public class TrackingHandlerWithFramesImproved {
 			@Override
 			public void run(){
 
-
 				//////////////////////////// continuing to next
 				//////////////////////////// dat////////////////////////////////////////
 
@@ -334,7 +333,7 @@ public class TrackingHandlerWithFramesImproved {
 				}
 
 				try{
-					
+
 					CsdpGeneratorFromDrm csdpgfd = new CsdpGeneratorFromDrm();
 					csdpgfd.generateCsdpFromDrm(drm);
 
@@ -347,14 +346,14 @@ public class TrackingHandlerWithFramesImproved {
 							drm.getCorrectionSelection() == MethodSetting.Reflectivity_with_Flux_Correction ||
 							drm.getCorrectionSelection() == MethodSetting.Reflectivity_without_Flux_Correction){
 
-						
+
 						ReflectivityNormalisation.reflectivityNormalisation1(csdp);
 						drm.setCsdp(csdp);
 					}
 
 					csdp.setRodName("Current Track");
 					ssvs.getRaw().getRtc().addCurrentTrace(csdp);
-				
+
 					display.syncExec(new Runnable() {
 						@Override
 						public void run() {	
@@ -363,27 +362,27 @@ public class TrackingHandlerWithFramesImproved {
 							return;
 						}
 					});
-					
+
 				}
 				catch(Exception h){
 					System.out.println(h.getMessage());
 				}
-				
+
 				return;
 			}
-			
-			
+
+
 
 		};
-		
+
 		t.start();
-	
+
 
 		ssvs.getCustomComposite().getReplay().setEnabled(true);
 
-		
+
 	}
-	
+
 
 	protected void updateTrackingDisplay(IDataset tempImage, int imageNumber){
 
@@ -415,9 +414,9 @@ public class TrackingHandlerWithFramesImproved {
 		}
 
 		ssvs.getSsps3c().generalUpdate(lenPt);
-		
+
 		updateOutputCurve();
-	
+
 		if(progressBar.isDisposed() != true){
 			progressBar.setSelection(progressBar.getSelection() +1);
 
@@ -426,10 +425,10 @@ public class TrackingHandlerWithFramesImproved {
 			}
 		}	
 	}
-	
-	
+
+
 	protected void updateOutputCurve(){
-		
+
 		ssp.stitchAndPresent1(ssvs.getSsps3c().getOutputCurves(), ssvs.getIds());
 		CsdpGeneratorFromDrm csdpgfd = new CsdpGeneratorFromDrm();
 		csdpgfd.generateCsdpFromDrm(drm);
@@ -437,33 +436,33 @@ public class TrackingHandlerWithFramesImproved {
 		CurveStitchWithErrorsAndFrames.curveStitch4(csdp, null);
 
 		drm.setCsdp(csdp);
-		
+
 		csdp.setRodName("Current Track");
 
 		ssvs.getRaw().getRtc().addCurrentTrace(csdp);
 
 		ssvs.getSsps3c().getOutputCurves().getIntensity().redraw();
 
-		
+
 	}
-	
+
 
 	protected void updateOutputCurve(CurveStitchDataPackage csdp){
-		
+
 		ssp.stitchAndPresentFromCsdp(ssvs.getSsps3c().getOutputCurves(), ssvs.getIds(), csdp);
 
 		drm.setCsdp(csdp);
-		
+
 		csdp.setRodName("Current Track");
 
 		ssvs.getRaw().getRtc().addCurrentTrace(csdp);
 
 		ssvs.getSsps3c().getOutputCurves().getIntensity().redraw();
 
-		
+
 	}
-	
-	
+
+
 
 	private int findNearestDatNo(double distance,
 			double myNum){

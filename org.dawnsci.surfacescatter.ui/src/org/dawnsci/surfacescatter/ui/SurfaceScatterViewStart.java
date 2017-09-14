@@ -963,59 +963,7 @@ public class SurfaceScatterViewStart extends Dialog {
 				
 				probeSecondBackgroundRegion();
 			}
-//				
-//				int[] len = ssp.getInitialLenPt()[0]; 
-//				int[] pt = ssp.getInitialLenPt()[1];
-//				
-//				IRectangularROI bounds = r2.getROI().getBounds();
-//				int[] redLen = bounds.getIntLengths();
-//				int[] redPt = bounds.getIntPoint();
-//				int[][] redLenPt = {redLen, redPt};
-//				
-//				ssp.setBackgroundLenPt(redLenPt);
-//				
-//				if (ssp.getMethodology() == Methodology.OVERLAPPING_BACKGROUND_BOX){
-//					
-//					int [][] newOffsetLenPt = new int[2][2];
-//					
-//					newOffsetLenPt[0][0]  =  -len[0] + redLen[0];
-//					newOffsetLenPt[0][1]  =  -len[1] + redLen[1];
-//					
-//					
-//					newOffsetLenPt[1][0]  = -pt[0] + redPt[0];
-//					newOffsetLenPt[1][1]  = -pt[1] + redPt[1];
-//					
-//					int[] bB = new int[4];
-//					
-//					bB[0] = Math.abs(newOffsetLenPt[1][0]);
-//					bB[1] = Math.abs(newOffsetLenPt[1][1]);
-//					
-//					bB[2] = Math.abs(newOffsetLenPt[1][0] + newOffsetLenPt[0][0] - pt[0]);
-//					bB[3] = Math.abs(newOffsetLenPt[1][1] + newOffsetLenPt[0][1] - pt[1]);
-//					
-//					int probe = bB[0];
-//					
-//					for(int g: bB){
-//						if(g>probe){
-//							probe = g;
-//						}
-//					}
-//					
-//					ssp.setbB(probe);
-//					
-//					if(!Arrays.equals(newOffsetLenPt[0], ssp.getBoxOffsetLenPt()[0]) ||
-//							!Arrays.equals(newOffsetLenPt[1], ssp.getBoxOffsetLenPt()[1])){
-//					 
-//						ssp.setBoxOffsetLenPt(newOffsetLenPt);
-//					}
-//				}
-//				
-//				RectangularROI[] greenAndBg = ssp.trackingRegionOfInterestSetter(ssp.getLenPt());
-//				
-//				customComposite.getIRegion().setROI(greenAndBg[0]);
-//				customComposite.getBgRegion().setROI(greenAndBg[1]);
-//
-//				}
+
 		});				
 	}
 

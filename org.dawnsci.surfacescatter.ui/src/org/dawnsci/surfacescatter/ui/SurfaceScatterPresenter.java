@@ -3338,14 +3338,7 @@ public class SurfaceScatterPresenter {
 		
 		String title = path + File.separator + stitle;
 	
-		
 		SavingUtils su = new SavingUtils();
-//		String rodSaveName = rodToSave.getText();
-		
-//		CurveStitchDataPackage csdpToSave = bringMeTheOneIWant(rodSaveName, 
-//				rcm.getCsdpList());
-//				
-//		SaveFormatSetting sfs =SaveFormatSetting.toMethod(outputFormatSelection.getText());
 		
 		int saveIntensityState = yAxis.getYAxisNumber();
 		
@@ -3379,8 +3372,7 @@ public class SurfaceScatterPresenter {
 					title,
 					saveIntensityState,
 					csdpToSave,
-					this.getDrm().getFms(),
-					this.getGm());
+					this.getDrm().getFms());
 		}
 
 		
