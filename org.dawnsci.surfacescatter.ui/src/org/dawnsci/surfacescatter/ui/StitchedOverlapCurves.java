@@ -18,6 +18,7 @@ import org.eclipse.dawnsci.analysis.dataset.roi.RectangularROI;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.PlotType;
 import org.eclipse.dawnsci.plotting.api.PlottingFactory;
+import org.eclipse.dawnsci.plotting.api.axis.IAxis;
 import org.eclipse.dawnsci.plotting.api.region.IROIListener;
 import org.eclipse.dawnsci.plotting.api.region.IRegion;
 import org.eclipse.dawnsci.plotting.api.region.ROIEvent;
@@ -447,6 +448,12 @@ public class StitchedOverlapCurves extends Composite {
 	    bottomForm.setWeights(new int[]{70,15,15});
 	    
 	    form.setWeights(new int[]{5,7,73,20});
+	    
+	    
+	    IAxis yAxisR = plotSystem.getSelectedYAxis();
+	    
+		yAxisR.setLog10(!yAxisR.isLog10());
+
 	  
     } 
 		

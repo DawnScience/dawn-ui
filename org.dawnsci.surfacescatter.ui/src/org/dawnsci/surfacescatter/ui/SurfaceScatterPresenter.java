@@ -20,6 +20,7 @@ import java.util.EnumMap;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.TreeMap;
+
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.math3.util.MathArrays;
 import org.dawnsci.surfacescatter.AnalaysisMethodologies;
@@ -69,7 +70,6 @@ import org.eclipse.dawnsci.analysis.api.roi.IRectangularROI;
 import org.eclipse.dawnsci.analysis.api.tree.Tree;
 import org.eclipse.dawnsci.analysis.dataset.roi.RectangularROI;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
-import org.eclipse.dawnsci.plotting.api.jreality.core.AxisMode;
 import org.eclipse.dawnsci.plotting.api.region.IRegion;
 import org.eclipse.dawnsci.plotting.api.trace.ILineTrace;
 import org.eclipse.january.dataset.AggregateDataset;
@@ -82,6 +82,7 @@ import org.eclipse.january.dataset.IDataset;
 import org.eclipse.january.dataset.ILazyDataset;
 import org.eclipse.january.dataset.Maths;
 import org.eclipse.january.dataset.ShapeUtils;
+import org.eclipse.january.dataset.Slice;
 import org.eclipse.january.dataset.SliceND;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionEvent;
@@ -469,6 +470,52 @@ public class SurfaceScatterPresenter {
 		
 		//sm.setSortedDatIntsInOrderDataset(imagesToFilepathRefDat);
 		
+		
+		if(gm.isUseNegativeQ()){
+			
+			thetaArrayCon = Maths.multiply(thetaArrayCon, -1);
+			xArrayCon = Maths.multiply(xArrayCon, -1);
+//			
+//			Dataset imageRefDatCopy = DatasetFactory.ones(imageRefList.size());
+//			
+			int[] localShape = imageRefDat.getShape();
+			
+			SliceND pr = new SliceND(localShape);
+
+			pr.flip();
+			
+			
+			int[] localShape2 = imagesToFilepathRefDat.getShape();
+			
+			SliceND pr2 = new SliceND(localShape2);
+
+			pr2.flip();
+			
+			imageRefDat = imageRefDat.getSlice(pr);
+			imagesToFilepathRefDat  = imagesToFilepathRefDat.getSlice(pr2);
+			
+			
+			
+			
+//			Dataset slice = imageRefDatCopy.getSlice(new SliceND);
+			
+			//			
+//			SliceND pr = new SliceND();
+			
+			
+//			for(int j = 0; j<imageRefDatCopy.getSize()-1; j++){
+//				for(int k = imageRefDatCopy.getSize()-1; k>=0; k--){
+//					imageRefDatCopy.set(imageRefDat.getObject(j), k);
+//					imagesToFilepathRefDatCopy.set(imagesToFilepathRefDat.getObject(j), k);
+//				}
+//			}
+//			
+//			imageRefDat = imageRefDatCopy;
+//			imagesToFilepathRefDat  = imagesToFilepathRefDatCopy;
+//			
+		}
+		
+
 		Dataset xArrayConClone = xArrayCon.clone();
 		
 		DoubleDataset xArrayConCloneDouble = (DoubleDataset) xArrayConClone.clone();
@@ -477,10 +524,6 @@ public class SurfaceScatterPresenter {
 		Dataset xArrayConCloneFork = xArrayCon.clone();
 		Dataset xArrayConCloneForl = xArrayCon.clone();
 		
-		if(gm.isUseNegativeQ()){
-			thetaArrayCon = Maths.multiply(thetaArrayCon, -1);
-			xArrayCon = Maths.multiply(xArrayCon, -1);
-		}
 		
 		try{
 			DatasetUtils.sort(xArrayCon, imageRefDat);
