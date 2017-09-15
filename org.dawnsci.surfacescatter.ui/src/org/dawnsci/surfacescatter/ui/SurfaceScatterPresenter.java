@@ -20,7 +20,6 @@ import java.util.EnumMap;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.TreeMap;
-
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.math3.util.MathArrays;
 import org.dawnsci.surfacescatter.AnalaysisMethodologies;
@@ -92,7 +91,6 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Shell;
-
 import uk.ac.diamond.scisoft.analysis.io.LoaderFactory;
 
 public class SurfaceScatterPresenter {
@@ -128,7 +126,7 @@ public class SurfaceScatterPresenter {
 	public void surfaceScatterPresenterBuildWithFrames(String[] filepaths,
 			String xName,
 			String datFolderPath,
-			int correctionSelection) {
+			MethodSetting correctionSelection) {
 
 
 		updateSvs = false;
@@ -138,7 +136,7 @@ public class SurfaceScatterPresenter {
 
 		drm.setDatFilepaths(filepaths);
 
-		drm.setCorrectionSelection(MethodSetting.toMethod(correctionSelection));
+		drm.setCorrectionSelection(correctionSelection);
 
 		ILazyDataset[] imageArray = new ILazyDataset[filepaths.length];
 		//////imageArray is an array of the image ILazyDatasets 
@@ -312,7 +310,7 @@ public class SurfaceScatterPresenter {
 						IDataset xdat = ildx.getSlice(slice1);
 						xArray[id] = xdat;
 
-						if(MethodSetting.toMethod(correctionSelection) == MethodSetting.SXRD){
+						if(correctionSelection == MethodSetting.SXRD){
 							try{
 								ILazyDataset ildl = dh1.getLazyDataset("l");
 								SliceND slicel = new SliceND(ildl.getShape());
@@ -378,7 +376,7 @@ public class SurfaceScatterPresenter {
 
 
 					//xArrayCon is an unsorted, but concatenated DoubleDataset of l values
-					if(MethodSetting.toMethod(correctionSelection) != MethodSetting.SXRD){
+					if(correctionSelection != MethodSetting.SXRD){
 						try{
 							thetaArrayCon = DatasetUtils.concatenate(thetaArray, 0);
 							xArrayCon = DatasetUtils.concatenate(xArray, 0);
@@ -434,7 +432,7 @@ public class SurfaceScatterPresenter {
 		try{
 			xArrayCon = DatasetUtils.concatenate(xArray, 0);
 			//xArrayCon is an unsorted, but concatenated DoubleDataset of l values
-			if(MethodSetting.toMethod(correctionSelection) == MethodSetting.SXRD){
+			if(correctionSelection == MethodSetting.SXRD){
 				try{
 					hArrayCon = DatasetUtils.concatenate(hArray, 0);
 					kArrayCon = DatasetUtils.concatenate(kArray, 0);
@@ -531,7 +529,7 @@ public class SurfaceScatterPresenter {
 			DatasetUtils.sort(xArrayConClone, imagesToFilepathRefDat);
 			//so now we have the dat number in filepaths (imagesToFilepathRefDat) sorted by "l" value xArrayCon
 
-			if(MethodSetting.toMethod(correctionSelection) == MethodSetting.SXRD){
+			if(correctionSelection == MethodSetting.SXRD){
 				try{
 					DatasetUtils.sort(xArrayConCloneForh, hArrayCon);
 					DatasetUtils.sort(xArrayConCloneFork, kArrayCon);
@@ -558,7 +556,7 @@ public class SurfaceScatterPresenter {
 
 			String[] datNamesInOrder = new String[imageRefList.size()];
 
-			drm.setCorrectionSelection(MethodSetting.toMethod(correctionSelection));
+			drm.setCorrectionSelection(correctionSelection);
 
 
 
@@ -582,13 +580,14 @@ public class SurfaceScatterPresenter {
 				fm.setNoInOriginalDat(imageNoInDatList.get(pos));
 				fm.setDatNo(imagesToFilepathRefDat.getInt(f));
 				fm.setImageNumber(f);
+				fm.setCorrectionSelection(correctionSelection);
 
 				System.out.println("imageNoInDatList.get(pos)" + imageNoInDatList.get(pos));
 
 
 				//				
 
-				if(MethodSetting.toMethod(correctionSelection) == MethodSetting.SXRD){
+				if(correctionSelection == MethodSetting.SXRD){
 
 					double polarisation = SXRDGeometricCorrections.polarisation(datNamesInOrder[f], 
 							gm.getInplanePolarisation(), 
@@ -630,8 +629,8 @@ public class SurfaceScatterPresenter {
 
 				try{
 
-					if(MethodSetting.toMethod(correctionSelection) == MethodSetting.Reflectivity_without_Flux_Correction ||
-							MethodSetting.toMethod(correctionSelection) == MethodSetting.Reflectivity_with_Flux_Correction){
+					if(correctionSelection == MethodSetting.Reflectivity_without_Flux_Correction ||
+							correctionSelection == MethodSetting.Reflectivity_with_Flux_Correction){
 
 						double angularFudgeFactor = gm.getAngularFudgeFactor();
 						double beamHeight = gm.getBeamHeight();
@@ -660,7 +659,7 @@ public class SurfaceScatterPresenter {
 				}
 
 				try{
-					if(MethodSetting.toMethod(correctionSelection) == MethodSetting.Reflectivity_with_Flux_Correction){
+					if(correctionSelection == MethodSetting.Reflectivity_with_Flux_Correction){
 
 
 						String externalFlux = gm.getFluxPath();

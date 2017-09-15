@@ -232,11 +232,12 @@ public class SurfaceScatterViewStart extends Dialog {
 				int[] test = correctionsDropDownArray;
 				int t = correctionsDropDown.getSelectionIndex();
 				
+				MethodSetting ms = MethodSetting.toMethod(test[t]);
 				
 				ssp.surfaceScatterPresenterBuildWithFrames(filepaths,
 												datDisplayer.getSelectedOption(),
 												datFolderPath, 
-												test[t]);
+												ms);
 				
 				try{
 					ssp.setLenPt(r);
