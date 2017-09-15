@@ -1,6 +1,9 @@
 package org.dawnsci.datavis.model.fileconfig;
 
+import java.util.List;
+
 import org.dawnsci.datavis.model.DataOptions;
+import org.dawnsci.datavis.model.DataStateObject;
 import org.dawnsci.datavis.model.LoadedFile;
 
 public class I11MacConfiguration implements ILoadedFileConfiguration {
@@ -20,6 +23,11 @@ public class I11MacConfiguration implements ILoadedFileConfiguration {
 
 		
 		return false;
+	}
+
+	@Override
+	public void setCurrentState(List<DataStateObject> state) {
+		//doesn't need state
 	}
 
 }
