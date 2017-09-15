@@ -236,7 +236,7 @@ public class SurfaceScatterViewStart extends Dialog {
 				
 				ssp.surfaceScatterPresenterBuildWithFrames(filepaths,
 												datDisplayer.getSelectedOption(),
-												datFolderPath, 
+//												datFolderPath, 
 												ms);
 				
 				try{
