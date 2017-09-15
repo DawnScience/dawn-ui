@@ -375,8 +375,8 @@ public class SurfaceScatterPresenter {
 			public void propertyChange(PropertyChangeEvent evt) {
 				for (int id = 0; id < filepaths.length; id++) {
 					try {
-						IDataHolder dh1 = LoaderFactory.getData(filepaths[id]);
-						ILazyDataset ild = dh1.getLazyDataset(gm.getImageName());
+						IDataHolder dh2 = LoaderFactory.getData(filepaths[id]);
+						ILazyDataset ild = dh2.getLazyDataset(gm.getImageName());
 						//						models.get(id).setDatImages(ild);
 					}
 
@@ -603,7 +603,7 @@ public class SurfaceScatterPresenter {
 				}
 				catch(Exception h ){
 					System.out.println("problem in ref area corr:   " + h.getMessage());
-
+					fluxCallibrationWarning();
 				}
 
 				try{
@@ -619,14 +619,20 @@ public class SurfaceScatterPresenter {
 								qdcdCon.getDouble(f), 
 								externalFlux);
 
-
-
 						fm.setReflectivityFluxCorrection(reflectivityFluxCorrection);
+						
+						if(Double.isInfinite(reflectivityFluxCorrection)){
+							fluxCallibrationWarning();
+							break;
+						}
 					}
 
 				}
 				catch(Exception i ){
 					System.out.println("problem doing flux corr");
+					fluxCallibrationWarning();
+					
+					
 				}
 
 				fm.setScannedVariable(xArrayCon.getDouble(f));
@@ -1117,7 +1123,7 @@ public class SurfaceScatterPresenter {
 					int len0 = len[0] + offsetLen[0];
 					int len1 = len[1] + offsetLen[1];
 
-					drm.setBackgroundLenPt(new int[][] {{pt0,pt1},{len0,len1}});
+					drm.setBackgroundLenPt(new int[][] {{len0,len1},{pt0,pt1}});
 				}
 
 
@@ -2254,6 +2260,11 @@ public class SurfaceScatterPresenter {
 
 	public void boundariesWarning(){
 		RegionOutOfBoundsWarning roobw = new RegionOutOfBoundsWarning(parentShell,0, null);
+		roobw.open();
+	}
+	
+	public void fluxCallibrationWarning(){
+		RegionOutOfBoundsWarning roobw = new RegionOutOfBoundsWarning(parentShell,6, null);
 		roobw.open();
 	}
 

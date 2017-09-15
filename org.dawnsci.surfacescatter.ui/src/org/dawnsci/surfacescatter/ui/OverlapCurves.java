@@ -559,8 +559,10 @@ public class OverlapCurves extends Composite {
 
 			plotSystem.addTrace(lt);
 			plotSystem.repaint();
-
+			
+			lt.setErrorBarEnabled(gohv.isErrorFlag());
 		}		
+		
 	}
 
 	private void imageNoAddListener(){

@@ -39,6 +39,8 @@ public class GeneralOverlapHandlerView extends Dialog {
     private boolean errorFlag =true;
 	
 	
+	
+
 	public GeneralOverlapHandlerView(Shell parentShell, 
 									 int style, 
 									 ArrayList<IDataset> xArrayList,
@@ -126,7 +128,8 @@ public class GeneralOverlapHandlerView extends Dialog {
 												   yArrayListRawError,
 												   "Stitched Curves", 
 												   model,
-												   ssp);
+												   ssp,
+												   this);
 		
 		stitchedCurves.setLayout(new GridLayout());
 		stitchedCurves.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
@@ -254,5 +257,10 @@ public class GeneralOverlapHandlerView extends Dialog {
 	public Button getExport(){
 		return export;
 	}
+	
+	public boolean isErrorFlag() {
+		return errorFlag;
+	}
+
 	
 }
