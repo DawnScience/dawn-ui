@@ -3,7 +3,6 @@ package org.dawnsci.datavis.model;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -19,13 +18,16 @@ import org.eclipse.dawnsci.analysis.dataset.slicer.SliceInformation;
 import org.eclipse.dawnsci.analysis.dataset.slicer.SourceInformation;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.axis.IAxis;
+import org.eclipse.dawnsci.plotting.api.trace.ILineTrace;
 import org.eclipse.dawnsci.plotting.api.trace.ITrace;
 import org.eclipse.january.dataset.IDataset;
 import org.eclipse.january.dataset.ILazyDataset;
 import org.eclipse.january.dataset.ShapeUtils;
 import org.eclipse.january.dataset.SliceND;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Cursor;
+import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.slf4j.Logger;
@@ -62,6 +64,9 @@ public class PlotController implements IPlotController {
 	
 	private IPlotDataModifier[] modifiers = new IPlotDataModifier[]{new PlotDataModifierMinMax(), new PlotDataModifierOffset(), new PlotDataModifierStack()};
 	private IPlotDataModifier currentModifier;
+	
+	private ITraceColourProvider colorProvider;
+	private List<Color> colorcache = null;
 	
 	private IFileController fileController;
 	
@@ -142,8 +147,8 @@ public class PlotController implements IPlotController {
 			currentMode = plotObject.getPlotMode();
 			if (currentMode != localMode) {
 				system.reset();
-				system.getSelectedXAxis().setTitle("");
-				system.getSelectedYAxis().setTitle("");
+				if (system.getSelectedXAxis() != null) system.getSelectedXAxis().setTitle("");
+				if (system.getSelectedYAxis() != null) system.getSelectedYAxis().setTitle("");
 				system.setTitle("");
 			}
 			localMode = currentMode;
@@ -162,8 +167,8 @@ public class PlotController implements IPlotController {
 		
 		if (state.isEmpty()) {
 			system.reset();
-			system.getSelectedXAxis().setTitle("");
-			system.getSelectedYAxis().setTitle("");
+			if (system.getSelectedXAxis() != null) system.getSelectedXAxis().setTitle("");
+			if (system.getSelectedYAxis() != null) system.getSelectedYAxis().setTitle("");
 			system.setTitle("");
 		}
 		updatePlotStateInJob(state, currentMode);
@@ -216,6 +221,8 @@ public class PlotController implements IPlotController {
 			}
 		});
 		
+		final List<Runnable> uiRunnables = new ArrayList<>();
+		
 		for (DataStateObject object : state) {
 
 			List<ITrace> list = updateMap.remove(object.getOption());
@@ -227,17 +234,58 @@ public class PlotController implements IPlotController {
 					system.removeTrace(t);
 				}
 			} else if (object.isChecked()) {
-				updatePlottedData(object, list, localCurrentMode, localModifier);
+				uiRunnables.add(updatePlottedData(object, list, localCurrentMode, localModifier));
 			}
+			
 		}
-		
-		List<IAxis> axes = system.getAxes();
-		if (axes != null) for (IAxis axis : axes) if (axis != null) axis.setAxisAutoscaleTight(true);
 		
 		Display.getDefault().syncExec(new Runnable() {
 			
 			@Override
 			public void run() {
+				for (Runnable r : uiRunnables) {
+					r.run();
+				}
+				
+				if (colorProvider != null) {
+					List<Color> local = null;
+					if (colorcache == null) {
+//						final IPaletteService pservice = (IPaletteService) PlatformUI.getWorkbench()
+//								.getService(IPaletteService.class);
+////						PaletteData paletteData = pservice.getDirectPaletteData("Viridis (blue-green-yellow)");
+//						PaletteData paletteData = pservice.getDirectPaletteData("Jet (Blue-Cyan-Green-Yellow-Red)");
+						RGB[] rgbs = colorProvider.getRGBs();
+						local = new ArrayList<Color>(rgbs.length);
+						Display display = Display.getDefault();
+						for (int i = 0; i < rgbs.length; i++) {
+							local.add(new Color(display, rgbs[i]));
+						}
+						colorcache = local;
+					}
+					local = colorcache;
+					
+					Collection<ITrace> traces = system.getTraces(ILineTrace.class);
+					double count = 0;
+					for (ITrace trace : traces)
+						if (trace.isUserTrace())
+							count++;
+
+					double val = local.size() / (count - 1);
+					if (Double.isNaN(val)) val = 0;
+					int i = 0;
+					for (ITrace trace : traces) {
+						if (trace.isUserTrace()) {
+							((ILineTrace) trace).setTraceColor(local.get((int) val * i));
+							i++;
+						}
+
+					}
+				}
+				
+			
+				
+				getPlottingSystem().repaint();
+				
 				Shell[] shells = Display.getCurrent().getShells();
 				for (Shell s : shells) {
 					if (s!= null && id.equals(s.getData())) {
@@ -246,9 +294,12 @@ public class PlotController implements IPlotController {
 				}
 			}
 		});
+		
+		List<IAxis> axes = system.getAxes();
+		if (axes != null) for (IAxis axis : axes) if (axis != null) axis.setAxisAutoscaleTight(true);
 	}
 	
-	private void updatePlottedData(DataStateObject stateObject,final List<ITrace> traces, IPlotMode mode, IPlotDataModifier modifier) {
+	private Runnable updatePlottedData(DataStateObject stateObject,final List<ITrace> traces, IPlotMode mode, IPlotDataModifier modifier) {
 		//remove traces if not the same as mode
 		//update the data in the plot
 		
@@ -278,24 +329,20 @@ public class PlotController implements IPlotController {
 		}
 		
 		if (mode instanceof ILazyPlotMode) {
-			
-				Display.getDefault().syncExec(new Runnable() {
-					
-					@Override
-					public void run() {
-						try {
-				((ILazyPlotMode)mode).displayData(traces.isEmpty() ? null : traces.toArray(new ITrace[traces.size()]), system, dataOp);
-				getPlottingSystem().repaint();
-						} catch (Exception e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
-						}
-					}});
-			
-			return;	
+
+			return ()->  {
+
+				try {
+					((ILazyPlotMode)mode).displayData(traces.isEmpty() ? null : traces.toArray(new ITrace[traces.size()]), system, dataOp);
+					getPlottingSystem().repaint();
+				} catch (Exception e) {
+					logger.error("Error plotting", e);
+				}
+			};
 		}
+	
 		
-		if (data == null) return;
+		if (data == null) return null;
 		
 		SourceInformation si = new SourceInformation(dataOp.getFilePath(), dataOp.getName(), dataOp.getLazyDataset());
 		SliceInformation s = new SliceInformation(slice, slice, new SliceND(dataOp.getLazyDataset().getShape()), mode.getDataDimensions(options), 1, 0);
@@ -313,20 +360,14 @@ public class PlotController implements IPlotController {
 	
 		final IDataset[] finalData = data;
 		
-		Display.getDefault().syncExec(new Runnable() {
-			
-			@Override
-			public void run() {
-					
-					try {
-						mode.displayData(finalData, traces.isEmpty() ? null : traces.toArray(new ITrace[traces.size()]), system, dataOp);
-					} catch (Exception e) {
-						logger.error("Error displaying data", e);
-					}
-				
-			getPlottingSystem().repaint();
+		return () -> {
+
+			try {
+				mode.displayData(finalData, traces.isEmpty() ? null : traces.toArray(new ITrace[traces.size()]), system, dataOp);
+			} catch (Exception e) {
+				logger.error("Error displaying data", e);
 			}
-		});
+		};
 		
 	}
 	
@@ -587,5 +628,26 @@ public class PlotController implements IPlotController {
 	@Override
 	public void dispose() {
 		system = null;
+	}
+
+	@Override
+	public ITraceColourProvider getColorProvider() {
+		return colorProvider;
+	}
+
+	@Override
+	public void setColorProvider(ITraceColourProvider colorProvider) {
+		this.colorProvider = colorProvider;
+		if (colorcache != null) {
+			colorcache.stream().forEach(Color::dispose);
+			colorcache = null;
+		}
+		if (colorProvider == null) {
+			system.clearTraces();
+		}
+		
+		final List<DataStateObject> state = fileController.getImmutableFileState();
+		//update plot
+		updatePlotStateInJob(state, currentMode);
 	}
 }

@@ -4,6 +4,7 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.util.ArrayList;
+
 import org.dawb.common.ui.widgets.ActionBarWrapper;
 import org.dawnsci.surfacescatter.AxisEnums;
 import org.dawnsci.surfacescatter.AxisEnums.xAxes;
@@ -14,10 +15,13 @@ import org.dawnsci.surfacescatter.GoodPointStripper;
 import org.dawnsci.surfacescatter.ReviewCurvesModel;
 import org.dawnsci.surfacescatter.SavingFormatEnum;
 import org.dawnsci.surfacescatter.SavingFormatEnum.SaveFormatSetting;
-import org.dawnsci.surfacescatter.SavingUtils;
+import org.eclipse.dawnsci.analysis.dataset.roi.RectangularROI;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.PlotType;
 import org.eclipse.dawnsci.plotting.api.PlottingFactory;
+import org.eclipse.dawnsci.plotting.api.axis.IAxis;
+import org.eclipse.dawnsci.plotting.api.region.IRegion;
+import org.eclipse.dawnsci.plotting.api.region.IRegion.RegionType;
 import org.eclipse.dawnsci.plotting.api.trace.ILineTrace;
 import org.eclipse.january.dataset.Dataset;
 import org.eclipse.january.dataset.DatasetFactory;
@@ -31,8 +35,12 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Group;
+import org.eclipse.swt.widgets.Listener;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableItem;
 
@@ -50,7 +58,7 @@ public class ReviewTabComposite extends Composite{
     private Button save;
     private Button saveGoodPoints;
 	private Combo outputFormatSelection;
-    private IPlottingSystem<Composite> plotSystem;
+    private IPlottingSystem<Composite> plotSystemReview;
     private ReviewCurvesModel rcm;
 	private String nexusFolderPath;
 	private boolean errorDisplayFlag = true;
@@ -65,6 +73,8 @@ public class ReviewTabComposite extends Composite{
 	private SurfaceScatterViewStart ssvs;
 	private boolean useGoodPointsOnly = false;
 	private Button showOnlyGoodPoints;
+	private IRegion imageNo;
+
 	
 	public ReviewTabComposite(Composite parent, 
 							  int style,
@@ -77,7 +87,8 @@ public class ReviewTabComposite extends Composite{
         this.ssp = ssp;
         
         try {
-        	plotSystem = PlottingFactory.createPlottingSystem();
+        	plotSystemReview = PlottingFactory.createPlottingSystem();
+        	plotSystemReview.setTitle("Review Plot");
 			
         } 
         catch (Exception e2) {
@@ -125,7 +136,7 @@ public class ReviewTabComposite extends Composite{
 					}
 					
 					rodDisplayTable.removeAll();	
-					plotSystem.clear();
+					plotSystemReview.clear();
 					rcm.setCsdpList(null);
 					rcm.setCsdpLatest(null);
 					
@@ -228,7 +239,7 @@ public class ReviewTabComposite extends Composite{
 				
 				refreshTable();
 				refreshCurves();
-				plotSystem.autoscaleAxes();
+				plotSystemReview.autoscaleAxes();
 			}
 			
 			@Override
@@ -237,8 +248,6 @@ public class ReviewTabComposite extends Composite{
 			}
 		});
 
-		
-		
 		rodDisplayTable = new Table(rodSelector, SWT.CHECK | SWT.V_SCROLL | SWT.H_SCROLL | SWT.BORDER);
 		rodDisplayTable.setEnabled(true);
 		
@@ -265,8 +274,6 @@ public class ReviewTabComposite extends Composite{
 				
 			}
 		});
-		
-		
 		
 ////////////////////////////////right		
 		rightForm = new SashForm(form, SWT.VERTICAL);
@@ -407,28 +414,22 @@ public class ReviewTabComposite extends Composite{
         storedCurvesData.heightHint = 100;
         storedCurves.setLayoutData(new GridData(GridData.FILL_HORIZONTAL | GridData.FILL_VERTICAL));
         
-        
-        
-	    try {
-			plotSystem = PlottingFactory.createPlottingSystem();
-				
-		} catch (Exception e2) {
-			e2.printStackTrace();
-		}
-	        
 		ActionBarWrapper actionBarComposite = ActionBarWrapper.createActionBars(storedCurves, 
 																				null);
 		  
-	    plotSystem.createPlotPart(storedCurves, 
+	    plotSystemReview.createPlotPart(storedCurves, 
 	        					  "Stored Curves", 
 	        					  actionBarComposite, 
 	        					  PlotType.IMAGE, 
 	        					  null);
 		
+	    plotSystemReview.getPlotComposite().setLayoutData(storedCurvesData);
 	    
-	    plotSystem.getPlotComposite().setLayoutData(storedCurvesData);
+	    IAxis yAxisR = plotSystemReview.getSelectedYAxis();
+		if (yAxisR != null) {
+			yAxisR.setLog10(true);
+		}
 	    
-	   
         showErrors = new Button(methodSetting, SWT.PUSH);
         showErrors.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
         showErrors.setData(new GridData(SWT.FILL));
@@ -540,12 +541,12 @@ public class ReviewTabComposite extends Composite{
 						System.out.println(i.getMessage());
 					}
 					
-					xAxis.setText(AxisEnums.toString(xAxisSelection));
-					yAxis.setText(AxisEnums.toString(yAxisSelection));
+					xAxis.setText(xAxisSelection.getXAxisName());
+					yAxis.setText(yAxisSelection.getYAxisName());
 					
 					refreshCurves();
 					refreshTable();
-					plotSystem.autoscaleAxes();
+					plotSystemReview.autoscaleAxes();
 				}
 				catch(Exception b){
 					System.out.println(b.getMessage());
@@ -553,12 +554,63 @@ public class ReviewTabComposite extends Composite{
 			}
 		});
 	    
-	    plotSystem.setShowLegend(true);
+	    plotSystemReview.setShowLegend(true);
 	    
 	    form.setWeights(new int[] {25, 75});
+	   
+	    try {
+			imageNo = plotSystemReview.createRegion("Image", RegionType.XAXIS_LINE);
+			imageNo.setShowPosition(true);
+			plotSystemReview.addRegion(imageNo);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+	    Display.getCurrent().addFilter(SWT.ALL, new Listener(){
+	        @Override
+	        public void handleEvent(Event event){
+	        	
+				char key = event.character;
+				
+				switch(key){
+				
+				case 'y':
+					if (plotSystemReview.getPlotType().is1D()) {
+		        		IAxis yAxisR = plotSystemReview.getSelectedYAxis();
+						if (yAxisR != null) {
+							yAxisR.setLog10(!yAxisR.isLog10());
+						}
+		        	}
+					break;
+					
+				case 'x':
+					if (plotSystemReview.getPlotType().is1D()){
+//							&& plotSystemReview.getPlotComposite().isFocusControl()) {
+		        		IAxis xAxisR = plotSystemReview.getSelectedXAxis();
+		        		if (xAxisR != null) {
+		        			xAxisR.setLog10(!xAxisR.isLog10());
+		        		}
+		        	}
+					break;
+					
+				default:
+					break;
+			
+				}
+	        }
+	    });
+
 	    
 	}
 	   
+	public IRegion getImageNo() {
+		return imageNo;
+	}
+
+	public void setImageNo(IRegion imageNo) {
+		this.imageNo = imageNo;
+	}
+
 	public Composite getComposite(){ 
 		
 	   	return this;
@@ -613,11 +665,11 @@ public class ReviewTabComposite extends Composite{
 	}
 
 	public IPlottingSystem<Composite> getPlotSystem() {
-		return plotSystem;
+		return plotSystemReview;
 	}
 
 	public void setPlotSystem(IPlottingSystem<Composite> plotSystem) {
-		this.plotSystem = plotSystem;
+		this.plotSystemReview = plotSystem;
 	}
 
 	public ReviewCurvesModel getRcm() {
@@ -637,74 +689,57 @@ public class ReviewTabComposite extends Composite{
 	}
 	
 	
+	
+	
 	private void saveRod(boolean writeOnlyGoodPoints){
 		
-		FileDialog fd = new FileDialog(ssvs.getShell(), SWT.SAVE);
-
-		if(ssp.getSaveFolder()!=null){
-			fd.setFilterPath(ssp.getSaveFolder());
-		}
+		SaveFormatSetting sfs =SaveFormatSetting.toMethod(outputFormatSelection.getText());
+		Shell shell = ssvs.getShell();
 		
-		String stitle = "r";
-		String path = "p";
-
-		if (fd.open() != null) {
-			stitle = fd.getFileName();
-			path = fd.getFilterPath();
-
-		}
-		
-		if(ssp.getSaveFolder()==null){
-			ssp.setSaveFolder(path);;
-		}
-		
-		String title = path + File.separator + stitle;
-	
-		
-		SavingUtils su = new SavingUtils();
 		String rodSaveName = rodToSave.getText();
-		
 		CurveStitchDataPackage csdpToSave = bringMeTheOneIWant(rodSaveName, 
 				rcm.getCsdpList());
-				
-		SaveFormatSetting sfs =SaveFormatSetting.toMethod(outputFormatSelection.getText());
 		
-		int saveIntensityState = AxisEnums.toInt(yAxisSelection);
 		
-		if (sfs == SaveFormatSetting.GenX) {
-			su.genXSave(writeOnlyGoodPoints,
-					title,
-					csdpToSave,
-					ssp.getDrm(),
-					ssp.getDrm().getFms(),
-					ssp.getGm());
-		}
-		if (sfs == SaveFormatSetting.Anarod) {
-			su.anarodSave(writeOnlyGoodPoints,
-					title,
-					csdpToSave,
-					ssp.getDrm(),
-					ssp.getDrm().getFms(),
-					ssp.getGm());
-		}
-		if (sfs == SaveFormatSetting.int_format) {
-			su.intSave(writeOnlyGoodPoints,
-					title,
-					csdpToSave,
-					ssp.getDrm(),
-					ssp.getDrm().getFms(),
-					ssp.getGm());
-		}
-		if (sfs == SaveFormatSetting.ASCII) {
-			su.simpleXYYeSave(writeOnlyGoodPoints,
-					title,
-					saveIntensityState,
-					csdpToSave,
-					ssp.getDrm(),
-					ssp.getDrm().getFms(),
-					ssp.getGm());
-		}
+		ssp.arbitrarySavingMethod(false, 
+								  writeOnlyGoodPoints, 
+								  shell, 
+								  sfs, 
+								  rodSaveName, 
+								  csdpToSave, 
+								  yAxisSelection);
+	}
+	
+	public void addImageNoRegion(double j){
 
+		RectangularROI r = new RectangularROI(j ,0.1,0,0.1,0);
+
+		if(plotSystemReview.getRegion("Image")== null){
+			
+			try{
+				imageNo = plotSystemReview.createRegion("Image", RegionType.XAXIS_LINE);
+			}
+			catch(Exception x){
+				
+			}
+			
+			
+			imageNo.setShowPosition(true);
+			imageNo.setROI(r);
+			
+			plotSystemReview.addRegion(imageNo);
+			imageNo.setShowPosition(true);
+		}
+		
+		else{
+			moveImageNoRegion(j);
+		}
+	}
+	
+	public void moveImageNoRegion(double j){
+		
+		RectangularROI r = new RectangularROI(j ,0.1,0,0.1,0);
+		imageNo.setROI(r);
 	}
 
 
@@ -753,10 +788,10 @@ public class ReviewTabComposite extends Composite{
 		}
 			
 		if(isXPresent){
-			outputList.add(AxisEnums.toString(xAxes.SCANNED_VARIABLE));
+			outputList.add(xAxes.SCANNED_VARIABLE.getXAxisName());
 		}
 		if(isQPresent){
-			outputList.add(AxisEnums.toString(xAxes.Q));
+			outputList.add(xAxes.Q.getXAxisName());
 		}
 		
 		if (outputList.size()>0){
@@ -909,7 +944,7 @@ public class ReviewTabComposite extends Composite{
 	
 	private ILineTrace buildLineTrace(CurveStitchDataPackage csdp){
 
-		ILineTrace lt =	plotSystem.createLineTrace(csdp.getRodName());
+		ILineTrace lt =	plotSystemReview.createLineTrace(csdp.getRodName());
 		
 		IDataset x = DatasetFactory.zeros(new int[] {2,2}, Dataset.ARRAYFLOAT64);
 		IDataset y[] = new IDataset[2];
@@ -920,13 +955,13 @@ public class ReviewTabComposite extends Composite{
 			boolean rg = true;
 			
 			for(String h :xAxis.getItems()){
-				if(AxisEnums.toString(xAxisSelection).equals(h)){
+				if(xAxisSelection.getXAxisName().equals(h)){
 					rg = false;
 				}
 			}
 			
 			if(rg){
-				xAxis.add(AxisEnums.toString(xAxisSelection));
+				xAxis.add(xAxisSelection.getXAxisName());
 			}
 			
 		}
@@ -971,15 +1006,15 @@ public class ReviewTabComposite extends Composite{
 		
 	private void refreshCurves(){
 		
-		plotSystem.clear();
+		plotSystemReview.clear();
 		
 		if(!rcm.getCsdpList().isEmpty()){
 			for(CurveStitchDataPackage csdp : rcm.getCsdpList()){
 				
 				ILineTrace lt = buildLineTrace(csdp);
 				
-				plotSystem.addTrace(lt);
-//				plotSystem.autoscaleAxes();
+				plotSystemReview.addTrace(lt);
+
 				
 			}
 		}
@@ -999,7 +1034,7 @@ public class ReviewTabComposite extends Composite{
 	
 	private void refreshCurvesFromTable(){
 		
-		plotSystem.clear();
+		plotSystemReview.clear();
 		
 		for(TableItem fd : rodDisplayTable.getItems()){
 			if(fd.getChecked()){
@@ -1011,8 +1046,8 @@ public class ReviewTabComposite extends Composite{
 				
 				ILineTrace lt =	buildLineTrace(csdp);
 				
-				plotSystem.addTrace(lt);
-				plotSystem.autoscaleAxes();
+				plotSystemReview.addTrace(lt);
+				plotSystemReview.autoscaleAxes();
 			}
 		}
 	}

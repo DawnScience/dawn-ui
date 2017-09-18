@@ -12,8 +12,10 @@ public class PlotDataModifierMinMax implements IPlotDataModifier {
 	public IDataset modifyForDisplay(IDataset d) {
 		double min = d.min(true).doubleValue();
 		double max = d.max().doubleValue();
+		double delta = max-min;
+		if (delta == 0) delta = 1;
 		Dataset dataset = DatasetUtils.convertToDataset(d);
-		dataset = Maths.subtract(dataset,min).idivide(max-min);
+		dataset = Maths.subtract(dataset,min).idivide(delta);
 		AxesMetadata md = d.getFirstMetadata(AxesMetadata.class);
 		if (md != null) {
 			dataset.addMetadata(md);

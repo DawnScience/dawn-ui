@@ -149,7 +149,7 @@ public class EscapableSliceVisitor implements SliceVisitor {
 		
 		@Override
 		public void close() throws Exception {
-			// TODO Auto-generated method stub
+			//do nothing
 			
 		}
 		
@@ -159,7 +159,7 @@ public class EscapableSliceVisitor implements SliceVisitor {
 				return;
 			}
 			IDataset out = result.getData();
-			//TODO change name
+
 			try {
 				SliceFromSeriesMetadata ssm = out.getMetadata(SliceFromSeriesMetadata.class).get(0);
 				Slice[] s = ssm.getSliceFromInput();
@@ -172,10 +172,9 @@ public class EscapableSliceVisitor implements SliceVisitor {
 				}
 				
 			} catch (Exception e) {
-				e.printStackTrace();
-				// TODO: handle exception
+				logger.debug("Could not build dataset name",e);
 			}
-//			out = Random.rand(out.getShape());
+
 			MetadataPlotUtils.plotDataWithMetadata(out, output);
 
 		}

@@ -22,4 +22,8 @@ public interface IPlotController {
 	
 	public void dispose();
 
+	void setColorProvider(ITraceColourProvider colorProvider);
+
+	ITraceColourProvider getColorProvider();
+
 }

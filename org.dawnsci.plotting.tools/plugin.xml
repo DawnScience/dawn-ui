@@ -449,6 +449,12 @@
              tooltip="Import reflections from a JCPDS file to vary with pressure"
              visible="false">
        </plotting_tool_page>
+       <plotting_tool_page
+             class="org.dawnsci.plotting.tools.decomposition.PCAToolPage"
+             id="org.dawnsci.plotting.tools.decomposition.PCAToolPage"
+             label="PCA"
+             visible="false">
+       </plotting_tool_page>
    </extension>
 
   <extension

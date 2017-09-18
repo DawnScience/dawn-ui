@@ -1,10 +1,8 @@
 package org.dawnsci.surfacescatter.ui;
 
 import org.dawb.common.ui.widgets.ActionBarWrapper;
-import org.dawnsci.surfacescatter.DataModel;
-import org.dawnsci.surfacescatter.ExampleModel;
-import org.dawnsci.surfacescatter.IntensityDisplayEnum;
-import org.dawnsci.surfacescatter.IntensityDisplayEnum.IntensityDisplaySetting;
+import org.dawnsci.surfacescatter.AxisEnums;
+import org.dawnsci.surfacescatter.CurveStitchDataPackage;
 import org.dawnsci.surfacescatter.SavingFormatEnum;
 import org.dawnsci.surfacescatter.SavingFormatEnum.SaveFormatSetting;
 import org.eclipse.dawnsci.analysis.dataset.roi.RectangularROI;
@@ -19,6 +17,8 @@ import org.eclipse.january.dataset.DatasetFactory;
 import org.eclipse.january.dataset.IDataset;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -26,13 +26,13 @@ import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Group;
+import org.eclipse.swt.widgets.Shell;
 
 public class MultipleOutputCurvesTableView extends Composite {
 
 	private IPlottingSystem<Composite> plotSystem4;
 	private IRegion imageNo;
 	private ILineTrace lt;
-	private ExampleModel model;
 	private Button sc;
 	private Button save;
 	private Combo intensitySelect;
@@ -43,24 +43,28 @@ public class MultipleOutputCurvesTableView extends Composite {
 	private Button qAxis;
 	private Button storeAsNexus;
 	private IRegion marker;
+	private SurfaceScatterPresenter ssp;
 	
 	public MultipleOutputCurvesTableView (Composite parent, 
 										  int style, 
-										  int extra) {
+										  int extra,
+										  SurfaceScatterPresenter ssp) {
 
 		super(parent, style);	
 		
+		this.ssp = ssp;
+		 
 		try {
 			plotSystem4 = PlottingFactory.createPlottingSystem();
 		} catch (Exception e2) {
 			e2.printStackTrace();
 		}
 
-		this.createContents(model);
+		this.createContents();
 
 	}
 
-	public void createContents(ExampleModel model) {
+	public void createContents() {
 		
 		SashForm sashForm= new SashForm(this, SWT.VERTICAL);
 		sashForm.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
@@ -78,8 +82,8 @@ public class MultipleOutputCurvesTableView extends Composite {
 		
 		intensitySelect = new Combo(overlapSelection, SWT.DROP_DOWN | SWT.BORDER |SWT.FILL);
 		
-		for(IntensityDisplaySetting  t: IntensityDisplayEnum.IntensityDisplaySetting.values()){
-			intensitySelect.add(IntensityDisplaySetting.toString(t));
+		for(AxisEnums.yAxes  t: AxisEnums.yAxes.values()){
+			intensitySelect.add(t.getYAxisName(), t.getYAxisNumber());
 		}
 	
 		intensitySelect.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
@@ -98,6 +102,21 @@ public class MultipleOutputCurvesTableView extends Composite {
 		save.setText("Save Spliced");
 		save.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		
+		save.addSelectionListener(new SelectionListener() {
+
+				@Override
+				public void widgetSelected(SelectionEvent e) {
+					saveRod(false);
+
+				}
+
+				@Override
+				public void widgetDefaultSelected(SelectionEvent e) {
+
+				}
+			});
+		
+		
 		final GridLayout gridLayout = new GridLayout();
 		gridLayout.numColumns = 1;
 		setLayout(gridLayout);
@@ -110,7 +129,7 @@ public class MultipleOutputCurvesTableView extends Composite {
 		gdSecondField.heightHint = 100;
 
 		plotSystem4.createPlotPart(sashForm,
-								   "ExamplePlot", 
+								   "Progress Plot", 
 								   actionBarComposite, 
 								   PlotType.IMAGE, 
 								   null);
@@ -191,29 +210,6 @@ public class MultipleOutputCurvesTableView extends Composite {
 
 	}
 
-	public void updateCurve(DataModel dm1, Boolean intensity) {
-
-		if (lt.getDataName() == null) {
-			lt = plotSystem4.createLineTrace("Output Curve");
-		}
-
-		if (dm1.getyList() == null || dm1.getxList() == null) {
-			lt.setData(dm1.backupDataset(), dm1.backupDataset());
-		} else if (intensity == true) {
-			lt.setData(dm1.xIDataset(), dm1.yIDataset());
-			lt.setName(dm1.getName()+ "_Intensity");
-		
-		}else{
-			lt.setData(dm1.xIDataset(), dm1.yIDatasetFhkl());
-			lt.setName(dm1.getName()+ "_Fhkl");
-		}
-		
-		plotSystem4.clear();
-		plotSystem4.addTrace(lt);
-		plotSystem4.repaint();
-
-	}
-		
 	public void addToDatSelector(){
 		if(this.getSc() == null){
 			sc = new Button(overlapSelection, SWT.CHECK);
@@ -264,19 +260,18 @@ public class MultipleOutputCurvesTableView extends Composite {
 
 		if(plotSystem4.getRegion("Image")== null){
 			
-		try{
-			imageNo = plotSystem4.createRegion("Image", RegionType.XAXIS_LINE);
-		}
-		catch(Exception x){
+			try{
+				imageNo = plotSystem4.createRegion("Image", RegionType.XAXIS_LINE);
+			}
+			catch(Exception x){
+				System.out.println(x.getMessage());
+			}
+				
+			imageNo.setShowPosition(true);
+			imageNo.setROI(r);
 			
-		}
-		
-		
-		imageNo.setShowPosition(true);
-		imageNo.setROI(r);
-		
-		plotSystem4.addRegion(imageNo);
-		imageNo.setShowPosition(true);
+			plotSystem4.addRegion(imageNo);
+			imageNo.setShowPosition(true);
 		}
 		
 		else{
@@ -298,5 +293,31 @@ public class MultipleOutputCurvesTableView extends Composite {
 		this.storeAsNexus = storeAsNexus;
 	}
 
+	private void saveRod(boolean writeOnlyGoodPoints){
+		
+		SaveFormatSetting sfs =SaveFormatSetting.toMethod(outputFormatSelection.getText());
+		Shell shell = this.getShell();
+		
+		AxisEnums.yAxes yAxisSelection =AxisEnums.yAxes.SPLICEDY; 
+		
+		for(AxisEnums.yAxes t :AxisEnums.yAxes.values()){
+			if(intensitySelect.getText().equals(t.getYAxisName())){
+				yAxisSelection = t;
+			}
+		}
+		
+		CurveStitchDataPackage csdpToSave = ssp.getDrm().getCsdp();
+		String rodSaveName = csdpToSave.getName();
+		
+		boolean useQ = qAxis.getSelection();
+		
+		ssp.arbitrarySavingMethod(useQ, 
+								  writeOnlyGoodPoints, 
+								  shell, 
+								  sfs, 
+								  rodSaveName, 
+								  csdpToSave, 
+								  yAxisSelection);
+	}
 	
 }

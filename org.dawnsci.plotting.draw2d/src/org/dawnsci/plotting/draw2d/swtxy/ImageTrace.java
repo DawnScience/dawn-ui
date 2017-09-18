@@ -1347,6 +1347,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 	}
 
 	public void setImageOrigin(ImageOrigin imageOrigin) {
+		logger.info("Image origin changed to: " + imageOrigin.getLabel());
 		if (this.mipMap!=null) mipMap.clear();
 		imageServiceBean.setOrigin(imageOrigin);
 		createAxisBounds();

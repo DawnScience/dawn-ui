@@ -7,6 +7,8 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CTabFolder;
 import org.eclipse.swt.custom.CTabItem;
 import org.eclipse.swt.custom.SashForm;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
@@ -22,6 +24,11 @@ public class RodAnalysisWindow {
 	private int numberOfImages;
 	private Dataset nullImage;
 	private TabFolder tabFolder;
+	private TabItem ssps3cTab;
+	private Composite ssps3cTabComposite;
+	private TabItem reviewTab;
+	private Composite reviewTabComposite; 
+	
 	
 	public RodAnalysisWindow(CTabFolder folder,
 							SurfaceScatterPresenter ssp,
@@ -77,11 +84,13 @@ public class RodAnalysisWindow {
 	    		
 		tabFolder.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 	        	
-		TabItem ssps3cTab = new TabItem(tabFolder, SWT.NONE);
+		ssps3cTab = new TabItem(tabFolder, SWT.NONE);
 		ssps3cTab.setText("Slice Output");
 		ssps3cTab.setData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
-		Composite ssps3cTabComposite = new Composite(tabFolder, SWT.NONE | SWT.FILL);
+		
+		
+		ssps3cTabComposite = new Composite(tabFolder, SWT.NONE | SWT.FILL);
 		ssps3cTabComposite.setLayout(new GridLayout());
 		ssps3cTabComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
     	
@@ -102,12 +111,14 @@ public class RodAnalysisWindow {
 
 		}
 		
-		TabItem reviewTab = new TabItem(tabFolder, SWT.NONE);
+		
+		
+		reviewTab = new TabItem(tabFolder, SWT.NONE);
 		reviewTab.setText("Review");
 		reviewTab.setData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
 		
-		Composite reviewTabComposite = new Composite(tabFolder, SWT.NONE | SWT.FILL);
+		reviewTabComposite = new Composite(tabFolder, SWT.NONE | SWT.FILL);
 		reviewTabComposite.setLayout(new GridLayout());
 		reviewTabComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 	       
@@ -129,6 +140,32 @@ public class RodAnalysisWindow {
 		
 	    
 	    tabFolder.getTabList()[1].setEnabled(false);
+	    
+	    tabFolder.addSelectionListener(new SelectionListener() {
+			
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				tabFolder.layout();
+				
+				rtc.setLayout(new GridLayout());
+				rtc.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+				
+
+				ssps3c.setLayout(new GridLayout());
+				ssps3c.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+				
+				
+				ssps3cTab.setControl(ssps3cTabComposite);
+				reviewTab.setControl(reviewTabComposite);
+				
+			}
+			
+			@Override
+			public void widgetDefaultSelected(SelectionEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+		});
 		
 	}
 	

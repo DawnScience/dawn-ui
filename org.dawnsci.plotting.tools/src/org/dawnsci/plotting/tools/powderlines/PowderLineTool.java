@@ -621,7 +621,7 @@ public class PowderLineTool extends AbstractToolPage {
 					eosModel.setPressure(0.);
 					theTool.setModel(eosModel);
 
-				} catch (MetadataException mE) {
+				} catch (Exception mE) {
 					; // do nothing, the model has not been overwritten
 				}
 			}

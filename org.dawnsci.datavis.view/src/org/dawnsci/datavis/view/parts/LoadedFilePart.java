@@ -71,9 +71,13 @@ import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.eclipse.ui.progress.IProgressService;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class LoadedFilePart {
 
+	private static final Logger logger = LoggerFactory.getLogger(LoadedFilePart.class);
+	
 	private final Image icon = Activator.getImage("icons/document-block.png");
 	private final Image iconLive = Activator.getImage("icons/document-light.png");
 	
@@ -92,6 +96,7 @@ public class LoadedFilePart {
 
 	@PostConstruct
 	public void createComposite(Composite parent) {
+		logger.info("Perspective Created: DataVis");
 		parent.setLayout(new FormLayout());
 		FormData checkForm = new FormData();
 		checkForm.top = new FormAttachment(0,0);
@@ -145,7 +150,7 @@ public class LoadedFilePart {
 							.toArray(String[]::new);
 					
 					loadData(names);
-					
+					logger.debug("Loaded files using quickwidget");
 				}
 			});
 		}
@@ -252,9 +257,13 @@ public class LoadedFilePart {
 			public void stateChanged(FileControllerStateEvent event) {
 				updateOnStateChange(event);
 				
-				if (quickFileWidget != null) {
-					Display.getDefault().asyncExec(() ->quickFileWidget.setDirectoryPath(ServiceManager.getRecentPlaces().getRecentPlaces().get(0)));
-					
+				if (quickFileWidget != null && ServiceManager.getRecentPlaces() != null) {
+
+					List<String> recentPlaces = ServiceManager.getRecentPlaces().getRecentPlaces();
+					if (recentPlaces != null && !recentPlaces.isEmpty()) {
+						Display.getDefault().asyncExec(() ->quickFileWidget.setDirectoryPath(ServiceManager.getRecentPlaces().getRecentPlaces().get(0)));
+					}
+
 				}
 			}
 		};

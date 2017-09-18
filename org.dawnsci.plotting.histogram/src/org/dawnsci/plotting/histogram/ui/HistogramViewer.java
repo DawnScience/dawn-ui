@@ -1,5 +1,7 @@
 package org.dawnsci.plotting.histogram.ui;
 
+import java.text.DecimalFormat;
+
 import org.dawnsci.common.widgets.spinner.FloatSpinner;
 import org.dawnsci.plotting.histogram.IHistogramProvider;
 import org.dawnsci.plotting.histogram.IHistogramProvider.IHistogramDatasets;
@@ -252,16 +254,19 @@ public class HistogramViewer extends ContentViewer {
 		double[] values = calculateIncrementAndPrecision(Math.max(Math.abs(min), Math.abs(max)));
 		double increment = values[0];
 		int precision = (int) values[1];
+		int width = (int) values[2];
 		if (maxText.getDouble() != max) {
 			maxText.setPrecision(precision);
 			maxText.setIncrement(increment);
 			maxText.setDouble(max);
+			maxText.setWidth(width);
 		}
 
 		if (minText.getDouble() != min) {
 			minText.setPrecision(precision);
 			minText.setIncrement(increment);
 			minText.setDouble(min);
+			minText.setWidth(width);
 		}
 	}
 
@@ -352,8 +357,30 @@ public class HistogramViewer extends ContentViewer {
 	}
 
 	private static double[] calculateIncrementAndPrecision(double value) {
-		int logInc = (int) Math.floor(Math.log10(value));
-		return new double[] {Math.pow(10, logInc - 1), Math.max(0, -logInc)};
+		// Let's format our incoming number as a string
+		// Currently one million should be a maximum value
+		String valueAsString = new DecimalFormat("#######.########").format(Math.abs(value)).replace(",", ".");
+		int integerPlaces = valueAsString.indexOf('.');
+		int decimalPlaces = valueAsString.length() - integerPlaces - 1;
+		int numberWidth = valueAsString.length() - 1;
+
+		// Let's get ready to handle whole numbers
+		if (integerPlaces == -1) {			
+			numberWidth += 2;
+			decimalPlaces = 1;
+		}
+		
+		// Float spinners can't accept a width of greater than 10, so that's 9 with a separator
+		// And subtracting another to catch a number of float spinner oddities
+		if (numberWidth > 8) {
+			decimalPlaces = Math.max(0, 8 - integerPlaces);
+		}
+
+		// Work out the minimum increment
+		double decimalIncrement = Math.pow(10, -decimalPlaces);
+		
+		// Return, ready for formatting
+		return new double[] {decimalIncrement, decimalPlaces, 10};
 	}
 
 	private void installMinMaxListeners() {

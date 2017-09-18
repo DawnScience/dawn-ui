@@ -4,7 +4,6 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import org.dawb.common.ui.widgets.ActionBarWrapper;
-import org.dawnsci.surfacescatter.DataModel;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -46,8 +45,7 @@ public class OutputMovie extends Composite {
 
     
     
-    public OutputMovie(Composite parent, int style
-    		, DataModel dm) throws Exception {
+    public OutputMovie(Composite parent, int style) throws Exception {
         super(parent, style);
         //composite = new Composite(parent, SWT.NONE);
 
@@ -63,12 +61,12 @@ public class OutputMovie extends Composite {
         //movie job
 //        movieJob = new MovieJob();
 //        movieProgress = new MovieProgress();
-        this.createContents(dm); 
+        this.createContents(); 
 //        System.out.println("Test line");
         
     }
      
-    public void createContents(DataModel dm) throws Exception {
+    public void createContents() throws Exception {
 
     	
     	final GridLayout gridLayout = new GridLayout();

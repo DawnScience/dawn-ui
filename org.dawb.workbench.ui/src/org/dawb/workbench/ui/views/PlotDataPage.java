@@ -93,7 +93,8 @@ public class PlotDataPage extends Page implements IAdaptable {
 	@Override
 	public void createControl(final Composite parent) {
 		
-		try {			
+		try {
+			logger.info("Perspective Created: DataBrowsing");
 			this.content = new Composite(parent, SWT.NONE);
 			content.setLayout(new GridLayout(1, true));
 			GridUtils.removeMargins(content);

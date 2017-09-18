@@ -13,7 +13,6 @@ package org.dawnsci.fileviewer;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import org.dawb.common.ui.util.EclipseUtils;
@@ -850,38 +849,26 @@ public class FileViewer {
 	 *         platform, may be empty but not null
 	 */
 	private File[] getRoots() {
-		/*
-		 * On JDK 1.22 only...
-		 */
-		// return File.listRoots();
-
-		/*
-		 * On JDK 1.1.7 and beyond... -- PORTABILITY ISSUES HERE --
-		 */
+		
+		File[] roots = File.listRoots();
+		
 		if (System.getProperty("os.name").indexOf("Windows") != -1) {
-			List<File> list = new ArrayList<File>();
-			list.add(new File(FileViewerConstants.DRIVE_A));
-			list.add(new File(FileViewerConstants.DRIVE_B));
-			for (char i = 'c'; i <= 'z'; ++i) {
-				File drive = new File(i + ":" + File.separator);
-				if (drive.isDirectory() && drive.exists()) {
-					list.add(drive);
-					if (initial && i == 'c') {
-						currentDirectory = drive;
-						initial = false;
-					}
+			for (File root : roots) {
+				if (root.isDirectory() &&
+					root.exists() &&
+					initial &&
+					(root.getAbsolutePath().startsWith("c") ||
+					 root.getAbsolutePath().startsWith("C"))) {
+					
+					currentDirectory = root;
+					initial = false;
 				}
 			}
-			File[] roots = list.toArray(new File[list.size()]);
-			Arrays.sort(roots);
-			return roots;
-		}
-		File root = new File(File.separator);
-		if (initial) {
-			currentDirectory = root;
+		} else if (initial){
+			currentDirectory = roots[0];
 			initial = false;
 		}
-		return new File[] { root };
+		return roots;
 	}
 
 	public IconCache getIconCache() {

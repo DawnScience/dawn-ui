@@ -325,8 +325,7 @@ public class SetUpProcessWizardPage extends WizardPage {
 			
 			MetadataPlotUtils.plotDataWithMetadata(firstSlice, system);
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.error("Could not update plot",e);
 		}
 	}
 	

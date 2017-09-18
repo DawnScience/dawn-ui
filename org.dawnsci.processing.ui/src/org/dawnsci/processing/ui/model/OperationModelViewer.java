@@ -50,6 +50,8 @@ import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.ui.ISelectionListener;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchPart;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Class for editing an operation model. Shows a table or other
@@ -65,6 +67,7 @@ import org.eclipse.ui.IWorkbenchPart;
  */
 public class OperationModelViewer implements ISelectionListener, ISelectionChangedListener, ISelectionProvider {
 
+	private static final Logger logger = LoggerFactory.getLogger(OperationModelViewer.class);
 	
 	private TableViewer           viewer;
 	private IOperationModel       model;
@@ -193,7 +196,7 @@ public class OperationModelViewer implements ISelectionListener, ISelectionChang
 							field.set(path);
 							refresh();
 						} catch (Exception e) {
-							e.printStackTrace();
+							logger.error("Could not set field value", e);
 						}
 					}
 				}
@@ -327,7 +330,7 @@ public class OperationModelViewer implements ISelectionListener, ISelectionChang
 				field.set(value); // Changes model value, getModel() will now return a model with the value changed.
 				viewer.refresh();
 			} catch (Exception e) {
-				e.printStackTrace();
+				logger.error("Could not set field value", e);
 			}
 		}
 
@@ -339,7 +342,6 @@ public class OperationModelViewer implements ISelectionListener, ISelectionChang
 		if (event.getSelection() instanceof IStructuredSelection) {
 			IStructuredSelection ss = (IStructuredSelection)event.getSelection();
 			final ModelField     mf = (ModelField)ss.getFirstElement();
-			// TODO 
 		}
 	}
 

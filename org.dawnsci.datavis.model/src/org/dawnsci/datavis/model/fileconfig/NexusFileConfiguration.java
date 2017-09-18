@@ -1,8 +1,10 @@
 package org.dawnsci.datavis.model.fileconfig;
 
+import java.util.List;
 import java.util.Map;
 
 import org.dawnsci.datavis.model.DataOptions;
+import org.dawnsci.datavis.model.DataStateObject;
 import org.dawnsci.datavis.model.LoadedFile;
 import org.eclipse.dawnsci.analysis.api.tree.DataNode;
 import org.eclipse.dawnsci.analysis.api.tree.GroupNode;
@@ -91,6 +93,11 @@ public class NexusFileConfiguration implements ILoadedFileConfiguration {
 		}
 
 		return false;
+	}
+	
+	@Override
+	public void setCurrentState(List<DataStateObject> state) {
+		//doesn't need state
 	}
 
 }

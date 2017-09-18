@@ -143,7 +143,7 @@ public class DataFileSliceView extends ViewPart {
 
 	@Override
 	public void createPartControl(Composite parent) {
-		
+		logger.info("Perspective Created: Processing");
 		fileManager = new FileManager(new SetupContextHelper());
 		
 		parent.setLayout(new GridLayout());
@@ -475,7 +475,7 @@ public class DataFileSliceView extends ViewPart {
 					if (tracker != null)
 						tracker.trackActionEvent("Processing_Run");
 				} catch (Exception e) {
-					e.printStackTrace();
+					logger.debug("Could not track event",e);
 				}
 			}
 		};

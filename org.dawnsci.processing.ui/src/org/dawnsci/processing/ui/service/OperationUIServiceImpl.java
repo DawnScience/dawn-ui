@@ -60,7 +60,6 @@ public class OperationUIServiceImpl implements IOperationUIService {
 			return rv;
 		} catch (NoSuchMethodException | SecurityException | InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
 			logger.error("Cannot construct instance of {}. ", klazz.getName());
-			e.printStackTrace();
 		}
 	
 		return returnDefaultIfNotFound ? new ConfigureOperationModelWizardPage(operation) : null;

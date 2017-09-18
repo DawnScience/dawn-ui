@@ -1,6 +1,5 @@
 package org.dawnsci.processing.ui.processing;
 
-import java.io.ObjectInputStream.GetField;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -34,8 +33,11 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.part.ResourceTransfer;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class OperationTableUtils {
+	
+	private static final Logger logger = LoggerFactory.getLogger(OperationTableUtils.class);
 	
 	/**
 	 *  Create an operation series table without breaking the encapsulation of the
@@ -143,8 +145,7 @@ public class OperationTableUtils {
 						((OperationDescriptor)current).getSeriesObject().setStoreOutput(isChecked());
 						seriesTable.refreshTable();
 					} catch (InstantiationException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
+						logger.error("Could not create series object",e);
 					}
 				}
 			}
@@ -162,8 +163,7 @@ public class OperationTableUtils {
 						((OperationDescriptor)current).getSeriesObject().setPassUnmodifiedData(isChecked());
 						seriesTable.refreshTable();
 					} catch (InstantiationException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
+						logger.error("Could not set pass through");
 					}
 				}
 			}
