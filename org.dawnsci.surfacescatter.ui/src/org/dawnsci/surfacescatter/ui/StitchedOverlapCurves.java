@@ -214,6 +214,7 @@ public class StitchedOverlapCurves extends Composite {
 
 				plotSystem.addTrace(lt1);
 				plotSystem.repaint();
+				lt1.setErrorBarEnabled(gohv.isErrorFlag());
 			}
 
 			@Override
