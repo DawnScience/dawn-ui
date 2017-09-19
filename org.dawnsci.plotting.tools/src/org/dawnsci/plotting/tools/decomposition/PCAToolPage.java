@@ -23,10 +23,13 @@ import org.eclipse.january.dataset.DatasetFactory;
 import org.eclipse.january.dataset.DatasetUtils;
 import org.eclipse.january.dataset.IDataset;
 import org.eclipse.january.dataset.IntegerDataset;
+import org.eclipse.january.dataset.LinearAlgebra;
+import org.eclipse.january.dataset.Maths;
 import org.eclipse.january.dataset.SliceND;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -47,6 +50,7 @@ public class PCAToolPage extends AbstractToolPage {
 	private IPlottingSystem<Composite> varianceSystem;
 	private IPlottingSystem<Composite> loadingSystem;
 	private IPlottingSystem<Composite> scoresSystem;
+	private IPlottingSystem<Composite> reconSystem;
 	private PCAJob job;
 	private Label status;
 	private Composite control;
@@ -55,6 +59,9 @@ public class PCAToolPage extends AbstractToolPage {
 	private PCADataPackage currentDataPackage;
 	private Combo yCombo;
 	private Combo xCombo;
+	
+	private Spinner pcRecon;
+	private Spinner sampleRecon;
 	
 	@Override
 	public ToolPageRole getToolPageRole() {
@@ -73,6 +80,7 @@ public class PCAToolPage extends AbstractToolPage {
 			varianceSystem = PlottingFactory.createPlottingSystem();
 			scoresSystem = PlottingFactory.createPlottingSystem();
 			loadingSystem = PlottingFactory.createPlottingSystem();
+			reconSystem = PlottingFactory.createPlottingSystem();
 		} catch (Exception e) {
 			
 			return;
@@ -86,7 +94,6 @@ public class PCAToolPage extends AbstractToolPage {
 		final Spinner nComponents = new Spinner(control, SWT.READ_ONLY | SWT.BORDER);
 		nComponents.setMinimum(1);
 		nComponents.setSelection(10);
-		
 		
 		status = new Label(control, SWT.NONE);
 		status.setText("Ready");
@@ -103,6 +110,10 @@ public class PCAToolPage extends AbstractToolPage {
 		TabItem scoresLoads = new TabItem(tabFolder, SWT.None);
 		scoresLoads.setText("Scores/Loads");
 		scoresLoads.setControl(makeLoadingScoresPlot(tabFolder));
+		
+		TabItem reconItem = new TabItem(tabFolder, SWT.NONE);
+		reconItem.setText("Reconstruct");
+		reconItem.setControl(makeReconstructionPanel(tabFolder));
 		
 		varianceSystem.createPlotPart(c, 
 				getTitle(), 
@@ -152,6 +163,11 @@ public class PCAToolPage extends AbstractToolPage {
 				xCombo.setItems(valsx);
 				xCombo.select(0);
 				
+				pcRecon.setMinimum(1);
+				pcRecon.setMaximum(nComp);
+				sampleRecon.setMinimum(0);
+				sampleRecon.setMaximum(data.getShape()[0]-1);
+				
 				
 				job.schedule();
 			}
@@ -160,6 +176,53 @@ public class PCAToolPage extends AbstractToolPage {
 		
 		
 		super.createControl(control);
+	}
+	
+	private Composite makeReconstructionPanel(TabFolder folder) {
+		Composite c = new Composite(folder, SWT.NONE);
+		c.setLayout(new GridLayout(1,false));
+		new Label(c, SWT.None);
+		
+		Composite c1 = new Composite(c, SWT.None);
+		c1.setLayout(new GridLayout(4,false));
+		
+		Label l = new Label(c1, SWT.None);
+		l.setText("PCs: ");
+		pcRecon = new Spinner(c1, SWT.NONE);
+		l = new Label(c1, SWT.NONE);
+		l.setText("Sample: ");
+		sampleRecon = new Spinner(c1, SWT.NONE);
+		
+		pcRecon.addSelectionListener(new SelectionAdapter() {
+		
+			
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				updateReconstruction(currentDataPackage,currentResult);
+			}
+			
+		});
+		
+		sampleRecon.addSelectionListener(new SelectionAdapter() {
+		
+			
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				updateReconstruction(currentDataPackage,currentResult);
+			}
+			
+		});
+		
+		reconSystem.createPlotPart(c, 
+				getTitle(), 
+				null, 
+				PlotType.XY,
+				this.getViewPart());
+		
+		reconSystem.getPlotComposite().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		
+		
+		return c;
 	}
 	
 	private Composite makeLoadingScoresPlot(TabFolder folder){
@@ -306,6 +369,60 @@ public class PCAToolPage extends AbstractToolPage {
 		scoresSystem.autoscaleAxes();
 		
 		updateVarianceExplained(fit.getVarianceRatio());
+		updateReconstruction(data, fit);
+	}
+	
+	private void updateReconstruction(PCADataPackage data, PCAResult result) {
+		
+		if (data == null || result == null) return;
+		
+		int selection = sampleRecon.getSelection();
+		int nPCs = pcRecon.getSelection();
+		
+		IDataset d = data.getData();
+		SliceND s = new SliceND(d.getShape());
+		s.setSlice(0, selection, selection+1,1);
+		
+		IDataset slice = d.getSlice(s);
+		IDataset sq = slice.squeeze();
+		sq.setName("Sample " + selection);
+		
+		IDataset scores = result.getScores();
+		SliceND scoresSlice = new SliceND(scores.getShape());
+		scoresSlice.setSlice(1, 0, nPCs, 1);
+//		scoresSlice.setSlice(0, selection, selection+1,1);
+		
+		
+		Dataset subScores = DatasetUtils.convertToDataset(scores.getSlice(scoresSlice));
+		
+		
+		IDataset loadings = result.getLoadings();
+		SliceND loadSlice = new SliceND(loadings.getShape());
+		loadSlice.setSlice(0, 0, nPCs, 1);
+		
+		Dataset subLoads = DatasetUtils.convertToDataset(loadings.getSlice(loadSlice));
+		
+		Dataset dotProduct = LinearAlgebra.dotProduct(subScores,subLoads);
+		
+		Dataset test = dotProduct.getSlice(s);
+		Dataset ts = test.squeeze();
+		ts.iadd(result.getMean());
+		Dataset recon = dotProduct.squeeze();
+		recon.iadd(result.getMean());
+		
+		IDataset residual = Maths.subtract(sq, ts);
+		residual.setName("Residual");
+		
+		IDataset loadAx = null;
+		
+		if (data.getAxes() != null && data.getAxes()[0] != null) {
+			loadAx = data.getAxes()[0];
+		}
+		
+		reconSystem.clear();
+		reconSystem.createPlot1D(loadAx, Arrays.asList(sq,ts,residual), null);
+		
+		
 	}
 	
 	private void updateVarianceExplained(IDataset explained){
@@ -318,6 +435,16 @@ public class PCAToolPage extends AbstractToolPage {
 		s.setName("% Variance Explained");
 		
 		varianceSystem.createPlot1D(range, Arrays.asList(new IDataset[]{s}), null);
+	}
+	
+	@Override
+	public void dispose() {
+		if (reconSystem!=null) reconSystem.dispose();
+		if (varianceSystem!=null) varianceSystem.dispose();
+		if (scoresSystem!=null) scoresSystem.dispose();
+		if (loadingSystem!=null) loadingSystem.dispose();
+		
+		super.dispose();
 	}
 	
 	@Override

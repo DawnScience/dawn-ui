@@ -451,6 +451,7 @@
        </plotting_tool_page>
        <plotting_tool_page
              class="org.dawnsci.plotting.tools.decomposition.PCAToolPage"
+             icon="icons/sport.png"
              id="org.dawnsci.plotting.tools.decomposition.PCAToolPage"
              label="PCA"
              visible="true">
