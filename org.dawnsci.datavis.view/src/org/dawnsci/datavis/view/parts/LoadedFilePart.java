@@ -143,7 +143,7 @@ public class LoadedFilePart {
 					String match = name;
 					File folder = new File(directory);
 					File[] files = folder.listFiles((FilenameFilter)new WildcardFileFilter(match));
-					
+					Arrays.sort(files);
 					String[] names = Arrays.stream(files)
 							.filter(f -> !f.isDirectory())
 							.map(File::getAbsolutePath)
