@@ -453,7 +453,7 @@
              class="org.dawnsci.plotting.tools.decomposition.PCAToolPage"
              id="org.dawnsci.plotting.tools.decomposition.PCAToolPage"
              label="PCA"
-             visible="false">
+             visible="true">
        </plotting_tool_page>
    </extension>
 

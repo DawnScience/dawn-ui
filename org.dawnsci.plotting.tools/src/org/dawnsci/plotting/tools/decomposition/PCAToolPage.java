@@ -27,7 +27,6 @@ import org.eclipse.january.dataset.SliceND;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -53,6 +52,7 @@ public class PCAToolPage extends AbstractToolPage {
 	private Composite control;
 	
 	private PCAResult currentResult;
+	private PCADataPackage currentDataPackage;
 	private Combo yCombo;
 	private Combo xCombo;
 	
@@ -119,10 +119,17 @@ public class PCAToolPage extends AbstractToolPage {
 				
 				IImageTrace t = getImageTrace();
 				IDataset data = t.getData();
+				List<IDataset> axes = t.getAxes();
+				
+				IDataset[] ax = null;
+				
+				if (axes != null) {
+					ax = axes.toArray(new IDataset[axes.size()]);
+				}
 				
 				int nComp = nComponents.getSelection();
 				
-				PCADataPackage p = new PCADataPackage(data, null, nComp);
+				PCADataPackage p = new PCADataPackage(data, ax, nComp);
 				
 				job.setDataPack(p);
 				status.setText("PCA running...");
@@ -140,10 +147,10 @@ public class PCAToolPage extends AbstractToolPage {
 				System.arraycopy(vals, 0, valsx, 1, vals.length);
 				
 				yCombo.setItems(vals);
-				yCombo.select(1);
+				yCombo.select(0);
 
 				xCombo.setItems(valsx);
-				xCombo.select(1);
+				xCombo.select(0);
 				
 				
 				job.schedule();
@@ -171,7 +178,7 @@ public class PCAToolPage extends AbstractToolPage {
 			
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				updateResult(null, currentResult);
+				updateResult(currentDataPackage, currentResult);
 				
 			}
 			
@@ -189,7 +196,7 @@ public class PCAToolPage extends AbstractToolPage {
 			
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				updateResult(null, currentResult);
+				updateResult(currentDataPackage, currentResult);
 				
 			}
 			
@@ -217,6 +224,8 @@ public class PCAToolPage extends AbstractToolPage {
 	
 	private void updateResult(PCADataPackage data, PCAResult fit){
 		
+		if (data == null || fit == null) return;
+		
 		if (Display.getCurrent() == null) {
 			Display.getDefault().asyncExec(() -> updateResult(data, fit));
 			return;
@@ -226,73 +235,75 @@ public class PCAToolPage extends AbstractToolPage {
 		control.layout();
 		
 		IDataset loadings = fit.getLoadings();
+		IDataset loadAx = null;
 		
-		List<IDataset> loadList = new ArrayList<IDataset>();
-		
-		
-		String y = yCombo.getText();
-		if (y.equals("y-axis")) {
-			loadList.add(DatasetFactory.createRange(loadings.getShape()[1]));
-			
-		} else {
-			int ypc = Integer.parseInt(y.substring(2, y.length()));
-			SliceND sy = new SliceND(loadings.getShape());
-			sy.setSlice(0,ypc, ypc+1, 1);
-			IDataset pcy = loadings.getSlice(sy);
-			pcy.setName("PC" + ypc);
-			pcy.squeeze();
-			loadList.add(pcy);
+		if (data.getAxes() != null && data.getAxes()[0] != null) {
+			loadAx = data.getAxes()[0];
 		}
 		
+		List<IDataset> loadList = new ArrayList<IDataset>();
+		IDataset mean = fit.getMean().getSliceView();
+		mean.setName("Mean");
+		loadList.add(mean);
+		
+		IDataset scoresx = null;
+		IDataset scoresy = null;
+		
+		IDataset scores = fit.getScores();
+		
 		String x = xCombo.getText();
-		int xpc = Integer.parseInt(x.substring(2, x.length()));
+		if (x.equals("Y-axis")) {
+			if (data.getAxes() != null && data.getAxes()[1] != null) {
+				scoresx = data.getAxes()[1];
+			}
+			
+		} else {
+			int xpc = Integer.parseInt(x.substring(2, x.length()));
+			SliceND sx = new SliceND(loadings.getShape());
+			sx.setSlice(0,xpc-1, xpc, 1);
+			IDataset pcx = loadings.getSlice(sx);
+			pcx.setName("PC" + xpc);
+			pcx.squeeze();
+			loadList.add(pcx);
+			
+			SliceND ss = new SliceND(scores.getShape());
+			ss.setSlice(1, xpc-1, xpc, 1);
+			scoresx = scores.getSlice(ss);
+			scoresx.setName("PC" + xpc);
+			scoresx.squeeze();
+		}
+		
+		String y = yCombo.getText();
+		int ypc = Integer.parseInt(y.substring(2, y.length()));
 		SliceND s = new SliceND(loadings.getShape());
-		s.setSlice(0, xpc, xpc+1, 1);
+		s.setSlice(0, ypc-1, ypc, 1);
 		IDataset pcx = loadings.getSlice(s);
-		pcx.setName("PC" + xpc);
+		pcx.setName("PC" + ypc);
 		pcx.squeeze();
 		loadList.add(pcx);
 		
-		
-		
-		
-		
-		
-		
-		
-//		SliceND s = new SliceND(loadings.getShape());
-//		s.setSlice(0, 0, 1, 1);
-//		IDataset pc1 = loadings.getSlice(s);
-//		pc1.setName("PC1");
-//		pc1.squeeze();
-		s.setSlice(0, 1, 2, 1);
-		IDataset pc2 = loadings.getSlice(s);
-		pc2.setName("PC2");
-		pc2.squeeze();
-		System.out.println(fit.getVarianceRatio().toString());
+		SliceND ss = new SliceND(scores.getShape());
+		ss.setSlice(1, ypc-1, ypc, 1);
+		scoresy = scores.getSlice(ss);
+		scoresy.setName("PC" + ypc);
+		scoresy.squeeze();
 		
 		loadingSystem.clear();
-		loadingSystem.createPlot1D(loadList.get(1), Arrays.asList(loadList.get(0)), null);
+		loadingSystem.createPlot1D(loadAx, loadList, null);
+		loadingSystem.setShowLegend(true);
+		loadingSystem.setTitle("Loadings");
 	
-		IDataset scores = fit.getScores();
-		SliceND ss = new SliceND(scores.getShape());
-		ss.setSlice(1, 0, 1, 1);
-		IDataset pc1s = scores.getSlice(ss);
-		pc1s.setName("PC1");
-		pc1s.squeeze();
-		ss.setSlice(1, 1, 2, 1);
-		IDataset pc2s = scores.getSlice(ss);
-		pc2s.setName("PC2");
-		pc2s.squeeze();
-		
 		scoresSystem.clear();
-		ILineTrace l = scoresSystem.createTrace("PC1 vs PC2", ILineTrace.class);
+		ILineTrace l = scoresSystem.createTrace("trace", ILineTrace.class);
 		
-		l.setData(pc1s, pc2s);
+		l.setData(scoresx, scoresy);
 		
 		l.setTraceType(TraceType.POINT);
 		l.setPointStyle(PointStyle.FILLED_CIRCLE);
 		scoresSystem.addTrace(l);
+		scoresSystem.getSelectedXAxis().setTitle(scoresx == null ? "sample" : scoresx.getName());
+		scoresSystem.getSelectedYAxis().setTitle(scoresy == null ? "axis" : scoresy.getName());
+		scoresSystem.autoscaleAxes();
 		
 		updateVarianceExplained(fit.getVarianceRatio());
 	}
@@ -368,9 +379,10 @@ public class PCAToolPage extends AbstractToolPage {
 			
 			if (p == null) return Status.OK_STATUS;
 			long start = System.currentTimeMillis();
-			PCAResult fit = PCA.fit(DatasetUtils.convertToDataset(p.getData()),p.nComponents);
+			PCAResult fit = PCA.fit(DatasetUtils.convertToDataset(p.getData()),p.getnComponents());
 			System.out.println("PCA in: " + (System.currentTimeMillis()-start));
 			currentResult = fit;
+			currentDataPackage = p;
 			updateResult(p, fit);
 			
 			return Status.OK_STATUS;
