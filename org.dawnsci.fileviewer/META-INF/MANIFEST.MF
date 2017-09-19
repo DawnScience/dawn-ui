@@ -22,7 +22,8 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.dawnsci.analysis.api,
  org.eclipse.january,
  org.apache.commons.lang,
- org.eclipse.dawnsci.nexus
+ org.eclipse.dawnsci.nexus,
+ org.dawb.common.util
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Import-Package: javax.inject;version="1.0.0",
  org.slf4j;version="1.7.6",

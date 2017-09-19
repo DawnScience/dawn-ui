@@ -19,7 +19,8 @@ Require-Bundle: org.eclipse.ui,
  org.mihalis.opal,
  org.dawnsci.common.widgets,
  org.eclipse.ui.navigator,
- org.eclipse.swt
+ org.eclipse.swt,
+ org.dawb.common.util
 Bundle-ActivationPolicy: lazy
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Import-Package: com.ibm.icu.util;version="54.1.1",
