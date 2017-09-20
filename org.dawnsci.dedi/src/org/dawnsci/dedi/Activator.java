@@ -8,7 +8,7 @@ import org.osgi.framework.ServiceReference;
 
 public class Activator extends AbstractUIPlugin {
    // The plug-in ID
-   public static final String PLUGIN_ID = "dedi";
+   public static final String PLUGIN_ID = "org.dawnsci.dedi";
 
    // The shared instance
    private static Activator plugin;
