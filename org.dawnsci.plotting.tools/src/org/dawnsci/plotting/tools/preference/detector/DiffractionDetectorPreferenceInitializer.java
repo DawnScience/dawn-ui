@@ -230,8 +230,6 @@ public class DiffractionDetectorPreferenceInitializer extends AbstractPreference
 		xmlEncoder.writeObject(dds);
 		xmlEncoder.close();
 		
-		store.setDefault(DiffractionDetectorConstants.DETECTOR, baos.toString());
-		
 		return dds;
 	}
 }
