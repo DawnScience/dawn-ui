@@ -343,8 +343,10 @@ public class TrackingHandlerWithFramesImproved {
 					drm.setCsdp(csdp);
 
 					if(drm.getCorrectionSelection() == MethodSetting.Reflectivity_NO_Correction ||
-							drm.getCorrectionSelection() == MethodSetting.Reflectivity_with_Flux_Correction ||
-							drm.getCorrectionSelection() == MethodSetting.Reflectivity_without_Flux_Correction){
+							drm.getCorrectionSelection() == MethodSetting.Reflectivity_with_Flux_Correction_Gaussian_Profile ||
+							drm.getCorrectionSelection() == MethodSetting.Reflectivity_without_Flux_Correction_Gaussian_Profile ||
+							drm.getCorrectionSelection() == MethodSetting.Reflectivity_with_Flux_Correction_Simple_Scaling ||
+							drm.getCorrectionSelection() == MethodSetting.Reflectivity_without_Flux_Correction_Simple_Scaling){
 
 
 						ReflectivityNormalisation.reflectivityNormalisation1(csdp);

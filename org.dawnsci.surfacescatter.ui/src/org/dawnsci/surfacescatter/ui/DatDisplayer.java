@@ -902,9 +902,7 @@ public class DatDisplayer extends Composite {
 	
 		ArrayList<MethodSetting> output = new ArrayList<>();
 		
-		for(MethodSetting m :MethodSetting.values()){
-			output.add(m);
-		}
+		
 		
 		boolean notCaught = true;
 		
@@ -927,11 +925,11 @@ public class DatDisplayer extends Composite {
 					 												    Double.valueOf(ssvs.getParamField().getOutplanePolarisation().getText())).getDouble(0);
 			
 			notCaught = false;
-			output.set(0,MethodSetting.SXRD);
+			output.add(MethodSetting.SXRD);
 			
 		}
 		catch(Exception i){
-			output.set(3,MethodSetting.SXRD);
+//			output.set(3,MethodSetting.SXRD);
 		}
 		
 		
@@ -980,54 +978,47 @@ public class DatDisplayer extends Composite {
 			}
 			
 			double geometricForReflectivity 
-				= GeometricCorrectionsReflectivityMethod.reflectivityCorrectionsBatch(dcdtheta, 
+				= GeometricCorrectionsReflectivityMethod.reflectivityCorrectionsBatchGaussianPofile(dcdtheta, 
 																					  0,  
 																					  Double.valueOf(ssvs.getParamField().getAngularFudgeFactor().getText()), 
 																					  Double.valueOf(ssvs.getParamField().getBeamHeight().getText()), 
 																					  Double.valueOf(ssvs.getParamField().getFootprint().getText()));
 			
 			notCaught = false;
-			output.set(0,MethodSetting.Reflectivity_with_Flux_Correction);
-			output.set(1,MethodSetting.Reflectivity_without_Flux_Correction);
+			output.add(MethodSetting.Reflectivity_with_Flux_Correction_Gaussian_Profile);
+			output.add(MethodSetting.Reflectivity_without_Flux_Correction_Gaussian_Profile);
+			
+			output.add(MethodSetting.Reflectivity_with_Flux_Correction_Simple_Scaling);
+			output.add(MethodSetting.Reflectivity_without_Flux_Correction_Simple_Scaling);
 			
 		}
 		catch(Exception i){
-			output.set(1,MethodSetting.Reflectivity_with_Flux_Correction);
-			output.set(2,MethodSetting.Reflectivity_without_Flux_Correction);
+//			output.set(1,MethodSetting.Reflectivity_with_Flux_Correction);
+//			output.set(2,MethodSetting.Reflectivity_without_Flux_Correction);
 		}
 		
 		
 		if(notCaught){
-			output.set(0,MethodSetting.Reflectivity_NO_Correction);
+			output.add(MethodSetting.Reflectivity_NO_Correction);
 		}
 		else{
-			output.add(2,MethodSetting.Reflectivity_NO_Correction);
+			output.add(MethodSetting.Reflectivity_NO_Correction);
 		}
 		
 		
-		
-//		for(MethodSetting m : output){
-//			int pos1 = output.indexOf(m);
-//			
-//			for(MethodSetting n : output){
-//				
-//				int pos2 = output.indexOf(n);
-//				
-//				for(int i = output.size()-1; i>=0; i--){
-//					if(output.get(i)==n){
-//						pos2 = i;
-//						break;
-//					}
-//				}
-//				
-//				if(m==n &&(pos1 != pos2)){
-//					output.remove(n);
-//					break;
-//				}
-//			}
-//			
-//		}
-		
+		for(MethodSetting m : MethodSetting.values()){
+			boolean add = true;
+			for(MethodSetting n : output){
+				if(n == m){
+					add = false;
+				}
+			}
+			if(add){
+				output.add(m);
+			}
+			
+		}
+
 		
 		return output;
 	}

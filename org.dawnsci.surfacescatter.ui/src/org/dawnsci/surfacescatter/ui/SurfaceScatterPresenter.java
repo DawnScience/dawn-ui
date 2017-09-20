@@ -174,10 +174,10 @@ public class SurfaceScatterPresenter {
 		Dataset kArrayCon = DatasetFactory.zeros(1);
 		Dataset lArrayCon = DatasetFactory.zeros(1);
 		Dataset thetaArrayCon = DatasetFactory.zeros(1);
-		
+
 		Dataset dcdThetaCon = DatasetFactory.zeros(1);
 		Dataset qdcdCon = DatasetFactory.zeros(1);
-		
+
 		ILazyDataset qdcd = null;
 
 		gm.setxName(xName);
@@ -331,10 +331,12 @@ public class SurfaceScatterPresenter {
 
 
 
-				if(drm.getCorrectionSelection() == MethodSetting.Reflectivity_NO_Correction||
-						drm.getCorrectionSelection() == MethodSetting.Reflectivity_with_Flux_Correction||	
-						drm.getCorrectionSelection() == MethodSetting.Reflectivity_without_Flux_Correction){
-	
+				if(drm.getCorrectionSelection().getCorrectionsNumber()>0){
+
+					//						== MethodSetting.Reflectivity_NO_Correction||
+					//						drm.getCorrectionSelection() == MethodSetting.Reflectivity_with_Flux_Correction||	
+					//						drm.getCorrectionSelection() == MethodSetting.Reflectivity_without_Flux_Correction){
+					//	
 					ILazyDataset ildtheta = dh1.getLazyDataset(gm.getxNameRef());
 
 					SliceND slice2 = new SliceND(ildtheta.getShape());
@@ -413,12 +415,12 @@ public class SurfaceScatterPresenter {
 					System.out.println(h.getMessage());
 				}
 			}
-			
+
 			if(correctionSelection != MethodSetting.SXRD){
 				try{
 					thetaArrayCon = DatasetUtils.concatenate(thetaArray, 0);
 					xArrayCon = DatasetUtils.concatenate(xArray, 0);
-					
+
 					dcdThetaCon = DatasetUtils.concatenate(dcdThetaArray, 0);
 					qdcdCon = DatasetUtils.concatenate(qdcdArray, 0);
 				}
@@ -426,7 +428,7 @@ public class SurfaceScatterPresenter {
 
 				}
 			}
-			
+
 
 			tifNamesCon = DatasetUtils.concatenate(tifNamesArray, 0);
 			//tifNamesCon is an unsorted, but concatenated DoubleDataset of l tif names
@@ -454,7 +456,7 @@ public class SurfaceScatterPresenter {
 
 			thetaArrayCon = Maths.multiply(thetaArrayCon, -1);
 			xArrayCon = Maths.multiply(xArrayCon, -1);
-					
+
 			int[] localShape = imageRefDat.getShape();
 
 			SliceND pr = new SliceND(localShape);
@@ -499,7 +501,7 @@ public class SurfaceScatterPresenter {
 					DatasetUtils.sort(xArrayConCloneForl, dcdThetaCon);
 				}
 			}
-			
+
 			catch(Exception h){
 				System.out.println(h.getMessage());
 			}
@@ -519,7 +521,7 @@ public class SurfaceScatterPresenter {
 			drm.setCorrectionSelection(correctionSelection);
 
 			for(int f = 0; f<imageRefList.size(); f++ ){
-			
+
 				datNamesInOrder[f] = filepaths[imagesToFilepathRefDat.getInt(f)];
 				filepathsSortedArray[f] = imagesToFilepathRefDat.getInt(f);
 				int pos = imageRefDat.getInt(f);
@@ -539,7 +541,7 @@ public class SurfaceScatterPresenter {
 				fm.setDatNo(imagesToFilepathRefDat.getInt(f));
 				fm.setImageNumber(f);
 				fm.setCorrectionSelection(correctionSelection);
-	
+
 
 				if(correctionSelection == MethodSetting.SXRD){
 
@@ -582,14 +584,16 @@ public class SurfaceScatterPresenter {
 
 				try{
 
-					if(correctionSelection == MethodSetting.Reflectivity_without_Flux_Correction ||
-							correctionSelection == MethodSetting.Reflectivity_with_Flux_Correction){
+					double angularFudgeFactor = gm.getAngularFudgeFactor();
+					double beamHeight = gm.getBeamHeight();
+					double footprint = gm.getFootprint();
 
-						double angularFudgeFactor = gm.getAngularFudgeFactor();
-						double beamHeight = gm.getBeamHeight();
-						double footprint = gm.getFootprint();
+					fm.setQdcd(qdcdCon.getDouble(f));
 
-						double reflectivityAreaCorrection = GeometricCorrectionsReflectivityMethod.reflectivityCorrectionsBatch(dcdThetaCon, 
+					if(correctionSelection == MethodSetting.Reflectivity_without_Flux_Correction_Gaussian_Profile ||
+							correctionSelection == MethodSetting.Reflectivity_with_Flux_Correction_Gaussian_Profile){
+
+						double reflectivityAreaCorrection = GeometricCorrectionsReflectivityMethod.reflectivityCorrectionsBatchGaussianPofile(dcdThetaCon, 
 								fm.getNoInOriginalDat(), 
 								angularFudgeFactor, 
 								beamHeight, 
@@ -598,7 +602,19 @@ public class SurfaceScatterPresenter {
 
 						fm.setReflectivityAreaCorrection(reflectivityAreaCorrection);
 
-						fm.setQdcd(qdcdCon.getDouble(f));
+					}
+
+					else if(correctionSelection == MethodSetting.Reflectivity_without_Flux_Correction_Simple_Scaling ||
+							correctionSelection == MethodSetting.Reflectivity_with_Flux_Correction_Simple_Scaling){
+
+						double reflectivityAreaCorrection = GeometricCorrectionsReflectivityMethod.reflectivityCorrectionsBatchSimpleScaling(dcdThetaCon, 
+								fm.getNoInOriginalDat(), 
+								//								angularFudgeFactor, 
+								beamHeight, 
+								footprint);
+
+						fm.setReflectivityAreaCorrection(reflectivityAreaCorrection);
+
 					}
 				}
 				catch(Exception h ){
@@ -607,7 +623,8 @@ public class SurfaceScatterPresenter {
 				}
 
 				try{
-					if(correctionSelection == MethodSetting.Reflectivity_with_Flux_Correction){
+					if(correctionSelection == MethodSetting.Reflectivity_with_Flux_Correction_Gaussian_Profile ||
+							correctionSelection == MethodSetting.Reflectivity_with_Flux_Correction_Simple_Scaling){
 
 						String externalFlux = gm.getFluxPath();
 
@@ -620,7 +637,7 @@ public class SurfaceScatterPresenter {
 								externalFlux);
 
 						fm.setReflectivityFluxCorrection(reflectivityFluxCorrection);
-						
+
 						if(Double.isInfinite(reflectivityFluxCorrection)){
 							fluxCallibrationWarning();
 							break;
@@ -631,15 +648,15 @@ public class SurfaceScatterPresenter {
 				catch(Exception i ){
 					System.out.println("problem doing flux corr");
 					fluxCallibrationWarning();
-					
-					
+
+
 				}
 
 				fm.setScannedVariable(xArrayCon.getDouble(f));
 
 			}
 
-//			Dataset sortedDatNamesInOrderDataset = DatasetFactory.createFromObject(datNamesInOrder);
+			//			Dataset sortedDatNamesInOrderDataset = DatasetFactory.createFromObject(datNamesInOrder);
 
 			drm.setFilepathsSortedArray(filepathsSortedArray);
 			drm.setImageNoInDatList(imageNoInDatList);
@@ -2087,7 +2104,8 @@ public class SurfaceScatterPresenter {
 
 				writer.println("#qdcd	I	Ie	Area Correction	Flux Correction");
 
-				if(drm.getCorrectionSelection() == MethodSetting.Reflectivity_with_Flux_Correction){
+				if(drm.getCorrectionSelection() == MethodSetting.Reflectivity_with_Flux_Correction_Gaussian_Profile ||
+						drm.getCorrectionSelection() == MethodSetting.Reflectivity_with_Flux_Correction_Simple_Scaling){
 					//
 					for(int gh = 0 ; gh<fms.size(); gh++){
 
@@ -2101,7 +2119,8 @@ public class SurfaceScatterPresenter {
 					}
 				}
 
-				if(drm.getCorrectionSelection() == MethodSetting.Reflectivity_without_Flux_Correction){
+				if(drm.getCorrectionSelection() == MethodSetting.Reflectivity_without_Flux_Correction_Gaussian_Profile||
+						drm.getCorrectionSelection() == MethodSetting.Reflectivity_without_Flux_Correction_Simple_Scaling){
 
 					for(int gh = 0 ; gh<fms.size(); gh++){
 
@@ -2262,7 +2281,7 @@ public class SurfaceScatterPresenter {
 		RegionOutOfBoundsWarning roobw = new RegionOutOfBoundsWarning(parentShell,0, null);
 		roobw.open();
 	}
-	
+
 	public void fluxCallibrationWarning(){
 		RegionOutOfBoundsWarning roobw = new RegionOutOfBoundsWarning(parentShell,6, null);
 		roobw.open();
@@ -2437,8 +2456,10 @@ public class SurfaceScatterPresenter {
 		CurveStitchWithErrorsAndFrames.curveStitch4(csdp, mm, oAos);
 
 		if(drm.getCorrectionSelection() == MethodSetting.Reflectivity_NO_Correction ||
-				drm.getCorrectionSelection() == MethodSetting.Reflectivity_with_Flux_Correction ||
-				drm.getCorrectionSelection() == MethodSetting.Reflectivity_without_Flux_Correction){
+				drm.getCorrectionSelection() == MethodSetting.Reflectivity_with_Flux_Correction_Gaussian_Profile ||
+				drm.getCorrectionSelection() == MethodSetting.Reflectivity_without_Flux_Correction_Gaussian_Profile ||
+				drm.getCorrectionSelection() == MethodSetting.Reflectivity_with_Flux_Correction_Simple_Scaling||
+				drm.getCorrectionSelection() == MethodSetting.Reflectivity_without_Flux_Correction_Simple_Scaling){
 
 			ReflectivityNormalisation.reflectivityNormalisation1(csdp);
 
@@ -2881,19 +2902,6 @@ public class SurfaceScatterPresenter {
 		CurveStitchDataPackage csdp = csdpgfd.getCsdp();
 
 		IDataset[] output1 = CurveStitchWithErrorsAndFrames.curveStitch4(csdp, null);
-		//		try{
-		//			if(drm.getCorrectionSelection() == MethodSetting.Reflectivity_NO_Correction ||
-		//					   drm.getCorrectionSelection() == MethodSetting.Reflectivity_with_Flux_Correction ||
-		//					   drm.getCorrectionSelection() == MethodSetting.Reflectivity_without_Flux_Correction){
-		//						
-		//						ReflectivityNormalisation.reflectivityNormalisation1(csdp);
-		//						
-		//			}
-		////		}
-		//		catch(Exception j){
-		//		 System.out.println(j.getMessage());
-		//		}
-		//		IDataset[] output = CurveStitchWithErrorsAndFrames.curveStitch4(csdp, null);
 
 		drm.setCsdp(csdp);
 

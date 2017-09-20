@@ -369,7 +369,7 @@ public class GeometricParametersWindows extends Composite{
 		
 		
 		InputTileGenerator tile1 = new InputTileGenerator("Beam Energy / KeV:",
-				 "3.00",
+				 "12.50",
 				 geometricParametersReflec);
 		
 		energy  = tile1.getText();
@@ -380,14 +380,12 @@ public class GeometricParametersWindows extends Composite{
 														 thetas,
 														 geometricParametersReflec);
 		theta = tile2.getCombo();
-//		theta.select(0);
 		
 		InputTileGenerator tile3 = new InputTileGenerator("Coded Parameter:",
 														  ssp.getOptions(),
 														  geometricParametersReflec);
 		
 		selectedOption = tile3.getCombo();
-		
 		
 		for(Control l : tile1.getGroup().getChildren()){
 			l.setEnabled(false);

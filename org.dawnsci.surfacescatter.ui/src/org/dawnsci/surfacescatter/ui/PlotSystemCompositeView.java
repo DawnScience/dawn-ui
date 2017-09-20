@@ -398,7 +398,8 @@ public class PlotSystemCompositeView extends Composite {
 			
 		}
 		
-		if (ssp.getCorrectionSelection() == MethodSetting.Reflectivity_with_Flux_Correction ){
+		if (ssp.getCorrectionSelection() == MethodSetting.Reflectivity_with_Flux_Correction_Gaussian_Profile ||
+				ssp.getCorrectionSelection() == MethodSetting.Reflectivity_with_Flux_Correction_Simple_Scaling){
 			
 			Group corrections = new Group(correctionsTabComposite, SWT.NONE);
 		    GridLayout 	correctionsLayout = new GridLayout(2,true);
@@ -414,7 +415,8 @@ public class PlotSystemCompositeView extends Composite {
 			reflectivityFluxCorr = subTile2.getText();
 		}
 		
-		if (ssp.getCorrectionSelection() == MethodSetting.Reflectivity_without_Flux_Correction ){
+		if (ssp.getCorrectionSelection() == MethodSetting.Reflectivity_without_Flux_Correction_Gaussian_Profile ||
+				ssp.getCorrectionSelection() == MethodSetting.Reflectivity_without_Flux_Correction_Simple_Scaling){
 			
 			Group corrections = new Group(correctionsTabComposite, SWT.NONE);
 		    GridLayout 	correctionsLayout = new GridLayout(2,true);
@@ -967,7 +969,8 @@ public class PlotSystemCompositeView extends Composite {
 			
 		}
 		
-		if (ssp.getCorrectionSelection() == MethodSetting.Reflectivity_with_Flux_Correction ){
+		if (ssp.getCorrectionSelection() == MethodSetting.Reflectivity_with_Flux_Correction_Gaussian_Profile || 
+				ssp.getCorrectionSelection() == MethodSetting.Reflectivity_with_Flux_Correction_Simple_Scaling){
 			
 			Group corrections = new Group(correctionsTabComposite, SWT.NONE);
 		    GridLayout 	correctionsLayout = new GridLayout(2,true);
@@ -983,7 +986,8 @@ public class PlotSystemCompositeView extends Composite {
 			reflectivityFluxCorr = subTile2.getText();
 		}
 		
-		if (ssp.getCorrectionSelection() == MethodSetting.Reflectivity_without_Flux_Correction ){
+		if (ssp.getCorrectionSelection() == MethodSetting.Reflectivity_without_Flux_Correction_Gaussian_Profile || 
+				ssp.getCorrectionSelection() == MethodSetting.Reflectivity_without_Flux_Correction_Simple_Scaling){
 			
 			Group corrections = new Group(correctionsTabComposite, SWT.NONE);
 		    GridLayout 	correctionsLayout = new GridLayout(2,true);
@@ -1040,7 +1044,8 @@ public class PlotSystemCompositeView extends Composite {
 			
 		}
 		
-		if (ssp.getCorrectionSelection() == MethodSetting.Reflectivity_with_Flux_Correction){
+		if (ssp.getCorrectionSelection() == MethodSetting.Reflectivity_with_Flux_Correction_Gaussian_Profile ||
+				ssp.getCorrectionSelection() == MethodSetting.Reflectivity_with_Flux_Correction_Simple_Scaling ){
 			
 			rawIntensity.setText(String.valueOf(ssp.getCurrentRawIntensity()));
 			
@@ -1053,7 +1058,8 @@ public class PlotSystemCompositeView extends Composite {
 			
 		}
 		
-		if (ssp.getCorrectionSelection() == MethodSetting.Reflectivity_without_Flux_Correction){
+		if (ssp.getCorrectionSelection() == MethodSetting.Reflectivity_without_Flux_Correction_Gaussian_Profile ||
+				ssp.getCorrectionSelection() == MethodSetting.Reflectivity_without_Flux_Correction_Simple_Scaling){
 			
 			rawIntensity.setText(String.valueOf(ssp.getCurrentRawIntensity()));
 			reflectivityAreaCorr.setText(String.valueOf(ssp.getCurrentReflectivityAreaCorrection()));
@@ -1085,7 +1091,8 @@ public class PlotSystemCompositeView extends Composite {
 									  double rawIntensityValue,
 									  double fluxCorrection){
 		
-		if (ssp.getCorrectionSelection() == MethodSetting.Reflectivity_with_Flux_Correction){
+		if (ssp.getCorrectionSelection() == MethodSetting.Reflectivity_with_Flux_Correction_Gaussian_Profile ||
+				ssp.getCorrectionSelection() == MethodSetting.Reflectivity_with_Flux_Correction_Simple_Scaling){
 			
 			rawIntensity.setText(String.valueOf(rawIntensityValue));
 			reflectivityFluxCorr.setText(String.valueOf(fluxCorrection));
@@ -1093,7 +1100,8 @@ public class PlotSystemCompositeView extends Composite {
 			
 		}
 		
-		if (ssp.getCorrectionSelection() == MethodSetting.Reflectivity_without_Flux_Correction){
+		if (ssp.getCorrectionSelection() == MethodSetting.Reflectivity_without_Flux_Correction_Gaussian_Profile ||
+				ssp.getCorrectionSelection() == MethodSetting.Reflectivity_without_Flux_Correction_Simple_Scaling){
 			
 			rawIntensity.setText(String.valueOf(rawIntensityValue));
 			reflectivityAreaCorr.setText(String.valueOf(areaCorrection));
