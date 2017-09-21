@@ -1,38 +1,55 @@
-//package org.dawnsci.surfacescatter.ui;
-//
-//import java.beans.PropertyChangeEvent;
-//import java.beans.PropertyChangeListener;
-//import java.io.File;
-//import java.nio.charset.Charset;
-//import java.nio.charset.StandardCharsets;
-//import java.nio.file.Files;
-//import java.nio.file.Path;
-//import java.nio.file.Paths;
-//import java.nio.file.StandardCopyOption;
-//
-//import org.apache.commons.lang.StringUtils;
-//import org.dawnsci.surfacescatter.ReflectivityMetadataTitlesForDialog;
-//import org.dawnsci.surfacescatter.MethodSettingEnum.MethodSetting;
-//import org.eclipse.dawnsci.analysis.api.io.IDataHolder;
-//import org.eclipse.dawnsci.analysis.api.tree.DataNode;
-//import org.eclipse.dawnsci.nexus.NexusFile;
-//import org.eclipse.january.dataset.AggregateDataset;
-//import org.eclipse.january.dataset.Dataset;
-//import org.eclipse.january.dataset.DatasetFactory;
-//import org.eclipse.january.dataset.DatasetUtils;
-//import org.eclipse.january.dataset.DoubleDataset;
-//import org.eclipse.january.dataset.IDataset;
-//import org.eclipse.january.dataset.ILazyDataset;
-//import org.eclipse.january.dataset.SliceND;
-//
-//import uk.ac.diamond.scisoft.analysis.io.LoaderFactory;
-//import uk.ac.diamond.scisoft.analysis.io.TIFFImageLoader;
-//
-//public class SurfaceScatterPresenterUtilities {
-//
+package org.dawnsci.surfacescatter.ui;
+
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
+import java.io.File;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
+
+import org.apache.commons.lang.StringUtils;
+import org.dawnsci.surfacescatter.ReflectivityMetadataTitlesForDialog;
+import org.dawnsci.surfacescatter.MethodSettingEnum.MethodSetting;
+import org.eclipse.dawnsci.analysis.api.io.IDataHolder;
+import org.eclipse.dawnsci.analysis.api.tree.DataNode;
+import org.eclipse.dawnsci.nexus.NexusFile;
+import org.eclipse.january.dataset.AggregateDataset;
+import org.eclipse.january.dataset.Dataset;
+import org.eclipse.january.dataset.DatasetFactory;
+import org.eclipse.january.dataset.DatasetUtils;
+import org.eclipse.january.dataset.DoubleDataset;
+import org.eclipse.january.dataset.IDataset;
+import org.eclipse.january.dataset.ILazyDataset;
+import org.eclipse.january.dataset.SliceND;
+
+import uk.ac.diamond.scisoft.analysis.io.LoaderFactory;
+import uk.ac.diamond.scisoft.analysis.io.TIFFImageLoader;
+
+public class SurfaceScatterPresenterUtilities {
+
+	
+	public static void sortDatasets(Dataset forSortingAgainst, Dataset[] sortThese){
+
+		Dataset[] copiesOfUnsortedDataset = new Dataset[sortThese.length];
+
+		for(int i=0; i<sortThese.length; i++){
+
+			if(forSortingAgainst.getSize() == sortThese[i].getSize()){
+				DatasetUtils.sort(forSortingAgainst.clone(), sortThese[i]);
+			}
+		}
+
+	}
+
+}
+	
+	
+	
 //	private IDataHolder dh1;
-//	
-//	
+	
 //	public void dataLoaderFromDat(String[] filepaths,
 //								  String imageFolderPath,
 //								  String gmImageName){
@@ -367,7 +384,7 @@
 //
 //
 //		}
-//
-//	
-//	
+
+	
+	
 //}

@@ -216,7 +216,6 @@ public class DatDisplayer extends Composite {
 			}
 		});
 		
-		
 		transferToRod = new Button(datSelector, SWT.PUSH);
 		transferToRod.setText("Transfer to Rod ->");
 		transferToRod.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
@@ -250,7 +249,6 @@ public class DatDisplayer extends Composite {
 	    	c.setEnabled(false);
 	    }
 	    
-	    
 	    InputTileGenerator startDat = new InputTileGenerator("Starting .Dat: ","", numericalDatSelection,0);
 	    startDat.setEnabled(false, false);
 	    InputTileGenerator endDat = new InputTileGenerator("Ending .Dat: ", "",numericalDatSelection,0);
@@ -273,8 +271,6 @@ public class DatDisplayer extends Composite {
 			}
 		});
 
-
-		
 		increment.getRadio().addSelectionListener(new SelectionListener() {
 			
 			@Override
@@ -301,7 +297,6 @@ public class DatDisplayer extends Composite {
 			
 			@Override
 			public void widgetDefaultSelected(SelectionEvent e) {
-				// TODO Auto-generated method stub
 				
 			}
 		});
@@ -347,7 +342,6 @@ public class DatDisplayer extends Composite {
 					
 				}
 				
-				
 				for(int cv = 0; cv<rodDisplayTable.getItems().length; cv++){
 					rodDisplayTable.remove(cv);
 				}
@@ -364,7 +358,6 @@ public class DatDisplayer extends Composite {
 				
 				prepareToBuildRod(tidiedTransferList);
 				
-				
 			}
 			
 			@Override
@@ -374,8 +367,6 @@ public class DatDisplayer extends Composite {
 			}
 		});
 
-		
-		
 		rodConstruction = new Group(right, SWT.V_SCROLL | SWT.FILL | SWT.FILL);
 		GridLayout rodConstructionLayout = new GridLayout(1, true);
 		GridData rodConstructionData = new GridData(GridData.FILL_BOTH);
@@ -704,8 +695,7 @@ public class DatDisplayer extends Composite {
 			
 			@Override
 			public void widgetDefaultSelected(SelectionEvent e) {
-				// TODO Auto-generated method stub
-
+				
 			}
 		});
 		
@@ -728,7 +718,6 @@ public class DatDisplayer extends Composite {
 					}
 
 				}
-				
 				
 				try {
 					
@@ -756,10 +745,6 @@ public class DatDisplayer extends Composite {
 			}
 		});
 		
-		
-		
-		
-//		selectionSash.setWeights(new int[] { 30, 30, 30 });
 	}
 
 	public Table getParamFileTable() {
