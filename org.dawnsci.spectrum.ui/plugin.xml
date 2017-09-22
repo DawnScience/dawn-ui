@@ -269,7 +269,7 @@
       </menuContribution>
    </extension>
    <extension
-         point="org.dawnsci.fileviewer.openFile">
+         point="uk.ac.diamond.sda.navigator.openFile">
       <fileOpen
             class="org.dawnsci.spectrum.ui.views.SpectrumFileOpen"
             id="org.dawnsci.spectrum.ui.views.spectrumFileOpen"
