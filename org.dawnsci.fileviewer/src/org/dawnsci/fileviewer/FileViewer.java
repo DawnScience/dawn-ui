@@ -16,7 +16,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.dawb.common.ui.util.EclipseUtils;
-import org.dawb.common.util.io.IOpenFileAction;
 import org.dawnsci.fileviewer.handlers.ConvertHandler;
 import org.dawnsci.fileviewer.handlers.LayoutHandler;
 import org.dawnsci.fileviewer.handlers.OpenHandler;
@@ -66,6 +65,8 @@ import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.dialogs.PreferencesUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import uk.ac.diamond.sda.navigator.views.IOpenFileAction;
 
 /**
  * File Viewer based on the SWT FileViewer example
