@@ -745,6 +745,12 @@ public class DatDisplayer extends Composite {
 			}
 		});
 		
+		
+		Button batchTest = new Button(parameterFiles, SWT.PUSH);
+		batchTest.setText("Batch Test");
+		batchTest.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		batchTest.setEnabled(false);
+		
 	}
 
 	public Table getParamFileTable() {
@@ -1001,9 +1007,7 @@ public class DatDisplayer extends Composite {
 			if(add){
 				output.add(m);
 			}
-			
 		}
-
 		
 		return output;
 	}
@@ -1037,7 +1041,6 @@ public class DatDisplayer extends Composite {
 				paramFilesChecked.add(ra);
 			}
 		}
-		
 	}
 
 	public String getOption() {

@@ -55,6 +55,7 @@ import org.dawnsci.surfacescatter.ReflectivityMetadataTitlesForDialog;
 import org.dawnsci.surfacescatter.ReflectivityNormalisation;
 import org.dawnsci.surfacescatter.RodObjectNexusBuilderModel;
 import org.dawnsci.surfacescatter.RodObjectNexusUtils;
+import org.dawnsci.surfacescatter.RodObjectNexusUtils_Development;
 import org.dawnsci.surfacescatter.SXRDAngleAliasEnum;
 import org.dawnsci.surfacescatter.SXRDGeometricCorrections;
 import org.dawnsci.surfacescatter.SavingFormatEnum.SaveFormatSetting;
@@ -568,10 +569,16 @@ public class SurfaceScatterPresenter {
 
 					fm.setLorentzianCorrection(lorentz);
 
-					double areaCorrection = SXRDGeometricCorrections.areacor(datNamesInOrder[f], gm.getBeamCorrection(),
-							gm.getSpecular(), gm.getSampleSize(), gm.getOutPlaneSlits(), gm.getInPlaneSlits(),
-							gm.getBeamInPlane(), gm.getBeamOutPlane(), gm.getDetectorSlits())
-							.getDouble(imageNoInDatList.get(pos));
+					double areaCorrection = SXRDGeometricCorrections.areacor(datNamesInOrder[f], 
+																			 gm.getBeamCorrection(),
+																			 gm.getSpecular(), 
+																			 gm.getSampleSize(), 
+																			 gm.getOutPlaneSlits(), 
+																			 gm.getInPlaneSlits(),
+																			 gm.getBeamInPlane(), 
+																			 gm.getBeamOutPlane(), 
+																			 gm.getDetectorSlits())
+																			 .getDouble(imageNoInDatList.get(pos));
 
 					fm.setAreaCorrection(areaCorrection);
 
@@ -1767,48 +1774,9 @@ public class SurfaceScatterPresenter {
 
 		RodObjectNexusBuilderModel rnbm = new RodObjectNexusBuilderModel(fms, nexusFilePath, gm, drm);
 
-		RodObjectNexusUtils ronu = new RodObjectNexusUtils(rnbm);
+		RodObjectNexusUtils_Development.RodObjectNexusUtils(rnbm);
 
 	}
-
-//	public void genXSave(String title) {
-//
-//		try {
-//			File file = new File(title);
-//			file.createNewFile();
-//			writer = new PrintWriter(file);
-//		} catch (FileNotFoundException e2) {
-//			e2.printStackTrace();
-//		} catch (IOException e1) {
-//			e1.printStackTrace();
-//		}
-//
-//		SimpleDateFormat sdfDate = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");// dd/MM/yyyy
-//		Date now = new Date();
-//		String strDate = sdfDate.format(now);
-//		writer.println("#Output file created: " + strDate);
-//
-//		if (drm.getCorrectionSelection() == MethodSetting.SXRD) {
-//
-//			for (int gh = 0; gh < fms.size(); gh++) {
-//				FrameModel f = fms.get(gh);
-//
-//				writer.println(f.getH() + "	" + f.getK() + "	" + f.getL() + "	"
-//						+ drm.getCsdp().getSplicedCurveYFhkl().getDouble(gh) + "	"
-//						+ drm.getCsdp().getSplicedCurveY().getError(gh));
-//			}
-//		}
-//
-//		else {
-//			writer.println("#" + gm.getxName() + "	I	Ie");
-//
-//			for (int gh = 0; gh < fms.size(); gh++) {
-//				writer.println(drm.getxList().get(gh) + "	" + drm.getCsdp().getSplicedCurveY().getDouble(gh) + "	"
-//						+ drm.getCsdp().getSplicedCurveY().getError(gh));
-//			}
-//		}
-//		writer.close();
-//	}
 
 	public IDataset getSplicedCurveX() {
 		return drm.getCsdp().getSplicedCurveX();
