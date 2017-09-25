@@ -12,7 +12,6 @@ import org.eclipse.e4.core.di.annotations.Optional;
 import org.eclipse.e4.core.di.extensions.EventTopic;
 import org.eclipse.e4.ui.model.application.MApplication;
 import org.eclipse.e4.ui.model.application.ui.SideValue;
-import org.eclipse.e4.ui.model.application.ui.advanced.MPerspective;
 import org.eclipse.e4.ui.model.application.ui.basic.MPartSashContainer;
 import org.eclipse.e4.ui.model.application.ui.basic.MPartStack;
 import org.eclipse.e4.ui.model.application.ui.basic.MStackElement;
@@ -60,7 +59,7 @@ public class HistogramToolbarAddon {
 	@Optional
 	public void subscribeTopicSelectedElement(
 			@EventTopic(UIEvents.ElementContainer.TOPIC_SELECTEDELEMENT) Event event) {
-		Object newValue = event.getProperty(EventTags.NEW_VALUE);
+		Object newValue = event.getProperty(EventTags.ELEMENT);
 		
 		if (newValue instanceof MPartSashContainer) {
 			newValue = ((MPartSashContainer)newValue).getSelectedElement();
@@ -69,6 +68,12 @@ public class HistogramToolbarAddon {
 		if (newValue instanceof MPartSashContainer) {
 			newValue = ((MPartSashContainer)newValue).getSelectedElement();
 		}
+		
+//		if (newValue instanceof MPlaceholder) {
+//			newValue = ((MPlaceholder)newValue).get
+//		}
+		
+		boolean visible = false;
 		
 		if (newValue instanceof MPartStack){
 			MStackElement se = ((MPartStack)newValue).getSelectedElement();
@@ -76,7 +81,7 @@ public class HistogramToolbarAddon {
 			try {
 				IViewPart view = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().showView(elementId);
 				if (view != null) {
-					IPlottingSystem system = view.getAdapter(IPlottingSystem.class);
+					IPlottingSystem<?> system = view.getAdapter(IPlottingSystem.class);
 					if (system != null) {
 						system.toString();
 						Collection<IPaletteTrace> traces = system.getTracesByClass(IPaletteTrace.class);
@@ -88,27 +93,17 @@ public class HistogramToolbarAddon {
 							Object object = control.getObject();
 							if (object instanceof HistrogramToolbarControl) {
 								((HistrogramToolbarControl)object).setSystemTrace(system, next);
+								visible = true;
 							}
 						}
-						control.setVisible(true);
-					} else {
-						control.setVisible(false);
-					}
-				} else {
-					control.setVisible(false);
-				}
+					} 
+				} 
 			} catch (PartInitException e) {
 
 			}
-			se.toString();
-		} else {
-			control.setVisible(false);
-		}
+		} 
 		
-	
-		if (!(newValue instanceof MPerspective)) {
-			return;
-		}
+		control.setVisible(visible);
 		
 	}
     

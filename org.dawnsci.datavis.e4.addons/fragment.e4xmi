@@ -2,5 +2,6 @@
 <fragment:ModelFragments xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:application="http://www.eclipse.org/ui/2010/UIModel/application" xmlns:fragment="http://www.eclipse.org/ui/2010/UIModel/fragment" xmi:id="_e97TUJiREee2l-FY7vFr0Q">
   <fragments xsi:type="fragment:StringModelFragment" xmi:id="_1ReR0JkpEee2l-FY7vFr0Q" featurename="addons" parentElementId="org.eclipse.e4.legacy.ide.application">
     <elements xsi:type="application:Addon" xmi:id="__iXS0JkpEee2l-FY7vFr0Q" elementId="org.dawnsci.datavis.e4.addons.addon.histogramtoolbar" contributionURI="bundleclass://org.dawnsci.datavis.e4.addons/org.dawnsci.datavis.e4.addons.HistogramToolbarAddon"/>
+    <elements xsi:type="application:Addon" xmi:id="_o18HoJ-fEee4LpBbi72CEw" elementId="org.dawnsci.datavis.e4.addons.addon.plotmodifieroffsetslider" contributionURI="bundleclass://org.dawnsci.datavis.e4.addons/org.dawnsci.datavis.e4.addons.PlotModifierOffsetAddon"/>
   </fragments>
 </fragment:ModelFragments>

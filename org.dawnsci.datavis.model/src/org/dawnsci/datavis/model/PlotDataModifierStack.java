@@ -9,6 +9,7 @@ import org.eclipse.january.metadata.AxesMetadata;
 public class PlotDataModifierStack implements IPlotDataModifier {
 
 	private double value = 0;
+	private double proportion = 0.2;
 	
 	@Override
 	public IDataset modifyForDisplay(IDataset d) {
@@ -18,7 +19,7 @@ public class PlotDataModifierStack implements IPlotDataModifier {
 		if (delta == 0) delta = 1;
 		Dataset dataset = DatasetUtils.convertToDataset(d);
 		dataset = Maths.subtract(dataset, min).idivide(delta);
-		dataset.iadd(value*0.2);
+		dataset.iadd(value*proportion);
 		value++;
 		
 		AxesMetadata md = d.getFirstMetadata(AxesMetadata.class);
@@ -34,8 +35,6 @@ public class PlotDataModifierStack implements IPlotDataModifier {
 		value = 0;
 	}
 
-
-
 	@Override
 	public String getName() {
 		return "Stack";
@@ -44,6 +43,14 @@ public class PlotDataModifierStack implements IPlotDataModifier {
 	@Override
 	public boolean supportsRank(int rank) {
 		return rank == 1;
+	}
+
+	public double getProportion() {
+		return proportion;
+	}
+
+	public void setProportion(double proportion) {
+		this.proportion = proportion;
 	}
 
 }
