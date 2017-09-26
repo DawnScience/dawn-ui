@@ -50,7 +50,7 @@ public class HistogramToolbarAddon {
 			control.setContributionURI(HistrogramToolbarControl.CLASS_URI);
 			topTrimBar.getChildren().add(0, control);
 		}
-        control.setVisible(false);
+        control.setVisible(true);
         
     }
     
@@ -61,50 +61,50 @@ public class HistogramToolbarAddon {
 			@EventTopic(UIEvents.ElementContainer.TOPIC_SELECTEDELEMENT) Event event) {
 		Object newValue = event.getProperty(EventTags.ELEMENT);
 		
-		if (newValue instanceof MPartSashContainer) {
-			newValue = ((MPartSashContainer)newValue).getSelectedElement();
-		}
-		
-		if (newValue instanceof MPartSashContainer) {
-			newValue = ((MPartSashContainer)newValue).getSelectedElement();
-		}
-		
-//		if (newValue instanceof MPlaceholder) {
-//			newValue = ((MPlaceholder)newValue).get
+//		if (newValue instanceof MPartSashContainer) {
+//			newValue = ((MPartSashContainer)newValue).getSelectedElement();
 //		}
-		
-		boolean visible = false;
-		
-		if (newValue instanceof MPartStack){
-			MStackElement se = ((MPartStack)newValue).getSelectedElement();
-			String elementId = se.getElementId();
-			try {
-				IViewPart view = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().showView(elementId);
-				if (view != null) {
-					IPlottingSystem<?> system = view.getAdapter(IPlottingSystem.class);
-					if (system != null) {
-						system.toString();
-						Collection<IPaletteTrace> traces = system.getTracesByClass(IPaletteTrace.class);
-						if (traces.isEmpty()) {
-							control.setVisible(false);
-						} else {
-							IPaletteTrace next = traces.iterator().next();
-							next.isRescaleHistogram();
-							Object object = control.getObject();
-							if (object instanceof HistrogramToolbarControl) {
-								((HistrogramToolbarControl)object).setSystemTrace(system, next);
-								visible = true;
-							}
-						}
-					} 
-				} 
-			} catch (PartInitException e) {
-
-			}
-		} 
-		
-		control.setVisible(visible);
-		
+//		
+//		if (newValue instanceof MPartSashContainer) {
+//			newValue = ((MPartSashContainer)newValue).getSelectedElement();
+//		}
+//		
+////		if (newValue instanceof MPlaceholder) {
+////			newValue = ((MPlaceholder)newValue).get
+////		}
+//		
+//		boolean visible = false;
+//		
+//		if (newValue instanceof MPartStack){
+//			MStackElement se = ((MPartStack)newValue).getSelectedElement();
+//			String elementId = se.getElementId();
+//			try {
+//				IViewPart view = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().showView(elementId);
+//				if (view != null) {
+//					IPlottingSystem<?> system = view.getAdapter(IPlottingSystem.class);
+//					if (system != null) {
+//						system.toString();
+//						Collection<IPaletteTrace> traces = system.getTracesByClass(IPaletteTrace.class);
+//						if (traces.isEmpty()) {
+//							control.setVisible(false);
+//						} else {
+//							IPaletteTrace next = traces.iterator().next();
+//							next.isRescaleHistogram();
+//							Object object = control.getObject();
+//							if (object instanceof HistrogramToolbarControl) {
+//								((HistrogramToolbarControl)object).setSystemTrace(system, next);
+//								visible = true;
+//							}
+//						}
+//					} 
+//				} 
+//			} catch (PartInitException e) {
+//
+//			}
+//		} 
+//		
+//		control.setVisible(visible);
+//		
 	}
     
     private MToolControl getMyControl() {

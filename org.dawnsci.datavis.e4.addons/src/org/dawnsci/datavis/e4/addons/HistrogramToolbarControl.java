@@ -41,10 +41,14 @@ public class HistrogramToolbarControl {
 		Composite c = new Composite(parent, SWT.None);
 		c.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false));
 		
-		GridLayout layout = new GridLayout(4, false);
+		GridLayout layout = new GridLayout(6, false);
 		layout.marginHeight = 2;
 		layout.marginWidth = 2;
 		c.setLayout(layout);
+		
+		Label l =new Label(c, SWT.SEPARATOR | SWT.VERTICAL);
+		l.setLayoutData(new GridData(2,24));
+		
 		lock = new Button(c,SWT.TOGGLE);
 		
 		if (lockImage == null) {
@@ -98,7 +102,7 @@ public class HistrogramToolbarControl {
 			}
 		});
 		
-		Label l = new Label(c, SWT.NONE);
+		l = new Label(c, SWT.NONE);
 		l.setText("-");
 		
 		high = new Text(c, SWT.BORDER);
@@ -125,9 +129,8 @@ public class HistrogramToolbarControl {
 			}
 		});
 		
-		Label col = new Label(c, SWT.NONE);
-		col.setText("Colour Map");
-		col.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, false, false, 4, 1));
+		l =new Label(c, SWT.SEPARATOR | SWT.VERTICAL);
+		l.setLayoutData(new GridData(2,24));
 		
 	}
 	

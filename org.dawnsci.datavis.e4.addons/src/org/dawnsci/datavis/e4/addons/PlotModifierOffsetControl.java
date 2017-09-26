@@ -13,7 +13,9 @@ import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Scale;
 
 public class PlotModifierOffsetControl {
@@ -29,13 +31,21 @@ public class PlotModifierOffsetControl {
 		Composite c = new Composite(parent, SWT.None);
 		c.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false));
 		
-		GridLayout layout = new GridLayout(1, false);
+		GridLayout layout = new GridLayout(4, false);
 		layout.marginHeight = 2;
 		layout.marginWidth = 2;
 		c.setLayout(layout);
 	
-		Scale s = new Scale(c,SWT.NONE);
+		Label l =new Label(c, SWT.SEPARATOR | SWT.VERTICAL);
+		l.setLayoutData(new GridData(2,24));
 		
+		Button b = new Button(c, SWT.TOGGLE);
+		
+		b.setText("On");
+		
+		
+		Scale s = new Scale(c,SWT.NONE);
+		s.setLayoutData(new GridData(48, 16));
 		s.setMaximum(100);
 		s.setMinimum(0);
 		
@@ -52,6 +62,9 @@ public class PlotModifierOffsetControl {
 			}
 			
 		});
+		
+		l = new Label(c, SWT.SEPARATOR | SWT.VERTICAL);
+		l.setLayoutData(new GridData(2,24));
 		
 		
 	}

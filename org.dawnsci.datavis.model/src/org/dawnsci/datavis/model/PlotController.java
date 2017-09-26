@@ -62,7 +62,7 @@ public class PlotController implements IPlotController {
 	private IPlotMode[] modes = new IPlotMode[]{new PlotModeXY(), new PlotModeImage(), new PlotModeSurface(), new PlotModeHyper()};
 	private IPlotMode currentMode;
 	
-	private IPlotDataModifier[] modifiers = new IPlotDataModifier[]{new PlotDataModifierMinMax(), new PlotDataModifierOffset(), new PlotDataModifierStack()};
+	private IPlotDataModifier[] modifiers = new IPlotDataModifier[]{ new PlotDataModifierStack()};
 	private IPlotDataModifier currentModifier;
 	
 	private ITraceColourProvider colorProvider;
@@ -423,6 +423,7 @@ public class PlotController implements IPlotController {
 	
 	public void enablePlotModifier(IPlotDataModifier modifier) {
 		if (modifier == currentModifier) return;
+		if (modifier != null) modifier.configure(getPlottingSystem());
 //		System.out.println("enabled " + modifier.getName());
 		currentModifier = modifier;
 		forceReplot();
