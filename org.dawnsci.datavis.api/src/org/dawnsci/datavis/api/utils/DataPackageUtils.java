@@ -30,7 +30,7 @@ public class DataPackageUtils {
 		
 		return stream.flatMap(f -> Arrays.stream(f.getDataPackages()))
 				.filter(IDataPackage::isSelected)
-				.filter(d -> (d.getSlice().getShape().length == 1))
+				.filter(d -> (d.getLazyDataset().getShape().length == 1))
 				.map(DataPackageUtils::getData)
 				.filter(Objects::nonNull)
 				.collect(Collectors.toList());
@@ -41,7 +41,11 @@ public class DataPackageUtils {
 		ILazyDataset l = pack.getLazyDataset();
 		SliceND s = pack.getSlice();
 		
-		if (s == null) return null;
+		if (s == null && l.getShape().length != 1) return null;
+		
+		if (s == null) {
+			s = new SliceND(l.getShape());
+		}
 		
 		try {
 			

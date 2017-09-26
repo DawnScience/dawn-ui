@@ -14,6 +14,7 @@ import org.eclipse.january.dataset.IDataset;
 import org.eclipse.january.dataset.ILazyDataset;
 import org.eclipse.january.dataset.Slice;
 import org.eclipse.january.dataset.SliceND;
+import org.eclipse.january.dataset.StringDataset;
 import org.eclipse.january.metadata.AxesMetadata;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -110,27 +111,40 @@ public class PlotModeImage implements IPlotMode {
 					ax.add(null);
 				} else {
 					IDataset axis = axes[0].getSlice().squeeze();
-					if (axis.getRank() != 1) {
-						SliceND s = new SliceND(axis.getShape());
-						s.setSlice(1, 0, 1, 1);
-						axis = axis.getSlice(s).squeeze();
+					
+					if (axis instanceof StringDataset) {
+						ax.add(null);
+					} else {
+						if (axis.getRank() != 1) {
+							SliceND s = new SliceND(axis.getShape());
+							s.setSlice(1, 0, 1, 1);
+							axis = axis.getSlice(s).squeeze();
+						}
+						axis.setName(MetadataPlotUtils.removeSquareBrackets(axis.getName()));
+						ax.add(axis);
 					}
-					axis.setName(MetadataPlotUtils.removeSquareBrackets(axis.getName()));
-					ax.add(axis);
+					
+					
 					
 				}
 				if (axes[1] == null) {
 					ax.add(null);
 				} else {
 					IDataset axis = axes[1].getSlice().squeeze();
-					if (axis.getRank() != 1) {
-						SliceND s = new SliceND(axis.getShape());
-						s.setSlice(0, 0, 1, 1);
-						axis = axis.getSlice(s).squeeze();
+
+					if (axis instanceof StringDataset) {
+						ax.add(null);
+					} else {
+
+						if (axis.getRank() != 1) {
+							SliceND s = new SliceND(axis.getShape());
+							s.setSlice(0, 0, 1, 1);
+							axis = axis.getSlice(s).squeeze();
+						}
+						axis.setName(MetadataPlotUtils.removeSquareBrackets(axis.getName()));
+						ax.add(axis);
 					}
-					axis.setName(MetadataPlotUtils.removeSquareBrackets(axis.getName()));
-					ax.add(axis);
-					
+
 				}
 				
 				

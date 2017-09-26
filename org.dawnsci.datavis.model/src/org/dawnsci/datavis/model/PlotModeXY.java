@@ -13,6 +13,7 @@ import org.eclipse.january.dataset.IDataset;
 import org.eclipse.january.dataset.ILazyDataset;
 import org.eclipse.january.dataset.Slice;
 import org.eclipse.january.dataset.SliceND;
+import org.eclipse.january.dataset.StringDataset;
 import org.eclipse.january.metadata.AxesMetadata;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -95,8 +96,15 @@ public class PlotModeXY implements IPlotMode {
 					builder.append(s[i].toString());
 				} else {
 					if (d.getSize() == 1) d.setShape(new int[]{1});
-					double val = DatasetUtils.convertToDataset(d).getElementDoubleAbs(0);
-					builder.append(Double.toString(val));
+					
+					if (d instanceof StringDataset) {
+						builder.append(d.getString(0));
+					} else {
+						double val = DatasetUtils.convertToDataset(d).getElementDoubleAbs(0);
+						builder.append(Double.toString(val));
+					}
+					
+					
 				}
 				builder.append(",");
 			}
