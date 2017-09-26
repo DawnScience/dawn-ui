@@ -645,7 +645,7 @@ public class SurfaceScatterPresenter {
 
 						double reflectivityFluxCorrection = 0;
 						
-						if(gm.isUseInternalFlux()){
+						if(gm.getUseInternalFlux()){
 
 							reflectivityFluxCorrection = ReflectivityFluxCorrectionsForDialog
 									.reflectivityFluxCorrectionsDouble(// fm.getDatFilePath(),
