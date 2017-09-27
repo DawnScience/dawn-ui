@@ -31,7 +31,8 @@ Require-Bundle: org.eclipse.ui,
  org.dawnsci.slicing.tools;bundle-version="1.0.0",
  org.eclipse.richbeans.widgets;bundle-version="1.0.0",
  org.mihalis.opal,
- uk.ac.diamond.scisoft.analysis.peakfinding;bundle-version="1.0.0"
+ uk.ac.diamond.scisoft.analysis.peakfinding;bundle-version="1.0.0",
+ org.eclipse.dawnsci.hdf.object
 Import-Package: javax.measure;version="4.3.1",
  javax.measure.converter;version="4.3.1",
  javax.measure.quantity;version="4.3.1",
