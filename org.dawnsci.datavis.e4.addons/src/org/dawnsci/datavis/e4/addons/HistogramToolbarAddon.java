@@ -12,6 +12,7 @@ import org.eclipse.e4.core.di.annotations.Optional;
 import org.eclipse.e4.core.di.extensions.EventTopic;
 import org.eclipse.e4.ui.model.application.MApplication;
 import org.eclipse.e4.ui.model.application.ui.SideValue;
+import org.eclipse.e4.ui.model.application.ui.advanced.MPerspective;
 import org.eclipse.e4.ui.model.application.ui.basic.MPartSashContainer;
 import org.eclipse.e4.ui.model.application.ui.basic.MPartStack;
 import org.eclipse.e4.ui.model.application.ui.basic.MStackElement;
@@ -38,7 +39,6 @@ public class HistogramToolbarAddon {
     @PostConstruct
     public void init(IEclipseContext context) {
         // injected IEclipseContext comes from the application
-        context.set("test1", "Hello");
         
         control = getMyControl();
         
@@ -59,7 +59,23 @@ public class HistogramToolbarAddon {
 	@Optional
 	public void subscribeTopicSelectedElement(
 			@EventTopic(UIEvents.ElementContainer.TOPIC_SELECTEDELEMENT) Event event) {
-		Object newValue = event.getProperty(EventTags.ELEMENT);
+//		Object newValue = event.getProperty(EventTags.ELEMENT);
+		
+		
+		Object newValue = event.getProperty(EventTags.NEW_VALUE);
+		
+		if (!(newValue instanceof MPerspective)) {
+			return;
+		}
+
+		MPerspective perspective = (MPerspective) newValue;
+		String id  = perspective.getElementId();
+		
+		if (id.equals("org.dawnsci.datavis.DataVisPerspective")) {
+			control.setVisible(true);
+		} else {
+			control.setVisible(false);
+		}
 		
 //		if (newValue instanceof MPartSashContainer) {
 //			newValue = ((MPartSashContainer)newValue).getSelectedElement();
