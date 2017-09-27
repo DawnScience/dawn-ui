@@ -4,9 +4,18 @@ import java.net.URL;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
+import javax.inject.Inject;
 
+import org.dawnsci.datavis.model.IPlotController;
+import org.eclipse.dawnsci.plotting.api.IPlotRegistrationListener;
+import org.eclipse.dawnsci.plotting.api.IPlottingService;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
+import org.eclipse.dawnsci.plotting.api.PlotRegistrationEvent;
 import org.eclipse.dawnsci.plotting.api.trace.IPaletteTrace;
+import org.eclipse.dawnsci.plotting.api.trace.ITraceListener;
+import org.eclipse.dawnsci.plotting.api.trace.TraceEvent;
+import org.eclipse.e4.core.di.annotations.Optional;
+import org.eclipse.e4.ui.di.UIEventTopic;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -20,11 +29,15 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
+import org.osgi.service.event.Event;
 
 public class HistrogramToolbarControl {
 
 	public static final String CLASS_URI = "bundleclass://org.dawnsci.datavis.e4.addons/" + HistrogramToolbarControl.class.getName();
 	public static final String ID = "org.dawnsci.datavis.e4.addons.HistrogramToolbarControl";
+	
+	@Inject
+	IPlottingService plottingService;
 	
 	private IPlottingSystem<?> system;
 	private IPaletteTrace trace;	
@@ -132,7 +145,46 @@ public class HistrogramToolbarControl {
 		l =new Label(c, SWT.SEPARATOR | SWT.VERTICAL);
 		l.setLayoutData(new GridData(2,24));
 		
+		plottingService.addRegistrationListener(new IPlotRegistrationListener.Stub() {
+			public void plottingSystemCreated(PlotRegistrationEvent evt) {
+				IPlottingSystem<Object> plottingSystem = evt.getPlottingSystem();
+				if (plottingSystem.getPlotName().equals("Plot")) {
+					HistrogramToolbarControl.this.system = plottingSystem;
+					system.addTraceListener(new ITraceListener.Stub() {
+						
+						@Override
+						public void traceAdded(TraceEvent evt) {
+							evt.toString();
+							
+						}
+
+						@Override
+						public void traceRemoved(TraceEvent evt) {
+							evt.toString();
+						}
+						
+					});
+				}
+			}
+		});
+		
 	}
+	
+	
+	@Inject
+	@Optional
+	private void plotControllerUpdate(@UIEventTopic("org/dawnsci/datavis/plot/UPDATE") Event data ) {
+
+		if (system == null) {
+			system = plottingService.getPlottingSystem("Plot");
+			
+			if (system != null) {
+				
+			}
+		}
+
+	} 
+	
 	
 	@PreDestroy
 	public void dispose() {
