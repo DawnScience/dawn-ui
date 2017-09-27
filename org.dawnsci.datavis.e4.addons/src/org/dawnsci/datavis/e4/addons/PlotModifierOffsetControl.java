@@ -56,8 +56,7 @@ public class PlotModifierOffsetControl {
 				IPlotDataModifier pm = controller.getEnabledPlotModifier();
 				if (pm instanceof PlotDataModifierStack) {
 					((PlotDataModifierStack)pm).setProportion(s.getSelection()/100.0);
-					controller.enablePlotModifier(null);
-					controller.enablePlotModifier(pm);
+					controller.forceReplot();
 				}
 			}
 			
