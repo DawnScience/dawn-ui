@@ -25,5 +25,7 @@ public interface IPlotController {
 	void setColorProvider(ITraceColourProvider colorProvider);
 
 	ITraceColourProvider getColorProvider();
+	
+	void forceReplot();
 
 }

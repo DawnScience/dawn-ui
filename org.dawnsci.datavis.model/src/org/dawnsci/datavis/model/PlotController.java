@@ -425,6 +425,11 @@ public class PlotController implements IPlotController {
 		if (modifier == currentModifier) return;
 //		System.out.println("enabled " + modifier.getName());
 		currentModifier = modifier;
+		forceReplot();
+	}
+	
+	@Override
+	public void forceReplot() {
 		final List<DataStateObject> state = fileController.getImmutableFileState();
 		//update plot
 		updatePlotStateInJob(state, currentMode);
