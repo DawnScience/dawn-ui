@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <plugin>
+   <extension-point id="openFile" name="Open a file in File View/FileViewer (overriding double click)" schema="schema/openFile.exsd"/>
 
    <extension
          point="org.eclipse.ui.views">

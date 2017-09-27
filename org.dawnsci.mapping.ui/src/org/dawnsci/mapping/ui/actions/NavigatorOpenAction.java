@@ -3,12 +3,11 @@ package org.dawnsci.mapping.ui.actions;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
+import org.dawb.common.util.io.IOpenFileAction;
 import org.dawnsci.mapping.ui.FileManagerSingleton;
 import org.dawnsci.mapping.ui.datamodel.MappedFileManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import uk.ac.diamond.sda.navigator.views.IOpenFileAction;
 
 public class NavigatorOpenAction implements IOpenFileAction {
 	

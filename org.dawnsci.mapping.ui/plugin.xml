@@ -92,7 +92,7 @@
       </actionSet>
    </extension>
    <extension
-         point="uk.ac.diamond.sda.navigator.openFile">
+         point="org.dawnsci.fileviewer.openFile">
       <fileOpen
             class="org.dawnsci.mapping.ui.actions.NavigatorOpenAction"
             id="org.dawnsci.mapping.ui.fileOpenNavigator"

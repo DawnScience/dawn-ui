@@ -57,7 +57,7 @@ public class FileViewerConstants {
 	/**
 	 * Extension point used for opening files with special actions
 	 */
-	public static final String OPEN_FILE_EXTENSION_POINT = "uk.ac.diamond.sda.navigator.openFile";
+	public static final String OPEN_FILE_EXTENSION_POINT = "org.dawnsci.fileviewer.openFile";
 
 	/**
 	 * constants to store preferences to display or not columns of table

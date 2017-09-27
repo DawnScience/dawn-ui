@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2016 IBM Corporation and others.
+ * Copyright (c) 2000, 2017 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -21,6 +21,7 @@ import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 
 import org.dawb.common.ui.util.EclipseUtils;
+import org.dawb.common.util.io.IOpenFileAction;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.Platform;
@@ -37,8 +38,6 @@ import org.eclipse.january.metadata.IMetadata;
 import org.eclipse.swt.program.Program;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import uk.ac.diamond.sda.navigator.views.IOpenFileAction;
 
 public class Utils {
 
