@@ -955,27 +955,23 @@ public class SurfaceScatterPresenter {
 
 		else {
 
-			try {
-				dh1 = LoaderFactory.getData(title);
-			} catch (Exception e) {
-
-			}
-
-			Tree tree = dh1.getTree();
+			
 
 			for (int n = 0; n < fms.size(); n++) {
 
 				FrameModel m = fms.get(n);
 
-				FittingParametersInputReader.readerFromNexus(tree, n, m);
+				FittingParametersInputReader.readerFromNexus(title, n, m);
 			}
 
 			fp = FittingParametersInputReader.fittingParametersFromFrameModel(fms.get(0));
 
-			FittingParametersInputReader.geometricalParametersReaderFromNexus(tree, gm);
-
+			FittingParametersInputReader.geometricalParametersReaderFromNexus(title, gm);
+			FittingParametersInputReader.anglesAliasReaderFromNexus(title);
 		}
 
+		
+		
 		drm.setInitialLenPt(fp.getLenpt());
 
 		try {

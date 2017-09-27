@@ -721,10 +721,7 @@ public class DatDisplayer extends Composite {
 				
 				try {
 					
-				IDataHolder dh1 = LoaderFactory.getData(ip.getText());
-				
-				Tree tree = dh1.getTree();			
-				FittingParametersInputReader.geometricalParametersReaderFromNexus(tree, ssp.getGm());
+				FittingParametersInputReader.geometricalParametersReaderFromNexus(ip.getText(), ssp.getGm());
 				
 				rsw.getParamField().setUpdateOn(false);
 				rsw.getParamField().updateDisplayFromGm(ssp.getGm());
