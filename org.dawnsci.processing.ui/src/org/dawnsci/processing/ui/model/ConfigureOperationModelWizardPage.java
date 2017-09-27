@@ -57,16 +57,20 @@ import org.slf4j.LoggerFactory;
 
 public class ConfigureOperationModelWizardPage extends AbstractOperationModelWizardPage {
 	
-	private IPlottingSystem<Composite> input;
-	private IPlottingSystem<Composite> output;
+	protected IPlottingSystem<Composite> input;
+	protected IPlottingSystem<Composite> output;
 	private OperationModelViewer modelViewer;
-	private Job update;
-	private Label errorLabel;
+	protected Job update;
+	protected Label errorLabel;
 	private IDataset[] axes;
 	private double[] minMax = new double[4];
 	
 	private final static Logger logger = LoggerFactory.getLogger(ConfigureOperationModelWizardPage.class);
 
+	public ConfigureOperationModelWizardPage() {
+		super();
+	}
+	
 	public ConfigureOperationModelWizardPage(IOperation<? extends IOperationModel, ? extends OperationData> operation) {
 		super(operation);
 	}
