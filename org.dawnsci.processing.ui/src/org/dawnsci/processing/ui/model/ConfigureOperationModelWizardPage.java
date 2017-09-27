@@ -60,7 +60,7 @@ public class ConfigureOperationModelWizardPage extends AbstractOperationModelWiz
 	protected IPlottingSystem<Composite> input;
 	protected IPlottingSystem<Composite> output;
 	private OperationModelViewer modelViewer;
-	protected Job update;
+	protected Job updateJob;
 	protected Label errorLabel;
 	private IDataset[] axes;
 	private double[] minMax = new double[4];
@@ -355,8 +355,8 @@ public class ConfigureOperationModelWizardPage extends AbstractOperationModelWiz
 	
 	@Override
 	protected void update() {
-		if (update == null) {
-			update = new Job("calculate...") {
+		if (updateJob == null) {
+			updateJob = new Job("calculate...") {
 
 				@Override
 				protected IStatus run(IProgressMonitor monitor) {
@@ -426,8 +426,8 @@ public class ConfigureOperationModelWizardPage extends AbstractOperationModelWiz
 			};
 		}
 
-		update.cancel();
-		update.schedule();
+		updateJob.cancel();
+		updateJob.schedule();
 	}
 
 	private RegionType getRegionType(RangeType type) {
