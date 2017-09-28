@@ -346,8 +346,6 @@ public class SurfaceScatterPresenter {
 					IDataset thetadat = ildtheta.getSlice(slice2);
 					thetaArray[id] = thetadat;
 
-//					dcdThetaArray[id] = dh1.getDataset(ReflectivityMetadataTitlesForDialog.getdcdtheta());
-////lllll
 					dcdThetaArray[id] = dh1.getDataset(ReflectivityAngleAliasEnum.THETA.getAngleAlias());
 					
 					qdcdArray[id] = dh1.getDataset(ReflectivityAngleAliasEnum.Q.getAngleAlias());
@@ -659,6 +657,7 @@ public class SurfaceScatterPresenter {
 											qdcdCon.getDouble(f), externalFlux);
 						}
 						fm.setReflectivityFluxCorrection(reflectivityFluxCorrection);
+//						fluxCallibrationWarning();
 
 						if (Double.isInfinite(reflectivityFluxCorrection)) {
 							fluxCallibrationWarning();

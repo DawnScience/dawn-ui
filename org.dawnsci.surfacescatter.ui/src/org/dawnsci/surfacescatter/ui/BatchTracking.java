@@ -27,41 +27,44 @@ import org.eclipse.swt.widgets.Display;
 
 public class BatchTracking {
 
-//	private IPlottingSystem<Composite> outputCurves;
+	// private IPlottingSystem<Composite> outputCurves;
 	private GeometricParametersModel gm;
 	private MethodSetting correctionSelection;
 	private int noImages;
 	private SurfaceScatterPresenter ssp;
 	private int DEBUG = 0;
-//	private ProgressBar progressBar;
-//	private TrackingProgressAndAbortViewImproved tpaav;
-	private Thread t;
+
+	// private ProgressBar progressBar;
+	// private TrackingProgressAndAbortViewImproved tpaav;
+
 	private ArrayList<FrameModel> fms;
 	private DirectoryModel drm;
+	private String savePath;
 
-	public void setT(Thread t) {
-		this.t = t;
-	}
 
-//	public TrackingProgressAndAbortViewImproved getTPAAV() {
-//		return tpaav;
-//	}
+	// public Thread getT() {
+	// return this.t;
+	// }
 
-//	public void setTPAAV(TrackingProgressAndAbortViewImproved tpaav) {
-//		this.tpaav = tpaav;
-//	}
-//
-//	public void setProgress(ProgressBar progress) {
-//		this.progressBar = progress;
-//	}
+	// public TrackingProgressAndAbortViewImproved getTPAAV() {
+	// return tpaav;
+	// }
 
-//	public void setOutputCurves(IPlottingSystem<Composite> outputCurves) {
-//		this.outputCurves = outputCurves;
-//	}
+	// public void setTPAAV(TrackingProgressAndAbortViewImproved tpaav) {
+	// this.tpaav = tpaav;
+	// }
+	//
+	// public void setProgress(ProgressBar progress) {
+	// this.progressBar = progress;
+	// }
 
-//	public void setCorrectionSelection(int cS) {
-//		this.correctionSelection = cS;
-//	}
+	// public void setOutputCurves(IPlottingSystem<Composite> outputCurves) {
+	// this.outputCurves = outputCurves;
+	// }
+
+	// public void setCorrectionSelection(int cS) {
+	// this.correctionSelection = cS;
+	// }
 
 	public void setGm(GeometricParametersModel gms) {
 		this.gm = gms;
@@ -71,11 +74,12 @@ public class BatchTracking {
 		this.ssp = ssp;
 	}
 
-	protected void runTJ1(int[][] lenPt) {
+	protected void runTJ1(int[][] lenPt, String savepath1) {
 
 		this.gm = ssp.getGm();
 		this.fms = ssp.getFms();
 		this.drm = ssp.getDrm();
+		this.savePath = savepath1;
 
 		drm.resetAll();
 
@@ -90,182 +94,162 @@ public class BatchTracking {
 
 		ssp.regionOfInterestSetter(lenPt);
 
-//		outputCurves.clear();
+		// outputCurves.clear();
 
 		String[] doneArray = new String[drm.getDatFilepaths().length];
 
 		drm.setDoneArray(doneArray);
 
-		t = new Thread() {
+		//////////////////////////// continuing to next
+		//////////////////////////// dat////////////////////////////////////////
 
-			@Override
-			public void run() {
+		System.out.println("////////////@@@@@@@@@@@~~~~~~~~~~starting tracking thread");
 
-				//////////////////////////// continuing to next
-				//////////////////////////// dat////////////////////////////////////////
+		while (!ClosestNoFinder.full(doneArray, "done")) {
 
-				while (!ClosestNoFinder.full(doneArray, "done")) {
+			int nextk = ClosestNoFinder.closestNoWithoutDone(drm.getSortedX().getDouble(ssp.getSliderPos()),
+					drm.getSortedX(), doneArray, drm.getFilepathsSortedArray());
 
-					int nextk = ClosestNoFinder.closestNoWithoutDone(drm.getSortedX().getDouble(ssp.getSliderPos()),
-							drm.getSortedX(), doneArray, drm.getFilepathsSortedArray());
+			int nextjok = drm.getFilepathsSortedArray()[nextk];
 
-					int nextjok = drm.getFilepathsSortedArray()[nextk];
+			debug("nextk :" + nextk);
+			debug("nextjok :" + nextjok);
+			debug("doneArray[nextjok]: " + doneArray[nextjok]);
 
-					debug("nextk :" + nextk);
-					debug("nextjok :" + nextjok);
-					debug("doneArray[nextjok]: " + doneArray[nextjok]);
+			for (int k = (nextk); k >= 0; k--) {
 
-					for (int k = (nextk); k >= 0; k--) {
+				FrameModel frame = fms.get(k);
 
-						if (t.isInterrupted()) {
-							break;
-						}
+				if (frame.getDatNo() == nextjok) {
 
-						FrameModel frame = fms.get(k);
+					debug("l value: " + Double.toString(drm.getSortedX().getDouble(k)) + " , " + "local k:  "
+							+ Integer.toString(k) + " , " + "local nextjok:  " + Integer.toString(nextjok));
 
-						if (frame.getDatNo() == nextjok) {
+					int trackingMarker = 1;
 
-							debug("l value: " + Double.toString(drm.getSortedX().getDouble(k)) + " , " + "local k:  "
-									+ Integer.toString(k) + " , " + "local nextjok:  " + Integer.toString(nextjok));
+					boolean seedRequired = doINeedASeedArray(k, startFrame, frame.getDatNo());
 
-							int trackingMarker = 1;
+					double myNum = drm.getSortedX().getDouble(k);
+					double distance = Math.abs(drm.getSortedX().getDouble(0) - myNum);
 
-							boolean seedRequired = doINeedASeedArray(k, startFrame, frame.getDatNo());
+					int frameDatNo = frame.getDatNo();
 
-							double myNum = drm.getSortedX().getDouble(k);
-							double distance = Math.abs(drm.getSortedX().getDouble(0) - myNum);
+					TrackerType1 tt1 = frame.getTrackingMethodology();
 
-							int frameDatNo = frame.getDatNo();
+					seedLocationSetter(trackingMarker, k, startFrame, frameDatNo, seedRequired, tt1, myNum, distance);
 
-							TrackerType1 tt1 = frame.getTrackingMethodology();
+					drm.addDmxList(frame.getDatNo(), frame.getNoInOriginalDat(), frame.getScannedVariable());
 
-							seedLocationSetter(trackingMarker, k, startFrame, frameDatNo, seedRequired, tt1, myNum,
-									distance);
+					drm.addxList(fms.size(), k, drm.getSortedX().getDouble(k));
 
-							drm.addDmxList(frame.getDatNo(), frame.getNoInOriginalDat(), frame.getScannedVariable());
+					debug("value added to xList:  " + drm.getSortedX().getDouble(k) + "  k:   " + k);
 
-							drm.addxList(fms.size(), k, drm.getSortedX().getDouble(k));
+					double[] gv = drm.getSeedLocation()[frame.getDatNo()];
 
-							debug("value added to xList:  " + drm.getSortedX().getDouble(k) + "  k:   " + k);
+					IDataset output1 = DummyProcessWithFrames.DummyProcess1(drm, gm,
+							// correctionSelection,
+							imagePosInOriginalDat[k], trackingMarker, k, gv, ssp.getLenPt());
 
-							double[] gv = drm.getSeedLocation()[frame.getDatNo()];
+					if (Arrays.equals(output1.getShape(), (new int[] { 2, 2 }))) {
+						Display d = Display.getCurrent();
+						debug("Dummy Proccessing failure");
 
-							IDataset output1 = DummyProcessWithFrames.DummyProcess1(drm, gm, 
-//									correctionSelection,
-									imagePosInOriginalDat[k], trackingMarker, k, gv, ssp.getLenPt());
-
-							if (Arrays.equals(output1.getShape(), (new int[] { 2, 2 }))) {
-								Display d = Display.getCurrent();
-								debug("Dummy Proccessing failure");
-
-								break;
-							}
-
-							drm.addBackgroundDatArray(fms.size(), k, output1);
-
-							int imageNumber = k;
-							IDataset tempImage = ssp.getImage(imageNumber);
-
-						}
+						break;
 					}
 
-					drm.getInputForEachDat()[nextjok] = null;
+					drm.addBackgroundDatArray(fms.size(), k, output1);
 
-					for (int k = nextk + 1; k < noImages; k++) {
+					int imageNumber = k;
+					IDataset tempImage = ssp.getImage(imageNumber);
 
-						if (t.isInterrupted()) {
-							break;
-						}
-
-						FrameModel frame = fms.get(k);
-
-						debug("%%%%%%%%%%%%%%%%% sm.getStartFrame:  " + startFrame + "??????????????????");
-						if (frame.getDatNo() == nextjok) {
-
-							debug("l value: " + Double.toString(drm.getSortedX().getDouble(k)) + " , " + "local k:  "
-									+ Integer.toString(k) + " , " + "local nextjok:  " + Integer.toString(nextjok));
-
-							int trackingMarker = 2;
-
-							SliceND slice = new SliceND(frame.getRawImageData().getShape());
-							IDataset j = DatasetFactory.createFromObject(0);
-							try {
-								j = frame.getRawImageData().getSlice(slice);
-							} catch (DatasetException e) {
-								e.printStackTrace();
-								System.out.println(e.getMessage());
-							}
-
-							boolean seedRequired = doINeedASeedArray(k, startFrame, frame.getDatNo());
-
-							double myNum = drm.getSortedX().getDouble(k);
-							double distance = Math.abs(drm.getSortedX().getDouble(0) - myNum);
-
-							int frameDatNo = frame.getDatNo();
-
-							TrackerType1 tt1 = frame.getTrackingMethodology();
-
-							seedLocationSetter(trackingMarker, k, startFrame, frameDatNo, seedRequired, tt1, myNum,
-									distance);
-							//
-
-							drm.addDmxList(frame.getDatNo(), frame.getNoInOriginalDat(), frame.getScannedVariable());
-
-							IDataset output1 = DummyProcessWithFrames.DummyProcess1(drm, gm, 
-//									correctionSelection,
-									imagePosInOriginalDat[k], trackingMarker, k,
-									drm.getSeedLocation()[frame.getDatNo()], ssp.getLenPt());
-
-							if (Arrays.equals(output1.getShape(), (new int[] { 2, 2 }))) {
-								Display d = Display.getCurrent();
-								debug("Dummy Proccessing failure");
-
-								break;
-							}
-
-							drm.addBackgroundDatArray(fms.size(), k, output1);
-
-							int imageNumber = k;
-							IDataset tempImage = j;
-
-						}
-					}
-
-					////// bottom of k++ loop
-					doneArray[nextjok] = "done";
 				}
-
-				try {
-
-					CsdpGeneratorFromDrm csdpgfd = new CsdpGeneratorFromDrm();
-					csdpgfd.generateCsdpFromDrm(drm);
-
-					CurveStitchDataPackage csdp = csdpgfd.getCsdp();
-					CurveStitchWithErrorsAndFrames.curveStitch4(csdp, null);
-
-					drm.setCsdp(csdp);
-
-					if (drm.getCorrectionSelection() == MethodSetting.Reflectivity_NO_Correction
-							|| drm.getCorrectionSelection() == MethodSetting.Reflectivity_with_Flux_Correction_Gaussian_Profile
-							|| drm.getCorrectionSelection() == MethodSetting.Reflectivity_without_Flux_Correction_Gaussian_Profile
-							|| drm.getCorrectionSelection() == MethodSetting.Reflectivity_with_Flux_Correction_Simple_Scaling
-							|| drm.getCorrectionSelection() == MethodSetting.Reflectivity_without_Flux_Correction_Simple_Scaling) {
-
-						ReflectivityNormalisation.reflectivityNormalisation1(csdp);
-						drm.setCsdp(csdp);
-					}
-
-					csdp.setRodName("Current Track");
-				} catch (Exception h) {
-					System.out.println(h.getMessage());
-				}
-
-				return;
-
 			}
-		};
 
-		t.start();
+			drm.getInputForEachDat()[nextjok] = null;
+
+			for (int k = nextk + 1; k < noImages; k++) {
+
+				
+
+				FrameModel frame = fms.get(k);
+
+				debug("%%%%%%%%%%%%%%%%% sm.getStartFrame:  " + startFrame + "??????????????????");
+				if (frame.getDatNo() == nextjok) {
+
+					debug("l value: " + Double.toString(drm.getSortedX().getDouble(k)) + " , " + "local k:  "
+							+ Integer.toString(k) + " , " + "local nextjok:  " + Integer.toString(nextjok));
+
+					int trackingMarker = 2;
+
+					SliceND slice = new SliceND(frame.getRawImageData().getShape());
+					IDataset j = DatasetFactory.createFromObject(0);
+					try {
+						j = frame.getRawImageData().getSlice(slice);
+					} catch (DatasetException e) {
+						e.printStackTrace();
+						System.out.println(e.getMessage());
+					}
+
+					boolean seedRequired = doINeedASeedArray(k, startFrame, frame.getDatNo());
+
+					double myNum = drm.getSortedX().getDouble(k);
+					double distance = Math.abs(drm.getSortedX().getDouble(0) - myNum);
+
+					int frameDatNo = frame.getDatNo();
+
+					TrackerType1 tt1 = frame.getTrackingMethodology();
+
+					seedLocationSetter(trackingMarker, k, startFrame, frameDatNo, seedRequired, tt1, myNum, distance);
+					//
+
+					drm.addDmxList(frame.getDatNo(), frame.getNoInOriginalDat(), frame.getScannedVariable());
+
+					IDataset output1 = DummyProcessWithFrames.DummyProcess1(drm, gm,
+							// correctionSelection,
+							imagePosInOriginalDat[k], trackingMarker, k, drm.getSeedLocation()[frame.getDatNo()],
+							ssp.getLenPt());
+
+					drm.addBackgroundDatArray(fms.size(), k, output1);
+
+					int imageNumber = k;
+					IDataset tempImage = j;
+
+				}
+			}
+
+			////// bottom of k++ loop
+			doneArray[nextjok] = "done";
+		}
+
+		try {
+
+			CsdpGeneratorFromDrm csdpgfd = new CsdpGeneratorFromDrm();
+			csdpgfd.generateCsdpFromDrm(drm);
+
+			CurveStitchDataPackage csdp = csdpgfd.getCsdp();
+			CurveStitchWithErrorsAndFrames.curveStitch4(csdp, null);
+
+			drm.setCsdp(csdp);
+
+			if (drm.getCorrectionSelection() == MethodSetting.Reflectivity_NO_Correction
+					|| drm.getCorrectionSelection() == MethodSetting.Reflectivity_with_Flux_Correction_Gaussian_Profile
+					|| drm.getCorrectionSelection() == MethodSetting.Reflectivity_without_Flux_Correction_Gaussian_Profile
+					|| drm.getCorrectionSelection() == MethodSetting.Reflectivity_with_Flux_Correction_Simple_Scaling
+					|| drm.getCorrectionSelection() == MethodSetting.Reflectivity_without_Flux_Correction_Simple_Scaling) {
+
+				ReflectivityNormalisation.reflectivityNormalisation1(csdp);
+				drm.setCsdp(csdp);
+			}
+
+			csdp.setRodName("Current Track");
+		} catch (Exception h) {
+			System.out.println(h.getMessage());
+		}
+
+		
+		ssp.writeNexus(savePath);
+		
+		return;
 
 	}
 
@@ -394,7 +378,8 @@ public class BatchTracking {
 		}
 	}
 
-	public Thread getT() {
-		return t;
+	public void setSavePath(String savePath) {
+		this.savePath = savePath;
 	}
+
 }
