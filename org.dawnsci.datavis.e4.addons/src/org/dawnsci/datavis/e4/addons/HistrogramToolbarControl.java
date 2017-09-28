@@ -46,6 +46,8 @@ public class HistrogramToolbarControl {
 	private IPlottingSystem<?> system;
 	private IPaletteTrace trace;
 	private IPaletteListener listener;
+	private ITraceListener traceListener;
+	private IPlotRegistrationListener regListener;
 	
 	private Button lock;
 	
@@ -188,65 +190,71 @@ public class HistrogramToolbarControl {
 		l =new Label(control, SWT.SEPARATOR | SWT.VERTICAL);
 		l.setLayoutData(new GridData(2,24));
 		
-		plottingService.addRegistrationListener(new IPlotRegistrationListener.Stub() {
+		
+		traceListener = new ITraceListener.Stub() {
+			
+			@Override
+			public void traceAdded(TraceEvent evt) {
+				Object source = evt.getSource();
+				if (source instanceof IPaletteTrace) {
+					IPaletteTrace pt = (IPaletteTrace)source;
+					HistrogramToolbarControl.this.trace = pt;
+					enable(true);
+					HistrogramToolbarControl.this.lock.setSelection(!pt.isRescaleHistogram());
+					HistrogramToolbarControl.this.low.setText(pt.getMin().toString());
+					HistrogramToolbarControl.this.high.setText(pt.getMax().toString());
+					HistrogramToolbarControl.this.trace.addPaletteListener(listener);
+					
+				} else {
+					enable(false);
+					HistrogramToolbarControl.this.trace = null;
+				}
+				
+			}
+			
+			@Override
+			public void traceUpdated(TraceEvent evt) {
+				Object source = evt.getSource();
+				if (source instanceof IPaletteTrace) {
+					IPaletteTrace pt = (IPaletteTrace)source;
+					HistrogramToolbarControl.this.trace = pt;
+					enable(true);
+					HistrogramToolbarControl.this.lock.setSelection(!pt.isRescaleHistogram());
+					HistrogramToolbarControl.this.low.setText(pt.getMin().toString());
+					HistrogramToolbarControl.this.high.setText(pt.getMax().toString());
+					
+				} else {
+					enable(false);
+					HistrogramToolbarControl.this.trace = null;
+				}
+				
+			}
+
+			@Override
+			public void traceRemoved(TraceEvent evt) {
+				Object source = evt.getSource();
+				if (source == HistrogramToolbarControl.this.trace) {
+					HistrogramToolbarControl.this.trace.removePaletteListener(listener);
+					HistrogramToolbarControl.this.trace = null;
+				}
+				
+				enable(false);
+			}
+			
+		};
+		
+		regListener = new IPlotRegistrationListener.Stub() {
 			public void plottingSystemCreated(PlotRegistrationEvent evt) {
 				IPlottingSystem<Object> plottingSystem = evt.getPlottingSystem();
 				if (plottingSystem.getPlotName().equals("Plot")) {
 					HistrogramToolbarControl.this.system = plottingSystem;
-					system.addTraceListener(new ITraceListener.Stub() {
-						
-						@Override
-						public void traceAdded(TraceEvent evt) {
-							Object source = evt.getSource();
-							if (source instanceof IPaletteTrace) {
-								IPaletteTrace pt = (IPaletteTrace)source;
-								HistrogramToolbarControl.this.trace = pt;
-								enable(true);
-								HistrogramToolbarControl.this.lock.setSelection(!pt.isRescaleHistogram());
-								HistrogramToolbarControl.this.low.setText(pt.getMin().toString());
-								HistrogramToolbarControl.this.high.setText(pt.getMax().toString());
-								HistrogramToolbarControl.this.trace.addPaletteListener(listener);
-								
-							} else {
-								enable(false);
-								HistrogramToolbarControl.this.trace = null;
-							}
-							
-						}
-						
-						@Override
-						public void traceUpdated(TraceEvent evt) {
-							Object source = evt.getSource();
-							if (source instanceof IPaletteTrace) {
-								IPaletteTrace pt = (IPaletteTrace)source;
-								HistrogramToolbarControl.this.trace = pt;
-								enable(true);
-								HistrogramToolbarControl.this.lock.setSelection(!pt.isRescaleHistogram());
-								HistrogramToolbarControl.this.low.setText(pt.getMin().toString());
-								HistrogramToolbarControl.this.high.setText(pt.getMax().toString());
-								
-							} else {
-								enable(false);
-								HistrogramToolbarControl.this.trace = null;
-							}
-							
-						}
-
-						@Override
-						public void traceRemoved(TraceEvent evt) {
-							Object source = evt.getSource();
-							if (source == HistrogramToolbarControl.this.trace) {
-								HistrogramToolbarControl.this.trace.removePaletteListener(listener);
-								HistrogramToolbarControl.this.trace = null;
-							}
-							
-							enable(false);
-						}
-						
-					});
+					system.addTraceListener(traceListener);
 				}
 			}
-		});
+		};
+		
+		
+		plottingService.addRegistrationListener(regListener);
 		
 		enable(false);
 		
@@ -281,6 +289,8 @@ public class HistrogramToolbarControl {
 	@PreDestroy
 	public void dispose() {
 		if (lockImage != null) lockImage.dispose();
+		if (system != null) system.removeTraceListener(traceListener);
+		plottingService.removeRegistrationListener(regListener);
 	}
 	
 	public void setSystemTrace(IPlottingSystem<?> system, IPaletteTrace trace) {
