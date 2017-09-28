@@ -1,5 +1,6 @@
 package org.dawnsci.datavis.model;
 
+import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.january.dataset.Dataset;
 import org.eclipse.january.dataset.DatasetUtils;
 import org.eclipse.january.dataset.IDataset;
@@ -39,6 +40,12 @@ private double value = 0;
 	public boolean supportsRank(int rank) {
 
 		return rank == 1;
+	}
+
+	@Override
+	public void configure(IPlottingSystem<?> system) {
+		// TODO Auto-generated method stub
+		
 	}
 
 }
