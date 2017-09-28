@@ -1,50 +1,75 @@
 package org.dawnsci.datavis.e4.addons;
 
+import java.net.URL;
+
 import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
 import javax.inject.Inject;
 
 import org.dawnsci.datavis.model.IPlotController;
 import org.dawnsci.datavis.model.IPlotDataModifier;
-import org.dawnsci.datavis.model.PlotController;
 import org.dawnsci.datavis.model.PlotDataModifierStack;
+import org.eclipse.e4.core.di.annotations.Optional;
+import org.eclipse.e4.ui.di.UIEventTopic;
+import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.events.SelectionListener;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Scale;
+import org.osgi.service.event.Event;
 
 public class PlotModifierOffsetControl {
 	
 	public static final String CLASS_URI = "bundleclass://org.dawnsci.datavis.e4.addons/" + PlotModifierOffsetControl.class.getName();
 	public static final String ID = "org.dawnsci.datavis.e4.addons.PlotModifierOffsetControl";
 	
+	private Button stackButton;
+	private Image stackImage;
+	private Composite control;
+	
 	@Inject
 	private IPlotController controller;
 	
 	@PostConstruct
 	public void createControl(Composite parent) {
-		Composite c = new Composite(parent, SWT.None);
-		c.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false));
+		control = new Composite(parent, SWT.None);
+		control.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false));
 		
 		GridLayout layout = new GridLayout(4, false);
 		layout.marginHeight = 2;
 		layout.marginWidth = 2;
-		c.setLayout(layout);
+		control.setLayout(layout);
 	
-		Label l =new Label(c, SWT.SEPARATOR | SWT.VERTICAL);
+		Label l =new Label(control, SWT.SEPARATOR | SWT.VERTICAL);
 		l.setLayoutData(new GridData(2,24));
 		
-		Button b = new Button(c, SWT.TOGGLE);
+		stackButton = new Button(control, SWT.TOGGLE);
 		
-		b.setText("On");
+		if (stackImage == null) {
+			try {
+				ImageDescriptor imd = ImageDescriptor.createFromURL(new URL("platform:/plugin/org.dawnsci.datavis.e4.addons/icons/offset.png"));
+				stackImage =  imd.createImage();
+			} catch (Exception e) {
+				
+			}
+		}
+		
+		if (stackImage != null) {
+			stackButton.setImage(stackImage);
+		} else {
+			stackButton.setText("Stack");
+		}
 		
 		
-		Scale s = new Scale(c,SWT.NONE);
+		
+		Scale s = new Scale(control,SWT.NONE);
 		s.setLayoutData(new GridData(48, 16));
 		s.setMaximum(100);
 		s.setMinimum(0);
@@ -62,10 +87,72 @@ public class PlotModifierOffsetControl {
 			
 		});
 		
-		l = new Label(c, SWT.SEPARATOR | SWT.VERTICAL);
+		l = new Label(control, SWT.SEPARATOR | SWT.VERTICAL);
 		l.setLayoutData(new GridData(2,24));
 		
+		stackButton.addSelectionListener(new SelectionAdapter() {
+			
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				
+				if (stackButton.getSelection()) {
+					IPlotDataModifier[] currentPlotModifiers = controller.getCurrentPlotModifiers();
+					
+					for (IPlotDataModifier m : currentPlotModifiers) {
+						if (m instanceof PlotDataModifierStack) {
+							((PlotDataModifierStack)m).setProportion(s.getSelection()/100.0);
+							controller.enablePlotModifier(m);
+						}
+					}
+					
+				} else {
+					controller.enablePlotModifier(null);
+				}
+			}
+			
+		});
 		
 	}
+	
+	@Inject
+	@Optional
+	private void plotControllerUpdate(@UIEventTopic("org/dawnsci/datavis/plot/UPDATE") Event data ) {
 
+		boolean selected = false;
+		
+		IPlotDataModifier pm = controller.getEnabledPlotModifier();
+		if (pm instanceof PlotDataModifierStack) {
+			selected = true;
+				
+		}
+		
+		IPlotDataModifier[] currentPlotModifiers = controller.getCurrentPlotModifiers();
+		
+		boolean enable = false;
+		
+		for (IPlotDataModifier m : currentPlotModifiers) {
+			if (m instanceof PlotDataModifierStack) {
+				enable = true;
+			}
+		}
+		
+		enable(enable);
+		
+		stackButton.setSelection(selected);	
+
+	}
+	
+	@PreDestroy
+	public void dispose() {
+		if (stackImage != null) stackImage.dispose();
+	}
+
+	private void enable(boolean enable) {
+		Control[] children = control.getChildren();
+		
+		for (Control c : children) {
+			c.setEnabled(enable);
+		}
+		
+	}
 }

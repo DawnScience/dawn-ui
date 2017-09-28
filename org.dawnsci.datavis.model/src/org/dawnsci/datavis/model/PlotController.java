@@ -3,6 +3,7 @@ package org.dawnsci.datavis.model;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -30,6 +31,8 @@ import org.eclipse.swt.graphics.Cursor;
 import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
+import org.osgi.service.event.Event;
+import org.osgi.service.event.EventAdmin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -297,6 +300,11 @@ public class PlotController implements IPlotController {
 		
 		List<IAxis> axes = system.getAxes();
 		if (axes != null) for (IAxis axis : axes) if (axis != null) axis.setAxisAutoscaleTight(true);
+		//"org/dawnsci/datavis/plot/UPDATE"
+		
+		Map<String,String> props = new HashMap<>();
+		EventAdmin eventAdmin = ServiceManager.getEventAdmin();
+		eventAdmin.postEvent(new Event("org/dawnsci/datavis/plot/UPDATE", props));
 	}
 	
 	private Runnable updatePlottedData(DataStateObject stateObject,final List<ITrace> traces, IPlotMode mode, IPlotDataModifier modifier) {

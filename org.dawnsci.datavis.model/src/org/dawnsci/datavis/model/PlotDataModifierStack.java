@@ -7,6 +7,7 @@ import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.axis.IAxis;
 import org.eclipse.january.DatasetException;
 import org.eclipse.january.dataset.Dataset;
+import org.eclipse.january.dataset.DatasetFactory;
 import org.eclipse.january.dataset.DatasetUtils;
 import org.eclipse.january.dataset.IDataset;
 import org.eclipse.january.dataset.Maths;
@@ -28,52 +29,60 @@ public class PlotDataModifierStack implements IPlotDataModifier {
 		AxesMetadata md = d.getFirstMetadata(AxesMetadata.class);
 		
 		if (xRange  != null) {
+
+			IDataset axis = null;
+
 			if (md != null && md.getAxes()!= null && md.getAxes()[0] != null) {
 				try {
-					IDataset axis = md.getAxes()[0].getSlice();
-					int tmpMin = ROISliceUtils.findPositionOfClosestValueInAxis(axis, xRange[0]);
-					int tmpMax = ROISliceUtils.findPositionOfClosestValueInAxis(axis, xRange[1]);
-					SliceND s = new SliceND(d.getShape());
-					if (tmpMin > tmpMax) {
-						int tmp = tmpMin;
-						tmpMin = tmpMax;
-						tmpMax = tmp;
-					}
-					s.setSlice(0, tmpMin, tmpMax, 1);
-					
-					IDataset crop = d.getSlice(s);
-					
-					min = crop.min(true).doubleValue();
-					max = crop.max().doubleValue();
-					
+					axis = md.getAxes()[0].getSlice();
 				} catch (DatasetException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 			}
+
+			if (axis == null) {
+				axis = DatasetFactory.createRange(d.getSize());
+			}
+
+			int tmpMin = ROISliceUtils.findPositionOfClosestValueInAxis(axis, xRange[0]);
+			int tmpMax = ROISliceUtils.findPositionOfClosestValueInAxis(axis, xRange[1]);
+			SliceND s = new SliceND(d.getShape());
+			if (tmpMin > tmpMax) {
+				int tmp = tmpMin;
+				tmpMin = tmpMax;
+				tmpMax = tmp;
+			}
+			s.setSlice(0, tmpMin, tmpMax, 1);
+
+			IDataset crop = d.getSlice(s);
+
+			min = crop.min(true).doubleValue();
+			max = crop.max().doubleValue();
+
 		} 
-		
+
 		double delta = max-min;
 		if (delta == 0) delta = 1;
 		Dataset dataset = DatasetUtils.convertToDataset(d);
-//		dataset = Maths.subtract(dataset, min).idivide(delta);
-//		dataset.iadd(value*proportion);
-		
+		//		dataset = Maths.subtract(dataset, min).idivide(delta);
+		//		dataset.iadd(value*proportion);
+
 		dataset = Maths.add(dataset,(value-min));
 		double peakToPeak = dataset.peakToPeak(true).doubleValue();
 		peakToPeak = (max+value-min)-value;
 		value += peakToPeak*proportion;
-		
-//		dataset = Maths.subtract(dataset, min).idivide(delta);
-//		dataset.iadd(value*proportion);
-		
-//		value++;
-		
-		
+
+		//		dataset = Maths.subtract(dataset, min).idivide(delta);
+		//		dataset.iadd(value*proportion);
+
+		//		value++;
+
+
 		if (md != null) {
 			dataset.addMetadata(md);
 		}
-		
+
 		return dataset;
 	}
 
