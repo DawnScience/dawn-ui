@@ -23,8 +23,8 @@ public class StitcherOutput extends AbstractProcess {
 		IDataset[] yArrayCorrected = output1[0];
 
 		
-		Dataset xCorrected = DatasetUtils.concatenate(xArrayCorrected, 0);
-		Dataset yCorrected = DatasetUtils.concatenate(yArrayCorrected, 0);
+		Dataset xCorrected = localConcatenate(xArrayCorrected, 0);
+		Dataset yCorrected = localConcatenate(yArrayCorrected, 0);
 		
 		xCorrected.setName("x");
 		yCorrected.setName("y");
@@ -44,6 +44,29 @@ public class StitcherOutput extends AbstractProcess {
 	@Override
 	protected String getAppendingName() {
 		// TODO Auto-generated method stub
+		return null;
+	}
+	
+	private static Dataset localConcatenate(IDataset[] in, int dim){
+		
+		boolean good = true;
+		
+		for(IDataset i : in){
+			
+			if(i == null){
+				good = false;
+				return null;
+			}
+			
+			if(i.getSize() == 0){
+				good = false;
+				return null;
+			}
+		}
+		
+		if(good){
+			return DatasetUtils.convertToDataset(DatasetUtils.concatenate(in, dim));
+		}
 		return null;
 	}
 }

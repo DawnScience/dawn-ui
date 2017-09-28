@@ -32,7 +32,7 @@ public class TrackingHandlerWithFramesImproved {
 	private IPlottingSystem<Composite> outputCurves;
 	private GeometricParametersModel gm;
 	private SurfaceScatterViewStart ssvs;
-	private int correctionSelection;
+//	private int correctionSelection;
 	private int noImages;
 	private SurfaceScatterPresenter ssp;
 	private int DEBUG = 0;
@@ -70,9 +70,9 @@ public class TrackingHandlerWithFramesImproved {
 		this.outputCurves = outputCurves;
 	}
 
-	public void setCorrectionSelection(int cS) {
-		this.correctionSelection = cS;
-	}
+//	public void setCorrectionSelection(int cS) {
+//		this.correctionSelection = cS;
+//	}
 
 	public void setGm(GeometricParametersModel gms) {
 		this.gm = gms;
@@ -186,7 +186,7 @@ public class TrackingHandlerWithFramesImproved {
 							IDataset output1 = 
 									DummyProcessWithFrames.DummyProcess1(drm, 
 											gm, 
-											correctionSelection, 
+//											correctionSelection, 
 											imagePosInOriginalDat[k], 
 											trackingMarker, 
 											k,
@@ -286,7 +286,7 @@ public class TrackingHandlerWithFramesImproved {
 							IDataset output1 = 
 									DummyProcessWithFrames.DummyProcess1(drm, 
 											gm, 
-											correctionSelection, 
+//											correctionSelection, 
 											imagePosInOriginalDat[k], 
 											trackingMarker, 
 											k,

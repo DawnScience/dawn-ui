@@ -96,8 +96,8 @@ public class StitchingOverlapProcessForUI{
 		
 //////////////////////////////////////////////////////////////		
 		
-		Dataset xCorrectedTrunc = DatasetUtils.concatenate(xArrayCorrTrunc, 0);
-		Dataset yCorrectedTrunc = DatasetUtils.concatenate(yArrayCorrTrunc, 0);
+		Dataset xCorrectedTrunc = localConcatenate(xArrayCorrTrunc, 0);
+		Dataset yCorrectedTrunc = localConcatenate(yArrayCorrTrunc, 0);
 		
 //		xCorrectedTrunc.setName("x");
 //		yCorrectedTrunc.setName("y");
@@ -114,5 +114,28 @@ public class StitchingOverlapProcessForUI{
 		return output;
 	}
 	
+	
+	private static Dataset localConcatenate(IDataset[] in, int dim){
+		
+		boolean good = true;
+		
+		for(IDataset i : in){
+			
+			if(i == null){
+				good = false;
+				return null;
+			}
+			
+			if(i.getSize() == 0){
+				good = false;
+				return null;
+			}
+		}
+		
+		if(good){
+			return DatasetUtils.convertToDataset(DatasetUtils.concatenate(in, dim));
+		}
+		return null;
+	}
 
 }

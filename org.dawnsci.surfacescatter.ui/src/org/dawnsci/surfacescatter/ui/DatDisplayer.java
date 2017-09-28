@@ -21,6 +21,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
+import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.GridData;
@@ -35,6 +36,7 @@ import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.swt.widgets.Text;
+import org.eclipse.ui.internal.SelectionAdapterFactory;
 
 import uk.ac.diamond.scisoft.analysis.io.LoaderFactory;
 
@@ -744,10 +746,19 @@ public class DatDisplayer extends Composite {
 		
 		
 		Button batchTest = new Button(parameterFiles, SWT.PUSH);
-		batchTest.setText("Batch Test");
+		batchTest.setText("Batch Test - Development!!!");
 		batchTest.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-		batchTest.setEnabled(false);
+		batchTest.setEnabled(true);
 		
+		
+		batchTest.addSelectionListener(new SelectionAdapter() {
+			
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				DummyBatchController.DummyBatchControl();
+				
+			}
+		});
 	}
 
 	public Table getParamFileTable() {

@@ -77,7 +77,7 @@ public class TrackingProgressAndAbortViewImproved extends Dialog {
 			
 			tj.setProgress(progress);
 			tj.setSsvs(ssvs);
-			tj.setCorrectionSelection(MethodSetting.toInt(ssp.getCorrectionSelection()));
+//			tj.setCorrectionSelection(MethodSetting.toInt(ssp.getCorrectionSelection()));
 			tj.setOutputCurves(ssvs.getSsps3c().getOutputCurves().getPlotSystem());
 			tj.setSsp(ssp);
 			tj.setTPAAV(TrackingProgressAndAbortViewImproved.this);

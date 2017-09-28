@@ -20,6 +20,7 @@ import java.util.EnumMap;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.TreeMap;
+
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.math3.util.MathArrays;
 import org.dawnsci.surfacescatter.AnalaysisMethodologies;
@@ -54,7 +55,6 @@ import org.dawnsci.surfacescatter.ReflectivityFluxParametersAliasEnum;
 import org.dawnsci.surfacescatter.ReflectivityMetadataTitlesForDialog;
 import org.dawnsci.surfacescatter.ReflectivityNormalisation;
 import org.dawnsci.surfacescatter.RodObjectNexusBuilderModel;
-import org.dawnsci.surfacescatter.RodObjectNexusUtils;
 import org.dawnsci.surfacescatter.RodObjectNexusUtils_Development;
 import org.dawnsci.surfacescatter.SXRDAngleAliasEnum;
 import org.dawnsci.surfacescatter.SXRDGeometricCorrections;
@@ -67,7 +67,6 @@ import org.dawnsci.surfacescatter.TrackingMethodology.TrackerType1;
 import org.eclipse.dawnsci.analysis.api.io.IDataHolder;
 import org.eclipse.dawnsci.analysis.api.roi.IROI;
 import org.eclipse.dawnsci.analysis.api.roi.IRectangularROI;
-import org.eclipse.dawnsci.analysis.api.tree.Tree;
 import org.eclipse.dawnsci.analysis.dataset.roi.RectangularROI;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.region.IRegion;
@@ -92,6 +91,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Shell;
+
 import uk.ac.diamond.scisoft.analysis.io.LoaderFactory; 
 
 public class SurfaceScatterPresenter {
@@ -340,7 +340,7 @@ public class SurfaceScatterPresenter {
 
 				if (drm.getCorrectionSelection().getCorrectionsNumber() > 0) {
 
-					ILazyDataset ildtheta = dh1.getLazyDataset(gm.getxNameRef());
+					ILazyDataset ildtheta = dh1.getLazyDataset(gm.getxName());
 
 					SliceND slice2 = new SliceND(ildtheta.getShape());
 					IDataset thetadat = ildtheta.getSlice(slice2);
@@ -405,14 +405,14 @@ public class SurfaceScatterPresenter {
 		}
 
 		try {
-			xArrayCon = DatasetUtils.concatenate(xArray, 0);
+			xArrayCon = localConcatenate(xArray, 0);
 			// xArrayCon is an unsorted, but concatenated DoubleDataset of l
 			// values
 			if (correctionSelection == MethodSetting.SXRD) {
 				try {
-					hArrayCon = DatasetUtils.concatenate(hArray, 0);
-					kArrayCon = DatasetUtils.concatenate(kArray, 0);
-					lArrayCon = DatasetUtils.concatenate(lArray, 0);
+					hArrayCon = localConcatenate(hArray, 0);
+					kArrayCon = localConcatenate(kArray, 0);
+					lArrayCon = localConcatenate(lArray, 0);
 				} catch (Exception h) {
 					System.out.println(h.getMessage());
 				}
@@ -420,17 +420,17 @@ public class SurfaceScatterPresenter {
 
 			if (correctionSelection != MethodSetting.SXRD) {
 				try {
-					thetaArrayCon = DatasetUtils.concatenate(thetaArray, 0);
-					xArrayCon = DatasetUtils.concatenate(xArray, 0);
+					thetaArrayCon = localConcatenate(thetaArray, 0);
+					xArrayCon = localConcatenate(xArray, 0);
 
-					dcdThetaCon = DatasetUtils.concatenate(dcdThetaArray, 0);
-					qdcdCon = DatasetUtils.concatenate(qdcdArray, 0);
+					dcdThetaCon = localConcatenate(dcdThetaArray, 0);
+					qdcdCon = localConcatenate(qdcdArray, 0);
 				} catch (Exception g) {
 
 				}
 			}
 
-			tifNamesCon = DatasetUtils.concatenate(tifNamesArray, 0);
+			tifNamesCon = localConcatenate(tifNamesArray, 0);
 			// tifNamesCon is an unsorted, but concatenated DoubleDataset of l
 			// tif names
 		} catch (NullPointerException e) {
@@ -1544,8 +1544,10 @@ public class SurfaceScatterPresenter {
 				lj = LocationLenPtConverterUtils.lenPtToLocationConverter(lenPt);
 			}
 
-			IDataset output = DummyProcessWithFrames.DummyProcess(drm, gm,
-					MethodSetting.toInt(drm.getCorrectionSelection()), j, trackingMarker, selection, lj, getLenPt());
+			IDataset output = DummyProcessWithFrames.DummyProcess(drm, 
+					gm,
+//					MethodSetting.toInt(drm.getCorrectionSelection()), 
+					j, trackingMarker, selection, lj, getLenPt());
 
 			drm.addBackgroundDatArray(fms.size(), selection, output);
 
@@ -3140,5 +3142,29 @@ public class SurfaceScatterPresenter {
 
 		return null;
 	}
+	
+	private static Dataset localConcatenate(IDataset[] in, int dim){
+		
+		boolean good = true;
+		
+		for(IDataset i : in){
+			
+			if(i == null){
+				good = false;
+				return null;
+			}
+			
+			if(i.getSize() == 0){
+				good = false;
+				return null;
+			}
+		}
+		
+		if(good){
+			return DatasetUtils.convertToDataset(DatasetUtils.concatenate(in, dim));
+		}
+		return null;
+	}
+	
 
 }
