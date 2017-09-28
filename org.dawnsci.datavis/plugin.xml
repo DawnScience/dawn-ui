@@ -125,6 +125,36 @@
          <hiddenMenuItem
                id="edit">
          </hiddenMenuItem>
+         <hiddenToolBarItem
+               id="newWizardDropDown">
+         </hiddenToolBarItem>
+         <hiddenToolBarItem
+               id="org.eclipse.ui.edit.text.gotoLastEditPosition">
+         </hiddenToolBarItem>
+         <hiddenToolBarItem
+               id="org.eclipse.ui.navigate.backwardHistory">
+         </hiddenToolBarItem>
+         <hiddenToolBarItem
+               id="org.eclipse.ui.file.save">
+         </hiddenToolBarItem>
+         <hiddenToolBarItem
+               id="org.eclipse.ui.file.saveAll">
+         </hiddenToolBarItem>
+         <hiddenToolBarItem
+               id="org.eclipse.search.OpenSearchDialogPage">
+         </hiddenToolBarItem>
+         <hiddenToolBarItem
+               id="org.eclipse.ui.navigate.next">
+         </hiddenToolBarItem>
+         <hiddenToolBarItem
+               id="org.eclipse.ui.navigate.previous">
+         </hiddenToolBarItem>
+         <hiddenToolBarItem
+               id="uk.ac.diamond.scisoft.analysis.rcp.plotting.actions.showPlotViewToolbarCommand">
+         </hiddenToolBarItem>
+         <hiddenToolBarItem
+               id="org.eclipse.ui.navigate.forwardHistory">
+         </hiddenToolBarItem>
       </perspectiveExtension>
    </extension>
 
