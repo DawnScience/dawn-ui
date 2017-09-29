@@ -41,6 +41,7 @@ public class MappedDataTest {
 	private static MappedData gridScanMap = null;
 	private static File file = null;
 	private static File fileRemap = null;
+	private static File fileEnergy = null;
 	
 	@BeforeClass
 	public static void buildData() throws Exception {
@@ -59,6 +60,9 @@ public class MappedDataTest {
 		
 		fileRemap = folder.newFile("file2.nxs");
 		MapNexusFileBuilderUtils.makeDiagLineScanWithSum(fileRemap.getAbsolutePath());
+		
+		fileEnergy = folder.newFile("file3.nxs");
+		MapNexusFileBuilderUtils.makeGridScanWithZandSum(fileEnergy.getAbsolutePath());
 		
 	}
 	
@@ -168,6 +172,28 @@ public class MappedDataTest {
 		assertEquals(map.getShape()[1],x.getShape()[1]);
 		
 		assertTrue(Comparisons.allTrue(Comparisons.isFinite(y)));
+	}
+	
+	@Test
+	public void testWithZ() throws Exception {
+		IDataHolder data = LoaderFactory.getData(fileEnergy.getAbsolutePath());
+		ILazyDataset lazyDataset = data.getLazyDataset(MapNexusFileBuilderUtils.DETECTOR_PATH);
+		
+		MapScanDimensions msd = new MapScanDimensions(2, 1, 3);
+		MappedDataBlock b = new MappedDataBlock(MapNexusFileBuilderUtils.DETECTOR_PATH,
+				lazyDataset, file.getAbsolutePath(),msd);
+		
+		ILazyDataset sum = data.getLazyDataset(MapNexusFileBuilderUtils.SUM_PATH);
+		
+		MappedData m = new MappedData(MapNexusFileBuilderUtils.SUM_PATH, sum.getSlice(), b,fileEnergy.getAbsolutePath(),false);
+		
+		IDataset spectrum = m.getSpectrum(2, 3);
+		
+		assertEquals(5, spectrum.getRank());
+		
+		assertNotNull(spectrum);
+		
+		m.toString();
 	}
 
 
