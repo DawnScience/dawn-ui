@@ -94,15 +94,12 @@ public class ModelFieldEditors {
 		if (value!=null) {
 			clazz = value.getClass();
 		} else {
-			try {
-				clazz = field.getType();
-			} catch (NoSuchFieldException | SecurityException e) {
-				logger.error("Could not get field type", e);
+			clazz = field.getType();
+			if (clazz == null) {
+				logger.error("Could not get field type");
 			}
-			
 		}
         
-  
 		CellEditor ed = null;
     	final OperationModelField anot = field.getAnnotation();
     	if (!isEnabled(field.getModel(), anot)) return null;
