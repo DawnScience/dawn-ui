@@ -17,11 +17,6 @@ public class BatchRunner {
 
 		int cores = Runtime.getRuntime().availableProcessors();
 
-//		int threadPoolNo = cores;
-//
-//		if (datFiles.length < cores) {
-//			threadPoolNo = datFiles.length;
-//		}
 
 		ExecutorService executor = Executors.newFixedThreadPool(cores);
 		for (int i = 0; i < datFiles.length; i++) {
@@ -59,72 +54,6 @@ public class BatchRunner {
 		while (!executor.isTerminated()) {
 		}
 		
-//		if (executor.isTerminated()) {
-//			ExecutorService executor2 = Executors.newFixedThreadPool(threadPoolNo);
-//			for (int i = 0; i < datFiles.length; i++) {
-//
-//				NexusWriteOutRunnable nwor = new NexusWriteOutRunnable(sspArray[i], nexusSaveFilePaths[i]);
-//
-//				executor2.execute(nwor);
-//
-//			}
-//			executor2.shutdown();
-//			while (!executor2.isTerminated()) {
-//			}
-//
-//		}
-
-		// for(int i = 0; i<datFiles.length; i++){
-		//
-		// SetupModel stmi = new SetupModel();
-		// stmi.setImageFolderPath(imageFolderPaths[i]);
-		//
-		// SurfaceScatterPresenter sspi = new SurfaceScatterPresenter();
-		// sspi.setStm(stmi);
-		// sspi.createGm();
-		//
-		// FittingParametersInputReader.anglesAliasReaderFromNexus(paramFiles[i]);
-		//
-		// FittingParametersInputReader.geometricalParametersReaderFromNexus(paramFiles[i],
-		// sspi.getGm());
-		//
-		// sspi.surfaceScatterPresenterBuildWithFrames(datFiles[i],
-		// xNames[i],
-		// correctionSelections[i]);
-		//
-		//
-		//
-		// sspi.loadParameters(paramFiles[i]);
-		//
-		// BatchTracking bat = new BatchTracking();
-		// bat.setSsp(sspi);
-		//
-		// int[][] lenpt =
-		// LocationLenPtConverterUtils.locationToLenPtConverter(sspi.getFms().get(0).getRoiLocation());
-		//
-		// BatchRunnable mr = new BatchRunnable(bat, lenpt);
-		//
-		// Thread t1 = new Thread(mr, "t1");
-		//// Thread t2 = bat.getT();
-		//
-		// t1.start();
-		//
-		// try {
-		// t1.join();
-		//
-		//// t2.join();
-		//
-		// } catch (InterruptedException e) {
-		// // TODO Auto-generated catch block
-		// System.out.println(e.getMessage());
-		// }
-		// sspArray[i] = sspi;
-		//
-		// }
-		//
-		// for(int i = 0; i<datFiles.length; i++){
-		// sspArray[i].writeNexus(nexusSaveFilePaths[i]);
-		// }
 	}
 
 }
