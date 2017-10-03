@@ -558,7 +558,6 @@ public class ReviewTabComposite extends Composite{
 				}
 	        }
 	    });
-
 	    
 	}
 	   
@@ -646,9 +645,6 @@ public class ReviewTabComposite extends Composite{
 	public void setNexusFolderPath(String nexusFolderPath) {
 		this.nexusFolderPath = nexusFolderPath;
 	}
-	
-	
-	
 	
 	private void saveRod(boolean writeOnlyGoodPoints){
 		

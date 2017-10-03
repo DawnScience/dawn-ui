@@ -9,6 +9,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Table;
@@ -17,7 +18,6 @@ import org.eclipse.swt.widgets.TableItem;
 public class BatchDisplay extends Composite {
 
 	
-	private SashForm selectionSash;
 	private SurfaceScatterPresenter ssp;
 	private SurfaceScatterViewStart ssvs;
 	private BatchSetupWindow bsw;
@@ -35,28 +35,42 @@ public class BatchDisplay extends Composite {
 
 		super(parent, style);
 
-		this.createContents();
 		this.ssp = ssp;
 		this.ssvs = ssvs;
 		this.bsw = rsw;
 		this.brm =brm;
+		
+		this.createContents();
+		
 
 	}
 
 	public void createContents() {
 
-
-		selectionSash = new SashForm(this, SWT.FILL);
-		selectionSash.setLayoutData(new GridData(GridData.FILL_BOTH));
-
-		Group datSelector = new Group(selectionSash, SWT.V_SCROLL | SWT.FILL);
-		GridLayout datSelectorLayout = new GridLayout(1, true);
-		GridData datSelectorData = new GridData((GridData.FILL_BOTH));
-		datSelector.setLayout(datSelectorLayout);
-		datSelector.setLayoutData(datSelectorData);
-		datSelector.setText("Selected Dat Files");
+		Group batchTableGroup = new Group(this, SWT.V_SCROLL | SWT.FILL);
+		GridLayout batchTableGroupLayout = new GridLayout(1, true);
+		GridData batchTableGroupData = new GridData((GridData.FILL_BOTH));
+		batchTableGroup.setLayout(batchTableGroupLayout);
+		batchTableGroup.setLayoutData(batchTableGroupData);
+		batchTableGroup.setText("Batch");
 			
-		folderDisplayTable = new Table(datSelector, SWT.CHECK | SWT.V_SCROLL | SWT.H_SCROLL | SWT.BORDER);
+		Button process = new Button(batchTableGroup, SWT.PUSH);
+		process.setText("Build and Process Batch");
+		process.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
+		process.setEnabled(true);		
+		
+		Button check = new Button(batchTableGroup, SWT.PUSH);
+		check.setText("<- Check");
+		check.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
+		check.setEnabled(true);
+		
+		Button clear = new Button(batchTableGroup, SWT.PUSH);
+		clear.setText("Clear Batch");
+		clear.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
+		clear.setEnabled(true);
+		
+		
+		folderDisplayTable = new Table(batchTableGroup, SWT.CHECK | SWT.V_SCROLL | SWT.H_SCROLL | SWT.BORDER);
 		folderDisplayTable.setEnabled(true);
 
 		GridData folderDisplayTableData = new GridData(GridData.FILL_BOTH);

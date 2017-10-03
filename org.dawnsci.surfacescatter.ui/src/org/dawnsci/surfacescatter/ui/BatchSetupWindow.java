@@ -7,22 +7,13 @@ import org.eclipse.swt.custom.CTabItem;
 import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Group;
 
 public class BatchSetupWindow {
 	
 	private BatchDatDisplayer datDisplayer;
-	private GeometricParametersWindows paramField;
-	private Combo correctionsDropDown;
-	private Group batchDisplay;
-	private Group methodSetting;
-	private Group parametersAlias;
-	private Group parametersSetting;
-	private AnglesAliasWindow anglesAliasWindow;
 	private BatchRodModel brm;
+	private BatchDisplay batchDisplay;
 		
 	public BatchSetupWindow(CTabFolder folder,
 			SurfaceScatterViewStart ssvs,
@@ -76,75 +67,29 @@ public class BatchSetupWindow {
 	
 		try {
 			
-			batchDisplay = new Group(right, SWT.FILL);
-			GridLayout batchDisplaySetupLayout = new GridLayout(1, true);
-			GridData batchDisplaySetupData = new GridData(GridData.FILL_BOTH);
-			batchDisplaySetupData.minimumWidth = 50;
-			batchDisplay.setLayout(batchDisplaySetupLayout);
-			batchDisplay.setLayoutData(batchDisplaySetupData);
-			batchDisplay.setText("Batch");
+//			batchDisplay = new Group(right, SWT.FILL);
+//			GridLayout batchDisplaySetupLayout = new GridLayout(1, true);
+//			GridData batchDisplaySetupData = new GridData(GridData.FILL_BOTH);
+//			batchDisplaySetupData.minimumWidth = 50;
+//			batchDisplay.setLayout(batchDisplaySetupLayout);
+//			batchDisplay.setLayoutData(batchDisplaySetupData);
+//			batchDisplay.setText("Batch");
 			
-			BatchDisplay bdy = new BatchDisplay(batchDisplay,SWT.FILL, ssp, ssvs, BatchSetupWindow.this, brm); 
-				
+			batchDisplay = new BatchDisplay(right,SWT.FILL, ssp, ssvs, BatchSetupWindow.this, brm); 
+			batchDisplay.setLayout(new GridLayout());
+			batchDisplay.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, true));
+	
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
+			System.out.println(e.getMessage() + "sssssssssssdddddddddddddddfffffffffffff");
 		}
 	}
 
-	public AnglesAliasWindow getAnglesAliasWindow() {
-		return anglesAliasWindow;
-	}
 
-	public void setupRightEnabled(boolean enabled){
-		
-		batchDisplay.setEnabled(enabled);
-		
-		for (Control r: batchDisplay.getChildren()){
-			r.setEnabled(enabled);
-		}
-		
-		for (Control r: methodSetting.getChildren()){
-			r.setEnabled(enabled);
-		}
-		
-		for (Control r: parametersAlias.getChildren()){
-			r.setEnabled(enabled);
-		}
-		
-		for (Control r: anglesAliasWindow.getChildren()){
-			r.setEnabled(enabled);
-		}
-		
-		
-		paramField.setEnabled(enabled);
-		parametersSetting.setEnabled(enabled);
-		parametersAlias.setEnabled(enabled);
-		anglesAliasWindow.setEnabled(enabled);
-		anglesAliasWindow.switchEnbaled(enabled);
-	}
 	
 	public BatchDatDisplayer getBatchDatDisplayer() {
 		return datDisplayer;
 	}
 	
-	public GeometricParametersWindows getParamField() {
-		return paramField;
-	}
-	
-	public Group getExperimentalSetup(){
-		return batchDisplay;
-	}
-	
-	public Group getMethodSetting(){
-		return methodSetting;
-	}
 
-	public Group getParametersSetting(){
-		return parametersSetting;
-	}
-	
-	public Combo getCorrectionsDropDown(){
-		return correctionsDropDown;
-	}
 }	

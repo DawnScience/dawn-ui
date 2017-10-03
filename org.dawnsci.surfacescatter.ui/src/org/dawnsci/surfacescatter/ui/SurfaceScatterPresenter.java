@@ -2218,6 +2218,15 @@ public class SurfaceScatterPresenter {
 
 		return;
 	}
+	
+	
+	public void dialogToChangeRodName(String suggested, BatchDatDisplayer dd) {
+
+		BatchRodNameSetterDialogue brnsd = new BatchRodNameSetterDialogue(parentShell, this, suggested, dd);
+		brnsd.open();
+
+		return;
+	}
 
 	public IDataset[] curveStitchingOutput() {
 
