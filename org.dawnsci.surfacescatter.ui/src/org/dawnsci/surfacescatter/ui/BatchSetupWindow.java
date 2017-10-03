@@ -1,6 +1,6 @@
 package org.dawnsci.surfacescatter.ui;
 
-import org.dawnsci.surfacescatter.MethodSettingEnum;
+import org.dawnsci.surfacescatter.BatchRodModel;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CTabFolder;
 import org.eclipse.swt.custom.CTabItem;
@@ -12,23 +12,26 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Group;
 
-public class RodSetupWindow {
+public class BatchSetupWindow {
 	
-	private DatDisplayer datDisplayer;
+	private BatchDatDisplayer datDisplayer;
 	private GeometricParametersWindows paramField;
 	private Combo correctionsDropDown;
-	private Group experimentalSetup;
+	private Group batchDisplay;
 	private Group methodSetting;
 	private Group parametersAlias;
 	private Group parametersSetting;
 	private AnglesAliasWindow anglesAliasWindow;
+	private BatchRodModel brm;
 		
-	public RodSetupWindow(CTabFolder folder,
+	public BatchSetupWindow(CTabFolder folder,
 			SurfaceScatterViewStart ssvs,
 			SurfaceScatterPresenter ssp){
 	
+		brm = new BatchRodModel();
+		
 		CTabItem setup = new CTabItem(folder, SWT.NONE);
-		setup.setText("Setup Parameters");
+		setup.setText("Batch Setup");
 		setup.setData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
 		Composite setupComposite = new Composite(folder, SWT.FILL);
@@ -44,7 +47,6 @@ public class RodSetupWindow {
 		left.setLayout(new GridLayout());
 		left.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 	
-		
 		SashForm right = new SashForm(setupSash, SWT.VERTICAL);
 		right.setLayout(new GridLayout());
 		right.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
@@ -58,7 +60,7 @@ public class RodSetupWindow {
 		
 		try {
 	
-			datDisplayer = new DatDisplayer(left, SWT.FILL, ssp, ssvs, RodSetupWindow.this);
+			datDisplayer = new BatchDatDisplayer(left, SWT.FILL, ssp, ssvs, BatchSetupWindow.this, brm);
 			datDisplayer.setLayout(new GridLayout());
 			datDisplayer.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, true));
 	
@@ -74,62 +76,15 @@ public class RodSetupWindow {
 	
 		try {
 			
-			experimentalSetup = new Group(right, SWT.FILL);
-			GridLayout experimentalSetupLayout = new GridLayout(1, true);
-			GridData experimentalSetupData = new GridData(GridData.FILL_BOTH);
-			experimentalSetupData.minimumWidth = 50;
-			experimentalSetup.setLayout(experimentalSetupLayout);
-			experimentalSetup.setLayoutData(experimentalSetupData);
-			experimentalSetup.setText("Experimental Setup");
+			batchDisplay = new Group(right, SWT.FILL);
+			GridLayout batchDisplaySetupLayout = new GridLayout(1, true);
+			GridData batchDisplaySetupData = new GridData(GridData.FILL_BOTH);
+			batchDisplaySetupData.minimumWidth = 50;
+			batchDisplay.setLayout(batchDisplaySetupLayout);
+			batchDisplay.setLayoutData(batchDisplaySetupData);
+			batchDisplay.setText("Batch");
 			
-			methodSetting = new Group(experimentalSetup, SWT.FILL);
-			GridLayout methodSettingLayout = new GridLayout(1, true);
-			GridData methodSettingData = new GridData(GridData.FILL_HORIZONTAL);
-			methodSettingData.minimumWidth = 50;
-			methodSetting.setLayout(methodSettingLayout);
-			methodSetting.setLayoutData(methodSettingData);
-			methodSetting.setText("SXRD / Reflectivity");
-	
-			correctionsDropDown = new Combo(methodSetting, SWT.DROP_DOWN | SWT.BORDER | SWT.FILL);
-			
-			for(org.dawnsci.surfacescatter.MethodSettingEnum.MethodSetting  t: MethodSettingEnum.MethodSetting.values()){
-				 correctionsDropDown.add(org.dawnsci.surfacescatter.MethodSettingEnum.MethodSetting.toString(t));
-			}
-	
-			
-			correctionsDropDown.select(0);
-			correctionsDropDown.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-	
-			
-			parametersAlias = new Group(experimentalSetup, SWT.FILL);
-			GridLayout parametersAliasLayout = new GridLayout(1, true);
-			GridData parametersAliasData = new GridData(GridData.FILL_BOTH);
-			parametersAliasData.minimumWidth = 50;
-			parametersAlias.setLayout(parametersAliasLayout);
-			parametersAlias.setLayoutData(parametersAliasData);
-			parametersAlias.setText("Parameter Aliases");
-			parametersAlias.setEnabled(false);
-			
-			
-			anglesAliasWindow = new AnglesAliasWindow(parametersAlias, SWT.FILL, ssp, ssvs);
-			anglesAliasWindow.setLayout(new GridLayout());
-			anglesAliasWindow.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-			anglesAliasWindow.setEnabled(false);
-			anglesAliasWindow.switchEnbaled(false);
-		
-			parametersSetting = new Group(experimentalSetup, SWT.FILL);
-			GridLayout parametersSettingLayout = new GridLayout(1, true);
-			GridData parametersSettingData = new GridData(GridData.FILL_BOTH);
-			parametersSettingData.minimumWidth = 50;
-			parametersSetting.setLayout(parametersSettingLayout);
-			parametersSetting.setLayoutData(parametersSettingData);
-			parametersSetting.setText("Geometric Parameters");
-			
-			paramField = new GeometricParametersWindows(parametersSetting, SWT.FILL, ssp, ssvs);
-			paramField.setLayout(new GridLayout());
-			paramField.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-			
-			this.setupRightEnabled(false);
+			BatchDisplay bdy = new BatchDisplay(batchDisplay,SWT.FILL, ssp, ssvs, BatchSetupWindow.this, brm); 
 				
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
@@ -143,9 +98,9 @@ public class RodSetupWindow {
 
 	public void setupRightEnabled(boolean enabled){
 		
-		experimentalSetup.setEnabled(enabled);
+		batchDisplay.setEnabled(enabled);
 		
-		for (Control r: experimentalSetup.getChildren()){
+		for (Control r: batchDisplay.getChildren()){
 			r.setEnabled(enabled);
 		}
 		
@@ -169,7 +124,7 @@ public class RodSetupWindow {
 		anglesAliasWindow.switchEnbaled(enabled);
 	}
 	
-	public DatDisplayer getDatDisplayer() {
+	public BatchDatDisplayer getBatchDatDisplayer() {
 		return datDisplayer;
 	}
 	
@@ -178,7 +133,7 @@ public class RodSetupWindow {
 	}
 	
 	public Group getExperimentalSetup(){
-		return experimentalSetup;
+		return batchDisplay;
 	}
 	
 	public Group getMethodSetting(){

@@ -228,7 +228,8 @@ public class SurfaceScatterViewStart extends Dialog {
 				int t = correctionsDropDown.getSelectionIndex();
 
 				MethodSetting ms = MethodSetting.toMethod(test[t]);
-
+				
+				ssp.getGm().setExperimentMethod(ms.getCorrectionsName());
 				ssp.surfaceScatterPresenterBuildWithFrames(filepaths, datDisplayer.getSelectedOption(), ms);
 
 				try {
@@ -256,7 +257,7 @@ public class SurfaceScatterViewStart extends Dialog {
 					}
 				}
 
-				folder.setSelection(1);
+				folder.setSelection(2);
 
 				customComposite.getSlider().setSelection(0);
 				customComposite.getSlider().setMinimum(0);
@@ -326,7 +327,16 @@ public class SurfaceScatterViewStart extends Dialog {
 
 		/////////////////////////////////////////////////////////////////////////
 		///////////////////////////////////////////////////////
-		// Tab 2 Analysis
+		// Tab 2 Batch Setup
+		////////////////////////////////////////////////////// #
+
+		BatchSetupWindow bsw = new BatchSetupWindow(folder, this, ssp);
+
+		
+		
+		/////////////////////////////////////////////////////////////////////////
+		///////////////////////////////////////////////////////
+		// Tab 3 Analysis
 		////////////////////////////////////////////////////// #
 
 		raw = new RodAnalysisWindow(folder, ssp, this);
@@ -411,6 +421,12 @@ public class SurfaceScatterViewStart extends Dialog {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 
+				CTabFolder f = (CTabFolder) e.getSource();
+				
+				if(f.getSelectionIndex()==1){
+					return;
+				}
+				
 				if (ssp.getNoImages() != 0) {
 					customComposite.getSlider().setMaximum(ssp.getNoImages());
 					customComposite.getPlotSystem1CompositeView().generalUpdate();
@@ -440,7 +456,13 @@ public class SurfaceScatterViewStart extends Dialog {
 
 					ssps3c.resetVerticalAndHorizontalSlices();
 					customComposite.getPlotSystem1CompositeView().checkTrackerOnButton();
-				} else {
+				} 
+				
+				else if(f.getSelectionIndex()==1){
+					folder.setSelection(1);
+				}
+				
+				else {
 					folder.setSelection(0);
 				}
 			}

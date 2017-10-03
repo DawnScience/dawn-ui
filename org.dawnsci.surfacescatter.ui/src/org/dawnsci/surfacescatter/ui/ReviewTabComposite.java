@@ -28,6 +28,7 @@ import org.eclipse.january.dataset.DatasetFactory;
 import org.eclipse.january.dataset.IDataset;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
+import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.GridData;
@@ -126,7 +127,7 @@ public class ReviewTabComposite extends Composite{
 		clearCurves.setText("Clear Curves");
 		clearCurves.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		
-		clearCurves.addSelectionListener(new SelectionListener() {
+		clearCurves.addSelectionListener(new SelectionAdapter() {
 				
 				@Override
 				public void widgetSelected(SelectionEvent e) {
@@ -142,11 +143,6 @@ public class ReviewTabComposite extends Composite{
 					
 				}
 				
-				@Override
-				public void widgetDefaultSelected(SelectionEvent e) {
-					// TODO Auto-generated method stub
-					
-				}
 		});
 		
 
@@ -155,7 +151,7 @@ public class ReviewTabComposite extends Composite{
         addCurve.setText("Add Curve");
         addCurve.setData(new GridData(SWT.FILL));
         
-		addCurve.addSelectionListener(new SelectionListener() {
+		addCurve.addSelectionListener(new SelectionAdapter() {
 
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -183,17 +179,13 @@ public class ReviewTabComposite extends Composite{
 				
 				rcm.addToCsdpList(newCsdp);
 			}
-
-			@Override
-			public void widgetDefaultSelected(SelectionEvent e) {
-			}
 		});
        
 		selectAll= new Button(rodSelector, SWT.PUSH | SWT.FILL);
 		selectAll.setText("Select All");
 		selectAll.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		
-		selectAll.addSelectionListener(new SelectionListener() {
+		selectAll.addSelectionListener(new SelectionAdapter() {
 			
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -214,18 +206,13 @@ public class ReviewTabComposite extends Composite{
 				refreshCurvesFromTable();
 			}
 			
-			@Override
-			public void widgetDefaultSelected(SelectionEvent e) {
-				// TODO Auto-generated method stub
-				
-			}
 		});
 
 		remove= new Button(rodSelector, SWT.PUSH | SWT.FILL);
 		remove.setText("Remove Selected");
 		remove.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		
-		remove.addSelectionListener(new SelectionListener() {
+		remove.addSelectionListener(new SelectionAdapter() {
 			
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -242,10 +229,6 @@ public class ReviewTabComposite extends Composite{
 				plotSystemReview.autoscaleAxes();
 			}
 			
-			@Override
-			public void widgetDefaultSelected(SelectionEvent e) {
-				
-			}
 		});
 
 		rodDisplayTable = new Table(rodSelector, SWT.CHECK | SWT.V_SCROLL | SWT.H_SCROLL | SWT.BORDER);
@@ -261,18 +244,13 @@ public class ReviewTabComposite extends Composite{
 		rodDisplayTable.getVerticalBar().setIncrement(1);
 		rodDisplayTable.getVerticalBar().setThumb(1);
 		
-		rodDisplayTable.addSelectionListener(new SelectionListener() {
+		rodDisplayTable.addSelectionListener(new SelectionAdapter(){
 			
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				refreshCurvesFromTable();
-				
+				refreshCurvesFromTable();	
 			}
 			
-			@Override
-			public void widgetDefaultSelected(SelectionEvent e) {
-				
-			}
 		});
 		
 ////////////////////////////////right		
@@ -310,16 +288,11 @@ public class ReviewTabComposite extends Composite{
         save.setData(new GridData(SWT.FILL));
         save.setText("Save Single Rod");
         
-        save.addSelectionListener(new SelectionListener() {
+        save.addSelectionListener(new SelectionAdapter() {
 
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				saveRod(false);
-
-			}
-
-			@Override
-			public void widgetDefaultSelected(SelectionEvent e) {
 
 			}
 		});
@@ -329,19 +302,14 @@ public class ReviewTabComposite extends Composite{
         saveGoodPoints.setData(new GridData(SWT.FILL));
         saveGoodPoints.setText("Save Only Good Points");
         
-        saveGoodPoints.addSelectionListener(new SelectionListener() {
+        saveGoodPoints.addSelectionListener(new SelectionAdapter() {
 			
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				saveRod(true);
 				
 			}
-			
-			@Override
-			public void widgetDefaultSelected(SelectionEvent e) {
-				// TODO Auto-generated method stub
-				
-			}
+		
 		});
         
         showOnlyGoodPoints = new Button(saveSettings, SWT.PUSH);
@@ -349,7 +317,7 @@ public class ReviewTabComposite extends Composite{
         showOnlyGoodPoints.setData(new GridData(SWT.FILL));
         showOnlyGoodPoints.setText("Show Only Good Points");
         
-        showOnlyGoodPoints.addSelectionListener(new SelectionListener() {
+        showOnlyGoodPoints.addSelectionListener(new SelectionAdapter() {
 			
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -357,11 +325,6 @@ public class ReviewTabComposite extends Composite{
 				refreshCurvesFromTable();
 			}
 			
-			@Override
-			public void widgetDefaultSelected(SelectionEvent e) {
-				// TODO Auto-generated method stub
-				
-			}
 		});
         
         Button storeAsNexus = new Button(saveSettings, SWT.PUSH);
@@ -369,7 +332,7 @@ public class ReviewTabComposite extends Composite{
         storeAsNexus.setData(new GridData(SWT.FILL));
         storeAsNexus.setText("Store As Nexus");
         
-        storeAsNexus.addSelectionListener(new SelectionListener() {
+        storeAsNexus.addSelectionListener(new SelectionAdapter() {
 			
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -399,10 +362,6 @@ public class ReviewTabComposite extends Composite{
 				
 			}
 			
-			@Override
-			public void widgetDefaultSelected(SelectionEvent e) {
-				
-			}
 		});
         
         Group storedCurves = new Group(rightForm, SWT.NONE);
@@ -461,7 +420,7 @@ public class ReviewTabComposite extends Composite{
 	    xAxis = tile1.getCombo();
 	    xAxis.select(0);;
 	   	
-	    xAxis.addSelectionListener(new SelectionListener() {
+	    xAxis.addSelectionListener(new SelectionAdapter() {
 			
 			@Override
 			public void widgetSelected(SelectionEvent e) {

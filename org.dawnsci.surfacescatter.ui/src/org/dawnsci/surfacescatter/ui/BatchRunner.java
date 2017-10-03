@@ -10,7 +10,7 @@ import org.dawnsci.surfacescatter.MethodSettingEnum.MethodSetting;
 
 public class BatchRunner {
 
-	public static void batchRun(String[][] datFiles, String[] imageFolderPaths, String[] xNames,
+	public static void batchRun(String[][] datFiles, String[] imageFolderPaths,
 			MethodSetting[] correctionSelections, String[] paramFiles, String[] nexusSaveFilePaths) {
 
 		SurfaceScatterPresenter[] sspArray = new SurfaceScatterPresenter[datFiles.length];
@@ -32,7 +32,7 @@ public class BatchRunner {
 
 			FittingParametersInputReader.geometricalParametersReaderFromNexus(paramFiles[i], sspi.getGm());
 
-			sspi.surfaceScatterPresenterBuildWithFrames(datFiles[i], xNames[i], correctionSelections[i]);
+			sspi.surfaceScatterPresenterBuildWithFrames(datFiles[i], sspi.getGm().getxName(), MethodSetting.toMethod(sspi.getGm().getExperimentMethod()));
 
 			sspi.loadParameters(paramFiles[i]);
 
@@ -45,7 +45,6 @@ public class BatchRunner {
 
 			BatchRunnable mr = new BatchRunnable(bat, lenpt,nexusSaveFilePaths[i] );
 
-			// Runnable worker = new WorkerThread("" + i);
 			executor.execute(mr);
 
 		}

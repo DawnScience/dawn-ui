@@ -32,16 +32,14 @@ public class ImageFolderChangeDialog extends Dialog {
 	private Text imageFolderText;
 	private Text saveFolderText;
 	private String imageName;
-//	private String saveName;
 	private Text imageNameText;
 	private Boolean hasBeenOpenedBefore;
-	private DatDisplayer dd;
-//	private boolean r = true;
+	private IDatDisplayer dd;
 	
 	public ImageFolderChangeDialog(Shell parentShell, 
 								   SurfaceScatterPresenter ssp,
 								   Boolean t,
-								   DatDisplayer dd) {
+								   IDatDisplayer dd) {
 		
 		super(parentShell);
 		this.ssp = ssp;
@@ -159,6 +157,8 @@ public class ImageFolderChangeDialog extends Dialog {
 				imageFolderText.setText(imageFolderPath);
 				imageFolderText.setEnabled(true);
 				ssp.setImageFolderPath(imageFolderPath);
+				
+				dd.setImageFolderPath(imageFolderPath);
 
 			}
 

@@ -2211,7 +2211,7 @@ public class SurfaceScatterPresenter {
 		return;
 	}
 
-	public void dialogToChangeImageFolder(Boolean t, DatDisplayer dd) {
+	public void dialogToChangeImageFolder(Boolean t, IDatDisplayer dd) {
 
 		ImageFolderChangeDialog ifcd = new ImageFolderChangeDialog(parentShell, this, t, dd);
 		ifcd.open();

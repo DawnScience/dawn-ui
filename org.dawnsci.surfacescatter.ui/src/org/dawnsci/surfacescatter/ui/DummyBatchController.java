@@ -22,7 +22,7 @@ public class DummyBatchController {
 				"/dls/i07/data/2017/si16564-1/292321.dat"};
 		
 		String[] imageFolderPaths = new String[] {null, null};
-		String[] xNames = new String[] {"qdcd", "qdcd"}; 
+//		String[] xNames = new String[] {"qdcd", "qdcd"}; 
 		MethodSetting[] correctionSelections = new MethodSetting[] {MethodSetting.Reflectivity_with_Flux_Correction_Gaussian_Profile, MethodSetting.Reflectivity_with_Flux_Correction_Gaussian_Profile};
 		String[] paramFiles = new String[]{"/scratch/Nexus_Tests/gm_test_193.nxs", "/scratch/Nexus_Tests/gm_test_193.nxs"};
 		String[] nexusSaveFilePaths = new String[]{"/scratch/Nexus_Tests/Dawn_Of_Batch_00.nxs", "/scratch/Nexus_Tests/Dawn_Of_Batch_01.nxs"};
@@ -30,7 +30,6 @@ public class DummyBatchController {
 	
 		BatchRunner.batchRun(datFiles, 
 				 imageFolderPaths,
-				 xNames, 
 				 correctionSelections,
 				 paramFiles,
 				 nexusSaveFilePaths);
