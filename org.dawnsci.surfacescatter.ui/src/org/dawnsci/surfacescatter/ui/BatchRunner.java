@@ -1,8 +1,11 @@
 package org.dawnsci.surfacescatter.ui;
 
+import java.io.File;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import org.dawnsci.surfacescatter.BatchRodDataTransferObject;
+import org.dawnsci.surfacescatter.BatchRodModel;
 import org.dawnsci.surfacescatter.FittingParametersInputReader;
 import org.dawnsci.surfacescatter.LocationLenPtConverterUtils;
 import org.dawnsci.surfacescatter.SetupModel;
@@ -10,8 +13,30 @@ import org.dawnsci.surfacescatter.MethodSettingEnum.MethodSetting;
 
 public class BatchRunner {
 
-	public static void batchRun(String[][] datFiles, String[] imageFolderPaths,
-			MethodSetting[] correctionSelections, String[] paramFiles, String[] nexusSaveFilePaths) {
+	public static void batchRun(BatchRodModel brm){
+		
+		String[][] datFiles = new String[brm.getBrdtoList().size()][];
+		String[] imageFolderPaths = new String[brm.getBrdtoList().size()];
+		String[] paramFiles = new String[brm.getBrdtoList().size()];
+		String[] nexusSaveFilePaths = new String[brm.getBrdtoList().size()];
+		
+		
+		for(int i = 0; i<brm.getBrdtoList().size();i++){
+			BatchRodDataTransferObject b = brm.getBrdtoList().get(i);
+			datFiles[i] = b.getDatFiles();
+			imageFolderPaths[i] = b.getImageFolderPath();
+			paramFiles[i] = b.getParamFiles();
+			
+			String nexusName = brm.getNxsFolderPath() + File.separator + b.getRodName()+".nxs";
+			nexusSaveFilePaths[i] = nexusName;
+		}
+		
+		batchRun(datFiles, imageFolderPaths, paramFiles, nexusSaveFilePaths);
+		
+	}
+	
+	
+	public static void batchRun(String[][] datFiles, String[] imageFolderPaths, String[] paramFiles, String[] nexusSaveFilePaths) {
 
 		SurfaceScatterPresenter[] sspArray = new SurfaceScatterPresenter[datFiles.length];
 

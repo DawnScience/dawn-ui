@@ -389,7 +389,7 @@ public class BatchDatDisplayer extends Composite implements IDatDisplayer {
 		transferToBatch.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				ssp.dialogToChangeRodName( getDatFilepaths()[0], BatchDatDisplayer.this);
+				ssp.dialogToChangeRodName(getDatFilepaths()[0], BatchDatDisplayer.this);
 				addToBatch();
 			}
 		});
@@ -502,7 +502,7 @@ public class BatchDatDisplayer extends Composite implements IDatDisplayer {
 			public void widgetSelected(SelectionEvent e) {
 				rodDisplayTable.removeAll();
 				enableRodConstruction(false);
-//				bsw.setupRightEnabled(false);
+				// bsw.setupRightEnabled(false);
 
 			}
 		});
@@ -546,7 +546,7 @@ public class BatchDatDisplayer extends Composite implements IDatDisplayer {
 				if (rodDisplayTable.getItemCount() == 0) {
 					enableRodConstruction(false);
 					ssvs.setupRightEnabled(false);
-//					bsw.setupRightEnabled(false);
+					// bsw.setupRightEnabled(false);
 				}
 
 			}
@@ -648,10 +648,10 @@ public class BatchDatDisplayer extends Composite implements IDatDisplayer {
 
 					FittingParametersInputReader.geometricalParametersReaderFromNexus(ip.getText(), ssp.getGm());
 
-//					bsw.getParamField().setUpdateOn(false);
-//					bsw.getParamField().updateDisplayFromGm(ssp.getGm());
-//					bsw.getAnglesAliasWindow().setFluxPath(ssp.getGm().getFluxPath());
-//					bsw.getParamField().setUpdateOn(true);
+					// bsw.getParamField().setUpdateOn(false);
+					// bsw.getParamField().updateDisplayFromGm(ssp.getGm());
+					// bsw.getAnglesAliasWindow().setFluxPath(ssp.getGm().getFluxPath());
+					// bsw.getParamField().setUpdateOn(true);
 
 				} catch (Exception e1) {
 
@@ -906,7 +906,7 @@ public class BatchDatDisplayer extends Composite implements IDatDisplayer {
 
 		return output;
 	}
-	
+
 	public String getOption() {
 		return option;
 	}
@@ -1038,8 +1038,6 @@ public class BatchDatDisplayer extends Composite implements IDatDisplayer {
 				e2.printStackTrace();
 			}
 
-			
-
 			clearRodTable.setEnabled(true);
 			clearParameterTable.setEnabled(true);
 			rodConstruction.setEnabled(true);
@@ -1052,11 +1050,8 @@ public class BatchDatDisplayer extends Composite implements IDatDisplayer {
 			paramFileSelection.setEnabled(true);
 			folderDisplayTable.getVerticalBar().setEnabled(true);
 			enableRodConstruction(true);
-//			bsw.setupRightEnabled(true);
+			// bsw.setupRightEnabled(true);
 		}
-
-
-		
 
 	}
 
@@ -1072,20 +1067,25 @@ public class BatchDatDisplayer extends Composite implements IDatDisplayer {
 		brdto.setParamFiles(p);
 
 		brdto.setRodName(rodName);
-		
-		brm.addToBrdtoList(brdto);
 
+		boolean good = true;
+
+		for (BatchRodDataTransferObject b : brm.getBrdtoList()) {
+			if (rodName.equals(b.getRodName())) {
+				good = false;
+				ssp.overlappingRodNames();
+				break;
+			}
+		}
+
+		if (good) {
+			brm.addToBrdtoList(brdto);
+		}
 	}
 
 	private String[] getDatFilepaths() {
 
 		ArrayList<TableItem> checkedList = new ArrayList<>();
-
-		for (TableItem d : rodDisplayTable.getItems()) {
-			if (d.getChecked()) {
-				checkedList.add(d);
-			}
-		}
 
 		for (TableItem d : rodDisplayTable.getItems()) {
 			if (d.getChecked()) {
@@ -1135,9 +1135,8 @@ public class BatchDatDisplayer extends Composite implements IDatDisplayer {
 
 		endDat.setEnabled(!increment.isStateOfText(), false);
 
-		
 	}
-	
+
 	public void setRodName(String rodName) {
 		this.rodName = rodName;
 	}

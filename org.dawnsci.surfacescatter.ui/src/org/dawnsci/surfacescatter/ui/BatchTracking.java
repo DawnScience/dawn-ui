@@ -42,30 +42,6 @@ public class BatchTracking {
 	private String savePath;
 
 
-	// public Thread getT() {
-	// return this.t;
-	// }
-
-	// public TrackingProgressAndAbortViewImproved getTPAAV() {
-	// return tpaav;
-	// }
-
-	// public void setTPAAV(TrackingProgressAndAbortViewImproved tpaav) {
-	// this.tpaav = tpaav;
-	// }
-	//
-	// public void setProgress(ProgressBar progress) {
-	// this.progressBar = progress;
-	// }
-
-	// public void setOutputCurves(IPlottingSystem<Composite> outputCurves) {
-	// this.outputCurves = outputCurves;
-	// }
-
-	// public void setCorrectionSelection(int cS) {
-	// this.correctionSelection = cS;
-	// }
-
 	public void setGm(GeometricParametersModel gms) {
 		this.gm = gms;
 	}

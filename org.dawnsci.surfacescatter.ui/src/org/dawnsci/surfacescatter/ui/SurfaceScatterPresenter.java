@@ -2084,6 +2084,11 @@ public class SurfaceScatterPresenter {
 		roobw.open();
 	}
 
+	public void overlappingRodNames() {
+		RegionOutOfBoundsWarning roobw = new RegionOutOfBoundsWarning(parentShell, 7, null);
+		roobw.open();
+	}
+	
 	public void fluxCallibrationWarning() {
 		RegionOutOfBoundsWarning roobw = new RegionOutOfBoundsWarning(parentShell, 6, null);
 		roobw.open();

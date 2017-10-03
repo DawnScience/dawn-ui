@@ -68,6 +68,9 @@ public class RegionOutOfBoundsWarning extends Dialog {
 		case 6:
 			warning.setText("Check that flux normalisation file covers scanned range of current experiment.");	
 			break;
+		case 7:
+			warning.setText("Can't have two rods with the same name.");	
+			break;
 		default:
 			warning.setText("Unknown or novel error.");	
 			break;

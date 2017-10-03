@@ -30,7 +30,7 @@ public class DummyBatchController {
 	
 		BatchRunner.batchRun(datFiles, 
 				 imageFolderPaths,
-				 correctionSelections,
+//				 correctionSelections,
 				 paramFiles,
 				 nexusSaveFilePaths);
 	

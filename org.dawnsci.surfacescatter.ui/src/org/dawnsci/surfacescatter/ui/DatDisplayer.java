@@ -745,20 +745,6 @@ public class DatDisplayer extends Composite implements IDatDisplayer{
 		});
 		
 		
-		Button batchTest = new Button(parameterFiles, SWT.PUSH);
-		batchTest.setText("Batch Test - Development!!!");
-		batchTest.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-		batchTest.setEnabled(true);
-		
-		
-		batchTest.addSelectionListener(new SelectionAdapter() {
-			
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				DummyBatchController.DummyBatchControl();
-				
-			}
-		});
 	}
 
 	public Table getParamFileTable() {
