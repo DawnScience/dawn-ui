@@ -5,6 +5,7 @@ import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.util.ArrayList;
 
+import org.dawnsci.surfacescatter.BatchRodDataTransferObject;
 import org.dawnsci.surfacescatter.BatchRodModel;
 import org.eclipse.dawnsci.analysis.api.io.IDataHolder;
 import org.eclipse.swt.SWT;
@@ -125,7 +126,18 @@ public class BatchDisplay extends Composite {
 
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-//				bsw.checkRod();
+
+				String r = "s";
+				
+				for (TableItem ra : batchDisplayTable.getItems()) {
+					if (ra.getChecked() == true) {
+						r = ra.getText();
+					}
+				}
+				
+				BatchRodDataTransferObject bd = brm.getDTO(r);
+				
+				
 			}
 		});
 		
@@ -145,7 +157,7 @@ public class BatchDisplay extends Composite {
 		});
 
 		Button remove = new Button(batchTableGroup, SWT.PUSH);
-		remove.setText("Clear Batch");
+		remove.setText("Remove Selected");
 		remove.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
 		remove.setEnabled(true);
 

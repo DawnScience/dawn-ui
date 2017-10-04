@@ -67,13 +67,7 @@ public class BatchSetupWindow {
 	
 		try {
 			
-//			batchDisplay = new Group(right, SWT.FILL);
-//			GridLayout batchDisplaySetupLayout = new GridLayout(1, true);
-//			GridData batchDisplaySetupData = new GridData(GridData.FILL_BOTH);
-//			batchDisplaySetupData.minimumWidth = 50;
-//			batchDisplay.setLayout(batchDisplaySetupLayout);
-//			batchDisplay.setLayoutData(batchDisplaySetupData);
-//			batchDisplay.setText("Batch");
+
 			
 			batchDisplay = new BatchDisplay(right,SWT.FILL, ssp, ssvs, BatchSetupWindow.this, brm); 
 			batchDisplay.setLayout(new GridLayout());
