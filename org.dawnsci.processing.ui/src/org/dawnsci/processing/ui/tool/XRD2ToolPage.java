@@ -3,6 +3,7 @@ package org.dawnsci.processing.ui.tool;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -27,6 +28,9 @@ import org.eclipse.dawnsci.analysis.dataset.roi.HyperbolicROI;
 import org.eclipse.dawnsci.analysis.dataset.roi.ParabolicROI;
 import org.eclipse.dawnsci.analysis.dataset.roi.RectangularROI;
 import org.eclipse.dawnsci.analysis.dataset.roi.XAxisBoxROI;
+import org.eclipse.dawnsci.analysis.dataset.slicer.SliceFromSeriesMetadata;
+import org.eclipse.dawnsci.analysis.dataset.slicer.SliceInformation;
+import org.eclipse.dawnsci.analysis.dataset.slicer.SourceInformation;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.PlotType;
 import org.eclipse.dawnsci.plotting.api.PlottingFactory;
@@ -34,12 +38,19 @@ import org.eclipse.dawnsci.plotting.api.region.IROIListener;
 import org.eclipse.dawnsci.plotting.api.region.IRegion;
 import org.eclipse.dawnsci.plotting.api.region.IRegion.RegionType;
 import org.eclipse.dawnsci.plotting.api.region.ROIEvent;
+import org.eclipse.dawnsci.plotting.api.region.RegionUtils;
 import org.eclipse.dawnsci.plotting.api.tool.AbstractToolPage;
+import org.eclipse.dawnsci.plotting.api.trace.IImageTrace;
 import org.eclipse.dawnsci.plotting.api.trace.ILineTrace;
+import org.eclipse.dawnsci.plotting.api.trace.ITrace;
+import org.eclipse.dawnsci.plotting.api.trace.ITraceListener;
 import org.eclipse.dawnsci.plotting.api.trace.MetadataPlotUtils;
+import org.eclipse.dawnsci.plotting.api.trace.TraceEvent;
+import org.eclipse.dawnsci.plotting.api.trace.TraceWillPlotEvent;
 import org.eclipse.january.MetadataException;
 import org.eclipse.january.dataset.BooleanDataset;
 import org.eclipse.january.dataset.IDataset;
+import org.eclipse.january.dataset.SliceND;
 import org.eclipse.january.metadata.MaskMetadata;
 import org.eclipse.january.metadata.MetadataFactory;
 import org.eclipse.jface.dialogs.Dialog;
@@ -56,7 +67,9 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Group;
+import org.eclipse.swt.widgets.Label;
 import org.eclipse.ui.IActionBars;
+import org.eclipse.ui.part.IPageSite;
 
 import uk.ac.diamond.scisoft.analysis.diffraction.DSpacing;
 import uk.ac.diamond.scisoft.analysis.io.DiffractionMetadata;
@@ -74,9 +87,23 @@ public class XRD2ToolPage extends AbstractToolPage {
 	private IPlottingSystem<Composite> plottingSystem;
 	private IDiffractionMetadata metadata;
 	private String lastPath = null;
+	private Label statusLabel;
 	
 	private XRD2Job job;
 	private XRD2Model model;
+	
+	private IRegion integrationBox;
+	private final static String BOXNAME = "BoxIntegrationRegion";
+	
+	private IRegion lineMarker;
+	private final static String LINENAME = "LineMarkerRegion";
+	
+	private IRegion ringMarker;
+	private final static String RINGNAME = "RingMarkerRegion";
+	
+	private XAxis currentAxis;
+	
+	private ITraceListener traceListener;
 	
 	@Override
 	public void createControl(Composite parent) {
@@ -96,14 +123,21 @@ public class XRD2ToolPage extends AbstractToolPage {
 			return;
 		}
 		
+		final IPageSite site = getSite();
+		IActionBars actionbars = site!=null?site.getActionBars():null;
+		
 		plottingSystem.createPlotPart(upper, 
 				getTitle(), 
-				(IActionBars)null, 
+				actionbars, 
 				PlotType.XY,
 				this.getViewPart());
 		
 		plottingSystem.getPlotComposite().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 
+		statusLabel = new Label(upper, SWT.None);
+		statusLabel.setText("");
+		statusLabel.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false));
+		
 		Composite lower = new Composite(control, SWT.NONE);
 		lower.setLayout(new GridLayout());
 		
@@ -111,6 +145,7 @@ public class XRD2ToolPage extends AbstractToolPage {
 		modelEditor.createPartControl(lower);
 		
 		model = new XRD2Model();
+		currentAxis = model.getAxisType();
 		
 		model.addPropertyChangeListener(new PropertyChangeListener() {
 			
@@ -120,14 +155,45 @@ public class XRD2ToolPage extends AbstractToolPage {
 				job.setModel(new XRD2Model(model),d, null);
 				job.schedule();
 				
+				XAxis x = model.getAxisType();
+				if (!currentAxis.equals(x)) {
+					XAxis old = currentAxis;
+					currentAxis = x;
+					updateMarkers(old);
+				}
 			}
 		});
 		
 		modelEditor.setModel(model);
 		
-		IDataset d = getImageTrace().getData();
+		update();
+		
+		traceListener = new ITraceListener.Stub() {
+			protected void update(TraceEvent evt) {
+				XRD2ToolPage.this.update();
+			}
+		};
+		
+		
+	}
+	
+	private void update() {
+		
+		IDataset d = null;
+		IROI r = null;
+		
+		IImageTrace image = getImageTrace();
+		
+		if (image != null) {
+			d = image.getData();
+		}
+		
+		if (integrationBox != null) {
+			r = integrationBox.getROI();
+		}
+			
 
-		job.setModel(new XRD2Model(model),d, null);
+		job.setModel(new XRD2Model(model),d, r);
 		job.schedule();
 
 	}
@@ -135,23 +201,43 @@ public class XRD2ToolPage extends AbstractToolPage {
 	@Override
 	public void activate() {
 		super.activate();
-		// Now add any listeners to the plotting providing getPlottingSystem()!=null
+		if (getPlottingSystem() != null && traceListener != null) {
+			getPlottingSystem().addTraceListener(traceListener);
+		}
 	}
 	
 	@Override
 	public void deactivate() {
 		super.deactivate();
-		// Now remove any listeners to the plotting providing getPlottingSystem()!=null
+		
+		if (getPlottingSystem() == null) return;
+		if (traceListener != null) {
+			getPlottingSystem().removeTraceListener(traceListener);
+		}
+		
+		if (integrationBox != null) {
+			getPlottingSystem().removeRegion(integrationBox);
+			integrationBox = null;
+		}
+		
+		if (ringMarker != null) {
+			getPlottingSystem().removeRegion(ringMarker);
+			ringMarker = null;
+		}
+	}
+	
+	private void updateMarkers(XAxis previous) {
+		
 	}
 	
 	private void setUpBoxRegion(){
 		try {
 
-			IRegion region2 = getPlottingSystem().createRegion("regionBox", RegionType.BOX);
+			integrationBox = getPlottingSystem().createRegion(RegionUtils.getUniqueName(BOXNAME, getPlottingSystem(), (String[])null), RegionType.BOX);
 			RectangularROI roi = new RectangularROI(100, 100, 100, 100, 0);
-			region2.setROI(roi);
-			getPlottingSystem().addRegion(region2);
-			region2.addROIListener(new IROIListener() {
+			integrationBox.setROI(roi);
+			getPlottingSystem().addRegion(integrationBox);
+			integrationBox.addROIListener(new IROIListener() {
 
 				@Override
 				public void roiSelected(ROIEvent evt) {
@@ -180,8 +266,7 @@ public class XRD2ToolPage extends AbstractToolPage {
 
 
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.error("Error making box region",e);
 		}
 	}
 	
@@ -197,29 +282,44 @@ public class XRD2ToolPage extends AbstractToolPage {
 		
 		RegionType reg = getConicRegionType(r);
 		
-		IRegion rline = plottingSystem.createRegion("line", RegionType.XAXIS_LINE);
+		lineMarker = plottingSystem.createRegion(RegionUtils.getUniqueName(LINENAME, plottingSystem, (String[])null), RegionType.XAXIS_LINE);
 		XAxisBoxROI xroi = new XAxisBoxROI();
 		xroi.setPoint(1.72, 1);
-		rline.setROI(xroi);
-		plottingSystem.addRegion(rline);
+		lineMarker.setROI(xroi);
+		plottingSystem.addRegion(lineMarker);
 		
-		IRegion region = getPlottingSystem().createRegion("region1", reg);
-		region.setROI(r);
-		region.setUserRegion(false);
-		region.setMobile(false);
-		region.setFill(false);
-		getPlottingSystem().addRegion(region);
+		ringMarker = getPlottingSystem().createRegion(RegionUtils.getUniqueName(RINGNAME, plottingSystem, (String[])null), reg);
+		ringMarker.setROI(r);
+		ringMarker.setUserRegion(false);
+		ringMarker.setMobile(false);
+		ringMarker.setFill(false);
+		getPlottingSystem().addRegion(ringMarker);
 		
-		rline.addROIListener(new IROIListener.Stub() {
+		lineMarker.addROIListener(new IROIListener.Stub() {
 			
 			
 			@Override
 			public void roiDragged(ROIEvent evt) {
 				double pointX = evt.getROI().getPointX();
 				try {
-					double resx = XAxis.Q.convertToRESOLUTION(pointX, metadata.getDiffractionCrystalEnvironment().getWavelength());
+					double resx = currentAxis.convertToRESOLUTION(pointX, metadata.getDiffractionCrystalEnvironment().getWavelength());
 					IROI r = DSpacing.conicFromDSpacing(metadata.getDetector2DProperties(), metadata.getDiffractionCrystalEnvironment(), resx);
-					region.setROI(r);
+					
+					if (!r.getClass().equals(ringMarker.getROI().getClass())) {
+						getPlottingSystem().removeRegion(ringMarker);
+						RegionType reg = getConicRegionType(r);
+						ringMarker = getPlottingSystem().createRegion(RegionUtils.getUniqueName(RINGNAME, plottingSystem, (String[])null), reg);
+						ringMarker.setROI(r);
+						ringMarker.setUserRegion(false);
+						ringMarker.setMobile(false);
+						ringMarker.setFill(false);
+						getPlottingSystem().addRegion(ringMarker);
+						
+					} else {
+						ringMarker.setROI(r);
+					}
+					
+					
 				} catch (Exception e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
@@ -308,16 +408,28 @@ public class XRD2ToolPage extends AbstractToolPage {
 			DataROIHolder drh = datasetReference.getAndSet(null);
 			List<IOperation> op = operationsReference.get();
 			
-			if (drh == null) return Status.OK_STATUS;
+			if (drh == null|| drh.data == null) {
+				plottingSystem.clear();
+				return Status.OK_STATUS;
+			}
 			
 			if (op == null){
 				op = buildOperations();
 			}
 			
-			IDataset d = drh.data;
+			IDataset d = drh.data.getSliceView();
 			IROI roi = drh.roi;
 			
 			if (op == null) return Status.OK_STATUS;
+			
+
+			SliceND slice = new SliceND(d.getShape());
+			int[] dataDims = new int[]{0, 1};
+			SliceInformation si = new SliceInformation(slice, slice, slice, dataDims, 1, 1);
+			SourceInformation so = new SourceInformation("", "", d);
+			SliceFromSeriesMetadata sliceMeta = new SliceFromSeriesMetadata(so, si);
+			
+			d.setMetadata(sliceMeta);
 			
 			OperationData opdata = null;
 			
@@ -334,7 +446,18 @@ public class XRD2ToolPage extends AbstractToolPage {
 					}
 				}
 				
-				 opdata = o.execute(d, null);
+				try {
+					opdata = o.execute(d, null);
+				} catch (Exception e) {
+					logger.error(e.getMessage(),e);
+					plottingSystem.clear();
+					Display.getDefault().syncExec(() -> {
+						statusLabel.setText("Error: " + e.getMessage());
+						statusLabel.getParent().layout();
+					});
+					return Status.OK_STATUS;
+				}
+				 
 				 
 				 
 				 if (o instanceof AzimuthalPixelIntegrationOperation && roi != null) {
@@ -363,18 +486,23 @@ public class XRD2ToolPage extends AbstractToolPage {
 			
 			List<ILineTrace> traces = new ArrayList<>();
 			
-			traces.add(MetadataPlotUtils.buildLineTrace(integrated, plottingSystem));
-			MetadataPlotUtils.plotDataWithMetadata(integrated, plottingSystem);
+
+			MetadataPlotUtils.plotDataWithMetadata(integrated, plottingSystem,false);
 			if (d2 != null) {
 				d2.setName("Region");
-				traces.add(MetadataPlotUtils.buildLineTrace(d2, plottingSystem));
+				MetadataPlotUtils.plotDataWithMetadata(d2, plottingSystem,false);
+			} else {
+				ITrace trace = plottingSystem.getTrace("Region");
+				
+				if (trace != null) {
+					Display.getDefault().syncExec(() -> plottingSystem.removeTrace(trace));
+				}
+				
+				
 			}
 			
-			Display.getDefault().asyncExec(() -> {
-				plottingSystem.clearTraces();
-				for (ILineTrace t: traces) plottingSystem.addTrace(t);
-			});
-			
+			plottingSystem.repaint();
+			Display.getDefault().syncExec(() -> statusLabel.setText(""));
 			return Status.OK_STATUS;
 		}
 		
@@ -514,7 +642,15 @@ public class XRD2ToolPage extends AbstractToolPage {
 				
 				@Override
 				public void widgetSelected(SelectionEvent e) {
-					setUpLineRegion();
+					if (showLine.getSelection()) {
+						setUpLineRegion();
+					} else {
+						plottingSystem.removeRegion(lineMarker);
+						getPlottingSystem().removeRegion(ringMarker);
+						lineMarker = null;
+						ringMarker = null;
+					}
+					
 					
 				}
 			});
@@ -525,7 +661,15 @@ public class XRD2ToolPage extends AbstractToolPage {
 				
 				@Override
 				public void widgetSelected(SelectionEvent e) {
-					setUpBoxRegion();
+					if (showRegion.getSelection()) {
+						setUpBoxRegion();
+					} else {
+						getPlottingSystem().removeRegion(integrationBox);
+						integrationBox = null;
+						job.setData(getImageTrace().getData(), null);
+						job.schedule();
+					}
+					
 					
 				}
 			});
