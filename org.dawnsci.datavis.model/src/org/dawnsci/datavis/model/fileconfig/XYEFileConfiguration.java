@@ -12,6 +12,9 @@ public class XYEFileConfiguration implements ILoadedFileConfiguration {
 
 	@Override
 	public boolean configure(LoadedFile f) {
+		
+		if (f.getTree() != null) return false;
+		
 		List<DataOptions> d = f.getDataOptions();
 		Map<String, int[]> ds = f.getDataShapes();
 		
