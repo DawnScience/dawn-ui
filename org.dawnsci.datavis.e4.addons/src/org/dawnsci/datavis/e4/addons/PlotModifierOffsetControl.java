@@ -30,6 +30,8 @@ public class PlotModifierOffsetControl {
 	public static final String CLASS_URI = "bundleclass://org.dawnsci.datavis.e4.addons/" + PlotModifierOffsetControl.class.getName();
 	public static final String ID = "org.dawnsci.datavis.e4.addons.PlotModifierOffsetControl";
 	
+	private Button normButton;
+	private Image normImage;
 	private Button stackButton;
 	private Image stackImage;
 	private Composite control;
@@ -42,7 +44,7 @@ public class PlotModifierOffsetControl {
 		control = new Composite(parent, SWT.None);
 		control.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false));
 		
-		GridLayout layout = new GridLayout(4, false);
+		GridLayout layout = new GridLayout(5, false);
 		layout.marginHeight = 2;
 		layout.marginWidth = 2;
 		control.setLayout(layout);
@@ -67,12 +69,46 @@ public class PlotModifierOffsetControl {
 			stackButton.setText("Stack");
 		}
 		
+		stackButton.setToolTipText("Stack XY data (using current x axis range");
+		
+		normButton = new Button(control, SWT.TOGGLE);
+
+		normButton.addSelectionListener(new SelectionAdapter() {
+			
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				IPlotDataModifier pm = controller.getEnabledPlotModifier();
+				if (pm instanceof PlotDataModifierStack) {
+					((PlotDataModifierStack)pm).setNormalise(normButton.getSelection());
+					controller.forceReplot();
+				}
+			}
+			
+		});
+		
+		if (normImage == null) {
+			try {
+				ImageDescriptor imd = ImageDescriptor.createFromURL(new URL("platform:/plugin/org.dawnsci.datavis.e4.addons/icons/norm.png"));
+				normImage =  imd.createImage();
+			} catch (Exception e) {
+				
+			}
+		}
+		
+		if (normImage != null) {
+			normButton.setImage(normImage);
+		} else {
+			normButton.setText("Norm");
+		}
+		
 		
 		
 		Scale s = new Scale(control,SWT.NONE);
 		s.setLayoutData(new GridData(48, 16));
 		s.setMaximum(100);
 		s.setMinimum(0);
+		
+		s.setToolTipText("Set magnitude of offset");
 		
 		s.addSelectionListener(new SelectionAdapter() {
 			
@@ -102,10 +138,14 @@ public class PlotModifierOffsetControl {
 						if (m instanceof PlotDataModifierStack) {
 							((PlotDataModifierStack)m).setProportion(s.getSelection()/100.0);
 							controller.enablePlotModifier(m);
+							s.setEnabled(true);
+							normButton.setEnabled(true);
 						}
 					}
 					
 				} else {
+					s.setEnabled(false);
+					normButton.setEnabled(false);
 					controller.enablePlotModifier(null);
 				}
 			}
@@ -145,14 +185,21 @@ public class PlotModifierOffsetControl {
 	@PreDestroy
 	public void dispose() {
 		if (stackImage != null) stackImage.dispose();
+		if (normImage != null) normImage.dispose();
 	}
 
 	private void enable(boolean enable) {
-		Control[] children = control.getChildren();
 		
-		for (Control c : children) {
-			c.setEnabled(enable);
+		if (!(controller.getEnabledPlotModifier() instanceof PlotDataModifierStack) && enable) {
+			stackButton.setEnabled(true);
+		} else {
+			Control[] children = control.getChildren();
+			
+			for (Control c : children) {
+				c.setEnabled(enable);
+			}
 		}
+		
 		
 	}
 }

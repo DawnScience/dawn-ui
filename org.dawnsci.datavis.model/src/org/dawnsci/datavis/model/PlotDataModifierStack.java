@@ -2,6 +2,7 @@ package org.dawnsci.datavis.model;
 
 import java.util.Arrays;
 
+import org.apache.commons.math3.genetics.NPointCrossover;
 import org.eclipse.dawnsci.analysis.dataset.roi.ROISliceUtils;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.axis.IAxis;
@@ -19,6 +20,7 @@ public class PlotDataModifierStack implements IPlotDataModifier {
 	private double value = 0;
 	private double proportion = 0.2;
 	private double[] xRange = null;
+	private boolean normalise = false;
 	
 	@Override
 	public IDataset modifyForDisplay(IDataset d) {
@@ -62,11 +64,22 @@ public class PlotDataModifierStack implements IPlotDataModifier {
 
 		} 
 
+		
+		
 		double delta = max-min;
 		if (delta == 0) delta = 1;
 		Dataset dataset = DatasetUtils.convertToDataset(d);
 		//		dataset = Maths.subtract(dataset, min).idivide(delta);
 		//		dataset.iadd(value*proportion);
+		
+		if (normalise) {
+			dataset = Maths.subtract(dataset, min).idivide(max-min);
+			double test = dataset.min(true).doubleValue();
+			double test1 = dataset.max(true).doubleValue();
+			max = 1;
+			min = 0;
+			delta = 1;
+		}
 
 		dataset = Maths.add(dataset,(value-min));
 		double peakToPeak = dataset.peakToPeak(true).doubleValue();
@@ -121,6 +134,14 @@ public class PlotDataModifierStack implements IPlotDataModifier {
 		xRange[1] = x.getUpper();
 		Arrays.sort(xRange);
 		
+	}
+
+	public boolean isNormalise() {
+		return normalise;
+	}
+
+	public void setNormalise(boolean normalise) {
+		this.normalise = normalise;
 	}
 
 }
