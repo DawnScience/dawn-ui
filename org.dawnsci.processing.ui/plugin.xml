@@ -154,6 +154,13 @@
             id="org.dawnsci.processing.ui.tool.ProcessingXYTool"
             label="Processing XY">
       </plotting_tool_page>
+      <plotting_tool_page
+            category="org.dawnsci.plotting.tools.category.Science"
+            class="org.dawnsci.processing.ui.tool.XRD2ToolPage"
+            icon="icons/XRD2.png"
+            id="org.dawnsci.processing.ui.tool.XRD2ToolPage"
+            label="XRD2">
+      </plotting_tool_page>
    </extension>
    <extension
          point="org.eclipse.ui.preferencePages">

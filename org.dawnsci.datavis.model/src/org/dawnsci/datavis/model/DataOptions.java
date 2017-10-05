@@ -94,6 +94,21 @@ public class DataOptions implements IDataObject, IDataPackage {
 							}
 
 							boolean allFound = !Arrays.asList(found).contains(false);
+							//has it only not found size 1 dims?
+							if (!allFound) {
+								boolean allOnes = true;
+								for (int j = 0; j < found.length; j++) {
+									if (!found[j] && axShape[j] != 1) {
+										allOnes = false;
+										break;
+									} else if (!found[j] && axShape[j] == 1) {
+										idx[j] = j;
+									}
+									
+								}
+								
+								allFound = allOnes;
+							}
 
 							if (!allFound) {
 								continue;
@@ -105,6 +120,7 @@ public class DataOptions implements IDataObject, IDataPackage {
 							
 							try {
 								lzAxes = lzAxes.getSliceView();
+								lzAxes.clearMetadata(AxesMetadata.class);
 								lzAxes.setShape(newShape);
 								ax.setAxis(i, lzAxes);
 							} catch (Exception e) {

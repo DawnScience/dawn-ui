@@ -88,6 +88,8 @@ public class HistrogramToolbarControl {
 			lock.setText("Lock");
 		}
 		
+		lock.setToolTipText("Lock min and max colourmap values");
+		
 		lock.addSelectionListener(new SelectionAdapter() {
 			
 			@Override
@@ -135,6 +137,7 @@ public class HistrogramToolbarControl {
 		low = new Text(control, SWT.BORDER | SWT.RIGHT);
 		low.setText("0");
 		low.setLayoutData(new GridData(48, 16));
+		low.setToolTipText("Set lower value");
 		low.addTraverseListener(new TraverseListener() {
 			
 			@Override
@@ -164,6 +167,7 @@ public class HistrogramToolbarControl {
 		high = new Text(control, SWT.BORDER | SWT.RIGHT);
 		high.setText("255");
 		high.setLayoutData(new GridData(48, 16));
+		high.setToolTipText("Set upper value");
 		high.addTraverseListener(new TraverseListener() {
 			
 			@Override
