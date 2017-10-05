@@ -38,6 +38,7 @@ import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.internal.SelectionAdapterFactory;
 
+
 import uk.ac.diamond.scisoft.analysis.io.LoaderFactory;
 
 public class DatDisplayer extends Composite implements IDatDisplayer{
@@ -82,6 +83,8 @@ public class DatDisplayer extends Composite implements IDatDisplayer{
 	private Group numericalDatSelection; 
 	private InputTileGenerator[] itgArray;
 	private Button transferUsingIncrement;
+	private boolean useTrajectory = true;
+	private Button useTrajectoryButton;
 
 
 
@@ -701,6 +704,22 @@ public class DatDisplayer extends Composite implements IDatDisplayer{
 			}
 		});
 		
+		InputTileGenerator useTrajectoryTile = new InputTileGenerator("Use Trajectory From File:", parameterFiles, true) ;
+		
+		useTrajectoryButton = useTrajectoryTile.getRadio();
+		
+		useTrajectoryButton.setSelection(useTrajectory);
+		
+		useTrajectoryButton.addSelectionListener(new SelectionAdapter() {
+
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				useTrajectory = useTrajectoryButton.getSelection();
+			}
+			
+		});
+		
+		
 		paramFileTable = new Table(parameterFiles, SWT.CHECK | SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL);
 		GridData paramFileTableData = new GridData(GridData.FILL_BOTH);
 		paramFileTable.setLayoutData(paramFileTableData);
@@ -723,7 +742,7 @@ public class DatDisplayer extends Composite implements IDatDisplayer{
 				
 				try {
 					
-				FittingParametersInputReader.geometricalParametersReaderFromNexus(ip.getText(), ssp.getGm());
+				FittingParametersInputReader.geometricalParametersReaderFromNexus(ip.getText(), ssp.getGm(), ssp.getDrm());
 				
 				rsw.getParamField().setUpdateOn(false);
 				rsw.getParamField().updateDisplayFromGm(ssp.getGm());
@@ -893,9 +912,9 @@ public class DatDisplayer extends Composite implements IDatDisplayer{
 		
 		try{
 			
-			double lorentz = SXRDGeometricCorrections.lorentz(filepath).getDouble(0);
+			SXRDGeometricCorrections.lorentz(filepath).getDouble(0);
 			
-			double areaCorrection = SXRDGeometricCorrections.areacor(filepath,
+			SXRDGeometricCorrections.areacor(filepath,
 																	 ssvs.getParamField().getBeamCorrection().getSelection(), 
 																	 ssvs.getParamField().getSpecular().getSelection(), 
 																	 Double.valueOf(ssvs.getParamField().getSampleSize().getText()),
@@ -905,7 +924,7 @@ public class DatDisplayer extends Composite implements IDatDisplayer{
 																	 Double.valueOf(ssvs.getParamField().getBeamOutPlane().getText()), 
 																	 Double.valueOf(ssvs.getParamField().getDetectorSlits().getText())).getDouble(0);
 			
-			double polarisation = SXRDGeometricCorrections.polarisation(filepath, 
+			SXRDGeometricCorrections.polarisation(filepath, 
 					 												    Double.valueOf(ssvs.getParamField().getInplanePolarisation().getText()), 
 					 												    Double.valueOf(ssvs.getParamField().getOutplanePolarisation().getText())).getDouble(0);
 			
@@ -962,8 +981,7 @@ public class DatDisplayer extends Composite implements IDatDisplayer{
 				
 			}
 			
-			double geometricForReflectivity 
-				= GeometricCorrectionsReflectivityMethod.reflectivityCorrectionsBatchGaussianPofile(dcdtheta, 
+			GeometricCorrectionsReflectivityMethod.reflectivityCorrectionsBatchGaussianPofile(dcdtheta, 
 																					  0,  
 																					  Double.valueOf(ssvs.getParamField().getAngularFudgeFactor().getText()), 
 																					  Double.valueOf(ssvs.getParamField().getBeamHeight().getText()), 
@@ -1017,25 +1035,25 @@ public class DatDisplayer extends Composite implements IDatDisplayer{
 		return output;
 	}
 	
-	private void thereCanBeOnlyOne(){
-		if(paramFilesChecked == null){
-			paramFilesChecked = new ArrayList<>();
-		}
-		
-		if (paramFilesChecked.size()>0){
-			for(TableItem ti : paramFilesChecked){
-				ti.setChecked(false);
-			}
-		}
-		
-		paramFilesChecked = new ArrayList<>();
-		
-		for (TableItem ra : paramFileTable.getItems()) {
-			if(ra.getChecked() == true){
-				paramFilesChecked.add(ra);
-			}
-		}
-	}
+//	private void thereCanBeOnlyOne(){
+//		if(paramFilesChecked == null){
+//			paramFilesChecked = new ArrayList<>();
+//		}
+//		
+//		if (paramFilesChecked.size()>0){
+//			for(TableItem ti : paramFilesChecked){
+//				ti.setChecked(false);
+//			}
+//		}
+//		
+//		paramFilesChecked = new ArrayList<>();
+//		
+//		for (TableItem ra : paramFileTable.getItems()) {
+//			if(ra.getChecked() == true){
+//				paramFilesChecked.add(ra);
+//			}
+//		}
+//	}
 
 	public String getOption() {
 		return option;
@@ -1250,5 +1268,14 @@ public class DatDisplayer extends Composite implements IDatDisplayer{
 	
 	public void setImageFolderPath(String f){
 		
+	}
+	
+	public boolean getUseTrajectory() {
+		return useTrajectory;
+	}
+
+	
+	public void setUseTrajectory(boolean f) {
+		this.useTrajectory = f;
 	}
 }

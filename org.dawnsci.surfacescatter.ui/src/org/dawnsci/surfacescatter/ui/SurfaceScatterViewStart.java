@@ -303,7 +303,7 @@ public class SurfaceScatterViewStart extends Dialog {
 				ssp.setSliderPos(0);
 
 				if (isThereAParamFile) {
-					setParametersFromFile(paramFile);
+					setParametersFromFile(paramFile, datDisplayer.getUseTrajectory());
 
 				}
 
@@ -639,7 +639,7 @@ public class SurfaceScatterViewStart extends Dialog {
 
 				String title = path + File.separator + stitle;
 
-				FittingParameters fp = ssp.loadParameters(title);
+				FittingParameters fp = ssp.loadParameters(title, false);
 
 				customComposite.getPlotSystem1CompositeView().setMethodologyDropDown(fp.getBgMethod());
 				customComposite.getPlotSystem1CompositeView().setFitPowerDropDown(fp.getFitPower());
@@ -893,7 +893,7 @@ public class SurfaceScatterViewStart extends Dialog {
 
 		else if (TrackingMethodology.intToTracker1(trackerSelection) == TrackerType1.USE_SET_POSITIONS
 				&& ssp.getTrackerOn()) {
-			setParametersFromFile(paramFile);
+			setParametersFromFile(paramFile, true);
 		}
 
 	}
@@ -1761,13 +1761,13 @@ public class SurfaceScatterViewStart extends Dialog {
 		return raw;
 	}
 
-	private void setParametersFromFile(String paramFile) {
-		setParametersFromFile(paramFile, false);
+	private void setParametersFromFile(String paramFile, boolean useTrajectory) {
+		setParametersFromFile(paramFile, false, useTrajectory);
 	}
 
-	private void setParametersFromFile(String paramFile, boolean setTheTrackerType) {
+	private void setParametersFromFile(String paramFile, boolean setTheTrackerType, boolean useTrajectory) {
 
-		FittingParameters fp = ssp.loadParameters(paramFile);
+		FittingParameters fp = ssp.loadParameters(paramFile, useTrajectory);
 
 		customComposite.getPlotSystem1CompositeView().setMethodologyDropDown(fp.getBgMethod());
 		customComposite.getPlotSystem1CompositeView().setFitPowerDropDown(fp.getFitPower());

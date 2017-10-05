@@ -288,6 +288,10 @@ public class SurfaceScatterPresenter {
 				if (ild == null) {
 					ild = dh1.getLazyDataset("file");
 				}
+				
+				if (ild == null) {
+					ild = dh1.getLazyDataset("file");
+				}
 
 				if (ild == null) {
 					imagesUnavailableWarning();
@@ -930,7 +934,7 @@ public class SurfaceScatterPresenter {
 	}
 
 	@SuppressWarnings("unchecked")
-	public FittingParameters loadParameters(String title) {
+	public FittingParameters loadParameters(String title, boolean useTrajectory) {
 
 		String fileType = StringUtils.substringAfterLast(title, ".");
 
@@ -943,7 +947,8 @@ public class SurfaceScatterPresenter {
 			for (FrameModel m : fms) {
 
 				double[] location = LocationLenPtConverterUtils.lenPtToLocationConverter(fp.getLenpt());
-
+				
+				
 				m.setRoiLocation(location);
 				m.setTrackingMethodology(fp.getTracker());
 				m.setFitPower(fp.getFitPower());
@@ -954,18 +959,22 @@ public class SurfaceScatterPresenter {
 
 		else {
 
+		
 			
-
 			for (int n = 0; n < fms.size(); n++) {
 
 				FrameModel m = fms.get(n);
 
-				FittingParametersInputReader.readerFromNexus(title, n, m);
+				FittingParametersInputReader.readerFromNexus(title, n, m, useTrajectory);
+				
+			
 			}
+			
+			
 
 			fp = FittingParametersInputReader.fittingParametersFromFrameModel(fms.get(0));
-
-			FittingParametersInputReader.geometricalParametersReaderFromNexus(title, gm);
+		
+			FittingParametersInputReader.geometricalParametersReaderFromNexus(title, gm, drm);
 			FittingParametersInputReader.anglesAliasReaderFromNexus(title);
 		}
 
@@ -1770,9 +1779,12 @@ public class SurfaceScatterPresenter {
 	public void writeNexus(String nexusFilePath) {
 
 		RodObjectNexusBuilderModel rnbm = new RodObjectNexusBuilderModel(fms, nexusFilePath, gm, drm);
-
-		RodObjectNexusUtils_Development.RodObjectNexusUtils(rnbm);
-
+		try{
+			RodObjectNexusUtils_Development.RodObjectNexusUtils(rnbm);
+		}
+		catch(Exception d){
+			System.out.println(d.getMessage());
+		}
 	}
 
 	public IDataset getSplicedCurveX() {
