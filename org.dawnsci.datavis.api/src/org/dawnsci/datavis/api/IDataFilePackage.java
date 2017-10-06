@@ -9,4 +9,6 @@ public interface IDataFilePackage {
 	public IDataPackage[] getDataPackages();
 	
 	public Tree getTree();
+	
+	public String getFilePath();
 }
