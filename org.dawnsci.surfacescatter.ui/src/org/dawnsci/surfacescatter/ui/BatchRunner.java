@@ -19,7 +19,7 @@ public class BatchRunner {
 		String[] imageFolderPaths = new String[brm.getBrdtoList().size()];
 		String[] paramFiles = new String[brm.getBrdtoList().size()];
 		String[] nexusSaveFilePaths = new String[brm.getBrdtoList().size()];
-		
+		boolean[] useTrajectories = new boolean[brm.getBrdtoList().size()];
 		
 		for(int i = 0; i<brm.getBrdtoList().size();i++){
 			BatchRodDataTransferObject b = brm.getBrdtoList().get(i);
@@ -29,16 +29,19 @@ public class BatchRunner {
 			
 			String nexusName = brm.getNxsFolderPath() + File.separator + b.getRodName()+".nxs";
 			nexusSaveFilePaths[i] = nexusName;
+			
+			useTrajectories[i]= b.isUseTrajectory();
 		}
 		
-		batchRun(datFiles, imageFolderPaths, paramFiles, nexusSaveFilePaths);
+		batchRun(datFiles, imageFolderPaths, paramFiles, nexusSaveFilePaths, useTrajectories);
 		
 	}
 	
 	
-	public static void batchRun(String[][] datFiles, String[] imageFolderPaths, String[] paramFiles, String[] nexusSaveFilePaths) {
+	public static void batchRun(String[][] datFiles, String[] imageFolderPaths, String[] paramFiles, String[] nexusSaveFilePaths,
+			boolean[] useTrajectories) {
 
-		SurfaceScatterPresenter[] sspArray = new SurfaceScatterPresenter[datFiles.length];
+//		SurfaceScatterPresenter[] sspArray = new SurfaceScatterPresenter[datFiles.length];
 
 		int cores = Runtime.getRuntime().availableProcessors();
 
@@ -55,20 +58,20 @@ public class BatchRunner {
 
 			FittingParametersInputReader.anglesAliasReaderFromNexus(paramFiles[i]);
 
-			FittingParametersInputReader.geometricalParametersReaderFromNexus(paramFiles[i], sspi.getGm());
+			FittingParametersInputReader.geometricalParametersReaderFromNexus(paramFiles[i], sspi.getGm(), sspi.getDrm());
 
 			sspi.surfaceScatterPresenterBuildWithFrames(datFiles[i], sspi.getGm().getxName(), MethodSetting.toMethod(sspi.getGm().getExperimentMethod()));
 
-			sspi.loadParameters(paramFiles[i]);
+			sspi.loadParameters(paramFiles[i], useTrajectories[i]);
 
 			BatchTracking bat = new BatchTracking();
 			bat.setSsp(sspi);
 
-			sspArray[i] = sspi;
+//			sspArray[i] = sspi;
 
 			int[][] lenpt = LocationLenPtConverterUtils.locationToLenPtConverter(sspi.getFms().get(0).getRoiLocation());
 
-			BatchRunnable mr = new BatchRunnable(bat, lenpt,nexusSaveFilePaths[i] );
+			BatchRunnable mr = new BatchRunnable(bat, lenpt,nexusSaveFilePaths[i], useTrajectories[i]);
 
 			executor.execute(mr);
 

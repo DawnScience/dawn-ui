@@ -27,12 +27,14 @@ public class DummyBatchController {
 		String[] paramFiles = new String[]{"/scratch/Nexus_Tests/gm_test_193.nxs", "/scratch/Nexus_Tests/gm_test_193.nxs"};
 		String[] nexusSaveFilePaths = new String[]{"/scratch/Nexus_Tests/Dawn_Of_Batch_00.nxs", "/scratch/Nexus_Tests/Dawn_Of_Batch_01.nxs"};
 	
-	
+		boolean[] usetrajectories = new boolean[]{true, false};
+		
 		BatchRunner.batchRun(datFiles, 
 				 imageFolderPaths,
 //				 correctionSelections,
 				 paramFiles,
-				 nexusSaveFilePaths);
+				 nexusSaveFilePaths,
+				 usetrajectories);
 	
 	
 	}

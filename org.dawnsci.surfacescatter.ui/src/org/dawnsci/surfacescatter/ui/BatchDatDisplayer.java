@@ -4,8 +4,6 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-
-import org.apache.commons.lang.StringUtils;
 import org.dawnsci.surfacescatter.BatchRodDataTransferObject;
 import org.dawnsci.surfacescatter.BatchRodModel;
 import org.dawnsci.surfacescatter.FittingParametersInputReader;
@@ -24,7 +22,6 @@ import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -36,7 +33,6 @@ import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.swt.widgets.Text;
-
 import uk.ac.diamond.scisoft.analysis.io.LoaderFactory;
 
 public class BatchDatDisplayer extends Composite implements IDatDisplayer {
@@ -72,7 +68,7 @@ public class BatchDatDisplayer extends Composite implements IDatDisplayer {
 	private String filepath;
 	private Button selectAll;
 	private String option;
-	private BatchSetupWindow bsw;
+//	private BatchSetupWindow bsw;
 	private Group parameterFiles;
 	private ArrayList<TableItem> paramFilesChecked;
 	private Group numericalDatSelection;
@@ -81,10 +77,12 @@ public class BatchDatDisplayer extends Composite implements IDatDisplayer {
 	private BatchRodModel brm;
 	private String imageFolderPath;
 	private String rodName;
+	private boolean useTrajectory = true;
+	private Button useTrajectoryButton;
 
-	public void setImageFolderPath(String imageFolderPath) {
-		this.imageFolderPath = imageFolderPath;
-	}
+	
+
+	
 
 	public BatchDatDisplayer(Composite parent, int style, SurfaceScatterPresenter ssp, SurfaceScatterViewStart ssvs,
 			BatchSetupWindow rsw, BatchRodModel brm) {
@@ -94,7 +92,7 @@ public class BatchDatDisplayer extends Composite implements IDatDisplayer {
 		this.createContents();
 		this.ssp = ssp;
 		this.ssvs = ssvs;
-		this.bsw = rsw;
+//		this.bsw = rsw;
 		this.brm = brm;
 
 	}
@@ -450,6 +448,9 @@ public class BatchDatDisplayer extends Composite implements IDatDisplayer {
 				prepareToAddToRod(tidiedTransferList);
 
 			}
+			
+			
+			
 		});
 
 		selectAll.addSelectionListener(new SelectionAdapter() {
@@ -623,6 +624,21 @@ public class BatchDatDisplayer extends Composite implements IDatDisplayer {
 				clearParameterTable.setEnabled(false);
 			}
 		});
+		
+		InputTileGenerator useTrajectoryTile = new InputTileGenerator("Use Trajectory From File:", parameterFiles, true) ;
+		
+		useTrajectoryButton = useTrajectoryTile.getRadio();
+		
+		useTrajectoryButton.setSelection(useTrajectory);
+		
+		useTrajectoryButton.addSelectionListener(new SelectionAdapter() {
+
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				useTrajectory = useTrajectoryButton.getSelection();
+			}
+			
+		});
 
 		paramFileTable = new Table(parameterFiles, SWT.CHECK | SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL);
 		GridData paramFileTableData = new GridData(GridData.FILL_BOTH);
@@ -646,12 +662,8 @@ public class BatchDatDisplayer extends Composite implements IDatDisplayer {
 
 				try {
 
-					FittingParametersInputReader.geometricalParametersReaderFromNexus(ip.getText(), ssp.getGm());
+					FittingParametersInputReader.geometricalParametersReaderFromNexus(ip.getText(), ssp.getGm(), ssp.getDrm());
 
-					// bsw.getParamField().setUpdateOn(false);
-					// bsw.getParamField().updateDisplayFromGm(ssp.getGm());
-					// bsw.getAnglesAliasWindow().setFluxPath(ssp.getGm().getFluxPath());
-					// bsw.getParamField().setUpdateOn(true);
 
 				} catch (Exception e1) {
 
@@ -691,14 +703,14 @@ public class BatchDatDisplayer extends Composite implements IDatDisplayer {
 	private void fillTable() {
 
 		File folder = new File(datFolderPath);
-		File[] listOfFiles = folder.listFiles();
+		File[] arrayOfFiles = folder.listFiles();
 		datList = new ArrayList<>();
 
 		CharSequence dat = ".dat";
 
-		for (int i = 0; i < listOfFiles.length; i++) {
-			if (listOfFiles[i].isFile() && listOfFiles[i].getName().contains(dat)) {
-				datList.add(listOfFiles[i].getName());
+		for (int i = 0; i < arrayOfFiles.length; i++) {
+			if (arrayOfFiles[i].isFile() && arrayOfFiles[i].getName().contains(dat)) {
+				datList.add(arrayOfFiles[i].getName());
 			}
 		}
 
@@ -896,17 +908,6 @@ public class BatchDatDisplayer extends Composite implements IDatDisplayer {
 		return output;
 	}
 
-	public int[] comboPositionToEnumInt(ArrayList<MethodSetting> input) {
-
-		int[] output = new int[input.size()];
-
-		for (int i = 0; i < input.size(); i++) {
-			output[i] = MethodSetting.toInt(input.get(i));
-		}
-
-		return output;
-	}
-
 	public String getOption() {
 		return option;
 	}
@@ -957,11 +958,6 @@ public class BatchDatDisplayer extends Composite implements IDatDisplayer {
 
 		options = dh1.getNames();
 
-		ssp.setOptions(options);
-
-		ssvs.populateThetaOptionsDropDown();
-		ssvs.getParamField().getSelectedOption().select(0);
-		ssvs.getParamField().getTheta().select(0);
 
 		List<String> pb = Arrays.asList(options);
 
@@ -998,6 +994,8 @@ public class BatchDatDisplayer extends Composite implements IDatDisplayer {
 				} catch (Exception e2) {
 					e2.printStackTrace();
 				}
+				
+				imageFolderPath = ssp.getImageFolderPath();
 
 			}
 
@@ -1066,6 +1064,8 @@ public class BatchDatDisplayer extends Composite implements IDatDisplayer {
 		String p = getParamFile();
 		brdto.setParamFiles(p);
 
+		brdto.setUseTrajectory(useTrajectory);
+		
 		brdto.setRodName(rodName);
 
 		boolean good = true;
@@ -1130,9 +1130,8 @@ public class BatchDatDisplayer extends Composite implements IDatDisplayer {
 
 		if (increment.isStateOfText()) {
 			increment.getRadio().setText("Deactivate Increment");
-
 		}
-
+		
 		endDat.setEnabled(!increment.isStateOfText(), false);
 
 	}
@@ -1140,5 +1139,25 @@ public class BatchDatDisplayer extends Composite implements IDatDisplayer {
 	public void setRodName(String rodName) {
 		this.rodName = rodName;
 	}
+	
+	public boolean getUseTrajectory() {
+		return useTrajectory;
+	}
 
+	
+	public void setUseTrajectory(boolean f) {
+		this.useTrajectory = f;
+	}
+	
+	public Button getUseTrajectoryButton() {
+		return useTrajectoryButton;
+	}
+
+	public void setUseTrajectoryButton(Button useTrajectoryButton) {
+		this.useTrajectoryButton = useTrajectoryButton;
+	}
+
+	public void setImageFolderPath(String imageFolderPath) {
+		this.imageFolderPath = imageFolderPath;
+	}
 }

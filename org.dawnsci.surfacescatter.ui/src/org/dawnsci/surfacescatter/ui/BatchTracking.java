@@ -50,18 +50,18 @@ public class BatchTracking {
 		this.ssp = ssp;
 	}
 
-	protected void runTJ1(int[][] lenPt, String savepath1) {
+	protected void runTJ1(int[][] lenPt, String savepath1, boolean useTrajectory) {
 
 		this.gm = ssp.getGm();
 		this.fms = ssp.getFms();
 		this.drm = ssp.getDrm();
 		this.savePath = savepath1;
 
-		drm.resetAll();
+//		drm.resetAll();
 
 		int startFrame = ssp.getSliderPos();
 
-		final Display display = Display.getCurrent();
+//		final Display display = Display.getCurrent();
 		int[] imagePosInOriginalDat = CountUpToArray.CountUpToArray1(drm.getFilepathsSortedArray());
 
 		ssp.regionOfInterestSetter(lenPt);
@@ -127,7 +127,7 @@ public class BatchTracking {
 							imagePosInOriginalDat[k], trackingMarker, k, gv, ssp.getLenPt());
 
 					if (Arrays.equals(output1.getShape(), (new int[] { 2, 2 }))) {
-						Display d = Display.getCurrent();
+//						Display d = Display.getCurrent();
 						debug("Dummy Proccessing failure");
 
 						break;
@@ -136,7 +136,7 @@ public class BatchTracking {
 					drm.addBackgroundDatArray(fms.size(), k, output1);
 
 					int imageNumber = k;
-					IDataset tempImage = ssp.getImage(imageNumber);
+//					IDataset tempImage = ssp.getImage(imageNumber);
 
 				}
 			}

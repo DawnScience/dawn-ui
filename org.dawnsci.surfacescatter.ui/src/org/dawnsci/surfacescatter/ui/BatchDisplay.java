@@ -137,7 +137,7 @@ public class BatchDisplay extends Composite {
 				
 				BatchRodDataTransferObject bd = brm.getDTO(r);
 				
-				
+				bsw.pushTocheck(bd);
 			}
 		});
 		
@@ -151,7 +151,7 @@ public class BatchDisplay extends Composite {
 
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				batchDisplayTable.clearAll();
+				batchDisplayTable.removeAll();
 				brm.getBrdtoList().clear();
 			}
 		});
