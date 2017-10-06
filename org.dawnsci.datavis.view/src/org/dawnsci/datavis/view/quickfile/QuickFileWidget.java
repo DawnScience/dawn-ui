@@ -1,6 +1,7 @@
 package org.dawnsci.datavis.view.quickfile;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
@@ -28,6 +29,7 @@ public class QuickFileWidget extends Composite {
 	
 	private CLabel directoryPath;
 	private Text fileNameText;
+	private ContentProposalAdapter adapter;
 	private Set<IQuickFileWidgetListener> listeners;
 	private ExecutorService executor = Executors.newSingleThreadExecutor();
 	
@@ -53,7 +55,7 @@ public class QuickFileWidget extends Composite {
 		nameForm.bottom = new FormAttachment(100,0);
 		fileNameText.setLayoutData(nameForm);
 		
-		final ContentProposalAdapter adapter = new ContentProposalAdapter(
+		adapter = new ContentProposalAdapter(
 				fileNameText, new TextContentAdapter(), null,
 				null, null);
 		adapter.setProposalAcceptanceStyle(ContentProposalAdapter.PROPOSAL_REPLACE);
@@ -67,41 +69,7 @@ public class QuickFileWidget extends Composite {
 			
 			@Override
 			public void focusGained(FocusEvent e) {
-				adapter.setContentProposalProvider(null);
-				
-				Runnable r = () -> {
-					String start = directoryPath.getText();
-					File f = new File(directoryPath.getText());
-					File[] listFiles = f.listFiles();
-					final String[] names = new String[listFiles.length];
-					for (int i = 0; i < listFiles.length; i++) {
-						names[i] = listFiles[i].getName();
-					}
-					
-					SimpleContentProposalProvider p = new SimpleContentProposalProvider(names) {
-						
-						@Override
-						public IContentProposal[] getProposals(String contents, int position) {
-
-								ArrayList<ContentProposal> list = new ArrayList<ContentProposal>();
-								for (int i = 0; i < names.length; i++) {
-									if (names[i].toLowerCase().contains(contents.toLowerCase())) {
-										list.add(new ContentProposal(names[i]));
-									}
-								}
-								return list.toArray(new IContentProposal[list
-										.size()]);
-							}
-
-					};
-					
-					if (start.equals(directoryPath.getText())){
-						adapter.setContentProposalProvider(p);
-					}
-					
-				};
-				
-				executor.submit(r);
+				updateContext();
 			}
 		});
 		
@@ -110,12 +78,66 @@ public class QuickFileWidget extends Composite {
 			@Override
 			public void keyTraversed(TraverseEvent e) {
 				if (e.detail == SWT.TRAVERSE_RETURN && !adapter.isProposalPopupOpen()) {
-					firesListeners(directoryPath.getText(), fileNameText.getText());
+					
+					String path = directoryPath.getText();
+					String name = fileNameText.getText();
+					
+					File f = new File(path, name);
+					
+					if (f.isDirectory()) {
+						try {
+							setDirectoryPath(f.getCanonicalPath());
+							updateContext();
+						} catch (IOException e1) {
+							// TODO Auto-generated catch block
+							e1.printStackTrace();
+						}
+						return;
+					}
+					
+					firesListeners(path, name);
 				}
 			}
 		});
 	}
 	
+	private void updateContext() {
+		adapter.setContentProposalProvider(null);
+		
+		Runnable r = () -> {
+			String start = directoryPath.getText();
+			File f = new File(directoryPath.getText());
+			File[] listFiles = f.listFiles();
+			final String[] names = new String[listFiles.length];
+			for (int i = 0; i < listFiles.length; i++) {
+				names[i] = listFiles[i].getName();
+			}
+			
+			SimpleContentProposalProvider p = new SimpleContentProposalProvider(names) {
+				
+				@Override
+				public IContentProposal[] getProposals(String contents, int position) {
+
+						ArrayList<ContentProposal> list = new ArrayList<ContentProposal>();
+						for (int i = 0; i < names.length; i++) {
+							if (names[i].toLowerCase().contains(contents.toLowerCase())) {
+								list.add(new ContentProposal(names[i]));
+							}
+						}
+						return list.toArray(new IContentProposal[list
+								.size()]);
+					}
+
+			};
+			
+			if (start.equals(directoryPath.getText())){
+				adapter.setContentProposalProvider(p);
+			}
+			
+		};
+		
+		executor.submit(r);
+	}
 	
 	public void setDirectoryPath(String path) {
 		if (path.equals(directoryPath.getText())) {
