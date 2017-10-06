@@ -211,10 +211,14 @@ public class PlotController implements IPlotController {
 		//have to do multiple iterations so image traces arent removed after correct
 		// one added
 		for (DataStateObject object : state) {
-			if (traceMap.get(object.getOption()) != null && traceMap.get(object.getOption()).get(0) != null && mode.isThisMode((traceMap.get(object.getOption()).get(0)))) updateMap.put(object.getOption(), traceMap.remove(object.getOption()));	
+			if (traceMap.get(object.getOption()) != null 
+					&& traceMap.get(object.getOption()).get(0) != null 
+					&& mode.isThisMode((traceMap.get(object.getOption()).get(0)))) {
+				updateMap.put(object.getOption(), traceMap.remove(object.getOption()));	
+			}
 		}
 		
-		Display.getDefault().syncExec(new Runnable() {
+		Runnable r = new Runnable() {
 			
 			@Override
 			public void run() {
@@ -222,9 +226,11 @@ public class PlotController implements IPlotController {
 					for (ITrace t : traces) system.removeTrace(t);
 				}
 			}
-		});
+		};
 		
 		final List<Runnable> uiRunnables = new ArrayList<>();
+		
+		uiRunnables.add(r);
 		
 		for (DataStateObject object : state) {
 
@@ -233,9 +239,10 @@ public class PlotController implements IPlotController {
 			if (list == null) list = new ArrayList<ITrace>();
 
 			if (!object.isChecked() && !list.isEmpty()) {
-				for (ITrace t : list){
+				final List<ITrace> fList = list;
+				 uiRunnables.add(() -> {for (ITrace t : fList){
 					system.removeTrace(t);
-				}
+				}});
 			} else if (object.isChecked()) {
 				uiRunnables.add(updatePlottedData(object, list, localCurrentMode, localModifier));
 			}
