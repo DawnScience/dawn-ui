@@ -1607,7 +1607,7 @@ public class SurfaceScatterViewStart extends Dialog {
 
 			double ref = ReflectivityFluxCorrectionsForDialog.reflectivityFluxCorrectionsDouble(// SurfaceScatterViewStart.this.getParamField().getFluxPath().getText(),
 					QdcdDat.getDouble(0),
-					// filepath
+					ssp.getGm().isUseNegativeQ(),
 					ssp.getGm().getFluxPath());
 
 		} catch (Exception h) {
