@@ -12,6 +12,7 @@ import org.eclipse.dawnsci.analysis.api.processing.IExportOperation;
 import org.eclipse.dawnsci.analysis.api.processing.IOperation;
 import org.eclipse.dawnsci.analysis.api.processing.IOperationInputData;
 import org.eclipse.dawnsci.analysis.api.processing.OperationData;
+import org.eclipse.dawnsci.analysis.api.processing.OperationDataForDisplay;
 import org.eclipse.dawnsci.analysis.api.processing.model.IOperationModel;
 import org.eclipse.dawnsci.analysis.dataset.slicer.SliceFromSeriesMetadata;
 import org.eclipse.dawnsci.analysis.dataset.slicer.SliceVisitor;
@@ -176,9 +177,18 @@ public class EscapableSliceVisitor implements SliceVisitor {
 			}
 
 			MetadataPlotUtils.plotDataWithMetadata(out, output);
-
+			
+			if (result instanceof OperationDataForDisplay) {
+				IDataset[] dd = ((OperationDataForDisplay)result).getDisplayData();
+				for (IDataset d : dd) {
+					IDataset view = d.getSliceView();
+					view = view.squeeze();
+					if (view.getRank() == 1) {
+						MetadataPlotUtils.plotDataWithMetadata(view, output, false);
+					}	
+				}	
+			}
 		}
-
 	}
 	
 	private class OperationInputDataImpl implements IOperationInputData {
