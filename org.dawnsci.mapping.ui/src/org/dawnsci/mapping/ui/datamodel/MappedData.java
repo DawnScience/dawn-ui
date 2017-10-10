@@ -29,7 +29,7 @@ public class MappedData extends AbstractMapData{
 	
 
 	public IDataset getSpectrum(double x, double y) {
-		int[] indices = MappingUtils.getIndicesFromCoOrds(baseMap, x, y, parent.getMapDims().getxDim(),parent.getMapDims().getxDim());
+		int[] indices = MappingUtils.getIndicesFromCoOrds(baseMap, x, y, parent.getMapDims().getxDim(),parent.getMapDims().getyDim());
 		if (indices == null) return null;
 		ILazyDataset spectrum = parent.getSpectrum(indices[0], indices[1]);
 		if (spectrum == null) return null;
