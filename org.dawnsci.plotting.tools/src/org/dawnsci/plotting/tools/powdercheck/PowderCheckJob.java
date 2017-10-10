@@ -37,6 +37,7 @@ import org.eclipse.swt.widgets.Display;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import uk.ac.diamond.scisoft.analysis.baseline.BaselineGeneration;
 import uk.ac.diamond.scisoft.analysis.crystallography.CalibrationFactory;
 import uk.ac.diamond.scisoft.analysis.crystallography.HKL;
 import uk.ac.diamond.scisoft.analysis.diffraction.powder.NonPixelSplittingIntegration;
@@ -138,55 +139,6 @@ public class PowderCheckJob extends Job {
 	}
 
 	private IStatus integrateQuadrants(Dataset data, IDiffractionMetadata md, IProgressMonitor monitor) {
-//		QSpace qSpace = new QSpace(md.getDetector2DProperties(), md.getDiffractionCrystalEnvironment());
-//		double[] bc = md.getDetector2DProperties().getBeamCentreCoords();
-//		int[] shape = data.getShape();
-//
-//		double[] farCorner = new double[]{0,0};
-//		double[] centre = md.getDetector2DProperties().getBeamCentreCoords();
-//		if (centre[0] < shape[0]/2.0) farCorner[0] = shape[0];
-//		if (centre[1] < shape[1]/2.0) farCorner[1] = shape[1];
-//		double maxDistance = Math.sqrt(Math.pow(centre[0]-farCorner[0],2)+Math.pow(centre[1]-farCorner[1],2));
-//		SectorROI sroi = new SectorROI(bc[0], bc[1], 0, maxDistance, Math.PI/4 - Math.PI/8, Math.PI/4 + Math.PI/8, 1, true, SectorROI.INVERT);
-//		Dataset[] profile = ROIProfile.sector(data, null, sroi, true, false, false, qSpace, xAxis, false);
-//
-//		ArrayList<IDataset> y = new ArrayList<IDataset> ();
-//		profile[0].setName("Bottom right");
-//		y.add(profile[0]);
-//		if (system == null) {
-//			logger.error("Plotting system is null");
-//			return Status.CANCEL_STATUS;
-//		}
-//
-//		List<ITrace> traces = system.updatePlot1D(profile[4], y, null);
-//		//((ILineTrace)traces.get(0)).setTraceColor(ColorConstants.darkBlue);
-//		y.remove(0);
-//
-//		final Dataset reflection = profile[2];
-//		final Dataset axref = profile[6];
-//		reflection.setName("Top left");
-//		y.add(reflection);
-//		traces = system.updatePlot1D(axref, y, null);
-//		//((ILineTrace)traces.get(0)).setTraceColor(ColorConstants.lightBlue);
-//		y.remove(0);
-//
-//		if (monitor.isCanceled()) return Status.CANCEL_STATUS;
-//
-//		sroi = new SectorROI(bc[0], bc[1], 0, maxDistance, 3*Math.PI/4 - Math.PI/8, 3*Math.PI/4 + Math.PI/8, 1, true, SectorROI.INVERT);
-//		profile = ROIProfile.sector(data, null, sroi, true, false, false, qSpace, xAxis, false);
-//
-//		profile[0].setName("Bottom left");
-//		y.add(profile[0]);
-//		traces = system.updatePlot1D(profile[4], y, null);
-//		//((ILineTrace)traces.get(0)).setTraceColor(ColorConstants.darkGreen);
-//		y.remove(0);
-//
-//		final Dataset reflection2 = profile[2];
-//		final Dataset axref2 = profile[6];
-//		reflection2.setName("Top right");
-//		y.add(reflection2);
-//		traces = system.updatePlot1D(axref2, y, null);
-		//((ILineTrace)traces.get(0)).setTraceColor(ColorConstants.lightGreen);
 		
 		int nBins = 36;
 		NonPixelSplittingIntegration2D npsi = new NonPixelSplittingIntegration2D(md);
@@ -246,7 +198,7 @@ public class PowderCheckJob extends Job {
 		
 		List<Dataset> out =  integrateFullSector(data, md, monitor);
 		
-		Dataset baseline = rollingBallBaselineCorrection(out.get(1), 10);
+		Dataset baseline = BaselineGeneration.rollingBallBaseline(out.get(1), 10);
 		
 		List<PowderCheckResult> result = fitPeaksToTrace(out.get(0),Maths.subtract(out.get(1), baseline), baseline);
 
@@ -422,35 +374,6 @@ public class PowderCheckJob extends Job {
 		results.add(new PowderCheckResult(cf.getFunction(minFuncIdx), qList.get(minQIdx)));
 		cf.removeFunction(minFuncIdx);
 		qList.remove(minQIdx);
-	}
-
-	private Dataset rollingBallBaselineCorrection(Dataset y, int width) {
-
-		Dataset t1 = DatasetFactory.zeros(y);
-		Dataset t2 = DatasetFactory.zeros(y);
-
-		for (int i = 0 ; i < y.getSize()-1; i++) {
-			int start = (i-width) < 0 ? 0 : (i - width);
-			int end = (i+width) > (y.getSize()-1) ? (y.getSize()-1) : (i+width);
-			double val = y.getSlice(new int[]{start}, new int[]{end}, null).min().doubleValue();
-			t1.set(val, i);
-		}
-
-		for (int i = 0 ; i < y.getSize()-1; i++) {
-			int start = (i-width) < 0 ? 0 : (i - width);
-			int end = (i+width) > (y.getSize()-1) ? (y.getSize()-1) : (i+width);
-			double val = t1.getSlice(new int[]{start}, new int[]{end}, null).max().doubleValue();
-			t2.set(val, i);
-		}
-
-		for (int i = 0 ; i < y.getSize()-1; i++) {
-			int start = (i-width) < 0 ? 0 : (i - width);
-			int end = (i+width) > (y.getSize()-1) ? (y.getSize()-1) : (i+width);
-			double val = (Double) t2.getSlice(new int[]{start}, new int[]{end}, null).mean();
-			t1.set(val, i);
-		}
-
-		return t1;
 	}
 	
 	private void cleanPlottingSystem(){
