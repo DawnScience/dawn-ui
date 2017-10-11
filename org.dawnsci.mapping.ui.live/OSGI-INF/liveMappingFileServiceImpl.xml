@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" name="Live File Impl">
+   <implementation class="org.dawnsci.mapping.ui.live.LiveMappingFileServiceImpl"/>
+   <service>
+      <provide interface="org.dawnsci.mapping.ui.ILiveMappingFileService"/>
+   </service>
+</scr:component>
