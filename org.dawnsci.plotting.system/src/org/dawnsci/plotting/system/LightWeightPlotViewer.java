@@ -350,6 +350,8 @@ public class LightWeightPlotViewer<T> extends AbstractPlottingViewer<T> implemen
 		if (xyGraph!=null) ((RegionArea)xyGraph.getPlotArea()).removeImageTraceListener(l);
 	}
 
+	final static double ZOOM_RATIO = 0.1; // from Axis
+
 	private MouseWheelListener mouseWheelListener;
 	private MouseWheelListener getMouseWheelListener() {
 		if (mouseWheelListener == null) mouseWheelListener = new MouseWheelListener() {
@@ -361,8 +363,8 @@ public class LightWeightPlotViewer<T> extends AbstractPlottingViewer<T> implemen
 				IFigure fig = getFigureAtCurrentMousePosition(null);
 				if (fig!=null && fig.getParent() instanceof Axis) {
 					Axis axis = (Axis)fig.getParent();
-					final double center = axis.getPositionValue(e.x, false);
-					axis.zoomInOut(center, direction*0.01);
+					final double center = axis.getPositionValue(axis.isHorizontal() ? e.x : e.y, false);
+					axis.zoomInOut(center, direction * ZOOM_RATIO);
 					xyGraph.repaint();
 					return;
 				}
@@ -370,7 +372,7 @@ public class LightWeightPlotViewer<T> extends AbstractPlottingViewer<T> implemen
 				if (xyGraph==null) return;
 				if (e.count==0)    return;
 				String level  = System.getProperty("org.dawb.workbench.plotting.system.zoomLevel");
-				double factor = level!=null ? Double.parseDouble(level) :  0.1d;
+				double factor = level != null ? Double.parseDouble(level) : ZOOM_RATIO;
 				
 				boolean useWhite = PlottingSystemActivator.getPlottingPreferenceStore().getBoolean(PlottingConstants.ZOOM_INTO_WHITESPACE);
 				xyGraph.setZoomLevel(e, direction*factor, useWhite);
