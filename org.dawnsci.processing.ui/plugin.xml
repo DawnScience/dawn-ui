@@ -185,6 +185,12 @@
             name="T Parameter Operation Set-up Wizard Page"
             operationid="uk.ac.diamond.scisoft.analysis.processing.operations.saxs.TParameterOperation">
       </operationsetupwizardpage>
+      <operationsetupwizardpage
+            class="org.dawnsci.processing.ui.oned.DigitalFilterWizardPage"
+            id="org.dawnsci.processing.ui.DigitalFilterWizardPage"
+            name="Digital Filter Operation Set-up Wizard Page"
+            operationid="uk.ac.diamond.scisoft.analysis.processing.operations.DigitalFilterOperation">
+      </operationsetupwizardpage>
    </extension>
 
 </plugin>
