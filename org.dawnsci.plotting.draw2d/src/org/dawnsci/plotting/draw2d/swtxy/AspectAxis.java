@@ -49,7 +49,7 @@ public class AspectAxis extends DAxis implements IAxis {
 
 	private AspectAxis relativeTo;
 	private Range      maximumRange;
-    private boolean    keepAspect; // This is so that the user may have images with and without aspect in the same application.
+	private boolean    keepAspect; // This is so that the user may have images with and without aspect in the same application.
 	private Dataset labelData;
 	
 	public AspectAxis(String title, boolean yAxis) {
@@ -226,22 +226,21 @@ public class AspectAxis extends DAxis implements IAxis {
 	private XYRegionGraph getGraph() {
 		return (XYRegionGraph)getParent();
 	}
-	
-	protected void pan(Range temp, double t1, double t2) {
-		
+
+	protected boolean panChecked(Range temp, double t1, double t2) {
 		final ImageTrace trace = ((XYRegionGraph)getGraph()).getRegionArea().getImageTrace();
-		
+
 		// Code to stop pan outside image bounds.
 		if (trace!=null && !trace.hasTrueAxes()) {
-		    
-		    final double d1 = t1-t2;
-		    final double d2 = t2-t1;
-		    
-		    final Range  cur  = getRange();
-    		final double ran  = Math.max(cur.getUpper(), cur.getLower()) - Math.min(cur.getUpper(), cur.getLower());
+
+			final double d1 = t1 - t2;
+			final double d2 = t2 - t1;
+
+			final Range cur = getRange();
+			final double ran = Math.max(cur.getUpper(), cur.getLower()) - Math.min(cur.getUpper(), cur.getLower());
 
 			boolean isAxisFlipped = isYAxis() ? trace.getImageOrigin().isOnTop() : !trace.getImageOrigin().isOnLeft();
-    		int yIndex = trace.getImageOrigin().isOnLeadingDiagonal() ? 0 : 1;
+			int yIndex = trace.getImageOrigin().isOnLeadingDiagonal() ? 0 : 1;
 			int index = isYAxis() ? yIndex : 1 - yIndex;
 			double lower, upper;
 			if (isAxisFlipped) {
@@ -254,25 +253,24 @@ public class AspectAxis extends DAxis implements IAxis {
 
 			if ((lower-d2)<=0) {
 				if (isAxisFlipped) {
-    				setRange(ran, 0);
+					setRange(ran, 0);
 				} else {
-    				setRange(0, ran);
+					setRange(0, ran);
 				}
-				return;
+				return true;
 
 			} else if ((upper+d1)>trace.getData().getShape()[index]) {
 				if (isAxisFlipped) {
-			        setRange(trace.getData().getShape()[index], trace.getData().getShape()[index]-ran);	    
+					setRange(trace.getData().getShape()[index], trace.getData().getShape()[index]-ran);
 				} else {
-					setRange(trace.getData().getShape()[index]-ran, trace.getData().getShape()[index]);	   
+					setRange(trace.getData().getShape()[index]-ran, trace.getData().getShape()[index]);
 				}
-				return;
+				return true;
 			}
 
- 		}
-		// End code to stop pan outside image bounds.
-		
-		super.pan(temp, t1, t2);
+		}
+
+		return super.panChecked(temp, t1, t2);
 	}
 
 	/**
