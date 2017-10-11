@@ -197,9 +197,9 @@ public class MappedFileManager {
 		}
 		
 		boolean load = true;
-		if (!mappedDataArea.isInRange(mdf)) {
-			load = MessageDialog.openConfirm(viewer.getControl().getShell(), "No overlap!", "Are you sure you want to load this data?");
-		} 
+//		if (!mappedDataArea.isInRange(mdf)) {
+//			load = MessageDialog.openConfirm(viewer.getControl().getShell(), "No overlap!", "Are you sure you want to load this data?");
+//		} 
 
 		if (load)mappedDataArea.addMappedDataFile(mdf);
 //		plotManager.clearAll();
@@ -265,6 +265,10 @@ public class MappedFileManager {
 	}
 	
 	public void importFile(final String path) {
+		importFile(path, true);
+	}
+	
+	public void importFile(final String path, boolean showWizard) {
 		if (contains(path)) return;
 		if (Display.getCurrent() == null) {
 			PlatformUI.getWorkbench().getDisplay().asyncExec(new Runnable() {
@@ -328,7 +332,11 @@ public class MappedFileManager {
 							return;
 						}
 						
-						showWizard(path, datasetNames, meta);
+						if (showWizard) {
+							showWizard(path, datasetNames, meta);
+						} else {
+							logger.error("Failed to import file :" + path);
+						}
 						
 					}
 					

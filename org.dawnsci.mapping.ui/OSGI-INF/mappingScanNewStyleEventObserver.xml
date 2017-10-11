@@ -1,6 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" activate="start" name="Mapping Scan Event Observer">
-   <implementation class="org.dawnsci.mapping.ui.MappingScanNewStyleEventObserver"/>
-   <reference bind="bindIEventService" cardinality="1..1" interface="org.eclipse.scanning.api.event.IEventService" name="IEventService" policy="static" unbind="unbindIEventService"/>
-   <reference bind="bindEventAdmin" cardinality="1..1" interface="org.osgi.service.event.EventAdmin" name="EventAdmin" policy="static" unbind="unbindEventAdmin"/>
-</scr:component>
