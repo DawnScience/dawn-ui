@@ -20,9 +20,9 @@ import org.eclipse.scanning.api.event.EventException;
 import org.eclipse.scanning.api.event.IEventService;
 import org.eclipse.scanning.api.event.bean.BeanEvent;
 import org.eclipse.scanning.api.event.bean.IBeanListener;
+import org.eclipse.scanning.api.event.core.IPropertyFilter.FilterAction;
 import org.eclipse.scanning.api.event.core.ISubmitter;
 import org.eclipse.scanning.api.event.core.ISubscriber;
-import org.eclipse.scanning.api.event.core.IPropertyFilter.FilterAction;
 import org.eclipse.scanning.api.event.scan.IScanListener;
 import org.eclipse.scanning.api.event.scan.ScanBean;
 import org.eclipse.scanning.api.event.scan.ScanEvent;
@@ -80,8 +80,8 @@ private static final String PROCESSING_QUEUE_NAME = "scisoft.operation.STATUS_QU
 	
 	@Override
 	public void setInitialFiles(String[] files) {
+		if (files == null) return;
 		initialFiles = files.clone();
-		
 	}
 
 	private void attach() {
