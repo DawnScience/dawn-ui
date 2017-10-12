@@ -203,10 +203,16 @@ public class NDimensions {
 			if (dimensions[i].getSlice() != null && dimensions[i].getSize() != 1) {
 				int size = dimensions[i].getSize();
 				Slice slice = dimensions[i].getSlice();
+
 				if (size == slice.getStop()) {
 					containsEnd = true;
 				}
-				if (size-1 == slice.getStart()) {
+				
+				Integer start = slice.getStart();
+				
+				if (start == null) start = 0;
+				
+				if (size-1 == start) {
 					isSingle = true;
 				}
 			}
@@ -250,7 +256,7 @@ public class NDimensions {
 		List<String>[] options = new List[dimensions.length];
 		for (int i = 0 ; i < options.length; i++) {
 			options[i] = new ArrayList<String>();
-			if (primary != null && primary[i] != null) {
+			if (primary != null &&  primary.length > i) {
 				options[i].add(primary[i]);
 				dimensions[i].setAxis(primary[i]);
 			} else {

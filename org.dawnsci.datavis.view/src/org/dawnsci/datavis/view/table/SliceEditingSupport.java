@@ -312,7 +312,6 @@ public class SliceEditingSupport extends EditingSupport {
 	
 	
 	protected void setShowingSlider(final boolean isShow) {
-
 		if (isShow) {
 			createSliderShell();	
 			Rectangle sizeT= editor.getControl().getBounds();

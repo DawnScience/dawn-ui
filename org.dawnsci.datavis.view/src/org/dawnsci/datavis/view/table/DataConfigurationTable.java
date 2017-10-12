@@ -37,10 +37,10 @@ public class DataConfigurationTable {
 		
 		tableViewer = new TableViewer(tableComposite, SWT.FULL_SELECTION | SWT.BORDER);
 		
-		final TableViewerColumn dim   = new TableViewerColumn(tableViewer, SWT.LEFT, 0);
-		dim.getColumn().setText("Dimension");
-		dim.getColumn().setWidth(80);
-		dim.setLabelProvider(new ColumnLabelProvider() {
+		final TableViewerColumn dimension  = new TableViewerColumn(tableViewer, SWT.LEFT, 0);
+		dimension.getColumn().setText("Dimension");
+		dimension.getColumn().setWidth(80);
+		dimension.setLabelProvider(new ColumnLabelProvider() {
 			@Override
 			public String getText(Object element) {
 				return nDimension.getDimensionWithSize((int)element);
@@ -114,7 +114,7 @@ public class DataConfigurationTable {
 		
 		
 		TableColumnLayout columnLayout = new TableColumnLayout();
-	    columnLayout.setColumnData(dim.getColumn(), new ColumnWeightData(15,20));
+	    columnLayout.setColumnData(dimension.getColumn(), new ColumnWeightData(15,20));
 	    columnLayout.setColumnData(options.getColumn(), new ColumnWeightData(15,20));
 	    columnLayout.setColumnData(slice.getColumn(), new ColumnWeightData(20,20));
 	    columnLayout.setColumnData(axis.getColumn(), new ColumnWeightData(50,20));
@@ -127,9 +127,13 @@ public class DataConfigurationTable {
 	}
 	
 	public void setInput(NDimensions ndims) {
+		if (ndims == nDimension) {
+			if (!tableViewer.isCellEditorActive()) {
+				tableViewer.refresh();
+			}
+			return;
+		}
 		nDimension = ndims;
-//		dimensionSupport.setNDimensions(ndims);
-//		options.setEditingSupport(new DimensionEditSupport(tableViewer,ndims));
 		tableViewer.setInput(ndims);
 		tableViewer.getTable().getParent().layout();
 	}
