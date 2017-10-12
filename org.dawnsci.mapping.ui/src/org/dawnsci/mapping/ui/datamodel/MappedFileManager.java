@@ -1,7 +1,9 @@
 package org.dawnsci.mapping.ui.datamodel;
 
 import java.lang.reflect.InvocationTargetException;
+import java.util.Arrays;
 import java.util.Map;
+import java.util.Optional;
 
 import org.dawb.common.ui.monitor.ProgressMonitorWrapper;
 import org.dawb.common.ui.util.DatasetNameUtils;
@@ -23,7 +25,6 @@ import org.eclipse.january.dataset.IRemoteData;
 import org.eclipse.january.dataset.RGBDataset;
 import org.eclipse.january.metadata.IMetadata;
 import org.eclipse.jface.dialogs.IDialogConstants;
-import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
@@ -63,6 +64,30 @@ public class MappedFileManager {
 	public void removeFile(String path) {
 		MappedDataFile dataFile = mappedDataArea.getDataFile(path);
 		removeFile(dataFile);
+	}
+	
+	public void clearNonLiveFiles() {
+		Object[] children = mappedDataArea.getChildren();
+		
+		Arrays.stream(children).filter(MappedDataFile.class::isInstance)
+		.map(MappedDataFile.class::cast).filter(f -> f.getLiveDataBean() == null).forEach(f -> {
+			mappedDataArea.removeFile(f);
+			plotManager.unplotFile(f);
+		});
+		
+		if (mappedDataArea.isEmpty()) {
+			plotManager.clearAll();
+		}
+		viewer.refresh();
+	}
+	
+	public boolean containsLiveFiles() {
+		Object[] children = mappedDataArea.getChildren();
+		
+		Optional<MappedDataFile> first = Arrays.stream(children).filter(MappedDataFile.class::isInstance)
+		.map(MappedDataFile.class::cast).filter(f -> f.getLiveDataBean() != null).findFirst();
+		
+		return first.isPresent();
 	}
 	
 	public void clearAll() {

@@ -157,6 +157,16 @@ public class MapActionUtils {
 		
 	}
 	
+	public static IAction getNonLiveFilesRemoveAction(final MappedFileManager manager) {
+		return new Action("Clear all finished scans") {
+			@Override
+			public void run() {
+				manager.clearNonLiveFiles();
+			}
+		};
+		
+	}
+	
 	public static IAction getFilesRemoveAllAction(final MappedFileManager manager) {
 		return new Action("Clear all files") {
 			@Override

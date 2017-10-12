@@ -247,7 +247,10 @@ public class MappedDataView extends ViewPart {
 					while(it != null && it.hasNext()) {
 						Object obj = it.next();
 						
-						if (obj instanceof MappedDataFile) mdfs.add((MappedDataFile)obj);
+						if (obj instanceof MappedDataFile) {
+							MappedDataFile f = (MappedDataFile)obj;
+							mdfs.add(f);
+						}
 						
 						if (obj instanceof AbstractMapData) {
 							maps.add((AbstractMapData)obj);
@@ -280,7 +283,15 @@ public class MappedDataView extends ViewPart {
 					if (!mdfs.isEmpty()) {
 						manager.add(new Separator());
 						manager.add(MapActionUtils.getFilesRemoveAllAction(FileManagerSingleton.getFileManager()));
+						
+						if (FileManagerSingleton.getFileManager().containsLiveFiles()) {
+							
+							manager.add(new Separator());
+							manager.add(MapActionUtils.getNonLiveFilesRemoveAction(FileManagerSingleton.getFileManager()));
+						}
 					}
+					
+					
 				}
 			}
 		});
