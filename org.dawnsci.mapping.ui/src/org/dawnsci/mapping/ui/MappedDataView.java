@@ -1,9 +1,6 @@
 package org.dawnsci.mapping.ui;
 
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.ArrayList;
-import java.util.EventListener;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -19,7 +16,6 @@ import org.dawnsci.mapping.ui.datamodel.MappedDataFile;
 import org.dawnsci.mapping.ui.datamodel.MappedFileManager;
 import org.dawnsci.mapping.ui.datamodel.PlottableMapObject;
 import org.eclipse.core.resources.IFile;
-import org.eclipse.dawnsci.analysis.api.processing.IOperationBean;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.PlotType;
 import org.eclipse.dawnsci.plotting.api.axis.ClickEvent;
@@ -37,17 +33,6 @@ import org.eclipse.jface.viewers.ITreeSelection;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TreeSelection;
 import org.eclipse.jface.viewers.TreeViewer;
-import org.eclipse.scanning.api.event.EventConstants;
-import org.eclipse.scanning.api.event.EventException;
-import org.eclipse.scanning.api.event.bean.BeanEvent;
-import org.eclipse.scanning.api.event.bean.IBeanListener;
-import org.eclipse.scanning.api.event.core.IPropertyFilter.FilterAction;
-import org.eclipse.scanning.api.event.core.ISubscriber;
-import org.eclipse.scanning.api.event.scan.IScanListener;
-import org.eclipse.scanning.api.event.scan.ScanEvent;
-import org.eclipse.scanning.api.event.status.Status;
-import org.eclipse.scanning.api.event.status.StatusBean;
-import org.eclipse.scanning.api.ui.CommandConstants;
 import org.eclipse.swt.dnd.DND;
 import org.eclipse.swt.dnd.DropTarget;
 import org.eclipse.swt.dnd.DropTargetAdapter;
@@ -126,6 +111,8 @@ public class MappedDataView extends ViewPart {
 	private MapPlotManager plotManager;
 	private MappedDataViewState initialState;
 	
+	private LiveMapFileListener liveMapListener;
+	
 	@SuppressWarnings("unchecked")
 	@Override
 	public void createPartControl(Composite parent) {
@@ -138,32 +125,6 @@ public class MappedDataView extends ViewPart {
 			final IViewPart view = page.showView(getSecondaryIdAttribute("mapview", "org.dawnsci.mapping.ui.mapview"));
 			map = (IPlottingSystem<Composite>)view.getAdapter(IPlottingSystem.class);
 			map.setPlotType(PlotType.IMAGE);
-//			// remove unwanted tool & menu contribution
-//			IActionBars bar = map.getActionBars();
-//			IToolBarManager tbm = bar.getToolBarManager();
-//			tbm.remove(ToolPageRole.ROLE_2D.getId());
-//			tbm.remove(BasePlottingConstants.SNAP_TO_GRID);
-//			IMenuManager mm = bar.getMenuManager();
-//			mm.remove(BasePlottingConstants.XY_PLOT_MENU_ID);
-//			mm.remove(BasePlottingConstants.IMAGE_PLOT_MENU_ID);
-//			mm.remove(BasePlottingConstants.IMAGE_ORIGIN_MENU_ID);
-//			// add histogram action
-//			IAction histogramAction = new Action() {
-//				@Override
-//				public void run() {
-//					try {
-//						if (map.getTraces().iterator().hasNext()) {
-//							final IToolPageSystem system = (IToolPageSystem) map.getAdapter(IToolPageSystem.class);
-//							system.setToolVisible(BasePlottingConstants.HISTO_TOOL_ID,
-//									ToolPageRole.ROLE_2D, ToolPageView.TOOLPAGE_2D_VIEW_ID);
-//						}
-//					} catch (Exception e1) {
-//						logger.error("Cannot show histogram tool programatically!", e1);
-//					}
-//				}
-//			};
-//			histogramAction.setImageDescriptor(Activator.getImageDescriptor("icons/color_wheel.png"));
-//			tbm.insertBefore(BasePlottingConstants.CONFIG_SETTINGS, histogramAction);
 		} catch (PartInitException e) {
 			throw new RuntimeException("Could not create the map view", e);
 		}
@@ -220,7 +181,7 @@ public class MappedDataView extends ViewPart {
 				}
 			}
 		});
-
+		
 		viewer = new TreeViewer(parent);
 		viewer.getTree().setLayoutData(new GridData(GridData.FILL_BOTH));
 		viewer.setContentProvider(new MapFileTreeContentProvider());
@@ -352,104 +313,32 @@ public class MappedDataView extends ViewPart {
 			}
 		});
 		
-		subscribeToOperationStatusTopic();
-		subscribeToScanTopic();
-
+		String[] filesToReload = null;
+		
 		// Restore state of view
 		if (initialState != null) {
+			List<String> filesInView = initialState.getFilesInView();
+			filesToReload = filesInView.toArray(new String[filesInView.size()]);
+		}
+		
+		ILiveMappingFileService liveService = LiveServiceManager.getLiveMappingFileService();
+		
+		//check for live
+		if (liveService != null) {
+			liveMapListener = new LiveMapFileListener();
+			liveService.setInitialFiles(filesToReload);
+			filesToReload = null;
+			liveService.addLiveFileListener(liveMapListener);
+		}
+
+		// Restore state of view
+		if (filesToReload != null) {
 			logger.info("Loading view state: {}", initialState);
 			final MappedFileManager mappedFileManager = FileManagerSingleton.getFileManager();
-			for (String f : initialState.getFilesInView()) {
+			for (String f : filesToReload) {
 				mappedFileManager.importFile(f);
 			}
 		}
-	}
-	
-	
-	private void subscribeToOperationStatusTopic(){
-		
-		final String suri = CommandConstants.getScanningBrokerUri();
-		if (suri==null) return; // Nothing to start, standard DAWN.
-
-
-		// Check the service is available this should always be true!
-		if (AcquisitionServiceManager.getEventService() == null) {
-			return;
-		}
-
-		try {
-			final URI uri = new URI(suri);
-			ISubscriber<EventListener> subscriber = AcquisitionServiceManager.getEventService().createSubscriber(uri, "scisoft.operation.STATUS_TOPIC");
-			
-			subscriber.addListener(new IBeanListener<StatusBean>() {
-
-				@Override
-				public void beanChangePerformed(BeanEvent<StatusBean> evt) {
-					System.out.println("bean update " + evt.getBean().toString());
-					plotManager.updatePlot();
-					if (evt.getBean() instanceof IOperationBean && evt.getBean().getStatus().isRunning() && evt.getBean().getPreviousStatus().equals(Status.SUBMITTED)) {
-						String host = MappingScanNewStyleEventObserver.getDataServerHost();
-						int port = MappingScanNewStyleEventObserver.getDataServerPort();
-						final IOperationBean bean = (IOperationBean)evt.getBean();
-						final LiveDataBean lb = new LiveDataBean();
-						lb.setHost(host);
-						lb.setPort(port);
-
-						FileManagerSingleton.getFileManager().importLiveFile(bean.getOutputFilePath(), lb, bean.getFilePath());
-
-						
-						
-					}
-					
-					if (!evt.getBean().getStatus().isFinal()) return;
-					if (evt.getBean() instanceof IOperationBean) {
-						final IOperationBean bean = (IOperationBean)evt.getBean();
-
-						FileManagerSingleton.getFileManager().locallyReloadLiveFile(bean.getOutputFilePath());
-
-
-					}
-				}
-			});
-			
-			
-		} catch (URISyntaxException | EventException e) {
-			
-		}
-		
-	}
-	
-	private void subscribeToScanTopic(){
-		
-		final String suri = CommandConstants.getScanningBrokerUri();
-		if (suri==null) return; // Nothing to start, standard DAWN.
-
-
-		logger.info("Starting the Mapping Scan Event Observer");
-
-		try {
-			final URI uri = new URI(suri);
-			ISubscriber<EventListener> subscriber = AcquisitionServiceManager.getEventService().createSubscriber(uri, EventConstants.STATUS_TOPIC);
-
-			subscriber.addProperty("scanRequest", FilterAction.DELETE); 
-			subscriber.addProperty("position", FilterAction.DELETE); 		            
-			subscriber.addListener(new IScanListener() {
-
-				public void scanEventPerformed(ScanEvent evt) {
-					plotManager.updatePlot();
-				}
-				
-				public void scanStateChanged(ScanEvent evt) {
-					plotManager.updatePlot();
-				}
-
-			});
-
-
-		} catch (URISyntaxException | EventException e) {
-
-		}
-
 	}
 	
 	private void openImportWizard(String path) {
@@ -467,6 +356,12 @@ public class MappedDataView extends ViewPart {
 	@Override
 	public void dispose() {
 		super.dispose();
+		
+		ILiveMappingFileService liveService = LiveServiceManager.getLiveMappingFileService();
+		
+		if (liveService != null && liveMapListener != null) {
+			liveService.removeLiveFileListener(liveMapListener);
+		}
 	}
 	
 	@SuppressWarnings({ "unchecked", "rawtypes" })
@@ -561,6 +456,34 @@ public class MappedDataView extends ViewPart {
 			props.setProperty(kv[0].trim(), kv[1].trim());
 		}
 		return props;
+	}
+	
+	private class LiveMapFileListener implements ILiveMapFileListener{
+
+		@Override
+		public void fileLoadRequest(String path, String host, int port, String parent) {
+			if (host != null) {
+				LiveDataBean b = new LiveDataBean();
+				b.setHost(host);
+				b.setPort(port);
+				FileManagerSingleton.getFileManager().importLiveFile(path, b, parent);
+			} else {
+				FileManagerSingleton.getFileManager().importFile(path, false);
+			}
+			
+			
+		}
+
+		@Override
+		public void refreshRequest() {
+			plotManager.updatePlot();
+		}
+
+		@Override
+		public void localReload(String path) {
+			FileManagerSingleton.getFileManager().locallyReloadLiveFile(path);
+		}
+		
 	}
 
 

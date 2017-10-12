@@ -8,6 +8,8 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.dawnsci.mapping.ui.AcquisitionServiceManager;
+import org.dawnsci.mapping.ui.ILiveMapFileListener;
+import org.dawnsci.mapping.ui.LiveServiceManager;
 import org.dawnsci.mapping.ui.datamodel.AbstractMapData;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -50,10 +52,7 @@ public class ImageGridDialog extends Dialog{
 	private static final int MIN_REFRESH_TIME = 5000;
 	private MultiPlotJob job;
 	private List<MapAndPlot> mapsWithPlots;
-	private ISubscriber<EventListener> scanSubscriber;
-	private ISubscriber<EventListener> beanSubscriber;
-	private IScanListener scanListener;
-	private IBeanListener<?> beanListener;
+	private ILiveMapFileListener listener;
 	
 	private static Logger logger = LoggerFactory.getLogger(ImageGridDialog.class);
 
@@ -99,7 +98,6 @@ public class ImageGridDialog extends Dialog{
 			for (IPlottingSystem<Composite> system : systems) {
 				system.createPlotPart(plotsComp, "Plot " + i, null, PlotType.IMAGE, null);
 				system.getPlotComposite().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-//				system.updatePlot2D(data.get(i), null, null);
 				MetadataPlotUtils.plotDataWithMetadata(data.get(i), system);
 				i++;
 			}
@@ -112,8 +110,30 @@ public class ImageGridDialog extends Dialog{
 			job.setRunnable(() -> {
 				mapsWithPlots.stream().forEach(MapAndPlot::update);
 			});
-			subscribeToOperationStatusTopic();
-			subscribeToScanTopic();
+			
+			listener = new ILiveMapFileListener() {
+				
+				@Override
+				public void refreshRequest() {
+					if (job != null) job.schedule();
+					
+				}
+				
+				@Override
+				public void localReload(String path) {
+					//do nothing
+				}
+				
+				@Override
+				public void fileLoadRequest(String path, String host, int port, String parent) {
+					//do nothing
+				}
+			};
+			
+			if (LiveServiceManager.getLiveMappingFileService() != null) {
+				LiveServiceManager.getLiveMappingFileService().addLiveFileListener(listener);
+			}
+			
 		}
 		
 		return container;
@@ -130,96 +150,11 @@ public class ImageGridDialog extends Dialog{
 		return new Point((int)(bounds.width*0.8),(int)(bounds.height*0.8));
 	}
 	
-	private void subscribeToOperationStatusTopic(){
-		
-		final String suri = CommandConstants.getScanningBrokerUri();
-		if (suri==null) return; // Nothing to start, standard DAWN.
-
-
-		// Check the service is available this should always be true!
-		if (AcquisitionServiceManager.getEventService() == null) {
-			return;
-		}
-
-		try {
-			final URI uri = new URI(suri);
-			beanSubscriber = AcquisitionServiceManager.getEventService().createSubscriber(uri, "scisoft.operation.STATUS_TOPIC");
-			
-			beanListener = new IBeanListener<StatusBean>() {
-				@Override
-				public void beanChangePerformed(BeanEvent<StatusBean> evt) {
-					if (job != null) job.schedule();
-				}
-			};
-			
-			
-			beanSubscriber.addListener(beanListener);
-			
-			
-		} catch (URISyntaxException | EventException e) {
-			
-		}
-		
-	}
-	
-	private void subscribeToScanTopic(){
-		
-		final String suri = CommandConstants.getScanningBrokerUri();
-		if (suri==null) return; // Nothing to start, standard DAWN.
-
-		try {
-			final URI uri = new URI(suri);
-			scanSubscriber= AcquisitionServiceManager.getEventService().createSubscriber(uri, EventConstants.STATUS_TOPIC);
-
-			
-			
-			scanSubscriber.addProperty("scanRequest", FilterAction.DELETE); 
-			scanSubscriber.addProperty("position", FilterAction.DELETE); 		       
-			
-			scanListener = new IScanListener() {
-				@Override
-				public void scanEventPerformed(ScanEvent evt) {
-					if (job != null) job.schedule();
-				}
-				
-				@Override
-				public void scanStateChanged(ScanEvent evt) {
-					if (job != null) job.schedule();
-				}
-			};
-			
-			scanSubscriber.addListener(scanListener);
-
-
-		} catch (URISyntaxException | EventException e) {
-
-		}
-
-	}
 	
 	private void unsubscribe(){
 		
-		if (scanListener == null && beanListener == null) return; 
-
-		if (scanListener != null && scanSubscriber != null) {
-			try {
-
-				scanSubscriber.removeListener(scanListener);
-				logger.debug("scan listener removed");
-				
-			} catch (Exception e) {
-				logger.error("Could not remove listener",e);
-			}
-		}
-		
-		if (beanListener != null && beanSubscriber != null) {
-			try {
-				beanSubscriber.removeListener(beanListener);
-				logger.debug("bean listener removed");
-				
-			} catch (Exception e) {
-				logger.error("Could not remove listener",e);
-			}
+		if (LiveServiceManager.getLiveMappingFileService() != null && listener != null) {
+			LiveServiceManager.getLiveMappingFileService().removeLiveFileListener(listener);
 		}
 		
 	}
@@ -253,8 +188,6 @@ public class ImageGridDialog extends Dialog{
 		}
 		
 	}
-	
-	
 	
 	private class MultiPlotJob extends Job {
 
