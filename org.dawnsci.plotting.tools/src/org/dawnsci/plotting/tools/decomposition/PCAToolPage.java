@@ -29,7 +29,6 @@ import org.eclipse.january.dataset.SliceND;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -52,6 +51,7 @@ public class PCAToolPage extends AbstractToolPage {
 	private IPlottingSystem<Composite> scoresSystem;
 	private IPlottingSystem<Composite> reconSystem;
 	private PCAJob job;
+	private PCAReconJob jobRecon;
 	private Label status;
 	private Composite control;
 	
@@ -74,6 +74,7 @@ public class PCAToolPage extends AbstractToolPage {
 		control.setLayout(new GridLayout(2, false));
 		
 		job = new PCAJob();
+		jobRecon = new PCAReconJob();
 		
 		
 		try {
@@ -116,7 +117,7 @@ public class PCAToolPage extends AbstractToolPage {
 		reconItem.setControl(makeReconstructionPanel(tabFolder));
 		
 		varianceSystem.createPlotPart(c, 
-				getTitle(), 
+				"PCA_tool_variance", 
 				null, 
 				PlotType.XY,
 				this.getViewPart());
@@ -167,6 +168,9 @@ public class PCAToolPage extends AbstractToolPage {
 				pcRecon.setMaximum(nComp);
 				sampleRecon.setMinimum(0);
 				sampleRecon.setMaximum(data.getShape()[0]-1);
+				sampleRecon.setSelection(0);
+				sampleRecon.getParent().pack();
+				sampleRecon.getParent().layout();
 				
 				
 				job.schedule();
@@ -188,10 +192,14 @@ public class PCAToolPage extends AbstractToolPage {
 		
 		Label l = new Label(c1, SWT.None);
 		l.setText("PCs: ");
-		pcRecon = new Spinner(c1, SWT.NONE);
+		l.setLayoutData(new GridData());
+		pcRecon = new Spinner(c1, SWT.BORDER);
+		pcRecon.setLayoutData(new GridData());
 		l = new Label(c1, SWT.NONE);
 		l.setText("Sample: ");
-		sampleRecon = new Spinner(c1, SWT.NONE);
+		l.setLayoutData(new GridData());
+		sampleRecon = new Spinner(c1, SWT.BORDER);
+		sampleRecon.setLayoutData(new GridData());
 		
 		pcRecon.addSelectionListener(new SelectionAdapter() {
 		
@@ -214,7 +222,7 @@ public class PCAToolPage extends AbstractToolPage {
 		});
 		
 		reconSystem.createPlotPart(c, 
-				getTitle(), 
+				"PCA_tool_reconstruction", 
 				null, 
 				PlotType.XY,
 				this.getViewPart());
@@ -266,7 +274,7 @@ public class PCAToolPage extends AbstractToolPage {
 		});
 		
 		loadingSystem.createPlotPart(c, 
-				getTitle(), 
+				"PCA_tool_loading", 
 				null, 
 				PlotType.XY,
 				this.getViewPart());
@@ -274,7 +282,7 @@ public class PCAToolPage extends AbstractToolPage {
 		loadingSystem.getPlotComposite().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
 		scoresSystem.createPlotPart(c, 
-				getTitle(), 
+				"PCA_tool_scores", 
 				null, 
 				PlotType.XY,
 				this.getViewPart());
@@ -372,56 +380,59 @@ public class PCAToolPage extends AbstractToolPage {
 		updateReconstruction(data, fit);
 	}
 	
-	private void updateReconstruction(PCADataPackage data, PCAResult result) {
+	private void updateReconstruction(final PCADataPackage data, final PCAResult result) {
+		
 		
 		if (data == null || result == null) return;
 		
-		int selection = sampleRecon.getSelection();
-		int nPCs = pcRecon.getSelection();
+		final int selection = sampleRecon.getSelection();
+		final int nPCs = pcRecon.getSelection();
 		
-		IDataset d = data.getData();
-		SliceND s = new SliceND(d.getShape());
-		s.setSlice(0, selection, selection+1,1);
+		Runnable r = () -> {
+			
+			IDataset d = data.getData();
+			SliceND s = new SliceND(d.getShape());
+			s.setSlice(0, selection, selection+1,1);
+			
+			IDataset slice = d.getSlice(s);
+			IDataset sq = slice.squeeze();
+			sq.setName("Sample " + selection);
+			
+			IDataset scores = result.getScores();
+			SliceND scoresSlice = new SliceND(scores.getShape());
+			scoresSlice.setSlice(1, 0, nPCs, 1);
+			
+			final Dataset subScores = DatasetUtils.convertToDataset(scores.getSlice(scoresSlice));
+			
+			IDataset loadings = result.getLoadings();
+			SliceND loadSlice = new SliceND(loadings.getShape());
+			loadSlice.setSlice(0, 0, nPCs, 1);
+			
+			final Dataset subLoads = DatasetUtils.convertToDataset(loadings.getSlice(loadSlice));
+			
+			Dataset dotProduct = LinearAlgebra.dotProduct(subScores,subLoads);
+			
+			Dataset test = dotProduct.getSlice(s);
+			Dataset ts = test.squeeze();
+			ts.iadd(result.getMean());
+			Dataset recon = dotProduct.squeeze();
+			recon.iadd(result.getMean());
+			
+			IDataset residual = Maths.subtract(sq, ts);
+			residual.setName("Residual");
+			
+			IDataset loadAx = null;
+			
+			if (data.getAxes() != null && data.getAxes()[0] != null) {
+				loadAx = data.getAxes()[0];
+			}
+			
+			reconSystem.clear();
+			reconSystem.createPlot1D(loadAx, Arrays.asList(sq,ts,residual), null);
+		};
 		
-		IDataset slice = d.getSlice(s);
-		IDataset sq = slice.squeeze();
-		sq.setName("Sample " + selection);
-		
-		IDataset scores = result.getScores();
-		SliceND scoresSlice = new SliceND(scores.getShape());
-		scoresSlice.setSlice(1, 0, nPCs, 1);
-//		scoresSlice.setSlice(0, selection, selection+1,1);
-		
-		
-		Dataset subScores = DatasetUtils.convertToDataset(scores.getSlice(scoresSlice));
-		
-		
-		IDataset loadings = result.getLoadings();
-		SliceND loadSlice = new SliceND(loadings.getShape());
-		loadSlice.setSlice(0, 0, nPCs, 1);
-		
-		Dataset subLoads = DatasetUtils.convertToDataset(loadings.getSlice(loadSlice));
-		
-		Dataset dotProduct = LinearAlgebra.dotProduct(subScores,subLoads);
-		
-		Dataset test = dotProduct.getSlice(s);
-		Dataset ts = test.squeeze();
-		ts.iadd(result.getMean());
-		Dataset recon = dotProduct.squeeze();
-		recon.iadd(result.getMean());
-		
-		IDataset residual = Maths.subtract(sq, ts);
-		residual.setName("Residual");
-		
-		IDataset loadAx = null;
-		
-		if (data.getAxes() != null && data.getAxes()[0] != null) {
-			loadAx = data.getAxes()[0];
-		}
-		
-		reconSystem.clear();
-		reconSystem.createPlot1D(loadAx, Arrays.asList(sq,ts,residual), null);
-		
+		jobRecon.setRunnable(r);
+		jobRecon.schedule();
 		
 	}
 	
@@ -513,5 +524,33 @@ public class PCAToolPage extends AbstractToolPage {
 			updateResult(p, fit);
 			
 			return Status.OK_STATUS;
-		}}
+		}
+	}
+	
+	private class PCAReconJob extends Job {
+
+		private AtomicReference<Runnable> runnable;
+		
+		public PCAReconJob() {
+			super("PCA Recon");
+			runnable = new AtomicReference<>();
+		}
+		
+		public void setRunnable(Runnable data) {
+			runnable.set(data);
+		}
+		
+
+		@Override
+		protected IStatus run(IProgressMonitor monitor) {
+
+			Runnable p = runnable.getAndSet(null);
+			
+			if (p == null) return Status.OK_STATUS;
+			
+			p.run();
+			
+			return Status.OK_STATUS;
+		}
+	}
 }
