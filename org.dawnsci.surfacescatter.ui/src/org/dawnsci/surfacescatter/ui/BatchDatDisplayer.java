@@ -68,7 +68,6 @@ public class BatchDatDisplayer extends Composite implements IDatDisplayer {
 	private String filepath;
 	private Button selectAll;
 	private String option;
-//	private BatchSetupWindow bsw;
 	private Group parameterFiles;
 	private ArrayList<TableItem> paramFilesChecked;
 	private Group numericalDatSelection;
@@ -80,10 +79,6 @@ public class BatchDatDisplayer extends Composite implements IDatDisplayer {
 	private boolean useTrajectory = true;
 	private Button useTrajectoryButton;
 
-	
-
-	
-
 	public BatchDatDisplayer(Composite parent, int style, SurfaceScatterPresenter ssp, SurfaceScatterViewStart ssvs,
 			BatchSetupWindow rsw, BatchRodModel brm) {
 
@@ -92,7 +87,6 @@ public class BatchDatDisplayer extends Composite implements IDatDisplayer {
 		this.createContents();
 		this.ssp = ssp;
 		this.ssvs = ssvs;
-//		this.bsw = rsw;
 		this.brm = brm;
 
 	}
@@ -503,7 +497,6 @@ public class BatchDatDisplayer extends Composite implements IDatDisplayer {
 			public void widgetSelected(SelectionEvent e) {
 				rodDisplayTable.removeAll();
 				enableRodConstruction(false);
-				// bsw.setupRightEnabled(false);
 
 			}
 		});
@@ -1048,7 +1041,7 @@ public class BatchDatDisplayer extends Composite implements IDatDisplayer {
 			paramFileSelection.setEnabled(true);
 			folderDisplayTable.getVerticalBar().setEnabled(true);
 			enableRodConstruction(true);
-			// bsw.setupRightEnabled(true);
+
 		}
 
 	}

@@ -104,6 +104,12 @@ public class BatchDisplay extends Composite {
 		});
 		
 		
+		Group processGroup = new Group(batchTableGroup, SWT.V_SCROLL | SWT.FILL);
+		GridLayout processGroupLayout = new GridLayout(2, true);
+		GridData processGroupData = new GridData((GridData.FILL_BOTH));
+		processGroup.setLayout(processGroupLayout);
+		processGroup.setLayoutData(processGroupData);
+		
 		Button process = new Button(batchTableGroup, SWT.PUSH);
 		process.setText("Build and Process Batch");
 		process.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
@@ -116,6 +122,24 @@ public class BatchDisplay extends Composite {
 				BatchRunner.batchRun(brm);
 			}
 		});
+		
+		Button advancedSettings = new Button(batchTableGroup, SWT.PUSH);
+		advancedSettings.setText("Build and Process Batch");
+		advancedSettings.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
+		advancedSettings.setEnabled(true);
+		
+		advancedSettings.addSelectionListener(new SelectionAdapter() {
+
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+//				BatchRunner.batchRun(brm);
+				
+				
+				
+			}
+		});
+		
+		
 		
 		Button check = new Button(batchTableGroup, SWT.PUSH);
 		check.setText("<- Check");
