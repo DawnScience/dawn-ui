@@ -1,5 +1,7 @@
 package org.dawnsci.mapping.ui.datamodel;
 
+import java.util.Arrays;
+
 import org.dawnsci.mapping.ui.LivePlottingUtils;
 import org.dawnsci.mapping.ui.MappingUtils;
 import org.eclipse.dawnsci.plotting.api.trace.MetadataPlotUtils;
@@ -71,7 +73,6 @@ public class ReMappedData extends AbstractMapData {
 		MapScanDimensions mapDims = oParent.getMapDims();
 		
 		fm = LivePlottingUtils.cropNanValuesFromAxes(fm,!mapDims.isRemappingRequired());
-		
 		IDataset[] remapData = MappingUtils.remapData(fm, shape, 0);
 		
 		if (remapData == null) return;
@@ -93,14 +94,14 @@ public class ReMappedData extends AbstractMapData {
 	
 	public void setShape(int[] shape){
 		this.shape = shape;
-		map = null;
+//		map = null;
 		updateRemappedData(shape);
 	}
 	
 	
 	@Override
 	public IDataset getSpectrum(double x, double y) {
-		int[] indices = MappingUtils.getIndicesFromCoOrds(map, x, y);
+		int[] indices = MappingUtils.getIndicesFromCoOrds(getMap(), x, y);
 		int index = -1;
 		try {
 			index = lookup.getInt(new int[]{indices[1],indices[0]});

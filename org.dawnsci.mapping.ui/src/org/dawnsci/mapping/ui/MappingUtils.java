@@ -141,7 +141,6 @@ public class MappingUtils {
 	
 	public static int[] getIndicesFromCoOrds(ILazyDataset map, double x, double y){
 		IDataset[] ax = MetadataPlotUtils.getAxesFromMetadata(map, false);
-		
 		IDataset xx = ax[1];
 		IDataset yy = ax[0];
 		
@@ -171,6 +170,7 @@ public class MappingUtils {
 	public static IDataset[] remapData(IDataset flatMap, int[] shape, int scanDim){
 		if (flatMap == null) return null;
 		IDataset[] axes = MetadataPlotUtils.getAxesForDimension(flatMap, scanDim);
+		
 		Dataset y = DatasetUtils.convertToDataset(axes[0]);
 		Dataset x = DatasetUtils.convertToDataset(axes[1]);
 		
@@ -184,7 +184,7 @@ public class MappingUtils {
 			shape = guessBestShapeShape(x,y);
 		}
 		
-		XYImagePixelCache cache = new XYImagePixelCache(x,y,new double[]{xMin,xMax},new double[]{yMin,yMax},shape[0],shape[1]);
+		XYImagePixelCache cache = new XYImagePixelCache(x,y,new double[]{xMin,xMax},new double[]{yMin,yMax},shape[1],shape[0]);
 		
 		List<Dataset> data = PixelIntegration.integrate(flatMap, null, cache);
 		data.get(0).setName(x.getName());
@@ -243,7 +243,7 @@ public class MappingUtils {
 		if (xOut > 1000) xOut = 1000;
 		if (yOut > 1000) yOut = 1000;
  		
-		return new int[]{xOut,yOut};
+		return new int[]{yOut,xOut};
 	}
 	
 	public static void saveRegisteredImage(AssociatedImage image, String path) {

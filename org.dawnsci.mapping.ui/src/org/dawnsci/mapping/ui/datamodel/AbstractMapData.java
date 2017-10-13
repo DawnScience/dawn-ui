@@ -125,7 +125,7 @@ public abstract class AbstractMapData implements PlottableMapObject{
 			long preSlice = System.currentTimeMillis();
 			IDataset slice = baseMap.getSlice(mapSlice);
 			logger.info("Slice of data from {} took {} ms", name, (System.currentTimeMillis()-preSlice));
-			if (slice.getRank() != 2) {
+			if (!mapDims.isRemappingRequired() && slice.getRank() != 2) {
 				int[] ss = ShapeUtils.squeezeShape(slice.getShape(), false);
 				if (ss.length == 1) {
 					int[] s2d = new int[]{1, ss[0]};
