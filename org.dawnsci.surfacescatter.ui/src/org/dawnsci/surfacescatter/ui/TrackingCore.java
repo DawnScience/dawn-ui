@@ -21,9 +21,12 @@ import org.eclipse.swt.widgets.Display;
 
 public class TrackingCore {
 
-	public TrackingCore(boolean[] doneArray, DirectoryModel drm, ArrayList<FrameModel> fms, SurfaceScatterPresenter ssp,
-			GeometricParametersModel gm, Thread t, SurfaceScatterViewStart ssvs, boolean showtrack,
-			TrackingHandlerWithFramesImproved thwfi, Display display) {
+	public TrackingCore(boolean[] doneArray, SurfaceScatterPresenter ssp, Thread t, SurfaceScatterViewStart ssvs,
+			boolean showtrack, TrackingHandlerWithFramesImproved thwfi, Display display) {
+
+		DirectoryModel drm = ssp.getDrm();
+		ArrayList<FrameModel> fms = ssp.getFms();
+		GeometricParametersModel gm = ssp.getGm();
 
 		boolean start = true;
 
@@ -39,13 +42,13 @@ public class TrackingCore {
 			while (isFmListScanned(fmal)) {
 
 				int k = closestNoWithoutDone(drm.getSortedX().getDouble(ssp.getSliderPos()), fmal);
-				
-				if (t != null) {
-					if (t.isInterrupted()) {
-						break;
-					}
+
+				if (t != null & t.isInterrupted()) {
+
+					break;
+
 				}
-				
+
 				FrameModel frame = fmal.get(k);
 
 				int trackingMarker = 1;
@@ -61,13 +64,9 @@ public class TrackingCore {
 
 				}
 
-				double myNum = frame.getScannedVariable();
-				double distance = Math.abs(drm.getSortedX().getDouble(0) - myNum);
-
 				TrackerType1 tt1 = frame.getTrackingMethodology();
 
-				seedLocationSetter(ssp, drm, frame.getFmNo(), !start, frame.getDatNo(), seedRequired, tt1, myNum,
-						distance);
+				seedLocationSetter(ssp, frame.getFmNo(), !start, frame.getDatNo(), seedRequired, tt1);
 
 				drm.addDmxList(frame.getDatNo(), frame.getNoInOriginalDat(), frame.getScannedVariable());
 
@@ -148,24 +147,22 @@ public class TrackingCore {
 		return;
 	}
 
-	private void seedLocationSetter(SurfaceScatterPresenter ssp, DirectoryModel drm, int k, boolean setStartFrame,
-			int frameDatNo, boolean seedRequired, TrackerType1 tt1, double myNum, double distance) {
+	private void seedLocationSetter(SurfaceScatterPresenter ssp, int k, boolean setStartFrame,
+			int frameDatNo, boolean seedRequired, TrackerType1 tt1) {
 
+		DirectoryModel drm = ssp.getDrm();
+		
 		if (seedRequired && tt1 != TrackerType1.SPLINE_INTERPOLATION && tt1 != TrackerType1.USE_SET_POSITIONS
 				&& drm.isTrackerOn()) {
 
 			double[] seedLocation = TrackerLocationInterpolation.trackerInterpolationInterpolator0(
 					drm.getTrackerLocationList(), drm.getSortedX(), drm.getInitialLenPt()[0], k);
 
-			System.out.println("k:        " + k + "      seedlocation [0]:   " + seedLocation[0]
-					+ "    seedlocation [1]:   " + seedLocation[1]);
-
 			drm.addSeedLocation(frameDatNo, seedLocation);
 
 		}
 
-		else if (// tt1 == TrackerType1.INTERPOLATION ||
-		tt1 == TrackerType1.SPLINE_INTERPOLATION) {
+		else if (tt1 == TrackerType1.SPLINE_INTERPOLATION) {
 
 			int[] len = new int[] { (int) Math.round(drm.getInterpolatedLenPts().get(k)[0][0]),
 					(int) Math.round(drm.getInterpolatedLenPts().get(k)[0][1]) };

@@ -228,7 +228,7 @@ public class SurfaceScatterViewStart extends Dialog {
 				int t = correctionsDropDown.getSelectionIndex();
 
 				MethodSetting ms = MethodSetting.toMethod(test[t]);
-				
+
 				ssp.getGm().setExperimentMethod(ms.getCorrectionsName());
 				ssp.surfaceScatterPresenterBuildWithFrames(filepaths, datDisplayer.getSelectedOption(), ms);
 
@@ -332,8 +332,6 @@ public class SurfaceScatterViewStart extends Dialog {
 
 		BatchSetupWindow bsw = new BatchSetupWindow(folder, this, ssp);
 
-		
-		
 		/////////////////////////////////////////////////////////////////////////
 		///////////////////////////////////////////////////////
 		// Tab 3 Analysis
@@ -422,11 +420,11 @@ public class SurfaceScatterViewStart extends Dialog {
 			public void widgetSelected(SelectionEvent e) {
 
 				CTabFolder f = (CTabFolder) e.getSource();
-				
-				if(f.getSelectionIndex()==1){
+
+				if (f.getSelectionIndex() == 1) {
 					return;
 				}
-				
+
 				if (ssp.getNoImages() != 0) {
 					customComposite.getSlider().setMaximum(ssp.getNoImages());
 					customComposite.getPlotSystem1CompositeView().generalUpdate();
@@ -456,12 +454,12 @@ public class SurfaceScatterViewStart extends Dialog {
 
 					ssps3c.resetVerticalAndHorizontalSlices();
 					customComposite.getPlotSystem1CompositeView().checkTrackerOnButton();
-				} 
-				
-				else if(f.getSelectionIndex()==1){
+				}
+
+				else if (f.getSelectionIndex() == 1) {
 					folder.setSelection(1);
 				}
-				
+
 				else {
 					folder.setSelection(0);
 				}
@@ -1061,14 +1059,12 @@ public class SurfaceScatterViewStart extends Dialog {
 					yData.set(consideredBox[1][1], ty);
 
 					lt1.insertPoint(x, y);
-					;
 
 				}
 
 				trajectoryRegion.setROI(lt1);
 				trajectoryRegion.setVisible(true);
 				trajectoryRegion.setRegionColor(cyan);
-				;
 
 				pS.addRegion(trajectoryRegion);
 				trajectoryRegion.setUserRegion(false);
@@ -1605,10 +1601,8 @@ public class SurfaceScatterViewStart extends Dialog {
 
 			}
 
-			double ref = ReflectivityFluxCorrectionsForDialog.reflectivityFluxCorrectionsDouble(// SurfaceScatterViewStart.this.getParamField().getFluxPath().getText(),
-					QdcdDat.getDouble(0),
-					ssp.getGm().isUseNegativeQ(),
-					ssp.getGm().getFluxPath());
+			ReflectivityFluxCorrectionsForDialog.reflectivityFluxCorrectionsDouble(// SurfaceScatterViewStart.this.getParamField().getFluxPath().getText(),
+					QdcdDat.getDouble(0), ssp.getGm().isUseNegativeQ(), ssp.getGm().getFluxPath());
 
 		} catch (Exception h) {
 			RegionOutOfBoundsWarning roobw = new RegionOutOfBoundsWarning(getShell(), 4, null);

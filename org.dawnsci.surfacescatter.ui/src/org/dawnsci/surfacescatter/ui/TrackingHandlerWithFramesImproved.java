@@ -1,14 +1,10 @@
 package org.dawnsci.surfacescatter.ui;
 
-import java.util.ArrayList;
-
 import org.dawnsci.surfacescatter.AnalaysisMethodologies.Methodology;
 import org.dawnsci.surfacescatter.CsdpGeneratorFromDrm;
 import org.dawnsci.surfacescatter.CurveStitchDataPackage;
 import org.dawnsci.surfacescatter.CurveStitchWithErrorsAndFrames;
 import org.dawnsci.surfacescatter.DirectoryModel;
-import org.dawnsci.surfacescatter.FrameModel;
-import org.dawnsci.surfacescatter.GeometricParametersModel;
 import org.dawnsci.surfacescatter.LocationLenPtConverterUtils;
 import org.eclipse.dawnsci.analysis.dataset.roi.RectangularROI;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
@@ -20,13 +16,11 @@ import org.eclipse.swt.widgets.ProgressBar;
 public class TrackingHandlerWithFramesImproved {
 
 	private IPlottingSystem<Composite> outputCurves;
-	private GeometricParametersModel gm;
 	private SurfaceScatterViewStart ssvs;
 	private SurfaceScatterPresenter ssp;
 	private ProgressBar progressBar;
 	private TrackingProgressAndAbortViewImproved tpaav;
 	private Thread t;
-	private ArrayList<FrameModel> fms;
 	private DirectoryModel drm;
 	boolean start = true;
 
@@ -58,19 +52,11 @@ public class TrackingHandlerWithFramesImproved {
 		this.outputCurves = outputCurves;
 	}
 
-	public void setGm(GeometricParametersModel gms) {
-		this.gm = gms;
-	}
-
 	public void setSsp(SurfaceScatterPresenter ssp) {
 		this.ssp = ssp;
 	}
 
 	protected void runTJ1() {
-
-		this.gm = ssp.getGm();
-		this.fms = ssp.getFms();
-		this.drm = ssp.getDrm();
 
 		drm.resetAll();
 
@@ -98,7 +84,7 @@ public class TrackingHandlerWithFramesImproved {
 			@Override
 			public void run() {
 
-				new TrackingCore(doneArray, drm, fms, ssp, gm, t, ssvs, true, TrackingHandlerWithFramesImproved.this,
+				new TrackingCore(doneArray, ssp, t, ssvs, true, TrackingHandlerWithFramesImproved.this,
 						display);
 
 				return;

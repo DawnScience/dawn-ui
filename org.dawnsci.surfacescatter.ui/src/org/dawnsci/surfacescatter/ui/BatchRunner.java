@@ -41,8 +41,6 @@ public class BatchRunner {
 	public static void batchRun(String[][] datFiles, String[] imageFolderPaths, String[] paramFiles, String[] nexusSaveFilePaths,
 			boolean[] useTrajectories) {
 
-//		SurfaceScatterPresenter[] sspArray = new SurfaceScatterPresenter[datFiles.length];
-
 		int cores = Runtime.getRuntime().availableProcessors();
 
 
