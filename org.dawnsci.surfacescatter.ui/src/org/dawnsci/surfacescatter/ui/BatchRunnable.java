@@ -7,7 +7,7 @@ public class BatchRunnable implements Runnable {
 	private String savePath;
 	private boolean useTrajectory;
 
-	public BatchRunnable(BatchTracking bat1, int[][] lenpt1, String savepath1, boolean useTrajectory) {
+	public BatchRunnable(BatchTracking bat1, int[][] lenpt1, String savepath1) {
 
 		setBat(bat1);
 		setLenpt(lenpt1);
@@ -17,7 +17,7 @@ public class BatchRunnable implements Runnable {
 	@Override
 	public void run() {
 
-		bat.runTJ1(lenpt, savePath, useTrajectory);
+		bat.runTJ1(lenpt, savePath);
 	}
 
 	public void setBat(BatchTracking bat1) {

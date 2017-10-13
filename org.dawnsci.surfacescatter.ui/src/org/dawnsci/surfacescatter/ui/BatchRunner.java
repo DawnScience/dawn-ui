@@ -67,11 +67,9 @@ public class BatchRunner {
 			BatchTracking bat = new BatchTracking();
 			bat.setSsp(sspi);
 
-//			sspArray[i] = sspi;
-
 			int[][] lenpt = LocationLenPtConverterUtils.locationToLenPtConverter(sspi.getFms().get(0).getRoiLocation());
 
-			BatchRunnable mr = new BatchRunnable(bat, lenpt,nexusSaveFilePaths[i], useTrajectories[i]);
+			BatchRunnable mr = new BatchRunnable(bat, lenpt,nexusSaveFilePaths[i]);
 
 			executor.execute(mr);
 
