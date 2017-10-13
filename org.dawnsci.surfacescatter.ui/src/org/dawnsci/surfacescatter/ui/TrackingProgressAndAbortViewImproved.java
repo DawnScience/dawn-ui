@@ -1,6 +1,5 @@
 package org.dawnsci.surfacescatter.ui;
 
-import org.dawnsci.surfacescatter.MethodSettingEnum.MethodSetting;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionEvent;

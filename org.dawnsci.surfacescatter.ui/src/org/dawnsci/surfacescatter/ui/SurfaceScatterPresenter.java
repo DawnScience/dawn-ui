@@ -535,6 +535,25 @@ public class SurfaceScatterPresenter {
 
 			drm.setCorrectionSelection(correctionSelection);
 
+
+			ArrayList<ArrayList<FrameModel>> fmsSorted = new ArrayList<>();
+					
+
+			for(int n=0; n<filepaths.length; n++){
+				
+				fmsSorted.add(new ArrayList<FrameModel>());
+				
+				
+				int io = imageArray[n].getShape()[0];
+				
+				for(int m =0; m<io;m++){
+					
+					fmsSorted.get(n).add(null);
+					
+				}
+			}
+			
+			
 			for (int f = 0; f < imageRefList.size(); f++) {
 
 				datNamesInOrder[f] = filepaths[imagesToFilepathRefDat.getInt(f)];
@@ -556,7 +575,12 @@ public class SurfaceScatterPresenter {
 				fm.setDatNo(imagesToFilepathRefDat.getInt(f));
 				fm.setImageNumber(f);
 				fm.setCorrectionSelection(correctionSelection);
+				fm.setFmNo(f);
 
+				
+				fmsSorted.get(fm.getDatNo()).set(fm.getNoInOriginalDat(), fm);
+				
+				
 				if (correctionSelection == MethodSetting.SXRD) {
 
 					double polarisation = SXRDGeometricCorrections
@@ -670,7 +694,11 @@ public class SurfaceScatterPresenter {
 				fm.setScannedVariable(xArrayCon.getDouble(f));
 
 			}
-
+	
+			
+			
+			drm.setFmsSorted(fmsSorted);
+			
 			drm.setFilepathsSortedArray(filepathsSortedArray);
 			drm.setImageNoInDatList(imageNoInDatList);
 
