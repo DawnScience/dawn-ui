@@ -205,8 +205,12 @@ public class HistrogramToolbarControl {
 					HistrogramToolbarControl.this.trace = pt;
 					enable(true);
 					HistrogramToolbarControl.this.lock.setSelection(!pt.isRescaleHistogram());
-					HistrogramToolbarControl.this.low.setText(pt.getMin().toString());
-					HistrogramToolbarControl.this.high.setText(pt.getMax().toString());
+					
+					if ((pt.getMin() != null) && (pt.getMax() != null)) {
+						HistrogramToolbarControl.this.low.setText(pt.getMin().toString());
+						HistrogramToolbarControl.this.high.setText(pt.getMax().toString());
+					}
+					
 					HistrogramToolbarControl.this.trace.addPaletteListener(listener);
 					
 				} else {
