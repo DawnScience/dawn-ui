@@ -4,9 +4,9 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.TreeMap;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
@@ -29,7 +29,7 @@ public class LoadedFile implements IDataObject, IDataFilePackage {
 
 	public LoadedFile(IDataHolder dataHolder) {
 		this.dataHolder = new AtomicReference<IDataHolder>(dataHolder);		
-		dataOptions = new TreeMap<>();
+		dataOptions = new LinkedHashMap<>();
 		String[] names = null;
 		if (dataHolder.getTree() != null) {
 			Map<DataNode, String> uniqueDataNodes = TreeUtils.getUniqueDataNodes(dataHolder.getTree().getGroupNode());
