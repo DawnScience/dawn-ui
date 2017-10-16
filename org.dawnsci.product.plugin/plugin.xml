@@ -7,14 +7,14 @@
          point="org.eclipse.core.runtime.products">
       <product
             application="org.eclipse.ui.ide.workbench"
-            name="Dawn">
+            name="DAWN Science">
          <property
                name="appName"
-               value="Dawn">
+               value="DAWN Science">
          </property>
          <property
                name="startupProgressRect"
-               value="0,245,600,15">
+               value="5,240,590,15">
          </property>
          <property
                name="windowImages"
