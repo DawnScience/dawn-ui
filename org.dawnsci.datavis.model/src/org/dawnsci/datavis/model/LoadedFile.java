@@ -4,9 +4,12 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.Map.Entry;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
@@ -14,15 +17,25 @@ import org.dawnsci.datavis.api.IDataFilePackage;
 import org.dawnsci.datavis.api.IDataPackage;
 import org.eclipse.dawnsci.analysis.api.io.IDataHolder;
 import org.eclipse.dawnsci.analysis.api.tree.DataNode;
+import org.eclipse.dawnsci.analysis.api.tree.GroupNode;
+import org.eclipse.dawnsci.analysis.api.tree.IFindInTree;
+import org.eclipse.dawnsci.analysis.api.tree.Node;
+import org.eclipse.dawnsci.analysis.api.tree.NodeLink;
 import org.eclipse.dawnsci.analysis.api.tree.Tree;
 import org.eclipse.dawnsci.analysis.api.tree.TreeUtils;
 import org.eclipse.january.dataset.Dataset;
 import org.eclipse.january.dataset.ILazyDataset;
 import org.eclipse.january.dataset.LazyDatasetBase;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import uk.ac.diamond.scisoft.analysis.io.NexusTreeUtils;
 
 
 public class LoadedFile implements IDataObject, IDataFilePackage {
 
+	private final static Logger logger = LoggerFactory.getLogger(LoadedFile.class);
+	
 	protected AtomicReference<IDataHolder> dataHolder;
 	protected Map<String,DataOptions> dataOptions;
 	private boolean selected = false;
@@ -32,40 +45,19 @@ public class LoadedFile implements IDataObject, IDataFilePackage {
 		dataOptions = new LinkedHashMap<>();
 		String[] names = null;
 		if (dataHolder.getTree() != null) {
-			Map<DataNode, String> uniqueDataNodes = TreeUtils.getUniqueDataNodes(dataHolder.getTree().getGroupNode());
-			Collection<String> values = uniqueDataNodes.values();
-			names = values.toArray(new String[values.size()]);
-//			//Find NX Datas
-//			Tree t = dataHolder.getTree();
-//			
-//			IFindInTree findNXData = new IFindInTree() {
-//				
-//				@Override
-//				public boolean found(NodeLink node) {
-//					Node n = node.getDestination();
-//					if (n instanceof GroupNode && n.containsAttribute("signal")) {
-//						return true;
-//					}
-//					return false;
-//				}
-//			};
-//			
-//			Map<String, NodeLink> found = TreeUtils.treeBreadthFirstSearch(t.getGroupNode(), findNXData, false, null);
-//			Tree tree = dataHolder.getTree();
-//			for (String key : found.keySet()) {
-//				String path = Node.SEPARATOR + key;
-//				NodeLink nl = tree.findNodeLink(path);
-//				Node dest = nl.getDestination();
-//				String signal = dest.getAttribute("signal").getFirstElement();
-//				DataOptions d = new DataOptions(path+Node.SEPARATOR+signal, this);
-//	
-//				dataOptions.add(d);
-//			}
-//			
+			try {
+				Map<DataNode, String> uniqueDataNodes = getUniqueDataNodes(dataHolder.getTree().getGroupNode());
+				Collection<String> values = uniqueDataNodes.values();
+				names = values.toArray(new String[values.size()]);
+			} catch ( Exception e) {
+				logger.error("Could not get unique nodes",e);
+			}
+			
 		}
 		
 		if (names == null) names = dataHolder.getNames();
 		for (String n : names) {
+			n = "/" + n;
 			ILazyDataset lazyDataset = dataHolder.getLazyDataset(n);
 			if (lazyDataset != null && ((LazyDatasetBase)lazyDataset).getDType() != Dataset.STRING && lazyDataset.getSize() != 1) {
 				DataOptions d = new DataOptions(n, this);
@@ -165,4 +157,45 @@ public class LoadedFile implements IDataObject, IDataFilePackage {
 		return dataOptions.values().stream().toArray(size ->new IDataPackage[size]);
 	}
 	
+	public static Map<DataNode,String> getUniqueDataNodes(GroupNode node) {
+		Set<DataNode> nodes = new HashSet<>();
+		
+		IFindInTree tree = new IFindInTree() {
+			
+			@Override
+			public boolean found(NodeLink node) {
+				Node d = node.getDestination();
+				if (d != null && d instanceof DataNode && !nodes.contains(d)) {
+					nodes.add((DataNode)d);
+					return true;
+				}
+				return false;
+			}
+		};
+		
+		Map<String, NodeLink> results = TreeUtils.treeBreadthFirstSearch(node, tree, false, true, null);
+		
+		Map<DataNode, String> out = new LinkedHashMap<DataNode, String>();
+		
+		for (Entry<String, NodeLink> e: results.entrySet()) {
+			Node d = e.getValue().getDestination();
+			if (d instanceof DataNode) {
+				Node source = e.getValue().getSource();
+				if (source != null && source.containsAttribute(NexusTreeUtils.NX_CLASS) && NexusTreeUtils.NX_DATA.equals(source.getAttribute(NexusTreeUtils.NX_CLASS))) {
+					out.put((DataNode)d, e.getKey());
+				}
+			}
+		}
+		
+		for (Entry<String, NodeLink> e: results.entrySet()) {
+			Node d = e.getValue().getDestination();
+			if (d instanceof DataNode) {
+				out.put((DataNode)d, e.getKey());
+			}
+		}
+		
+		return out;
+		
+		
+	}
 }
