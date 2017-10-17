@@ -7,6 +7,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CTabFolder;
 import org.eclipse.swt.custom.CTabItem;
 import org.eclipse.swt.custom.SashForm;
+import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.GridData;
@@ -27,13 +28,10 @@ public class RodAnalysisWindow {
 	private TabItem ssps3cTab;
 	private Composite ssps3cTabComposite;
 	private TabItem reviewTab;
-	private Composite reviewTabComposite; 
-	
-	
-	public RodAnalysisWindow(CTabFolder folder,
-							SurfaceScatterPresenter ssp,
-							SurfaceScatterViewStart ssvs){
-		
+	private Composite reviewTabComposite;
+
+	public RodAnalysisWindow(CTabFolder folder, SurfaceScatterPresenter ssp, SurfaceScatterViewStart ssvs) {
+
 		CTabItem analysis = new CTabItem(folder, SWT.NONE);
 		analysis.setText("Analysis");
 		analysis.setData(new GridData(SWT.FILL, SWT.FILL, true, true));
@@ -62,45 +60,35 @@ public class RodAnalysisWindow {
 		///////////////// anaLeft Window 3/////////////////////////////////
 
 		@SuppressWarnings("deprecation")
-		Dataset noImage = DatasetFactory.zeros(new int[] {2,2}, Dataset.ARRAYFLOAT64);
-		
-		customComposite = new PlotSystemCompositeView(anaLeft, 
-													  SWT.FILL, 
-													  noImage, 
-//													  1, 
-													  numberOfImages, 
-													  nullImage,
-													  ssp, 
-													  ssvs);
+		Dataset noImage = DatasetFactory.zeros(new int[] { 2, 2 }, Dataset.ARRAYFLOAT64);
+
+		customComposite = new PlotSystemCompositeView(anaLeft, SWT.FILL, noImage,
+				// 1,
+				numberOfImages, nullImage, ssp, ssvs);
 
 		customComposite.setLayout(new GridLayout());
 		customComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		
+
 		//////////////////////// Analysis Right//////////////////////////////
 		///////////////// anaRight Window 4/////////////////////////////////
-		
+
 		tabFolder = new TabFolder(anaRight, SWT.BORDER | SWT.CLOSE);
 		tabFolder.setLayout(new GridLayout());
-	    		
+
 		tabFolder.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-	        	
+
 		ssps3cTab = new TabItem(tabFolder, SWT.NONE);
 		ssps3cTab.setText("Slice Output");
 		ssps3cTab.setData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		
-		
-		
+
 		ssps3cTabComposite = new Composite(tabFolder, SWT.NONE | SWT.FILL);
 		ssps3cTabComposite.setLayout(new GridLayout());
 		ssps3cTabComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-    	
+
 		ssps3cTab.setControl(ssps3cTabComposite);
-		
+
 		try {
-			ssps3c = new SuperSashPlotSystem3Composite(ssps3cTabComposite, 
-													   SWT.FILL, 
-													   ssvs, 
-													   ssp);
+			ssps3c = new SuperSashPlotSystem3Composite(ssps3cTabComposite, SWT.FILL, ssvs, ssp);
 
 			ssps3c.setLayout(new GridLayout());
 			ssps3c.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
@@ -108,67 +96,50 @@ public class RodAnalysisWindow {
 			ssps3c.setSsp(ssp);
 
 		} catch (Exception d) {
-
+			System.out.println(d.getMessage());
 		}
-		
-		
-		
+
 		reviewTab = new TabItem(tabFolder, SWT.NONE);
 		reviewTab.setText("Review");
 		reviewTab.setData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		
-		
+
 		reviewTabComposite = new Composite(tabFolder, SWT.NONE | SWT.FILL);
 		reviewTabComposite.setLayout(new GridLayout());
 		reviewTabComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-	       
-		reviewTab.setControl(reviewTabComposite);
-		
-		
-		try {
-			rtc = new ReviewTabComposite(reviewTabComposite, 
-										 SWT.FILL, 
-										 ssp,
-										 ssvs);
 
+		reviewTab.setControl(reviewTabComposite);
+
+		try {
+			rtc = new ReviewTabComposite(reviewTabComposite, SWT.FILL, ssp, ssvs);
 			rtc.setLayout(new GridLayout());
 			rtc.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-			
+
 		} catch (Exception d) {
 			System.out.println(d.getMessage());
 		}
-		
-	    
-	    tabFolder.getTabList()[1].setEnabled(false);
-	    
-	    tabFolder.addSelectionListener(new SelectionListener() {
-			
+
+		tabFolder.getTabList()[1].setEnabled(false);
+
+		tabFolder.addSelectionListener(new SelectionAdapter() {
+
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				tabFolder.layout();
-				
+
 				rtc.setLayout(new GridLayout());
 				rtc.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-				
 
 				ssps3c.setLayout(new GridLayout());
 				ssps3c.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-				
-				
+
 				ssps3cTab.setControl(ssps3cTabComposite);
 				reviewTab.setControl(reviewTabComposite);
-				
-			}
-			
-			@Override
-			public void widgetDefaultSelected(SelectionEvent e) {
-				// TODO Auto-generated method stub
-				
+
 			}
 		});
-		
+
 	}
-	
+
 	public TabFolder getTabFolder() {
 		return tabFolder;
 	}
@@ -181,14 +152,14 @@ public class RodAnalysisWindow {
 		return rtc.getPlotSystem();
 	}
 
-	public SuperSashPlotSystem3Composite getSsps3c(){
+	public SuperSashPlotSystem3Composite getSsps3c() {
 		return ssps3c;
 	}
-	
-	public PlotSystemCompositeView getCustomComposite(){
+
+	public PlotSystemCompositeView getCustomComposite() {
 		return customComposite;
 	}
-	
+
 	public ReviewTabComposite getRtc() {
 		return rtc;
 	}

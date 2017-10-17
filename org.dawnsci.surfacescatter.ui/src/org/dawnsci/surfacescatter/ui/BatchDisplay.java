@@ -7,6 +7,9 @@ import java.util.ArrayList;
 
 import org.dawnsci.surfacescatter.BatchRodDataTransferObject;
 import org.dawnsci.surfacescatter.BatchRodModel;
+import org.dawnsci.surfacescatter.BatchSavingAdvancedSettings;
+import org.dawnsci.surfacescatter.BatchSetupMiscellaneousProperties;
+import org.dawnsci.surfacescatter.SavingFormatEnum.SaveFormatSetting;
 import org.eclipse.dawnsci.analysis.api.io.IDataHolder;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
@@ -18,6 +21,7 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.DirectoryDialog;
 import org.eclipse.swt.widgets.Group;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.swt.widgets.Text;
@@ -32,6 +36,8 @@ public class BatchDisplay extends Composite {
 	private Table batchDisplayTable;
 	private BatchRodModel brm;
 	private String nxsFolderPath;
+	private BatchSavingAdvancedSettings[] bsas;
+	private BatchSetupMiscellaneousProperties bsmps;
 
 	public BatchDisplay(Composite parent, int style, SurfaceScatterPresenter ssp, SurfaceScatterViewStart ssvs,
 			BatchSetupWindow rsw, BatchRodModel brm) {
@@ -49,6 +55,9 @@ public class BatchDisplay extends Composite {
 
 	public void createContents() {
 
+		brm.setBsas( new BatchSavingAdvancedSettings[SaveFormatSetting.values().length]);
+		brm.setBsmps( new BatchSetupMiscellaneousProperties());
+		
 		Group batchTableGroup = new Group(this, SWT.V_SCROLL | SWT.FILL);
 		GridLayout batchTableGroupLayout = new GridLayout(1, true);
 		GridData batchTableGroupData = new GridData((GridData.FILL_BOTH));
@@ -70,12 +79,10 @@ public class BatchDisplay extends Composite {
 
 		datFolderSelection.setText("Select .dat File Folder");
 
-		
 		Text nxsFolderText = new Text(datFolders, SWT.SINGLE | SWT.BORDER | SWT.FILL);
 		nxsFolderText.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		nxsFolderText.setEnabled(false);
 		nxsFolderText.setEditable(false);
-		
 
 		datFolderSelection.addSelectionListener(new SelectionAdapter() {
 
@@ -96,25 +103,18 @@ public class BatchDisplay extends Composite {
 				String dir = dlg.open();
 				nxsFolderPath = dir;
 				brm.setNxsFolderPath(nxsFolderPath);
-				
+
 				nxsFolderText.setText(nxsFolderPath);
 				nxsFolderText.setEnabled(true);
 
 			}
 		});
-		
-		
-		Group processGroup = new Group(batchTableGroup, SWT.V_SCROLL | SWT.FILL);
-		GridLayout processGroupLayout = new GridLayout(2, true);
-		GridData processGroupData = new GridData((GridData.FILL_BOTH));
-		processGroup.setLayout(processGroupLayout);
-		processGroup.setLayoutData(processGroupData);
-		
-		Button process = new Button(batchTableGroup, SWT.PUSH);
+
+		Button process = new Button(datFolders, SWT.PUSH);
 		process.setText("Build and Process Batch");
 		process.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
 		process.setEnabled(true);
-		
+
 		process.addSelectionListener(new SelectionAdapter() {
 
 			@Override
@@ -122,49 +122,45 @@ public class BatchDisplay extends Composite {
 				BatchRunner.batchRun(brm);
 			}
 		});
-		
-		Button advancedSettings = new Button(batchTableGroup, SWT.PUSH);
-		advancedSettings.setText("Build and Process Batch");
+
+		Button advancedSettings = new Button(datFolders, SWT.PUSH);
+		advancedSettings.setText("Advanced Process Settings");
 		advancedSettings.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
 		advancedSettings.setEnabled(true);
-		
+
 		advancedSettings.addSelectionListener(new SelectionAdapter() {
 
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-//				BatchRunner.batchRun(brm);
-				
-				
-				
+
+				BatchConfigurationSettings bcs = new BatchConfigurationSettings(ssvs.getShell(), brm);
+				bcs.open();
 			}
 		});
-		
-		
-		
+
 		Button check = new Button(batchTableGroup, SWT.PUSH);
 		check.setText("<- Check");
 		check.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
 		check.setEnabled(true);
-		
+
 		check.addSelectionListener(new SelectionAdapter() {
 
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 
 				String r = "s";
-				
+
 				for (TableItem ra : batchDisplayTable.getItems()) {
 					if (ra.getChecked() == true) {
 						r = ra.getText();
 					}
 				}
-				
+
 				BatchRodDataTransferObject bd = brm.getDTO(r);
-				
+
 				bsw.pushTocheck(bd);
 			}
 		});
-		
 
 		Button clear = new Button(batchTableGroup, SWT.PUSH);
 		clear.setText("Clear Batch");

@@ -6,6 +6,8 @@ import java.util.concurrent.Executors;
 
 import org.dawnsci.surfacescatter.BatchRodDataTransferObject;
 import org.dawnsci.surfacescatter.BatchRodModel;
+import org.dawnsci.surfacescatter.BatchSavingAdvancedSettings;
+import org.dawnsci.surfacescatter.BatchSetupMiscellaneousProperties;
 import org.dawnsci.surfacescatter.FittingParametersInputReader;
 import org.dawnsci.surfacescatter.LocationLenPtConverterUtils;
 import org.dawnsci.surfacescatter.SetupModel;
@@ -20,6 +22,8 @@ public class BatchRunner {
 		String[] paramFiles = new String[brm.getBrdtoList().size()];
 		String[] nexusSaveFilePaths = new String[brm.getBrdtoList().size()];
 		boolean[] useTrajectories = new boolean[brm.getBrdtoList().size()];
+		BatchSavingAdvancedSettings[] bsas = brm.getBsas();
+		BatchSetupMiscellaneousProperties bsmps = brm.getBsmps();
 		
 		for(int i = 0; i<brm.getBrdtoList().size();i++){
 			BatchRodDataTransferObject b = brm.getBrdtoList().get(i);
@@ -33,13 +37,13 @@ public class BatchRunner {
 			useTrajectories[i]= b.isUseTrajectory();
 		}
 		
-		batchRun(datFiles, imageFolderPaths, paramFiles, nexusSaveFilePaths, useTrajectories);
+		batchRun(datFiles, imageFolderPaths, paramFiles, nexusSaveFilePaths, useTrajectories, bsas, bsmps);
 		
 	}
 	
 	
 	public static void batchRun(String[][] datFiles, String[] imageFolderPaths, String[] paramFiles, String[] nexusSaveFilePaths,
-			boolean[] useTrajectories) {
+			boolean[] useTrajectories, BatchSavingAdvancedSettings[] bsas, BatchSetupMiscellaneousProperties bsmps) {
 
 		int cores = Runtime.getRuntime().availableProcessors();
 
@@ -67,7 +71,7 @@ public class BatchRunner {
 
 			int[][] lenpt = LocationLenPtConverterUtils.locationToLenPtConverter(sspi.getFms().get(0).getRoiLocation());
 
-			BatchRunnable mr = new BatchRunnable(bat, lenpt,nexusSaveFilePaths[i]);
+			BatchRunnable mr = new BatchRunnable(bat, lenpt,nexusSaveFilePaths[i], bsas, bsmps);
 
 			executor.execute(mr);
 

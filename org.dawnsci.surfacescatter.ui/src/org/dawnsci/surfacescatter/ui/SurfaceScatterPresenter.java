@@ -3,24 +3,18 @@ package org.dawnsci.surfacescatter.ui;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.PrintWriter;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.EnumMap;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.TreeMap;
-
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.math3.util.MathArrays;
 import org.dawnsci.surfacescatter.AnalaysisMethodologies;
@@ -106,7 +100,6 @@ public class SurfaceScatterPresenter {
 	private double energy;
 	private Set<IPresenterStateChangeEventListener> listeners = new HashSet<>();
 	private int DEBUG = 0;
-	private PrintWriter writer;
 	private Shell parentShell;
 	private DirectoryModel drm;
 	private int sliderPos = 0;
@@ -1579,15 +1572,12 @@ public class SurfaceScatterPresenter {
 		}
 	}
 
-	public void geometricParametersUpdate(
-			// String fluxPath,
-			double beamHeight, double footprint, double angularFudgeFactor, boolean beamCorrection, double beamInPlane,
+	public void geometricParametersUpdate(double beamHeight, double footprint, double angularFudgeFactor, boolean beamCorrection, double beamInPlane,
 			double beamOutPlane, double covar, double detectorSlits, double inPlaneSlits, double inplanePolarisation,
 			double outPlaneSlits, double outplanePolarisation, double scalingFactor, double reflectivityA,
 			double sampleSize, double normalisationFactor, double energy1, boolean specular, String imageName,
 			String xNameRef, boolean useNegativeQ) {
 
-		// gm.setFluxPath(fluxPath);
 		gm.setBeamHeight(beamHeight);
 		gm.setFootprint(footprint);
 		gm.setAngularFudgeFactor(angularFudgeFactor);
@@ -1822,238 +1812,6 @@ public class SurfaceScatterPresenter {
 		} catch (NullPointerException g) {
 			return false;
 		}
-	}
-
-	public void anarodSave(String title) {
-
-		try {
-			File file = new File(title);
-			file.createNewFile();
-			writer = new PrintWriter(file);
-		} catch (FileNotFoundException e2) {
-			e2.printStackTrace();
-		} catch (IOException e1) {
-			e1.printStackTrace();
-		}
-
-		SimpleDateFormat sdfDate = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");// dd/MM/yyyy
-		Date now = new Date();
-		String strDate = sdfDate.format(now);
-
-		if (drm.getCorrectionSelection() == MethodSetting.SXRD) {
-
-			writer.println("# Test file created: " + strDate);
-			writer.println("# Headers: ");
-			writer.println("#h	k	l	F	Fe");
-
-			for (int gh = 0; gh < fms.size(); gh++) {
-				FrameModel f = fms.get(gh);
-
-				writer.println(f.getH() + "	" + f.getK() + "	" + f.getL() + "	"
-						+ drm.getCsdp().getSplicedCurveYFhkl().getDouble(gh) + "	"
-						+ drm.getCsdp().getSplicedCurveYFhkl().getError(gh));
-			}
-		}
-
-		else {
-
-			if (Double.isFinite(fms.get(0).getQ())) {
-
-				writer.println("# Test file created: " + strDate);
-				writer.println("# Headers: ");
-				writer.println("#qdcd	I	Ie");
-
-				for (int gh = 0; gh < fms.size(); gh++) {
-
-					writer.println(fms.get(gh).getQ() + "	" + drm.getCsdp().getSplicedCurveY().getDouble(gh) + "	"
-							+ drm.getCsdp().getSplicedCurveY().getError(gh));
-				}
-
-			}
-			//
-			else {
-				writer.println("#" + gm.getxName() + "	I	Ie");
-
-				for (int gh = 0; gh < fms.size(); gh++) {
-
-					writer.println(drm.getxList().get(gh) + "	" + drm.getCsdp().getSplicedCurveY().getDouble(gh)
-							+ "	" + drm.getCsdp().getSplicedCurveY().getError(gh));
-				}
-
-			}
-			//
-		}
-
-		writer.close();
-	}
-
-	public void intSave(String title) {
-
-		File file = null;
-
-		try {
-			file = new File(title);
-			file.createNewFile();
-			writer = new PrintWriter(file);
-		} catch (FileNotFoundException e2) {
-			e2.printStackTrace();
-		} catch (IOException e1) {
-			e1.printStackTrace();
-		}
-
-		int index = title.lastIndexOf(".");
-
-		if (index != -1) {
-			String ext = title.substring(0, index);
-			file.renameTo(new File(ext + ".int"));
-		} else {
-			file.renameTo(new File(title + ".int"));
-		}
-
-		SimpleDateFormat sdfDate = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");// dd/MM/yyyy
-		Date now = new Date();
-		String strDate = sdfDate.format(now);
-
-		if (drm.getCorrectionSelection() == MethodSetting.SXRD) {
-
-			writer.println("# Test file created: " + strDate);
-			writer.println("# Headers: ");
-			writer.println("#h	k	l	F	Fe	lorentz	correction 	polarisation correction		area correction");
-
-			for (int gh = 0; gh < fms.size(); gh++) {
-				FrameModel f = fms.get(gh);
-
-				writer.println(f.getH() + "	" + f.getK() + "	" + f.getL() + "	"
-						+ drm.getCsdp().getSplicedCurveYFhkl().getDouble(gh) + "	"
-						+ drm.getCsdp().getSplicedCurveYFhkl().getError(gh) + "	" + f.getLorentzianCorrection() + "	"
-						+ f.getPolarisationCorrection() + "	" + f.getAreaCorrection());
-			}
-		} else {
-
-			writer.println("# Test file created: " + strDate);
-			writer.println("# Headers: ");
-
-			if (Double.isFinite(fms.get(0).getQdcd())) {
-
-				writer.println("#qdcd	I	Ie	Area Correction	Flux Correction");
-
-				if (drm.getCorrectionSelection() == MethodSetting.Reflectivity_with_Flux_Correction_Gaussian_Profile
-						|| drm.getCorrectionSelection() == MethodSetting.Reflectivity_with_Flux_Correction_Simple_Scaling) {
-					//
-					for (int gh = 0; gh < fms.size(); gh++) {
-
-						FrameModel fm = fms.get(gh);
-
-						writer.println(fm.getQdcd() + "	" + drm.getCsdp().getSplicedCurveY().getDouble(gh) + "	"
-								+ drm.getCsdp().getSplicedCurveY().getError(gh) + "	"
-								+ fm.getReflectivityAreaCorrection() + "	" + fm.getReflectivityFluxCorrection());
-					}
-				}
-
-				if (drm.getCorrectionSelection() == MethodSetting.Reflectivity_without_Flux_Correction_Gaussian_Profile
-						|| drm.getCorrectionSelection() == MethodSetting.Reflectivity_without_Flux_Correction_Simple_Scaling) {
-
-					for (int gh = 0; gh < fms.size(); gh++) {
-
-						FrameModel fm = fms.get(gh);
-
-						writer.println(fm.getQdcd() + "	" + drm.getCsdp().getSplicedCurveY().getDouble(gh) + "	"
-								+ drm.getCsdp().getSplicedCurveY().getError(gh) + "	"
-								+ fm.getReflectivityAreaCorrection());
-					}
-				}
-
-				if (drm.getCorrectionSelection() == MethodSetting.Reflectivity_NO_Correction) {
-
-					for (int gh = 0; gh < fms.size(); gh++) {
-
-						FrameModel fm = fms.get(gh);
-
-						writer.println(fm.getQdcd() + "	" + drm.getCsdp().getSplicedCurveY().getDouble(gh) + "	"
-								+ drm.getCsdp().getSplicedCurveY().getError(gh));
-					}
-				}
-
-			}
-		}
-
-		writer.close();
-	}
-
-	public void writeOutReflectivityDat() {
-		//
-		SimpleDateFormat sdfDate = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");// dd/MM/yyyy
-		Date now = new Date();
-		String strDate = sdfDate.format(now);
-
-		writer.println("# Test file created: " + strDate);
-		writer.println("# Headers: ");
-		writer.println("#qdcd	I	Ie");
-
-		for (int gh = 0; gh < fms.size(); gh++) {
-
-			FrameModel fm = fms.get(gh);
-
-			writer.println(fm.getQdcd() + "	" + drm.getCsdp().getSplicedCurveY().getDouble(gh) + "	"
-					+ drm.getCsdp().getSplicedCurveY().getError(gh));
-		}
-	}
-
-	public void simpleXYYeSave(String title, int state) {
-
-		File file = null;
-
-		try {
-			file = new File(title);
-			file.createNewFile();
-			writer = new PrintWriter(file);
-		} catch (FileNotFoundException e2) {
-			e2.printStackTrace();
-		} catch (IOException e1) {
-			e1.printStackTrace();
-		}
-
-		int index = title.lastIndexOf(".");
-		if (index != -1) {
-			String ext = title.substring(0, index);
-			file.renameTo(new File(ext + ".int"));
-		} else {
-			file.renameTo(new File(title + ".int"));
-		}
-
-		SimpleDateFormat sdfDate = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");// dd/MM/yyyy
-		Date now = new Date();
-		String strDate = sdfDate.format(now);
-
-		writer.println("# Test file created: " + strDate);
-		writer.println("# Headers: ");
-		writer.println("#X	Y	Ye");
-
-		if (state == 1) {
-			for (int gh = 0; gh < fms.size(); gh++) {
-				writer.println(drm.getCsdp().getSplicedCurveX().getDouble(gh) + "	"
-						+ drm.getCsdp().getSplicedCurveYFhkl().getDouble(gh) + "	"
-						+ drm.getCsdp().getSplicedCurveYFhkl().getError(gh));
-			}
-		}
-
-		if (state == 0) {
-			for (int gh = 0; gh < fms.size(); gh++) {
-				writer.println(drm.getCsdp().getSplicedCurveX().getDouble(gh) + "	"
-						+ drm.getCsdp().getSplicedCurveY().getDouble(gh) + "	"
-						+ drm.getCsdp().getSplicedCurveY().getError(gh));
-			}
-		}
-
-		if (state == 2) {
-			for (int gh = 0; gh < fms.size(); gh++) {
-				writer.println(drm.getCsdp().getSplicedCurveX().getDouble(gh) + "	"
-						+ drm.getCsdp().getSplicedCurveYRaw().getDouble(gh) + "	"
-						+ drm.getCsdp().getSplicedCurveYRaw().getError(gh));
-			}
-		}
-
-		writer.close();
 	}
 
 	public void setSplicedCurveX(IDataset xData) {
@@ -3093,9 +2851,7 @@ public class SurfaceScatterPresenter {
 	}
 
 	public void arbitrarySavingMethod(boolean useQ, boolean writeOnlyGoodPoints, Shell shell, SaveFormatSetting sfs,
-			String rodSaveName, CurveStitchDataPackage csdpToSave, AxisEnums.yAxes yAxis
-	// AxisEnums.xAxes xAxis
-	) {
+		String rodSaveName, CurveStitchDataPackage csdpToSave, AxisEnums.yAxes yAxis) {
 
 		FileDialog fd = new FileDialog(shell, SWT.SAVE);
 
@@ -3114,10 +2870,17 @@ public class SurfaceScatterPresenter {
 
 		if (this.getSaveFolder() == null) {
 			this.setSaveFolder(path);
-			;
 		}
 
-		String title = path + File.separator + stitle;
+		String title = path + File.separator + stitle + File.separator + rodSaveName;
+
+		
+		arbitrarySavingMethodCore(useQ, writeOnlyGoodPoints, sfs,
+				csdpToSave, yAxis, title);
+	}
+	
+	public void arbitrarySavingMethodCore(boolean useQ, boolean writeOnlyGoodPoints, SaveFormatSetting sfs,
+			CurveStitchDataPackage csdpToSave, AxisEnums.yAxes yAxis, String title) {
 
 		SavingUtils su = new SavingUtils();
 
@@ -3135,9 +2898,10 @@ public class SurfaceScatterPresenter {
 		if (sfs == SaveFormatSetting.ASCII) {
 			su.simpleXYYeSave(useQ, writeOnlyGoodPoints, title, saveIntensityState, csdpToSave, this.getDrm().getFms());
 		}
-
+		
 	}
-
+	
+	
 	public void disregardNegativeIntensities() {
 
 		CurveStitchDataPackage csdp = drm.getCsdp();

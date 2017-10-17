@@ -13,14 +13,13 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.TabFolder;
 import org.eclipse.swt.widgets.TabItem;
 import org.eclipse.swt.widgets.Text;
 
-public class GeometricParametersWindows extends Composite{
+public class GeometricParametersWindows extends Composite {
 
 	private Button beamCorrection;
 	private Button radio;
@@ -42,51 +41,43 @@ public class GeometricParametersWindows extends Composite{
 	private Text footprint;
 	private Text angularFudgeFactor;
 	private Text savePath;
-//	private Text fluxPath;
 	private Text energy;
 	private TabFolder folder;
 	private SurfaceScatterPresenter ssp;
-	private SurfaceScatterViewStart ssvs;
 	private GeometricParametersWindows gpw;
 	private Group geometricParametersSX;
 	private Combo theta;
 	private Combo selectedOption;
-//	private String fluxpathStorage = " ";
 	private boolean updateOn = true;
 	private boolean useNegativeQ = false;
 	private Button useNegativeQButton;
-	
 
-	public GeometricParametersWindows(Composite parent, 
-									  int style,
-									  SurfaceScatterPresenter ssp,
-									  SurfaceScatterViewStart ssvs){
-		
+	public GeometricParametersWindows(Composite parent, int style, SurfaceScatterPresenter ssp) {
+
 		super(parent, style);
-        
-        this.ssp = ssp;
-        this.ssvs = ssvs;
-        this.gpw =this;
-        
-        this.createContents();
-        
+
+		this.ssp = ssp;
+		this.gpw = this;
+
+		this.createContents();
+
 	}
-	
+
 	public void createContents() {
-		
+
 		folder = new TabFolder(this, SWT.NONE);
 		folder.setLayoutData(new GridData(GridData.FILL_BOTH));
-		
-	    //Tab 1
-	    TabItem paramsSXRD = new TabItem(folder, SWT.NONE);
-	    paramsSXRD.setText("SXRD Parameters");
-	   
+
+		// Tab 1
+		TabItem paramsSXRD = new TabItem(folder, SWT.NONE);
+		paramsSXRD.setText("SXRD Parameters");
+
 		geometricParametersSX = new Group(folder, SWT.NULL);
-		GridLayout geometricParametersSXLayout = new GridLayout(2,true);
+		GridLayout geometricParametersSXLayout = new GridLayout(2, true);
 		GridData geometricParametersSXData = new GridData(GridData.FILL_BOTH);
 		geometricParametersSX.setLayout(geometricParametersSXLayout);
 		geometricParametersSX.setLayoutData(geometricParametersSXData);
-		
+
 		new Label(geometricParametersSX, SWT.LEFT).setText("beamCorrection");
 		beamCorrection = new Button(geometricParametersSX, SWT.CHECK);
 		beamCorrection.setSelection(false);
@@ -139,297 +130,279 @@ public class GeometricParametersWindows extends Composite{
 		normalisationFactor.setText("10.0");
 		normalisationFactor.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		new Label(geometricParametersSX, SWT.LEFT).setText("specular");
-		specular = new Button (geometricParametersSX, SWT.CHECK);
+		specular = new Button(geometricParametersSX, SWT.CHECK);
 		specular.setSelection(false);
 		new Label(geometricParametersSX, SWT.LEFT).setText("imageName");
 		imageName = new Text(geometricParametersSX, SWT.SINGLE);
 		imageName.setText("file_image");
 		imageName.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-		
+
 		paramsSXRD.setControl(geometricParametersSX);
-	   	    
-	    //Tab 2
-	    TabItem paramsReflec = new TabItem(folder, SWT.NONE);
-	    paramsReflec.setText("Reflectivity Parameters");
+
+		// Tab 2
+		TabItem paramsReflec = new TabItem(folder, SWT.NONE);
+		paramsReflec.setText("Reflectivity Parameters");
 
 		Group geometricParametersReflec = new Group(folder, SWT.NULL);
-		GridLayout geometricParametersLayoutReflec = new GridLayout(2,true);
+		GridLayout geometricParametersLayoutReflec = new GridLayout(2, true);
 		GridData geometricParametersDataReflec = new GridData(GridData.HORIZONTAL_ALIGN_FILL);
 		geometricParametersReflec.setLayout(geometricParametersLayoutReflec);
 		geometricParametersReflec.setLayoutData(geometricParametersDataReflec);
-		
+
 		new Label(geometricParametersReflec, SWT.LEFT).setText("Beam Height /mm");
 		beamHeight = new Text(geometricParametersReflec, SWT.SINGLE);
 		beamHeight.setText("0.06");
 		beamHeight.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-	    
-		
+
 		new Label(geometricParametersReflec, SWT.LEFT).setText("Footprint /mm");
 		footprint = new Text(geometricParametersReflec, SWT.SINGLE);
 		footprint.setText("190");
 		footprint.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-	    
+
 		new Label(geometricParametersReflec, SWT.LEFT).setText("Angular Adjustment");
 		angularFudgeFactor = new Text(geometricParametersReflec, SWT.SINGLE);
 		angularFudgeFactor.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-	    angularFudgeFactor.setText("0");
-		
+		angularFudgeFactor.setText("0");
+
 		new Label(geometricParametersReflec, SWT.LEFT).setText("Use Negative q?");
 		useNegativeQButton = new Button(geometricParametersReflec, SWT.CHECK);
 		useNegativeQButton.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-	    
 
 		useNegativeQButton.addSelectionListener(new SelectionAdapter() {
-		
-			private void buttonSelected(SelectionEvent e){
+
+			@Override
+			public void widgetSelected(SelectionEvent e) {
 				GeometricParametersWindows.this.useNegativeQ = !GeometricParametersWindows.this.useNegativeQ;
 			}
-			
+
 		});
-			
-	    beamHeight.addModifyListener(new ModifyListener(){
+
+		beamHeight.addModifyListener(new ModifyListener() {
 
 			@Override
 			public void modifyText(ModifyEvent e) {
 				geometricParametersUpdate();
 			}
-	    	
-	    });
-		
-	    footprint.addModifyListener(new ModifyListener(){
+
+		});
+
+		footprint.addModifyListener(new ModifyListener() {
 
 			@Override
 			public void modifyText(ModifyEvent e) {
 				geometricParametersUpdate();
 			}
-	    	
-	    });
-	    
-	    angularFudgeFactor.addModifyListener(new ModifyListener(){
+
+		});
+
+		angularFudgeFactor.addModifyListener(new ModifyListener() {
 
 			@Override
 			public void modifyText(ModifyEvent e) {
 				geometricParametersUpdate();
 			}
-	    	
-	    });
-	    
+
+		});
+
 		beamCorrection.addSelectionListener(new SelectionListener() {
-			
+
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				geometricParametersUpdate();
-				
+
 			}
-			
+
 			@Override
 			public void widgetDefaultSelected(SelectionEvent e) {
 				geometricParametersUpdate();
-				
+
 			}
 		});
-		
-		beamInPlane.addModifyListener(new ModifyListener(){
+
+		beamInPlane.addModifyListener(new ModifyListener() {
 
 			@Override
 			public void modifyText(ModifyEvent e) {
 				geometricParametersUpdate();
 			}
-	    	
-	    });
-		
-		beamOutPlane.addModifyListener(new ModifyListener(){
+
+		});
+
+		beamOutPlane.addModifyListener(new ModifyListener() {
 
 			@Override
 			public void modifyText(ModifyEvent e) {
 				geometricParametersUpdate();
 			}
-	    	
-	    });
-		
-		covar.addModifyListener(new ModifyListener(){
+
+		});
+
+		covar.addModifyListener(new ModifyListener() {
 
 			@Override
 			public void modifyText(ModifyEvent e) {
 				geometricParametersUpdate();
 			}
-	    	
-	    });
-		
-		detectorSlits.addModifyListener(new ModifyListener(){
+
+		});
+
+		detectorSlits.addModifyListener(new ModifyListener() {
 
 			@Override
 			public void modifyText(ModifyEvent e) {
 				geometricParametersUpdate();
 			}
-	    	
-	    });
-		
-		inPlaneSlits.addModifyListener(new ModifyListener(){
+
+		});
+
+		inPlaneSlits.addModifyListener(new ModifyListener() {
 
 			@Override
 			public void modifyText(ModifyEvent e) {
 				geometricParametersUpdate();
 			}
-	    	
-	    });
-		
-		inplanePolarisation.addModifyListener(new ModifyListener(){
+
+		});
+
+		inplanePolarisation.addModifyListener(new ModifyListener() {
 
 			@Override
 			public void modifyText(ModifyEvent e) {
 				geometricParametersUpdate();
 			}
-	    	
-	    });
 
-		outPlaneSlits.addModifyListener(new ModifyListener(){
+		});
 
-			@Override
-			public void modifyText(ModifyEvent e) {
-				geometricParametersUpdate();
-			}
-	    	
-	    });
-
-		outplanePolarisation.addModifyListener(new ModifyListener(){
+		outPlaneSlits.addModifyListener(new ModifyListener() {
 
 			@Override
 			public void modifyText(ModifyEvent e) {
 				geometricParametersUpdate();
 			}
-	    	
-	    });
 
-		
-		scalingFactor.addModifyListener(new ModifyListener(){
+		});
 
-			@Override
-			public void modifyText(ModifyEvent e) {
-				geometricParametersUpdate();
-			}
-	    	
-	    });
-		
-		reflectivityA.addModifyListener(new ModifyListener(){
+		outplanePolarisation.addModifyListener(new ModifyListener() {
 
 			@Override
 			public void modifyText(ModifyEvent e) {
 				geometricParametersUpdate();
 			}
-	    	
-	    });
 
-		sampleSize.addModifyListener(new ModifyListener(){
+		});
 
-			@Override
-			public void modifyText(ModifyEvent e) {
-				geometricParametersUpdate();
-			}
-	    	
-	    });
-
-		normalisationFactor.addModifyListener(new ModifyListener(){
+		scalingFactor.addModifyListener(new ModifyListener() {
 
 			@Override
 			public void modifyText(ModifyEvent e) {
 				geometricParametersUpdate();
 			}
-	    	
-	    });
+
+		});
+
+		reflectivityA.addModifyListener(new ModifyListener() {
+
+			@Override
+			public void modifyText(ModifyEvent e) {
+				geometricParametersUpdate();
+			}
+
+		});
+
+		sampleSize.addModifyListener(new ModifyListener() {
+
+			@Override
+			public void modifyText(ModifyEvent e) {
+				geometricParametersUpdate();
+			}
+
+		});
+
+		normalisationFactor.addModifyListener(new ModifyListener() {
+
+			@Override
+			public void modifyText(ModifyEvent e) {
+				geometricParametersUpdate();
+			}
+
+		});
 
 		specular.addSelectionListener(new SelectionListener() {
-			
+
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				geometricParametersUpdate();
-				
+
 			}
-			
+
 			@Override
 			public void widgetDefaultSelected(SelectionEvent e) {
 				geometricParametersUpdate();
-				
+
 			}
 		});
-		
-		imageName.addModifyListener(new ModifyListener(){
+
+		imageName.addModifyListener(new ModifyListener() {
 
 			@Override
 			public void modifyText(ModifyEvent e) {
 				geometricParametersUpdate();
 			}
-	    	
-	    });		
 
-		InputTileGenerator tile0 = new InputTileGenerator("Compute q", 
-														  geometricParametersReflec,
-														   true);
+		});
+
+		InputTileGenerator tile0 = new InputTileGenerator("Compute q", geometricParametersReflec, true);
 		radio = tile0.getRadio();
-		
-		
-		InputTileGenerator tile1 = new InputTileGenerator("Beam Energy / KeV:",
-				 "12.50",
-				 geometricParametersReflec);
-		
-		energy  = tile1.getText();
-		
-		String[] thetas = new String[] {"Theta", "2*Theta"};
-		
-		InputTileGenerator tile2 = new InputTileGenerator("Angle:",
-														 thetas,
-														 geometricParametersReflec);
+
+		InputTileGenerator tile1 = new InputTileGenerator("Beam Energy / KeV:", "12.50", geometricParametersReflec);
+
+		energy = tile1.getText();
+
+		String[] thetas = new String[] { "Theta", "2*Theta" };
+
+		InputTileGenerator tile2 = new InputTileGenerator("Angle:", thetas, geometricParametersReflec);
 		theta = tile2.getCombo();
-		
-		InputTileGenerator tile3 = new InputTileGenerator("Coded Parameter:",
-														  ssp.getOptions(),
-														  geometricParametersReflec);
-		
+
+		InputTileGenerator tile3 = new InputTileGenerator("Coded Parameter:", ssp.getOptions(),
+				geometricParametersReflec);
+
 		selectedOption = tile3.getCombo();
-		
-		for(Control l : tile1.getGroup().getChildren()){
+
+		for (Control l : tile1.getGroup().getChildren()) {
 			l.setEnabled(false);
 		}
-		
-		for(Control l : tile2.getGroup().getChildren()){
+
+		for (Control l : tile2.getGroup().getChildren()) {
 			l.setEnabled(false);
 		}
-		
-		for(Control l : tile3.getGroup().getChildren()){
+
+		for (Control l : tile3.getGroup().getChildren()) {
 			l.setEnabled(false);
 		}
-		
-		radio.addSelectionListener(new SelectionListener() {
-			
+
+		radio.addSelectionListener(new SelectionAdapter() {
+
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				for(Control l : tile1.getGroup().getChildren()){
+				for (Control l : tile1.getGroup().getChildren()) {
 					l.setEnabled(radio.getSelection());
 				}
-				
-				for(Control l : tile2.getGroup().getChildren()){
+
+				for (Control l : tile2.getGroup().getChildren()) {
 					l.setEnabled(radio.getSelection());
 				}
-				
-				for(Control l : tile3.getGroup().getChildren()){
+
+				for (Control l : tile3.getGroup().getChildren()) {
 					l.setEnabled(radio.getSelection());
 				}
-				
+
 				ssp.setqConvert(radio.getSelection());
 			}
-			
-			@Override
-			public void widgetDefaultSelected(SelectionEvent e) {
-				// TODO Auto-generated method stub
-				
-			}
 		});
-		
-		
+
 		paramsReflec.setControl(geometricParametersReflec);
 	}
-	
-	
+
 	public Button getRadio() {
 		return radio;
 	}
@@ -565,7 +538,7 @@ public class GeometricParametersWindows extends Composite{
 	public void setImageName(Text imageName) {
 		this.imageName = imageName;
 	}
-	
+
 	public void setImageName(String imageName) {
 		this.imageName.setText(imageName);
 	}
@@ -610,14 +583,6 @@ public class GeometricParametersWindows extends Composite{
 		this.savePath = savePath;
 	}
 
-//	public Text getFluxPath() {
-//		return fluxPath;
-//	}
-//
-//	public void setFluxPath(Text fluxPath) {
-//		this.fluxPath = fluxPath;
-//	}
-
 	public TabFolder getFolder() {
 		return folder;
 	}
@@ -641,114 +606,82 @@ public class GeometricParametersWindows extends Composite{
 	public void setGpw(GeometricParametersWindows gpw) {
 		this.gpw = gpw;
 	}
-	
-	public TabFolder getTabFolder(){
+
+	public TabFolder getTabFolder() {
 		return folder;
 	}
-	
-	public void setEnabled(boolean enabled){
-		
-		for (Control o :geometricParametersSX.getChildren()){
+
+	public void setEnabled(boolean enabled) {
+
+		for (Control o : geometricParametersSX.getChildren()) {
 			o.setEnabled(enabled);
 		}
 
-		for(Control i :folder.getChildren()){
+		for (Control i : folder.getChildren()) {
 			i.setEnabled(enabled);
 		}
-		
+
 		folder.setEnabled(enabled);
 	}
-	
+
 	public void geometricParametersUpdate() {
-		if(updateOn){	
-			ssp.geometricParametersUpdate(
-//					  fluxpathStorage,
-					  (Double.parseDouble(beamHeight.getText())),
-					  (Double.parseDouble(footprint.getText())),
-					  (Double.parseDouble(angularFudgeFactor.getText())),
-					  beamCorrection.getSelection(),
-					  (Double.parseDouble(beamInPlane.getText())),
-					  (Double.parseDouble(beamOutPlane.getText())),
-					  (Double.parseDouble(covar.getText())),
-					  (Double.parseDouble(detectorSlits.getText())),
-					  (Double.parseDouble(inPlaneSlits.getText())),
-					  (Double.parseDouble(inplanePolarisation.getText())),
-					  (Double.parseDouble(outPlaneSlits.getText())),
-					  (Double.parseDouble(outplanePolarisation.getText())),
-					  (Double.parseDouble(scalingFactor.getText())),
-					  (Double.parseDouble(reflectivityA.getText())),
-					  (Double.parseDouble(sampleSize.getText())),
-					  (Double.parseDouble(normalisationFactor.getText())),
-					  (Double.parseDouble(energy.getText())),
-					  (specular.getSelection()),
-					  (imageName.getText()),
-					  selectedOption.getText(),
-					  useNegativeQButton.getSelection()
-					  );
+		if (updateOn) {
+			ssp.geometricParametersUpdate((Double.parseDouble(beamHeight.getText())),
+					(Double.parseDouble(footprint.getText())), (Double.parseDouble(angularFudgeFactor.getText())),
+					beamCorrection.getSelection(), (Double.parseDouble(beamInPlane.getText())),
+					(Double.parseDouble(beamOutPlane.getText())), (Double.parseDouble(covar.getText())),
+					(Double.parseDouble(detectorSlits.getText())), (Double.parseDouble(inPlaneSlits.getText())),
+					(Double.parseDouble(inplanePolarisation.getText())), (Double.parseDouble(outPlaneSlits.getText())),
+					(Double.parseDouble(outplanePolarisation.getText())), (Double.parseDouble(scalingFactor.getText())),
+					(Double.parseDouble(reflectivityA.getText())), (Double.parseDouble(sampleSize.getText())),
+					(Double.parseDouble(normalisationFactor.getText())), (Double.parseDouble(energy.getText())),
+					(specular.getSelection()), (imageName.getText()), selectedOption.getText(),
+					useNegativeQButton.getSelection());
 		}
 	}
-	
-	
+
 	public void getGeometricParameters() {
-		
-		ssp.geometricParametersUpdate(
-//				  fluxpathStorage,
-				  (Double.parseDouble(beamHeight.getText())),
-				  (Double.parseDouble(footprint.getText())),
-				  (Double.parseDouble(angularFudgeFactor.getText())),
-				  beamCorrection.getSelection(),
-				  (Double.parseDouble(beamInPlane.getText())),
-				  (Double.parseDouble(beamOutPlane.getText())),
-				  (Double.parseDouble(covar.getText())),
-				  (Double.parseDouble(detectorSlits.getText())),
-				  (Double.parseDouble(inPlaneSlits.getText())),
-				  (Double.parseDouble(inplanePolarisation.getText())),
-				  (Double.parseDouble(outPlaneSlits.getText())),
-				  (Double.parseDouble(outplanePolarisation.getText())),
-				  (Double.parseDouble(scalingFactor.getText())),
-				  (Double.parseDouble(reflectivityA.getText())),
-				  (Double.parseDouble(sampleSize.getText())),
-				  (Double.parseDouble(normalisationFactor.getText())),
-				  (Double.parseDouble(energy.getText())),
-				  (specular.getSelection()),
-				  (imageName.getText()),
-				  selectedOption.getText(),
-				  useNegativeQButton.getSelection()
-				  );
-		
+
+		ssp.geometricParametersUpdate((Double.parseDouble(beamHeight.getText())),
+				(Double.parseDouble(footprint.getText())), (Double.parseDouble(angularFudgeFactor.getText())),
+				beamCorrection.getSelection(), (Double.parseDouble(beamInPlane.getText())),
+				(Double.parseDouble(beamOutPlane.getText())), (Double.parseDouble(covar.getText())),
+				(Double.parseDouble(detectorSlits.getText())), (Double.parseDouble(inPlaneSlits.getText())),
+				(Double.parseDouble(inplanePolarisation.getText())), (Double.parseDouble(outPlaneSlits.getText())),
+				(Double.parseDouble(outplanePolarisation.getText())), (Double.parseDouble(scalingFactor.getText())),
+				(Double.parseDouble(reflectivityA.getText())), (Double.parseDouble(sampleSize.getText())),
+				(Double.parseDouble(normalisationFactor.getText())), (Double.parseDouble(energy.getText())),
+				(specular.getSelection()), (imageName.getText()), selectedOption.getText(),
+				useNegativeQButton.getSelection());
+
 	}
-	
-	
-	
+
 	public void localGeometricParametersUpdate(GeometricParametersModel gm) {
-		
-//		gm.setFluxPath(fluxpathStorage);
-		gm.setBeamHeight( (Double.parseDouble(beamHeight.getText())));
+
+		gm.setBeamHeight((Double.parseDouble(beamHeight.getText())));
 		gm.setFootprint(Double.parseDouble(footprint.getText()));
-		gm.setAngularFudgeFactor (Double.parseDouble(angularFudgeFactor.getText()));
+		gm.setAngularFudgeFactor(Double.parseDouble(angularFudgeFactor.getText()));
 		gm.setBeamCorrection(beamCorrection.getSelection());
 		gm.setBeamInPlane(Double.parseDouble(beamInPlane.getText()));
 		gm.setBeamOutPlane(Double.parseDouble(beamOutPlane.getText()));
-		gm.setCovar( (Double.parseDouble(covar.getText())));
+		gm.setCovar((Double.parseDouble(covar.getText())));
 		gm.setDetectorSlits((Double.parseDouble(detectorSlits.getText())));
 		gm.setInPlaneSlits((Double.parseDouble(inPlaneSlits.getText())));
 		gm.setInplanePolarisation(Double.parseDouble(inplanePolarisation.getText()));
-		gm.setOutPlaneSlits (Double.parseDouble(outPlaneSlits.getText()));
+		gm.setOutPlaneSlits(Double.parseDouble(outPlaneSlits.getText()));
 		gm.setOutplanePolarisation((Double.parseDouble(outplanePolarisation.getText())));
 		gm.setScalingFactor((Double.parseDouble(scalingFactor.getText())));
-		gm.setReflectivityA( (Double.parseDouble(reflectivityA.getText())));
-		gm.setSampleSize( (Double.parseDouble(sampleSize.getText())));
-		gm.setNormalisationFactor (Double.parseDouble(sampleSize.getText()));
+		gm.setReflectivityA((Double.parseDouble(reflectivityA.getText())));
+		gm.setSampleSize((Double.parseDouble(sampleSize.getText())));
+		gm.setNormalisationFactor(Double.parseDouble(sampleSize.getText()));
 		gm.setSpecular(specular.getSelection());
-		gm.setImageName (imageName.getText());		
+		gm.setImageName(imageName.getText());
 		gm.setUseNegativeQ(useNegativeQButton.getSelection());
-		
-		
+
 	}
 
-	public void updateDisplayFromGm(GeometricParametersModel gm){
-		
-	
+	public void updateDisplayFromGm(GeometricParametersModel gm) {
+
 		beamHeight.setText(String.valueOf(gm.getBeamHeight()));
 		angularFudgeFactor.setText(String.valueOf(gm.getAngularFudgeFactor()));
 		footprint.setText(String.valueOf(gm.getFootprint()));
@@ -766,16 +699,13 @@ public class GeometricParametersWindows extends Composite{
 		normalisationFactor.setText(String.valueOf(gm.getNormalisationFactor()));
 		specular.setSelection(gm.getSpecular());
 		imageName.setText(gm.getImageName());
-//		fluxPath.setText(gm.getFluxPath());
 		selectedOption.setText(gm.getxNameRef());
 		energy.setText(String.valueOf(gm.getEnergy()));
 		theta.select(gm.getTheta());
 		useNegativeQButton.setEnabled(gm.isUseNegativeQ());
-				
-			
+
 	}
-	
-	
+
 	public Text getEnergy() {
 		return energy;
 	}
@@ -783,11 +713,11 @@ public class GeometricParametersWindows extends Composite{
 	public void setEnergy(Text energy) {
 		this.energy = energy;
 	}
-	
-	public void setUpdateOn(boolean b){
-		this.updateOn  =b;
+
+	public void setUpdateOn(boolean b) {
+		this.updateOn = b;
 	}
-	
+
 	public boolean isUseNegativeQ() {
 		return useNegativeQ;
 	}

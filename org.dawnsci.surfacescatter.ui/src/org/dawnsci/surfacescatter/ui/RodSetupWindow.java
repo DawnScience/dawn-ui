@@ -125,7 +125,7 @@ public class RodSetupWindow {
 			parametersSetting.setLayoutData(parametersSettingData);
 			parametersSetting.setText("Geometric Parameters");
 			
-			paramField = new GeometricParametersWindows(parametersSetting, SWT.FILL, ssp, ssvs);
+			paramField = new GeometricParametersWindows(parametersSetting, SWT.FILL, ssp);
 			paramField.setLayout(new GridLayout());
 			paramField.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 			

@@ -90,9 +90,6 @@ public class SurfaceScatterViewStart extends Dialog {
 	private String paramFile;
 	private IRegion r2;
 
-	// private final static Logger logger =
-	// LoggerFactory.getLogger(SurfaceScatterViewStart.class);
-
 	public SurfaceScatterViewStart(Shell parentShell) {
 
 		super(parentShell);
@@ -601,7 +598,6 @@ public class SurfaceScatterViewStart extends Dialog {
 
 				if (ssp.getSaveFolder() == null) {
 					ssp.setSaveFolder(path);
-					;
 				}
 
 				ssp.saveParameters(title);
@@ -623,7 +619,6 @@ public class SurfaceScatterViewStart extends Dialog {
 
 				if (ssp.getSaveFolder() != null) {
 					fd.setFilterPath(ssp.getSaveFolder());
-					;
 				}
 
 				String stitle = "r";
