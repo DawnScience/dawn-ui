@@ -54,11 +54,12 @@ public class TrackingHandlerWithFramesImproved {
 
 	public void setSsp(SurfaceScatterPresenter ssp) {
 		this.ssp = ssp;
+		this.drm = ssp.getDrm();
 	}
 
 	protected void runTJ1() {
 
-		drm.resetAll();
+		ssp.getDrm().resetAll();
 
 		final Display display = Display.getCurrent();
 

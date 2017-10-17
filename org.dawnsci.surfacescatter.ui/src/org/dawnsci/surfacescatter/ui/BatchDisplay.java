@@ -2,17 +2,13 @@ package org.dawnsci.surfacescatter.ui;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
-import java.io.File;
 import java.util.ArrayList;
-
 import org.dawnsci.surfacescatter.BatchRodDataTransferObject;
 import org.dawnsci.surfacescatter.BatchRodModel;
 import org.dawnsci.surfacescatter.BatchSavingAdvancedSettings;
 import org.dawnsci.surfacescatter.BatchSetupMiscellaneousProperties;
 import org.dawnsci.surfacescatter.SavingFormatEnum.SaveFormatSetting;
-import org.eclipse.dawnsci.analysis.api.io.IDataHolder;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
@@ -21,30 +17,23 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.DirectoryDialog;
 import org.eclipse.swt.widgets.Group;
-import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.swt.widgets.Text;
 
-import uk.ac.diamond.scisoft.analysis.io.LoaderFactory;
-
 public class BatchDisplay extends Composite {
 
-	private SurfaceScatterPresenter ssp;
 	private SurfaceScatterViewStart ssvs;
 	private BatchSetupWindow bsw;
 	private Table batchDisplayTable;
 	private BatchRodModel brm;
 	private String nxsFolderPath;
-	private BatchSavingAdvancedSettings[] bsas;
-	private BatchSetupMiscellaneousProperties bsmps;
 
-	public BatchDisplay(Composite parent, int style, SurfaceScatterPresenter ssp, SurfaceScatterViewStart ssvs,
+	public BatchDisplay(Composite parent, int style, SurfaceScatterViewStart ssvs,
 			BatchSetupWindow rsw, BatchRodModel brm) {
 
 		super(parent, style);
 
-		this.ssp = ssp;
 		this.ssvs = ssvs;
 		this.bsw = rsw;
 		this.brm = brm;

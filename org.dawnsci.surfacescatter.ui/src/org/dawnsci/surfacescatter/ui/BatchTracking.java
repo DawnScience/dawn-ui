@@ -1,15 +1,11 @@
 package org.dawnsci.surfacescatter.ui;
 
 import java.util.ArrayList;
-
-import org.dawnsci.surfacescatter.AxisEnums;
 import org.dawnsci.surfacescatter.AxisEnums.yAxes;
 import org.dawnsci.surfacescatter.BatchSavingAdvancedSettings;
 import org.dawnsci.surfacescatter.BatchSetupMiscellaneousProperties;
 import org.dawnsci.surfacescatter.BatchSetupYAxes;
-import org.dawnsci.surfacescatter.CurveStitchDataPackage;
 import org.dawnsci.surfacescatter.SavingFormatEnum.SaveFormatSetting;
-import org.eclipse.swt.widgets.Shell;
 
 public class BatchTracking {
 
@@ -34,7 +30,7 @@ public class BatchTracking {
 
 		new TrackingCore(doneArray, ssp, null, null, false, null, null);
 
-		ssp.writeNexus(savePath);
+		ssp.writeNexus(savePath+ "_NEXUS");
 		
 		yAxes[] yA = goodYAxes(bsmps.getBsya());
 		
@@ -42,10 +38,10 @@ public class BatchTracking {
 			SaveFormatSetting sfs = bsa.getSfs();
 			for(yAxes y : yA) {
 				if (bsa.isAllPoints()) {
-					ssp.arbitrarySavingMethodCore(bsmps.isUseQ(), false, sfs, ssp.getDrm().getCsdp(), y, savePath);
+					ssp.arbitrarySavingMethodCore(bsmps.isUseQ(), false, sfs, ssp.getDrm().getCsdp(), y, savePath+"_" +sfs.getDisplayName()+"_"+"ALL_POINTS");
 				}
 				if (bsa.isGoodPoints()) {
-					ssp.arbitrarySavingMethodCore(bsmps.isUseQ(), true, sfs, ssp.getDrm().getCsdp(), y, savePath);
+					ssp.arbitrarySavingMethodCore(bsmps.isUseQ(), true, sfs, ssp.getDrm().getCsdp(), y, savePath+"_" +sfs.getDisplayName()+"_"+"GOOD_POINTS_ONLY");
 				}
 			}
 		}

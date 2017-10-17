@@ -2005,7 +2005,7 @@ public class SurfaceScatterPresenter {
 
 	public void dialogToChangeRodName(String suggested, BatchDatDisplayer dd) {
 
-		BatchRodNameSetterDialogue brnsd = new BatchRodNameSetterDialogue(parentShell, this, suggested, dd);
+		BatchRodNameSetterDialogue brnsd = new BatchRodNameSetterDialogue(parentShell, suggested, dd);
 		brnsd.open();
 
 		return;

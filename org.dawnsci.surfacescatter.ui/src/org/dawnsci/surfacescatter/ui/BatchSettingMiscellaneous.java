@@ -86,7 +86,7 @@ public class BatchSettingMiscellaneous extends Composite {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				for (TableItem ti : yAxisTable.getItems()) {
-					AxisEnums.yAxes y = AxisEnums.yAxes.valueOf(ti.getText());
+					AxisEnums.yAxes y = AxisEnums.toYAxis(ti.getText());
 					bsmps.getBsya()[y.getYAxisNumber()].setUse(ti.getChecked());
 				}
 

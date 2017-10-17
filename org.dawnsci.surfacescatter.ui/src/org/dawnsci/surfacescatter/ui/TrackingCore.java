@@ -43,10 +43,10 @@ public class TrackingCore {
 
 				int k = closestNoWithoutDone(drm.getSortedX().getDouble(ssp.getSliderPos()), fmal);
 
-				if (t != null & t.isInterrupted()) {
-
-					break;
-
+				if (t != null) {
+					if (t.isInterrupted()) {
+						break;
+					}
 				}
 
 				FrameModel frame = fmal.get(k);
@@ -147,11 +147,11 @@ public class TrackingCore {
 		return;
 	}
 
-	private void seedLocationSetter(SurfaceScatterPresenter ssp, int k, boolean setStartFrame,
-			int frameDatNo, boolean seedRequired, TrackerType1 tt1) {
+	private void seedLocationSetter(SurfaceScatterPresenter ssp, int k, boolean setStartFrame, int frameDatNo,
+			boolean seedRequired, TrackerType1 tt1) {
 
 		DirectoryModel drm = ssp.getDrm();
-		
+
 		if (seedRequired && tt1 != TrackerType1.SPLINE_INTERPOLATION && tt1 != TrackerType1.USE_SET_POSITIONS
 				&& drm.isTrackerOn()) {
 

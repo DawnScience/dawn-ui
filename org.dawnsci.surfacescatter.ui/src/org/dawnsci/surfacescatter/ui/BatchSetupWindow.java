@@ -1,8 +1,6 @@
 package org.dawnsci.surfacescatter.ui;
 
 import java.io.File;
-import java.util.ArrayList;
-
 import org.apache.commons.lang.StringUtils;
 import org.dawnsci.surfacescatter.BatchRodDataTransferObject;
 import org.dawnsci.surfacescatter.BatchRodModel;
@@ -71,7 +69,7 @@ public class BatchSetupWindow {
 
 		try {
 
-			batchDisplay = new BatchDisplay(right, SWT.FILL, ssp, ssvs, BatchSetupWindow.this, brm);
+			batchDisplay = new BatchDisplay(right, SWT.FILL, ssvs, BatchSetupWindow.this, brm);
 			batchDisplay.setLayout(new GridLayout());
 			batchDisplay.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, true));
 

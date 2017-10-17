@@ -1,12 +1,9 @@
 package org.dawnsci.surfacescatter.ui;
 
 import org.eclipse.jface.dialogs.Dialog;
-import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
-import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.GridData;
@@ -20,21 +17,16 @@ import org.eclipse.ui.PlatformUI;
 
 public class BatchRodNameSetterDialogue extends Dialog {
 	
-	private SurfaceScatterPresenter ssp;
-	private String imageName;
 	private Text suggestedRodNameText;
 	private BatchDatDisplayer dd;
 	private String suggestedRodName;
 	
 	public BatchRodNameSetterDialogue(Shell parentShell, 
-								   SurfaceScatterPresenter ssp,
 								   String suggestedRodName,
 								   BatchDatDisplayer dd) {
 		
 		super(parentShell);
-		this.ssp = ssp;
 		this.dd= dd;
-		this.imageName = ssp.getImageName();
 		this.suggestedRodName =suggestedRodName;
 				
 		setShellStyle(getShellStyle() | SWT.RESIZE);
@@ -44,22 +36,7 @@ public class BatchRodNameSetterDialogue extends Dialog {
 	@Override
 	protected Control createButtonBar(Composite parent) {
 		Control c = super.createButtonBar(parent);
-		getShell().setDefaultButton(null);
-		
-//		this.getButton(IDialogConstants.CANCEL_ID).addSelectionListener(new SelectionListener() {
-//			
-//			@Override
-//			public void widgetSelected(SelectionEvent e) {
-//				dd.setR(false);
-//			}
-//			
-//			@Override
-//			public void widgetDefaultSelected(SelectionEvent e) {
-//				// TODO Auto-generated method stub
-//				
-//			}
-//		});
-//		
+		getShell().setDefaultButton(null);	
 		
 		return c;
 	}

@@ -4,6 +4,8 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+
+import org.apache.commons.lang.StringUtils;
 import org.dawnsci.surfacescatter.BatchRodDataTransferObject;
 import org.dawnsci.surfacescatter.BatchRodModel;
 import org.dawnsci.surfacescatter.FittingParametersInputReader;
@@ -381,7 +383,10 @@ public class BatchDatDisplayer extends Composite implements IDatDisplayer {
 		transferToBatch.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				ssp.dialogToChangeRodName(getDatFilepaths()[0], BatchDatDisplayer.this);
+				
+				String namePrompt =  StringUtils.substringBetween(getDatFilepaths()[0], "/", ".");
+				
+				ssp.dialogToChangeRodName(namePrompt, BatchDatDisplayer.this);
 				addToBatch();
 			}
 		});
