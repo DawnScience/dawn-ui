@@ -3,6 +3,7 @@ package org.dawnsci.datavis.view.quickfile;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
@@ -113,6 +114,8 @@ public class QuickFileWidget extends Composite {
 				names[i] = listFiles[i].getName();
 			}
 			
+			Arrays.sort(names);
+			
 			SimpleContentProposalProvider p = new SimpleContentProposalProvider(names) {
 				
 				@Override
@@ -124,6 +127,7 @@ public class QuickFileWidget extends Composite {
 								list.add(new ContentProposal(names[i]));
 							}
 						}
+						
 						return list.toArray(new IContentProposal[list
 								.size()]);
 					}
