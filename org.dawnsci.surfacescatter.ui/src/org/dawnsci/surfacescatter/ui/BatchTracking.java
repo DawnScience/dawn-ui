@@ -30,7 +30,7 @@ public class BatchTracking {
 
 		new TrackingCore(doneArray, ssp, null, null, false, null, null);
 
-		ssp.writeNexus(savePath+ "_NEXUS");
+		ssp.writeNexus(savePath);
 		
 		yAxes[] yA = goodYAxes(bsmps.getBsya());
 		

@@ -134,8 +134,6 @@ public class SurfaceScatterViewStart extends Dialog {
 
 		RodSetupWindow rsw = new RodSetupWindow(folder, this, ssp);
 
-		DatDisplayer datDisplayer = rsw.getDatDisplayer();
-
 		this.experimentalSetup = rsw.getExperimentalSetup();
 		this.methodSetting = rsw.getMethodSetting();
 		this.parametersSetting = rsw.getParametersSetting();
@@ -148,7 +146,7 @@ public class SurfaceScatterViewStart extends Dialog {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 
-				datDisplayer.setOption(datDisplayer.getSelectedOption());
+				rsw.getDatDisplayer().setOption(datDisplayer.getSelectedOption());
 
 				String k = outputCurves.getIntensity().getText();
 				AxisEnums.yAxes ids0 = AxisEnums.toYAxis(k);
@@ -327,7 +325,7 @@ public class SurfaceScatterViewStart extends Dialog {
 		// Tab 2 Batch Setup
 		////////////////////////////////////////////////////// #
 
-		BatchSetupWindow bsw = new BatchSetupWindow(folder, this, ssp);
+		new BatchSetupWindow(folder, this, ssp);
 
 		/////////////////////////////////////////////////////////////////////////
 		///////////////////////////////////////////////////////
@@ -1289,9 +1287,6 @@ public class SurfaceScatterViewStart extends Dialog {
 		return correctionsDropDown;
 	}
 
-	public DatDisplayer getDatDisplayer() {
-		return datDisplayer;
-	}
 
 	public void resetIntensityCombo() {
 		SurfaceScatterViewStart.this.getSsps3c().getOutputCurves().getIntensity().select(0);
@@ -1535,7 +1530,7 @@ public class SurfaceScatterViewStart extends Dialog {
 
 		parentPs.addTrace(lt1);
 		getSsps3c().getOutputCurves().getIntensity().select(0);
-		;
+		
 	}
 
 	public void export(CurveStitchDataPackage csdpNew) {
@@ -1597,7 +1592,7 @@ public class SurfaceScatterViewStart extends Dialog {
 			}
 
 			ReflectivityFluxCorrectionsForDialog.reflectivityFluxCorrectionsDouble(// SurfaceScatterViewStart.this.getParamField().getFluxPath().getText(),
-					QdcdDat.getDouble(0), ssp.getGm().isUseNegativeQ(), ssp.getGm().getFluxPath());
+					QdcdDat.getDouble(0), ssp.getGm().getUseNegativeQ(), ssp.getGm().getFluxPath());
 
 		} catch (Exception h) {
 			RegionOutOfBoundsWarning roobw = new RegionOutOfBoundsWarning(getShell(), 4, null);
@@ -1792,6 +1787,11 @@ public class SurfaceScatterViewStart extends Dialog {
 
 		getSsps3c().generalUpdate(ssp.getLenPt());
 		customComposite.generalCorrectionsUpdate();
+		
+		
+		
+		
+		
 	}
 
 }

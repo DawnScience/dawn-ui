@@ -142,8 +142,6 @@ public class SurfaceScatterPresenter {
 		IDataset[] kArray = new IDataset[filepaths.length];
 		IDataset[] lArray = new IDataset[filepaths.length];
 
-		IDataset[] internalFluxArray = new IDataset[filepaths.length];
-
 		IDataset[] dcdThetaArray = new IDataset[filepaths.length];
 		IDataset[] qdcdArray = new IDataset[filepaths.length];
 
@@ -450,7 +448,7 @@ public class SurfaceScatterPresenter {
 			imagesToFilepathRefDat.set(imagesToFilepathRef.get(sd), sd);
 		}
 
-		if (gm.isUseNegativeQ()) {
+		if (gm.getUseNegativeQ()) {
 
 			thetaArrayCon = Maths.multiply(thetaArrayCon, -1);
 			dcdThetaCon= Maths.multiply(dcdThetaCon, -1);
@@ -660,13 +658,13 @@ public class SurfaceScatterPresenter {
 							
 							reflectivityFluxCorrection = ReflectivityFluxCorrectionsForDialog
 									.reflectivityFluxCorrectionsDouble(// fm.getDatFilePath(),
-											xArrayCon.getDouble(f),gm.isUseNegativeQ(), filepaths);
+											xArrayCon.getDouble(f),gm.getUseNegativeQ(), filepaths);
 
 						} else {
 
 							reflectivityFluxCorrection = ReflectivityFluxCorrectionsForDialog
 									.reflectivityFluxCorrectionsDouble(// fm.getDatFilePath(),
-											qdcdCon.getDouble(f),gm.isUseNegativeQ(), externalFlux);
+											qdcdCon.getDouble(f),gm.getUseNegativeQ(), externalFlux);
 						}
 						fm.setReflectivityFluxCorrection(reflectivityFluxCorrection);
 						// fluxCallibrationWarning();
@@ -981,6 +979,9 @@ public class SurfaceScatterPresenter {
 			fp = FittingParametersInputReader.fittingParametersFromFrameModel(fms.get(0));
 
 			FittingParametersInputReader.geometricalParametersReaderFromNexus(title, gm, drm);
+			
+			fp.setUseNegativeQ(gm.getUseNegativeQ());
+			
 			FittingParametersInputReader.anglesAliasReaderFromNexus(title);
 		}
 
@@ -1751,7 +1752,7 @@ public class SurfaceScatterPresenter {
 
 		try {
 			FrameModel f = fms.get(k);
-			int jok = f.getDatNo();
+			
 
 			setup[0] = AnalaysisMethodologies.toString(f.getBackgroundMethdology());
 			setup[1] = String.valueOf(AnalaysisMethodologies.toInt(f.getFitPower()));
@@ -2914,7 +2915,7 @@ public class SurfaceScatterPresenter {
 			for (int s = 0; s < datLength; s++) {
 				if (csdp.getyIDataset()[r].getDouble(s) < 0) {
 					getFrameModel(r, s).setGoodPoint(false);
-					;
+					
 				}
 			}
 		}

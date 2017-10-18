@@ -702,7 +702,7 @@ public class GeometricParametersWindows extends Composite {
 		selectedOption.setText(gm.getxNameRef());
 		energy.setText(String.valueOf(gm.getEnergy()));
 		theta.select(gm.getTheta());
-		useNegativeQButton.setEnabled(gm.isUseNegativeQ());
+		useNegativeQButton.setSelection(gm.getUseNegativeQ());
 
 	}
 
