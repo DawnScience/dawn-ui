@@ -48,7 +48,12 @@ public class LoadedFile implements IDataObject, IDataFilePackage {
 			try {
 				Map<DataNode, String> uniqueDataNodes = getUniqueDataNodes(dataHolder.getTree().getGroupNode());
 				Collection<String> values = uniqueDataNodes.values();
-				names = values.toArray(new String[values.size()]);
+				names = new String[values.size()];
+				int count = 0;
+				for (String v : values) {
+					names[count++] = "/" + v;
+				}
+//				names = values.toArray(new String[values.size()]);
 			} catch ( Exception e) {
 				logger.error("Could not get unique nodes",e);
 			}
@@ -57,7 +62,6 @@ public class LoadedFile implements IDataObject, IDataFilePackage {
 		
 		if (names == null) names = dataHolder.getNames();
 		for (String n : names) {
-			n = "/" + n;
 			ILazyDataset lazyDataset = dataHolder.getLazyDataset(n);
 			if (lazyDataset != null && ((LazyDatasetBase)lazyDataset).getDType() != Dataset.STRING && lazyDataset.getSize() != 1) {
 				DataOptions d = new DataOptions(n, this);
