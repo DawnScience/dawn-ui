@@ -32,6 +32,7 @@ public class LegacyMapBeanBuilder {
 	private static final String I05DATA = "data";
 	private static final String I05ANGLES = "angles";
 	private static final String I05ENERGIES = "energies";
+	private static final String I05LOCATION = "location";
 	public static final String I05CHECK = "/entry1/instrument/analyser/cps";
 	
 	public static final String I22SAXCHECK = "/entry1/detector/data";
@@ -202,7 +203,7 @@ public static MappedDataFileBean buildBeani08Energyin2016(Tree tree) {
 		if (n instanceof GroupNode) {
 			GroupNode gn = (GroupNode)n;
 			if (!gn.containsDataNode(I05DATA)) return null;
-			if (!gn.containsDataNode(I05ANGLES)) return null;
+			if (!gn.containsDataNode(I05ANGLES) && !gn.containsDataNode(I05LOCATION)) return null;
 			if (!gn.containsDataNode(I05ENERGIES)) return null;
 			
 			String[] xyAxesNames = getXYAxesNames(gn);
@@ -218,7 +219,7 @@ public static MappedDataFileBean buildBeani08Energyin2016(Tree tree) {
 			String[] ax = new String[4];
 			ax[0] = I05ANALYSER + Node.SEPARATOR + yAxis;
 			ax[1] = I05ANALYSER + Node.SEPARATOR + xAxis;
-			ax[2] = I05ANALYSER + Node.SEPARATOR + I05ANGLES;
+			ax[2] = gn.containsDataNode(I05ANGLES) ? I05ANALYSER + Node.SEPARATOR + I05ANGLES : I05ANALYSER + Node.SEPARATOR + I05LOCATION;
 			ax[3] = I05ANALYSER + Node.SEPARATOR + I05ENERGIES;
 			bb.setAxes(ax);
 			bb.setRank(4);
