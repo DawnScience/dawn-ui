@@ -68,7 +68,7 @@ public class SurfaceScatterViewStart extends Dialog {
 	private PlotSystemCompositeView customComposite;
 	private SuperSashPlotSystem3Composite ssps3c;
 	private MultipleOutputCurvesTableView outputCurves;
-	private DatDisplayer datDisplayer;
+//	private DatDisplayer datDisplayer;
 	private GeometricParametersWindows paramField;
 	private CTabFolder folder;
 	private SurfaceScatterPresenter ssp;
@@ -146,7 +146,7 @@ public class SurfaceScatterViewStart extends Dialog {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 
-				rsw.getDatDisplayer().setOption(datDisplayer.getSelectedOption());
+				rsw.getDatDisplayer().setOption(rsw.getDatDisplayer().getSelectedOption());
 
 				String k = outputCurves.getIntensity().getText();
 				AxisEnums.yAxes ids0 = AxisEnums.toYAxis(k);
@@ -165,7 +165,7 @@ public class SurfaceScatterViewStart extends Dialog {
 				boolean isThereAParamFile = false;
 				paramFile = " ";
 
-				for (TableItem jh : datDisplayer.getParamFileTable().getItems()) {
+				for (TableItem jh : rsw.getDatDisplayer().getParamFileTable().getItems()) {
 					if (jh.getChecked()) {
 						isThereAParamFile = true;
 						paramFile = jh.getText();
@@ -184,7 +184,7 @@ public class SurfaceScatterViewStart extends Dialog {
 
 				ArrayList<TableItem> checkedList = new ArrayList<>();
 
-				for (TableItem d : datDisplayer.getRodDisplayTable().getItems()) {
+				for (TableItem d : rsw.getDatDisplayer().getRodDisplayTable().getItems()) {
 					if (d.getChecked()) {
 						checkedList.add(d);
 					}
@@ -225,7 +225,7 @@ public class SurfaceScatterViewStart extends Dialog {
 				MethodSetting ms = MethodSetting.toMethod(test[t]);
 
 				ssp.getGm().setExperimentMethod(ms.getCorrectionsName());
-				ssp.surfaceScatterPresenterBuildWithFrames(filepaths, datDisplayer.getSelectedOption(), ms);
+				ssp.surfaceScatterPresenterBuildWithFrames(filepaths, rsw.getDatDisplayer().getSelectedOption(), ms);
 
 				try {
 					ssp.setLenPt(r);
@@ -298,7 +298,7 @@ public class SurfaceScatterViewStart extends Dialog {
 				ssp.setSliderPos(0);
 
 				if (isThereAParamFile) {
-					setParametersFromFile(paramFile, datDisplayer.getUseTrajectory());
+					setParametersFromFile(paramFile, rsw.getDatDisplayer().getUseTrajectory());
 
 				}
 
@@ -678,7 +678,7 @@ public class SurfaceScatterViewStart extends Dialog {
 		customComposite.getSecondBgRegion().repaint();
 		appendListenersToOutputCurves();
 
-		datDisplayer.redrawDatDisplayerFolderView();
+//		datDisplayer.redrawDatDisplayerFolderView();
 
 		Display.getCurrent().addFilter(SWT.KeyDown, new Listener() {
 			@Override

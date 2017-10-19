@@ -108,7 +108,8 @@ public class BatchDisplay extends Composite {
 
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				BatchRunner.batchRun(brm);
+				 BatchTrackingProgressAndAbortViewImproved btpaavi = new  BatchTrackingProgressAndAbortViewImproved(ssvs.getShell(), brm);
+				 btpaavi.open();
 			}
 		});
 
