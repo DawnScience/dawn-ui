@@ -235,9 +235,9 @@ public class ImageRotateTool extends AbstractToolPage {
 						IDataset xAxis = axes.get(0), yAxis = axes.get(1);
 						if (xAxis == null || yAxis == null)
 							return Status.CANCEL_STATUS;
-						double[] xRange = new double[] { xAxis.min().doubleValue(),
-								xAxis.max().doubleValue() }, yRange = new double[] {
-								yAxis.min().doubleValue(), yAxis.max().doubleValue() };
+						double[] xRange = new double[] { xAxis.min(true).doubleValue(),
+								xAxis.max(true).doubleValue() }, yRange = new double[] {
+								yAxis.min(true).doubleValue(), yAxis.max(true).doubleValue() };
 						double xRangeValue = (xRange[1] - xRange[0]);
 						double yRangeValue = (yRange[1] - yRange[0]);
 						int[] shape = trace.getData().getShape();

@@ -63,8 +63,8 @@ public class DataSetScatterPlot3D extends DataSet3DPlot3D {
 			globalRealYmax = yAxisValues.getMaxValue();
 			globalZmin = zAxisValues.getMinValue();
 			globalZmax = zAxisValues.getMaxValue();
-			dataMin = displayData.min().doubleValue();
-			dataMax = displayData.max().doubleValue();
+			dataMin = displayData.min(true).doubleValue();
+			dataMax = displayData.max(true).doubleValue();
 		} else {
 			// TODO Resolve this?
 			

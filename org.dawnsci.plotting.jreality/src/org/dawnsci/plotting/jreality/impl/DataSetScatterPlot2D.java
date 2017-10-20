@@ -86,8 +86,8 @@ public class DataSetScatterPlot2D extends DataSet3DPlot1D {
 			globalXmax = globalRealXmax;
 			globalYmin = Math.min(globalYmin, yAxis.getMinValue());
 			globalYmax = Math.max(globalYmax, yAxis.getMaxValue());
-			dataMin = Math.min(set.min().doubleValue(), dataMin);
-			dataMax = Math.max(set.max().doubleValue(), dataMax);
+			dataMin = Math.min(set.min(true).doubleValue(), dataMin);
+			dataMax = Math.max(set.max(true).doubleValue(), dataMax);
 		}
 		// check on yAxis is in offset mode if yes it will be added to the
 		// minimum
@@ -500,8 +500,8 @@ public class DataSetScatterPlot2D extends DataSet3DPlot1D {
 				// protection against infinite zoom
 				if (rangeZoom && zoomedDataSet != null) {
 					if (zoomedDataSet.getSize() != 1) {
-						dataMin = Math.min(dataMin, zoomedDataSet.min().doubleValue());
-						dataMax = Math.max(dataMax, zoomedDataSet.max().doubleValue());
+						dataMin = Math.min(dataMin, zoomedDataSet.min(true).doubleValue());
+						dataMax = Math.max(dataMax, zoomedDataSet.max(true).doubleValue());
 					} else {
 						dataMin = Math.min(dataMin, zoomedDataSet.getDouble(0));
 						dataMax = Math.max(dataMax, zoomedDataSet.getDouble(0) + 0.0001);

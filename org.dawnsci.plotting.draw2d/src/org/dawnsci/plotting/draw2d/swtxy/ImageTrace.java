@@ -606,10 +606,10 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 		final int xSize = imageData.width;
 		final int ySize = imageData.height;
 		
-		double xmin = xAxis.min().doubleValue();
-		double xmax = xAxis.max().doubleValue();
-		double ymin = yAxis.min().doubleValue();
-		double ymax = yAxis.max().doubleValue();
+		double xmin = xAxis.min(true).doubleValue();
+		double xmax = xAxis.max(true).doubleValue();
+		double ymin = yAxis.min(true).doubleValue();
+		double ymax = yAxis.max(true).doubleValue();
 		
 		double xLen = xAxis.getSize();
 		double yLen = yAxis.getSize();
@@ -837,16 +837,16 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 				
 		// Bind the extent of the images to the actual data
 		
-		double minXData = x.min().doubleValue()/bin;
+		double minXData = x.min(true).doubleValue()/bin;
 		minX = Math.max(minXData, minX);
 		
-		double maxXData = x.max().doubleValue()/bin;
+		double maxXData = x.max(true).doubleValue()/bin;
 		maxX = Math.min(maxXData, maxX);
 		
-		double minYData = y.min().doubleValue()/bin;
+		double minYData = y.min(true).doubleValue()/bin;
 		minY = Math.max(minYData, minY);
 
-		double maxYData = y.max().doubleValue()/bin;
+		double maxYData = y.max(true).doubleValue()/bin;
 		maxY = Math.min(maxYData, maxY);
 	
 		if (pixels) {

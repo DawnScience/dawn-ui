@@ -1350,7 +1350,7 @@ public class JRealityPlotViewer extends IPlottingSystemViewer.Stub<Composite> im
 			IDataset dataset = iter.next();
 			if (checkForNan(dataset)) {
 				// replace Nans by min value
-				double minValue = dataset.min(true, true).doubleValue();
+				double minValue = dataset.min(true).doubleValue();
 				cleanNan(dataset, minValue);
 			}
 			if (checkForInf(dataset)) {

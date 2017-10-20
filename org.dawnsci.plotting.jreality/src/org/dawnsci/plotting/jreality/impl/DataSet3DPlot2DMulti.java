@@ -266,8 +266,8 @@ public class DataSet3DPlot2DMulti extends DataSet3DPlot2D {
 									tableMin = 0;
 									tableMax = 0;
 								} else {
-									tableMin = currentData.min().doubleValue();
-									tableMax = currentData.max().doubleValue();
+									tableMin = currentData.min(true).doubleValue();
+									tableMax = currentData.max(true).doubleValue();
 								}
 								graphAppearance = createAppearance();
 								subGraph.setAppearance(graphAppearance);

@@ -45,8 +45,8 @@ public class VolumeRenderer {
 			
 		IDataset slice = dataset.getSlice(monitor, new int[]{0,0,0}, dataset.getShape(), step);
 		
-		double sliceMin = slice.min().doubleValue();
-		double sliceMax = slice.max().doubleValue();
+		double sliceMin = slice.min(true).doubleValue();
+		double sliceMax = slice.max(true).doubleValue();
 		
 		double[] scaledMinMaxValue = scaledMinAndMax(minValue, maxValue, sliceMin, sliceMax);
 		double[] scaledMinMaxCull = scaledMinAndMax(minCull, maxCull, sliceMin, sliceMax);

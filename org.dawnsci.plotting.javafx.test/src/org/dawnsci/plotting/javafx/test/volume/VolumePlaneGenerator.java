@@ -18,8 +18,8 @@ public class VolumePlaneGenerator {
 	private double resolution;
 
 	public VolumePlaneGenerator(double resolution, ILazyDataset dataset) throws DatasetException {
-		this.max = dataset.getSlice().max(true, true).doubleValue();
-		this.min = dataset.getSlice().min(true, true).doubleValue();
+		this.max = dataset.getSlice().max(true).doubleValue();
+		this.min = dataset.getSlice().min(true).doubleValue();
 
 		this.resolution = resolution;
 

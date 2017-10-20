@@ -154,8 +154,8 @@ public class CombineDialog extends Dialog implements IAdaptable{
 				}
 				AxesMetadata ax = data.getFirstMetadata(AxesMetadata.class);
 				ax.setAxis(0, dataset);
-				globalRange[2] = dataset.min().doubleValue();
-				globalRange[3] = dataset.max().doubleValue();
+				globalRange[2] = dataset.min(true).doubleValue();
+				globalRange[3] = dataset.max(true).doubleValue();
 				system.clear();
 				IImageTrace t = MetadataPlotUtils.buildTrace(data, system);
 				t.setGlobalRange(globalRange);

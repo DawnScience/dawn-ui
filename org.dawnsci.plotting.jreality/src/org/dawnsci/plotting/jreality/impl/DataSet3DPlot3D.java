@@ -766,8 +766,8 @@ public class DataSet3DPlot3D implements IDataSet3DCorePlot {
 					globalRealXmax = xAxisValues.getMaxValue();
 				} else {
 					Dataset windowedXAxis = xAxisValues.toDataset().getSliceView(new Slice(windowStartPosX, windowEndPosX +1));
-					globalRealXmin = windowedXAxis.min().doubleValue();
-					globalRealXmax = windowedXAxis.max().doubleValue();
+					globalRealXmin = windowedXAxis.min(true).doubleValue();
+					globalRealXmax = windowedXAxis.max(true).doubleValue();
 				}
 			break;
 		}
@@ -797,8 +797,8 @@ public class DataSet3DPlot3D implements IDataSet3DCorePlot {
 					globalRealYmax = yAxisValues.getMaxValue();
 				} else {
 					Dataset windowedYAxis = yAxisValues.toDataset().getSliceView(new Slice(windowStartPosY, windowEndPosY +1));
-					globalRealYmin = windowedYAxis.min().doubleValue();
-					globalRealYmax = windowedYAxis.max().doubleValue();
+					globalRealYmin = windowedYAxis.min(true).doubleValue();
+					globalRealYmax = windowedYAxis.max(true).doubleValue();
 				}			
 			break;
 		}
@@ -997,8 +997,8 @@ public class DataSet3DPlot3D implements IDataSet3DCorePlot {
 			buildDisplayDataSet();
 			setGlobalMinMax();
 			
-			globalZmin = displayData.min().doubleValue();
-			globalZmax = displayData.max().doubleValue();
+			globalZmin = displayData.min(true).doubleValue();
+			globalZmax = displayData.max(true).doubleValue();
 			graphAppearance = new Appearance();
 			graph.setGeometry(createGraphGeometry(0,0));
 			graph.setAppearance(graphAppearance);
@@ -1431,8 +1431,8 @@ public class DataSet3DPlot3D implements IDataSet3DCorePlot {
 
 	protected void updateDisplay(int xAspect, int yAspect) {
 		setGlobalMinMax();
-		globalZmin = displayData.min().doubleValue();
-		globalZmax = displayData.max().doubleValue();
+		globalZmin = displayData.min(true).doubleValue();
+		globalZmax = displayData.max(true).doubleValue();
 		graph.setGeometry(createGraphGeometry(xAspect,yAspect));
 		if (axis != null) {
 			axis.setGeometry(createAxisGeometry());

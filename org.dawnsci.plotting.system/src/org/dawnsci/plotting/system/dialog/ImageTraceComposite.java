@@ -123,11 +123,11 @@ public class ImageTraceComposite extends Composite {
 		Text maximumBox = new Text(group, SWT.BORDER);
 		maximumBox.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
 		this.maximum = isInt ? new IntegerDecorator(maximumBox) : new FloatDecorator(maximumBox);
-      		
-		maximum.setMaximum(imageTrace.getData().max().doubleValue());
+
+		maximum.setMaximum(imageTrace.getData().max(true).doubleValue());
 		maximum.setMinimum(minimum);
-	    minimum.setMaximum(maximum);
-		minimum.setMinimum(imageTrace.getData().min().doubleValue());
+		minimum.setMaximum(maximum);
+		minimum.setMinimum(imageTrace.getData().min(true).doubleValue());
 		
 		Number min = imageTrace.getMin();
 		Number max = imageTrace.getMax();

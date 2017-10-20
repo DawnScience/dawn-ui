@@ -1035,8 +1035,8 @@ public class DataSet3DPlot1D implements IDataSet3DCorePlot, AreaSelectListener, 
 		double realXmax = -Float.MAX_VALUE;
 		while (iter.hasNext()) {
 			IDataset set = iter.next();
-			ymin = Math.min(ymin, set.min().doubleValue());
-			ymax = Math.max(ymax, set.max().doubleValue());
+			ymin = Math.min(ymin, set.min(true).doubleValue());
+			ymax = Math.max(ymax, set.max(true).doubleValue());
 			switch (xAxis) {
 			case LINEAR:
 				realXmin = 0;
@@ -1070,8 +1070,8 @@ public class DataSet3DPlot1D implements IDataSet3DCorePlot, AreaSelectListener, 
 		double currentXmax = -Float.MAX_VALUE;
 		double currentRealXmin = Float.MAX_VALUE;
 		double currentRealXmax = -Float.MAX_VALUE;
-		currentYmin = Math.min(currentYmin, dataSet.min().doubleValue());
-		currentYmax = Math.max(currentYmax, dataSet.max().doubleValue());
+		currentYmin = Math.min(currentYmin, dataSet.min(true).doubleValue());
+		currentYmax = Math.max(currentYmax, dataSet.max(true).doubleValue());
 		currentXmax = Math.max(currentXmax, dataSet.getShape()[0]);
 		switch (xAxis) {
 		case LINEAR:
@@ -1170,8 +1170,8 @@ public class DataSet3DPlot1D implements IDataSet3DCorePlot, AreaSelectListener, 
 		globalRealXmax = -Float.MAX_VALUE;
 		while (iter.hasNext()) {
 			IDataset set = iter.next();
-			globalYmin = Math.min(globalYmin, set.min().doubleValue());
-			globalYmax = Math.max(globalYmax, set.max().doubleValue());
+			globalYmin = Math.min(globalYmin, set.min(true).doubleValue());
+			globalYmax = Math.max(globalYmax, set.max(true).doubleValue());
 			globalXmax = Math.max(globalXmax, set.getShape()[0]);
 			switch (xAxis) {
 			case LINEAR:
@@ -1777,8 +1777,8 @@ public class DataSet3DPlot1D implements IDataSet3DCorePlot, AreaSelectListener, 
 				// protection against infinite zoom
 				if (rangeZoom) {
 					if (zoomedDataSet.getSize() != 1) {
-						globalYmin = Math.min(globalYmin, zoomedDataSet.min().doubleValue());
-						globalYmax = Math.max(globalYmax, zoomedDataSet.max().doubleValue());
+						globalYmin = Math.min(globalYmin, zoomedDataSet.min(true).doubleValue());
+						globalYmax = Math.max(globalYmax, zoomedDataSet.max(true).doubleValue());
 					} else {
 						globalYmin = zoomedDataSet.getDouble(0);
 						globalYmax = zoomedDataSet.getDouble(0) + 0.0001;
@@ -1829,8 +1829,8 @@ public class DataSet3DPlot1D implements IDataSet3DCorePlot, AreaSelectListener, 
 				if (rangeZoom) {
 					// protection against infinite zoom
 					if (zoomedDataSet.getSize() != 1) {
-						globalYmin = Math.min(globalYmin, zoomedDataSet.min().doubleValue());
-						globalYmax = Math.max(globalYmax, zoomedDataSet.max().doubleValue());
+						globalYmin = Math.min(globalYmin, zoomedDataSet.min(true).doubleValue());
+						globalYmax = Math.max(globalYmax, zoomedDataSet.max(true).doubleValue());
 					} else {
 						globalYmin = zoomedDataSet.getDouble(0);
 						globalYmax = zoomedDataSet.getDouble(0) + 0.0001;
@@ -1963,8 +1963,8 @@ public class DataSet3DPlot1D implements IDataSet3DCorePlot, AreaSelectListener, 
 				// protection against infinite zoom
 				if (rangeZoom && zoomedDataSet != null) {
 					if (zoomedDataSet.getSize() != 1) {
-						globalYmin = Math.min(globalYmin, zoomedDataSet.min().doubleValue());
-						globalYmax = Math.max(globalYmax, zoomedDataSet.max().doubleValue());
+						globalYmin = Math.min(globalYmin, zoomedDataSet.min(true).doubleValue());
+						globalYmax = Math.max(globalYmax, zoomedDataSet.max(true).doubleValue());
 					} else {
 						globalYmin = Math.min(globalYmin, zoomedDataSet.getDouble(0));
 						globalYmax = Math.max(globalYmax, zoomedDataSet.getDouble(0) + 0.0001);

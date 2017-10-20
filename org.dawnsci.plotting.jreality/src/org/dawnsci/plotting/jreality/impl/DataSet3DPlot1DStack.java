@@ -176,8 +176,8 @@ public class DataSet3DPlot1DStack extends DataSet3DPlot1D {
 		
 		while (iter.hasNext()) {
 			IDataset set = iter.next();
-			globalYmin = Math.min(globalYmin, set.min().doubleValue());
-			globalYmax = Math.max(globalYmax, set.max().doubleValue());
+			globalYmin = Math.min(globalYmin, set.min(true).doubleValue());
+			globalYmax = Math.max(globalYmax, set.max(true).doubleValue());
 			globalXmax = Math.max(globalXmax, set.getShape()[0]);
 			switch (xAxis) {
 			case LINEAR:

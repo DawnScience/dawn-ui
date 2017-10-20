@@ -26,8 +26,8 @@ public class OverlapFinder{
 			
 			try {
 				xArray[k] =arrayILDx.get(k).getSlice(sliceX);
-				maxMinArray[k][0] = (double) xArray[k].max(null);
-				maxMinArray[k][1] = (double) xArray[k].min(null);
+				maxMinArray[k][0] = (double) xArray[k].max();
+				maxMinArray[k][1] = (double) xArray[k].min();
 				
 			} catch (DatasetException e) {
 				// TODO Auto-generated catch block

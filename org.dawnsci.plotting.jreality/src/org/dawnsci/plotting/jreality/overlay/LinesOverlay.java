@@ -67,16 +67,16 @@ public class LinesOverlay extends AbstractOverlayConsumer {
     }
 
 	public void setY(final Dataset y) {
-		this.min = y.min().doubleValue();
-		this.max = y.min().doubleValue();
+		this.min = y.min(true).doubleValue();
+		this.max = y.min(true).doubleValue();
 	}
 	
 	public void setYs(List<IDataset> ys) {
 		this.min = Double.MAX_VALUE;
 		this.max = -Double.MAX_VALUE;
 		for (IDataset y : ys) {
-			this.min = Math.min(min, y.min().doubleValue());
-			this.max = Math.max(max, y.max().doubleValue());
+			this.min = Math.min(min, y.min(true).doubleValue());
+			this.max = Math.max(max, y.max(true).doubleValue());
 		}
 		
 	}

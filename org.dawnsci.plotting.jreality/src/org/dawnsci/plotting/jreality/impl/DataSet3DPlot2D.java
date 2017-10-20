@@ -996,8 +996,8 @@ public class DataSet3DPlot2D implements IDataSet3DCorePlot,
 			lastImageType = currentImageType;
 		} else {
 			//System.err.println("Generate texture x"+xPos+" y "+yPos+" w "+width+" h "+height);			
-			double maxValue = data.max().doubleValue();
-			double minValue = data.min().doubleValue();
+			double maxValue = data.max(true).doubleValue();
+			double minValue = data.min(true).doubleValue();
 			int srcHeight = data.getShape()[0];
 			int srcWidth = data.getShape()[1];
 			softwareImageRGBAdata = new byte[width * height * 4];
@@ -1348,8 +1348,8 @@ public class DataSet3DPlot2D implements IDataSet3DCorePlot,
 							tableMin = 0;
 							tableMax = 0;
 						} else {
-							tableMin = currentData.min().doubleValue();
-							tableMax = currentData.max().doubleValue();
+							tableMin = currentData.min(true).doubleValue();
+							tableMax = currentData.max(true).doubleValue();
 						}
 						int texWidth = (width > maxDimW ? maxDimW : width);
 						int texHeight = (height > maxDimH ? maxDimH : height);

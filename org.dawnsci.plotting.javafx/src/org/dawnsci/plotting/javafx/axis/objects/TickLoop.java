@@ -204,8 +204,8 @@ public class TickLoop extends Group {
 
 		TickFactory tickGenerator = new TickFactory(TickFormatting.autoMode, null);
 		
-		List<Tick> tickList = tickGenerator.generateTicks(tickLookUpTable.min().doubleValue(),
-				tickLookUpTable.max().doubleValue(), 10, false, true);
+		List<Tick> tickList = tickGenerator.generateTicks(tickLookUpTable.min(true).doubleValue(),
+				tickLookUpTable.max(true).doubleValue(), 10, false, true);
 		
 		Point3D maxPivot = new Point3D(0,0,0);
 		

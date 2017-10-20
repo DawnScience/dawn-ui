@@ -351,8 +351,8 @@ public class FittingUtils {
 		// We make an x dataset with n times the points of the real data to get a smooth
 		// fitting function
 		final int    factor = Activator.getPlottingPreferenceStore().getInt(FittingConstants.FIT_SMOOTH_FACTOR);
-		final double xmin = x.min().doubleValue();
-		final double xmax = x.max().doubleValue();
+		final double xmin = x.min(true).doubleValue();
+		final double xmax = x.max(true).doubleValue();
 		final double step = (xmax-xmin)/(x.getSize()*factor);
 		x = DatasetFactory.createRange(DoubleDataset.class, xmin, xmax, step);
 
