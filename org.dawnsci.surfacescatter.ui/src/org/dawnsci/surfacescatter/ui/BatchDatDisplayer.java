@@ -14,6 +14,8 @@ import org.dawnsci.surfacescatter.MethodSettingEnum.MethodSetting;
 import org.dawnsci.surfacescatter.ReflectivityMetadataTitlesForDialog;
 import org.dawnsci.surfacescatter.SXRDGeometricCorrections;
 import org.eclipse.dawnsci.analysis.api.io.IDataHolder;
+import org.eclipse.dawnsci.hdf5.nexus.NexusFileFactoryHDF5;
+import org.eclipse.dawnsci.nexus.NexusFile;
 import org.eclipse.january.DatasetException;
 import org.eclipse.january.dataset.Dataset;
 import org.eclipse.january.dataset.ILazyDataset;
@@ -660,7 +662,9 @@ public class BatchDatDisplayer extends Composite implements IDatDisplayer {
 
 				try {
 
-					FittingParametersInputReader.geometricalParametersReaderFromNexus(ip.getText(), ssp.getGm(), ssp.getDrm());
+					NexusFile file = new NexusFileFactoryHDF5().newNexusFile(ip.getText());
+					
+					FittingParametersInputReader.geometricalParametersReaderFromNexus(file , ssp.getGm(), ssp.getDrm());
 
 
 				} catch (Exception e1) {

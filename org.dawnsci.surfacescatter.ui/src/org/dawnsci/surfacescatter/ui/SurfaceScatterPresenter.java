@@ -62,6 +62,8 @@ import org.eclipse.dawnsci.analysis.api.io.IDataHolder;
 import org.eclipse.dawnsci.analysis.api.roi.IROI;
 import org.eclipse.dawnsci.analysis.api.roi.IRectangularROI;
 import org.eclipse.dawnsci.analysis.dataset.roi.RectangularROI;
+import org.eclipse.dawnsci.hdf5.nexus.NexusFileFactoryHDF5;
+import org.eclipse.dawnsci.nexus.NexusFile;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.region.IRegion;
 import org.eclipse.dawnsci.plotting.api.trace.ILineTrace;
@@ -968,21 +970,25 @@ public class SurfaceScatterPresenter {
 
 		else {
 
+			NexusFile file = new NexusFileFactoryHDF5().newNexusFile(title);
+			
 			for (int n = 0; n < fms.size(); n++) {
 
 				FrameModel m = fms.get(n);
+				
+				
 
-				FittingParametersInputReader.readerFromNexus(title, n, m, useTrajectory);
+				FittingParametersInputReader.readerFromNexus(file, n, m, useTrajectory);
 
 			}
 
 			fp = FittingParametersInputReader.fittingParametersFromFrameModel(fms.get(0));
 
-			FittingParametersInputReader.geometricalParametersReaderFromNexus(title, gm, drm);
+			FittingParametersInputReader.geometricalParametersReaderFromNexus(file, gm, drm);
 			
 			fp.setUseNegativeQ(gm.getUseNegativeQ());
 			
-			FittingParametersInputReader.anglesAliasReaderFromNexus(title);
+			FittingParametersInputReader.anglesAliasReaderFromNexus(file);
 		}
 
 		drm.setInitialLenPt(fp.getLenpt());

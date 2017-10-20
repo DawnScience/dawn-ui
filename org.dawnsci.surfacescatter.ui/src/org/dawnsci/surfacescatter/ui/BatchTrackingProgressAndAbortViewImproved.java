@@ -35,7 +35,6 @@ public class BatchTrackingProgressAndAbortViewImproved extends Dialog {
 	@Override
 	protected Control createDialogArea(Composite parent) {
 
-		
 		final Composite container = (Composite) super.createDialogArea(parent);
 		container.setLayout(new GridLayout());
 		container.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
@@ -51,7 +50,7 @@ public class BatchTrackingProgressAndAbortViewImproved extends Dialog {
 		abort.setText("Abort");
 
 		final Display display = Display.getCurrent();
-		
+
 		abort.addSelectionListener(new SelectionAdapter() {
 
 			@Override
@@ -61,9 +60,8 @@ public class BatchTrackingProgressAndAbortViewImproved extends Dialog {
 
 			}
 		});
-		
-		br = new BatchRunner(brm, progress, this, display);
 
+		br = new BatchRunner(brm, progress, this, display);
 
 		return container;
 

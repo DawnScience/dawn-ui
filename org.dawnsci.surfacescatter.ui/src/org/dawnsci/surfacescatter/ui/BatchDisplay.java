@@ -29,8 +29,8 @@ public class BatchDisplay extends Composite {
 	private BatchRodModel brm;
 	private String nxsFolderPath;
 
-	public BatchDisplay(Composite parent, int style, SurfaceScatterViewStart ssvs,
-			BatchSetupWindow rsw, BatchRodModel brm) {
+	public BatchDisplay(Composite parent, int style, SurfaceScatterViewStart ssvs, BatchSetupWindow rsw,
+			BatchRodModel brm) {
 
 		super(parent, style);
 
@@ -44,9 +44,9 @@ public class BatchDisplay extends Composite {
 
 	public void createContents() {
 
-		brm.setBsas( new BatchSavingAdvancedSettings[SaveFormatSetting.values().length]);
-		brm.setBsmps( new BatchSetupMiscellaneousProperties());
-		
+		brm.setBsas(new BatchSavingAdvancedSettings[SaveFormatSetting.values().length]);
+		brm.setBsmps(new BatchSetupMiscellaneousProperties());
+
 		Group batchTableGroup = new Group(this, SWT.V_SCROLL | SWT.FILL);
 		GridLayout batchTableGroupLayout = new GridLayout(1, true);
 		GridData batchTableGroupData = new GridData((GridData.FILL_BOTH));
@@ -108,8 +108,9 @@ public class BatchDisplay extends Composite {
 
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				 BatchTrackingProgressAndAbortViewImproved btpaavi = new  BatchTrackingProgressAndAbortViewImproved(ssvs.getShell(), brm);
-				 btpaavi.open();
+				BatchTrackingProgressAndAbortViewImproved btpaavi = new BatchTrackingProgressAndAbortViewImproved(
+						ssvs.getShell(), brm);
+				btpaavi.open();
 			}
 		});
 

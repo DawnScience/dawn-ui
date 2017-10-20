@@ -7,6 +7,9 @@ import org.dawnsci.surfacescatter.BatchSetupMiscellaneousProperties;
 import org.dawnsci.surfacescatter.FittingParametersInputReader;
 import org.dawnsci.surfacescatter.MethodSettingEnum.MethodSetting;
 import org.dawnsci.surfacescatter.SetupModel;
+import org.eclipse.dawnsci.hdf5.nexus.NexusFileFactoryHDF5;
+import org.eclipse.dawnsci.nexus.NexusException;
+import org.eclipse.dawnsci.nexus.NexusFile;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.ProgressBar;
 
@@ -50,9 +53,31 @@ public class BatchRunnable implements Callable {
 		sspi.setStm(stmi);
 		sspi.createGm();
 
-		FittingParametersInputReader.anglesAliasReaderFromNexus(paramFile);
+		long startTime = System.nanoTime();
 
-		FittingParametersInputReader.geometricalParametersReaderFromNexus(paramFile, sspi.getGm(), sspi.getDrm());
+		NexusFile file = new NexusFileFactoryHDF5().newNexusFile(paramFile);
+
+		try {
+			file.close();
+		} catch (NexusException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		
+		FittingParametersInputReader.anglesAliasReaderFromNexus(file);
+
+		long angleTime = System.nanoTime();
+
+		System.out.println(" anglesAliasTime :   " + (angleTime - startTime) / 1000000);
+
+		startTime = System.nanoTime();
+
+		FittingParametersInputReader.geometricalParametersReaderFromNexus(file, sspi.getGm(), sspi.getDrm());
+
+		long geometryTime = System.nanoTime();
+
+		System.out.println(" geometryAliasTime :   " + (geometryTime - startTime) / 1000000);
 
 		sspi.surfaceScatterPresenterBuildWithFrames(datFiles, sspi.getGm().getxName(),
 				MethodSetting.toMethod(sspi.getGm().getExperimentMethod()));
@@ -62,23 +87,29 @@ public class BatchRunnable implements Callable {
 		BatchTracking bat = new BatchTracking();
 		bat.setSsp(sspi);
 
+		startTime = System.nanoTime();
+
 		bat.runTJ1(savePath, bsas, bsmps, imageFolderPath, paramFile, datFiles, useTrajectory);
 
-		display.syncExec(new Runnable() {
-			@Override
-			public void run() {
+		long batchTime = System.nanoTime();
 
-				if (progress.isDisposed() != true) {
-					progress.setSelection(progress.getSelection() + 1);
+		System.out.println(" batchTime :   " + (batchTime - startTime) / 1000000);
 
-					if (progress.getSelection() == progress.getMaximum()) {
-						bpaatv.close();
-					}
-
-				}
-				return;
-			}
-		});
+//		display.syncExec(new Runnable() {
+//			@Override
+//			public void run() {
+//
+//				if (progress.isDisposed() != true) {
+//					progress.setSelection(progress.getSelection() + 1);
+//
+//					if (progress.getSelection() == progress.getMaximum()) {
+//						bpaatv.close();
+//					}
+//
+//				}
+//				return;
+//			}
+//		});
 
 		return true;
 

@@ -2,15 +2,11 @@ package org.dawnsci.surfacescatter.ui;
 
 import java.util.ArrayList;
 
-import org.apache.commons.lang.StringUtils;
 import org.dawnsci.surfacescatter.AxisEnums.yAxes;
-import org.dawnsci.surfacescatter.MethodSettingEnum.MethodSetting;
 import org.dawnsci.surfacescatter.BatchSavingAdvancedSettings;
 import org.dawnsci.surfacescatter.BatchSetupMiscellaneousProperties;
 import org.dawnsci.surfacescatter.BatchSetupYAxes;
-import org.dawnsci.surfacescatter.FittingParametersInputReader;
 import org.dawnsci.surfacescatter.LocationLenPtConverterUtils;
-import org.dawnsci.surfacescatter.SetupModel;
 import org.dawnsci.surfacescatter.SavingFormatEnum.SaveFormatSetting;
 
 public class BatchTracking {
@@ -23,32 +19,11 @@ public class BatchTracking {
 		this.ssp = ssp;
 	}
 
-	protected void runTJ1(String savepath1, BatchSavingAdvancedSettings[] bsas,
-			BatchSetupMiscellaneousProperties bsmps, String imageFolderPath, String paramFile, String[] datFiles,
-			boolean useTrajectory) {
-		
-		
-//		SetupModel stmi = new SetupModel();
-//		stmi.setImageFolderPath(imageFolderPath);
-//
-//		SurfaceScatterPresenter sspi = new SurfaceScatterPresenter();
-//		sspi.setStm(stmi);
-//		sspi.createGm();
-//
-//		FittingParametersInputReader.anglesAliasReaderFromNexus(paramFile);
-//
-//		FittingParametersInputReader.geometricalParametersReaderFromNexus(paramFile, sspi.getGm(), sspi.getDrm());
-//
-//		sspi.surfaceScatterPresenterBuildWithFrames(datFiles, sspi.getGm().getxName(), MethodSetting.toMethod(sspi.getGm().getExperimentMethod()));
-//
-//		sspi.loadParameters(paramFile, useTrajectory);
-//
-//		BatchTracking bat = new BatchTracking();
-//		bat.setSsp(sspi);
-		
+	protected void runTJ1(String savepath1, BatchSavingAdvancedSettings[] bsas, BatchSetupMiscellaneousProperties bsmps,
+			String imageFolderPath, String paramFile, String[] datFiles, boolean useTrajectory) {
+
 		int[][] lenpt = LocationLenPtConverterUtils.locationToLenPtConverter(ssp.getFms().get(0).getRoiLocation());
-		
-		
+
 		this.savePath = savepath1;
 
 		ssp.regionOfInterestSetter(lenpt);
@@ -59,9 +34,21 @@ public class BatchTracking {
 
 		ssp.getDrm().setDoneArray(doneArray);
 
+		long startTime = System.nanoTime();
+
 		new TrackingCore(doneArray, ssp, null, null, false, null, null);
 
-		ssp.writeNexus(savePath+".nxs");
+		long trackingCoreTime = System.nanoTime();
+
+		System.out.println(" TrackingCoreTime :   " + (trackingCoreTime - startTime) / 1000000);
+
+		startTime = System.nanoTime();
+
+		ssp.writeNexus(savePath + ".nxs");
+
+		long nexusTime = System.nanoTime();
+
+		System.out.println(" nexusTime :   " + (nexusTime - startTime) / 1000000);
 
 		yAxes[] yA = goodYAxes(bsmps.getBsya());
 
@@ -71,11 +58,11 @@ public class BatchTracking {
 				for (yAxes y : yA) {
 					if (bsa.isAllPoints()) {
 						ssp.arbitrarySavingMethodCore(bsmps.isUseQ(), false, sfs, ssp.getDrm().getCsdp(), y,
-								savePath + "_" + sfs.getDisplayName() + "_" + "ALL_POINTS"+ "_" +y.getYAxisName());
+								savePath + "_" + sfs.getDisplayName() + "_" + "ALL_POINTS" + "_" + y.getYAxisName());
 					}
 					if (bsa.isGoodPoints()) {
-						ssp.arbitrarySavingMethodCore(bsmps.isUseQ(), true, sfs, ssp.getDrm().getCsdp(), y,
-								savePath + "_" + sfs.getDisplayName() + "_" + "GOOD_POINTS_ONLY"+ "_" +y.getYAxisName());
+						ssp.arbitrarySavingMethodCore(bsmps.isUseQ(), true, sfs, ssp.getDrm().getCsdp(), y, savePath
+								+ "_" + sfs.getDisplayName() + "_" + "GOOD_POINTS_ONLY" + "_" + y.getYAxisName());
 					}
 				}
 			}
