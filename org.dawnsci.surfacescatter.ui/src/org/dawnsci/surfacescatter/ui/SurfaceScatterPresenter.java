@@ -2879,7 +2879,7 @@ public class SurfaceScatterPresenter {
 			this.setSaveFolder(path);
 		}
 
-		String title = path + File.separator + stitle + File.separator + rodSaveName;
+		String title = path + File.separator + stitle;
 
 		
 		arbitrarySavingMethodCore(useQ, writeOnlyGoodPoints, sfs,
@@ -2894,16 +2894,16 @@ public class SurfaceScatterPresenter {
 		int saveIntensityState = yAxis.getYAxisNumber();
 
 		if (sfs == SaveFormatSetting.GenX) {
-			su.genXSave(writeOnlyGoodPoints, title, csdpToSave, this.getDrm(), this.getDrm().getFms(), this.getGm());
+			su.genXSave(writeOnlyGoodPoints, title+ ".txt", csdpToSave, this.getDrm(), this.getDrm().getFms(), this.getGm());
 		}
 		if (sfs == SaveFormatSetting.Anarod) {
-			su.anarodSave(writeOnlyGoodPoints, title, csdpToSave, this.getDrm(), this.getDrm().getFms(), this.getGm());
+			su.anarodSave(writeOnlyGoodPoints, title+".ana", csdpToSave, this.getDrm(), this.getDrm().getFms(), this.getGm());
 		}
 		if (sfs == SaveFormatSetting.int_format) {
-			su.intSave(writeOnlyGoodPoints, title, csdpToSave, this.getDrm(), this.getDrm().getFms(), this.getGm());
+			su.intSave(writeOnlyGoodPoints, title+".int", csdpToSave, this.getDrm(), this.getDrm().getFms(), this.getGm());
 		}
 		if (sfs == SaveFormatSetting.ASCII) {
-			su.simpleXYYeSave(useQ, writeOnlyGoodPoints, title, saveIntensityState, csdpToSave, this.getDrm().getFms());
+			su.simpleXYYeSave(useQ, writeOnlyGoodPoints, title +".txt", saveIntensityState, csdpToSave, this.getDrm().getFms());
 		}
 		
 	}
