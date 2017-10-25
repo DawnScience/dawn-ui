@@ -20,14 +20,10 @@ import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.PlotType;
 import org.eclipse.dawnsci.plotting.api.axis.ClickEvent;
 import org.eclipse.dawnsci.plotting.api.axis.IClickListener;
-import org.eclipse.jface.action.IMenuListener;
-import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.util.LocalSelectionTransfer;
 import org.eclipse.jface.viewers.ColumnViewerToolTipSupport;
-import org.eclipse.jface.viewers.DoubleClickEvent;
-import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.ITreeSelection;
 import org.eclipse.jface.viewers.StructuredSelection;
@@ -78,7 +74,7 @@ import org.slf4j.LoggerFactory;
 public class MappedDataView extends ViewPart {
 
 	private static Logger logger = LoggerFactory.getLogger(MappedDataView.class);
-	public final static String ID = "org.dawnsci.mapping.ui.mappeddataview";
+	public static final String ID = "org.dawnsci.mapping.ui.mappeddataview";
 	
 	private static class MapClickEvent implements IMapClickEvent {
 		
@@ -212,26 +208,22 @@ public class MappedDataView extends ViewPart {
 			}
 		});
 	
-		viewer.addDoubleClickListener(new IDoubleClickListener() {
+		viewer.addDoubleClickListener(event -> {
 			
-			@Override
-			public void doubleClick(DoubleClickEvent event) {
-				Object e = ((StructuredSelection)event.getSelection()).getFirstElement();
-				if (e instanceof AbstractMapData || e instanceof MappedDataBlock) {
-					
-					if (e instanceof MappedDataBlock) {
-						if (!((MappedDataBlock)e).canPlot()) return;
-					}
-					
-					plotManager.updateLayers((PlottableMapObject)e);
-				}
-				if (e instanceof AssociatedImage) plotManager.addImage((AssociatedImage)e);
-				if (e instanceof MappedDataFile) {
-					MappedDataFile mdf = (MappedDataFile)e;
-					if (mdf.getLiveDataBean() !=null) FileManagerSingleton.getFileManager().importLiveFile(mdf.getPath(), mdf.getLiveDataBean(),mdf.getParentPath());
-				}
-				viewer.refresh();
+			Object e = ((StructuredSelection)event.getSelection()).getFirstElement();
+			if (e instanceof AbstractMapData || e instanceof MappedDataBlock) {
+				if (e instanceof MappedDataBlock && !((MappedDataBlock)e).canPlot())
+					return;
+				plotManager.updateLayers((PlottableMapObject)e);
 			}
+			if (e instanceof AssociatedImage)
+				plotManager.addImage((AssociatedImage)e);
+			if (e instanceof MappedDataFile) {
+				MappedDataFile mdf = (MappedDataFile)e;
+				if (mdf.getLiveDataBean() !=null)
+					FileManagerSingleton.getFileManager().importLiveFile(mdf.getPath(), mdf.getLiveDataBean(),mdf.getParentPath());
+			}
+			viewer.refresh();
 		});
 		
 		FileManagerSingleton.initialiseManager(plotManager, area, viewer);
@@ -239,83 +231,70 @@ public class MappedDataView extends ViewPart {
 		// Add menu and action to treeviewer
 		MenuManager menuMgr = new MenuManager();
 		Menu menu = menuMgr.createContextMenu(viewer.getControl());
-		menuMgr.addMenuListener(new IMenuListener() {
-			@Override
-			public void menuAboutToShow(IMenuManager manager) {
-				if (viewer.getSelection().isEmpty())
-					return;
-				if (viewer.getSelection() instanceof IStructuredSelection) {
-					IStructuredSelection selection = (IStructuredSelection) viewer.getSelection();
-					Iterator<?> it = selection.iterator();
-					List<AbstractMapData> maps = new ArrayList<AbstractMapData>();
-					
-					if (selection.size() == 1 && selection.getFirstElement() instanceof MappedDataFile) {
+		menuMgr.addMenuListener(manager -> {
+			if (viewer.getSelection().isEmpty())
+				return;
+			if(!IStructuredSelection.class.isInstance(viewer.getSelection()))
+				return;
+			IStructuredSelection selection = (IStructuredSelection) viewer.getSelection();
+			Iterator<?> it = selection.iterator();
+			List<AbstractMapData> maps = new ArrayList<>();
+				
+			if (selection.size() == 1 && selection.getFirstElement() instanceof MappedDataFile) {
 
-						manager.add(MapActionUtils.getFileRemoveAction(FileManagerSingleton.getFileManager(), (MappedDataFile)selection.getFirstElement()));
-
-					}
+				manager.add(MapActionUtils.getFileRemoveAction(FileManagerSingleton.getFileManager(), (MappedDataFile)selection.getFirstElement()));
+			}
+				
+			if (selection.size() == 1 && selection.getFirstElement() instanceof MappedDataBlock && ((MappedDataBlock)selection.getFirstElement()).getLazy().getRank() == 3) {
+				manager.add(MapActionUtils.getDynamicViewerAction((MappedDataBlock)selection.getFirstElement()));
+			}
+				
+			if (selection.size() == 1 && selection.getFirstElement() instanceof AssociatedImage) {
+				manager.add(MapActionUtils.getSaveImageAction((AssociatedImage)selection.getFirstElement()));
+			}
+				
+			List<MappedDataFile> mdfs = new ArrayList<>();
+			while(it != null && it.hasNext()) {
+				Object obj = it.next();
 					
-					if (selection.size() == 1 && selection.getFirstElement() instanceof MappedDataBlock && ((MappedDataBlock)selection.getFirstElement()).getLazy().getRank() == 3) {
-
-						manager.add(MapActionUtils.getDynamicViewerAction((MappedDataBlock)selection.getFirstElement()));
-
-					}
+				if (obj instanceof MappedDataFile) {
+					MappedDataFile f = (MappedDataFile)obj;
+					mdfs.add(f);
+				}
 					
-					if (selection.size() == 1 && selection.getFirstElement() instanceof AssociatedImage) {
-
-						manager.add(MapActionUtils.getSaveImageAction((AssociatedImage)selection.getFirstElement()));
-
-					}
+				if (obj instanceof AbstractMapData) {
+					maps.add((AbstractMapData)obj);
+				}
+			}
+			
+			if (selection instanceof ITreeSelection) {
+				Object ob = ((ITreeSelection)selection).getPaths()[0].getParentPath().getFirstSegment();
+				if (ob instanceof MappedDataFile) {
+					MappedDataFile df = (MappedDataFile)ob;
+					if (!maps.isEmpty())manager.add(MapActionUtils.getRGBDialog(maps, df,viewer));
+					if (!maps.isEmpty())manager.add(MapActionUtils.getVectorDialog(maps, df,viewer));
+				}
+			}
+				
+			if (!maps.isEmpty())manager.add(MapActionUtils.getComparisonDialog(maps));
+			if (maps.size() == 1) {
+				manager.add(MapActionUtils.getMapPropertiesAction(maps.get(0),plotManager, area));
+			}
+				
+			if (mdfs.size() > 1) manager.add(MapActionUtils.getFilesRemoveAction(FileManagerSingleton.getFileManager(),mdfs));
+				
+			if (!maps.isEmpty()) {
+				manager.add(new Separator());
+				manager.add(MapActionUtils.getUnPlotAllAction(plotManager, viewer));
+			}
 					
-					List<MappedDataFile> mdfs = new ArrayList<MappedDataFile>();
-					while(it != null && it.hasNext()) {
-						Object obj = it.next();
-						
-						if (obj instanceof MappedDataFile) {
-							MappedDataFile f = (MappedDataFile)obj;
-							mdfs.add(f);
-						}
-						
-						if (obj instanceof AbstractMapData) {
-							maps.add((AbstractMapData)obj);
-						}
-					}
-					
-					if (selection instanceof ITreeSelection) {
-						Object ob = ((ITreeSelection)selection).getPaths()[0].getParentPath().getFirstSegment();
-						if (ob instanceof MappedDataFile) {
-							MappedDataFile df = (MappedDataFile)ob;
-							if (!maps.isEmpty())manager.add(MapActionUtils.getRGBDialog(maps, df,viewer));
-							if (!maps.isEmpty())manager.add(MapActionUtils.getVectorDialog(maps, df,viewer));
-						}
-					}
-					
-					if (!maps.isEmpty())manager.add(MapActionUtils.getComparisonDialog(maps));
-					if (maps.size() == 1) {
-						manager.add(MapActionUtils.getMapPropertiesAction(maps.get(0),plotManager, area));
-					}
-					
-					if (mdfs.size() > 1) manager.add(MapActionUtils.getFilesRemoveAction(FileManagerSingleton.getFileManager(),mdfs));
-					
-					
-					
-					if (!maps.isEmpty()) {
-						manager.add(new Separator());
-						manager.add(MapActionUtils.getUnPlotAllAction(plotManager, viewer));
-					}
-					
-					if (!mdfs.isEmpty()) {
-						manager.add(new Separator());
-						manager.add(MapActionUtils.getFilesRemoveAllAction(FileManagerSingleton.getFileManager()));
-						
-						if (FileManagerSingleton.getFileManager().containsLiveFiles()) {
-							
-							manager.add(new Separator());
-							manager.add(MapActionUtils.getNonLiveFilesRemoveAction(FileManagerSingleton.getFileManager()));
-						}
-					}
-					
-					
+			if (!mdfs.isEmpty()) {
+				manager.add(new Separator());
+				manager.add(MapActionUtils.getFilesRemoveAllAction(FileManagerSingleton.getFileManager()));
+				
+				if (FileManagerSingleton.getFileManager().containsLiveFiles()) {
+					manager.add(new Separator());
+					manager.add(MapActionUtils.getNonLiveFilesRemoveAction(FileManagerSingleton.getFileManager()));
 				}
 			}
 		});
@@ -332,7 +311,7 @@ public class MappedDataView extends ViewPart {
 				Object dropData = event.data;
 				if (dropData instanceof TreeSelection) {
 					TreeSelection selectedNode = (TreeSelection) dropData;
-					Object obj[] = selectedNode.toArray();
+					Object[] obj = selectedNode.toArray();
 					for (int i = 0; i < obj.length; i++) {
 						if (obj[i] instanceof IFile) {
 							IFile file = (IFile) obj[i];
