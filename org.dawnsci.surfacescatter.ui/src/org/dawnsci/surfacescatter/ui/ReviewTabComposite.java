@@ -358,7 +358,7 @@ public class ReviewTabComposite extends Composite{
 
 				ssp.setRodName(stitle);
 				
-				ssp.writeNexus(title);
+				ssp.writeNexus(title, 10);
 				
 			}
 			

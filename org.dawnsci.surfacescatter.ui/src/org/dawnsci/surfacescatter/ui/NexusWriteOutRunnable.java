@@ -13,7 +13,7 @@ public class NexusWriteOutRunnable implements Runnable {
 	@Override
 	public void run() {
 
-		ssp.writeNexus(savePath);
+		ssp.writeNexus(savePath, 10);
 	}
 
 	public void setSsp(SurfaceScatterPresenter ssp1) {

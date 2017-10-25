@@ -8,6 +8,9 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
+
 import org.dawnsci.surfacescatter.BatchRodDataTransferObject;
 import org.dawnsci.surfacescatter.BatchRodModel;
 import org.dawnsci.surfacescatter.BatchSavingAdvancedSettings;
@@ -42,10 +45,14 @@ public class BatchRunner {
 			baseSaveFilePaths[i] = baseName;
 			useTrajectories[i] = b.isUseTrajectory();
 		}
-
+		long startTime = System.nanoTime();
+		
 		batchRun(datFiles, imageFolderPaths, paramFiles, baseSaveFilePaths, useTrajectories, bsas, bsmps, progress,
 				bpaatv, display);
+		
+		long endTime = System.nanoTime() - startTime;
 
+		System.out.println("final total batch time:  " + endTime);
 	}
 
 	@SuppressWarnings("rawtypes")
@@ -60,12 +67,14 @@ public class BatchRunner {
 
 		List<Future<Boolean>> batch = new ArrayList<>();
 
+		ReadWriteLock lock = new ReentrantReadWriteLock();
+		
 		executor = Executors.newFixedThreadPool(cores - 1);
 
 		for (int i = 0; i < datFiles.length; i++) {
 			
 			brs[i] = new BatchRunnable(nexusSaveFilePaths[i], bsas, bsmps, progress, bpaatv, display,
-					imageFolderPaths[i], paramFiles[i], datFiles[i], useTrajectories[i]);
+					imageFolderPaths[i], paramFiles[i], datFiles[i], useTrajectories[i], datFiles.length, lock);
 
 			@SuppressWarnings("unchecked")
 			Callable<Boolean> cb = brs[i];
@@ -85,8 +94,6 @@ public class BatchRunner {
 		
 		executor.shutdown();
 		
-		
-
 	}
 
 	public ExecutorService getExecutor() {

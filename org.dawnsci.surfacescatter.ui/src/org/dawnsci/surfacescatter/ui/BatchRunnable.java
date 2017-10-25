@@ -1,6 +1,7 @@
 package org.dawnsci.surfacescatter.ui;
 
 import java.util.concurrent.Callable;
+import java.util.concurrent.locks.ReadWriteLock;
 
 import org.dawnsci.surfacescatter.BatchSavingAdvancedSettings;
 import org.dawnsci.surfacescatter.BatchSetupMiscellaneousProperties;
@@ -26,10 +27,12 @@ public class BatchRunnable implements Callable {
 	private String paramFile;
 	private String[] datFiles;
 	private boolean useTrajectory;
+	private int noRods;
+	private ReadWriteLock lock;
 
 	public BatchRunnable(String savepath1, BatchSavingAdvancedSettings[] bsas, BatchSetupMiscellaneousProperties bsmps,
 			ProgressBar progress, BatchTrackingProgressAndAbortViewImproved bpaatv, Display display,
-			String imageFolderPath, String paramFile, String[] datFiles, boolean useTrajectory) {
+			String imageFolderPath, String paramFile, String[] datFiles, boolean useTrajectory, int noRods, ReadWriteLock lock) {
 
 		this.savePath = savepath1;
 		this.bsas = bsas;
@@ -41,6 +44,7 @@ public class BatchRunnable implements Callable {
 		this.paramFile = paramFile;
 		this.datFiles = datFiles;
 		this.useTrajectory = useTrajectory;
+		this.lock = lock;
 
 	}
 
@@ -89,7 +93,7 @@ public class BatchRunnable implements Callable {
 
 		startTime = System.nanoTime();
 
-		bat.runTJ1(savePath, bsas, bsmps, imageFolderPath, paramFile, datFiles, useTrajectory);
+		bat.runTJ1(savePath, bsas, bsmps, imageFolderPath, paramFile, datFiles, useTrajectory, noRods, lock);
 
 		long batchTime = System.nanoTime();
 

@@ -15,6 +15,8 @@ import java.util.EnumMap;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.concurrent.locks.ReadWriteLock;
+
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.math3.util.MathArrays;
 import org.dawnsci.surfacescatter.AnalaysisMethodologies;
@@ -198,13 +200,13 @@ public class SurfaceScatterPresenter {
 
 					String[] tifNames = StringUtils.substringsBetween(content, "/", ".tif");
 
-					for (int y=0;y<tifNames.length;y++) {
+					for (int y = 0; y < tifNames.length; y++) {
 						if (tifNames[y].contains("/")) {
-							String q  = StringUtils.substringAfterLast(tifNames[y], "/");
-							
+							String q = StringUtils.substringAfterLast(tifNames[y], "/");
+
 							tifNames[y] = q;
 						}
-						
+
 					}
 					Dataset tifNamesDatasetOut = DatasetFactory.createFromObject(tifNames);
 
@@ -464,20 +466,20 @@ public class SurfaceScatterPresenter {
 			xArrayCon = Maths.multiply(xArrayCon, -1);
 			qdcdCon = Maths.multiply(qdcdCon, -1);
 
-//			int[] localShape = imageRefDat.getShape();
-//
-//			SliceND pr = new SliceND(localShape);
-//
-//			pr.flip();
-//
-//			int[] localShape2 = imagesToFilepathRefDat.getShape();
-//
-//			SliceND pr2 = new SliceND(localShape2);
-//
-//			pr2.flip();
-//
-//			imageRefDat = imageRefDat.getSlice(pr);
-//			imagesToFilepathRefDat = imagesToFilepathRefDat.getSlice(pr2);
+			// int[] localShape = imageRefDat.getShape();
+			//
+			// SliceND pr = new SliceND(localShape);
+			//
+			// pr.flip();
+			//
+			// int[] localShape2 = imagesToFilepathRefDat.getShape();
+			//
+			// SliceND pr2 = new SliceND(localShape2);
+			//
+			// pr2.flip();
+			//
+			// imageRefDat = imageRefDat.getSlice(pr);
+			// imagesToFilepathRefDat = imagesToFilepathRefDat.getSlice(pr2);
 		}
 
 		Dataset xArrayConClone = xArrayCon.clone();
@@ -966,9 +968,9 @@ public class SurfaceScatterPresenter {
 
 			NexusFile file = new NexusFileFactoryHDF5().newNexusFile(title);
 
-			FrameSetupFromNexusTransferObject fsfnto = FittingParametersInputReader.readerFromNexusOverView(file, useTrajectory);
+			FrameSetupFromNexusTransferObject fsfnto = FittingParametersInputReader.readerFromNexusOverView(file,
+					useTrajectory);
 
-			
 			for (int n = 0; n < fms.size(); n++) {
 
 				FrameModel m = fms.get(n);
@@ -978,7 +980,7 @@ public class SurfaceScatterPresenter {
 				m.setTrackingMethodology(TrackingMethodology.toTracker1(fsfnto.getTrackingMethodArray()[n]));
 				m.setBackgroundMethodology(AnalaysisMethodologies.toMethodology(fsfnto.getBackgroundMethodArray()[n]));
 				m.setRoiLocation(fsfnto.getRoiLocationArray()[n]);
-				
+
 			}
 
 			fp = FittingParametersInputReader.fittingParametersFromFrameModel(fms.get(0));
@@ -1781,11 +1783,23 @@ public class SurfaceScatterPresenter {
 		return noImages;
 	}
 
-	public void writeNexus(String nexusFilePath) {
+	public void writeNexus(String nexusFilePath, int noRods) {
 
-		RodObjectNexusBuilderModel rnbm = new RodObjectNexusBuilderModel(fms, nexusFilePath, gm, drm);
+		RodObjectNexusBuilderModel rnbm = new RodObjectNexusBuilderModel(fms, nexusFilePath, gm, drm, noRods);
 		try {
 			RodObjectNexusUtils_Development.RodObjectNexusUtils(rnbm);
+		} catch (Exception d) {
+			System.out.println(d.getMessage());
+		}
+	}
+
+	public void writeNexus(String nexusFilePath, int noRods, ReadWriteLock lock) {
+
+		RodObjectNexusBuilderModel rnbm = new RodObjectNexusBuilderModel(fms, nexusFilePath, gm, drm, noRods);
+		try {
+			lock.writeLock().lock();
+			RodObjectNexusUtils_Development.RodObjectNexusUtils(rnbm);
+			lock.writeLock().unlock();
 		} catch (Exception d) {
 			System.out.println(d.getMessage());
 		}

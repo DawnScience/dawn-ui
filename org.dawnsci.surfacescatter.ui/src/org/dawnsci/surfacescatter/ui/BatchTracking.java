@@ -1,6 +1,7 @@
 package org.dawnsci.surfacescatter.ui;
 
 import java.util.ArrayList;
+import java.util.concurrent.locks.ReadWriteLock;
 
 import org.dawnsci.surfacescatter.AxisEnums.yAxes;
 import org.dawnsci.surfacescatter.BatchSavingAdvancedSettings;
@@ -20,7 +21,7 @@ public class BatchTracking {
 	}
 
 	protected void runTJ1(String savepath1, BatchSavingAdvancedSettings[] bsas, BatchSetupMiscellaneousProperties bsmps,
-			String imageFolderPath, String paramFile, String[] datFiles, boolean useTrajectory) {
+			String imageFolderPath, String paramFile, String[] datFiles, boolean useTrajectory, int noRods, ReadWriteLock lock) {
 
 		int[][] lenpt = LocationLenPtConverterUtils.locationToLenPtConverter(ssp.getFms().get(0).getRoiLocation());
 
@@ -45,7 +46,7 @@ public class BatchTracking {
 		startTime = System.nanoTime();
 		
 		if(bsmps.isOutputNexusFiles()) {
-			ssp.writeNexus(savePath + ".nxs");
+			ssp.writeNexus(savePath + ".nxs", noRods , lock);
 		}
 		
 		long nexusTime = System.nanoTime();

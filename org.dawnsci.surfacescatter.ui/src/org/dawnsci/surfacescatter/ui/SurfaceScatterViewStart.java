@@ -1493,7 +1493,7 @@ public class SurfaceScatterViewStart extends Dialog {
 
 				ssp.setRodName(stitle);
 
-				ssp.writeNexus(title);
+				ssp.writeNexus(title, 10);
 
 				raw.getTabFolder().getTabList()[1].setEnabled(true);
 
