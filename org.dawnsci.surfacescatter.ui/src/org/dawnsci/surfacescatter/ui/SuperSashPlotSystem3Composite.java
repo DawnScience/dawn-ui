@@ -336,7 +336,7 @@ public class SuperSashPlotSystem3Composite extends Composite{
 					
 			Dataset subImage =ssp.subImage(selection,greenRectangle);
 			
-			double rawIntensity= (double) DatasetUtils.cast(subImage,Dataset.FLOAT64).sum();
+			double rawIntensity= ((Number) DatasetUtils.cast(subImage,Dataset.FLOAT64).sum()).doubleValue();
 			ssp.setCurrentRawIntensity(rawIntensity);
 			
 			plotSystem2.updatePlot2D(subImage, null, null);

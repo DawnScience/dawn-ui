@@ -476,7 +476,7 @@ public class RegionSumTool extends AbstractToolPage implements IROIListener {
 			logger.debug("Error getting region data:"+ e);
 		}
 		//round the Sum to n decimal
-		double value = DoubleUtils.roundDouble((Double)dataRegion.sum(true), precision);
+		double value = DoubleUtils.roundDouble(((Number) dataRegion.sum(true)).doubleValue(), precision);
 
 		if(isSciNotation){
 			sumStr = sciNotationFormat.format(value);

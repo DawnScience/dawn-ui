@@ -172,7 +172,7 @@ public class ToolUtils {
 	public static double getRectangleSum(IDataset rectangleSlice) {
 		if (rectangleSlice == null)
 			return Double.NaN;
-		return (double) DatasetUtils.convertToDataset(rectangleSlice).sum(true);
+		return ((Number) DatasetUtils.convertToDataset(rectangleSlice).sum(true)).doubleValue();
 	}
 
 	/**

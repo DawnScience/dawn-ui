@@ -178,7 +178,7 @@ public class IntegrationTool extends AbstractToolPage implements IROIListener, I
 				DoubleDataset yData = DatasetUtils.cast(DoubleDataset.class, trace.getYData());
 				int lowerBoundIndex = DatasetUtils.findIndexGreaterThanOrEqualTo(xData, lowerBound);
 				int upperBoundIndex = DatasetUtils.findIndexGreaterThanOrEqualTo(xData, upperBound);
-				return String.format("%g", yData.getSlice(new int[]{lowerBoundIndex}, new int[]{upperBoundIndex + 1}, null).sum());
+				return String.format("%g", ((Number) yData.getSlice(new int[]{lowerBoundIndex}, new int[]{upperBoundIndex + 1}, null).sum()).doubleValue());
 			}
 		});
 		

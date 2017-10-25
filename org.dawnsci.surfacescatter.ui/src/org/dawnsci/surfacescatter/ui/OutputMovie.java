@@ -166,7 +166,7 @@ public class OutputMovie extends Composite {
     		java.util.Date date = new java.util.Date();
     	    System.out.println(date);
     		System.out.println("start:" + date);
-    		System.out.println("sum: " + (Double) DatasetUtils.cast(DoubleDataset.class, t).sum());
+    		System.out.println("sum: " + DatasetUtils.cast(DoubleDataset.class, t).sum());
     		//outputMovie.clear();
     		outputMovie.updatePlot2D(t, null, monitor);
     		outputMovie.repaint(true);
@@ -205,7 +205,7 @@ public class OutputMovie extends Composite {
 	    		java.util.Date date = new java.util.Date();
 	    	    System.out.println(date);
 	    		System.out.println("start:" + date);
-	    		System.out.println("sum: " + (Double) DatasetUtils.cast(DoubleDataset.class, t).sum());
+	    		System.out.println("sum: " + DatasetUtils.cast(DoubleDataset.class, t).sum());
 	    		//outputMovie.clear();
 	    		outputMovie.updatePlot2D(t, null, monitor);
 	    		outputMovie.repaint(true);

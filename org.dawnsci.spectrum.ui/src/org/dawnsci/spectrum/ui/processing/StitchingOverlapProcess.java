@@ -123,7 +123,7 @@ public class StitchingOverlapProcess extends AbstractProcess {
 							yHigherDataset.sum());
 					
 					
-					double correctionRatio = ((double) correctionsRatioDataset.sum())/((double) correctionsRatioDataset.getSize())*attenuationFactor;
+					double correctionRatio = ((Number) correctionsRatioDataset.sum()).doubleValue()/((double) correctionsRatioDataset.getSize())*attenuationFactor;
 					
 					attenuationFactor = correctionRatio;
 					

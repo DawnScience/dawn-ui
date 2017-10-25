@@ -23,7 +23,7 @@ public class PolynomialOverlap {
 				calculatedValuesHigher.sum());
 		
 		
-		double correction = ((double) correctionsRatioDataset.sum())/((double) correctionsRatioDataset.getSize())*attenuationFactor;
+		double correction = ((Number) correctionsRatioDataset.sum()).doubleValue()/((double) correctionsRatioDataset.getSize())*attenuationFactor;
 		
 		
 		return correction;
@@ -44,7 +44,7 @@ public class PolynomialOverlap {
 		Dataset correctionsRatioDataset = Maths.divide(calculatedValuesLowerAv, 
 				calculatedValuesHigherAv);
 		
-		double correction = ((double) correctionsRatioDataset.sum())*attenuationFactor;
+		double correction = ((Number) correctionsRatioDataset.sum()).doubleValue()*attenuationFactor;
 		
 		return correction;
 	}
