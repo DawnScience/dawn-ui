@@ -48,6 +48,15 @@ public class BatchSettingMiscellaneous extends Composite {
 		Group f2 = localSmallGroup(f);
 		Button useQ = new Button(f2, SWT.CHECK);
 		useQ.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		
+		Group f3 = localSmallGroup(f);
+		Label fLabel3 = new Label(f3, SWT.FILL);
+		fLabel3.setText("Produce NeXus files for all:");
+
+		Group f4 = localSmallGroup(f);
+		Button produceNexusFiles = new Button(f4, SWT.CHECK);
+		produceNexusFiles.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		produceNexusFiles.setSelection(bsmps.isOutputNexusFiles());
 
 		Group g = new Group(container, SWT.NONE);
 		GridLayout gLayout = new GridLayout(1, true);

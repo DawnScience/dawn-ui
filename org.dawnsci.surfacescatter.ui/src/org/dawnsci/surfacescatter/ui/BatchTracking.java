@@ -43,9 +43,11 @@ public class BatchTracking {
 		System.out.println(" TrackingCoreTime :   " + (trackingCoreTime - startTime) / 1000000);
 
 		startTime = System.nanoTime();
-
-		ssp.writeNexus(savePath + ".nxs");
-
+		
+		if(bsmps.isOutputNexusFiles()) {
+			ssp.writeNexus(savePath + ".nxs");
+		}
+		
 		long nexusTime = System.nanoTime();
 
 		System.out.println(" nexusTime :   " + (nexusTime - startTime) / 1000000);
