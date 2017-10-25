@@ -33,6 +33,7 @@ import org.eclipse.jface.viewers.ITreeSelection;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TreeSelection;
 import org.eclipse.jface.viewers.TreeViewer;
+import org.eclipse.swt.SWT;
 import org.eclipse.swt.dnd.DND;
 import org.eclipse.swt.dnd.DropTarget;
 import org.eclipse.swt.dnd.DropTargetAdapter;
@@ -40,9 +41,14 @@ import org.eclipse.swt.dnd.DropTargetEvent;
 import org.eclipse.swt.dnd.FileTransfer;
 import org.eclipse.swt.dnd.TextTransfer;
 import org.eclipse.swt.dnd.Transfer;
+import org.eclipse.swt.events.KeyAdapter;
+import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Menu;
+import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.IMemento;
 import org.eclipse.ui.IViewPart;
 import org.eclipse.ui.IViewSite;
@@ -181,13 +187,31 @@ public class MappedDataView extends ViewPart {
 				}
 			}
 		});
+	
+		final Composite searchComposite = new Composite(parent, SWT.NONE);
+		searchComposite.setLayout(new GridLayout(2, false));
+		final Label searchLabel = new Label(searchComposite, SWT.NONE);
+		searchLabel.setText("Search: ");
+		searchLabel.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false));
+		final Text searchText = new Text(searchComposite, SWT.BORDER | SWT.SEARCH);
+		searchText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 		
-		viewer = new TreeViewer(parent);
-		viewer.getTree().setLayoutData(new GridData(GridData.FILL_BOTH));
+		viewer = new TreeViewer(searchComposite);
+		viewer.getTree().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));
 		viewer.setContentProvider(new MapFileTreeContentProvider());
 		viewer.setLabelProvider(new MapFileCellLabelProvider(plotManager));
 		viewer.setInput(area);
 		ColumnViewerToolTipSupport.enableFor(viewer);
+		MappedDataFilter filter = new MappedDataFilter();
+		viewer.addFilter(filter);
+		searchText.addKeyListener(new KeyAdapter() {
+			@Override
+			public void keyReleased(KeyEvent e) {
+				filter.setSearchText(searchText.getText());
+				viewer.refresh();
+			}
+		});
+	
 		viewer.addDoubleClickListener(new IDoubleClickListener() {
 			
 			@Override
