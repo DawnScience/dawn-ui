@@ -1,12 +1,16 @@
 package org.dawnsci.surfacescatter.ui;
 
+import java.util.List;
+
 import org.dawb.common.ui.widgets.ActionBarWrapper;
+import org.dawnsci.plotting.draw2d.swtxy.AspectAxis;
 import org.dawnsci.surfacescatter.VerticalHorizontalSlices;
 import org.eclipse.dawnsci.analysis.api.roi.IRectangularROI;
 import org.eclipse.dawnsci.analysis.dataset.roi.RectangularROI;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.PlotType;
 import org.eclipse.dawnsci.plotting.api.PlottingFactory;
+import org.eclipse.dawnsci.plotting.api.axis.IAxis;
 import org.eclipse.dawnsci.plotting.api.region.IROIListener;
 import org.eclipse.dawnsci.plotting.api.region.IRegion;
 import org.eclipse.dawnsci.plotting.api.region.IRegion.RegionType;
@@ -25,6 +29,7 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Group;
+//import org.eclipse.nebula.visualization.xygraph.figures;
 
 public class SuperSashPlotSystem3Composite extends Composite{
 
@@ -60,13 +65,13 @@ public class SuperSashPlotSystem3Composite extends Composite{
         
         try {
         	plotSystem1 = PlottingFactory.createPlottingSystem();
-        	plotSystem1.setTitle("Vertical Slice");
         	plotSystem1.setShowLegend(false);
 			plotSystem2 = PlottingFactory.createPlottingSystem();
 			plotSystem2.setTitle("Raw Sub Image");
 			plotSystem3 = PlottingFactory.createPlottingSystem();
 			plotSystem1.setTitle("Horizontal Slice");
 			plotSystem3.setShowLegend(false);
+			plotSystem3.setTitle("Vertical Slice");
         } 
         catch (Exception e2) {
 		}
@@ -178,6 +183,10 @@ public class SuperSashPlotSystem3Composite extends Composite{
 		
 		plotSystem3.getAxis("X-Axis").setTitle("");
 	
+		List<IAxis> w = plotSystem3.getAxes();
+		IAxis ya = w.get(1);
+		
+		w.get(1).setInverted(true);
 
 	//////////////////////////////////////////////////////////////////////////////////////////////
 

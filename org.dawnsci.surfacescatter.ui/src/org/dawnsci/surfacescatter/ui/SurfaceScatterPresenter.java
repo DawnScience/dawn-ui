@@ -33,6 +33,7 @@ import org.dawnsci.surfacescatter.FittingParameters;
 import org.dawnsci.surfacescatter.FittingParametersInputReader;
 import org.dawnsci.surfacescatter.FittingParametersOutput;
 import org.dawnsci.surfacescatter.FrameModel;
+import org.dawnsci.surfacescatter.FrameSetupFromNexusTransferObject;
 import org.dawnsci.surfacescatter.GeometricCorrectionsReflectivityMethod;
 import org.dawnsci.surfacescatter.GeometricParametersModel;
 import org.dawnsci.surfacescatter.InterpolationTracker;
@@ -186,8 +187,6 @@ public class SurfaceScatterPresenter {
 
 			for (int id = 0; id < filepaths.length; id++) {
 
-				// gm.setxNameRef(xName);
-
 				if (imageFolderPath == null) {
 					dh1 = LoaderFactory.getData(filepaths[id]);
 
@@ -199,6 +198,14 @@ public class SurfaceScatterPresenter {
 
 					String[] tifNames = StringUtils.substringsBetween(content, "/", ".tif");
 
+					for (int y=0;y<tifNames.length;y++) {
+						if (tifNames[y].contains("/")) {
+							String q  = StringUtils.substringAfterLast(tifNames[y], "/");
+							
+							tifNames[y] = q;
+						}
+						
+					}
 					Dataset tifNamesDatasetOut = DatasetFactory.createFromObject(tifNames);
 
 					tifNamesArray[id] = tifNamesDatasetOut;
@@ -453,24 +460,24 @@ public class SurfaceScatterPresenter {
 		if (gm.getUseNegativeQ()) {
 
 			thetaArrayCon = Maths.multiply(thetaArrayCon, -1);
-			dcdThetaCon= Maths.multiply(dcdThetaCon, -1);
+			dcdThetaCon = Maths.multiply(dcdThetaCon, -1);
 			xArrayCon = Maths.multiply(xArrayCon, -1);
 			qdcdCon = Maths.multiply(qdcdCon, -1);
-			
-			int[] localShape = imageRefDat.getShape();
 
-			SliceND pr = new SliceND(localShape);
-
-			pr.flip();
-
-			int[] localShape2 = imagesToFilepathRefDat.getShape();
-
-			SliceND pr2 = new SliceND(localShape2);
-
-			pr2.flip();
-
-			imageRefDat = imageRefDat.getSlice(pr);
-			imagesToFilepathRefDat = imagesToFilepathRefDat.getSlice(pr2);
+//			int[] localShape = imageRefDat.getShape();
+//
+//			SliceND pr = new SliceND(localShape);
+//
+//			pr.flip();
+//
+//			int[] localShape2 = imagesToFilepathRefDat.getShape();
+//
+//			SliceND pr2 = new SliceND(localShape2);
+//
+//			pr2.flip();
+//
+//			imageRefDat = imageRefDat.getSlice(pr);
+//			imagesToFilepathRefDat = imagesToFilepathRefDat.getSlice(pr2);
 		}
 
 		Dataset xArrayConClone = xArrayCon.clone();
@@ -494,17 +501,12 @@ public class SurfaceScatterPresenter {
 
 					Dataset[] sortThese = new Dataset[] { hArrayCon, kArrayCon, lArrayCon };
 					SurfaceScatterPresenterUtilities.sortDatasets(xArrayConCloneForh, sortThese);
-					//
-					// DatasetUtils.sort(xArrayConCloneForh, hArrayCon);
-					// DatasetUtils.sort(xArrayConCloneFork, kArrayCon);
-					// DatasetUtils.sort(xArrayConCloneForl, lArrayCon);
+
 				} else {
 
 					Dataset[] sortThese = new Dataset[] { thetaArrayCon, qdcdCon, dcdThetaCon };
 					SurfaceScatterPresenterUtilities.sortDatasets(xArrayConCloneForh, sortThese);
-					// DatasetUtils.sort(xArrayConCloneForh, thetaArrayCon);
-					// DatasetUtils.sort(xArrayConCloneFork, qdcdCon);
-					// DatasetUtils.sort(xArrayConCloneForl, dcdThetaCon);
+
 				}
 			}
 
@@ -528,25 +530,21 @@ public class SurfaceScatterPresenter {
 
 			drm.setCorrectionSelection(correctionSelection);
 
-
 			ArrayList<ArrayList<FrameModel>> fmsSorted = new ArrayList<>();
-					
 
-			for(int n=0; n<filepaths.length; n++){
-				
+			for (int n = 0; n < filepaths.length; n++) {
+
 				fmsSorted.add(new ArrayList<FrameModel>());
-				
-				
+
 				int io = imageArray[n].getShape()[0];
-				
-				for(int m =0; m<io;m++){
-					
+
+				for (int m = 0; m < io; m++) {
+
 					fmsSorted.get(n).add(null);
-					
+
 				}
 			}
-			
-			
+
 			for (int f = 0; f < imageRefList.size(); f++) {
 
 				datNamesInOrder[f] = filepaths[imagesToFilepathRefDat.getInt(f)];
@@ -570,10 +568,8 @@ public class SurfaceScatterPresenter {
 				fm.setCorrectionSelection(correctionSelection);
 				fm.setFmNo(f);
 
-				
 				fmsSorted.get(fm.getDatNo()).set(fm.getNoInOriginalDat(), fm);
-				
-				
+
 				if (correctionSelection == MethodSetting.SXRD) {
 
 					double polarisation = SXRDGeometricCorrections
@@ -657,16 +653,16 @@ public class SurfaceScatterPresenter {
 						double reflectivityFluxCorrection = 0;
 
 						if (gm.getUseInternalFlux()) {
-							
+
 							reflectivityFluxCorrection = ReflectivityFluxCorrectionsForDialog
 									.reflectivityFluxCorrectionsDouble(// fm.getDatFilePath(),
-											xArrayCon.getDouble(f),gm.getUseNegativeQ(), filepaths);
+											xArrayCon.getDouble(f), gm.getUseNegativeQ(), filepaths);
 
 						} else {
 
 							reflectivityFluxCorrection = ReflectivityFluxCorrectionsForDialog
 									.reflectivityFluxCorrectionsDouble(// fm.getDatFilePath(),
-											qdcdCon.getDouble(f),gm.getUseNegativeQ(), externalFlux);
+											qdcdCon.getDouble(f), gm.getUseNegativeQ(), externalFlux);
 						}
 						fm.setReflectivityFluxCorrection(reflectivityFluxCorrection);
 						// fluxCallibrationWarning();
@@ -687,11 +683,9 @@ public class SurfaceScatterPresenter {
 				fm.setScannedVariable(xArrayCon.getDouble(f));
 
 			}
-	
-			
-			
+
 			drm.setFmsSorted(fmsSorted);
-			
+
 			drm.setFilepathsSortedArray(filepathsSortedArray);
 			drm.setImageNoInDatList(imageNoInDatList);
 
@@ -971,23 +965,28 @@ public class SurfaceScatterPresenter {
 		else {
 
 			NexusFile file = new NexusFileFactoryHDF5().newNexusFile(title);
+
+			FrameSetupFromNexusTransferObject fsfnto = FittingParametersInputReader.readerFromNexusOverView(file, useTrajectory);
+
 			
 			for (int n = 0; n < fms.size(); n++) {
 
 				FrameModel m = fms.get(n);
-				
-				
 
-				FittingParametersInputReader.readerFromNexus(file, n, m, useTrajectory);
-
+				m.setBoundaryBox(fsfnto.getBoundaryBoxArray()[n]);
+				m.setFitPower(AnalaysisMethodologies.toFitPower(fsfnto.getFitPowersArray()[n]));
+				m.setTrackingMethodology(TrackingMethodology.toTracker1(fsfnto.getTrackingMethodArray()[n]));
+				m.setBackgroundMethodology(AnalaysisMethodologies.toMethodology(fsfnto.getBackgroundMethodArray()[n]));
+				m.setRoiLocation(fsfnto.getRoiLocationArray()[n]);
+				
 			}
 
 			fp = FittingParametersInputReader.fittingParametersFromFrameModel(fms.get(0));
 
 			FittingParametersInputReader.geometricalParametersReaderFromNexus(file, gm, drm);
-			
+
 			fp.setUseNegativeQ(gm.getUseNegativeQ());
-			
+
 			FittingParametersInputReader.anglesAliasReaderFromNexus(file);
 		}
 
@@ -1579,11 +1578,11 @@ public class SurfaceScatterPresenter {
 		}
 	}
 
-	public void geometricParametersUpdate(double beamHeight, double footprint, double angularFudgeFactor, boolean beamCorrection, double beamInPlane,
-			double beamOutPlane, double covar, double detectorSlits, double inPlaneSlits, double inplanePolarisation,
-			double outPlaneSlits, double outplanePolarisation, double scalingFactor, double reflectivityA,
-			double sampleSize, double normalisationFactor, double energy1, boolean specular, String imageName,
-			String xNameRef, boolean useNegativeQ) {
+	public void geometricParametersUpdate(double beamHeight, double footprint, double angularFudgeFactor,
+			boolean beamCorrection, double beamInPlane, double beamOutPlane, double covar, double detectorSlits,
+			double inPlaneSlits, double inplanePolarisation, double outPlaneSlits, double outplanePolarisation,
+			double scalingFactor, double reflectivityA, double sampleSize, double normalisationFactor, double energy1,
+			boolean specular, String imageName, String xNameRef, boolean useNegativeQ) {
 
 		gm.setBeamHeight(beamHeight);
 		gm.setFootprint(footprint);
@@ -1758,7 +1757,6 @@ public class SurfaceScatterPresenter {
 
 		try {
 			FrameModel f = fms.get(k);
-			
 
 			setup[0] = AnalaysisMethodologies.toString(f.getBackgroundMethdology());
 			setup[1] = String.valueOf(AnalaysisMethodologies.toInt(f.getFitPower()));
@@ -2858,7 +2856,7 @@ public class SurfaceScatterPresenter {
 	}
 
 	public void arbitrarySavingMethod(boolean useQ, boolean writeOnlyGoodPoints, Shell shell, SaveFormatSetting sfs,
-		String rodSaveName, CurveStitchDataPackage csdpToSave, AxisEnums.yAxes yAxis) {
+			String rodSaveName, CurveStitchDataPackage csdpToSave, AxisEnums.yAxes yAxis) {
 
 		FileDialog fd = new FileDialog(shell, SWT.SAVE);
 
@@ -2881,11 +2879,9 @@ public class SurfaceScatterPresenter {
 
 		String title = path + File.separator + stitle;
 
-		
-		arbitrarySavingMethodCore(useQ, writeOnlyGoodPoints, sfs,
-				csdpToSave, yAxis, title);
+		arbitrarySavingMethodCore(useQ, writeOnlyGoodPoints, sfs, csdpToSave, yAxis, title);
 	}
-	
+
 	public void arbitrarySavingMethodCore(boolean useQ, boolean writeOnlyGoodPoints, SaveFormatSetting sfs,
 			CurveStitchDataPackage csdpToSave, AxisEnums.yAxes yAxis, String title) {
 
@@ -2894,21 +2890,24 @@ public class SurfaceScatterPresenter {
 		int saveIntensityState = yAxis.getYAxisNumber();
 
 		if (sfs == SaveFormatSetting.GenX) {
-			su.genXSave(writeOnlyGoodPoints, title+ ".txt", csdpToSave, this.getDrm(), this.getDrm().getFms(), this.getGm());
+			su.genXSave(writeOnlyGoodPoints, title + ".txt", csdpToSave, this.getDrm(), this.getDrm().getFms(),
+					this.getGm());
 		}
 		if (sfs == SaveFormatSetting.Anarod) {
-			su.anarodSave(writeOnlyGoodPoints, title+".ana", csdpToSave, this.getDrm(), this.getDrm().getFms(), this.getGm());
+			su.anarodSave(writeOnlyGoodPoints, title + ".ana", csdpToSave, this.getDrm(), this.getDrm().getFms(),
+					this.getGm());
 		}
 		if (sfs == SaveFormatSetting.int_format) {
-			su.intSave(writeOnlyGoodPoints, title+".int", csdpToSave, this.getDrm(), this.getDrm().getFms(), this.getGm());
+			su.intSave(writeOnlyGoodPoints, title + ".int", csdpToSave, this.getDrm(), this.getDrm().getFms(),
+					this.getGm());
 		}
 		if (sfs == SaveFormatSetting.ASCII) {
-			su.simpleXYYeSave(useQ, writeOnlyGoodPoints, title +".txt", saveIntensityState, csdpToSave, this.getDrm().getFms());
+			su.simpleXYYeSave(useQ, writeOnlyGoodPoints, title + ".txt", saveIntensityState, csdpToSave,
+					this.getDrm().getFms());
 		}
-		
+
 	}
-	
-	
+
 	public void disregardNegativeIntensities() {
 
 		CurveStitchDataPackage csdp = drm.getCsdp();
@@ -2921,7 +2920,7 @@ public class SurfaceScatterPresenter {
 			for (int s = 0; s < datLength; s++) {
 				if (csdp.getyIDataset()[r].getDouble(s) < 0) {
 					getFrameModel(r, s).setGoodPoint(false);
-					
+
 				}
 			}
 		}
