@@ -1,5 +1,6 @@
 package org.dawnsci.surfacescatter.ui;
 
+import org.dawnsci.surfacescatter.StareModeSelection;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -19,13 +20,13 @@ import org.eclipse.ui.PlatformUI;
 public class StareModeSelector  extends Dialog {
 
 
-	private boolean accept;
+	private StareModeSelection bdd;
 
-	public StareModeSelector(Shell parentShell, BatchDatDisplayer bdd) {
+	public StareModeSelector(Shell parentShell, StareModeSelection bdd) {
 
 		super(parentShell);
 		
-		this.accept = bdd.getAccept();
+		this.bdd = bdd;
 		
 		setShellStyle(getShellStyle() | SWT.RESIZE);
 
@@ -74,7 +75,7 @@ public class StareModeSelector  extends Dialog {
 			
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				StareModeSelector.this.accept=(g);
+				bdd.setAccept(g);
 				StareModeSelector.this.close();
 			}
 	
@@ -101,8 +102,5 @@ public class StareModeSelector  extends Dialog {
 		return true;
 	}
 
-	public boolean getAccept() {
-		return accept;
-	}
 
 }

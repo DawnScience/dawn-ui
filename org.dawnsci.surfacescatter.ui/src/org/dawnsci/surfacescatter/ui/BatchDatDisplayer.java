@@ -14,6 +14,7 @@ import org.dawnsci.surfacescatter.GeometricCorrectionsReflectivityMethod;
 import org.dawnsci.surfacescatter.MethodSettingEnum.MethodSetting;
 import org.dawnsci.surfacescatter.ReflectivityMetadataTitlesForDialog;
 import org.dawnsci.surfacescatter.SXRDGeometricCorrections;
+import org.dawnsci.surfacescatter.StareModeSelection;
 import org.eclipse.dawnsci.analysis.api.io.IDataHolder;
 import org.eclipse.dawnsci.hdf5.nexus.NexusFileFactoryHDF5;
 import org.eclipse.dawnsci.nexus.NexusFile;
@@ -83,7 +84,6 @@ public class BatchDatDisplayer extends Composite implements IDatDisplayer {
 	private String rodName;
 	private boolean useTrajectory = true;
 	private Button useTrajectoryButton;
-	private boolean accept;
 
 	public BatchDatDisplayer(Composite parent, int style, SurfaceScatterPresenter ssp, SurfaceScatterViewStart ssvs,
 			BatchSetupWindow rsw, BatchRodModel brm) {
@@ -403,8 +403,8 @@ public class BatchDatDisplayer extends Composite implements IDatDisplayer {
 					}
 
 					else{
-
-						StareModeSelector sms = new StareModeSelector(ssvs.getShell(), BatchDatDisplayer.this);
+						StareModeSelection smsn = new StareModeSelection();
+						StareModeSelector sms = new StareModeSelector(ssvs.getShell(), smsn);
 
 						sms.open();
 
@@ -416,7 +416,7 @@ public class BatchDatDisplayer extends Composite implements IDatDisplayer {
 
 						}
 
-						if (accept) {
+						if (smsn.getAccept()) {
 							String namePrompt = StringUtils.substringBetween(getDatFilepaths()[0], "/", ".");
 
 							ssp.dialogToChangeRodName(namePrompt, BatchDatDisplayer.this);
@@ -1203,14 +1203,6 @@ public class BatchDatDisplayer extends Composite implements IDatDisplayer {
 
 	public void setImageFolderPath(String imageFolderPath) {
 		this.imageFolderPath = imageFolderPath;
-	}
-
-	public void setAccept(boolean accept) {
-		this.accept = accept;
-	}
-	
-	public boolean getAccept() {
-		return accept ;
 	}
 
 }
