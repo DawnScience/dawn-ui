@@ -21,6 +21,7 @@ import org.eclipse.swt.widgets.ProgressBar;
 public class BatchRunner {
 
 	private ExecutorService executor;
+	private List<Future<Boolean>> batch;
 
 	public BatchRunner(BatchRodModel brm, ProgressBar progress, BatchTrackingProgressAndAbortViewImproved bpaatv,
 			Display display) {
@@ -65,7 +66,7 @@ public class BatchRunner {
 
 		BatchRunnable[] brs = new BatchRunnable[datFiles.length];
 
-		List<Future<Boolean>> batch = new ArrayList<>();
+		batch = new ArrayList<>();
 
 		ReadWriteLock lock = new ReentrantReadWriteLock();
 		
@@ -83,17 +84,17 @@ public class BatchRunner {
 
 		}
 		
-//		for (Future<Boolean> future : batch) {
-//			try{
-//				future.get();
-//			}catch (Exception e) {
-//				throw new RuntimeException(e);
-//			}
-//		}
-		
-		
 		executor.shutdown();
 		
+		
+		
+		
+		
+		
+	}
+
+	public List<Future<Boolean>> getBatch() {
+		return batch;
 	}
 
 	public ExecutorService getExecutor() {

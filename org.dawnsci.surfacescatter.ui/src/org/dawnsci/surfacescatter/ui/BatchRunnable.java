@@ -99,21 +99,21 @@ public class BatchRunnable implements Callable {
 
 		System.out.println(" batchTime :   " + (batchTime - startTime) / 1000000);
 
-//		display.syncExec(new Runnable() {
-//			@Override
-//			public void run() {
+		display.asyncExec(new Runnable() {
+			@Override
+			public void run() {
 //
-//				if (progress.isDisposed() != true) {
-//					progress.setSelection(progress.getSelection() + 1);
-//
-//					if (progress.getSelection() == progress.getMaximum()) {
-//						bpaatv.close();
-//					}
-//
-//				}
-//				return;
-//			}
-//		});
+				if (progress.isDisposed() != true) {
+					progress.setSelection(progress.getSelection() + 1);
+
+					if (progress.getSelection() == progress.getMaximum()) {
+						bpaatv.close();
+					}
+
+				}
+				return;
+			}
+		});
 
 		return true;
 

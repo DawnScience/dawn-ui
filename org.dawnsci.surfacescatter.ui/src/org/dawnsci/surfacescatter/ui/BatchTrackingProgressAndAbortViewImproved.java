@@ -1,5 +1,7 @@
 package org.dawnsci.surfacescatter.ui;
 
+import java.util.concurrent.Future;
+
 import org.dawnsci.surfacescatter.BatchRodModel;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.swt.SWT;
@@ -63,6 +65,32 @@ public class BatchTrackingProgressAndAbortViewImproved extends Dialog {
 
 		br = new BatchRunner(brm, progress, this, display);
 
+		
+//		br.getBatch().
+//		
+//		for (Future<Boolean> future : br.getBatch()) {
+//			try{
+//				if(future.get()) {
+//
+//							if (progress.isDisposed() != true) {
+//								progress.setSelection(progress.getSelection() + 1);
+//			
+//								if (progress.getSelection() == progress.getMaximum()) {
+//									getShell().close();
+//								}
+//			
+////							}
+////							return;
+//						}
+////					});
+//				}
+//			}catch (Exception e) {
+//				System.out.println(e.getMessage());
+//				throw new RuntimeException(e);
+//			}
+//		}
+		
+		
 		return container;
 
 	}
