@@ -27,12 +27,13 @@ public class BatchRunnable implements Callable {
 	private String paramFile;
 	private String[] datFiles;
 	private boolean useTrajectory;
+	private boolean useStareMode;
 	private int noRods;
 	private ReadWriteLock lock;
 
 	public BatchRunnable(String savepath1, BatchSavingAdvancedSettings[] bsas, BatchSetupMiscellaneousProperties bsmps,
 			ProgressBar progress, BatchTrackingProgressAndAbortViewImproved bpaatv, Display display,
-			String imageFolderPath, String paramFile, String[] datFiles, boolean useTrajectory, int noRods, ReadWriteLock lock) {
+			String imageFolderPath, String paramFile, String[] datFiles, boolean useTrajectory, boolean useStareMode, int noRods, ReadWriteLock lock) {
 
 		this.savePath = savepath1;
 		this.bsas = bsas;
@@ -44,7 +45,9 @@ public class BatchRunnable implements Callable {
 		this.paramFile = paramFile;
 		this.datFiles = datFiles;
 		this.useTrajectory = useTrajectory;
+		this.useStareMode = useStareMode;
 		this.lock = lock;
+		this.noRods = noRods;
 
 	}
 
@@ -86,14 +89,14 @@ public class BatchRunnable implements Callable {
 		sspi.surfaceScatterPresenterBuildWithFrames(datFiles, sspi.getGm().getxName(),
 				MethodSetting.toMethod(sspi.getGm().getExperimentMethod()));
 
-		sspi.loadParameters(paramFile, useTrajectory);
+		sspi.loadParameters(paramFile, useTrajectory, useStareMode);
 
 		BatchTracking bat = new BatchTracking();
 		bat.setSsp(sspi);
 
 		startTime = System.nanoTime();
 
-		bat.runTJ1(savePath, bsas, bsmps, imageFolderPath, paramFile, datFiles, useTrajectory, noRods, lock);
+		bat.runTJ1(savePath, bsas, bsmps, noRods, lock);
 
 		long batchTime = System.nanoTime();
 

@@ -20,8 +20,9 @@ public class BatchTracking {
 		this.ssp = ssp;
 	}
 
-	protected void runTJ1(String savepath1, BatchSavingAdvancedSettings[] bsas, BatchSetupMiscellaneousProperties bsmps,
-			String imageFolderPath, String paramFile, String[] datFiles, boolean useTrajectory, int noRods, ReadWriteLock lock) {
+	protected void runTJ1(String savepath1, BatchSavingAdvancedSettings[] bsas, 
+			BatchSetupMiscellaneousProperties bsmps,
+		  int noRods, ReadWriteLock lock) {
 
 		int[][] lenpt = LocationLenPtConverterUtils.locationToLenPtConverter(ssp.getFms().get(0).getRoiLocation());
 

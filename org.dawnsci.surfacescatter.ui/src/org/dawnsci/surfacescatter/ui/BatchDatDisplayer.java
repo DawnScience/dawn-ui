@@ -8,6 +8,7 @@ import java.util.List;
 import org.apache.commons.lang.StringUtils;
 import org.dawnsci.surfacescatter.BatchRodDataTransferObject;
 import org.dawnsci.surfacescatter.BatchRodModel;
+import org.dawnsci.surfacescatter.FileCounter;
 import org.dawnsci.surfacescatter.FittingParametersInputReader;
 import org.dawnsci.surfacescatter.GeometricCorrectionsReflectivityMethod;
 import org.dawnsci.surfacescatter.MethodSettingEnum.MethodSetting;
@@ -82,6 +83,7 @@ public class BatchDatDisplayer extends Composite implements IDatDisplayer {
 	private String rodName;
 	private boolean useTrajectory = true;
 	private Button useTrajectoryButton;
+	private boolean accept;
 
 	public BatchDatDisplayer(Composite parent, int style, SurfaceScatterPresenter ssp, SurfaceScatterViewStart ssvs,
 			BatchSetupWindow rsw, BatchRodModel brm) {
@@ -385,11 +387,49 @@ public class BatchDatDisplayer extends Composite implements IDatDisplayer {
 		transferToBatch.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				
-				String namePrompt =  StringUtils.substringBetween(getDatFilepaths()[0], "/", ".");
-				
-				ssp.dialogToChangeRodName(namePrompt, BatchDatDisplayer.this);
-				addToBatch();
+
+				if (getParamFile() != null) {
+
+					boolean matchingNoFrames = new FileCounter(getDatFilepaths(), getParamFile()).getGood();
+
+					if (matchingNoFrames) {
+
+						// evaluate number of frames
+
+						String namePrompt = StringUtils.substringBetween(getDatFilepaths()[0], "/", ".");
+
+						ssp.dialogToChangeRodName(namePrompt, BatchDatDisplayer.this);
+						addToBatch();
+					}
+
+					else{
+
+						StareModeSelector sms = new StareModeSelector(ssvs.getShell(), BatchDatDisplayer.this);
+
+						sms.open();
+
+						try {
+							while (!sms.getShell().isDisposed()) {
+							
+							}
+						} catch (Exception p) {
+
+						}
+
+						if (accept) {
+							String namePrompt = StringUtils.substringBetween(getDatFilepaths()[0], "/", ".");
+
+							ssp.dialogToChangeRodName(namePrompt, BatchDatDisplayer.this);
+							addToBatch(true);
+
+						}
+
+					}
+				} else {
+
+					RegionOutOfBoundsWarning roobw = new RegionOutOfBoundsWarning(ssvs.getShell(), 8, null);
+					roobw.open();
+				}
 			}
 		});
 
@@ -449,9 +489,7 @@ public class BatchDatDisplayer extends Composite implements IDatDisplayer {
 				prepareToAddToRod(tidiedTransferList);
 
 			}
-			
-			
-			
+
 		});
 
 		selectAll.addSelectionListener(new SelectionAdapter() {
@@ -624,20 +662,21 @@ public class BatchDatDisplayer extends Composite implements IDatDisplayer {
 				clearParameterTable.setEnabled(false);
 			}
 		});
-		
-		InputTileGenerator useTrajectoryTile = new InputTileGenerator("Use Trajectory From File:", parameterFiles, true) ;
-		
+
+		InputTileGenerator useTrajectoryTile = new InputTileGenerator("Use Trajectory From File:", parameterFiles,
+				true);
+
 		useTrajectoryButton = useTrajectoryTile.getRadio();
-		
+
 		useTrajectoryButton.setSelection(useTrajectory);
-		
+
 		useTrajectoryButton.addSelectionListener(new SelectionAdapter() {
 
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				useTrajectory = useTrajectoryButton.getSelection();
 			}
-			
+
 		});
 
 		paramFileTable = new Table(parameterFiles, SWT.CHECK | SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL);
@@ -663,9 +702,8 @@ public class BatchDatDisplayer extends Composite implements IDatDisplayer {
 				try {
 
 					NexusFile file = new NexusFileFactoryHDF5().newNexusFile(ip.getText());
-					
-					FittingParametersInputReader.geometricalParametersReaderFromNexus(file , ssp.getGm(), ssp.getDrm());
 
+					FittingParametersInputReader.geometricalParametersReaderFromNexus(file, ssp.getGm(), ssp.getDrm());
 
 				} catch (Exception e1) {
 
@@ -960,7 +998,6 @@ public class BatchDatDisplayer extends Composite implements IDatDisplayer {
 
 		options = dh1.getNames();
 
-
 		List<String> pb = Arrays.asList(options);
 
 		while (r) {
@@ -996,7 +1033,7 @@ public class BatchDatDisplayer extends Composite implements IDatDisplayer {
 				} catch (Exception e2) {
 					e2.printStackTrace();
 				}
-				
+
 				imageFolderPath = ssp.getImageFolderPath();
 
 			}
@@ -1056,8 +1093,14 @@ public class BatchDatDisplayer extends Composite implements IDatDisplayer {
 	}
 
 	private void addToBatch() {
+		addToBatch(false);
+	}
+
+	private void addToBatch(boolean useStareMode) {
 
 		BatchRodDataTransferObject brdto = new BatchRodDataTransferObject();
+
+		brdto.setUseStareMode(useStareMode);
 
 		String[] f = getDatFilepaths();
 		brdto.setDatFiles(f);
@@ -1067,7 +1110,7 @@ public class BatchDatDisplayer extends Composite implements IDatDisplayer {
 		brdto.setParamFiles(p);
 
 		brdto.setUseTrajectory(useTrajectory);
-		
+
 		brdto.setRodName(rodName);
 
 		boolean good = true;
@@ -1133,7 +1176,7 @@ public class BatchDatDisplayer extends Composite implements IDatDisplayer {
 		if (increment.isStateOfText()) {
 			increment.getRadio().setText("Deactivate Increment");
 		}
-		
+
 		endDat.setEnabled(!increment.isStateOfText(), false);
 
 	}
@@ -1141,16 +1184,15 @@ public class BatchDatDisplayer extends Composite implements IDatDisplayer {
 	public void setRodName(String rodName) {
 		this.rodName = rodName;
 	}
-	
+
 	public boolean getUseTrajectory() {
 		return useTrajectory;
 	}
 
-	
 	public void setUseTrajectory(boolean f) {
 		this.useTrajectory = f;
 	}
-	
+
 	public Button getUseTrajectoryButton() {
 		return useTrajectoryButton;
 	}
@@ -1162,4 +1204,13 @@ public class BatchDatDisplayer extends Composite implements IDatDisplayer {
 	public void setImageFolderPath(String imageFolderPath) {
 		this.imageFolderPath = imageFolderPath;
 	}
+
+	public void setAccept(boolean accept) {
+		this.accept = accept;
+	}
+	
+	public boolean getAccept() {
+		return accept ;
+	}
+
 }

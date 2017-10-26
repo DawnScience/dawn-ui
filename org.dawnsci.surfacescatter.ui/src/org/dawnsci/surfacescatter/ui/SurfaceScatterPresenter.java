@@ -81,6 +81,7 @@ import org.eclipse.january.dataset.ILazyDataset;
 import org.eclipse.january.dataset.Maths;
 import org.eclipse.january.dataset.ShapeUtils;
 import org.eclipse.january.dataset.SliceND;
+import org.eclipse.osgi.internal.resolver.UserState;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
@@ -124,7 +125,6 @@ public class SurfaceScatterPresenter {
 	}
 
 	public void surfaceScatterPresenterBuildWithFrames(String[] filepaths, String xName,
-			// String datFolderPath,
 			MethodSetting correctionSelection) {
 
 		updateSvs = false;
@@ -942,7 +942,7 @@ public class SurfaceScatterPresenter {
 	}
 
 	@SuppressWarnings("unchecked")
-	public FittingParameters loadParameters(String title, boolean useTrajectory) {
+	public FittingParameters loadParameters(String title, boolean useTrajectory,  boolean useStareMode) {
 
 		String fileType = StringUtils.substringAfterLast(title, ".");
 
@@ -971,18 +971,12 @@ public class SurfaceScatterPresenter {
 			FrameSetupFromNexusTransferObject fsfnto = FittingParametersInputReader.readerFromNexusOverView(file,
 					useTrajectory);
 
-			for (int n = 0; n < fms.size(); n++) {
-
-				FrameModel m = fms.get(n);
-
-				m.setBoundaryBox(fsfnto.getBoundaryBoxArray()[n]);
-				m.setFitPower(AnalaysisMethodologies.toFitPower(fsfnto.getFitPowersArray()[n]));
-				m.setTrackingMethodology(TrackingMethodology.toTracker1(fsfnto.getTrackingMethodArray()[n]));
-				m.setBackgroundMethodology(AnalaysisMethodologies.toMethodology(fsfnto.getBackgroundMethodArray()[n]));
-				m.setRoiLocation(fsfnto.getRoiLocationArray()[n]);
-
+			if(useStareMode) {
+				setFrameModelsUsingNexus(fsfnto, 0);
 			}
-
+			else {
+				setFrameModelsUsingNexus(fsfnto);
+			}
 			fp = FittingParametersInputReader.fittingParametersFromFrameModel(fms.get(0));
 
 			FittingParametersInputReader.geometricalParametersReaderFromNexus(file, gm, drm);
@@ -1006,6 +1000,36 @@ public class SurfaceScatterPresenter {
 
 	}
 
+	private void setFrameModelsUsingNexus(FrameSetupFromNexusTransferObject fsfnto) {
+		for (int n = 0; n < fms.size(); n++) {
+
+			FrameModel m = fms.get(n);
+
+			m.setBoundaryBox(fsfnto.getBoundaryBoxArray()[n]);
+			m.setFitPower(AnalaysisMethodologies.toFitPower(fsfnto.getFitPowersArray()[n]));
+			m.setTrackingMethodology(TrackingMethodology.toTracker1(fsfnto.getTrackingMethodArray()[n]));
+			m.setBackgroundMethodology(AnalaysisMethodologies.toMethodology(fsfnto.getBackgroundMethodArray()[n]));
+			m.setRoiLocation(fsfnto.getRoiLocationArray()[n]);
+			
+
+		}
+	}
+
+	private void setFrameModelsUsingNexus(FrameSetupFromNexusTransferObject fsfnto, int i) {
+		for (int n = 0; n < fms.size(); n++) {
+
+			FrameModel m = fms.get(n);
+
+			m.setBoundaryBox(fsfnto.getBoundaryBoxArray()[i]);
+			m.setFitPower(AnalaysisMethodologies.toFitPower(fsfnto.getFitPowersArray()[i]));
+			m.setTrackingMethodology(TrackingMethodology.toTracker1(fsfnto.getTrackingMethodArray()[i]));
+			m.setBackgroundMethodology(AnalaysisMethodologies.toMethodology(fsfnto.getBackgroundMethodArray()[i]));
+			m.setRoiLocation(fsfnto.getRoiLocationArray()[i]);
+			
+
+		}
+	}
+	
 	public IDataset getImage(int k) {
 
 		try {

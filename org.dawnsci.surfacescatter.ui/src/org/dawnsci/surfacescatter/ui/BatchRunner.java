@@ -32,6 +32,7 @@ public class BatchRunner {
 		String[] nexusSaveFilePaths = new String[brm.getBrdtoList().size()];
 		String[] baseSaveFilePaths = new String[brm.getBrdtoList().size()];
 		boolean[] useTrajectories = new boolean[brm.getBrdtoList().size()];
+		boolean[] useStareModes = new boolean[brm.getBrdtoList().size()];
 		BatchSavingAdvancedSettings[] bsas = brm.getBsas();
 		BatchSetupMiscellaneousProperties bsmps = brm.getBsmps();
 
@@ -45,10 +46,11 @@ public class BatchRunner {
 			nexusSaveFilePaths[i] = nexusName;
 			baseSaveFilePaths[i] = baseName;
 			useTrajectories[i] = b.isUseTrajectory();
+			useStareModes[i] = b.isUseStareMode();
 		}
 		long startTime = System.nanoTime();
 		
-		batchRun(datFiles, imageFolderPaths, paramFiles, baseSaveFilePaths, useTrajectories, bsas, bsmps, progress,
+		batchRun(datFiles, imageFolderPaths, paramFiles, baseSaveFilePaths, useTrajectories,useStareModes, bsas, bsmps, progress,
 				bpaatv, display);
 		
 		long endTime = System.nanoTime() - startTime;
@@ -58,7 +60,7 @@ public class BatchRunner {
 
 	@SuppressWarnings("rawtypes")
 	public void batchRun(String[][] datFiles, String[] imageFolderPaths, String[] paramFiles,
-			String[] nexusSaveFilePaths, boolean[] useTrajectories, BatchSavingAdvancedSettings[] bsas,
+			String[] nexusSaveFilePaths, boolean[] useTrajectories, boolean[] useStareModes, BatchSavingAdvancedSettings[] bsas,
 			BatchSetupMiscellaneousProperties bsmps, ProgressBar progress,
 			BatchTrackingProgressAndAbortViewImproved bpaatv, Display display) {
 
@@ -75,7 +77,8 @@ public class BatchRunner {
 		for (int i = 0; i < datFiles.length; i++) {
 			
 			brs[i] = new BatchRunnable(nexusSaveFilePaths[i], bsas, bsmps, progress, bpaatv, display,
-					imageFolderPaths[i], paramFiles[i], datFiles[i], useTrajectories[i], datFiles.length, lock);
+					imageFolderPaths[i], paramFiles[i], datFiles[i], useTrajectories[i],
+					useStareModes[i],datFiles.length, lock);
 
 			@SuppressWarnings("unchecked")
 			Callable<Boolean> cb = brs[i];

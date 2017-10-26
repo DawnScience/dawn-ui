@@ -71,6 +71,9 @@ public class RegionOutOfBoundsWarning extends Dialog {
 		case 7:
 			warning.setText("Can't have two rods with the same name.");	
 			break;
+		case 8:
+			warning.setText("No parameter file selected");	
+			break;
 		default:
 			warning.setText("Unknown or novel error.");	
 			break;

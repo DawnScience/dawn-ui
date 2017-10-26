@@ -630,7 +630,7 @@ public class SurfaceScatterViewStart extends Dialog {
 
 				String title = path + File.separator + stitle;
 
-				FittingParameters fp = ssp.loadParameters(title, false);
+				FittingParameters fp = ssp.loadParameters(title, false, false);
 
 				customComposite.getPlotSystem1CompositeView().setMethodologyDropDown(fp.getBgMethod());
 				customComposite.getPlotSystem1CompositeView().setFitPowerDropDown(fp.getFitPower());
@@ -1751,7 +1751,7 @@ public class SurfaceScatterViewStart extends Dialog {
 
 	private void setParametersFromFile(String paramFile, boolean setTheTrackerType, boolean useTrajectory) {
 
-		FittingParameters fp = ssp.loadParameters(paramFile, useTrajectory);
+		FittingParameters fp = ssp.loadParameters(paramFile, useTrajectory, false);
 
 		customComposite.getPlotSystem1CompositeView().setMethodologyDropDown(fp.getBgMethod());
 		customComposite.getPlotSystem1CompositeView().setFitPowerDropDown(fp.getFitPower());
