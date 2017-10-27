@@ -19,6 +19,7 @@ import org.eclipse.january.dataset.Dataset;
 import org.eclipse.january.dataset.IDataset;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
+import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Color;
@@ -85,7 +86,6 @@ public class PlotSystemCompositeView extends Composite {
     public PlotSystemCompositeView(Composite parent, 
     							   int style,
     							   IDataset image, 
-//    							   int extra,
     							   int numberOfImages,
     							   Dataset nullImage,
     							   SurfaceScatterPresenter ssp,
@@ -142,8 +142,8 @@ public class PlotSystemCompositeView extends Composite {
 	    slider.setIncrement(1);
 	    slider.setThumb(1);
         
-        final GridData gd_firstField = new GridData(SWT.FILL, SWT.CENTER, true, false);
-        slider.setLayoutData(gd_firstField);
+        final GridData gdFirstField = new GridData(SWT.FILL, SWT.CENTER, true, false);
+        slider.setLayoutData(gdFirstField);
       
         Group indicators = new Group(mainImage, SWT.NONE);
         GridLayout 	indicatorsLayout = new GridLayout(3,true);
@@ -225,7 +225,7 @@ public class PlotSystemCompositeView extends Composite {
 		centreRegion.setText("Centre Region");
 		centreRegion.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
         
-		centreRegion.addSelectionListener(new SelectionListener() {
+		centreRegion.addSelectionListener(new SelectionAdapter() {
 			
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -233,10 +233,6 @@ public class PlotSystemCompositeView extends Composite {
 				
 			}
 			
-			@Override
-			public void widgetDefaultSelected(SelectionEvent e) {
-				
-			}
 		});
 		
         centreSecondBgRegion = new Button(centringButtons, SWT.PUSH | SWT.FILL);
@@ -244,7 +240,7 @@ public class PlotSystemCompositeView extends Composite {
         centreSecondBgRegion.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
         centreSecondBgRegion.setEnabled(false);
 		
-        centreSecondBgRegion.addSelectionListener(new SelectionListener() {
+        centreSecondBgRegion.addSelectionListener(new SelectionAdapter() {
 			
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -252,11 +248,6 @@ public class PlotSystemCompositeView extends Composite {
 				
 			}
 			
-			@Override
-			public void widgetDefaultSelected(SelectionEvent e) {
-				// TODO Auto-generated method stub
-				
-			}
 		});
         
         disregardFrame = new Button(centringButtons, SWT.PUSH | SWT.FILL);
@@ -264,28 +255,25 @@ public class PlotSystemCompositeView extends Composite {
         disregardFrame.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
         disregardFrame.setEnabled(true);
         	
-        disregardFrame.addSelectionListener(new SelectionListener() {
+        disregardFrame.addSelectionListener(new SelectionAdapter() {
 			
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				ssp.flipGoodPoint(slider.getSelection());
 				if(ssp.getDrm().getFms().get(ssp.getSliderPos()).isGoodPoint()){
 					disregardFrame.setText("Disregard Frame");
-					if(ssp.areAllPointsGood()){
-						includeAllFrames.setEnabled(false);
-					}
+					
 				}
 				else{
 					disregardFrame.setText("Include Frame");
 					includeAllFrames.setEnabled(true);
 				}
+				if(ssp.areAllPointsGood()){
+					includeAllFrames.setEnabled(false);
+				}
 			}
 			
-			@Override
-			public void widgetDefaultSelected(SelectionEvent e) {
-				// TODO Auto-generated method stub
-				
-			}
+	
 		});
         
         includeAllFrames = new Button(centringButtons, SWT.PUSH | SWT.FILL);
@@ -293,7 +281,7 @@ public class PlotSystemCompositeView extends Composite {
         includeAllFrames.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
         includeAllFrames.setEnabled(false);
         	
-        includeAllFrames.addSelectionListener(new SelectionListener() {
+        includeAllFrames.addSelectionListener(new SelectionAdapter() {
 			
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -304,9 +292,6 @@ public class PlotSystemCompositeView extends Composite {
 				includeAllFrames.setEnabled(false);
 			}
 			
-			@Override
-			public void widgetDefaultSelected(SelectionEvent e) {
-			}
 		});
         		
         		
@@ -334,7 +319,6 @@ public class PlotSystemCompositeView extends Composite {
     	customComposite1 = new PlotSystem1CompositeView(subIComposite,
     												    SWT.NONE,
     												    0, 
-//    												    0, 
     												    ssp,
     												    ssvs);
     		
@@ -466,8 +450,31 @@ public class PlotSystemCompositeView extends Composite {
 				PlotSystemCompositeView.this.roiStandard(evt);
 			}
 		});
+		
+//		secondBgRegion.addROIListener(new IROIListener() {
+//
+//			@Override
+//			public void roiDragged(ROIEvent evt) {
+//				roiStandard(evt);
+//			}
+//
+//			@Override
+//			public void roiChanged(ROIEvent evt) {
+//				roiStandard(evt);
+//			}
+//
+//			@Override
+//			public void roiSelected(ROIEvent evt) {
+//				roiStandard(evt);
+//			}
+//			
+//			public void roiStandard(ROIEvent evt) {
+//				
+//				PlotSystemCompositeView.this.roiStandard(evt);
+//			}
+//		});
         
-		slider.addSelectionListener(new SelectionListener() {
+		slider.addSelectionListener(new SelectionAdapter() {
 			
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -476,11 +483,6 @@ public class PlotSystemCompositeView extends Composite {
 					
 			}
 			
-			@Override
-			public void widgetDefaultSelected(SelectionEvent e) {
-				// TODO Auto-generated method stub
-				
-			}
 		});
 		
 		processing = new Group (form,SWT.NONE);  
@@ -509,7 +511,7 @@ public class PlotSystemCompositeView extends Composite {
     
     public void addChangeProcessingMethodListeners(){
     	
-	    processingMode.addSelectionListener(new SelectionListener() {
+	    processingMode.addSelectionListener(new SelectionAdapter() {
 			
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -517,11 +519,6 @@ public class PlotSystemCompositeView extends Composite {
 				changeProcessingMode();
 			}
 			
-			@Override
-			public void widgetDefaultSelected(SelectionEvent e) {
-				// TODO Auto-generated method stub
-				
-			}
 		});
 	    
 	}

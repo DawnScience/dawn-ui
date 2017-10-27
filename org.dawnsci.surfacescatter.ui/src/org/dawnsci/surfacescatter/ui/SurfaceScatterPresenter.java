@@ -16,7 +16,6 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.concurrent.locks.ReadWriteLock;
-
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.math3.util.MathArrays;
 import org.dawnsci.surfacescatter.AnalaysisMethodologies;
@@ -81,8 +80,8 @@ import org.eclipse.january.dataset.ILazyDataset;
 import org.eclipse.january.dataset.Maths;
 import org.eclipse.january.dataset.ShapeUtils;
 import org.eclipse.january.dataset.SliceND;
-import org.eclipse.osgi.internal.resolver.UserState;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Color;
@@ -115,8 +114,7 @@ public class SurfaceScatterPresenter {
 	private IDataHolder dh1;
 	private double currentRawIntensity;
 	private boolean trackWithQ = false;
-	private int bB = 10; // this is a false boundaryBox, used to avoid hitting
-	// edges
+	private int bB = 10; // this is a false boundaryBox, used to avoid hitting // edges
 	private boolean updateSvs;
 
 	public SurfaceScatterPresenter() {
@@ -128,7 +126,7 @@ public class SurfaceScatterPresenter {
 			MethodSetting correctionSelection) {
 
 		updateSvs = false;
-		fms = new ArrayList<FrameModel>();
+		fms = new ArrayList<>();
 		drm = new DirectoryModel();
 		drm.setFms(fms);
 
@@ -385,7 +383,7 @@ public class SurfaceScatterPresenter {
 					try {
 						IDataHolder dh2 = LoaderFactory.getData(filepaths[id]);
 						ILazyDataset ild = dh2.getLazyDataset(gm.getImageName());
-						// models.get(id).setDatImages(ild);
+
 					}
 
 					catch (Exception e1) {
@@ -403,7 +401,8 @@ public class SurfaceScatterPresenter {
 		try {
 			imageCon = new AggregateDataset(false, imageArray);
 		} catch (Exception j) {
-			imageCon = new AggregateDataset(false, DatasetFactory.zeros(new int[] { 2, 2 }, Dataset.ARRAYFLOAT64));
+			imageCon = new AggregateDataset(false,
+					DatasetFactory.createFromObject(new int[] { 2, 2 }, Dataset.ARRAYFLOAT64));
 		}
 
 		try {
@@ -466,20 +465,6 @@ public class SurfaceScatterPresenter {
 			xArrayCon = Maths.multiply(xArrayCon, -1);
 			qdcdCon = Maths.multiply(qdcdCon, -1);
 
-			// int[] localShape = imageRefDat.getShape();
-			//
-			// SliceND pr = new SliceND(localShape);
-			//
-			// pr.flip();
-			//
-			// int[] localShape2 = imagesToFilepathRefDat.getShape();
-			//
-			// SliceND pr2 = new SliceND(localShape2);
-			//
-			// pr2.flip();
-			//
-			// imageRefDat = imageRefDat.getSlice(pr);
-			// imagesToFilepathRefDat = imagesToFilepathRefDat.getSlice(pr2);
 		}
 
 		Dataset xArrayConClone = xArrayCon.clone();
@@ -487,8 +472,6 @@ public class SurfaceScatterPresenter {
 		DoubleDataset xArrayConCloneDouble = (DoubleDataset) xArrayConClone.clone();
 
 		Dataset xArrayConCloneForh = xArrayCon.clone();
-		// Dataset xArrayConCloneFork = xArrayCon.clone();
-		// Dataset xArrayConCloneForl = xArrayCon.clone();
 
 		try {
 			DatasetUtils.sort(xArrayCon, imageRefDat);
@@ -667,7 +650,6 @@ public class SurfaceScatterPresenter {
 											qdcdCon.getDouble(f), gm.getUseNegativeQ(), externalFlux);
 						}
 						fm.setReflectivityFluxCorrection(reflectivityFluxCorrection);
-						// fluxCallibrationWarning();
 
 						if (Double.isInfinite(reflectivityFluxCorrection)) {
 							fluxCallibrationWarning();
@@ -941,8 +923,7 @@ public class SurfaceScatterPresenter {
 
 	}
 
-	@SuppressWarnings("unchecked")
-	public FittingParameters loadParameters(String title, boolean useTrajectory,  boolean useStareMode) {
+	public FittingParameters loadParameters(String title, boolean useTrajectory, boolean useStareMode) {
 
 		String fileType = StringUtils.substringAfterLast(title, ".");
 
@@ -971,10 +952,9 @@ public class SurfaceScatterPresenter {
 			FrameSetupFromNexusTransferObject fsfnto = FittingParametersInputReader.readerFromNexusOverView(file,
 					useTrajectory);
 
-			if(useStareMode) {
+			if (useStareMode) {
 				setFrameModelsUsingNexus(fsfnto, 0);
-			}
-			else {
+			} else {
 				setFrameModelsUsingNexus(fsfnto);
 			}
 			fp = FittingParametersInputReader.fittingParametersFromFrameModel(fms.get(0));
@@ -1010,7 +990,6 @@ public class SurfaceScatterPresenter {
 			m.setTrackingMethodology(TrackingMethodology.toTracker1(fsfnto.getTrackingMethodArray()[n]));
 			m.setBackgroundMethodology(AnalaysisMethodologies.toMethodology(fsfnto.getBackgroundMethodArray()[n]));
 			m.setRoiLocation(fsfnto.getRoiLocationArray()[n]);
-			
 
 		}
 	}
@@ -1025,25 +1004,22 @@ public class SurfaceScatterPresenter {
 			m.setTrackingMethodology(TrackingMethodology.toTracker1(fsfnto.getTrackingMethodArray()[i]));
 			m.setBackgroundMethodology(AnalaysisMethodologies.toMethodology(fsfnto.getBackgroundMethodArray()[i]));
 			m.setRoiLocation(fsfnto.getRoiLocationArray()[i]);
-			
 
 		}
 	}
-	
+
 	public IDataset getImage(int k) {
 
 		try {
 			FrameModel frame = fms.get(k);
 
 			SliceND slice = new SliceND(frame.getRawImageData().getShape());
-			IDataset j = DatasetFactory.createFromObject(0);
 
-			j = frame.getRawImageData().getSlice(slice).squeeze();
-			return (IDataset) j;
+			return frame.getRawImageData().getSlice(slice).squeeze();
 
 		} catch (Exception e) {
 
-			return DatasetFactory.zeros(new int[] { 2, 2 }, Dataset.ARRAYFLOAT64);
+			return DatasetFactory.createFromObject(new int[] { 2, 2 });
 		}
 
 	}
@@ -1072,9 +1048,7 @@ public class SurfaceScatterPresenter {
 
 		}
 
-		double[] bgRegionROI = BoxSlicerRodScanUtilsForDialog.backgroundBoxForDisplay(lenPt, boundaryBox, meth);
-
-		return bgRegionROI;
+		return BoxSlicerRodScanUtilsForDialog.backgroundBoxForDisplay(lenPt, boundaryBox, meth);
 
 	}
 
@@ -1270,9 +1244,7 @@ public class SurfaceScatterPresenter {
 
 	public void illuminateCorrectInterpolationBox() {
 
-		if ((// getTrackerType() == TrackerType1.INTERPOLATION
-				// ||
-		getTrackerType() == TrackerType1.SPLINE_INTERPOLATION) && drm.getInterpolatorRegions() != null) {
+		if ((getTrackerType() == TrackerType1.SPLINE_INTERPOLATION) && drm.getInterpolatorRegions() != null) {
 
 			double u = (double) sliderPos;
 
@@ -1292,9 +1264,7 @@ public class SurfaceScatterPresenter {
 
 	public void illuminateCorrectInterpolationBox(int k) {
 
-		if ((// getTrackerType() == TrackerType1.INTERPOLATION
-				// ||
-		getTrackerType() == TrackerType1.SPLINE_INTERPOLATION) && drm.getInterpolatorRegions() != null) {
+		if ((getTrackerType() == TrackerType1.SPLINE_INTERPOLATION) && drm.getInterpolatorRegions() != null) {
 
 			double u = (double) k;
 
@@ -1383,9 +1353,7 @@ public class SurfaceScatterPresenter {
 		int len0 = len[0] + offsetLen[0];
 		int len1 = len[1] + offsetLen[1];
 
-		RectangularROI offsetBgROI = new RectangularROI(pt0, pt1, len0, len1, 0);
-
-		return offsetBgROI;
+		return new RectangularROI(pt0, pt1, len0, len1, 0);
 
 	}
 
@@ -1409,11 +1377,11 @@ public class SurfaceScatterPresenter {
 		int i = 1;
 		for (; i < anum; i++) {
 			if (at != DTypeUtils.getDType(as[i])) {
-				// utilsLogger.error("Datasets are not of same type");
+
 				break;
 			}
 			if (!ShapeUtils.areShapesCompatible(ashape, as[i].getShape(), axis)) {
-				// utilsLogger.error("Datasets' shapes are not equal");
+
 				break;
 			}
 			final int is = as[i].getElementsPerItem();
@@ -1421,7 +1389,6 @@ public class SurfaceScatterPresenter {
 				isize = is;
 		}
 		if (i < anum) {
-			// utilsLogger.error("Dataset are not compatible");
 			throw new IllegalArgumentException("Datasets are not compatible");
 		}
 
@@ -1453,8 +1420,7 @@ public class SurfaceScatterPresenter {
 				|| Arrays.equals(drm.getInitialLenPt()[1], lenPt[1]) == false) {
 
 			drm.setInitialLenPt(lenPt);
-		} // drm.setInitialLenPt(lenPt);
-
+		}
 		double[] bgRegionROI = BoxSlicerRodScanUtilsForDialog.backgroundBoxForDisplay(lenPt,
 				fms.get(sliderPos).getBoundaryBox(), fms.get(sliderPos).getBackgroundMethdology());
 
@@ -1462,7 +1428,6 @@ public class SurfaceScatterPresenter {
 				bgRegionROI[4]);
 
 		return new RectangularROI[] { green, bgROI };
-
 	}
 
 	public int[][] getLenPt() {
@@ -1515,14 +1480,13 @@ public class SurfaceScatterPresenter {
 	}
 
 	public double closestXValue(double in) {
-		double out = ClosestNoFinder.closestNo(in, drm.getSortedX());
-		return out;
+		return ClosestNoFinder.closestNo(in, drm.getSortedX());
 	}
 
 	public int closestImageIntegerInStack(double in) {
+
 		int l = fms.size();
-		int out = ClosestNoFinder.closestIntegerInStack(in, l);
-		return out;
+		return ClosestNoFinder.closestIntegerInStack(in, l);
 	}
 
 	public IDataset getTemporaryBackground() {
@@ -1572,8 +1536,7 @@ public class SurfaceScatterPresenter {
 	}
 
 	public Dataset subImage(IDataset image, IROI box) {
-		Dataset subImage = (Dataset) PlotSystem2DataSetter.PlotSystem2DataSetter1(box, image);
-		return subImage;
+		return (Dataset) PlotSystem2DataSetter.PlotSystem2DataSetter1(box, image);
 	}
 
 	public IDataset presenterDummyProcess(int selection, IDataset image, int trackingMarker, int[][] lenPt) {
@@ -1588,9 +1551,8 @@ public class SurfaceScatterPresenter {
 				lj = LocationLenPtConverterUtils.lenPtToLocationConverter(lenPt);
 			}
 
-			IDataset output = DummyProcessWithFrames.DummyProcess(drm, gm,
-					// MethodSetting.toInt(drm.getCorrectionSelection()),
-					j, trackingMarker, selection, lj, getLenPt());
+			IDataset output = DummyProcessWithFrames.DummyProcess(drm, gm, j, trackingMarker, selection, lj,
+					getLenPt());
 
 			drm.addBackgroundDatArray(fms.size(), selection, output);
 
@@ -1691,8 +1653,7 @@ public class SurfaceScatterPresenter {
 	public int xPositionFinderInDat(int i, double myNum) {
 
 		Dataset xIn = DatasetFactory.createFromList(drm.getDmxList().get(i));
-		int d = ClosestNoFinder.closestNoPos(myNum, xIn);
-		return d;
+		return ClosestNoFinder.closestNoPos(myNum, xIn);
 
 	}
 
@@ -1700,15 +1661,13 @@ public class SurfaceScatterPresenter {
 
 		int d = xPositionFinderInDat(i, myNum);
 
-		int e = 0;
-
 		for (FrameModel fm : drm.getFms()) {
 			if (fm.getDatNo() == i && fm.getNoInOriginalDat() == d) {
-				e = fm.getImageNumber();
+				return fm.getImageNumber();
 			}
 		}
 
-		return e;
+		return 0;
 	}
 
 	public double xValueFinderInDat(int i, double myNum) {
@@ -1722,16 +1681,13 @@ public class SurfaceScatterPresenter {
 	public double xValueFromDat(int i, double myNum) {
 
 		Dataset xIn = DatasetFactory.createFromList(drm.getDmxList().get(i));
-		double f = xIn.getDouble((int) myNum);
-		return f;
-
+		return xIn.getDouble((int) myNum);
 	}
 
 	public int qPositionFinder(double myNum) {
 
-		int qPos = ClosestNoFinder.closestNoPos(myNum, drm.getSortedQ());
+		return ClosestNoFinder.closestNoPos(myNum, drm.getSortedQ());
 
-		return qPos;
 	}
 
 	public void updateAnalysisMethodology(int methodologySelection, int fitPowerSelection, int trackerSelection,
@@ -1861,7 +1817,6 @@ public class SurfaceScatterPresenter {
 		drm.getCsdp().setSplicedCurveX(xData);
 	}
 
-	//
 	public void setSplicedCurveY(IDataset yData) {
 		drm.getCsdp().setSplicedCurveY(yData);
 	}
@@ -1925,22 +1880,13 @@ public class SurfaceScatterPresenter {
 		RegionOutOfBoundsWarning roobw = new RegionOutOfBoundsWarning(parentShell, 1, note);
 		roobw.open();
 
-		roobw.getOverride().addSelectionListener(new SelectionListener() {
+		roobw.getOverride().addSelectionListener(new SelectionAdapter() {
 
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				roobw.close();
-				return;
-
-			}
-
-			@Override
-			public void widgetDefaultSelected(SelectionEvent e) {
-				// TODO Auto-generated method stub
-
 			}
 		});
-
 	}
 
 	public void boundariesWarning(String note, Display d) {
@@ -1953,22 +1899,14 @@ public class SurfaceScatterPresenter {
 		RegionOutOfBoundsWarning roobw = new RegionOutOfBoundsWarning(parentShell, 1, null);
 		roobw.open();
 
-		roobw.getOverride().addSelectionListener(new SelectionListener() {
+		roobw.getOverride().addSelectionListener(new SelectionAdapter() {
 
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				roobw.close();
-				return;
-
-			}
-
-			@Override
-			public void widgetDefaultSelected(SelectionEvent e) {
-
 			}
 		});
 
-		return;
 	}
 
 	public void correctionMethodsWarning() {
@@ -1976,22 +1914,14 @@ public class SurfaceScatterPresenter {
 
 		roobw.open();
 
-		roobw.getOverride().addSelectionListener(new SelectionListener() {
+		roobw.getOverride().addSelectionListener(new SelectionAdapter() {
 
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				roobw.close();
-				return;
-
 			}
 
-			@Override
-			public void widgetDefaultSelected(SelectionEvent e) {
-
-			}
 		});
-
-		return;
 	}
 
 	public void imagesUnavailableWarning() {
@@ -2122,7 +2052,7 @@ public class SurfaceScatterPresenter {
 
 		Display display = Display.getCurrent();
 
-		IDataset x = DatasetFactory.zeros(new int[] { 2, 2 }, Dataset.ARRAYFLOAT64);
+		IDataset x = DatasetFactory.createFromObject(new int[] { 2, 2 });
 
 		if (qAxis) {
 			x = getSplicedCurveQ();
@@ -2190,7 +2120,7 @@ public class SurfaceScatterPresenter {
 
 		Display display = Display.getCurrent();
 
-		IDataset x = DatasetFactory.zeros(new int[] { 2, 2 }, Dataset.ARRAYFLOAT64);
+		IDataset x = DatasetFactory.createFromObject(new int[] { 2, 2 });
 
 		if (qAxis) {
 			x = getSplicedCurveQ();
@@ -2260,11 +2190,9 @@ public class SurfaceScatterPresenter {
 
 	public void setSelection(int selection) {
 		sliderPos = selection;
-		// sm.setSelection(selection);
 	}
 
 	public void setSliderPos(int selection) {
-		// sm.setSliderPos(selection);
 		sliderPos = selection;
 		fireStateListeners();
 	}
@@ -2275,6 +2203,10 @@ public class SurfaceScatterPresenter {
 
 	public void setBackgroundLenPt(int[][] l) {
 		drm.setBackgroundLenPt(l);
+		try {
+			fireStateListeners();
+		} catch (Exception f) {
+		}
 	}
 
 	public int[][] getInitialLenPt() {
@@ -2287,9 +2219,7 @@ public class SurfaceScatterPresenter {
 
 	public IDataset returnNullImage() {
 
-		IDataset output = this.getImage(0);
-
-		return output;
+		return this.getImage(0);
 
 	}
 
@@ -2308,7 +2238,7 @@ public class SurfaceScatterPresenter {
 			FrameModel fm = fms.get(c);
 			double cdistance = fm.getScannedVariable() - myNum;
 			if ((cdistance < distance) & !Arrays.equals(fm.getRoiLocation(), test)
-					& !Arrays.equals(fm.getRoiLocation(), null)) {
+					&& !Arrays.equals(fm.getRoiLocation(), null)) {
 
 				nearestCompletedDatFileNo = fm.getDatNo();
 				distance = cdistance;
@@ -2347,9 +2277,8 @@ public class SurfaceScatterPresenter {
 
 		RectangularROI startROI = new RectangularROI(100, 100, 50, 50, 0);
 		IROI box = startROI.getBounds().bounds(startROI);
-		IDataset subImage = PlotSystem2DataSetter.PlotSystem2DataSetter1(box, this.returnNullImage());
+		return PlotSystem2DataSetter.PlotSystem2DataSetter1(box, this.returnNullImage());
 
-		return subImage;
 	}
 
 	public IDataset getSplicedCurveQ() {
@@ -2372,45 +2301,6 @@ public class SurfaceScatterPresenter {
 		return stm.getNexusPath();
 	}
 
-	public void stitchAndPresent(MultipleOutputCurvesTableView outputCurves) {
-
-		outputCurves.resetCurve();
-
-		IPlottingSystem<Composite> pS = outputCurves.getPlotSystem();
-
-		CsdpGeneratorFromDrm csdpgfd = new CsdpGeneratorFromDrm();
-
-		IDataset[] output = CurveStitchWithErrorsAndFrames.curveStitch4(csdpgfd.generateCsdpFromDrm(drm), null);
-
-		ILineTrace lt = pS.createLineTrace("progress");
-
-		CurveStitchDataPackage csdp = csdpgfd.getCsdp();
-
-		drm.setCsdp(csdp);
-
-		try {
-			qConversion();
-		} catch (Exception d) {
-		}
-
-		lt.setData(drm.getCsdp().getSplicedCurveX(), drm.getCsdp().getSplicedCurveY());
-
-		pS.clear();
-		pS.addTrace(lt);
-
-		pS.repaint();
-		pS.autoscaleAxes();
-
-		double start = lt.getXData().getDouble(0);
-		double end = lt.getXData().getDouble(lt.getXData().getShape()[0] - 1);
-		double range = end - start;
-
-		pS.getAxes().get(0).setRange((start - 0.1 * range), (end) + 0.1 * range);
-
-		lt.setErrorBarEnabled(false);
-
-	}
-
 	public void stitchAndPresentWithFrames(MultipleOutputCurvesTableView outputCurves, AxisEnums.yAxes ids) {
 
 		Display display = Display.getCurrent();
@@ -2420,8 +2310,6 @@ public class SurfaceScatterPresenter {
 		IPlottingSystem<Composite> pS = outputCurves.getPlotSystem();
 
 		CsdpGeneratorFromDrm csdpgfd = new CsdpGeneratorFromDrm();
-
-		IDataset[] output = CurveStitchWithErrorsAndFrames.curveStitch4(csdpgfd.generateCsdpFromDrm(drm), null);
 
 		ILineTrace lt = pS.createLineTrace("progress");
 
@@ -2496,8 +2384,6 @@ public class SurfaceScatterPresenter {
 		csdpgfd.generateCsdpFromDrm(drm);
 
 		CurveStitchDataPackage csdp = csdpgfd.getCsdp();
-
-		IDataset[] output1 = CurveStitchWithErrorsAndFrames.curveStitch4(csdp, null);
 
 		drm.setCsdp(csdp);
 
@@ -2625,11 +2511,9 @@ public class SurfaceScatterPresenter {
 	}
 
 	public void switchErrorDisplay() {
-		if (errorDisplayFlag == true) {
-			errorDisplayFlag = (false);
-		} else {
-			errorDisplayFlag = (true);
-		}
+
+		errorDisplayFlag = !errorDisplayFlag;
+
 	}
 
 	public boolean getErrorFlag() {
@@ -2638,10 +2522,6 @@ public class SurfaceScatterPresenter {
 
 	public void setErrorFlag(boolean n) {
 		errorDisplayFlag = n;
-	}
-
-	public void geometricParametersWindowPopulate() {
-
 	}
 
 	private void debug(String output) {
@@ -2745,12 +2625,10 @@ public class SurfaceScatterPresenter {
 
 		int l = b == null ? 0 : b.getSize();
 		Dataset[] t = new Dataset[l];
-		int n = 0;
+
 		for (int i = 0; i < l; i++) {
 			if (b.getObject(i) != null) {
-
 				t[i] = DatasetFactory.createFromObject(b.getObject(i));
-				n++;
 			}
 		}
 
@@ -2765,7 +2643,9 @@ public class SurfaceScatterPresenter {
 		String[] sortedB = new String[l];
 
 		for (int r = 0; r < l; r++) {
-			sortedB[r] = b.getString((int) positionsInB[r]);
+			if (b != null) {
+				sortedB[r] = b.getString((int) positionsInB[r]);
+			}
 		}
 
 		Dataset outputB = DatasetFactory.createFromObject(sortedB);
@@ -2986,25 +2866,18 @@ public class SurfaceScatterPresenter {
 
 	private static Dataset localConcatenate(IDataset[] in, int dim) {
 
-		boolean good = true;
-
 		for (IDataset i : in) {
 
 			if (i == null) {
-				good = false;
 				return null;
 			}
 
 			if (i.getSize() == 0) {
-				good = false;
 				return null;
 			}
 		}
 
-		if (good) {
-			return DatasetUtils.convertToDataset(DatasetUtils.concatenate(in, dim));
-		}
-		return null;
+		return DatasetUtils.convertToDataset(DatasetUtils.concatenate(in, dim));
 	}
 
 }

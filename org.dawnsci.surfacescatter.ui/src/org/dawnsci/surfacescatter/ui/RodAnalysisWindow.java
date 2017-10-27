@@ -9,7 +9,6 @@ import org.eclipse.swt.custom.CTabItem;
 import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
@@ -59,12 +58,10 @@ public class RodAnalysisWindow {
 		////////////////////// Analysis Left//////////////////////////////
 		///////////////// anaLeft Window 3/////////////////////////////////
 
-		@SuppressWarnings("deprecation")
-		Dataset noImage = DatasetFactory.zeros(new int[] { 2, 2 }, Dataset.ARRAYFLOAT64);
 
-		customComposite = new PlotSystemCompositeView(anaLeft, SWT.FILL, noImage,
-				// 1,
-				numberOfImages, nullImage, ssp, ssvs);
+		Dataset noImage = DatasetFactory.createFromObject(new int[] { 2, 2 });
+
+		customComposite = new PlotSystemCompositeView(anaLeft, SWT.FILL, noImage, numberOfImages, nullImage, ssp, ssvs);
 
 		customComposite.setLayout(new GridLayout());
 		customComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));

@@ -7,6 +7,7 @@ import org.dawnsci.surfacescatter.AnalaysisMethodologies.Methodology;
 import org.dawnsci.surfacescatter.AxisEnums;
 import org.dawnsci.surfacescatter.AxisEnums.yAxes;
 import org.dawnsci.surfacescatter.CurveStitchDataPackage;
+import org.dawnsci.surfacescatter.FileCounter;
 import org.dawnsci.surfacescatter.FittingParameters;
 import org.dawnsci.surfacescatter.MethodSettingEnum.MethodSetting;
 import org.dawnsci.surfacescatter.ProcessingMethodsEnum.ProccessingMethod;
@@ -14,6 +15,7 @@ import org.dawnsci.surfacescatter.ReflectivityFluxCorrectionsForDialog;
 import org.dawnsci.surfacescatter.ReflectivityMetadataTitlesForDialog;
 import org.dawnsci.surfacescatter.SavingFormatEnum.SaveFormatSetting;
 import org.dawnsci.surfacescatter.SetupModel;
+import org.dawnsci.surfacescatter.StareModeSelection;
 import org.dawnsci.surfacescatter.TrackingMethodology;
 import org.dawnsci.surfacescatter.TrackingMethodology.TrackerType1;
 import org.eclipse.dawnsci.analysis.api.io.IDataHolder;
@@ -42,6 +44,7 @@ import org.eclipse.swt.custom.CTabFolder2Adapter;
 import org.eclipse.swt.custom.CTabFolderEvent;
 import org.eclipse.swt.events.FocusEvent;
 import org.eclipse.swt.events.FocusListener;
+import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Color;
@@ -60,7 +63,6 @@ import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.ui.PlatformUI;
-
 import uk.ac.diamond.scisoft.analysis.io.LoaderFactory;
 
 public class SurfaceScatterViewStart extends Dialog {
@@ -68,7 +70,6 @@ public class SurfaceScatterViewStart extends Dialog {
 	private PlotSystemCompositeView customComposite;
 	private SuperSashPlotSystem3Composite ssps3c;
 	private MultipleOutputCurvesTableView outputCurves;
-//	private DatDisplayer datDisplayer;
 	private GeometricParametersWindows paramField;
 	private CTabFolder folder;
 	private SurfaceScatterPresenter ssp;
@@ -76,7 +77,6 @@ public class SurfaceScatterViewStart extends Dialog {
 	private boolean modify = true;
 	private String datFolderPath;
 	private Combo correctionsDropDown;
-	private Composite container;
 	private Group experimentalSetup;
 	private Group methodSetting;
 	private Group parametersSetting;
@@ -124,7 +124,7 @@ public class SurfaceScatterViewStart extends Dialog {
 
 		JFaceResources.getString(IDialogConstants.NO_TO_ALL_LABEL);
 
-		container = (Composite) super.createDialogArea(parent);
+		Composite container = (Composite) super.createDialogArea(parent);
 		container.setLayout(new GridLayout());
 		container.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 
@@ -141,27 +141,12 @@ public class SurfaceScatterViewStart extends Dialog {
 
 		paramField = rsw.getParamField();
 
-		rsw.getDatDisplayer().getBuildRod().addSelectionListener(new SelectionListener() {
+		rsw.getDatDisplayer().getBuildRod().addSelectionListener(new SelectionAdapter() {
 
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 
-				rsw.getDatDisplayer().setOption(rsw.getDatDisplayer().getSelectedOption());
-
-				String k = outputCurves.getIntensity().getText();
-				AxisEnums.yAxes ids0 = AxisEnums.toYAxis(k);
-
-				setIds(ids0);
-
-				setSms(SaveFormatSetting
-						.toMethod(ssps3c.getOutputCurves().getOutputFormatSelection().getSelectionIndex()));
-
-				ssp.createGm();
-
-				rsw.getAnglesAliasWindow().writeOutValues();
-
-				paramField.geometricParametersUpdate();
-
+				boolean stareMode = false;
 				boolean isThereAParamFile = false;
 				paramFile = " ";
 
@@ -170,16 +155,6 @@ public class SurfaceScatterViewStart extends Dialog {
 						isThereAParamFile = true;
 						paramFile = jh.getText();
 					}
-				}
-
-				try {
-					for (IRegion g : ssp.getInterpolatorRegions()) {
-						customComposite.getPlotSystem().removeRegion(g);
-						g.remove();
-
-					}
-				} catch (Exception u) {
-					System.out.println(u.getMessage());
 				}
 
 				ArrayList<TableItem> checkedList = new ArrayList<>();
@@ -201,6 +176,61 @@ public class SurfaceScatterViewStart extends Dialog {
 				for (int f = 0; f < rodComponentDats.length; f++) {
 					String filename = rodComponentDats[f].getText();
 					filepaths[f] = datFolderPath + File.separator + filename;
+				}
+
+				if (isThereAParamFile) {
+
+					boolean matchingNoFrames = new FileCounter(filepaths, paramFile).getGood();
+
+					if (!matchingNoFrames) {
+
+						StareModeSelection smsn = new StareModeSelection();
+						StareModeSelector smsa = new StareModeSelector(SurfaceScatterViewStart.this.getShell(), smsn);
+
+						smsa.open();
+
+						try {
+							while (!smsa.getShell().isDisposed()) {
+
+							}
+						} catch (Exception p) {
+
+						}
+
+						if (smsn.getAccept()) {
+							stareMode = true;
+
+						} else {
+							return;
+						}
+
+					}
+				}
+
+				rsw.getDatDisplayer().setOption(rsw.getDatDisplayer().getSelectedOption());
+
+				String k = outputCurves.getIntensity().getText();
+				AxisEnums.yAxes ids0 = AxisEnums.toYAxis(k);
+
+				setIds(ids0);
+
+				setSms(SaveFormatSetting
+						.toMethod(ssps3c.getOutputCurves().getOutputFormatSelection().getSelectionIndex()));
+
+				ssp.createGm();
+
+				rsw.getAnglesAliasWindow().writeOutValues();
+
+				paramField.geometricParametersUpdate();
+
+				try {
+					for (IRegion g : ssp.getInterpolatorRegions()) {
+						customComposite.getPlotSystem().removeRegion(g);
+						g.remove();
+
+					}
+				} catch (Exception u) {
+					System.out.println(u.getMessage());
 				}
 
 				ssp.resetSmOutputObjects();
@@ -238,7 +268,7 @@ public class SurfaceScatterViewStart extends Dialog {
 				}
 
 				if (ssp.isqConvert()) {
-					double energy = Double.valueOf(paramField.getEnergy().getText());
+					double energy = Double.parseDouble(paramField.getEnergy().getText());
 					ssp.setEnergy(energy);
 
 					ssp.setTheta(paramField.getTheta().getSelectionIndex());
@@ -298,7 +328,7 @@ public class SurfaceScatterViewStart extends Dialog {
 				ssp.setSliderPos(0);
 
 				if (isThereAParamFile) {
-					setParametersFromFile(paramFile, rsw.getDatDisplayer().getUseTrajectory());
+					setParametersFromFile(paramFile, rsw.getDatDisplayer().getUseTrajectory(), stareMode);
 
 				}
 
@@ -314,10 +344,6 @@ public class SurfaceScatterViewStart extends Dialog {
 				ssps3c.resetCrossHairs();
 			}
 
-			@Override
-			public void widgetDefaultSelected(SelectionEvent e) {
-
-			}
 		});
 
 		/////////////////////////////////////////////////////////////////////////
@@ -337,7 +363,7 @@ public class SurfaceScatterViewStart extends Dialog {
 		this.customComposite = raw.getCustomComposite();
 		this.ssps3c = raw.getSsps3c();
 
-		customComposite.getReplay().addSelectionListener(new SelectionListener() {
+		customComposite.getReplay().addSelectionListener(new SelectionAdapter() {
 
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -352,13 +378,9 @@ public class SurfaceScatterViewStart extends Dialog {
 				mJ.setSubIBgPS(customComposite.getSubImageBgPlotSystem());
 				mJ.run();
 			}
-
-			@Override
-			public void widgetDefaultSelected(SelectionEvent e) {
-			}
 		});
 
-		customComposite.getSlider().addSelectionListener(new SelectionListener() {
+		customComposite.getSlider().addSelectionListener(new SelectionAdapter() {
 
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -374,10 +396,6 @@ public class SurfaceScatterViewStart extends Dialog {
 				}
 			}
 
-			@Override
-			public void widgetDefaultSelected(SelectionEvent e) {
-
-			}
 		});
 
 		customComposite.getGreenRegion().addROIListener(new IROIListener() {
@@ -409,7 +427,7 @@ public class SurfaceScatterViewStart extends Dialog {
 			}
 		});
 
-		folder.addSelectionListener(new SelectionListener() {
+		folder.addSelectionListener(new SelectionAdapter() {
 
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -458,12 +476,6 @@ public class SurfaceScatterViewStart extends Dialog {
 				else {
 					folder.setSelection(0);
 				}
-			}
-
-			@Override
-			public void widgetDefaultSelected(SelectionEvent e) {
-				// TODO Auto-generated method stub
-
 			}
 		});
 
@@ -608,7 +620,7 @@ public class SurfaceScatterViewStart extends Dialog {
 			}
 		});
 
-		customComposite.getPlotSystem1CompositeView().getLoadButton().addSelectionListener(new SelectionListener() {
+		customComposite.getPlotSystem1CompositeView().getLoadButton().addSelectionListener(new SelectionAdapter() {
 
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -667,18 +679,12 @@ public class SurfaceScatterViewStart extends Dialog {
 
 			}
 
-			@Override
-			public void widgetDefaultSelected(SelectionEvent e) {
-
-			}
 		});
 
 		////////////////////////////////////////////////////////////////////
 		customComposite.getSecondBgRegion().setVisible(false);
 		customComposite.getSecondBgRegion().repaint();
 		appendListenersToOutputCurves();
-
-//		datDisplayer.redrawDatDisplayerFolderView();
 
 		Display.getCurrent().addFilter(SWT.KeyDown, new Listener() {
 			@Override
@@ -731,7 +737,7 @@ public class SurfaceScatterViewStart extends Dialog {
 
 		});
 
-		ssps3c.getOutputCurves().getqAxis().addSelectionListener(new SelectionListener() {
+		ssps3c.getOutputCurves().getqAxis().addSelectionListener(new SelectionAdapter() {
 
 			Display display = Display.getCurrent();
 			Color red = display.getSystemColor(SWT.COLOR_RED);
@@ -771,7 +777,6 @@ public class SurfaceScatterViewStart extends Dialog {
 
 					lt1.setErrorBarEnabled(ssp.getErrorFlag());
 					lt1.setErrorBarColor(red);
-					// IDataset xprobe = lt1.getXData();
 
 					double start = lt1.getXData().getDouble(0);
 					double end = lt1.getXData().getDouble(lt1.getXData().getShape()[0] - 1);
@@ -822,11 +827,6 @@ public class SurfaceScatterViewStart extends Dialog {
 
 			}
 
-			@Override
-			public void widgetDefaultSelected(SelectionEvent e) {
-				// TODO Auto-generated method stub
-
-			}
 		});
 		container.layout();
 		return container;
@@ -837,10 +837,7 @@ public class SurfaceScatterViewStart extends Dialog {
 
 		ssp.updateAnalysisMethodology(methodologySelection, fitPowerSelection, trackerSelection, boundaryBox);
 
-		if (// TrackingMethodology.intToTracker1(trackerSelection) !=
-			// TrackerType1.INTERPOLATION
-			// &&
-		TrackingMethodology.intToTracker1(trackerSelection) != TrackingMethodology.TrackerType1.SPLINE_INTERPOLATION
+		if (TrackingMethodology.intToTracker1(trackerSelection) != TrackingMethodology.TrackerType1.SPLINE_INTERPOLATION
 				&& ssp.getInterpolatorRegions() != null) {
 
 			for (IRegion g : ssp.getInterpolatorRegions()) {
@@ -872,10 +869,7 @@ public class SurfaceScatterViewStart extends Dialog {
 			customComposite.getPlotSystem1CompositeView().getRejectLocation().setEnabled(false);
 		}
 
-		if ((// TrackingMethodology.intToTracker1(trackerSelection) ==
-				// TrackerType1.INTERPOLATION
-				// ||
-		TrackingMethodology.intToTracker1(trackerSelection) == TrackerType1.SPLINE_INTERPOLATION)
+		if ((TrackingMethodology.intToTracker1(trackerSelection) == TrackerType1.SPLINE_INTERPOLATION)
 				&& ssp.getTrackerOn()) {
 
 			customComposite.getPlotSystem1CompositeView().getAcceptLocation().setEnabled(true);
@@ -982,9 +976,9 @@ public class SurfaceScatterViewStart extends Dialog {
 
 				customComposite.getBgRegion().setROI(greenAndBg[1]);
 			}
-
+			
+			
 		}
-
 	}
 
 	@SuppressWarnings("deprecation")
@@ -1225,9 +1219,7 @@ public class SurfaceScatterViewStart extends Dialog {
 
 		ssp.illuminateCorrectInterpolationBox(k);
 
-		if ((// ssp.getTrackerType() == TrackerType1.INTERPOLATION
-				// ||
-		ssp.getTrackerType() == TrackerType1.SPLINE_INTERPOLATION) && ssp.getInterpolatedLenPts() != null) {
+		if ((ssp.getTrackerType() == TrackerType1.SPLINE_INTERPOLATION) && ssp.getInterpolatedLenPts() != null) {
 
 			double[][] lf = ssp.getInterpolatedLenPts().get(ssp.getSliderPos());
 
@@ -1287,7 +1279,6 @@ public class SurfaceScatterViewStart extends Dialog {
 		return correctionsDropDown;
 	}
 
-
 	public void resetIntensityCombo() {
 		SurfaceScatterViewStart.this.getSsps3c().getOutputCurves().getIntensity().select(0);
 	}
@@ -1313,7 +1304,7 @@ public class SurfaceScatterViewStart extends Dialog {
 
 		outputCurves = ssps3c.getOutputCurves();
 
-		outputCurves.getOverlapZoom().addSelectionListener(new SelectionListener() {
+		outputCurves.getOverlapZoom().addSelectionListener(new SelectionAdapter() {
 
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -1325,11 +1316,6 @@ public class SurfaceScatterViewStart extends Dialog {
 						xyArrays.get(5), xyArrays.get(6), ssp, SurfaceScatterViewStart.this);
 
 				goh.open();
-
-			}
-
-			@Override
-			public void widgetDefaultSelected(SelectionEvent e) {
 
 			}
 		});
@@ -1407,7 +1393,7 @@ public class SurfaceScatterViewStart extends Dialog {
 
 		});
 
-		outputCurves.getOutputFormatSelection().addSelectionListener(new SelectionListener() {
+		outputCurves.getOutputFormatSelection().addSelectionListener(new SelectionAdapter() {
 
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -1415,15 +1401,9 @@ public class SurfaceScatterViewStart extends Dialog {
 				setSms(SaveFormatSetting.toMethod(outputCurves.getOutputFormatSelection().getSelectionIndex()));
 
 			}
-
-			@Override
-			public void widgetDefaultSelected(SelectionEvent e) {
-				// TODO Auto-generated method stub
-
-			}
 		});
 
-		outputCurves.getIntensity().addSelectionListener(new SelectionListener() {
+		outputCurves.getIntensity().addSelectionListener(new SelectionAdapter() {
 
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -1437,15 +1417,9 @@ public class SurfaceScatterViewStart extends Dialog {
 				ids = AxisEnums.toYAxis(k);
 
 			}
-
-			@Override
-			public void widgetDefaultSelected(SelectionEvent e) {
-				// TODO Auto-generated method stub
-
-			}
 		});
 
-		outputCurves.getErrorsButton().addSelectionListener(new SelectionListener() {
+		outputCurves.getErrorsButton().addSelectionListener(new SelectionAdapter() {
 
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -1459,15 +1433,9 @@ public class SurfaceScatterViewStart extends Dialog {
 				ssp.switchFhklIntensity(pS, selectorName, outputCurves.getqAxis().getSelection());
 
 			}
-
-			@Override
-			public void widgetDefaultSelected(SelectionEvent e) {
-				// TODO Auto-generated method stub
-
-			}
 		});
 
-		outputCurves.getStoreAsNexus().addSelectionListener(new SelectionListener() {
+		outputCurves.getStoreAsNexus().addSelectionListener(new SelectionAdapter() {
 
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -1501,10 +1469,6 @@ public class SurfaceScatterViewStart extends Dialog {
 
 			}
 
-			@Override
-			public void widgetDefaultSelected(SelectionEvent e) {
-
-			}
 		});
 
 	}
@@ -1530,7 +1494,7 @@ public class SurfaceScatterViewStart extends Dialog {
 
 		parentPs.addTrace(lt1);
 		getSsps3c().getOutputCurves().getIntensity().select(0);
-		
+
 	}
 
 	public void export(CurveStitchDataPackage csdpNew) {
@@ -1787,11 +1751,7 @@ public class SurfaceScatterViewStart extends Dialog {
 
 		getSsps3c().generalUpdate(ssp.getLenPt());
 		customComposite.generalCorrectionsUpdate();
-		
-		
-		
-		
-		
+
 	}
 
 }
