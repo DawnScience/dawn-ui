@@ -40,10 +40,8 @@ import org.eclipse.jface.viewers.ColumnViewer;
 import org.eclipse.jface.viewers.ColumnViewerToolTipSupport;
 import org.eclipse.jface.viewers.ColumnWeightData;
 import org.eclipse.jface.viewers.EditingSupport;
-import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
@@ -93,6 +91,50 @@ public class LoadedFilePart {
 	private Image unticked;
 	
 	private FileControllerStateEventListener fileStateListener;
+	
+	private class QuickFileWidgetListener implements IQuickFileWidgetListener {
+		@Override
+		public void fileSelected(String directory, String name) {
+			String match = name;
+			File folder = new File(directory);
+					
+			// first check for presence of range
+			int startRangeChar = match.indexOf('<');
+			int midRangeChar = match.indexOf('-', startRangeChar + 1);
+			int endRangeChar = match.indexOf('>', midRangeChar + 1);
+					
+			List<String> patterns = new ArrayList<>();
+				
+			if (startRangeChar > 0 && midRangeChar > startRangeChar && endRangeChar > midRangeChar) {
+				try {
+					int startRange = Integer.parseInt(match.substring(startRangeChar +1 , midRangeChar));
+					int endRange = Integer.parseInt(match.substring(midRangeChar + 1, endRangeChar));
+					if (endRange <= startRange)
+						throw new NumberFormatException();
+					String prefix = startRangeChar > 0 ? match.substring(0, startRangeChar) : "";
+					String suffix = endRangeChar != match.length() - 1 ? match.substring(endRangeChar + 1): ""; 
+					for (int i = startRange ; i <= endRange ; i++) {
+						patterns.add(prefix + Integer.toString(i) + suffix);
+					}
+				} catch (NumberFormatException e) {
+					patterns.add(match);
+				}
+			} else {
+				patterns.add(match);
+			}
+			
+			String[] names = patterns
+				.stream()
+				.flatMap(pattern -> Arrays.stream(folder.listFiles((FilenameFilter) new WildcardFileFilter(pattern))))
+				.sorted()
+				.filter(f -> !f.isDirectory())
+				.map(File::getAbsolutePath)
+				.toArray(String[]::new);
+					
+			loadData(names);
+			logger.debug("Loaded files using quickwidget");
+		}
+	}
 
 	@PostConstruct
 	public void createComposite(Composite parent) {
@@ -136,23 +178,7 @@ public class LoadedFilePart {
 		final QuickFileWidget quickFileWidget = qfw;
 		
 		if (quickFileWidget != null) {
-			qfw.addListener(new IQuickFileWidgetListener() {
-				
-				@Override
-				public void fileSelected(String directory, String name) {
-					String match = name;
-					File folder = new File(directory);
-					File[] files = folder.listFiles((FilenameFilter)new WildcardFileFilter(match));
-					Arrays.sort(files);
-					String[] names = Arrays.stream(files)
-							.filter(f -> !f.isDirectory())
-							.map(File::getAbsolutePath)
-							.toArray(String[]::new);
-					
-					loadData(names);
-					logger.debug("Loaded files using quickwidget");
-				}
-			});
+			qfw.addListener(new QuickFileWidgetListener());
 		}
 		
 		ticked = AbstractUIPlugin.imageDescriptorFromPlugin("org.dawnsci.datavis.view", "icons/ticked.png").createImage();
@@ -169,13 +195,11 @@ public class LoadedFilePart {
 
 			@Override
 			public void dispose() {
-				// TODO Auto-generated method stub
 				
 			}
 
 			@Override
 			public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
-				// TODO Auto-generated method stub
 				
 			}
 			
@@ -203,9 +227,7 @@ public class LoadedFilePart {
 			@Override
 			public String getText(Object element) {
 				
-				String name = ((LoadedFile)element).getName();
-				
-				return name;
+				return ((LoadedFile)element).getName();
 			}
 			
 			@Override
@@ -231,19 +253,15 @@ public class LoadedFilePart {
 		ColumnViewerToolTipSupport.enableFor(viewer);
 		viewer.setInput(fileController);
 		
-		viewer.addSelectionChangedListener(new ISelectionChangedListener() {
-			  @Override
-			  public void selectionChanged(SelectionChangedEvent event) {
-			    IStructuredSelection selection = viewer.getStructuredSelection();
-			    if (selection.getFirstElement() instanceof LoadedFile) {
-			    	LoadedFile selected = (LoadedFile)selection.getFirstElement();
-			    	fileController.setCurrentFile(selected, selected.isSelected());
-			    }
+		viewer.addSelectionChangedListener(event -> {
+			IStructuredSelection selection = viewer.getStructuredSelection();
+			if (selection.getFirstElement() instanceof LoadedFile) {
+			  	LoadedFile selected = (LoadedFile)selection.getFirstElement();
+			   	fileController.setCurrentFile(selected, selected.isSelected());
+			}
 			    
-			    selectionService.setSelection(new StructuredSelection(selection.toArray()));
-			    
-			  }
-			});
+			selectionService.setSelection(new StructuredSelection(selection.toArray()));
+		});
 		
 		MenuManager menuMgr = new MenuManager();
 		Menu menu = menuMgr.createContextMenu(viewer.getControl());
@@ -251,19 +269,13 @@ public class LoadedFilePart {
 		menuMgr.setRemoveAllWhenShown(true);
 		viewer.getControl().setMenu(menu);
 		
-		fileStateListener = new FileControllerStateEventListener() {
-			
-			@Override
-			public void stateChanged(FileControllerStateEvent event) {
-				updateOnStateChange(event);
-				
-				if (quickFileWidget != null && ServiceManager.getRecentPlaces() != null) {
-
-					List<String> recentPlaces = ServiceManager.getRecentPlaces().getRecentPlaces();
-					if (recentPlaces != null && !recentPlaces.isEmpty()) {
-						Display.getDefault().asyncExec(() ->quickFileWidget.setDirectoryPath(ServiceManager.getRecentPlaces().getRecentPlaces().get(0)));
-					}
-
+		fileStateListener = event -> {
+			updateOnStateChange(event);
+	
+			if (quickFileWidget != null && ServiceManager.getRecentPlaces() != null) {
+				List<String> recentPlaces = ServiceManager.getRecentPlaces().getRecentPlaces();
+				if (recentPlaces != null && !recentPlaces.isEmpty()) {
+					Display.getDefault().asyncExec(() -> quickFileWidget.setDirectoryPath(ServiceManager.getRecentPlaces().getRecentPlaces().get(0)));
 				}
 			}
 		};
@@ -279,8 +291,8 @@ public class LoadedFilePart {
 				Object dropData = event.data;
 				if (dropData instanceof TreeSelection) {
 					TreeSelection selectedNode = (TreeSelection) dropData;
-					Object obj[] = selectedNode.toArray();
-					List<String> paths = new ArrayList<String>();
+					Object[] obj = selectedNode.toArray();
+					List<String> paths = new ArrayList<>();
 					for (int i = 0; i < obj.length; i++) {
 						if (obj[i] instanceof IFile) {
 							IFile file = (IFile) obj[i];
@@ -335,17 +347,9 @@ public class LoadedFilePart {
 	
 	private void updateOnStateChange(final FileControllerStateEvent event) {
 		if (Display.getCurrent() == null) {
-			Display.getDefault().syncExec(new Runnable() {
-				
-				@Override
-				public void run() {
-					updateOnStateChange(event);
-				}
-			});
-			
+			Display.getDefault().syncExec(() -> updateOnStateChange(event));
 			return;
 		}
-		
 		viewer.refresh();
 	}
 	
