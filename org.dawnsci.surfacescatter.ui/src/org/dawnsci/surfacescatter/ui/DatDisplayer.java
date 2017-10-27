@@ -80,7 +80,9 @@ public class DatDisplayer extends Composite implements IDatDisplayer {
 	private Button transferUsingIncrement;
 	private boolean useTrajectory = true;
 	private Button useTrajectoryButton;
-
+	private InputTileGenerator useTrajectoryTile ;
+	private InputTileGenerator parameterFilesTile;
+	
 	public DatDisplayer(Composite parent, int style, SurfaceScatterPresenter ssp, SurfaceScatterViewStart ssvs,
 			RodSetupWindow rsw) {
 
@@ -127,7 +129,7 @@ public class DatDisplayer extends Composite implements IDatDisplayer {
 
 		datFolderSelection.setText("Select .dat File Folder");
 
-		datFolderSelection.addSelectionListener(new SelectionListener() {
+		datFolderSelection.addSelectionListener(new SelectionAdapter() {
 
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -175,9 +177,7 @@ public class DatDisplayer extends Composite implements IDatDisplayer {
 				transferUsingIncrement.setEnabled(true);
 			}
 
-			@Override
-			public void widgetDefaultSelected(SelectionEvent e) {
-			}
+		
 		});
 
 		datFolderText = new Text(datFolders, SWT.SINGLE | SWT.BORDER | SWT.FILL);
@@ -195,7 +195,7 @@ public class DatDisplayer extends Composite implements IDatDisplayer {
 		refreshTable.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		refreshTable.setEnabled(false);
 
-		refreshTable.addSelectionListener(new SelectionListener() {
+		refreshTable.addSelectionListener(new SelectionAdapter() {
 
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -204,11 +204,6 @@ public class DatDisplayer extends Composite implements IDatDisplayer {
 
 			}
 
-			@Override
-			public void widgetDefaultSelected(SelectionEvent e) {
-				// TODO Auto-generated method stub
-
-			}
 		});
 
 		transferToRod = new Button(datSelector, SWT.PUSH);
@@ -258,8 +253,8 @@ public class DatDisplayer extends Composite implements IDatDisplayer {
 			@Override
 			public void modifyText(ModifyEvent e) {
 				if (increment.isStateOfText()) {
-					int inc = Integer.valueOf(increment.getText().getText());
-					int start = Integer.valueOf(startDat.getText().getText());
+					int inc = Integer.parseInt(increment.getText().getText());
+					int start = Integer.parseInt(startDat.getText().getText());
 
 					endDat.getText().setText(String.valueOf(start + inc));
 				}
@@ -271,8 +266,8 @@ public class DatDisplayer extends Composite implements IDatDisplayer {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 
-				int inc = Integer.valueOf(increment.getText().getText());
-				int start = Integer.valueOf(startDat.getText().getText());
+				int inc = Integer.parseInt(increment.getText().getText());
+				int start = Integer.parseInt(startDat.getText().getText());
 
 				endDat.getText().setText(String.valueOf(start + inc));
 
@@ -301,7 +296,7 @@ public class DatDisplayer extends Composite implements IDatDisplayer {
 		transferUsingIncrement.setText("Transfer to Rod ->");
 		transferUsingIncrement.setEnabled(false);
 
-		transferUsingIncrement.addSelectionListener(new SelectionListener() {
+		transferUsingIncrement.addSelectionListener(new SelectionAdapter() {
 
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -355,11 +350,6 @@ public class DatDisplayer extends Composite implements IDatDisplayer {
 
 			}
 
-			@Override
-			public void widgetDefaultSelected(SelectionEvent e) {
-				// TODO Auto-generated method stub
-
-			}
 		});
 
 		rodConstruction = new Group(right, SWT.V_SCROLL | SWT.FILL | SWT.FILL);
@@ -418,7 +408,7 @@ public class DatDisplayer extends Composite implements IDatDisplayer {
 		rodDisplayTable.setLayout(new GridLayout());
 		rodDisplayTable.setEnabled(false);
 
-		transferToRod.addSelectionListener(new SelectionListener() {
+		transferToRod.addSelectionListener(new SelectionAdapter() {
 
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -466,12 +456,6 @@ public class DatDisplayer extends Composite implements IDatDisplayer {
 				}
 
 				prepareToBuildRod(tidiedTransferList);
-
-			}
-
-			@Override
-			public void widgetDefaultSelected(SelectionEvent e) {
-				// TODO Auto-generated method stub
 
 			}
 		});
@@ -522,6 +506,9 @@ public class DatDisplayer extends Composite implements IDatDisplayer {
 				sortOutEnabling(itgArray[2], itgArray[1]);
 				transferUsingIncrement.setEnabled(false);
 				refreshTable.setEnabled(false);
+				
+				parameterFilesTile.setEnabled(false);
+				clearParameterTable.setEnabled(false);
 			}
 
 			@Override
@@ -615,16 +602,12 @@ public class DatDisplayer extends Composite implements IDatDisplayer {
 		parameterFiles.setText("Parameter Files");
 		parameterFiles.setEnabled(false);
 
-		Group parameterFilesSelect = new Group(parameterFiles, SWT.NONE);
-		GridLayout parameterFilesSelectLayout = new GridLayout(2, true);
-		GridData parameterFilesSelectData = new GridData((GridData.FILL_HORIZONTAL));
-		parameterFilesSelect.setLayout(parameterFilesSelectLayout);
-		parameterFilesSelect.setLayoutData(parameterFilesSelectData);
-
-		paramFileSelection = new Button(parameterFilesSelect, SWT.PUSH | SWT.FILL);
-		paramFileSelection.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-		paramFileSelection.setText("Select Parameter File");
-		paramFileSelection.setEnabled(false);
+		parameterFilesTile = new InputTileGenerator("Select Parameter File", parameterFiles, 2);
+		
+		paramFileSelection = parameterFilesTile.getPush();
+		paramFileText = parameterFilesTile.getText();
+		
+		parameterFilesTile.setEnabled(false);
 
 		paramFileSelection.addSelectionListener(new SelectionListener() {
 
@@ -657,11 +640,6 @@ public class DatDisplayer extends Composite implements IDatDisplayer {
 			}
 		});
 
-		paramFileText = new Text(parameterFilesSelect, SWT.SINGLE | SWT.BORDER | SWT.FILL);
-		paramFileText.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-		paramFileText.setEnabled(false);
-		paramFileText.setEditable(false);
-
 		clearParameterTable = new Button(parameterFiles, SWT.PUSH | SWT.FILL);
 		clearParameterTable.setText("Clear Table");
 		clearParameterTable.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
@@ -687,9 +665,11 @@ public class DatDisplayer extends Composite implements IDatDisplayer {
 			}
 		});
 
-		InputTileGenerator useTrajectoryTile = new InputTileGenerator("Use Trajectory From File:", parameterFiles,
+		useTrajectoryTile = new InputTileGenerator("Use Trajectory From File:", parameterFiles,
 				true);
-
+		
+		useTrajectoryTile.setEnabled(false); 
+		
 		useTrajectoryButton = useTrajectoryTile.getRadio();
 
 		useTrajectoryButton.setSelection(useTrajectory);
@@ -762,7 +742,7 @@ public class DatDisplayer extends Composite implements IDatDisplayer {
 		return buildRod;
 	}
 
-	public void enableRodConstruction(boolean enabled) {
+	private void enableRodConstruction(boolean enabled) {
 		rodConstruction.setEnabled(enabled);
 		scannedVariableOptions.setEnabled(enabled);
 		rodComponents.setEnabled(enabled);
@@ -772,6 +752,13 @@ public class DatDisplayer extends Composite implements IDatDisplayer {
 		optionsDropDown.setEnabled(enabled);
 		clearRodTable.setEnabled(enabled);
 		selectAll.setEnabled(enabled);
+		useTrajectoryTile.setEnabled(enabled);
+		parameterFiles.setEnabled(enabled);
+		parameterFilesTile.setEnabled(enabled);
+		
+		for(Control c: parameterFiles.getChildren()) {
+				c.setEnabled(enabled);
+		}
 	}
 
 	public Button getMassRunner() {

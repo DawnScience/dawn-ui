@@ -22,6 +22,7 @@ public class InputTileGenerator {
 	private Spinner spinner;
 	private Combo comboDropDownTheta;
 	private Button radio;
+	private Button push;
 	boolean stateOfText = false;
 	
 
@@ -39,6 +40,25 @@ public class InputTileGenerator {
 		
 		text = new Text(tile, SWT.SINGLE |  SWT.BORDER| SWT.FILL);
 		text.setText(t);
+	    
+	}
+	
+	public InputTileGenerator(String l, Composite parent, int p){
+		
+		tile = new Group(parent, SWT.NONE);
+        GridLayout 	tileLayout = new GridLayout(p,true);
+    	
+        tile.setLayout(tileLayout);
+		GridData tileData = new GridData(SWT.FILL, SWT.NULL, true, false);
+		tile.setLayoutData(tileData);
+		
+		push =new Button(tile, SWT.PUSH | SWT.FILL);
+		push.setText(l);
+		push.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		   
+		
+		text = new Text(tile, SWT.SINGLE |  SWT.BORDER| SWT.FILL);
+		text.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 	    
 	}
 	
@@ -273,6 +293,10 @@ public class InputTileGenerator {
 		return label;
 	}
 	
+	public Button getPush() {
+		return push;
+	}
+	
 	public Text getText(){
 		return text;
 	}
@@ -285,6 +309,14 @@ public class InputTileGenerator {
 		if(g){
 			text.setEnabled(stateOfText);
 		}
+	}
+	
+	public void setEnabled(boolean in){
+	
+		for(Control cl :tile.getChildren()){
+			cl.setEnabled(in);
+		}
+	
 	}
 	
 	

@@ -246,7 +246,13 @@ public class SurfaceScatterPresenter {
 
 					content = content.replaceAll(pathNameToReplace, imageFolderPath);
 
-					Files.write(to, content.getBytes(charset));
+					try {
+						Files.write(to, content.getBytes(charset));
+					} catch (java.nio.file.FileAlreadyExistsException f) {
+						String ec=  StringUtils.substringBeforeLast(to.toString(), ".dat") + "_extra_copy";
+						 ec = ec + ".dat";
+						 to = Paths.get(ec);
+					}
 
 					dh1 = LoaderFactory.getData(to.toString());
 
@@ -2385,20 +2391,31 @@ public class SurfaceScatterPresenter {
 
 		CurveStitchDataPackage csdp = csdpgfd.getCsdp();
 
+		CurveStitchWithErrorsAndFrames.curveStitch4(csdp, null);
+
 		drm.setCsdp(csdp);
 
 		ILineTrace lt = pS.createLineTrace("progress");
 
-		IDataset X = DatasetFactory.createFromObject(csdp.getSplicedCurveX());
+		if (csdp.getSplicedCurveX() == null) {
+
+			csdp.setSplicedCurveX(DatasetFactory.createRange(fms.size()));
+			csdp.setSplicedCurveQ(DatasetFactory.createRange(fms.size()));
+		}
+
+		if (drm.getCsdp().getSplicedCurveY() == null) {
+
+			csdp.setSplicedCurveY(DatasetFactory.createRange(fms.size()));
+			csdp.setSplicedCurveYFhkl(DatasetFactory.createRange(fms.size()));
+			csdp.setSplicedCurveYRaw(DatasetFactory.createRange(fms.size()));
+		}
+
+		IDataset X = csdp.getSplicedCurveX();
 
 		if (outputCurves.getqAxis().getSelection()) {
 
 			qConversion();
 			X = drm.getCsdp().getSplicedCurveQ();
-		}
-
-		else {
-			X = csdp.getSplicedCurveX();
 		}
 
 		if (ids == null) {

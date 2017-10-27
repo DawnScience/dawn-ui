@@ -15,6 +15,7 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.DirectoryDialog;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Table;
@@ -28,6 +29,8 @@ public class BatchDisplay extends Composite {
 	private Table batchDisplayTable;
 	private BatchRodModel brm;
 	private String nxsFolderPath;
+	private Group batchTableGroup;
+	private Group datFolders;
 
 	public BatchDisplay(Composite parent, int style, SurfaceScatterViewStart ssvs, BatchSetupWindow rsw,
 			BatchRodModel brm) {
@@ -47,14 +50,14 @@ public class BatchDisplay extends Composite {
 		brm.setBsas(new BatchSavingAdvancedSettings[SaveFormatSetting.values().length]);
 		brm.setBsmps(new BatchSetupMiscellaneousProperties());
 
-		Group batchTableGroup = new Group(this, SWT.V_SCROLL | SWT.FILL);
+		batchTableGroup = new Group(this, SWT.V_SCROLL | SWT.FILL);
 		GridLayout batchTableGroupLayout = new GridLayout(1, true);
 		GridData batchTableGroupData = new GridData((GridData.FILL_BOTH));
 		batchTableGroup.setLayout(batchTableGroupLayout);
 		batchTableGroup.setLayoutData(batchTableGroupData);
 		batchTableGroup.setText("Batch");
 
-		Group datFolders = new Group(batchTableGroup, SWT.NONE);
+		datFolders = new Group(batchTableGroup, SWT.NONE);
 		GridLayout datFoldersLayout = new GridLayout(2, true);
 		GridData datFoldersData = new GridData((GridData.FILL_HORIZONTAL));
 		datFolders.setLayout(datFoldersLayout);
@@ -63,10 +66,9 @@ public class BatchDisplay extends Composite {
 		nxsFolderPath = null;
 
 		Button datFolderSelection = new Button(datFolders, SWT.PUSH | SWT.FILL);
-
 		datFolderSelection.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-
 		datFolderSelection.setText("Select .dat File Folder");
+		datFolderSelection.setEnabled(false);
 
 		Text nxsFolderText = new Text(datFolders, SWT.SINGLE | SWT.BORDER | SWT.FILL);
 		nxsFolderText.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
@@ -94,7 +96,7 @@ public class BatchDisplay extends Composite {
 				brm.setNxsFolderPath(nxsFolderPath);
 
 				nxsFolderText.setText(nxsFolderPath);
-				nxsFolderText.setEnabled(true);
+				nxsFolderText.setEnabled(false);
 
 			}
 		});
@@ -102,7 +104,7 @@ public class BatchDisplay extends Composite {
 		Button process = new Button(datFolders, SWT.PUSH);
 		process.setText("Build and Process Batch");
 		process.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
-		process.setEnabled(true);
+		process.setEnabled(false);
 
 		process.addSelectionListener(new SelectionAdapter() {
 
@@ -117,7 +119,7 @@ public class BatchDisplay extends Composite {
 		Button advancedSettings = new Button(datFolders, SWT.PUSH);
 		advancedSettings.setText("Advanced Process Settings");
 		advancedSettings.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
-		advancedSettings.setEnabled(true);
+		advancedSettings.setEnabled(false);
 
 		advancedSettings.addSelectionListener(new SelectionAdapter() {
 
@@ -132,7 +134,7 @@ public class BatchDisplay extends Composite {
 		Button check = new Button(batchTableGroup, SWT.PUSH);
 		check.setText("<- Check");
 		check.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
-		check.setEnabled(true);
+		check.setEnabled(false);
 
 		check.addSelectionListener(new SelectionAdapter() {
 
@@ -156,7 +158,7 @@ public class BatchDisplay extends Composite {
 		Button clear = new Button(batchTableGroup, SWT.PUSH);
 		clear.setText("Clear Batch");
 		clear.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
-		clear.setEnabled(true);
+		clear.setEnabled(false);
 
 		clear.addSelectionListener(new SelectionAdapter() {
 
@@ -164,13 +166,14 @@ public class BatchDisplay extends Composite {
 			public void widgetSelected(SelectionEvent e) {
 				batchDisplayTable.removeAll();
 				brm.getBrdtoList().clear();
+				brm.setBatchDisplayOn(false);
 			}
 		});
 
 		Button remove = new Button(batchTableGroup, SWT.PUSH);
 		remove.setText("Remove Selected");
 		remove.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
-		remove.setEnabled(true);
+		remove.setEnabled(false);
 
 		remove.addSelectionListener(new SelectionAdapter() {
 
@@ -179,32 +182,46 @@ public class BatchDisplay extends Composite {
 				ArrayList<String> itemsToKeepList = new ArrayList<>();
 
 				for (TableItem ra : batchDisplayTable.getItems()) {
-					if (ra.getChecked() == false) {
+					if (!ra.getChecked()) {
 						itemsToKeepList.add(ra.getText());
 					}
 				}
 
 				batchDisplayTable.removeAll();
 
-				if (itemsToKeepList.size() != batchDisplayTable.getItems().length) {
+				for (BatchRodDataTransferObject g : brm.getBrdtoList()) {
+					for (String t : itemsToKeepList) {
+
+						if (g.getRodName().equals(t)) {
+							break;
+						}
+
+						brm.getBrdtoList().remove(g);
+					}
+				}
+
+				if (!itemsToKeepList.isEmpty()) {
 					for (String ra : itemsToKeepList) {
 						TableItem rat = new TableItem(batchDisplayTable, SWT.NONE);
 						rat.setText(ra);
 					}
+				} else {
+					brm.setBatchDisplayOn(false);
 				}
+
 			}
 		});
 
 		batchDisplayTable = new Table(batchTableGroup, SWT.CHECK | SWT.V_SCROLL | SWT.H_SCROLL | SWT.BORDER);
-		batchDisplayTable.setEnabled(true);
+		batchDisplayTable.setEnabled(false);
 
 		GridData folderDisplayTableData = new GridData(GridData.FILL_BOTH);
 
 		batchDisplayTable.setLayoutData(folderDisplayTableData);
 		batchDisplayTable.setLayout(new GridLayout());
-		batchDisplayTable.getVerticalBar().setEnabled(true);
+		batchDisplayTable.getVerticalBar().setEnabled(false);
 
-		batchDisplayTable.getVerticalBar().setEnabled(true);
+		batchDisplayTable.getVerticalBar().setEnabled(false);
 		batchDisplayTable.getVerticalBar().setIncrement(1);
 		batchDisplayTable.getVerticalBar().setThumb(1);
 
@@ -212,6 +229,8 @@ public class BatchDisplay extends Composite {
 
 			@Override
 			public void propertyChange(PropertyChangeEvent evt) {
+
+				BatchDisplay.this.setElementsEnabled(brm.isBatchDisplayOn());
 
 				if (brm.isUpdateControl()) {
 					ArrayList<String> checked = new ArrayList<>();
@@ -249,5 +268,18 @@ public class BatchDisplay extends Composite {
 			}
 		});
 
+	}
+
+	private void setElementsEnabled(boolean t) {
+
+		batchDisplayTable.setEnabled(t);
+
+		for (Control c : batchTableGroup.getChildren()) {
+			c.setEnabled(t);
+		}
+
+		for (Control c : datFolders.getChildren()) {
+			c.setEnabled(t);
+		}
 	}
 }

@@ -130,7 +130,7 @@ public class TrackingCore {
 			if (showtrack) {
 				ssvs.getRaw().getRtc().addCurrentTrace(csdp);
 
-				display.syncExec(new Runnable() {
+				display.asyncExec(new Runnable() {
 					@Override
 					public void run() {
 

@@ -8,6 +8,8 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CTabFolder;
 import org.eclipse.swt.custom.CTabItem;
 import org.eclipse.swt.custom.SashForm;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
@@ -18,6 +20,8 @@ public class BatchSetupWindow {
 	private BatchDatDisplayer batchDatDisplayer;
 	private BatchRodModel brm;
 	private BatchDisplay batchDisplay;
+
+	
 
 	public BatchSetupWindow(CTabFolder folder, SurfaceScatterViewStart ssvs, SurfaceScatterPresenter ssp) {
 
@@ -53,7 +57,7 @@ public class BatchSetupWindow {
 
 		try {
 
-			batchDatDisplayer = new BatchDatDisplayer(left, SWT.FILL, ssp, ssvs, BatchSetupWindow.this, brm);
+			batchDatDisplayer = new BatchDatDisplayer(left, SWT.FILL, ssp, ssvs, brm);
 			batchDatDisplayer.setLayout(new GridLayout());
 			batchDatDisplayer.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, true));
 
@@ -77,6 +81,8 @@ public class BatchSetupWindow {
 			// TODO Auto-generated catch block
 			System.out.println(e.getMessage() + "sssssssssssdddddddddddddddfffffffffffff");
 		}
+
+		
 	}
 
 	public BatchDatDisplayer getBatchDatDisplayer() {
@@ -88,7 +94,7 @@ public class BatchSetupWindow {
 		batchDatDisplayer.getRodDisplayTable().removeAll();
 		batchDatDisplayer.getRodDisplayTable().setEnabled(true);
 		batchDatDisplayer.enableRodConstruction(true);
-		
+
 		String[] completeDatNames = brt.getDatFiles();
 		String[] displayDatNames = completeDatNames.clone();
 
@@ -98,14 +104,18 @@ public class BatchSetupWindow {
 			ti.setText(displayDatNames[i]);
 			ti.setChecked(true);
 		}
-		
+
 		batchDatDisplayer.getParamFileTable().removeAll();
-		
+
 		TableItem p = new TableItem(batchDatDisplayer.getParamFileTable(), SWT.NONE);
 		p.setChecked(true);
 		p.setText(brt.getParamFiles());
-		
+
 		batchDatDisplayer.getUseTrajectoryButton().setEnabled(brt.isUseTrajectory());
 		batchDatDisplayer.setUseTrajectory(brt.isUseTrajectory());
 	}
+
+	
+	
+	
 }

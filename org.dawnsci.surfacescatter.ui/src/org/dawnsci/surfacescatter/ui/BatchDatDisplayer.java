@@ -43,7 +43,6 @@ import uk.ac.diamond.scisoft.analysis.io.LoaderFactory;
 
 public class BatchDatDisplayer extends Composite implements IDatDisplayer {
 
-	private Button selectFiles;
 	private SurfaceScatterPresenter ssp;
 	private Table rodDisplayTable;
 	private Table paramFileTable;
@@ -84,9 +83,11 @@ public class BatchDatDisplayer extends Composite implements IDatDisplayer {
 	private String rodName;
 	private boolean useTrajectory = true;
 	private Button useTrajectoryButton;
+	private InputTileGenerator useTrajectoryTile;
+	private InputTileGenerator parameterFilesTile;
 
 	public BatchDatDisplayer(Composite parent, int style, SurfaceScatterPresenter ssp, SurfaceScatterViewStart ssvs,
-			BatchSetupWindow rsw, BatchRodModel brm) {
+			BatchRodModel brm) {
 
 		super(parent, style);
 
@@ -177,6 +178,7 @@ public class BatchDatDisplayer extends Composite implements IDatDisplayer {
 				sortOutEnabling(itgArray[2], itgArray[1]);
 				sortOutEnabling(itgArray[2], itgArray[1]);
 				transferUsingIncrement.setEnabled(true);
+
 			}
 
 		});
@@ -400,9 +402,10 @@ public class BatchDatDisplayer extends Composite implements IDatDisplayer {
 
 						ssp.dialogToChangeRodName(namePrompt, BatchDatDisplayer.this);
 						addToBatch();
+						brm.setBatchDisplayOn(true);
 					}
 
-					else{
+					else {
 						StareModeSelection smsn = new StareModeSelection();
 						StareModeSelector sms = new StareModeSelector(ssvs.getShell(), smsn);
 
@@ -410,7 +413,7 @@ public class BatchDatDisplayer extends Composite implements IDatDisplayer {
 
 						try {
 							while (!sms.getShell().isDisposed()) {
-							
+
 							}
 						} catch (Exception p) {
 
@@ -421,6 +424,7 @@ public class BatchDatDisplayer extends Composite implements IDatDisplayer {
 
 							ssp.dialogToChangeRodName(namePrompt, BatchDatDisplayer.this);
 							addToBatch(true);
+							brm.setBatchDisplayOn(true);
 
 						}
 
@@ -585,7 +589,6 @@ public class BatchDatDisplayer extends Composite implements IDatDisplayer {
 				if (rodDisplayTable.getItemCount() == 0) {
 					enableRodConstruction(false);
 					ssvs.setupRightEnabled(false);
-					// bsw.setupRightEnabled(false);
 				}
 
 			}
@@ -600,15 +603,12 @@ public class BatchDatDisplayer extends Composite implements IDatDisplayer {
 		parameterFiles.setText("Parameter Files");
 		parameterFiles.setEnabled(false);
 
-		Group parameterFilesSelect = new Group(parameterFiles, SWT.NONE);
-		GridLayout parameterFilesSelectLayout = new GridLayout(2, true);
-		GridData parameterFilesSelectData = new GridData((GridData.FILL_HORIZONTAL));
-		parameterFilesSelect.setLayout(parameterFilesSelectLayout);
-		parameterFilesSelect.setLayoutData(parameterFilesSelectData);
+		parameterFilesTile = new InputTileGenerator("Select Parameter File", parameterFiles, 2);
 
-		paramFileSelection = new Button(parameterFilesSelect, SWT.PUSH | SWT.FILL);
-		paramFileSelection.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-		paramFileSelection.setText("Select Parameter File");
+		paramFileSelection = parameterFilesTile.getPush();
+		paramFileText = parameterFilesTile.getText();
+
+		parameterFilesTile.setEnabled(false);
 		paramFileSelection.setEnabled(false);
 
 		paramFileSelection.addSelectionListener(new SelectionAdapter() {
@@ -638,11 +638,6 @@ public class BatchDatDisplayer extends Composite implements IDatDisplayer {
 			}
 		});
 
-		paramFileText = new Text(parameterFilesSelect, SWT.SINGLE | SWT.BORDER | SWT.FILL);
-		paramFileText.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-		paramFileText.setEnabled(false);
-		paramFileText.setEditable(false);
-
 		clearParameterTable = new Button(parameterFiles, SWT.PUSH | SWT.FILL);
 		clearParameterTable.setText("Clear Table");
 		clearParameterTable.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
@@ -663,9 +658,8 @@ public class BatchDatDisplayer extends Composite implements IDatDisplayer {
 			}
 		});
 
-		InputTileGenerator useTrajectoryTile = new InputTileGenerator("Use Trajectory From File:", parameterFiles,
-				true);
-
+		useTrajectoryTile = new InputTileGenerator("Use Trajectory From File:", parameterFiles, true);
+		useTrajectoryTile.setEnabled(false);
 		useTrajectoryButton = useTrajectoryTile.getRadio();
 
 		useTrajectoryButton.setSelection(useTrajectory);
@@ -734,10 +728,14 @@ public class BatchDatDisplayer extends Composite implements IDatDisplayer {
 		deleteSelected.setEnabled(enabled);
 		clearRodTable.setEnabled(enabled);
 		selectAll.setEnabled(enabled);
+		useTrajectoryTile.setEnabled(enabled);
+		parameterFilesTile.setEnabled(enabled);
+		clearParameterTable.setEnabled(enabled);
+
 	}
 
-	public Button getSelectFiles() {
-		return selectFiles;
+	public Button getDatFolderSelection() {
+		return datFolderSelection;
 	}
 
 	private void fillTable() {
