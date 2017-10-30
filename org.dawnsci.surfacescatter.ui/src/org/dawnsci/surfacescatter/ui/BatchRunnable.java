@@ -91,9 +91,8 @@ public class BatchRunnable implements Callable {
 
 		sspi.loadParameters(paramFile, useTrajectory, useStareMode);
 
-		BatchTracking bat = new BatchTracking();
-		bat.setSsp(sspi);
-
+		BatchTracking bat = new BatchTracking(sspi);
+	
 		startTime = System.nanoTime();
 
 		bat.runTJ1(savePath, bsas, bsmps, noRods, lock);

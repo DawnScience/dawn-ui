@@ -273,7 +273,8 @@ public class BatchDisplay extends Composite {
 	private void setElementsEnabled(boolean t) {
 
 		batchDisplayTable.setEnabled(t);
-
+		batchTableGroup.setEnabled(t);
+		
 		for (Control c : batchTableGroup.getChildren()) {
 			c.setEnabled(t);
 		}

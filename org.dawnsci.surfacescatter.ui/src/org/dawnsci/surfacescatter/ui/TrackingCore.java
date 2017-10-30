@@ -54,20 +54,21 @@ public class TrackingCore {
 				int trackingMarker = 1;
 
 				boolean seedRequired = false;
+				
+				TrackerType1 tt1 = frame.getTrackingMethodology();
 
 				if (start) {
+					seedLocationSetter(ssp, frame.getFmNo(), start, frame.getDatNo(), seedRequired, tt1);
 					start = false;
 				}
 
 				else {
 					seedRequired = doINeedASeedArray(frame.getDatNo(), drm);
+					seedLocationSetter(ssp, frame.getFmNo(), start, frame.getDatNo(), seedRequired, tt1);
 
 				}
 
-				TrackerType1 tt1 = frame.getTrackingMethodology();
-
-				seedLocationSetter(ssp, frame.getFmNo(), !start, frame.getDatNo(), seedRequired, tt1);
-
+				
 				drm.addDmxList(frame.getDatNo(), frame.getNoInOriginalDat(), frame.getScannedVariable());
 
 				drm.addxList(fms.size(), frame.getFmNo(), drm.getSortedX().getDouble(frame.getFmNo()));
@@ -185,6 +186,10 @@ public class TrackingCore {
 
 	private boolean doINeedASeedArray(int frameDatNo, DirectoryModel drm) {
 
+		
+		if (frameDatNo == 2) {
+			System.out.println("haha");
+		}
 		for (double[] o : drm.getLocationList().get(frameDatNo)) {
 			if (!Arrays.equals(o, new double[] { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 })) {
 				return false;

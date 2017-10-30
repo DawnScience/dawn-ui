@@ -2,7 +2,6 @@ package org.dawnsci.surfacescatter.ui;
 
 import java.util.ArrayList;
 import java.util.concurrent.locks.ReadWriteLock;
-
 import org.dawnsci.surfacescatter.AxisEnums.yAxes;
 import org.dawnsci.surfacescatter.BatchSavingAdvancedSettings;
 import org.dawnsci.surfacescatter.BatchSetupMiscellaneousProperties;
@@ -16,6 +15,10 @@ public class BatchTracking {
 	boolean start = true;
 	private String savePath;
 
+	public BatchTracking(SurfaceScatterPresenter ssp) {
+		this.ssp = ssp;
+	}
+	
 	public void setSsp(SurfaceScatterPresenter ssp) {
 		this.ssp = ssp;
 	}
@@ -36,23 +39,23 @@ public class BatchTracking {
 
 		ssp.getDrm().setDoneArray(doneArray);
 
-		long startTime = System.nanoTime();
+//		long startTime = System.nanoTime();
 
 		new TrackingCore(doneArray, ssp, null, null, false, null, null);
 
-		long trackingCoreTime = System.nanoTime();
+//		long trackingCoreTime = System.nanoTime();
 
-		System.out.println(" TrackingCoreTime :   " + (trackingCoreTime - startTime) / 1000000);
+//		System.out.println(" TrackingCoreTime :   " + (trackingCoreTime - startTime) / 1000000);
 
-		startTime = System.nanoTime();
+//		startTime = System.nanoTime();
 		
 		if(bsmps.isOutputNexusFiles()) {
 			ssp.writeNexus(savePath + ".nxs", noRods , lock);
 		}
 		
-		long nexusTime = System.nanoTime();
+//		long nexusTime = System.nanoTime();
 
-		System.out.println(" nexusTime :   " + (nexusTime - startTime) / 1000000);
+//		System.out.println(" nexusTime :   " + (nexusTime - startTime) / 1000000);
 
 		yAxes[] yA = goodYAxes(bsmps.getBsya());
 
