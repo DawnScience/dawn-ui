@@ -1,5 +1,6 @@
 package org.dawnsci.surfacescatter.ui;
 
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.concurrent.locks.ReadWriteLock;
 import org.dawnsci.surfacescatter.AxisEnums.yAxes;
@@ -18,64 +19,93 @@ public class BatchTracking {
 	public BatchTracking(SurfaceScatterPresenter ssp) {
 		this.ssp = ssp;
 	}
-	
+
 	public void setSsp(SurfaceScatterPresenter ssp) {
 		this.ssp = ssp;
 	}
 
-	protected void runTJ1(String savepath1, BatchSavingAdvancedSettings[] bsas, 
-			BatchSetupMiscellaneousProperties bsmps,
-		  int noRods, ReadWriteLock lock) {
-
-		int[][] lenpt = LocationLenPtConverterUtils.locationToLenPtConverter(ssp.getFms().get(0).getRoiLocation());
+	protected void runTJ1(String savepath1, BatchSavingAdvancedSettings[] bsas, BatchSetupMiscellaneousProperties bsmps,
+			int noRods, ReadWriteLock lock, PrintWriter writer) {
 
 		this.savePath = savepath1;
 
-		ssp.regionOfInterestSetter(lenpt);
+		String progressReport = savePath + "   :  ";
 
-		ssp.regionOfInterestSetter(lenpt);
+		try {
+			int[][] lenpt = LocationLenPtConverterUtils.locationToLenPtConverter(ssp.getFms().get(0).getRoiLocation());
 
-		boolean[] doneArray = new boolean[ssp.getDrm().getDatFilepaths().length];
+			ssp.regionOfInterestSetter(lenpt);
 
-		ssp.getDrm().setDoneArray(doneArray);
+			boolean[] doneArray = new boolean[ssp.getDrm().getDatFilepaths().length];
 
-//		long startTime = System.nanoTime();
+			ssp.getDrm().setDoneArray(doneArray);
 
-		new TrackingCore(doneArray, ssp, null, null, false, null, null);
+			new TrackingCore(doneArray, ssp, null, null, false, null, null);
 
-//		long trackingCoreTime = System.nanoTime();
-
-//		System.out.println(" TrackingCoreTime :   " + (trackingCoreTime - startTime) / 1000000);
-
-//		startTime = System.nanoTime();
-		
-		if(bsmps.isOutputNexusFiles()) {
-			ssp.writeNexus(savePath + ".nxs", noRods , lock);
+			progressReport += "   tracked successfully; ";
 		}
-		
-//		long nexusTime = System.nanoTime();
 
-//		System.out.println(" nexusTime :   " + (nexusTime - startTime) / 1000000);
+		catch (Exception p) {
+			progressReport += "   track failed : " + p.getMessage();
+			lock.writeLock().lock();
+			writer.println(progressReport);
+			lock.writeLock().unlock();
+			return;
+
+		}
+
+		try {
+			if (bsmps.isOutputNexusFiles()) {
+				ssp.writeNexus(savePath + ".nxs", noRods, lock);
+			}
+
+			progressReport += "   wrote NeXus successfully; ";
+
+		} catch (Exception n) {
+			progressReport += "   NeXus write out failed : " + n.getMessage();
+			lock.writeLock().lock();
+			writer.println(progressReport);
+			lock.writeLock().unlock();
+			return;
+
+		}
 
 		yAxes[] yA = goodYAxes(bsmps.getBsya());
 
-		for (BatchSavingAdvancedSettings bsa : bsas) {
-			if (bsa != null) {
-				SaveFormatSetting sfs = bsa.getSfs();
-				for (yAxes y : yA) {
-					if (bsa.isAllPoints()) {
-						ssp.arbitrarySavingMethodCore(bsmps.isUseQ(), false, sfs, ssp.getDrm().getCsdp(), y,
-								savePath + "_" + sfs.getDisplayName() + "_" + "ALL_POINTS" + "_" + y.getYAxisName());
-					}
-					if (bsa.isGoodPoints()) {
-						ssp.arbitrarySavingMethodCore(bsmps.isUseQ(), true, sfs, ssp.getDrm().getCsdp(), y, savePath
-								+ "_" + sfs.getDisplayName() + "_" + "GOOD_POINTS_ONLY" + "_" + y.getYAxisName());
+		try {
+
+			for (BatchSavingAdvancedSettings bsa : bsas) {
+				if (bsa != null) {
+					SaveFormatSetting sfs = bsa.getSfs();
+					for (yAxes y : yA) {
+						if (bsa.isAllPoints()) {
+							ssp.arbitrarySavingMethodCore(bsmps.isUseQ(), false, sfs, ssp.getDrm().getCsdp(), y,
+									savePath + "_" + sfs.getDisplayName() + "_" + "ALL_POINTS" + "_"
+											+ y.getYAxisName());
+						}
+						if (bsa.isGoodPoints()) {
+							ssp.arbitrarySavingMethodCore(bsmps.isUseQ(), true, sfs, ssp.getDrm().getCsdp(), y, savePath
+									+ "_" + sfs.getDisplayName() + "_" + "GOOD_POINTS_ONLY" + "_" + y.getYAxisName());
+						}
 					}
 				}
 			}
+			progressReport += "   reduced save files written successfully : ALL RAN FINE";
+
+			lock.writeLock().lock();
+			writer.println(progressReport);
+			lock.writeLock().unlock();
+			return;
 		}
 
-		return;
+		catch (Exception j) {
+			progressReport += "   reduced save files write failed : FAILURE";
+
+			lock.writeLock().lock();
+			writer.println(progressReport);
+			lock.writeLock().unlock();
+			return;
+		}
 
 	}
 

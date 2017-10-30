@@ -1,7 +1,10 @@
 package org.dawnsci.surfacescatter.ui;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.concurrent.Future;
-
 import org.dawnsci.surfacescatter.BatchRodModel;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.swt.SWT;
@@ -24,11 +27,13 @@ public class BatchTrackingProgressAndAbortViewImproved extends Dialog {
 	private ProgressBar progress;
 	private BatchRodModel brm;
 	private BatchRunner br;
+	private PrintWriter writer;
 
-	public BatchTrackingProgressAndAbortViewImproved(Shell parentShell, BatchRodModel brm) {
+	public BatchTrackingProgressAndAbortViewImproved(Shell parentShell, BatchRodModel brm, PrintWriter writer) {
 
 		super(parentShell);
 		this.brm = brm;
+		this.writer = writer;
 
 		setShellStyle(getShellStyle() | SWT.RESIZE | SWT.APPLICATION_MODAL);
 
@@ -37,6 +42,7 @@ public class BatchTrackingProgressAndAbortViewImproved extends Dialog {
 	@Override
 	protected Control createDialogArea(Composite parent) {
 
+		
 		final Composite container = (Composite) super.createDialogArea(parent);
 		container.setLayout(new GridLayout());
 		container.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
@@ -63,7 +69,7 @@ public class BatchTrackingProgressAndAbortViewImproved extends Dialog {
 			}
 		});
 
-		br = new BatchRunner(brm, progress, this, display);
+		br = new BatchRunner(brm, progress, this, display, writer);
 
 		
 //		br.getBatch().

@@ -74,6 +74,15 @@ public class RegionOutOfBoundsWarning extends Dialog {
 		case 8:
 			warning.setText("No parameter file selected");	
 			break;
+		case 9:
+			warning.setText("Unable to create output files.");	
+			break;
+		case 10:
+			warning.setText("Set batch name.");	
+			break;
+		case 11:
+			warning.setText("Set working directory.");	
+			break;
 		default:
 			warning.setText("Unknown or novel error.");	
 			break;

@@ -1,8 +1,8 @@
 package org.dawnsci.surfacescatter.ui;
 
+import java.io.PrintWriter;
 import java.util.concurrent.Callable;
 import java.util.concurrent.locks.ReadWriteLock;
-
 import org.dawnsci.surfacescatter.BatchSavingAdvancedSettings;
 import org.dawnsci.surfacescatter.BatchSetupMiscellaneousProperties;
 import org.dawnsci.surfacescatter.FittingParametersInputReader;
@@ -30,10 +30,12 @@ public class BatchRunnable implements Callable {
 	private boolean useStareMode;
 	private int noRods;
 	private ReadWriteLock lock;
+	private PrintWriter writer;
 
 	public BatchRunnable(String savepath1, BatchSavingAdvancedSettings[] bsas, BatchSetupMiscellaneousProperties bsmps,
 			ProgressBar progress, BatchTrackingProgressAndAbortViewImproved bpaatv, Display display,
-			String imageFolderPath, String paramFile, String[] datFiles, boolean useTrajectory, boolean useStareMode, int noRods, ReadWriteLock lock) {
+			String imageFolderPath, String paramFile, String[] datFiles, boolean useTrajectory, boolean useStareMode,
+			int noRods, ReadWriteLock lock, PrintWriter writer) {
 
 		this.savePath = savepath1;
 		this.bsas = bsas;
@@ -48,6 +50,7 @@ public class BatchRunnable implements Callable {
 		this.useStareMode = useStareMode;
 		this.lock = lock;
 		this.noRods = noRods;
+		this.writer = writer;
 
 	}
 
@@ -95,7 +98,7 @@ public class BatchRunnable implements Callable {
 	
 		startTime = System.nanoTime();
 
-		bat.runTJ1(savePath, bsas, bsmps, noRods, lock);
+		bat.runTJ1(savePath, bsas, bsmps, noRods, lock, writer);
 
 		long batchTime = System.nanoTime();
 
@@ -104,8 +107,8 @@ public class BatchRunnable implements Callable {
 		display.asyncExec(new Runnable() {
 			@Override
 			public void run() {
-//
-				if (progress.isDisposed() != true) {
+				
+				if (!progress.isDisposed()) {
 					progress.setSelection(progress.getSelection() + 1);
 
 					if (progress.getSelection() == progress.getMaximum()) {
@@ -117,6 +120,7 @@ public class BatchRunnable implements Callable {
 			}
 		});
 
+		
 		return true;
 
 	}

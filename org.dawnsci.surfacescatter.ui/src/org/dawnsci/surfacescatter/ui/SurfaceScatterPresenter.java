@@ -2791,7 +2791,7 @@ public class SurfaceScatterPresenter {
 	}
 
 	public void arbitrarySavingMethod(boolean useQ, boolean writeOnlyGoodPoints, Shell shell, SaveFormatSetting sfs,
-			String rodSaveName, CurveStitchDataPackage csdpToSave, AxisEnums.yAxes yAxis) {
+			 CurveStitchDataPackage csdpToSave, AxisEnums.yAxes yAxis) {
 
 		FileDialog fd = new FileDialog(shell, SWT.SAVE);
 
@@ -2820,24 +2820,24 @@ public class SurfaceScatterPresenter {
 	public void arbitrarySavingMethodCore(boolean useQ, boolean writeOnlyGoodPoints, SaveFormatSetting sfs,
 			CurveStitchDataPackage csdpToSave, AxisEnums.yAxes yAxis, String title) {
 
-		SavingUtils su = new SavingUtils();
+		SavingUtils su = new SavingUtils(writeOnlyGoodPoints, csdpToSave);
 
 		int saveIntensityState = yAxis.getYAxisNumber();
 
 		if (sfs == SaveFormatSetting.GenX) {
-			su.genXSave(writeOnlyGoodPoints, title + ".txt", csdpToSave, this.getDrm(), this.getDrm().getFms(),
+			su.genXSave(title + ".txt", this.getDrm(), this.getDrm().getFms(),
 					this.getGm());
 		}
 		if (sfs == SaveFormatSetting.Anarod) {
-			su.anarodSave(writeOnlyGoodPoints, title + ".ana", csdpToSave, this.getDrm(), this.getDrm().getFms(),
+			su.anarodSave(title + ".ana", this.getDrm(), this.getDrm().getFms(),
 					this.getGm());
 		}
 		if (sfs == SaveFormatSetting.int_format) {
-			su.intSave(writeOnlyGoodPoints, title + ".int", csdpToSave, this.getDrm(), this.getDrm().getFms(),
+			su.intSave(title + ".int", this.getDrm(), this.getDrm().getFms(),
 					this.getGm());
 		}
 		if (sfs == SaveFormatSetting.ASCII) {
-			su.simpleXYYeSave(useQ, writeOnlyGoodPoints, title + ".txt", saveIntensityState, csdpToSave,
+			su.simpleXYYeSave(useQ, title + ".txt", saveIntensityState,
 					this.getDrm().getFms());
 		}
 

@@ -2,6 +2,10 @@ package org.dawnsci.surfacescatter.ui;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import org.dawnsci.surfacescatter.BatchRodDataTransferObject;
 import org.dawnsci.surfacescatter.BatchRodModel;
@@ -9,6 +13,8 @@ import org.dawnsci.surfacescatter.BatchSavingAdvancedSettings;
 import org.dawnsci.surfacescatter.BatchSetupMiscellaneousProperties;
 import org.dawnsci.surfacescatter.SavingFormatEnum.SaveFormatSetting;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.ModifyEvent;
+import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
@@ -31,6 +37,7 @@ public class BatchDisplay extends Composite {
 	private String nxsFolderPath;
 	private Group batchTableGroup;
 	private Group datFolders;
+	private InputTileGenerator batchNameTile;
 
 	public BatchDisplay(Composite parent, int style, SurfaceScatterViewStart ssvs, BatchSetupWindow rsw,
 			BatchRodModel brm) {
@@ -101,6 +108,7 @@ public class BatchDisplay extends Composite {
 			}
 		});
 
+	
 		Button process = new Button(datFolders, SWT.PUSH);
 		process.setText("Build and Process Batch");
 		process.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
@@ -110,10 +118,62 @@ public class BatchDisplay extends Composite {
 
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				BatchTrackingProgressAndAbortViewImproved btpaavi = new BatchTrackingProgressAndAbortViewImproved(
-						ssvs.getShell(), brm);
-				btpaavi.open();
+
+				File file = null;
+				File logFile = null;
+				PrintWriter writer = null;
+
+				if(brm.getBatchTitle() ==null || brm.getBatchTitle().isEmpty()) {
+					RegionOutOfBoundsWarning r = new RegionOutOfBoundsWarning(ssvs.getShell(), 10, null);
+					r.open();
+				}
+				
+				if(brm.getNxsFolderPath() ==null ||brm.getNxsFolderPath().isEmpty()) {
+					RegionOutOfBoundsWarning r = new RegionOutOfBoundsWarning(ssvs.getShell(), 11, null);
+					r.open();
+				}
+				
+				try {
+					String folderPath =brm.getNxsFolderPath() + File.separator + brm.getBatchTitle(); 
+					file = new File(folderPath);
+					
+					String logFilePath =folderPath + File.separator + brm.getBatchTitle(); 
+					logFile = new File(logFilePath);
+					
+					boolean b = file.mkdirs();
+					boolean a = logFile.createNewFile();
+					
+					
+					if (a && b) {
+						writer = new PrintWriter(logFile);
+
+						BatchTrackingProgressAndAbortViewImproved btpaavi = new BatchTrackingProgressAndAbortViewImproved(
+								ssvs.getShell(), brm, writer);
+						btpaavi.open();
+						try {
+							while (!btpaavi.getShell().isDisposed()) {
+	
+							}
+						}
+						catch(NullPointerException f) {
+							
+						}
+						writer.close();
+						
+					}
+
+					else {
+						RegionOutOfBoundsWarning roobw = new RegionOutOfBoundsWarning(ssvs.getShell(), 9, null);
+						roobw.open();
+					}
+					
+				} catch (FileNotFoundException e2) {
+					e2.printStackTrace();
+				} catch (IOException e1) {
+					e1.printStackTrace();
+				}
 			}
+
 		});
 
 		Button advancedSettings = new Button(datFolders, SWT.PUSH);
@@ -130,6 +190,18 @@ public class BatchDisplay extends Composite {
 				bcs.open();
 			}
 		});
+		
+		batchNameTile = new InputTileGenerator("Set batch Name", "", batchTableGroup);
+
+		batchNameTile.getText().addModifyListener(new ModifyListener() {
+
+			@Override
+			public void modifyText(ModifyEvent e) {
+				brm.setBatchTitle(batchNameTile.getText().getText());
+
+			}
+		});
+
 
 		Button check = new Button(batchTableGroup, SWT.PUSH);
 		check.setText("<- Check");
@@ -268,13 +340,15 @@ public class BatchDisplay extends Composite {
 			}
 		});
 
+		setElementsEnabled(false);
 	}
 
 	private void setElementsEnabled(boolean t) {
 
 		batchDisplayTable.setEnabled(t);
 		batchTableGroup.setEnabled(t);
-		
+		batchNameTile.setEnabled(t);
+
 		for (Control c : batchTableGroup.getChildren()) {
 			c.setEnabled(t);
 		}

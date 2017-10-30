@@ -315,7 +315,6 @@ public class MultipleOutputCurvesTableView extends Composite {
 								  writeOnlyGoodPoints, 
 								  shell, 
 								  sfs, 
-								  rodSaveName, 
 								  csdpToSave, 
 								  yAxisSelection);
 	}

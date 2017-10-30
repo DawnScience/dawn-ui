@@ -660,7 +660,6 @@ public class ReviewTabComposite extends Composite{
 								  writeOnlyGoodPoints, 
 								  shell, 
 								  sfs, 
-								  rodSaveName, 
 								  csdpToSave, 
 								  yAxisSelection);
 	}
