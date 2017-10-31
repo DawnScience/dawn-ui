@@ -74,31 +74,22 @@ public class StitchedOverlapCurves extends Composite {
 	private Button showOnlyGoodPoints;
 	private Button export;
 	private Button normalise;
-	private boolean errorDisplayFlag = true;
 	private Slider slider;
 	private IRegion imageNo;
 	private GeneralOverlapHandlerView gohv;
 
-	public StitchedOverlapCurves(Composite parent, 
-			int style,
-			ArrayList<IDataset> xArrayList,
-			ArrayList<IDataset> yArrayList,
-			ArrayList<IDataset> yArrayListError,
-			ArrayList<IDataset> yArrayListFhkl,
-			ArrayList<IDataset> yArrayListFhklError,
-			ArrayList<IDataset> yArrayListRaw,
-			ArrayList<IDataset> yArrayListRawError,
-			String title, 
-			OverlapUIModel model,
-			SurfaceScatterPresenter ssp,
+	public StitchedOverlapCurves(Composite parent, int style, ArrayList<IDataset> xArrayList,
+			ArrayList<IDataset> yArrayList, ArrayList<IDataset> yArrayListError, ArrayList<IDataset> yArrayListFhkl,
+			ArrayList<IDataset> yArrayListFhklError, ArrayList<IDataset> yArrayListRaw,
+			ArrayList<IDataset> yArrayListRawError, String title, OverlapUIModel model, SurfaceScatterPresenter ssp,
 			GeneralOverlapHandlerView gohv) {
 
 		super(parent, style);
 
 		new Label(this, SWT.NONE).setText(title);
 		this.xArrayList = xArrayList;
-		this.gohv=gohv;
-		
+		this.gohv = gohv;
+
 		try {
 			plotSystem = PlottingFactory.createPlottingSystem();
 		} catch (Exception e2) {
@@ -107,26 +98,15 @@ public class StitchedOverlapCurves extends Composite {
 
 		this.ssp = ssp;
 
-		this.createContents(yArrayList,
-				yArrayListError,
-				yArrayListFhkl,
-				yArrayListFhklError,
-				yArrayListRaw,
-				yArrayListRawError,
-				title, model); 
-
+		this.createContents(yArrayList, yArrayListError, yArrayListFhkl, yArrayListFhklError, yArrayListRaw,
+				yArrayListRawError, title, model);
 
 	}
 
-	public void createContents(ArrayList<IDataset> yArrayList,
-			ArrayList<IDataset> yArrayListError,
-			ArrayList<IDataset> yArrayListFhkl,
-			ArrayList<IDataset> yArrayListFhklError, 
-			ArrayList<IDataset> yArrayListRaw,
-			ArrayList<IDataset> yArrayListRawError,
-			String filepaths, 
+	public void createContents(ArrayList<IDataset> yArrayList, ArrayList<IDataset> yArrayListError,
+			ArrayList<IDataset> yArrayListFhkl, ArrayList<IDataset> yArrayListFhklError,
+			ArrayList<IDataset> yArrayListRaw, ArrayList<IDataset> yArrayListRawError, String filepaths,
 			OverlapUIModel model) {
-
 
 		csdp = ssp.curveStitchingOutput(null, false, null);
 
@@ -149,7 +129,6 @@ public class StitchedOverlapCurves extends Composite {
 		saveSettingsData.heightHint = 100;
 		saveSettings.setLayoutData(new GridData(GridData.FILL_HORIZONTAL | GridData.FILL_VERTICAL));
 
-
 		showOnlyGoodPoints = new Button(saveSettings, SWT.PUSH);
 		showOnlyGoodPoints.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		showOnlyGoodPoints.setData(new GridData(SWT.FILL));
@@ -171,22 +150,20 @@ public class StitchedOverlapCurves extends Composite {
 		});
 
 		export = new Button(saveSettings, SWT.PUSH);
-		export.setLayoutData (new GridData(GridData.FILL_HORIZONTAL));
+		export.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		export.setText("Export Curve");
 		export.setSize(export.computeSize(100, 20, true));
 
-		Group normGroup= new Group(form, SWT.NONE);
+		Group normGroup = new Group(form, SWT.NONE);
 		GridLayout normGroupLayout = new GridLayout(1, true);
-		normGroup.setLayout(normGroupLayout);    
+		normGroup.setLayout(normGroupLayout);
 		GridData normGroupData = new GridData(SWT.FILL, SWT.FILL, true, true);
 		normGroupData.grabExcessVerticalSpace = true;
 		normGroupData.heightHint = 100;
 		normGroup.setLayoutData(new GridData(GridData.FILL_HORIZONTAL | GridData.FILL_VERTICAL));
 
-
-
 		normalise = new Button(normGroup, SWT.PUSH);
-		normalise.setLayoutData (new GridData(GridData.FILL_HORIZONTAL));
+		normalise.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		normalise.setText("Normalise To Point");
 		normalise.setSize(export.computeSize(100, 20, true));
 
@@ -201,9 +178,7 @@ public class StitchedOverlapCurves extends Composite {
 
 				double normalisationPoint = normalisationValue(k);
 
-				ReflectivityNormalisation.reflectivityNormalisationToAPoint(csdp, 
-						k, 
-						normalisationPoint);
+				ReflectivityNormalisation.reflectivityNormalisationToAPoint(csdp, k, normalisationPoint);
 
 				lt1 = plotSystem.createLineTrace("Concatenated Curve Test");
 
@@ -225,7 +200,7 @@ public class StitchedOverlapCurves extends Composite {
 		});
 
 		slider = new Slider(normGroup, SWT.HORIZONTAL);
-		slider.setLayoutData (new GridData(GridData.FILL_HORIZONTAL));
+		slider.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		slider.setMinimum(0);
 		slider.setMaximum(csdp.getSplicedCurveX().getSize());
 		slider.setIncrement(1);
@@ -235,7 +210,7 @@ public class StitchedOverlapCurves extends Composite {
 
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				double xsl =(double) slider.getSelection();
+				double xsl = (double) slider.getSelection();
 
 				double xval = ssp.getFms().get((int) xsl).getScannedVariable();
 				moveImageNoRegion(xval);
@@ -249,7 +224,7 @@ public class StitchedOverlapCurves extends Composite {
 			}
 		});
 
-		///////////////////////////TOP		
+		/////////////////////////// TOP
 
 		SashForm topForm = new SashForm(form, SWT.VERTICAL);
 		topForm.setLayout(new GridLayout());
@@ -262,7 +237,8 @@ public class StitchedOverlapCurves extends Composite {
 		stitchedCurves.setLayoutData(stitchedCurvesData);
 		stitchedCurves.setText("Stitched Curves");
 
-		ActionBarWrapper actionBarComposite = ActionBarWrapper.createActionBars(stitchedCurves, null);;
+		ActionBarWrapper actionBarComposite = ActionBarWrapper.createActionBars(stitchedCurves, null);
+		
 
 		final GridData gdSecondField = new GridData(SWT.FILL, SWT.FILL, true, true);
 		gdSecondField.grabExcessVerticalSpace = true;
@@ -280,9 +256,7 @@ public class StitchedOverlapCurves extends Composite {
 		plotSystem.addTrace(lt1);
 		plotSystem.repaint();
 
-		maxMinArray = AttenuationCorrectedOutput.maxMinArrayGenerator(xArrayList,
-				model);
-
+		maxMinArray = AttenuationCorrectedOutput.maxMinArrayGenerator(xArrayList, model);
 
 		model.addPropertyChangeListener(new PropertyChangeListener() {
 
@@ -291,21 +265,13 @@ public class StitchedOverlapCurves extends Composite {
 
 				int g = slider.getSelection();
 
-				maxMinArray = AttenuationCorrectedOutput.maxMinArrayGenerator(xArrayList,
-						model);
+				maxMinArray = AttenuationCorrectedOutput.maxMinArrayGenerator(xArrayList, model);
 
 				csdp = ssp.curveStitchingOutput(maxMinArray, false, null);
 
 				plotSystem.clear();
 
-				//				getTheRightCurve(model.getyAxis(), model.getxAxis());
-				//				
-				//				plotSystem.clearTraces();
-				//				plotSystem.addTrace(lt1);
-				//				plotSystem.repaint();
-
-
-				resetAttenuationFactors(model.getxAxis(),model.getyAxis(), overlapSelector, xArrayList,true);
+				resetAttenuationFactors(model.getxAxis(), model.getyAxis(), overlapSelector, xArrayList, true);
 
 				slider.setMinimum(0);
 				slider.setMaximum(csdp.getSplicedCurveX().getSize());
@@ -313,20 +279,14 @@ public class StitchedOverlapCurves extends Composite {
 				slider.setThumb(1);
 				slider.setSelection(g);
 
+				buildLineTrace(model.getyAxis(), model.getxAxis());
 
-
-				buildLineTrace(model.getyAxis(),model.getxAxis());
-				//				IDataset y = getYIDataset(model.getyAxis());
-				//				IDataset x = getXIDataset(model.getxAxis());
-				//				
-				//				lt1.setData(x, y);
 			}
 		});
 
-
 		plotSystem.getPlotComposite().setLayoutData(gdSecondField);
 
-		/////////////BOTTOM
+		///////////// BOTTOM
 
 		SashForm bottomForm = new SashForm(form, SWT.VERTICAL);
 		bottomForm.setLayout(new GridLayout());
@@ -345,10 +305,7 @@ public class StitchedOverlapCurves extends Composite {
 
 		oAos = new ArrayList<OverlapAttenuationObject>();
 
-		viewer = buildTable1(model.getxAxis(),
-				model.getyAxis(), 
-				overlapSelector,
-				xArrayList);
+		viewer = buildTable1(model.getxAxis(), model.getyAxis(), overlapSelector, xArrayList);
 
 		viewer.getTable().setLayout(overlapSelectorLayout);
 		viewer.getTable().setLayoutData(overlapSelectorData);
@@ -357,19 +314,18 @@ public class StitchedOverlapCurves extends Composite {
 
 		resetAll.setText("Reset All");
 
-
 		resetAll.addSelectionListener(new SelectionListener() {
 
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				for(OverlapDisplayObjects odo: odos){
+				for (OverlapDisplayObjects odo : odos) {
 					odo.setModified(false);
 				}
-				for(OverlapAttenuationObject oAo: oAos){
+				for (OverlapAttenuationObject oAo : oAos) {
 					oAo.setModified(false);
 				}
 
-				resetAttenuationFactors(model.getxAxis(),model.getyAxis(), overlapSelector, xArrayList,true);
+				resetAttenuationFactors(model.getxAxis(), model.getyAxis(), overlapSelector, xArrayList, true);
 
 			}
 
@@ -383,14 +339,11 @@ public class StitchedOverlapCurves extends Composite {
 
 		go.setText("Go");
 
-
 		go.addSelectionListener(new SelectionListener() {
 
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				updateAttenuationFactors(model.getxAxis(),
-						model.getyAxis(), 
-						xArrayList);
+				updateAttenuationFactors(model.getxAxis(), model.getyAxis(), xArrayList);
 
 			}
 
@@ -400,7 +353,7 @@ public class StitchedOverlapCurves extends Composite {
 			}
 		});
 
-		RectangularROI r = new RectangularROI(csdp.getSplicedCurveX().getDouble(1) ,0.1,0,0.1,0);
+		RectangularROI r = new RectangularROI(csdp.getSplicedCurveX().getDouble(1), 0.1, 0, 0.1, 0);
 
 		try {
 			imageNo = plotSystem.createRegion("Image", RegionType.XAXIS_LINE);
@@ -411,7 +364,7 @@ public class StitchedOverlapCurves extends Composite {
 			e.printStackTrace();
 		}
 
-		if(imageNo != null){
+		if (imageNo != null) {
 			imageNo.addROIListener(new IROIListener() {
 
 				@Override
@@ -425,14 +378,13 @@ public class StitchedOverlapCurves extends Composite {
 				@Override
 				public void roiChanged(ROIEvent evt) {
 
-					int xPos =ssp.xPositionFinder(imageNo.getROI().getPointX());
+					int xPos = ssp.xPositionFinder(imageNo.getROI().getPointX());
 
 					double yValue = 0;
 
 					AxisEnums.yAxes yA = model.getyAxis();
 
-
-					switch(yA){
+					switch (yA) {
 					case SPLICEDYFHKL:
 						yValue = ssp.getFms().get(xPos).getUnspliced_Fhkl_Intensity();
 						break;
@@ -440,37 +392,34 @@ public class StitchedOverlapCurves extends Composite {
 						yValue = ssp.getFms().get(xPos).getUnspliced_Corrected_Intensity();
 						break;
 					case SPLICEDYRAW:
-						yValue = ssp.getFms().get(xPos).getUnspliced_Raw_Intensity();						
+						yValue = ssp.getFms().get(xPos).getUnspliced_Raw_Intensity();
 						break;
 					default:
-						//defensive only
+						// defensive only
 					}
 				}
 			});
 		}
 
+		bottomForm.setWeights(new int[] { 70, 15, 15 });
 
-		bottomForm.setWeights(new int[]{70,15,15});
-
-		form.setWeights(new int[]{5,7,73,20});
-
+		form.setWeights(new int[] { 5, 7, 73, 20 });
 
 		IAxis yAxisR = plotSystem.getSelectedYAxis();
 
 		yAxisR.setLog10(!yAxisR.isLog10());
 
+	}
 
-	} 
-
-	public Composite getComposite(){
+	public Composite getComposite() {
 		return this;
 	}
 
-	public IPlottingSystem<Composite> getPlotSystem(){
+	public IPlottingSystem<Composite> getPlotSystem() {
 		return plotSystem;
 	}
 
-	public ILineTrace getLineTrace1(){
+	public ILineTrace getLineTrace1() {
 		return lt1;
 	}
 
@@ -482,14 +431,11 @@ public class StitchedOverlapCurves extends Composite {
 		this.csdp = csdp;
 	}
 
-	private void updateAttenuationFactors(AxisEnums.xAxes x,
-			AxisEnums.yAxes y,
-			ArrayList<IDataset> xArrayList){
+	private void updateAttenuationFactors(AxisEnums.xAxes x, AxisEnums.yAxes y, ArrayList<IDataset> xArrayList) {
 
-
-		for(OverlapDisplayObjects odo : odos){
-			if(odo.isModified()){
-				OverlapAttenuationObject oAo = odo.getOAo(); 
+		for (OverlapDisplayObjects odo : odos) {
+			if (odo.isModified()) {
+				OverlapAttenuationObject oAo = odo.getOAo();
 				oAos.set(odo.getOdoNumber(), oAo);
 			}
 		}
@@ -497,28 +443,25 @@ public class StitchedOverlapCurves extends Composite {
 		csdp = ssp.curveStitchingOutput(maxMinArray, true, oAos);
 		odms = csdp.getOverlapDataModels();
 
-		for(int i =0; i<odos.size(); i++){
+		for (int i = 0; i < odos.size(); i++) {
 
 			OverlapDisplayObjects odo = odos.get(i);
 			OverlapDataModel odm = odms.get(i);
 			OverlapAttenuationObject oAo = oAos.get(i);
 
-			if(odo.isModified()){
+			if (odo.isModified()) {
 				settingOdoFromOdm(odm, odo, oAo);
 				oAo = odo.getOAo();
-				odo.setModified(true); 
+				odo.setModified(true);
 				oAos.set(odo.getOdoNumber(), odo.getOAo());
 
-			}
-			else{
+			} else {
 				settingOdoFromOdm(odm, odo, oAo);
 				oAo = odo.getOAo();
 				oAos.set(odo.getOdoNumber(), odo.getOAo());
 
 			}
 		}
-
-
 
 		getTheRightCurve(y, x);
 
@@ -527,67 +470,58 @@ public class StitchedOverlapCurves extends Composite {
 		plotSystem.repaint();
 	}
 
+	private void resetAttenuationFactors(AxisEnums.xAxes x, AxisEnums.yAxes y, Group group,
+			ArrayList<IDataset> xArrayList, boolean globalReset) {
 
-	private void resetAttenuationFactors(AxisEnums.xAxes x,
-			AxisEnums.yAxes y,
-			Group group,
-			ArrayList<IDataset> xArrayList,
-			boolean globalReset){
-
-		if(globalReset){
+		if (globalReset) {
 			csdp = ssp.curveStitchingOutput(maxMinArray, true, null);
-		}
-		else{
+		} else {
 			csdp = ssp.curveStitchingOutput(maxMinArray, true, oAos);
 		}
 
 		buildLineTrace(y, x);
 
-		//		plotSystem.clearTraces();
-		//		plotSystem.addTrace(lt1);
-		//		plotSystem.repaint();
+		// plotSystem.clearTraces();
+		// plotSystem.addTrace(lt1);
+		// plotSystem.repaint();
 
-		//		csdp = ssp.curveStitchingOutput(null, false, null);
+		// csdp = ssp.curveStitchingOutput(null, false, null);
 		odms = csdp.getOverlapDataModels();
 
-		for(int i =0; i<odos.size(); i++){
+		for (int i = 0; i < odos.size(); i++) {
 
 			OverlapDisplayObjects odo = odos.get(i);
 			OverlapDataModel odm = odms.get(i);
 
 			OverlapAttenuationObject oAo = odo.getOAo();
 
-			if(!globalReset){
+			if (!globalReset) {
 
-				if(odo.isButtonPushed()){
+				if (odo.isButtonPushed()) {
 
 					settingOdoFromOdm(odm, odo, oAo);
 					oAo = odo.getOAo();
 				}
-			}
-			else{
+			} else {
 				settingOdoFromOdm(odm, odo, oAo);
 				oAo = odo.getOAo();
 			}
-			oAos.set(odo.getOdoNumber(),oAo);
+			oAos.set(odo.getOdoNumber(), oAo);
 		}
 
 	}
 
-	private void settingOdoFromOdm(OverlapDataModel odm,
-			OverlapDisplayObjects odo,
-			OverlapAttenuationObject oAo){
+	private void settingOdoFromOdm(OverlapDataModel odm, OverlapDisplayObjects odo, OverlapAttenuationObject oAo) {
 
-
-		double l = odm.getAttenuationFactor(); 
+		double l = odm.getAttenuationFactor();
 		odo.getTextCorrected().setText(String.valueOf(l));
 		odo.setTextCorrectedContent(l);
 
-		double m = odm.getAttenuationFactorRaw(); 
+		double m = odm.getAttenuationFactorRaw();
 		odo.getTextRaw().setText(String.valueOf(m));
 		odo.setTextRawContent(m);
 
-		double n = odm.getAttenuationFactorFhkl(); 
+		double n = odm.getAttenuationFactorFhkl();
 		odo.getTextFhkl().setText(String.valueOf(n));
 		odo.setTextFhklContent(n);
 
@@ -597,33 +531,29 @@ public class StitchedOverlapCurves extends Composite {
 
 	}
 
+	private void generateOdosFromOdms(AxisEnums.xAxes x, AxisEnums.yAxes y, ArrayList<IDataset> xArrayList) {
 
-	private void generateOdosFromOdms(AxisEnums.xAxes x,AxisEnums.yAxes y , ArrayList<IDataset> xArrayList){
+		ArrayList<OverlapAttenuationObject> oAos1 = new ArrayList<>();
+		// odos = new ArrayList<>();
 
-		ArrayList<OverlapAttenuationObject> oAos1= new ArrayList<>();
-		//	   odos = new ArrayList<>();
-
-		for(int i = 0; i<odms.size(); i++){
+		for (int i = 0; i < odms.size(); i++) {
 
 			OverlapDataModel odm = odms.get(i);
 
 			OverlapDisplayObjects odo = new OverlapDisplayObjects();
 
-			odo.generateFromOdmAndTable(odm, 
-					i, 
-					overlapDisplayTable);
+			odo.generateFromOdmAndTable(odm, i, overlapDisplayTable);
 
 			odos.add(odo);
 
 			oAos1.add(odo.getOAo());
-			try{
-				if(oAos.size()>=(i-1) && oAos.size()>0 ){
-					if(oAos.get(i) != null){
+			try {
+				if (oAos.size() >= (i - 1) && oAos.size() > 0) {
+					if (oAos.get(i) != null) {
 						oAos1.get(i).setModified(oAos.get(i).isModified());
 					}
 				}
-			}
-			catch(Exception h){
+			} catch (Exception h) {
 
 			}
 
@@ -631,23 +561,20 @@ public class StitchedOverlapCurves extends Composite {
 
 				@Override
 				public void propertyChange(PropertyChangeEvent evt) {
-					if(modify){
+					if (modify) {
 						OverlapDisplayObjects odo = (OverlapDisplayObjects) evt.getSource();
 						odo.setModified(true);
 
-
-						if(odo.isButtonPushed()){
+						if (odo.isButtonPushed()) {
 							odo.setModified(false);
-							try{
+							try {
 								oAos.get(odo.getOdoNumber()).setModified(false);
-							}
-							catch(Exception m){
+							} catch (Exception m) {
 
 							}
 						}
 
-						updateAttenuationFactors(x,y, 
-								xArrayList);
+						updateAttenuationFactors(x, y, xArrayList);
 					}
 				}
 			});
@@ -656,38 +583,32 @@ public class StitchedOverlapCurves extends Composite {
 		oAos = oAos1;
 	}
 
+	private TableViewer buildTable1(AxisEnums.xAxes x, AxisEnums.yAxes y, Group overlapSelector,
+			ArrayList<IDataset> xArrayList) {
 
-	private TableViewer buildTable1(AxisEnums.xAxes x,
-			AxisEnums.yAxes y,
-			Group overlapSelector,
-			ArrayList<IDataset> xArrayList){
+		ArrayList<OverlapAttenuationObject> oAos1 = new ArrayList<>();
 
-		ArrayList<OverlapAttenuationObject> oAos1= new ArrayList<>();
+		viewer = new TableViewer(overlapSelector,
+				SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL | SWT.FULL_SELECTION | SWT.BORDER);
 
-		viewer = new TableViewer(overlapSelector, SWT.MULTI | SWT.H_SCROLL
-				| SWT.V_SCROLL | SWT.FULL_SELECTION | SWT.BORDER);
-
-		for(int i = 0; i<odms.size(); i++){
+		for (int i = 0; i < odms.size(); i++) {
 
 			OverlapDataModel odm = odms.get(i);
 
 			OverlapDisplayObjects odo = new OverlapDisplayObjects();
 
-			odo.generateFromOdmAndTable(odm, 
-					i, 
-					overlapDisplayTable);
+			odo.generateFromOdmAndTable(odm, i, overlapDisplayTable);
 
 			odos.add(odo);
 
 			oAos1.add(odo.getOAo());
-			try{
-				if(oAos.size()>=(i-1) && oAos.size()>0 ){
-					if(oAos.get(i) != null){
+			try {
+				if (oAos.size() >= (i - 1) && oAos.size() > 0) {
+					if (oAos.get(i) != null) {
 						oAos1.get(i).setModified(oAos.get(i).isModified());
 					}
 				}
-			}
-			catch(Exception h){
+			} catch (Exception h) {
 
 			}
 
@@ -695,22 +616,20 @@ public class StitchedOverlapCurves extends Composite {
 
 				@Override
 				public void propertyChange(PropertyChangeEvent evt) {
-					if(modify){
+					if (modify) {
 						OverlapDisplayObjects odo = (OverlapDisplayObjects) evt.getSource();
 						odo.setModified(true);
 
-
-						if(odo.isButtonPushed()){
+						if (odo.isButtonPushed()) {
 							odo.setModified(false);
-							try{
+							try {
 								oAos.get(odo.getOdoNumber()).setModified(false);
-							}
-							catch(Exception m){
+							} catch (Exception m) {
 
 							}
 						}
 
-						resetAttenuationFactors(x,y,overlapSelector ,xArrayList, false);
+						resetAttenuationFactors(x, y, overlapSelector, xArrayList, false);
 
 					}
 				}
@@ -735,23 +654,15 @@ public class StitchedOverlapCurves extends Composite {
 		return viewer;
 	}
 
-	private void createColumns(final Composite parent, 
-			final TableViewer viewer) {
+	private void createColumns(final Composite parent, final TableViewer viewer) {
 
-		String[] titles = { "Overlap: ", 
-				"Corrected Attenuation: ", 
-				"Raw Attenuation: ", 
-				"Fhkl Attenuation: ", 
-		"Local Reset: " };
+		String[] titles = { "Overlap: ", "Corrected Attenuation: ", "Raw Attenuation: ", "Fhkl Attenuation: ",
+				"Local Reset: " };
 
 		int[] bounds = { 100, 100, 100, 100, 50 };
 
 		// first column is for the overlap name
-		TableViewerColumn col = createTableViewerColumn(viewer, 
-				titles[0], 
-				bounds[0], 
-				0);
-
+		TableViewerColumn col = createTableViewerColumn(viewer, titles[0], bounds[0], 0);
 
 		col.setLabelProvider(new ColumnLabelProvider() {
 			@Override
@@ -762,10 +673,7 @@ public class StitchedOverlapCurves extends Composite {
 		});
 
 		// second column is for the corrected data attenuation factor
-		col = createTableViewerColumn(viewer,
-				titles[1], 
-				bounds[1], 
-				1);
+		col = createTableViewerColumn(viewer, titles[1], bounds[1], 1);
 
 		col.setLabelProvider(new ColumnLabelProvider() {
 
@@ -778,7 +686,7 @@ public class StitchedOverlapCurves extends Composite {
 
 				odo.buildTextCorrected(attenuationCorrected);
 
-				editor.grabHorizontal  = true;
+				editor.grabHorizontal = true;
 				editor.grabVertical = true;
 				editor.setEditor(odo.getTextCorrected(), item, cell.getColumnIndex());
 				editor.layout();
@@ -787,10 +695,7 @@ public class StitchedOverlapCurves extends Composite {
 		});
 
 		// third column is for the raw data attenuation factor
-		col = createTableViewerColumn(viewer,
-				titles[2], 
-				bounds[2], 
-				2);
+		col = createTableViewerColumn(viewer, titles[2], bounds[2], 2);
 
 		col.setLabelProvider(new ColumnLabelProvider() {
 
@@ -803,7 +708,7 @@ public class StitchedOverlapCurves extends Composite {
 
 				odo.buildTextRaw(attenuationRaw);
 
-				editor.grabHorizontal  = true;
+				editor.grabHorizontal = true;
 				editor.grabVertical = true;
 				editor.setEditor(odo.getTextRaw(), item, cell.getColumnIndex());
 				editor.layout();
@@ -812,10 +717,7 @@ public class StitchedOverlapCurves extends Composite {
 		});
 
 		// fourth column is for the Fhkl data attenuation factor
-		col = createTableViewerColumn(viewer,
-				titles[3], 
-				bounds[3], 
-				3);
+		col = createTableViewerColumn(viewer, titles[3], bounds[3], 3);
 		col.setLabelProvider(new ColumnLabelProvider() {
 
 			@Override
@@ -827,7 +729,7 @@ public class StitchedOverlapCurves extends Composite {
 
 				odo.buildTextFhkl(attenuationFhkl);
 
-				editor.grabHorizontal  = true;
+				editor.grabHorizontal = true;
 				editor.grabVertical = true;
 				editor.setEditor(odo.getTextFhkl(), item, cell.getColumnIndex());
 				editor.layout();
@@ -836,10 +738,7 @@ public class StitchedOverlapCurves extends Composite {
 		});
 
 		// fifth column is for the reset button
-		col = createTableViewerColumn(viewer,
-				titles[4], 
-				bounds[4], 
-				4);
+		col = createTableViewerColumn(viewer, titles[4], bounds[4], 4);
 		col.setLabelProvider(new ColumnLabelProvider() {
 
 			@Override
@@ -851,7 +750,7 @@ public class StitchedOverlapCurves extends Composite {
 				resetOverlap.setText("Reset Overlap");
 				odo.addResetListener(resetOverlap);
 
-				editor.grabHorizontal  = true;
+				editor.grabHorizontal = true;
 				editor.grabVertical = true;
 				editor.setEditor(odo.getResetOverlap(), item, cell.getColumnIndex());
 				editor.layout();
@@ -861,9 +760,7 @@ public class StitchedOverlapCurves extends Composite {
 
 	}
 
-	private TableViewerColumn createTableViewerColumn(TableViewer viewer, 
-			String title, 
-			int bound, 
+	private TableViewerColumn createTableViewerColumn(TableViewer viewer, String title, int bound,
 			final int colNumber) {
 
 		final TableViewerColumn viewerColumn = new TableViewerColumn(viewer, SWT.NONE);
@@ -875,9 +772,7 @@ public class StitchedOverlapCurves extends Composite {
 		return viewerColumn;
 	}
 
-
-	public void changeCurves(AxisEnums.yAxes y,
-			AxisEnums.xAxes x){
+	public void changeCurves(AxisEnums.yAxes y, AxisEnums.xAxes x) {
 
 		Display display = Display.getCurrent();
 
@@ -887,12 +782,10 @@ public class StitchedOverlapCurves extends Composite {
 
 		plotSystem.clear();
 
-
 		IDataset xD = getXIDataset(x);
 		IDataset yD = getYIDataset(y);
 
-
-		switch(y){
+		switch (y) {
 		case SPLICEDY:
 			lt1 = plotSystem.createLineTrace("Spliced Corrected Curve");
 			lt1.setTraceColor(blue);
@@ -906,7 +799,7 @@ public class StitchedOverlapCurves extends Composite {
 			lt1.setTraceColor(black);
 			break;
 		default:
-			//purely defensive
+			// purely defensive
 
 		}
 
@@ -915,15 +808,12 @@ public class StitchedOverlapCurves extends Composite {
 
 	}
 
-	private void getTheRightCurve(AxisEnums.yAxes y,
-			AxisEnums.xAxes x){
-
+	private void getTheRightCurve(AxisEnums.yAxes y, AxisEnums.xAxes x) {
 
 		IDataset xD = getXIDataset(x);
 		IDataset yD = getYIDataset(y);
 
-
-		switch(y){
+		switch (y) {
 		case SPLICEDY:
 			lt1 = plotSystem.createLineTrace("Spliced Corrected Curve");
 			break;
@@ -934,63 +824,54 @@ public class StitchedOverlapCurves extends Composite {
 			lt1 = plotSystem.createLineTrace("Spliced Raw Curve");
 			break;
 		default:
-			//purely defensive
+			// purely defensive
 		}
 
 		lt1.setData(xD, yD);
 
 	}
 
-	public void resetAll(AxisEnums.xAxes x,AxisEnums.yAxes y){
-		resetAll(x,y, true);
+	public void resetAll(AxisEnums.xAxes x, AxisEnums.yAxes y) {
+		resetAll(x, y, true);
 	}
 
-	public void resetAll(AxisEnums.xAxes x,
-			AxisEnums.yAxes y,
-			boolean global){
+	public void resetAll(AxisEnums.xAxes x, AxisEnums.yAxes y, boolean global) {
 
-
-		for(OverlapDisplayObjects odo: odos){
+		for (OverlapDisplayObjects odo : odos) {
 			odo.setModified(false);
 		}
-		for(OverlapAttenuationObject oAo: oAos){
+		for (OverlapAttenuationObject oAo : oAos) {
 			oAo.setModified(false);
 		}
 
-		resetAttenuationFactors(x, y, overlapSelector, xArrayList,global);
+		resetAttenuationFactors(x, y, overlapSelector, xArrayList, global);
 	}
 
-	private void flipUseGoodPointsOnly(){
+	private void flipUseGoodPointsOnly() {
 
-		useGoodPointsOnly  = !useGoodPointsOnly;
+		useGoodPointsOnly = !useGoodPointsOnly;
 
-		if(useGoodPointsOnly){
+		if (useGoodPointsOnly) {
 			showOnlyGoodPoints.setText("Include All Points");
-		}
-		else{
+		} else {
 			showOnlyGoodPoints.setText("Disregard Bad Points");
 		}
 	}
 
-	private void buildLineTrace(AxisEnums.yAxes yA, AxisEnums.xAxes xA){
+	private void buildLineTrace(AxisEnums.yAxes yA, AxisEnums.xAxes xA) {
 
 		plotSystem.clear();
 
-		lt1 =	plotSystem.createLineTrace(csdp.getRodName());
+		lt1 = plotSystem.createLineTrace(csdp.getRodName());
 
-		IDataset x = DatasetFactory.zeros(new int[] {2,2}, Dataset.ARRAYFLOAT64);
+		IDataset x = DatasetFactory.zeros(new int[] { 2, 2 }, Dataset.ARRAYFLOAT64);
 		IDataset y[] = new IDataset[2];
 
 		GoodPointStripper gps = new GoodPointStripper();
 
-		x  = gps.splicedXGoodPointStripper(csdp, 
-				xA,
-				!useGoodPointsOnly);
+		x = gps.splicedXGoodPointStripper(csdp, xA, !useGoodPointsOnly);
 
-
-		y = gps.splicedYGoodPointStripper(csdp, 
-				yA,
-				!useGoodPointsOnly);
+		y = gps.splicedYGoodPointStripper(csdp, yA, !useGoodPointsOnly);
 
 		y[0].setErrors(y[1]);
 
@@ -1005,30 +886,26 @@ public class StitchedOverlapCurves extends Composite {
 		return export;
 	}
 
-
-
-	private void refreshCurvesFromTable(AxisEnums.xAxes x,AxisEnums.yAxes y){
+	private void refreshCurvesFromTable(AxisEnums.xAxes x, AxisEnums.yAxes y) {
 
 		plotSystem.clear();
 
-		buildLineTrace(y,x);
+		buildLineTrace(y, x);
 
 		plotSystem.autoscaleAxes();
 	}
 
-	public void addImageNoRegion(double j){
+	public void addImageNoRegion(double j) {
 
-		RectangularROI r = new RectangularROI(j ,0.1,0,0.1,0);
+		RectangularROI r = new RectangularROI(j, 0.1, 0, 0.1, 0);
 
-		if(plotSystem.getRegion("Image")== null){
+		if (plotSystem.getRegion("Image") == null) {
 
-			try{
+			try {
 				imageNo = plotSystem.createRegion("Image", RegionType.XAXIS_LINE);
-			}
-			catch(Exception x){
+			} catch (Exception x) {
 
 			}
-
 
 			imageNo.setShowPosition(true);
 			imageNo.setROI(r);
@@ -1037,20 +914,20 @@ public class StitchedOverlapCurves extends Composite {
 			imageNo.setShowPosition(true);
 		}
 
-		else{
+		else {
 			moveImageNoRegion(j);
 		}
 	}
 
-	public void moveImageNoRegion(double j){
+	public void moveImageNoRegion(double j) {
 
-		RectangularROI r = new RectangularROI(j ,0.1,0,0.1,0);
+		RectangularROI r = new RectangularROI(j, 0.1, 0, 0.1, 0);
 		imageNo.setROI(r);
 	}
 
-	private IDataset getYIDataset(AxisEnums.yAxes y){
+	private IDataset getYIDataset(AxisEnums.yAxes y) {
 
-		switch(y){
+		switch (y) {
 		case SPLICEDY:
 			return csdp.getSplicedCurveY();
 		case SPLICEDYRAW:
@@ -1058,47 +935,47 @@ public class StitchedOverlapCurves extends Composite {
 		case SPLICEDYFHKL:
 			return csdp.getSplicedCurveYFhkl();
 		default:
-			//	   			
+			//
 		}
 
 		return csdp.getSplicedCurveY();
 	}
 
-	private IDataset getXIDataset(AxisEnums.xAxes x){
+	private IDataset getXIDataset(AxisEnums.xAxes x) {
 
-		switch(x){
+		switch (x) {
 		case SCANNED_VARIABLE:
 			return csdp.getSplicedCurveX();
 		case Q:
 			return csdp.getSplicedCurveQ();
 		default:
-			//	   			
+			//
 		}
 
 		return csdp.getSplicedCurveX();
 	}
 
-	private double normalisationValue(AxisEnums.yAxes k){
+	private double normalisationValue(AxisEnums.yAxes k) {
 
-		int xPos =ssp.xPositionFinder(imageNo.getROI().getPointX());
+		int xPos = ssp.xPositionFinder(imageNo.getROI().getPointX());
 
 		double yValue = 1;
 
-		switch(k){
+		switch (k) {
 		case SPLICEDYFHKL:
 			yValue = csdp.getSplicedCurveYFhkl().getDouble(xPos);
 			break;
 
 		case SPLICEDY:
-			yValue =  csdp.getSplicedCurveY().getDouble(xPos);// ssp.getFms().get(xPos).getUnspliced_Corrected_Intensity();
+			yValue = csdp.getSplicedCurveY().getDouble(xPos);// ssp.getFms().get(xPos).getUnspliced_Corrected_Intensity();
 			break;
 
 		case SPLICEDYRAW:
-			yValue =  ssp.getFms().get(xPos).getUnspliced_Raw_Intensity();
+			yValue = ssp.getFms().get(xPos).getUnspliced_Raw_Intensity();
 			break;
 
 		default:
-			//defensive only
+			// defensive only
 		}
 
 		return yValue;

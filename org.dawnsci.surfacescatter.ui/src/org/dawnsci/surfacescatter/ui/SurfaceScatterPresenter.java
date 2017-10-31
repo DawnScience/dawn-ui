@@ -2019,6 +2019,9 @@ public class SurfaceScatterPresenter {
 
 		CurveStitchWithErrorsAndFrames.curveStitch4(csdp, mm, oAos);
 
+		
+		
+		
 		if (drm.getCorrectionSelection() == MethodSetting.Reflectivity_NO_Correction
 				|| drm.getCorrectionSelection() == MethodSetting.Reflectivity_with_Flux_Correction_Gaussian_Profile
 				|| drm.getCorrectionSelection() == MethodSetting.Reflectivity_without_Flux_Correction_Gaussian_Profile

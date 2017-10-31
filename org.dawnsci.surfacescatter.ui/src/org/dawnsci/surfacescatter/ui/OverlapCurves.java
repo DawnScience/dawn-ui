@@ -180,7 +180,7 @@ public class OverlapCurves extends Composite {
 		activeCurveCombo = activeCurve.getCombo();
 		activeCurveCombo.select(0);
 
-		activeCurveCombo.addSelectionListener(new SelectionListener() {
+		activeCurveCombo.addSelectionListener(new SelectionAdapter() {
 
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -202,11 +202,7 @@ public class OverlapCurves extends Composite {
 
 			}
 
-			@Override
-			public void widgetDefaultSelected(SelectionEvent e) {
-				// TODO Auto-generated method stub
 
-			}
 		});
 
 		Group includeControls = new Group(controls, SWT.NULL);
@@ -328,7 +324,6 @@ public class OverlapCurves extends Composite {
 		unstitchedCurves.setText("Unstitched Curves");
 
 		ActionBarWrapper actionBarComposite = ActionBarWrapper.createActionBars(unstitchedCurves, null);
-		;
 
 		final GridData gdSecondField = new GridData(SWT.FILL, SWT.FILL, true, true);
 		gdSecondField.grabExcessVerticalSpace = true;
@@ -358,13 +353,7 @@ public class OverlapCurves extends Composite {
 
 			if (overlap[k][1] < 999999) {
 
-				if (DEBUG == 1) {
-					System.out.println("k in overlapCurves: " + k);
-					System.out.println("overlap[k][1]: " + overlap[k][1]);
-					System.out.println("overlap[k][0]: " + overlap[k][0]);
-					System.out.println("roiList.size() : " + roiList.size());
-				}
-
+			
 				roiList.set(k, new RectangularROI(overlap[k][1], 0.1, overlap[k][0] - overlap[k][1], 0.1, 0));
 
 				String regionName = root + Integer.toString(k);
