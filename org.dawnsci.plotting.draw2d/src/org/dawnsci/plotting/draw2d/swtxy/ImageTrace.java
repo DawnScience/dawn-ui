@@ -93,7 +93,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 	
 	private static final Logger logger = LoggerFactory.getLogger(ImageTrace.class);
 	
-	private static final int MINIMUM_ZOOM_SIZE  = 4;
+	private static final int MINIMUM_ZOOM_SIZE  = 2;
 	private static final int MINIMUM_LABEL_SIZE = 10;
 
 	private String           name;
@@ -281,8 +281,32 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 		return scaledData;
 	}
 
-	private org.eclipse.swt.graphics.Rectangle  screenRectangle;
+	private org.eclipse.swt.graphics.Rectangle screenRectangle;
 
+	/**
+	 * Check if requested scaling is much bigger than than the screen size and in that case do not scale
+	 * Fix to http://jira.diamond.ac.uk/browse/SCI-926
+	 * @param scaledWidth
+	 * @param scaledHeight
+	 * @return true if we will not trigger an SWT bug
+	 */
+	private boolean checkScalingAgainstScreenSize(int scaledWidth, int scaledHeight) {
+		if (screenRectangle == null) {
+			Display d = Display.getCurrent();
+			if (d == null) {
+				return true;
+			}
+			screenRectangle = d.getPrimaryMonitor().getClientArea();
+		}
+		if (scaledWidth > screenRectangle.width * 2 || scaledHeight > screenRectangle.height * 2) {
+			logger.error("Image scaling algorithm has malfunctioned and asked for an image bigger than the screen!");
+			logger.debug("scaleWidth="+scaledWidth);
+			logger.debug("scaleHeight="+scaledHeight);
+			return false;
+		}
+		return true;
+	}
+	
 	/**
 	 * Object to hold the current scaled image, the location it should be drawn
 	 * and the downsampled image data which it used.
@@ -295,8 +319,8 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 	final static int INTENSITY_SCALE_ENTRIES = 256;
 
 	/**
-	 * When this is called the SWT image is created
-	 * and saved in the swtImage field. The image is downsampled. If rescaleAllowed
+	 * When this is called an SWT image is created
+	 * and saved in the scaledData field. The image is downsampled. If rescaleAllowed
 	 * is set to false, the current bin is not checked and the last scaled image
 	 * is always used.
 	 *  
@@ -307,202 +331,149 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 	protected boolean createScaledImage(ImageScaleType rescaleType, final IProgressMonitor monitor) {
 			
 		if (!imageCreationAllowed) return false;
-		
-		boolean requireImageGeneration = scaledData==null || 
-				                         scaledData.getDownsampledImageData() == null ||
+		boolean requireImageGeneration = scaledData.getDownsampledImageData() == null ||
 				                         rescaleType==ImageScaleType.FORCE_REIMAGE || 
 				                         rescaleType==ImageScaleType.REHISTOGRAM; // We know that it is needed
 		
 		// If we just changed downsample scale, we force the update.
 	    // This allows user resizes of the plot area to be picked up
 		// and the larger data size used if it fits.
-        if (!requireImageGeneration && rescaleType==ImageScaleType.REIMAGE_ALLOWED && currentDownSampleBin>0) {
-        	if (getDownsampleBin()!=currentDownSampleBin) {
-        		requireImageGeneration = true;
-        	}
-        }
+		if (!requireImageGeneration && rescaleType == ImageScaleType.REIMAGE_ALLOWED && currentDownSampleBin > 0) {
+			if (getDownsampleBin() != currentDownSampleBin) {
+				requireImageGeneration = true;
+			}
+		}
 
 		final XYRegionGraph graph  = (XYRegionGraph)getXAxis().getParent();
 		final Rectangle     bounds = graph.getRegionArea().getBounds();
-		if (bounds.width<1 || bounds.height<1) return false;
+		if (bounds.width < 1 || bounds.height < 1) return false;
+
 		scaledData.setX(bounds.x);
 		scaledData.setY(bounds.y);
 		scaledData.setXoffset(0);
-		scaledData.setYoffset(0);			
+		scaledData.setYoffset(0);
 
 		if (!imageCreationAllowed) return false;
 		if (monitor!=null && monitor.isCanceled()) return false;
 
-		// 
-		if (requireImageGeneration)  {
+		if (requireImageGeneration) {
 			boolean ok = createDownsampledImageData(rescaleType, monitor);
 			if (!ok) return false;
 		}
-		
+
 		if (monitor!=null && monitor.isCanceled()) return false;
 		if (scaledData.getDownsampledImageData() == null) return false;
 
 		try {
-			
 			isMaximumZoom = false;
 			isLabelZoom   = false;
-			
-			if (scaledData != null) scaledData.disposeImage();
-			
+
+			scaledData.disposeImage();
 			ImageData imageData = scaledData.getDownsampledImageData();
-			if (imageData!=null && imageData.width==bounds.width && imageData.height==bounds.height) { 
+			if (imageData != null && imageData.width == bounds.width && imageData.height == bounds.height) {
 				// No slice, faster
 				if (monitor!=null && monitor.isCanceled()) return false;
 				Image scaledImage  = new Image(Display.getDefault(), imageData);
 				scaledData.setScaledImage(scaledImage);
-				 
 			} else {
-				
+
 				if (globalRange != null) {
 					return buildImageRelativeToAxes(imageData);
-					
 				}
-				
+
 				// slice data to get current zoom area
-				/**     
-				 *      x1,y1--------------x2,y2
-				 *        |                  |
-				 *        |                  |
-				 *        |                  |
-				 *      x3,y3--------------x4,y4
-				 */
-				
-				ImageData data = imageData;
-				ImageOrigin origin = getImageOrigin();
-				
 				Range xRange = xAxis.getRange();
 				Range yRange = yAxis.getRange();
-				
-				int reverseXScale = 1;
-				int reverseYScale = 1;
-				
-				if (xRange.getLower() > xRange.getUpper()) {
-					reverseXScale = -1;
-				}
-				
-				//origin top left for images
-				if (yRange.getLower() < yRange.getUpper()) {
-					reverseYScale = -1;
-				}
-				
-				double minX = xRange.getLower()/currentDownSampleBin;
-				double minY = yRange.getLower()/currentDownSampleBin;
-				double maxX = xRange.getUpper()/currentDownSampleBin;
-				double maxY = yRange.getUpper()/currentDownSampleBin;
+
+				double xMin = xRange.getLower() / currentDownSampleBin;
+				double yMin = yRange.getLower() / currentDownSampleBin;
+				double xMax = xRange.getUpper() / currentDownSampleBin;
+				double yMax = yRange.getUpper() / currentDownSampleBin;
 				int xSize = imageData.width;
 				int ySize = imageData.height;
 				
 				// check as getLower and getUpper don't work as expected
-				if(maxX < minX){
-					double temp = maxX;
-					maxX = minX;
-					minX = temp;
+				int reverseXScale;
+				int reverseYScale;
+				if (xMax < xMin) {
+					double temp = xMax;
+					xMax = xMin;
+					xMin = temp;
+					reverseXScale = -1;
+				} else {
+					reverseXScale = 1;
 				}
-				if(maxY < minY){
-					double temp = maxY;
-					maxY = minY;
-					minY = temp;
+				if (yMax < yMin) {
+					double temp = yMax;
+					yMax = yMin;
+					yMin = temp;
+					reverseYScale = 1;
+				} else {
+					reverseYScale = -1;
 				}
-				
-				double xSpread = maxX - minX;
-				double ySpread = maxY - minY;
-				
-				double xScale = bounds.width / xSpread;
-				double yScale = bounds.height / ySpread;
-//				System.err.println("Area is " + rbounds + " with scale (x,y) " + xScale + ", " + yScale);
-				
+
+				// factors to scale image data 
+				double xScale = bounds.width / (xMax - xMin);
+				double yScale = bounds.height / (yMax - yMin);
+
 				// Deliberately get the over-sized dimensions so that the edge pixels can be smoothly panned through.
-				int minXI = (int) Math.floor(minX);
-				int minYI = (int) Math.floor(minY);
-				
-				int maxXI = (int) Math.ceil(maxX);
-				int maxYI = (int) Math.ceil(maxY);
-				
-				int fullWidth = (int) (maxXI-minXI);
-				int fullHeight = (int) (maxYI-minYI);
-				
-				// Force a minimum size on the system
-				if (fullWidth <= MINIMUM_ZOOM_SIZE) {
-					if (fullWidth > imageData.width) fullWidth = MINIMUM_ZOOM_SIZE;
-					isMaximumZoom = true;
-				}
-				if (fullHeight <= MINIMUM_ZOOM_SIZE) {
-					if (fullHeight > imageData.height) fullHeight = MINIMUM_ZOOM_SIZE;
+				double xPix = Math.floor(xMin);
+				double yPix = Math.floor(yMin);
+				int fullWidth  = (int) (Math.ceil(xMax) - xPix);
+				int fullHeight = (int) (Math.ceil(yMax) - yPix);
+
+				// Force a minimum size for (zoomed-in) pixels on the system
+				if (fullWidth <= MINIMUM_ZOOM_SIZE && fullHeight <= MINIMUM_ZOOM_SIZE) {
 					isMaximumZoom = true;
 				}
 				if (fullWidth <= MINIMUM_LABEL_SIZE && fullHeight <= MINIMUM_LABEL_SIZE) {
 					isLabelZoom = true;
 				}
-				
-				int scaleWidth = (int) (fullWidth*xScale);
-				int scaleHeight = (int) (fullHeight*yScale);
-//				System.err.println("Scaling to " + scaleWidth + "x" + scaleHeight);
-				int xPix = (int)minX;
-				int yPix = (int)minY;
-				
-				double xPixD = 0;
-				double yPixD = 0;
-				
+
 				// These offsets are used when the scaled images is drawn to the screen.
-				double xOffset = (minX - Math.floor(minX))*xScale;
-				double yOffset = (minY - Math.floor(minY))*yScale;
+				double xOffset;
+				double yOffset;
 				// Deal with the origin orientations correctly.
-				if (!origin.isOnLeft()) {
-					xPixD = xSize-maxX;
-					xPix = (int) Math.floor(xPixD);
-					xOffset = (xPixD - xPix)*xScale;
-					reverseXScale*=-1;
+				ImageOrigin origin = getImageOrigin();
+				if (origin.isOnLeft()) {
+					xOffset = (xMin - xPix) * xScale;
+				} else {
+					double xPixD = xSize - xMax;
+					xPix = Math.floor(xPixD);
+					xOffset = (xPixD - xPix) * xScale;
+					reverseXScale *= -1;
 				}
-				if (!origin.isOnTop()) {
-					yPixD = ySize-maxY;
-					yPix = (int) Math.floor(yPixD);
-					yOffset = (yPixD - yPix)*yScale;
-					reverseYScale*=-1;
+				if (origin.isOnTop()) {
+					yOffset = (yMin - yPix) * yScale;
+				} else {
+					double yPixD = ySize - yMax;
+					yPix = Math.floor(yPixD);
+					yOffset = (yPixD - yPix) * yScale;
+					reverseYScale *= -1;
 				}
 				if (xPix < 0 || yPix < 0 || xPix+fullWidth > xSize || yPix+fullHeight > ySize) {
 					return false; // prevent IAE in calling getPixel
 				}
+
 				// Slice the data.
 				// Pixel slice on downsampled data = fast!
-				data = sliceImageData(imageData, fullWidth, fullHeight, xPix, yPix, ySize);
-				
-				// create the scaled image
-				// We are suspicious if the algorithm wants to create an image
-				// bigger than the screen size and in that case do not scale
-				// Fix to http://jira.diamond.ac.uk/browse/SCI-926
-				boolean proceedWithScale = true;
-				try {
-					if (screenRectangle == null) {
-						screenRectangle = Display.getCurrent().getPrimaryMonitor().getClientArea();
-					}
-					if (scaleWidth>screenRectangle.width*2      || 
-						scaleHeight>screenRectangle.height*2) {
-						
-						logger.error("Image scaling algorithm has malfunctioned and asked for an image bigger than the screen!");
-						logger.debug("scaleWidth="+scaleWidth);
-						logger.debug("scaleHeight="+scaleHeight);
-						proceedWithScale = false;
-					}
-				} catch (Throwable ne) {
-					proceedWithScale = true;
-				}
-				
+				ImageData data = sliceImageData(imageData, fullWidth, fullHeight, (int) xPix, (int) yPix, ySize);
+
+				int scaledWidth = (int) (fullWidth * xScale);
+				int scaledHeight = (int) (fullHeight * yScale);
+
 				Image scaledImage = null;
-				if (proceedWithScale) {
-					data = data!=null ? data.scaledTo(scaleWidth * reverseXScale, scaleHeight * reverseYScale) : null;
-					scaledImage = data!=null ? new Image(Display.getDefault(), data) : null;
-				} else if (scaledImage==null) {
-					scaledImage = data!=null ? new Image(Display.getDefault(), data) : null;
-				}	
+				if (data != null) {
+					if (checkScalingAgainstScreenSize(scaledWidth, scaledHeight)) {
+						data = data.scaledTo(scaledWidth * reverseXScale, scaledHeight * reverseYScale);
+					} else {
+						isMaximumZoom = true;
+					}
+					scaledImage = new Image(Display.getDefault(), data);
+				}
 				scaledData.setXoffset(xOffset);
 				scaledData.setYoffset(yOffset);
 				scaledData.setScaledImage(scaledImage);
-				
 			}
 
 			return true;
@@ -511,7 +482,6 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 			return false;
 		} catch (java.lang.NegativeArraySizeException allowed) {
 			return false;
-			
 		} catch (NullPointerException ne) {
 			throw ne;
 		} catch (Throwable ne) {
@@ -519,7 +489,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 			return false;
 		}
 	}
-	
+
 	private boolean buildImageRelativeToAxes(ImageData imageData) {
 		
 		// slice data to get current zoom area
@@ -553,13 +523,11 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 			double d = yAxis.getDouble();
 			yAxis = DatasetFactory.createFromObject(new double[]{ d, d + step});
 		}
-		
-		
-		boolean xDataInc = xAxis.getDouble(0) < xAxis.getDouble(xAxis.getSize()-1);
-		boolean yDataInc = yAxis.getDouble(0) < yAxis.getDouble(yAxis.getSize()-1);
-		
-		
-		//Get the axes coodinates visible on screen
+
+		boolean xDataInc = xAxis.getDouble(0) < xAxis.getDouble(-1);
+		boolean yDataInc = yAxis.getDouble(0) < yAxis.getDouble(-1);
+
+		//Get the axes coordinates visible on screen
 		double[] da = getImageCoords(1, false, xAxis, yAxis);
 		double minX = da[0];
 		double minY = da[1];
@@ -623,12 +591,11 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 		
 
 		//FIXME origins
-		
 		int width  = xPix+xDataPointsDS > xSize  ? Math.min(xSize, xDataPointsDS) : xDataPointsDS;
 		int height = yPix+yDataPointsDS > ySize  ? Math.min(ySize, yDataPointsDS) : yDataPointsDS;
 		
-		int scaleWidth  = Math.max(1, (int) (xDataPoints*xScale));
-		int scaleHeight = Math.max(1, (int) (yDataPoints*yScale));
+		int scaledWidth  = Math.max(1, (int) (xDataPoints*xScale));
+		int scaledHeight = Math.max(1, (int) (yDataPoints*yScale));
 		
 //		 Force a minimum size on the system
 //		if (width <= MINIMUM_ZOOM_SIZE) {
@@ -645,35 +612,19 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 			// Pixel slice on downsampled data = fast!
 			data = sliceImageData(data, width, height, xPix, yPix, ySize);
 
-			// create the scaled image
-			// We are suspicious if the algorithm wants to create an image
-			// bigger than the screen size and in that case do not scale
-			// Fix to http://jira.diamond.ac.uk/browse/SCI-926
-			boolean proceedWithScale = true;
-			try {
-				if (screenRectangle == null) {
-					screenRectangle = Display.getCurrent().getPrimaryMonitor().getClientArea();
-				}
-				if (scaleWidth>screenRectangle.width*2 ||  scaleHeight>screenRectangle.height*2) {
-					logger.error("Image scaling algorithm has malfunctioned and asked for an image bigger than the screen!");
-					logger.debug("scaleWidth="+scaleWidth);
-					logger.debug("scaleHeight="+scaleHeight);
-					proceedWithScale = false;
-				}
-			} catch (Throwable ne) {
-				proceedWithScale = true;
-			}
+			boolean proceed = checkScalingAgainstScreenSize(scaledWidth, scaledHeight);
 
-			if (!xDataInc) scaleWidth*=-1;
-			if (!yDataInc) scaleHeight*=-1;
-			
-			
+			if (!xDataInc) scaledWidth*=-1;
+			if (!yDataInc) scaledHeight*=-1;
+
 			Image scaledImage = null;
-			if (proceedWithScale) {
-				data = data!=null ? data.scaledTo(scaleWidth, scaleHeight) : null;
-				scaledImage = data!=null ? new Image(Display.getDefault(), data) : null;
-			} else if (scaledImage==null) {
-				scaledImage = data!=null ? new Image(Display.getDefault(), data) : null;
+			if (data != null) {
+				if (proceed) {
+					data = data.scaledTo(scaledWidth, scaledHeight);
+				} else {
+					isMaximumZoom = true;
+				}
+				scaledImage = new Image(Display.getDefault(), data);
 			}
 			
 			scaledData.setX(screenCoords[0]);
@@ -686,8 +637,8 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 			
 			logger.error("Image scaling has malfunctioned");
 			logger.debug("Trace name = "+getName());
-			logger.debug("scaleWidth = "+scaleWidth);
-			logger.debug("scaleHeight = "+scaleHeight);
+			logger.debug("scaleWidth = "+scaledWidth);
+			logger.debug("scaleHeight = "+scaledHeight);
 			logger.debug("width = "+width);
 			logger.debug("height = "+height);
 			logger.debug("xPix = "+xPix);
@@ -1138,13 +1089,13 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 	public void sleep() {
 		if (mipMap!=null)           mipMap.clear();
 		if (maskMap!=null)          maskMap.clear();
-		if (scaledData!=null)       scaledData.disposeImage();
+		scaledData.disposeImage();
 	}
 	public void remove() {
 		
 		if (mipMap!=null)           mipMap.clear();
 		if (maskMap!=null)          maskMap.clear();
-		if (scaledData!=null)       scaledData.disposeImage();
+		scaledData.disposeImage();
 		
 		if (paletteListeners!=null) paletteListeners.clear();
 		paletteListeners = null;
@@ -1167,7 +1118,6 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 			dynamic = null;
 		}
 		
-		if (scaledData!=null) scaledData.disposeImage();
 		this.image            = null;
 		this.rgbDataset       = null;
 		this.fullMask         = null;
@@ -1515,7 +1465,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 		if (image==null) return false;
 		this.image = im;
 		if (this.mipMap!=null)  mipMap.clear();
-		if (scaledData!=null) scaledData.disposeImage();
+		scaledData.disposeImage();
 		
 		if (imageServiceBean==null) imageServiceBean = new ImageServiceBean();
 		imageServiceBean.setImage(im);
@@ -1528,7 +1478,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 		}
 		
 		setAxes(axes, performAuto);
-       
+
 		if (plottingSystem!=null) try {
 			if (plottingSystem.getTraces().contains(this)) {
 				plottingSystem.fireTraceUpdated(new TraceEvent(this));
