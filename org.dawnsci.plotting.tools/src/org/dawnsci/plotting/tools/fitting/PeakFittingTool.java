@@ -27,8 +27,10 @@ import org.dawnsci.plotting.tools.Activator;
 import org.dawnsci.plotting.tools.preference.FittingPreferencePage;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.dawnsci.analysis.api.fitting.functions.IPeak;
+import org.eclipse.dawnsci.analysis.api.tree.GroupNode;
 import org.eclipse.dawnsci.analysis.dataset.roi.LinearROI;
 import org.eclipse.dawnsci.analysis.dataset.roi.RectangularROI;
+import org.eclipse.dawnsci.nexus.NexusFile;
 import org.eclipse.dawnsci.plotting.api.annotation.IAnnotation;
 import org.eclipse.dawnsci.plotting.api.region.IRegion;
 import org.eclipse.dawnsci.plotting.api.region.IRegion.RegionType;
@@ -457,8 +459,10 @@ public class PeakFittingTool extends AbstractFittingTool implements IRegionListe
 		
 		final String nodeName = getTitle().replace(' ', '_');
 		
-		String entry     = (String)lastSlice.getFile().getRoot();
-		String container = (String)lastSlice.getFile().group(nodeName, entry);
+		NexusFile file = lastSlice.getFile();
+		String entry = (String)file.getRoot();
+		String container = entry + "/" + nodeName;
+		GroupNode containerNode = file.getGroup(container, true);
 		for (int i = 1; i <= fit.size(); i++) {
 			
 			final String peakName = "Peak"+i;
@@ -484,9 +488,9 @@ public class PeakFittingTool extends AbstractFittingTool implements IRegionListe
 				Dataset ds = DatasetUtils.convertToDataset(iDataset.squeeze());
 				ds.setName(peakName+"_functions");
 				
-				
 				// Append directly into file.
-				lastSlice.getFile().appendDataset(ds.getName(), ds, container);
+				file.createData(containerNode, ds);
+//				lastSlice.getFile().appendDataset(ds.getName(), ds, container);
 			}
 
 		}

@@ -15,9 +15,12 @@ import java.util.List;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.dawnsci.analysis.api.roi.IROI;
+import org.eclipse.dawnsci.analysis.api.tree.DataNode;
+import org.eclipse.dawnsci.analysis.api.tree.GroupNode;
 import org.eclipse.dawnsci.analysis.dataset.roi.RectangularROI;
-import org.eclipse.dawnsci.hdf.object.IHierarchicalDataFile;
-import org.eclipse.dawnsci.hdf.object.Nexus;
+import org.eclipse.dawnsci.analysis.tree.impl.AttributeImpl;
+import org.eclipse.dawnsci.nexus.NexusException;
+import org.eclipse.dawnsci.nexus.NexusFile;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.axis.IAxis;
 import org.eclipse.dawnsci.plotting.api.region.IRegion;
@@ -202,15 +205,16 @@ public class BoxProfileTool extends ProfileTool {
 
 		final IImageTrace   image   = getImageTrace();
 		final Collection<IRegion> regions = getPlottingSystem().getRegions();
-		IHierarchicalDataFile file = slice.getFile();
+		NexusFile file = slice.getFile();
 
-		String dataGroup = slice.getParent();
-		
+		String dataGroupPath = slice.getParent();
 		// Fix to http://jira.diamond.ac.uk/browse/SCI-1898
-		file.setNexusAttribute(dataGroup, Nexus.SUBENTRY);
-		
-		if (slice.getMonitor()!=null && slice.getMonitor().isCancelled()) return null;
+		GroupNode groupNode = file.getGroup(dataGroupPath, true);
+		file.addAttribute(groupNode, new AttributeImpl(NexusFile.NXCLASS, "NXsubentry"));
 
+		if (slice.getMonitor()!=null && slice.getMonitor().isCancelled()) return null;
+		DataNode dataNode = null;
+		String dataPath = "";
 		for (IRegion region : regions) {
 			if (!isRegionTypeSupported(region.getRegionType())) continue;
 			if (!region.isVisible())    continue;
@@ -220,22 +224,26 @@ public class BoxProfileTool extends ProfileTool {
 			
 			//create roi name group
 			String datasetName = region.getName();
-			if (datasetName.startsWith(dataGroup)) datasetName = datasetName.substring(dataGroup.length());
+			if (datasetName.startsWith(dataGroupPath))
+				datasetName = datasetName.substring(dataGroupPath.length());
 			datasetName = datasetName.replace(' ', '_');
-			
-			String regionGroup = file.group(datasetName, dataGroup);
-			file.setNexusAttribute(regionGroup, Nexus.DATA);
+			file.getGroup(groupNode, datasetName, "NXdata", true);
+//			String regionGroup = file.group(datasetName, dataGroup);
+//			file.setNexusAttribute(regionGroup, "NXdata");
 
 			//box profiles
-			String profileGroup = file.group("profile", dataGroup);
-			file.setNexusAttribute(profileGroup, Nexus.DATA);
-			slice.setParent(profileGroup);
+			String regionGroup = dataGroupPath + "/" + "profile";
+			file.getGroup(groupNode, "profile", "NXdata", true);
+//			String profileGroup = file.group("profile", dataGroup);
+//			file.setNexusAttribute(profileGroup, "NXdata");
+			slice.setParent(regionGroup);
 
 			Dataset[] box = ROIProfile.box(DatasetUtils.convertToDataset(slice.getData()), DatasetUtils.convertToDataset(image.getMask()),
 					(RectangularROI)region.getROI(), false);
 
 			final Dataset x_intensity = box[0];
 			x_intensity.setName("X_Profile");
+			
 			slice.appendData(x_intensity);
 
 			final Dataset y_intensity = box[1];

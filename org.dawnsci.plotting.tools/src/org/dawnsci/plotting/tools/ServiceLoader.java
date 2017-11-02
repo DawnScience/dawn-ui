@@ -5,6 +5,7 @@ import org.eclipse.dawnsci.analysis.api.image.IImageFilterService;
 import org.eclipse.dawnsci.analysis.api.image.IImageTransform;
 import org.eclipse.dawnsci.analysis.api.io.ILoaderService;
 import org.eclipse.dawnsci.analysis.api.persistence.IPersistenceService;
+import org.eclipse.dawnsci.nexus.INexusFileFactory;
 import org.eclipse.dawnsci.plotting.api.expressions.IExpressionObjectService;
 
 public class ServiceLoader {
@@ -15,6 +16,7 @@ public class ServiceLoader {
 	private static IExpressionObjectService expressiononbjectservice;
 	private static IConversionService conversionservice;
 	private static IPersistenceService persistenceService;
+	private static INexusFileFactory nexusFileFactory;
 
 	public ServiceLoader() {
 		
@@ -76,5 +78,13 @@ public class ServiceLoader {
 
 	public static void setPersistenceService(IPersistenceService pservice) {
 		persistenceService = pservice;
+	}
+
+	public static INexusFileFactory getNexusFileFactory() {
+		return nexusFileFactory;
+	}
+
+	public static void setNexusFileFactory(INexusFileFactory nexusFileFactory) {
+		ServiceLoader.nexusFileFactory = nexusFileFactory;
 	}
 }
