@@ -33,6 +33,7 @@ import org.dawnsci.surfacescatter.DummyProcessWithFrames;
 import org.dawnsci.surfacescatter.FittingParameters;
 import org.dawnsci.surfacescatter.FittingParametersInputReader;
 import org.dawnsci.surfacescatter.FittingParametersOutput;
+import org.dawnsci.surfacescatter.FourierTransformCurveStitch;
 import org.dawnsci.surfacescatter.FrameModel;
 import org.dawnsci.surfacescatter.FrameSetupFromNexusTransferObject;
 import org.dawnsci.surfacescatter.GeometricCorrectionsReflectivityMethod;
@@ -1994,7 +1995,7 @@ public class SurfaceScatterPresenter {
 
 		CsdpGeneratorFromDrm csdpgfd = new CsdpGeneratorFromDrm();
 
-		IDataset[] output = CurveStitchWithErrorsAndFrames.curveStitch4(csdpgfd.generateCsdpFromDrm(drm), null);
+		IDataset[] output = FourierTransformCurveStitch.curveStitch4(csdpgfd.generateCsdpFromDrm(drm), null);
 
 		CurveStitchDataPackage csdp = csdpgfd.getCsdp();
 
@@ -2043,6 +2044,39 @@ public class SurfaceScatterPresenter {
 		return csdp;
 	}
 
+	public CurveStitchDataPackage curveStitchingOutputFourier(double[][] mm, boolean accept,
+			ArrayList<OverlapAttenuationObject> oAos) {
+
+		CsdpGeneratorFromDrm csdpgfd = new CsdpGeneratorFromDrm();
+
+		csdpgfd.generateCsdpFromDrm(drm);
+
+		CurveStitchDataPackage csdp = csdpgfd.getCsdp();
+
+		FourierTransformCurveStitch.curveStitch4(csdp, mm, oAos);
+		
+		
+		if (drm.getCorrectionSelection() == MethodSetting.Reflectivity_NO_Correction
+				|| drm.getCorrectionSelection() == MethodSetting.Reflectivity_with_Flux_Correction_Gaussian_Profile
+				|| drm.getCorrectionSelection() == MethodSetting.Reflectivity_without_Flux_Correction_Gaussian_Profile
+				|| drm.getCorrectionSelection() == MethodSetting.Reflectivity_with_Flux_Correction_Simple_Scaling
+				|| drm.getCorrectionSelection() == MethodSetting.Reflectivity_without_Flux_Correction_Simple_Scaling) {
+
+			ReflectivityNormalisation.reflectivityNormalisation1(csdp);
+
+		}
+
+		if (accept) {
+			drm.setCsdp(csdp);
+		}
+		try {
+			qConversion();
+		} catch (Exception d) {
+		}
+
+		return csdp;
+	}
+	
 	public void switchFhklIntensity(IPlottingSystem<Composite> pS, String selectorName, boolean qAxis) {
 
 		AxisEnums.yAxes selector = AxisEnums.yAxes.SPLICEDY;

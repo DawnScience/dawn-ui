@@ -8,6 +8,7 @@ import org.dawnsci.surfacescatter.CurveStitchDataPackage;
 import org.dawnsci.surfacescatter.CurveStitchWithErrorsAndFrames;
 import org.dawnsci.surfacescatter.DirectoryModel;
 import org.dawnsci.surfacescatter.DummyProcessWithFrames;
+import org.dawnsci.surfacescatter.FourierTransformCurveStitch;
 import org.dawnsci.surfacescatter.FrameModel;
 import org.dawnsci.surfacescatter.GeometricParametersModel;
 import org.dawnsci.surfacescatter.LocationLenPtConverterUtils;
@@ -111,7 +112,7 @@ public class TrackingCore {
 			csdpgfd.generateCsdpFromDrm(drm);
 
 			CurveStitchDataPackage csdp = csdpgfd.getCsdp();
-			CurveStitchWithErrorsAndFrames.curveStitch4(csdp, null);
+			FourierTransformCurveStitch.curveStitch4(csdp, null);
 
 			drm.setCsdp(csdp);
 

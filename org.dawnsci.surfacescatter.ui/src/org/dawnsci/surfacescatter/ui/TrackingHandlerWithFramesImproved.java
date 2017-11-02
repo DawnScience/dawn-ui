@@ -5,6 +5,7 @@ import org.dawnsci.surfacescatter.CsdpGeneratorFromDrm;
 import org.dawnsci.surfacescatter.CurveStitchDataPackage;
 import org.dawnsci.surfacescatter.CurveStitchWithErrorsAndFrames;
 import org.dawnsci.surfacescatter.DirectoryModel;
+import org.dawnsci.surfacescatter.FourierTransformCurveStitch;
 import org.dawnsci.surfacescatter.LocationLenPtConverterUtils;
 import org.eclipse.dawnsci.analysis.dataset.roi.RectangularROI;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;

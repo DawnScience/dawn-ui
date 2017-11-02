@@ -267,7 +267,7 @@ public class StitchedOverlapCurves extends Composite {
 
 				maxMinArray = AttenuationCorrectedOutput.maxMinArrayGenerator(xArrayList, model);
 
-				csdp = ssp.curveStitchingOutput(maxMinArray, false, null);
+				csdp = ssp.curveStitchingOutputFourier(maxMinArray, false, null);
 
 				plotSystem.clear();
 
