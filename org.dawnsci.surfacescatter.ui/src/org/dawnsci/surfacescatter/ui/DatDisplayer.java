@@ -1,6 +1,13 @@
 package org.dawnsci.surfacescatter.ui;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -31,9 +38,9 @@ import org.eclipse.swt.widgets.DirectoryDialog;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Table;
+import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.swt.widgets.Text;
-
 import uk.ac.diamond.scisoft.analysis.io.LoaderFactory;
 
 public class DatDisplayer extends Composite implements IDatDisplayer {
@@ -80,9 +87,9 @@ public class DatDisplayer extends Composite implements IDatDisplayer {
 	private Button transferUsingIncrement;
 	private boolean useTrajectory = true;
 	private Button useTrajectoryButton;
-	private InputTileGenerator useTrajectoryTile ;
+	private InputTileGenerator useTrajectoryTile;
 	private InputTileGenerator parameterFilesTile;
-	
+
 	public DatDisplayer(Composite parent, int style, SurfaceScatterPresenter ssp, SurfaceScatterViewStart ssvs,
 			RodSetupWindow rsw) {
 
@@ -177,7 +184,6 @@ public class DatDisplayer extends Composite implements IDatDisplayer {
 				transferUsingIncrement.setEnabled(true);
 			}
 
-		
 		});
 
 		datFolderText = new Text(datFolders, SWT.SINGLE | SWT.BORDER | SWT.FILL);
@@ -211,8 +217,9 @@ public class DatDisplayer extends Composite implements IDatDisplayer {
 		transferToRod.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		transferToRod.setEnabled(false);
 
-		folderDisplayTable = new Table(datSelector, SWT.CHECK | SWT.V_SCROLL | SWT.H_SCROLL | SWT.BORDER);
+		folderDisplayTable = new Table(datSelector, SWT.CHECK | SWT.V_SCROLL | SWT.H_SCROLL | SWT.BORDER | SWT.MULTI);
 		folderDisplayTable.setEnabled(false);
+		folderDisplayTable.setLinesVisible(true);
 
 		selectionSash.getParent().layout(true, true);
 		selectionSash.redraw();
@@ -227,6 +234,18 @@ public class DatDisplayer extends Composite implements IDatDisplayer {
 		folderDisplayTable.getVerticalBar().setEnabled(true);
 		folderDisplayTable.getVerticalBar().setIncrement(1);
 		folderDisplayTable.getVerticalBar().setThumb(1);
+
+		//// folder table setup///
+
+		folderDisplayTable.setHeaderVisible(true);
+		
+		TableColumn datColumn = new TableColumn(folderDisplayTable, SWT.MULTI | SWT.BORDER);
+		datColumn.setText(".dat File");
+
+		TableColumn commandColumn = new TableColumn(folderDisplayTable, SWT.MULTI | SWT.BORDER);
+		commandColumn.setText("Scan Command");
+		
+		////
 
 		numericalDatSelection = new Group(left, SWT.NONE);
 		GridLayout numericalDatSelectionLayout = new GridLayout(2, true);
@@ -506,7 +525,7 @@ public class DatDisplayer extends Composite implements IDatDisplayer {
 				sortOutEnabling(itgArray[2], itgArray[1]);
 				transferUsingIncrement.setEnabled(false);
 				refreshTable.setEnabled(false);
-				
+
 				parameterFilesTile.setEnabled(false);
 				clearParameterTable.setEnabled(false);
 			}
@@ -603,10 +622,10 @@ public class DatDisplayer extends Composite implements IDatDisplayer {
 		parameterFiles.setEnabled(false);
 
 		parameterFilesTile = new InputTileGenerator("Select Parameter File", parameterFiles, 2);
-		
+
 		paramFileSelection = parameterFilesTile.getPush();
 		paramFileText = parameterFilesTile.getText();
-		
+
 		parameterFilesTile.setEnabled(false);
 
 		paramFileSelection.addSelectionListener(new SelectionListener() {
@@ -665,11 +684,10 @@ public class DatDisplayer extends Composite implements IDatDisplayer {
 			}
 		});
 
-		useTrajectoryTile = new InputTileGenerator("Use Trajectory From File:", parameterFiles,
-				true);
-		
-		useTrajectoryTile.setEnabled(false); 
-		
+		useTrajectoryTile = new InputTileGenerator("Use Trajectory From File:", parameterFiles, true);
+
+		useTrajectoryTile.setEnabled(false);
+
 		useTrajectoryButton = useTrajectoryTile.getRadio();
 
 		useTrajectoryButton.setSelection(useTrajectory);
@@ -705,9 +723,8 @@ public class DatDisplayer extends Composite implements IDatDisplayer {
 
 				try {
 					NexusFile file = new NexusFileFactoryHDF5().newNexusFile(ip.getText());
-					
-					FittingParametersInputReader.geometricalParametersReaderFromNexus(file, ssp.getGm(),
-							ssp.getDrm());
+
+					FittingParametersInputReader.geometricalParametersReaderFromNexus(file, ssp.getGm(), ssp.getDrm());
 
 					rsw.getParamField().setUpdateOn(false);
 					rsw.getParamField().updateDisplayFromGm(ssp.getGm());
@@ -755,9 +772,9 @@ public class DatDisplayer extends Composite implements IDatDisplayer {
 		useTrajectoryTile.setEnabled(enabled);
 		parameterFiles.setEnabled(enabled);
 		parameterFilesTile.setEnabled(enabled);
-		
-		for(Control c: parameterFiles.getChildren()) {
-				c.setEnabled(enabled);
+
+		for (Control c : parameterFiles.getChildren()) {
+			c.setEnabled(enabled);
 		}
 	}
 
@@ -790,8 +807,31 @@ public class DatDisplayer extends Composite implements IDatDisplayer {
 		}
 
 		for (int j = 0; j < datList.size(); j++) {
+
+			Path from = Paths.get(datFolderPath + File.separator + datList.get(j));
+
+			Charset charset = StandardCharsets.UTF_8;
+
+			String content = "";
+
+			try {
+				content = new String(Files.readAllBytes(from), charset);
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+
+			String scanCommand = StringUtils.substringBetween(content, "scan", "\n");
+
 			TableItem t = new TableItem(folderDisplayTable, SWT.NONE);
-			t.setText(datList.get(j));
+			t.setText(0, datList.get(j));
+			t.setText(1, scanCommand);
+
+
+		}
+
+		for (int loopIndex = 0; loopIndex < folderDisplayTable.getColumnCount(); loopIndex++) {
+			folderDisplayTable.getColumn(loopIndex).pack();
 		}
 
 		folderDisplayTable.getVerticalBar().setEnabled(true);
@@ -1188,6 +1228,6 @@ public class DatDisplayer extends Composite implements IDatDisplayer {
 
 	@Override
 	public void setImageFolderPath(String g) {
-		
+
 	}
 }

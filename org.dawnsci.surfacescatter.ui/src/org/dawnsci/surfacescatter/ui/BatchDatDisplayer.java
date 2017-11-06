@@ -1,6 +1,12 @@
 package org.dawnsci.surfacescatter.ui;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -37,6 +43,7 @@ import org.eclipse.swt.widgets.DirectoryDialog;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Table;
+import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.swt.widgets.Text;
 import uk.ac.diamond.scisoft.analysis.io.LoaderFactory;
@@ -216,6 +223,7 @@ public class BatchDatDisplayer extends Composite implements IDatDisplayer {
 
 		folderDisplayTable = new Table(datSelector, SWT.CHECK | SWT.V_SCROLL | SWT.H_SCROLL | SWT.BORDER);
 		folderDisplayTable.setEnabled(false);
+		folderDisplayTable.setLinesVisible(true);
 
 		selectionSash.getParent().layout(true, true);
 		selectionSash.redraw();
@@ -231,6 +239,17 @@ public class BatchDatDisplayer extends Composite implements IDatDisplayer {
 		folderDisplayTable.getVerticalBar().setIncrement(1);
 		folderDisplayTable.getVerticalBar().setThumb(1);
 
+		//// folder table setup///
+
+		folderDisplayTable.setHeaderVisible(true);
+
+		TableColumn datColumn = new TableColumn(folderDisplayTable, SWT.MULTI | SWT.BORDER);
+		datColumn.setText(".dat File");
+
+		TableColumn commandColumn = new TableColumn(folderDisplayTable, SWT.MULTI | SWT.BORDER);
+		commandColumn.setText("Scan Command");
+
+		////
 		numericalDatSelection = new Group(left, SWT.NONE);
 		GridLayout numericalDatSelectionLayout = new GridLayout(2, true);
 		numericalDatSelection.setLayout(numericalDatSelectionLayout);
@@ -759,10 +778,32 @@ public class BatchDatDisplayer extends Composite implements IDatDisplayer {
 		}
 
 		for (int j = 0; j < datList.size(); j++) {
+
+			Path from = Paths.get(datFolderPath + File.separator + datList.get(j));
+
+			Charset charset = StandardCharsets.UTF_8;
+
+			String content = "";
+
+			try {
+				content = new String(Files.readAllBytes(from), charset);
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+
+			String scanCommand = StringUtils.substringBetween(content, "scan", "\n");
+
 			TableItem t = new TableItem(folderDisplayTable, SWT.NONE);
 			t.setText(datList.get(j));
+			t.setText(1, scanCommand);
 		}
 
+		for (int loopIndex = 0; loopIndex < folderDisplayTable.getColumnCount(); loopIndex++) {
+			folderDisplayTable.getColumn(loopIndex).pack();
+		}
+
+		
 		folderDisplayTable.getVerticalBar().setEnabled(true);
 
 	}
@@ -794,6 +835,8 @@ public class BatchDatDisplayer extends Composite implements IDatDisplayer {
 			t.setText(paramFileList.get(j));
 		}
 
+		
+		
 		paramFileTable.getVerticalBar().setEnabled(true);
 
 	}
