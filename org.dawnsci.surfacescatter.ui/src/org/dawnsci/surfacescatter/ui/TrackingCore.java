@@ -5,16 +5,15 @@ import java.util.Arrays;
 import org.dawnsci.surfacescatter.ClosestNoFinder;
 import org.dawnsci.surfacescatter.CsdpGeneratorFromDrm;
 import org.dawnsci.surfacescatter.CurveStitchDataPackage;
-import org.dawnsci.surfacescatter.CurveStitchWithErrorsAndFrames;
 import org.dawnsci.surfacescatter.DirectoryModel;
 import org.dawnsci.surfacescatter.DummyProcessWithFrames;
 import org.dawnsci.surfacescatter.FourierTransformCurveStitch;
 import org.dawnsci.surfacescatter.FrameModel;
 import org.dawnsci.surfacescatter.GeometricParametersModel;
 import org.dawnsci.surfacescatter.LocationLenPtConverterUtils;
+import org.dawnsci.surfacescatter.MethodSettingEnum.MethodSetting;
 import org.dawnsci.surfacescatter.ReflectivityNormalisation;
 import org.dawnsci.surfacescatter.TrackerLocationInterpolation;
-import org.dawnsci.surfacescatter.MethodSettingEnum.MethodSetting;
 import org.dawnsci.surfacescatter.TrackingMethodology.TrackerType1;
 import org.eclipse.january.dataset.Dataset;
 import org.eclipse.january.dataset.IDataset;
@@ -75,14 +74,14 @@ public class TrackingCore {
 
 				double[] gv = drm.getSeedLocation()[frame.getDatNo()];
 
-				IDataset output1 = DummyProcessWithFrames.DummyProcess1(drm, gm, frame.getNoInOriginalDat(),
+				IDataset output1 = DummyProcessWithFrames.DummyProcess1(drm, frame.getNoInOriginalDat(),
 						trackingMarker, frame.getFmNo(), gv, ssp.getLenPt());
 
 				if (Arrays.equals(output1.getShape(), (new int[] { 2, 2 }))) {
 
 					break;
 				}
-
+				
 				drm.addBackgroundDatArray(fms.size(), frame.getFmNo(), output1);
 
 				if (showtrack) {
@@ -170,9 +169,7 @@ public class TrackingCore {
 			int[] pt = new int[] { (int) Math.round(drm.getInterpolatedLenPts().get(k)[1][0]),
 					(int) Math.round(drm.getInterpolatedLenPts().get(k)[1][1]) };
 
-			double[] seedLocation = new double[] { (double) pt[0], (double) pt[1], (double) (pt[0] + len[0]),
-					(double) (pt[1]), (double) pt[0], (double) pt[1] + len[1], (double) (pt[0] + len[0]),
-					(double) (pt[1] + len[1]) };
+			double[] seedLocation = LocationLenPtConverterUtils.lenPtToLocationConverter(new int [][] {len, pt});
 
 			drm.addSeedLocation(frameDatNo, seedLocation);
 		}
