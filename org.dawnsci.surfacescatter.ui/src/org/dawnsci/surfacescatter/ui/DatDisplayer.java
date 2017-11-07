@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import org.apache.commons.lang.StringUtils;
+import org.dawnsci.surfacescatter.DisplayLabelStrings;
 import org.dawnsci.surfacescatter.FittingParametersInputReader;
 import org.dawnsci.surfacescatter.GeometricCorrectionsReflectivityMethod;
 import org.dawnsci.surfacescatter.MethodSettingEnum.MethodSetting;
@@ -212,8 +213,17 @@ public class DatDisplayer extends Composite implements IDatDisplayer {
 
 		});
 
+
+		numericalDatSelection = new Group(datSelector, SWT.NONE);
+		GridLayout numericalDatSelectionLayout = new GridLayout(2, true);
+		numericalDatSelection.setLayout(numericalDatSelectionLayout);
+		GridData numericalDatSelectionData = new GridData(SWT.FILL, SWT.NULL, true, false);
+		numericalDatSelection.setLayoutData(numericalDatSelectionData);
+		numericalDatSelection.setEnabled(false);
+		
+		
 		transferToRod = new Button(datSelector, SWT.PUSH);
-		transferToRod.setText("Transfer to Rod ->");
+		transferToRod.setText(DisplayLabelStrings.getTransferSelectedToRod());
 		transferToRod.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		transferToRod.setEnabled(false);
 
@@ -247,12 +257,6 @@ public class DatDisplayer extends Composite implements IDatDisplayer {
 		
 		////
 
-		numericalDatSelection = new Group(left, SWT.NONE);
-		GridLayout numericalDatSelectionLayout = new GridLayout(2, true);
-		numericalDatSelection.setLayout(numericalDatSelectionLayout);
-		GridData numericalDatSelectionData = new GridData(SWT.FILL, SWT.NULL, true, false);
-		numericalDatSelection.setLayoutData(numericalDatSelectionData);
-		numericalDatSelection.setEnabled(false);
 
 		for (Control c : numericalDatSelection.getChildren()) {
 			c.setEnabled(false);
@@ -312,7 +316,7 @@ public class DatDisplayer extends Composite implements IDatDisplayer {
 
 		transferUsingIncrement = new Button(numericalDatSelection, SWT.PUSH);
 		transferUsingIncrement.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-		transferUsingIncrement.setText("Transfer to Rod ->");
+		transferUsingIncrement.setText(DisplayLabelStrings.getTransferSeriesToRod());
 		transferUsingIncrement.setEnabled(false);
 
 		transferUsingIncrement.addSelectionListener(new SelectionAdapter() {
