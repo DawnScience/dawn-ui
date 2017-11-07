@@ -1239,6 +1239,9 @@ public class SurfaceScatterPresenter {
 			}
 
 			drm.setInterpolatedLenPts(interpolatedLenPts);
+			
+
+			
 
 		}
 

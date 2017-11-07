@@ -1,5 +1,7 @@
 package org.dawnsci.surfacescatter.ui;
 
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -106,6 +108,16 @@ public class SurfaceScatterViewStart extends Dialog {
 				updateDisplay(null, ssp.isUpdateSvs());
 			}
 		});
+		
+		this.ssp.getDrm().addPropertyChangeListener(new PropertyChangeListener() {
+
+			@Override
+			public void propertyChange(PropertyChangeEvent evt) {
+				updateDisplay(null, ssp.isUpdateSvs());
+			}
+		});
+
+			
 
 		setShellStyle(getShellStyle() | SWT.RESIZE | SWT.PRIMARY_MODAL);
 	}
@@ -148,7 +160,7 @@ public class SurfaceScatterViewStart extends Dialog {
 
 				boolean stareMode = false;
 				boolean isThereAParamFile = false;
-				paramFile = " ";
+				paramFile = "";
 
 				for (TableItem jh : rsw.getDatDisplayer().getParamFileTable().getItems()) {
 					if (jh.getChecked()) {
@@ -199,6 +211,7 @@ public class SurfaceScatterViewStart extends Dialog {
 
 						if (smsn.getAccept()) {
 							stareMode = true;
+							ssp.setTrackerOn(false);
 
 						} else {
 							return;
@@ -288,8 +301,12 @@ public class SurfaceScatterViewStart extends Dialog {
 				customComposite.getSlider().setMinimum(0);
 				customComposite.getSlider().setMaximum(ssp.getDrm().getFms().size());
 				customComposite.getSlider().setThumb(1);
-				customComposite.getPlotSystem1CompositeView().checkTrackerOnButton();
-
+				
+				if(!stareMode) {
+					customComposite.getPlotSystem1CompositeView().generalUpdate();
+				}
+				
+				
 				try {
 					ssps3c.generalUpdate();
 				} catch (Exception u) {
@@ -990,6 +1007,19 @@ public class SurfaceScatterViewStart extends Dialog {
 
 			IRegion greenRegion = customComposite.getGreenRegion();
 
+
+			if (ssp.getInterpolatorBoxes() != null) {
+				for (int j = 0; j < ssp.getInterpolatorBoxes().size(); j++) {
+					if (ssp.getInterpolatorBoxes().get(j)[2][0] == ssp.getSliderPos()) {
+						ssp.getInterpolatorBoxes().remove(j);
+						customComposite.getPlotSystem().removeRegion(ssp.getInterpolatorRegions().get(j));
+						ssp.getInterpolatorRegions().remove(j);
+						customComposite.getPlotSystem().repaint(false);
+					}
+				}
+			}
+			
+			
 			ArrayList<double[][]> jk = ssp.interpolationTrackerBoxesAccept(greenRegion);
 
 			try {
@@ -1697,6 +1727,8 @@ public class SurfaceScatterViewStart extends Dialog {
 
 		customComposite.getPlotSystem().repaint();
 
+		customComposite.getPlotSystem1CompositeView().update();
+		
 		try {
 			ssps3c.generalUpdate();
 		} catch (Exception o) {

@@ -1,10 +1,10 @@
 
 package org.dawnsci.surfacescatter.ui;
 
-import org.apache.commons.lang.StringUtils;
 import org.dawnsci.surfacescatter.AnalaysisMethodologies;
 import org.dawnsci.surfacescatter.AnalaysisMethodologies.FitPower;
 import org.dawnsci.surfacescatter.AnalaysisMethodologies.Methodology;
+import org.dawnsci.surfacescatter.DisplayLabelStrings;
 import org.dawnsci.surfacescatter.TrackingMethodology;
 import org.dawnsci.surfacescatter.TrackingMethodology.TrackerType1;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -195,7 +195,7 @@ public class PlotSystem1CompositeView extends Composite {
 				trackerOn = !trackerOn;
 
 				if(trackerOn){
-					trackerOnButton.setText("Turn Tracker Off");
+					trackerOnButton.setText(DisplayLabelStrings.getTurnTrackerOff());
 					if(ssp.getTrackerType() == TrackerType1.SPLINE_INTERPOLATION){
 						button4.setEnabled(true);
 						button5.setEnabled(true);
@@ -203,7 +203,7 @@ public class PlotSystem1CompositeView extends Composite {
 				}
 
 				else{
-					trackerOnButton.setText("Turn Tracker On");
+					trackerOnButton.setText(DisplayLabelStrings.getTurnTrackerOn());
 					button4.setEnabled(false);
 					button5.setEnabled(false);
 				}
@@ -349,8 +349,6 @@ public class PlotSystem1CompositeView extends Composite {
 		int fitPowerSelection = polynomialPowerCombo.getSelectionIndex();
 		int trackerSelection = trackingMethodCombo.getSelectionIndex();
 
-
-
 		String boundaryBox = String.valueOf(boundaryBoxText.getSelection());
 
 		ssvs.updateAnalysisMethodology(methodologySelection, 
@@ -375,7 +373,7 @@ public class PlotSystem1CompositeView extends Composite {
 		ssvs.getPlotSystemCompositeView().getBgRegion().setROI(bgRegionROI[1]);
 
 
-		if(ssp.getDrm().getFms().get(ssp.getSliderPos()).getTrackingMethodology() != TrackerType1.SPLINE_INTERPOLATION){
+		if(ssp.getDrm().getFms().get(ssp.getSliderPos()).getTrackingMethodology() != TrackerType1.SPLINE_INTERPOLATION || !ssp.getTrackerOn()){
 
 			button4.setEnabled(false);
 			button5.setEnabled(false);
@@ -399,20 +397,22 @@ public class PlotSystem1CompositeView extends Composite {
 
 		if(ssp.getTrackerOn()){
 
-			trackerOnButton.setText("Tracker On");
-
-			if(//(ssp.getTrackerType() == TrackerType1.INTERPOLATION ||
-					ssp.getTrackerType() == TrackerType1.SPLINE_INTERPOLATION){
+			if(ssp.getTrackerType() == TrackerType1.SPLINE_INTERPOLATION){
 				button4.setEnabled(true);
 				button5.setEnabled(true);
 			}
 
 
-			trackerOnButton.setText("Tracker Off");
-			button4.setEnabled(false);
-			button5.setEnabled(false);
+			trackerOnButton.setText(DisplayLabelStrings.getTurnTrackerOff());
 
 			ssp.setTrackerOn(trackerOn);
+		}
+		
+		if(trackerOn) {
+			trackerOnButton.setText(DisplayLabelStrings.getTurnTrackerOff());
+		}
+		else {
+			trackerOnButton.setText(DisplayLabelStrings.getTurnTrackerOn());
 		}
 
 	}
@@ -504,12 +504,12 @@ public class PlotSystem1CompositeView extends Composite {
 	public void checkTrackerOnButton(){
 
 		if(!ssp.getTrackerOn()){
-			trackerOnButton.setText("Turn Tracker On");
+			trackerOnButton.setText(DisplayLabelStrings.getTurnTrackerOn());
 			button4.setEnabled(false);
 			button5.setEnabled(false);
 		}
 		else{
-			trackerOnButton.setText("Turn Tracker Off");
+			trackerOnButton.setText(DisplayLabelStrings.getTurnTrackerOn());
 		}
 
 	}
