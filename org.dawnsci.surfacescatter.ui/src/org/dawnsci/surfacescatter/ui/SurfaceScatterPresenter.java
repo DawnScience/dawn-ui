@@ -1477,7 +1477,7 @@ public class SurfaceScatterPresenter {
 
 	public void sliderZoomedArea(int sliderPos, IROI box, IPlottingSystem<Composite>... pS) {
 		IDataset image = this.getImage(sliderPos);
-		Dataset subImage = (Dataset) PlotSystem2DataSetter.PlotSystem2DataSetter1(box, image);
+		PlotSystem2DataSetter.PlotSystem2DataSetter1(box, image);
 	}
 
 	public void resetCorrectionsSelection(int correctionSelection) {
@@ -1741,6 +1741,11 @@ public class SurfaceScatterPresenter {
 
 	public void setInterpolatorRegions(ArrayList<IRegion> boxes) {
 		drm.setInterpolatorRegions(boxes);
+	}
+	
+	public void resetInterpolatorMethods() {
+		drm.setInterpolatorBoxes(null);
+		drm.setInterpolatorRegions(null);
 	}
 
 	public String[] getAnalysisSetup(int k) {

@@ -846,6 +846,10 @@ public class SurfaceScatterViewStart extends Dialog {
 
 		});
 		container.layout();
+		
+		
+//		customComposite.resetRegion(customComposite.getGreenRegion());
+		
 		return container;
 	}
 

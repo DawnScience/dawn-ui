@@ -50,6 +50,7 @@ public class PlotSystem1CompositeView extends Composite {
 	private Boolean trackerOn =false;
 	private SurfaceScatterViewStart ssvs;
 	private Button useQAxis;
+	private InputTileGenerator trackingTile;
 
 	public PlotSystem1CompositeView(Composite parent, 
 			int style, 
@@ -69,6 +70,8 @@ public class PlotSystem1CompositeView extends Composite {
 		}
 
 		this.createContents(trackingMarker); 
+		
+		
 
 	}
 
@@ -110,10 +113,11 @@ public class PlotSystem1CompositeView extends Composite {
 		polynomialPowerCombo = tile1.getCombo();
 		polynomialPowerCombo.setText(setup[1]);
 
-		InputTileGenerator tile2 = new InputTileGenerator("Tracking Method:", methodSetting);
-		trackingMethodCombo = tile2.getCombo();
+		trackingTile = new InputTileGenerator("Tracking Method:", methodSetting);
+		trackingMethodCombo = trackingTile.getCombo();
 		trackingMethodCombo.setText(setup[2]);
-
+		trackingTile.setEnabled(false);
+		
 		InputTileGenerator tile3 = new InputTileGenerator("Boundary Box:", methodSetting, 0, 1000, 1);   
 		boundaryBoxText = tile3.getSpinner();
 
@@ -193,13 +197,16 @@ public class PlotSystem1CompositeView extends Composite {
 			public void widgetSelected(SelectionEvent e) {
 
 				trackerOn = !trackerOn;
-
+				trackingTile.setEnabled(trackerOn);
+				
 				if(trackerOn){
 					trackerOnButton.setText(DisplayLabelStrings.getTurnTrackerOff());
 					if(ssp.getTrackerType() == TrackerType1.SPLINE_INTERPOLATION){
 						button4.setEnabled(true);
 						button5.setEnabled(true);
 					}
+					
+					
 				}
 
 				else{
@@ -210,6 +217,7 @@ public class PlotSystem1CompositeView extends Composite {
 
 				ssp.setTrackerOn(trackerOn);
 				PlotSystem1CompositeView.this.redraw();
+				generalUpdate();
 			}
 
 			@Override
@@ -380,7 +388,14 @@ public class PlotSystem1CompositeView extends Composite {
 
 			try{
 				IRegion u = ssvs.getPlotSystemCompositeView().getPlotSystem().getRegion("Interpolated trajectory");
-				ssvs.getPlotSystemCompositeView().getPlotSystem().removeRegion(u);    	   
+				ssvs.getPlotSystemCompositeView().getPlotSystem().removeRegion(u);    	
+				
+				for (IRegion g : ssp.getInterpolatorRegions()) {
+					ssvs.getPlotSystemCompositeView().getPlotSystem().removeRegion(g);
+					g.remove();
+
+				}
+				
 			}
 			catch(Exception k){
 
@@ -413,6 +428,7 @@ public class PlotSystem1CompositeView extends Composite {
 		}
 		else {
 			trackerOnButton.setText(DisplayLabelStrings.getTurnTrackerOn());
+			ssp.resetInterpolatorMethods();
 		}
 
 	}
