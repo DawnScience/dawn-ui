@@ -5,8 +5,6 @@ import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
 import org.dawb.common.ui.widgets.ActionBarWrapper;
 import org.dawnsci.surfacescatter.AxisEnums;
-import org.dawnsci.surfacescatter.AxisEnums.xAxes;
-import org.dawnsci.surfacescatter.AxisEnums.yAxes;
 import org.dawnsci.surfacescatter.CurveStitchDataPackage;
 import org.dawnsci.surfacescatter.GoodPointStripper;
 import org.dawnsci.surfacescatter.OverlapAttenuationObject;
@@ -21,11 +19,9 @@ import org.eclipse.dawnsci.plotting.api.PlottingFactory;
 import org.eclipse.dawnsci.plotting.api.axis.IAxis;
 import org.eclipse.dawnsci.plotting.api.region.IROIListener;
 import org.eclipse.dawnsci.plotting.api.region.IRegion;
-import org.eclipse.dawnsci.plotting.api.region.ROIEvent;
 import org.eclipse.dawnsci.plotting.api.region.IRegion.RegionType;
+import org.eclipse.dawnsci.plotting.api.region.ROIEvent;
 import org.eclipse.dawnsci.plotting.api.trace.ILineTrace;
-import org.eclipse.january.dataset.Dataset;
-import org.eclipse.january.dataset.DatasetFactory;
 import org.eclipse.january.dataset.IDataset;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
@@ -37,7 +33,6 @@ import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.custom.TableEditor;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -220,7 +215,6 @@ public class StitchedOverlapCurves extends Composite {
 		stitchedCurves.setText("Stitched Curves");
 
 		ActionBarWrapper actionBarComposite = ActionBarWrapper.createActionBars(stitchedCurves, null);
-		
 
 		final GridData gdSecondField = new GridData(SWT.FILL, SWT.FILL, true, true);
 		gdSecondField.grabExcessVerticalSpace = true;
@@ -291,6 +285,8 @@ public class StitchedOverlapCurves extends Composite {
 
 		viewer.getTable().setLayout(overlapSelectorLayout);
 		viewer.getTable().setLayoutData(overlapSelectorData);
+
+		viewer.getTable().pack();
 
 		resetAll = new Button(bottomForm, SWT.PUSH);
 
@@ -440,8 +436,8 @@ public class StitchedOverlapCurves extends Composite {
 		plotSystem.repaint();
 	}
 
-	private void resetAttenuationFactors(AxisEnums.xAxes x, AxisEnums.yAxes y,
-			ArrayList<IDataset> xArrayList, boolean globalReset) {
+	private void resetAttenuationFactors(AxisEnums.xAxes x, AxisEnums.yAxes y, ArrayList<IDataset> xArrayList,
+			boolean globalReset) {
 
 		if (globalReset) {
 			csdp = ssp.curveStitchingOutput(maxMinArray, true, null);
@@ -499,14 +495,14 @@ public class StitchedOverlapCurves extends Composite {
 	private void generateOdosFromOdms(AxisEnums.xAxes x, AxisEnums.yAxes y, ArrayList<IDataset> xArrayList) {
 
 		ArrayList<OverlapAttenuationObject> oAos1 = new ArrayList<>();
-		
+
 		for (int i = 0; i < odms.size(); i++) {
 
 			OverlapDataModel odm = odms.get(i);
 
 			OverlapDisplayObjects odo = new OverlapDisplayObjects();
 
-			odo.generateFromOdmAndTable(odm, i, overlapDisplayTable);
+			odo.generateFromOdmAndTable(odm, i);
 
 			odos.add(odo);
 
@@ -559,35 +555,35 @@ public class StitchedOverlapCurves extends Composite {
 
 			OverlapDataModel odm = odms.get(i);
 
-			OverlapDisplayObjects odo = new OverlapDisplayObjects();
+			OverlapDisplayObjects odol = new OverlapDisplayObjects();
 
-			odo.generateFromOdmAndTable(odm, i, overlapDisplayTable);
+			odol.generateFromOdmAndTable(odm, i);
 
-			odos.add(odo);
+			odos.add(odol);
 
-			oAos1.add(odo.getOAo());
+			oAos1.add(odol.getOAo());
 			try {
-				if (oAos.size() >= (i - 1) && oAos.size() > 0) {
-					if (oAos.get(i) != null) {
-						oAos1.get(i).setModified(oAos.get(i).isModified());
-					}
+				if (oAos.size() >= (i - 1) && oAos.get(i) != null) {
+
+					oAos1.get(i).setModified(oAos.get(i).isModified());
+
 				}
 			} catch (Exception h) {
 
 			}
 
-			odo.addPropertyChangeListener(new PropertyChangeListener() {
+			odol.addPropertyChangeListener(new PropertyChangeListener() {
 
 				@Override
 				public void propertyChange(PropertyChangeEvent evt) {
 					if (modify) {
-						OverlapDisplayObjects odo = (OverlapDisplayObjects) evt.getSource();
-						odo.setModified(true);
+						OverlapDisplayObjects odom = (OverlapDisplayObjects) evt.getSource();
+						odom.setModified(true);
 
-						if (odo.isButtonPushed()) {
-							odo.setModified(false);
+						if (odom.isButtonPushed()) {
+							odom.setModified(false);
 							try {
-								oAos.get(odo.getOdoNumber()).setModified(false);
+								oAos.get(odom.getOdoNumber()).setModified(false);
 							} catch (Exception m) {
 
 							}
@@ -609,11 +605,13 @@ public class StitchedOverlapCurves extends Composite {
 		final Table table = viewer.getTable();
 		table.setHeaderVisible(true);
 		table.setLinesVisible(true);
+		table.pack();
 
 		viewer.setContentProvider(new ArrayContentProvider());
 
 		// get the content for the viewer, setInput will call getElements in the
 		viewer.setInput(odos);
+
 
 		return viewer;
 	}

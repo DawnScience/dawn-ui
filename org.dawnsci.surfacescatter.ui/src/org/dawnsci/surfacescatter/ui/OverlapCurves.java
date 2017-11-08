@@ -403,7 +403,7 @@ public class OverlapCurves extends Composite {
 					redRegion.setMobile(false);
 					
 					nonOverlapRegionArray[k] = redRegion;
-					overlapRegionArray[k].setROI(redROI);
+					
 				} catch (Exception e1) {
 					e1.printStackTrace();
 				}

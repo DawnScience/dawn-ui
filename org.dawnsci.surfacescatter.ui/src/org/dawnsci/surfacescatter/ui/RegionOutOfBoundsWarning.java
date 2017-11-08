@@ -81,9 +81,16 @@ public class RegionOutOfBoundsWarning extends Dialog {
 			warning.setText("Set batch name.");	
 			break;
 		case 11:
-			warning.setText("Set working directory.");	
+			warning.setText("Set working directory.");
+			break;
 		case 12:
 			warning.setText("Can't find files corresponding to the entered values.");	
+			break;
+		case 13:
+			warning.setText("NO! STOP IT!");	
+			break;
+		case 14:
+			warning.setText("No curve selected to save.");	
 			break;
 		default:
 			warning.setText("Unknown or novel error.");	
