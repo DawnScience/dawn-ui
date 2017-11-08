@@ -30,5 +30,6 @@ Import-Package: org.apache.commons.collections.iterators;version="3.2.2",
  org.dawnsci.plotting.system,
  org.eclipse.draw2d,
  org.eclipse.jdt.launching,
+ org.eclipse.ui.forms.widgets,
  uk.ac.diamond.scisoft.analysis.io
 Export-Package: org.dawnsci.surfacescatter.ui

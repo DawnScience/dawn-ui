@@ -2867,7 +2867,7 @@ public class SurfaceScatterPresenter {
 
 		SavingUtils su = new SavingUtils(writeOnlyGoodPoints, csdpToSave);
 
-		int saveIntensityState = yAxis.getYAxisNumber();
+		AxisEnums.yAxes saveIntensityState = AxisEnums.toYAxis(yAxis.getYAxisNumber());
 
 		if (sfs == SaveFormatSetting.GenX) {
 			su.genXSave(title + ".txt", this.getDrm(), this.getDrm().getFms(),

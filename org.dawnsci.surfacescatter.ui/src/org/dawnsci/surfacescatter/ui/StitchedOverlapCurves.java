@@ -25,12 +25,16 @@ import org.eclipse.dawnsci.plotting.api.trace.ILineTrace;
 import org.eclipse.january.dataset.IDataset;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
+import org.eclipse.jface.viewers.ColumnPixelData;
+import org.eclipse.jface.viewers.ColumnWeightData;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.jface.viewers.ViewerCell;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.custom.TableEditor;
+import org.eclipse.swt.events.ControlEvent;
+import org.eclipse.swt.events.ControlListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Color;
@@ -60,7 +64,6 @@ public class StitchedOverlapCurves extends Composite {
 	private boolean modify = true;
 	private Button go;
 	private Button resetAll;
-	private Table overlapDisplayTable;
 	private TableViewer viewer;
 	private OverlapDisplayObjects odo;
 	private Group overlapSelector;
@@ -287,6 +290,10 @@ public class StitchedOverlapCurves extends Composite {
 		viewer.getTable().setLayoutData(overlapSelectorData);
 
 		viewer.getTable().pack();
+//		viewer.getTable().setFocus();
+		viewer.getTable().forceFocus();
+		
+		
 
 		resetAll = new Button(bottomForm, SWT.PUSH);
 
@@ -376,7 +383,28 @@ public class StitchedOverlapCurves extends Composite {
 		IAxis yAxisR = plotSystem.getSelectedYAxis();
 
 		yAxisR.setLog10(!yAxisR.isLog10());
+		
 
+		viewer.getTable().forceFocus();
+		viewer.getTable().setFocus();
+		
+		this.getShell().addControlListener(new ControlListener() {
+			
+			@Override
+			public void controlResized(ControlEvent e) {
+				viewer.getTable().forceFocus();
+				viewer.getTable().setFocus();
+				viewer.getTable().forceFocus();
+				
+			}
+			
+			@Override
+			public void controlMoved(ControlEvent e) {
+				viewer.getTable().forceFocus();
+				viewer.getTable().setFocus();
+				viewer.getTable().forceFocus();
+			}
+		});
 	}
 
 	public Composite getComposite() {
