@@ -82,6 +82,8 @@ public class RegionOutOfBoundsWarning extends Dialog {
 			break;
 		case 11:
 			warning.setText("Set working directory.");	
+		case 12:
+			warning.setText("Can't find files corresponding to the entered values.");	
 			break;
 		default:
 			warning.setText("Unknown or novel error.");	

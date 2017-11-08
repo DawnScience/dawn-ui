@@ -324,9 +324,22 @@ public class DatDisplayer extends Composite implements IDatDisplayer {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 
-				String startDatString = startDat.getText().getText() + ".dat";
-				String endDatString = endDat.getText().getText() + ".dat";
-
+				String startDatString = "";
+				String endDatString = "";
+				
+				if(StringUtils.contains(startDat.getText().getText(), ".dat")) {
+					startDatString = startDat.getText().getText();
+				}
+				else {
+					startDatString = startDat.getText().getText() + ".dat";
+				}
+				if(StringUtils.contains(endDat.getText().getText(), ".dat")) {
+					endDatString = startDat.getText().getText();
+				}
+				else {
+					endDatString = endDat.getText().getText() + ".dat";
+				}
+				
 				boolean checkStart = false;
 				boolean checkEnd = false;
 
@@ -353,6 +366,11 @@ public class DatDisplayer extends Composite implements IDatDisplayer {
 						break;
 					}
 
+				}
+				
+				if (!checkEnd || !checkStart) {
+					RegionOutOfBoundsWarning aah = new RegionOutOfBoundsWarning(ssvs.getShell(), 12, null);
+					aah.open();
 				}
 
 				for (int cv = 0; cv < rodDisplayTable.getItems().length; cv++) {

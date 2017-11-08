@@ -9,13 +9,13 @@ import org.dawnsci.surfacescatter.DirectoryModel;
 import org.dawnsci.surfacescatter.DummyProcessWithFrames;
 import org.dawnsci.surfacescatter.FourierTransformCurveStitch;
 import org.dawnsci.surfacescatter.FrameModel;
-import org.dawnsci.surfacescatter.GeometricParametersModel;
 import org.dawnsci.surfacescatter.LocationLenPtConverterUtils;
 import org.dawnsci.surfacescatter.MethodSettingEnum.MethodSetting;
 import org.dawnsci.surfacescatter.ReflectivityNormalisation;
 import org.dawnsci.surfacescatter.TrackerLocationInterpolation;
 import org.dawnsci.surfacescatter.TrackingMethodology.TrackerType1;
 import org.eclipse.january.dataset.Dataset;
+import org.eclipse.january.dataset.DatasetFactory;
 import org.eclipse.january.dataset.IDataset;
 import org.eclipse.swt.widgets.Display;
 
@@ -26,8 +26,7 @@ public class TrackingCore {
 
 		DirectoryModel drm = ssp.getDrm();
 		ArrayList<FrameModel> fms = ssp.getFms();
-		GeometricParametersModel gm = ssp.getGm();
-
+	
 		boolean start = true;
 
 		while (!ClosestNoFinder.full(doneArray, "done")) {
@@ -74,8 +73,23 @@ public class TrackingCore {
 
 				double[] gv = drm.getSeedLocation()[frame.getDatNo()];
 
-				IDataset output1 = DummyProcessWithFrames.DummyProcess1(drm, frame.getNoInOriginalDat(),
+				IDataset output1 =(IDataset) DatasetFactory.createFromObject(new int[] {2,2});
+				
+				try {
+					output1 = DummyProcessWithFrames.DummyProcess1(drm, frame.getNoInOriginalDat(),
 						trackingMarker, frame.getFmNo(), gv, ssp.getLenPt());
+				}
+				catch(ArrayIndexOutOfBoundsException f) {
+					display.syncExec(new Runnable() {
+						@Override
+						public void run() {
+
+							RegionOutOfBoundsWarning roobw = new RegionOutOfBoundsWarning(ssvs.getShell(), 0, null);
+							roobw.open();
+							return;
+						}
+					});
+				}
 
 				if (Arrays.equals(output1.getShape(), (new int[] { 2, 2 }))) {
 
