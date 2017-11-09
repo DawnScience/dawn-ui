@@ -478,7 +478,7 @@ public class PlotSystemCompositeView extends Composite {
 
 		addChangeProcessingMethodListeners();
 
-		form.setWeights(new int[] { 10, 46, 29, 7 });
+		form.setWeights(new int[] { 10, 56, 27, 7 });
 	}
 
 	public void addChangeProcessingMethodListeners() {

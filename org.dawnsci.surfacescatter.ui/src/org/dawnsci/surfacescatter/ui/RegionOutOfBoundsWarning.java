@@ -92,6 +92,9 @@ public class RegionOutOfBoundsWarning extends Dialog {
 		case 14:
 			warning.setText("No curve selected to save.");	
 			break;
+		case 15:
+			warning.setText("Tracker has run off the image.");	
+			break;
 		default:
 			warning.setText("Unknown or novel error.");	
 			break;

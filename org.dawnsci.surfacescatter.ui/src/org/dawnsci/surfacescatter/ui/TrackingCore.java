@@ -26,7 +26,7 @@ public class TrackingCore {
 
 		DirectoryModel drm = ssp.getDrm();
 		ArrayList<FrameModel> fms = ssp.getFms();
-	
+
 		boolean start = true;
 
 		while (!ClosestNoFinder.full(doneArray, "done")) {
@@ -43,8 +43,8 @@ public class TrackingCore {
 				int k = closestNoWithoutDone(drm.getSortedX().getDouble(ssp.getSliderPos()), fmal);
 
 				if (t != null) {
-					if(t.isInterrupted()) {
-					break;
+					if (t.isInterrupted()) {
+						break;
 					}
 				}
 
@@ -73,29 +73,35 @@ public class TrackingCore {
 
 				double[] gv = drm.getSeedLocation()[frame.getDatNo()];
 
-				IDataset output1 =(IDataset) DatasetFactory.createFromObject(new int[] {2,2});
-				
-				try {
-					output1 = DummyProcessWithFrames.DummyProcess1(drm, frame.getNoInOriginalDat(),
-						trackingMarker, frame.getFmNo(), gv, ssp.getLenPt());
-				}
-				catch(ArrayIndexOutOfBoundsException f) {
-					display.syncExec(new Runnable() {
-						@Override
-						public void run() {
+				IDataset output1 = DatasetFactory.createFromObject(new int[] { 2, 2 });
 
-							RegionOutOfBoundsWarning roobw = new RegionOutOfBoundsWarning(ssvs.getShell(), 0, null);
-							roobw.open();
-							return;
-						}
-					});
+				try {
+					output1 = DummyProcessWithFrames.DummyProcess1(drm, frame.getNoInOriginalDat(), trackingMarker,
+							frame.getFmNo(), gv, ssp.getLenPt());
+				} catch (ArrayIndexOutOfBoundsException f) {
+
+					if (showtrack) {
+						display.syncExec(new Runnable() {
+
+							@Override
+							public void run() {
+
+								RegionOutOfBoundsWarning roobw = new RegionOutOfBoundsWarning(ssvs.getShell(), 15,
+										null);
+								roobw.open();
+								t.interrupt();
+								thwfi.kill();
+								return;
+							}
+						});
+					}
 				}
 
 				if (Arrays.equals(output1.getShape(), (new int[] { 2, 2 }))) {
 
 					break;
 				}
-				
+
 				drm.addBackgroundDatArray(fms.size(), frame.getFmNo(), output1);
 
 				if (showtrack) {
@@ -104,8 +110,14 @@ public class TrackingCore {
 					display.syncExec(new Runnable() {
 						@Override
 						public void run() {
-
-							thwfi.updateTrackingDisplay(tempImage, frame.getFmNo());
+							try {
+								thwfi.updateTrackingDisplay(tempImage, frame.getFmNo());
+							} catch (IndexOutOfBoundsException i) {
+								RegionOutOfBoundsWarning r = new RegionOutOfBoundsWarning(ssvs.getShell(), 15, null);
+								r.open();
+								t.interrupt();
+								thwfi.kill();
+							}
 							return;
 						}
 					});
@@ -183,7 +195,7 @@ public class TrackingCore {
 			int[] pt = new int[] { (int) Math.round(drm.getInterpolatedLenPts().get(k)[1][0]),
 					(int) Math.round(drm.getInterpolatedLenPts().get(k)[1][1]) };
 
-			double[] seedLocation = LocationLenPtConverterUtils.lenPtToLocationConverter(new int [][] {len, pt});
+			double[] seedLocation = LocationLenPtConverterUtils.lenPtToLocationConverter(new int[][] { len, pt });
 
 			drm.addSeedLocation(frameDatNo, seedLocation);
 		}

@@ -246,7 +246,7 @@ public class GeneralOverlapHandlerView extends Dialog {
 		int h = rect.height;
 		int w = rect.width;
 		
-		return new Point((int) Math.round(0.6*w), (int) Math.round(0.8*h));
+		return new Point((int) Math.round(w), (int) Math.round(h));
 	}
 	
 	@Override

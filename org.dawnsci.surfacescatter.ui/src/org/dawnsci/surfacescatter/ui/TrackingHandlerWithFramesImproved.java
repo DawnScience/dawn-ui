@@ -5,7 +5,6 @@ import org.dawnsci.surfacescatter.CsdpGeneratorFromDrm;
 import org.dawnsci.surfacescatter.CurveStitchDataPackage;
 import org.dawnsci.surfacescatter.CurveStitchWithErrorsAndFrames;
 import org.dawnsci.surfacescatter.DirectoryModel;
-import org.dawnsci.surfacescatter.FourierTransformCurveStitch;
 import org.dawnsci.surfacescatter.LocationLenPtConverterUtils;
 import org.eclipse.dawnsci.analysis.dataset.roi.RectangularROI;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
@@ -86,8 +85,7 @@ public class TrackingHandlerWithFramesImproved {
 			@Override
 			public void run() {
 
-				new TrackingCore(doneArray, ssp, t, ssvs, true, TrackingHandlerWithFramesImproved.this,
-						display);
+				new TrackingCore(doneArray, ssp, t, ssvs, true, TrackingHandlerWithFramesImproved.this, display);
 
 				return;
 
@@ -102,6 +100,22 @@ public class TrackingHandlerWithFramesImproved {
 
 	protected void updateTrackingDisplay(IDataset tempImage, int imageNumber) {
 
+		double[] location = ssp.getThisLocation(imageNumber);
+
+		if (location[0] > tempImage.getShape()[1] || location[2] > tempImage.getShape()[1]) {
+			throw new java.lang.IndexOutOfBoundsException();
+		}
+
+		if (location[2] > tempImage.getShape()[0] || location[7] > tempImage.getShape()[0]) {
+			throw new java.lang.IndexOutOfBoundsException();
+		}
+
+		for (double i : location) {
+			if (i < 0) {
+				throw new java.lang.IndexOutOfBoundsException();
+			}
+		}
+
 		ssvs.getPlotSystemCompositeView().getFolder().setSelection(2);
 		ssp.sliderMovemementMainImage(imageNumber);
 		ssvs.updateIndicators(imageNumber);
@@ -111,8 +125,6 @@ public class TrackingHandlerWithFramesImproved {
 		ssvs.getPlotSystemCompositeView().getPlotSystem().repaint(true);
 		ssvs.getPlotSystemCompositeView().getSubImageBgPlotSystem().repaint(true);
 		ssvs.getSsps3c().generalUpdate();
-
-		double[] location = ssp.getThisLocation(imageNumber);
 
 		int[] len = new int[] { (int) (location[2] - location[0]), (int) (location[5] - location[1]) };
 		int[] pt = new int[] { (int) location[0], (int) location[1] };
@@ -133,7 +145,7 @@ public class TrackingHandlerWithFramesImproved {
 
 		updateOutputCurve();
 
-		if (progressBar.isDisposed() != true) {
+		if (!progressBar.isDisposed()) {
 			progressBar.setSelection(progressBar.getSelection() + 1);
 
 			if (progressBar.getSelection() == progressBar.getMaximum()) {
@@ -142,6 +154,10 @@ public class TrackingHandlerWithFramesImproved {
 		}
 	}
 
+	public void kill() {
+		tpaav.close();
+	}
+	
 	protected void updateOutputCurve() {
 
 		ssp.stitchAndPresent1(ssvs.getSsps3c().getOutputCurves(), ssvs.getIds());
