@@ -1561,7 +1561,7 @@ public class SurfaceScatterPresenter {
 				lj = LocationLenPtConverterUtils.lenPtToLocationConverter(lenPt);
 			}
 
-			IDataset output = DummyProcessWithFrames.dummyProcess(drm, gm, j, trackingMarker, selection, lj,
+			IDataset output = DummyProcessWithFrames.dummyProcess(drm, j, trackingMarker, selection, lj,
 					getLenPt());
 
 			drm.addBackgroundDatArray(fms.size(), selection, output);
