@@ -21,4 +21,8 @@ public class FileManagerSingleton {
 		manager.init(plotManager, mappedDataArea, viewer);
 	}
 	
+	public static void clearManager() {
+		manager = null;
+	}
+	
 }
