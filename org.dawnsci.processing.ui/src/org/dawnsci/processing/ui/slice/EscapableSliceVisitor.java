@@ -165,15 +165,20 @@ public class EscapableSliceVisitor implements SliceVisitor {
 				SliceFromSeriesMetadata ssm = out.getMetadata(SliceFromSeriesMetadata.class).get(0);
 				Slice[] s = ssm.getSliceFromInput();
 				String n = ssm.getFilePath();
-				if (n != null && !n.isEmpty() && (out.getName() == null || out.getName().isEmpty())) {
+				if (n != null && !n.isEmpty()) {
 					File f = new File(n);
-					String b = FilenameUtils.getBaseName(f.getAbsolutePath());
-					String name = b + "_" + Slice.createString(s);
+					String name = FilenameUtils.getBaseName(f.getAbsolutePath());
+//					name = name + "_" + Slice.createString(s);
+					name = name + "_" + endOp.getName();
 					out.setName(name);
 				}
 				
 			} catch (Exception e) {
 				logger.debug("Could not build dataset name",e);
+			}
+			
+			if (out != null && out.getName() == null) {
+				out.setName("output");
 			}
 
 			MetadataPlotUtils.plotDataWithMetadata(out, output);
@@ -188,6 +193,8 @@ public class EscapableSliceVisitor implements SliceVisitor {
 					}	
 				}	
 			}
+			
+			output.setTitle("Output");
 		}
 	}
 	
