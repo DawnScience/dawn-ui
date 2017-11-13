@@ -106,7 +106,7 @@ public class TrackingHandlerWithFramesImproved {
 			throw new java.lang.IndexOutOfBoundsException();
 		}
 
-		if (location[2] > tempImage.getShape()[0] || location[7] > tempImage.getShape()[0]) {
+		if (location[1] > tempImage.getShape()[0] || location[7] > tempImage.getShape()[0]) {
 			throw new java.lang.IndexOutOfBoundsException();
 		}
 
@@ -143,7 +143,11 @@ public class TrackingHandlerWithFramesImproved {
 
 		ssvs.getSsps3c().generalUpdate(lenPt);
 
-		updateOutputCurve();
+		try {
+			updateOutputCurve();
+		} catch (Exception g) {
+			throw new java.lang.IndexOutOfBoundsException();
+		}
 
 		if (!progressBar.isDisposed()) {
 			progressBar.setSelection(progressBar.getSelection() + 1);
@@ -157,7 +161,7 @@ public class TrackingHandlerWithFramesImproved {
 	public void kill() {
 		tpaav.close();
 	}
-	
+
 	protected void updateOutputCurve() {
 
 		ssp.stitchAndPresent1(ssvs.getSsps3c().getOutputCurves(), ssvs.getIds());

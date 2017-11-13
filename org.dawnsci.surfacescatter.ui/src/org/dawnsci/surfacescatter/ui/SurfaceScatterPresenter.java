@@ -865,6 +865,8 @@ public class SurfaceScatterPresenter {
 			content = content.replaceAll(pathNameToReplace, imFolPath);
 
 			Files.write(to, content.getBytes(charset));
+			
+			
 
 			return dh1 = LoaderFactory.getData(to.toString());
 		} catch (Exception n1) {

@@ -1067,6 +1067,7 @@ public class PlotSystemCompositeView extends Composite {
 		plotSystem.updatePlot2D(ssp.getImage(ssp.getSliderPos()), null, null);
 		setRegion(ssp.getLenPt());
 		plotSystem.repaint();
+		
 		generalCorrectionsUpdate();
 
 	}

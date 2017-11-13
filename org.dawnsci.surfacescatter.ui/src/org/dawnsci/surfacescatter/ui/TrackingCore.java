@@ -76,9 +76,9 @@ public class TrackingCore {
 				IDataset output1 = DatasetFactory.createFromObject(new int[] { 2, 2 });
 
 				try {
-					output1 = DummyProcessWithFrames.DummyProcess1(drm, frame.getNoInOriginalDat(), trackingMarker,
+					output1 = DummyProcessWithFrames.dummyProcess1(drm, frame.getNoInOriginalDat(), trackingMarker,
 							frame.getFmNo(), gv, ssp.getLenPt());
-				} catch (ArrayIndexOutOfBoundsException f) {
+				} catch (Exception f) {
 
 					if (showtrack) {
 						display.syncExec(new Runnable() {
@@ -86,11 +86,12 @@ public class TrackingCore {
 							@Override
 							public void run() {
 
+								t.interrupt();
+								thwfi.kill();
 								RegionOutOfBoundsWarning roobw = new RegionOutOfBoundsWarning(ssvs.getShell(), 15,
 										null);
 								roobw.open();
-								t.interrupt();
-								thwfi.kill();
+
 								return;
 							}
 						});
@@ -154,11 +155,11 @@ public class TrackingCore {
 			csdp.setRodName("Current Track");
 
 			if (showtrack) {
-				ssvs.getRaw().getRtc().addCurrentTrace(csdp);
-
+				
 				display.syncExec(new Runnable() {
 					@Override
 					public void run() {
+						ssvs.getRaw().getRtc().addCurrentTrace(csdp);
 
 						thwfi.updateOutputCurve(csdp);
 						return;

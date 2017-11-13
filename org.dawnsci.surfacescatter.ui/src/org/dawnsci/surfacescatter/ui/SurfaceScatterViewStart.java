@@ -232,6 +232,8 @@ public class SurfaceScatterViewStart extends Dialog {
 
 				ssp.createGm();
 
+				customComposite.resetCorrectionsTab();
+				
 				rsw.getAnglesAliasWindow().writeOutValues();
 
 				paramField.geometricParametersUpdate();
