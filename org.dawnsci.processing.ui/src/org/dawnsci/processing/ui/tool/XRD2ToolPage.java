@@ -318,8 +318,10 @@ public class XRD2ToolPage extends AbstractToolPage {
 
 		try {
 			XAxis axisType = model.getAxisType();
+			
+			double dPos = axisType.convertToRESOLUTION(linePos, metadata.getDiffractionCrystalEnvironment().getWavelength());
 
-			IROI r = DSpacing.conicFromDSpacing(metadata.getDetector2DProperties(), metadata.getDiffractionCrystalEnvironment(), linePos);
+			IROI r = DSpacing.conicFromDSpacing(metadata.getDetector2DProperties(), metadata.getDiffractionCrystalEnvironment(), dPos);
 
 			RegionType reg = getConicRegionType(r);
 

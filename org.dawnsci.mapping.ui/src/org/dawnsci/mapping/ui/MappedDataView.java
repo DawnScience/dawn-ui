@@ -371,6 +371,8 @@ public class MappedDataView extends ViewPart {
 	public void dispose() {
 		super.dispose();
 		
+		FileManagerSingleton.clearManager();
+		
 		ILiveMappingFileService liveService = LiveServiceManager.getLiveMappingFileService();
 		
 		if (liveService != null && liveMapListener != null) {
