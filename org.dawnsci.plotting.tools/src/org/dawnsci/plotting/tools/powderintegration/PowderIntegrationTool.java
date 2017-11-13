@@ -44,6 +44,7 @@ import org.eclipse.january.dataset.IDataset;
 import org.eclipse.dawnsci.analysis.api.metadata.IDiffractionMetadata;
 import org.eclipse.dawnsci.analysis.api.tree.DataNode;
 import org.eclipse.dawnsci.analysis.api.tree.GroupNode;
+import org.eclipse.dawnsci.analysis.api.tree.Node;
 import org.eclipse.dawnsci.analysis.tree.impl.AttributeImpl;
 import org.eclipse.january.metadata.IMetadata;
 import org.eclipse.jface.action.Action;
@@ -537,6 +538,7 @@ public class PowderIntegrationTool extends AbstractToolPage implements IDataRedu
 	
 	@Override
 	public String exportInit() {
+		super.exportInit();
 		firstExportIteration = true;
 		//FIXME needs to be this name so the NCD to ascii convert works
 		return "integration_result";
@@ -557,14 +559,11 @@ public class PowderIntegrationTool extends AbstractToolPage implements IDataRedu
 		try {
 			IMetadata md = slice.getData().getFirstMetadata(IMetadata.class);
 			if (md != null && md.getFilePath()!= null) {
-				String collection = resultGroup + "/files";
-				GroupNode groupNode = file.getGroup(collection, true);
-//				String collection = file.group("files", file.getParent(resultGroup));
-				file.addAttribute(groupNode, new AttributeImpl("NXcollection", collection));
-//				file.setNexusAttribute(collection, "NXcollection");
+				String collection = resultGroup + Node.SEPARATOR + "files";
+				GroupNode filesNode = file.getGroup(collection, true);
+				file.addAttribute(filesNode, new AttributeImpl("NXcollection", collection));
 				String path = slice.getData().getFirstMetadata(IMetadata.class).getFilePath();
-				file.createData(groupNode, DatasetFactory.createFromObject(path));
-//				file.appendDataset("files", Dataset.STRING, new long[]{1}, path, collection);
+				file.createData(filesNode, DatasetFactory.createFromObject(path));
 			}
 		} catch (Exception e) {
 			//ignore
@@ -577,48 +576,35 @@ public class PowderIntegrationTool extends AbstractToolPage implements IDataRedu
 		if (firstExportIteration) {
 			axis = axis.squeeze();
 			DataNode axisNode = file.createData(resultGroupNode, axis);
-//			String s = file.createDataset(axis.getName(),  axis, resultGroup);
 			UnitFormat unitFormat = UnitFormat.getUCUMInstance();
 			
 			switch (model.getAxisType()) {
 			case Q:
 				String angstrom = unitFormat.format(NonSI.ANGSTROM.inverse());
 				file.addAttribute(axisNode, new AttributeImpl("units", angstrom));
-//				file.setAttribute(s, "units", angstrom);
 				break;
 			case ANGLE:
 				String degrees = unitFormat.format(NonSI.DEGREE_ANGLE);
 				file.addAttribute(axisNode, new AttributeImpl("units", degrees));
-//				file.setAttribute(s, "units", degrees);
 				break;
 			case RESOLUTION:
 				String ang = unitFormat.format(NonSI.ANGSTROM);
 				file.addAttribute(axisNode, new AttributeImpl("units", ang));
-//				file.setAttribute(s, "units", ang);
 				break;
 			case PIXEL:
 				file.addAttribute(axisNode, new AttributeImpl("units", "pixels"));
-//				file.setAttribute(s, "units", "pixels");
 				break;
 			}
 			
-//			file.setNexusAttribute(s, Nexus.SDS);
-			
 			if (model.getIntegrationMode() == IntegrationMode.SPLITTING2D || model.getIntegrationMode() == IntegrationMode.NONSPLITTING2D) {
-//				file.setIntAttribute(s, "axis", 3);
 				file.addAttribute(axisNode, new AttributeImpl("axis", 3));
 				axis = out.get(2);
 				axis = axis.squeeze();
 				DataNode s2 = file.createData(resultGroupNode, axis);
 				file.addAttribute(s2, new AttributeImpl("units", unitFormat.format(NonSI.DEGREE_ANGLE)));
 				file.addAttribute(s2, new AttributeImpl("axis", 2));
-//				String s2 = file.createDataset(axis.getName(),  axis, resultGroup);
-//				file.setAttribute(s2, "units", unitFormat.format(NonSI.DEGREE_ANGLE));
-//				file.setIntAttribute(s2, "axis", 2);
-				
 			} else {
 				file.addAttribute(axisNode, new AttributeImpl("axis", 2));
-//				file.setIntAttribute(s, "axis", 2);
 			}
 			
 //			IPersistenceService service = (IPersistenceService)ServiceManager.getService(IPersistenceService.class);
@@ -626,22 +612,18 @@ public class PowderIntegrationTool extends AbstractToolPage implements IDataRedu
 //			pf.setDiffractionMetadata(metadata);
 			
 			String parent = resultGroup.substring(0, resultGroup.lastIndexOf("/"));
-			writeProcessInformation(file, parent);
+			writeProcessInformation(file, file.getGroup(parent, false));
 			
 		}
 		
 		Dataset signal = out.get(1);
 		signal.setName("data");
-		slice.appendData(signal);
+		slice.appendData(lazyWritables, signal, exportIndex);
 		
 		if (firstExportIteration) {
-			// TODO
-//			for (String path : file.memberList(resultGroup)) {
-//				final String name = path.substring(path.lastIndexOf('/')+1);
-//				if (file.isDataset(path) && name.equals(signal.getName())) {
-//					file.setIntAttribute(path, "signal", 1);
-//				}
-//			}
+			String parentPath = slice.getParent();
+			DataNode datanode = file.getData(parentPath + Node.SEPARATOR + "data");
+			file.addAttribute(datanode, new AttributeImpl("signal", 1));
 		}
 		
 		firstExportIteration = false;
@@ -649,28 +631,16 @@ public class PowderIntegrationTool extends AbstractToolPage implements IDataRedu
 		return new DataReductionInfo(Status.OK_STATUS);
 	}
 	
-	private void writeProcessInformation(NexusFile file, String group) throws Exception {
-		String processPath = group + "/" + "process";
-		GroupNode processGroup = file.getGroup(processPath, true);
-		file.addAttribute(processGroup, new AttributeImpl("NXprocess"));
+	private void writeProcessInformation(NexusFile file, GroupNode group) throws Exception {
+		GroupNode processGroup = file.getGroup(group, "process", "NXprocess", true);
 		createDataset("program", processGroup, file, "DAWN-powder integration tool");
-////		file.addAttribute(processGroup, new AttributeImpl("program", "DAWN-powder integration tool"));
-//		String process = file.group("process", group);
-//		file.setNexusAttribute(process, "NXprocess");
-//		file.createStringDataset("program", "DAWN-powder integration tool", process);
 		
 		String version =  BundleUtils.getDawnVersion();
 		if (version != null)
 			createDataset("version", processGroup, file, version);
-//			file.createStringDataset("version", version, process);
 		
-		String correctionPath = processPath + "/" + "1_correction";
-		GroupNode correctionGroup = file.getGroup(correctionPath, true);
-		file.addAttribute(correctionGroup, new AttributeImpl("NXnote"));
+		GroupNode correctionGroup = file.getGroup(processGroup, "1_correction", "NXnote", true);
 		createDataset("description", correctionGroup, file, "Correction process details");
-//		String note = file.group("1_correction", process);
-//		file.setNexusAttribute(note, "NXnote");
-//		file.createStringDataset("description", "Correction process details", note);
 		
 		String solid = "No";
 		if (corModel.isApplySolidAngleCorrection()) {
@@ -678,38 +648,27 @@ public class PowderIntegrationTool extends AbstractToolPage implements IDataRedu
 		}
 		
 		createDataset("solid_angle_corrected", correctionGroup, file, solid);
-//		file.createStringDataset("solid_angle_corrected", solid, note);
 		
 		String polar = "No";
 		if (corModel.isApplyPolarisationCorrection()) {
 			polar = "Yes";
 			createDataset("polarisation_factor", correctionGroup, file, new double[]{corModel.getPolarisationFactor()});
-//			createDoubleDataset("polarisation_factor", new double[]{corModel.getPolarisationFactor()}, file, note);
 			
 			createDataset("polarisation_angular", correctionGroup, file, new double[]{corModel.getPolarisationAngularOffset()});
-//			createDoubleDataset("polarisation_angular", new double[]{corModel.getPolarisationAngularOffset()}, file, note);
 		}
 		
 		createDataset("polarisation_corrected", correctionGroup, file, polar);
-//		file.createStringDataset("polarisation_corrected", polar, note);
 		
 		String trans = "No";
 		if (corModel.isAppyDetectorTransmissionCorrection()) {
 			trans = "Yes";
 			createDataset("transmitted_fraction", correctionGroup, file, new double[]{corModel.getTransmittedFraction()});
-//			createDoubleDataset("transmitted_fraction", new double[]{corModel.getTransmittedFraction()}, file, note);
 		}
 		
 		createDataset("detector_tranmission_corrected", correctionGroup, file, trans);
-//		file.createStringDataset("detector_tranmission_corrected", trans, note);
 		
-		String integrationPath = processPath + "/" + "2_integration";
-		GroupNode integrationNode = file.getGroup(integrationPath, true);
-		file.addAttribute(integrationNode, new AttributeImpl("NXnote"));
-//		note = file.group("2_integration", process);
-//		file.setNexusAttribute(note, "NXnote");
+		GroupNode integrationNode = file.getGroup(processGroup, "2_integration", "NXnote", true);
 		createDataset("description", integrationNode, file, "Integration process details");
-//		file.createStringDataset("description", "Integration process details", note);
 		
 		String integrationRoutine = "unknown";
 		String integrationDirection = "unknown";
@@ -737,18 +696,14 @@ public class PowderIntegrationTool extends AbstractToolPage implements IDataRedu
 		}
 		
 		createDataset("integration_routine", integrationNode, file, integrationRoutine);
-//		file.createStringDataset("integration_routine", integrationRoutine, note);
 		createDataset("integration_direction", integrationNode, file, integrationDirection);
-//		file.createStringDataset("integration_direction", integrationDirection, note);
 		
 		if (model.getRadialRange() != null) {
 			createDataset("radial_range", integrationNode, file, model.getRadialRange());
-//			createDoubleDataset("radial_range", model.getRadialRange(), file, note);
 		}
 		
 		if (model.getAzimuthalRange() != null) {
 			createDataset("azimuthal_range", integrationNode, file, model.getAzimuthalRange());
-//			createDoubleDataset("azimuthal_range", model.getAzimuthalRange(), file, note);
 		}
 		
 	}
@@ -766,6 +721,16 @@ public class PowderIntegrationTool extends AbstractToolPage implements IDataRedu
 		} else {
 			return super.getAdapter(clazz);
 		}
+	}
+
+	@Override
+	public int getExportIndex() {
+		return exportIndex;
+	}
+
+	@Override
+	public void setExportIndex(int exportIndex) {
+		this.exportIndex = exportIndex;
 	}
 
 }

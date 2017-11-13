@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012 Diamond Light Source Ltd.
+ * Copyright (c) 2012, 2017 Diamond Light Source Ltd.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -354,12 +354,12 @@ public class RadialProfileTool extends SectorProfileTool {
 		
 			Dataset integral = profile[0];
 			integral.setName("radial_"+region.getName().replace(' ', '_'));     
-			slice.appendData(integral);
+			slice.appendData(lazyWritables, integral, exportIndex);
 			
 		    if (profile.length>=3 && profile[2]!=null && sroi.hasSeparateRegions()) {
 				final Dataset reflection = profile[2];
 				reflection.setName("radial_sym_"+region.getName().replace(' ', '_'));     
-				slice.appendData(reflection);
+				slice.appendData(lazyWritables, reflection, exportIndex);
 		    }
 		}
 		return new DataReductionInfo(Status.OK_STATUS);

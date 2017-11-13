@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012 Diamond Light Source Ltd.
+ * Copyright (c) 2012, 2017 Diamond Light Source Ltd.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -153,7 +153,7 @@ public class ZoomTool extends ProfileTool {
 											                       new int[] {yInc, xInc}));
 			slice.setName(region.getName().replace(' ','_'));
 			
-			drslice.appendData(slice);
+			drslice.appendData(lazyWritables, slice, exportIndex);
 		}
         return new DataReductionInfo(Status.OK_STATUS);
 

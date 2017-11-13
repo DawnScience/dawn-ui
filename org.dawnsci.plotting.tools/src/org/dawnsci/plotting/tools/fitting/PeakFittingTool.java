@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012 Diamond Light Source Ltd.
+ * Copyright (c) 2012, 2017 Diamond Light Source Ltd.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -28,6 +28,7 @@ import org.dawnsci.plotting.tools.preference.FittingPreferencePage;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.dawnsci.analysis.api.fitting.functions.IPeak;
 import org.eclipse.dawnsci.analysis.api.tree.GroupNode;
+import org.eclipse.dawnsci.analysis.api.tree.Node;
 import org.eclipse.dawnsci.analysis.dataset.roi.LinearROI;
 import org.eclipse.dawnsci.analysis.dataset.roi.RectangularROI;
 import org.eclipse.dawnsci.nexus.NexusFile;
@@ -388,28 +389,28 @@ public class PeakFittingTool extends AbstractFittingTool implements IRegionListe
 				Dataset sdd = DatasetFactory.createFromObject(fp.getPeakValue(), 1);
 				addValue(fit, index, fp.getPeakValue());
 				sdd.setName(peakName+"_fit");
-				slice.appendData(sdd);
+				slice.appendData(lazyWritables, sdd, exportIndex);
 				
 				sdd = DatasetFactory.createFromObject(fp.getPosition(), 1);
 				addValue(xpos, index, fp.getPosition());
 				sdd.setName(peakName+"_xposition");
-				slice.appendData(sdd);
+				slice.appendData(lazyWritables, sdd, exportIndex);
 				
 				sdd = DatasetFactory.createFromObject(fp.getFWHM(), 1);
 				addValue(fwhm, index, fp.getFWHM());
 				sdd.setName(peakName+"_fwhm");
-				slice.appendData(sdd);
+				slice.appendData(lazyWritables, sdd, exportIndex);
 				
 				sdd = DatasetFactory.createFromObject(fp.getArea(), 1);
 				addValue(area, index, fp.getArea());
 				sdd.setName(peakName+"_area");
-				slice.appendData(sdd);
+				slice.appendData(lazyWritables, sdd, exportIndex);
 
 				final Dataset[] pair = fp.getPeakFunctions();
 				Dataset     function = pair[1];
 				Dataset fc = function.clone();
 				fc.setName(peakName+"_function");
-				slice.appendData(fc);
+				slice.appendData(lazyWritables, fc, exportIndex);
 				addList(functions, index, fc);
 
 				++index;
@@ -461,7 +462,7 @@ public class PeakFittingTool extends AbstractFittingTool implements IRegionListe
 		
 		NexusFile file = lastSlice.getFile();
 		String entry = (String)file.getRoot();
-		String container = entry + "/" + nodeName;
+		String container = entry + Node.SEPARATOR + nodeName;
 		GroupNode containerNode = file.getGroup(container, true);
 		for (int i = 1; i <= fit.size(); i++) {
 			
@@ -469,19 +470,19 @@ public class PeakFittingTool extends AbstractFittingTool implements IRegionListe
 
 			final IDataset fits  = DatasetFactory.createFromList(fit.get(i));
 			fits.setName(peakName+"_fit_byElement");
-			lastSlice.appendData(fits, container);
+			lastSlice.appendData(lazyWritables, fits, container, i);
 			
 			final IDataset xposi = DatasetFactory.createFromList(xpos.get(i));
 			xposi.setName(peakName+"_xposition_byElement");
-			lastSlice.appendData(xposi, container);
+			lastSlice.appendData(lazyWritables, xposi, container, i);
 
 			final IDataset fwhms = DatasetFactory.createFromList(fwhm.get(i));
 			fwhms.setName(peakName+"_fwhm_byElement");
-			lastSlice.appendData(fwhms, container);
+			lastSlice.appendData(lazyWritables, fwhms, container, i);
 
 			final IDataset areas = DatasetFactory.createFromList(area.get(i));
 			areas.setName(peakName+"_area_byElement");
-			lastSlice.appendData(areas, container);
+			lastSlice.appendData(lazyWritables, areas, container, i);
 			
 			final List<IDataset> fs = functions.get(i);
 			for (IDataset iDataset : fs) {
@@ -501,6 +502,7 @@ public class PeakFittingTool extends AbstractFittingTool implements IRegionListe
 		area.clear();
 		functions.clear();
 		lastSlice = null;
+		super.exportFinished();
 
 	}
 
@@ -816,4 +818,13 @@ public class PeakFittingTool extends AbstractFittingTool implements IRegionListe
 		}
 	}
 
+	@Override
+	public int getExportIndex() {
+		return exportIndex;
+	}
+
+	@Override
+	public void setExportIndex(int exportIndex) {
+		this.exportIndex = exportIndex;
+	}
 }

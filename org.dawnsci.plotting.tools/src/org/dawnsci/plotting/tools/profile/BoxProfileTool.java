@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012 Diamond Light Source Ltd.
+ * Copyright (c) 2012, 2017 Diamond Light Source Ltd.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -15,11 +15,10 @@ import java.util.List;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.dawnsci.analysis.api.roi.IROI;
-import org.eclipse.dawnsci.analysis.api.tree.DataNode;
 import org.eclipse.dawnsci.analysis.api.tree.GroupNode;
+import org.eclipse.dawnsci.analysis.api.tree.Node;
 import org.eclipse.dawnsci.analysis.dataset.roi.RectangularROI;
 import org.eclipse.dawnsci.analysis.tree.impl.AttributeImpl;
-import org.eclipse.dawnsci.nexus.NexusException;
 import org.eclipse.dawnsci.nexus.NexusFile;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.axis.IAxis;
@@ -213,7 +212,6 @@ public class BoxProfileTool extends ProfileTool {
 		file.addAttribute(groupNode, new AttributeImpl(NexusFile.NXCLASS, "NXsubentry"));
 
 		if (slice.getMonitor()!=null && slice.getMonitor().isCancelled()) return null;
-		DataNode dataNode = null;
 		String dataPath = "";
 		for (IRegion region : regions) {
 			if (!isRegionTypeSupported(region.getRegionType())) continue;
@@ -228,14 +226,11 @@ public class BoxProfileTool extends ProfileTool {
 				datasetName = datasetName.substring(dataGroupPath.length());
 			datasetName = datasetName.replace(' ', '_');
 			file.getGroup(groupNode, datasetName, "NXdata", true);
-//			String regionGroup = file.group(datasetName, dataGroup);
-//			file.setNexusAttribute(regionGroup, "NXdata");
+			dataPath = dataGroupPath + Node.SEPARATOR + datasetName;
 
 			//box profiles
-			String regionGroup = dataGroupPath + "/" + "profile";
+			String regionGroup = dataGroupPath + Node.SEPARATOR + "profile";
 			file.getGroup(groupNode, "profile", "NXdata", true);
-//			String profileGroup = file.group("profile", dataGroup);
-//			file.setNexusAttribute(profileGroup, "NXdata");
 			slice.setParent(regionGroup);
 
 			Dataset[] box = ROIProfile.box(DatasetUtils.convertToDataset(slice.getData()), DatasetUtils.convertToDataset(image.getMask()),
@@ -244,11 +239,11 @@ public class BoxProfileTool extends ProfileTool {
 			final Dataset x_intensity = box[0];
 			x_intensity.setName("X_Profile");
 			
-			slice.appendData(x_intensity);
+			slice.appendData(lazyWritables, x_intensity, exportIndex);
 
 			final Dataset y_intensity = box[1];
 			y_intensity.setName("Y_Profile");
-			slice.appendData(y_intensity);
+			slice.appendData(lazyWritables, y_intensity, exportIndex);
 
 			// Mean, Sum, Std deviation and region
 			int xInc = bounds.getPoint()[0]<bounds.getEndPoint()[0] ? 1 : -1;
@@ -260,26 +255,26 @@ public class BoxProfileTool extends ProfileTool {
 					new int[] {yInc, xInc}));
 			//mean
 			Object mean = dataRegion.mean();
-			Dataset meands = DatasetFactory.createFromObject(mean);
+			Dataset meands = DatasetFactory.createFromObject(mean, new int[]{1});
 			meands.setName("Mean");
-			slice.appendData(meands,regionGroup);
+			slice.appendData(lazyWritables, meands,dataPath, exportIndex);
 
 			//Sum
 			Object sum = dataRegion.sum();
-			Dataset sumds = DatasetFactory.createFromObject(sum);
+			Dataset sumds = DatasetFactory.createFromObject(sum, new int[]{1});
 			sumds.setName("Sum");
-			slice.appendData(sumds,regionGroup);
+			slice.appendData(lazyWritables, sumds,dataPath, exportIndex);
 
 			//Standard deviation
 			Object std = dataRegion.stdDeviation();
-			Dataset stds = DatasetFactory.createFromObject(std);
+			Dataset stds = DatasetFactory.createFromObject(std, new int[]{1});
 			stds.setName("Std_Deviation");
-			slice.appendData(stds,regionGroup);
+			slice.appendData(lazyWritables, stds,dataPath, exportIndex);
 
 			//region
-			slice.setParent(regionGroup);
+			slice.setParent(dataPath);
 			dataRegion.setName("Region_Slice");
-			slice.appendData(dataRegion);
+			slice.appendData(lazyWritables, dataRegion, exportIndex);
 		}
 		return new DataReductionInfo(Status.OK_STATUS);
 	}

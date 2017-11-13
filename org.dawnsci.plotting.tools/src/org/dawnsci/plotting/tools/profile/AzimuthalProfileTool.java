@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012 Diamond Light Source Ltd.
+ * Copyright (c) 2012, 2017 Diamond Light Source Ltd.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -119,12 +119,12 @@ public class AzimuthalProfileTool extends SectorProfileTool {
 		
 			Dataset integral = profile[1];
 			integral.setName("azimuthal_"+region.getName().replace(' ', '_'));     
-			slice.appendData(integral);
+			slice.appendData(lazyWritables, integral, exportIndex);
 			
 		    if (profile.length>=4 && profile[3]!=null && sroi.hasSeparateRegions()) {
 				final Dataset reflection = profile[3];
 				reflection.setName("azimuthal_sym_"+region.getName().replace(' ', '_'));     
-				slice.appendData(reflection);
+				slice.appendData(lazyWritables, reflection, exportIndex);
 		    }
 		}
 		return new DataReductionInfo(Status.OK_STATUS);

@@ -18,6 +18,7 @@ import org.dawnsci.plotting.tools.ServiceLoader;
 import org.eclipse.dawnsci.analysis.api.conversion.IConversionContext;
 import org.eclipse.dawnsci.analysis.api.conversion.IConversionVisitor;
 import org.eclipse.dawnsci.analysis.api.tree.GroupNode;
+import org.eclipse.dawnsci.analysis.api.tree.Node;
 import org.eclipse.dawnsci.analysis.tree.impl.AttributeImpl;
 import org.eclipse.dawnsci.nexus.NexusFile;
 import org.eclipse.dawnsci.plotting.api.tool.IToolPage;
@@ -73,6 +74,11 @@ class ToolConversionVisitor implements IConversionVisitor {
 		bean.setExpandedDatasetNames(getExpandedDatasets());
 		DataReductionInfo  info = tool.export(bean);
 		if (info.getStatus().isOK()) object = info.getUserData();
+
+		// increment export index
+		int idx = tool.getExportIndex();
+		idx++;
+		tool.setExportIndex(idx);
 
 		if (context.getMonitor()!=null) context.getMonitor().worked(1);
 	}
@@ -189,7 +195,7 @@ class ToolConversionVisitor implements IConversionVisitor {
 		GroupNode groupNode = output.getGroup("/entry", true);
 		output.addAttribute(groupNode, new AttributeImpl(NexusFile.NXCLASS, "NXentry"));
 		
-		String dataPath = "/entry" + "/" + path;
+		String dataPath = "/entry" + Node.SEPARATOR + path;
 		groupNode = output.getGroup(dataPath, true);
 		// Fix to http://jira.diamond.ac.uk/browse/SCI-1898
 		// We switch this to NXsubentry later and must have enough chars to change attribute
