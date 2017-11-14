@@ -137,7 +137,7 @@ public class XRD2ToolPage extends AbstractToolPage {
 		Composite lower = new Composite(control, SWT.NONE);
 		lower.setLayout(new GridLayout());
 		
-		OperationModelViewer modelEditor = new OperationModelViewer(true);
+		OperationModelViewer modelEditor = new OperationModelViewer(false);
 		modelEditor.createPartControl(lower);
 		
 		model = new XRD2Model();
