@@ -10,10 +10,13 @@ import org.dawnsci.surfacescatter.DummyProcessWithFrames;
 import org.dawnsci.surfacescatter.FourierTransformCurveStitch;
 import org.dawnsci.surfacescatter.FrameModel;
 import org.dawnsci.surfacescatter.LocationLenPtConverterUtils;
+import org.dawnsci.surfacescatter.PlotSystem2DataSetter;
 import org.dawnsci.surfacescatter.MethodSettingEnum.MethodSetting;
 import org.dawnsci.surfacescatter.ReflectivityNormalisation;
 import org.dawnsci.surfacescatter.TrackerLocationInterpolation;
 import org.dawnsci.surfacescatter.TrackingMethodology.TrackerType1;
+import org.eclipse.dawnsci.analysis.api.roi.IRectangularROI;
+import org.eclipse.dawnsci.analysis.dataset.roi.RectangularROI;
 import org.eclipse.january.dataset.Dataset;
 import org.eclipse.january.dataset.DatasetFactory;
 import org.eclipse.january.dataset.IDataset;
@@ -38,7 +41,9 @@ public class TrackingCore {
 
 			ArrayList<FrameModel> fmal = drm.getFmsSorted().get(nextjok);
 
-			while (isFmListScanned(fmal)) {
+			boolean go = isFmListScanned(fmal);
+
+			while (go) {
 
 				int k = closestNoWithoutDone(drm.getSortedX().getDouble(ssp.getSliderPos()), fmal);
 
@@ -56,6 +61,8 @@ public class TrackingCore {
 
 				TrackerType1 tt1 = frame.getTrackingMethodology();
 
+				IDataset output1 = DatasetFactory.createFromObject(new int[] { 2, 2 });
+
 				if (start) {
 					seedLocationSetter(ssp, frame.getFmNo(), start, frame.getDatNo(), seedRequired, tt1);
 					start = false;
@@ -72,8 +79,6 @@ public class TrackingCore {
 				drm.addxList(fms.size(), frame.getFmNo(), drm.getSortedX().getDouble(frame.getFmNo()));
 
 				double[] gv = drm.getSeedLocation()[frame.getDatNo()];
-
-				IDataset output1 = DatasetFactory.createFromObject(new int[] { 2, 2 });
 
 				try {
 					output1 = DummyProcessWithFrames.dummyProcess1(drm, frame.getNoInOriginalDat(), trackingMarker,
@@ -127,7 +132,7 @@ public class TrackingCore {
 				frame.setScanned(true);
 			}
 
-			drm.getInputForEachDat()[nextjok] = null;
+			// drm.getInputForEachDat()[nextjok] = null;
 
 			doneArray[nextjok] = true;
 		}
@@ -138,10 +143,10 @@ public class TrackingCore {
 			csdpgfd.generateCsdpFromDrm(drm);
 
 			CurveStitchDataPackage csdp = csdpgfd.getCsdp();
-			if(ditchNegativeValues){
+			if (ditchNegativeValues) {
 				ssp.disregardNegativeIntensities(csdp);
 			}
-			
+
 			FourierTransformCurveStitch.curveStitch4(csdp, null);
 
 			drm.setCsdp(csdp);
@@ -159,7 +164,7 @@ public class TrackingCore {
 			csdp.setRodName("Current Track");
 
 			if (showtrack) {
-				
+
 				display.syncExec(new Runnable() {
 					@Override
 					public void run() {

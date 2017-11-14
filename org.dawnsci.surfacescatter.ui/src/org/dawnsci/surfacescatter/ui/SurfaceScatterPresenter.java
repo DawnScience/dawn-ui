@@ -988,6 +988,28 @@ public class SurfaceScatterPresenter {
 		return fp;
 
 	}
+	
+	public double[][] loadROIs(String title) {
+
+		String fileType = StringUtils.substringAfterLast(title, ".");
+		
+		if (!fileType.equals("nxs")) {
+
+			throw new NullPointerException();
+		}
+
+		else {
+
+			NexusFile file = new NexusFileFactoryHDF5().newNexusFile(title);
+
+			double[][] r =  FittingParametersInputReader.readROIsFromNexus(file);
+
+			drm.setSetPositions(r);
+			
+			return r;
+		}
+
+	}
 
 	private void setFrameModelsUsingNexus(FrameSetupFromNexusTransferObject fsfnto) {
 		for (int n = 0; n < fms.size(); n++) {
@@ -1249,26 +1271,30 @@ public class SurfaceScatterPresenter {
 
 		return interpolatedLenPts;
 	}
+	
+	public double[][] getSetPositions(){
+		return drm.getSetPositions();
+	}
 
 	public ArrayList<double[][]> getInterpolatorBoxes() {
 		return drm.getInterpolatorBoxes();
 	}
 
-	public void illuminateCorrectInterpolationBox() {
-
-		if ((getTrackerType() == TrackerType1.SPLINE_INTERPOLATION) && drm.getInterpolatorRegions() != null) {
-
-			double u = (double) sliderPos;
-
-			for (int j = 0; j < drm.getInterpolatorBoxes().size(); j++) {
-				if (drm.getInterpolatorBoxes().get(j)[2][0] == u) {
-					drm.getInterpolatorRegions().get(j).setFill(true);
-				} else {
-					drm.getInterpolatorRegions().get(j).setFill(false);
-				}
-			}
-		}
-	}
+//	public void illuminateCorrectInterpolationBox() {
+//
+//		if ((getTrackerType() == TrackerType1.SPLINE_INTERPOLATION) && drm.getInterpolatorRegions() != null) {
+//
+//			double u = (double) sliderPos;
+//
+//			for (int j = 0; j < drm.getInterpolatorBoxes().size(); j++) {
+//				if (drm.getInterpolatorBoxes().get(j)[2][0] == u) {
+//					drm.getInterpolatorRegions().get(j).setFill(true);
+//				} else {
+//					drm.getInterpolatorRegions().get(j).setFill(false);
+//				}
+//			}
+//		}
+//	}
 
 	public ArrayList<double[][]> getInterpolatedLenPts() {
 		return drm.getInterpolatedLenPts();
@@ -1288,6 +1314,7 @@ public class SurfaceScatterPresenter {
 				}
 			}
 		}
+		
 	}
 
 	public AnalaysisMethodologies.Methodology getBackgroundSubtraction() {
@@ -2958,6 +2985,14 @@ public class SurfaceScatterPresenter {
 		}
 
 		return DatasetUtils.convertToDataset(DatasetUtils.concatenate(in, dim));
+	}
+	
+	public void setSetROIs(ArrayList<IRectangularROI> t) {
+		drm.setSetRegions(t);
+	}
+	
+	public ArrayList<IRectangularROI> getSetROIs() {
+		return drm.getSetRegions();
 	}
 
 }

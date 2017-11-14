@@ -9,8 +9,10 @@ import org.dawnsci.surfacescatter.AnalaysisMethodologies.Methodology;
 import org.dawnsci.surfacescatter.AxisEnums;
 import org.dawnsci.surfacescatter.AxisEnums.yAxes;
 import org.dawnsci.surfacescatter.CurveStitchDataPackage;
+import org.dawnsci.surfacescatter.DisplayLabelStrings;
 import org.dawnsci.surfacescatter.FileCounter;
 import org.dawnsci.surfacescatter.FittingParameters;
+import org.dawnsci.surfacescatter.LocationLenPtConverterUtils;
 import org.dawnsci.surfacescatter.MethodSettingEnum.MethodSetting;
 import org.dawnsci.surfacescatter.ProcessingMethodsEnum.ProccessingMethod;
 import org.dawnsci.surfacescatter.ReflectivityFluxCorrectionsForDialog;
@@ -108,7 +110,7 @@ public class SurfaceScatterViewStart extends Dialog {
 				updateDisplay(null, ssp.isUpdateSvs());
 			}
 		});
-		
+
 		this.ssp.getDrm().addPropertyChangeListener(new PropertyChangeListener() {
 
 			@Override
@@ -116,8 +118,6 @@ public class SurfaceScatterViewStart extends Dialog {
 				updateDisplay(null, ssp.isUpdateSvs());
 			}
 		});
-
-			
 
 		setShellStyle(getShellStyle() | SWT.RESIZE | SWT.PRIMARY_MODAL);
 	}
@@ -233,7 +233,7 @@ public class SurfaceScatterViewStart extends Dialog {
 				ssp.createGm();
 
 				customComposite.resetCorrectionsTab();
-				
+
 				rsw.getAnglesAliasWindow().writeOutValues();
 
 				paramField.geometricParametersUpdate();
@@ -250,7 +250,7 @@ public class SurfaceScatterViewStart extends Dialog {
 
 				ssp.resetSmOutputObjects();
 
-				int[][] r = new int[][] { { 50, 50 }, { 10, 10 } };
+				int[][] r = new int[][] { { 50, 50 }, { 73, 182 } };
 				String q = null;
 				int[][] pbolp = null;
 				int[][] bolp = null;
@@ -303,12 +303,11 @@ public class SurfaceScatterViewStart extends Dialog {
 				customComposite.getSlider().setMinimum(0);
 				customComposite.getSlider().setMaximum(ssp.getDrm().getFms().size());
 				customComposite.getSlider().setThumb(1);
-				
-				if(!stareMode) {
+
+				if (!stareMode) {
 					customComposite.getPlotSystem1CompositeView().generalUpdate();
 				}
-				
-				
+
 				try {
 					ssps3c.generalUpdate();
 				} catch (Exception u) {
@@ -337,8 +336,14 @@ public class SurfaceScatterViewStart extends Dialog {
 				customComposite.generalUpdate();
 
 				try {
-					customComposite.getPlotSystem()
-							.removeTrace(customComposite.getPlotSystem().getTrace("Interpolated trajectory"));
+					customComposite.getPlotSystem().removeTrace(
+							customComposite.getPlotSystem().getTrace(DisplayLabelStrings.getInterpolatedTrajectory()));
+				} catch (Exception g) {
+
+				}
+				try {
+					customComposite.getPlotSystem().removeTrace(
+							customComposite.getPlotSystem().getTrace(DisplayLabelStrings.getSetTrajectory()));
 				} catch (Exception g) {
 
 				}
@@ -354,7 +359,13 @@ public class SurfaceScatterViewStart extends Dialog {
 				customComposite.getPlotSystem1CompositeView().getCombos()[2].removeAll();
 
 				for (TrackerType1 f : TrackerType1.values()) {
-					if (f != TrackerType1.USE_SET_POSITIONS || isThereAParamFile) {
+
+					if (f != TrackerType1.USE_SET_POSITIONS) {
+						customComposite.getPlotSystem1CompositeView().getCombos()[2].add(f.getTrackerName(),
+								f.getTrackerNo());
+					}
+					if (f == TrackerType1.USE_SET_POSITIONS && isThereAParamFile) {
+
 						customComposite.getPlotSystem1CompositeView().getCombos()[2].add(f.getTrackerName(),
 								f.getTrackerNo());
 					}
@@ -848,10 +859,9 @@ public class SurfaceScatterViewStart extends Dialog {
 
 		});
 		container.layout();
-		
-		
-//		customComposite.resetRegion(customComposite.getGreenRegion());
-		
+
+		// customComposite.resetRegion(customComposite.getGreenRegion());
+
 		return container;
 	}
 
@@ -860,6 +870,16 @@ public class SurfaceScatterViewStart extends Dialog {
 
 		ssp.updateAnalysisMethodology(methodologySelection, fitPowerSelection, trackerSelection, boundaryBox);
 
+		if(TrackingMethodology.intToTracker1(trackerSelection) != TrackingMethodology.TrackerType1.USE_SET_POSITIONS) {
+			try{
+				customComposite.getPlotSystem()
+			.removeTrace(customComposite.getPlotSystem().getTrace(DisplayLabelStrings.getSetTrajectory()));
+			}
+			catch(Exception j) {
+				
+			}
+		}
+		
 		if (TrackingMethodology.intToTracker1(trackerSelection) != TrackingMethodology.TrackerType1.SPLINE_INTERPOLATION
 				&& ssp.getInterpolatorRegions() != null) {
 
@@ -870,7 +890,7 @@ public class SurfaceScatterViewStart extends Dialog {
 			}
 			try {
 				customComposite.getPlotSystem()
-						.removeTrace(customComposite.getPlotSystem().getTrace("Interpolated trajectory"));
+						.removeTrace(customComposite.getPlotSystem().getTrace(DisplayLabelStrings.getInterpolatedTrajectory()));
 			} catch (Exception g) {
 
 			}
@@ -901,7 +921,7 @@ public class SurfaceScatterViewStart extends Dialog {
 
 		else if (TrackingMethodology.intToTracker1(trackerSelection) == TrackerType1.USE_SET_POSITIONS
 				&& ssp.getTrackerOn()) {
-			setParametersFromFile(paramFile, true);
+//			useSetPositionTracker();
 		}
 
 	}
@@ -999,12 +1019,10 @@ public class SurfaceScatterViewStart extends Dialog {
 
 				customComposite.getBgRegion().setROI(greenAndBg[1]);
 			}
-			
-			
+
 		}
 	}
 
-	@SuppressWarnings("deprecation")
 	public void interpolationTrackerBoxesAccept() {
 
 		try {
@@ -1012,7 +1030,6 @@ public class SurfaceScatterViewStart extends Dialog {
 			Color cyan = display.getSystemColor(SWT.COLOR_CYAN);
 
 			IRegion greenRegion = customComposite.getGreenRegion();
-
 
 			if (ssp.getInterpolatorBoxes() != null) {
 				for (int j = 0; j < ssp.getInterpolatorBoxes().size(); j++) {
@@ -1024,8 +1041,7 @@ public class SurfaceScatterViewStart extends Dialog {
 					}
 				}
 			}
-			
-			
+
 			ArrayList<double[][]> jk = ssp.interpolationTrackerBoxesAccept(greenRegion);
 
 			try {
@@ -1051,8 +1067,7 @@ public class SurfaceScatterViewStart extends Dialog {
 				greenRegion.toFront();
 
 			} catch (Exception e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
+
 				debug("Box not accepted");
 			}
 
@@ -1069,17 +1084,12 @@ public class SurfaceScatterViewStart extends Dialog {
 
 				IRegion trajectoryRegion = pS.createRegion("Interpolated trajectory", RegionType.POLYLINE);
 
-				Dataset xData = DatasetFactory.zeros(new int[] { jk.size() }, Dataset.ARRAYFLOAT64);
-				Dataset yData = DatasetFactory.zeros(new int[] { jk.size() }, Dataset.ARRAYFLOAT64);
-
 				PolylineROI lt1 = new PolylineROI();
 
 				for (int ty = 0; ty < jk.size(); ty++) {
 					double[][] consideredBox = jk.get(ty);
 					double x = consideredBox[1][0];
 					double y = consideredBox[1][1];
-					xData.set(consideredBox[1][0], ty);
-					yData.set(consideredBox[1][1], ty);
 
 					lt1.insertPoint(x, y);
 
@@ -1098,8 +1108,79 @@ public class SurfaceScatterViewStart extends Dialog {
 		}
 
 		catch (Exception f) {
-			System.out.println("error at line 1069: " + f.getMessage());
+			
 		}
+	}
+
+	public void useSetPositionTracker() {
+
+		Display display = Display.getCurrent();
+		Color cyan = display.getSystemColor(SWT.COLOR_CYAN);
+
+		double[][] rois = ssp.loadROIs(paramFile);
+		
+		ArrayList<IRectangularROI> setROIS = new ArrayList<>();
+		
+		for(double[] roi :rois) {
+			
+			int[][] lenpt = LocationLenPtConverterUtils.locationToLenPtConverter(roi);
+			int[] len = lenpt[0];
+			int[] pt = lenpt[1];
+		
+			IRectangularROI newROI = new RectangularROI(pt[0], pt[1], len[0], len[1], 0);
+			setROIS.add(newROI);
+		}
+
+		ssp.setSetROIs(setROIS);
+		
+		IPlottingSystem<Composite> pS = customComposite.getPlotSystem();
+
+		String setTrajectory = DisplayLabelStrings.getSetTrajectory();
+
+		try {
+			IRegion n = pS.getRegion(setTrajectory);
+			pS.removeRegion(n);
+		} catch (Exception g) {
+
+		}
+
+		IRegion trajectoryRegion;
+
+		try {
+			trajectoryRegion = pS.createRegion(setTrajectory, RegionType.POLYLINE);
+
+			PolylineROI lt1 = new PolylineROI();
+
+			for (int ty = 0; ty < rois.length; ty++) {
+				try {
+
+					double[] consideredBox = rois[ty];
+					double x = consideredBox[0];
+					double y = consideredBox[1];
+
+					lt1.insertPoint(x, y);
+				} catch (ArrayIndexOutOfBoundsException ai) {
+					System.out.println("error at ty :    " + ty);
+				
+			} catch (NullPointerException np) {
+				System.out.println("error at ty :    " + ty);
+			}
+			}
+
+			trajectoryRegion.setROI(lt1);
+			trajectoryRegion.setVisible(true);
+			trajectoryRegion.setRegionColor(cyan);
+
+			pS.addRegion(trajectoryRegion);
+			trajectoryRegion.toFront();
+			trajectoryRegion.setUserRegion(false);
+			trajectoryRegion.setMobile(false);
+
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
 	}
 
 	public void interpolationTrackerBoxesReject() {
@@ -1258,6 +1339,29 @@ public class SurfaceScatterViewStart extends Dialog {
 		if ((ssp.getTrackerType() == TrackerType1.SPLINE_INTERPOLATION) && ssp.getInterpolatedLenPts() != null) {
 
 			double[][] lf = ssp.getInterpolatedLenPts().get(ssp.getSliderPos());
+
+			RectangularROI grayROI = new RectangularROI(lf[1][0], lf[1][1], lf[0][0], lf[0][1], 0);
+
+			try {
+				IRegion grayRegion = customComposite.getPlotSystem().createRegion( DisplayLabelStrings.getGrayRegion(), RegionType.BOX);
+				grayRegion.setROI(grayROI);
+				grayRegion.setRegionColor(gray);
+				grayRegion.setLineWidth(10);
+				grayRegion.setFill(true);
+				grayRegion.setUserRegion(false);
+				grayRegion.setMobile(false);
+				customComposite.getPlotSystem().addRegion(grayRegion);
+			} catch (Exception e) {
+				e.printStackTrace();
+
+			}
+		}
+
+		if ((ssp.getTrackerType() == TrackerType1.USE_SET_POSITIONS) && ssp.getSetROIs() != null) {
+
+			double[] af = ssp.getSetPositions()[ssp.getSliderPos()];
+
+			int[][] lf = LocationLenPtConverterUtils.locationToLenPtConverter(af);
 
 			RectangularROI grayROI = new RectangularROI(lf[1][0], lf[1][1], lf[0][0], lf[0][1], 0);
 
@@ -1734,7 +1838,7 @@ public class SurfaceScatterViewStart extends Dialog {
 		customComposite.getPlotSystem().repaint();
 
 		customComposite.getPlotSystem1CompositeView().update();
-		
+
 		try {
 			ssps3c.generalUpdate();
 		} catch (Exception o) {
