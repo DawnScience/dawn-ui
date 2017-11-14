@@ -243,7 +243,7 @@ public abstract class AbstractProcessingTool extends AbstractToolPage {
 		lower.setLayout(new GridLayout(2, false));
 		informer = OperationTableUtils.initialiseOperationTable(seriesTable, lower);
 		
-		modelEditor = new OperationModelViewer(true);
+		modelEditor = new OperationModelViewer(false);
 		modelEditor.createPartControl(lower);
 		seriesTable.addSelectionListener(new ISelectionChangedListener() {
 			
