@@ -85,7 +85,7 @@ public class TrackingHandlerWithFramesImproved {
 			@Override
 			public void run() {
 
-				new TrackingCore(doneArray, ssp, t, ssvs, true, TrackingHandlerWithFramesImproved.this, display);
+				new TrackingCore(doneArray, ssp, t, ssvs, true, TrackingHandlerWithFramesImproved.this, display, false);
 
 				return;
 

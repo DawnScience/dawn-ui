@@ -40,7 +40,7 @@ public class BatchTracking {
 
 			ssp.getDrm().setDoneArray(doneArray);
 
-			new TrackingCore(doneArray, ssp, null, null, false, null, null);
+			new TrackingCore(doneArray, ssp, null, null, false, null, null, bsmps.isDitchNegativeValues());
 
 			progressReport += "   tracked successfully; ";
 		}

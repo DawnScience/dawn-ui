@@ -6,7 +6,14 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+
+import org.apache.commons.lang.StringUtils;
 import org.dawnsci.surfacescatter.BatchRodDataTransferObject;
 import org.dawnsci.surfacescatter.BatchRodModel;
 import org.dawnsci.surfacescatter.BatchSavingAdvancedSettings;
@@ -137,10 +144,24 @@ public class BatchDisplay extends Composite {
 					String folderPath =brm.getNxsFolderPath() + File.separator + brm.getBatchTitle(); 
 					file = new File(folderPath);
 					
-					String logFilePath =folderPath + File.separator + brm.getBatchTitle(); 
+				
+					SimpleDateFormat sdfDate = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");//dd/MM/yyyy
+					Date now = new Date();
+					String strDate = sdfDate.format(now);
+					
+					String rightNow = StringUtils.deleteWhitespace(strDate);
+					
+					String logFilePath =folderPath + File.separator + brm.getBatchTitle()+rightNow; 
 					logFile = new File(logFilePath);
 					
-					boolean b = file.mkdirs();
+					boolean b = false;
+					
+					if(!Files.isDirectory(Paths.get(folderPath))) {
+						b = file.mkdirs();
+					}
+					
+					b = Files.isDirectory(Paths.get(folderPath));
+						 
 					boolean a = logFile.createNewFile();
 					
 					

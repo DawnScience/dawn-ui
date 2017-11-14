@@ -169,9 +169,14 @@ public class ReviewTabComposite extends Composite {
 
 				String title = path + File.separator + stitle;
 
-				CurveStitchDataPackage newCsdp = CsdpFromNexusFile.CsdpFromNexusFileGenerator(title);
+				try {
+					CurveStitchDataPackage newCsdp = CsdpFromNexusFile.CsdpFromNexusFileGenerator(title);
+					rcm.addToCsdpList(newCsdp);
+				} catch (NullPointerException n) {
+					RegionOutOfBoundsWarning r = new RegionOutOfBoundsWarning(ssvs.getShell(), 16, null);
+					r.open();
+				}
 
-				rcm.addToCsdpList(newCsdp);
 			}
 		});
 
@@ -408,8 +413,6 @@ public class ReviewTabComposite extends Composite {
 		logPlot.setData(new GridData(SWT.FILL));
 		logPlot.setText("Log Plot On/Off");
 
-		
-
 		InputTileGenerator tile1 = new InputTileGenerator("X Axis:", curveSettings);
 		xAxis = tile1.getCombo();
 		xAxis.select(0);
@@ -550,7 +553,7 @@ public class ReviewTabComposite extends Composite {
 				}
 			}
 		});
-		
+
 		logPlot.addSelectionListener(new SelectionAdapter() {
 
 			@Override
@@ -655,13 +658,13 @@ public class ReviewTabComposite extends Composite {
 		Shell shell = ssvs.getShell();
 
 		String rodSaveName = rodToSave.getText();
-		
-		if(rodSaveName.equals("")) {
+
+		if (rodSaveName.equals("")) {
 			RegionOutOfBoundsWarning no = new RegionOutOfBoundsWarning(ssvs.getShell(), 14, null);
 			no.open();
 			return;
 		}
-		
+
 		CurveStitchDataPackage csdpToSave = bringMeTheOneIWant(rodSaveName, rcm.getCsdpList());
 
 		ssp.arbitrarySavingMethod(false, writeOnlyGoodPoints, shell, sfs, csdpToSave, yAxisSelection);
@@ -770,41 +773,57 @@ public class ReviewTabComposite extends Composite {
 		boolean isYFhklPresent = true;
 
 		for (CurveStitchDataPackage csdp : csdps) {
-			if (csdp.getSplicedCurveY() == null) {
+			if (csdp.getSplicedCurveY() == null || csdp.getSplicedCurveY().getSize() == 0) {
 				isYPresent = false;
 			} else {
 				for (int i = 0; i < csdp.getSplicedCurveY().getSize(); i++) {
-					double d = csdp.getSplicedCurveY().getDouble(i);
 
-					if (d == -10000000000.0) {
-						isYPresent = false;
-						break;
+					try {
+						double d = csdp.getSplicedCurveY().getDouble(i);
+
+						if (d == -10000000000.0) {
+							isYPresent = false;
+							break;
+						}
+					} catch (Exception y) {
+						System.out.println("error, in get Y i:  " + i);
+
 					}
 				}
 			}
 
-			if (csdp.getSplicedCurveYRaw() == null) {
+			if (csdp.getSplicedCurveYRaw() == null || csdp.getSplicedCurveYRaw().getSize() == 0) {
 				isYRawPresent = false;
 			} else {
 				for (int i = 0; i < csdp.getSplicedCurveYRaw().getSize(); i++) {
-					double d = csdp.getSplicedCurveYRaw().getDouble(i);
+					try {
+						double d = csdp.getSplicedCurveYRaw().getDouble(i);
 
-					if (d == -10000000000.0) {
-						isYRawPresent = false;
-						break;
+						if (d == -10000000000.0) {
+							isYRawPresent = false;
+							break;
+						}
+					} catch (Exception y) {
+						System.out.println("error, in get YRaw i:  " + i);
+
 					}
 				}
 			}
 
-			if (csdp.getSplicedCurveYFhkl() == null) {
+			if (csdp.getSplicedCurveYFhkl() == null || csdp.getSplicedCurveYFhkl().getSize() == 0) {
 				isYFhklPresent = false;
 			} else {
 				for (int i = 0; i < csdp.getSplicedCurveYFhkl().getSize(); i++) {
-					double d = csdp.getSplicedCurveYFhkl().getDouble(i);
+					try {
+						double d = csdp.getSplicedCurveYFhkl().getDouble(i);
 
-					if (d == -10000000000.0) {
-						isYFhklPresent = false;
-						break;
+						if (d == -10000000000.0) {
+							isYFhklPresent = false;
+							break;
+						}
+					} catch (Exception y) {
+						System.out.println("error, in get YFhkl i:  " + i);
+
 					}
 				}
 			}

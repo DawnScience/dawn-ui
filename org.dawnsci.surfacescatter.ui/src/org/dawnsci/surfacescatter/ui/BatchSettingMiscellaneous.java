@@ -52,12 +52,22 @@ public class BatchSettingMiscellaneous extends Composite {
 		Group f3 = localSmallGroup(f);
 		Label fLabel3 = new Label(f3, SWT.FILL);
 		fLabel3.setText("Produce NeXus files for all:");
-
+		
 		Group f4 = localSmallGroup(f);
 		Button produceNexusFiles = new Button(f4, SWT.CHECK);
 		produceNexusFiles.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		produceNexusFiles.setSelection(bsmps.isOutputNexusFiles());
 
+		Group f5 = localSmallGroup(f);
+		Label fLabel5 = new Label(f5, SWT.FILL);
+		fLabel5.setText("Disregard negative values:  ");
+		
+		Group f6 = localSmallGroup(f);
+		Button disregardNegativeValues = new Button(f6, SWT.CHECK);
+		disregardNegativeValues.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		disregardNegativeValues.setSelection(bsmps.isDitchNegativeValues());
+		
+		
 		Group g = new Group(container, SWT.NONE);
 		GridLayout gLayout = new GridLayout(1, true);
 		GridData gData = new GridData((GridData.FILL_HORIZONTAL));
@@ -100,6 +110,7 @@ public class BatchSettingMiscellaneous extends Composite {
 				}
 
 				bsmps.setUseQ(useQ.getSelection());
+				bsmps.setDitchNegativeValues(disregardNegativeValues.getSelection());
 			}
 		});
 

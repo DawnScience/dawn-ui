@@ -95,6 +95,9 @@ public class RegionOutOfBoundsWarning extends Dialog {
 		case 15:
 			warning.setText("Tracker has run off the image.");	
 			break;
+		case 16:
+			warning.setText("Nexus file improperly formatted/ data cannot be read");	
+			break;
 		default:
 			warning.setText("Unknown or novel error.");	
 			break;

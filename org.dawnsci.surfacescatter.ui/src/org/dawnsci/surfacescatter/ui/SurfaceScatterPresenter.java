@@ -2907,6 +2907,22 @@ public class SurfaceScatterPresenter {
 			}
 		}
 	}
+	
+	public void disregardNegativeIntensities(CurveStitchDataPackage csdp) {
+
+		int noDats = csdp.getyIDataset().length;
+
+		for (int r = 0; r < noDats; r++) {
+			int datLength = csdp.getyIDataset()[r].getSize();
+
+			for (int s = 0; s < datLength; s++) {
+				if (csdp.getyIDataset()[r].getDouble(s) < 0) {
+					getFrameModel(r, s).setGoodPoint(false);
+
+				}
+			}
+		}
+	}
 
 	public boolean isUpdateSvs() {
 		return updateSvs;

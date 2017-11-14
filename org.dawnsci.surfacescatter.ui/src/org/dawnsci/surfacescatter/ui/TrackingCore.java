@@ -22,7 +22,7 @@ import org.eclipse.swt.widgets.Display;
 public class TrackingCore {
 
 	public TrackingCore(boolean[] doneArray, SurfaceScatterPresenter ssp, Thread t, SurfaceScatterViewStart ssvs,
-			boolean showtrack, TrackingHandlerWithFramesImproved thwfi, Display display) {
+			boolean showtrack, TrackingHandlerWithFramesImproved thwfi, Display display, boolean ditchNegativeValues) {
 
 		DirectoryModel drm = ssp.getDrm();
 		ArrayList<FrameModel> fms = ssp.getFms();
@@ -138,6 +138,10 @@ public class TrackingCore {
 			csdpgfd.generateCsdpFromDrm(drm);
 
 			CurveStitchDataPackage csdp = csdpgfd.getCsdp();
+			if(ditchNegativeValues){
+				ssp.disregardNegativeIntensities(csdp);
+			}
+			
 			FourierTransformCurveStitch.curveStitch4(csdp, null);
 
 			drm.setCsdp(csdp);
