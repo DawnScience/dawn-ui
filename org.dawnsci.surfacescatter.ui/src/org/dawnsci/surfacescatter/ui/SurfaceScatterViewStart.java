@@ -870,16 +870,15 @@ public class SurfaceScatterViewStart extends Dialog {
 
 		ssp.updateAnalysisMethodology(methodologySelection, fitPowerSelection, trackerSelection, boundaryBox);
 
-		if(TrackingMethodology.intToTracker1(trackerSelection) != TrackingMethodology.TrackerType1.USE_SET_POSITIONS) {
-			try{
+		if (TrackingMethodology.intToTracker1(trackerSelection) != TrackingMethodology.TrackerType1.USE_SET_POSITIONS) {
+			try {
 				customComposite.getPlotSystem()
-			.removeTrace(customComposite.getPlotSystem().getTrace(DisplayLabelStrings.getSetTrajectory()));
-			}
-			catch(Exception j) {
-				
+						.removeTrace(customComposite.getPlotSystem().getTrace(DisplayLabelStrings.getSetTrajectory()));
+			} catch (Exception j) {
+
 			}
 		}
-		
+
 		if (TrackingMethodology.intToTracker1(trackerSelection) != TrackingMethodology.TrackerType1.SPLINE_INTERPOLATION
 				&& ssp.getInterpolatorRegions() != null) {
 
@@ -889,8 +888,8 @@ public class SurfaceScatterViewStart extends Dialog {
 
 			}
 			try {
-				customComposite.getPlotSystem()
-						.removeTrace(customComposite.getPlotSystem().getTrace(DisplayLabelStrings.getInterpolatedTrajectory()));
+				customComposite.getPlotSystem().removeTrace(
+						customComposite.getPlotSystem().getTrace(DisplayLabelStrings.getInterpolatedTrajectory()));
 			} catch (Exception g) {
 
 			}
@@ -921,7 +920,7 @@ public class SurfaceScatterViewStart extends Dialog {
 
 		else if (TrackingMethodology.intToTracker1(trackerSelection) == TrackerType1.USE_SET_POSITIONS
 				&& ssp.getTrackerOn()) {
-//			useSetPositionTracker();
+			// useSetPositionTracker();
 		}
 
 	}
@@ -1108,8 +1107,30 @@ public class SurfaceScatterViewStart extends Dialog {
 		}
 
 		catch (Exception f) {
-			
+
 		}
+	}
+
+	public double[][] loadAndSetROIS() {
+		
+		double[][] rois = ssp.loadROIs(paramFile);
+
+		ArrayList<IRectangularROI> setROIS = new ArrayList<>();
+
+		for (double[] roi : rois) {
+
+			int[][] lenpt = LocationLenPtConverterUtils.locationToLenPtConverter(roi);
+			int[] len = lenpt[0];
+			int[] pt = lenpt[1];
+
+			IRectangularROI newROI = new RectangularROI(pt[0], pt[1], len[0], len[1], 0);
+			setROIS.add(newROI);
+		}
+
+		ssp.setSetROIs(setROIS);
+
+		return rois;
+
 	}
 
 	public void useSetPositionTracker() {
@@ -1117,21 +1138,7 @@ public class SurfaceScatterViewStart extends Dialog {
 		Display display = Display.getCurrent();
 		Color cyan = display.getSystemColor(SWT.COLOR_CYAN);
 
-		double[][] rois = ssp.loadROIs(paramFile);
-		
-		ArrayList<IRectangularROI> setROIS = new ArrayList<>();
-		
-		for(double[] roi :rois) {
-			
-			int[][] lenpt = LocationLenPtConverterUtils.locationToLenPtConverter(roi);
-			int[] len = lenpt[0];
-			int[] pt = lenpt[1];
-		
-			IRectangularROI newROI = new RectangularROI(pt[0], pt[1], len[0], len[1], 0);
-			setROIS.add(newROI);
-		}
-
-		ssp.setSetROIs(setROIS);
+		double[][] rois = loadAndSetROIS();
 		
 		IPlottingSystem<Composite> pS = customComposite.getPlotSystem();
 
@@ -1161,10 +1168,10 @@ public class SurfaceScatterViewStart extends Dialog {
 					lt1.insertPoint(x, y);
 				} catch (ArrayIndexOutOfBoundsException ai) {
 					System.out.println("error at ty :    " + ty);
-				
-			} catch (NullPointerException np) {
-				System.out.println("error at ty :    " + ty);
-			}
+
+				} catch (NullPointerException np) {
+					System.out.println("error at ty :    " + ty);
+				}
 			}
 
 			trajectoryRegion.setROI(lt1);
@@ -1343,7 +1350,8 @@ public class SurfaceScatterViewStart extends Dialog {
 			RectangularROI grayROI = new RectangularROI(lf[1][0], lf[1][1], lf[0][0], lf[0][1], 0);
 
 			try {
-				IRegion grayRegion = customComposite.getPlotSystem().createRegion( DisplayLabelStrings.getGrayRegion(), RegionType.BOX);
+				IRegion grayRegion = customComposite.getPlotSystem().createRegion(DisplayLabelStrings.getGrayRegion(),
+						RegionType.BOX);
 				grayRegion.setROI(grayROI);
 				grayRegion.setRegionColor(gray);
 				grayRegion.setLineWidth(10);
