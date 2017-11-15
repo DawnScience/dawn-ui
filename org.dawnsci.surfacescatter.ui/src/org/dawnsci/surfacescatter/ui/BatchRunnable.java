@@ -63,8 +63,6 @@ public class BatchRunnable implements Callable {
 		sspi.setStm(stmi);
 		sspi.createGm();
 
-		long startTime = System.nanoTime();
-
 		NexusFile file = new NexusFileFactoryHDF5().newNexusFile(paramFile);
 
 		try {
@@ -77,17 +75,7 @@ public class BatchRunnable implements Callable {
 		
 		FittingParametersInputReader.anglesAliasReaderFromNexus(file);
 
-		long angleTime = System.nanoTime();
-
-		System.out.println(" anglesAliasTime :   " + (angleTime - startTime) / 1000000);
-
-		startTime = System.nanoTime();
-
 		FittingParametersInputReader.geometricalParametersReaderFromNexus(file, sspi.getGm(), sspi.getDrm());
-
-		long geometryTime = System.nanoTime();
-
-		System.out.println(" geometryAliasTime :   " + (geometryTime - startTime) / 1000000);
 
 		sspi.surfaceScatterPresenterBuildWithFrames(datFiles, sspi.getGm().getxName(),
 				MethodSetting.toMethod(sspi.getGm().getExperimentMethod()));
@@ -96,13 +84,7 @@ public class BatchRunnable implements Callable {
 
 		BatchTracking bat = new BatchTracking(sspi);
 	
-		startTime = System.nanoTime();
-
 		bat.runTJ1(savePath, bsas, bsmps, noRods, lock, writer);
-
-		long batchTime = System.nanoTime();
-
-		System.out.println(" batchTime :   " + (batchTime - startTime) / 1000000);
 
 		display.asyncExec(new Runnable() {
 			@Override

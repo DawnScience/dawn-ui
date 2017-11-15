@@ -358,7 +358,6 @@ public class SurfaceScatterPresenter {
 					dcdThetaArray[id] = dh1.getDataset(ReflectivityAngleAliasEnum.THETA.getAngleAlias());
 
 					qdcdArray[id] = dh1.getDataset(ReflectivityAngleAliasEnum.Q.getAngleAlias());
-					// dh1.getDataset(ReflectivityMetadataTitlesForDialog.getqdcd());
 
 					if (dcdThetaArray[id] == null) {
 						try {
@@ -936,7 +935,7 @@ public class SurfaceScatterPresenter {
 
 		String fileType = StringUtils.substringAfterLast(title, ".");
 
-		FittingParameters fp = new FittingParameters();
+		FittingParameters fp;
 
 		if (!fileType.equals("nxs")) {
 
@@ -1280,21 +1279,6 @@ public class SurfaceScatterPresenter {
 		return drm.getInterpolatorBoxes();
 	}
 
-//	public void illuminateCorrectInterpolationBox() {
-//
-//		if ((getTrackerType() == TrackerType1.SPLINE_INTERPOLATION) && drm.getInterpolatorRegions() != null) {
-//
-//			double u = (double) sliderPos;
-//
-//			for (int j = 0; j < drm.getInterpolatorBoxes().size(); j++) {
-//				if (drm.getInterpolatorBoxes().get(j)[2][0] == u) {
-//					drm.getInterpolatorRegions().get(j).setFill(true);
-//				} else {
-//					drm.getInterpolatorRegions().get(j).setFill(false);
-//				}
-//			}
-//		}
-//	}
 
 	public ArrayList<double[][]> getInterpolatedLenPts() {
 		return drm.getInterpolatedLenPts();
@@ -1569,9 +1553,9 @@ public class SurfaceScatterPresenter {
 	}
 
 	public Dataset subImage(int sliderPos, IROI box) {
-		IDataset image = this.getImage(sliderPos); // sm.getImages()[sliderPos];
-		Dataset subImage = (Dataset) PlotSystem2DataSetter.PlotSystem2DataSetter1(box, image);
-		return subImage;
+		IDataset image = this.getImage(sliderPos); 
+		return (Dataset) PlotSystem2DataSetter.PlotSystem2DataSetter1(box, image);
+		
 	}
 
 	public Dataset subImage(IDataset image, IROI box) {

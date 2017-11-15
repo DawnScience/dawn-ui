@@ -77,7 +77,6 @@ public class SurfaceScatterViewStart extends Dialog {
 	private GeometricParametersWindows paramField;
 	private CTabFolder folder;
 	private SurfaceScatterPresenter ssp;
-	private int DEBUG = 1;
 	private boolean modify = true;
 	private String datFolderPath;
 	private Combo correctionsDropDown;
@@ -1067,7 +1066,6 @@ public class SurfaceScatterViewStart extends Dialog {
 
 			} catch (Exception e1) {
 
-				debug("Box not accepted");
 			}
 
 			IPlottingSystem<Composite> pS = customComposite.getPlotSystem();
@@ -1386,12 +1384,6 @@ public class SurfaceScatterViewStart extends Dialog {
 				e.printStackTrace();
 
 			}
-		}
-	}
-
-	private void debug(String output) {
-		if (DEBUG == 1) {
-			System.out.println(output);
 		}
 	}
 
@@ -1859,9 +1851,6 @@ public class SurfaceScatterViewStart extends Dialog {
 		return raw;
 	}
 
-	private void setParametersFromFile(String paramFile, boolean useTrajectory) {
-		setParametersFromFile(paramFile, false, useTrajectory);
-	}
 
 	private void setParametersFromFile(String paramFile, boolean setTheTrackerType, boolean useTrajectory) {
 
