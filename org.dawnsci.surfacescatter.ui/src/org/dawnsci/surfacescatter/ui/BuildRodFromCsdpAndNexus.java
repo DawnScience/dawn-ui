@@ -34,15 +34,11 @@ public class BuildRodFromCsdpAndNexus {
 
 		for (OverviewNexusObjectBuilderEnum oe : OverviewNexusObjectBuilderEnum.values()) {
 			try {
-				oe.frameGroupNodePopulateFromFrameModelMethod(oe, nxData, fm);
+				oe.frameModelPopulateFromGroupNodeMethod(g, fm);
 			} catch (Exception j) {
 				System.out.println(j.getMessage());
 			}
-			try {
-				oe.frameExtractionMethod(oe, m, fm);
-			} catch (Exception ji) {
-				System.out.println(ji.getMessage());
-			}
+			
 		}
 		
 		
