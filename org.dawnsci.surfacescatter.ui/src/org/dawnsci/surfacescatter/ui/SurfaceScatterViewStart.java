@@ -249,7 +249,7 @@ public class SurfaceScatterViewStart extends Dialog {
 
 				ssp.resetSmOutputObjects();
 
-				int[][] r = new int[][] { { 50, 50 }, { 73, 182 } };
+				int[][] r = new int[][] { { 50, 50 }, { 10, 10 } };
 				String q = null;
 				int[][] pbolp = null;
 				int[][] bolp = null;
@@ -369,7 +369,13 @@ public class SurfaceScatterViewStart extends Dialog {
 								f.getTrackerNo());
 					}
 				}
+				try {
 
+					customComposite.getPlotSystem1CompositeView().getCombos()[2]
+							.select(ssp.getFms().get(0).getTrackingMethodology().getTrackerNo());
+				} catch (Exception h) {
+
+				}
 				ssps3c.resetCrossHairs();
 			}
 
@@ -1110,7 +1116,7 @@ public class SurfaceScatterViewStart extends Dialog {
 	}
 
 	public double[][] loadAndSetROIS() {
-		
+
 		double[][] rois = ssp.loadROIs(paramFile);
 
 		ArrayList<IRectangularROI> setROIS = new ArrayList<>();
@@ -1137,7 +1143,7 @@ public class SurfaceScatterViewStart extends Dialog {
 		Color cyan = display.getSystemColor(SWT.COLOR_CYAN);
 
 		double[][] rois = loadAndSetROIS();
-		
+
 		IPlottingSystem<Composite> pS = customComposite.getPlotSystem();
 
 		String setTrajectory = DisplayLabelStrings.getSetTrajectory();
@@ -1267,7 +1273,12 @@ public class SurfaceScatterViewStart extends Dialog {
 				getPlotSystemCompositeView().getSash().setWeights(new int[] { 23, 45, 25, 7 });
 
 			}
-
+			
+			try {
+				double[][] rois = ssp.loadROIs(paramFile);
+			}catch(Exception o) {
+				
+			}
 			TrackingProgressAndAbortViewImproved tpaav = new TrackingProgressAndAbortViewImproved(getParentShell(), ssp,
 					this);
 			tpaav.open();
@@ -1850,7 +1861,6 @@ public class SurfaceScatterViewStart extends Dialog {
 	public RodAnalysisWindow getRaw() {
 		return raw;
 	}
-
 
 	private void setParametersFromFile(String paramFile, boolean setTheTrackerType, boolean useTrajectory) {
 

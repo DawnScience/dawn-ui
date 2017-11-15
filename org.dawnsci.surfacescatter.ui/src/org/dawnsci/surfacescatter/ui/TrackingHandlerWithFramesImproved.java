@@ -72,8 +72,6 @@ public class TrackingHandlerWithFramesImproved {
 
 		ssp.regionOfInterestSetter(lenPt);
 
-		ssp.regionOfInterestSetter(lenPt);
-
 		outputCurves.clear();
 
 		boolean[] doneArray = new boolean[drm.getDatFilepaths().length];

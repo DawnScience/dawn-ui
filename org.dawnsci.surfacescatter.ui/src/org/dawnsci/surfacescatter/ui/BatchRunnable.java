@@ -81,7 +81,9 @@ public class BatchRunnable implements Callable {
 				MethodSetting.toMethod(sspi.getGm().getExperimentMethod()));
 
 		sspi.loadParameters(paramFile, useTrajectory, useStareMode);
-
+		
+		double[][] rois = sspi.loadROIs(paramFile);
+		
 		BatchTracking bat = new BatchTracking(sspi);
 	
 		bat.runTJ1(savePath, bsas, bsmps, noRods, lock, writer);
