@@ -51,17 +51,11 @@ public class BatchRunner {
 			useTrajectories[i] = b.isUseTrajectory();
 			useStareModes[i] = b.isUseStareMode();
 		}
-		long startTime = System.nanoTime();
-
+		
 		
 		batchRun(datFiles, imageFolderPaths, paramFiles, baseSaveFilePaths, useTrajectories, useStareModes, bsas, bsmps,
 				progress, bpaatv, display);
 
-		long endTime = System.nanoTime() - startTime;
-
-	
-		
-		System.out.println("final total batch time:  " + endTime);
 	}
 
 	public void batchRun(String[][] datFiles, String[] imageFolderPaths, String[] paramFiles,
@@ -93,13 +87,7 @@ public class BatchRunner {
 		}
 
 		executor.shutdown();
-		
-//		for(Future f: batch) {
-//			if(!f.isCancelled()) {
-//			
-//				f.
-//			}
-//		}
+
 
 	}
 

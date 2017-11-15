@@ -1009,6 +1009,27 @@ public class SurfaceScatterPresenter {
 		}
 
 	}
+	
+	public void loadSetROIs(String title) {
+
+		String fileType = StringUtils.substringAfterLast(title, ".");
+		
+		if (!fileType.equals("nxs")) {
+
+			throw new NullPointerException();
+		}
+
+		else {
+
+			NexusFile file = new NexusFileFactoryHDF5().newNexusFile(title);
+
+			double[][] r =  FittingParametersInputReader.readROIsFromNexus(file);
+
+			drm.setSetPositions(r);
+			
+		}
+
+	}
 
 	private void setFrameModelsUsingNexus(FrameSetupFromNexusTransferObject fsfnto) {
 		for (int n = 0; n < fms.size(); n++) {

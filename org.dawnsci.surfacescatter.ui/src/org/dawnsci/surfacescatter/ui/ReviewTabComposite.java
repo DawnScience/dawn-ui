@@ -228,7 +228,7 @@ public class ReviewTabComposite extends Composite {
 			}
 
 		});
-
+		
 		rodDisplayTable = new Table(rodSelector, SWT.CHECK | SWT.V_SCROLL | SWT.H_SCROLL | SWT.BORDER);
 		rodDisplayTable.setEnabled(true);
 
@@ -275,6 +275,27 @@ public class ReviewTabComposite extends Composite {
 		Group saveSettings = new Group(rightForm, SWT.NONE);
 		GridLayout saveSettingsLayout = new GridLayout(2, true);
 		saveSettings.setLayout(saveSettingsLayout);
+		
+		Button loadTarget = new Button(rightForm, SWT.PUSH);
+		loadTarget.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		loadTarget.setData(new GridData(SWT.FILL));
+		loadTarget.setText("Load Target");
+
+		loadTarget.addSelectionListener(new SelectionListener() {
+
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+
+				loadTarget();
+
+			}
+
+			@Override
+			public void widgetDefaultSelected(SelectionEvent e) {
+
+			}
+		});
+		
 
 		final GridData saveSettingsData = new GridData(SWT.FILL, SWT.FILL, true, true);
 		saveSettingsData.grabExcessVerticalSpace = true;
@@ -472,7 +493,7 @@ public class ReviewTabComposite extends Composite {
 		outputFormatSelection.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		outputFormatSelection.select(0);
 
-		rightForm.setWeights(new int[] { 8, 10, 8, 74 });
+		rightForm.setWeights(new int[] { 8, 10,5, 8, 69 });
 
 		rcm.addPropertyChangeListener(new PropertyChangeListener() {
 
@@ -1047,6 +1068,20 @@ public class ReviewTabComposite extends Composite {
 		} else {
 			showOnlyGoodPoints.setText("Disregard Bad Points");
 		}
+	}
+	
+	private void loadTarget() {
+		
+		String rodSaveName = rodToSave.getText();
+		
+		if (rodSaveName.equals("")) {
+			RegionOutOfBoundsWarning no = new RegionOutOfBoundsWarning(ssvs.getShell(), 14, null);
+			no.open();
+			return;
+		}
+		
+		
+		
 	}
 
 }

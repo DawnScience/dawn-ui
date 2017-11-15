@@ -14,8 +14,6 @@ import org.dawnsci.surfacescatter.MethodSettingEnum.MethodSetting;
 import org.dawnsci.surfacescatter.ReflectivityNormalisation;
 import org.dawnsci.surfacescatter.TrackerLocationInterpolation;
 import org.dawnsci.surfacescatter.TrackingMethodology.TrackerType1;
-import org.eclipse.dawnsci.analysis.api.roi.IRectangularROI;
-import org.eclipse.dawnsci.analysis.dataset.roi.RectangularROI;
 import org.eclipse.january.dataset.Dataset;
 import org.eclipse.january.dataset.DatasetFactory;
 import org.eclipse.january.dataset.IDataset;
@@ -30,14 +28,6 @@ public class TrackingCore {
 		ArrayList<FrameModel> fms = ssp.getFms();
 
 		boolean start = true;
-		
-		TrackerType1 tt0 = fms.get(0).getTrackingMethodology();
-		
-//		if(tt0 == TrackerType1.USE_SET_POSITIONS) {
-//
-//			sspi.loadROIs(paramFile);
-//		}
-//		
 		
 		while (!ClosestNoFinder.full(doneArray, "done")) {
 

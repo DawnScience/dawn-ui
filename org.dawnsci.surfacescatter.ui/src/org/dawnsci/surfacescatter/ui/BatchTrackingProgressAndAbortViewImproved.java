@@ -70,31 +70,6 @@ public class BatchTrackingProgressAndAbortViewImproved extends Dialog {
 		});
 
 		br = new BatchRunner(brm, progress, this, display, writer);
-
-		
-//		br.getBatch().
-//		
-//		for (Future<Boolean> future : br.getBatch()) {
-//			try{
-//				if(future.get()) {
-//
-//							if (progress.isDisposed() != true) {
-//								progress.setSelection(progress.getSelection() + 1);
-//			
-//								if (progress.getSelection() == progress.getMaximum()) {
-//									getShell().close();
-//								}
-//			
-////							}
-////							return;
-//						}
-////					});
-//				}
-//			}catch (Exception e) {
-//				System.out.println(e.getMessage());
-//				throw new RuntimeException(e);
-//			}
-//		}
 		
 		
 		return container;

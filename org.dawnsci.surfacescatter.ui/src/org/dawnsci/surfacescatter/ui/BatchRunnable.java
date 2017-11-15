@@ -82,7 +82,9 @@ public class BatchRunnable implements Callable {
 
 		sspi.loadParameters(paramFile, useTrajectory, useStareMode);
 		
-		double[][] rois = sspi.loadROIs(paramFile);
+		if(useTrajectory) {
+			sspi.loadSetROIs(paramFile);
+		}
 		
 		BatchTracking bat = new BatchTracking(sspi);
 	
