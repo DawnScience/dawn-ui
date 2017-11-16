@@ -138,6 +138,7 @@ import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.printing.PrintDialog;
 import org.eclipse.swt.printing.Printer;
 import org.eclipse.swt.printing.PrinterData;
+import org.eclipse.swt.widgets.Canvas;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.FileDialog;
@@ -160,7 +161,7 @@ public class LightWeightPlotViewer<T> extends AbstractPlottingViewer<T> implemen
 	private static final Logger logger = LoggerFactory.getLogger(LightWeightPlotViewer.class);
 	
     // Canvas used in SWT mode
-    private FigureCanvas           figureCanvas;
+    private Canvas           figureCanvas;
 
     // Controls
 	private XYRegionGraph          xyGraph;
@@ -199,7 +200,7 @@ public class LightWeightPlotViewer<T> extends AbstractPlottingViewer<T> implemen
 		
 		LightweightSystem lws = null;
 		if (parent instanceof Composite) {
-			FigureCanvas xyCanvas = new FigureCanvas((Composite)parent, SWT.DOUBLE_BUFFERED|SWT.NO_REDRAW_RESIZE|SWT.NO_BACKGROUND);
+			Canvas xyCanvas = new Canvas((Composite)parent, SWT.DOUBLE_BUFFERED|SWT.NO_REDRAW_RESIZE|SWT.NO_BACKGROUND);
 			lws = new LightweightSystem(xyCanvas);
 			
 			// Stops a mouse wheel move corrupting the plotting area, but it wobbles a bit.
