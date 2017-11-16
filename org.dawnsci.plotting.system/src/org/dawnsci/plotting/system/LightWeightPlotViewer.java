@@ -52,6 +52,7 @@ import org.eclipse.dawnsci.plotting.api.axis.IAxisSystem;
 import org.eclipse.dawnsci.plotting.api.axis.IClickListener;
 import org.eclipse.dawnsci.plotting.api.axis.IPositionListener;
 import org.eclipse.dawnsci.plotting.api.histogram.IPaletteService;
+import org.eclipse.dawnsci.plotting.api.histogram.ImageServiceBean;
 import org.eclipse.dawnsci.plotting.api.histogram.functions.FunctionContainer;
 import org.eclipse.dawnsci.plotting.api.preferences.PlottingConstants;
 import org.eclipse.dawnsci.plotting.api.region.IRegion;
@@ -97,6 +98,7 @@ import org.eclipse.january.dataset.DoubleDataset;
 import org.eclipse.january.dataset.IDataset;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.ActionContributionItem;
+import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IContributionItem;
 import org.eclipse.jface.action.IContributionManager;
 import org.eclipse.jface.action.IMenuListener;
@@ -118,6 +120,7 @@ import org.eclipse.nebula.visualization.xygraph.figures.Annotation;
 import org.eclipse.nebula.visualization.xygraph.figures.Axis;
 import org.eclipse.nebula.visualization.xygraph.figures.DAxis;
 import org.eclipse.nebula.visualization.xygraph.figures.IXYGraph;
+import org.eclipse.nebula.visualization.xygraph.figures.PlotArea;
 import org.eclipse.nebula.visualization.xygraph.figures.ZoomType;
 import org.eclipse.nebula.visualization.xygraph.linearscale.AbstractScale.LabelSide;
 import org.eclipse.nebula.visualization.xygraph.linearscale.LinearScaleTickLabels;
@@ -166,10 +169,14 @@ public class LightWeightPlotViewer<T> extends AbstractPlottingViewer<T> implemen
 	private PlottingSystemImpl<T>  system;
 	private LightWeightPlotActions plotActionsCreator;
 	private Figure                 plotContents;
+	private Figure                 graphLayer;
 	private ColorMapRamp           intensity;
 	private ScaledSliderFigure     folderScale;
+	private Axis                  colorMapAxis;
 	public static final String XAXIS_DEFAULT_NAME = "X-Axis";
 	public static final String YAXIS_DEFAULT_NAME = "Y-Axis";
+	
+	private static final double COLORMAP_WHEEL_SCALE = 10;
 
 	private LayeredPane content;
 
@@ -231,7 +238,7 @@ public class LightWeightPlotViewer<T> extends AbstractPlottingViewer<T> implemen
  		// region draw layer is on 0)
  		this.content      = new LayeredPane();
         new RegionCreationLayer(content, xyGraph.getRegionArea());  
-        Layer graphLayer = new Layer();
+        graphLayer = new Layer();
         
         graphLayer.setLayoutManager(new BorderLayout());
         
@@ -240,7 +247,18 @@ public class LightWeightPlotViewer<T> extends AbstractPlottingViewer<T> implemen
         plotContents.add(xyGraph, new GridData(SWT.FILL, SWT.FILL, true, true));
         graphLayer.add(plotContents, BorderLayout.CENTER);
         
-		this.intensity = new ColorMapRamp(new DAxis());
+        
+        colorMapAxis = new DAxis();
+        colorMapAxis.setShowMaxLabel(true);
+        colorMapAxis.setShowMinLabel(true);
+        
+		this.intensity = new ColorMapRamp(colorMapAxis);
+		
+		ColorMapMouseListener l = new ColorMapMouseListener();
+		
+		intensity.addMouseMotionListener(l);
+		intensity.addMouseListener(l);
+		
 		Color bgdColor = parent instanceof Composite? ((Composite)parent).getBackground():null;
  		intensity.setBorder(new LineBorder(bgdColor != null ? bgdColor : ColorConstants.white, 5));
         graphLayer.add(intensity, BorderLayout.RIGHT);
@@ -361,6 +379,34 @@ public class LightWeightPlotViewer<T> extends AbstractPlottingViewer<T> implemen
 				int direction = e.count > 0 ? 1 : -1;
 
 				IFigure fig = getFigureAtCurrentMousePosition(null);
+				
+				if (isColorMapFigure(fig)) {
+					
+					ImageTrace image = getImageTrace();
+					if (image == null) return;
+					
+					ImageServiceBean bean = image.getImageServiceBean();
+					if (bean == null) return;
+					
+					double max = bean.getMax().doubleValue();
+					double min = bean.getMin().doubleValue();
+
+					double currentValue = colorMapAxis.getPositionValue(e.y-intensity.getLocation().y, false);
+					if (currentValue > max) currentValue = max;
+					if (currentValue < min) currentValue = min;
+					double fraction = (currentValue - min) / (max  - min);
+					double offset = ((max-min)/COLORMAP_WHEEL_SCALE)*direction ;
+					double minOffset = min+(offset*fraction);
+					double maxOffset = max-(offset*(1-fraction));
+					image.getImageServiceBean().setMin(minOffset);
+					image.setMin(minOffset);
+					image.getImageServiceBean().setMax(maxOffset);
+					image.setMax(maxOffset);
+					image.setPaletteData(image.getPaletteData());
+
+					return;
+				}
+				
 				if (fig!=null && fig.getParent() instanceof Axis) {
 					Axis axis = (Axis)fig.getParent();
 					final double center = axis.getPositionValue(axis.isHorizontal() ? e.x : e.y, false);
@@ -380,6 +426,12 @@ public class LightWeightPlotViewer<T> extends AbstractPlottingViewer<T> implemen
 			}	
 		};
 		return mouseWheelListener;
+	}
+	
+	private boolean isColorMapFigure(IFigure fig) {
+		return (fig != null &&
+				fig.getParent() != null &&
+				(fig.getParent() instanceof ColorMapRamp || fig.getParent().getParent() instanceof ColorMapRamp));
 	}
 
 	private void redraw() {
@@ -544,7 +596,14 @@ public class LightWeightPlotViewer<T> extends AbstractPlottingViewer<T> implemen
 							fillAxisConfigure(manager, (AspectAxis)scale);
 						}
 					}
-					system.getPlotActionSystem().fillZoomActions(manager);
+					
+					if (isColorMapFigure(fig)) {
+						fillColorMapConfigure(manager);
+					} else {
+						system.getPlotActionSystem().fillZoomActions(manager);
+					}
+					
+					
 					manager.update();
 				}
 			};
@@ -555,12 +614,19 @@ public class LightWeightPlotViewer<T> extends AbstractPlottingViewer<T> implemen
 	protected IFigure getFigureAtCurrentMousePosition(Class<?> type) {
 		Point   pnt       = Display.getDefault().getCursorLocation();
 		Point   par       = toDisplay(new Point(0,0));
+
 		final int xOffset = par.x+xyGraph.getLocation().x;
 		final int yOffset = par.y+xyGraph.getLocation().y;
 		
 		IFigure fig = xyGraph.findFigureAt(pnt.x-xOffset, pnt.y-yOffset);
         if (fig!=null && type==null)          return fig;
         if (fig!=null && type.isInstance(fig)) return fig;
+        
+		
+		fig = intensity.findFigureAt(pnt.x-par.x, pnt.y-par.y);
+		
+		if (fig!=null && type==null)          return fig;
+    	if (fig!=null && type.isInstance(fig)) return fig;
 		
 		// We loop +-5 around the click point to find what we want
         for (int x = 1;x<=5; x++){
@@ -632,6 +698,69 @@ public class LightWeightPlotViewer<T> extends AbstractPlottingViewer<T> implemen
 		};
 		manager.add(configure);
 		manager.add(new Separator("org.dawb.workbench.plotting.system.configure.group"));
+	}
+	
+	private void fillColorMapConfigure(IMenuManager manager) {
+		final ImageTrace imageTrace = getImageTrace();
+		
+		if (imageTrace == null) return;
+		
+		ImageServiceBean bean = imageTrace.getImageServiceBean();		
+		
+		if (bean == null) return;
+		
+		if (xyGraph!=null) {
+			final Action configure = new Action("Configure Histogramming", PlottingSystemActivator.getImageDescriptor("icons/TraceProperties.png")) {
+				public void run() {
+					final XYRegionConfigDialog dialog = new XYRegionConfigDialog(Display.getDefault().getActiveShell(), xyGraph, getSystem().isRescale());
+					dialog.setPlottingSystem(system);
+					dialog.setSelectedTrace(imageTrace);
+					dialog.open();
+				}
+			};
+			manager.add(configure);
+			manager.add(new Separator());
+		}
+		
+		boolean log = bean.isLogColorScale();
+		final Action logAction = new Action("Log colour scale", IAction.AS_CHECK_BOX) {
+			public void run() {
+				bean.setLogColorScale(!log);
+				if (imageTrace.isRescaleHistogram()) imageTrace.rehistogram();
+				PlottingSystemActivator.getPlottingPreferenceStore().setValue(PlottingConstants.CM_LOGSCALE, this.isChecked());
+			}
+		};
+		
+		logAction.setChecked(log);
+		
+		final Action invertColorScale = new Action("Invert color scale", IAction.AS_CHECK_BOX) {
+			public void run() {
+				ServiceLoader.getPaletteService().setInverted(this.isChecked());
+				Collection<IPaletteTrace> ps = system.getTracesByClass(IPaletteTrace.class);
+
+				if (ps != null && !ps.isEmpty()) {
+					for (IPaletteTrace p : ps) {
+						p.setPalette(p.getPaletteName());
+					}
+					PlottingSystemActivator.getPlottingPreferenceStore().setValue(PlottingConstants.CM_INVERTED, this.isChecked());
+				}
+			}
+		};
+		
+		invertColorScale.setChecked(PlottingSystemActivator.getPlottingPreferenceStore().getBoolean(PlottingConstants.CM_INVERTED));
+		
+		
+		boolean locked= imageTrace.isRescaleHistogram();
+		final Action lockAction = new Action("Lock", IAction.AS_CHECK_BOX) {
+			public void run() {
+				imageTrace.setRescaleHistogram(!imageTrace.isRescaleHistogram());
+			}
+		};
+		lockAction.setChecked(locked);
+		
+		manager.add(logAction);
+		manager.add(invertColorScale);
+		manager.add(lockAction);
 	}
 	
     /**
@@ -1746,5 +1875,68 @@ public class LightWeightPlotViewer<T> extends AbstractPlottingViewer<T> implemen
 	@Override
 	public Collection<Class<? extends ITrace>> getSupportTraceTypes() {
 		return new ArrayList<>(SUPPORTED_TRACES);
+	}
+	
+	private ImageTrace getImageTrace() {
+		PlotArea plotArea = xyGraph.getPlotArea();
+		if (plotArea instanceof RegionArea) {
+			ImageTrace image = ((RegionArea)plotArea).getImageTrace();
+			return image;
+		}
+		
+		return null;
+	}
+	
+	class ColorMapMouseListener extends MouseMotionListener.Stub implements MouseListener {
+
+		private org.eclipse.draw2d.geometry.Point start;
+		private boolean armed;
+		double startValue = 0;
+		
+		@Override
+		public void mousePressed(org.eclipse.draw2d.MouseEvent me) {
+			
+			start = me.getLocation().getCopy();
+			startValue = colorMapAxis.getPositionValue(start.y-intensity.getLocation().y, false);
+			armed = true;
+			
+		}
+
+		@Override
+		public void mouseReleased(org.eclipse.draw2d.MouseEvent me) {
+			armed = false;
+			
+		}
+
+		@Override
+		public void mouseDoubleClicked(org.eclipse.draw2d.MouseEvent me) {
+			//do nothing
+		}
+		
+		@Override
+		public void mouseDragged(org.eclipse.draw2d.MouseEvent me) {
+			if (!armed) return;
+			
+			ImageTrace image = getImageTrace();
+			if (image == null) return;
+			
+			ImageServiceBean bean = image.getImageServiceBean();
+			if (bean == null) return;
+			
+			org.eclipse.draw2d.geometry.Point location = me.getLocation();
+			double currentValue = colorMapAxis.getPositionValue(location.y-intensity.getLocation().y, false);
+			double offset = startValue-currentValue;
+
+			double max = bean.getMax().doubleValue();
+			double min = bean.getMin().doubleValue();
+
+			image.getImageServiceBean().setMin(min+offset);
+			image.setMin(min+offset);
+			image.getImageServiceBean().setMax(max+offset);
+			image.setMax(max+offset);
+			image.setPaletteData(image.getPaletteData());
+
+		}
+		
 	}
 }
