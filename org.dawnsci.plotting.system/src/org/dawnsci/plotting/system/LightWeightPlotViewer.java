@@ -751,7 +751,7 @@ public class LightWeightPlotViewer<T> extends AbstractPlottingViewer<T> implemen
 		invertColorScale.setChecked(PlottingSystemActivator.getPlottingPreferenceStore().getBoolean(PlottingConstants.CM_INVERTED));
 		
 		
-		boolean locked= imageTrace.isRescaleHistogram();
+		boolean locked= !imageTrace.isRescaleHistogram();
 		final Action lockAction = new Action("Lock", IAction.AS_CHECK_BOX) {
 			public void run() {
 				imageTrace.setRescaleHistogram(!imageTrace.isRescaleHistogram());
