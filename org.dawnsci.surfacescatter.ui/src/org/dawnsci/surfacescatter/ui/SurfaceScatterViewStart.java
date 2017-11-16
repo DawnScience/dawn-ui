@@ -185,10 +185,8 @@ public class SurfaceScatterViewStart extends Dialog {
 
 				MovieJob mJ = new MovieJob();
 				mJ.setPS(customComposite.getPlotSystem());
-
 				mJ.setSsp(ssp);
 				mJ.setSsvs(SurfaceScatterViewStart.this);
-				mJ.setSliders(customComposite.getSlider());
 				mJ.setFolder(customComposite.getFolder());
 				mJ.setSubIBgPS(customComposite.getSubImageBgPlotSystem());
 				mJ.run();

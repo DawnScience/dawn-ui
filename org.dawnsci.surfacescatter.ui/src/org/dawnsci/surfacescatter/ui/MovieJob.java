@@ -1,7 +1,5 @@
 package org.dawnsci.surfacescatter.ui;
 
-import java.util.ArrayList;
-
 import org.dawnsci.surfacescatter.DirectoryModel;
 import org.dawnsci.surfacescatter.LocationLenPtConverterUtils;
 import org.eclipse.dawnsci.analysis.dataset.roi.RectangularROI;
@@ -9,27 +7,20 @@ import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.january.dataset.IDataset;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.Slider;
 import org.eclipse.swt.widgets.TabFolder;
 
 public class MovieJob {
 
-	
-	private int time = 220;
 	private IDataset tempImage;
 	private IDataset subTempImage;
-	private IDataset subIBgTempImage;
 	private double[] tempLoc;
 	private DirectoryModel drm;
-	private int noImages;
-	private int timeStep;
 	private int DEBUG = 0;
 	private IPlottingSystem<Composite> pS;
 	private IPlottingSystem<Composite> subIBgPS;
 	private SurfaceScatterPresenter ssp;
 	private SurfaceScatterViewStart ssvs;
 	private int imageNumber;
-	private Slider sliders;
 	private TabFolder folder;
  
 
@@ -38,25 +29,13 @@ public class MovieJob {
 //		super("Playing movie...");
 	}
 		
-	public void setTime(int time) {
-		this.time = time;
-	}
-	
 	public void setSsp(SurfaceScatterPresenter ssp) {
 		this.ssp = ssp;
 	}
-	
-	public void setSliders(Slider sliders){
-		this.sliders = sliders;
-	}
-	
+		
 	public void setSsvs(SurfaceScatterViewStart ssvs) {
 		this.ssvs = ssvs;
 	}
-	
-//	public void setSuperModel(SuperModel sm) {
-//		this.sm = sm;
-//	}
 	
 	public void setPS(IPlottingSystem<Composite> pS) {
 		this.pS = pS;
