@@ -62,16 +62,12 @@ public class StitchedOverlapCurves extends Composite {
 	private ArrayList<OverlapDataModel> odms;
 	private ArrayList<OverlapDisplayObjects> odos;
 	private boolean modify = true;
-	private Button go;
-	private Button resetAll;
 	private TableViewer viewer;
 	private OverlapDisplayObjects odo;
-	private Group overlapSelector;
 	private ArrayList<IDataset> xArrayList;
 	private boolean useGoodPointsOnly = false;
 	private Button showOnlyGoodPoints;
 	private Button export;
-	private Button normalise;
 	private Slider slider;
 	private IRegion imageNo;
 	private GeneralOverlapHandlerView gohv;
@@ -154,7 +150,7 @@ public class StitchedOverlapCurves extends Composite {
 		normGroupData.heightHint = 100;
 		normGroup.setLayoutData(new GridData(GridData.FILL_HORIZONTAL | GridData.FILL_VERTICAL));
 
-		normalise = new Button(normGroup, SWT.PUSH);
+		Button normalise = new Button(normGroup, SWT.PUSH);
 		normalise.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		normalise.setText("Normalise To Point");
 		normalise.setSize(export.computeSize(100, 20, true));
@@ -271,7 +267,7 @@ public class StitchedOverlapCurves extends Composite {
 		bottomForm.setLayout(new GridLayout());
 		bottomForm.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 
-		overlapSelector = new Group(bottomForm, SWT.V_SCROLL | SWT.BORDER | SWT.MULTI);
+		Group overlapSelector = new Group(bottomForm, SWT.V_SCROLL | SWT.BORDER | SWT.MULTI);
 		GridLayout overlapSelectorLayout = new GridLayout(1, true);
 		GridData overlapSelectorData = new GridData(GridData.FILL_BOTH);
 		overlapSelector.setLayout(overlapSelectorLayout);
@@ -290,12 +286,9 @@ public class StitchedOverlapCurves extends Composite {
 		viewer.getTable().setLayoutData(overlapSelectorData);
 
 		viewer.getTable().pack();
-//		viewer.getTable().setFocus();
 		viewer.getTable().forceFocus();
-		
-		
 
-		resetAll = new Button(bottomForm, SWT.PUSH);
+		Button resetAll = new Button(bottomForm, SWT.PUSH);
 
 		resetAll.setText("Reset All");
 
@@ -315,7 +308,7 @@ public class StitchedOverlapCurves extends Composite {
 			}
 		});
 
-		go = new Button(bottomForm, SWT.PUSH);
+		Button go = new Button(bottomForm, SWT.PUSH);
 
 		go.setText("Go");
 
@@ -383,21 +376,20 @@ public class StitchedOverlapCurves extends Composite {
 		IAxis yAxisR = plotSystem.getSelectedYAxis();
 
 		yAxisR.setLog10(!yAxisR.isLog10());
-		
 
 		viewer.getTable().forceFocus();
 		viewer.getTable().setFocus();
-		
+
 		this.getShell().addControlListener(new ControlListener() {
-			
+
 			@Override
 			public void controlResized(ControlEvent e) {
 				viewer.getTable().forceFocus();
 				viewer.getTable().setFocus();
 				viewer.getTable().forceFocus();
-				
+
 			}
-			
+
 			@Override
 			public void controlMoved(ControlEvent e) {
 				viewer.getTable().forceFocus();
@@ -520,57 +512,6 @@ public class StitchedOverlapCurves extends Composite {
 
 	}
 
-	private void generateOdosFromOdms(AxisEnums.xAxes x, AxisEnums.yAxes y, ArrayList<IDataset> xArrayList) {
-
-		ArrayList<OverlapAttenuationObject> oAos1 = new ArrayList<>();
-
-		for (int i = 0; i < odms.size(); i++) {
-
-			OverlapDataModel odm = odms.get(i);
-
-			OverlapDisplayObjects odo = new OverlapDisplayObjects();
-
-			odo.generateFromOdmAndTable(odm, i);
-
-			odos.add(odo);
-
-			oAos1.add(odo.getOAo());
-			try {
-				if (oAos.size() >= (i - 1) && oAos.size() > 0) {
-					if (oAos.get(i) != null) {
-						oAos1.get(i).setModified(oAos.get(i).isModified());
-					}
-				}
-			} catch (Exception h) {
-
-			}
-
-			odo.addPropertyChangeListener(new PropertyChangeListener() {
-
-				@Override
-				public void propertyChange(PropertyChangeEvent evt) {
-					if (modify) {
-						OverlapDisplayObjects odo = (OverlapDisplayObjects) evt.getSource();
-						odo.setModified(true);
-
-						if (odo.isButtonPushed()) {
-							odo.setModified(false);
-							try {
-								oAos.get(odo.getOdoNumber()).setModified(false);
-							} catch (Exception m) {
-
-							}
-						}
-
-						updateAttenuationFactors(x, y, xArrayList);
-					}
-				}
-			});
-		}
-
-		oAos = oAos1;
-	}
-
 	private TableViewer buildTable1(AxisEnums.xAxes x, AxisEnums.yAxes y, Group overlapSelector,
 			ArrayList<IDataset> xArrayList) {
 
@@ -627,7 +568,7 @@ public class StitchedOverlapCurves extends Composite {
 		}
 
 		// create the columns
-		createColumns(overlapSelector, viewer);
+		createColumns(viewer);
 
 		// make lines and header visible
 		final Table table = viewer.getTable();
@@ -640,11 +581,10 @@ public class StitchedOverlapCurves extends Composite {
 		// get the content for the viewer, setInput will call getElements in the
 		viewer.setInput(odos);
 
-
 		return viewer;
 	}
 
-	private void createColumns(final Composite parent, final TableViewer viewer) {
+	private void createColumns(final TableViewer viewer) {
 
 		String[] titles = { "Overlap: ", "Corrected Attenuation: ", "Raw Attenuation: ", "Fhkl Attenuation: ",
 				"Local Reset: " };
