@@ -388,10 +388,13 @@ public class ConfigureOperationModelWizardPage extends AbstractOperationModelWiz
 							@Override
 							public void run() {
 								try {
+									output.clear();
+									output.clearTraces();
 									MetadataPlotUtils.plotDataWithMetadata(out,output);
 									if (additional!=null) {
 										if (onInput) {
 											input.clear();
+											input.clearTraces();
 											MetadataPlotUtils.plotDataWithMetadata(id.getData(),input);
 											MetadataPlotUtils.plotDataWithMetadata(additional, input, false);
 										} else {
