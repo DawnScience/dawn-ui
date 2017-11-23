@@ -1904,88 +1904,54 @@ public class SurfaceScatterViewStart extends Dialog {
 
 		BuildRodFromCsdpAndNexus brfcan = new BuildRodFromCsdpAndNexus(csdp, ssp);
 
-		// String k = outputCurves.getIntensity().getText();
-		// AxisEnums.yAxes ids0 = AxisEnums.toYAxis(k);
-		//
-		// setIds(ids0);
-		//
-		// setSms(SaveFormatSetting.toMethod(ssps3c.getOutputCurves().getOutputFormatSelection().getSelectionIndex()));
-		//
-		// ssp.createGm();
-		//
-		// customComposite.resetCorrectionsTab();
-		//
-		// rsw.getAnglesAliasWindow().writeOutValues();
-		//
-		// paramField.geometricParametersUpdate();
-		//
-		// try {
-		// for (IRegion g : ssp.getInterpolatorRegions()) {
-		// customComposite.getPlotSystem().removeRegion(g);
-		// g.remove();
-		//
-		// }
-		// } catch (Exception u) {
-		// System.out.println(u.getMessage());
-		// }
-		//
-		// ssp.resetSmOutputObjects();
-		//
-		// int[][] r = new int[][] { { 50, 50 }, { 10, 10 } };
-		// String q = null;
-		// int[][] pbolp = null;
-		// int[][] bolp = null;
-		// int[][] bglpt = null;
-		//
-		// bglpt = ssp.getBackgroundLenPt() != null ? ssp.getBackgroundLenPt() : new
-		// int[][] { { 50, 50 }, { 10, 10 } };
-		// q = ssp.getSaveFolder() != null ? ssp.getSaveFolder() : "null";
-		// r = ssp.getLenPt() != null ? ssp.getLenPt() : new int[][] { { 50, 50 }, { 10,
-		// 10 } };
-		// pbolp = (ssp.getPermanentBoxOffsetLenPt() != null) ?
-		// ssp.getPermanentBoxOffsetLenPt()
-		// : new int[][] { { 0, 0 }, { 0, 0 } };
-		// bolp = ssp.getBoxOffsetLenPt();
-		//
-		// int[] test = correctionsDropDownArray;
-		// int t = correctionsDropDown.getSelectionIndex();
-		//
-		// MethodSetting ms = MethodSetting.toMethod(test[t]);
-		//
-		// ssp.getGm().setExperimentMethod(ms.getCorrectionsName());
-		// ssp.surfaceScatterPresenterBuildWithFrames(filepaths,
-		// rsw.getDatDisplayer().getSelectedOption(), ms);
-		//
-		// try {
-		// ssp.setLenPt(r);
-		// ssp.setPermanentBoxOffsetLenPt(pbolp);
-		// ssp.setBoxOffsetLenPt(bolp);
-		// ssp.setSaveFolder(q);
-		// ssp.setBackgroundLenPt(bglpt);
-		// } catch (Exception m) {
-		// System.out.println(m.getMessage());
-		// }
-		//
-		// if (ssp.isqConvert()) {
-		// double energy = Double.parseDouble(paramField.getEnergy().getText());
-		// ssp.setEnergy(energy);
-		//
-		// ssp.setTheta(paramField.getTheta().getSelectionIndex());
-		// outputCurves.getqAxis().setEnabled(ssp.isqConvert());
-		// customComposite.getPlotSystem1CompositeView().getUseQAxis().setEnabled(ssp.isqConvert());
-		//
-		// try {
-		// ssp.qConversion();
-		// } catch (Exception g) {
-		//
-		// }
-		// }
-		//
+		
+		this.ssp = brfcan.getSsp();
+		
+		
+		brfcan.getSsp().setParentShell(this.getParentShell());
+
+		brfcan.getSsp().addStateListener(new IPresenterStateChangeEventListener() {
+
+			@Override
+			public void update() {
+
+				updateDisplay(null, brfcan.getSsp().isUpdateSvs());
+				customComposite.generalUpdate();
+			}
+		});
+
+		brfcan.getSsp().getDrm().addPropertyChangeListener(new PropertyChangeListener() {
+
+			@Override
+			public void propertyChange(PropertyChangeEvent evt) {
+				updateDisplay(null, brfcan.getSsp().isUpdateSvs());
+			}
+		});
+		
+		
+		brfcan.getSsp().addStateListener(new IPresenterStateChangeEventListener() {
+
+			@Override
+			public void update() {
+				try {
+					ssps3c.generalUpdate();
+				} catch (Exception r) {
+
+				}
+
+			}
+		});
+
+		
+		customComposite.setSsp(brfcan.getSsp());
+		ssps3c.setSsp(brfcan.getSsp());
+		customComposite.getPlotSystem1CompositeView().setSsp(brfcan.getSsp());
+		
 		folder.setSelection(2);
 
 		customComposite.getSlider().setSelection(0);
 		customComposite.getSlider().setMinimum(0);
-		customComposite.getSlider().setMaximum(ssp.getDrm().getFms().size());
+		customComposite.getSlider().setMaximum(brfcan.getSsp().getDrm().getFms().size());
 		customComposite.getSlider().setThumb(1);
 
 		customComposite.getPlotSystem1CompositeView().generalUpdate();
@@ -2032,12 +1998,6 @@ public class SurfaceScatterViewStart extends Dialog {
 
 		ssp.setSelection(0);
 		ssp.setSliderPos(0);
-
-		// if (isThereAParamFile) {
-		// setParametersFromFile(paramFile, rsw.getDatDisplayer().getUseTrajectory(),
-		// stareMode);
-		//
-		// }
 
 		customComposite.getPlotSystem1CompositeView().getCombos()[2].removeAll();
 

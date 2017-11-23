@@ -48,7 +48,6 @@ public class PlotSystemCompositeView extends Composite {
 	private IRegion bgRegion;
 	private IRegion secondBgRegion;
 	private Button outputControl;
-	private Group processing;
 	private Button run;
 	private Combo processingMode;;
 	private int numberOfImages;
@@ -72,7 +71,6 @@ public class PlotSystemCompositeView extends Composite {
 	private SashForm form;
 	private TabItem subBgI;
 	private TabItem correctionsTab;
-	private Button centreRegion;
 	private Button centreSecondBgRegion;
 	private Button disregardFrame;
 	private Button includeAllFrames;
@@ -215,7 +213,7 @@ public class PlotSystemCompositeView extends Composite {
 		GridData centringButtonsData = new GridData(SWT.FILL, SWT.NULL, true, false);
 		centringButtons.setLayoutData(centringButtonsData);
 
-		centreRegion = new Button(centringButtons, SWT.PUSH | SWT.FILL);
+		Button centreRegion = new Button(centringButtons, SWT.PUSH | SWT.FILL);
 		centreRegion.setText("Centre Region");
 		centreRegion.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 
@@ -459,7 +457,7 @@ public class PlotSystemCompositeView extends Composite {
 
 		});
 
-		processing = new Group(form, SWT.NONE);
+		Group processing = new Group(form, SWT.NONE);
 		GridLayout processingLayout = new GridLayout(2, true);
 		processing.setLayout(processingLayout);
 		GridData processingData = new GridData(SWT.FILL, SWT.NULL, true, false);
@@ -1213,6 +1211,10 @@ public class PlotSystemCompositeView extends Composite {
 
 	public Button getDisregardFrame() {
 		return disregardFrame;
+	}
+	
+	public void setSsp(SurfaceScatterPresenter ssp) {
+		this.ssp = ssp;
 	}
 
 }

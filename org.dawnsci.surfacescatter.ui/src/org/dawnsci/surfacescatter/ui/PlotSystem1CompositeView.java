@@ -594,4 +594,8 @@ public class PlotSystem1CompositeView extends Composite {
 			return Status.OK_STATUS;
 		}
 	}
+	
+	public void setSsp(SurfaceScatterPresenter ssp) {
+		this.ssp = ssp;
+	}
 }

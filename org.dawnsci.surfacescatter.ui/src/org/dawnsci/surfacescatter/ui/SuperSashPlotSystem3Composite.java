@@ -440,7 +440,6 @@ public class SuperSashPlotSystem3Composite extends Composite {
 			RectangularROI vertROI = new RectangularROI((int) Math.round(ad[1] / 4), 0, (int) Math.round(ad[1] * 0.5),
 					ad[0], 0);
 			verticalSlice.setROI(vertROI);
-			;
 
 		} catch (Exception e) {
 			// TODO Auto-generated catch block

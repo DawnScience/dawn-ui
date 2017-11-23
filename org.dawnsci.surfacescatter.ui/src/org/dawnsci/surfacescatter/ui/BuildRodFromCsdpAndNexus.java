@@ -149,7 +149,7 @@ public class BuildRodFromCsdpAndNexus {
 			try {
 				oe.directoryModelPopulateFromGroupNodeMethod(directoryModelNode, drm);
 			} catch (Exception j) {
-				System.out.println(j.getMessage());
+				System.out.println(j.getMessage() + "  directoryModelPopulateFromGroupNodeMethod:  " + oe.getFirstName());
 			}
 
 		}
@@ -293,5 +293,9 @@ public class BuildRodFromCsdpAndNexus {
 
 	public DirectoryModel getDirectoryModel() {
 		return drm;
+	}
+	
+	public SurfaceScatterPresenter getSsp() {
+		return ssp;
 	}
 }
