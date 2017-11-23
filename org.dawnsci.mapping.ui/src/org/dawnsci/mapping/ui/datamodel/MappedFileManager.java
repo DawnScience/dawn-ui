@@ -434,4 +434,7 @@ public class MappedFileManager {
 	}
 	
 	
+	public PlottableMapObject getTopMap() {
+		return plotManager.getTopMap();
+	}
 }
