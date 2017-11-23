@@ -44,7 +44,7 @@ public class MultipleOutputCurvesTableView extends Composite {
 	private Button storeAsNexus;
 	private IRegion marker;
 	private SurfaceScatterPresenter ssp;
-	
+
 	public MultipleOutputCurvesTableView (Composite parent, 
 										  int style, 
 										  int extra,
@@ -318,5 +318,11 @@ public class MultipleOutputCurvesTableView extends Composite {
 								  csdpToSave, 
 								  yAxisSelection);
 	}
+	
+	
+	public void setSsp(SurfaceScatterPresenter ssp) {
+		this.ssp = ssp;
+	}
+
 	
 }

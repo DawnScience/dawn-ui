@@ -29,8 +29,8 @@ public class BuildRodFromCsdpAndNexus {
 	public BuildRodFromCsdpAndNexus(CurveStitchDataPackage csdp, SurfaceScatterPresenter sspi) {
 
 		sspi = new SurfaceScatterPresenter();
-		this.ssp=sspi;
-		
+		this.ssp = sspi;
+
 		ArrayList<FrameModel> fms = new ArrayList<>();
 
 		NexusFile file = new NexusFileFactoryHDF5().newNexusFile(csdp.getRodName());
@@ -91,23 +91,26 @@ public class BuildRodFromCsdpAndNexus {
 
 		Dataset rawImage = null;
 		try {
-			rawImage = (Dataset) g.getDataNode(NeXusStructureStrings.getRawImage()).getDataset().getSlice(new SliceND (g.getDataNode(NeXusStructureStrings.getRawImage()).getDataset().getShape()));
+			rawImage = (Dataset) g.getDataNode(NeXusStructureStrings.getRawImage()).getDataset()
+					.getSlice(new SliceND(g.getDataNode(NeXusStructureStrings.getRawImage()).getDataset().getShape()));
 		} catch (DatasetException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		 
 
 		fm.setRawImageData(rawImage);
 
-		Dataset backgroundSubtractedImage  = null;
+		Dataset backgroundSubtractedImage = null;
 		try {
-			backgroundSubtractedImage  = (Dataset) g.getDataNode(NeXusStructureStrings.getBackgroundSubtractedImage()).getDataset().getSlice(new SliceND (g.getDataNode(NeXusStructureStrings.getBackgroundSubtractedImage()).getDataset().getShape()));
+			backgroundSubtractedImage = (Dataset) g.getDataNode(NeXusStructureStrings.getBackgroundSubtractedImage())
+					.getDataset()
+					.getSlice(new SliceND(g.getDataNode(NeXusStructureStrings.getBackgroundSubtractedImage())
+							.getDataset().getShape()));
 		} catch (DatasetException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
+
 		fm.setBackgroundSubtractedImage(backgroundSubtractedImage);
 
 		return fm;
@@ -149,7 +152,8 @@ public class BuildRodFromCsdpAndNexus {
 			try {
 				oe.directoryModelPopulateFromGroupNodeMethod(directoryModelNode, drm);
 			} catch (Exception j) {
-				System.out.println(j.getMessage() + "  directoryModelPopulateFromGroupNodeMethod:  " + oe.getFirstName());
+				System.out
+						.println(j.getMessage() + "  directoryModelPopulateFromGroupNodeMethod:  " + oe.getFirstName());
 			}
 
 		}
@@ -231,7 +235,7 @@ public class BuildRodFromCsdpAndNexus {
 			dmqList.add(new ArrayList<>());
 			locationList.add(new ArrayList<>());
 
-			for (int j = 0; j < noFramesInEachDat[y]+1; j++) {
+			for (int j = 0; j < noFramesInEachDat[y] + 1; j++) {
 				fmsSorted.get(y).add(new FrameModel());
 				framesCorrespondingToDats.get(y).add(0);
 				dmxList.get(y).add(0.0);
@@ -263,7 +267,7 @@ public class BuildRodFromCsdpAndNexus {
 		ArrayList<Integer> imageNoInDatList = new ArrayList<>();
 
 		int[] filePathsSortedArray = new int[fms.size()];
-		String[] datFilepaths = new String[fms.size()];
+		String[] datFilepathsAll = new String[fms.size()];
 
 		for (FrameModel fm : fms) {
 
@@ -272,9 +276,12 @@ public class BuildRodFromCsdpAndNexus {
 			backgroundDatArray.add(fm.getBackgroundSubtractedImage());
 			imageNoInDatList.add(fm.getImageNumber());
 			filePathsSortedArray[fm.getFmNo()] = fm.getDatNo();
-			datFilepaths[fm.getFmNo()] = fm.getDatFilePath();
+			datFilepathsAll[fm.getFmNo()] = fm.getDatFilePath();
 		}
 
+		String[] datFilepaths = uniqueStrings(datFilepathsAll);
+		
+		
 		drm.setqList(qList);
 		drm.setxList(xList);
 
@@ -291,10 +298,47 @@ public class BuildRodFromCsdpAndNexus {
 
 	}
 
+	private String[] uniqueStrings(String[] in) {
+
+		ArrayList<String> outList = new ArrayList<>();
+
+		String probe = in[0];
+
+		outList.add(probe);
+
+		for (String s : in) {
+
+			if (s.equals(probe)) {
+				continue;
+			}
+
+			else {
+				boolean add = true;
+				for (String r : outList) {
+					if (s.equals(r)) {
+						add = false;
+						break;
+					}
+				}
+				if (add) {
+					outList.add(s);
+				}
+			}
+		}
+
+		String[] out = new String[outList.size()];
+
+		for (int i = 0; i < outList.size(); i++) {
+			out[i] = outList.get(i);
+		}
+
+		return out;
+	}
+
 	public DirectoryModel getDirectoryModel() {
 		return drm;
 	}
-	
+
 	public SurfaceScatterPresenter getSsp() {
 		return ssp;
 	}

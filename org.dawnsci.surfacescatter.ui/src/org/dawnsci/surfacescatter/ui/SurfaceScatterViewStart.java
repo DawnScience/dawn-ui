@@ -7,8 +7,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import org.dawnsci.surfacescatter.AnalaysisMethodologies.Methodology;
 import org.dawnsci.surfacescatter.AxisEnums;
+import org.dawnsci.surfacescatter.CsdpGeneratorFromDrm;
 import org.dawnsci.surfacescatter.AxisEnums.yAxes;
 import org.dawnsci.surfacescatter.CurveStitchDataPackage;
+import org.dawnsci.surfacescatter.CurveStitchWithErrorsAndFrames;
 import org.dawnsci.surfacescatter.DisplayLabelStrings;
 import org.dawnsci.surfacescatter.FileCounter;
 import org.dawnsci.surfacescatter.FittingParameters;
@@ -1970,7 +1972,7 @@ public class SurfaceScatterViewStart extends Dialog {
 		getSsps3c().isOutputCurvesVisible(false);
 		customComposite.getReplay().setEnabled(false);
 
-		ssps3c.isOutputCurvesVisible(false);
+		ssps3c.isOutputCurvesVisible(true);
 		ssp.setProcessingMethodSelection(
 				ProccessingMethod.toMethodology(customComposite.getProcessingMode().getSelectionIndex()));
 
@@ -2014,6 +2016,43 @@ public class SurfaceScatterViewStart extends Dialog {
 
 		}
 		ssps3c.resetCrossHairs();
+		
+		updateOutputCurve();
+	}
+	
+	private void updateOutputCurve() {
+
+		ssp.stitchAndPresent1(ssps3c.getOutputCurves(), getIds());
+		CsdpGeneratorFromDrm csdpgfd = new CsdpGeneratorFromDrm();
+		csdpgfd.generateCsdpFromDrm(ssp.getDrm());
+		CurveStitchDataPackage csdp = csdpgfd.getCsdp();
+		CurveStitchWithErrorsAndFrames.curveStitch4(csdp, null);
+
+		ssp.getDrm().setCsdp(csdp);
+
+		csdp.setRodName("Current Track");
+
+		raw.getRtc().addCurrentTrace(csdp);
+
+		ssps3c.getOutputCurves().getIntensity().redraw();
+
+	}
+	
+	private void updateOutputCurve(CurveStitchDataPackage csdp) {
+
+		ssp.stitchAndPresentFromCsdp(ssps3c.getOutputCurves(), getIds(), csdp);
+		CsdpGeneratorFromDrm csdpgfd = new CsdpGeneratorFromDrm();
+//		csdpgfd.generateCsdpFromDrm(ssp.getDrm());
+		CurveStitchWithErrorsAndFrames.curveStitch4(csdp, null);
+
+		ssp.getDrm().setCsdp(csdp);
+
+		csdp.setRodName("Current Track");
+
+		raw.getRtc().addCurrentTrace(csdp);
+
+		ssps3c.getOutputCurves().getIntensity().redraw();
+
 	}
 
 }
