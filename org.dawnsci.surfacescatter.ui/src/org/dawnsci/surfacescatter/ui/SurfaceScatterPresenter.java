@@ -131,7 +131,7 @@ public class SurfaceScatterPresenter {
 		drm = new DirectoryModel();
 		drm.setFms(fms);
 
-//		drm.setDatFilepaths(filepaths);
+		drm.setDatFilepaths(filepaths);
 
 		drm.setCorrectionSelection(correctionSelection);
 

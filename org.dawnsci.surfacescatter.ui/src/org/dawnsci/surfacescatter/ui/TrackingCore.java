@@ -193,7 +193,7 @@ public class TrackingCore {
 
 		}
 
-		else if (tt1 == TrackerType1.SPLINE_INTERPOLATION) {
+		else if (tt1 == TrackerType1.SPLINE_INTERPOLATION && drm.isTrackerOn()) {
 
 			int[] len = new int[] { (int) Math.round(drm.getInterpolatedLenPts().get(k)[0][0]),
 					(int) Math.round(drm.getInterpolatedLenPts().get(k)[0][1]) };

@@ -4,7 +4,6 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.util.ArrayList;
-
 import org.dawb.common.ui.widgets.ActionBarWrapper;
 import org.dawnsci.surfacescatter.AxisEnums;
 import org.dawnsci.surfacescatter.AxisEnums.xAxes;
@@ -54,10 +53,7 @@ public class ReviewTabComposite extends Composite {
 	private Button clearCurves;
 	private Button addCurve;
 	private Button selectAll;
-	private Button remove;
 	private Button showErrors;
-	private Button save;
-	private Button saveGoodPoints;
 	private Combo outputFormatSelection;
 	private IPlottingSystem<Composite> plotSystemReview;
 	private ReviewCurvesModel rcm;
@@ -206,7 +202,7 @@ public class ReviewTabComposite extends Composite {
 
 		});
 
-		remove = new Button(rodSelector, SWT.PUSH | SWT.FILL);
+		Button remove = new Button(rodSelector, SWT.PUSH | SWT.FILL);
 		remove.setText("Remove Selected");
 		remove.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 
@@ -228,7 +224,7 @@ public class ReviewTabComposite extends Composite {
 			}
 
 		});
-		
+
 		rodDisplayTable = new Table(rodSelector, SWT.CHECK | SWT.V_SCROLL | SWT.H_SCROLL | SWT.BORDER);
 		rodDisplayTable.setEnabled(true);
 
@@ -275,7 +271,7 @@ public class ReviewTabComposite extends Composite {
 		Group saveSettings = new Group(rightForm, SWT.NONE);
 		GridLayout saveSettingsLayout = new GridLayout(2, true);
 		saveSettings.setLayout(saveSettingsLayout);
-		
+
 		Button loadTarget = new Button(rightForm, SWT.PUSH);
 		loadTarget.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		loadTarget.setData(new GridData(SWT.FILL));
@@ -295,14 +291,13 @@ public class ReviewTabComposite extends Composite {
 
 			}
 		});
-		
 
 		final GridData saveSettingsData = new GridData(SWT.FILL, SWT.FILL, true, true);
 		saveSettingsData.grabExcessVerticalSpace = true;
 		saveSettingsData.heightHint = 100;
 		saveSettings.setLayoutData(new GridData(GridData.FILL_HORIZONTAL | GridData.FILL_VERTICAL));
 
-		save = new Button(saveSettings, SWT.PUSH);
+		Button save = new Button(saveSettings, SWT.PUSH);
 		save.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		save.setData(new GridData(SWT.FILL));
 		save.setText("Save Single Rod");
@@ -316,7 +311,7 @@ public class ReviewTabComposite extends Composite {
 			}
 		});
 
-		saveGoodPoints = new Button(saveSettings, SWT.PUSH);
+		Button saveGoodPoints = new Button(saveSettings, SWT.PUSH);
 		saveGoodPoints.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		saveGoodPoints.setData(new GridData(SWT.FILL));
 		saveGoodPoints.setText("Save Only Good Points");
@@ -355,6 +350,14 @@ public class ReviewTabComposite extends Composite {
 
 			@Override
 			public void widgetSelected(SelectionEvent e) {
+
+				String rodSaveName = rodToSave.getText();
+
+				if (rodSaveName.equals("")) {
+					RegionOutOfBoundsWarning no = new RegionOutOfBoundsWarning(ssvs.getShell(), 14, null);
+					no.open();
+					return;
+				}
 
 				FileDialog fd = new FileDialog(ssvs.getShell(), SWT.SAVE);
 
@@ -493,7 +496,7 @@ public class ReviewTabComposite extends Composite {
 		outputFormatSelection.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		outputFormatSelection.select(0);
 
-		rightForm.setWeights(new int[] { 8, 10,5, 8, 69 });
+		rightForm.setWeights(new int[] { 10, 10, 10, 5, 65 });
 
 		rcm.addPropertyChangeListener(new PropertyChangeListener() {
 
@@ -1069,19 +1072,20 @@ public class ReviewTabComposite extends Composite {
 			showOnlyGoodPoints.setText("Disregard Bad Points");
 		}
 	}
-	
+
 	private void loadTarget() {
-		
+
 		String rodSaveName = rodToSave.getText();
-		
+
 		if (rodSaveName.equals("")) {
 			RegionOutOfBoundsWarning no = new RegionOutOfBoundsWarning(ssvs.getShell(), 14, null);
 			no.open();
 			return;
 		}
-		
-		
-		
+
+		CurveStitchDataPackage c1 = rcm.getCurveStitchDataPackage(rodSaveName);
+		ssvs.buildRodFromCsdp(c1);
+
 	}
 
 }

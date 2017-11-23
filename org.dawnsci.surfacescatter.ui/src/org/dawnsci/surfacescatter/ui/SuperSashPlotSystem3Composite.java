@@ -346,29 +346,23 @@ public class SuperSashPlotSystem3Composite extends Composite {
 					subImage, greenRectangle);
 
 			plotSystem1.addTrace(lt1);
-		} catch (ArrayIndexOutOfBoundsException h) {
-
-			resetCrossHairs();
-
-			ILineTrace lt1 = VerticalHorizontalSlices.horizontalslice(horizontalSlice.getROI().getBounds(), plotSystem1,
-					subImage, greenRectangle);
-
-			plotSystem1.addTrace(lt1);
-
-		}
-		try {
-			ILineTrace lt2 = VerticalHorizontalSlices.verticalslice(verticalSlice.getROI().getBounds(), subImage,
-					plotSystem3, greenRectangle);
-
-			plotSystem3.addTrace(lt2);
-		} catch (ArrayIndexOutOfBoundsException h) {
-
-			resetCrossHairs();
 
 			ILineTrace lt2 = VerticalHorizontalSlices.verticalslice(verticalSlice.getROI().getBounds(), subImage,
 					plotSystem3, greenRectangle);
 
 			plotSystem3.addTrace(lt2);
+
+		} catch (ArrayIndexOutOfBoundsException h) {
+
+			resetCrossHairs();
+
+			// ILineTrace lt1 =
+			// VerticalHorizontalSlices.horizontalslice(horizontalSlice.getROI().getBounds(),
+			// plotSystem1,
+			// subImage, greenRectangle);
+			//
+			// plotSystem1.addTrace(lt1);
+
 		}
 
 		@SuppressWarnings("unchecked")
@@ -484,13 +478,23 @@ public class SuperSashPlotSystem3Composite extends Composite {
 
 		int[] ad = image2.getShape();
 
-		RectangularROI horizROI = new RectangularROI(0, (int) Math.round(ad[0] / 4), ad[1],
-				(int) Math.round(ad[0] * 0.5), 0);
-		horizontalSlice.setROI(horizROI);
+		if (horizontalSlice.getROI().getBounds().getIntLength(1) != (int) Math.round(ad[0] * 0.5)
+				|| horizontalSlice.getROI().getBounds().getIntPoint()[1] != (int) Math.round(ad[0] / 4)) {
 
-		RectangularROI vertROI = new RectangularROI((int) Math.round(ad[1] / 4), 0, (int) Math.round(ad[1] * 0.5),
-				ad[0], 0);
-		verticalSlice.setROI(vertROI);
+			RectangularROI horizROI = new RectangularROI(0, (int) Math.round(ad[0] / 4), ad[1],
+					(int) Math.round(ad[0] * 0.5), 0);
+
+			horizontalSlice.setROI(horizROI);
+
+		}
+
+		if (verticalSlice.getROI().getBounds().getIntLength(0) != (int) Math.round(ad[1] * 0.5)
+				|| verticalSlice.getROI().getBounds().getIntPoint()[0] != (int) Math.round(ad[1] / 4)) {
+			RectangularROI vertROI = new RectangularROI((int) Math.round(ad[1] / 4), 0, (int) Math.round(ad[1] * 0.5),
+					ad[0], 0);
+			verticalSlice.setROI(vertROI);
+
+		}
 
 	}
 

@@ -3,6 +3,7 @@ package org.dawnsci.surfacescatter.ui;
 import java.util.ArrayList;
 import org.dawnsci.surfacescatter.CurveStitchDataPackage;
 import org.dawnsci.surfacescatter.DirectoryModel;
+import org.dawnsci.surfacescatter.DirectoryModelNodeEnum;
 import org.dawnsci.surfacescatter.FittingParametersInputReader;
 import org.dawnsci.surfacescatter.FrameModel;
 import org.dawnsci.surfacescatter.NeXusStructureStrings;
@@ -12,26 +13,27 @@ import org.eclipse.dawnsci.analysis.api.tree.GroupNode;
 import org.eclipse.dawnsci.hdf5.nexus.NexusFileFactoryHDF5;
 import org.eclipse.dawnsci.nexus.NexusException;
 import org.eclipse.dawnsci.nexus.NexusFile;
+import org.eclipse.january.DatasetException;
 import org.eclipse.january.dataset.Dataset;
 import org.eclipse.january.dataset.DatasetFactory;
 import org.eclipse.january.dataset.DatasetUtils;
 import org.eclipse.january.dataset.IDataset;
 import org.eclipse.january.dataset.IntegerDataset;
+import org.eclipse.january.dataset.SliceND;
 
 public class BuildRodFromCsdpAndNexus {
 
-	public BuildRodFromCsdpAndNexus(String inFile, CurveStitchDataPackage csdp) {
+	public DirectoryModel drm;
+	public SurfaceScatterPresenter ssp;
 
-		SurfaceScatterPresenter sspi = new SurfaceScatterPresenter();
-		sspi.createGm();
+	public BuildRodFromCsdpAndNexus(CurveStitchDataPackage csdp, SurfaceScatterPresenter sspi) {
 
+		sspi = new SurfaceScatterPresenter();
+		this.ssp=sspi;
+		
 		ArrayList<FrameModel> fms = new ArrayList<>();
 
-		NexusFile file = new NexusFileFactoryHDF5().newNexusFile(inFile);
-
-		FittingParametersInputReader.anglesAliasReaderFromNexus(file);
-
-		FittingParametersInputReader.geometricalParametersReaderFromNexus(file, sspi.getGm(), sspi.getDrm());
+		NexusFile file = new NexusFileFactoryHDF5().newNexusFile(csdp.getRodName());
 
 		try {
 			file.openToRead();
@@ -43,7 +45,7 @@ public class BuildRodFromCsdpAndNexus {
 		try {
 			GroupNode point = file.getGroup(path, false);
 
-			Attribute boundaryBoxAttribute = point.getAttribute(path + NeXusStructureStrings.getBoundaryboxArray()[1]);
+			Attribute boundaryBoxAttribute = point.getAttribute(NeXusStructureStrings.getBoundaryboxArray()[1]);
 			IntegerDataset boundaryBox0 = DatasetUtils.cast(IntegerDataset.class, boundaryBoxAttribute.getValue());
 
 			for (int i = 0; i < boundaryBox0.getSize(); i++) {
@@ -59,12 +61,18 @@ public class BuildRodFromCsdpAndNexus {
 			e.printStackTrace();
 		}
 
-		sspi.setFms(fms);
-
-		DirectoryModel drm = directoryModelBuilder(fms, file);
+		drm = directoryModelBuilder(fms, file);
 		drm.setCsdp(csdp);
 
-		sspi.setDrm(drm);
+		ssp.setDrm(drm);
+
+		ssp.createGm();
+
+		FittingParametersInputReader.anglesAliasReaderFromNexus(file);
+
+		FittingParametersInputReader.geometricalParametersReaderFromNexus(file, ssp.getGm(), ssp.getDrm());
+
+		ssp.setFms(fms);
 
 	}
 
@@ -76,19 +84,30 @@ public class BuildRodFromCsdpAndNexus {
 			try {
 				oe.frameModelPopulateFromGroupNodeMethod(g, fm);
 			} catch (Exception j) {
-				System.out.println(j.getMessage());
+				System.out.println(j.getMessage() + " OverviewNexusObjectBuilderEnum:  " + oe.getSecondName());
 			}
 
 		}
 
-		Attribute rawImageAt = g.getAttribute(NeXusStructureStrings.getRawImage());
-		Dataset rawImage = (Dataset) rawImageAt.getValue();
+		Dataset rawImage = null;
+		try {
+			rawImage = (Dataset) g.getDataNode(NeXusStructureStrings.getRawImage()).getDataset().getSlice(new SliceND (g.getDataNode(NeXusStructureStrings.getRawImage()).getDataset().getShape()));
+		} catch (DatasetException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		 
 
 		fm.setRawImageData(rawImage);
 
-		Attribute backgroundSubtractedImageAt = g.getAttribute(NeXusStructureStrings.getBackgroundSubtractedImage());
-		Dataset backgroundSubtractedImage = (Dataset) backgroundSubtractedImageAt.getValue();
-
+		Dataset backgroundSubtractedImage  = null;
+		try {
+			backgroundSubtractedImage  = (Dataset) g.getDataNode(NeXusStructureStrings.getBackgroundSubtractedImage()).getDataset().getSlice(new SliceND (g.getDataNode(NeXusStructureStrings.getBackgroundSubtractedImage()).getDataset().getShape()));
+		} catch (DatasetException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
 		fm.setBackgroundSubtractedImage(backgroundSubtractedImage);
 
 		return fm;
@@ -97,7 +116,7 @@ public class BuildRodFromCsdpAndNexus {
 
 	private DirectoryModel directoryModelBuilder(ArrayList<FrameModel> fms, NexusFile file) {
 
-		DirectoryModel drm = new DirectoryModel();
+		drm = new DirectoryModel();
 
 		FrameModel fm0 = fms.get(0);
 
@@ -114,6 +133,28 @@ public class BuildRodFromCsdpAndNexus {
 		makeSortedNestedArrayLists(fms, drm);
 
 		makeSortedLists(fms, drm);
+
+		String directoryModelPath = "/" + NeXusStructureStrings.getEntry() + "/"
+				+ NeXusStructureStrings.getDirectoryModelParameters();
+
+		GroupNode directoryModelNode = null;
+
+		try {
+			directoryModelNode = file.getGroup(directoryModelPath, true);
+		} catch (Exception k) {
+			System.out.println(k.getMessage());
+		}
+
+		for (DirectoryModelNodeEnum oe : DirectoryModelNodeEnum.values()) {
+			try {
+				oe.directoryModelPopulateFromGroupNodeMethod(directoryModelNode, drm);
+			} catch (Exception j) {
+				System.out.println(j.getMessage());
+			}
+
+		}
+
+		drm.setFms(fms);
 
 		return drm;
 
@@ -141,19 +182,6 @@ public class BuildRodFromCsdpAndNexus {
 		}
 
 		return probeList.size();
-	}
-
-	private int getMaxNo(int[] in) {
-
-		int probe = in[0];
-
-		for (int i : in) {
-			if (i > probe) {
-				probe = i;
-			}
-		}
-
-		return probe;
 	}
 
 	private int[] numberOfFramesInEachDat(int noDats, int[] inDatNos, int[] inNoInDat) {
@@ -203,12 +231,12 @@ public class BuildRodFromCsdpAndNexus {
 			dmqList.add(new ArrayList<>());
 			locationList.add(new ArrayList<>());
 
-			for (int j = 0; j < noFramesInEachDat[y]; j++) {
+			for (int j = 0; j < noFramesInEachDat[y]+1; j++) {
 				fmsSorted.get(y).add(new FrameModel());
 				framesCorrespondingToDats.get(y).add(0);
 				dmxList.get(y).add(0.0);
 				dmqList.get(y).add(0.0);
-				locationList.get(y).add(new double[] {0.0, 0.0, 0.0, 0.0, 0.0, 0.0,0.0,0.0});
+				locationList.get(y).add(new double[] { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 });
 			}
 		}
 
@@ -231,14 +259,12 @@ public class BuildRodFromCsdpAndNexus {
 
 		ArrayList<Double> qList = new ArrayList<>();
 		ArrayList<Double> xList = new ArrayList<>();
-		ArrayList<IDataset> backgroundDatArray= new ArrayList<>();
-		ArrayList<Integer> imageNoInDatList= new ArrayList<>();
+		ArrayList<IDataset> backgroundDatArray = new ArrayList<>();
+		ArrayList<Integer> imageNoInDatList = new ArrayList<>();
 
-		
 		int[] filePathsSortedArray = new int[fms.size()];
 		String[] datFilepaths = new String[fms.size()];
-		
-		
+
 		for (FrameModel fm : fms) {
 
 			qList.add(fm.getQ());
@@ -251,18 +277,21 @@ public class BuildRodFromCsdpAndNexus {
 
 		drm.setqList(qList);
 		drm.setxList(xList);
-		
+
 		Dataset qDat = DatasetFactory.createFromList(qList);
 		Dataset xDat = DatasetFactory.createFromList(xList);
-		
+
 		drm.setSortedX(xDat);
 		drm.setSortedQ(qDat);
-		
+
 		drm.setBackgroundDatArray(backgroundDatArray);
 		drm.setImageNoInDatList(imageNoInDatList);
 		drm.setFilepathsSortedArray(filePathsSortedArray);
 		drm.setDatFilepaths(datFilepaths);
-		
 
+	}
+
+	public DirectoryModel getDirectoryModel() {
+		return drm;
 	}
 }

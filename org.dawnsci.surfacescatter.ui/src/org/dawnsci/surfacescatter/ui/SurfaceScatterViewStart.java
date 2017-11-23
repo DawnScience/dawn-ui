@@ -1901,175 +1901,159 @@ public class SurfaceScatterViewStart extends Dialog {
 	}
 
 	public void buildRodFromCsdp(CurveStitchDataPackage csdp) {
-//
-//		
-//		paramFile = csdp.getRodName();
-//
-//
-//		String[] filepaths = new String[rodComponentDats.length];
-//
-//		for (int f = 0; f < rodComponentDats.length; f++) {
-//			String filename = rodComponentDats[f].getText();
-//			filepaths[f] = datFolderPath + File.separator + filename;
-//		}
-//
-//		
-//
-//		rsw.getDatDisplayer().setOption(rsw.getDatDisplayer().getSelectedOption());
-//
-//		String k = outputCurves.getIntensity().getText();
-//		AxisEnums.yAxes ids0 = AxisEnums.toYAxis(k);
-//
-//		setIds(ids0);
-//
-//		setSms(SaveFormatSetting.toMethod(ssps3c.getOutputCurves().getOutputFormatSelection().getSelectionIndex()));
-//
-//		ssp.createGm();
-//
-//		customComposite.resetCorrectionsTab();
-//
-//		rsw.getAnglesAliasWindow().writeOutValues();
-//
-//		paramField.geometricParametersUpdate();
-//
-//		try {
-//			for (IRegion g : ssp.getInterpolatorRegions()) {
-//				customComposite.getPlotSystem().removeRegion(g);
-//				g.remove();
-//
-//			}
-//		} catch (Exception u) {
-//			System.out.println(u.getMessage());
-//		}
-//
-//		ssp.resetSmOutputObjects();
-//
-//		int[][] r = new int[][] { { 50, 50 }, { 10, 10 } };
-//		String q = null;
-//		int[][] pbolp = null;
-//		int[][] bolp = null;
-//		int[][] bglpt = null;
-//
-//		bglpt = ssp.getBackgroundLenPt() != null ? ssp.getBackgroundLenPt() : new int[][] { { 50, 50 }, { 10, 10 } };
-//		q = ssp.getSaveFolder() != null ? ssp.getSaveFolder() : "null";
-//		r = ssp.getLenPt() != null ? ssp.getLenPt() : new int[][] { { 50, 50 }, { 10, 10 } };
-//		pbolp = (ssp.getPermanentBoxOffsetLenPt() != null) ? ssp.getPermanentBoxOffsetLenPt()
-//				: new int[][] { { 0, 0 }, { 0, 0 } };
-//		bolp = ssp.getBoxOffsetLenPt();
-//
-//		int[] test = correctionsDropDownArray;
-//		int t = correctionsDropDown.getSelectionIndex();
-//
-//		MethodSetting ms = MethodSetting.toMethod(test[t]);
-//
-//		ssp.getGm().setExperimentMethod(ms.getCorrectionsName());
-//		ssp.surfaceScatterPresenterBuildWithFrames(filepaths, rsw.getDatDisplayer().getSelectedOption(), ms);
-//
-//		try {
-//			ssp.setLenPt(r);
-//			ssp.setPermanentBoxOffsetLenPt(pbolp);
-//			ssp.setBoxOffsetLenPt(bolp);
-//			ssp.setSaveFolder(q);
-//			ssp.setBackgroundLenPt(bglpt);
-//		} catch (Exception m) {
-//			System.out.println(m.getMessage());
-//		}
-//
-//		if (ssp.isqConvert()) {
-//			double energy = Double.parseDouble(paramField.getEnergy().getText());
-//			ssp.setEnergy(energy);
-//
-//			ssp.setTheta(paramField.getTheta().getSelectionIndex());
-//			outputCurves.getqAxis().setEnabled(ssp.isqConvert());
-//			customComposite.getPlotSystem1CompositeView().getUseQAxis().setEnabled(ssp.isqConvert());
-//
-//			try {
-//				ssp.qConversion();
-//			} catch (Exception g) {
-//
-//			}
-//		}
-//
-//		folder.setSelection(2);
-//
-//		customComposite.getSlider().setSelection(0);
-//		customComposite.getSlider().setMinimum(0);
-//		customComposite.getSlider().setMaximum(ssp.getDrm().getFms().size());
-//		customComposite.getSlider().setThumb(1);
-//
-//		if (!stareMode) {
-//			customComposite.getPlotSystem1CompositeView().generalUpdate();
-//		}
-//
-//		try {
-//			ssps3c.generalUpdate();
-//		} catch (Exception u) {
-//
-//		}
-//
-//		customComposite.resetCorrectionsTab();
-//		customComposite.generalCorrectionsUpdate();
-//		customComposite.getPlotSystem1CompositeView().generalUpdate();
-//		updateIndicators(0);
-//		getPlotSystemCompositeView().removeBackgroundSubtractedSubImage();
-//		getSsps3c().isOutputCurvesVisible(false);
-//		customComposite.getReplay().setEnabled(false);
-//
-//		ssps3c.isOutputCurvesVisible(false);
-//		ssp.setProcessingMethodSelection(
-//				ProccessingMethod.toMethodology(customComposite.getProcessingMode().getSelectionIndex()));
-//
-//		if (ids == null) {
-//			ids = yAxes.SPLICEDY;
-//		}
-//
-//		ssps3c.getOutputCurves().getIntensity().select(ids.getYAxisNumber());
-//		ssps3c.getOutputCurves().getOutputFormatSelection().select(SaveFormatSetting.toInt(sms));
-//
-//		customComposite.generalUpdate();
-//
-//		try {
-//			customComposite.getPlotSystem().removeTrace(
-//					customComposite.getPlotSystem().getTrace(DisplayLabelStrings.getInterpolatedTrajectory()));
-//		} catch (Exception g) {
-//
-//		}
-//		try {
-//			customComposite.getPlotSystem()
-//					.removeTrace(customComposite.getPlotSystem().getTrace(DisplayLabelStrings.getSetTrajectory()));
-//		} catch (Exception g) {
-//
-//		}
-//
-//		ssp.setSelection(0);
-//		ssp.setSliderPos(0);
-//
-//		if (isThereAParamFile) {
-//			setParametersFromFile(paramFile, rsw.getDatDisplayer().getUseTrajectory(), stareMode);
-//
-//		}
-//
-//		customComposite.getPlotSystem1CompositeView().getCombos()[2].removeAll();
-//
-//		for (TrackerType1 f : TrackerType1.values()) {
-//
-//			if (f != TrackerType1.USE_SET_POSITIONS) {
-//				customComposite.getPlotSystem1CompositeView().getCombos()[2].add(f.getTrackerName(), f.getTrackerNo());
-//			}
-//			if (f == TrackerType1.USE_SET_POSITIONS && isThereAParamFile) {
-//
-//				customComposite.getPlotSystem1CompositeView().getCombos()[2].add(f.getTrackerName(), f.getTrackerNo());
-//			}
-//		}
-//		try {
-//
-//			customComposite.getPlotSystem1CompositeView().getCombos()[2]
-//					.select(ssp.getFms().get(0).getTrackingMethodology().getTrackerNo());
-//		} catch (Exception h) {
-//
-//		}
-//		ssps3c.resetCrossHairs();
+
+		BuildRodFromCsdpAndNexus brfcan = new BuildRodFromCsdpAndNexus(csdp, ssp);
+
+		// String k = outputCurves.getIntensity().getText();
+		// AxisEnums.yAxes ids0 = AxisEnums.toYAxis(k);
+		//
+		// setIds(ids0);
+		//
+		// setSms(SaveFormatSetting.toMethod(ssps3c.getOutputCurves().getOutputFormatSelection().getSelectionIndex()));
+		//
+		// ssp.createGm();
+		//
+		// customComposite.resetCorrectionsTab();
+		//
+		// rsw.getAnglesAliasWindow().writeOutValues();
+		//
+		// paramField.geometricParametersUpdate();
+		//
+		// try {
+		// for (IRegion g : ssp.getInterpolatorRegions()) {
+		// customComposite.getPlotSystem().removeRegion(g);
+		// g.remove();
+		//
+		// }
+		// } catch (Exception u) {
+		// System.out.println(u.getMessage());
+		// }
+		//
+		// ssp.resetSmOutputObjects();
+		//
+		// int[][] r = new int[][] { { 50, 50 }, { 10, 10 } };
+		// String q = null;
+		// int[][] pbolp = null;
+		// int[][] bolp = null;
+		// int[][] bglpt = null;
+		//
+		// bglpt = ssp.getBackgroundLenPt() != null ? ssp.getBackgroundLenPt() : new
+		// int[][] { { 50, 50 }, { 10, 10 } };
+		// q = ssp.getSaveFolder() != null ? ssp.getSaveFolder() : "null";
+		// r = ssp.getLenPt() != null ? ssp.getLenPt() : new int[][] { { 50, 50 }, { 10,
+		// 10 } };
+		// pbolp = (ssp.getPermanentBoxOffsetLenPt() != null) ?
+		// ssp.getPermanentBoxOffsetLenPt()
+		// : new int[][] { { 0, 0 }, { 0, 0 } };
+		// bolp = ssp.getBoxOffsetLenPt();
+		//
+		// int[] test = correctionsDropDownArray;
+		// int t = correctionsDropDown.getSelectionIndex();
+		//
+		// MethodSetting ms = MethodSetting.toMethod(test[t]);
+		//
+		// ssp.getGm().setExperimentMethod(ms.getCorrectionsName());
+		// ssp.surfaceScatterPresenterBuildWithFrames(filepaths,
+		// rsw.getDatDisplayer().getSelectedOption(), ms);
+		//
+		// try {
+		// ssp.setLenPt(r);
+		// ssp.setPermanentBoxOffsetLenPt(pbolp);
+		// ssp.setBoxOffsetLenPt(bolp);
+		// ssp.setSaveFolder(q);
+		// ssp.setBackgroundLenPt(bglpt);
+		// } catch (Exception m) {
+		// System.out.println(m.getMessage());
+		// }
+		//
+		// if (ssp.isqConvert()) {
+		// double energy = Double.parseDouble(paramField.getEnergy().getText());
+		// ssp.setEnergy(energy);
+		//
+		// ssp.setTheta(paramField.getTheta().getSelectionIndex());
+		// outputCurves.getqAxis().setEnabled(ssp.isqConvert());
+		// customComposite.getPlotSystem1CompositeView().getUseQAxis().setEnabled(ssp.isqConvert());
+		//
+		// try {
+		// ssp.qConversion();
+		// } catch (Exception g) {
+		//
+		// }
+		// }
+		//
+		folder.setSelection(2);
+
+		customComposite.getSlider().setSelection(0);
+		customComposite.getSlider().setMinimum(0);
+		customComposite.getSlider().setMaximum(ssp.getDrm().getFms().size());
+		customComposite.getSlider().setThumb(1);
+
+		customComposite.getPlotSystem1CompositeView().generalUpdate();
+
+		try {
+			ssps3c.generalUpdate();
+		} catch (Exception u) {
+
+		}
+
+		customComposite.resetCorrectionsTab();
+		customComposite.generalCorrectionsUpdate();
+		customComposite.getPlotSystem1CompositeView().generalUpdate();
+		updateIndicators(0);
+		getPlotSystemCompositeView().removeBackgroundSubtractedSubImage();
+		getSsps3c().isOutputCurvesVisible(false);
+		customComposite.getReplay().setEnabled(false);
+
+		ssps3c.isOutputCurvesVisible(false);
+		ssp.setProcessingMethodSelection(
+				ProccessingMethod.toMethodology(customComposite.getProcessingMode().getSelectionIndex()));
+
+		if (ids == null) {
+			ids = yAxes.SPLICEDY;
+		}
+
+		ssps3c.getOutputCurves().getIntensity().select(ids.getYAxisNumber());
+		ssps3c.getOutputCurves().getOutputFormatSelection().select(SaveFormatSetting.toInt(sms));
+
+		customComposite.generalUpdate();
+
+		try {
+			customComposite.getPlotSystem().removeTrace(
+					customComposite.getPlotSystem().getTrace(DisplayLabelStrings.getInterpolatedTrajectory()));
+		} catch (Exception g) {
+
+		}
+		try {
+			customComposite.getPlotSystem()
+					.removeTrace(customComposite.getPlotSystem().getTrace(DisplayLabelStrings.getSetTrajectory()));
+		} catch (Exception g) {
+
+		}
+
+		ssp.setSelection(0);
+		ssp.setSliderPos(0);
+
+		// if (isThereAParamFile) {
+		// setParametersFromFile(paramFile, rsw.getDatDisplayer().getUseTrajectory(),
+		// stareMode);
+		//
+		// }
+
+		customComposite.getPlotSystem1CompositeView().getCombos()[2].removeAll();
+
+		for (TrackerType1 f : TrackerType1.values()) {
+
+			customComposite.getPlotSystem1CompositeView().getCombos()[2].add(f.getTrackerName(), f.getTrackerNo());
+
+		}
+		try {
+
+			customComposite.getPlotSystem1CompositeView().getCombos()[2]
+					.select(ssp.getFms().get(0).getTrackingMethodology().getTrackerNo());
+		} catch (Exception h) {
+
+		}
+		ssps3c.resetCrossHairs();
 	}
 
-	
 }
