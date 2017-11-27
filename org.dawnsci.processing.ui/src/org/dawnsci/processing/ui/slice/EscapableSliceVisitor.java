@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.io.FilenameUtils;
+import org.dawb.common.ui.util.DisplayUtils;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.dawnsci.analysis.api.conversion.IConversionContext;
 import org.eclipse.dawnsci.analysis.api.processing.IExecutionVisitor;
@@ -38,12 +39,19 @@ public class EscapableSliceVisitor implements SliceVisitor {
 	private IProgressMonitor monitor;
 	private IConversionContext context;
 	private IPlottingSystem<?> output;
+	private IPlottingSystem<?> display;
+	private ProcessingLogDisplay logDisplay;
 	private IOperationInputData inputData = null;
 	
 	private final static Logger logger = LoggerFactory.getLogger(EscapableSliceVisitor.class);
 
 	public EscapableSliceVisitor(ILazyDataset lz, int[] dataDims, IOperation[] series, IOperation[] fullSeries,
 			IProgressMonitor monitor, IConversionContext context, IPlottingSystem<?> system) {
+		this(lz, dataDims, series, fullSeries, monitor, context, system, null, null);
+	}
+
+	public EscapableSliceVisitor(ILazyDataset lz, int[] dataDims, IOperation[] series, IOperation[] fullSeries,
+			IProgressMonitor monitor, IConversionContext context, IPlottingSystem<?> system, IPlottingSystem<?> display, ProcessingLogDisplay logDisplay) {
 		this.visitor = new UIExecutionVisitor();
 		this.dataDims = dataDims;
 		this.series = series;
@@ -51,6 +59,8 @@ public class EscapableSliceVisitor implements SliceVisitor {
 		this.monitor= monitor;
 		this.context= context;
 		this.output = system;
+		this.display = display;
+		this.logDisplay = logDisplay;
 	}
 
 	public void setEndOperation(IOperation<? extends IOperationModel, ? extends OperationData> op) {
@@ -155,6 +165,12 @@ public class EscapableSliceVisitor implements SliceVisitor {
 		}
 		
 		private void displayData(OperationData result, int[] dataDims) throws Exception {
+			if (display != null) {
+				display.clear();
+			}
+			if (logDisplay != null) {
+				logDisplay.clear();
+			}
 			if (result == null) {
 				output.clear();
 				return;
@@ -179,22 +195,30 @@ public class EscapableSliceVisitor implements SliceVisitor {
 				logger.debug("Could not build dataset name",e);
 			}
 			
-			if (out != null && out.getName() == null) {
-				out.setName("output");
-			}
-
 			if (out != null) {
+				if (out.getName() == null) {
+					out.setName("output");
+				}
 				MetadataPlotUtils.plotDataWithMetadata(out, output);
 			}
 
+			if (logDisplay != null && result.getLog() != null) {
+				logDisplay.setLog(result.getLog().toString());
+			}
+
 			if (result instanceof OperationDataForDisplay) {
-				IDataset[] dd = ((OperationDataForDisplay) result).getDisplayData();
+				IDataset[] dd = ((OperationDataForDisplay)result).getDisplayData();
 				if (dd != null) {
 					for (IDataset d : dd) {
 						IDataset view = d.getSliceView();
 						view = view.squeeze();
 						if (view.getRank() == 1) {
-							MetadataPlotUtils.plotDataWithMetadata(view, output, false);
+							if (out.getRank() != 1 && display != null) {
+								MetadataPlotUtils.plotDataWithMetadata(view, display, false);
+								display.repaint();
+							} else {
+								MetadataPlotUtils.plotDataWithMetadata(view, output, false);
+							}
 						}
 					}
 				}

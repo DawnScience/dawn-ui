@@ -24,6 +24,7 @@ import org.dawb.common.ui.monitor.ProgressMonitorWrapper;
 import org.dawnsci.common.widgets.dialog.FileSelectionDialog;
 import org.dawnsci.conversion.schemes.ProcessConversionScheme;
 import org.dawnsci.processing.ui.Activator;
+import org.dawnsci.processing.ui.ProcessingOutputView;
 import org.dawnsci.processing.ui.ServiceHolder;
 import org.dawnsci.processing.ui.preference.ProcessingConstants;
 import org.dawnsci.processing.ui.processing.OperationDescriptor;
@@ -134,6 +135,8 @@ public class DataFileSliceView extends ViewPart {
 	private IOperation<? extends IOperationModel, ? extends OperationData> currentOperation = null;
 	private IPlottingSystem<Composite> input;
 	private IPlottingSystem<Composite> output;
+	private IPlottingSystem<Composite> display;
+	private ProcessingLogDisplay logDisplay;
 	private IOperationInputData inputData = null;
 	private ProcessingOutputType processingOutputType = ProcessingOutputType.PROCESSING_ONLY;
 	
@@ -251,11 +254,14 @@ public class DataFileSliceView extends ViewPart {
 		
 		IWorkbenchPage page = getSite().getPage();
 		IViewPart view = page.findView("org.dawnsci.processing.ui.output");
-		output = (IPlottingSystem<Composite>)view.getAdapter(IPlottingSystem.class);
-		
+		output = (IPlottingSystem<Composite>) view.getAdapter(IPlottingSystem.class);
+		if (view instanceof ProcessingOutputView) {
+			display = ((ProcessingOutputView) view).getDisplayPlot();
+			logDisplay = ((ProcessingOutputView) view).getLogDisplay();
+		}
 		view = page.findView("org.dawnsci.processing.ui.input");
 		input = (IPlottingSystem<Composite>)view.getAdapter(IPlottingSystem.class);
-		
+
 		fileManager.addFileListener(new IFilesAddedListener() {
 
 			@Override
@@ -505,7 +511,7 @@ public class DataFileSliceView extends ViewPart {
 				try {
 					input.reset();
 					output.reset();
-					
+					display.reset();
 				} catch (Exception e1) {
 					logger.error("Could not clear plotting systems");
 				}
@@ -559,7 +565,7 @@ public class DataFileSliceView extends ViewPart {
 		try {
 			input.reset();
 			output.reset();
-			
+			display.reset();
 		} catch (Exception e1) {
 			logger.error("Could not clear plotting systems");
 		}
@@ -838,7 +844,7 @@ public class DataFileSliceView extends ViewPart {
 	
 	private EscapableSliceVisitor getSliceVisitor(IOperation<? extends IOperationModel, ? extends OperationData>[] series,ILazyDataset lz,  
             int[] dataDims, IProgressMonitor mon) {
-		return new EscapableSliceVisitor(lz,dataDims,series,getOperations(),mon,fileManager.getContext(),output);
+		return new EscapableSliceVisitor(lz,dataDims,series,getOperations(),mon,fileManager.getContext(),output, display, logDisplay);
 	}
 	
 	@Override
