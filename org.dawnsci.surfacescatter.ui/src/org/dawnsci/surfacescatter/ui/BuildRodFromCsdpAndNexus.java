@@ -7,6 +7,8 @@ import org.dawnsci.surfacescatter.DirectoryModelNodeEnum;
 import org.dawnsci.surfacescatter.FittingParametersInputReader;
 import org.dawnsci.surfacescatter.FrameModel;
 import org.dawnsci.surfacescatter.NeXusStructureStrings;
+import org.dawnsci.surfacescatter.OutputCurvesDataPackage;
+import org.dawnsci.surfacescatter.OutputCurvesDataPackageEnum;
 import org.dawnsci.surfacescatter.OverviewNexusObjectBuilderEnum;
 import org.eclipse.dawnsci.analysis.api.tree.Attribute;
 import org.eclipse.dawnsci.analysis.api.tree.GroupNode;
@@ -31,8 +33,6 @@ public class BuildRodFromCsdpAndNexus {
 		sspi = new SurfaceScatterPresenter();
 		this.ssp = sspi;
 
-		ArrayList<FrameModel> fms = new ArrayList<>();
-
 		NexusFile file = new NexusFileFactoryHDF5().newNexusFile(csdp.getRodName());
 
 		try {
@@ -40,6 +40,30 @@ public class BuildRodFromCsdpAndNexus {
 		} catch (NexusException e) {
 			e.printStackTrace();
 		}
+		
+		ArrayList<FrameModel> fms = fmsBuilder(file);
+
+		drm = directoryModelBuilder(fms, file);
+		
+		drm.setCsdp(csdp);
+
+		drm.setOcdp(ocdpBuilder(file));
+
+		ssp.setDrm(drm);
+
+		ssp.createGm();
+
+		FittingParametersInputReader.anglesAliasReaderFromNexus(file);
+
+		FittingParametersInputReader.geometricalParametersReaderFromNexus(file, ssp.getGm(), ssp.getDrm());
+
+		ssp.setFms(fms);
+
+	}
+
+	private ArrayList<FrameModel> fmsBuilder(NexusFile file) {
+
+		ArrayList<FrameModel> fms = new ArrayList<>();
 
 		String path = "/" + NeXusStructureStrings.getEntry() + "/" + NeXusStructureStrings.getOverviewOfFrames();
 		try {
@@ -61,19 +85,7 @@ public class BuildRodFromCsdpAndNexus {
 			e.printStackTrace();
 		}
 
-		drm = directoryModelBuilder(fms, file);
-		drm.setCsdp(csdp);
-
-		ssp.setDrm(drm);
-
-		ssp.createGm();
-
-		FittingParametersInputReader.anglesAliasReaderFromNexus(file);
-
-		FittingParametersInputReader.geometricalParametersReaderFromNexus(file, ssp.getGm(), ssp.getDrm());
-
-		ssp.setFms(fms);
-
+		return fms;
 	}
 
 	private FrameModel frameModelBuilder(GroupNode g) {
@@ -114,6 +126,36 @@ public class BuildRodFromCsdpAndNexus {
 		fm.setBackgroundSubtractedImage(backgroundSubtractedImage);
 
 		return fm;
+
+	}
+
+	private OutputCurvesDataPackage ocdpBuilder(NexusFile file) {
+
+		OutputCurvesDataPackage ocdp = new OutputCurvesDataPackage();
+
+		String path = "/" + NeXusStructureStrings.getEntry() + "/"
+				+ NeXusStructureStrings.getDataPackageForOverlapCalculation();
+
+		GroupNode g;
+
+		try {
+			g = file.getGroup(path, false);
+
+			for (OutputCurvesDataPackageEnum oe : OutputCurvesDataPackageEnum.values()) {
+				try {
+					oe.outputCurvesDataPackagePopulateFromGroupNodeMethod(g, ocdp);
+				} catch (Exception j) {
+					System.out.println(j.getMessage() + " OverviewNexusObjectBuilderEnum:  " + oe.getFirstName());
+				}
+
+			}
+
+		} catch (NexusException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		return ocdp;
 
 	}
 
@@ -235,7 +277,7 @@ public class BuildRodFromCsdpAndNexus {
 			dmqList.add(new ArrayList<>());
 			locationList.add(new ArrayList<>());
 
-			for (int j = 0; j < noFramesInEachDat[y] + 1; j++) {
+			for (int j = 0; j <= noFramesInEachDat[y]; j++) {
 				fmsSorted.get(y).add(new FrameModel());
 				framesCorrespondingToDats.get(y).add(0);
 				dmxList.get(y).add(0.0);
@@ -247,9 +289,9 @@ public class BuildRodFromCsdpAndNexus {
 		for (FrameModel fm : fms) {
 			fmsSorted.get(fm.getDatNo()).set(fm.getNoInOriginalDat(), fm);
 			framesCorrespondingToDats.get(fm.getDatNo()).set(fm.getNoInOriginalDat(), fm.getFmNo());
-			dmxList.get(fm.getDatNo()).add(fm.getScannedVariable());
-			dmqList.get(fm.getDatNo()).add(fm.getQ());
-			locationList.get(fm.getDatNo()).add(fm.getRoiLocation());
+			dmxList.get(fm.getDatNo()).set(fm.getNoInOriginalDat(),fm.getScannedVariable());
+			dmqList.get(fm.getDatNo()).set(fm.getNoInOriginalDat(),fm.getQ());
+			locationList.get(fm.getDatNo()).set(fm.getNoInOriginalDat(),fm.getRoiLocation());
 		}
 
 		drm.setFramesCorespondingToDats(framesCorrespondingToDats);
@@ -280,8 +322,7 @@ public class BuildRodFromCsdpAndNexus {
 		}
 
 		String[] datFilepaths = uniqueStrings(datFilepathsAll);
-		
-		
+
 		drm.setqList(qList);
 		drm.setxList(xList);
 

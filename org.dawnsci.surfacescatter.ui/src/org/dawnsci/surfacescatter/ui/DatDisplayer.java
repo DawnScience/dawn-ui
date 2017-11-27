@@ -1207,4 +1207,8 @@ public class DatDisplayer extends Composite implements IDatDisplayer {
 	public void setImageFolderPath(String g) {
 
 	}
+	
+	public void setSsp(SurfaceScatterPresenter in) {
+		this.ssp = in;
+	}
 }

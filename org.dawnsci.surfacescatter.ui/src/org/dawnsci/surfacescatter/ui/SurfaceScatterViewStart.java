@@ -95,6 +95,7 @@ public class SurfaceScatterViewStart extends Dialog {
 	private SetupModel stm;
 	private String paramFile;
 	private IRegion r2;
+	private BatchSetupWindow bsw;
 
 	public SurfaceScatterViewStart(Shell parentShell) {
 
@@ -168,7 +169,7 @@ public class SurfaceScatterViewStart extends Dialog {
 		// Tab 2 Batch Setup
 		////////////////////////////////////////////////////// #
 
-		new BatchSetupWindow(folder, this, ssp);
+		bsw = new BatchSetupWindow(folder, this, ssp);
 
 		/////////////////////////////////////////////////////////////////////////
 		///////////////////////////////////////////////////////
@@ -1948,6 +1949,13 @@ public class SurfaceScatterViewStart extends Dialog {
 		customComposite.setSsp(brfcan.getSsp());
 		ssps3c.setSsp(brfcan.getSsp());
 		customComposite.getPlotSystem1CompositeView().setSsp(brfcan.getSsp());
+		raw.getRtc().setSsp(brfcan.getSsp());
+		rsw.getDatDisplayer().setSsp(brfcan.getSsp());
+		rsw.setSsp(brfcan.getSsp());
+		rsw.getParamField().setSsp(brfcan.getSsp());
+		rsw.getAnglesAliasWindow().setSsp(brfcan.getSsp());
+		bsw.getBatchDatDisplayer().setSsp(brfcan.getSsp());
+		
 		
 		folder.setSelection(2);
 

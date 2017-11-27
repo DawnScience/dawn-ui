@@ -726,4 +726,5 @@ public class GeometricParametersWindows extends Composite {
 		this.useNegativeQ = useNegativeQ;
 	}
 
+
 }

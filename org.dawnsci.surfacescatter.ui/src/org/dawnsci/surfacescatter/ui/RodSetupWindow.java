@@ -22,7 +22,8 @@ public class RodSetupWindow {
 	private Group parametersAlias;
 	private Group parametersSetting;
 	private AnglesAliasWindow anglesAliasWindow;
-		
+	private SurfaceScatterPresenter ssp;
+	
 	public RodSetupWindow(CTabFolder folder,
 			SurfaceScatterViewStart ssvs,
 			SurfaceScatterPresenter ssp){
@@ -191,5 +192,9 @@ public class RodSetupWindow {
 	
 	public Combo getCorrectionsDropDown(){
 		return correctionsDropDown;
+	}
+	
+	public void setSsp(SurfaceScatterPresenter in) {
+		this.ssp = in;
 	}
 }	

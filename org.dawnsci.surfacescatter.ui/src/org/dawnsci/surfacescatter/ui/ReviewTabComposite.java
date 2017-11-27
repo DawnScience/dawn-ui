@@ -378,7 +378,7 @@ public class ReviewTabComposite extends Composite {
 
 				String title = path + File.separator + stitle + ".nxs";
 
-				ssp.setRodName(stitle);
+				ssp.setRodName(title);
 
 				ssp.writeNexus(title, 10);
 
@@ -1086,6 +1086,10 @@ public class ReviewTabComposite extends Composite {
 		CurveStitchDataPackage c1 = rcm.getCurveStitchDataPackage(rodSaveName);
 		ssvs.buildRodFromCsdp(c1);
 
+	}
+	
+	public void setSsp (SurfaceScatterPresenter in) {
+		this.ssp= in;
 	}
 
 }

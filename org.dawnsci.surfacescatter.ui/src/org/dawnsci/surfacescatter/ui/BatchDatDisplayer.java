@@ -1025,6 +1025,10 @@ public class BatchDatDisplayer extends Composite implements IDatDisplayer {
 	public void setOptions(String[] options) {
 		this.options = options;
 	}
+	
+	public void setSsp(SurfaceScatterPresenter in) {
+		this.ssp =in;
+	}
 
 	public Boolean getPromptedForImageFolder() {
 		return promptedForImageFolder;

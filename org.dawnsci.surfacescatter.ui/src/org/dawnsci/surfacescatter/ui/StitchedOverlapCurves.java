@@ -794,9 +794,9 @@ public class StitchedOverlapCurves extends Composite {
 
 		GoodPointStripper gps = new GoodPointStripper();
 
-		IDataset x = gps.splicedXGoodPointStripper(csdp, xA, !useGoodPointsOnly);
+		IDataset x = gps.splicedXGoodPointStripper(csdp, xA, useGoodPointsOnly);
 
-		IDataset[] y = gps.splicedYGoodPointStripper(csdp, yA, !useGoodPointsOnly);
+		IDataset[] y = gps.splicedYGoodPointStripper(csdp, yA, useGoodPointsOnly);
 
 		y[0].setErrors(y[1]);
 
@@ -896,7 +896,7 @@ public class StitchedOverlapCurves extends Composite {
 			break;
 
 		case SPLICEDYRAW:
-			yValue = ssp.getFms().get(xPos).getUnspliced_Raw_Intensity();
+			yValue = csdp.getSplicedCurveYRaw().getDouble(xPos);
 			break;
 
 		default:
