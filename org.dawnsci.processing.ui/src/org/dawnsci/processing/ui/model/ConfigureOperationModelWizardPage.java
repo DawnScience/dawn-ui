@@ -189,6 +189,9 @@ public class ConfigureOperationModelWizardPage extends AbstractOperationModelWiz
 		
 		
 		for (final Entry<String,ROIStruct> entry : rois.entrySet()) {
+			if (entry.getValue().roi == null) {
+				continue;
+			}
 			try {
 				final IRegionService rservice = (IRegionService) ServiceManager.getService(IRegionService.class);
 				

@@ -169,7 +169,9 @@ public class EscapableSliceVisitor implements SliceVisitor {
 					File f = new File(n);
 					String name = FilenameUtils.getBaseName(f.getAbsolutePath());
 //					name = name + "_" + Slice.createString(s);
-					name = name + "_" + endOp.getName();
+					if (endOp != null) {
+						name = name + "_" + endOp.getName();
+					}
 					out.setName(name);
 				}
 				
@@ -181,20 +183,29 @@ public class EscapableSliceVisitor implements SliceVisitor {
 				out.setName("output");
 			}
 
-			MetadataPlotUtils.plotDataWithMetadata(out, output);
-			
-			if (result instanceof OperationDataForDisplay) {
-				IDataset[] dd = ((OperationDataForDisplay)result).getDisplayData();
-				for (IDataset d : dd) {
-					IDataset view = d.getSliceView();
-					view = view.squeeze();
-					if (view.getRank() == 1) {
-						MetadataPlotUtils.plotDataWithMetadata(view, output, false);
-					}	
-				}	
+			if (out != null) {
+				MetadataPlotUtils.plotDataWithMetadata(out, output);
 			}
-			
-			output.setTitle("Output");
+
+			if (result instanceof OperationDataForDisplay) {
+				IDataset[] dd = ((OperationDataForDisplay) result).getDisplayData();
+				if (dd != null) {
+					for (IDataset d : dd) {
+						IDataset view = d.getSliceView();
+						view = view.squeeze();
+						if (view.getRank() == 1) {
+							MetadataPlotUtils.plotDataWithMetadata(view, output, false);
+						}
+					}
+				}
+			}
+
+			DisplayUtils.asyncExec(new Runnable() {
+				@Override
+				public void run() {
+					output.setTitle("Output");
+				}
+			});
 		}
 	}
 	
