@@ -43,7 +43,7 @@ public class SuperSashPlotSystem3Composite extends Composite {
 	private SurfaceScatterPresenter ssp;
 	private Group topRight;
 	private SashForm sashForm;
-	private Button resetCrossHairs;
+//	private Button resetCrossHairs;
 	private SurfaceScatterViewStart ssvs;
 
 	public SuperSashPlotSystem3Composite(Composite parent, int style, SurfaceScatterViewStart ssvs,
@@ -132,7 +132,7 @@ public class SuperSashPlotSystem3Composite extends Composite {
 		plotSystem2.getPlotComposite().setLayoutData(ld2);
 		plotSystem2.createPlot2D(image2, null, null);
 
-		resetCrossHairs = new Button(mainImage, SWT.None);
+		Button resetCrossHairs = new Button(mainImage, SWT.None);
 		resetCrossHairs.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		resetCrossHairs.setText("Centre Cross Hairs");
 
