@@ -100,8 +100,9 @@ public class EscapableSliceVisitor implements SliceVisitor {
 						inputData = new OperationInputDataImpl(data.getData(), i);
 
 					OperationData tmp = i.execute(data.getData(), null);
-					if (tmp != null)
+					if (tmp != null && tmp.getData() != null) {
 						tmp.getData().setMetadata(ssm);
+					}
 					visitor.notify(i, tmp); // Optionally send intermediate
 											// result
 					data = i.isPassUnmodifiedData() ? data : tmp;
@@ -175,27 +176,27 @@ public class EscapableSliceVisitor implements SliceVisitor {
 				output.clear();
 				return;
 			}
-			IDataset out = result.getData();
 
-			try {
-				SliceFromSeriesMetadata ssm = out.getMetadata(SliceFromSeriesMetadata.class).get(0);
-				Slice[] s = ssm.getSliceFromInput();
-				String n = ssm.getFilePath();
-				if (n != null && !n.isEmpty()) {
-					File f = new File(n);
-					String name = FilenameUtils.getBaseName(f.getAbsolutePath());
-//					name = name + "_" + Slice.createString(s);
-					if (endOp != null) {
-						name = name + "_" + endOp.getName();
-					}
-					out.setName(name);
-				}
-				
-			} catch (Exception e) {
-				logger.debug("Could not build dataset name",e);
-			}
-			
+			IDataset out = result.getData();
 			if (out != null) {
+				try {
+					SliceFromSeriesMetadata ssm = out.getMetadata(SliceFromSeriesMetadata.class).get(0);
+					Slice[] s = ssm.getSliceFromInput();
+					String n = ssm.getFilePath();
+					if (n != null && !n.isEmpty()) {
+						File f = new File(n);
+						String name = FilenameUtils.getBaseName(f.getAbsolutePath());
+//						name = name + "_" + Slice.createString(s);
+						if (endOp != null) {
+							name = name + "_" + endOp.getName();
+						}
+						out.setName(name);
+					}
+					
+				} catch (Exception e) {
+					logger.debug("Could not build dataset name",e);
+				}
+
 				if (out.getName() == null) {
 					out.setName("output");
 				}

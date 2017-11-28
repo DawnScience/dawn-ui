@@ -365,6 +365,9 @@ public class ConfigureOperationModelWizardPage extends AbstractOperationModelWiz
 				protected IStatus run(IProgressMonitor monitor) {
 					try {
 						od = operation.execute(id.getData(),new ProgressMonitorWrapper(monitor));
+						if (od == null) {
+							return Status.OK_STATUS;
+						}
 						final IDataset out = od.getData();
 						PlotAdditionalData an = operation.getClass().getAnnotation(PlotAdditionalData.class);
 						IDataset aux = null;
