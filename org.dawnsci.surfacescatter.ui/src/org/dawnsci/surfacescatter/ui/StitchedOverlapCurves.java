@@ -13,6 +13,7 @@ import org.dawnsci.surfacescatter.OverlapDataModel;
 import org.dawnsci.surfacescatter.OverlapDisplayObjects;
 import org.dawnsci.surfacescatter.OverlapUIModel;
 import org.dawnsci.surfacescatter.ReflectivityNormalisation;
+import org.dawnsci.surfacescatter.ScannedVariableName;
 import org.eclipse.dawnsci.analysis.dataset.roi.RectangularROI;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.PlotType;
@@ -259,6 +260,8 @@ public class StitchedOverlapCurves extends Composite {
 		});
 
 		plotSystem.getPlotComposite().setLayoutData(gdSecondField);
+		
+		plotSystem.getAxes().get(0).setTitle(ScannedVariableName.SCANNED_VARIABLE_NAME.getName());
 
 		///////////// BOTTOM
 
@@ -782,7 +785,7 @@ public class StitchedOverlapCurves extends Composite {
 		if (useGoodPointsOnly) {
 			showOnlyGoodPoints.setText("Include All Points");
 		} else {
-			showOnlyGoodPoints.setText("Disregard Bad Points");
+			showOnlyGoodPoints.setText("Show Only Good Points");
 		}
 	}
 

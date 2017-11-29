@@ -446,9 +446,25 @@ public class PlotSystem1CompositeView extends Composite {
 		}
 		try {
 			ssvs.sliderMovementGeneralUpdate();
-		}catch(NullPointerException g) {
-			
+		} catch (NullPointerException g) {
+
 		}
+
+		if (AnalaysisMethodologies.toMethodology(methodologySelection) != Methodology.TWOD
+				&& AnalaysisMethodologies.toMethodology(methodologySelection) != Methodology.X
+				&& AnalaysisMethodologies.toMethodology(methodologySelection) != Methodology.Y) {
+
+			boundaryBoxText.setEnabled(false);
+
+		}
+
+		else {
+			boundaryBoxText.setEnabled(true);
+
+		}
+		
+		backgroundCombo.setEnabled(true);
+
 	}
 
 	public Combo[] getCombos() {
@@ -594,7 +610,7 @@ public class PlotSystem1CompositeView extends Composite {
 			return Status.OK_STATUS;
 		}
 	}
-	
+
 	public void setSsp(SurfaceScatterPresenter ssp) {
 		this.ssp = ssp;
 	}

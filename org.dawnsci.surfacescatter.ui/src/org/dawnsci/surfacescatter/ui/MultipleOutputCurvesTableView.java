@@ -307,7 +307,6 @@ public class MultipleOutputCurvesTableView extends Composite {
 		}
 		
 		CurveStitchDataPackage csdpToSave = ssp.getDrm().getCsdp();
-		String rodSaveName = csdpToSave.getName();
 		
 		boolean useQ = qAxis.getSelection();
 		
@@ -324,5 +323,9 @@ public class MultipleOutputCurvesTableView extends Composite {
 		this.ssp = ssp;
 	}
 
-	
+	public void changeXaxisLabel(String in) {
+		
+		plotSystem4.getAxes().get(0).setTitle(in);
+		
+	}
 }

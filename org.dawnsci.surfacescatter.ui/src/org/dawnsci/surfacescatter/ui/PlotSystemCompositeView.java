@@ -27,6 +27,7 @@ import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
@@ -80,6 +81,7 @@ public class PlotSystemCompositeView extends Composite {
 	private SurfaceScatterViewStart ssvs;
 	private Button accept;
 	private Button acceptBack;
+	private Label tile1Label;
 
 	public PlotSystemCompositeView(Composite parent, int style, IDataset image, int numberOfImages, Dataset nullImage,
 			SurfaceScatterPresenter ssp, SurfaceScatterViewStart ssvs) {
@@ -145,6 +147,8 @@ public class PlotSystemCompositeView extends Composite {
 
 		InputTileGenerator tile1 = new InputTileGenerator("X Variable:",
 				String.valueOf(ssp.getXValue(slider.getSelection())), indicators);
+		
+		tile1Label = tile1.getLabel();
 		xValue = tile1.getText();
 		InputTileGenerator tile2 = new InputTileGenerator("Image No.:", String.valueOf(slider.getSelection()),
 				indicators);
@@ -1215,6 +1219,12 @@ public class PlotSystemCompositeView extends Composite {
 	
 	public void setSsp(SurfaceScatterPresenter ssp) {
 		this.ssp = ssp;
+	}
+	
+	public void setXValueLabel(String in) {
+		
+		tile1Label.setText(in);
+		
 	}
 
 }

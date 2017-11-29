@@ -10,6 +10,7 @@ import org.dawnsci.surfacescatter.CurveStitchDataPackage;
 import org.dawnsci.surfacescatter.GoodPointStripper;
 import org.dawnsci.surfacescatter.OverlapFinder;
 import org.dawnsci.surfacescatter.OverlapUIModel;
+import org.dawnsci.surfacescatter.ScannedVariableName;
 import org.eclipse.dawnsci.analysis.api.roi.IROI;
 import org.eclipse.dawnsci.analysis.api.roi.IRectangularROI;
 import org.eclipse.dawnsci.analysis.dataset.roi.RectangularROI;
@@ -329,6 +330,10 @@ public class OverlapCurves extends Composite {
 
 		plotSystem.getPlotComposite().setLayoutData(gdSecondField);
 
+		
+		plotSystem.getAxes().get(0).setTitle(ScannedVariableName.SCANNED_VARIABLE_NAME.getName());
+				
+				
 		ArrayList<IRectangularROI> roiList = new ArrayList<IRectangularROI>();
 		IRectangularROI nullROI = null;
 

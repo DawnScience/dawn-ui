@@ -483,7 +483,7 @@ public class ReviewTabComposite extends Composite {
 			}
 		});
 
-		InputTileGenerator tile3 = new InputTileGenerator("Curve To Save:", curveSettings);
+		InputTileGenerator tile3 = new InputTileGenerator("Curve To Save/Load:", curveSettings);
 		rodToSave = tile3.getCombo();
 		rodToSave.select(0);
 
