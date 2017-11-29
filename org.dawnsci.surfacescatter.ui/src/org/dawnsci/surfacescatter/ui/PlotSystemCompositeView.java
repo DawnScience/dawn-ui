@@ -72,6 +72,7 @@ public class PlotSystemCompositeView extends Composite {
 	private SashForm form;
 	private TabItem subBgI;
 	private TabItem correctionsTab;
+	private TabItem parameters;
 	private Button centreSecondBgRegion;
 	private Button disregardFrame;
 	private Button includeAllFrames;
@@ -424,6 +425,27 @@ public class PlotSystemCompositeView extends Composite {
 					String.valueOf(ssp.getCurrentRawIntensity()), corrections);
 			rawIntensity = subTile0.getText();
 		}
+		
+		////////////////////////////////////////////////////////
+		// Tab 3 Setup
+		//////////////////////////////////////////////////////////
+
+		TabItem geometricParametersRepeaterTab = new TabItem(folder, SWT.NONE);
+		geometricParametersRepeaterTab.setText("Geometric Parameters");
+		geometricParametersRepeaterTab.setData(new GridData(SWT.FILL, SWT.FILL, true, true));
+
+		Composite geometricParametersRepeaterTabComposite = new Composite(folder, SWT.NONE | SWT.FILL);
+		geometricParametersRepeaterTabComposite.setLayout(new GridLayout());
+		geometricParametersRepeaterTabComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+
+		geometricParametersRepeaterTab.setControl(geometricParametersRepeaterTabComposite);
+		
+		GeometricParametersRepeaterTable gprt = new GeometricParametersRepeaterTable( geometricParametersRepeaterTabComposite, SWT.NONE, ssp, ssvs);
+
+		GridData ld3 = new GridData(SWT.FILL, SWT.FILL, true, true);
+		
+		gprt.setLayout(new GridLayout());
+		gprt.setLayoutData(ld3);
 
 		folder.pack();
 
