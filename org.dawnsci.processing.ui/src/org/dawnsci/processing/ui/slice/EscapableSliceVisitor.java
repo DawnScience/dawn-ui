@@ -181,7 +181,7 @@ public class EscapableSliceVisitor implements SliceVisitor {
 			if (out != null) {
 				try {
 					SliceFromSeriesMetadata ssm = out.getMetadata(SliceFromSeriesMetadata.class).get(0);
-					Slice[] s = ssm.getSliceFromInput();
+//					Slice[] s = ssm.getSliceFromInput();
 					String n = ssm.getFilePath();
 					if (n != null && !n.isEmpty()) {
 						File f = new File(n);
@@ -208,16 +208,19 @@ public class EscapableSliceVisitor implements SliceVisitor {
 			}
 
 			if (result instanceof OperationDataForDisplay) {
-				IDataset[] dd = ((OperationDataForDisplay)result).getDisplayData();
+				OperationDataForDisplay odd = (OperationDataForDisplay) result;
+				IDataset[] dd = odd.getDisplayData();
 				if (dd != null) {
-					for (IDataset d : dd) {
-						IDataset view = d.getSliceView();
-						view = view.squeeze();
-						if (view.getRank() == 1) {
-							if (out.getRank() != 1 && display != null) {
-								MetadataPlotUtils.plotDataWithMetadata(view, display, false);
-								display.repaint();
-							} else {
+					if (display != null && odd.isShowSeparately()) {
+						for (IDataset d : dd) {
+							IDataset view = d.getSliceView().squeeze();
+							MetadataPlotUtils.plotDataWithMetadata(view, display, false);
+						}
+						display.repaint();
+					} else {
+						for (IDataset d : dd) {
+							IDataset view = d.getSliceView().squeeze();
+							if (view.getRank() == 1) {
 								MetadataPlotUtils.plotDataWithMetadata(view, output, false);
 							}
 						}
