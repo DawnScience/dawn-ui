@@ -55,6 +55,8 @@ import org.eclipse.draw2d.geometry.Point;
 import org.eclipse.draw2d.geometry.Rectangle;
 import org.eclipse.jface.action.IStatusLineManager;
 import org.eclipse.jface.viewers.ISelectionProvider;
+import org.eclipse.nebula.visualization.internal.xygraph.undo.SaveStateCommand;
+import org.eclipse.nebula.visualization.internal.xygraph.undo.ZoomCommand;
 import org.eclipse.nebula.visualization.widgets.figureparts.ColorMapRamp;
 import org.eclipse.nebula.visualization.xygraph.figures.Annotation;
 import org.eclipse.nebula.visualization.xygraph.figures.Axis;
@@ -62,11 +64,15 @@ import org.eclipse.nebula.visualization.xygraph.figures.IXYGraph;
 import org.eclipse.nebula.visualization.xygraph.figures.PlotArea;
 import org.eclipse.nebula.visualization.xygraph.figures.Trace;
 import org.eclipse.nebula.visualization.xygraph.figures.ZoomType;
+import org.eclipse.nebula.visualization.xygraph.linearscale.Range;
+import org.eclipse.nebula.visualization.xygraph.util.SWTConstants;
+import org.eclipse.nebula.visualization.xygraph.util.XYGraphMediaFactory;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Cursor;
 import org.eclipse.swt.graphics.PaletteData;
+import org.eclipse.swt.widgets.Display;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -85,10 +91,38 @@ public class RegionArea extends PlotArea implements IPlotArea {
 	private boolean                         containsMouse=false;
 	private MouseMotionListener             positionListener;
 
+	private Cursor grabbing;
+	private Point start;
+	private Point end;
+	private boolean armed;
+
+	private Color revertBackColor;
+
+	private enum PanStatus {
+		X_FAIL,
+		Y_FAIL,
+		XY_FAIL,
+		SUCCESS,
+	}
+
 	public RegionArea(XYRegionGraph xyGraph) {
 		super((IXYGraph) xyGraph);
 		this.regions     = new LinkedHashMap<String,IRegion>();
-		this.imageTraces = new LinkedHashMap<String,ImageTrace>();	
+		this.imageTraces = new LinkedHashMap<String,ImageTrace>();
+		grabbing = XYGraphMediaFactory.getInstance().getCursor(XYGraphMediaFactory.CURSOR_GRABBING_PATH);
+
+		Color backRGB = getBackgroundColor();
+		revertBackColor = XYGraphMediaFactory.getInstance().getColor(255 - backRGB.getRed(), 255 - backRGB.getGreen(),
+				255 - backRGB.getBlue());
+
+		
+		// override old mouse and mouse motion listeners
+		final MouseMotionListener omml = (MouseMotionListener) this.getListeners(MouseMotionListener.class).next();
+		removeListener(MouseListener.class, omml);
+		removeListener(MouseMotionListener.class, omml);
+		PlotMouseListener zoomer = new PlotMouseListener();
+		addMouseListener(zoomer);
+		addMouseMotionListener(zoomer);
 		
 		this.positionListener = new MouseMotionListener.Stub() {
 			@Override
@@ -138,6 +172,336 @@ public class RegionArea extends PlotArea implements IPlotArea {
 			
 		});
 
+	}
+
+	/**
+	 * Listener to mouse events, performs panning and some zooms Is very similar
+	 * to the Axis.AxisMouseListener, but unclear how easy/useful it would be to
+	 * base them on the same code.
+	 */
+	class PlotMouseListener implements MouseListener, MouseMotionListener {
+		private static final int ZOOM_SPEED = 200;
+		private static final double ZOOM_RATIO = 0.1;
+		final private List<Range> xAxisStartRangeList = new ArrayList<Range>();
+		final private List<Range> yAxisStartRangeList = new ArrayList<Range>();
+
+		private SaveStateCommand command;
+		private boolean dynamicZoomMode = false;
+		private ZoomType previousZoomType = ZoomType.NONE;
+		private boolean armed;
+		private Point start;
+		private Point end;
+		private Point dynamicStart;
+
+		@Override
+		public void mousePressed(final MouseEvent me) {
+			fireMousePressed(me);
+
+			// Only react to 'main' mouse button, only react to 'real' zoom
+			if ((me.button != BUTTON1 || getZoomType() == ZoomType.NONE) && me.button != BUTTON2)
+				return;
+			// Remember last used zoomtype
+			ZoomType czt = previousZoomType = getZoomType();
+			// if the mousewheel is pressed
+			if (me.button == BUTTON2) {
+				czt = ZoomType.PANNING;
+			}
+
+			armed = true;
+			dynamicZoomMode = false;
+			// get start position
+			switch (czt) {
+			case RUBBERBAND_ZOOM:
+				start = me.getLocation();
+				end = null;
+				break;
+			case DYNAMIC_ZOOM:
+				start = me.getLocation();
+				dynamicStart = me.getLocation(); // dynamicStart will save
+													// starting point, start
+													// variable
+													// will be changed according
+													// to zoomType
+				end = null;
+				break;
+			case HORIZONTAL_ZOOM:
+				start = new Point(me.getLocation().x, bounds.y);
+				end = null;
+				break;
+			case VERTICAL_ZOOM:
+				start = new Point(bounds.x, me.getLocation().y);
+				end = null;
+				break;
+			case PANNING:
+				setCursor(grabbing);
+				start = me.getLocation();
+				end = null;
+				xAxisStartRangeList.clear();
+				yAxisStartRangeList.clear();
+				for (Axis axis : getXYGraph().getXAxisList())
+					xAxisStartRangeList.add(axis.getRange());
+				for (Axis axis : getXYGraph().getYAxisList())
+					yAxisStartRangeList.add(axis.getRange());
+				break;
+			case ZOOM_IN:
+			case ZOOM_IN_HORIZONTALLY:
+			case ZOOM_IN_VERTICALLY:
+			case ZOOM_OUT:
+			case ZOOM_OUT_HORIZONTALLY:
+			case ZOOM_OUT_VERTICALLY:
+				start = me.getLocation();
+				end = new Point();
+				// Start timer that will zoom while mouse button is pressed
+				Display.getCurrent().timerExec(ZOOM_SPEED, new Runnable() {
+					@Override
+					public void run() {
+						if (!armed)
+							return;
+						performInOutZoom();
+						Display.getCurrent().timerExec(ZOOM_SPEED, this);
+					}
+				});
+				break;
+			default:
+				break;
+			}
+
+			// add command for undo operation
+			command = new ZoomCommand(czt.getDescription(), getXYGraph().getXAxisList(), getXYGraph().getYAxisList());
+			me.consume();
+		}
+
+		@Override
+		public void mouseDoubleClicked(final MouseEvent me) {
+			fireMouseDoubleClicked(me);
+		}
+
+		@Override
+		public void mouseDragged(final MouseEvent me) {
+			fireMouseDragged(me);
+
+			ZoomType czt = getZoomType();
+			if (!armed)
+				return;
+			if (dynamicZoomMode)
+				czt = ZoomType.DYNAMIC_ZOOM;
+			switch (czt) {
+			case DYNAMIC_ZOOM:
+				dynamicZoomMode = true;
+				if (Math.abs(dynamicStart.x - me.x) < 30) {
+					start = new Point(bounds.x, dynamicStart.y);
+					end = new Point(bounds.x + bounds.width, me.getLocation().y);
+					setZoomType(ZoomType.VERTICAL_ZOOM);
+				} else if (Math.abs(dynamicStart.y - me.y) < 30) {
+					start = new Point(dynamicStart.x, bounds.y);
+					end = new Point(me.getLocation().x, bounds.y + bounds.height);
+					setZoomType(ZoomType.HORIZONTAL_ZOOM);
+				} else {
+					start = dynamicStart;
+					end = me.getLocation();
+					setZoomType(ZoomType.RUBBERBAND_ZOOM);
+				}
+				break;
+			case RUBBERBAND_ZOOM:
+				end = me.getLocation();
+				break;
+			case HORIZONTAL_ZOOM:
+				end = new Point(me.getLocation().x, bounds.y + bounds.height);
+				break;
+			case VERTICAL_ZOOM:
+				end = new Point(bounds.x + bounds.width, me.getLocation().y);
+				break;
+			case PANNING:
+				Point old = end == null ? start : end;
+				end = me.getLocation();
+				switch (pan()) { // reset parts of end point
+				case XY_FAIL:
+					end = old;
+					break;
+				case X_FAIL:
+					end.x = old.x;
+					break;
+				case Y_FAIL:
+					end.y = old.y;
+					break;
+				case SUCCESS:
+				default:
+					break;
+				}
+				break;
+			default:
+				break;
+			}
+			RegionArea.this.repaint();
+		}
+
+		@Override
+		public void mouseExited(final MouseEvent me) {
+			fireMouseExited(me);
+			ZoomType czt = getZoomType();
+			// Treat like releasing the button to stop zoomIn/Out timer
+			switch (czt) {
+			case ZOOM_IN:
+			case ZOOM_IN_HORIZONTALLY:
+			case ZOOM_IN_VERTICALLY:
+			case ZOOM_OUT:
+			case ZOOM_OUT_HORIZONTALLY:
+			case ZOOM_OUT_VERTICALLY:
+				mouseReleased(me);
+			default:
+			}
+		}
+
+		@Override
+		public void mouseReleased(final MouseEvent me) {
+			fireMouseReleased(me);
+			ZoomType czt = getZoomType();
+			if (!armed)
+				return;
+			armed = false;
+			if (czt == ZoomType.PANNING)
+				setCursor(czt.getCursor());
+			if (end == null || start == null)
+				return;
+
+			// If we are in dynamicZoom mode we will zoom like this, for other
+			// zooms is everything like before
+			if (dynamicZoomMode) {
+				if (czt != ZoomType.VERTICAL_ZOOM)
+					for (Axis axis : getXYGraph().getXAxisList()) {
+						final double t1 = axis.getPositionValue(start.x, false);
+						final double t2 = axis.getPositionValue(end.x, false);
+						axis.setRange(t1, t2, true);
+					}
+				if (czt != ZoomType.HORIZONTAL_ZOOM)
+					for (Axis axis : getXYGraph().getYAxisList()) {
+						final double t1 = axis.getPositionValue(start.y, false);
+						final double t2 = axis.getPositionValue(end.y, false);
+						axis.setRange(t1, t2, true);
+					}
+				setZoomType(ZoomType.DYNAMIC_ZOOM);
+			} else
+				switch (czt) {
+				case RUBBERBAND_ZOOM:
+					for (Axis axis : getXYGraph().getXAxisList()) {
+						final double t1 = axis.getPositionValue(start.x, false);
+						final double t2 = axis.getPositionValue(end.x, false);
+						axis.setRange(t1, t2, true);
+					}
+					for (Axis axis : getXYGraph().getYAxisList()) {
+						final double t1 = axis.getPositionValue(start.y, false);
+						final double t2 = axis.getPositionValue(end.y, false);
+						axis.setRange(t1, t2, true);
+					}
+					break;
+				case HORIZONTAL_ZOOM:
+					for (Axis axis : getXYGraph().getXAxisList()) {
+						final double t1 = axis.getPositionValue(start.x, false);
+						final double t2 = axis.getPositionValue(end.x, false);
+						axis.setRange(t1, t2, true);
+					}
+					break;
+				case VERTICAL_ZOOM:
+					for (Axis axis : getXYGraph().getYAxisList()) {
+						final double t1 = axis.getPositionValue(start.y, false);
+						final double t2 = axis.getPositionValue(end.y, false);
+						axis.setRange(t1, t2, true);
+					}
+					break;
+				case PANNING:
+					pan();
+					break;
+				case ZOOM_IN:
+				case ZOOM_IN_HORIZONTALLY:
+				case ZOOM_IN_VERTICALLY:
+				case ZOOM_OUT:
+				case ZOOM_OUT_HORIZONTALLY:
+				case ZOOM_OUT_VERTICALLY:
+					performInOutZoom();
+					break;
+				default:
+					break;
+				}
+
+			// mousewheel is pressed and last zoom type was not panning, we set
+			// the zoomtype to the previous state.
+			if (me.button == BUTTON2 && previousZoomType != ZoomType.PANNING) {
+				setZoomType(previousZoomType);
+			}
+			if (czt != ZoomType.NONE && command != null) {
+				command.saveState();
+				getXYGraph().getOperationsManager().addCommand(command);
+				command = null;
+			}
+			start = null;
+			end = null;
+			RegionArea.this.repaint();
+		}
+
+		/** Pan axis according to start/end from mouse listener */
+		private PanStatus pan() {
+			List<Axis> axes = getXYGraph().getXAxisList();
+			PanStatus status = PanStatus.SUCCESS;
+			for (int i = 0; i < axes.size(); ++i) {
+				final Axis axis = axes.get(i);
+				if (((AspectAxis) axis).panChecked(xAxisStartRangeList.get(i), axis.getPositionValue(start.x, false),
+						axis.getPositionValue(end.x, false))) {
+					status = PanStatus.X_FAIL;
+					break;
+				}
+			}
+			axes = getXYGraph().getYAxisList();
+			for (int i = 0; i < axes.size(); ++i) {
+				final Axis axis = axes.get(i);
+				if (((AspectAxis) axis).panChecked(yAxisStartRangeList.get(i), axis.getPositionValue(start.y, false),
+						axis.getPositionValue(end.y, false))) {
+					status = status == PanStatus.X_FAIL ? PanStatus.XY_FAIL : PanStatus.Y_FAIL;
+					break;
+				}
+			}
+
+			return status;
+		}
+
+		/** Perform the in or out zoom according to zoomType */
+		private void performInOutZoom() {
+			switch (getZoomType()) {
+			case ZOOM_IN:
+				zoomInOut(true, true, start.x, start.y, ZOOM_RATIO);
+				break;
+			case ZOOM_IN_HORIZONTALLY:
+				zoomInOut(true, false, start.x, start.y, ZOOM_RATIO);
+				break;
+			case ZOOM_IN_VERTICALLY:
+				zoomInOut(false, true, start.x, start.y, ZOOM_RATIO);
+				break;
+			case ZOOM_OUT:
+				zoomInOut(true, true, start.x, start.y, -ZOOM_RATIO);
+				break;
+			case ZOOM_OUT_HORIZONTALLY:
+				zoomInOut(true, false, start.x, start.y, -ZOOM_RATIO);
+				break;
+			case ZOOM_OUT_VERTICALLY:
+				zoomInOut(false, true, start.x, start.y, -ZOOM_RATIO);
+				break;
+			default: // NOP
+			}
+		}
+
+		@Override
+		public void mouseEntered(MouseEvent me) {
+			fireMouseEntered(me);
+		}
+
+		@Override
+		public void mouseHover(MouseEvent me) {
+			fireMouseHover(me);
+		}
+
+		@Override
+		public void mouseMoved(MouseEvent me) {
+			fireMouseMoved(me);
+		}
 	}
 
 	public void setBackgroundColor(Color color) {
@@ -218,6 +582,25 @@ public class RegionArea extends PlotArea implements IPlotArea {
 	protected void paintClientArea(final Graphics graphics) {
 		try {
 			super.paintClientArea(graphics);
+
+			// need to do this as arm is never true once we have added our own plot mouse listener
+			// Show the start/end cursor or the 'rubberband' of a zoom operation?
+			if (armed && end != null && start != null) {
+				switch (getZoomType()) {
+				case RUBBERBAND_ZOOM:
+				case DYNAMIC_ZOOM:
+				case HORIZONTAL_ZOOM:
+				case VERTICAL_ZOOM:
+					graphics.setLineStyle(SWTConstants.LINE_DOT);
+					graphics.setLineWidth(1);
+					graphics.setForegroundColor(revertBackColor);
+					graphics.drawRectangle(start.x, start.y, end.x - start.x, end.y - start.y);
+					break;
+
+				default:
+					break;
+				}
+			}
 			
 			if (shiftPoint!=null && toPoint!=null && shiftDown && getSelectedCursor()!=null) {
 				graphics.pushState();
