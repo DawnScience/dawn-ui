@@ -20,7 +20,7 @@ import org.slf4j.LoggerFactory;
 
 public class PlotModeXY implements IPlotMode {
 
-	private static final String[] options =  new String[]{"X"};
+	protected static final String[] options =  new String[]{"X"};
 	private long count = 0;
 	
 	private final static Logger logger = LoggerFactory.getLogger(PlotModeXY.class);
