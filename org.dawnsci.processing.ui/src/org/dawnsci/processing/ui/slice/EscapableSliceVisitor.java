@@ -237,9 +237,9 @@ public class EscapableSliceVisitor implements SliceVisitor {
 				public void run() {
 					output.setTitle("Output");
 					if (displayHelper != null) {
-						if (result.getLog() != null && result instanceof OperationDataForDisplay) {
+						if (result.getLog() != null && result instanceof OperationDataForDisplay && ((OperationDataForDisplay)result).isShowSeparately()) {
 							displayHelper.setDisplayMode(ProcessDisplayOptions.ALL);
-						} else if (result.getLog() == null && (result instanceof OperationDataForDisplay)) {
+						} else if (result.getLog() == null && (result instanceof OperationDataForDisplay) && ((OperationDataForDisplay)result).isShowSeparately()) {
 							displayHelper.setDisplayMode(ProcessDisplayOptions.OUTPUT_DISPLAY);
 						} else if (result.getLog() != null && !(result instanceof OperationDataForDisplay)) {
 							displayHelper.setDisplayMode(ProcessDisplayOptions.OUTPUT_LOG);
