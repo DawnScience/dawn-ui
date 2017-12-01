@@ -159,13 +159,15 @@ public class PlotModeXY implements IPlotMode {
 		AxesMetadata metadata = data.getFirstMetadata(AxesMetadata.class);
 		IDataset ax = null;
 		
+		String axName = null;
+		
 		if (metadata != null) {
 			ILazyDataset[] axes = metadata.getAxes();
 			if (axes.length == 1 && axes[0] != null) {
 				ax = axes[0].getSlice();
 				String name = MetadataPlotUtils.removeSquareBrackets(ax.getName());
 				ax.setName(MetadataPlotUtils.removeSquareBrackets(name));
-				system.getSelectedXAxis().setTitle(name);
+				axName = name;
 			}
 			
 		}
@@ -190,6 +192,8 @@ public class PlotModeXY implements IPlotMode {
 		trace.setData(ax, data);
 		trace.setUserObject(userObject);
 		if (!canUpdate)system.addTrace(trace);
+		
+		if (axName != null) system.getSelectedXAxis().setTitle(axName);
 	}
 
 	@Override
