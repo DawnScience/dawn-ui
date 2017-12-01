@@ -379,6 +379,13 @@ public class LiveLoadedFile extends LoadedFile implements IRefreshable {
 				ILazyDataset lazyDataset = dataHolder.get().getLazyDataset(n);
 				addNonStringDataset(lazyDataset, n);
 			}
+			
+			if (!dataOptions.isEmpty()) {
+				return;
+			}
+			
+			updateDataHolder();
+			
 			return;
 		} else {
 			updateDataHolder();
