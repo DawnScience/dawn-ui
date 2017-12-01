@@ -62,6 +62,7 @@ public class OverlapCurves extends Composite {
 	private CurveStitchDataPackage csdp;
 	private Color red;
 
+
 	public OverlapCurves(Composite parent, int style, ArrayList<IDataset> arrayILDy, ArrayList<IDataset> arrayILDx,
 			String title, OverlapUIModel model, GeneralOverlapHandlerView gohv, SurfaceScatterPresenter ssp) {
 
@@ -265,6 +266,9 @@ public class OverlapCurves extends Composite {
 				disregardPoint.setText("Disregard Point");
 				addCurves();
 				gohv.getStitchedCurves().resetAll(model.getxAxis(), model.getyAxis(), true);
+				
+				model.setUseNegativevalues(true);
+				model.poke();
 			}
 		});
 
@@ -306,6 +310,7 @@ public class OverlapCurves extends Composite {
 			public void widgetSelected(SelectionEvent e) {
 				ssp.disregardNegativeIntensities();
 				model.poke();
+				model.setUseNegativevalues(false);
 				addCurves();
 			}
 

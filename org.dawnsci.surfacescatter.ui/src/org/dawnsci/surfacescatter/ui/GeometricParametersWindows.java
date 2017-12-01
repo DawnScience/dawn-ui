@@ -730,6 +730,7 @@ public class GeometricParametersWindows extends Composite {
 
 	public void updateDisplayFromGm(GeometricParametersModel gm) {
 
+		beamCorrection.setSelection(gm.getBeamCorrection());
 		beamHeight.setText(String.valueOf(gm.getBeamHeight()));
 		angularFudgeFactor.setText(String.valueOf(gm.getAngularFudgeFactor()));
 		footprint.setText(String.valueOf(gm.getFootprint()));

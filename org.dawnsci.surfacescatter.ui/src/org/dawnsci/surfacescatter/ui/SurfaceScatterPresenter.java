@@ -687,8 +687,16 @@ public class SurfaceScatterPresenter {
 								
 							}
 
+						
+						
+						try {
+//							applyNewCorrections();
+							
 						}
-
+						catch(Exception d) {
+							
+						}
+						}
 						catch (Exception e1) {
 							// TODO Auto-generated catch block
 							e1.printStackTrace();
@@ -3093,4 +3101,9 @@ public class SurfaceScatterPresenter {
 		}
 
 	}
+	
+//	private void applyNewCorrections() {
+//		rrrr
+//		
+//	}
 }

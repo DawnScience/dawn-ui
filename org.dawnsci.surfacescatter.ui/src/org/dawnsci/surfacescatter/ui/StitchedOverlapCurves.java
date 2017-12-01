@@ -255,6 +255,10 @@ public class StitchedOverlapCurves extends Composite {
 				slider.setSelection(g);
 
 				buildLineTrace(model.getyAxis(), model.getxAxis());
+				
+				useGoodPointsOnly = model.isUseNegativevalues();
+				checkGoodPointsLegend();
+				
 
 			}
 		});
@@ -781,12 +785,17 @@ public class StitchedOverlapCurves extends Composite {
 	private void flipUseGoodPointsOnly() {
 
 		useGoodPointsOnly = !useGoodPointsOnly;
-
-		if (useGoodPointsOnly) {
+		checkGoodPointsLegend();
+	}
+	
+	private void checkGoodPointsLegend() {
+		
+		if (!useGoodPointsOnly) {
 			showOnlyGoodPoints.setText("Include All Points");
 		} else {
 			showOnlyGoodPoints.setText("Show Only Good Points");
 		}
+		
 	}
 
 	private void buildLineTrace(AxisEnums.yAxes yA, AxisEnums.xAxes xA) {
