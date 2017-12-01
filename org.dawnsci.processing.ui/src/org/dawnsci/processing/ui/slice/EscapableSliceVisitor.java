@@ -6,6 +6,8 @@ import java.util.List;
 
 import org.apache.commons.io.FilenameUtils;
 import org.dawb.common.ui.util.DisplayUtils;
+import org.dawnsci.processing.ui.IProcessDisplayHelper;
+import org.dawnsci.processing.ui.IProcessDisplayHelper.ProcessDisplayOptions;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.dawnsci.analysis.api.conversion.IConversionContext;
 import org.eclipse.dawnsci.analysis.api.processing.IExecutionVisitor;
@@ -42,16 +44,17 @@ public class EscapableSliceVisitor implements SliceVisitor {
 	private IPlottingSystem<?> display;
 	private ProcessingLogDisplay logDisplay;
 	private IOperationInputData inputData = null;
+	private IProcessDisplayHelper displayHelper;
 	
 	private final static Logger logger = LoggerFactory.getLogger(EscapableSliceVisitor.class);
 
 	public EscapableSliceVisitor(ILazyDataset lz, int[] dataDims, IOperation[] series, IOperation[] fullSeries,
 			IProgressMonitor monitor, IConversionContext context, IPlottingSystem<?> system) {
-		this(lz, dataDims, series, fullSeries, monitor, context, system, null, null);
+		this(lz, dataDims, series, fullSeries, monitor, context, system, null, null, null);
 	}
 
 	public EscapableSliceVisitor(ILazyDataset lz, int[] dataDims, IOperation[] series, IOperation[] fullSeries,
-			IProgressMonitor monitor, IConversionContext context, IPlottingSystem<?> system, IPlottingSystem<?> display, ProcessingLogDisplay logDisplay) {
+			IProgressMonitor monitor, IConversionContext context, IPlottingSystem<?> system, IPlottingSystem<?> display, ProcessingLogDisplay logDisplay, IProcessDisplayHelper displayHelper) {
 		this.visitor = new UIExecutionVisitor();
 		this.dataDims = dataDims;
 		this.series = series;
@@ -61,6 +64,7 @@ public class EscapableSliceVisitor implements SliceVisitor {
 		this.output = system;
 		this.display = display;
 		this.logDisplay = logDisplay;
+		this.displayHelper = displayHelper;
 	}
 
 	public void setEndOperation(IOperation<? extends IOperationModel, ? extends OperationData> op) {
@@ -202,7 +206,7 @@ public class EscapableSliceVisitor implements SliceVisitor {
 				}
 				MetadataPlotUtils.plotDataWithMetadata(out, output);
 			}
-
+			
 			if (logDisplay != null && result.getLog() != null) {
 				logDisplay.setLog(result.getLog().toString());
 			}
@@ -227,11 +231,22 @@ public class EscapableSliceVisitor implements SliceVisitor {
 					}
 				}
 			}
-
+			
 			DisplayUtils.asyncExec(new Runnable() {
 				@Override
 				public void run() {
 					output.setTitle("Output");
+					if (displayHelper != null) {
+						if (result.getLog() != null && result instanceof OperationDataForDisplay) {
+							displayHelper.setDisplayMode(ProcessDisplayOptions.ALL);
+						} else if (result.getLog() == null && (result instanceof OperationDataForDisplay)) {
+							displayHelper.setDisplayMode(ProcessDisplayOptions.OUTPUT_DISPLAY);
+						} else if (result.getLog() != null && !(result instanceof OperationDataForDisplay)) {
+							displayHelper.setDisplayMode(ProcessDisplayOptions.OUTPUT_LOG);
+						} else {
+							displayHelper.setDisplayMode(ProcessDisplayOptions.OUTPUT_ONLY);
+						}
+					}
 				}
 			});
 		}
