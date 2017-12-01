@@ -24,6 +24,7 @@ import org.dawb.common.ui.monitor.ProgressMonitorWrapper;
 import org.dawnsci.common.widgets.dialog.FileSelectionDialog;
 import org.dawnsci.conversion.schemes.ProcessConversionScheme;
 import org.dawnsci.processing.ui.Activator;
+import org.dawnsci.processing.ui.IProcessDisplayHelper;
 import org.dawnsci.processing.ui.ProcessingOutputView;
 import org.dawnsci.processing.ui.ServiceHolder;
 import org.dawnsci.processing.ui.preference.ProcessingConstants;
@@ -139,6 +140,7 @@ public class DataFileSliceView extends ViewPart {
 	private ProcessingLogDisplay logDisplay;
 	private IOperationInputData inputData = null;
 	private ProcessingOutputType processingOutputType = ProcessingOutputType.PROCESSING_ONLY;
+	private IProcessDisplayHelper displayHelper;
 	
 	String lastPath = null;
 	
@@ -255,6 +257,7 @@ public class DataFileSliceView extends ViewPart {
 		IWorkbenchPage page = getSite().getPage();
 		IViewPart view = page.findView("org.dawnsci.processing.ui.output");
 		output = (IPlottingSystem<Composite>) view.getAdapter(IPlottingSystem.class);
+		displayHelper = view.getAdapter(IProcessDisplayHelper.class);
 		if (view instanceof ProcessingOutputView) {
 			display = ((ProcessingOutputView) view).getDisplayPlot();
 			logDisplay = ((ProcessingOutputView) view).getLogDisplay();
@@ -844,7 +847,7 @@ public class DataFileSliceView extends ViewPart {
 	
 	private EscapableSliceVisitor getSliceVisitor(IOperation<? extends IOperationModel, ? extends OperationData>[] series,ILazyDataset lz,  
             int[] dataDims, IProgressMonitor mon) {
-		return new EscapableSliceVisitor(lz,dataDims,series,getOperations(),mon,fileManager.getContext(),output, display, logDisplay);
+		return new EscapableSliceVisitor(lz,dataDims,series,getOperations(),mon,fileManager.getContext(),output, display, logDisplay,displayHelper);
 	}
 	
 	@Override
