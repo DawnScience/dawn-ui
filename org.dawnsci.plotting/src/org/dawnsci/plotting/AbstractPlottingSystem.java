@@ -46,6 +46,7 @@ import org.eclipse.dawnsci.plotting.api.trace.IMulti2DTrace;
 import org.eclipse.dawnsci.plotting.api.trace.IPlane3DTrace;
 import org.eclipse.dawnsci.plotting.api.trace.IScatter3DTrace;
 import org.eclipse.dawnsci.plotting.api.trace.ISurfaceTrace;
+import org.eclipse.dawnsci.plotting.api.trace.ITableDataTrace;
 import org.eclipse.dawnsci.plotting.api.trace.ITrace;
 import org.eclipse.dawnsci.plotting.api.trace.ITraceListener;
 import org.eclipse.dawnsci.plotting.api.trace.IVolumeRenderTrace;
@@ -988,6 +989,7 @@ public abstract class AbstractPlottingSystem<T> implements IPlottingSystem<T>, I
 		if (ILine3DTrace.class.isAssignableFrom(clazz)) return PlotType.XY_STACKED_3D;
 		if (IScatter3DTrace.class.isAssignableFrom(clazz)) return PlotType.XY_SCATTER_3D;
 		if (IMulti2DTrace.class.isAssignableFrom(clazz)) return PlotType.MULTI_IMAGE;
+		if (ITableDataTrace.class.isAssignableFrom(clazz)) return PlotType.DATA;
 
 		return null;
 
