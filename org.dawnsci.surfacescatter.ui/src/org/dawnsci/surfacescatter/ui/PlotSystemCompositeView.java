@@ -72,6 +72,8 @@ public class PlotSystemCompositeView extends Composite {
 	private SashForm form;
 	private TabItem subBgI;
 	private TabItem correctionsTab;
+	private GeometricParametersRepeaterTable gprt;
+	private RodComponentsDisplay rcd;
 	private Button centreSecondBgRegion;
 	private Button disregardFrame;
 	private Button includeAllFrames;
@@ -147,7 +149,7 @@ public class PlotSystemCompositeView extends Composite {
 
 		InputTileGenerator tile1 = new InputTileGenerator("X Variable:",
 				String.valueOf(ssp.getXValue(slider.getSelection())), indicators);
-		
+
 		tile1Label = tile1.getLabel();
 		xValue = tile1.getText();
 		InputTileGenerator tile2 = new InputTileGenerator("Image No.:", String.valueOf(slider.getSelection()),
@@ -425,6 +427,48 @@ public class PlotSystemCompositeView extends Composite {
 			rawIntensity = subTile0.getText();
 		}
 
+		////////////////////////////////////////////////////////
+		// Tab 3 Setup
+		//////////////////////////////////////////////////////////
+
+		TabItem geometricParametersRepeaterTab = new TabItem(folder, SWT.NONE);
+		geometricParametersRepeaterTab.setText("Geometric Parameters");
+		geometricParametersRepeaterTab.setData(new GridData(SWT.FILL, SWT.FILL, true, true));
+
+		Composite geometricParametersRepeaterTabComposite = new Composite(folder, SWT.NONE | SWT.FILL);
+		geometricParametersRepeaterTabComposite.setLayout(new GridLayout());
+		geometricParametersRepeaterTabComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+
+		geometricParametersRepeaterTab.setControl(geometricParametersRepeaterTabComposite);
+
+		gprt = new GeometricParametersRepeaterTable(geometricParametersRepeaterTabComposite, SWT.NONE, ssp, ssvs);
+
+		GridData ld3 = new GridData(SWT.FILL, SWT.FILL, true, true);
+
+		gprt.setLayout(new GridLayout());
+		gprt.setLayoutData(ld3);
+
+		////////////////////////////////////////////////////////
+		// Tab 4 Setup
+		//////////////////////////////////////////////////////////
+
+		TabItem rodComponentsDisplayTab = new TabItem(folder, SWT.NONE);
+		rodComponentsDisplayTab.setText("Rod Component Files");
+		rodComponentsDisplayTab.setData(new GridData(SWT.FILL, SWT.FILL, true, true));
+
+		Composite rodComponentsDisplayComposite = new Composite(folder, SWT.NONE | SWT.FILL);
+		rodComponentsDisplayComposite.setLayout(new GridLayout());
+		rodComponentsDisplayComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+
+		rodComponentsDisplayTab.setControl(rodComponentsDisplayComposite);
+
+		rcd = new RodComponentsDisplay(rodComponentsDisplayComposite, SWT.NONE, ssp);
+
+		GridData ld4 = new GridData(SWT.FILL, SWT.FILL, true, true);
+
+		rcd.setLayout(new GridLayout());
+		rcd.setLayoutData(ld4);
+
 		folder.pack();
 
 		region.addROIListener(new IROIListener() {
@@ -481,6 +525,14 @@ public class PlotSystemCompositeView extends Composite {
 		addChangeProcessingMethodListeners();
 
 		form.setWeights(new int[] { 10, 56, 27, 7 });
+	}
+
+	public GeometricParametersRepeaterTable getGprt() {
+		return gprt;
+	}
+
+	public RodComponentsDisplay getRcd() {
+		return rcd;
 	}
 
 	public void addChangeProcessingMethodListeners() {
@@ -1069,7 +1121,7 @@ public class PlotSystemCompositeView extends Composite {
 		plotSystem.updatePlot2D(ssp.getImage(ssp.getSliderPos()), null, null);
 		setRegion(ssp.getLenPt());
 		plotSystem.repaint();
-		
+
 		generalCorrectionsUpdate();
 
 	}
@@ -1118,19 +1170,21 @@ public class PlotSystemCompositeView extends Composite {
 		subImageBgPlotSystem.getPlotComposite().setLayoutData(new GridData(GridData.FILL_BOTH));
 		subImageBgPlotSystem.createPlot2D(nullImage, null, null);
 
+		folder.setSelection(subBgI);
+		
 		folder.pack();
 
 	}
 
 	public void removeBackgroundSubtractedSubImage() {
-		
+
 		for (TabItem a : folder.getItems()) {
 			if (a.getText().equals(DisplayLabelStrings.getBgSubtractedImage())) {
 				a.dispose();
 				break;
 			}
 		}
-		
+
 		folder.pack();
 		subBgI = null;
 		form.setWeights(new int[] { 19, 45, 29, 7 });
@@ -1216,15 +1270,17 @@ public class PlotSystemCompositeView extends Composite {
 	public Button getDisregardFrame() {
 		return disregardFrame;
 	}
-	
+
 	public void setSsp(SurfaceScatterPresenter ssp) {
 		this.ssp = ssp;
+		gprt.setSsp(ssp);
+		rcd.setSsp(ssp);
 	}
-	
+
 	public void setXValueLabel(String in) {
-		
+
 		tile1Label.setText(in);
-		
+
 	}
 
 }

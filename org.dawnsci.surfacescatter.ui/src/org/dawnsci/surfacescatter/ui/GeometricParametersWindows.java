@@ -2,6 +2,7 @@ package org.dawnsci.surfacescatter.ui;
 
 import org.dawnsci.surfacescatter.GeometricParametersModel;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -45,7 +46,7 @@ public class GeometricParametersWindows extends Composite {
 	private TabFolder folder;
 	private SurfaceScatterPresenter ssp;
 	private GeometricParametersWindows gpw;
-	private Group geometricParametersSX;
+	private Composite geometricParametersSX;
 	private Combo theta;
 	private Combo selectedOption;
 	private boolean updateOn = true;
@@ -62,6 +63,17 @@ public class GeometricParametersWindows extends Composite {
 		this.createContents();
 
 	}
+	
+//	public GeometricParametersWindows(Composite parent, int style, SurfaceScatterPresenter ssp, boolean in) {
+//
+//		super(parent, style);
+//
+//		this.ssp = ssp;
+//		this.gpw = this;
+//
+//		this.createContents(true);
+//
+//	}
 
 	public void createContents() {
 
@@ -72,20 +84,30 @@ public class GeometricParametersWindows extends Composite {
 		TabItem paramsSXRD = new TabItem(folder, SWT.NONE);
 		paramsSXRD.setText("SXRD Parameters");
 
-		geometricParametersSX = new Group(folder, SWT.NULL);
+		ScrolledComposite sc1 = new ScrolledComposite(folder, SWT.BORDER | SWT.H_SCROLL | SWT.V_SCROLL);
+
+		geometricParametersSX = new Composite(sc1, SWT.NULL);
 		GridLayout geometricParametersSXLayout = new GridLayout(2, true);
 		GridData geometricParametersSXData = new GridData(GridData.FILL_BOTH);
 		geometricParametersSX.setLayout(geometricParametersSXLayout);
 		geometricParametersSX.setLayoutData(geometricParametersSXData);
 
-		new Label(geometricParametersSX, SWT.LEFT).setText("beamCorrection");
+		Label beamCorrectionLabel = new Label(geometricParametersSX, SWT.LEFT);
+		beamCorrectionLabel.setText("beamCorrection");
+
 		beamCorrection = new Button(geometricParametersSX, SWT.CHECK);
 		beamCorrection.setSelection(false);
-		new Label(geometricParametersSX, SWT.LEFT).setText("beamInPlane");
+
+		Label beamInPlaneLabel = new Label(geometricParametersSX, SWT.LEFT);
+		beamInPlaneLabel.setText("beamInPlane");
+
 		beamInPlane = new Text(geometricParametersSX, SWT.SINGLE);
 		beamInPlane.setText("0.3");
 		beamInPlane.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-		new Label(geometricParametersSX, SWT.LEFT).setText("beamOutPlane");
+
+		Label beamOutPlaneLabel = new Label(geometricParametersSX, SWT.LEFT);
+		beamOutPlaneLabel.setText("beamOutPlane");
+
 		beamOutPlane = new Text(geometricParametersSX, SWT.SINGLE);
 		beamOutPlane.setText("0.3");
 		beamOutPlane.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
@@ -137,13 +159,25 @@ public class GeometricParametersWindows extends Composite {
 		imageName.setText("file_image");
 		imageName.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 
-		paramsSXRD.setControl(geometricParametersSX);
+		sc1.setContent(geometricParametersSX);
+		//
+		sc1.setExpandHorizontal(true);
+		sc1.setExpandVertical(true);
+
+		sc1.setMinSize(geometricParametersSX.computeSize(geometricParametersSX.getSize().x, SWT.DEFAULT));
+
+		// sc1.setAlwaysShowScrollBars(true);
+		sc1.pack();
+
+		paramsSXRD.setControl(sc1);
 
 		// Tab 2
-		TabItem paramsReflec = new TabItem(folder, SWT.NONE);
-		paramsReflec.setText("Reflectivity Parameters");
+		TabItem paramsReflecTab = new TabItem(folder, SWT.NONE);
+		paramsReflecTab.setText("Reflectivity Parameters");
 
-		Group geometricParametersReflec = new Group(folder, SWT.NULL);
+		ScrolledComposite sc2 = new ScrolledComposite(folder, SWT.BORDER | SWT.H_SCROLL | SWT.V_SCROLL);
+
+		Composite geometricParametersReflec = new Composite(sc2, SWT.NULL);
 		GridLayout geometricParametersLayoutReflec = new GridLayout(2, true);
 		GridData geometricParametersDataReflec = new GridData(GridData.HORIZONTAL_ALIGN_FILL);
 		geometricParametersReflec.setLayout(geometricParametersLayoutReflec);
@@ -400,7 +434,20 @@ public class GeometricParametersWindows extends Composite {
 			}
 		});
 
-		paramsReflec.setControl(geometricParametersReflec);
+		sc2.setContent(geometricParametersReflec);
+
+		sc2.setExpandHorizontal(true);
+		sc2.setExpandVertical(true);
+
+		paramsReflecTab.setControl(sc2);
+
+		sc2.setMinSize(geometricParametersReflec.computeSize(geometricParametersReflec.getSize().x, SWT.DEFAULT));
+
+		sc2.pack();
+
+		paramsSXRD.setControl(sc1);
+
+		this.pack();
 	}
 
 	public Button getRadio() {
@@ -597,6 +644,7 @@ public class GeometricParametersWindows extends Composite {
 
 	public void setSsp(SurfaceScatterPresenter ssp) {
 		this.ssp = ssp;
+		updateDisplayFromGm(ssp.getGm());
 	}
 
 	public GeometricParametersWindows getGpw() {
@@ -682,6 +730,7 @@ public class GeometricParametersWindows extends Composite {
 
 	public void updateDisplayFromGm(GeometricParametersModel gm) {
 
+		beamCorrection.setSelection(gm.getBeamCorrection());
 		beamHeight.setText(String.valueOf(gm.getBeamHeight()));
 		angularFudgeFactor.setText(String.valueOf(gm.getAngularFudgeFactor()));
 		footprint.setText(String.valueOf(gm.getFootprint()));
@@ -725,6 +774,5 @@ public class GeometricParametersWindows extends Composite {
 	public void setUseNegativeQ(boolean useNegativeQ) {
 		this.useNegativeQ = useNegativeQ;
 	}
-
 
 }

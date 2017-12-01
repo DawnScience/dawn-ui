@@ -67,6 +67,7 @@ import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.TabItem;
 import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.ui.PlatformUI;
 
@@ -620,8 +621,6 @@ public class SurfaceScatterViewStart extends Dialog {
 		});
 		container.layout();
 
-		// customComposite.resetRegion(customComposite.getGreenRegion());
-
 		return container;
 	}
 
@@ -1018,7 +1017,7 @@ public class SurfaceScatterViewStart extends Dialog {
 
 			ssp.triggerBoxOffsetTransfer();
 
-			if (getSsps3c().getOutputCurves().isVisible() != true) {
+			if (!getSsps3c().getOutputCurves().isVisible()) {
 				getSsps3c().getOutputCurves().setVisible(true);
 				getSsps3c().getSashForm().setWeights(new int[] { 50, 50 });
 			}
@@ -1033,9 +1032,17 @@ public class SurfaceScatterViewStart extends Dialog {
 				ssp.loadSetROIs(paramFile);
 			}
 
+			for(TabItem t : customComposite.getFolder().getItems()) {
+				if (t.getText().equals(DisplayLabelStrings.getBgSubtractedImage())) {
+					customComposite.getFolder().setSelection(t);
+				}
+			}
+			
 			TrackingProgressAndAbortViewImproved tpaav = new TrackingProgressAndAbortViewImproved(getParentShell(), ssp,
 					this);
 			tpaav.open();
+			
+			 
 
 		}
 
@@ -1769,6 +1776,7 @@ public class SurfaceScatterViewStart extends Dialog {
 		ssp.getGm().setExperimentMethod(ms.getCorrectionsName());
 		ssp.surfaceScatterPresenterBuildWithFrames(filepaths, rsw.getDatDisplayer().getSelectedOption(), ms);
 
+		
 		ScannedVariableName.SCANNED_VARIABLE_NAME.setSetName(rsw.getDatDisplayer().getSelectedOption());
 		
 		try {
@@ -1877,13 +1885,18 @@ public class SurfaceScatterViewStart extends Dialog {
 		ssps3c.resetCrossHairs();
 		customComposite.setXValueLabel(ScannedVariableName.SCANNED_VARIABLE_NAME.getSetName() + " Value:       ");
 		ssps3c.getOutputCurves().changeXaxisLabel(ScannedVariableName.SCANNED_VARIABLE_NAME.getSetName());
+		
+		customComposite.getRcd().setSsp(ssp);
+		customComposite.getGprt().setSsp(ssp);
+		
+		
 	}
 
 	public void buildRodFromCsdp(CurveStitchDataPackage csdp) {
 
 		BuildRodFromCsdpAndNexus brfcan = new BuildRodFromCsdpAndNexus(csdp, ssp);
 
-		this.ssp = brfcan.getSsp();
+		setSsp(brfcan.getSsp());
 
 		brfcan.getSsp().setParentShell(this.getParentShell());
 
@@ -2004,6 +2017,10 @@ public class SurfaceScatterViewStart extends Dialog {
 
 		FittingParameters fp = ssp.loadParameters(csdp.getRodName(), false, false);
 		resetPlotSystem1CompositeViewFromFittingParamters(fp);
+		
+		customComposite.getRcd().setSsp(ssp);
+		customComposite.getGprt().setSsp(ssp);
+		
 
 	}
 
