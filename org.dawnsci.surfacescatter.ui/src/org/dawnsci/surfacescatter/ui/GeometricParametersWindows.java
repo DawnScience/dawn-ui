@@ -46,8 +46,7 @@ public class GeometricParametersWindows extends Composite {
 	private TabFolder folder;
 	private SurfaceScatterPresenter ssp;
 	private GeometricParametersWindows gpw;
-	 private Composite geometricParametersSX;
-//	private ScrolledComposite geometricParametersSX;
+	private Composite geometricParametersSX;
 	private Combo theta;
 	private Combo selectedOption;
 	private boolean updateOn = true;
@@ -64,6 +63,17 @@ public class GeometricParametersWindows extends Composite {
 		this.createContents();
 
 	}
+	
+//	public GeometricParametersWindows(Composite parent, int style, SurfaceScatterPresenter ssp, boolean in) {
+//
+//		super(parent, style);
+//
+//		this.ssp = ssp;
+//		this.gpw = this;
+//
+//		this.createContents(true);
+//
+//	}
 
 	public void createContents() {
 
@@ -150,13 +160,13 @@ public class GeometricParametersWindows extends Composite {
 		imageName.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 
 		sc1.setContent(geometricParametersSX);
-//		
+		//
 		sc1.setExpandHorizontal(true);
 		sc1.setExpandVertical(true);
 
 		sc1.setMinSize(geometricParametersSX.computeSize(geometricParametersSX.getSize().x, SWT.DEFAULT));
 
-		sc1.setAlwaysShowScrollBars(true);
+		// sc1.setAlwaysShowScrollBars(true);
 		sc1.pack();
 
 		paramsSXRD.setControl(sc1);
@@ -165,9 +175,8 @@ public class GeometricParametersWindows extends Composite {
 		TabItem paramsReflecTab = new TabItem(folder, SWT.NONE);
 		paramsReflecTab.setText("Reflectivity Parameters");
 
-
 		ScrolledComposite sc2 = new ScrolledComposite(folder, SWT.BORDER | SWT.H_SCROLL | SWT.V_SCROLL);
-		
+
 		Composite geometricParametersReflec = new Composite(sc2, SWT.NULL);
 		GridLayout geometricParametersLayoutReflec = new GridLayout(2, true);
 		GridData geometricParametersDataReflec = new GridData(GridData.HORIZONTAL_ALIGN_FILL);
@@ -425,22 +434,19 @@ public class GeometricParametersWindows extends Composite {
 			}
 		});
 
-	
 		sc2.setContent(geometricParametersReflec);
-		
+
 		sc2.setExpandHorizontal(true);
 		sc2.setExpandVertical(true);
-		
+
 		paramsReflecTab.setControl(sc2);
 
 		sc2.setMinSize(geometricParametersReflec.computeSize(geometricParametersReflec.getSize().x, SWT.DEFAULT));
 
-		sc2.setAlwaysShowScrollBars(true);
 		sc2.pack();
 
 		paramsSXRD.setControl(sc1);
-		
-		
+
 		this.pack();
 	}
 
@@ -638,6 +644,7 @@ public class GeometricParametersWindows extends Composite {
 
 	public void setSsp(SurfaceScatterPresenter ssp) {
 		this.ssp = ssp;
+		updateDisplayFromGm(ssp.getGm());
 	}
 
 	public GeometricParametersWindows getGpw() {

@@ -5,6 +5,7 @@ import org.dawnsci.surfacescatter.CsdpGeneratorFromDrm;
 import org.dawnsci.surfacescatter.CurveStitchDataPackage;
 import org.dawnsci.surfacescatter.CurveStitchWithErrorsAndFrames;
 import org.dawnsci.surfacescatter.DirectoryModel;
+import org.dawnsci.surfacescatter.DisplayLabelStrings;
 import org.dawnsci.surfacescatter.LocationLenPtConverterUtils;
 import org.eclipse.dawnsci.analysis.dataset.roi.RectangularROI;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
@@ -12,6 +13,7 @@ import org.eclipse.january.dataset.IDataset;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.ProgressBar;
+import org.eclipse.swt.widgets.TabItem;
 
 public class TrackingHandlerWithFramesImproved {
 
@@ -114,7 +116,12 @@ public class TrackingHandlerWithFramesImproved {
 			}
 		}
 
-		ssvs.getPlotSystemCompositeView().getFolder().setSelection(2);
+		for(TabItem ti : ssvs.getPlotSystemCompositeView().getFolder().getItems()) {
+			if (ti.getText().equals(DisplayLabelStrings.getBgSubtractedImage())) {
+				ssvs.getPlotSystemCompositeView().getFolder().setSelection(ti);
+			}
+		}
+		
 		ssp.sliderMovemementMainImage(imageNumber);
 		ssvs.updateIndicators(imageNumber);
 		ssvs.getPlotSystemCompositeView().getPlotSystem().updatePlot2D(tempImage.squeeze(), null, null);
