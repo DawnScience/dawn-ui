@@ -280,7 +280,7 @@ public class PlotController implements IPlotController {
 						if (trace.isUserTrace())
 							count++;
 
-					double val = local.size() / (count - 1);
+					double val = (local.size()-1) / (count - 1);
 					if (Double.isNaN(val)) val = 0;
 					int i = 0;
 					for (ITrace trace : traces) {
