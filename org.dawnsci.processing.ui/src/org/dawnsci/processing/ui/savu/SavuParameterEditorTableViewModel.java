@@ -1,5 +1,6 @@
-package org.dawnsci.processing.ui.savu.ParameterEditor;
+package org.dawnsci.processing.ui.savu;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -12,9 +13,9 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class ParameterEditorTableViewModel {
-	private List<ParameterEditorRowDataModel> rows = new ArrayList<ParameterEditorRowDataModel>();
-	private final static Logger logger = LoggerFactory.getLogger(ParameterEditorTableViewModel.class);
+public class SavuParameterEditorTableViewModel {
+	private List<SavuParameterEditorRowDataModel> rows = new ArrayList<SavuParameterEditorRowDataModel>();
+	private final static Logger logger = LoggerFactory.getLogger(SavuParameterEditorTableViewModel.class);
 
 	private Map<String, Object> pluginDict;
 
@@ -52,7 +53,7 @@ public class ParameterEditorTableViewModel {
 
 	private static String wspacePath;
 
-	public ParameterEditorTableViewModel() {
+	public SavuParameterEditorTableViewModel() {
 		wspacePath = ResourcesPlugin.getWorkspace().getRoot().getLocation().toString();
 		this.pluginName = null;
 		try {
@@ -75,18 +76,18 @@ public class ParameterEditorTableViewModel {
 
 	public void rebuildTable(Map<String, Object> pluginDict) {
 		if (pluginDict == null) {
-			rows.add(new ParameterEditorRowDataModel("", "", ""));
+			rows.add(new SavuParameterEditorRowDataModel("", "", ""));
 		} else {
 			for (Map.Entry<String, Object> entry : pluginDict.entrySet()) {
 				Map<String, Object> info = (Map<String, Object>) entry.getValue();
-				rows.add(new ParameterEditorRowDataModel(entry.getKey(), info.get("value"), (String) info.get("hint")));
+				rows.add(new SavuParameterEditorRowDataModel(entry.getKey(), info.get("value"), (String) info.get("hint")));
 				
 		}	
 		}
 
 	}
 
-	public void addEntry(ParameterEditorRowDataModel model) {
+	public void addEntry(SavuParameterEditorRowDataModel model) {
 		rows.add(model);
 	}
 	public void clearEntries() {
@@ -105,10 +106,10 @@ public class ParameterEditorTableViewModel {
 	}
 
 	public static void setWspacePath(String wspacePath) {
-		ParameterEditorTableViewModel.wspacePath = wspacePath;
+		SavuParameterEditorTableViewModel.wspacePath = wspacePath;
 	}
 
-	public List<ParameterEditorRowDataModel> getValues() {
+	public List<SavuParameterEditorRowDataModel> getValues() {
 		return rows;
 	}
 
@@ -118,7 +119,7 @@ public class ParameterEditorTableViewModel {
 		FileInputStream fileIn;
 
 		try {
-			fileIn = new FileInputStream(wspacePath + pluginName+".ser");// just																								// testing
+			fileIn = new FileInputStream(wspacePath + File.separator + pluginName+".ser");// just																								// testing
 			in = new ObjectInputStream(fileIn);
 			pluginDict = (Map<String, Object>) in.readObject();
 			in.close();

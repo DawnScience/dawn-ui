@@ -1,4 +1,4 @@
-package org.dawnsci.processing.ui.savu.ParameterEditor;
+package org.dawnsci.processing.ui.savu;
 
 import java.util.Map;
 
@@ -22,13 +22,13 @@ import org.slf4j.LoggerFactory;
  * EditingSupport Class
  *
  */
-class ParameterEditingSupport extends EditingSupport {
+class SavuParameterEditingSupport extends EditingSupport {
 
 	private int column;
-	private ParameterEditorTableViewModel viewModel;
-	private final static Logger logger = LoggerFactory.getLogger(ParameterEditingSupport.class);
+	private SavuParameterEditorTableViewModel viewModel;
+	private final static Logger logger = LoggerFactory.getLogger(SavuParameterEditingSupport.class);
 
-	public ParameterEditingSupport(ParameterEditorTableViewModel viewModel, ColumnViewer viewer, int col) {
+	public SavuParameterEditingSupport(SavuParameterEditorTableViewModel viewModel, ColumnViewer viewer, int col) {
 		super(viewer);
 		this.column = col;
 		this.viewModel = viewModel;				
@@ -184,7 +184,7 @@ class ParameterEditingSupport extends EditingSupport {
 
 	private Object getRowValue(Object element) throws Exception {
 
-		final ParameterEditorRowDataModel row = (ParameterEditorRowDataModel) element;
+		final SavuParameterEditorRowDataModel row = (SavuParameterEditorRowDataModel) element;
 		switch (column) {
 		case 0:
 			return row.getKey();
@@ -207,7 +207,7 @@ class ParameterEditingSupport extends EditingSupport {
 	}
 
 	private void setValue(Object element, Object value, boolean tableRefresh) throws Exception {
-		final ParameterEditorRowDataModel row = (ParameterEditorRowDataModel) element;
+		final SavuParameterEditorRowDataModel row = (SavuParameterEditorRowDataModel) element;
 
 		switch (column) {
 		case 0:
@@ -232,7 +232,7 @@ class ParameterEditingSupport extends EditingSupport {
 
 	}
 
-	private void setPluginDictValues(ParameterEditorRowDataModel row) {
+	private void setPluginDictValues(SavuParameterEditorRowDataModel row) {
 		Map<String, Object> pluginDict = this.viewModel.getPluginDict();
 		Map<String, Object> entryGroup = (Map<String, Object>) pluginDict.get(row.getKey());
 		entryGroup.put("value", row.getValue());

@@ -1,4 +1,4 @@
-package org.dawnsci.processing.ui.savu.ParameterEditor;
+package org.dawnsci.processing.ui.savu;
 
 import java.text.DecimalFormat;
 
@@ -9,11 +9,11 @@ import org.eclipse.swt.graphics.Image;
  * Table viewer label provider
  *
  */
-class ParameterEditorLabelProvider extends ColumnLabelProvider {
+class SavuParameterEditorLabelProvider extends ColumnLabelProvider {
 
 	private int column;
 
-	public ParameterEditorLabelProvider(ParameterEditorTableViewModel viewModel, int column) {
+	public SavuParameterEditorLabelProvider(SavuParameterEditorTableViewModel viewModel, int column) {
 		this.column = column;
 	}
 
@@ -24,7 +24,7 @@ class ParameterEditorLabelProvider extends ColumnLabelProvider {
 
 	@Override
 	public String getText(Object element) {
-		final ParameterEditorRowDataModel model = (ParameterEditorRowDataModel)element;
+		final SavuParameterEditorRowDataModel model = (SavuParameterEditorRowDataModel)element;
 		DecimalFormat pointFormat = new DecimalFormat("##0.0###");
 		switch (column) {
 		case 0:
@@ -61,11 +61,6 @@ class ParameterEditorLabelProvider extends ColumnLabelProvider {
 	@Override
 	public String getToolTipText(Object element) {
 		return "";
-	}
-
-	@Override
-	public void dispose() {
-		super.dispose();
 	}
 
 }

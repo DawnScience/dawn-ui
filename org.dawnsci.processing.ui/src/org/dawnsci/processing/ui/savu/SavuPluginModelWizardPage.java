@@ -4,8 +4,6 @@ package org.dawnsci.processing.ui.savu;
 import java.util.Map;
 
 import org.dawnsci.processing.ui.model.AbstractOperationModelWizardPage;
-import org.dawnsci.processing.ui.savu.ParameterEditor.ParameterEditor;
-import org.dawnsci.processing.ui.savu.ParameterEditor.ParameterEditorTableViewModel;
 import org.eclipse.dawnsci.analysis.api.processing.IOperation;
 import org.eclipse.dawnsci.analysis.api.processing.OperationData;
 
@@ -64,14 +62,14 @@ public class SavuPluginModelWizardPage extends AbstractOperationModelWizardPage 
 			logger.error("Couldn't select the metadata radar box",e2);
 		}
 		// initialise the parameter editor model.
-		ParameterEditorTableViewModel viewModel = new ParameterEditorTableViewModel();
+		SavuParameterEditorTableViewModel viewModel = new SavuParameterEditorTableViewModel();
 		if (pluginDict!=null){
 			viewModel.setPluginDict(pluginDict);
 		}
 		
 
 		//Initialise the parameter edtior gui
-		final ParameterEditor parameterEditor = new ParameterEditor(container, SWT.NONE);
+		final SavuParameterEditor parameterEditor = new SavuParameterEditor(container, SWT.NONE);
 
 		GridData parameterEditorLayout = new GridData();
 		parameterEditorLayout.horizontalAlignment = SWT.FILL;

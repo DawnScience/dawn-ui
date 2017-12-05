@@ -1,4 +1,4 @@
-package org.dawnsci.processing.ui.savu.ParameterEditor;
+package org.dawnsci.processing.ui.savu;
 
 /**
  * Model object for a Region Of Interest row used in an AxisPixel Table
@@ -6,12 +6,12 @@ package org.dawnsci.processing.ui.savu.ParameterEditor;
  * @author wqk87977
  *
  */
-class ParameterEditorRowDataModel {
+class SavuParameterEditorRowDataModel {
 	private String key;
 	private Object value;
 	private String description;
 
-	public ParameterEditorRowDataModel(String key, Object value, String description) {
+	public SavuParameterEditorRowDataModel(String key, Object value, String description) {
 		this.key = key;
 		this.value = value;
 		this.description = description;

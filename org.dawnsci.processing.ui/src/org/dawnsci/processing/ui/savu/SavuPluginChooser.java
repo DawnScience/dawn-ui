@@ -1,5 +1,6 @@
 package org.dawnsci.processing.ui.savu;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -112,14 +113,14 @@ public class SavuPluginChooser extends Composite {
 		Map<String, Object> pluginDict = null;
 		ObjectInputStream in;
 		FileInputStream fileIn;
-			try {
-			fileIn = new FileInputStream(wspacePath + "savu_plugin_info.ser");// just
+		try {
+			fileIn = new FileInputStream(wspacePath + File.separator + "savu_plugin_info.ser");// just
 			in = new ObjectInputStream(fileIn);
 			pluginDict = (Map<String, Object>) in.readObject();
 			in.close();
 			fileIn.close();
 		} catch (ClassNotFoundException | IOException e) {
-			logger.warn("Couldn't open the file for "+wspacePath + "savu_plugin_info.ser",e);
+			logger.warn("Couldn't open the file for "+ wspacePath + File.separator + "savu_plugin_info.ser", e);
 		}
 		return pluginDict;
 	
