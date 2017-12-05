@@ -103,11 +103,11 @@ public class SurfaceScatterViewStart extends Dialog {
 
 		super(parentShell);
 
-		this.ssp = new SurfaceScatterPresenter();
+		ssp = new SurfaceScatterPresenter();
 
 		ssp.setParentShell(this.getParentShell());
 
-		this.ssp.addStateListener(new IPresenterStateChangeEventListener() {
+		ssp.addStateListener(new IPresenterStateChangeEventListener() {
 
 			@Override
 			public void update() {
@@ -116,12 +116,23 @@ public class SurfaceScatterViewStart extends Dialog {
 			}
 		});
 
-		this.ssp.getDrm().addPropertyChangeListener(new PropertyChangeListener() {
+		ssp.getDrm().addPropertyChangeListener(new PropertyChangeListener() {
 
 			@Override
 			public void propertyChange(PropertyChangeEvent evt) {
 				updateDisplay(null, ssp.isUpdateSvs());
 			}
+		});
+
+		ssp.getGm().addPropertyChangeListener(new PropertyChangeListener() {
+
+			@Override
+			public void propertyChange(PropertyChangeEvent evt) {
+				raw.getRtc().addCurrentTrace(ssp.getDrm().getCsdp());
+
+				ssps3c.getOutputCurves().getIntensity().redraw();
+			}
+
 		});
 
 		setShellStyle(getShellStyle() | SWT.RESIZE | SWT.PRIMARY_MODAL);
@@ -245,57 +256,59 @@ public class SurfaceScatterViewStart extends Dialog {
 			}
 		});
 
-//		folder.addSelectionListener(new SelectionAdapter() {
-//
-//			@Override
-//			public void widgetSelected(SelectionEvent e) {
-//
-//				CTabFolder f = (CTabFolder) e.getSource();
-//
-//				if (f.getSelectionIndex() == 1) {
-//					return;
-//				}
-//
-//				if (ssp.getNoImages() != 0) {
-//					customComposite.getSlider().setMaximum(ssp.getNoImages());
-//					customComposite.getPlotSystem1CompositeView().generalUpdate();
-//					paramField.geometricParametersUpdate();
-//
-//					IRectangularROI greenRectangle = customComposite.getGreenRegion().getROI().getBounds();
-//					int[] len = greenRectangle.getIntLengths();
-//					int[] pt = greenRectangle.getIntPoint();
-//
-//					int[][] lenPt = { len, pt };
-//
-//					double[] bgRegionROI = ssp.regionOfInterestSetter1(lenPt);
-//					RectangularROI bgROI = new RectangularROI(bgRegionROI[0], bgRegionROI[1], bgRegionROI[2],
-//							bgRegionROI[3], bgRegionROI[4]);
-//
-//					customComposite.getBgRegion().setROI(bgROI);
-//
-//					if (ssp.getYList() == (null)) {
-//						try {
-//							getPlotSystemCompositeView().removeBackgroundSubtractedSubImage();
-//							getSsps3c().isOutputCurvesVisible(false);
-//							customComposite.getReplay().setEnabled(false);
-//						} catch (Exception n) {
-//
-//						}
-//					}
-//
-//					ssps3c.resetVerticalAndHorizontalSlices();
-//					customComposite.getPlotSystem1CompositeView().checkTrackerOnButton();
-//				}
-//
-//				else if (f.getSelectionIndex() == 1) {
-//					folder.setSelection(1);
-//				}
-//
-//				else {
-//					folder.setSelection(0);
-//				}
-//			}
-//		});
+		// folder.addSelectionListener(new SelectionAdapter() {
+		//
+		// @Override
+		// public void widgetSelected(SelectionEvent e) {
+		//
+		// CTabFolder f = (CTabFolder) e.getSource();
+		//
+		// if (f.getSelectionIndex() == 1) {
+		// return;
+		// }
+		//
+		// if (ssp.getNoImages() != 0) {
+		// customComposite.getSlider().setMaximum(ssp.getNoImages());
+		// customComposite.getPlotSystem1CompositeView().generalUpdate();
+		// paramField.geometricParametersUpdate();
+		//
+		// IRectangularROI greenRectangle =
+		// customComposite.getGreenRegion().getROI().getBounds();
+		// int[] len = greenRectangle.getIntLengths();
+		// int[] pt = greenRectangle.getIntPoint();
+		//
+		// int[][] lenPt = { len, pt };
+		//
+		// double[] bgRegionROI = ssp.regionOfInterestSetter1(lenPt);
+		// RectangularROI bgROI = new RectangularROI(bgRegionROI[0], bgRegionROI[1],
+		// bgRegionROI[2],
+		// bgRegionROI[3], bgRegionROI[4]);
+		//
+		// customComposite.getBgRegion().setROI(bgROI);
+		//
+		// if (ssp.getYList() == (null)) {
+		// try {
+		// getPlotSystemCompositeView().removeBackgroundSubtractedSubImage();
+		// getSsps3c().isOutputCurvesVisible(false);
+		// customComposite.getReplay().setEnabled(false);
+		// } catch (Exception n) {
+		//
+		// }
+		// }
+		//
+		// ssps3c.resetVerticalAndHorizontalSlices();
+		// customComposite.getPlotSystem1CompositeView().checkTrackerOnButton();
+		// }
+		//
+		// else if (f.getSelectionIndex() == 1) {
+		// folder.setSelection(1);
+		// }
+		//
+		// else {
+		// folder.setSelection(0);
+		// }
+		// }
+		// });
 
 		addSecondBgRegionListeners(customComposite.getSecondBgRegion());
 
@@ -542,7 +555,7 @@ public class SurfaceScatterViewStart extends Dialog {
 					int state = getOutputCurves().getIntensity().getSelectionIndex();
 
 					ssp.qConversion();
-				
+
 					outputCurves.getPlotSystem().getAxes().get(0).setTitle("q");
 
 					if (state == 0) {
@@ -584,9 +597,9 @@ public class SurfaceScatterViewStart extends Dialog {
 
 					int state = getOutputCurves().getIntensity().getSelectionIndex();
 
-					outputCurves.getPlotSystem().getAxes().get(0).setTitle(ScannedVariableName.SCANNED_VARIABLE_NAME.getName());
+					outputCurves.getPlotSystem().getAxes().get(0)
+							.setTitle(ScannedVariableName.SCANNED_VARIABLE_NAME.getName());
 
-					
 					if (state == 0) {
 						IDataset x = ssp.getSplicedCurveX();
 						lt1.setData(x, ssp.getSplicedCurveY());
@@ -1032,17 +1045,15 @@ public class SurfaceScatterViewStart extends Dialog {
 				ssp.loadSetROIs(paramFile);
 			}
 
-			for(TabItem t : customComposite.getFolder().getItems()) {
+			for (TabItem t : customComposite.getFolder().getItems()) {
 				if (t.getText().equals(DisplayLabelStrings.getBgSubtractedImage())) {
 					customComposite.getFolder().setSelection(t);
 				}
 			}
-			
+
 			TrackingProgressAndAbortViewImproved tpaav = new TrackingProgressAndAbortViewImproved(getParentShell(), ssp,
 					this);
 			tpaav.open();
-			
-			 
 
 		}
 
@@ -1658,7 +1669,7 @@ public class SurfaceScatterViewStart extends Dialog {
 		if (ssp.getMethodology() == Methodology.OVERLAPPING_BACKGROUND_BOX) {
 			customComposite.getSecondBgRegion().setROI(ssp.generateOffsetBgROI(ssp.getLenPt()));
 		}
-		
+
 		getSsps3c().generalUpdate(ssp.getLenPt());
 		customComposite.generalCorrectionsUpdate();
 
@@ -1776,9 +1787,8 @@ public class SurfaceScatterViewStart extends Dialog {
 		ssp.getGm().setExperimentMethod(ms.getCorrectionsName());
 		ssp.surfaceScatterPresenterBuildWithFrames(filepaths, rsw.getDatDisplayer().getSelectedOption(), ms);
 
-		
 		ScannedVariableName.SCANNED_VARIABLE_NAME.setSetName(rsw.getDatDisplayer().getSelectedOption());
-		
+
 		try {
 			ssp.setLenPt(r);
 			ssp.setPermanentBoxOffsetLenPt(pbolp);
@@ -1885,11 +1895,27 @@ public class SurfaceScatterViewStart extends Dialog {
 		ssps3c.resetCrossHairs();
 		customComposite.setXValueLabel(ScannedVariableName.SCANNED_VARIABLE_NAME.getSetName() + " Value:       ");
 		ssps3c.getOutputCurves().changeXaxisLabel(ScannedVariableName.SCANNED_VARIABLE_NAME.getSetName());
-		
+
 		customComposite.getRcd().setSsp(ssp);
 		customComposite.getGprt().setSsp(ssp);
-		
-		
+
+		ssp.getGm().addPropertyChangeListener(new PropertyChangeListener() {
+
+			@Override
+			public void propertyChange(PropertyChangeEvent evt) {
+				try {
+					raw.getRtc().addCurrentTrace(ssp.getDrm().getCsdp());
+
+					ssps3c.getOutputCurves().getIntensity().redraw();
+					
+					ssp.stitchAndPresentFromCsdp(ssps3c.getOutputCurves(),getIds(), ssp.getDrm().getCsdp());
+				} catch (Error or) {
+
+				}
+			}
+
+		});
+
 	}
 
 	public void buildRodFromCsdp(CurveStitchDataPackage csdp) {
@@ -1931,12 +1957,11 @@ public class SurfaceScatterViewStart extends Dialog {
 			}
 		});
 
-		
 		ScannedVariableName.SCANNED_VARIABLE_NAME.setSetName(ssp.getGm().getxName());
-		
+
 		customComposite.setXValueLabel(ScannedVariableName.SCANNED_VARIABLE_NAME.getSetName() + " Value:       ");
 		ssps3c.getOutputCurves().changeXaxisLabel(ScannedVariableName.SCANNED_VARIABLE_NAME.getSetName());
-		
+
 		customComposite.setSsp(brfcan.getSsp());
 		ssps3c.setSsp(brfcan.getSsp());
 		customComposite.getPlotSystem1CompositeView().setSsp(brfcan.getSsp());
@@ -2017,10 +2042,34 @@ public class SurfaceScatterViewStart extends Dialog {
 
 		FittingParameters fp = ssp.loadParameters(csdp.getRodName(), false, false);
 		resetPlotSystem1CompositeViewFromFittingParamters(fp);
-		
+
 		customComposite.getRcd().setSsp(ssp);
 		customComposite.getGprt().setSsp(ssp);
-		
+
+		brfcan.getSsp().getDrm().addPropertyChangeListener(new PropertyChangeListener() {
+
+			@Override
+			public void propertyChange(PropertyChangeEvent evt) {
+				updateDisplay(null, ssp.isUpdateSvs());
+			}
+		});
+
+		brfcan.getSsp().getGm().addPropertyChangeListener(new PropertyChangeListener() {
+
+			@Override
+			public void propertyChange(PropertyChangeEvent evt) {
+				try {
+					raw.getRtc().addCurrentTrace(ssp.getDrm().getCsdp());
+
+					ssps3c.getOutputCurves().getIntensity().redraw();
+					
+					ssp.stitchAndPresentFromCsdp(ssps3c.getOutputCurves(),getIds(), ssp.getDrm().getCsdp());
+				} catch (Error or) {
+
+				}
+			}
+
+		});
 
 	}
 

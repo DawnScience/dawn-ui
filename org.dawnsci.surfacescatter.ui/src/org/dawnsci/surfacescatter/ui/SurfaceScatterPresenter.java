@@ -29,6 +29,7 @@ import org.dawnsci.surfacescatter.CsdpGeneratorFromDrm;
 import org.dawnsci.surfacescatter.CurveStitchDataPackage;
 import org.dawnsci.surfacescatter.CurveStitchWithErrorsAndFrames;
 import org.dawnsci.surfacescatter.DirectoryModel;
+import org.dawnsci.surfacescatter.DummyClassUtils;
 import org.dawnsci.surfacescatter.DummyProcessWithFrames;
 import org.dawnsci.surfacescatter.FittingParameters;
 import org.dawnsci.surfacescatter.FittingParametersInputReader;
@@ -259,9 +260,9 @@ public class SurfaceScatterPresenter {
 					try {
 						Files.write(to, content.getBytes(charset));
 					} catch (java.nio.file.FileAlreadyExistsException f) {
-						String ec=  StringUtils.substringBeforeLast(to.toString(), ".dat") + "_extra_copy";
-						 ec = ec + ".dat";
-						 to = Paths.get(ec);
+						String ec = StringUtils.substringBeforeLast(to.toString(), ".dat") + "_extra_copy";
+						ec = ec + ".dat";
+						to = Paths.get(ec);
 					}
 
 					dh1 = LoaderFactory.getData(to.toString());
@@ -390,8 +391,6 @@ public class SurfaceScatterPresenter {
 		catch (Exception e1) {
 			e1.printStackTrace();
 		}
-
-		
 
 		Dataset tifNamesCon = DatasetFactory.zeros(1);
 
@@ -554,155 +553,33 @@ public class SurfaceScatterPresenter {
 
 				fmsSorted.get(fm.getDatNo()).set(fm.getNoInOriginalDat(), fm);
 
-//				if (correctionSelection == MethodSetting.SXRD) {
-//
-//					double polarisation = SXRDGeometricCorrections
-//							.polarisation(datNamesInOrder[f], gm.getInplanePolarisation(), gm.getOutplanePolarisation())
-//							.getDouble(imageNoInDatList.get(pos));
-//
-//					fm.setPolarisationCorrection(polarisation);
-//
-//					double lorentz = SXRDGeometricCorrections.lorentz(datNamesInOrder[f])
-//							.getDouble(imageNoInDatList.get(pos));
-//
-//					fm.setLorentzianCorrection(lorentz);
-//
-//					double areaCorrection = SXRDGeometricCorrections.areacor(datNamesInOrder[f], gm.getBeamCorrection(),
-//							gm.getSpecular(), gm.getSampleSize(), gm.getOutPlaneSlits(), gm.getInPlaneSlits(),
-//							gm.getBeamInPlane(), gm.getBeamOutPlane(), gm.getDetectorSlits())
-//							.getDouble(imageNoInDatList.get(pos));
-//
-//					fm.setAreaCorrection(areaCorrection);
-//
-//					fm.setH(hArrayCon.getDouble(f));
-//					fm.setK(kArrayCon.getDouble(f));
-//					fm.setL(lArrayCon.getDouble(f));
-//
-//				}
-//
-//				else {
-//
-//					drm.setSortedTheta(thetaArrayCon);
-//
-//				}
-//
-//				try {
-//
-//					double angularFudgeFactor = gm.getAngularFudgeFactor();
-//					double beamHeight = gm.getBeamHeight();
-//					double footprint = gm.getFootprint();
-//
-//					try {
-//						fm.setQdcd(qdcdCon.getDouble(f));
-//					} catch (IndexOutOfBoundsException e) {
-//
-//					}
-//					if (correctionSelection == MethodSetting.Reflectivity_without_Flux_Correction_Gaussian_Profile
-//							|| correctionSelection == MethodSetting.Reflectivity_with_Flux_Correction_Gaussian_Profile) {
-//
-//						double reflectivityAreaCorrection = GeometricCorrectionsReflectivityMethod
-//								.reflectivityCorrectionsBatchGaussianPofile(dcdThetaCon, fm.getNoInOriginalDat(),
-//										angularFudgeFactor, beamHeight, footprint);
-//
-//						fm.setReflectivityAreaCorrection(reflectivityAreaCorrection);
-//
-//					}
-//
-//					else if (correctionSelection == MethodSetting.Reflectivity_without_Flux_Correction_Simple_Scaling
-//							|| correctionSelection == MethodSetting.Reflectivity_with_Flux_Correction_Simple_Scaling) {
-//
-//						double reflectivityAreaCorrection = GeometricCorrectionsReflectivityMethod
-//								.reflectivityCorrectionsBatchSimpleScaling(dcdThetaCon, fm.getNoInOriginalDat(),
-//										beamHeight, footprint);
-//
-//						fm.setReflectivityAreaCorrection(reflectivityAreaCorrection);
-//
-//					}
-//				} catch (Exception h) {
-//					System.out.println("problem in ref area corr:   " + h.getMessage());
-//					fluxCallibrationWarning();
-//					break;
-//				}
-//
-//				try {
-//					if (correctionSelection == MethodSetting.Reflectivity_with_Flux_Correction_Gaussian_Profile
-//							|| correctionSelection == MethodSetting.Reflectivity_with_Flux_Correction_Simple_Scaling) {
-//
-//						String externalFlux = gm.getFluxPath();
-//
-//						if (externalFlux.isEmpty()) {
-//							externalFlux = null;
-//						}
-//
-//						double reflectivityFluxCorrection = 0;
-//
-//						if (gm.getUseInternalFlux()) {
-//
-//							reflectivityFluxCorrection = ReflectivityFluxCorrectionsForDialog
-//									.reflectivityFluxCorrectionsDouble(// fm.getDatFilePath(),
-//											xArrayCon.getDouble(f), gm.getUseNegativeQ(), filepaths);
-//
-//						} else {
-//
-//							reflectivityFluxCorrection = ReflectivityFluxCorrectionsForDialog
-//									.reflectivityFluxCorrectionsDouble(// fm.getDatFilePath(),
-//											qdcdCon.getDouble(f), gm.getUseNegativeQ(), externalFlux);
-//						}
-//						fm.setReflectivityFluxCorrection(reflectivityFluxCorrection);
-//
-//						if (Double.isInfinite(reflectivityFluxCorrection)) {
-//							fluxCallibrationWarning();
-//							break;
-//						}
-//					}
-//
-//				} catch (Exception i) {
-//					System.out.println("problem doing flux corr");
-//					fluxCallibrationWarning();
-//					break;
-//
-//				}
-				
-				buildCorrections(f, pos, fm,correctionSelection,
-						datNamesInOrder, imageNoInDatList, dcdThetaCon, hArrayCon,
-						kArrayCon, lArrayCon, thetaArrayCon, qdcdCon);
+				buildCorrections(f, pos, fm, correctionSelection, datNamesInOrder, imageNoInDatList, dcdThetaCon,
+						hArrayCon, kArrayCon, lArrayCon, thetaArrayCon, qdcdCon);
 
 				fm.setScannedVariable(xArrayCon.getDouble(f));
 
 			}
-			
-			
+
 			gm.addPropertyChangeListener(new PropertyChangeListener() {
 
 				public void propertyChange(PropertyChangeEvent evt) {
-					for (int id = 0; id < filepaths.length; id++) {
-						try {
-//							IDataHolder dh2 = LoaderFactory.getData(filepaths[id]);
-//							ILazyDataset ild = dh2.getLazyDataset(gm.getImageName());
-							
-							for(FrameModel g : fms) {
-								 buildCorrections(g.getFmNo(), g.getNoInOriginalDat(), g, g.getCorrectionSelection(),
-											datNamesInOrder, imageNoInDatList, dcdThetaCon, hArrayCon,
-											kArrayCon, lArrayCon, thetaArrayCon, qdcdCon);
-								
-							}
 
-						
-						
-						try {
-//							applyNewCorrections();
-							
-						}
-						catch(Exception d) {
-							
-						}
-						}
-						catch (Exception e1) {
-							// TODO Auto-generated catch block
-							e1.printStackTrace();
-						}
+					for (FrameModel g : fms) {
+						buildCorrections(g.getFmNo(), g.getNoInOriginalDat(), g, g.getCorrectionSelection(),
+								datNamesInOrder, imageNoInDatList, dcdThetaCon, hArrayCon, kArrayCon, lArrayCon,
+								thetaArrayCon, qdcdCon);
+
 					}
+
+					try {
+						applyNewCorrections();
+
+					} catch (Exception d) {
+
+					}
+
 				}
+
 			});
 
 			drm.setFmsSorted(fmsSorted);
@@ -719,7 +596,9 @@ public class SurfaceScatterPresenter {
 
 		}
 
-		catch (Exception e) {
+		catch (
+
+		Exception e) {
 			System.out.println(e.getMessage());
 		}
 
@@ -3096,14 +2975,81 @@ public class SurfaceScatterPresenter {
 
 			}
 
-			// fm.setScannedVariable(xArrayCon.getDouble(f));
-
 		}
 
 	}
-	
-//	private void applyNewCorrections() {
-//		rrrr
-//		
-//	}
+
+	@SuppressWarnings("unchecked")
+	private void applyNewCorrections() {
+
+		ArrayList<Double> correctionList = new ArrayList<>();
+		ArrayList<ArrayList<Double>> correctionListofLists = new ArrayList<>();
+
+		for (FrameModel f : fms) {
+
+			double correctionValue = DummyClassUtils.getCorrectionValue(f);
+
+			correctionList.add(correctionValue);
+
+			double unsplicedCorrectedIntensity = correctionValue * f.getUnspliced_Raw_Intensity();
+
+			f.setUnspliced_Corrected_Intensity(unsplicedCorrectedIntensity);
+
+			double unsplicedCorrectedIntensityError = correctionValue * f.getUnspliced_Raw_Intensity_Error();
+
+			f.setUnspliced_Corrected_Intensity_Error(unsplicedCorrectedIntensityError);
+		}
+
+		ArrayList<Double> newyList = (ArrayList<Double>) drm.getOcdp().getyListRawIntensity().clone();
+		ArrayList<Double> newyListError = (ArrayList<Double>) drm.getOcdp().getyListRawIntensityError().clone();
+
+		ArrayList<ArrayList<Double>> newyListForEachDat = (ArrayList<ArrayList<Double>>) drm.getOcdp()
+				.getyListForEachDat().clone();
+		ArrayList<ArrayList<Double>> newyListErrorForEachDat = (ArrayList<ArrayList<Double>>) drm.getOcdp()
+				.getyListErrorForEachDat().clone();
+		
+
+		correctionListofLists = (ArrayList<ArrayList<Double>>) drm.getOcdp().getyListForEachDat().clone();
+
+		IDataset[] newyIDataset = drm.getCsdp().getyIDataset().clone();
+		IDataset[] newyIDatasetError = drm.getCsdp().getyIDatasetError().clone();
+
+		IDataset newSplicedCurveY = drm.getCsdp().getSplicedCurveYRaw().clone();
+		IDataset newSplicedCurveYError = drm.getCsdp().getSplicedCurveYRawError().clone();
+
+		for (FrameModel f : fms) {
+
+			double yvalue = correctionList.get(f.getFmNo()) * drm.getOcdp().getyListRawIntensity().get(f.getFmNo());
+			double yValueError = correctionList.get(f.getFmNo())
+					* drm.getOcdp().getyListRawIntensityError().get(f.getFmNo());
+
+			newyList.set(f.getFmNo(), yvalue);
+
+			newyListForEachDat.get(f.getDatNo()).set(f.getNoInOriginalDat(), (Double) yvalue);
+
+			newyListError.set(f.getFmNo(), yValueError);
+
+			newyListErrorForEachDat.get(f.getDatNo()).set(f.getNoInOriginalDat(), (Double) yValueError);
+
+			correctionListofLists.get(f.getDatNo()).set(f.getNoInOriginalDat(),
+					(Double) correctionList.get(f.getFmNo()));
+
+			newyIDataset[f.getDatNo()].set(yvalue, f.getNoInOriginalDat());
+			newyIDatasetError[f.getDatNo()].set(yValueError, f.getNoInOriginalDat());
+
+			newSplicedCurveY.set(yvalue, f.getFmNo());
+			newSplicedCurveYError.set(yValueError, f.getFmNo());
+
+		}
+
+		drm.getOcdp().setyList(newyList);
+		drm.getOcdp().setyListError(newyListError);
+
+		drm.getOcdp().setyListForEachDat(newyListForEachDat);
+		drm.getOcdp().setyListErrorForEachDat(newyListErrorForEachDat);
+
+		drm.getCsdp().setSplicedCurveY(newSplicedCurveY);
+		drm.getCsdp().setSplicedCurveYError(newSplicedCurveYError);
+		//
+	}
 }

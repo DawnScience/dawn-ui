@@ -25,15 +25,12 @@ public class GeometricParametersRepeaterTable extends Composite {
 
 	public void createContents() {
 		
-		Button push = new Button(this, SWT.PUSH | SWT.FILL);
-		push.setText("Apply Settngs");
-		push.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-
-		
 		gpw= new GeometricParametersWindows(this, SWT.FILL, ssp);
 		gpw.setLayout(new GridLayout());
 		gpw.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		
 
+	
 	}
 
 	public Composite getComposite() {
