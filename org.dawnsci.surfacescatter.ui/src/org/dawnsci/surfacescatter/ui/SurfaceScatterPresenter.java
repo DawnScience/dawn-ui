@@ -2993,21 +2993,38 @@ public class SurfaceScatterPresenter {
 
 			double unsplicedCorrectedIntensity = correctionValue * f.getUnspliced_Raw_Intensity();
 
+			double unsplicedFhkl = Math.pow(unsplicedCorrectedIntensity, 0.5);
+			
 			f.setUnspliced_Corrected_Intensity(unsplicedCorrectedIntensity);
+			
+			f.setUnspliced_Fhkl_Intensity(unsplicedFhkl);
 
 			double unsplicedCorrectedIntensityError = correctionValue * f.getUnspliced_Raw_Intensity_Error();
 
+			double unsplicedFhklError =unsplicedFhkl * 0.5 / Math.sqrt(f.getUnspliced_Raw_Intensity());
+			
 			f.setUnspliced_Corrected_Intensity_Error(unsplicedCorrectedIntensityError);
+			
+			f.setUnspliced_Fhkl_Intensity_Error(unsplicedFhklError);
 		}
 
 		ArrayList<Double> newyList = (ArrayList<Double>) drm.getOcdp().getyListRawIntensity().clone();
 		ArrayList<Double> newyListError = (ArrayList<Double>) drm.getOcdp().getyListRawIntensityError().clone();
 
+		ArrayList<Double> newyListFhkl = (ArrayList<Double>) drm.getOcdp().getyListRawIntensity().clone();
+		ArrayList<Double> newyListFhklError = (ArrayList<Double>) drm.getOcdp().getyListRawIntensityError().clone();
+
+		
 		ArrayList<ArrayList<Double>> newyListForEachDat = (ArrayList<ArrayList<Double>>) drm.getOcdp()
 				.getyListForEachDat().clone();
 		ArrayList<ArrayList<Double>> newyListErrorForEachDat = (ArrayList<ArrayList<Double>>) drm.getOcdp()
 				.getyListErrorForEachDat().clone();
-		
+	
+		ArrayList<ArrayList<Double>> newyListFhklForEachDat = (ArrayList<ArrayList<Double>>) drm.getOcdp()
+				.getyListForEachDat().clone();
+		ArrayList<ArrayList<Double>> newyListFhklErrorForEachDat = (ArrayList<ArrayList<Double>>) drm.getOcdp()
+				.getyListErrorForEachDat().clone();
+	
 
 		correctionListofLists = (ArrayList<ArrayList<Double>>) drm.getOcdp().getyListForEachDat().clone();
 
@@ -3017,12 +3034,20 @@ public class SurfaceScatterPresenter {
 		IDataset newSplicedCurveY = drm.getCsdp().getSplicedCurveYRaw().clone();
 		IDataset newSplicedCurveYError = drm.getCsdp().getSplicedCurveYRawError().clone();
 
+		IDataset[] newyIDatasetFhkl = drm.getCsdp().getyIDataset().clone();
+		IDataset[] newyIDatasetFhklError = drm.getCsdp().getyIDatasetError().clone();
+
+		IDataset newSplicedCurveYFhkl = drm.getCsdp().getSplicedCurveYRaw().clone();
+		IDataset newSplicedCurveYFhklError = drm.getCsdp().getSplicedCurveYRawError().clone();
+
+		
 		for (FrameModel f : fms) {
 
 			double yvalue = correctionList.get(f.getFmNo()) * drm.getOcdp().getyListRawIntensity().get(f.getFmNo());
 			double yValueError = correctionList.get(f.getFmNo())
 					* drm.getOcdp().getyListRawIntensityError().get(f.getFmNo());
 
+			
 			newyList.set(f.getFmNo(), yvalue);
 
 			newyListForEachDat.get(f.getDatNo()).set(f.getNoInOriginalDat(), (Double) yvalue);
@@ -3039,6 +3064,28 @@ public class SurfaceScatterPresenter {
 
 			newSplicedCurveY.set(yvalue, f.getFmNo());
 			newSplicedCurveYError.set(yValueError, f.getFmNo());
+			
+			
+
+			double yvalueFhkl = Math.pow(yvalue, 0.5);
+			double yValueFhklError =  yvalueFhkl * 0.5 / Math.sqrt(drm.getOcdp().getyListRawIntensity().get(f.getFmNo()));
+
+			
+			
+			newyListFhkl.set(f.getFmNo(), yvalueFhkl);
+
+			newyListFhklForEachDat.get(f.getDatNo()).set(f.getNoInOriginalDat(), (Double) yvalueFhkl);
+
+			newyListFhklError.set(f.getFmNo(), yValueFhklError);
+
+			newyListFhklErrorForEachDat.get(f.getDatNo()).set(f.getNoInOriginalDat(), (Double) yValueFhklError);
+
+
+			newyIDatasetFhkl[f.getDatNo()].set(yvalueFhkl, f.getNoInOriginalDat());
+			newyIDatasetFhklError[f.getDatNo()].set(yValueFhklError, f.getNoInOriginalDat());
+
+			newSplicedCurveYFhkl.set(yvalueFhkl, f.getFmNo());
+			newSplicedCurveYFhklError.set(yValueFhklError, f.getFmNo());
 
 		}
 
@@ -3050,6 +3097,16 @@ public class SurfaceScatterPresenter {
 
 		drm.getCsdp().setSplicedCurveY(newSplicedCurveY);
 		drm.getCsdp().setSplicedCurveYError(newSplicedCurveYError);
-		//
+
+		drm.getOcdp().setyListFhkl(newyListFhkl);
+		drm.getOcdp().setyListFhklError(newyListFhklError);
+
+		drm.getOcdp().setyListFhklForEachDat(newyListFhklForEachDat);
+		drm.getOcdp().setyListFhklErrorForEachDat(newyListFhklErrorForEachDat);
+
+		drm.getCsdp().setSplicedCurveYFhkl(newSplicedCurveYFhkl);
+		drm.getCsdp().setSplicedCurveYFhklError(newSplicedCurveYFhklError);
+
+		
 	}
 }
