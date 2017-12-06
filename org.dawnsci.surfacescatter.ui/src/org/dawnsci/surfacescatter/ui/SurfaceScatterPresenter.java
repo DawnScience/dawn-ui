@@ -230,8 +230,8 @@ public class SurfaceScatterPresenter {
 					String localFilepathCopy = StringUtils.substringBeforeLast(datName, ".dat") + "_copy";
 
 					Path from = Paths.get(filepaths[id]);
-
-					Path to = Paths.get(stm.getSaveFolder() + localFilepathCopy + ".dat");
+					
+					Path to = Paths.get(stm.getSaveFolder() +  File.separator +localFilepathCopy + ".dat");
 
 					Files.copy(from, to, StandardCopyOption.REPLACE_EXISTING);
 
@@ -637,6 +637,7 @@ public class SurfaceScatterPresenter {
 
 	public void setSaveFolder(String sfp) {
 		saveFolder = sfp;
+		stm.setSaveFolder(sfp);
 	}
 
 	public String getSaveFolder() {
