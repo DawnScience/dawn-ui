@@ -788,7 +788,7 @@ public class DatDisplayer extends Composite implements IDatDisplayer {
 
 		File folder = new File(datFolderPath);
 		File[] listOfFiles = folder.listFiles();
-		ArrayList<String>  datList = new ArrayList<>();
+		ArrayList<String> datList = new ArrayList<>();
 
 		CharSequence dat = ".dat";
 
@@ -819,8 +819,16 @@ public class DatDisplayer extends Composite implements IDatDisplayer {
 				e.printStackTrace();
 			}
 
-			String scanCommand = StringUtils.substringBetween(content, "scan", "\n");
+			String scanCommand = " ";
+			try {
+				scanCommand = StringUtils.substringBetween(content, "scan", "\n");
+			} catch (Exception t) {
 
+			}
+			
+			if(scanCommand == null) {
+				scanCommand = " ";
+			}
 			TableItem t = new TableItem(folderDisplayTable, SWT.NONE);
 			t.setText(0, datList.get(j));
 			t.setText(1, scanCommand);
@@ -1207,7 +1215,7 @@ public class DatDisplayer extends Composite implements IDatDisplayer {
 	public void setImageFolderPath(String g) {
 
 	}
-	
+
 	public void setSsp(SurfaceScatterPresenter in) {
 		this.ssp = in;
 	}
