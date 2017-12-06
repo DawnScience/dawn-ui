@@ -16,8 +16,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.eclipse.dawnsci.analysis.api.io.SliceObject;
-import org.eclipse.dawnsci.hdf.object.HierarchicalDataFactory;
-import org.eclipse.dawnsci.hdf.object.nexus.NexusUtils;
+import org.eclipse.dawnsci.hdf5.HDF5Utils;
+import org.eclipse.dawnsci.nexus.NexusUtils;
 import org.eclipse.dawnsci.plotting.api.expressions.IExpressionObject;
 import org.eclipse.dawnsci.plotting.api.expressions.IExpressionObjectService;
 import org.eclipse.dawnsci.slicing.api.Activator;
@@ -166,17 +166,15 @@ class AxisEditingSupport extends EditingSupport {
 				
 			List<String> names = new ArrayList<String>(7);
 			
-			boolean isHDF5 = HierarchicalDataFactory.isHDF5(sliceObject.getPath());
+			boolean isHDF5 = HDF5Utils.isHDF5(sliceObject.getPath());
 			if (isHDF5) try {
 				if (sliceObject.getPath()!=null && sliceObject.getName()!=null) {
-				    names.addAll(NexusUtils.getAxisNames(sliceObject.getPath(), sliceObject.getName(), idim));
+					names.addAll(NexusUtils.getAxisNames(sliceObject.getPath(), sliceObject.getName(), idim));
 				}
 			} catch ( NullPointerException ignored) {
 				// Allowed not to have axes.
-				
 			} catch (Throwable ne) {
-				if (!ddl.isExpression()) throw ne; // Expressions, we don't care that
-                // cannot read nexus
+				if (!ddl.isExpression()) throw ne; // Expressions, we don't care that cannot read nexus
 			}
 			
 			
