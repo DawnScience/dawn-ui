@@ -5,12 +5,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.dawnsci.common.widgets.dialog.FileSelectionDialog;
+import org.dawnsci.mapping.ui.api.IMapFileController;
 import org.dawnsci.mapping.ui.datamodel.AbstractMapData;
 import org.dawnsci.mapping.ui.datamodel.AssociatedImage;
 import org.dawnsci.mapping.ui.datamodel.MappedDataArea;
 import org.dawnsci.mapping.ui.datamodel.MappedDataBlock;
 import org.dawnsci.mapping.ui.datamodel.MappedDataFile;
-import org.dawnsci.mapping.ui.datamodel.MappedFileManager;
 import org.dawnsci.mapping.ui.datamodel.RGBMapData;
 import org.dawnsci.mapping.ui.datamodel.VectorMapData;
 import org.dawnsci.mapping.ui.dialog.DynamicDialog;
@@ -136,7 +136,7 @@ public class MapActionUtils {
 		
 	}
 	
-	public static IAction getFileRemoveAction(final MappedFileManager manager, final MappedDataFile file) {
+	public static IAction getFileRemoveAction(final IMapFileController manager, final MappedDataFile file) {
 		return new Action("Clear") {
 			@Override
 			public void run() {
@@ -147,7 +147,7 @@ public class MapActionUtils {
 		
 	}
 	
-	public static IAction getFilesRemoveAction(final MappedFileManager manager, final List<MappedDataFile> files) {
+	public static IAction getFilesRemoveAction(final IMapFileController manager, final List<MappedDataFile> files) {
 		return new Action("Clear files") {
 			@Override
 			public void run() {
@@ -157,7 +157,7 @@ public class MapActionUtils {
 		
 	}
 	
-	public static IAction getNonLiveFilesRemoveAction(final MappedFileManager manager) {
+	public static IAction getNonLiveFilesRemoveAction(final IMapFileController manager) {
 		return new Action("Clear all finished scans") {
 			@Override
 			public void run() {
@@ -167,7 +167,7 @@ public class MapActionUtils {
 		
 	}
 	
-	public static IAction getFilesRemoveAllAction(final MappedFileManager manager) {
+	public static IAction getFilesRemoveAllAction(final IMapFileController manager) {
 		return new Action("Clear all files") {
 			@Override
 			public void run() {
@@ -177,7 +177,7 @@ public class MapActionUtils {
 		
 	}
 	
-	public static IAction getFilesRemoveAction(final MappedFileManager manager) {
+	public static IAction getFilesRemoveAction(final IMapFileController manager) {
 		return new Action("Clear all") {
 			@Override
 			public void run() {
@@ -191,7 +191,7 @@ public class MapActionUtils {
 		return new Action("Clear plot") {
 			@Override
 			public void run() {
-				FileManagerSingleton.getFileManager().unplotAll();
+				LocalServiceManager.getFileController().unplotAll();
 			}
 		};
 

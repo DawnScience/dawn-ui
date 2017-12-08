@@ -33,7 +33,7 @@ public class BeanBuilderWizard implements IBeanBuilderHelper {
 		
 		if (wd.open() == WizardDialog.CANCEL) return;
 		
-		FileManagerSingleton.getFileManager().loadFiles(path, wiz.getMappedDataFileBean(), null);
+		LocalServiceManager.getFileController().loadFile(path, wiz.getMappedDataFileBean(), null);
 
 	}
 

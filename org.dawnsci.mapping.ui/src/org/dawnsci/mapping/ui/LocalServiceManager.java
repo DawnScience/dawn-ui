@@ -1,5 +1,6 @@
 package org.dawnsci.mapping.ui;
 
+import org.dawnsci.mapping.ui.api.IMapFileController;
 import org.eclipse.dawnsci.analysis.api.io.ILoaderService;
 import org.eclipse.dawnsci.analysis.api.io.IRemoteDatasetService;
 import org.eclipse.dawnsci.analysis.api.persistence.IMarshallerService;
@@ -15,6 +16,7 @@ public class LocalServiceManager {
 	private static INexusFileFactory nexusFactory;
 	private static EventAdmin eventAdmin;
 	private static IMarshallerService marshallerService;
+	private static IMapFileController fileController;
 
 	public static void setLoaderService(ILoaderService s) {
 		lservice = s;
@@ -62,6 +64,14 @@ public class LocalServiceManager {
 
 	public static void setMarshallerService(IMarshallerService marshallerService) {
 		LocalServiceManager.marshallerService = marshallerService;
+	}
+	
+	public static IMapFileController getFileController() {
+		return fileController;
+	}
+
+	public static void setFileController(IMapFileController fileController) {
+		LocalServiceManager.fileController = fileController;
 	}
 	
 }

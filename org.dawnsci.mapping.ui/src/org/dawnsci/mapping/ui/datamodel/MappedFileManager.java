@@ -16,6 +16,7 @@ import org.dawnsci.mapping.ui.BeanBuilderWizard;
 import org.dawnsci.mapping.ui.IBeanBuilderHelper;
 import org.dawnsci.mapping.ui.IRegistrationHelper;
 import org.dawnsci.mapping.ui.LocalServiceManager;
+import org.dawnsci.mapping.ui.api.IMapFileController;
 import org.dawnsci.mapping.ui.wizards.LegacyMapBeanBuilder;
 import org.dawnsci.mapping.ui.wizards.MapBeanBuilder;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -32,11 +33,10 @@ import org.eclipse.ui.progress.IProgressService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class MappedFileManager {
+public class MappedFileManager implements IMapFileController{
 
 	private final static Logger logger = LoggerFactory.getLogger(MappedFileManager.class);
 	
-//	private MapPlotManager plotManager;
 	private MappedDataArea mappedDataArea;
 	private IRegistrationHelper registrationHelper;
 	private IBeanBuilderHelper beanHelper;
@@ -49,21 +49,21 @@ public class MappedFileManager {
 		beanHelper = new BeanBuilderWizard();
 	}
 
+	@Override
 	public void removeFile(MappedDataFile file) {
 		if (file == null) return;
 		mappedDataArea.removeFile(file);
-//		plotManager.unplotFile(file);
-		if (mappedDataArea.isEmpty()) {
-//			plotManager.clearAll();
-		}
+
 		fireListeners(null);
 	}
 	
+	@Override
 	public void setRegistrationHelper(IRegistrationHelper helper) {
 		registrationHelper = helper;
 	}
 	
-	public void togglePlot(PlottableMapObject object) {
+	@Override
+	public void toggleDisplay(PlottableMapObject object) {
 		boolean plotted = !object.isPlotted();
 
 		MappedDataFile f = mappedDataArea.getParentFile(object);
@@ -97,6 +97,7 @@ public class MappedFileManager {
 	}
 	
 
+	@Override
 	public List<String> loadFiles(String[] paths, IProgressService progressService) {
 		
 		MapLoadingRunnable runnable = new MapLoadingRunnable(paths, null, true);
@@ -117,7 +118,8 @@ public class MappedFileManager {
 		return failed;
 	}
 	
-	public List<String> loadFiles(String path, MappedDataFileBean bean, IProgressService progressService) {
+	@Override
+	public List<String> loadFile(String path, MappedDataFileBean bean, IProgressService progressService) {
 		
 		MapLoadingRunnable runnable = new MapLoadingRunnable(new String[] {path}, bean, true);
 		
@@ -137,6 +139,7 @@ public class MappedFileManager {
 		return failed;
 	}	
 	
+	@Override
 	public void loadLiveFile(final String path, LiveDataBean bean, String parentFile) {
 		if (parentFile != null && !mappedDataArea.contains(parentFile)) return;
 		
@@ -147,6 +150,7 @@ public class MappedFileManager {
 		ex.shutdown();
 	}
 	
+	@Override
 	public void localReloadFile(String path) {
 		if (!mappedDataArea.contains(path)) return;
 		
@@ -179,26 +183,25 @@ public class MappedFileManager {
 	}
 	
 	
+	@Override
 	public void removeFile(String path) {
 		MappedDataFile dataFile = mappedDataArea.getDataFile(path);
 		removeFile(dataFile);
 	}
 	
+	@Override
 	public void clearNonLiveFiles() {
 		Object[] children = mappedDataArea.getChildren();
 		
 		Arrays.stream(children).filter(MappedDataFile.class::isInstance)
 		.map(MappedDataFile.class::cast).filter(f -> f.getLiveDataBean() == null).forEach(f -> {
 			mappedDataArea.removeFile(f);
-//			plotManager.unplotFile(f);
 		});
 		
-		if (mappedDataArea.isEmpty()) {
-//			plotManager.clearAll();
-		}
 		fireListeners(null);
 	}
 	
+	@Override
 	public boolean containsLiveFiles() {
 		Object[] children = mappedDataArea.getChildren();
 		
@@ -208,21 +211,18 @@ public class MappedFileManager {
 		return first.isPresent();
 	}
 	
+	@Override
 	public void clearAll() {
 		mappedDataArea.clearAll();
-//		plotManager.clearAll();
 		fireListeners(null);
 	}
 	
+	@Override
 	public boolean contains(String path) {
 		return mappedDataArea.contains(path);
 	}
 	
-
-	
-
-	
-	
+	@Override
 	public List<PlottableMapObject> getPlottedObjects(){
 		return mappedDataArea.getPlottedObjects();
 	}
@@ -239,10 +239,12 @@ public class MappedFileManager {
 		return b;
 	}
 	
+	@Override
 	public MappedDataArea getArea() {
 		return mappedDataArea;
 	}
 	
+	@Override
 	public void addAssociatedImage(AssociatedImage image) {
 		MappedDataFile file = new MappedDataFile(image.getPath());
 		file.addMapObject(image.toString(), image);
@@ -250,11 +252,12 @@ public class MappedFileManager {
 		fireListeners(file);
 	}
 	
-
+	@Override
 	public void addListener(IMapFileEventListener l) {
 		listeners.add(l);
 	}
 
+	@Override
 	public void removeListener(IMapFileEventListener l) {
 		listeners.remove(l);
 	}
@@ -265,14 +268,16 @@ public class MappedFileManager {
 		}
 	}
 	
+	@Override
 	public void unplotAll() {
 		getPlottedObjects().stream().forEach(p -> p.setPlotted(false));
 		fireListeners(null);
 	}
 	
+	@Override
 	public PlottableMapObject getTopMap() {
 		return null;
-//		return plotManager.getTopMap();
+
 	}
 	
 	private void innerImportFile(final String path, final MappedDataFileBean bean, final IMonitor monitor, String parentPath) {

@@ -9,11 +9,11 @@ import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
+import org.dawnsci.mapping.ui.api.IMapFileController;
 import org.dawnsci.mapping.ui.datamodel.AssociatedImage;
 import org.dawnsci.mapping.ui.datamodel.IMapFileEventListener;
 import org.dawnsci.mapping.ui.datamodel.MapObject;
 import org.dawnsci.mapping.ui.datamodel.MappedDataFile;
-import org.dawnsci.mapping.ui.datamodel.MappedFileManager;
 import org.dawnsci.mapping.ui.datamodel.PlottableMapObject;
 import org.dawnsci.mapping.ui.datamodel.VectorMapData;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -64,7 +64,7 @@ public class MapPlotManager {
 	private boolean firstHold = true;
 	private Runnable mapRunnable;
 	
-	private MappedFileManager fileManager;
+	private IMapFileController fileManager;
 
 	
 	private static long MIN_REFRESH_TIME = 2000;
@@ -74,7 +74,7 @@ public class MapPlotManager {
 	public MapPlotManager(IPlottingSystem<Composite> map, IPlottingSystem<Composite> data) {
 		this.map = map;
 		this.data = data;
-		this.fileManager = FileManagerSingleton.getFileManager();
+		this.fileManager = LocalServiceManager.getFileController();
 		atomicPosition = new AtomicInteger(0);
 		layers = new ConcurrentLinkedDeque<MapTrace>();
 		job = new PlotJob("Plot point...",false);
@@ -527,7 +527,7 @@ public class MapPlotManager {
 			t = MetadataPlotUtils.buildTrace(longName, map, this.map);
 			//TODO something better here:
 			t.setGlobalRange(sanizeRange(ob.getRange(), map.getShape()));
-			if (ob instanceof PlottableMapObject)  t.setAlpha(((PlottableMapObject)ob).getTransparency());
+//			if (ob instanceof PlottableMapObject)  t.setAlpha(((PlottableMapObject)ob).getTransparency());
 		} catch (Exception e) {
 			logger.error("Error creating image trace", e);
 		}

@@ -30,7 +30,7 @@ public class RegistrationHelperImpl implements IRegistrationHelper {
 		RGBDataset ds = (RGBDataset)dialog.getRegisteredImage();
 		ds.setName("Registered");
 		AssociatedImage asIm = new AssociatedImage("Registered", ds, path);
-		FileManagerSingleton.getFileManager().addAssociatedImage(asIm);
+		LocalServiceManager.getFileController().addAssociatedImage(asIm);
 
 	}
 

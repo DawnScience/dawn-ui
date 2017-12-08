@@ -1,5 +1,6 @@
 package org.dawnsci.mapping.ui;
 
+import org.dawnsci.mapping.ui.api.IMapFileController;
 import org.dawnsci.mapping.ui.datamodel.LiveDataBean;
 import org.dawnsci.mapping.ui.datamodel.MappedDataFileBean;
 import org.dawnsci.mapping.ui.datamodel.MappedFileManager;
@@ -74,7 +75,7 @@ public class DebugRemoteMapView extends ViewPart {
 						IViewPart view = page.findView("org.dawnsci.mapping.ui.mappeddataview");
 						if (view==null) return;
 
-						final MappedFileManager manager = (MappedFileManager)view.getAdapter(MappedFileManager.class);
+						final IMapFileController manager = (IMapFileController)view.getAdapter(MappedFileManager.class);
 						if (manager != null) {
 							manager.loadLiveFile(filename.getText(), l,null);
 						}
@@ -89,9 +90,9 @@ public class DebugRemoteMapView extends ViewPart {
 					IViewPart view = page.findView("org.dawnsci.mapping.ui.mappeddataview");
 					if (view==null) return;
 
-					final MappedFileManager manager = (MappedFileManager)view.getAdapter(MappedFileManager.class);
+					final IMapFileController manager = (IMapFileController)view.getAdapter(MappedFileManager.class);
 					if (manager != null) {
-						manager.loadFiles(filename.getText(), b, null);
+						manager.loadFile(filename.getText(), b, null);
 					}
 				} catch (Exception e1) {
 					// TODO Auto-generated catch block

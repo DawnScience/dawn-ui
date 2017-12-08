@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.Properties;
 
 import org.apache.commons.math3.ml.clustering.FuzzyKMeansClusterer;
+import org.dawnsci.mapping.ui.api.IMapFileController;
 import org.dawnsci.mapping.ui.datamodel.AbstractMapData;
 import org.dawnsci.mapping.ui.datamodel.AssociatedImage;
 import org.dawnsci.mapping.ui.datamodel.IMapFileEventListener;
@@ -119,6 +120,8 @@ public class MappedDataView extends ViewPart {
 	private LiveMapFileListener liveMapListener;
 	private IMapFileEventListener mapFileListener;
 	
+	private IMapFileController fileController;
+	
 	@SuppressWarnings("unchecked")
 	@Override
 	public void createPartControl(Composite parent) {
@@ -141,8 +144,9 @@ public class MappedDataView extends ViewPart {
 			throw new RuntimeException("Could not create the spectrum view", e);
 		}
 		
+		fileController = LocalServiceManager.getFileController();
 		plotManager = new MapPlotManager(map, spectrum);
-		FileManagerSingleton.getFileManager().setRegistrationHelper(new RegistrationHelperImpl(plotManager));
+		fileController.setRegistrationHelper(new RegistrationHelperImpl(plotManager));
 		
 		map.addClickListener(new IClickListener() {
 			
@@ -160,7 +164,7 @@ public class MappedDataView extends ViewPart {
 				Map<String,Object> props = new HashMap<>();
 				PlottableMapObject topMap = plotManager.getTopMap();
 				String path = topMap == null ? null : topMap.getPath();
-				MappedDataFile p = FileManagerSingleton.getFileManager().getArea().getParentFile(topMap);
+				MappedDataFile p = fileController.getArea().getParentFile(topMap);
 				if (p != null && p.getParentPath() != null) {
 					path = p.getParentPath();
 				}
@@ -199,7 +203,7 @@ public class MappedDataView extends ViewPart {
 		viewer.getTree().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));
 		viewer.setContentProvider(new MapFileTreeContentProvider());
 		viewer.setLabelProvider(new MapFileCellLabelProvider(plotManager));
-		viewer.setInput(FileManagerSingleton.getFileManager().getArea());
+		viewer.setInput(fileController.getArea());
 		ColumnViewerToolTipSupport.enableFor(viewer);
 		MappedDataFilter filter = new MappedDataFilter();
 		viewer.addFilter(filter);
@@ -214,27 +218,21 @@ public class MappedDataView extends ViewPart {
 		viewer.addDoubleClickListener(event -> {
 			
 			Object e = ((StructuredSelection)event.getSelection()).getFirstElement();
-			if (e instanceof AbstractMapData || e instanceof MappedDataBlock) {
+			if (e instanceof AbstractMapData || e instanceof MappedDataBlock || e instanceof AssociatedImage) {
 				if (e instanceof MappedDataBlock && !((MappedDataBlock)e).canPlot()) {
 					return;
 				}
 				
-				FileManagerSingleton.getFileManager().togglePlot((PlottableMapObject)e);
-				
-//				plotManager.updateLayers((PlottableMapObject)e);
+				fileController.toggleDisplay((PlottableMapObject)e);;
 			}
-			if (e instanceof AssociatedImage)
-				FileManagerSingleton.getFileManager().togglePlot((PlottableMapObject)e);
-//				plotManager.addImage((AssociatedImage)e);
+
 			if (e instanceof MappedDataFile) {
 				MappedDataFile mdf = (MappedDataFile)e;
 				if (mdf.getLiveDataBean() !=null)
-					FileManagerSingleton.getFileManager().loadLiveFile(mdf.getPath(), mdf.getLiveDataBean(),mdf.getParentPath());
+					fileController.loadLiveFile(mdf.getPath(), mdf.getLiveDataBean(),mdf.getParentPath());
 			}
 			viewer.refresh();
 		});
-		
-//		FileManagerSingleton.initialiseManager(plotManager, area);
 		
 		mapFileListener = new IMapFileEventListener() {
 			
@@ -248,9 +246,7 @@ public class MappedDataView extends ViewPart {
 			}
 		};
 		
-		
-		
-		FileManagerSingleton.getFileManager().addListener(mapFileListener);
+		fileController.addListener(mapFileListener);
 
 		// Add menu and action to treeviewer
 		MenuManager menuMgr = new MenuManager();
@@ -266,7 +262,7 @@ public class MappedDataView extends ViewPart {
 				
 			if (selection.size() == 1 && selection.getFirstElement() instanceof MappedDataFile) {
 
-				manager.add(MapActionUtils.getFileRemoveAction(FileManagerSingleton.getFileManager(), (MappedDataFile)selection.getFirstElement()));
+				manager.add(MapActionUtils.getFileRemoveAction(fileController, (MappedDataFile)selection.getFirstElement()));
 			}
 				
 			if (selection.size() == 1 && selection.getFirstElement() instanceof MappedDataBlock && ((MappedDataBlock)selection.getFirstElement()).getLazy().getRank() == 3) {
@@ -302,10 +298,10 @@ public class MappedDataView extends ViewPart {
 				
 			if (!maps.isEmpty())manager.add(MapActionUtils.getComparisonDialog(maps));
 			if (maps.size() == 1) {
-				manager.add(MapActionUtils.getMapPropertiesAction(maps.get(0),plotManager, FileManagerSingleton.getFileManager().getArea()));
+				manager.add(MapActionUtils.getMapPropertiesAction(maps.get(0),plotManager, fileController.getArea()));
 			}
 				
-			if (mdfs.size() > 1) manager.add(MapActionUtils.getFilesRemoveAction(FileManagerSingleton.getFileManager(),mdfs));
+			if (mdfs.size() > 1) manager.add(MapActionUtils.getFilesRemoveAction(fileController,mdfs));
 				
 			if (!maps.isEmpty()) {
 				manager.add(new Separator());
@@ -314,11 +310,11 @@ public class MappedDataView extends ViewPart {
 					
 			if (!mdfs.isEmpty()) {
 				manager.add(new Separator());
-				manager.add(MapActionUtils.getFilesRemoveAllAction(FileManagerSingleton.getFileManager()));
+				manager.add(MapActionUtils.getFilesRemoveAllAction(fileController));
 				
-				if (FileManagerSingleton.getFileManager().containsLiveFiles()) {
+				if (fileController.containsLiveFiles()) {
 					manager.add(new Separator());
-					manager.add(MapActionUtils.getNonLiveFilesRemoveAction(FileManagerSingleton.getFileManager()));
+					manager.add(MapActionUtils.getNonLiveFilesRemoveAction(fileController));
 				}
 			}
 		});
@@ -353,7 +349,7 @@ public class MappedDataView extends ViewPart {
 					}
 
 				}
-				FileManagerSingleton.getFileManager().loadFiles(files.toArray(new String[files.size()]), null);
+				fileController.loadFiles(files.toArray(new String[files.size()]), null);
 			}
 		});
 		
@@ -378,7 +374,7 @@ public class MappedDataView extends ViewPart {
 		// Restore state of view
 		if (filesToReload != null) {
 			logger.info("Loading view state: {}", initialState);
-			final MappedFileManager mappedFileManager = FileManagerSingleton.getFileManager();
+			final IMapFileController mappedFileManager = fileController;
 //			for (String f : filesToReload) {
 				mappedFileManager.loadFiles(filesToReload, null);
 //			}
@@ -387,7 +383,7 @@ public class MappedDataView extends ViewPart {
 	
 //	private void openImportWizard(String path) {
 //		
-//		FileManagerSingleton.getFileManager().importFile(path);
+//		fileController.importFile(path);
 //		
 //	}
 	
@@ -400,7 +396,7 @@ public class MappedDataView extends ViewPart {
 	@Override
 	public void dispose() {
 		super.dispose();
-		FileManagerSingleton.getFileManager().removeListener(mapFileListener);
+		fileController.removeListener(mapFileListener);
 		FileManagerSingleton.clearManager();
 		
 		ILiveMappingFileService liveService = LiveServiceManager.getLiveMappingFileService();
@@ -414,7 +410,7 @@ public class MappedDataView extends ViewPart {
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@Override
 	public Object getAdapter(Class adapter) {
-		if (MappedFileManager.class == adapter) return FileManagerSingleton.getFileManager();
+		if (MappedFileManager.class == adapter) return fileController;
 		return super.getAdapter(adapter);
 	}
 
@@ -438,11 +434,11 @@ public class MappedDataView extends ViewPart {
 	public void saveState(IMemento memento) {
 		if (memento != null && isRunningInGDA()) {
 			try {
-				final int numFiles = FileManagerSingleton.getFileManager().getArea().count();
+				final int numFiles = fileController.getArea().count();
 				if (numFiles > 0) {
 					final List<String> filesInView = new ArrayList<>();
 					for (int i = 0; i < numFiles; i++) {
-						filesInView.add(FileManagerSingleton.getFileManager().getArea().getDataFile(i).getPath());
+						filesInView.add(fileController.getArea().getDataFile(i).getPath());
 					}
 					final MappedDataViewState state = new MappedDataViewState();
 					state.setFilesInView(filesInView);
@@ -513,9 +509,9 @@ public class MappedDataView extends ViewPart {
 				LiveDataBean b = new LiveDataBean();
 				b.setHost(host);
 				b.setPort(port);
-				FileManagerSingleton.getFileManager().loadLiveFile(path, b, parent);
+				fileController.loadLiveFile(path, b, parent);
 			} else {
-				FileManagerSingleton.getFileManager().loadFiles(new String[] {path}, null);
+				fileController.loadFiles(new String[] {path}, null);
 			}
 			
 			
@@ -528,7 +524,7 @@ public class MappedDataView extends ViewPart {
 
 		@Override
 		public void localReload(String path) {
-			FileManagerSingleton.getFileManager().localReloadFile(path);
+			fileController.localReloadFile(path);
 		}
 		
 	}

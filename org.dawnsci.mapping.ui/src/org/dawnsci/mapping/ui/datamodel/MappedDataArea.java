@@ -12,9 +12,8 @@ public class MappedDataArea implements MapObject {
 	private List<MappedDataFile> files = new ArrayList<MappedDataFile>();
 
 	public void addMappedDataFile(MappedDataFile file) {
-//		files.clear();
 		if (file.getLiveDataBean() != null) {
-		MappedDataFile f = null;
+			MappedDataFile f = null;
 			Iterator<MappedDataFile> iterator = files.iterator();
 			while (iterator.hasNext()) {
 				MappedDataFile next = iterator.next();
@@ -23,10 +22,17 @@ public class MappedDataArea implements MapObject {
 					break;
 				}
 			}
-			
-		if (f != null) removeFile(f);
-			
+
+			if (f != null) removeFile(f);
+
 		}
+		
+		AbstractMapData map = file.getMap();
+		if (map != null) map.setPlotted(true);
+		
+		AssociatedImage aI = file.getAssociatedImage();
+		if (aI != null) aI.setPlotted(true);
+		 
 		files.add(file);
 	}
 

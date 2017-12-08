@@ -1,9 +1,10 @@
 package org.dawnsci.mapping.ui.actions;
 
 import org.dawnsci.mapping.ui.FileManagerSingleton;
+import org.dawnsci.mapping.ui.LocalServiceManager;
+import org.dawnsci.mapping.ui.api.IMapFileController;
 import org.dawnsci.mapping.ui.datamodel.LiveDataBean;
 import org.dawnsci.mapping.ui.datamodel.MappedDataFileBean;
-import org.dawnsci.mapping.ui.datamodel.MappedFileManager;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.PlatformUI;
 import org.osgi.service.event.Event;
@@ -26,7 +27,7 @@ public class FileOpenEventHandler implements EventHandler {
 			return;
 		}
 		
-		MappedFileManager fm = FileManagerSingleton.getFileManager();
+		IMapFileController fm = LocalServiceManager.getFileController();
 		if (fm == null) return;
 		
 		String path = (String)event.getProperty("path");
@@ -44,7 +45,7 @@ public class FileOpenEventHandler implements EventHandler {
 		
 		if (event.containsProperty("map_bean")) {
 			Object p = event.getProperty("map_bean");
-			if (p instanceof MappedDataFileBean) fm.loadFiles(path, (MappedDataFileBean)p, null);
+			if (p instanceof MappedDataFileBean) fm.loadFile(path, (MappedDataFileBean)p, null);
 		}
 		
 		if (event.containsProperty("live_bean")) {

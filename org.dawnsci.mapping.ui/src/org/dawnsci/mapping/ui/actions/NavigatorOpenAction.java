@@ -5,7 +5,8 @@ import java.nio.file.Path;
 
 import org.dawb.common.util.io.IOpenFileAction;
 import org.dawnsci.mapping.ui.FileManagerSingleton;
-import org.dawnsci.mapping.ui.datamodel.MappedFileManager;
+import org.dawnsci.mapping.ui.LocalServiceManager;
+import org.dawnsci.mapping.ui.api.IMapFileController;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -20,7 +21,7 @@ public class NavigatorOpenAction implements IOpenFileAction {
 		if (file==null) return;
 		
 		if (!Files.isDirectory(file)) {
-			MappedFileManager manager = FileManagerSingleton.getFileManager();
+			IMapFileController manager = LocalServiceManager.getFileController();
 			if (manager != null) {
 				manager.loadFiles(new String[] {file.toAbsolutePath().toString()}, null);
 			} else {
