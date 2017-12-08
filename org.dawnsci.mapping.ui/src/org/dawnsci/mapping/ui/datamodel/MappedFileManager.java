@@ -2,15 +2,16 @@ package org.dawnsci.mapping.ui.datamodel;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 import org.dawb.common.ui.monitor.ProgressMonitorWrapper;
 import org.dawb.common.ui.util.DatasetNameUtils;
 import org.dawnsci.mapping.ui.AcquisitionServiceManager;
 import org.dawnsci.mapping.ui.LocalServiceManager;
-import org.dawnsci.mapping.ui.MapPlotManager;
-import org.dawnsci.mapping.ui.dialog.RectangleRegistrationDialog;
 import org.dawnsci.mapping.ui.wizards.ImportMappedDataWizard;
 import org.dawnsci.mapping.ui.wizards.LegacyMapBeanBuilder;
 import org.dawnsci.mapping.ui.wizards.MapBeanBuilder;
@@ -22,12 +23,8 @@ import org.eclipse.dawnsci.analysis.tree.TreeToMapUtils;
 import org.eclipse.january.IMonitor;
 import org.eclipse.january.dataset.IDataset;
 import org.eclipse.january.dataset.IRemoteData;
-import org.eclipse.january.dataset.RGBDataset;
 import org.eclipse.january.metadata.IMetadata;
-import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.operation.IRunnableWithProgress;
-import org.eclipse.jface.viewers.TreeViewer;
-import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Display;
@@ -40,26 +37,60 @@ public class MappedFileManager {
 
 	private final static Logger logger = LoggerFactory.getLogger(MappedFileManager.class);
 	
-	private MapPlotManager plotManager;
+//	private MapPlotManager plotManager;
 	private MappedDataArea mappedDataArea;
-	private Viewer viewer;
-
-	public void init(MapPlotManager plotManager, MappedDataArea mappedDataArea, Viewer viewer){
-		this.plotManager = plotManager;
-		this.mappedDataArea = mappedDataArea;
-		this.viewer = viewer;
-	}
 	
+	private Set<IMapFileEventListener> listeners;
+	
+	public MappedFileManager() {
+		listeners = new HashSet<>();
+		mappedDataArea = new MappedDataArea();
+	}
 
 	public void removeFile(MappedDataFile file) {
 		if (file == null) return;
 		mappedDataArea.removeFile(file);
-		plotManager.unplotFile(file);
+//		plotManager.unplotFile(file);
 		if (mappedDataArea.isEmpty()) {
-			plotManager.clearAll();
+//			plotManager.clearAll();
 		}
-		viewer.refresh();
+		fireListeners(null);
 	}
+	
+	public void togglePlot(PlottableMapObject object) {
+		boolean plotted = !object.isPlotted();
+
+		MappedDataFile f = mappedDataArea.getParentFile(object);
+		
+		if (f != null) {
+			Arrays.stream(f.getChildren()).filter(PlottableMapObject.class::isInstance).map(PlottableMapObject.class::cast).forEach(p -> p.setPlotted(false));
+		}
+		
+		object.setPlotted(plotted);
+		
+		if (object.getRange() != null) {
+			double[] range = object.getRange();
+			
+			Arrays.stream(mappedDataArea.getChildren())
+			.filter(MappedDataFile.class::isInstance)
+			.map(MappedDataFile.class::cast)
+			.flatMap(file -> Arrays.stream(file.getChildren()))
+			.filter(PlottableMapObject.class::isInstance)
+			.map(PlottableMapObject.class::cast)
+			.filter(PlottableMapObject::isPlotted)
+					.filter(p -> p != object)
+					.forEach(p -> {
+						double[] r = p.getRange();
+						if (r != null && Arrays.equals(range, r)) {
+							p.setPlotted(false);
+						}
+					});
+		}
+		
+		fireListeners(null);
+	}
+	
+	
 	
 	public void removeFile(String path) {
 		MappedDataFile dataFile = mappedDataArea.getDataFile(path);
@@ -72,13 +103,13 @@ public class MappedFileManager {
 		Arrays.stream(children).filter(MappedDataFile.class::isInstance)
 		.map(MappedDataFile.class::cast).filter(f -> f.getLiveDataBean() == null).forEach(f -> {
 			mappedDataArea.removeFile(f);
-			plotManager.unplotFile(f);
+//			plotManager.unplotFile(f);
 		});
 		
 		if (mappedDataArea.isEmpty()) {
-			plotManager.clearAll();
+//			plotManager.clearAll();
 		}
-		viewer.refresh();
+		fireListeners(null);
 	}
 	
 	public boolean containsLiveFiles() {
@@ -92,8 +123,8 @@ public class MappedFileManager {
 	
 	public void clearAll() {
 		mappedDataArea.clearAll();
-		plotManager.clearAll();
-		viewer.refresh();
+//		plotManager.clearAll();
+		fireListeners(null);
 	}
 	
 	public boolean contains(String path) {
@@ -141,15 +172,8 @@ public class MappedFileManager {
 						}
 					}
 					
-					plotManager.plotLayers();
-					PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
- 
-						@Override
-						public void run() {
-							viewer.refresh();
-
-						}
-					});
+//					plotManager.plotLayers();
+					fireListeners(null);
 				}
 			});
 		} catch (InvocationTargetException e) {
@@ -208,6 +232,10 @@ public class MappedFileManager {
 	}
 	
 	
+	public List<PlottableMapObject> getPlottedObjects(){
+		return mappedDataArea.getPlottedObjects();
+	}
+	
 	private void updateUI(final MappedDataFile mdf){
 		if (Display.getCurrent() == null) {
 			PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
@@ -228,11 +256,11 @@ public class MappedFileManager {
 
 		if (load)mappedDataArea.addMappedDataFile(mdf);
 //		plotManager.clearAll();
-		plotManager.updateLayers(mdf.getMap());
-		viewer.refresh();
-		if (viewer instanceof TreeViewer) {
-			((TreeViewer)viewer).expandToLevel(mdf, 1);
-		}
+//		plotManager.updateLayers(mdf.getMap());
+		fireListeners(mdf);
+//		if (viewer instanceof TreeViewer) {
+//			((TreeViewer)viewer).expandToLevel(mdf, 1);
+//		}
 		
 	}
 
@@ -278,14 +306,7 @@ public class MappedFileManager {
 		MappedDataFile mdf = new MappedDataFile(path,bean);
 		mdf.setParentPath(parentFile);
 		mappedDataArea.addMappedDataFile(mdf);
-		PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
-
-			@Override
-			public void run() {
-				viewer.refresh();
-
-			}
-		});
+		fireListeners(null);
 		
 	}
 	
@@ -424,17 +445,41 @@ public class MappedFileManager {
 		}
 
 
-		RectangleRegistrationDialog dialog = new RectangleRegistrationDialog(PlatformUI.getWorkbench().getDisplay().getActiveShell(), plotManager.getTopMap().getMap(),data);
-		if (dialog.open() != IDialogConstants.OK_ID) return;
-		RGBDataset ds = (RGBDataset)dialog.getRegisteredImage();
-		ds.setName("Registered");
-		AssociatedImage asIm = new AssociatedImage("Registered", ds, path);
-		mappedDataArea.addMappedDataFile(MappedFileFactory.getMappedDataFile(path, asIm));
-		viewer.refresh();
+//		RectangleRegistrationDialog dialog = new RectangleRegistrationDialog(PlatformUI.getWorkbench().getDisplay().getActiveShell(), plotManager.getTopMap().getMap(),data);
+//		if (dialog.open() != IDialogConstants.OK_ID) return;
+//		RGBDataset ds = (RGBDataset)dialog.getRegisteredImage();
+//		ds.setName("Registered");
+//		AssociatedImage asIm = new AssociatedImage("Registered", ds, path);
+//		mappedDataArea.addMappedDataFile(MappedFileFactory.getMappedDataFile(path, asIm));
+//		fireListeners(null);
 	}
 	
+	public MappedDataArea getArea() {
+		return mappedDataArea;
+	}
+	
+
+	public void addListener(IMapFileEventListener l) {
+		listeners.add(l);
+	}
+
+	public void removeListener(IMapFileEventListener l) {
+		listeners.remove(l);
+	}
+	
+	private void fireListeners(MappedDataFile file) {
+		for (IMapFileEventListener l : listeners) {
+			l.mapFileStateChanged(file);
+		}
+	}
+	
+	public void unplotAll() {
+		getPlottedObjects().stream().forEach(p -> p.setPlotted(false));
+		fireListeners(null);
+	}
 	
 	public PlottableMapObject getTopMap() {
-		return plotManager.getTopMap();
+		return null;
+//		return plotManager.getTopMap();
 	}
 }

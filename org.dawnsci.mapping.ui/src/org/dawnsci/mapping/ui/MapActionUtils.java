@@ -191,8 +191,7 @@ public class MapActionUtils {
 		return new Action("Clear plot") {
 			@Override
 			public void run() {
-				manager.clearAll();
-				viewer.refresh();
+				FileManagerSingleton.getFileManager().unplotAll();
 			}
 		};
 

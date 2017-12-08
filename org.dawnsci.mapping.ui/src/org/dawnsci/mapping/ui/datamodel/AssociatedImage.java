@@ -13,6 +13,7 @@ public class AssociatedImage implements PlottableMapObject {
 	private String path;
 	private RGBDataset image;
 	private double[] range;
+	private boolean plotted;
 
 	public AssociatedImage(String name, RGBDataset image, String path) {
 		this.name = name;
@@ -78,4 +79,11 @@ public class AssociatedImage implements PlottableMapObject {
 		return path;
 	}
 	
+	public boolean isPlotted() {
+		return this.plotted;
+	}
+	
+	public void setPlotted(boolean plot) {
+		this.plotted = plot;
+	}
 }

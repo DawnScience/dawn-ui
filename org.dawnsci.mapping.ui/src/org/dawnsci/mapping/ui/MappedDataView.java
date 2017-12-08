@@ -7,8 +7,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
+import org.apache.commons.math3.ml.clustering.FuzzyKMeansClusterer;
 import org.dawnsci.mapping.ui.datamodel.AbstractMapData;
 import org.dawnsci.mapping.ui.datamodel.AssociatedImage;
+import org.dawnsci.mapping.ui.datamodel.IMapFileEventListener;
 import org.dawnsci.mapping.ui.datamodel.LiveDataBean;
 import org.dawnsci.mapping.ui.datamodel.MappedDataArea;
 import org.dawnsci.mapping.ui.datamodel.MappedDataBlock;
@@ -42,6 +44,7 @@ import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.Text;
@@ -50,6 +53,7 @@ import org.eclipse.ui.IViewPart;
 import org.eclipse.ui.IViewSite;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.PartInitException;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.part.ResourceTransfer;
 import org.eclipse.ui.part.ViewPart;
 import org.osgi.service.event.Event;
@@ -109,17 +113,15 @@ public class MappedDataView extends ViewPart {
 	public static final String EVENT_TOPIC_MAPVIEW_CLICK = "org/dawnsci/mapping/ui/mapview/click";
 	
 	private TreeViewer viewer;
-	private MappedDataArea area;
 	private MapPlotManager plotManager;
 	private MappedDataViewState initialState;
 	
 	private LiveMapFileListener liveMapListener;
+	private IMapFileEventListener mapFileListener;
 	
 	@SuppressWarnings("unchecked")
 	@Override
 	public void createPartControl(Composite parent) {
-		
-		area = new MappedDataArea();
 		
 		final IWorkbenchPage page = getSite().getPage();
 		final IPlottingSystem<Composite> map;
@@ -139,7 +141,7 @@ public class MappedDataView extends ViewPart {
 			throw new RuntimeException("Could not create the spectrum view", e);
 		}
 		
-		plotManager = new MapPlotManager(map, spectrum, area);
+		plotManager = new MapPlotManager(map, spectrum);
 		
 		map.addClickListener(new IClickListener() {
 			
@@ -157,7 +159,7 @@ public class MappedDataView extends ViewPart {
 				Map<String,Object> props = new HashMap<>();
 				PlottableMapObject topMap = plotManager.getTopMap();
 				String path = topMap == null ? null : topMap.getPath();
-				MappedDataFile p = area.getParentFile(topMap);
+				MappedDataFile p = FileManagerSingleton.getFileManager().getArea().getParentFile(topMap);
 				if (p != null && p.getParentPath() != null) {
 					path = p.getParentPath();
 				}
@@ -196,7 +198,7 @@ public class MappedDataView extends ViewPart {
 		viewer.getTree().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));
 		viewer.setContentProvider(new MapFileTreeContentProvider());
 		viewer.setLabelProvider(new MapFileCellLabelProvider(plotManager));
-		viewer.setInput(area);
+		viewer.setInput(FileManagerSingleton.getFileManager().getArea());
 		ColumnViewerToolTipSupport.enableFor(viewer);
 		MappedDataFilter filter = new MappedDataFilter();
 		viewer.addFilter(filter);
@@ -212,12 +214,17 @@ public class MappedDataView extends ViewPart {
 			
 			Object e = ((StructuredSelection)event.getSelection()).getFirstElement();
 			if (e instanceof AbstractMapData || e instanceof MappedDataBlock) {
-				if (e instanceof MappedDataBlock && !((MappedDataBlock)e).canPlot())
+				if (e instanceof MappedDataBlock && !((MappedDataBlock)e).canPlot()) {
 					return;
-				plotManager.updateLayers((PlottableMapObject)e);
+				}
+				
+				FileManagerSingleton.getFileManager().togglePlot((PlottableMapObject)e);
+				
+//				plotManager.updateLayers((PlottableMapObject)e);
 			}
 			if (e instanceof AssociatedImage)
-				plotManager.addImage((AssociatedImage)e);
+				FileManagerSingleton.getFileManager().togglePlot((PlottableMapObject)e);
+//				plotManager.addImage((AssociatedImage)e);
 			if (e instanceof MappedDataFile) {
 				MappedDataFile mdf = (MappedDataFile)e;
 				if (mdf.getLiveDataBean() !=null)
@@ -226,7 +233,23 @@ public class MappedDataView extends ViewPart {
 			viewer.refresh();
 		});
 		
-		FileManagerSingleton.initialiseManager(plotManager, area, viewer);
+//		FileManagerSingleton.initialiseManager(plotManager, area);
+		
+		mapFileListener = new IMapFileEventListener() {
+			
+			@Override
+			public void mapFileStateChanged(MappedDataFile file) {
+				if (file == null) {
+					
+				}
+				
+				updateViewer(file);
+			}
+		};
+		
+		
+		
+		FileManagerSingleton.getFileManager().addListener(mapFileListener);
 
 		// Add menu and action to treeviewer
 		MenuManager menuMgr = new MenuManager();
@@ -278,7 +301,7 @@ public class MappedDataView extends ViewPart {
 				
 			if (!maps.isEmpty())manager.add(MapActionUtils.getComparisonDialog(maps));
 			if (maps.size() == 1) {
-				manager.add(MapActionUtils.getMapPropertiesAction(maps.get(0),plotManager, area));
+				manager.add(MapActionUtils.getMapPropertiesAction(maps.get(0),plotManager, FileManagerSingleton.getFileManager().getArea()));
 			}
 				
 			if (mdfs.size() > 1) manager.add(MapActionUtils.getFilesRemoveAction(FileManagerSingleton.getFileManager(),mdfs));
@@ -370,7 +393,7 @@ public class MappedDataView extends ViewPart {
 	@Override
 	public void dispose() {
 		super.dispose();
-		
+		FileManagerSingleton.getFileManager().removeListener(mapFileListener);
 		FileManagerSingleton.clearManager();
 		
 		ILiveMappingFileService liveService = LiveServiceManager.getLiveMappingFileService();
@@ -378,6 +401,7 @@ public class MappedDataView extends ViewPart {
 		if (liveService != null && liveMapListener != null) {
 			liveService.removeLiveFileListener(liveMapListener);
 		}
+		
 	}
 	
 	@SuppressWarnings({ "unchecked", "rawtypes" })
@@ -407,11 +431,11 @@ public class MappedDataView extends ViewPart {
 	public void saveState(IMemento memento) {
 		if (memento != null && isRunningInGDA()) {
 			try {
-				final int numFiles = area.count();
+				final int numFiles = FileManagerSingleton.getFileManager().getArea().count();
 				if (numFiles > 0) {
 					final List<String> filesInView = new ArrayList<>();
 					for (int i = 0; i < numFiles; i++) {
-						filesInView.add(area.getDataFile(i).getPath());
+						filesInView.add(FileManagerSingleton.getFileManager().getArea().getDataFile(i).getPath());
 					}
 					final MappedDataViewState state = new MappedDataViewState();
 					state.setFilesInView(filesInView);
@@ -502,5 +526,23 @@ public class MappedDataView extends ViewPart {
 		
 	}
 
+	private void updateViewer(final MappedDataFile file) {
+		if (Display.getCurrent() == null) {
+			PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
+				
+				@Override
+				public void run() {
+					updateViewer(file);
+				}
+			});
+			return;
+		}
+		
+		viewer.refresh();
+		
+		if (file != null && viewer instanceof TreeViewer) {
+			((TreeViewer)viewer).expandToLevel(file, 1);
+		}
+	}
 
 }

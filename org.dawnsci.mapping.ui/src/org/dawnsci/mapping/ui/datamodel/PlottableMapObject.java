@@ -17,4 +17,8 @@ public interface PlottableMapObject extends MapObject {
 	public IDataset getSpectrum(double x, double y);
 	
 	public String getPath();
+	
+	public boolean isPlotted();
+	
+	public void setPlotted(boolean plot);
 }

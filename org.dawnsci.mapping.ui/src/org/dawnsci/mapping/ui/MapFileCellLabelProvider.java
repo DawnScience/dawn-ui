@@ -5,6 +5,7 @@ import org.dawnsci.mapping.ui.datamodel.AssociatedImage;
 import org.dawnsci.mapping.ui.datamodel.MapObject;
 import org.dawnsci.mapping.ui.datamodel.MappedDataBlock;
 import org.dawnsci.mapping.ui.datamodel.MappedDataFile;
+import org.dawnsci.mapping.ui.datamodel.PlottableMapObject;
 import org.eclipse.jface.viewers.StyledCellLabelProvider;
 import org.eclipse.jface.viewers.StyledString;
 import org.eclipse.jface.viewers.ViewerCell;
@@ -67,7 +68,7 @@ public class MapFileCellLabelProvider extends StyledCellLabelProvider {
       }
       
       
-      if ( element instanceof MapObject && manager.isPlotted((MapObject)element)) cell.setFont(italicFont);
+      if ( element instanceof PlottableMapObject && ((PlottableMapObject)element).isPlotted()) cell.setFont(italicFont);
       else cell.setFont(initialFont);
       super.update(cell);
 

@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
 
 public class MappedDataArea implements MapObject {
 
@@ -78,6 +80,22 @@ public class MappedDataArea implements MapObject {
 		
 		return false;
 		
+	}
+	
+	public List<PlottableMapObject> getPlottedObjects() {
+		List<PlottableMapObject> objects = new ArrayList<>();
+		
+		for (MappedDataFile f : files) {
+			List<PlottableMapObject> collected = Arrays.stream(f.getChildren())
+													   .filter(PlottableMapObject.class::isInstance)
+													   .map(PlottableMapObject.class::cast)
+													   .filter(PlottableMapObject::isPlotted)
+													   .collect(Collectors.toList());
+			
+			objects.addAll(collected);
+		}
+		
+		return objects;
 	}
 	
 	

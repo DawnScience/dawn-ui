@@ -29,6 +29,7 @@ public class MappedDataBlock implements MapObject, PlottableMapObject {
 	private double[] range;
 
 	private LiveRemoteAxes axes;
+	private boolean plotted;
 	
 	private static final Logger logger = LoggerFactory.getLogger(MappedDataBlock.class);
 	
@@ -341,6 +342,14 @@ public class MappedDataBlock implements MapObject, PlottableMapObject {
 		
 		return mapDims.isPointDetector(dataset.getShape());
 		
+	}
+	
+	public boolean isPlotted() {
+		return this.plotted;
+	}
+	
+	public void setPlotted(boolean plot) {
+		this.plotted = plot;
 	}
 }
 	

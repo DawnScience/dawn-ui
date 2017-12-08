@@ -137,7 +137,7 @@ public class MapPropertiesDialog extends Dialog {
 				public void widgetSelected(SelectionEvent e) {
 					shape[0] = xspin.getSelection();
 					rm.setShape(shape);
-					manager.plotMap(rm);
+					manager.refresh();
 				}
 			});
 
@@ -152,7 +152,7 @@ public class MapPropertiesDialog extends Dialog {
 				public void widgetSelected(SelectionEvent e) {
 					shape[1] = yspin.getSelection();
 					rm.setShape(shape);
-					manager.plotMap(rm);
+					manager.refresh();
 				}
 			});
 			

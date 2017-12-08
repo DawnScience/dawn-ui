@@ -26,6 +26,7 @@ public abstract class AbstractMapData implements PlottableMapObject{
 	private double[] range;
 	
 	protected boolean live;
+	private boolean plotted;
 	
 	private static final Logger logger = LoggerFactory.getLogger(AbstractMapData.class);
 	
@@ -220,5 +221,13 @@ public abstract class AbstractMapData implements PlottableMapObject{
 	@Override
 	public String getPath(){
 		return path;
+	}
+	
+	public boolean isPlotted() {
+		return this.plotted;
+	}
+	
+	public void setPlotted(boolean plot) {
+		this.plotted = plot;
 	}
 }
