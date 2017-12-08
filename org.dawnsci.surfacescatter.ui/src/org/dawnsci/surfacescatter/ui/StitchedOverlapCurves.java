@@ -791,7 +791,7 @@ public class StitchedOverlapCurves extends Composite {
 	private void checkGoodPointsLegend() {
 		
 		if (!useGoodPointsOnly) {
-			showOnlyGoodPoints.setText("Include All Points");
+			showOnlyGoodPoints.setText("Display All Points");
 		} else {
 			showOnlyGoodPoints.setText("Show Only Good Points");
 		}
