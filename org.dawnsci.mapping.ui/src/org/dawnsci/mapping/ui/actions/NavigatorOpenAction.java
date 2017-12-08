@@ -22,7 +22,7 @@ public class NavigatorOpenAction implements IOpenFileAction {
 		if (!Files.isDirectory(file)) {
 			MappedFileManager manager = FileManagerSingleton.getFileManager();
 			if (manager != null) {
-				manager.importFile(file.toAbsolutePath().toString());
+				manager.loadFiles(new String[] {file.toAbsolutePath().toString()}, null);
 			} else {
 				logger.error("Could not get file manager");
 			}

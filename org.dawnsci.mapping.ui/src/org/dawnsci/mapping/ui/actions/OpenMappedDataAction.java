@@ -63,7 +63,7 @@ private static final Logger logger = LoggerFactory.getLogger(OpenMappedDataActio
 				
 				MappedFileManager manager = FileManagerSingleton.getFileManager();
 				if (manager != null) {
-					manager.importFile(loc);
+					manager.loadFiles(new String[] {loc}, null);
 				} else {
 					logger.error("Could not get file manager");
 				}

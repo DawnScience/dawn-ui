@@ -37,19 +37,19 @@ public class FileOpenEventHandler implements EventHandler {
 		}
 		
 		if (event.getTopic().endsWith("LOCALRELOAD")) {
-			fm.locallyReloadLiveFile(path);
+			fm.localReloadFile(path);
 			return;
 		}
 		
 		
 		if (event.containsProperty("map_bean")) {
 			Object p = event.getProperty("map_bean");
-			if (p instanceof MappedDataFileBean) fm.importFile(path, (MappedDataFileBean)p);
+			if (p instanceof MappedDataFileBean) fm.loadFiles(path, (MappedDataFileBean)p, null);
 		}
 		
 		if (event.containsProperty("live_bean")) {
 			Object p = event.getProperty("live_bean");
-			if (p instanceof LiveDataBean) fm.importLiveFile(path, (LiveDataBean)p,null);
+			if (p instanceof LiveDataBean) fm.loadLiveFile(path, (LiveDataBean)p,null);
 			return;
 		}
 		
@@ -57,11 +57,11 @@ public class FileOpenEventHandler implements EventHandler {
 			LiveDataBean b = new LiveDataBean();
 			b.setHost(event.getProperty("host").toString());
 			b.setPort(Integer.parseInt(event.getProperty("port").toString()));
-			fm.importLiveFile(path, (LiveDataBean)b,null);
+			fm.loadLiveFile(path, (LiveDataBean)b,null);
 			return;
 		}
 
-		fm.importFile(path);
+		fm.loadFiles(new String[] {path}, null);
 	}
 
 }

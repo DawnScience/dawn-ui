@@ -76,7 +76,7 @@ public class DebugRemoteMapView extends ViewPart {
 
 						final MappedFileManager manager = (MappedFileManager)view.getAdapter(MappedFileManager.class);
 						if (manager != null) {
-							manager.importLiveFile(filename.getText(), l,null);
+							manager.loadLiveFile(filename.getText(), l,null);
 						}
 					}
 					
@@ -91,7 +91,7 @@ public class DebugRemoteMapView extends ViewPart {
 
 					final MappedFileManager manager = (MappedFileManager)view.getAdapter(MappedFileManager.class);
 					if (manager != null) {
-						manager.importFile(filename.getText(), b);
+						manager.loadFiles(filename.getText(), b, null);
 					}
 				} catch (Exception e1) {
 					// TODO Auto-generated catch block

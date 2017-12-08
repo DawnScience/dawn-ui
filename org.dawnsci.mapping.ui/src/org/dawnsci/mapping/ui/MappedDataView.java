@@ -142,6 +142,7 @@ public class MappedDataView extends ViewPart {
 		}
 		
 		plotManager = new MapPlotManager(map, spectrum);
+		FileManagerSingleton.getFileManager().setRegistrationHelper(new RegistrationHelperImpl(plotManager));
 		
 		map.addClickListener(new IClickListener() {
 			
@@ -228,7 +229,7 @@ public class MappedDataView extends ViewPart {
 			if (e instanceof MappedDataFile) {
 				MappedDataFile mdf = (MappedDataFile)e;
 				if (mdf.getLiveDataBean() !=null)
-					FileManagerSingleton.getFileManager().importLiveFile(mdf.getPath(), mdf.getLiveDataBean(),mdf.getParentPath());
+					FileManagerSingleton.getFileManager().loadLiveFile(mdf.getPath(), mdf.getLiveDataBean(),mdf.getParentPath());
 			}
 			viewer.refresh();
 		});
@@ -328,25 +329,31 @@ public class MappedDataView extends ViewPart {
 				FileTransfer.getInstance(), ResourceTransfer.getInstance(),
 				LocalSelectionTransfer.getTransfer() });
 		dt.addDropListener(new DropTargetAdapter() {
-			
+
 			@Override
 			public void drop(DropTargetEvent event) {
 				Object dropData = event.data;
+
+				List<String> files = new ArrayList<>();
+
 				if (dropData instanceof TreeSelection) {
 					TreeSelection selectedNode = (TreeSelection) dropData;
 					Object[] obj = selectedNode.toArray();
 					for (int i = 0; i < obj.length; i++) {
 						if (obj[i] instanceof IFile) {
 							IFile file = (IFile) obj[i];
-							openImportWizard(file.getLocation().toOSString());
+							files.add(file.getLocation().toOSString());
 							return;
 						}
 					}
 				} else if (dropData instanceof String[]) {
-					openImportWizard(((String[])dropData)[0]);
+					String[] d = (String[])dropData;
+					for (String s : d) {
+						files.add(s);
+					}
 
 				}
-				
+				FileManagerSingleton.getFileManager().loadFiles(files.toArray(new String[files.size()]), null);
 			}
 		});
 		
@@ -372,17 +379,17 @@ public class MappedDataView extends ViewPart {
 		if (filesToReload != null) {
 			logger.info("Loading view state: {}", initialState);
 			final MappedFileManager mappedFileManager = FileManagerSingleton.getFileManager();
-			for (String f : filesToReload) {
-				mappedFileManager.importFile(f);
-			}
+//			for (String f : filesToReload) {
+				mappedFileManager.loadFiles(filesToReload, null);
+//			}
 		}
 	}
 	
-	private void openImportWizard(String path) {
-		
-		FileManagerSingleton.getFileManager().importFile(path);
-		
-	}
+//	private void openImportWizard(String path) {
+//		
+//		FileManagerSingleton.getFileManager().importFile(path);
+//		
+//	}
 	
 	@Override
 	public void setFocus() {
@@ -506,9 +513,9 @@ public class MappedDataView extends ViewPart {
 				LiveDataBean b = new LiveDataBean();
 				b.setHost(host);
 				b.setPort(port);
-				FileManagerSingleton.getFileManager().importLiveFile(path, b, parent);
+				FileManagerSingleton.getFileManager().loadLiveFile(path, b, parent);
 			} else {
-				FileManagerSingleton.getFileManager().importFile(path, false);
+				FileManagerSingleton.getFileManager().loadFiles(new String[] {path}, null);
 			}
 			
 			
@@ -521,7 +528,7 @@ public class MappedDataView extends ViewPart {
 
 		@Override
 		public void localReload(String path) {
-			FileManagerSingleton.getFileManager().locallyReloadLiveFile(path);
+			FileManagerSingleton.getFileManager().localReloadFile(path);
 		}
 		
 	}

@@ -36,9 +36,11 @@ public class OpenLocalFileAction extends Action implements IWorkbenchWindowActio
 			
 			MappedFileManager manager = FileManagerSingleton.getFileManager();
 			if (manager != null) {
-				for (String name : names) {
-					manager.importFile(dialog.getFilterPath() + File.separator + name);
+				for (int i = 0; i < names.length; i++) {
+					names[i] = dialog.getFilterPath() + File.separator +names[i];
 				}
+				
+				manager.loadFiles(names, null);
 			}
 		}
 	}
