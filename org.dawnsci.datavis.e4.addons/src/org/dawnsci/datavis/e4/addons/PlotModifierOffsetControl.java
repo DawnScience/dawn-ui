@@ -69,10 +69,10 @@ public class PlotModifierOffsetControl {
 			stackButton.setText("Stack");
 		}
 		
-		stackButton.setToolTipText("Stack XY data (using current x axis range");
+		stackButton.setToolTipText("Stack XY data (using current x axis range)");
 		
 		normButton = new Button(control, SWT.TOGGLE);
-
+		normButton.setToolTipText("Normalise data (between 0-1)");
 		normButton.addSelectionListener(new SelectionAdapter() {
 			
 			@Override
