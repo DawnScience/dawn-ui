@@ -79,7 +79,7 @@ public class PlotControllerTest extends AbstractTestModel {
 		//Open file and select 1D data
 		setUpAndSelectFirstFile1D();
 		assertNotNull(plotManager.getCurrentPlotModes());
-		assertEquals(1, plotManager.getCurrentPlotModes().length);
+		assertEquals(2, plotManager.getCurrentPlotModes().length);
 
 		testSingleTraceAddRemoveUnload();
 		
