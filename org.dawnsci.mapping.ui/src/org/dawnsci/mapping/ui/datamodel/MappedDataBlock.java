@@ -189,7 +189,7 @@ public class MappedDataBlock implements MapObject, PlottableMapObject {
 	private MetadataType generateSliceMetadata(int x, int y){
 		SourceInformation si = new SourceInformation(getPath(), toString(), dataset);
 		SliceND slice = getMatchingDataSlice(x, y);
-		SliceInformation sl = new SliceInformation(slice, slice, new SliceND(dataset.getShape()), getDataDimensions(), 1, 1);
+		SliceInformation sl = new SliceInformation(slice, slice, new SliceND(dataset.getShape()), getDataDimensions(), 1, 0);
 		return new SliceFromSeriesMetadata(si,sl);
 	}
 	
@@ -277,7 +277,7 @@ public class MappedDataBlock implements MapObject, PlottableMapObject {
 	private MetadataType generateLiveSliceMetadata(int x, int y){
 		SourceInformation si = new SourceInformation(getPath(), toString(), dataset);
 		SliceND slice = getMatchingDataSlice(x, y);
-		SliceInformation sl = new SliceInformation(slice, slice, new SliceND(dataset.getShape()), getDataDimensions(), 1, 1);
+		SliceInformation sl = new SliceInformation(slice, slice, new SliceND(dataset.getShape()), getDataDimensions(), 1, 0);
 		return new SliceFromLiveSeriesMetadata(si,sl,axes.getHost(),axes.getPort(),axes.getAxesNames(),axes.getxAxisForRemappingName());
 	}
 

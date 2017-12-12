@@ -27,7 +27,7 @@ import org.eclipse.swt.widgets.Composite;
 public class ChangeSliceWidget {
 	
 	private int current = 0;
-	private int max = 0;
+	private int max = 1;
 	private int skip = 1;
 	private int[] dataDims;
 	private Button startBtn;
@@ -41,7 +41,7 @@ public class ChangeSliceWidget {
 	private HashSet<ISliceChangeListener> listeners;
 	
 	public ChangeSliceWidget(Composite parent) {
-		max = 0;
+		max = 1;
 		current = 0;
 		listeners = new HashSet<ISliceChangeListener>();
 		
@@ -210,7 +210,7 @@ public class ChangeSliceWidget {
 		skipForwardBtn.setEnabled(true);
 		skipBackBtn.setEnabled(true);
 		
-		if (current == 0 && max == 0) {
+		if (max == 1) {
 			startBtn.setEnabled(false);
 			stepbackBtn.setEnabled(false);
 			endBtn.setEnabled(false);

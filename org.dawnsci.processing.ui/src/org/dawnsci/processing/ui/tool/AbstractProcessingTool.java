@@ -410,7 +410,7 @@ public abstract class AbstractProcessingTool extends AbstractToolPage {
 			if (info.parentMetadata == null) {
 				SliceND slice = new SliceND(ds.getShape());
 				int[] dataDims = new int[]{0, 1};
-				SliceInformation si = new SliceInformation(slice, slice, slice, dataDims, 1, 1);
+				SliceInformation si = new SliceInformation(slice, slice, slice, dataDims, 1, 0);
 				SourceInformation so = new SourceInformation("", "", ds);
 				sliceMeta = new SliceFromSeriesMetadata(so, si);
 			} else {

@@ -471,7 +471,7 @@ public class XRD2ToolPage extends AbstractToolPage {
 
 			SliceND slice = new SliceND(d.getShape());
 			int[] dataDims = new int[]{0, 1};
-			SliceInformation si = new SliceInformation(slice, slice, slice, dataDims, 1, 1);
+			SliceInformation si = new SliceInformation(slice, slice, slice, dataDims, 1, 0);
 			SourceInformation so = new SourceInformation("", "", d);
 			SliceFromSeriesMetadata sliceMeta = new SliceFromSeriesMetadata(so, si);
 			
