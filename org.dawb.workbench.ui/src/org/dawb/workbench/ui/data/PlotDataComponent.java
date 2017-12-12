@@ -37,7 +37,6 @@ import org.dawb.workbench.ui.editors.preference.EditorConstants;
 import org.dawb.workbench.ui.editors.preference.EditorPreferencePage;
 import org.dawb.workbench.ui.transferable.TransferableDataObject;
 import org.dawnsci.conversion.ui.ConvertWizard;
-import org.dawnsci.io.h5.H5Loader;
 import org.dawnsci.plotting.AbstractPlottingSystem;
 import org.dawnsci.plotting.tools.reduction.DataReductionWizard;
 import org.eclipse.core.commands.ExecutionEvent;
@@ -55,6 +54,7 @@ import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.dawnsci.analysis.api.io.IDataHolder;
 import org.eclipse.dawnsci.analysis.api.io.ILoaderService;
+import org.eclipse.dawnsci.hdf5.HDF5Utils;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystemSelection;
 import org.eclipse.dawnsci.plotting.api.PlotType;
@@ -735,7 +735,7 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 				menuManager.add(new Separator(getClass().getName()+".export"));
 				menuManager.add(export);
 
-				if (H5Loader.isH5(getFileName())) {
+				if (HDF5Utils.isHDF5(getFileName())) {
 					menuManager.add(new Separator(getClass().getName()+"sep2"));
 					
 					dataReduction.setEnabled(false);
@@ -1115,7 +1115,7 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 
 	public boolean isDataReductionToolActive() {
 		
-		if (H5Loader.isH5(getFileName()) || isSelectionReducible()) {
+		if (HDF5Utils.isHDF5(getFileName()) || isSelectionReducible()) {
 			
 			IToolPageSystem toolSystem = (IToolPageSystem)getPlottingSystem().getAdapter(IToolPageSystem.class);
 			IToolPage tool = toolSystem.getActiveTool();

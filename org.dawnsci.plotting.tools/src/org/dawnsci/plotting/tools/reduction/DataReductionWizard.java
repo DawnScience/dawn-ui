@@ -15,7 +15,6 @@ import org.dawb.common.ui.monitor.ProgressMonitorWrapper;
 import org.dawb.common.ui.plot.tools.IDataReductionToolPage;
 import org.dawb.common.ui.util.EclipseUtils;
 import org.dawb.common.util.io.FileUtils;
-import org.dawnsci.io.h5.H5Loader;
 import org.dawnsci.plotting.tools.ServiceLoader;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -23,6 +22,7 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.dawnsci.analysis.api.conversion.IConversionContext;
 import org.eclipse.dawnsci.analysis.api.conversion.IConversionService;
 import org.eclipse.dawnsci.analysis.api.conversion.IConversionVisitor;
+import org.eclipse.dawnsci.hdf5.HDF5Utils;
 import org.eclipse.dawnsci.slicing.api.system.DimsData;
 import org.eclipse.dawnsci.slicing.api.system.DimsDataList;
 import org.eclipse.january.dataset.ILazyDataset;
@@ -152,7 +152,7 @@ public class DataReductionWizard extends Wizard implements IExportWizard {
 		context.setOutputPath(file.getParent()+File.separator+sugFileName);
 		context.setConversionVisitor(visitor);
 		// if a h5path and the file is an hdf5 format, other wise try with lazydataset
-		if (h5Path != null && H5Loader.isH5(file.getAbsolutePath()))
+		if (h5Path != null && HDF5Utils.isHDF5(file.getAbsolutePath()))
 			context.setDatasetName(h5Path);
 		else
 			context.setLazyDataset(lazy);
