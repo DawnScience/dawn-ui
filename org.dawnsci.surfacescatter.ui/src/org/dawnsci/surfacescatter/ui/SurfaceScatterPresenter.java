@@ -1488,7 +1488,7 @@ public class SurfaceScatterPresenter {
 		return (Dataset) PlotSystem2DataSetter.PlotSystem2DataSetter1(box, image);
 	}
 
-	public IDataset presenterDummyProcess(int selection, IDataset image, int trackingMarker, int[][] lenPt) {
+	public IDataset presenterDummyProcess(int selection, int trackingMarker, int[][] lenPt) {
 
 		int j = fms.get(selection).getNoInOriginalDat();
 
@@ -1842,11 +1842,11 @@ public class SurfaceScatterPresenter {
 		});
 	}
 
-	public void boundariesWarning(String note, Display d) {
-		RegionOutOfBoundsWarning roobw = new RegionOutOfBoundsWarning(parentShell, 0, note);
-		roobw.open();
-
-	}
+//	public void boundariesWarning(String note, Display d) {
+//		RegionOutOfBoundsWarning roobw = new RegionOutOfBoundsWarning(parentShell, 0, note);
+//		roobw.open();
+//
+//	}
 
 	public void numberFormatWarning() {
 		RegionOutOfBoundsWarning roobw = new RegionOutOfBoundsWarning(parentShell, 1, null);

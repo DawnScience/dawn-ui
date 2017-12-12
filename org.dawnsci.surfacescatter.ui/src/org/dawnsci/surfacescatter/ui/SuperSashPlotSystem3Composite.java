@@ -366,7 +366,7 @@ public class SuperSashPlotSystem3Composite extends Composite {
 		}
 
 		@SuppressWarnings("unchecked")
-		IDataset output = ssp.presenterDummyProcess(selection, ssp.getImage(selection), 3, lenPt);
+		IDataset output = ssp.presenterDummyProcess(selection,3, lenPt);
 		try {
 			ILineTrace lt3 = VerticalHorizontalSlices.horizontalsliceBackgroundSubtracted(
 					horizontalSlice.getROI().getBounds(), plotSystem1, ssp.getTemporaryBackground(), greenRectangle);

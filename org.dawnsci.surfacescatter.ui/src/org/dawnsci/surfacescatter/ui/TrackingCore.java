@@ -78,6 +78,26 @@ public class TrackingCore {
 				try {
 					output1 = DummyProcessWithFrames.dummyProcess1(drm, frame.getNoInOriginalDat(), trackingMarker,
 							frame.getFmNo(), gv, ssp.getLenPt());
+				}
+				catch(IndexOutOfBoundsException h) {
+					if (showtrack) {
+						display.syncExec(new Runnable() {
+
+							@Override
+							public void run() {
+
+								t.interrupt();
+								thwfi.kill();
+								RegionOutOfBoundsWarning roobw = new RegionOutOfBoundsWarning(ssvs.getShell(), 0,
+										null);
+								roobw.open();
+
+								return;
+							}
+						});
+					}
+					
+					break;
 				} catch (Exception f) {
 
 					if (showtrack) {
@@ -96,6 +116,8 @@ public class TrackingCore {
 							}
 						});
 					}
+					
+					break;
 				}
 
 				if (Arrays.equals(output1.getShape(), (new int[] { 2, 2 }))) {

@@ -280,7 +280,6 @@ public class AnalysisTabRightPane extends Dialog {
 		
 				
 				IDataset output = ssp.presenterDummyProcess(selection,
-															ssp.getImage(selection),
 															3,
 															lenPt);
 		

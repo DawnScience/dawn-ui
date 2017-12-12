@@ -256,60 +256,6 @@ public class SurfaceScatterViewStart extends Dialog {
 			}
 		});
 
-		// folder.addSelectionListener(new SelectionAdapter() {
-		//
-		// @Override
-		// public void widgetSelected(SelectionEvent e) {
-		//
-		// CTabFolder f = (CTabFolder) e.getSource();
-		//
-		// if (f.getSelectionIndex() == 1) {
-		// return;
-		// }
-		//
-		// if (ssp.getNoImages() != 0) {
-		// customComposite.getSlider().setMaximum(ssp.getNoImages());
-		// customComposite.getPlotSystem1CompositeView().generalUpdate();
-		// paramField.geometricParametersUpdate();
-		//
-		// IRectangularROI greenRectangle =
-		// customComposite.getGreenRegion().getROI().getBounds();
-		// int[] len = greenRectangle.getIntLengths();
-		// int[] pt = greenRectangle.getIntPoint();
-		//
-		// int[][] lenPt = { len, pt };
-		//
-		// double[] bgRegionROI = ssp.regionOfInterestSetter1(lenPt);
-		// RectangularROI bgROI = new RectangularROI(bgRegionROI[0], bgRegionROI[1],
-		// bgRegionROI[2],
-		// bgRegionROI[3], bgRegionROI[4]);
-		//
-		// customComposite.getBgRegion().setROI(bgROI);
-		//
-		// if (ssp.getYList() == (null)) {
-		// try {
-		// getPlotSystemCompositeView().removeBackgroundSubtractedSubImage();
-		// getSsps3c().isOutputCurvesVisible(false);
-		// customComposite.getReplay().setEnabled(false);
-		// } catch (Exception n) {
-		//
-		// }
-		// }
-		//
-		// ssps3c.resetVerticalAndHorizontalSlices();
-		// customComposite.getPlotSystem1CompositeView().checkTrackerOnButton();
-		// }
-		//
-		// else if (f.getSelectionIndex() == 1) {
-		// folder.setSelection(1);
-		// }
-		//
-		// else {
-		// folder.setSelection(0);
-		// }
-		// }
-		// });
-
 		addSecondBgRegionListeners(customComposite.getSecondBgRegion());
 
 		customComposite.getGo().addSelectionListener(new SelectionListener() {
@@ -996,7 +942,7 @@ public class SurfaceScatterViewStart extends Dialog {
 
 			ssp.addXValuesForFireAccept();
 
-			ssp.presenterDummyProcess(ssp.getSliderPos(), ssp.getImage(ssp.getSliderPos()), 4, null);
+			ssp.presenterDummyProcess(ssp.getSliderPos(), 4, null);
 
 			if (getSsps3c().getOutputCurves().isVisible() != true) {
 				getSsps3c().getOutputCurves().setVisible(true);
