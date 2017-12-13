@@ -440,6 +440,8 @@ public class BatchDatDisplayer extends Composite implements IDatDisplayer {
 
 						String namePrompt = StringUtils.substringBetween(getDatFilepaths()[0], "/", ".");
 
+						namePrompt = StringUtils.substringAfterLast(namePrompt, "/") + "_rod";
+						
 						ssp.dialogToChangeRodName(namePrompt, BatchDatDisplayer.this);
 						addToBatch();
 						brm.setBatchDisplayOn(true);

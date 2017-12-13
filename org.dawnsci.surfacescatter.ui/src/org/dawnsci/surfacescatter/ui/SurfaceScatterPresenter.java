@@ -25,6 +25,7 @@ import org.dawnsci.surfacescatter.AxisEnums;
 import org.dawnsci.surfacescatter.AxisEnums.yAxes;
 import org.dawnsci.surfacescatter.BoxSlicerRodScanUtilsForDialog;
 import org.dawnsci.surfacescatter.ClosestNoFinder;
+import org.dawnsci.surfacescatter.CorrectionsException;
 import org.dawnsci.surfacescatter.CsdpGeneratorFromDrm;
 import org.dawnsci.surfacescatter.CurveStitchDataPackage;
 import org.dawnsci.surfacescatter.CurveStitchWithErrorsAndFrames;
@@ -48,7 +49,6 @@ import org.dawnsci.surfacescatter.PolynomialOverlap;
 import org.dawnsci.surfacescatter.ProcessingMethodsEnum;
 import org.dawnsci.surfacescatter.ProcessingMethodsEnum.ProccessingMethod;
 import org.dawnsci.surfacescatter.ReflectivityAngleAliasEnum;
-import org.dawnsci.surfacescatter.ReflectivityFluxCorrectionsForDialog;
 import org.dawnsci.surfacescatter.ReflectivityFluxParametersAliasEnum;
 import org.dawnsci.surfacescatter.ReflectivityMetadataTitlesForDialog;
 import org.dawnsci.surfacescatter.ReflectivityNormalisation;
@@ -124,8 +124,6 @@ public class SurfaceScatterPresenter {
 	private Dataset kArrayCon;
 	private Dataset lArrayCon;
 	private Dataset thetaArrayCon;
-
-	// Dataset internaFluxArrayCon = DatasetFactory.zeros(1);
 	private Dataset qdcdCon;
 
 	public SurfaceScatterPresenter() {
@@ -552,10 +550,14 @@ public class SurfaceScatterPresenter {
 				fm.setFmNo(f);
 
 				fmsSorted.get(fm.getDatNo()).set(fm.getNoInOriginalDat(), fm);
-
-				buildCorrections(f, pos, fm, correctionSelection, datNamesInOrder, imageNoInDatList, dcdThetaCon,
-						hArrayCon, kArrayCon, lArrayCon, thetaArrayCon, qdcdCon);
-
+				try {
+					buildCorrections(f, pos, fm, correctionSelection, datNamesInOrder, imageNoInDatList, dcdThetaCon,
+							hArrayCon, kArrayCon, lArrayCon, thetaArrayCon, qdcdCon);
+				}
+				catch(Exception fuckedUp){
+					exitedCorrectionsWarnings();
+					break;
+				}
 				fm.setScannedVariable(xArrayCon.getDouble(f));
 
 			}
@@ -565,9 +567,15 @@ public class SurfaceScatterPresenter {
 				public void propertyChange(PropertyChangeEvent evt) {
 
 					for (FrameModel g : fms) {
-						buildCorrections(g.getFmNo(), g.getNoInOriginalDat(), g, g.getCorrectionSelection(),
+						try {
+							buildCorrections(g.getFmNo(), g.getNoInOriginalDat(), g, g.getCorrectionSelection(),
 								datNamesInOrder, imageNoInDatList, dcdThetaCon, hArrayCon, kArrayCon, lArrayCon,
 								thetaArrayCon, qdcdCon);
+						}
+						catch(CorrectionsException s){
+							exitedCorrectionsWarnings();
+							
+						}
 
 					}
 
@@ -1841,12 +1849,19 @@ public class SurfaceScatterPresenter {
 			}
 		});
 	}
+	
+	public void exitedCorrectionsWarnings() {
+		RegionOutOfBoundsWarning roobw = new RegionOutOfBoundsWarning(parentShell, 17, null);
+		roobw.open();
 
-//	public void boundariesWarning(String note, Display d) {
-//		RegionOutOfBoundsWarning roobw = new RegionOutOfBoundsWarning(parentShell, 0, note);
-//		roobw.open();
-//
-//	}
+		roobw.getOverride().addSelectionListener(new SelectionAdapter() {
+
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				roobw.close();
+			}
+		});
+	}
 
 	public void numberFormatWarning() {
 		RegionOutOfBoundsWarning roobw = new RegionOutOfBoundsWarning(parentShell, 1, null);
@@ -2906,7 +2921,7 @@ public class SurfaceScatterPresenter {
 
 	private void buildCorrections(int f, int pos, FrameModel fm, MethodSetting correctionSelection,
 			String[] datNamesInOrder, ArrayList<Integer> imageNoInDatList, Dataset dcdThetaCon, Dataset hArrayCon,
-			Dataset kArrayCon, Dataset lArrayCon, Dataset thetaArrayCon, Dataset qdcdCon) {
+			Dataset kArrayCon, Dataset lArrayCon, Dataset thetaArrayCon, Dataset qdcdCon) throws CorrectionsException {
 
 		if (correctionSelection == MethodSetting.SXRD) {
 
@@ -2977,7 +2992,8 @@ public class SurfaceScatterPresenter {
 			} catch (Exception i) {
 				System.out.println("problem doing flux corr");
 				fluxCallibrationWarning();
-
+				throw new CorrectionsException(null);
+	
 			}
 
 		}
