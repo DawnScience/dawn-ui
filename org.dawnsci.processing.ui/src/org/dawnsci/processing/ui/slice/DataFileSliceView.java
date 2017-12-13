@@ -465,7 +465,20 @@ public class DataFileSliceView extends ViewPart {
 							} catch (final Exception e) {
 								Display.getDefault().asyncExec(new Runnable() {
 									public void run() {
-										MessageDialog.openError(DataFileSliceView.this.getViewSite().getShell(), "Error processing files!", e.getMessage());
+										boolean memoryError = false;
+										Throwable cause = e.getCause();
+										while (cause != null) {
+											cause = cause.getCause();
+											if (cause instanceof OutOfMemoryError) {
+												memoryError = true;
+											}
+										}
+										if (memoryError) {
+											MessageDialog.openError(DataFileSliceView.this.getViewSite().getShell(), "Error processing files!", "DAWN has ran out of memory while processing, "+
+										"Either increase the xmx value in dawn.ini, or disable parallel processing");
+										} else {
+											MessageDialog.openError(DataFileSliceView.this.getViewSite().getShell(), "Error processing files!", e.getMessage());
+										}
 									}
 								});
 								
