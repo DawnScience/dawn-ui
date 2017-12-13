@@ -487,8 +487,10 @@ public class ReviewTabComposite extends Composite {
 		rodToSave = tile3.getCombo();
 		rodToSave.select(0);
 
-		outputFormatSelection = new Combo(curveSettings, SWT.DROP_DOWN | SWT.BORDER | SWT.FILL);
-
+		
+		InputTileGenerator tile4 = new InputTileGenerator("Saving Format:", curveSettings);
+		outputFormatSelection  = tile4.getCombo();
+		
 		for (SaveFormatSetting t : SavingFormatEnum.SaveFormatSetting.values()) {
 			outputFormatSelection.add(SaveFormatSetting.toString(t));
 		}

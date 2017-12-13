@@ -2178,6 +2178,10 @@ public class SurfaceScatterPresenter {
 	}
 
 	public void setSliderPos(int selection) {
+		
+		if(selection < 0) {
+			selection =0;
+		}
 		sliderPos = selection;
 		fireStateListeners();
 	}
