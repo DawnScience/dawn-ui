@@ -36,6 +36,14 @@ public class MapScanDimensions {
 		
 	}
 	
+	public MapScanDimensions(MapScanDimensions original) {
+		this.xDim = original.xDim;
+		this.yDim = original.yDim;
+		this.nonXYScanDimensions = original.nonXYScanDimensions != null ? original.nonXYScanDimensions.clone() : null;
+		this.nonXYDimensionValues = original.nonXYDimensionValues != null ? original.nonXYDimensionValues.clone() : null;
+		this.scanRank = original.scanRank;
+	}
+	
 	private void initialiseNonXScanValues(){
 		
 		for (int i = 0, j = 0; i < scanRank; i++) {

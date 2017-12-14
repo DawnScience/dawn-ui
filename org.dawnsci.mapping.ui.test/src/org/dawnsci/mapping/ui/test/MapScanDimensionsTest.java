@@ -106,7 +106,7 @@ public class MapScanDimensionsTest {
 		slice = msd.getSlice(0, 0, new int[]{10,10,10,100,100});
 		assertArrayEquals(new int[]{0,0,0,0,0},slice.getStart());
 		assertArrayEquals(new int[]{1,1,1,100,100},slice.getStop());
-		msd.updateNonXYScanSlice(0, 1);
+		msd.updateNonXYScanSlice(2, 1);
 		slice = msd.getSlice(0, 0, new int[]{10,10,10,100,100});
 		assertArrayEquals(new int[]{0,0,1,0,0},slice.getStart());
 		assertArrayEquals(new int[]{1,1,2,100,100},slice.getStop());

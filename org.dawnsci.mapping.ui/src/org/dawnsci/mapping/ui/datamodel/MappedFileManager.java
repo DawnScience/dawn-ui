@@ -269,12 +269,12 @@ public class MappedFileManager implements IMapFileController{
 	}
 	
 	@Override
-	public void unplotAll() {
+	public void removeAllFromDisplay() {
 		getPlottedObjects().stream().forEach(p -> p.setPlotted(false));
 		fireListeners(null);
 	}
 	
-	@Override
+
 	public PlottableMapObject getTopMap() {
 		return null;
 

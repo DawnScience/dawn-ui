@@ -69,6 +69,29 @@ public abstract class AbstractMapData implements PlottableMapObject{
 		return null;
 	}
 	
+	public IDataset getMapForDims(int x, int y) {
+		try {
+
+			if (baseMap.getSize() == 1) return null;
+
+			MapScanDimensions mapDims = parent.getMapDims();
+			//clone to not change state
+			mapDims = new MapScanDimensions(mapDims);
+			mapDims.changeXandYdims(x, y);
+			SliceND s = mapDims.getMapSlice(baseMap);
+			IDataset slice;
+
+			slice = baseMap.getSlice(s);
+
+			slice.squeeze();
+			return slice;
+		} catch (DatasetException e) {
+			logger.error("Could not slice map");
+		}
+
+		return null;
+	}
+	
 	protected void buildAxesMetadata(){
 		AxesMetadata ax;
 		((IDynamicDataset)baseMap).refreshShape();
@@ -115,8 +138,6 @@ public abstract class AbstractMapData implements PlottableMapObject{
 		if (ax == null) return null;
 		int[] refresh = ax.refresh(baseMap.getShape());
 		((IDynamicDataset) baseMap).resize(refresh);
-
-
 
 		try {
 			

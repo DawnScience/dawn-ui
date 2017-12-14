@@ -12,11 +12,17 @@ import org.dawnsci.mapping.ui.datamodel.MappedDataFileBean;
 import org.dawnsci.mapping.ui.datamodel.PlottableMapObject;
 import org.eclipse.ui.progress.IProgressService;
 
+
+/**
+ * Interface to the file controller in the Mapping perspective.
+ * 
+ * Use to gain information about the current state of the file
+ * loaded, and perform actions on those files
+ * 
+ */
 public interface IMapFileController {
 
-	PlottableMapObject getTopMap();
-
-	void unplotAll();
+	void removeAllFromDisplay();
 
 	void removeListener(IMapFileEventListener l);
 

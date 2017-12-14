@@ -65,7 +65,6 @@ public class MapPlotManager {
 	private Runnable mapRunnable;
 	
 	private IMapFileController fileManager;
-
 	
 	private static long MIN_REFRESH_TIME = 2000;
 	
@@ -295,25 +294,6 @@ public class MapPlotManager {
 		job.schedule();
 	}
 	
-//	public void unplotFile(MappedDataFile file){
-//		
-//		Object[] c = file.getChildren();
-//		List<Object> list = Arrays.asList(c);
-//		
-//		Iterator<MapTrace> it = layers.iterator();
-//		
-//		while (it.hasNext()) {
-//			MapTrace m = it.next();
-//			if (list.contains(m.getMap())) {
-//				it.remove();
-//				if (m.getTrace() != null) this.map.removeTrace(m.getTrace());
-//			}
-//		}
-//
-//		plotLayers();
-//		
-//	}
-	
 	public void refresh() {
 		updateState();
 	}
@@ -375,71 +355,6 @@ public class MapPlotManager {
 		plotLayers();
 	}
 	
-	
-//	public void updateLayers(PlottableMapObject map) {
-//		
-//		Iterator<MapTrace> it = layers.iterator();
-//		
-//		while (it.hasNext()) {
-//			MapTrace m = it.next();
-//			if (m.getMap() == map) {
-//				it.remove();
-//				if (m.getTrace() != null) this.map.removeTrace(m.getTrace());
-//				plotLayers();
-//				return;
-//			}
-//		}
-//		
-//		
-//		MappedDataArea area = fileManager.getArea();
-//		
-//		if (map == null) {
-//			for (int i = 0; i < area.count();i++) {
-//				
-//				AssociatedImage associatedImage = area.getDataFile(i).getAssociatedImage();
-//				if (associatedImage != null) {
-//					addImage(associatedImage);
-//				}
-//				
-//				map = area.getDataFile(i).getMap();
-//				if (map == null) {
-//					logger.debug("Map is null");
-//					continue;
-//				}
-//				addMap(map);
-//			}
-// 			
-//		} else {
-//			addMap(map);
-//		}
-//		
-//		plotLayers();
-//	}
-	
-//	public void plotMap(PlottableMapObject map) {
-//		addMap(map);		plotLayers();
-//	}
-//	
-//	public void addImage(AssociatedImage image) {
-//		Iterator<MapTrace> it = layers.iterator();
-//		
-//		while (it.hasNext()) {
-//			MapTrace m = it.next();
-//			if (m.getMap() == image) {
-//				it.remove();
-//				this.map.removeTrace(m.getTrace());
-//				plotLayers();
-//				return;
-//			}
-//		}	
-//
-//		layers.addLast(new MapTrace(image, null));
-//		map.clearTraces();
-//		for (MapTrace l : layers) l.rebuildTrace();
-//		
-//		plotLayers();
-//	}
-	
 	public PlottableMapObject getTopMap(double x, double y){
 		
 		Iterator<MapTrace> iterator = layers.iterator();
@@ -466,50 +381,6 @@ public class MapPlotManager {
 		
 		return null;
 	}
-	
-	
-//	public void clearAll(){
-//		fileManager.getPlottedObjects().stream().forEach(p -> p.setPlotted(false));
-//		map.clearTraces();
-//		data.clear();
-//		layers.clear();
-//	}
-	
-//	private void addMap(PlottableMapObject map) {
-//
-//		MapTrace sameMap = null;
-//		
-//		Iterator<MapTrace> iterator = layers.iterator();
-//		
-//		while (iterator.hasNext()) {
-//			MapTrace l = iterator.next();
-//			if (l.getMap() instanceof PlottableMapObject && isTheSameMap((PlottableMapObject)l.getMap(), map)) {
-//				sameMap = l;
-//				break;
-//			}
-//		}
-//		
-//		
-//		if (sameMap != null) {
-//			if (map instanceof VectorMapData) {
-//				IVectorTrace vectorTrace = createVectorTrace(map);
-//				layers.push(new MapTrace(map, vectorTrace));
-//			}
-//			else{
-//				sameMap.switchMap(map); //test if switches images only
-//			}
-//		}
-//		else if (map instanceof VectorMapData) {
-//			// Initialise a vector trace
-//			IVectorTrace vectorTrace = createVectorTrace(map);
-//			layers.push(new MapTrace(map, vectorTrace));
-//		} 
-//		else {
-//			IImageTrace t = createImageTrace(map);
-//			layers.push(new MapTrace(map, t));
-//		}
-//	}
-	
 	
 	private IImageTrace createImageTrace(MapObject ob) {
 		
@@ -617,48 +488,6 @@ public class MapPlotManager {
 		}
 	}
 	
-//	private boolean isTheSameMap(PlottableMapObject omap, PlottableMapObject map) {
-//		
-//		if (omap.getLongName().equals(map.getLongName())) return true;
-//		
-//		if (omap.getMap() == null ||  map.getMap() == null) return false;
-//		
-//		if (!Arrays.equals(omap.getMap().getShape(), map.getMap().getShape())) return false;
-//		
-//		AxesMetadata oax = omap.getMap().getFirstMetadata(AxesMetadata.class);
-//		AxesMetadata ax = map.getMap().getFirstMetadata(AxesMetadata.class);
-//		
-//		if (oax == null || ax == null) return false; // should never be the case
-//		
-//		ILazyDataset[] oaxes = oax.getAxes();
-//		ILazyDataset[] axes = ax.getAxes();
-//		
-//		if (oaxes.length != axes.length) return false;
-//		
-//		for (int i = 0 ; i < oaxes.length; i++) {
-//			if (oaxes[i] == null) return false;
-//			if (axes[i] == null) return false;
-//		
-//			IDataset oa;
-//			try {
-//				oa = oaxes[i].getSlice();
-//			} catch (DatasetException e) {
-//				logger.warn("Could not get data from lazy dataset", e);
-//				return false;
-//			}
-//			IDataset a;
-//			try {
-//				a = axes[i].getSlice();
-//			} catch (DatasetException e) {
-//				logger.warn("Could not get data from lazy dataset", e);
-//				return false;
-//			}
-//			if (!oa.equals(a)) return false;
-//		}
-//		
-//		return true;
-//		
-//	}
 	
 	public void updatePlottedRange(){
 		
@@ -696,19 +525,6 @@ public class MapPlotManager {
 		
 	}
 	
-	public static void updateRange(MapObject object, double[] range) {
-		if (object == null) return;
-		double[] r = object.getRange();
-		if (r == null) return;
-		
-		range[0]  = r[0] < range[0] ? r[0] : range[0];
-		range[1]  = r[1] > range[1] ? r[1] : range[1];
-		range[2]  = r[2] < range[2] ? r[2] : range[2];
-		range[3]  = r[3] > range[3] ? r[3] : range[3];
-		
-	}
-	
-	
 	public void setTransparency(PlottableMapObject m) {
 		
 		
@@ -721,15 +537,6 @@ public class MapPlotManager {
 		
 		map.repaint(false);
 	}
-	
-//	public boolean isPlotted(MapObject object) {
-//		
-//		for (MapTrace t : layers) {
-//			if (t.getMap().equals(object)) return true;
-//		}
-//		
-//		return false;
-//	}
 	
 	private Dataset getMergedDataset(IDataset input) {
 
