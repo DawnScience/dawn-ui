@@ -66,8 +66,6 @@ public class MappedDataTest {
 		
 	}
 	
-	
-	
 	@Test
 	public void testGetSpectrum() {
 		IDataset spectrum = gridScanMap.getSpectrum(0, 0);
@@ -193,7 +191,16 @@ public class MappedDataTest {
 		
 		assertNotNull(spectrum);
 		
-		m.toString();
+		
+		
+		IDataset map = m.getMap();
+		
+		assertArrayEquals(new int[] {11, 12}, map.getShape());
+		
+		IDataset map2 = m.getMapForDims(0, 1);
+		
+		assertArrayEquals(new int[] {10, 11}, map2.getShape());
+		
 	}
 
 

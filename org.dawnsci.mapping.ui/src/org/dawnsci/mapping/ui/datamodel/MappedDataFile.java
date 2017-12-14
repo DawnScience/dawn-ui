@@ -88,21 +88,6 @@ public class MappedDataFile implements MapObject{
 		
 	}
 	
-//	public MappedDataBlock addFullDataBlock(String datasetName, int xdim, int ydim) {
-//		
-//		//TODO make use of the x and y dimensions
-//		MappedDataBlock block = null;
-//		try {
-//			ILazyDataset lz = LocalServiceManager.getLoaderService().getData(path, null).getLazyDataset(datasetName);
-//			block = new MappedDataBlock(datasetName, lz,xdim,ydim, path);
-//			fullDataMap.put(datasetName, block);
-//		} catch (Exception e) {
-//			logger.error("Error loading mapped data block!", e);
-//		}
-//		
-//		return block;
-//	}
-	
 	public Map<String,MappedDataBlock> getDataBlockMap() {
 		return fullDataMap;
 	}
@@ -170,20 +155,6 @@ public class MappedDataFile implements MapObject{
 		return range == null ? null : range.clone(); 
 	}
 	
-//	public void addNonMapImage(String imageName) {
-//		try {
-//			ILazyDataset lz = LocalServiceManager.getLoaderService().getData(path, null).getLazyDataset(imageName);
-//			IDataset test = lz.getSlice(new Slice(0,1),null,null).squeeze();
-//			RGBDataset microrgb = DatasetUtils.createCompoundDataset(RGBDataset.class, (Dataset)lz.getSlice(new Slice(0,1),null,null).squeeze(),
-//					 (Dataset)lz.getSlice(new Slice(1,2),null,null).squeeze(),
-//					 (Dataset)lz.getSlice(new Slice(2,3),null,null).squeeze());
-//			microrgb.setMetadata(test.getMetadata(AxesMetadata.class).get(0));
-//			microscopeDataMap.put(imageName, new AssociatedImage(imageName, microrgb,path));
-//		} catch (Exception e) {
-//			logger.error("Error non map image!", e);
-//		}
-//	}
-	
 	public LiveDataBean getLiveDataBean() {
 		if (descriptionBean == null) return null;
 		return this.descriptionBean.getLiveBean();
@@ -193,15 +164,6 @@ public class MappedDataFile implements MapObject{
 		if (mapDataMap.containsValue(map)) {
 			list.addAll(fullDataMap.values());
 		}
-//		int[] shape = map.getData().getShape();
-//		double[] r = map.getRange();
-//		for (MappedDataBlock block : fullDataMap.values()) {
-//			if (block.getxSize() == shape[1] && block.getySize() == shape[0]) {
-//				if (Arrays.equals(r, range)) {
-//					list.add(block);
-//				}
-//			}
-//		}
 	}
 	
 
