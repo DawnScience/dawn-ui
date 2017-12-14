@@ -737,6 +737,20 @@ public class ReviewTabComposite extends Composite {
 		boolean isXPresent = true;
 		boolean isQPresent = true;
 
+
+		for (CurveStitchDataPackage csdp : csdps) {
+			boolean remove = true;
+			if (csdp.getSplicedCurveX() != null && csdp.getSplicedCurveX().getSize() > 0) {
+				remove = false;
+			}
+			if (csdp.getSplicedCurveQ() != null && csdp.getSplicedCurveQ().getSize() > 0) {
+				remove = false;
+			}
+			if(remove) {
+				rcm.removeFromCsdpList(csdp);
+			}
+		}
+		
 		for (CurveStitchDataPackage csdp : csdps) {
 			if (csdp.getSplicedCurveX() == null) {
 				isXPresent = false;
@@ -800,7 +814,23 @@ public class ReviewTabComposite extends Composite {
 		boolean isYPresent = true;
 		boolean isYRawPresent = true;
 		boolean isYFhklPresent = true;
-
+		
+		for (CurveStitchDataPackage csdp : csdps) {
+			boolean remove = true;
+			if (csdp.getSplicedCurveY() != null && csdp.getSplicedCurveY().getSize() > 0) {
+				remove = false;
+			}
+			if (csdp.getSplicedCurveYRaw() != null && csdp.getSplicedCurveYRaw().getSize() > 0) {
+				remove = false;
+			}
+			if (csdp.getSplicedCurveYFhkl() != null && csdp.getSplicedCurveYFhkl().getSize() > 0) {
+				remove = false;
+			} 					
+			if(remove) {
+				rcm.removeFromCsdpList(csdp);
+			}
+		}
+		
 		for (CurveStitchDataPackage csdp : csdps) {
 			if (csdp.getSplicedCurveY() == null || csdp.getSplicedCurveY().getSize() == 0) {
 				isYPresent = false;
