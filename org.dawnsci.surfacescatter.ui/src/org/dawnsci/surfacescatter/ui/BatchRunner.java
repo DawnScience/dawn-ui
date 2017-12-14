@@ -31,6 +31,7 @@ public class BatchRunner {
 		this.writer = writer;
 		String[][] datFiles = new String[brm.getBrdtoList().size()][];
 		String[] imageFolderPaths = new String[brm.getBrdtoList().size()];
+		String[] saveFolderPaths = new String[brm.getBrdtoList().size()];
 		String[] paramFiles = new String[brm.getBrdtoList().size()];
 		String[] nexusSaveFilePaths = new String[brm.getBrdtoList().size()];
 		String[] baseSaveFilePaths = new String[brm.getBrdtoList().size()];
@@ -43,6 +44,7 @@ public class BatchRunner {
 			BatchRodDataTransferObject b = brm.getBrdtoList().get(i);
 			datFiles[i] = b.getDatFiles();
 			imageFolderPaths[i] = b.getImageFolderPath();
+			saveFolderPaths[i] = b.getSaveFolder();
 			paramFiles[i] = b.getParamFiles();
 			String baseName = brm.getNxsFolderPath() + File.separator+ brm.getBatchTitle()  + File.separator + b.getRodName();
 			String nexusName = brm.getNxsFolderPath() + File.separator + brm.getBatchTitle()  + File.separator + b.getRodName() + ".nxs";
@@ -53,12 +55,12 @@ public class BatchRunner {
 		}
 		
 		
-		batchRun(datFiles, imageFolderPaths, paramFiles, baseSaveFilePaths, useTrajectories, useStareModes, bsas, bsmps,
+		batchRun(datFiles, imageFolderPaths,saveFolderPaths, paramFiles, baseSaveFilePaths, useTrajectories, useStareModes, bsas, bsmps,
 				progress, bpaatv, display);
 
 	}
 
-	public void batchRun(String[][] datFiles, String[] imageFolderPaths, String[] paramFiles,
+	public void batchRun(String[][] datFiles, String[] imageFolderPaths,String[] saveFolderPaths, String[] paramFiles,
 			String[] nexusSaveFilePaths, boolean[] useTrajectories, boolean[] useStareModes,
 			BatchSavingAdvancedSettings[] bsas, BatchSetupMiscellaneousProperties bsmps, ProgressBar progress,
 			BatchTrackingProgressAndAbortViewImproved bpaatv, Display display) {
@@ -76,7 +78,7 @@ public class BatchRunner {
 		for (int i = 0; i < datFiles.length; i++) {
 
 			brs[i] = new BatchRunnable(nexusSaveFilePaths[i], bsas, bsmps, progress, bpaatv, display,
-					imageFolderPaths[i], paramFiles[i], datFiles[i], useTrajectories[i], useStareModes[i],
+					imageFolderPaths[i],saveFolderPaths[i], paramFiles[i], datFiles[i], useTrajectories[i], useStareModes[i],
 					datFiles.length, lock, writer);
 
 			@SuppressWarnings("unchecked")

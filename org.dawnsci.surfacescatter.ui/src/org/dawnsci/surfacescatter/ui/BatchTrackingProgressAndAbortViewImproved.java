@@ -1,10 +1,6 @@
 package org.dawnsci.surfacescatter.ui;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.concurrent.Future;
 import org.dawnsci.surfacescatter.BatchRodModel;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.swt.SWT;

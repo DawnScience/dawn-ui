@@ -43,6 +43,7 @@ import org.dawnsci.surfacescatter.GeometricParametersModel;
 import org.dawnsci.surfacescatter.InterpolationTracker;
 import org.dawnsci.surfacescatter.LocationLenPtConverterUtils;
 import org.dawnsci.surfacescatter.MethodSettingEnum.MethodSetting;
+import org.dawnsci.surfacescatter.OutputException;
 import org.dawnsci.surfacescatter.OverlapAttenuationObject;
 import org.dawnsci.surfacescatter.PlotSystem2DataSetter;
 import org.dawnsci.surfacescatter.PolynomialOverlap;
@@ -228,8 +229,8 @@ public class SurfaceScatterPresenter {
 					String localFilepathCopy = StringUtils.substringBeforeLast(datName, ".dat") + "_copy";
 
 					Path from = Paths.get(filepaths[id]);
-					
-					Path to = Paths.get(stm.getSaveFolder() +  File.separator +localFilepathCopy + ".dat");
+
+					Path to = Paths.get(stm.getSaveFolder() + File.separator + localFilepathCopy + ".dat");
 
 					Files.copy(from, to, StandardCopyOption.REPLACE_EXISTING);
 
@@ -262,7 +263,7 @@ public class SurfaceScatterPresenter {
 						ec = ec + ".dat";
 						to = Paths.get(ec);
 					}
-
+					filepaths[id] = to.toString();
 					dh1 = LoaderFactory.getData(to.toString());
 
 					////////////////// getting an array of .tifs
@@ -553,8 +554,7 @@ public class SurfaceScatterPresenter {
 				try {
 					buildCorrections(f, pos, fm, correctionSelection, datNamesInOrder, imageNoInDatList, dcdThetaCon,
 							hArrayCon, kArrayCon, lArrayCon, thetaArrayCon, qdcdCon);
-				}
-				catch(Exception fuckedUp){
+				} catch (Exception fuckedUp) {
 					exitedCorrectionsWarnings();
 					break;
 				}
@@ -569,12 +569,11 @@ public class SurfaceScatterPresenter {
 					for (FrameModel g : fms) {
 						try {
 							buildCorrections(g.getFmNo(), g.getNoInOriginalDat(), g, g.getCorrectionSelection(),
-								datNamesInOrder, imageNoInDatList, dcdThetaCon, hArrayCon, kArrayCon, lArrayCon,
-								thetaArrayCon, qdcdCon);
-						}
-						catch(CorrectionsException s){
+									datNamesInOrder, imageNoInDatList, dcdThetaCon, hArrayCon, kArrayCon, lArrayCon,
+									thetaArrayCon, qdcdCon);
+						} catch (CorrectionsException s) {
 							exitedCorrectionsWarnings();
-							
+
 						}
 
 					}
@@ -1743,6 +1742,7 @@ public class SurfaceScatterPresenter {
 			lock.writeLock().unlock();
 		} catch (Exception d) {
 			System.out.println(d.getMessage());
+			lock.writeLock().unlock();
 		}
 	}
 
@@ -1822,6 +1822,10 @@ public class SurfaceScatterPresenter {
 		roobw.open();
 	}
 
+	public void outputErrorWarning(String in) {
+		RegionOutOfBoundsWarning roobw = new RegionOutOfBoundsWarning(parentShell, 0, in);
+		roobw.open();
+	}
 	public void overlappingRodNames() {
 		RegionOutOfBoundsWarning roobw = new RegionOutOfBoundsWarning(parentShell, 7, null);
 		roobw.open();
@@ -1849,7 +1853,7 @@ public class SurfaceScatterPresenter {
 			}
 		});
 	}
-	
+
 	public void exitedCorrectionsWarnings() {
 		RegionOutOfBoundsWarning roobw = new RegionOutOfBoundsWarning(parentShell, 17, null);
 		roobw.open();
@@ -2193,9 +2197,9 @@ public class SurfaceScatterPresenter {
 	}
 
 	public void setSliderPos(int selection) {
-		
-		if(selection < 0) {
-			selection =0;
+
+		if (selection < 0) {
+			selection = 0;
 		}
 		sliderPos = selection;
 		fireStateListeners();
@@ -2789,7 +2793,7 @@ public class SurfaceScatterPresenter {
 	}
 
 	public void arbitrarySavingMethod(boolean useQ, boolean writeOnlyGoodPoints, Shell shell, SaveFormatSetting sfs,
-			CurveStitchDataPackage csdpToSave, AxisEnums.yAxes yAxis) {
+			CurveStitchDataPackage csdpToSave, AxisEnums.yAxes yAxis) throws OutputException {
 
 		FileDialog fd = new FileDialog(shell, SWT.SAVE);
 
@@ -2811,28 +2815,44 @@ public class SurfaceScatterPresenter {
 		}
 
 		String title = path + File.separator + stitle;
-
-		arbitrarySavingMethodCore(useQ, writeOnlyGoodPoints, sfs, csdpToSave, yAxis, title);
+		
+		try {
+			arbitrarySavingMethodCore(useQ, writeOnlyGoodPoints, sfs, csdpToSave, yAxis, title);
+		} catch (OutputException g) {
+			throw new OutputException(g.getMessage());
+		}
 	}
 
 	public void arbitrarySavingMethodCore(boolean useQ, boolean writeOnlyGoodPoints, SaveFormatSetting sfs,
-			CurveStitchDataPackage csdpToSave, AxisEnums.yAxes yAxis, String title) {
+			CurveStitchDataPackage csdpToSave, AxisEnums.yAxes yAxis, String title) throws OutputException {
 
 		SavingUtils su = new SavingUtils(writeOnlyGoodPoints, csdpToSave);
 
 		AxisEnums.yAxes saveIntensityState = AxisEnums.toYAxis(yAxis.getYAxisNumber());
+		try {
+			switch (sfs) {
 
-		if (sfs == SaveFormatSetting.GenX) {
-			su.genXSave(title + ".txt", this.getDrm(), this.getDrm().getFms(), this.getGm());
-		}
-		if (sfs == SaveFormatSetting.Anarod) {
-			su.anarodSave(title + ".ana", this.getDrm(), this.getDrm().getFms(), this.getGm());
-		}
-		if (sfs == SaveFormatSetting.int_format) {
-			su.intSave(title + ".int", this.getDrm(), this.getDrm().getFms(), this.getGm());
-		}
-		if (sfs == SaveFormatSetting.ASCII) {
-			su.simpleXYYeSave(useQ, title + ".txt", saveIntensityState, this.getDrm().getFms());
+			case GenX:
+				su.genXSave(title + ".txt", this.getDrm(), this.getDrm().getFms(), this.getGm());
+				break;
+
+			case Anarod:
+				su.anarodSave(title + ".ana", this.getDrm(), this.getDrm().getFms(), this.getGm());
+				break;
+
+			case int_format:
+				su.intSave(title + ".int", this.getDrm(), this.getDrm().getFms(), this.getGm());
+				break;
+
+			case ASCII:
+				su.simpleXYYeSave(useQ, title + ".txt", saveIntensityState, this.getDrm().getFms());
+				break;
+
+			default:
+				break;
+			}
+		} catch (OutputException f) {
+			throw new OutputException(f.getMessage());
 		}
 
 	}
@@ -2948,7 +2968,7 @@ public class SurfaceScatterPresenter {
 				fm.setK(kArrayCon.getDouble(f));
 				fm.setL(lArrayCon.getDouble(f));
 			} catch (Exception o) {
-
+				System.out.println("why   " + o.getMessage());
 			}
 		}
 
@@ -2993,7 +3013,7 @@ public class SurfaceScatterPresenter {
 				System.out.println("problem doing flux corr");
 				fluxCallibrationWarning();
 				throw new CorrectionsException(null);
-	
+
 			}
 
 		}
@@ -3015,17 +3035,17 @@ public class SurfaceScatterPresenter {
 			double unsplicedCorrectedIntensity = correctionValue * f.getUnspliced_Raw_Intensity();
 
 			double unsplicedFhkl = Math.pow(unsplicedCorrectedIntensity, 0.5);
-			
+
 			f.setUnspliced_Corrected_Intensity(unsplicedCorrectedIntensity);
-			
+
 			f.setUnspliced_Fhkl_Intensity(unsplicedFhkl);
 
 			double unsplicedCorrectedIntensityError = correctionValue * f.getUnspliced_Raw_Intensity_Error();
 
-			double unsplicedFhklError =unsplicedFhkl * 0.5 / Math.sqrt(f.getUnspliced_Raw_Intensity());
-			
+			double unsplicedFhklError = unsplicedFhkl * 0.5 / Math.sqrt(f.getUnspliced_Raw_Intensity());
+
 			f.setUnspliced_Corrected_Intensity_Error(unsplicedCorrectedIntensityError);
-			
+
 			f.setUnspliced_Fhkl_Intensity_Error(unsplicedFhklError);
 		}
 
@@ -3035,17 +3055,15 @@ public class SurfaceScatterPresenter {
 		ArrayList<Double> newyListFhkl = (ArrayList<Double>) drm.getOcdp().getyListRawIntensity().clone();
 		ArrayList<Double> newyListFhklError = (ArrayList<Double>) drm.getOcdp().getyListRawIntensityError().clone();
 
-		
 		ArrayList<ArrayList<Double>> newyListForEachDat = (ArrayList<ArrayList<Double>>) drm.getOcdp()
 				.getyListForEachDat().clone();
 		ArrayList<ArrayList<Double>> newyListErrorForEachDat = (ArrayList<ArrayList<Double>>) drm.getOcdp()
 				.getyListErrorForEachDat().clone();
-	
+
 		ArrayList<ArrayList<Double>> newyListFhklForEachDat = (ArrayList<ArrayList<Double>>) drm.getOcdp()
 				.getyListForEachDat().clone();
 		ArrayList<ArrayList<Double>> newyListFhklErrorForEachDat = (ArrayList<ArrayList<Double>>) drm.getOcdp()
 				.getyListErrorForEachDat().clone();
-	
 
 		correctionListofLists = (ArrayList<ArrayList<Double>>) drm.getOcdp().getyListForEachDat().clone();
 
@@ -3061,14 +3079,12 @@ public class SurfaceScatterPresenter {
 		IDataset newSplicedCurveYFhkl = drm.getCsdp().getSplicedCurveYRaw().clone();
 		IDataset newSplicedCurveYFhklError = drm.getCsdp().getSplicedCurveYRawError().clone();
 
-		
 		for (FrameModel f : fms) {
 
 			double yvalue = correctionList.get(f.getFmNo()) * drm.getOcdp().getyListRawIntensity().get(f.getFmNo());
 			double yValueError = correctionList.get(f.getFmNo())
 					* drm.getOcdp().getyListRawIntensityError().get(f.getFmNo());
 
-			
 			newyList.set(f.getFmNo(), yvalue);
 
 			newyListForEachDat.get(f.getDatNo()).set(f.getNoInOriginalDat(), (Double) yvalue);
@@ -3085,14 +3101,11 @@ public class SurfaceScatterPresenter {
 
 			newSplicedCurveY.set(yvalue, f.getFmNo());
 			newSplicedCurveYError.set(yValueError, f.getFmNo());
-			
-			
 
 			double yvalueFhkl = Math.pow(yvalue, 0.5);
-			double yValueFhklError =  yvalueFhkl * 0.5 / Math.sqrt(drm.getOcdp().getyListRawIntensity().get(f.getFmNo()));
+			double yValueFhklError = yvalueFhkl * 0.5
+					/ Math.sqrt(drm.getOcdp().getyListRawIntensity().get(f.getFmNo()));
 
-			
-			
 			newyListFhkl.set(f.getFmNo(), yvalueFhkl);
 
 			newyListFhklForEachDat.get(f.getDatNo()).set(f.getNoInOriginalDat(), (Double) yvalueFhkl);
@@ -3100,7 +3113,6 @@ public class SurfaceScatterPresenter {
 			newyListFhklError.set(f.getFmNo(), yValueFhklError);
 
 			newyListFhklErrorForEachDat.get(f.getDatNo()).set(f.getNoInOriginalDat(), (Double) yValueFhklError);
-
 
 			newyIDatasetFhkl[f.getDatNo()].set(yvalueFhkl, f.getNoInOriginalDat());
 			newyIDatasetFhklError[f.getDatNo()].set(yValueFhklError, f.getNoInOriginalDat());
@@ -3128,6 +3140,5 @@ public class SurfaceScatterPresenter {
 		drm.getCsdp().setSplicedCurveYFhkl(newSplicedCurveYFhkl);
 		drm.getCsdp().setSplicedCurveYFhklError(newSplicedCurveYFhklError);
 
-		
 	}
 }

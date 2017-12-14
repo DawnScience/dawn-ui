@@ -18,6 +18,7 @@ import org.eclipse.swt.widgets.ProgressBar;
 public class BatchRunnable implements Callable {
 
 	private String savePath;
+	private String saveFolderPath;
 	private BatchSavingAdvancedSettings[] bsas;
 	private BatchSetupMiscellaneousProperties bsmps;
 	private ProgressBar progress;
@@ -34,7 +35,7 @@ public class BatchRunnable implements Callable {
 
 	public BatchRunnable(String savepath1, BatchSavingAdvancedSettings[] bsas, BatchSetupMiscellaneousProperties bsmps,
 			ProgressBar progress, BatchTrackingProgressAndAbortViewImproved bpaatv, Display display,
-			String imageFolderPath, String paramFile, String[] datFiles, boolean useTrajectory, boolean useStareMode,
+			String imageFolderPath, String saveFolderPath, String paramFile, String[] datFiles, boolean useTrajectory, boolean useStareMode,
 			int noRods, ReadWriteLock lock, PrintWriter writer) {
 
 		this.savePath = savepath1;
@@ -44,6 +45,7 @@ public class BatchRunnable implements Callable {
 		this.bpaatv = bpaatv;
 		this.display = display;
 		this.imageFolderPath = imageFolderPath;
+		this.saveFolderPath = saveFolderPath;
 		this.paramFile = paramFile;
 		this.datFiles = datFiles;
 		this.useTrajectory = useTrajectory;
@@ -58,6 +60,7 @@ public class BatchRunnable implements Callable {
 
 		SetupModel stmi = new SetupModel();
 		stmi.setImageFolderPath(imageFolderPath);
+		stmi.setSaveFolder(saveFolderPath);
 
 		SurfaceScatterPresenter sspi = new SurfaceScatterPresenter();
 		sspi.setStm(stmi);

@@ -101,9 +101,9 @@ public class RegionOutOfBoundsWarning extends Dialog {
 		case 17:
 			warning.setText("Problem when calculating correction factors. Check geometry/metadata.");	
 			break;
-//		case 18:
-//			warning.setText("Fuck you. Get fucked. Fuck off.");	
-//			break;
+		case 18:
+			warning.setText("Error While Saving.");	
+			break;
 		default:
 			warning.setText("Unknown or novel error.");	
 			break;

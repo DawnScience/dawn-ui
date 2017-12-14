@@ -11,6 +11,7 @@ import org.dawnsci.surfacescatter.AxisEnums.yAxes;
 import org.dawnsci.surfacescatter.CsdpFromNexusFile;
 import org.dawnsci.surfacescatter.CurveStitchDataPackage;
 import org.dawnsci.surfacescatter.GoodPointStripper;
+import org.dawnsci.surfacescatter.OutputException;
 import org.dawnsci.surfacescatter.ReviewCurvesModel;
 import org.dawnsci.surfacescatter.SavingFormatEnum;
 import org.dawnsci.surfacescatter.SavingFormatEnum.SaveFormatSetting;
@@ -487,10 +488,9 @@ public class ReviewTabComposite extends Composite {
 		rodToSave = tile3.getCombo();
 		rodToSave.select(0);
 
-		
 		InputTileGenerator tile4 = new InputTileGenerator("Saving Format:", curveSettings);
-		outputFormatSelection  = tile4.getCombo();
-		
+		outputFormatSelection = tile4.getCombo();
+
 		for (SaveFormatSetting t : SavingFormatEnum.SaveFormatSetting.values()) {
 			outputFormatSelection.add(SaveFormatSetting.toString(t));
 		}
@@ -692,8 +692,11 @@ public class ReviewTabComposite extends Composite {
 		}
 
 		CurveStitchDataPackage csdpToSave = bringMeTheOneIWant(rodSaveName, rcm.getCsdpList());
-
-		ssp.arbitrarySavingMethod(false, writeOnlyGoodPoints, shell, sfs, csdpToSave, yAxisSelection);
+		try {
+			ssp.arbitrarySavingMethod(false, writeOnlyGoodPoints, shell, sfs, csdpToSave, yAxisSelection);
+		} catch (OutputException o) {
+			ssp.outputErrorWarning(o.getMessage());
+		}
 	}
 
 	public void addImageNoRegion(double j) {
@@ -1089,9 +1092,9 @@ public class ReviewTabComposite extends Composite {
 		ssvs.buildRodFromCsdp(c1);
 
 	}
-	
-	public void setSsp (SurfaceScatterPresenter in) {
-		this.ssp= in;
+
+	public void setSsp(SurfaceScatterPresenter in) {
+		this.ssp = in;
 	}
 
 }

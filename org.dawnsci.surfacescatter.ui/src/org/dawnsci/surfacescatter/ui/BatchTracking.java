@@ -99,7 +99,7 @@ public class BatchTracking {
 		}
 
 		catch (Exception j) {
-			progressReport += "   reduced save files write failed : FAILURE";
+			progressReport += "   reduced save files write failed : FAILURE  " + j.getMessage();
 
 			lock.writeLock().lock();
 			writer.println(progressReport);

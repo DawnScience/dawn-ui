@@ -3,6 +3,7 @@ package org.dawnsci.surfacescatter.ui;
 import org.dawb.common.ui.widgets.ActionBarWrapper;
 import org.dawnsci.surfacescatter.AxisEnums;
 import org.dawnsci.surfacescatter.CurveStitchDataPackage;
+import org.dawnsci.surfacescatter.OutputException;
 import org.dawnsci.surfacescatter.SavingFormatEnum;
 import org.dawnsci.surfacescatter.SavingFormatEnum.SaveFormatSetting;
 import org.eclipse.dawnsci.analysis.dataset.roi.RectangularROI;
@@ -45,15 +46,12 @@ public class MultipleOutputCurvesTableView extends Composite {
 	private IRegion marker;
 	private SurfaceScatterPresenter ssp;
 
-	public MultipleOutputCurvesTableView (Composite parent, 
-										  int style, 
-										  int extra,
-										  SurfaceScatterPresenter ssp) {
+	public MultipleOutputCurvesTableView(Composite parent, int style, int extra, SurfaceScatterPresenter ssp) {
 
-		super(parent, style);	
-		
+		super(parent, style);
+
 		this.ssp = ssp;
-		 
+
 		try {
 			plotSystem4 = PlottingFactory.createPlottingSystem();
 		} catch (Exception e2) {
@@ -65,78 +63,73 @@ public class MultipleOutputCurvesTableView extends Composite {
 	}
 
 	public void createContents() {
-		
-		SashForm sashForm= new SashForm(this, SWT.VERTICAL);
+
+		SashForm sashForm = new SashForm(this, SWT.VERTICAL);
 		sashForm.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		
+
 		overlapSelection = new Group(sashForm, SWT.NULL);
 		GridLayout overlapSelectionLayout = new GridLayout(4, true);
 		GridData overlapSelectionData = new GridData(SWT.FILL);
 		overlapSelectionData.minimumWidth = 50;
 		overlapSelection.setLayout(overlapSelectionLayout);
 		overlapSelection.setLayoutData(overlapSelectionData);
-		
-		errors = new Button(overlapSelection, SWT.PUSH |SWT.FILL);
+
+		errors = new Button(overlapSelection, SWT.PUSH | SWT.FILL);
 		errors.setText("Errors");
 		errors.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-		
-		intensitySelect = new Combo(overlapSelection, SWT.DROP_DOWN | SWT.BORDER |SWT.FILL);
-		
-		for(AxisEnums.yAxes  t: AxisEnums.yAxes.values()){
+
+		intensitySelect = new Combo(overlapSelection, SWT.DROP_DOWN | SWT.BORDER | SWT.FILL);
+
+		for (AxisEnums.yAxes t : AxisEnums.yAxes.values()) {
 			intensitySelect.add(t.getYAxisName(), t.getYAxisNumber());
 		}
-	
+
 		intensitySelect.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		intensitySelect.select(0);
-		
+
 		outputFormatSelection = new Combo(overlapSelection, SWT.DROP_DOWN | SWT.BORDER | SWT.FILL);
-		
-		for(SaveFormatSetting  t: SavingFormatEnum.SaveFormatSetting.values()){
+
+		for (SaveFormatSetting t : SavingFormatEnum.SaveFormatSetting.values()) {
 			outputFormatSelection.add(SaveFormatSetting.toString(t));
 		}
-	
+
 		outputFormatSelection.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		outputFormatSelection.select(0);
-		
-		save = new Button(overlapSelection, SWT.PUSH |SWT.FILL);
+
+		save = new Button(overlapSelection, SWT.PUSH | SWT.FILL);
 		save.setText("Save Spliced");
 		save.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-		
+
 		save.addSelectionListener(new SelectionListener() {
 
-				@Override
-				public void widgetSelected(SelectionEvent e) {
-					saveRod(false);
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				saveRod(false);
 
-				}
+			}
 
-				@Override
-				public void widgetDefaultSelected(SelectionEvent e) {
+			@Override
+			public void widgetDefaultSelected(SelectionEvent e) {
 
-				}
-			});
-		
-		
+			}
+		});
+
 		final GridLayout gridLayout = new GridLayout();
 		gridLayout.numColumns = 1;
 		setLayout(gridLayout);
-		
+
 		ActionBarWrapper actionBarComposite = ActionBarWrapper.createActionBars(sashForm, null);
-		
+
 		final GridData gdSecondField = new GridData(SWT.FILL, SWT.FILL, true, true);
 		gdSecondField.grabExcessVerticalSpace = true;
 		gdSecondField.grabExcessVerticalSpace = true;
 		gdSecondField.heightHint = 100;
 
-		plotSystem4.createPlotPart(sashForm,
-								   "Progress Plot", 
-								   actionBarComposite, 
-								   PlotType.IMAGE, 
-								   null);
-			
+		plotSystem4.createPlotPart(sashForm, "Progress Plot", actionBarComposite, PlotType.IMAGE, null);
+
 		lt = plotSystem4.createLineTrace("Blank Curve");
 		IDataset backup = DatasetFactory.createRange(0, 200, 1, Dataset.FLOAT64);
-		lt.setData(backup, backup);		
+		lt.setData(backup, backup);
 
 		plotSystem4.addTrace(lt);
 		try {
@@ -150,25 +143,25 @@ public class MultipleOutputCurvesTableView extends Composite {
 		plotSystem4.getPlotComposite().setLayoutData(gdSecondField);
 
 		Group extraButtons = new Group(sashForm, SWT.NULL);
-		GridLayout extraButtonsLayout = new GridLayout(3,true);
+		GridLayout extraButtonsLayout = new GridLayout(3, true);
 		GridData extraButtonsData = new GridData(SWT.FILL, SWT.NULL, true, false);
 		extraButtons.setLayout(extraButtonsLayout);
 		extraButtons.setLayoutData(extraButtonsData);
-		
+
 		overlapZoom = new Button(extraButtons, SWT.PUSH);
 		overlapZoom.setText("Overlap Zoom");
 		overlapZoom.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-	    
-		qAxis= new Button(extraButtons, SWT.CHECK);
+
+		qAxis = new Button(extraButtons, SWT.CHECK);
 		qAxis.setText("q Axis");
 		qAxis.setEnabled(false);
 		qAxis.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-		
+
 		storeAsNexus = new Button(extraButtons, SWT.PUSH);
 		storeAsNexus.setText("Store As Nexus");
 		storeAsNexus.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-	    
-		sashForm.setWeights(new int[]{10,7,75,8});
+
+		sashForm.setWeights(new int[] { 10, 7, 75, 8 });
 	}
 
 	public Button getqAxis() {
@@ -193,7 +186,6 @@ public class MultipleOutputCurvesTableView extends Composite {
 	}
 
 	public void resetCurve() {
-	
 
 		Display.getDefault().syncExec(new Runnable() {
 
@@ -210,8 +202,8 @@ public class MultipleOutputCurvesTableView extends Composite {
 
 	}
 
-	public void addToDatSelector(){
-		if(this.getSc() == null){
+	public void addToDatSelector() {
+		if (this.getSc() == null) {
 			sc = new Button(overlapSelection, SWT.CHECK);
 			sc.setText("Spliced Curve");
 			sc.setSelection(true);
@@ -221,70 +213,69 @@ public class MultipleOutputCurvesTableView extends Composite {
 			this.update();
 		}
 	}
-	
-	public Button getSc(){
+
+	public Button getSc() {
 		return sc;
 	}
-	
-	public Group getOverlapSelectionGroup(){
+
+	public Group getOverlapSelectionGroup() {
 		return overlapSelection;
 	}
-	
-	public Combo getIntensity(){
+
+	public Combo getIntensity() {
 		return intensitySelect;
 	}
-	
-	public Combo getOutputFormatSelection(){
+
+	public Combo getOutputFormatSelection() {
 		return outputFormatSelection;
 	}
-	
-	public Button getOverlapZoom(){
+
+	public Button getOverlapZoom() {
 		return overlapZoom;
 	}
-	
-	public Button getSave(){
+
+	public Button getSave() {
 		return save;
 	}
-		
-	public Button getErrorsButton(){
+
+	public Button getErrorsButton() {
 		return errors;
 	}
-	
-	public IRegion getMarker(){
+
+	public IRegion getMarker() {
 		return marker;
 	}
-	
-	public void addImageNoRegion(double j){
 
-		RectangularROI r = new RectangularROI(j ,0.1,0,0.1,0);
+	public void addImageNoRegion(double j) {
 
-		if(plotSystem4.getRegion("Image")== null){
-			
-			try{
+		RectangularROI r = new RectangularROI(j, 0.1, 0, 0.1, 0);
+
+		if (plotSystem4.getRegion("Image") == null) {
+
+			try {
 				imageNo = plotSystem4.createRegion("Image", RegionType.XAXIS_LINE);
-			}
-			catch(Exception x){
+			} catch (Exception x) {
 				System.out.println(x.getMessage());
 			}
-				
+
 			imageNo.setShowPosition(true);
 			imageNo.setROI(r);
-			
+
 			plotSystem4.addRegion(imageNo);
 			imageNo.setShowPosition(true);
 		}
-		
-		else{
+
+		else {
 			moveImageNoRegion(j);
 		}
 	}
-	
-	public void moveImageNoRegion(double j){
-		
-		RectangularROI r = new RectangularROI(j ,0.1,0,0.1,0);
+
+	public void moveImageNoRegion(double j) {
+
+		RectangularROI r = new RectangularROI(j, 0.1, 0, 0.1, 0);
 		imageNo.setROI(r);
 	}
-	
+
 	public Button getStoreAsNexus() {
 		return storeAsNexus;
 	}
@@ -293,39 +284,36 @@ public class MultipleOutputCurvesTableView extends Composite {
 		this.storeAsNexus = storeAsNexus;
 	}
 
-	private void saveRod(boolean writeOnlyGoodPoints){
-		
-		SaveFormatSetting sfs =SaveFormatSetting.toMethod(outputFormatSelection.getText());
+	private void saveRod(boolean writeOnlyGoodPoints) {
+
+		SaveFormatSetting sfs = SaveFormatSetting.toMethod(outputFormatSelection.getText());
 		Shell shell = this.getShell();
-		
-		AxisEnums.yAxes yAxisSelection =AxisEnums.yAxes.SPLICEDY; 
-		
-		for(AxisEnums.yAxes t :AxisEnums.yAxes.values()){
-			if(intensitySelect.getText().equals(t.getYAxisName())){
+
+		AxisEnums.yAxes yAxisSelection = AxisEnums.yAxes.SPLICEDY;
+
+		for (AxisEnums.yAxes t : AxisEnums.yAxes.values()) {
+			if (intensitySelect.getText().equals(t.getYAxisName())) {
 				yAxisSelection = t;
 			}
 		}
-		
+
 		CurveStitchDataPackage csdpToSave = ssp.getDrm().getCsdp();
-		
+
 		boolean useQ = qAxis.getSelection();
-		
-		ssp.arbitrarySavingMethod(useQ, 
-								  writeOnlyGoodPoints, 
-								  shell, 
-								  sfs, 
-								  csdpToSave, 
-								  yAxisSelection);
+		try {
+			ssp.arbitrarySavingMethod(useQ, writeOnlyGoodPoints, shell, sfs, csdpToSave, yAxisSelection);
+		} catch (OutputException o) {
+			ssp.outputErrorWarning(o.getMessage());
+		}
 	}
-	
-	
+
 	public void setSsp(SurfaceScatterPresenter ssp) {
 		this.ssp = ssp;
 	}
 
 	public void changeXaxisLabel(String in) {
-		
+
 		plotSystem4.getAxes().get(0).setTitle(in);
-		
+
 	}
 }
