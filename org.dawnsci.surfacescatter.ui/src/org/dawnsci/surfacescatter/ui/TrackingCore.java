@@ -28,7 +28,7 @@ public class TrackingCore {
 		ArrayList<FrameModel> fms = ssp.getFms();
 
 		boolean start = true;
-		
+
 		while (!ClosestNoFinder.full(doneArray, "done")) {
 
 			int nextk = closestNoWithoutDone(drm.getSortedX().getDouble(ssp.getSliderPos()), drm.getSortedX(),
@@ -37,7 +37,7 @@ public class TrackingCore {
 			int nextjok = drm.getFilepathsSortedArray()[nextk];
 
 			ArrayList<FrameModel> fmal = drm.getFmsSorted().get(nextjok);
-			
+
 			while (isFmListScanned(fmal)) {
 
 				int k = closestNoWithoutDone(drm.getSortedX().getDouble(ssp.getSliderPos()), fmal);
@@ -78,8 +78,7 @@ public class TrackingCore {
 				try {
 					output1 = DummyProcessWithFrames.dummyProcess1(drm, frame.getNoInOriginalDat(), trackingMarker,
 							frame.getFmNo(), gv, ssp.getLenPt());
-				}
-				catch(IndexOutOfBoundsException h) {
+				} catch (IndexOutOfBoundsException h) {
 					if (showtrack) {
 						display.syncExec(new Runnable() {
 
@@ -88,15 +87,14 @@ public class TrackingCore {
 
 								t.interrupt();
 								thwfi.kill();
-								RegionOutOfBoundsWarning roobw = new RegionOutOfBoundsWarning(ssvs.getShell(), 0,
-										null);
+								RegionOutOfBoundsWarning roobw = new RegionOutOfBoundsWarning(ssvs.getShell(), 0, null);
 								roobw.open();
 
 								return;
 							}
 						});
 					}
-					
+
 					break;
 				} catch (Exception f) {
 
@@ -116,7 +114,7 @@ public class TrackingCore {
 							}
 						});
 					}
-					
+
 					break;
 				}
 
@@ -160,10 +158,10 @@ public class TrackingCore {
 			csdpgfd.generateCsdpFromDrm(drm);
 
 			CurveStitchDataPackage csdp = csdpgfd.getCsdp();
-			if(ditchNegativeValues){
+			if (ditchNegativeValues) {
 				ssp.disregardNegativeIntensities(csdp);
 			}
-			
+
 			FourierTransformCurveStitch.curveStitch4(csdp, null);
 
 			drm.setCsdp(csdp);
@@ -181,7 +179,7 @@ public class TrackingCore {
 			csdp.setRodName("Current Track");
 
 			if (showtrack) {
-				
+
 				display.syncExec(new Runnable() {
 					@Override
 					public void run() {

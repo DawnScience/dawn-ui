@@ -2860,19 +2860,9 @@ public class SurfaceScatterPresenter {
 	public void disregardNegativeIntensities() {
 
 		CurveStitchDataPackage csdp = drm.getCsdp();
+		disregardNegativeIntensities(csdp);
 
-		int noDats = csdp.getyIDataset().length;
-
-		for (int r = 0; r < noDats; r++) {
-			int datLength = csdp.getyIDataset()[r].getSize();
-
-			for (int s = 0; s < datLength; s++) {
-				if (csdp.getyIDataset()[r].getDouble(s) < 0) {
-					getFrameModel(r, s).setGoodPoint(false);
-
-				}
-			}
-		}
+		
 	}
 
 	public void disregardNegativeIntensities(CurveStitchDataPackage csdp) {
@@ -2885,6 +2875,7 @@ public class SurfaceScatterPresenter {
 			for (int s = 0; s < datLength; s++) {
 				if (csdp.getyIDataset()[r].getDouble(s) < 0) {
 					getFrameModel(r, s).setGoodPoint(false);
+					csdp.getGoodPointIDataset()[r].set(false, s);
 
 				}
 			}
