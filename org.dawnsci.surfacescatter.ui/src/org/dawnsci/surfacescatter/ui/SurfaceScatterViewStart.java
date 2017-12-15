@@ -1866,7 +1866,7 @@ public class SurfaceScatterViewStart extends Dialog {
 
 	public void buildRodFromCsdp(CurveStitchDataPackage csdp) {
 
-		BuildRodFromCsdpAndNexus brfcan = new BuildRodFromCsdpAndNexus(csdp, ssp);
+		BuildRodFromCsdpAndNexus brfcan = new BuildRodFromCsdpAndNexus(csdp, ssp, this);
 
 		setSsp(brfcan.getSsp());
 
@@ -2072,5 +2072,10 @@ public class SurfaceScatterViewStart extends Dialog {
 		customComposite.generalCorrectionsUpdate();
 
 	}
+	
+	public void setParamFile(String paramFile) {
+		this.paramFile = paramFile;
+	}
+
 
 }

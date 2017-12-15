@@ -28,13 +28,15 @@ public class BuildRodFromCsdpAndNexus {
 	public DirectoryModel drm;
 	public SurfaceScatterPresenter ssp;
 
-	public BuildRodFromCsdpAndNexus(CurveStitchDataPackage csdp, SurfaceScatterPresenter sspi) {
+	public BuildRodFromCsdpAndNexus(CurveStitchDataPackage csdp, SurfaceScatterPresenter sspi, SurfaceScatterViewStart ssvs) {
 
 		sspi = new SurfaceScatterPresenter();
 		this.ssp = sspi;
 
 		NexusFile file = new NexusFileFactoryHDF5().newNexusFile(csdp.getRodName());
 
+		ssvs.setParamFile(csdp.getRodName());
+		
 		try {
 			file.openToRead();
 		} catch (NexusException e) {

@@ -146,9 +146,9 @@ public class TrackingCore {
 
 				frame.setScanned(true);
 			}
-
-			drm.getInputForEachDat()[nextjok] = null;
-
+			if (drm.getInputForEachDat()[nextjok] != null) {
+				drm.getInputForEachDat()[nextjok] = null;
+			}
 			doneArray[nextjok] = true;
 		}
 
