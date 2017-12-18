@@ -129,25 +129,25 @@ public class PlotSystemCompositeView extends Composite {
 		ScrolledComposite sc2 = new ScrolledComposite(form, SWT.BORDER | SWT.H_SCROLL | SWT.V_SCROLL);
 
 		Composite topControlsComposite = new Composite(sc2, SWT.NULL);
-		GridLayout topControlsCompositeLayout = new GridLayout();
+		GridLayout topControlsCompositeLayout =new GridLayout(3, true);
 		GridData topControlsCompositeData = new GridData(GridData.FILL_BOTH);
 		topControlsComposite.setLayout(topControlsCompositeLayout);
 		topControlsComposite.setLayoutData(topControlsCompositeData);
 
 		
-		Group mainImage = new Group(topControlsComposite, SWT.FILL);
-		GridLayout mainImageLayout = new GridLayout(1, true);
-		mainImage.setLayout(mainImageLayout);
-		GridData mainImageData = new GridData(SWT.FILL, SWT.FILL, true, false);
-		mainImage.setLayoutData(mainImageData);
+//		Group mainImage = new Group(topControlsComposite, SWT.FILL);
+//		GridLayout mainImageLayout = new GridLayout(1, true);
+//		mainImage.setLayout(mainImageLayout);
+//		GridData mainImageData = new GridData(SWT.FILL, SWT.FILL, true, false);
+//		mainImage.setLayoutData(mainImageData);
 
-		Group sliderGroup = new Group(mainImage, SWT.NONE);
-		GridLayout sliderGroupLayout = new GridLayout(3, true);
-		sliderGroup.setLayout(sliderGroupLayout);
-		GridData sliderGroupData = new GridData(SWT.FILL, SWT.NULL, true, false);
-		sliderGroup.setLayoutData(sliderGroupData);
-		
-		slider = new Slider(sliderGroup, SWT.HORIZONTAL);
+//		Group sliderGroup = new Group(mainImage, SWT.NONE);
+//		GridLayout sliderGroupLayout = new GridLayout(3, true);
+//		sliderGroup.setLayout(sliderGroupLayout);
+//		GridData sliderGroupData = new GridData(SWT.FILL, SWT.NULL, true, false);
+//		sliderGroup.setLayoutData(sliderGroupData);
+//		
+		slider = new Slider(topControlsComposite, SWT.HORIZONTAL);
 
 		slider.setMinimum(0);
 		slider.setMaximum(numberOfImages);
@@ -158,38 +158,34 @@ public class PlotSystemCompositeView extends Composite {
 		slider.setLayoutData(gdFirstField);
 
 
-		go = new Button(sliderGroup, SWT.PUSH | SWT.FILL);
+		go = new Button(topControlsComposite, SWT.PUSH | SWT.FILL);
 		go.setText("Go");
 		go.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 
-		replay = new Button(sliderGroup, SWT.PUSH | SWT.FILL);
+		replay = new Button(topControlsComposite, SWT.PUSH | SWT.FILL);
 		replay.setText("Replay");
 		replay.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		replay.setEnabled(false);
 
-//		Group indicators = new Group(topControlsComposite, SWT.NONE);
-//		GridLayout indicatorsLayout = new GridLayout(4, true);
-//		indicators.setLayout(indicatorsLayout);
-//		GridData indicatorsData = new GridData(SWT.FILL, SWT.NULL, true, false);
-//		indicators.setLayoutData(indicatorsData);
-
 		InputTileGenerator tile1 = new InputTileGenerator("X Variable:",
-				String.valueOf(ssp.getXValue(slider.getSelection())), sliderGroup);
+				String.valueOf(ssp.getXValue(slider.getSelection())), topControlsComposite);
 
 		tile1Label = tile1.getLabel();
 		xValue = tile1.getText();
 		InputTileGenerator tile2 = new InputTileGenerator("Image No.:", String.valueOf(slider.getSelection()),
-				sliderGroup);
+				topControlsComposite);
 		imageNumber = tile2.getText();
 		InputTileGenerator tile3 = new InputTileGenerator("ROI x coord:", String.valueOf(ssp.getLenPt()[1][0]),
-				sliderGroup);
+				topControlsComposite);
 		xCoord = tile3.getText();
-		InputTileGenerator tile4 = new InputTileGenerator("x Len:", String.valueOf(ssp.getLenPt()[0][0]), sliderGroup);
+		InputTileGenerator tile4 = new InputTileGenerator("x Len:", String.valueOf(ssp.getLenPt()[0][0]), 
+				topControlsComposite);
 		xLen = tile4.getText();
 		InputTileGenerator tile5 = new InputTileGenerator("ROI y coord:", String.valueOf(ssp.getLenPt()[1][1]),
-				sliderGroup);
+				topControlsComposite);
 		yCoord = tile5.getText();
-		InputTileGenerator tile6 = new InputTileGenerator("y len:", String.valueOf(ssp.getLenPt()[0][1]), sliderGroup);
+		InputTileGenerator tile6 = new InputTileGenerator("y len:", String.valueOf(ssp.getLenPt()[0][1]), 
+				topControlsComposite);
 		yLen = tile6.getText();
 
 		sc2.setContent(topControlsComposite);
