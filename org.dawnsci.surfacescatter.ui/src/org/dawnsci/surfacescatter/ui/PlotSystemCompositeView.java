@@ -131,7 +131,13 @@ public class PlotSystemCompositeView extends Composite {
 		GridData mainImageData = new GridData(SWT.FILL, SWT.FILL, true, false);
 		mainImage.setLayoutData(mainImageData);
 
-		slider = new Slider(mainImage, SWT.HORIZONTAL);
+		Group sliderGroup = new Group(mainImage, SWT.NONE);
+		GridLayout sliderGroupLayout = new GridLayout(2, true);
+		sliderGroup.setLayout(sliderGroupLayout);
+		GridData sliderGroupData = new GridData(SWT.FILL, SWT.NULL, true, false);
+		sliderGroup.setLayoutData(sliderGroupData);
+		
+		slider = new Slider(sliderGroup, SWT.HORIZONTAL);
 
 		slider.setMinimum(0);
 		slider.setMaximum(numberOfImages);
@@ -140,9 +146,24 @@ public class PlotSystemCompositeView extends Composite {
 
 		final GridData gdFirstField = new GridData(SWT.FILL, SWT.CENTER, true, false);
 		slider.setLayoutData(gdFirstField);
+		
+		Group buttons = new Group(sliderGroup, SWT.NONE);
+		GridLayout buttonsLayout = new GridLayout(2, true);
+		buttons.setLayout(buttonsLayout);
+		GridData buttonsData = new GridData(SWT.FILL, SWT.NULL, true, false);
+		buttons.setLayoutData(buttonsData);
+
+		go = new Button(buttons, SWT.PUSH | SWT.FILL);
+		go.setText("Go");
+		go.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+
+		replay = new Button(buttons, SWT.PUSH | SWT.FILL);
+		replay.setText("Replay");
+		replay.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		replay.setEnabled(false);
 
 		Group indicators = new Group(mainImage, SWT.NONE);
-		GridLayout indicatorsLayout = new GridLayout(3, true);
+		GridLayout indicatorsLayout = new GridLayout(4, true);
 		indicators.setLayout(indicatorsLayout);
 		GridData indicatorsData = new GridData(SWT.FILL, SWT.NULL, true, false);
 		indicators.setLayoutData(indicatorsData);
@@ -173,20 +194,7 @@ public class PlotSystemCompositeView extends Composite {
 
 		outputControl.dispose();
 
-		Group buttons = new Group(mainImage, SWT.NONE);
-		GridLayout buttonsLayout = new GridLayout(2, true);
-		buttons.setLayout(buttonsLayout);
-		GridData buttonsData = new GridData(SWT.FILL, SWT.NULL, true, false);
-		buttons.setLayoutData(buttonsData);
-
-		go = new Button(buttons, SWT.PUSH | SWT.FILL);
-		go.setText("Go");
-		go.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-
-		replay = new Button(buttons, SWT.PUSH | SWT.FILL);
-		replay.setText("Replay");
-		replay.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-		replay.setEnabled(false);
+		
 
 		Group images = new Group(form, SWT.NONE);
 		GridLayout imagesLayout = new GridLayout(1, true);
