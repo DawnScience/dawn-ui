@@ -107,6 +107,15 @@ public abstract class AbstractMapData implements PlottableMapObject{
 			ax.setAxis(yd, ly);
 			ax.addAxis(xd, lx);
 			
+			if (md.getNonXYScanDimensions() != null) {
+				for (int i : md.getNonXYScanDimensions()) {
+					ILazyDataset[] axis = parent.getAxis(i);
+					if (axis != null && axis[0] != null) {
+						ax.addAxis(i, axis[0]);
+					}
+				}
+			}
+			
 			int[] refresh = ax.refresh(baseMap.getShape());
 			((IDynamicDataset)baseMap).resize(refresh);
 			baseMap.setMetadata(ax);
@@ -115,6 +124,16 @@ public abstract class AbstractMapData implements PlottableMapObject{
 			e.printStackTrace();
 		}
 
+	}
+	
+	public boolean isReady() {
+		if (!parent.isReady()) return false;
+		
+		if (baseMap instanceof IDynamicDataset) {
+			return ((IDynamicDataset) baseMap).refreshShape();
+		}
+		
+		return true;
 	}
 	
 	

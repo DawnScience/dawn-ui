@@ -133,6 +133,13 @@ public class MappedDataBlock implements MapObject, PlottableMapObject {
 		return md.getAxis(mapDims.getyDim());
 	}
 	
+	public ILazyDataset[] getAxis(int dim) {
+		if (axes != null) return getLiveAxis(dim);
+		AxesMetadata md = dataset.getFirstMetadata(AxesMetadata.class);
+		if (md == null) return null;
+		return md.getAxis(dim);
+	}
+	
 	public boolean isRemappingRequired(){
 		return mapDims.isRemappingRequired();
 	}
@@ -179,14 +186,6 @@ public class MappedDataBlock implements MapObject, PlottableMapObject {
 		return mapDims.getxDim();
 	}
 	
-	public int getySize() {
-		return dataset.getShape()[mapDims.getyDim()];
-	}
-
-	public int getxSize() {
-		return dataset.getShape()[mapDims.getxDim()];
-	}
-
 	private MetadataType generateSliceMetadata(int x, int y){
 		SourceInformation si = new SourceInformation(getPath(), toString(), dataset);
 		SliceND slice = getMatchingDataSlice(x, y);
@@ -273,6 +272,11 @@ public class MappedDataBlock implements MapObject, PlottableMapObject {
 		axes.update();
 		return new ILazyDataset[]{axes.getAxes()[mapDims.getyDim()]};
 	}
+	
+	private ILazyDataset[] getLiveAxis(int dim) {
+		axes.update();
+		return new ILazyDataset[]{axes.getAxes()[dim]};
+	}
 
 	
 	private MetadataType generateLiveSliceMetadata(int x, int y){
@@ -285,13 +289,17 @@ public class MappedDataBlock implements MapObject, PlottableMapObject {
 	@Override
 	public IDataset getMap() {
 		
+		return getMapObject().getMap();
+	}
+	
+	public AbstractMapData getMapObject() {
 		if (mapRepresentation == null) {
 			if (mapDims.isRemappingRequired()) {
 
 				mapRepresentation = new ReMappedData(this.toString(), dataset.getSliceView() ,this, path, isLive());
 				if (isLive()) mapRepresentation.update();
 				range = mapRepresentation.getRange();
-				return mapRepresentation.getMap();
+				return mapRepresentation;
 
 
 			} else {
@@ -299,7 +307,7 @@ public class MappedDataBlock implements MapObject, PlottableMapObject {
 				mapRepresentation = new MappedData(this.toString(),dataset.getSliceView(),this, path, isLive());
 				if (isLive()) mapRepresentation.update();
 				range = mapRepresentation.getRange();
-				return mapRepresentation.getMap();
+				return mapRepresentation;
 
 			}
 			
@@ -307,9 +315,13 @@ public class MappedDataBlock implements MapObject, PlottableMapObject {
 		
 		if (isLive()) mapRepresentation.update();
 		range = mapRepresentation.getRange();
-		return mapRepresentation.getMap();
+		return mapRepresentation;
 	}
 
+	public boolean isReady() {
+		return ((IDynamicDataset)dataset).refreshShape();
+	}
+	
 	@Override
 	public void update() {
 		((IDynamicDataset)dataset).refreshShape();
@@ -340,7 +352,16 @@ public class MappedDataBlock implements MapObject, PlottableMapObject {
 			update();
 		}
 		
-		return mapDims.isPointDetector(dataset.getShape());
+		int[] shape = null;
+		
+		if (dataset instanceof IDynamicDataset) {
+			shape = ((IDynamicDataset) dataset).getMaxShape();
+		} else {
+			shape = dataset.getShape();
+		}
+		
+		
+		return mapDims.isPointDetector(shape);
 		
 	}
 	

@@ -62,20 +62,41 @@ public class LiveRemoteAxes {
 	}
 	
 	public void update() {
+		updateReady(false);
+	}
+	
+	public boolean isReady() {
+		
+		return updateReady(true);
+	}
+	
+	private boolean updateReady(boolean breakOnFail) {
+		
+		boolean isReady = true;
+		
 		for (int i = 0; i < axes.length; i++) {
 			IDynamicDataset ax = axes[i];
 			if (ax != null) {
-				ax.refreshShape();
+				boolean r = ax.refreshShape();
 				ax.getDataset().setName(axesNames[i]);
+				if (!r) {
+					isReady = false;
+					if (breakOnFail) return false;
+				}
 			}
 		}
 		
 		if (xAxisForRemapping != null) {
-			xAxisForRemapping.refreshShape();
+			boolean r = xAxisForRemapping.refreshShape();
 			xAxisForRemapping.setName(xAxisForRemappingName);
+			if (!r) {
+				isReady = false;
+				if (breakOnFail) return false;
+			}
 		}
+		
+		return isReady;
+		
 	}
-	
-
 	
 }

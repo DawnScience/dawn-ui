@@ -95,7 +95,15 @@ public class MapScanDimensions {
 	public void changeXandYdims(int xDim, int yDim) {
 		this.xDim = xDim;
 		this.yDim = yDim;
-		initialiseNonXScanValues();
+		
+		if (xDim != yDim && scanRank == 2) {
+			nonXYScanDimensions = null;
+			nonXYDimensionValues = null;
+		} else {
+			initialiseNonXScanValues();
+		}
+		
+		
 		
 	}
 	
