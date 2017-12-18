@@ -156,12 +156,7 @@ public class PlotSystemCompositeView extends Composite {
 
 		final GridData gdFirstField = new GridData(SWT.FILL, SWT.CENTER, true, false);
 		slider.setLayoutData(gdFirstField);
-//		
-//		Group buttons = new Group(sliderGroup, SWT.NONE);
-//		GridLayout buttonsLayout = new GridLayout(2, true);
-//		buttons.setLayout(buttonsLayout);
-//		GridData buttonsData = new GridData(SWT.FILL, SWT.NULL, true, false);
-//		buttons.setLayoutData(buttonsData);
+
 
 		go = new Button(sliderGroup, SWT.PUSH | SWT.FILL);
 		go.setText("Go");

@@ -115,10 +115,10 @@ public class InputTileGenerator {
 		GridData tileData = new GridData(SWT.FILL, SWT.NULL, true, false);
 		tile.setLayoutData(tileData);
 
-		label = new Label(tile, SWT.SINGLE | SWT.BORDER | SWT.FILL);
+		label = new Label(tile, SWT.SINGLE  | SWT.FILL);
 		label.setText(l);
 
-		text = new Text(tile, SWT.SINGLE | SWT.BORDER | SWT.FILL);
+		text = new Text(tile, SWT.SINGLE | SWT.FILL);
 		text.setText(t);
 		text.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 
