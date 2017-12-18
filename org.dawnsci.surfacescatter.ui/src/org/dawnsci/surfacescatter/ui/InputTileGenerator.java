@@ -38,6 +38,7 @@ public class InputTileGenerator {
 		label.setText(l);
 
 		text = new Text(tile, SWT.SINGLE | SWT.BORDER | SWT.FILL);
+		text.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		text.setText(t);
 
 	}

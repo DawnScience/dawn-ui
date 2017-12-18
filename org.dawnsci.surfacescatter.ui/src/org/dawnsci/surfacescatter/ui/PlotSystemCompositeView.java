@@ -133,20 +133,7 @@ public class PlotSystemCompositeView extends Composite {
 		GridData topControlsCompositeData = new GridData(GridData.FILL_BOTH);
 		topControlsComposite.setLayout(topControlsCompositeLayout);
 		topControlsComposite.setLayoutData(topControlsCompositeData);
-
 		
-//		Group mainImage = new Group(topControlsComposite, SWT.FILL);
-//		GridLayout mainImageLayout = new GridLayout(1, true);
-//		mainImage.setLayout(mainImageLayout);
-//		GridData mainImageData = new GridData(SWT.FILL, SWT.FILL, true, false);
-//		mainImage.setLayoutData(mainImageData);
-
-//		Group sliderGroup = new Group(mainImage, SWT.NONE);
-//		GridLayout sliderGroupLayout = new GridLayout(3, true);
-//		sliderGroup.setLayout(sliderGroupLayout);
-//		GridData sliderGroupData = new GridData(SWT.FILL, SWT.NULL, true, false);
-//		sliderGroup.setLayoutData(sliderGroupData);
-//		
 		slider = new Slider(topControlsComposite, SWT.HORIZONTAL);
 
 		slider.setMinimum(0);

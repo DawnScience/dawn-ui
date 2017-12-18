@@ -28,6 +28,7 @@ import org.eclipse.january.dataset.DatasetFactory;
 import org.eclipse.january.dataset.IDataset;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
+import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
@@ -47,7 +48,7 @@ import org.eclipse.swt.widgets.TableItem;
 
 public class ReviewTabComposite extends Composite {
 
-	private Group methodSetting;
+	private Composite rightFormComposite;
 	private SashForm form;
 	private SashForm rightForm;
 	private SashForm leftForm;
@@ -252,15 +253,50 @@ public class ReviewTabComposite extends Composite {
 		rightForm = new SashForm(form, SWT.VERTICAL);
 		rightForm.setLayout(new GridLayout());
 		rightForm.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		
+		ScrolledComposite sc2 = new ScrolledComposite(rightForm, SWT.BORDER | SWT.H_SCROLL | SWT.V_SCROLL);
 
-		methodSetting = new Group(rightForm, SWT.FILL | SWT.FILL);
+		rightFormComposite = new Composite(sc2, SWT.NULL);
+		
 		GridLayout methodSettingLayout = new GridLayout(1, true);
 		GridData methodSettingData = new GridData(GridData.FILL_HORIZONTAL);
-		methodSetting.setLayout(methodSettingLayout);
-		methodSetting.setLayoutData(methodSettingData);
-		methodSetting.setText("Rod Display");
+		rightFormComposite.setLayout(methodSettingLayout);
+		rightFormComposite.setLayoutData(methodSettingData);
+		
+		showErrors = new Button(rightFormComposite, SWT.PUSH);
+		showErrors.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		showErrors.setData(new GridData(SWT.FILL));
+		showErrors.setText("Show Errors");
 
-		Group curveSettings = new Group(rightForm, SWT.NONE);
+		showErrors.addSelectionListener(new SelectionListener() {
+
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+
+				if (errorDisplayFlag == true) {
+					errorDisplayFlag = false;
+				} else {
+					errorDisplayFlag = true;
+				}
+
+				refreshCurves();
+
+			}
+
+			@Override
+			public void widgetDefaultSelected(SelectionEvent e) {
+
+			}
+		});
+		
+
+		Button logPlot = new Button(rightFormComposite, SWT.PUSH);
+		logPlot.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		logPlot.setData(new GridData(SWT.FILL));
+		logPlot.setText("Log Plot On/Off");
+
+		
+		Group curveSettings = new Group(rightFormComposite, SWT.NONE);
 		GridLayout curveSettingsLayout = new GridLayout(2, true);
 		curveSettings.setLayout(curveSettingsLayout);
 
@@ -269,11 +305,11 @@ public class ReviewTabComposite extends Composite {
 		curveSettingsData.heightHint = 100;
 		curveSettings.setLayoutData(new GridData(GridData.FILL_HORIZONTAL | GridData.FILL_VERTICAL));
 
-		Group saveSettings = new Group(rightForm, SWT.NONE);
+		Group saveSettings = new Group(rightFormComposite, SWT.NONE);
 		GridLayout saveSettingsLayout = new GridLayout(2, true);
 		saveSettings.setLayout(saveSettingsLayout);
 
-		Button loadTarget = new Button(rightForm, SWT.PUSH);
+		Button loadTarget = new Button(rightFormComposite, SWT.PUSH);
 		loadTarget.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		loadTarget.setData(new GridData(SWT.FILL));
 		loadTarget.setText("Load Target");
@@ -387,7 +423,7 @@ public class ReviewTabComposite extends Composite {
 
 		});
 
-		Group storedCurves = new Group(rightForm, SWT.NONE);
+		Group storedCurves = new Group(rightFormComposite, SWT.NONE);
 		GridLayout storedCurvesLayout = new GridLayout();
 		storedCurves.setLayout(storedCurvesLayout);
 
@@ -398,7 +434,7 @@ public class ReviewTabComposite extends Composite {
 
 		ActionBarWrapper actionBarComposite = ActionBarWrapper.createActionBars(storedCurves, null);
 
-		plotSystemReview.createPlotPart(storedCurves, "Stored Curves", actionBarComposite, PlotType.IMAGE, null);
+		plotSystemReview.createPlotPart(rightForm, "Stored Curves", actionBarComposite, PlotType.IMAGE, null);
 
 		plotSystemReview.getPlotComposite().setLayoutData(storedCurvesData);
 
@@ -407,36 +443,7 @@ public class ReviewTabComposite extends Composite {
 			yAxisR.setLog10(true);
 		}
 
-		showErrors = new Button(methodSetting, SWT.PUSH);
-		showErrors.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-		showErrors.setData(new GridData(SWT.FILL));
-		showErrors.setText("Show Errors");
-
-		showErrors.addSelectionListener(new SelectionListener() {
-
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-
-				if (errorDisplayFlag == true) {
-					errorDisplayFlag = false;
-				} else {
-					errorDisplayFlag = true;
-				}
-
-				refreshCurves();
-
-			}
-
-			@Override
-			public void widgetDefaultSelected(SelectionEvent e) {
-
-			}
-		});
-
-		Button logPlot = new Button(methodSetting, SWT.PUSH);
-		logPlot.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-		logPlot.setData(new GridData(SWT.FILL));
-		logPlot.setText("Log Plot On/Off");
+		
 
 		InputTileGenerator tile1 = new InputTileGenerator("X Axis:", curveSettings);
 		xAxis = tile1.getCombo();
@@ -497,8 +504,18 @@ public class ReviewTabComposite extends Composite {
 
 		outputFormatSelection.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		outputFormatSelection.select(0);
+		
+		sc2.setContent(rightFormComposite);
+		//
+		sc2.setExpandHorizontal(true);
+		sc2.setExpandVertical(true);
 
-		rightForm.setWeights(new int[] { 10, 10, 10, 5, 65 });
+		sc2.setMinSize(rightFormComposite.computeSize(rightFormComposite.getSize().x, SWT.DEFAULT));
+
+		// sc1.setAlwaysShowScrollBars(true);
+		sc2.pack();
+		int h= rightForm.getChildren().length;
+		rightForm.setWeights(new int[] {50, 50});
 
 		rcm.addPropertyChangeListener(new PropertyChangeListener() {
 
@@ -606,12 +623,9 @@ public class ReviewTabComposite extends Composite {
 		return this;
 	}
 
-	public Group getMethodSetting() {
-		return methodSetting;
-	}
 
 	public void setMethodSetting(Group methodSetting) {
-		this.methodSetting = methodSetting;
+		this.rightFormComposite = methodSetting;
 	}
 
 	public SashForm getForm() {
