@@ -167,29 +167,29 @@ public class PlotSystemCompositeView extends Composite {
 		replay.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		replay.setEnabled(false);
 
-		Group indicators = new Group(topControlsComposite, SWT.NONE);
-		GridLayout indicatorsLayout = new GridLayout(4, true);
-		indicators.setLayout(indicatorsLayout);
-		GridData indicatorsData = new GridData(SWT.FILL, SWT.NULL, true, false);
-		indicators.setLayoutData(indicatorsData);
+//		Group indicators = new Group(topControlsComposite, SWT.NONE);
+//		GridLayout indicatorsLayout = new GridLayout(4, true);
+//		indicators.setLayout(indicatorsLayout);
+//		GridData indicatorsData = new GridData(SWT.FILL, SWT.NULL, true, false);
+//		indicators.setLayoutData(indicatorsData);
 
 		InputTileGenerator tile1 = new InputTileGenerator("X Variable:",
-				String.valueOf(ssp.getXValue(slider.getSelection())), indicators);
+				String.valueOf(ssp.getXValue(slider.getSelection())), sliderGroup);
 
 		tile1Label = tile1.getLabel();
 		xValue = tile1.getText();
 		InputTileGenerator tile2 = new InputTileGenerator("Image No.:", String.valueOf(slider.getSelection()),
-				indicators);
+				sliderGroup);
 		imageNumber = tile2.getText();
 		InputTileGenerator tile3 = new InputTileGenerator("ROI x coord:", String.valueOf(ssp.getLenPt()[1][0]),
-				indicators);
+				sliderGroup);
 		xCoord = tile3.getText();
-		InputTileGenerator tile4 = new InputTileGenerator("x Len:", String.valueOf(ssp.getLenPt()[0][0]), indicators);
+		InputTileGenerator tile4 = new InputTileGenerator("x Len:", String.valueOf(ssp.getLenPt()[0][0]), sliderGroup);
 		xLen = tile4.getText();
 		InputTileGenerator tile5 = new InputTileGenerator("ROI y coord:", String.valueOf(ssp.getLenPt()[1][1]),
-				indicators);
+				sliderGroup);
 		yCoord = tile5.getText();
-		InputTileGenerator tile6 = new InputTileGenerator("y len:", String.valueOf(ssp.getLenPt()[0][1]), indicators);
+		InputTileGenerator tile6 = new InputTileGenerator("y len:", String.valueOf(ssp.getLenPt()[0][1]), sliderGroup);
 		yLen = tile6.getText();
 
 		sc2.setContent(topControlsComposite);
@@ -232,7 +232,7 @@ public class PlotSystemCompositeView extends Composite {
 		}
 
 		Group centringButtons = new Group(images, SWT.NONE);
-		GridLayout centringButtonsLayout = new GridLayout(2, true);
+		GridLayout centringButtonsLayout = new GridLayout(4, true);
 		centringButtons.setLayout(centringButtonsLayout);
 		GridData centringButtonsData = new GridData(SWT.FILL, SWT.NULL, true, false);
 		centringButtons.setLayoutData(centringButtonsData);
@@ -555,7 +555,7 @@ public class PlotSystemCompositeView extends Composite {
 
 		addChangeProcessingMethodListeners();
 
-		form.setWeights(new int[] { 10, 56, 27, 7 });
+		form.setWeights(new int[] { 12, 54, 27, 7 });
 	}
 
 	public GeometricParametersRepeaterTable getGprt() {
