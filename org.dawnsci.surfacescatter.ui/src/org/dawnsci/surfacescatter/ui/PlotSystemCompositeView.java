@@ -20,10 +20,12 @@ import org.eclipse.january.dataset.Dataset;
 import org.eclipse.january.dataset.IDataset;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
+import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -48,7 +50,6 @@ public class PlotSystemCompositeView extends Composite {
 	private IRegion region;
 	private IRegion bgRegion;
 	private IRegion secondBgRegion;
-	private Button outputControl;
 	private Button run;
 	private Combo processingMode;;
 	private int numberOfImages;
@@ -125,14 +126,23 @@ public class PlotSystemCompositeView extends Composite {
 		form.setLayout(new GridLayout());
 		form.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 
-		Group mainImage = new Group(form, SWT.FILL);
+		ScrolledComposite sc2 = new ScrolledComposite(form, SWT.BORDER | SWT.H_SCROLL | SWT.V_SCROLL);
+
+		Composite topControlsComposite = new Composite(sc2, SWT.NULL);
+		GridLayout topControlsCompositeLayout = new GridLayout();
+		GridData topControlsCompositeData = new GridData(GridData.FILL_BOTH);
+		topControlsComposite.setLayout(topControlsCompositeLayout);
+		topControlsComposite.setLayoutData(topControlsCompositeData);
+
+		
+		Group mainImage = new Group(topControlsComposite, SWT.FILL);
 		GridLayout mainImageLayout = new GridLayout(1, true);
 		mainImage.setLayout(mainImageLayout);
 		GridData mainImageData = new GridData(SWT.FILL, SWT.FILL, true, false);
 		mainImage.setLayoutData(mainImageData);
 
 		Group sliderGroup = new Group(mainImage, SWT.NONE);
-		GridLayout sliderGroupLayout = new GridLayout(2, true);
+		GridLayout sliderGroupLayout = new GridLayout(3, true);
 		sliderGroup.setLayout(sliderGroupLayout);
 		GridData sliderGroupData = new GridData(SWT.FILL, SWT.NULL, true, false);
 		sliderGroup.setLayoutData(sliderGroupData);
@@ -146,23 +156,23 @@ public class PlotSystemCompositeView extends Composite {
 
 		final GridData gdFirstField = new GridData(SWT.FILL, SWT.CENTER, true, false);
 		slider.setLayoutData(gdFirstField);
-		
-		Group buttons = new Group(sliderGroup, SWT.NONE);
-		GridLayout buttonsLayout = new GridLayout(2, true);
-		buttons.setLayout(buttonsLayout);
-		GridData buttonsData = new GridData(SWT.FILL, SWT.NULL, true, false);
-		buttons.setLayoutData(buttonsData);
+//		
+//		Group buttons = new Group(sliderGroup, SWT.NONE);
+//		GridLayout buttonsLayout = new GridLayout(2, true);
+//		buttons.setLayout(buttonsLayout);
+//		GridData buttonsData = new GridData(SWT.FILL, SWT.NULL, true, false);
+//		buttons.setLayoutData(buttonsData);
 
-		go = new Button(buttons, SWT.PUSH | SWT.FILL);
+		go = new Button(sliderGroup, SWT.PUSH | SWT.FILL);
 		go.setText("Go");
 		go.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 
-		replay = new Button(buttons, SWT.PUSH | SWT.FILL);
+		replay = new Button(sliderGroup, SWT.PUSH | SWT.FILL);
 		replay.setText("Replay");
 		replay.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		replay.setEnabled(false);
 
-		Group indicators = new Group(mainImage, SWT.NONE);
+		Group indicators = new Group(topControlsComposite, SWT.NONE);
 		GridLayout indicatorsLayout = new GridLayout(4, true);
 		indicators.setLayout(indicatorsLayout);
 		GridData indicatorsData = new GridData(SWT.FILL, SWT.NULL, true, false);
@@ -187,13 +197,18 @@ public class PlotSystemCompositeView extends Composite {
 		InputTileGenerator tile6 = new InputTileGenerator("y len:", String.valueOf(ssp.getLenPt()[0][1]), indicators);
 		yLen = tile6.getText();
 
-		outputControl = new Button(indicators, SWT.CHECK);
-		outputControl.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-		outputControl.setSelection(true);
-		outputControl.setVisible(false);
+		sc2.setContent(topControlsComposite);
+		//
+		sc2.setExpandHorizontal(true);
+		sc2.setExpandVertical(true);
 
-		outputControl.dispose();
+		sc2.setMinSize(topControlsComposite.computeSize(topControlsComposite.getSize().x, SWT.DEFAULT));
 
+		// sc1.setAlwaysShowScrollBars(true);
+		sc2.pack();
+
+	
+		
 		
 
 		Group images = new Group(form, SWT.NONE);
@@ -310,20 +325,33 @@ public class PlotSystemCompositeView extends Composite {
 		TabItem subI = new TabItem(folder, SWT.NONE);
 		subI.setText("Background Options");
 		subI.setData(new GridData(SWT.FILL, SWT.FILL, true, true));
-
-		Composite subIComposite = new Composite(folder, SWT.NONE | SWT.FILL);
+		
+		ScrolledComposite sc1 = new ScrolledComposite(folder, SWT.BORDER | SWT.H_SCROLL | SWT.V_SCROLL);
+				
+		Composite subIComposite = new Composite(sc1, SWT.NONE | SWT.FILL);
 		subIComposite.setLayout(new GridLayout());
 		subIComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-
-		subI.setControl(subIComposite);
-
+		
 		GridData ld2 = new GridData(SWT.FILL, SWT.FILL, true, true);
 
 		customComposite1 = new PlotSystem1CompositeView(subIComposite, SWT.NONE, 0, ssp, ssvs);
-
 		customComposite1.setLayout(new GridLayout());
 		customComposite1.setLayoutData(ld2);
 
+		sc1.setContent(subIComposite);
+		sc1.setExpandHorizontal(true);
+		sc1.setExpandVertical(true);
+		
+		int x = subIComposite.computeSize(subIComposite.getSize().x, SWT.DEFAULT).x;
+		int y = subIComposite.computeSize(subIComposite.getSize().y, SWT.DEFAULT).y;
+		
+		sc1.setMinSize(x,y);
+
+		
+		sc1.pack();
+		
+		subI.setControl(sc1);
+		
 		plotSystem.addRegion(region);
 		RectangularROI startROI = new RectangularROI(100, 100, 50, 50, 0);
 		region.setROI(startROI);
@@ -802,10 +830,6 @@ public class PlotSystemCompositeView extends Composite {
 		return customComposite1;
 	}
 
-	public Button getOutputControl() {
-		return outputControl;
-
-	}
 
 	public Slider getSlider() {
 		return slider;

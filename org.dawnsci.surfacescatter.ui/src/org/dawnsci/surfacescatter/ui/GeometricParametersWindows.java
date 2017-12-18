@@ -63,17 +63,6 @@ public class GeometricParametersWindows extends Composite {
 		this.createContents();
 
 	}
-	
-//	public GeometricParametersWindows(Composite parent, int style, SurfaceScatterPresenter ssp, boolean in) {
-//
-//		super(parent, style);
-//
-//		this.ssp = ssp;
-//		this.gpw = this;
-//
-//		this.createContents(true);
-//
-//	}
 
 	public void createContents() {
 

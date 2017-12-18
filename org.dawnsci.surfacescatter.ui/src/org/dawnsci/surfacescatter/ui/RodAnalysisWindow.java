@@ -53,7 +53,7 @@ public class RodAnalysisWindow {
 		anaRight.setLayout(new GridLayout());
 		anaRight.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, true, true));
 
-		analysisSash.setWeights(new int[] { 40, 60 });
+		analysisSash.setWeights(new int[] { 50, 50 });
 
 		////////////////////// Analysis Left//////////////////////////////
 		///////////////// anaLeft Window 3/////////////////////////////////

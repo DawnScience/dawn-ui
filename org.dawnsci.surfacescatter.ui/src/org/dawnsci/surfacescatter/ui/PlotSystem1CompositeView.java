@@ -18,6 +18,7 @@ import org.eclipse.dawnsci.plotting.api.PlottingFactory;
 import org.eclipse.dawnsci.plotting.api.region.IRegion;
 import org.eclipse.january.dataset.IDataset;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionEvent;
@@ -77,6 +78,7 @@ public class PlotSystem1CompositeView extends Composite {
 		} catch (NullPointerException r) {
 			trackerOn = false;
 		}
+	
 		trackerOnButton = new Button(this, SWT.PUSH);
 		trackerOnButton.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 
@@ -300,6 +302,20 @@ public class PlotSystem1CompositeView extends Composite {
 
 			}
 		});
+		
+		
+		
+//
+//		sc1.setContent(methodSetting);
+//		//
+//		sc1.setExpandHorizontal(true);
+//		sc1.setExpandVertical(true);
+//
+//		sc1.setMinSize(methodSetting.computeSize(methodSetting.getSize().x, SWT.DEFAULT));
+//
+//		// sc1.setAlwaysShowScrollBars(true);
+//		sc1.pack();
+		
 
 	}
 
