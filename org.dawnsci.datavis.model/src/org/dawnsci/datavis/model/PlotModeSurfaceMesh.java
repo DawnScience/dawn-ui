@@ -79,7 +79,7 @@ public class PlotModeSurfaceMesh extends PlotModeImage {
 		trace.setData(d, ax.toArray(new IDataset[ax.size()]));
 		trace.setUserObject(userObject);
 		if (!isUpdate) {
-			system.setPlotType(PlotType.SURFACE);
+//			system.setPlotType(PlotType.SURFACE);
 			system.addTrace(trace);
 		}
 		
