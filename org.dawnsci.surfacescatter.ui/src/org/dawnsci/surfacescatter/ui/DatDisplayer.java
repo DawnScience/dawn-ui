@@ -57,6 +57,7 @@ public class DatDisplayer extends Composite implements IDatDisplayer {
 	private SashForm selectionSash;
 	private Button paramFileSelection;
 	private Button refreshTable;
+	private Button deSelectAll;
 	private Button clearParameterTable;
 	private SurfaceScatterViewStart ssvs;
 	private String datFolderPath = null;
@@ -222,7 +223,22 @@ public class DatDisplayer extends Composite implements IDatDisplayer {
 		transferToRod.setText(DisplayLabelStrings.getTransferSelectedToRod());
 		transferToRod.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		transferToRod.setEnabled(false);
+		
+		deSelectAll = new Button(datSelector, SWT.PUSH);
+		deSelectAll.setText(DisplayLabelStrings.getDeselectAll());
+		deSelectAll.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		deSelectAll.setEnabled(false);
 
+		deSelectAll.addSelectionListener(new SelectionAdapter() {
+			
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				folderDisplayTable.deselectAll();
+				
+			}
+			
+		});
+		
 		folderDisplayTable = new Table(datSelector, SWT.CHECK | SWT.V_SCROLL | SWT.H_SCROLL | SWT.BORDER | SWT.MULTI);
 		folderDisplayTable.setEnabled(false);
 		folderDisplayTable.setLinesVisible(true);
@@ -774,7 +790,8 @@ public class DatDisplayer extends Composite implements IDatDisplayer {
 		useTrajectoryTile.setEnabled(enabled);
 		parameterFiles.setEnabled(enabled);
 		parameterFilesTile.setEnabled(enabled);
-
+		deSelectAll.setEnabled(enabled);
+		
 		for (Control c : parameterFiles.getChildren()) {
 			c.setEnabled(enabled);
 		}

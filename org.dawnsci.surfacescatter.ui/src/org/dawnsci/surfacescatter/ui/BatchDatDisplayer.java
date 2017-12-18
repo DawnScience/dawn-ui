@@ -54,6 +54,7 @@ public class BatchDatDisplayer extends Composite implements IDatDisplayer {
 	private SurfaceScatterPresenter ssp;
 	private Table rodDisplayTable;
 	private Table paramFileTable;
+	private Button deSelectAll;
 	private String[] options;
 	private ArrayList<String> datList;
 	private ArrayList<String> paramFileList;
@@ -232,6 +233,22 @@ public class BatchDatDisplayer extends Composite implements IDatDisplayer {
 		transferToRod.setText(DisplayLabelStrings.getTransferSelectedToRod());
 		transferToRod.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		transferToRod.setEnabled(false);
+		
+		deSelectAll = new Button(datSelector, SWT.PUSH);
+		deSelectAll.setText(DisplayLabelStrings.getDeselectAll());
+		deSelectAll.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		deSelectAll.setEnabled(false);
+
+		deSelectAll.addSelectionListener(new SelectionAdapter() {
+			
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				folderDisplayTable.deselectAll();
+				
+			}
+			
+		});
+		
 
 		folderDisplayTable = new Table(datSelector, SWT.CHECK | SWT.V_SCROLL | SWT.H_SCROLL | SWT.BORDER);
 		folderDisplayTable.setEnabled(false);
@@ -773,6 +790,7 @@ public class BatchDatDisplayer extends Composite implements IDatDisplayer {
 		useTrajectoryTile.setEnabled(enabled);
 		parameterFilesTile.setEnabled(enabled);
 		clearParameterTable.setEnabled(enabled);
+		deSelectAll.setEnabled(enabled);
 
 	}
 

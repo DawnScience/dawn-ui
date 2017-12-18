@@ -1,8 +1,11 @@
 package org.dawnsci.surfacescatter.ui;
 
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.concurrent.Callable;
 import java.util.concurrent.locks.ReadWriteLock;
+
+import org.dawnsci.surfacescatter.AttenuationFactors;
 import org.dawnsci.surfacescatter.BatchSavingAdvancedSettings;
 import org.dawnsci.surfacescatter.BatchSetupMiscellaneousProperties;
 import org.dawnsci.surfacescatter.FittingParametersInputReader;
@@ -78,6 +81,8 @@ public class BatchRunnable implements Callable {
 		
 		FittingParametersInputReader.anglesAliasReaderFromNexus(file);
 
+		ArrayList<AttenuationFactors> afs = FittingParametersInputReader.attenuationFactorsFromNexus(file);
+		
 		FittingParametersInputReader.geometricalParametersReaderFromNexus(file, sspi.getGm(), sspi.getDrm());
 
 		sspi.surfaceScatterPresenterBuildWithFrames(datFiles, sspi.getGm().getxName(),
@@ -91,7 +96,7 @@ public class BatchRunnable implements Callable {
 		
 		BatchTracking bat = new BatchTracking(sspi);
 	
-		bat.runTJ1(savePath, bsas, bsmps, noRods, lock, writer);
+		bat.runTJ1(savePath, bsas, bsmps, noRods, lock, writer, afs);
 
 		display.asyncExec(new Runnable() {
 			@Override

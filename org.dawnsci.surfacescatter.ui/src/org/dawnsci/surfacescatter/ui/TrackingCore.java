@@ -2,9 +2,12 @@ package org.dawnsci.surfacescatter.ui;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+
+import org.dawnsci.surfacescatter.AttenuationFactors;
 import org.dawnsci.surfacescatter.ClosestNoFinder;
 import org.dawnsci.surfacescatter.CsdpGeneratorFromDrm;
 import org.dawnsci.surfacescatter.CurveStitchDataPackage;
+import org.dawnsci.surfacescatter.CurveStitchWithSetAttenuationFactors;
 import org.dawnsci.surfacescatter.DirectoryModel;
 import org.dawnsci.surfacescatter.DummyProcessWithFrames;
 import org.dawnsci.surfacescatter.FourierTransformCurveStitch;
@@ -22,7 +25,8 @@ import org.eclipse.swt.widgets.Display;
 public class TrackingCore {
 
 	public TrackingCore(boolean[] doneArray, SurfaceScatterPresenter ssp, Thread t, SurfaceScatterViewStart ssvs,
-			boolean showtrack, TrackingHandlerWithFramesImproved thwfi, Display display, boolean ditchNegativeValues) {
+			boolean showtrack, TrackingHandlerWithFramesImproved thwfi, Display display, boolean ditchNegativeValues,
+			ArrayList<AttenuationFactors> afs) {
 
 		DirectoryModel drm = ssp.getDrm();
 		ArrayList<FrameModel> fms = ssp.getFms();
@@ -162,7 +166,11 @@ public class TrackingCore {
 				ssp.disregardNegativeIntensities(csdp);
 			}
 
-			FourierTransformCurveStitch.curveStitch4(csdp, null);
+			if (afs == null) {
+				FourierTransformCurveStitch.curveStitch4(csdp, null);
+			} else {
+				CurveStitchWithSetAttenuationFactors.curveStitch(csdp, afs);
+			}
 
 			drm.setCsdp(csdp);
 

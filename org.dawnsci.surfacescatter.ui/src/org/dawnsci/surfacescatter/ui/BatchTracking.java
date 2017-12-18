@@ -4,6 +4,7 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.concurrent.locks.ReadWriteLock;
 import org.dawnsci.surfacescatter.AxisEnums.yAxes;
+import org.dawnsci.surfacescatter.AttenuationFactors;
 import org.dawnsci.surfacescatter.BatchSavingAdvancedSettings;
 import org.dawnsci.surfacescatter.BatchSetupMiscellaneousProperties;
 import org.dawnsci.surfacescatter.BatchSetupYAxes;
@@ -25,7 +26,7 @@ public class BatchTracking {
 	}
 
 	protected void runTJ1(String savepath1, BatchSavingAdvancedSettings[] bsas, BatchSetupMiscellaneousProperties bsmps,
-			int noRods, ReadWriteLock lock, PrintWriter writer) {
+			int noRods, ReadWriteLock lock, PrintWriter writer, ArrayList<AttenuationFactors> afs) {
 
 		this.savePath = savepath1;
 
@@ -40,7 +41,7 @@ public class BatchTracking {
 
 			ssp.getDrm().setDoneArray(doneArray);
 
-			new TrackingCore(doneArray, ssp, null, null, false, null, null, bsmps.isDitchNegativeValues());
+			new TrackingCore(doneArray, ssp, null, null, false, null, null, bsmps.isDitchNegativeValues(), afs);
 
 			progressReport += "   tracked successfully; ";
 		}
