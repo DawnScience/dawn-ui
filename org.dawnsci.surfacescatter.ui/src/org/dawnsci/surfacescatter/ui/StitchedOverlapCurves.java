@@ -150,14 +150,6 @@ public class StitchedOverlapCurves extends Composite {
 		export.setText("Export Curve");
 		export.setSize(export.computeSize(100, 20, true));
 
-//		Composite normGroup = new Composite(form, SWT.NONE);
-//		GridLayout normGroupLayout = new GridLayout(1, true);
-//		normGroup.setLayout(normGroupLayout);
-//		GridData normGroupData = new GridData(SWT.FILL, SWT.FILL, true, true);
-//		normGroupData.grabExcessVerticalSpace = true;
-//		normGroupData.heightHint = 100;
-//		normGroup.setLayoutData(new GridData(GridData.FILL_HORIZONTAL | GridData.FILL_VERTICAL));
-
 		Button normalise = new Button(saveSettings, SWT.PUSH);
 		normalise.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		normalise.setText("Normalise To Point");
@@ -214,8 +206,7 @@ public class StitchedOverlapCurves extends Composite {
 		GridData stitchedCurvesData = new GridData(GridData.FILL_HORIZONTAL);
 		stitchedCurves.setLayout(stitchedCurvesLayout);
 		stitchedCurves.setLayoutData(stitchedCurvesData);
-//		stitchedCurves.setText("Stitched Curves");
-
+		
 		ActionBarWrapper actionBarComposite = ActionBarWrapper.createActionBars(stitchedCurves, null);
 
 		final GridData gdSecondField = new GridData(SWT.FILL, SWT.FILL, true, true);
@@ -281,7 +272,6 @@ public class StitchedOverlapCurves extends Composite {
 		GridData overlapSelectorData = new GridData(GridData.FILL_BOTH);
 		overlapSelector.setLayout(overlapSelectorLayout);
 		overlapSelector.setLayoutData(overlapSelectorData);
-//		overlapSelector.setText("Attenuation Factors");
 
 		odms = csdp.getOverlapDataModels();
 
@@ -297,8 +287,15 @@ public class StitchedOverlapCurves extends Composite {
 		viewer.getTable().pack();
 		viewer.getTable().forceFocus();
 
-		Button resetAll = new Button(bottomForm, SWT.PUSH);
-
+		Composite bottomButtons = new Composite(bottomForm, SWT.V_SCROLL | SWT.BORDER | SWT.MULTI);
+		GridLayout bottomButtonsLayout = new GridLayout(2, true);
+		GridData bottomButtonsData = new GridData(GridData.FILL_BOTH);
+		bottomButtons.setLayout(bottomButtonsLayout);
+		bottomButtons.setLayoutData(bottomButtonsData);
+		
+		Button resetAll = new Button(bottomButtons, SWT.PUSH);
+		resetAll.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		resetAll.setData(new GridData(SWT.FILL));
 		resetAll.setText("Reset All");
 
 		resetAll.addSelectionListener(new SelectionAdapter() {
@@ -317,7 +314,9 @@ public class StitchedOverlapCurves extends Composite {
 			}
 		});
 
-		Button go = new Button(bottomForm, SWT.PUSH);
+		Button go = new Button(bottomButtons, SWT.PUSH);
+		go.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		go.setData(new GridData(SWT.FILL));
 
 		go.setText("Go");
 
@@ -357,7 +356,7 @@ public class StitchedOverlapCurves extends Composite {
 
 					int xPos = ssp.xPositionFinder(imageNo.getROI().getPointX());
 
-					double yValue = 0;
+					double yValue;
 
 					AxisEnums.yAxes yA = model.getyAxis();
 
@@ -378,8 +377,10 @@ public class StitchedOverlapCurves extends Composite {
 			});
 		}
 
-		bottomForm.setWeights(new int[] { 70, 15, 15 });
-
+//		int h = bottomForm.getChildren().length;
+//	
+		bottomForm.setWeights(new int[] {80,20});
+		
 		form.setWeights(new int[] { 5, 7, 73, 20 });
 
 		IAxis yAxisR = plotSystem.getSelectedYAxis();

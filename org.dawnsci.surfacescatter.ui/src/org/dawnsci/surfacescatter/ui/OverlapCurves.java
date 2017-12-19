@@ -277,13 +277,13 @@ public class OverlapCurves extends Composite {
 		InputTileGenerator yPoint = new InputTileGenerator("Y Value:  ", "0", controls);
 		yValueText = yPoint.getText();
 
-		Composite normGroup = new Composite(form, SWT.NONE);
-		GridLayout normGroupLayout = new GridLayout(1, true);
-		normGroup.setLayout(normGroupLayout);
-		GridData normGroupData = new GridData(SWT.FILL, SWT.FILL, true, true);
-		normGroupData.grabExcessVerticalSpace = true;
-		normGroupData.heightHint = 100;
-		normGroup.setLayoutData(new GridData(GridData.FILL_HORIZONTAL | GridData.FILL_VERTICAL));
+//		Composite normGroup = new Composite(form, SWT.NONE);
+//		GridLayout normGroupLayout = new GridLayout(1, true);
+//		normGroup.setLayout(normGroupLayout);
+//		GridData normGroupData = new GridData(SWT.FILL, SWT.FILL, true, true);
+//		normGroupData.grabExcessVerticalSpace = true;
+//		normGroupData.heightHint = 100;
+//		normGroup.setLayoutData(new GridData(GridData.FILL_HORIZONTAL | GridData.FILL_VERTICAL));
 
 		slider = new Slider(controls, SWT.HORIZONTAL);
 
@@ -473,7 +473,7 @@ public class OverlapCurves extends Composite {
 			}
 		});
 
-		form.setWeights(new int[] { 15, 9, 72, 4 });
+		form.setWeights(new int[] {20, 67, 4 });
 
 		IAxis yAxisR = plotSystem.getSelectedYAxis();
 
