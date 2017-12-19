@@ -1,5 +1,6 @@
 package org.dawnsci.surfacescatter.ui;
 
+import org.apache.commons.lang.StringUtils;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
@@ -55,6 +56,10 @@ public class BatchRodNameSetterDialogue extends Dialog {
 		explanation.setLayoutData(explanationData);
 		
 		explanation.setText("Name for this rod?");
+		
+		if(StringUtils.isEmpty(suggestedRodName)) {
+			suggestedRodName = "the_rod_with_no_name";
+		}
 		
 		InputTileGenerator tile1 = new InputTileGenerator("Rod Name:", suggestedRodName, container, 0);
 		suggestedRodNameText = tile1.getText();
