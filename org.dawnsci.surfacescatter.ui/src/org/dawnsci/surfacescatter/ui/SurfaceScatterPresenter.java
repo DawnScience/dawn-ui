@@ -349,7 +349,7 @@ public class SurfaceScatterPresenter {
 
 						ILazyDataset ildk = dh1.getLazyDataset("k");
 						SliceND slicek = new SliceND(ildk.getShape());
-						kArray[id] = ildl.getSlice(slicek);
+						kArray[id] = ildk.getSlice(slicek);
 
 					} catch (Exception h) {
 
