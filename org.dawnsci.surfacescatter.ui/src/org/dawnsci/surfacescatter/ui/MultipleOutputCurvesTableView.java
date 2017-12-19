@@ -38,7 +38,7 @@ public class MultipleOutputCurvesTableView extends Composite {
 	private Button save;
 	private Combo intensitySelect;
 	private Combo outputFormatSelection;
-	private Group overlapSelection;
+	private Composite overlapSelection;
 	private Button errors;
 	private Button overlapZoom;
 	private Button qAxis;
@@ -67,7 +67,7 @@ public class MultipleOutputCurvesTableView extends Composite {
 		SashForm sashForm = new SashForm(this, SWT.VERTICAL);
 		sashForm.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 
-		overlapSelection = new Group(sashForm, SWT.NULL);
+		overlapSelection = new Composite(sashForm, SWT.NULL);
 		GridLayout overlapSelectionLayout = new GridLayout(4, true);
 		GridData overlapSelectionData = new GridData(SWT.FILL);
 		overlapSelectionData.minimumWidth = 50;
@@ -142,7 +142,7 @@ public class MultipleOutputCurvesTableView extends Composite {
 
 		plotSystem4.getPlotComposite().setLayoutData(gdSecondField);
 
-		Group extraButtons = new Group(sashForm, SWT.NULL);
+		Composite extraButtons = new Composite(sashForm, SWT.NULL);
 		GridLayout extraButtonsLayout = new GridLayout(3, true);
 		GridData extraButtonsData = new GridData(SWT.FILL, SWT.NULL, true, false);
 		extraButtons.setLayout(extraButtonsLayout);
@@ -218,9 +218,9 @@ public class MultipleOutputCurvesTableView extends Composite {
 		return sc;
 	}
 
-	public Group getOverlapSelectionGroup() {
-		return overlapSelection;
-	}
+//	public Group getOverlapSelectionGroup() {
+//		return overlapSelection;
+//	}
 
 	public Combo getIntensity() {
 		return intensitySelect;

@@ -37,7 +37,6 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Slider;
 import org.eclipse.swt.widgets.Text;
@@ -107,8 +106,8 @@ public class OverlapCurves extends Composite {
 
 		form.setOrientation(SWT.VERTICAL);
 
-		Group controls = new Group(form, SWT.NULL);
-		GridLayout controlsSelectionLayout = new GridLayout(2, true);
+		Composite controls = new Composite(form, SWT.NULL);
+		GridLayout controlsSelectionLayout = new GridLayout(3, true);
 		GridData controlsSelectionData = new GridData(SWT.FILL, SWT.NULL, true, false);
 		controls.setLayoutData(controlsSelectionData);
 		controls.setLayout(controlsSelectionLayout);
@@ -208,7 +207,7 @@ public class OverlapCurves extends Composite {
 
 		});
 
-		Group includeControls = new Group(controls, SWT.NULL);
+		Composite includeControls = new Composite(controls, SWT.NULL);
 		GridLayout includeControlsLayout = new GridLayout(2, true);
 		GridData includeControlsData = new GridData(SWT.FILL, SWT.NULL, true, false);
 		includeControls.setLayoutData(includeControlsData);
@@ -278,7 +277,7 @@ public class OverlapCurves extends Composite {
 		InputTileGenerator yPoint = new InputTileGenerator("Y Value:  ", "0", controls);
 		yValueText = yPoint.getText();
 
-		Group normGroup = new Group(form, SWT.NONE);
+		Composite normGroup = new Composite(form, SWT.NONE);
 		GridLayout normGroupLayout = new GridLayout(1, true);
 		normGroup.setLayout(normGroupLayout);
 		GridData normGroupData = new GridData(SWT.FILL, SWT.FILL, true, true);
@@ -286,7 +285,7 @@ public class OverlapCurves extends Composite {
 		normGroupData.heightHint = 100;
 		normGroup.setLayoutData(new GridData(GridData.FILL_HORIZONTAL | GridData.FILL_VERTICAL));
 
-		slider = new Slider(normGroup, SWT.HORIZONTAL);
+		slider = new Slider(controls, SWT.HORIZONTAL);
 
 		int rf = ssp.getDrm().getDmxList().get(0).size();
 
@@ -296,11 +295,11 @@ public class OverlapCurves extends Composite {
 		slider.setThumb(1);
 		slider.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 
-		errors = new Button(normGroup, SWT.PUSH);
+		errors = new Button(controls, SWT.PUSH);
 		errors.setText("Errors");
 		errors.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 
-		Button removeNegativeIntensities = new Button(normGroup, SWT.PUSH);
+		Button removeNegativeIntensities = new Button(controls, SWT.PUSH);
 		removeNegativeIntensities.setText("Remove Negative Intensities");
 		removeNegativeIntensities.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 
@@ -316,12 +315,12 @@ public class OverlapCurves extends Composite {
 
 		});
 
-		Group unstitchedCurves = new Group(form, SWT.FILL | SWT.FILL);
+		Composite unstitchedCurves = new Composite(form, SWT.FILL | SWT.FILL);
 		GridLayout stitchedCurvesLayout = new GridLayout(1, true);
 		GridData stitchedCurvesData = new GridData(GridData.FILL_HORIZONTAL);
 		unstitchedCurves.setLayout(stitchedCurvesLayout);
 		unstitchedCurves.setLayoutData(stitchedCurvesData);
-		unstitchedCurves.setText("Unstitched Curves");
+//		unstitchedCurves.setText("Unstitched Curves");
 
 		ActionBarWrapper actionBarComposite = ActionBarWrapper.createActionBars(unstitchedCurves, null);
 
@@ -445,7 +444,7 @@ public class OverlapCurves extends Composite {
 			}
 		});
 
-		Group resetGroup = new Group(form, SWT.FILL | SWT.FILL);
+		Composite resetGroup = new Composite(form, SWT.FILL | SWT.FILL);
 		GridLayout resetGroupLayout = new GridLayout(1, true);
 		GridData resetGroupData = new GridData(GridData.FILL_HORIZONTAL);
 		resetGroup.setLayout(resetGroupLayout);

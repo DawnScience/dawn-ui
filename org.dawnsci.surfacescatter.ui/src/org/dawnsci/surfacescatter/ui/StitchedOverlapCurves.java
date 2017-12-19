@@ -43,7 +43,7 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.Group;
+//import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Slider;
 import org.eclipse.swt.widgets.Table;
@@ -114,8 +114,16 @@ public class StitchedOverlapCurves extends Composite {
 
 		form.setOrientation(SWT.VERTICAL);
 
-		Group saveSettings = new Group(form, SWT.NONE);
-		GridLayout saveSettingsLayout = new GridLayout(2, true);
+		
+		slider = new Slider(form, SWT.HORIZONTAL);
+		slider.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		slider.setMinimum(0);
+		slider.setMaximum(csdp.getSplicedCurveX().getSize());
+		slider.setIncrement(1);
+		slider.setThumb(1);
+		
+		Composite saveSettings = new Composite(form, SWT.NONE);
+		GridLayout saveSettingsLayout = new GridLayout(3, true);
 		saveSettings.setLayout(saveSettingsLayout);
 
 		final GridData saveSettingsData = new GridData(SWT.FILL, SWT.FILL, true, true);
@@ -142,15 +150,15 @@ public class StitchedOverlapCurves extends Composite {
 		export.setText("Export Curve");
 		export.setSize(export.computeSize(100, 20, true));
 
-		Group normGroup = new Group(form, SWT.NONE);
-		GridLayout normGroupLayout = new GridLayout(1, true);
-		normGroup.setLayout(normGroupLayout);
-		GridData normGroupData = new GridData(SWT.FILL, SWT.FILL, true, true);
-		normGroupData.grabExcessVerticalSpace = true;
-		normGroupData.heightHint = 100;
-		normGroup.setLayoutData(new GridData(GridData.FILL_HORIZONTAL | GridData.FILL_VERTICAL));
+//		Composite normGroup = new Composite(form, SWT.NONE);
+//		GridLayout normGroupLayout = new GridLayout(1, true);
+//		normGroup.setLayout(normGroupLayout);
+//		GridData normGroupData = new GridData(SWT.FILL, SWT.FILL, true, true);
+//		normGroupData.grabExcessVerticalSpace = true;
+//		normGroupData.heightHint = 100;
+//		normGroup.setLayoutData(new GridData(GridData.FILL_HORIZONTAL | GridData.FILL_VERTICAL));
 
-		Button normalise = new Button(normGroup, SWT.PUSH);
+		Button normalise = new Button(saveSettings, SWT.PUSH);
 		normalise.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		normalise.setText("Normalise To Point");
 		normalise.setSize(export.computeSize(100, 20, true));
@@ -181,12 +189,7 @@ public class StitchedOverlapCurves extends Composite {
 			}
 		});
 
-		slider = new Slider(normGroup, SWT.HORIZONTAL);
-		slider.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-		slider.setMinimum(0);
-		slider.setMaximum(csdp.getSplicedCurveX().getSize());
-		slider.setIncrement(1);
-		slider.setThumb(1);
+	
 
 		slider.addSelectionListener(new SelectionAdapter() {
 
@@ -206,12 +209,12 @@ public class StitchedOverlapCurves extends Composite {
 		topForm.setLayout(new GridLayout());
 		topForm.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 
-		Group stitchedCurves = new Group(topForm, SWT.FILL | SWT.FILL);
+		Composite stitchedCurves = new Composite(topForm, SWT.FILL | SWT.FILL);
 		GridLayout stitchedCurvesLayout = new GridLayout(1, true);
 		GridData stitchedCurvesData = new GridData(GridData.FILL_HORIZONTAL);
 		stitchedCurves.setLayout(stitchedCurvesLayout);
 		stitchedCurves.setLayoutData(stitchedCurvesData);
-		stitchedCurves.setText("Stitched Curves");
+//		stitchedCurves.setText("Stitched Curves");
 
 		ActionBarWrapper actionBarComposite = ActionBarWrapper.createActionBars(stitchedCurves, null);
 
@@ -273,12 +276,12 @@ public class StitchedOverlapCurves extends Composite {
 		bottomForm.setLayout(new GridLayout());
 		bottomForm.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 
-		Group overlapSelector = new Group(bottomForm, SWT.V_SCROLL | SWT.BORDER | SWT.MULTI);
+		Composite overlapSelector = new Composite(bottomForm, SWT.V_SCROLL | SWT.BORDER | SWT.MULTI);
 		GridLayout overlapSelectorLayout = new GridLayout(1, true);
 		GridData overlapSelectorData = new GridData(GridData.FILL_BOTH);
 		overlapSelector.setLayout(overlapSelectorLayout);
 		overlapSelector.setLayoutData(overlapSelectorData);
-		overlapSelector.setText("Attenuation Factors");
+//		overlapSelector.setText("Attenuation Factors");
 
 		odms = csdp.getOverlapDataModels();
 
@@ -518,7 +521,7 @@ public class StitchedOverlapCurves extends Composite {
 
 	}
 
-	private TableViewer buildTable1(AxisEnums.xAxes x, AxisEnums.yAxes y, Group overlapSelector,
+	private TableViewer buildTable1(AxisEnums.xAxes x, AxisEnums.yAxes y, Composite overlapSelector,
 			ArrayList<IDataset> xArrayList) {
 
 		ArrayList<OverlapAttenuationObject> oAos1 = new ArrayList<>();

@@ -142,6 +142,22 @@ public class InputTileGenerator {
 
 	}
 
+	public InputTileGenerator(String l, Composite parent) {
+
+		tile = new Group(parent, SWT.NONE);
+		GridLayout tileLayout = new GridLayout(2, true);
+
+		tile.setLayout(tileLayout);
+		GridData tileData = new GridData(SWT.FILL, SWT.NULL, true, false);
+		tile.setLayoutData(tileData);
+
+		label = new Label(tile, SWT.NULL);
+		label.setText(l);
+
+		comboDropDown = new Combo(tile, SWT.DROP_DOWN | SWT.BORDER | SWT.FILL);
+		comboDropDown.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+
+	}
 	public InputTileGenerator(String l, String t, Composite parent, int n) {
 
 		tile = new Group(parent, SWT.NONE);

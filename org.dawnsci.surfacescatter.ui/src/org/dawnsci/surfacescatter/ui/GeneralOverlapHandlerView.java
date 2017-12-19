@@ -96,7 +96,7 @@ public class GeneralOverlapHandlerView extends Dialog {
 		sashForm.setWeights(new int[]{50,50});
 		
 		/////////////////Left SashForm///////////////////////////////////////////////////
-		Group topImage = new Group(left, SWT.NONE);
+		Composite topImage = new Composite(left, SWT.NONE);
 		GridLayout topImageLayout = new GridLayout();
 		topImage.setLayout(topImageLayout);
 		GridData topImageData= new GridData(SWT.FILL, SWT.FILL, true, true);
