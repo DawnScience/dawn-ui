@@ -64,6 +64,8 @@ public class BatchRodNameSetterDialogue extends Dialog {
 		InputTileGenerator tile1 = new InputTileGenerator("Rod Name:", suggestedRodName, container, 0);
 		suggestedRodNameText = tile1.getText();
 		
+		dd.setRodName(suggestedRodName);
+		
 		suggestedRodNameText.addModifyListener(new ModifyListener() {
 			
 			@Override
