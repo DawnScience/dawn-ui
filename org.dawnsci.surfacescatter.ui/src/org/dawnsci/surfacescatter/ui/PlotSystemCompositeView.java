@@ -80,7 +80,7 @@ public class PlotSystemCompositeView extends Composite {
 	private Button includeAllFrames;
 	private Button increment;
 	private Button decrement;
-	private Group manualControls;
+	private Composite manualControls;
 	private SurfaceScatterViewStart ssvs;
 	private Button accept;
 	private Button acceptBack;
