@@ -143,7 +143,7 @@ public class BatchDisplay extends Composite {
 					file = new File(folderPath);
 					
 				
-					SimpleDateFormat sdfDate = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");//dd/MM/yyyy
+					SimpleDateFormat sdfDate = new SimpleDateFormat("yyyy-MM-dd HH-mm-ss");//dd/MM/yyyy
 					Date now = new Date();
 					String strDate = sdfDate.format(now);
 					
