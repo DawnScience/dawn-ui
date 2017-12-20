@@ -12,12 +12,13 @@ package org.dawnsci.plotting.tools.powderlines;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
-import org.apache.commons.lang.ArrayUtils;
 import org.dawnsci.plotting.tools.Activator;
 import org.dawnsci.plotting.tools.ServiceLoader;
-import org.dawnsci.plotting.tools.powderlines.PowderLineModel.PowderLineCoord;
+import org.dawnsci.plotting.tools.powderlines.PowderLinesModel.PowderLineCoord;
 import org.eclipse.dawnsci.analysis.api.io.IDataHolder;
 import org.eclipse.dawnsci.analysis.api.io.ILoaderService;
 import org.eclipse.dawnsci.analysis.dataset.roi.XAxisLineBoxROI;
@@ -27,8 +28,8 @@ import org.eclipse.dawnsci.plotting.api.region.RegionUtils;
 import org.eclipse.dawnsci.plotting.api.tool.AbstractToolPage;
 import org.eclipse.dawnsci.plotting.api.trace.ITraceListener;
 import org.eclipse.dawnsci.plotting.api.trace.TraceEvent;
-import org.eclipse.january.MetadataException;
 import org.eclipse.january.dataset.Dataset;
+import org.eclipse.january.dataset.DatasetFactory;
 import org.eclipse.january.dataset.DatasetUtils;
 import org.eclipse.january.dataset.DoubleDataset;
 import org.eclipse.january.dataset.IndexIterator;
@@ -36,29 +37,30 @@ import org.eclipse.january.metadata.IMetadata;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.layout.TableColumnLayout;
+import org.eclipse.jface.preference.ColorSelector;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
-import org.eclipse.jface.viewers.ColumnViewerToolTipSupport;
 import org.eclipse.jface.viewers.ColumnWeightData;
 import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.jface.viewers.Viewer;
-import org.eclipse.jface.window.ToolTip;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
-import org.eclipse.swt.events.ModifyEvent;
-import org.eclipse.swt.events.ModifyListener;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
+import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 
@@ -67,32 +69,29 @@ public class PowderLineTool extends AbstractToolPage {
 	private Composite composite; // root Composite of the tool
 	private TableViewer lineTableViewer; // TableViewer holding the list of lines
 	private ITraceListener tracerListener; // The trace on which the tool listens
-	private PowderLineModel.PowderLineCoord plotCoordinate = PowderLineModel.PowderLineCoord.Q; // The coordinate of the input data
+	private PowderLinesModel.PowderLineCoord plotCoordinate = PowderLinesModel.PowderLineCoord.Q; // The coordinate of the input data
 	private List<IRegion> currentLineRegions;
+	
+	private TableViewer manyLineTV; // TableViewer holding the list of all lines
+	
+	private Set<PowderLinesModel> materialModels;
 	
 	private SashForm sashForm;
 	// sub composites, needed to set the relative size for the different domains
-	private Composite tableCompo, domainCompo;
-	private EoSComposite eosCompo;
+	private Composite mTableCompo;
+
+	private ModelsDetailsComposite modelsDetailsCompo;
 	
-	private PowderLineModel model;
+	protected PowderLinesModel model;
 	
-	static final PowderLineModel.PowderLineCoord defaultCoords = PowderLineCoord.D_SPACING;
+	private double pressure;
+	
+	static final PowderLinesModel.PowderLineCoord defaultCoords = PowderLineCoord.D_SPACING;
 	
 	public enum PowderDomains {
 			POWDER,
 			EQUATION_OF_STATE;
-		
-//		public Composite getComposite(Composite parent, int style) {
-//			switch(this) {
-//			case EQUATION_OF_STATE:
-//				return new EoSComposite(parent, style); 
-//			case POWDER:
-//			default:
-//				return null;
-//			}
-//		}
-	};
+	}
 	
 	public PowderLineTool() {
 		try{
@@ -108,11 +107,12 @@ public class PowderLineTool extends AbstractToolPage {
 			logger.error("Cannot get plotting system!", e);
 		}
 		
-		model = new PowderLineModel();
+		model = new PowderLinesModel();
 		// Default data
 		model.clearLines();
 		model.setEnergy(76.6);
 		
+		materialModels = new HashSet<>();
 	}
 	
 	@Override
@@ -133,44 +133,21 @@ public class PowderLineTool extends AbstractToolPage {
 		// Add a SashForm to show both the table and the domain specific pane
 		sashForm = new SashForm(composite, SWT.VERTICAL);
 		
-		
-		// Create the table of lines
-		tableCompo = new Composite(sashForm, SWT.NONE);
-		lineTableViewer = new TableViewer(tableCompo, SWT.FULL_SELECTION | SWT.SINGLE | SWT.H_SCROLL | SWT.V_SCROLL | SWT.BORDER);
-		createColumns(lineTableViewer);
-		
-		lineTableViewer.getTable().setLinesVisible(true);
-		lineTableViewer.getTable().setHeaderVisible(true);
 		// Create the Actions
 		createActions();
 		
-		// define the content and the provider
-		lineTableViewer.setContentProvider(new IStructuredContentProvider() {
-			
-			@Override
-			public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
-				// TODO Auto-generated method stub
-			}
-			
-			@Override
-			public void dispose() {
-				// TODO Auto-generated method stub
-				
-			}
-			
-			@Override
-			public Object[] getElements(Object inputElement) {
-				return ArrayUtils.toObject(((DoubleDataset) inputElement).getData());
-			}
-		});
+		// Create the table of all lines of all materials
+		mTableCompo = new Composite(sashForm, SWT.NONE);
+		manyLineTV = new TableViewer(mTableCompo, SWT.FULL_SELECTION | SWT.SINGLE | SWT.H_SCROLL | SWT.V_SCROLL | SWT.BORDER);
+		createManyColumns(manyLineTV);
 		
-		lineTableViewer.setInput(model.getLines());
+		manyLineTV.getTable().setLinesVisible(true);
+		manyLineTV.getTable().setHeaderVisible(true);
 		
-		// The domain specific part of the interface
-		domainCompo = new Composite(sashForm, SWT.NONE);
-		eosCompo = new EoSComposite(domainCompo, SWT.NONE);
-		// maximize the table until told otherwise
-		sashForm.setMaximizedControl(tableCompo);
+		manyLineTV.setContentProvider(new ManyLineCP());
+		manyLineTV.setInput(materialModels);
+		
+		modelsDetailsCompo = new ModelsDetailsComposite(sashForm, SWT.BORDER);
 		
 		activate();
 		
@@ -201,7 +178,7 @@ public class PowderLineTool extends AbstractToolPage {
 	public void deactivate() {
 		// Clear the lines on exit
 		model.clearLines();
-		drawPowderLines();
+		drawPowderLines(new HashSet<PowderLinesModel>());
 		
 		super.deactivate();
 		
@@ -211,12 +188,7 @@ public class PowderLineTool extends AbstractToolPage {
 		}
 	}
 	
-	// Create the table columns
-	private void createColumns(final TableViewer viewer) {
-		
-		// Set the tooltip to not created more than once in the same area
-		ColumnViewerToolTipSupport.enableFor(viewer, ToolTip.NO_RECREATE);
-		
+	private void createManyColumns(final TableViewer viewer) {
 		TableColumnLayout tcl = new TableColumnLayout();
 		viewer.getControl().getParent().setLayout(tcl);
 		
@@ -224,74 +196,84 @@ public class PowderLineTool extends AbstractToolPage {
 		// Create the columns
 		TableViewerColumn colvarTheMagnificent;
 		int iCol = 0;
-		
-		colvarTheMagnificent = new TableViewerColumn(lineTableViewer, SWT.CENTER, iCol++);
+		colvarTheMagnificent = new TableViewerColumn(viewer, SWT.CENTER, iCol++);
 		colvarTheMagnificent.getColumn().setText("d spacing (Å)");
 		colvarTheMagnificent.getColumn().setWidth(300); // a reasonable width
-		colvarTheMagnificent.setLabelProvider(new PowderLineLabelProvider(PowderLineModel.PowderLineCoord.D_SPACING));
+		colvarTheMagnificent.setLabelProvider(new LineModelLabelProvider(PowderLinesModel.PowderLineCoord.D_SPACING));
 		tcl.setColumnData(colvarTheMagnificent.getColumn(), new ColumnWeightData(1));
 		
-		colvarTheMagnificent = new TableViewerColumn(lineTableViewer, SWT.CENTER, iCol++);
+		colvarTheMagnificent = new TableViewerColumn(viewer, SWT.CENTER, iCol++);
 		colvarTheMagnificent.getColumn().setText("Q (Å⁻¹)");
 		colvarTheMagnificent.getColumn().setWidth(300); // a reasonable width
-		colvarTheMagnificent.setLabelProvider(new PowderLineLabelProvider(PowderLineModel.PowderLineCoord.Q));
+		colvarTheMagnificent.setLabelProvider(new LineModelLabelProvider(PowderLinesModel.PowderLineCoord.Q));
 		tcl.setColumnData(colvarTheMagnificent.getColumn(), new ColumnWeightData(1));
 		
-		colvarTheMagnificent = new TableViewerColumn(lineTableViewer, SWT.CENTER, iCol++);
+		colvarTheMagnificent = new TableViewerColumn(viewer, SWT.CENTER, iCol++);
 		colvarTheMagnificent.getColumn().setText("2θ (°)");
 		colvarTheMagnificent.getColumn().setWidth(300); // a reasonable width
-		colvarTheMagnificent.setLabelProvider(new PowderLineLabelProvider(PowderLineModel.PowderLineCoord.ANGLE));
+		colvarTheMagnificent.setLabelProvider(new LineModelLabelProvider(PowderLinesModel.PowderLineCoord.ANGLE));
 		tcl.setColumnData(colvarTheMagnificent.getColumn(), new ColumnWeightData(1));
-		
+
 	}
 	
-	private class PowderLineLabelProvider extends ColumnLabelProvider {
-		private PowderLineModel.PowderLineCoord columnCoordinate;
+	private class LineModelLabelProvider extends ColumnLabelProvider {
+		private PowderLinesModel.PowderLineCoord columnCoordinate;
 		private DecimalFormat format = new DecimalFormat("#.###");
-		
-		public PowderLineLabelProvider(PowderLineModel.PowderLineCoord columnCoordinate/*, double energy*/) {
+
+		public LineModelLabelProvider(PowderLinesModel.PowderLineCoord columnCoordinate) {
 			this.columnCoordinate = columnCoordinate;
 		}
-		
+
 		@Override
 		public String getText(Object element) {
-			double value = (double) element;
-			return format.format(model.convertLinePositions(value, defaultCoords, columnCoordinate));
+			if (element instanceof PowderLineModel) {
+				return format.format(((PowderLineModel) element).get(columnCoordinate));
+			} else {
+				return element.toString();
+			}
 		}
+	
 	}
 	
-	private void setCoords(PowderLineModel.PowderLineCoord coord) {
+	private void setCoords(PowderLinesModel.PowderLineCoord coord) {
 		this.plotCoordinate = coord;
 	}
 	
-	protected void setModel(PowderLineModel model) {
+	protected void setModel(PowderLinesModel model) {
 		this.model = model;
 		if (this.lineTableViewer != null)
 			lineTableViewer.setInput(model.getLines());
 			
 	}
 	
+	protected void addMaterialModel(PowderLinesModel model) {
+		materialModels.add(model);
+		this.manyLineTV.setInput(this.materialModels);
+		modelsDetailsCompo.addModel(model);
+		modelsDetailsCompo.redraw();
+	}
 	
-	protected void setLines(DoubleDataset novaLines) {
-		model.setLines(novaLines);
-		model.setCoords(defaultCoords);
-		this.lineTableViewer.setInput(model.getLines());
-		this.drawPowderLines();
+	protected void clearModels() {
+		this.materialModels.clear();
+		this.manyLineTV.setInput(this.materialModels);
+		modelsDetailsCompo.clearModels();
+		this.clearLines();
 	}
 	
 	protected void clearLines() {
-		model.clearLines();
-		model.setCoords(defaultCoords);
-		this.lineTableViewer.setInput(model.getLines());
-		this.drawPowderLines();
+		this.drawPowderLines(new HashSet<PowderLinesModel>());
 	}
 	
-	private void drawPowderLines() {
-		// Correct the stored lines for the plot coordinates
+	private void drawPowderLines(Set<PowderLinesModel> drawModels) {
+		// Lines from the material models
 		
-		
-		
-		DoubleDataset plotLineLocations = model.convertLinePositions(model.getLines(), defaultCoords, plotCoordinate);
+		List<Double> plotLineList = new ArrayList<>();
+		// Iterate over the material models
+		for (PowderLinesModel linesModel : drawModels) {
+			for (PowderLineModel lineModel : linesModel.getLineModels())
+				plotLineList.add(lineModel.get(plotCoordinate));
+		}
+		DoubleDataset plotLineLocations = (!plotLineList.isEmpty()) ? (DoubleDataset) DatasetFactory.createFromList(plotLineList) : DatasetFactory.zeros(0);
 		
 		final XAxisLineBoxROI[] novalines = makeROILines(plotLineLocations);
 		final List<IRegion> viejoRegions = (currentLineRegions != null) ? new ArrayList<IRegion>(currentLineRegions) : null;
@@ -350,16 +332,10 @@ public class PowderLineTool extends AbstractToolPage {
 	/**
 	 * Refreshes the table and line locations
 	 */
-	private void refresh() {
-		this.drawPowderLines();
-		// It is ugly, but it works
-		DoubleDataset lines = model.getLines();
-		this.model.clearLines();
-		this.model.setLines(lines);
-		this.model.setCoords(defaultCoords);
-		
-		this.lineTableViewer.setInput(model.getLines());
-
+	protected void refresh(boolean refreshPlot) {
+		this.drawGenericTable();
+//		this.drawDomainSpecific(model);
+		this.drawPowderLines(this.materialModels);
 	}
 	
 	private void createActions() {
@@ -377,7 +353,7 @@ public class PowderLineTool extends AbstractToolPage {
 					theTool.model.setEnergy(dialog.getEnergy());
 					theTool.setCoords(dialog.getCoords());
 					
-					theTool.refresh();
+					theTool.refresh(true);
 				}
 			}
 		};
@@ -386,164 +362,19 @@ public class PowderLineTool extends AbstractToolPage {
 		final Action clearAction = new Action("Clear the lines", Activator.getImageDescriptor("icons/delete.gif")) {
 			@Override
 			public void run() {
-				theTool.clearLines();
+				theTool.clearModels();
 			}
 		};
 		getSite().getActionBars().getToolBarManager().add(clearAction);
 	}
 
-	public void drawDomainSpecific(PowderLineModel model) {
-		for (Control ctrl : domainCompo.getChildren()) {
-			ctrl.setVisible(false);
-		};
-		domainCompo.layout();
-		if (model.getDomain() == PowderDomains.EQUATION_OF_STATE) {
-
-			eosCompo.setVisible(true);
-			
-			domainCompo.setLayout(new FillLayout());
-			sashForm.setMaximizedControl(null);
-			sashForm.setWeights(new int[]{2,1});
-			domainCompo.layout();
-			
-			eosCompo.setModel((EoSLineModel) model);
-			
-		} else {
-			sashForm.setMaximizedControl(tableCompo);
-		}
-		
+	public void drawGenericTable() {
+		this.manyLineTV.setInput(materialModels);
 	}
 	
 	private void setLengthScale(double lengthScale) {
-		refresh();
-	}
-	protected class EoSComposite extends Composite {
-		
-		Text pressure, k0, k0prime, v, v0, ll0;
-		EoSLineModel model;
-		final double pressureMultiplier = 1e9;
-		final String pressureUnits = "GPa";
-		final String modulusSymbol = "B"; // Could instead be K
-		
-		public EoSComposite(Composite parent, int style) {
-			super(parent, style | SWT.BORDER);
-			
-			this.redraw();
-			
-			pressure.addModifyListener(new ModifyListener() {
-				
-				@Override
-				public void modifyText(ModifyEvent e) {
-					double newPressure;
-					try {
-						newPressure = Double.parseDouble(pressure.getText());
-					} catch (NumberFormatException nFE) {
-						return; // Having done nothing
-					}
-					model.setPressure(newPressure);
-					double lengthRatio = model.convertLinePositions(1.0, defaultCoords, defaultCoords);
-					ll0.setText(Double.toString(lengthRatio));
-					setLengthScale(lengthRatio);
-				}
-			});
-		}
-		
-		
-		@Override
-		public void dispose() {
-			this.clearListeners();
-		};
-	
-		private void clearListeners() {
-			// Clear all listeners
-			// pressure modify listener
-			for (Listener listener : pressure.getListeners(SWT.Modify))
-				pressure.removeListener(SWT.Modify, listener);
-		}
-		
-		@Override
-		public void redraw() {
-			// Text and Labels
-			GridLayout layout = new GridLayout(7, false);
-			
-			
-			this.setLayout(layout);
-
-			Label modulusLabel = new Label(this, SWT.RIGHT);
-			modulusLabel.setText(modulusSymbol + "₀");
-			modulusLabel.setLayoutData(new GridData(SWT.RIGHT, SWT.TOP, false, false));
-			
-			k0 = new Text(this, SWT.SINGLE | SWT.LEFT);
-			k0.setLayoutData(new GridData(SWT.BEGINNING, SWT.TOP, false, false));
-			k0.setEditable(false);
-			
-			Label modulusUnits = new Label(this, SWT.LEFT);
-			modulusUnits.setText(pressureUnits);
-			modulusUnits.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false));
-			
-			// Empty text for a spacer
-			Text spacer = new Text(this, SWT.SINGLE);
-			spacer.setEditable(false);
-			
-			Label derivLabel = new Label(this, SWT.RIGHT);
-			derivLabel.setText(modulusSymbol + "₀′");
-			derivLabel.setLayoutData(new GridData(SWT.RIGHT, SWT.TOP, false, false));
-			
-			k0prime = new Text(this, SWT.SINGLE | SWT.LEFT);
-			k0prime.setLayoutData(new GridData(SWT.BEGINNING, SWT.TOP, false, false));
-			k0prime.setEditable(false);
-
-			Label derivUnits = new Label(this, SWT.LEFT);
-			derivUnits.setText("");
-			derivUnits.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false));
-			
-			
-			Label pressureLabel = new Label(this, SWT.RIGHT);
-			pressureLabel.setText("Pressure");
-			pressureLabel.setLayoutData(new GridData(SWT.RIGHT, SWT.TOP, false, false));
-			
-			pressure = new Text(this, SWT.BORDER | SWT.SINGLE | SWT.LEFT);
-			pressure.setLayoutData(new GridData(SWT.BEGINNING, SWT.TOP, false, false));
-
-			Label pressureUnitsLabel = new Label(this, SWT.LEFT);
-			pressureUnitsLabel.setText(pressureUnits);
-			pressureUnitsLabel.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false));
-
-
-			// Empty text for a spacer
-			spacer = new Text(this, SWT.SINGLE);
-			spacer.setEditable(false);
-
-			
-			Label ll0Label = new Label(this, SWT.RIGHT);
-			ll0Label.setText("l/l₀");
-			ll0Label.setLayoutData(new GridData(SWT.RIGHT, SWT.TOP, false, false));
-			
-			ll0 = new Text(this, SWT.SINGLE | SWT.LEFT);
-			ll0.setLayoutData(new GridData(SWT.BEGINNING, SWT.TOP, false, false));
-			ll0.setEditable(false);
-			
-			Label ll0Units = new Label(this, SWT.LEFT);
-			ll0Units.setText("");
-			ll0Units.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false));
-
-			super.redraw();
-		};
-		
-		public void setModel(EoSLineModel model) {
-			this.model = model;
-			
-			k0.setText(Double.toString(this.model.getBulkModulus()));
-			k0prime.setText(Double.toString(this.model.getBulkModulus_p()));
-			pressure.setText(Double.toString(model.getPressure()));
-			
-			double lengthRatio = model.convertLinePositions(1.0, defaultCoords, defaultCoords);
-			ll0.setText(Double.toString(lengthRatio));
-
-		}
-		
-		
-
+		this.drawGenericTable();
+		this.drawPowderLines(this.materialModels);
 	}
 	
 	protected class LoadAction extends Action {
@@ -608,6 +439,9 @@ public class PowderLineTool extends AbstractToolPage {
 				lines = (DoubleDataset) theDataset;
 			}
 			
+			// the model of the data to create
+			PowderLinesModel nyModel = null;
+			
 			// Now check for metadata
 			IMetadata metadata = dataHolder.getMetadata();
 			if (metadata != null) { 
@@ -615,21 +449,28 @@ public class PowderLineTool extends AbstractToolPage {
 				try {
 					if (metadata.getMetaNames().contains("K0"))
 						System.err.println("PowderLineTool: Equation of State metadata found!");
-					EoSLineModel eosModel = new EoSLineModel();
+					EoSLinesModel eosModel = new EoSLinesModel();
 					eosModel.setBulkModulus(Double.parseDouble((String) metadata.getMetaValue("K0")));
 					eosModel.setBulkModulus_p(Double.parseDouble((String) metadata.getMetaValue("K0P")));
 					eosModel.setPressure(0.);
-					theTool.setModel(eosModel);
-
+					nyModel = eosModel;
+					
 				} catch (Exception mE) {
 					; // do nothing, the model has not been overwritten
 				}
 			}
 			
-			theTool.clearLines();
-			theTool.setLines(lines);
+			// New, multiple file loading
+			if (nyModel == null) {
+				nyModel = new PowderLinesModel();
+			}
+			nyModel.setWavelength(theTool.model.getWavelength());
+			nyModel.setCoords(PowderLineCoord.D_SPACING);
+			nyModel.setLines(lines);
+
+			theTool.addMaterialModel(nyModel);
 			
-			theTool.drawDomainSpecific(theTool.model);
+			theTool.refresh(true);
 
 		}
 	}
@@ -638,7 +479,7 @@ public class PowderLineTool extends AbstractToolPage {
 	public class PowderLineSettingsDialog extends Dialog {
 
 		private double energy;
-		private PowderLineModel.PowderLineCoord coords;
+		private PowderLinesModel.PowderLineCoord coords;
 		
 		private Text energyText;
 		private Combo coordCombo;
@@ -673,9 +514,9 @@ public class PowderLineTool extends AbstractToolPage {
 			
 			coordCombo = new Combo(container, SWT.BORDER);
 			String[] coordsItems = new String[]{
-					PowderLineModel.PowderLineCoord.Q.name(),
-					PowderLineModel.PowderLineCoord.ANGLE.name(),
-					PowderLineModel.PowderLineCoord.D_SPACING.name()
+					PowderLinesModel.PowderLineCoord.Q.name(),
+					PowderLinesModel.PowderLineCoord.ANGLE.name(),
+					PowderLinesModel.PowderLineCoord.D_SPACING.name()
 			};
 			coordCombo.setItems(coordsItems);
 			// Select the current coordinates
@@ -693,7 +534,7 @@ public class PowderLineTool extends AbstractToolPage {
 			
 		}
 		
-		public void setCurrentValues(double energy, PowderLineModel.PowderLineCoord coords) {
+		public void setCurrentValues(double energy, PowderLinesModel.PowderLineCoord coords) {
 			this.energy = energy;
 			this.coords = coords;
 		}
@@ -702,17 +543,155 @@ public class PowderLineTool extends AbstractToolPage {
 			return this.energy;
 		}
 		
-		public PowderLineModel.PowderLineCoord getCoords() {
+		public PowderLinesModel.PowderLineCoord getCoords() {
 			return this.coords;
 		}
 		
 		@Override
 		protected void okPressed() {
 			this.energy = Double.parseDouble(energyText.getText());
-			this.coords = PowderLineModel.PowderLineCoord.valueOf(coordCombo.getItems()[coordCombo.getSelectionIndex()]);
+			this.coords = PowderLinesModel.PowderLineCoord.valueOf(coordCombo.getItems()[coordCombo.getSelectionIndex()]);
 			super.okPressed();
 		}
 		
 	}
+	
+	protected class ManyLineCP implements IStructuredContentProvider {
 
+		@Override
+		public void dispose() {
+		}
+
+		@Override
+		public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
+			// TODO Auto-generated method stub
+			
+		}
+
+		@Override
+		public Object[] getElements(Object inputElement) {
+			Set<?> setOfModels = (Set<?>) inputElement;
+			List<PowderLineModel> allLineModels = new ArrayList<>();
+			
+			for (Object iModel: setOfModels) {
+				if (iModel instanceof PowderLinesModel) {
+					PowderLinesModel materialModel = (PowderLinesModel) iModel;
+					allLineModels.addAll(materialModel.getLineModels());
+				}
+			}
+			
+			return allLineModels.toArray();
+		}
+		
+	}
+	
+	// Composite wrapping the details of each model
+	private class ModelsDetailsComposite extends Composite {
+		private List<PowderLinesModel> models;
+		private List<Composite> modelDetails;
+		
+		public ModelsDetailsComposite(Composite parent, int style) {
+			super(parent, style);
+			models = new ArrayList<>();
+			modelDetails = new ArrayList<>();
+		}
+		
+		public void addModel(PowderLinesModel model) {
+			models.add(model);
+			redraw();
+		}
+		
+		public void clearModels() {
+			models.clear();
+			for (Composite subCompo : modelDetails)
+				subCompo.dispose();
+			modelDetails.clear();
+		}
+		
+		@Override
+		public void redraw() {
+			for (Composite subCompo : modelDetails)
+				subCompo.dispose();
+			modelDetails.clear();
+			
+			this.setLayout(new GridLayout(1, true));
+			
+			for (PowderLinesModel drawModel : models) {
+				ModelDetailsComposite modelCompo = new ModelDetailsComposite(this, SWT.NONE);
+				modelCompo.setModel(drawModel);
+				modelCompo.redraw();
+				modelCompo.setLayoutData(new GridData(SWT.FILL, SWT.BEGINNING, true, false));
+				modelDetails.add(modelCompo);
+
+				Composite detailsCompo = drawModel.getModelSpecificDetailsComposite(this, SWT.NONE);
+				detailsCompo.setLayoutData(new GridData(SWT.FILL, SWT.BEGINNING, true, false));
+				modelDetails.add(detailsCompo);
+			}
+			this.layout();
+		}
+	}
+	
+	protected class ModelDetailsComposite extends Composite {
+		PowderLinesModel model;
+		Label filenameText;
+		ColorSelector colourSelector;
+		Button deleteButton;
+		Composite modelSpecific;
+
+		public ModelDetailsComposite(Composite parent, int style) {
+			super(parent, style);
+		}
+		
+		// Set the model to display
+		public void setModel(PowderLinesModel model) {
+			this.model = model;
+		}
+		
+		// Redraw the composite, e.g. when the model pressure changes
+		@Override
+		public void redraw() {
+			// Layout
+			GridLayout layout = new GridLayout(3, false);
+			this.setLayout(layout);
+			
+			// Generic details
+			filenameText = new Label(this, SWT.SINGLE | SWT.LEAD);
+			filenameText.setText("FILENAME"); // TODO: get actual filename
+			filenameText.setLayoutData(new GridData(SWT.FILL, SWT.BEGINNING, true, false));
+			
+			colourSelector = new ColorSelector(this);
+			colourSelector.getButton().setLayoutData(new GridData(SWT.BEGINNING, SWT.BEGINNING, false, false));
+			// TODO: Add the colour call-back
+			colourSelector.setColorValue(new RGB(255, 0, 255));
+			
+			deleteButton = new Button(this, SWT.NONE);
+			deleteButton.setText("×");
+			deleteButton.setLayoutData(new GridData(SWT.END, SWT.BEGINNING, false, false));
+			deleteButton.addSelectionListener(new SelectionListener() {
+				
+				@Override
+				public void widgetSelected(SelectionEvent e) {
+					System.err.println("Don't press this button again!");
+				}
+				
+				@Override
+				public void widgetDefaultSelected(SelectionEvent e) {
+					// TODO Auto-generated method stub
+				}
+			});
+		}
+	}
+
+	// A composite for the details of a generic powder line model
+	static class GenericDetailsComposite extends Composite {
+		Label genericLabel;
+		public GenericDetailsComposite(Composite parent, int style) {
+			super(parent, style);
+			this.setLayout(new FillLayout());
+			
+			genericLabel = new Label(this, SWT.NONE);
+			genericLabel.setText("No metadata");
+		}
+	}
+	
 }
