@@ -85,6 +85,10 @@ public class EoSLinesModel extends PowderLinesModel {
 	public Composite getModelSpecificDetailsComposite(Composite parent, int style ) {
 		EoSLineTool.EosDetailsComposite compo = new EoSLineTool.EosDetailsComposite(parent, style);
 		compo.setPressureMultiplierMagnitude(9);
+		
+		compo.setModulus(bulkModulus);
+		compo.setModulusDerivative(bulkModulus_p);
+		
 		return compo;
 	}
 	

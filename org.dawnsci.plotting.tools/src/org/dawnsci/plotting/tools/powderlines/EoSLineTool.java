@@ -9,6 +9,8 @@
 
 package org.dawnsci.plotting.tools.powderlines;
 
+import java.text.DecimalFormat;
+
 import org.dawnsci.plotting.tools.ServiceLoader;
 import org.dawnsci.plotting.tools.powderlines.PowderLinesModel.PowderLineCoord;
 import org.eclipse.dawnsci.analysis.api.io.IDataHolder;
@@ -98,8 +100,6 @@ public class EoSLineTool extends PowderLineTool {
 		
 		public EosDetailsComposite(Composite parent, int style) {
 			super(parent, style);
-			
-			redraw();
 		}
 		
 		public void setPressureMultiplierMagnitude(int magnitude) {
@@ -113,8 +113,18 @@ public class EoSLineTool extends PowderLineTool {
 			} else {
 				pressureUnits = prefices[magnitude]+"Pa";
 			}
+			
+			redraw();
 		}
-	
+
+		public void setModulus(double modulus) {
+			this.k0.setText(Double.toString(modulus));//new DecimalFormat("#.###").format(modulus/pressureMultiplier));
+		}
+
+		public void setModulusDerivative(double modulusDeriviative) {
+			this.k0prime.setText(Double.toString(modulusDeriviative));
+		}
+
 		@Override
 		public void redraw() {
 			GridLayout layout = new GridLayout(11, false);
@@ -122,7 +132,7 @@ public class EoSLineTool extends PowderLineTool {
 			
 			// Modulus
 			Label modulusLabel = new Label(this, SWT.RIGHT);
-			modulusLabel.setText(modulusString);
+			modulusLabel.setText(modulusString + " :");
 			modulusLabel.setLayoutData(new GridData(SWT.RIGHT, SWT.TOP, false, false));
 			k0 = new Text(this, SWT.SINGLE | SWT.LEFT);
 			k0.setLayoutData(new GridData(SWT.BEGINNING, SWT.TOP, false, false));
@@ -137,7 +147,7 @@ public class EoSLineTool extends PowderLineTool {
 			
 			// Modulus derivate
 			Label derivLabel = new Label(this, SWT.RIGHT);
-			derivLabel.setText(modulusDerivativeString);
+			derivLabel.setText(modulusDerivativeString + " :");
 			derivLabel.setLayoutData(new GridData(SWT.RIGHT, SWT.TOP, false, false));
 			
 			k0prime = new Text(this, SWT.SINGLE | SWT.LEFT);
@@ -153,7 +163,7 @@ public class EoSLineTool extends PowderLineTool {
 			spacer.setEditable(false);
 			
 			Label ll0Label = new Label(this, SWT.RIGHT);
-			ll0Label.setText("l/l₀");
+			ll0Label.setText("l/l₀ :");
 			ll0Label.setLayoutData(new GridData(SWT.RIGHT, SWT.TOP, false, false));
 			
 			ll0 = new Text(this, SWT.SINGLE | SWT.LEFT);
