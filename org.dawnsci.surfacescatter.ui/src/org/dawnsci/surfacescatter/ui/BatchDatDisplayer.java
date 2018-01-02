@@ -306,7 +306,6 @@ public class BatchDatDisplayer extends Composite implements IDatDisplayer {
 
 		////
 		
-
 		InputTileGenerator startDat = new InputTileGenerator("Starting .Dat: ", "", numericalDatSelection, 0);
 		startDat.setEnabled(false, false);
 		InputTileGenerator endDat = new InputTileGenerator("Ending .Dat: ", "", numericalDatSelection, 0);
@@ -386,18 +385,17 @@ public class BatchDatDisplayer extends Composite implements IDatDisplayer {
 				int startDatInt = 0;
 				int endDatInt = 0;
 
-				ArrayList<TableItem> tidiedTransferList = new ArrayList<>();
+				ArrayList<String> tidiedTransferList = new ArrayList<>();
 
-				for (int i = 0; i < folderDisplayTable.getItems().length; i++) {
+				for (int i = 0; i < in0.length; i++) {
 
-					TableItem d = folderDisplayTable.getItems()[i];
-
-					if (d.getText().equals(startDatString)) {
+					
+					if (in0[i].equals(startDatString)) {
 						startDatInt = i;
 						checkStart = true;
 					}
 
-					if (d.getText().equals(endDatString)) {
+					if (in0[i].equals(endDatString)) {
 						endDatInt = i;
 						checkEnd = true;
 					}
@@ -422,12 +420,15 @@ public class BatchDatDisplayer extends Composite implements IDatDisplayer {
 				rodDisplayTable.clearAll();
 
 				for (int j = startDatInt; j <= endDatInt; j++) {
-					tidiedTransferList.add(folderDisplayTable.getItems()[j]);
+					tidiedTransferList.add(in0[j]);
 				}
 
 				r = true;
-
-				prepareToAddToRod(tidiedTransferList);
+				
+				String[] tidiedTransferStringArray = new String[tidiedTransferList.size()];
+				tidiedTransferList.toArray(tidiedTransferStringArray);
+				
+				prepareToAddToRod(tidiedTransferStringArray);
 
 			}
 
@@ -887,8 +888,13 @@ public class BatchDatDisplayer extends Composite implements IDatDisplayer {
 			String scanCommand = StringUtils.substringBetween(content, "scan", "\n");
 
 			TableItem t = new TableItem(folderDisplayTable, SWT.NONE);
+			
 			t.setText(datList.get(j));
+			in0[j] = datList.get(j);
+			
 			t.setText(1, scanCommand);
+			in1[j] = scanCommand;
+			
 		}
 
 		for (int loopIndex = 0; loopIndex < folderDisplayTable.getColumnCount(); loopIndex++) {
@@ -1117,6 +1123,9 @@ public class BatchDatDisplayer extends Composite implements IDatDisplayer {
 		this.imageName = imageName;
 	}
 
+
+	
+	
 	private void prepareToAddToRod(ArrayList<TableItem> tidiedTransferList) {
 
 		IDataHolder dh1 = null;
@@ -1200,6 +1209,119 @@ public class BatchDatDisplayer extends Composite implements IDatDisplayer {
 			for (int k = 0; k < tidiedTransferList.size(); k++) {
 				TableItem t = new TableItem(rodDisplayTable, SWT.NONE);
 				t.setText(tidiedTransferList.get(k).getText());
+			}
+
+			try {
+
+				String filename2 = rodDisplayTable.getItem(0).getText();
+				String filep = datFolderPath + File.separator + filename2;
+				dh1 = LoaderFactory.getData(filep);
+
+			} catch (Exception e2) {
+				e2.printStackTrace();
+			}
+
+			clearRodTable.setEnabled(true);
+			clearParameterTable.setEnabled(true);
+			rodConstruction.setEnabled(true);
+			deleteSelected.setEnabled(true);
+			transferToBatch.setEnabled(true);
+			rodDisplayTable.setEnabled(true);
+			rodComponents.setEnabled(true);
+			parameterFiles.setEnabled(true);
+			paramFileTable.setEnabled(true);
+			paramFileSelection.setEnabled(true);
+			folderDisplayTable.getVerticalBar().setEnabled(true);
+			enableRodConstruction(true);
+
+		}
+
+	}
+	
+
+	private void prepareToAddToRod(String[] in0Local) {
+
+		IDataHolder dh1 = null;
+		ILazyDataset ild = null;
+
+		String filename = in0Local[0];
+
+		try {
+			String filepath1 = datFolderPath + File.separator + filename;
+			filepath = filepath1;
+			dh1 = LoaderFactory.getData(filepath);
+
+		} catch (Exception e2) {
+			e2.printStackTrace();
+		}
+
+		options = dh1.getNames();
+
+		List<String> pb = Arrays.asList(options);
+
+		while (r) {
+
+			ild = null;
+
+			if (pb.contains(ssp.getImageName())) {
+
+				ild = dh1.getLazyDataset(ssp.getImageName());
+
+				if (ild == null) {
+					ssp.dialogToChangeImageFolder(promptedForImageFolder, BatchDatDisplayer.this);
+
+					try {
+
+						dh1 = ssp.copiedDatWithCorrectedTifs(filename, datFolderPath);
+						ild = dh1.getLazyDataset(ssp.getImageName());
+
+					} catch (Exception e2) {
+						e2.printStackTrace();
+						ssp.dialogToChangeImageFolder(promptedForImageFolder, BatchDatDisplayer.this);
+					}
+				}
+			}
+
+			if (ild == null && r == true && ssp.getImageFolderPath() != null) {
+
+				try {
+
+					dh1 = ssp.copiedDatWithCorrectedTifs(filename, datFolderPath);
+					ild = dh1.getLazyDataset(ssp.getImageName());
+
+				} catch (Exception e2) {
+					e2.printStackTrace();
+				}
+
+				imageFolderPath = ssp.getImageFolderPath();
+
+			}
+
+			if (ild == null && r == true) {
+
+				ssp.dialogToChangeImageFolder(promptedForImageFolder, BatchDatDisplayer.this);
+
+				try {
+
+					dh1 = ssp.copiedDatWithCorrectedTifs(filename, datFolderPath);
+					ild = dh1.getLazyDataset(ssp.getImageName());
+
+				} catch (Exception e2) {
+					e2.printStackTrace();
+				}
+			}
+
+			if (ild != null) {
+				r = false;
+				promptedForImageFolder = false;
+			}
+		}
+
+		if (ild != null) {
+
+			for (int k = 0; k < in0Local.length; k++) {
+				TableItem t = new TableItem(rodDisplayTable, SWT.NONE);
+				t.setText(in0Local[k]);
 			}
 
 			try {

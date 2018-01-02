@@ -397,18 +397,16 @@ public class DatDisplayer extends Composite implements IDatDisplayer {
 				int startDatInt = 0;
 				int endDatInt = 0;
 
-				ArrayList<TableItem> tidiedTransferList = new ArrayList<>();
+				ArrayList<String> tidiedTransferList = new ArrayList<>();
 
-				for (int i = 0; i < folderDisplayTable.getItems().length; i++) {
+				for (int i = 0; i < in0.length; i++) {
 
-					TableItem d = folderDisplayTable.getItems()[i];
-
-					if (d.getText().equals(startDatString)) {
+					if (in0[i].equals(startDatString)) {
 						startDatInt = i;
 						checkStart = true;
 					}
 
-					if (d.getText().equals(endDatString)) {
+					if (in0[i].equals(endDatString)) {
 						endDatInt = i;
 						checkEnd = true;
 					}
@@ -434,12 +432,15 @@ public class DatDisplayer extends Composite implements IDatDisplayer {
 				rodDisplayTable.clearAll();
 
 				for (int j = startDatInt; j <= endDatInt; j++) {
-					tidiedTransferList.add(folderDisplayTable.getItems()[j]);
+					tidiedTransferList.add(in0[j]);
 				}
 
 				r = true;
 
-				prepareToBuildRod(tidiedTransferList);
+				String[] tidiedTransferArray = new String[tidiedTransferList.size()];
+				tidiedTransferList.toArray(tidiedTransferArray);
+				
+				prepareToBuildRod(tidiedTransferArray);
 
 			}
 
@@ -1198,6 +1199,161 @@ public class DatDisplayer extends Composite implements IDatDisplayer {
 			for (int k = 0; k < tidiedTransferList.size(); k++) {
 				TableItem t = new TableItem(rodDisplayTable, SWT.NONE);
 				t.setText(tidiedTransferList.get(k).getText());
+			}
+
+			try {
+
+				String filename2 = rodDisplayTable.getItem(0).getText();
+				String filep = datFolderPath + File.separator + filename2;
+				dh1 = LoaderFactory.getData(filep);
+
+			} catch (Exception e2) {
+				e2.printStackTrace();
+			}
+
+			for (int t = 0; t < options.length; t++) {
+				optionsDropDown.add(options[t]);
+			}
+
+			boolean isThePreviousOptionAvailable = false;
+
+			if (option != null) {
+				for (int y = 0; y < options.length; y++) {
+					if (StringUtils.equals(options[y], option)) {
+						isThePreviousOptionAvailable = true;
+						optionsDropDown.select(y);
+					}
+				}
+			} else {
+				optionsDropDown.select(0);
+			}
+
+			if (isThePreviousOptionAvailable == false) {
+				optionsDropDown.select(0);
+			}
+
+			clearRodTable.setEnabled(true);
+			clearParameterTable.setEnabled(true);
+			rodConstruction.setEnabled(true);
+			deleteSelected.setEnabled(true);
+			buildRod.setEnabled(true);
+			optionsDropDown.setEnabled(true);
+			rodDisplayTable.setEnabled(true);
+			rodComponents.setEnabled(true);
+			parameterFiles.setEnabled(true);
+			paramFileTable.setEnabled(true);
+			paramFileSelection.setEnabled(true);
+			scannedVariableOptions.setEnabled(true);
+			folderDisplayTable.getVerticalBar().setEnabled(true);
+			ssvs.setupRightEnabled(true);
+			enableRodConstruction(true);
+			rsw.setupRightEnabled(true);
+		}
+
+		ArrayList<MethodSetting> cC = checkCorrections();
+
+		ssvs.resetSXRDReflectivityCombo(comboPositionToEnumInt(cC));
+
+		if (cC.get(0) == MethodSetting.SXRD) {
+			rsw.getAnglesAliasWindow().getFolder().setSelection(0);
+			rsw.getParamField().getFolder().setSelection(0);
+		} else {
+			rsw.getAnglesAliasWindow().getFolder().setSelection(1);
+			rsw.getParamField().getFolder().setSelection(1);
+		}
+
+	}
+	
+	private void prepareToBuildRod(String[] in0Local) {
+		IDataHolder dh1 = null;
+		ILazyDataset ild = null;
+
+		String filename = in0Local[0];
+		String filepath1 = null;
+		
+		try {
+			filepath1 = datFolderPath + File.separator + filename;
+			filepath = filepath1;
+			dh1 = LoaderFactory.getData(filepath);
+
+		} catch (Exception e2) {
+			e2.printStackTrace();
+		}
+
+		optionsDropDown.removeAll();
+
+		options = dh1.getNames();
+
+		rsw.getAnglesAliasWindow().updateAllWithOptions(options, true);
+
+		ssp.setOptions(options);
+		ssvs.populateThetaOptionsDropDown();
+		ssvs.getParamField().getSelectedOption().select(0);
+		ssvs.getParamField().getTheta().select(0);
+
+		List<String> pb = Arrays.asList(options);
+
+		while (r) {
+
+			ild = null;
+
+			if (pb.contains(ssp.getImageName())) {
+
+				ild = dh1.getLazyDataset(ssp.getImageName());
+
+				if (ild == null) {
+					ssp.dialogToChangeImageFolder(promptedForImageFolder, DatDisplayer.this);
+
+					try {
+
+						dh1 = ssp.copiedDatWithCorrectedTifs(filename, datFolderPath);
+						ild = dh1.getLazyDataset(ssp.getImageName());
+
+					} catch (Exception e2) {
+						e2.printStackTrace();
+						ssp.dialogToChangeImageFolder(promptedForImageFolder, DatDisplayer.this);
+					}
+				}
+			}
+
+			if (ild == null && r == true && ssp.getImageFolderPath() != null) {
+
+				try {
+
+					dh1 = ssp.copiedDatWithCorrectedTifs(filepath1, datFolderPath);
+					ild = dh1.getLazyDataset(ssp.getImageName());
+
+				} catch (Exception e2) {
+					e2.printStackTrace();
+				}
+
+			}
+
+			if (ild == null && r == true) {
+
+				ssp.dialogToChangeImageFolder(promptedForImageFolder, DatDisplayer.this);
+
+				try {
+
+					dh1 = ssp.copiedDatWithCorrectedTifs(filename, datFolderPath);
+					ild = dh1.getLazyDataset(ssp.getImageName());
+
+				} catch (Exception e2) {
+					e2.printStackTrace();
+				}
+			}
+
+			if (ild != null) {
+				r = false;
+				promptedForImageFolder = false;
+			}
+		}
+
+		if (ild != null) {
+
+			for (int k = 0; k < in0Local.length; k++) {
+				TableItem t = new TableItem(rodDisplayTable, SWT.NONE);
+				t.setText(in0Local[k]);
 			}
 
 			try {
