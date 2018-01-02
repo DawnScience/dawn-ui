@@ -22,6 +22,7 @@ import org.dawnsci.plotting.tools.powderlines.PowderLinesModel.PowderLineCoord;
 import org.eclipse.dawnsci.analysis.api.io.IDataHolder;
 import org.eclipse.dawnsci.analysis.api.io.ILoaderService;
 import org.eclipse.dawnsci.analysis.dataset.roi.XAxisLineBoxROI;
+import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.region.IRegion;
 import org.eclipse.dawnsci.plotting.api.region.IRegion.RegionType;
 import org.eclipse.dawnsci.plotting.api.region.RegionUtils;
@@ -50,7 +51,6 @@ import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Color;
-import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -273,39 +273,28 @@ public class PowderLineTool extends AbstractToolPage {
 		drawPowderLines(materialModels);
 	}
 	
+	private void redrawPowderLines() {
+		drawPowderLines(materialModels);
+	}
+	
 	private void drawPowderLines(Set<PowderLinesModel> drawModels) {
 		// Lines from the material models
 		
-		List<Double> plotLineList = new ArrayList<>();
-		// Iterate over the material models
-		for (PowderLinesModel linesModel : drawModels) {
-			for (PowderLineModel lineModel : linesModel.getLineModels())
-				plotLineList.add(lineModel.get(plotCoordinate));
-		}
-		DoubleDataset plotLineLocations = (!plotLineList.isEmpty()) ? (DoubleDataset) DatasetFactory.createFromList(plotLineList) : DatasetFactory.zeros(0);
-		
-		final XAxisLineBoxROI[] novalines = makeROILines(plotLineLocations);
-		final List<IRegion> viejoRegions = (currentLineRegions != null) ? new ArrayList<IRegion>(currentLineRegions) : null;
-		final List<IRegion> novaRegions = new ArrayList<IRegion>();
-		
 		// Keep track of our region names, since we are not adding them to the
 		// PlottingSystem until the syncExec call
-		List<String> usedNames = new ArrayList<String>();
+		List<String> usedNames = new ArrayList<>();
+
+		final List<IRegion> gamlaRegions = (currentLineRegions != null) ? new ArrayList<>(currentLineRegions) : null;
+		final List<IRegion> nyRegions = new ArrayList<>();
+
+		for (PowderLinesModel linesModel : drawModels)
+			nyRegions.addAll(makeRegionsFromModel(linesModel, plotCoordinate, usedNames, getPlottingSystem()));
+
+		currentLineRegions = nyRegions;
 		
-		for (XAxisLineBoxROI line : novalines) {
-			try {
-				IRegion rLine = getPlottingSystem().createRegion(RegionUtils.getUniqueName("PowderLine", getPlottingSystem(), usedNames.toArray(new String[]{})), RegionType.XAXIS_LINE);
-				usedNames.add(rLine.getName());
-				rLine.setROI(line);
-				novaRegions.add(rLine);
-			} catch (Exception e) {
-				System.err.println("Failed creating region for new powder line.");
-			}
-		}
-		currentLineRegions = novaRegions;
 		Display.getDefault().syncExec(new Runnable() {
 			public void run() {
-					for (IRegion lineRegion : novaRegions) {
+					for (IRegion lineRegion : nyRegions) {
 						try {
 							getPlottingSystem().addRegion(lineRegion);
 							lineRegion.setMobile(false);
@@ -314,8 +303,8 @@ public class PowderLineTool extends AbstractToolPage {
 						}
 					}
 					// Remove the ROIs that constitute the old lines
-					if (viejoRegions != null) {
-						for (IRegion lineRegion : viejoRegions) {
+					if (gamlaRegions != null) {
+						for (IRegion lineRegion : gamlaRegions) {
 							try {
 								getPlottingSystem().removeRegion(lineRegion);
 							} catch (Exception e) {
@@ -327,15 +316,42 @@ public class PowderLineTool extends AbstractToolPage {
 		});
 	}
 	
-	private XAxisLineBoxROI[] makeROILines(Dataset locations) {
+	// Generate a set of correctly coloured RoIs from a single LinesModel
+	private static List<IRegion> makeRegionsFromModel(PowderLinesModel model, PowderLinesModel.PowderLineCoord plotCoordinate, List<String> usedNames, IPlottingSystem<Object> plotSystem) {
+		List<Double> plotLineList = new ArrayList<>();
+		for (PowderLineModel lineModel: model.getLineModels())
+			plotLineList.add(lineModel.get(plotCoordinate));
+
+		if (plotLineList.isEmpty())
+			return new ArrayList<>();
 		
-		List<XAxisLineBoxROI> novalines = new ArrayList<XAxisLineBoxROI>();
+		DoubleDataset plotLineLocations = (DoubleDataset) DatasetFactory.createFromList(plotLineList);
+
+		List<XAxisLineBoxROI> nylines = new ArrayList<>();
+		IndexIterator iter = plotLineLocations.getIterator();
+		while(iter.hasNext()) {
+			XAxisLineBoxROI nyRoi = new XAxisLineBoxROI(plotLineLocations.getElementDoubleAbs(iter.index), 0, 0, 1, 0);
+			nylines.add(nyRoi);
+		}
+
+		List<IRegion> nyRegions = new ArrayList<>();
 		
-		IndexIterator iter = locations.getIterator();
-		while(iter.hasNext())
-			novalines.add(new XAxisLineBoxROI(locations.getElementDoubleAbs(iter.index), 0, 0, 1, 0));
+		Color regionColour = new Color(Display.getCurrent(), model.getRegionRGB());
 		
-		return novalines.toArray(new XAxisLineBoxROI[]{});
+		for (XAxisLineBoxROI line : nylines) {
+			try {
+				IRegion rLine = plotSystem.createRegion(RegionUtils.getUniqueName("PowderLine", plotSystem, usedNames.toArray(new String[]{})), RegionType.XAXIS_LINE);
+				rLine.setRegionColor(regionColour);
+				usedNames.add(rLine.getName());
+				rLine.setROI(line);
+				nyRegions.add(rLine);
+			} catch (Exception e) {
+				System.err.println("Failed creating region for new powder line.");
+			}
+		}
+
+		return nyRegions;
+
 	}
 	
 	/**
@@ -638,6 +654,10 @@ public class PowderLineTool extends AbstractToolPage {
 			}
 		}
 		
+		public void redrawLines() {
+			this.tool.redrawPowderLines();
+		}
+		
 		@Override
 		public void redraw() {
 			for (Composite subCompo : modelDetails)
@@ -694,8 +714,24 @@ public class PowderLineTool extends AbstractToolPage {
 			
 			colourSelector = new ColorSelector(this);
 			colourSelector.getButton().setLayoutData(new GridData(SWT.BEGINNING, SWT.BEGINNING, false, false));
-			// TODO: Add the colour call-back
-			colourSelector.setColorValue(new RGB(255, 0, 255));
+			colourSelector.setColorValue(model.getRegionRGB());
+			
+			colourSelector.getButton().addSelectionListener(new SelectionListener() {
+				
+				@Override
+				public void widgetSelected(SelectionEvent e) {
+					model.setRegionRGB(colourSelector.getColorValue());
+					
+					if (getParent() instanceof ModelsDetailsComposite) {
+						((ModelsDetailsComposite) getParent()).redrawLines();
+					}
+				}
+
+				
+				@Override
+				public void widgetDefaultSelected(SelectionEvent e) {
+				}
+			});
 			
 			deleteButton = new Button(this, SWT.NONE);
 			deleteButton.setText("×");
@@ -711,7 +747,6 @@ public class PowderLineTool extends AbstractToolPage {
 				
 				@Override
 				public void widgetDefaultSelected(SelectionEvent e) {
-					// TODO Auto-generated method stub
 				}
 			});
 		}

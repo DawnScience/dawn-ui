@@ -17,7 +17,7 @@ import org.dawnsci.plotting.tools.powderlines.PowderLineTool.PowderDomains;
 import org.eclipse.january.dataset.DatasetFactory;
 import org.eclipse.january.dataset.DoubleDataset;
 import org.eclipse.january.dataset.IndexIterator;
-import org.eclipse.january.dataset.Maths;
+import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.widgets.Composite;
 
 /**
@@ -41,6 +41,7 @@ public class PowderLinesModel {
 	private PowderLineCoord dataCoords;
 	private DoubleDataset lineLocations;
 	private String originalFilename;
+	private RGB rgb;
 	
 	private List<PowderLineModel> lineModels;
 	
@@ -53,6 +54,7 @@ public class PowderLinesModel {
 		this.lineLocations = DatasetFactory.zeros(0);
 		this.lineModels = new ArrayList<>();
 		this.originalFilename = "";
+		this.rgb = new RGB(127, 0, 0);
 	}
 	
 	/**
@@ -99,6 +101,23 @@ public class PowderLinesModel {
 	 */
 	public String getDescription() {
 		return this.originalFilename;
+	}
+	
+	/**
+	 * Sets the colour of the RoIs for this group of lines.
+	 * @param colour
+	 * 				the new colour of the lines.
+	 */
+	public void setRegionRGB(RGB rgb) {
+		this.rgb = rgb;
+	}
+	
+	/**
+	 * Returns the colour that the associated RoIs should have.
+	 * @return the RoI colour.
+	 */
+	public RGB getRegionRGB() {
+		return this.rgb;
 	}
 	
 	/**
