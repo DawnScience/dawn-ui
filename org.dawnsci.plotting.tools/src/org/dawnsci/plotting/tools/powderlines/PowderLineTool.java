@@ -148,6 +148,7 @@ public class PowderLineTool extends AbstractToolPage {
 		manyLineTV.setInput(materialModels);
 		
 		modelsDetailsCompo = new ModelsDetailsComposite(sashForm, SWT.BORDER);
+		modelsDetailsCompo.setTool(this);
 		
 		activate();
 		
@@ -262,6 +263,14 @@ public class PowderLineTool extends AbstractToolPage {
 	
 	protected void clearLines() {
 		this.drawPowderLines(new HashSet<PowderLinesModel>());
+	}
+	
+	private void deleteModel(PowderLinesModel delModel) {
+		if (materialModels.contains(delModel))
+			materialModels.remove(delModel);
+		this.manyLineTV.setInput(this.materialModels);
+		modelsDetailsCompo.deleteModel(delModel);
+		drawPowderLines(materialModels);
 	}
 	
 	private void drawPowderLines(Set<PowderLinesModel> drawModels) {
@@ -589,18 +598,28 @@ public class PowderLineTool extends AbstractToolPage {
 	
 	// Composite wrapping the details of each model
 	private class ModelsDetailsComposite extends Composite {
+		private PowderLineTool tool;
 		private List<PowderLinesModel> models;
-		private List<Composite> modelDetails;
+		private List<ModelDetailsComposite> modelDetails;
+		private List<Composite> modelDetailsData;
 		
 		public ModelsDetailsComposite(Composite parent, int style) {
 			super(parent, style);
 			models = new ArrayList<>();
 			modelDetails = new ArrayList<>();
+			modelDetailsData = new ArrayList<>();
+
 		}
 		
 		public void addModel(PowderLinesModel model) {
-			models.add(model);
-			redraw();
+			if (!models.contains(model)) {
+				models.add(model);
+				redraw();
+			}
+		}
+		
+		public void setTool(PowderLineTool tool) {
+			this.tool = tool;
 		}
 		
 		public void clearModels() {
@@ -610,11 +629,23 @@ public class PowderLineTool extends AbstractToolPage {
 			modelDetails.clear();
 		}
 		
+		public void deleteModel(PowderLinesModel model) {
+			if (models.contains(model)) {
+				System.err.println("Deleting model " + model.getDescription() + " from ModelsDetailsComposite.");
+				models.remove(model);
+				redraw();
+				this.tool.deleteModel(model);
+			}
+		}
+		
 		@Override
 		public void redraw() {
 			for (Composite subCompo : modelDetails)
 				subCompo.dispose();
 			modelDetails.clear();
+			for (Composite subCompo : modelDetailsData)
+				subCompo.dispose();
+			modelDetailsData.clear();
 			
 			this.setLayout(new GridLayout(1, true));
 			
@@ -627,7 +658,7 @@ public class PowderLineTool extends AbstractToolPage {
 
 				Composite detailsCompo = drawModel.getModelSpecificDetailsComposite(this, SWT.NONE);
 				detailsCompo.setLayoutData(new GridData(SWT.FILL, SWT.BEGINNING, true, false));
-				modelDetails.add(detailsCompo);
+				modelDetailsData.add(detailsCompo);
 			}
 			this.layout();
 		}
@@ -673,7 +704,9 @@ public class PowderLineTool extends AbstractToolPage {
 				
 				@Override
 				public void widgetSelected(SelectionEvent e) {
-					System.err.println("Don't press this button again!");
+					if (getParent() instanceof ModelsDetailsComposite) {
+						((ModelsDetailsComposite) getParent()).deleteModel(model);
+					}
 				}
 				
 				@Override
