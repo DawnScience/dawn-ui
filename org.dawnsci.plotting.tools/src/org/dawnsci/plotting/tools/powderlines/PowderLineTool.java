@@ -453,6 +453,7 @@ public class PowderLineTool extends AbstractToolPage {
 					eosModel.setBulkModulus(Double.parseDouble((String) metadata.getMetaValue("K0")));
 					eosModel.setBulkModulus_p(Double.parseDouble((String) metadata.getMetaValue("K0P")));
 					eosModel.setPressure(0.);
+					eosModel.setComment((String) metadata.getMetaValue("COMMENT")); 
 					nyModel = eosModel;
 					
 				} catch (Exception mE) {
@@ -464,6 +465,7 @@ public class PowderLineTool extends AbstractToolPage {
 			if (nyModel == null) {
 				nyModel = new PowderLinesModel();
 			}
+			nyModel.setDescription(chosenFile);
 			nyModel.setWavelength(theTool.model.getWavelength());
 			nyModel.setCoords(PowderLineCoord.D_SPACING);
 			nyModel.setLines(lines);
@@ -656,7 +658,7 @@ public class PowderLineTool extends AbstractToolPage {
 			
 			// Generic details
 			filenameText = new Label(this, SWT.SINGLE | SWT.LEAD);
-			filenameText.setText("FILENAME"); // TODO: get actual filename
+			filenameText.setText(model.getDescription());
 			filenameText.setLayoutData(new GridData(SWT.FILL, SWT.BEGINNING, true, false));
 			
 			colourSelector = new ColorSelector(this);

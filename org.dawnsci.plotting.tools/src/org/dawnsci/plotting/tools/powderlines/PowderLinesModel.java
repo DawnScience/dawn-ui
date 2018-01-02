@@ -40,6 +40,7 @@ public class PowderLinesModel {
 	private double wavelength; // in angstroms
 	private PowderLineCoord dataCoords;
 	private DoubleDataset lineLocations;
+	private String originalFilename;
 	
 	private List<PowderLineModel> lineModels;
 	
@@ -51,6 +52,7 @@ public class PowderLinesModel {
 		// and empty dataset of zeros
 		this.lineLocations = DatasetFactory.zeros(0);
 		this.lineModels = new ArrayList<>();
+		this.originalFilename = "";
 	}
 	
 	/**
@@ -81,6 +83,24 @@ public class PowderLinesModel {
 	public void setCoords(PowderLineCoord coords) {
 		this.dataCoords = coords;
 	}
+	
+	/**
+	 * Sets the filename of the file that provided the data
+	 * @param filename
+	 * 				name of the original data file. Can be the empty string.
+	 */
+	public void setDescription(String filename) {
+		this.originalFilename = filename;
+	}
+	
+	/**
+	 * Returns the filename that provided the line data.
+	 * @return filename of the data file. Might be an empty string for non-file based data.
+	 */
+	public String getDescription() {
+		return this.originalFilename;
+	}
+	
 	/**
 	 * @param energy_keV
 	 * 					the energy of the beam (in keV) to set

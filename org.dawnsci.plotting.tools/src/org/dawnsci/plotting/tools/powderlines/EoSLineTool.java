@@ -9,8 +9,6 @@
 
 package org.dawnsci.plotting.tools.powderlines;
 
-import java.text.DecimalFormat;
-
 import org.dawnsci.plotting.tools.ServiceLoader;
 import org.dawnsci.plotting.tools.powderlines.PowderLinesModel.PowderLineCoord;
 import org.eclipse.dawnsci.analysis.api.io.IDataHolder;
@@ -87,9 +85,9 @@ public class EoSLineTool extends PowderLineTool {
 	}
 
 	static class EosDetailsComposite extends Composite {
-		static final String modulusSymbol = "B"; // Could also be K
-		static final String modulusString = modulusSymbol+"₀";
-		static final String modulusDerivativeString = modulusSymbol + "₀′";
+		static final String MODULUSSYMBOL = "B"; // Could also be K
+		static final String MODULUSSTRING = MODULUSSYMBOL+"₀";
+		static final String MODULUSDERIVATIVESTRING = MODULUSSYMBOL + "₀′";
 		String pressureUnits = "Pa";
 		double pressureMultiplier = 1;
 		Text k0;
@@ -132,7 +130,7 @@ public class EoSLineTool extends PowderLineTool {
 			
 			// Modulus
 			Label modulusLabel = new Label(this, SWT.RIGHT);
-			modulusLabel.setText(modulusString + " :");
+			modulusLabel.setText(MODULUSSTRING + " :");
 			modulusLabel.setLayoutData(new GridData(SWT.RIGHT, SWT.TOP, false, false));
 			k0 = new Text(this, SWT.SINGLE | SWT.LEFT);
 			k0.setLayoutData(new GridData(SWT.BEGINNING, SWT.TOP, false, false));
@@ -147,7 +145,7 @@ public class EoSLineTool extends PowderLineTool {
 			
 			// Modulus derivate
 			Label derivLabel = new Label(this, SWT.RIGHT);
-			derivLabel.setText(modulusDerivativeString + " :");
+			derivLabel.setText(MODULUSDERIVATIVESTRING + " :");
 			derivLabel.setLayoutData(new GridData(SWT.RIGHT, SWT.TOP, false, false));
 			
 			k0prime = new Text(this, SWT.SINGLE | SWT.LEFT);

@@ -26,6 +26,8 @@ public class EoSLinesModel extends PowderLinesModel {
 
 	private double pressure;
 	
+	private String comment;
+	
 
 	/**
 	 * @return the bulk modulus of the material
@@ -71,6 +73,16 @@ public class EoSLinesModel extends PowderLinesModel {
 		this.pressure = pressure;
 	}
 
+//	@Override
+	public void setComment(String comment) {
+		this.comment = comment;
+	}
+	
+	@Override
+	public String getDescription() {
+		return this.comment;
+	}
+	
 	@Override
 	public boolean hasEoSMetadata() {
 		return true;
