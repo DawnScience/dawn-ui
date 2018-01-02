@@ -88,6 +88,8 @@ public class DatDisplayer extends Composite implements IDatDisplayer {
 	private InputTileGenerator parameterFilesTile;
 	private boolean useIncrement;
 	private InputTileGenerator searchBox;
+	private String[] in0;
+	private String[] in1;
 	
 
 	public DatDisplayer(Composite parent, int style, SurfaceScatterPresenter ssp, SurfaceScatterViewStart ssvs,
@@ -232,10 +234,10 @@ public class DatDisplayer extends Composite implements IDatDisplayer {
 			@Override
 			public void modifyText(ModifyEvent e) {
 				if(!searchBox.getText().getText().isEmpty()) {
-					fillTable(SearchForString.search(searchBox.getText().getText(), folderDisplayTable.getItems()));
+					fillTable(SearchForString.search(searchBox.getText().getText(), in0, in1));
 				}
 				else{
-					fillTable();
+					fillTable(new String[][] {in0, in1});
 				}
 			}
 		});
@@ -417,6 +419,7 @@ public class DatDisplayer extends Composite implements IDatDisplayer {
 
 				}
 
+				
 				if (!checkEnd || !checkStart) {
 					RegionOutOfBoundsWarning aah = new RegionOutOfBoundsWarning(ssvs.getShell(), 12, null);
 					aah.open();
@@ -491,6 +494,7 @@ public class DatDisplayer extends Composite implements IDatDisplayer {
 		buildRod.setText("Build Rod From Selected");
 		buildRod.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
 		buildRod.setEnabled(false);
+		
 
 		rodDisplayTable = new Table(rodComponents, SWT.CHECK | SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL);
 		GridData rodDisplayData = new GridData(GridData.FILL_BOTH);
@@ -826,22 +830,18 @@ public class DatDisplayer extends Composite implements IDatDisplayer {
 		return selectFiles;
 	}
 
-	private void fillTable(TableItem[] in) {
+	private void fillTable(String[][] in) {
 		 
-		String[] in0 = new String[in.length];
-		String[] in1 = new String[in.length];
-		
-		for(int j = 0; j < in.length; j++) {
-			in0[j]=in[j].getText(0);
-			in1[j]=in[j].getText(1);
-		}
+		String[] in0local = in[0];
+		String[] in1local = in[1];
+	
 		
 		folderDisplayTable.removeAll();
 		
-		for (int j = 0; j < in.length; j++) {			
+		for (int j = 0; j < in[0].length; j++) {			
 			TableItem t = new TableItem(folderDisplayTable, SWT.NONE);
-			t.setText(0, in0[j]);
-			t.setText(1, in1[j]);
+			t.setText(0, in0local[j]);
+			t.setText(1, in1local[j]);
 		}
 
 		for (int loopIndex = 0; loopIndex < folderDisplayTable.getColumnCount(); loopIndex++) {
@@ -873,6 +873,9 @@ public class DatDisplayer extends Composite implements IDatDisplayer {
 		
 		folderDisplayTable.removeAll();
 
+		in0 = new String[datList.size()];
+		in1 = new String[datList.size()];
+		
 		for (int j = 0; j < datList.size(); j++) {
 
 			Path from = Paths.get(datFolderPath + File.separator + datList.get(j));
@@ -899,8 +902,13 @@ public class DatDisplayer extends Composite implements IDatDisplayer {
 				scanCommand = " ";
 			}
 			TableItem t = new TableItem(folderDisplayTable, SWT.NONE);
+			
 			t.setText(0, datList.get(j));
+			in0[j] = datList.get(j);
+			
 			t.setText(1, scanCommand);
+			in1[j] = scanCommand;
+			
 
 		}
 

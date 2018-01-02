@@ -3,25 +3,28 @@ package org.dawnsci.surfacescatter.ui;
 import java.util.ArrayList;
 
 import org.apache.commons.lang.StringUtils;
-import org.eclipse.swt.widgets.TableItem;
 
 public class SearchForString {
-
-	public static TableItem[] search(String in, TableItem[] tis) {
+	
+	public static String[][] search(String in, String[] in0, String[] in1) {
 		
-		ArrayList<TableItem> tiList = new ArrayList<>();
+		ArrayList<String> in0List = new ArrayList<>();
+		ArrayList<String> in1List = new ArrayList<>();
 		
-		for(TableItem t : tis) {
-			if(StringUtils.contains(t.getText(1), in)) {
-				tiList.add(t);
+		for(int y = 0; y<in0.length; y++) {
+			if(StringUtils.contains(in1[y], in) || StringUtils.contains(in0[y], in) ) {
+				in0List.add(in0[y]);
+				in1List.add(in1[y]);
 			}
 		}
 		
-		TableItem[] p =  new TableItem[tiList.size()];
+		String[] in0out =  new String[in0List.size()];
+		String[] in1out =  new String[in1List.size()];
 		
-		tiList.toArray(p);
+		in0List.toArray(in0out);
+		in1List.toArray(in1out);
 		
-		return p;
+		return new String[][] {in0out, in1out};
 	}
 	
 }
