@@ -94,6 +94,7 @@ public class BatchDatDisplayer extends Composite implements IDatDisplayer {
 	private Button useTrajectoryButton;
 	private InputTileGenerator useTrajectoryTile;
 	private InputTileGenerator parameterFilesTile;
+	private InputTileGenerator searchBox;
 
 	public BatchDatDisplayer(Composite parent, int style, SurfaceScatterPresenter ssp, SurfaceScatterViewStart ssvs,
 			BatchRodModel brm) {
@@ -188,6 +189,7 @@ public class BatchDatDisplayer extends Composite implements IDatDisplayer {
 				sortOutEnabling(itgArray[2], itgArray[1]);
 				transferUsingIncrement.setEnabled(true);
 				deSelectAll.setEnabled(true);
+				searchBox.setEnabled(true, false);
 			}
 
 		});
@@ -228,6 +230,24 @@ public class BatchDatDisplayer extends Composite implements IDatDisplayer {
 		for (Control c : numericalDatSelection.getChildren()) {
 			c.setEnabled(false);
 		}
+		
+		
+		searchBox = new InputTileGenerator("Search Scan Command For String: ", "", datSelector, 0);
+		searchBox.setEnabled(false, false);
+		
+		searchBox.getText().addModifyListener(new ModifyListener() {
+			
+			@Override
+			public void modifyText(ModifyEvent e) {
+				if(!searchBox.getText().getText().isEmpty()) {
+					fillTable(SearchForString.search(searchBox.getText().getText(), folderDisplayTable.getItems()));
+				}
+				else{
+					fillTable();
+				}
+			}
+		});
+		
 
 		transferToRod = new Button(datSelector, SWT.PUSH);
 		transferToRod.setText(DisplayLabelStrings.getTransferSelectedToRod());
@@ -599,6 +619,7 @@ public class BatchDatDisplayer extends Composite implements IDatDisplayer {
 				sortOutEnabling(itgArray[2], itgArray[1]);
 				transferUsingIncrement.setEnabled(false);
 				deSelectAll.setEnabled(false);
+				searchBox.setEnabled(false, false);
 				refreshTable.setEnabled(false);
 			}
 
@@ -800,6 +821,30 @@ public class BatchDatDisplayer extends Composite implements IDatDisplayer {
 	public Button getDatFolderSelection() {
 		return datFolderSelection;
 	}
+	
+	private void fillTable(TableItem[] in) {
+		 
+		String[] in0 = new String[in.length];
+		String[] in1 = new String[in.length];
+		
+		for(int j = 0; j < in.length; j++) {
+			in0[j]=in[j].getText(0);
+			in1[j]=in[j].getText(1);
+		}
+		
+		folderDisplayTable.removeAll();
+		
+		for (int j = 0; j < in.length; j++) {			
+			TableItem t = new TableItem(folderDisplayTable, SWT.NONE);
+			t.setText(0, in0[j]);
+			t.setText(1, in1[j]);
+		}
+
+		for (int loopIndex = 0; loopIndex < folderDisplayTable.getColumnCount(); loopIndex++) {
+			folderDisplayTable.getColumn(loopIndex).pack();
+		}
+		
+	}
 
 	private void fillTable() {
 
@@ -820,6 +865,8 @@ public class BatchDatDisplayer extends Composite implements IDatDisplayer {
 		} catch (Exception g) {
 
 		}
+		
+		folderDisplayTable.removeAll();
 
 		for (int j = 0; j < datList.size(); j++) {
 

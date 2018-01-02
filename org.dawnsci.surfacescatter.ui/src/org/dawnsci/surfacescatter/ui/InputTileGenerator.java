@@ -93,6 +93,7 @@ public class InputTileGenerator {
 
 		text = new Text(tile, SWT.SINGLE | SWT.BORDER | SWT.FILL);
 		text.setText(l);
+		text.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		if (in) {
 			text.setEnabled(stateOfText);
 		}
