@@ -1410,6 +1410,8 @@ public class SurfaceScatterPresenter {
 
 	public void setLenPt(int sliderpos, int[][] lenPt) {
 
+		int[][] test = getLenPt();
+		
 		if (!Arrays.equals(lenPt[0], getLenPt()[0]) || !Arrays.equals(lenPt[1], getLenPt()[1])) {
 
 			drm.setInitialLenPt(sliderpos, lenPt);
@@ -1826,6 +1828,7 @@ public class SurfaceScatterPresenter {
 		RegionOutOfBoundsWarning roobw = new RegionOutOfBoundsWarning(parentShell, 0, in);
 		roobw.open();
 	}
+
 	public void overlappingRodNames() {
 		RegionOutOfBoundsWarning roobw = new RegionOutOfBoundsWarning(parentShell, 7, null);
 		roobw.open();
@@ -2210,11 +2213,16 @@ public class SurfaceScatterPresenter {
 	}
 
 	public void setBackgroundLenPt(int[][] l) {
-		drm.setBackgroundLenPt(l);
-		try {
-			fireStateListeners();
-		} catch (Exception f) {
+
+		if (!Arrays.equals(drm.getBackgroundLenPt()[0], l[0]) || !Arrays.equals(drm.getBackgroundLenPt()[1], l[1])) {
+
+			drm.setBackgroundLenPt(l);
+			try {
+				fireStateListeners();
+			} catch (Exception f) {
+			}
 		}
+
 	}
 
 	public int[][] getInitialLenPt() {
@@ -2625,8 +2633,9 @@ public class SurfaceScatterPresenter {
 	}
 
 	private void fireStateListeners() {
-		for (IPresenterStateChangeEventListener l : listeners)
+		for (IPresenterStateChangeEventListener l : listeners) {
 			l.update();
+		}
 	}
 
 	public void createGm() {
@@ -2815,7 +2824,7 @@ public class SurfaceScatterPresenter {
 		}
 
 		String title = path + File.separator + stitle;
-		
+
 		try {
 			arbitrarySavingMethodCore(useQ, writeOnlyGoodPoints, sfs, csdpToSave, yAxis, title);
 		} catch (OutputException g) {
@@ -2862,7 +2871,6 @@ public class SurfaceScatterPresenter {
 		CurveStitchDataPackage csdp = drm.getCsdp();
 		disregardNegativeIntensities(csdp);
 
-		
 	}
 
 	public void disregardNegativeIntensities(CurveStitchDataPackage csdp) {

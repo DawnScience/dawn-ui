@@ -187,7 +187,7 @@ public class BatchDatDisplayer extends Composite implements IDatDisplayer {
 				sortOutEnabling(itgArray[2], itgArray[1]);
 				sortOutEnabling(itgArray[2], itgArray[1]);
 				transferUsingIncrement.setEnabled(true);
-
+				deSelectAll.setEnabled(true);
 			}
 
 		});
@@ -244,6 +244,10 @@ public class BatchDatDisplayer extends Composite implements IDatDisplayer {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				folderDisplayTable.deselectAll();
+				folderDisplayTable.deselectAll();
+				for(TableItem t: folderDisplayTable.getItems()) {
+					t.setChecked(false);
+				}
 				
 			}
 			
@@ -594,6 +598,7 @@ public class BatchDatDisplayer extends Composite implements IDatDisplayer {
 				sortOutEnabling(itgArray[2], itgArray[1]);
 				sortOutEnabling(itgArray[2], itgArray[1]);
 				transferUsingIncrement.setEnabled(false);
+				deSelectAll.setEnabled(false);
 				refreshTable.setEnabled(false);
 			}
 
@@ -790,8 +795,6 @@ public class BatchDatDisplayer extends Composite implements IDatDisplayer {
 		useTrajectoryTile.setEnabled(enabled);
 		parameterFilesTile.setEnabled(enabled);
 		clearParameterTable.setEnabled(enabled);
-		deSelectAll.setEnabled(enabled);
-
 	}
 
 	public Button getDatFolderSelection() {

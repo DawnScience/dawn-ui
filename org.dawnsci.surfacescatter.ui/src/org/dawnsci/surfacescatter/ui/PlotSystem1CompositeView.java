@@ -304,17 +304,7 @@ public class PlotSystem1CompositeView extends Composite {
 		});
 		
 		
-		
-//
-//		sc1.setContent(methodSetting);
-//		//
-//		sc1.setExpandHorizontal(true);
-//		sc1.setExpandVertical(true);
-//
-//		sc1.setMinSize(methodSetting.computeSize(methodSetting.getSize().x, SWT.DEFAULT));
-//
-//		// sc1.setAlwaysShowScrollBars(true);
-//		sc1.pack();
+
 		
 
 	}

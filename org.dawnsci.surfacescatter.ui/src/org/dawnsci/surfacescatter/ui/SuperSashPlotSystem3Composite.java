@@ -3,7 +3,6 @@ package org.dawnsci.surfacescatter.ui;
 import java.util.List;
 
 import org.dawb.common.ui.widgets.ActionBarWrapper;
-import org.dawnsci.plotting.draw2d.swtxy.AspectAxis;
 import org.dawnsci.surfacescatter.VerticalHorizontalSlices;
 import org.eclipse.dawnsci.analysis.api.roi.IRectangularROI;
 import org.eclipse.dawnsci.analysis.dataset.roi.RectangularROI;
@@ -356,12 +355,6 @@ public class SuperSashPlotSystem3Composite extends Composite {
 
 			resetCrossHairs();
 
-			// ILineTrace lt1 =
-			// VerticalHorizontalSlices.horizontalslice(horizontalSlice.getROI().getBounds(),
-			// plotSystem1,
-			// subImage, greenRectangle);
-			//
-			// plotSystem1.addTrace(lt1);
 
 		}
 
@@ -379,9 +372,6 @@ public class SuperSashPlotSystem3Composite extends Composite {
 
 			ILineTrace lt6 = VerticalHorizontalSlices.verticalsliceBackgroundSubtracted(
 					verticalSlice.getROI().getBounds(), plotSystem3, output, greenRectangle);
-
-			// lt3.setName("background Slice");
-			// lt4.setName("background Slice");
 
 			plotSystem1.addTrace(lt3);
 			plotSystem3.addTrace(lt4);
