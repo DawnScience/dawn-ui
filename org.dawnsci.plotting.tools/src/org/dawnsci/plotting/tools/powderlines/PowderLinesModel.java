@@ -126,6 +126,9 @@ public class PowderLinesModel {
 	 */
 	public void setEnergy(double energy_keV) {
 		this.wavelength = hc_keVAA / energy_keV;
+		for (PowderLineModel lineModel: lineModels) {
+			lineModel.setWavelength(wavelength);
+		}
 	}
 	/**
 	 * @return the energy of the beam (in keV)

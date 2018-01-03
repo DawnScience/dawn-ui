@@ -36,7 +36,6 @@ import org.eclipse.january.dataset.DoubleDataset;
 import org.eclipse.january.dataset.IndexIterator;
 import org.eclipse.january.metadata.IMetadata;
 import org.eclipse.jface.action.Action;
-import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.layout.TableColumnLayout;
 import org.eclipse.jface.preference.ColorSelector;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
@@ -45,12 +44,14 @@ import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.jface.viewers.Viewer;
-import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
+import org.eclipse.swt.events.ModifyEvent;
+import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -79,8 +80,9 @@ public class PowderLineTool extends AbstractToolPage {
 	private SashForm sashForm;
 	// sub composites, needed to set the relative size for the different domains
 	private Composite mTableCompo;
-
 	private ModelsDetailsComposite modelsDetailsCompo;
+	private Composite settingsOuterComposite;
+	private SettingsComposite settingsComposite;
 	
 	protected PowderLinesModel model;
 	
@@ -136,6 +138,9 @@ public class PowderLineTool extends AbstractToolPage {
 		// Create the Actions
 		createActions();
 		
+		// Settings
+		settingsOuterComposite = new Composite(sashForm, SWT.NONE);
+		
 		// Create the table of all lines of all materials
 		mTableCompo = new Composite(sashForm, SWT.NONE);
 		manyLineTV = new TableViewer(mTableCompo, SWT.FULL_SELECTION | SWT.SINGLE | SWT.H_SCROLL | SWT.V_SCROLL | SWT.BORDER);
@@ -153,6 +158,8 @@ public class PowderLineTool extends AbstractToolPage {
 		activate();
 		
 		super.createControl(parent);
+		
+		drawSettings();
 	}
 	
 	@Override
@@ -361,6 +368,7 @@ public class PowderLineTool extends AbstractToolPage {
 		this.drawGenericTable();
 //		this.drawDomainSpecific(model);
 		this.drawPowderLines(this.materialModels);
+		this.drawSettings();
 	}
 	
 	private void createActions() {
@@ -368,21 +376,6 @@ public class PowderLineTool extends AbstractToolPage {
 		final PowderLineTool theTool = this;
 
 		getSite().getActionBars().getToolBarManager().add( new LoadAction(theShell, theTool));
-		
-		final Action coordinateAction = new Action("Set up the coordinates of the plot and lines", Activator.getImageDescriptor("icons/bullet_wrench.png")) {
-			@Override
-			public void run() {
-				PowderLineSettingsDialog dialog = new PowderLineSettingsDialog(theShell);
-				dialog.setCurrentValues(theTool.model.getEnergy(), plotCoordinate);
-				if (dialog.open() == Window.OK) {
-					theTool.model.setEnergy(dialog.getEnergy());
-					theTool.setCoords(dialog.getCoords());
-					
-					theTool.refresh(true);
-				}
-			}
-		};
-		getSite().getActionBars().getToolBarManager().add(coordinateAction);
 		
 		final Action clearAction = new Action("Clear the lines", Activator.getImageDescriptor("icons/delete.gif")) {
 			@Override
@@ -400,6 +393,13 @@ public class PowderLineTool extends AbstractToolPage {
 	private void setLengthScale(double lengthScale) {
 		this.drawGenericTable();
 		this.drawPowderLines(this.materialModels);
+	}
+	
+	private void setEnergy(double energy) {
+		this.model.setEnergy(energy);
+		for (PowderLinesModel materialModel : materialModels) {
+			materialModel.setEnergy(energy);
+		}
 	}
 	
 	protected class LoadAction extends Action {
@@ -502,85 +502,24 @@ public class PowderLineTool extends AbstractToolPage {
 		}
 	}
 	
-	
-	public class PowderLineSettingsDialog extends Dialog {
+	private void drawSettings() {
+		if (settingsOuterComposite == null)
+			return;
 
-		private double energy;
-		private PowderLinesModel.PowderLineCoord coords;
+		settingsOuterComposite.setLayout(new FillLayout());
 		
-		private Text energyText;
-		private Combo coordCombo;
-		
-		public PowderLineSettingsDialog(Shell parent) {
-			super(parent);
+		if (settingsComposite == null) {
+			settingsComposite = new SettingsComposite(settingsOuterComposite, SWT.NONE);
+			settingsComposite.setTool(this);
+			settingsComposite.redraw();
 		}
-
-		@Override
-		public void create() {
-			super.create();
-			setTitle("Powder Line Tool Settings");
-		}
+		settingsOuterComposite.layout();
 		
-		@Override
-		protected Control createDialogArea(Composite parent) {
-			Composite area = (Composite) super.createDialogArea(parent);
-			Composite container = new Composite(area, SWT.NONE);
-			container.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-			GridLayout layout  = new GridLayout(2, false);
-			container.setLayout(layout);
-			
-			createCoordinateDropdown(container);
-			createEnergyBox(container);
-			
-			return area;
-		}
-		
-		private void createCoordinateDropdown(Composite container) {
-			Label coordLabel = new Label(container, SWT.NONE);
-			coordLabel.setText("Plot coordinates");
-			
-			coordCombo = new Combo(container, SWT.BORDER);
-			String[] coordsItems = new String[]{
-					PowderLinesModel.PowderLineCoord.Q.name(),
-					PowderLinesModel.PowderLineCoord.ANGLE.name(),
-					PowderLinesModel.PowderLineCoord.D_SPACING.name()
-			};
-			coordCombo.setItems(coordsItems);
-			// Select the current coordinates
-			int currentIndex = Arrays.asList(coordsItems).indexOf(coords.name()); 
-			coordCombo.select(currentIndex);
-			
-		}
-		
-		private void createEnergyBox(Composite container) {
-			Label energyLabel = new Label(container, SWT.NONE);
-			energyLabel.setText("Energy (keV)");
-			
-			energyText = new Text(container, SWT.BORDER);
-			energyText.setText(Double.toString(energy));
-			
-		}
-		
-		public void setCurrentValues(double energy, PowderLinesModel.PowderLineCoord coords) {
-			this.energy = energy;
-			this.coords = coords;
-		}
-		
-		public double getEnergy() {
-			return this.energy;
-		}
-		
-		public PowderLinesModel.PowderLineCoord getCoords() {
-			return this.coords;
-		}
-		
-		@Override
-		protected void okPressed() {
-			this.energy = Double.parseDouble(energyText.getText());
-			this.coords = PowderLinesModel.PowderLineCoord.valueOf(coordCombo.getItems()[coordCombo.getSelectionIndex()]);
-			super.okPressed();
-		}
-		
+		Point compoSize = settingsComposite.computeSize(SWT.DEFAULT, SWT.DEFAULT);
+		Point sashSize = sashForm.getSize();
+		int otherWeight = (sashSize.y - compoSize.y)/2;
+		if (compoSize.y > 0 && otherWeight > 0)
+			sashForm.setWeights(new int[] {(int) (compoSize.y*1.05), otherWeight, otherWeight});
 	}
 	
 	protected class ManyLineCP implements IStructuredContentProvider {
@@ -764,4 +703,101 @@ public class PowderLineTool extends AbstractToolPage {
 		}
 	}
 	
+	// A Composite to report and change the settings, replacing the former dialog
+	static class SettingsComposite extends Composite {
+		private PowderLineTool tool;
+		
+		private Text energyText;
+		private Combo coordCombo;
+
+		public SettingsComposite(Composite parent, int style) {
+			super(parent, style);
+		}
+		
+		@Override
+		public void redraw() {
+			
+			GridLayout layout = new GridLayout(11, false);
+			this.setLayout(layout);
+			
+			// Plot coordinates
+			Label coordLabel = new Label(this, SWT.RIGHT);
+			coordLabel.setText("Plot coordinates");
+			coordLabel.setLayoutData(new GridData(SWT.RIGHT, SWT.TOP, false, false));
+			
+			coordCombo = new Combo(this, SWT.BORDER);
+			String[] coordsItems = new String[]{
+					PowderLinesModel.PowderLineCoord.Q.name(),
+					PowderLinesModel.PowderLineCoord.ANGLE.name(),
+					PowderLinesModel.PowderLineCoord.D_SPACING.name()
+			};
+			coordCombo.setItems(coordsItems);
+			// Select the current coordinates
+			int currentIndex = Arrays.asList(coordsItems).indexOf(tool.plotCoordinate.name()); 
+			coordCombo.select(currentIndex);
+			coordCombo.setLayoutData(new GridData(SWT.RIGHT, SWT.TOP, false, false));
+			coordCombo.addSelectionListener(new SelectionListener() {
+				
+				@Override
+				public void widgetSelected(SelectionEvent e) {
+					coordsChanged();
+				}
+				
+				@Override
+				public void widgetDefaultSelected(SelectionEvent e) {
+					// TODO Auto-generated method stub
+				}
+			});
+			
+			Text spacer = new Text(this, SWT.SINGLE);
+			spacer.setEditable(false);
+			spacer.setLayoutData(new GridData(SWT.RIGHT, SWT.TOP, true, false));
+			
+			// Beam energy box
+			Label energyLabel = new Label(this, SWT.RIGHT);
+			energyLabel.setText("Beam energy");
+			energyLabel.setLayoutData(new GridData(SWT.RIGHT, SWT.TOP, false, false));
+			
+			energyText = new Text(this, SWT.BORDER);
+			energyText.setText(Double.toString(tool.model.getEnergy()));
+			energyText.setLayoutData(new GridData(SWT.RIGHT, SWT.TOP, false, false));
+			energyText.addModifyListener(new ModifyListener() {
+				
+				@Override
+				public void modifyText(ModifyEvent e) {
+					energyChanged();
+				}
+			});
+			
+			Label unitsLabel = new Label(this, SWT.RIGHT);
+			unitsLabel.setText("keV");
+			unitsLabel.setLayoutData(new GridData(SWT.RIGHT, SWT.TOP, false, false));
+			
+			super.redraw();
+			
+			this.layout();
+		}
+		
+		public void setTool(PowderLineTool tool) {
+			this.tool = tool;
+		}
+		
+		private void energyChanged() {
+			
+			double energy;
+			try {
+				energy = Double.parseDouble(energyText.getText());
+			} catch (NumberFormatException nfe) {
+				energy = 1.0; // default to 1 keV
+			}
+			tool.setEnergy(energy);
+			tool.refresh(true);
+		}
+		
+		private void coordsChanged() {
+			PowderLineCoord coord = PowderLineCoord.valueOf(coordCombo.getItem(coordCombo.getSelectionIndex()));
+			tool.setCoords(coord);
+			tool.refresh(true);
+		}
+	}
 }
