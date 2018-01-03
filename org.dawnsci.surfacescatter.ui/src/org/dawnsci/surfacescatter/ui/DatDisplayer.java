@@ -872,7 +872,7 @@ public class DatDisplayer extends Composite implements IDatDisplayer {
 
 		}
 		
-		folderDisplayTable.removeAll();
+		clearTable();
 
 		in0 = new String[datList.size()];
 		in1 = new String[datList.size()];
@@ -954,6 +954,7 @@ public class DatDisplayer extends Composite implements IDatDisplayer {
 
 	public void clearTable() {
 		folderDisplayTable.removeAll();
+		ssp.getStm().setImageFolderPath(null);
 	}
 
 	public Table getRodDisplayTable() {
