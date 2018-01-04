@@ -6,6 +6,7 @@ import org.dawnsci.mapping.ui.IRegistrationHelper;
 import org.dawnsci.mapping.ui.datamodel.AssociatedImage;
 import org.dawnsci.mapping.ui.datamodel.IMapFileEventListener;
 import org.dawnsci.mapping.ui.datamodel.LiveDataBean;
+import org.dawnsci.mapping.ui.datamodel.LiveStreamMapObject;
 import org.dawnsci.mapping.ui.datamodel.MappedDataArea;
 import org.dawnsci.mapping.ui.datamodel.MappedDataFile;
 import org.dawnsci.mapping.ui.datamodel.MappedDataFileBean;
@@ -57,5 +58,7 @@ public interface IMapFileController {
 	void setRegistrationHelper(IRegistrationHelper helper);
 
 	void removeFile(MappedDataFile file);
+	
+	void addLiveStream(LiveStreamMapObject stream);
 }
 
