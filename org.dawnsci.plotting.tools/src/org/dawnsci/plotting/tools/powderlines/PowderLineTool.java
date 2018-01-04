@@ -18,6 +18,7 @@ import java.util.Set;
 
 import org.dawnsci.plotting.tools.Activator;
 import org.dawnsci.plotting.tools.ServiceLoader;
+import org.dawnsci.plotting.tools.powderlines.EoSLineTool.EosDetailsComposite;
 import org.dawnsci.plotting.tools.powderlines.PowderLinesModel.PowderLineCoord;
 import org.eclipse.dawnsci.analysis.api.io.IDataHolder;
 import org.eclipse.dawnsci.analysis.api.io.ILoaderService;
@@ -389,16 +390,20 @@ public class PowderLineTool extends AbstractToolPage {
 		this.manyLineTV.setInput(materialModels);
 	}
 	
-	private void setLengthScale(double lengthScale) {
-		this.drawGenericTable();
-		this.drawPowderLines(this.materialModels);
-	}
-	
 	private void setEnergy(double energy) {
 		this.model.setEnergy(energy);
 		for (PowderLinesModel materialModel : materialModels) {
 			materialModel.setEnergy(energy);
 		}
+	}
+	
+	public void setPressure(double pressure) {
+		for (PowderLinesModel linesModel : materialModels) {
+			if (linesModel instanceof EoSLinesModel)
+				((EoSLinesModel) linesModel).setPressure(pressure);
+		}
+		refresh(true);
+		modelsDetailsCompo.setPressure(pressure);
 	}
 	
 	protected class LoadAction extends Action {
@@ -523,6 +528,10 @@ public class PowderLineTool extends AbstractToolPage {
 			sashForm.setWeights(new int[] {(int) (compoSize.y*1.05), otherWeight, otherWeight});
 	}
 	
+	private void drawDetailsComposite() {
+		modelsDetailsCompo.redraw();
+	}
+	
 	protected class ManyLineCP implements IStructuredContentProvider {
 
 		@Override
@@ -583,6 +592,9 @@ public class PowderLineTool extends AbstractToolPage {
 			for (Composite subCompo : modelDetails)
 				subCompo.dispose();
 			modelDetails.clear();
+			for (Composite detailsCompo : modelDetailsData)
+				detailsCompo.dispose();
+			modelDetailsData.clear();
 		}
 		
 		public void deleteModel(PowderLinesModel model) {
@@ -621,6 +633,13 @@ public class PowderLineTool extends AbstractToolPage {
 				modelDetailsData.add(detailsCompo);
 			}
 			this.layout();
+		}
+		
+		public void setPressure(double pressure) {
+			for (Composite detailsCompo: modelDetailsData) {
+				if (detailsCompo instanceof EosDetailsComposite)
+					((EosDetailsComposite) detailsCompo).setPressure(pressure);
+			}
 		}
 	}
 	

@@ -128,7 +128,7 @@ public class EoSLineTool extends PowderLineTool {
 		 * 				value in Pa.
 		 */
 		public void setModulus(double modulus) {
-			this.k0.setText(Double.toString(modulus/pressureMultiplier));//new DecimalFormat("#.###").format(modulus/pressureMultiplier));
+			this.k0.setText(Double.toString(modulus/pressureMultiplier));
 		}
 
 		public void setModulusDerivative(double modulusDeriviative) {
@@ -141,7 +141,8 @@ public class EoSLineTool extends PowderLineTool {
 		 * 				value in Pa.
 		 */
 		public void setPressure(double pressure) {
-			this.p.setText(Double.toString(pressure/pressureMultiplier));
+			if (!Double.toString(pressure/pressureMultiplier).equals(p.getText()))
+				this.p.setText(Double.toString(pressure/pressureMultiplier));
 		}
 
 		public void setModel(EoSLinesModel model) {
@@ -230,9 +231,9 @@ public class EoSLineTool extends PowderLineTool {
 					} catch (NumberFormatException nfe) {
 						pressure = 1e-5;
 					}
-					model.setPressure(pressure);
+					tool.setPressure(pressure);
 					ll0.setText(Double.toString(model.getLengthRatio()));
-					tool.refresh(true);
+//					tool.refresh(true);
 				}
 				
 			});
