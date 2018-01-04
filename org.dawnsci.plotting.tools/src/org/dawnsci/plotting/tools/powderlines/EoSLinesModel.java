@@ -27,9 +27,14 @@ public class EoSLinesModel extends PowderLinesModel {
 	
 	private String comment;
 	
-	private double lengthRatio;
+	private double linearRatio;
+	private double vexp_v0;
 	
-
+	public EoSLinesModel() {
+		pressure = 0.0;
+		vexp_v0 = 1.0;
+	}
+	
 	/**
 	 * @return the bulk modulus of the material, in Pa
 	 */
@@ -115,20 +120,29 @@ public class EoSLinesModel extends PowderLinesModel {
 	}
 	
 	private void updateLengthScales() {
-		lengthRatio = BirchMurnaghanSolver.birchMurnaghanLinear(pressure, bulkModulus, bulkModulus_p);
+		linearRatio = BirchMurnaghanSolver.birchMurnaghanLinear(pressure, bulkModulus, bulkModulus_p);
+		linearRatio *= Math.cbrt(vexp_v0);
 		for (PowderLineModel lineModel: lineModels) {
 			if (lineModel instanceof EoSLineModel) {
-				((EoSLineModel) lineModel).setLengthRatio(lengthRatio);
+				((EoSLineModel) lineModel).setLengthRatio(linearRatio);
 			}
 		}
 	}
 	
 	public void setLengthRatio(double ratio) {
-		this.lengthRatio = ratio;
+		this.linearRatio = ratio;
 	}
 	
 	public double getLengthRatio() {
-		return this.lengthRatio;
+		return this.linearRatio;
 	}
 	
+	public void setVexpV0(double vexpv0) {
+		this.vexp_v0 = vexpv0;
+		updateLengthScales();
+	}
+	
+	public double getVexpV0() {
+		return vexp_v0;
+	}
 }

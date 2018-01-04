@@ -256,8 +256,23 @@ public class EoSLineTool extends PowderLineTool {
 			
 			v0exp = new Text(this, SWT.BORDER);
 			v0exp.setLayoutData(new GridData(SWT.BEGINNING, SWT.TOP, false, false));
-			v0exp.setEditable(true);
-			v0exp.setText("1.0");
+			v0exp.setText(Double.toString(model.getVexpV0()));
+			v0exp.addModifyListener(new ModifyListener() {
+
+				@Override
+				public void modifyText(ModifyEvent e) {
+					double v0expValue;
+					try {
+						v0expValue = Double.parseDouble(v0exp.getText());
+					} catch (NumberFormatException nfe) {
+						v0expValue = 1.0;
+					}
+					model.setVexpV0(v0expValue);
+					setLL0();
+					tool.refresh(true);
+				}
+				
+			});
 			
 			Label v0expUnits = new Label(this, SWT.LEFT);
 			v0expUnits.setText("");
