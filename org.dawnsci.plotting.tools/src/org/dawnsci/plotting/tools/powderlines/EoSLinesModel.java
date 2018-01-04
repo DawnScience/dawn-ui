@@ -119,6 +119,8 @@ public class EoSLinesModel extends PowderLinesModel {
 		return new EoSLineModel(vaccuumDSpacing);
 	}
 	
+	// Update the length scales based on the pressure and experimental
+	// unit cell ratio
 	private void updateLengthScales() {
 		linearRatio = BirchMurnaghanSolver.birchMurnaghanLinear(pressure, bulkModulus, bulkModulus_p);
 		linearRatio *= Math.cbrt(vexp_v0);
@@ -129,19 +131,30 @@ public class EoSLinesModel extends PowderLinesModel {
 		}
 	}
 	
-	public void setLengthRatio(double ratio) {
-		this.linearRatio = ratio;
-	}
-	
+	/**
+	 * Returns the last calculated value of the linear scaling ratio. 
+	 * @return Linear scale of the model.
+	 */
 	public double getLengthRatio() {
 		return this.linearRatio;
 	}
 	
+	/**
+	 * Sets the ratio of the experimentally observed unit cell volume.
+	 * to the theoretical value.
+	 * @param vexpv0
+	 * 				Value of V₀(exp)/V₀ to set.
+	 */
 	public void setVexpV0(double vexpv0) {
 		this.vexp_v0 = vexpv0;
 		updateLengthScales();
 	}
 	
+	/**
+	 * Returns the current value of the ratio of the experimentally
+	 * observed unit cell volume.
+	 * @return Value of V₀(exp)/V₀
+	 */
 	public double getVexpV0() {
 		return vexp_v0;
 	}

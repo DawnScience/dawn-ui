@@ -66,10 +66,19 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 
+/**
+ * A tool to allow the importation of powder line data from either a 
+ * raw data file, or from a JCPDS file. The latter will enable equation
+ * of state features in the interface, such as pressure driven volume
+ * changes, and corrections between the experimental and theoretical
+ * unit cell volume.
+ * 
+ * @author Timothy Spain, timothy.spain@diamond.ac.uk
+ *
+ */
 public class PowderLineTool extends AbstractToolPage {
 
 	private Composite composite; // root Composite of the tool
-	private TableViewer lineTableViewer; // TableViewer holding the list of lines
 	private ITraceListener tracerListener; // The trace on which the tool listens
 	private PowderLinesModel.PowderLineCoord plotCoordinate = PowderLinesModel.PowderLineCoord.Q; // The coordinate of the input data
 	private List<IRegion> currentLineRegions;
@@ -87,15 +96,25 @@ public class PowderLineTool extends AbstractToolPage {
 	
 	protected PowderLinesModel model;
 	
-	private double pressure;
-	
 	static final PowderLinesModel.PowderLineCoord defaultCoords = PowderLineCoord.D_SPACING;
-	
+
+	/**
+	 * 
+	 * @author Timothy Spain, timothy.spain@diamond.ac.uk
+	 *
+	 * An enumeration of the possible types of file to be read in:
+	 * without and
+	 * with equation of state data
+	 *
+	 */
 	public enum PowderDomains {
 			POWDER,
 			EQUATION_OF_STATE;
 	}
 	
+	/**
+	 * Default constructor for the Powder Line Tool
+	 */
 	public PowderLineTool() {
 		try{
 			this.tracerListener = new ITraceListener.Stub() {
@@ -197,6 +216,7 @@ public class PowderLineTool extends AbstractToolPage {
 		}
 	}
 	
+	// Create the table for the data
 	private void createManyColumns(final TableViewer viewer) {
 		TableColumnLayout tcl = new TableColumnLayout();
 		viewer.getControl().getParent().setLayout(tcl);
@@ -225,6 +245,7 @@ public class PowderLineTool extends AbstractToolPage {
 
 	}
 	
+	// label provider for the columns of the data table
 	private class LineModelLabelProvider extends ColumnLabelProvider {
 		private PowderLinesModel.PowderLineCoord columnCoordinate;
 		private DecimalFormat format = new DecimalFormat("#.###");
@@ -244,17 +265,17 @@ public class PowderLineTool extends AbstractToolPage {
 	
 	}
 	
+	// Sets the coordinates of the main plot, so that the lines can be
+	// displayed along the correct scale
 	private void setCoords(PowderLinesModel.PowderLineCoord coord) {
 		this.plotCoordinate = coord;
 	}
 	
-	protected void setModel(PowderLinesModel model) {
-		this.model = model;
-		if (this.lineTableViewer != null)
-			lineTableViewer.setInput(model.getLines());
-			
-	}
-	
+	/**
+	 * Adds a new model of the lines data to the set to be displayed
+	 * @param model
+	 * 				the data object for the new set of lines
+	 */
 	protected void addMaterialModel(PowderLinesModel model) {
 		materialModels.add(model);
 		this.manyLineTV.setInput(this.materialModels);
@@ -262,6 +283,9 @@ public class PowderLineTool extends AbstractToolPage {
 		modelsDetailsCompo.redraw();
 	}
 	
+	/**
+	 * Clears all sets of line data from the tool.
+	 */
 	protected void clearModels() {
 		this.materialModels.clear();
 		this.manyLineTV.setInput(this.materialModels);
@@ -269,10 +293,14 @@ public class PowderLineTool extends AbstractToolPage {
 		this.clearLines();
 	}
 	
+	/**
+	 * Clears the lines on the plot.
+	 */
 	protected void clearLines() {
 		this.drawPowderLines(new HashSet<PowderLinesModel>());
 	}
 	
+	// Deletes a single model from the set to be displayed
 	private void deleteModel(PowderLinesModel delModel) {
 		if (materialModels.contains(delModel))
 			materialModels.remove(delModel);
@@ -281,10 +309,12 @@ public class PowderLineTool extends AbstractToolPage {
 		drawPowderLines(materialModels);
 	}
 	
+	// Redraws the powder lines for all lines models
 	private void redrawPowderLines() {
 		drawPowderLines(materialModels);
 	}
 	
+	//Redraws the powder lines for the given lines models
 	private void drawPowderLines(Set<PowderLinesModel> drawModels) {
 		// Lines from the material models
 		
@@ -371,6 +401,7 @@ public class PowderLineTool extends AbstractToolPage {
 		this.drawSettings();
 	}
 	
+	// Creates the action (load, clear) button in the button bar 
 	private void createActions() {
 		final Shell theShell = this.getSite().getShell();
 		final PowderLineTool theTool = this;
@@ -386,10 +417,15 @@ public class PowderLineTool extends AbstractToolPage {
 		getSite().getActionBars().getToolBarManager().add(clearAction);
 	}
 
+	/**
+	 * Sets the input of the generic data table to the lines models already defined
+	 */
 	public void drawGenericTable() {
 		this.manyLineTV.setInput(materialModels);
 	}
 	
+	// Sets the beam energy used to convert between real and momentum
+	// space units
 	private void setEnergy(double energy) {
 		this.model.setEnergy(energy);
 		for (PowderLinesModel materialModel : materialModels) {
@@ -397,6 +433,13 @@ public class PowderLineTool extends AbstractToolPage {
 		}
 	}
 	
+	/**
+	 * Sets the pressure exerted on each lines model.
+	 * <p>
+	 * Not generic. Depends on 'instanceof' to find EoS models.
+	 * @param pressure
+	 * 				Pressure exerted in the measurement environment in Pa
+	 */
 	public void setPressure(double pressure) {
 		for (PowderLinesModel linesModel : materialModels) {
 			if (linesModel instanceof EoSLinesModel)
@@ -471,7 +514,8 @@ public class PowderLineTool extends AbstractToolPage {
 			// the model of the data to create
 			PowderLinesModel nyModel = null;
 			
-			// Now check for metadata
+			// Now check for metadata. This is another place that the
+			// difference between generic and EoS files impinges.
 			IMetadata metadata = dataHolder.getMetadata();
 			if (metadata != null) { 
 				System.err.println("PowderLineTool: Metadata found!");
@@ -508,6 +552,8 @@ public class PowderLineTool extends AbstractToolPage {
 		}
 	}
 	
+	// Draws the settings composite, and resizes it if enough
+	// information is known about the parent composite. 
 	private void drawSettings() {
 		if (settingsOuterComposite == null)
 			return;
@@ -528,10 +574,7 @@ public class PowderLineTool extends AbstractToolPage {
 			sashForm.setWeights(new int[] {(int) (compoSize.y*1.05), otherWeight, otherWeight});
 	}
 	
-	private void drawDetailsComposite() {
-		modelsDetailsCompo.redraw();
-	}
-	
+	// Content provider for the data table
 	protected class ManyLineCP implements IStructuredContentProvider {
 
 		@Override
@@ -568,14 +611,25 @@ public class PowderLineTool extends AbstractToolPage {
 		private List<ModelDetailsComposite> modelDetails;
 		private List<Composite> modelDetailsData;
 		
+		/**
+		 * Default constructor.
+		 * @param parent
+		 * 				Parent {@link Composite}
+		 * @param style
+		 * 				Composite style parameters.
+		 */
 		public ModelsDetailsComposite(Composite parent, int style) {
 			super(parent, style);
 			models = new ArrayList<>();
 			modelDetails = new ArrayList<>();
 			modelDetailsData = new ArrayList<>();
-
 		}
 		
+		/**
+		 * Adds a new model to the model details
+		 * @param model
+		 * 				Model to be added
+		 */
 		public void addModel(PowderLinesModel model) {
 			if (!models.contains(model)) {
 				models.add(model);
@@ -583,10 +637,18 @@ public class PowderLineTool extends AbstractToolPage {
 			}
 		}
 		
+		/**
+		 * Sets the tool which contains the composite, for callback purposes.
+		 * @param tool
+		 * 			containing tool.
+		 */
 		public void setTool(PowderLineTool tool) {
 			this.tool = tool;
 		}
 		
+		/**
+		 * Clears the UI elements for all models from the Composite.
+		 */
 		public void clearModels() {
 			models.clear();
 			for (Composite subCompo : modelDetails)
@@ -597,6 +659,13 @@ public class PowderLineTool extends AbstractToolPage {
 			modelDetailsData.clear();
 		}
 		
+		/**
+		 * Deletes the UI elements for a single model from the
+		 * Composite.
+		 * @param model
+		 * 				the model the details of which are to be
+		 * 				removed.
+		 */
 		public void deleteModel(PowderLinesModel model) {
 			if (models.contains(model)) {
 				System.err.println("Deleting model " + model.getDescription() + " from ModelsDetailsComposite.");
@@ -606,6 +675,9 @@ public class PowderLineTool extends AbstractToolPage {
 			}
 		}
 		
+		/**
+		 * Instructs the tool to redraw the powder lines.
+		 */
 		public void redrawLines() {
 			this.tool.redrawPowderLines();
 		}
@@ -635,6 +707,11 @@ public class PowderLineTool extends AbstractToolPage {
 			this.layout();
 		}
 		
+		/**
+		 * Sets the pressure value for all relevant UI elements.
+		 * @param pressure
+		 * 				pressure value to set in Pa.
+		 */
 		public void setPressure(double pressure) {
 			for (Composite detailsCompo: modelDetailsData) {
 				if (detailsCompo instanceof EosDetailsComposite)
@@ -643,6 +720,11 @@ public class PowderLineTool extends AbstractToolPage {
 		}
 	}
 	
+	/**
+	 * The generic details of a lines model.
+	 * @author Timothy Spain, timothy.spain@diamond.ac.uk
+	 *
+	 */
 	protected class ModelDetailsComposite extends Composite {
 		PowderLinesModel model;
 		Label filenameText;
@@ -798,10 +880,17 @@ public class PowderLineTool extends AbstractToolPage {
 			this.layout();
 		}
 		
+		/**
+		 * Sets the tool containing this Composite, for callback
+		 * purposes.
+		 * @param tool
+		 * 			Containing tool.
+		 */
 		public void setTool(PowderLineTool tool) {
 			this.tool = tool;
 		}
 		
+		// Update the tool if the energy is changed.
 		private void energyChanged() {
 			
 			double energy;
@@ -814,6 +903,7 @@ public class PowderLineTool extends AbstractToolPage {
 			tool.refresh(true);
 		}
 		
+		// Update the tool if the plot coordinates type is changed.
 		private void coordsChanged() {
 			PowderLineCoord coord = PowderLineCoord.valueOf(coordCombo.getItem(coordCombo.getSelectionIndex()));
 			tool.setCoords(coord);

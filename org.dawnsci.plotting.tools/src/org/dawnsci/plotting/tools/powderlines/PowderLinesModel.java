@@ -21,10 +21,10 @@ import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.widgets.Composite;
 
 /**
+ * A model holding the data and state for the powder line tool.
  * 
  * @author Timothy Spain, timothy.spain@diamond.ac.uk 
  *
- * A model holding the data and state for the powder line tool.
  */
 public class PowderLinesModel {
 
@@ -198,14 +198,34 @@ public class PowderLinesModel {
 		return lineModels;
 	}
 	
+	/**
+	 * Returns an instance of a {@link Composite} that will display all
+	 * the relevant details of this instance.
+	 * @param parent
+	 * 				parent of the new Composite.
+	 * @param style
+	 * 				style to be applied to the new Composite.
+	 * @return An instance of the correct Composite type.
+	 */
 	public Composite getModelSpecificDetailsComposite(Composite parent, int style ) {
 		return new PowderLineTool.GenericDetailsComposite(parent, style);
 	}
 	
+	/**
+	 * Sets the tool that contains this model, for use in callbacks.
+	 * @param tool
+	 * 			the containing instance of PowderLineTool
+	 */
 	public void setTool(PowderLineTool tool) {
 		this.tool = tool;
 	}
 	
+	/**
+	 * Returns a new instance of a line model of the correct type.
+	 * @param dSpacing
+	 * 				d-spacing of the new model in Å
+	 * @return The new instance
+	 */
 	protected PowderLineModel getLineModel(double dSpacing) {
 		return new PowderLineModel(dSpacing);
 	}

@@ -11,83 +11,28 @@ package org.dawnsci.plotting.tools.powderlines;
 
 import java.text.DecimalFormat;
 
-import org.dawnsci.plotting.tools.ServiceLoader;
-import org.dawnsci.plotting.tools.powderlines.PowderLinesModel.PowderLineCoord;
-import org.eclipse.dawnsci.analysis.api.io.IDataHolder;
-import org.eclipse.dawnsci.analysis.api.io.ILoaderService;
-import org.eclipse.january.dataset.Dataset;
-import org.eclipse.january.dataset.DatasetFactory;
-import org.eclipse.january.dataset.DatasetUtils;
-import org.eclipse.january.dataset.DoubleDataset;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 
+/**
+ * A class containing the specifics of a {@link PowderLineTool} with equation of state information.
+ * @author Timothy Spain, timothy.spain@diamond.ac.uk
+ *
+ */
 public class EoSLineTool extends PowderLineTool {
 
-	
-	protected class LoadAction extends PowderLineTool.LoadAction {
-		
-		// This version loads JCPDS files exclusively
-		@Override
-		public void run() {
-			FileDialog chooser = new FileDialog(theShell, SWT.OPEN);
-			String chosenFile = chooser.open();
-			
-			ILoaderService loaderService = ServiceLoader.getLoaderService();
-			IDataHolder dataHolder = null;
-			// Get the data from the file
-			try {
-				dataHolder = loaderService.getData(chosenFile, null);
-			
-			} catch (Exception e) {
-				if (chosenFile != null)
-					System.err.println("EoSLineTool: Could not read line data from " + chosenFile + ".");
-				return;
-			}
-			// Get the d, i, h, k, l Datasets from the file
-			Dataset d = DatasetUtils.convertToDataset(dataHolder.getDataset("d"));
-			
-			if (d == null) {
-				logger.info("EoSLineTool: No valid d-spacing data in file " + chosenFile + ".");
-				return;
-			}
-			if (d.getDType() != Dataset.FLOAT) {
-				logger.info("EoSLineTool: No valid double data found in file " + chosenFile + ".");
-				return;
-			}
-			// If d does exist, then perhaps we shall assume that the rest do, too.
-			Dataset i = DatasetUtils.convertToDataset(dataHolder.getDataset("i"));
-			int n = i.getSize();
-			Dataset hkl = DatasetFactory.zeros(n, 3);
-			String[] axes = new String[] {"h", "k", "l"};
-			for (int j=0; j<3; j++)
-				setMySlice(hkl, dataHolder, n, j, axes[j]);
-
-			// New, multiple file loading
-			PowderLinesModel nyModel = new EoSLinesModel();
-			nyModel.setWavelength(theTool.model.getWavelength());
-			nyModel.setCoords(PowderLineCoord.D_SPACING);
-			nyModel.setLines((DoubleDataset) d);
-			theTool.addMaterialModel(nyModel);
-			
-			theTool.refresh(true);
-//			theTool.setLines((DoubleDataset)d);
-			
-		}
-		
-	}
-	
-	private void setMySlice(Dataset data, IDataHolder dh, int n, int index, String name) {
-		data.setSlice(DatasetUtils.convertToDataset(dh.getDataset(name)), new int[]{0, index}, new int[]{n, index+1}, new int[]{1, 1});
-	}
-
+	/**
+	 * The Composite that will display the model details when equation
+	 * of state information is present.
+	 * @author Timothy Spain, timothy.spain@diamond.ac.uk
+	 *
+	 */
 	static class EosDetailsComposite extends Composite {
 		static final String MODULUSSYMBOL = "B"; // Could also be K
 		static final String MODULUSSTRING = MODULUSSYMBOL+"₀";
@@ -105,17 +50,30 @@ public class EoSLineTool extends PowderLineTool {
 		PowderLineTool tool;
 		static final DecimalFormat ll0Format = new DecimalFormat("#.###");
 		
+		/**
+		 * Constructor
+		 * @param parent
+		 * 				parent Composite
+		 * @param style
+		 * 				style to apply to the new Composite
+		 */
 		public EosDetailsComposite(Composite parent, int style) {
 			super(parent, style);
 			model = null;
 		}
 		
+		/**
+		 * Sets the scale of the pressure
+		 * @param magnitude
+		 * 					power of ten magnitude to scale the
+		 * 					pressure by (for GPa, magnitude = 9).
+		 */
 		public void setPressureMultiplierMagnitude(int magnitude) {
 			pressureMultiplier = Math.pow(10., magnitude);
 			// "terapascals" is probably sufficient
-			String[] prefices = new String[] {"", "da", "h", "k", "", "", "M", "", "", "G", "", "", "T"};
+			String[] prefices = new String[] {"", "da", "h", "k", "10⁴ ", "10⁵ ", "M", "10⁷ ", "10⁸ ", "G", "10¹⁰ ", "10¹¹ ", "T"};
 			
-			if (magnitude < 0 || magnitude > 12 || prefices[magnitude].equals("")) {
+			if (magnitude < 0 || magnitude > 12) {
 				// not a valid multiplier
 				System.err.println("10^" + magnitude + " is not a valid SI prefix scale.");
 			} else {
@@ -149,10 +107,20 @@ public class EoSLineTool extends PowderLineTool {
 			}
 		}
 
+		/**
+		 * Sets the model that this Composite represents for callback purposes
+		 * @param model
+		 * 				model to call back to. 
+		 */
 		public void setModel(EoSLinesModel model) {
 			this.model = model;
 		}
 		
+		/**
+		 * Sets the tool that this Composite represents for callback purposes
+		 * @param tool
+		 * 				tool to call back to. 
+		 */
 		public void setTool(PowderLineTool tool) {
 			this.tool = tool;
 		}
@@ -282,7 +250,8 @@ public class EoSLineTool extends PowderLineTool {
 			super.redraw();
 
 		}
-		
+
+		// Sets the length value to display.
 		private void setLL0() {
 			ll0.setText(ll0Format.format(model.getLengthRatio()));
 			ll0.setSize(ll0.computeSize(SWT.DEFAULT, SWT.DEFAULT));
