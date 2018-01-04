@@ -9,8 +9,6 @@
 package org.dawnsci.plotting.tools.powderlines;
 
 import org.dawnsci.plotting.tools.powderlines.PowderLineTool.PowderDomains;
-import org.eclipse.january.dataset.DoubleDataset;
-import org.eclipse.january.dataset.Maths;
 import org.eclipse.swt.widgets.Composite;
 
 import uk.ac.diamond.scisoft.analysis.crystallography.BirchMurnaghanSolver;
@@ -22,15 +20,18 @@ import uk.ac.diamond.scisoft.analysis.crystallography.BirchMurnaghanSolver;
  */
 public class EoSLinesModel extends PowderLinesModel {
 
-	private double bulkModulus, bulkModulus_p; 
+	private double bulkModulus; // in Pa
+	private double bulkModulus_p; // in Pa 
 
-	private double pressure;
+	private double pressure; // in Pa
 	
 	private String comment;
 	
+	private double lengthRatio;
+	
 
 	/**
-	 * @return the bulk modulus of the material
+	 * @return the bulk modulus of the material, in Pa
 	 */
 	public double getBulkModulus() {
 		return bulkModulus;
@@ -38,7 +39,7 @@ public class EoSLinesModel extends PowderLinesModel {
 
 	/**
 	 * @param bulkModulus
-	 * 					the bulk modulus of the material to set
+	 * 					the bulk modulus of the material to set, in Pa
 	 */
 	public void setBulkModulus(double bulkModulus) {
 		this.bulkModulus = bulkModulus;
@@ -71,6 +72,7 @@ public class EoSLinesModel extends PowderLinesModel {
 	 */
 	public void setPressure(double pressure) {
 		this.pressure = pressure;
+		updateLengthScales();
 	}
 
 //	@Override
@@ -96,21 +98,37 @@ public class EoSLinesModel extends PowderLinesModel {
 	@Override
 	public Composite getModelSpecificDetailsComposite(Composite parent, int style ) {
 		EoSLineTool.EosDetailsComposite compo = new EoSLineTool.EosDetailsComposite(parent, style);
+		compo.setModel(this);
+		compo.setTool(tool);
 		compo.setPressureMultiplierMagnitude(9);
 		
 		compo.setModulus(bulkModulus);
 		compo.setModulusDerivative(bulkModulus_p);
+		compo.setPressure(this.pressure);
 		
 		return compo;
 	}
 	
-//	@Override
-//	public DoubleDataset convertLinePositions(DoubleDataset lines, PowderLineCoord sourceCoords, PowderLineCoord targetCoords) {
-//		double lengthRatio = BirchMurnaghanSolver.birchMurnaghanLinear(pressure, bulkModulus, bulkModulus_p);
-//		
-//		DoubleDataset scaledLines = (lines.getSize() > 0) ? (DoubleDataset) Maths.multiply(lines, lengthRatio) : lines;
-//		
-//		return super.convertLinePositions(scaledLines, sourceCoords, targetCoords);
-//	}
-
+	@Override
+	protected PowderLineModel getLineModel(double vaccuumDSpacing) {
+		return new EoSLineModel(vaccuumDSpacing);
+	}
+	
+	private void updateLengthScales() {
+		lengthRatio = BirchMurnaghanSolver.birchMurnaghanLinear(pressure, bulkModulus, bulkModulus_p);
+		for (PowderLineModel lineModel: lineModels) {
+			if (lineModel instanceof EoSLineModel) {
+				((EoSLineModel) lineModel).setLengthRatio(lengthRatio);
+			}
+		}
+	}
+	
+	public void setLengthRatio(double ratio) {
+		this.lengthRatio = ratio;
+	}
+	
+	public double getLengthRatio() {
+		return this.lengthRatio;
+	}
+	
 }

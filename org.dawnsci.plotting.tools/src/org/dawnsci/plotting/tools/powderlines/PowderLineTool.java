@@ -366,7 +366,6 @@ public class PowderLineTool extends AbstractToolPage {
 	 */
 	protected void refresh(boolean refreshPlot) {
 		this.drawGenericTable();
-//		this.drawDomainSpecific(model);
 		this.drawPowderLines(this.materialModels);
 		this.drawSettings();
 	}
@@ -475,9 +474,10 @@ public class PowderLineTool extends AbstractToolPage {
 					if (metadata.getMetaNames().contains("K0"))
 						System.err.println("PowderLineTool: Equation of State metadata found!");
 					EoSLinesModel eosModel = new EoSLinesModel();
-					eosModel.setBulkModulus(Double.parseDouble((String) metadata.getMetaValue("K0")));
+					final double gpaFactor = 1e9; // gigapascals (file) in pascals (data)
+					eosModel.setBulkModulus(Double.parseDouble((String) metadata.getMetaValue("K0"))*gpaFactor);
 					eosModel.setBulkModulus_p(Double.parseDouble((String) metadata.getMetaValue("K0P")));
-					eosModel.setPressure(0.);
+					eosModel.setPressure(0.); // 0 pascals
 					eosModel.setComment((String) metadata.getMetaValue("COMMENT")); 
 					nyModel = eosModel;
 					
@@ -494,6 +494,7 @@ public class PowderLineTool extends AbstractToolPage {
 			nyModel.setWavelength(theTool.model.getWavelength());
 			nyModel.setCoords(PowderLineCoord.D_SPACING);
 			nyModel.setLines(lines);
+			nyModel.setTool(theTool);
 
 			theTool.addMaterialModel(nyModel);
 			

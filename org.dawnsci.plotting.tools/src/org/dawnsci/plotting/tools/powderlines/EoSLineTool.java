@@ -18,6 +18,8 @@ import org.eclipse.january.dataset.DatasetFactory;
 import org.eclipse.january.dataset.DatasetUtils;
 import org.eclipse.january.dataset.DoubleDataset;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.ModifyEvent;
+import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
@@ -95,9 +97,14 @@ public class EoSLineTool extends PowderLineTool {
 		Text v;
 		Text v0;
 		Text ll0;
+		Text p;
+		Text v0exp;
+		EoSLinesModel model;
+		PowderLineTool tool;
 		
 		public EosDetailsComposite(Composite parent, int style) {
 			super(parent, style);
+			model = null;
 		}
 		
 		public void setPressureMultiplierMagnitude(int magnitude) {
@@ -115,22 +122,51 @@ public class EoSLineTool extends PowderLineTool {
 			redraw();
 		}
 
+		/**
+		 * Sets the modulus.
+		 * @param modulus
+		 * 				value in Pa.
+		 */
 		public void setModulus(double modulus) {
-			this.k0.setText(Double.toString(modulus));//new DecimalFormat("#.###").format(modulus/pressureMultiplier));
+			this.k0.setText(Double.toString(modulus/pressureMultiplier));//new DecimalFormat("#.###").format(modulus/pressureMultiplier));
 		}
 
 		public void setModulusDerivative(double modulusDeriviative) {
 			this.k0prime.setText(Double.toString(modulusDeriviative));
 		}
+		
+		/**
+		 * Sets the pressure at which to calculate the EoS.
+		 * @param modulus
+		 * 				value in Pa.
+		 */
+		public void setPressure(double pressure) {
+			this.p.setText(Double.toString(pressure/pressureMultiplier));
+		}
 
+		public void setModel(EoSLinesModel model) {
+			this.model = model;
+		}
+		
+		public void setTool(PowderLineTool tool) {
+			this.tool = tool;
+		}
+		
 		@Override
 		public void redraw() {
+			if (k0 != null) k0.dispose();
+			if (k0prime != null) k0prime.dispose();
+			if (ll0 != null) ll0.dispose();
+			if (p != null) p.dispose();
+			if (v0exp != null) v0exp.dispose();
+			
+			
 			GridLayout layout = new GridLayout(11, false);
 			this.setLayout(layout);
 			
 			// Modulus
 			Label modulusLabel = new Label(this, SWT.RIGHT);
-			modulusLabel.setText(MODULUSSTRING + " :");
+			modulusLabel.setText(MODULUSSTRING);
 			modulusLabel.setLayoutData(new GridData(SWT.RIGHT, SWT.TOP, false, false));
 			k0 = new Text(this, SWT.SINGLE | SWT.LEFT);
 			k0.setLayoutData(new GridData(SWT.BEGINNING, SWT.TOP, false, false));
@@ -142,10 +178,11 @@ public class EoSLineTool extends PowderLineTool {
 			// Empty text for a spacer
 			Text spacer = new Text(this, SWT.SINGLE);
 			spacer.setEditable(false);
+			spacer.setLayoutData(new GridData(SWT.BEGINNING, SWT.TOP, true, false));
 			
-			// Modulus derivate
+			// Modulus derivative
 			Label derivLabel = new Label(this, SWT.RIGHT);
-			derivLabel.setText(MODULUSDERIVATIVESTRING + " :");
+			derivLabel.setText(MODULUSDERIVATIVESTRING);
 			derivLabel.setLayoutData(new GridData(SWT.RIGHT, SWT.TOP, false, false));
 			
 			k0prime = new Text(this, SWT.SINGLE | SWT.LEFT);
@@ -159,19 +196,69 @@ public class EoSLineTool extends PowderLineTool {
 			// Empty text for a spacer
 			spacer = new Text(this, SWT.SINGLE);
 			spacer.setEditable(false);
+			spacer.setLayoutData(new GridData(SWT.BEGINNING, SWT.TOP, true, false));
 			
-			Label ll0Label = new Label(this, SWT.RIGHT);
-			ll0Label.setText("l/l₀ :");
-			ll0Label.setLayoutData(new GridData(SWT.RIGHT, SWT.TOP, false, false));
+			Label ll0Label = new Label(this, SWT.LEFT);
+			ll0Label.setText("l/l₀");
+			ll0Label.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false));
 			
 			ll0 = new Text(this, SWT.SINGLE | SWT.LEFT);
 			ll0.setLayoutData(new GridData(SWT.BEGINNING, SWT.TOP, false, false));
 			ll0.setEditable(false);
 			
+			ll0.setText(Double.toString(model.getLengthRatio()));
+			
 			Label ll0Units = new Label(this, SWT.LEFT);
 			ll0Units.setText("");
 			ll0Units.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false));
 
+			// New line
+
+			// pressure
+			Label pressureLabel = new Label(this, SWT.RIGHT);
+			pressureLabel.setText("Pressure");
+			pressureLabel.setLayoutData(new GridData(SWT.RIGHT, SWT.TOP, false, false));
+			p = new Text(this, SWT.BORDER);
+			p.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
+			p.addModifyListener(new ModifyListener() {
+
+				@Override
+				public void modifyText(ModifyEvent e) {
+					double pressure;
+					try {
+						pressure = Double.parseDouble(p.getText())* pressureMultiplier;
+					} catch (NumberFormatException nfe) {
+						pressure = 1e-5;
+					}
+					model.setPressure(pressure);
+					ll0.setText(Double.toString(model.getLengthRatio()));
+					tool.refresh(true);
+				}
+				
+			});
+			Label pressureUnitsLabel = new Label(this, SWT.LEFT);
+			pressureUnitsLabel.setText(pressureUnits);
+			pressureUnitsLabel.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false));
+			
+			// Empty text for a spacer
+			spacer = new Text(this, SWT.SINGLE);
+			spacer.setEditable(false);
+			spacer.setLayoutData(new GridData(SWT.BEGINNING, SWT.TOP, true, false, 5, 1));
+
+			Label v0expLabel = new Label(this, SWT.RIGHT);
+			v0expLabel.setText("V₀(exp)/V₀");
+			v0expLabel.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false));
+			
+			v0exp = new Text(this, SWT.BORDER);
+			v0exp.setLayoutData(new GridData(SWT.BEGINNING, SWT.TOP, false, false));
+			v0exp.setEditable(true);
+			v0exp.setText("1.0");
+			
+			Label v0expUnits = new Label(this, SWT.LEFT);
+			v0expUnits.setText("");
+			v0expUnits.setLayoutData(new GridData(SWT.RIGHT, SWT.TOP, false, false));
+			
+			
 			super.redraw();
 
 		}

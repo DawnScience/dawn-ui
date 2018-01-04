@@ -43,7 +43,8 @@ public class PowderLinesModel {
 	private String originalFilename;
 	private RGB rgb;
 	
-	private List<PowderLineModel> lineModels;
+	protected List<PowderLineModel> lineModels;
+	protected PowderLineTool tool;
 	
 	public PowderLinesModel() {
 		// default to the typical wavelength of I15-1
@@ -159,11 +160,12 @@ public class PowderLinesModel {
 		this.lineLocations = lines;
 		IndexIterator iter = lines.getIterator();
 		while(iter.hasNext()) {
-			PowderLineModel lineModel = new PowderLineModel(lines.getElementDoubleAbs(iter.index));
+			PowderLineModel lineModel = getLineModel(lines.getElementDoubleAbs(iter.index));
 			lineModel.setWavelength(wavelength);
 			lineModels.add(lineModel);
 		}
 	}
+	
 	/**
 	 * clear the current set of lines
 	 */
@@ -198,5 +200,13 @@ public class PowderLinesModel {
 	
 	public Composite getModelSpecificDetailsComposite(Composite parent, int style ) {
 		return new PowderLineTool.GenericDetailsComposite(parent, style);
+	}
+	
+	public void setTool(PowderLineTool tool) {
+		this.tool = tool;
+	}
+	
+	protected PowderLineModel getLineModel(double dSpacing) {
+		return new PowderLineModel(dSpacing);
 	}
 }

@@ -4,6 +4,10 @@ public class EoSLineModel extends PowderLineModel {
 	
 	private double lengthRatio;
 	
+	public EoSLineModel(double vaccuumDSpacing) {
+		super(vaccuumDSpacing);
+	}
+	
 	@Override
 	public double getDSpacing() {
 		return lengthRatio*super.getDSpacing();

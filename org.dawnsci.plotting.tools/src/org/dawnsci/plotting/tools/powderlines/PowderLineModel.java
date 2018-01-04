@@ -22,11 +22,11 @@ public class PowderLineModel {
 	}
 	
 	public double getQ() {
-		return 2*Math.PI/dSpacing;
+		return 2*Math.PI/getDSpacing();
 	}
 	
 	public double get2Theta(double beamWavelength) {
-		return twoThetaFromD(dSpacing, beamWavelength);
+		return twoThetaFromD(getDSpacing(), beamWavelength);
 	}
 	
 	public double get(PowderLinesModel.PowderLineCoord coord) {
