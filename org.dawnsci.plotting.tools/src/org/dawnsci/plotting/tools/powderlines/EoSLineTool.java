@@ -9,6 +9,8 @@
 
 package org.dawnsci.plotting.tools.powderlines;
 
+import java.text.DecimalFormat;
+
 import org.dawnsci.plotting.tools.ServiceLoader;
 import org.dawnsci.plotting.tools.powderlines.PowderLinesModel.PowderLineCoord;
 import org.eclipse.dawnsci.analysis.api.io.IDataHolder;
@@ -101,6 +103,7 @@ public class EoSLineTool extends PowderLineTool {
 		Text v0exp;
 		EoSLinesModel model;
 		PowderLineTool tool;
+		static final DecimalFormat ll0Format = new DecimalFormat("#.###");
 		
 		public EosDetailsComposite(Composite parent, int style) {
 			super(parent, style);
@@ -141,8 +144,9 @@ public class EoSLineTool extends PowderLineTool {
 		 * 				value in Pa.
 		 */
 		public void setPressure(double pressure) {
-			if (!Double.toString(pressure/pressureMultiplier).equals(p.getText()))
-				this.p.setText(Double.toString(pressure/pressureMultiplier));
+			if (!Double.toString(pressure/pressureMultiplier).equals(p.getText())) {
+				p.setText(Double.toString(pressure/pressureMultiplier));
+			}
 		}
 
 		public void setModel(EoSLinesModel model) {
@@ -207,7 +211,7 @@ public class EoSLineTool extends PowderLineTool {
 			ll0.setLayoutData(new GridData(SWT.BEGINNING, SWT.TOP, false, false));
 			ll0.setEditable(false);
 			
-			ll0.setText(Double.toString(model.getLengthRatio()));
+			setLL0();
 			
 			Label ll0Units = new Label(this, SWT.LEFT);
 			ll0Units.setText("");
@@ -232,7 +236,7 @@ public class EoSLineTool extends PowderLineTool {
 						pressure = 1e-5;
 					}
 					tool.setPressure(pressure);
-					ll0.setText(Double.toString(model.getLengthRatio()));
+					setLL0();
 //					tool.refresh(true);
 				}
 				
@@ -262,6 +266,11 @@ public class EoSLineTool extends PowderLineTool {
 			
 			super.redraw();
 
+		}
+		
+		private void setLL0() {
+			ll0.setText(ll0Format.format(model.getLengthRatio()));
+			ll0.setSize(ll0.computeSize(SWT.DEFAULT, SWT.DEFAULT));
 		}
 	}
 }
