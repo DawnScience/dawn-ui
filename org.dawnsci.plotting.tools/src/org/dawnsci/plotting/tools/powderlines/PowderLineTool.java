@@ -518,18 +518,16 @@ public class PowderLineTool extends AbstractToolPage {
 			// difference between generic and EoS files impinges.
 			IMetadata metadata = dataHolder.getMetadata();
 			if (metadata != null) { 
-				System.err.println("PowderLineTool: Metadata found!");
 				try {
-					if (metadata.getMetaNames().contains("K0"))
-						System.err.println("PowderLineTool: Equation of State metadata found!");
-					EoSLinesModel eosModel = new EoSLinesModel();
-					final double gpaFactor = 1e9; // gigapascals (file) in pascals (data)
-					eosModel.setBulkModulus(Double.parseDouble((String) metadata.getMetaValue("K0"))*gpaFactor);
-					eosModel.setBulkModulus_p(Double.parseDouble((String) metadata.getMetaValue("K0P")));
-					eosModel.setPressure(0.); // 0 pascals
-					eosModel.setComment((String) metadata.getMetaValue("COMMENT")); 
-					nyModel = eosModel;
-					
+					if (metadata.getMetaNames().contains("K0")) {
+						EoSLinesModel eosModel = new EoSLinesModel();
+						final double gpaFactor = 1e9; // gigapascals (file) in pascals (data)
+						eosModel.setBulkModulus(Double.parseDouble((String) metadata.getMetaValue("K0"))*gpaFactor);
+						eosModel.setBulkModulus_p(Double.parseDouble((String) metadata.getMetaValue("K0P")));
+						eosModel.setPressure(0.); // 0 pascals
+						eosModel.setComment((String) metadata.getMetaValue("COMMENT")); 
+						nyModel = eosModel;
+					}
 				} catch (Exception mE) {
 					; // do nothing, the model has not been overwritten
 				}
@@ -668,7 +666,6 @@ public class PowderLineTool extends AbstractToolPage {
 		 */
 		public void deleteModel(PowderLinesModel model) {
 			if (models.contains(model)) {
-				System.err.println("Deleting model " + model.getDescription() + " from ModelsDetailsComposite.");
 				models.remove(model);
 				redraw();
 				this.tool.deleteModel(model);
