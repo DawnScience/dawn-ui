@@ -12,6 +12,8 @@ import java.util.concurrent.atomic.AtomicReference;
 import org.dawnsci.mapping.ui.api.IMapFileController;
 import org.dawnsci.mapping.ui.datamodel.AssociatedImage;
 import org.dawnsci.mapping.ui.datamodel.IMapFileEventListener;
+import org.dawnsci.mapping.ui.datamodel.LiveStreamMapObject;
+import org.dawnsci.mapping.ui.datamodel.LiveStreamMapObject.IAxisMoveListener;
 import org.dawnsci.mapping.ui.datamodel.MapObject;
 import org.dawnsci.mapping.ui.datamodel.MappedDataFile;
 import org.dawnsci.mapping.ui.datamodel.PlottableMapObject;
@@ -41,6 +43,7 @@ import org.eclipse.january.dataset.DatasetFactory;
 import org.eclipse.january.dataset.DatasetUtils;
 import org.eclipse.january.dataset.FloatDataset;
 import org.eclipse.january.dataset.IDataset;
+import org.eclipse.january.dataset.IDynamicShape;
 import org.eclipse.january.dataset.ILazyDataset;
 import org.eclipse.january.dataset.ShapeUtils;
 import org.eclipse.january.dataset.SliceND;
@@ -63,6 +66,7 @@ public class MapPlotManager {
 	private int layerCounter = 0;
 	private boolean firstHold = true;
 	private Runnable mapRunnable;
+	private IAxisMoveListener moveListener;
 	
 	private IMapFileController fileManager;
 	
@@ -114,6 +118,26 @@ public class MapPlotManager {
 				updateState();
 			}
 		});
+		
+		moveListener = new IAxisMoveListener() {
+			
+			@Override
+			public void axisMoved() {
+				for (MapTrace t : layers) {
+					if (t.getMap() instanceof LiveStreamMapObject) {
+						LiveStreamMapObject l = (LiveStreamMapObject)t.getMap();
+						List<IDataset> axes = l.getAxes();
+						double[] range = l.getRange();
+						ITrace trace = t.getTrace();
+						if (trace != null && trace instanceof IImageTrace) {
+							IImageTrace im = (IImageTrace)trace;
+							im.setGlobalRange(range);
+							im.setAxes(axes, false);
+						}
+					}
+				}
+			}
+		};
 		
 	}
 	
@@ -326,12 +350,24 @@ public class MapPlotManager {
 		
 		for (MapTrace t : stale) {
 			map.removeTrace(t.getTrace());
+			if (t.getMap() instanceof LiveStreamMapObject) {
+				try {
+					((LiveStreamMapObject)t.getMap()).disconnect();
+				} catch (Exception e) {
+					logger.error("Could not disconnect stream!",e);
+				}
+			}
 		}
 		
 		boolean needsClear = false;
-		
+
 		for (PlottableMapObject o : plottedObjects) {
-			if (o instanceof VectorMapData) {
+			if (o instanceof LiveStreamMapObject){
+				IImageTrace stream = createLiveStreamTrace((LiveStreamMapObject) o);
+				MapTrace t = new MapTrace(o, stream);
+				layers.addLast(t);
+				needsClear = true;
+			} else if (o instanceof VectorMapData) {
 				// Initialise a vector trace
 				IVectorTrace vectorTrace = createVectorTrace(o);
 				layers.push(new MapTrace(o, vectorTrace));
@@ -339,9 +375,9 @@ public class MapPlotManager {
 				MapTrace t = new MapTrace((AssociatedImage)o, null);
 				layers.addLast(t);
 				needsClear = true;
-				
+
 			}else {
-			
+
 				IImageTrace t = createImageTrace(o);
 				layers.push(new MapTrace(o, t));
 			}
@@ -349,12 +385,40 @@ public class MapPlotManager {
 		
 		if (needsClear) {
 			map.clearTraces();
-			for (MapTrace l : layers) l.rebuildTrace();
+			for (MapTrace l : layers) {
+				if (!(l.getMap() instanceof LiveStreamMapObject)) l.rebuildTrace();
+			}
 		}
 		
 		plotLayers();
 	}
 	
+	private IImageTrace createLiveStreamTrace(LiveStreamMapObject o) {
+		
+		IDynamicShape dataset = null;
+		
+		try {
+			 dataset = o.connect();
+		} catch (Exception e) {
+			try {
+				 
+			o.disconnect();
+			dataset = o.connect();
+			} catch (Exception e2) {
+				logger.error("Could not connect to stream",e2);
+			}
+		}
+			
+		if (dataset == null) return null;
+		
+		IImageTrace trace = map.createImageTrace(o.getPath());
+		trace.setGlobalRange(o.getRange());
+		trace.setDynamicData(dataset);
+		trace.setAxes(o.getAxes(), false);
+		return trace;
+	
+	}
+
 	public PlottableMapObject getTopMap(double x, double y){
 		
 		Iterator<MapTrace> iterator = layers.iterator();
@@ -478,7 +542,13 @@ public class MapPlotManager {
 			while (it.hasNext()) {
 				MapTrace m = it.next();
 				if (!traces.contains(m.getTrace())) {
-					if (m.getTrace() != null) map.addTrace(m.getTrace());
+					if (m.getTrace() != null) {
+						map.addTrace(m.getTrace());
+						if (m.getMap() instanceof LiveStreamMapObject) {
+							LiveStreamMapObject l = (LiveStreamMapObject)m.getMap();
+							l.addAxisListener(moveListener);
+						}
+					}
 				}
 				
 			}

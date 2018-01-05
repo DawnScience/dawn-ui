@@ -13,6 +13,7 @@ import org.dawnsci.mapping.ui.datamodel.AbstractMapData;
 import org.dawnsci.mapping.ui.datamodel.AssociatedImage;
 import org.dawnsci.mapping.ui.datamodel.IMapFileEventListener;
 import org.dawnsci.mapping.ui.datamodel.LiveDataBean;
+import org.dawnsci.mapping.ui.datamodel.LiveStreamMapObject;
 import org.dawnsci.mapping.ui.datamodel.MappedDataArea;
 import org.dawnsci.mapping.ui.datamodel.MappedDataBlock;
 import org.dawnsci.mapping.ui.datamodel.MappedDataFile;
@@ -218,12 +219,12 @@ public class MappedDataView extends ViewPart {
 		viewer.addDoubleClickListener(event -> {
 			
 			Object e = ((StructuredSelection)event.getSelection()).getFirstElement();
-			if (e instanceof AbstractMapData || e instanceof MappedDataBlock || e instanceof AssociatedImage) {
+			if (e instanceof AbstractMapData || e instanceof MappedDataBlock || e instanceof AssociatedImage || e instanceof LiveStreamMapObject) {
 				if (e instanceof MappedDataBlock && !((MappedDataBlock)e).canPlot()) {
 					return;
 				}
 				
-				fileController.toggleDisplay((PlottableMapObject)e);;
+				fileController.toggleDisplay((PlottableMapObject)e);
 			}
 
 			if (e instanceof MappedDataFile) {

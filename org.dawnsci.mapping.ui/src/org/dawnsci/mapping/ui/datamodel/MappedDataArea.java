@@ -4,12 +4,13 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
-import java.util.stream.Collector;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 public class MappedDataArea implements MapObject {
 
 	private List<MappedDataFile> files = new ArrayList<MappedDataFile>();
+	private LiveStreamMapObject streamObject;
 
 	public void addMappedDataFile(MappedDataFile file) {
 		if (file.getLiveDataBean() != null) {
@@ -48,7 +49,18 @@ public class MappedDataArea implements MapObject {
 
 	@Override
 	public Object[] getChildren() {
-		return files.toArray();
+		
+		Object[] children = files.toArray();
+		
+		if (streamObject == null) {
+			return children;
+		}
+		
+		Object[] withStream = new Object[children.length+1];
+		withStream[0] = streamObject;
+		System.arraycopy(children, 0, withStream, 1, children.length);
+		
+		return withStream;
 	}
 	
 	public boolean contains(String path) {
@@ -90,6 +102,10 @@ public class MappedDataArea implements MapObject {
 	
 	public List<PlottableMapObject> getPlottedObjects() {
 		List<PlottableMapObject> objects = new ArrayList<>();
+		
+		if (streamObject != null && streamObject.isPlotted()) {
+			objects.add(streamObject);
+		}
 		
 		for (MappedDataFile f : files) {
 			List<PlottableMapObject> collected = Arrays.stream(f.getChildren())
@@ -188,6 +204,19 @@ public class MappedDataArea implements MapObject {
 		}
 		
 		return r;
+	}
+	
+	public void setStream(LiveStreamMapObject stream) {
+		if (streamObject != null) {
+			try {
+				streamObject.setPlotted(false);
+				streamObject.disconnect();
+			} catch (Exception e) {
+				//TODO
+			}
+			
+		}
+		streamObject = stream;
 	}
 	
 }

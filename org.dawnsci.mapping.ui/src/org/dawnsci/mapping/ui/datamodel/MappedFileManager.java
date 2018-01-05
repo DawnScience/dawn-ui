@@ -434,13 +434,12 @@ public class MappedFileManager implements IMapFileController{
 			
 		}
 		
-		
-		
 	}
 
 	@Override
 	public void addLiveStream(LiveStreamMapObject stream) {
-//		mappedDataArea.setStream(stream);
+		mappedDataArea.setStream(stream);
+		fireListeners(null);
 		
 	}
 }

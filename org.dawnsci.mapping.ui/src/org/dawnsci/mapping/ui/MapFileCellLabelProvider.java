@@ -2,6 +2,7 @@ package org.dawnsci.mapping.ui;
 
 import org.dawnsci.mapping.ui.datamodel.AbstractMapData;
 import org.dawnsci.mapping.ui.datamodel.AssociatedImage;
+import org.dawnsci.mapping.ui.datamodel.LiveStreamMapObject;
 import org.dawnsci.mapping.ui.datamodel.MapObject;
 import org.dawnsci.mapping.ui.datamodel.MappedDataBlock;
 import org.dawnsci.mapping.ui.datamodel.MappedDataFile;
@@ -22,6 +23,7 @@ public class MapFileCellLabelProvider extends StyledCellLabelProvider {
 	private final Image image = Activator.getImage("icons/image-resize-actual.png");
 	private final Image file = Activator.getImage("icons/map-file.png");
 	private final Image remote= Activator.getImage("icons/remote-file.png");
+	private final Image camera= Activator.getImage("icons/camera-black.png");
 	private Font italicFont = null;
 	private Font initialFont = null;
 	
@@ -36,7 +38,7 @@ public class MapFileCellLabelProvider extends StyledCellLabelProvider {
 
       Object element = cell.getElement();
       StyledString text = new StyledString();
-      text.append(element.toString());
+      text.append(element instanceof LiveStreamMapObject ? ((LiveStreamMapObject)element).getLongName() : element.toString());
       
       if (element instanceof MappedDataBlock) {
     	  cell.setImage(block);
@@ -44,6 +46,8 @@ public class MapFileCellLabelProvider extends StyledCellLabelProvider {
     	  cell.setImage(map);
       } else if (element instanceof AssociatedImage) {
     	  cell.setImage(image);
+      } else if (element instanceof LiveStreamMapObject) {
+        	  cell.setImage(camera);
       } else if (element instanceof MappedDataFile){
     	  
     	  if (((MappedDataFile)element).getLiveDataBean() != null) {
@@ -94,6 +98,7 @@ public class MapFileCellLabelProvider extends StyledCellLabelProvider {
 		map.dispose();
 		file.dispose();
 		remote.dispose();
+		camera.dispose();
 		if (italicFont != null) italicFont.dispose();
 		super.dispose();
 	}
