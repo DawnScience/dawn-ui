@@ -53,36 +53,24 @@ public class PlotModeSurfaceMesh extends PlotModeImage {
 		d.setName(name);
 		
 		boolean isUpdate = false;
-//		if (update == null) {
+
 		
 		if (update != null) {
 			for (ITrace t : update) system.removeTrace(t);
 		}
-		
-			trace = system.createTrace(d.getName(),ISurfaceMeshTrace.class);
-			trace.setDataName(d.getName());
-//		} else {
-//			if (update[0] instanceof ISurfaceMeshTrace) {
-//				trace = (ISurfaceMeshTrace) update[0];
-//				isUpdate = true;
-//			}
-//			
-//			for (int i = 0; i < update.length; i++) {
-//				if (i==0 && update[i] instanceof ISurfaceMeshTrace) {
-//					continue;
-//				}
-//				system.removeTrace(update[i]);
-//			}
-//		}
-		
-		
+
+		trace = system.createTrace(d.getName(),ISurfaceMeshTrace.class);
+		trace.setDataName(d.getName());
+
+
+
 		trace.setData(d, ax.toArray(new IDataset[ax.size()]));
 		trace.setUserObject(userObject);
 		if (!isUpdate) {
-//			system.setPlotType(PlotType.SURFACE);
+			//			system.setPlotType(PlotType.SURFACE);
 			system.addTrace(trace);
 		}
-		
+
 		system.repaint();
 		
 	}
