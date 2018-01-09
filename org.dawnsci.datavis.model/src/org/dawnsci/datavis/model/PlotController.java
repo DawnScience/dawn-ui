@@ -62,7 +62,7 @@ public class PlotController implements IPlotController {
 	
 	private IPlottingSystem<?> system;
 
-	private IPlotMode[] modes = new IPlotMode[]{new PlotModeXY(), new PlotModeImage(), new PlotModeSurface(), new PlotModeSurfaceMesh(), new PlotModeHyper(), new PlotModeDataTable1D(),  new PlotModeDataTable2D()};
+	private IPlotMode[] modes = new IPlotMode[]{new PlotModeXY(), new PlotModeImage(), new PlotModeSurface(), new PlotModeSurfaceMesh(), new PlotModeWaterfall(), new PlotModeHyper(), new PlotModeDataTable1D(),  new PlotModeDataTable2D()};
 	private IPlotMode currentMode;
 	
 	private IPlotDataModifier[] modifiers = new IPlotDataModifier[]{ new PlotDataModifierStack()};
