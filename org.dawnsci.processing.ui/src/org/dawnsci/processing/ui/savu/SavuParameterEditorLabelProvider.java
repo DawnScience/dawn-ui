@@ -13,7 +13,7 @@ class SavuParameterEditorLabelProvider extends ColumnLabelProvider {
 
 	private int column;
 
-	public SavuParameterEditorLabelProvider(SavuParameterEditorTableViewModel viewModel, int column) {
+	public SavuParameterEditorLabelProvider(int column) {
 		this.column = column;
 	}
 

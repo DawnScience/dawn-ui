@@ -2,87 +2,58 @@ package org.dawnsci.processing.ui.savu;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
 import org.eclipse.core.resources.ResourcesPlugin;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class SavuParameterEditorTableViewModel {
-	private List<SavuParameterEditorRowDataModel> rows = new ArrayList<SavuParameterEditorRowDataModel>();
-	private final static Logger logger = LoggerFactory.getLogger(SavuParameterEditorTableViewModel.class);
+	private List<SavuParameterEditorRowDataModel> rows = new ArrayList<>();
+	private static final String wspacePath = ResourcesPlugin.getWorkspace().getRoot().getLocation().toString();
 
-	private Map<String, Object> pluginDict;
 
-	private static String pluginName=null;
+	private final Map<String, Object> pluginParameterDict;
 
-	public static String getPluginName() {
+	private String pluginName = null;
+
+	public String getPluginName() {
 		return pluginName;
 	}
 
-	public void updateModel(String pluginName, Map<String, Object> pluginDict) {
-		logger.debug(pluginName + " " + this.pluginName);
-		try {
-			if (pluginDict == null || this.pluginName !=pluginName){
-				if (this.pluginDict != null){
-					this.pluginDict.clear();// this is the case at the start of the model build
-				}
-				
-				this.pluginName = pluginName;
-				this.pluginDict = getMapFromFile();
+	public void updateModel(String pluginName) {
+		if (this.pluginName != null && pluginName != null && !this.pluginName.equals(pluginName))
+			pluginParameterDict.clear();
+		this.pluginName = pluginName;
+		if (pluginName != null && pluginParameterDict.isEmpty()) {
+			Map<String, Object> newPluginParameterDict;
+			try {
+				newPluginParameterDict = getMapFromFile();
+				pluginParameterDict.putAll(newPluginParameterDict);
+			} catch (Exception e) {
+				e.printStackTrace();
 			}
-			
-			else if (this.pluginName == pluginName) {
-			}
-			else {
-				this.pluginDict.clear();
-				this.pluginDict = pluginDict;
-			}
-		} catch (IOException e) {
-			logger.error("Couldn't select a plugin",e);
 		}
 		rows.clear();
-		rebuildTable(this.pluginDict);
+		rebuildTable();
 		
 	}
 
-	private static String wspacePath;
-
-	public SavuParameterEditorTableViewModel() {
-		wspacePath = ResourcesPlugin.getWorkspace().getRoot().getLocation().toString();
-		this.pluginName = null;
-		try {
-			if (pluginDict == null) {
-				
-				try {
-					pluginDict = getMapFromFile();
-					this.pluginDict = pluginDict;
-				} catch (FileNotFoundException e) {
-					logger.warn("Haven't found a file associated with plugin name " + this.pluginName.toString() + ". This should only happen on startup.");
-					this.pluginDict = null;
-				}}
-
-		} catch (IOException e) {
-			logger.error("Could not find a map file!",e);
-		}
-		rebuildTable(pluginDict);
-
+	public SavuParameterEditorTableViewModel(Map<String, Object> pluginParameterDict) {
+		this.pluginParameterDict = pluginParameterDict;
+		updateModel(null);
 	}
 
-	public void rebuildTable(Map<String, Object> pluginDict) {
-		if (pluginDict == null) {
-			rows.add(new SavuParameterEditorRowDataModel("", "", ""));
-		} else {
-			for (Map.Entry<String, Object> entry : pluginDict.entrySet()) {
+	public void rebuildTable() {
+		if (pluginParameterDict != null) {
+		//	rows.add(new SavuParameterEditorRowDataModel("", "", ""));
+		//} else {
+			for (Map.Entry<String, Object> entry : pluginParameterDict.entrySet()) {
+				@SuppressWarnings("unchecked")
 				Map<String, Object> info = (Map<String, Object>) entry.getValue();
 				rows.add(new SavuParameterEditorRowDataModel(entry.getKey(), info.get("value"), (String) info.get("hint")));
-				
-		}	
+			}	
 		}
 
 	}
@@ -93,40 +64,21 @@ public class SavuParameterEditorTableViewModel {
 	public void clearEntries() {
 		rows.clear();
 	}
-	public Map<String, Object> getPluginDict() {
-		return pluginDict;
-	}
-
-	public void setPluginDict(Map<String, Object> pluginDict) {
-		this.pluginDict = pluginDict;
-	}
-
-	public static String getWspacePath() {
-		return wspacePath;
-	}
-
-	public static void setWspacePath(String wspacePath) {
-		SavuParameterEditorTableViewModel.wspacePath = wspacePath;
+	public Map<String, Object> getPluginParameterDict() {
+		return pluginParameterDict;
 	}
 
 	public List<SavuParameterEditorRowDataModel> getValues() {
 		return rows;
 	}
 
-	public Map<String, Object> getMapFromFile() throws IOException {
-		Map<String, Object> pluginDict = null;
-		ObjectInputStream in;
-		FileInputStream fileIn;
-
-		try {
-			fileIn = new FileInputStream(wspacePath + File.separator + pluginName+".ser");// just																								// testing
-			in = new ObjectInputStream(fileIn);
-			pluginDict = (Map<String, Object>) in.readObject();
-			in.close();
-			fileIn.close();
-		} catch (ClassNotFoundException | IOException e) {
-			logger.warn("Error finding plugin info",e);
-		}
-		return pluginDict;
+	@SuppressWarnings("unchecked")
+	public Map<String, Object> getMapFromFile() throws Exception {
+		try (
+			FileInputStream fileIn = new FileInputStream(wspacePath + File.separator + pluginName+".ser");// just																								// testing
+			ObjectInputStream in = new ObjectInputStream(fileIn);
+			) {
+			return (Map<String, Object>) in.readObject();
+		} 
 	}
 }
