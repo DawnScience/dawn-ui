@@ -5,6 +5,7 @@
          point="org.eclipse.ui.perspectives">
       <perspective
             class="org.dawnsci.dedi.ui.perspectives.Perspective"
+            icon="icons/DEDI.png"
             id="dedi.perspective"
             name="DEDI">
       </perspective>
@@ -18,12 +19,14 @@
    	    <view
    	    	category="dedi.dediViewsCategory"
    	    	class="org.dawnsci.dedi.ui.views.plot.BeamlineConfigurationPlotView"
+   	    	icon="icons/map.png"
    	    	id="dedi.plottingview"
    	    	name="Plot">
    	    </view>
         <view
               category="dedi.dediViewsCategory"
               class="org.dawnsci.dedi.ui.views.configuration.ConfigurationView"
+              icon="icons/dashboard.png"
               id="dedi.configurationpanel"
               name="Configuration"
               restorable="true">
@@ -31,6 +34,7 @@
         <view
               category="dedi.dediViewsCategory"
               class="org.dawnsci.dedi.ui.views.results.ResultsView"
+              icon="icons/table.png"
               id="dedi.views.results"
               name="Results"
               restorable="true">
