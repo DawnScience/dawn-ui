@@ -47,6 +47,7 @@ import org.eclipse.dawnsci.analysis.api.diffraction.IDiffractionCrystalEnvironme
 import org.eclipse.dawnsci.plotting.api.trace.IImageTrace;
 import org.eclipse.dawnsci.analysis.api.metadata.IDiffractionMetadata;
 import org.eclipse.january.metadata.IMetadata;
+import org.eclipse.swt.widgets.Display;
 import org.jscience.physics.amount.Amount;
 
 /**
@@ -643,6 +644,10 @@ public class DiffractionTreeModel extends AbstractNodeModel {
 			
 			@Override
 			public void detectorPropertiesChanged(DetectorPropertyEvent evt) {
+				if (Display.getCurrent() == null) {
+					Display.getDefault().syncExec(() -> detectorPropertiesChanged(evt));
+					return;
+				}
 				if (!isActive)         return;
 				if (!canUpdate)        return;
 				if (evt.hasNormalChanged()) {
@@ -682,7 +687,14 @@ public class DiffractionTreeModel extends AbstractNodeModel {
 					DiffractionCrystalEnvironmentEvent evt) {
 				if (!isActive)         return;
 				if (!canUpdate)        return;
+				
 				if (evt.hasWavelengthChanged()) {
+					
+					if (Display.getCurrent() == null) {
+						Display.getDefault().syncExec(() -> diffractionCrystalEnvironmentChanged(evt));
+						return;
+					}
+					
 					int unit = lambda.getUnitIndex();
 					lambda.setValueQuietly(dce.getWavelength(), NonSI.ANGSTROM);
 					lambda.setUnitIndex(unit);

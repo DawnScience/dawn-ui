@@ -607,6 +607,10 @@ public class DiffractionImageAugmenter implements IDetectorPropertyListener, IDi
 	}
 
 	private void updateAll() {
+		if (Display.getCurrent() == null) {
+			Display.getDefault().syncExec(() -> updateAll());
+			return;
+		}
 		beamCentre.run();
 		standardRings.run();
 		iceRings.run();
@@ -620,6 +624,10 @@ public class DiffractionImageAugmenter implements IDetectorPropertyListener, IDi
 
 	@Override
 	public void diffractionCrystalEnvironmentChanged(DiffractionCrystalEnvironmentEvent evt) {
+		if (Display.getCurrent() == null) {
+			Display.getDefault().syncExec(() -> diffractionCrystalEnvironmentChanged(evt));
+			return;
+		}
 		standardRings.run();
 		iceRings.run();
 		calibrantRings.run();
