@@ -60,7 +60,7 @@ public class SavuPluginModelWizardPage extends AbstractOperationModelWizardPage 
 		container.setLayout(containerLayout);
 		setControl(container);
 		// create model and populate it
-		Map<String, Object> pluginParameterDict = null;
+		Map<String, Map<String,Object>> pluginParameterDict = null;
 		boolean isMetaData = false;
 		String pluginName = null;
 		try {
@@ -69,7 +69,7 @@ public class SavuPluginModelWizardPage extends AbstractOperationModelWizardPage 
 			logger.warn("Couldn't get the pluginName");
 		}
 		try {
-			pluginParameterDict = (Map<String, Object>) model.get("parameters"); // this cannot fail! It will be empty initially though...
+			pluginParameterDict = (Map<String, Map<String, Object>>) model.get("parameters"); // this cannot fail! It will be empty initially though...
 		} catch (Exception e2) {
 			logger.warn("Couldn't get the model parameters",e2);
 		}

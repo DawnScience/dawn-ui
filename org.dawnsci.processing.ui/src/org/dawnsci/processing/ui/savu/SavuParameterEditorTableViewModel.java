@@ -14,7 +14,7 @@ public class SavuParameterEditorTableViewModel {
 	private static final String wspacePath = ResourcesPlugin.getWorkspace().getRoot().getLocation().toString();
 
 
-	private final Map<String, Object> pluginParameterDict;
+	private final Map<String, Map<String, Object>> pluginParameterDict;
 
 	private String pluginName = null;
 
@@ -23,14 +23,12 @@ public class SavuParameterEditorTableViewModel {
 	}
 
 	public void updateModel(String pluginName) {
-		if (this.pluginName != null && pluginName != null && !this.pluginName.equals(pluginName))
-			pluginParameterDict.clear();
 		this.pluginName = pluginName;
-		if (pluginName != null && pluginParameterDict.isEmpty()) {
+		if (pluginName != null && !pluginParameterDict.containsKey(pluginName)) {
 			Map<String, Object> newPluginParameterDict;
 			try {
-				newPluginParameterDict = getMapFromFile();
-				pluginParameterDict.putAll(newPluginParameterDict);
+				newPluginParameterDict = getMapFromFile(pluginName);
+				pluginParameterDict.put(pluginName, newPluginParameterDict);
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
@@ -40,16 +38,16 @@ public class SavuParameterEditorTableViewModel {
 		
 	}
 
-	public SavuParameterEditorTableViewModel(Map<String, Object> pluginParameterDict) {
+	public SavuParameterEditorTableViewModel(Map<String, Map<String, Object>> pluginParameterDict) {
 		this.pluginParameterDict = pluginParameterDict;
 		updateModel(null);
 	}
 
 	public void rebuildTable() {
-		if (pluginParameterDict != null) {
+		if (pluginParameterDict != null && pluginName != null) {
 		//	rows.add(new SavuParameterEditorRowDataModel("", "", ""));
 		//} else {
-			for (Map.Entry<String, Object> entry : pluginParameterDict.entrySet()) {
+			for (Map.Entry<String, Object> entry : pluginParameterDict.get(pluginName).entrySet()) {
 				@SuppressWarnings("unchecked")
 				Map<String, Object> info = (Map<String, Object>) entry.getValue();
 				rows.add(new SavuParameterEditorRowDataModel(entry.getKey(), info.get("value"), (String) info.get("hint")));
@@ -64,7 +62,7 @@ public class SavuParameterEditorTableViewModel {
 	public void clearEntries() {
 		rows.clear();
 	}
-	public Map<String, Object> getPluginParameterDict() {
+	public Map<String, Map<String, Object>> getPluginParameterDict() {
 		return pluginParameterDict;
 	}
 
@@ -73,7 +71,7 @@ public class SavuParameterEditorTableViewModel {
 	}
 
 	@SuppressWarnings("unchecked")
-	public Map<String, Object> getMapFromFile() throws Exception {
+	public static Map<String, Object> getMapFromFile(String pluginName) throws Exception {
 		try (
 			FileInputStream fileIn = new FileInputStream(wspacePath + File.separator + pluginName+".ser");// just																								// testing
 			ObjectInputStream in = new ObjectInputStream(fileIn);
