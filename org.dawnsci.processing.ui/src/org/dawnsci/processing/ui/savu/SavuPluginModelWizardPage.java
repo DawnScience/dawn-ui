@@ -21,6 +21,7 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Label;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -75,6 +76,17 @@ public class SavuPluginModelWizardPage extends AbstractOperationModelWizardPage 
 		GridLayout containerLayout = new GridLayout(1, true);
 		container.setLayout(containerLayout);
 		setControl(container);
+		
+		if (pluginDict == null) {
+			// preferences need to be run first!!!
+			Label errorLabel = new Label(container, SWT.BORDER);
+			errorLabel.setText("Before running Savu from within DAWN, you need to determine which Savu plugins are available.\n"
+					+ "This can be accomplished from within Preferences -> Data Analysis -> Processing Preferences -> Savu Processing Preferences -> Check for Plugins\n"
+					+ "Afterwards try opening this wizardpage again.");
+			errorLabel.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, true, true));
+			return;
+		}
+		
 		// create model and populate it
 		Map<String, Map<String, Map<String, Object>>> pluginParameterDict = null;
 		boolean isMetaData = false;
