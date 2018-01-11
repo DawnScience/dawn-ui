@@ -30,7 +30,7 @@ public class SavuPluginModelWizardPage extends AbstractOperationModelWizardPage 
 
 	private static final Logger logger = LoggerFactory.getLogger(SavuPluginModelWizardPage.class);
 
-	private Map<String, Object> pluginDict;
+	private Map<String, Map<String, Object>> pluginDict;
 	
 	@SuppressWarnings("unchecked")
 	public SavuPluginModelWizardPage(IOperation<? extends IOperationModel, ? extends OperationData> operation) {
@@ -42,7 +42,7 @@ public class SavuPluginModelWizardPage extends AbstractOperationModelWizardPage 
 			FileInputStream fileIn = new FileInputStream(wspacePath + File.separator + "savu_plugin_info.ser");// just
 			ObjectInputStream in = new ObjectInputStream(fileIn);
 				) {
-			pluginDict = (Map<String, Object>) in.readObject();
+			pluginDict = (Map<String, Map<String, Object>>) in.readObject();
 		} catch (Exception e) {
 			logger.warn("Couldn't open the file for "+ wspacePath + File.separator + "savu_plugin_info.ser", e);
 			// better to display a wizardpage with an appropriate message...
@@ -53,6 +53,7 @@ public class SavuPluginModelWizardPage extends AbstractOperationModelWizardPage 
 		super();
 	}
 	
+	@SuppressWarnings("unchecked")
 	@Override
 	public void createControl(Composite parent) {
 		Composite container = new Composite(parent, SWT.NONE);
@@ -60,7 +61,7 @@ public class SavuPluginModelWizardPage extends AbstractOperationModelWizardPage 
 		container.setLayout(containerLayout);
 		setControl(container);
 		// create model and populate it
-		Map<String, Map<String,Object>> pluginParameterDict = null;
+		Map<String, Map<String, Map<String, Object>>> pluginParameterDict = null;
 		boolean isMetaData = false;
 		String pluginName = null;
 		try {
@@ -69,7 +70,7 @@ public class SavuPluginModelWizardPage extends AbstractOperationModelWizardPage 
 			logger.warn("Couldn't get the pluginName");
 		}
 		try {
-			pluginParameterDict = (Map<String, Map<String, Object>>) model.get("parameters"); // this cannot fail! It will be empty initially though...
+			pluginParameterDict = (Map<String, Map<String, Map<String, Object>>>) model.get("parameters"); // this cannot fail! It will be empty initially though...
 		} catch (Exception e2) {
 			logger.warn("Couldn't get the model parameters",e2);
 		}
@@ -85,8 +86,6 @@ public class SavuPluginModelWizardPage extends AbstractOperationModelWizardPage 
 		final SavuParameterEditor parameterEditor = new SavuParameterEditor(container, viewModel, SWT.NONE);
 
 		GridData parameterEditorLayout = new GridData(SWT.FILL, SWT.FILL, true, true);
-		//parameterEditorLayout.heightHint = parameterEditor.getHeight();
-		//parameterEditorLayout.widthHint = parameterEditor.getWidth();
 		parameterEditor.setLayoutData(parameterEditorLayout);
 		
 		
@@ -104,8 +103,7 @@ public class SavuPluginModelWizardPage extends AbstractOperationModelWizardPage 
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				String selectedPluginName = pluginChooser.getText();
-				@SuppressWarnings("unchecked")
-				Map<String,Object> selectedPluginParamsDict = (Map<String, Object>) pluginDict.get(selectedPluginName);
+				Map<String, Object> selectedPluginParamsDict = pluginDict.get(selectedPluginName);
 				try {
 					model.set("pluginPath", selectedPluginParamsDict.get("path2plugin"));
 				} catch (Exception e1) {
@@ -127,7 +125,6 @@ public class SavuPluginModelWizardPage extends AbstractOperationModelWizardPage 
 					logger.error("Couldn't update model!",e2);
 				}
 				parameterEditor.updateTable();		
-				//container.pack();
 			}
 		});
 

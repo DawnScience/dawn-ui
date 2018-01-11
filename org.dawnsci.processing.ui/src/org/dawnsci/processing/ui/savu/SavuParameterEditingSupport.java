@@ -223,9 +223,8 @@ class SavuParameterEditingSupport extends EditingSupport {
 	}
 
 	private void setPluginDictValues(SavuParameterEditorRowDataModel row) {
-		Map<String, Object> pluginDict = viewModel.getPluginParameterDict().get(viewModel.getPluginName());
-		@SuppressWarnings("unchecked")
-		Map<String, Object> entryGroup = (Map<String, Object>) pluginDict.get(row.getKey());
+		Map<String, Map<String,Object>> pluginDict = viewModel.getPluginParameterDict().get(viewModel.getPluginName());
+		Map<String, Object> entryGroup = pluginDict.get(row.getKey());
 		entryGroup.put("value", row.getValue());
 		pluginDict.put(row.getKey(), entryGroup);
 	}
