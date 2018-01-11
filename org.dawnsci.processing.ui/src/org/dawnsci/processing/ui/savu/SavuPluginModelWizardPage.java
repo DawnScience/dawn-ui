@@ -16,7 +16,6 @@ import org.eclipse.dawnsci.analysis.api.processing.model.IOperationModel;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -31,6 +30,22 @@ public class SavuPluginModelWizardPage extends AbstractOperationModelWizardPage 
 	private static final Logger logger = LoggerFactory.getLogger(SavuPluginModelWizardPage.class);
 
 	private Map<String, Map<String, Object>> pluginDict;
+	private int pluginOutputType;
+
+	private Button checkBox;
+	
+	private enum PluginOutputTypes { 
+		OUTPUT_TYPE_DATA_ONLY(0),
+		OUTPUT_TYPE_METADATA_ONLY(1),
+		OUTPUT_TYPE_METADATA_AND_DATA(2);
+		
+		private final int value;
+		
+		PluginOutputTypes(int value) {
+			this.value = value;
+		}
+	};
+	
 	
 	@SuppressWarnings("unchecked")
 	public SavuPluginModelWizardPage(IOperation<? extends IOperationModel, ? extends OperationData> operation) {
@@ -96,6 +111,10 @@ public class SavuPluginModelWizardPage extends AbstractOperationModelWizardPage 
 		pluginLayout.verticalAlignment = GridData.END;	
 		pluginChooser.setLayoutData(pluginLayout);
 		String[] pluginNameArray = pluginDict.keySet().toArray(new String[0]);
+		if (pluginName != null) {
+			Map<String, Object> currentPluginParamsDict = pluginDict.get(pluginName);
+			pluginOutputType = (int) currentPluginParamsDict.get("plugin_output_type");
+		}
 		pluginChooser.setItems(pluginNameArray);
 
 		pluginChooser.addSelectionListener(new SelectionAdapter() {
@@ -104,6 +123,7 @@ public class SavuPluginModelWizardPage extends AbstractOperationModelWizardPage 
 			public void widgetSelected(SelectionEvent e) {
 				String selectedPluginName = pluginChooser.getText();
 				Map<String, Object> selectedPluginParamsDict = pluginDict.get(selectedPluginName);
+				pluginOutputType = (int) selectedPluginParamsDict.get("plugin_output_type");
 				try {
 					model.set("pluginPath", selectedPluginParamsDict.get("path2plugin"));
 				} catch (Exception e1) {
@@ -124,13 +144,14 @@ public class SavuPluginModelWizardPage extends AbstractOperationModelWizardPage 
 				} catch (Exception e2) {
 					logger.error("Couldn't update model!",e2);
 				}
-				parameterEditor.updateTable();		
+				parameterEditor.updateTable();
+				updateMetaOnly();
 			}
 		});
 
 		parameterEditor.initialiseTable();
 		
-		Button checkBox = new Button(container,SWT.CHECK); // to figure out if we want it as metadata or not
+		checkBox = new Button(container,SWT.CHECK); // to figure out if we want it as metadata or not
 		checkBox.setText("Save as metadata");
 		GridData checkboxLayout = new GridData();
 		checkboxLayout.horizontalSpan=1;
@@ -138,23 +159,15 @@ public class SavuPluginModelWizardPage extends AbstractOperationModelWizardPage 
 		checkBox.setLayoutData(checkboxLayout);
 		checkBox.setSelection(isMetaData);
 
-		checkBox.addSelectionListener(new SelectionListener() {
+		checkBox.addSelectionListener(new SelectionAdapter() {
 			
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				Button btn = (Button) e.getSource();
 				try {
-				model.set("MetaDataOnly", btn.getSelection());
+				model.set("metaDataOnly", checkBox.getSelection());
 				} catch (Exception e1) {
 					logger.error("Couldn't set the meta data switch", e1);
 				}
-				
-			}
-			
-			@Override
-			public void widgetDefaultSelected(SelectionEvent e) {
-				logger.debug("In default selection");
-
 				
 			}
 		});
@@ -167,10 +180,28 @@ public class SavuPluginModelWizardPage extends AbstractOperationModelWizardPage 
 				logger.error("Couldn't update model!",e2);
 			}
 			parameterEditor.updateTable();		
+			updateMetaOnly();
 		}
 		
 	}
 
+	private void updateMetaOnly() {
+		if (pluginOutputType == PluginOutputTypes.OUTPUT_TYPE_DATA_ONLY.value) {
+			checkBox.setSelection(false);
+			checkBox.setEnabled(false);
+		} else if (pluginOutputType == PluginOutputTypes.OUTPUT_TYPE_METADATA_ONLY.value) {
+			checkBox.setSelection(true);
+			checkBox.setEnabled(false);
+		} else if (pluginOutputType == PluginOutputTypes.OUTPUT_TYPE_METADATA_AND_DATA.value) {
+			checkBox.setEnabled(true);
+		}
+		try {
+			model.set("metaDataOnly", checkBox.getSelection());
+		} catch (Exception e) {
+			logger.error("Couldn't update model!",e);
+		}
+		
+	}
 
 }
 

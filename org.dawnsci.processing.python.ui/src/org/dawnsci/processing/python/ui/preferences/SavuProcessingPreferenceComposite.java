@@ -64,7 +64,6 @@ public class SavuProcessingPreferenceComposite extends Composite {
 		list.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		list.addSelectionListener(new SelectionAdapter() {
 			
-			@SuppressWarnings("unused")
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				String[] selection = list.getSelection();
