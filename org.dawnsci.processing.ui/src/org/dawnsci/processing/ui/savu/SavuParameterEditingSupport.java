@@ -1,4 +1,4 @@
-package org.dawnsci.processing.ui.savu.ParameterEditor;
+package org.dawnsci.processing.ui.savu;
 
 import java.util.Map;
 
@@ -22,13 +22,13 @@ import org.slf4j.LoggerFactory;
  * EditingSupport Class
  *
  */
-class ParameterEditingSupport extends EditingSupport {
+class SavuParameterEditingSupport extends EditingSupport {
 
 	private int column;
-	private ParameterEditorTableViewModel viewModel;
-	private final static Logger logger = LoggerFactory.getLogger(ParameterEditingSupport.class);
+	private SavuParameterEditorTableViewModel viewModel;
+	private static final Logger logger = LoggerFactory.getLogger(SavuParameterEditingSupport.class);
 
-	public ParameterEditingSupport(ParameterEditorTableViewModel viewModel, ColumnViewer viewer, int col) {
+	public SavuParameterEditingSupport(SavuParameterEditorTableViewModel viewModel, ColumnViewer viewer, int col) {
 		super(viewer);
 		this.column = col;
 		this.viewModel = viewModel;				
@@ -39,35 +39,29 @@ class ParameterEditingSupport extends EditingSupport {
 	protected CellEditor getCellEditor(final Object element) {
 		FieldComponentCellEditor ed = null;
 		if (this.getValue(element) instanceof Double) {
-			ed = createDoubleEditor(element, ed);
-			return ed;
-
+			ed = createDoubleEditor(element);
 		}
 		if (this.getValue(element) instanceof Integer) {
-			ed = createIntegerEditor(element, ed);
-			return ed;
-
+			ed = createIntegerEditor(element);
 		}
 
 		if (this.getValue(element) instanceof Boolean) {
-			ed = createBooleanEditor(ed);
-			return ed;
+			ed = createBooleanEditor();
 		}
 
 		if (this.getValue(element) instanceof String) {
-
 			String theString = (String) this.getValue(element);
 			Integer numSlashes = StringUtils.countMatches(theString, "/");
 			Integer numDots = StringUtils.countMatches(theString, ".");
 			// At some point I will use the above to make this a file browser if I think it's a path
-			ed = createStringEditor(ed);
-			}
+			ed = createStringEditor();
+		}
 		return ed;
-
 	}
 
 
-	private FieldComponentCellEditor createStringEditor(FieldComponentCellEditor ed) {
+	private FieldComponentCellEditor createStringEditor() {
+		FieldComponentCellEditor ed;
 		try {
 			ed = new FieldComponentCellEditor(((TableViewer) getViewer()).getTable(),
 					TextWrapper.class.getName(), SWT.RIGHT);
@@ -82,9 +76,9 @@ class ParameterEditingSupport extends EditingSupport {
 		return ed;
 	}
 
-	private FieldComponentCellEditor createBooleanEditor(FieldComponentCellEditor ed) {
+	private FieldComponentCellEditor createBooleanEditor() {
+		FieldComponentCellEditor ed;
 		try {
-
 			ed = new FieldComponentCellEditor(((TableViewer) getViewer()).getTable(),
 					BooleanWrapper.class.getName(), SWT.RIGHT);
 		} catch (ClassNotFoundException e) {
@@ -98,9 +92,9 @@ class ParameterEditingSupport extends EditingSupport {
 		return ed;
 	}
 
-	private FieldComponentCellEditor createIntegerEditor(final Object element, FieldComponentCellEditor ed) {
+	private FieldComponentCellEditor createIntegerEditor(final Object element) {
+		FieldComponentCellEditor ed;
 		try {
-
 			ed = new FieldComponentCellEditor(((TableViewer) getViewer()).getTable(),
 					FloatSpinnerWrapper.class.getName(), SWT.RIGHT);
 		} catch (ClassNotFoundException e) {
@@ -130,7 +124,8 @@ class ParameterEditingSupport extends EditingSupport {
 		return ed;
 	}
 
-	private FieldComponentCellEditor createDoubleEditor(final Object element, FieldComponentCellEditor ed) {
+	private FieldComponentCellEditor createDoubleEditor(final Object element) {
+		FieldComponentCellEditor ed;
 		try {
 
 			ed = new FieldComponentCellEditor(((TableViewer) getViewer()).getTable(),
@@ -164,12 +159,7 @@ class ParameterEditingSupport extends EditingSupport {
 
 	@Override
 	protected boolean canEdit(Object element) {
-		if (column == 0)
-			return false;
-		if (column == 2)
-			return false;
-		else
-			return true;
+		return !(column == 0 || column == 2);
 	}
 
 	@Override
@@ -184,7 +174,7 @@ class ParameterEditingSupport extends EditingSupport {
 
 	private Object getRowValue(Object element) throws Exception {
 
-		final ParameterEditorRowDataModel row = (ParameterEditorRowDataModel) element;
+		final SavuParameterEditorRowDataModel row = (SavuParameterEditorRowDataModel) element;
 		switch (column) {
 		case 0:
 			return row.getKey();
@@ -207,7 +197,7 @@ class ParameterEditingSupport extends EditingSupport {
 	}
 
 	private void setValue(Object element, Object value, boolean tableRefresh) throws Exception {
-		final ParameterEditorRowDataModel row = (ParameterEditorRowDataModel) element;
+		final SavuParameterEditorRowDataModel row = (SavuParameterEditorRowDataModel) element;
 
 		switch (column) {
 		case 0:
@@ -232,11 +222,10 @@ class ParameterEditingSupport extends EditingSupport {
 
 	}
 
-	private void setPluginDictValues(ParameterEditorRowDataModel row) {
-		Map<String, Object> pluginDict = this.viewModel.getPluginDict();
-		Map<String, Object> entryGroup = (Map<String, Object>) pluginDict.get(row.getKey());
+	private void setPluginDictValues(SavuParameterEditorRowDataModel row) {
+		Map<String, Map<String,Object>> pluginDict = viewModel.getPluginParameterDict().get(viewModel.getPluginName());
+		Map<String, Object> entryGroup = pluginDict.get(row.getKey());
 		entryGroup.put("value", row.getValue());
 		pluginDict.put(row.getKey(), entryGroup);
-		this.viewModel.setPluginDict(pluginDict);
 	}
 }
