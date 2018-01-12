@@ -8,17 +8,29 @@
  */
 package org.dawnsci.common.widgets.gda.function.jexl;
 
+import org.dawb.common.services.ServiceManager;
 import org.dawnsci.common.widgets.gda.function.descriptors.FunctionInstantiationFailedException;
 import org.dawnsci.common.widgets.gda.function.descriptors.IFunctionDescriptor;
 import org.eclipse.core.runtime.PlatformObject;
 import org.eclipse.dawnsci.analysis.api.expressions.IExpressionEngine;
+import org.eclipse.dawnsci.analysis.api.expressions.IExpressionService;
 import org.eclipse.dawnsci.analysis.api.fitting.functions.IFunction;
 
 public class JexlExpressionFunctionDescriptor extends PlatformObject implements IFunctionDescriptor {
 	private JexlExpressionFunction jexl;
 
 	public JexlExpressionFunctionDescriptor() {
-		jexl = new JexlExpressionFunction();
+		
+		IExpressionService service = null;
+		
+		try {
+			service = (IExpressionService)ServiceManager.getService(IExpressionService.class);
+		} catch (Exception e) {
+			// TODO: handle exception
+		}
+		
+		
+		jexl = new JexlExpressionFunction(service);
 	}
 
 	@Override

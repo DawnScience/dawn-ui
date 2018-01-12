@@ -13,6 +13,7 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import org.dawb.common.services.ServiceManager;
 import org.dawnsci.common.widgets.gda.function.FunctionTreeViewer.COLUMN;
 import org.dawnsci.common.widgets.gda.function.descriptors.CustomFunctionDescriptorProvider;
 import org.dawnsci.common.widgets.gda.function.handlers.CopyHandler;
@@ -27,6 +28,7 @@ import org.dawnsci.common.widgets.gda.function.internal.model.ParameterModel;
 import org.dawnsci.common.widgets.gda.function.internal.model.SetFunctionModel;
 import org.dawnsci.common.widgets.gda.function.jexl.JexlExpressionFunction;
 import org.eclipse.core.commands.ExecutionException;
+import org.eclipse.dawnsci.analysis.api.expressions.IExpressionService;
 import org.eclipse.dawnsci.analysis.api.fitting.functions.IFunction;
 import org.eclipse.swt.widgets.Composite;
 import org.junit.Before;
@@ -56,12 +58,13 @@ public class FunctionTreeViewerHandlersExecutePluginTest extends
 	}
 
 	@Before
-	public void before() {
+	public void before() throws Exception {
 		actual = new CompositeFunction();
 		gaussian = new Gaussian();
 		actual.addFunction(gaussian);
 		subtract = new Subtract();
-		jexl = new JexlExpressionFunction("a+b+x");
+		IExpressionService service = (IExpressionService)ServiceManager.getService(IExpressionService.class);
+		jexl = new JexlExpressionFunction(service,"a+b+x");
 		subtract.addFunction(jexl);
 		actual.addFunction(subtract);
 

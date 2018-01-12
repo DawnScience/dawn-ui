@@ -55,33 +55,36 @@ public class FunctionTreeViewerJexlPluginTest extends
 	}
 
 	@Test
-	public void testRendering_x() {
+	public void testRendering_x() throws Exception {
 		CompositeFunction actual = new CompositeFunction();
-		actual.addFunction(new JexlExpressionFunction("x"));
+		IExpressionService service = (IExpressionService)ServiceManager.getService(IExpressionService.class);
+		actual.addFunction(new JexlExpressionFunction(service,"x"));
 		viewer.setInput(actual);
 
 		assertTreeLooksLike(new Node("x"), Node.ADD_NEW_FUNCTION);
 	}
 
 	@Test
-	public void testRendering_xa() {
+	public void testRendering_xa() throws Exception {
 		CompositeFunction actual = new CompositeFunction();
-		actual.addFunction(new JexlExpressionFunction("x+a"));
+		IExpressionService service = (IExpressionService)ServiceManager.getService(IExpressionService.class);
+		actual.addFunction(new JexlExpressionFunction(service,"x+a"));
 		viewer.setInput(actual);
 
 		assertTreeLooksLike(new Node("x+a", "a"), Node.ADD_NEW_FUNCTION);
 	}
 
 	@Test
-	public void testSortOrderOfParams_abc() {
+	public void testSortOrderOfParams_abc() throws Exception {
 		// Test that we infer parameters in the order declared
 		// (At the time of this writing this relies on improved
 		// ExpressionEngineImpl.getVariableNamesFromExpression that
 		// maintains insertion order of the set
 
 		CompositeFunction declaredAlphabetically = new CompositeFunction();
+		IExpressionService service = (IExpressionService)ServiceManager.getService(IExpressionService.class);
 		declaredAlphabetically
-				.addFunction(new JexlExpressionFunction("x+a+b+c"));
+				.addFunction(new JexlExpressionFunction(service,"x+a+b+c"));
 		viewer.setInput(declaredAlphabetically);
 
 		assertTreeLooksLike(new Node("x+a+b+c", "a", "b", "c"),
@@ -89,9 +92,10 @@ public class FunctionTreeViewerJexlPluginTest extends
 	}
 
 	@Test
-	public void testSortOrderOfParams_cba() {
+	public void testSortOrderOfParams_cba() throws Exception {
 		CompositeFunction declaredReverse = new CompositeFunction();
-		declaredReverse.addFunction(new JexlExpressionFunction("x+c+b+a"));
+		IExpressionService service = (IExpressionService)ServiceManager.getService(IExpressionService.class);
+		declaredReverse.addFunction(new JexlExpressionFunction(service,"x+c+b+a"));
 		viewer.setInput(declaredReverse);
 
 		assertTreeLooksLike(new Node("x+c+b+a", "c", "b", "a"),
@@ -99,14 +103,15 @@ public class FunctionTreeViewerJexlPluginTest extends
 	}
 
 	@Test
-	public void testEditFunction() {
+	public void testEditFunction() throws Exception {
 		CompositeFunction actual = new CompositeFunction();
-		JexlExpressionFunction function = new JexlExpressionFunction("x+a");
+		IExpressionService service = (IExpressionService)ServiceManager.getService(IExpressionService.class);
+		JexlExpressionFunction function = new JexlExpressionFunction(service,"x+a");
 		actual.addFunction(function);
 		viewer.setInput(actual);
 
 		editFunctionGUI(function, "x+a+b");
-		assertEquals(new JexlExpressionFunction("x+a+b"), actual.getFunction(0));
+		assertEquals(new JexlExpressionFunction(service,"x+a+b"), actual.getFunction(0));
 
 		// Note we can't compare against function above because the GUI may
 		// recreate the function as it is not required to maintain it (although
@@ -115,9 +120,10 @@ public class FunctionTreeViewerJexlPluginTest extends
 	}
 
 	@Test
-	public void testFunctionError() {
+	public void testFunctionError() throws Exception {
 		CompositeFunction actual = new CompositeFunction();
-		JexlExpressionFunction function = new JexlExpressionFunction("missing_x");
+		IExpressionService service = (IExpressionService)ServiceManager.getService(IExpressionService.class);
+		JexlExpressionFunction function = new JexlExpressionFunction(service,"missing_x");
 		actual.addFunction(function);
 		viewer.setInput(actual);
 

@@ -12,8 +12,10 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.dawb.common.services.ServiceManager;
 import org.dawnsci.common.widgets.gda.function.jexl.JexlExpressionFunction;
 import org.dawnsci.common.widgets.gda.function.jexl.JexlExpressionFunctionDescriptor;
+import org.eclipse.dawnsci.analysis.api.expressions.IExpressionService;
 import org.eclipse.dawnsci.analysis.api.fitting.functions.IFunction;
 
 public class CustomFunctionDescriptorProvider implements
@@ -49,7 +51,13 @@ public class CustomFunctionDescriptorProvider implements
 	public IFunction getFunction(String functionName) throws FunctionInstantiationFailedException {
 		IFunctionDescriptor descriptor = getDescriptor(functionName);
 		if (descriptor != null && descriptor == jexlDescriptor) {
-			return new JexlExpressionFunction(functionName);
+			IExpressionService service;
+			try {
+				service = (IExpressionService)ServiceManager.getService(IExpressionService.class);
+			} catch (Exception e) {
+				throw new FunctionInstantiationFailedException(e);
+			}
+			return new JexlExpressionFunction(service,functionName);
 		} else {
 			return descriptor.getFunction();
 		}

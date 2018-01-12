@@ -14,7 +14,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.dawb.common.services.ServiceManager;
 import org.eclipse.dawnsci.analysis.api.expressions.IExpressionEngine;
 import org.eclipse.dawnsci.analysis.api.expressions.IExpressionService;
 import org.eclipse.dawnsci.analysis.api.fitting.functions.IFunction;
@@ -108,15 +107,6 @@ public class JexlExpressionFunction extends AFunction {
 	private transient Map<String, IParameter> beforeParametersMap;
 	private transient IExpressionService service;
 
-	/**
-	 * Create a JexlExpressionFunction with no expression yet. Until the
-	 * expression is set the error status will be
-	 * {@link JexlExpressionFunctionError#NO_EXPRESSION}
-	 */
-	public JexlExpressionFunction() {
-		super(0);
-		init(null);
-	}
 
 	/**
 	 * Accessible for tests only. The other constructors get the expression
@@ -131,23 +121,6 @@ public class JexlExpressionFunction extends AFunction {
 		init(service);
 	}
 
-	/**
-	 * Create a JexlExpressionFunction with an initial expression. Convenience
-	 * for calling {@link JexlExpressionFunction#JexlExpressionFunction()}
-	 * followed by {@link JexlExpressionFunction#setExpression(String)}
-	 *
-	 * @param jexlExpression
-	 *            initial expression.
-	 */
-	public JexlExpressionFunction(String jexlExpression) {
-		super(0);
-		init(null);
-		try {
-			setExpression(jexlExpression);
-		} catch (JexlExpressionFunctionException e) {
-			// The error state is saved in expressionError
-		}
-	}
 
 	/**
 	 * Accessible for tests only. The other constructors get the expression
@@ -175,9 +148,6 @@ public class JexlExpressionFunction extends AFunction {
 		description = DESC;
 
 		try {
-			if (service == null) {
-				service = (IExpressionService) ServiceManager.getService(IExpressionService.class, true);
-			}
 			this.service = service;
 			this.engine = service.getExpressionEngine();
 
