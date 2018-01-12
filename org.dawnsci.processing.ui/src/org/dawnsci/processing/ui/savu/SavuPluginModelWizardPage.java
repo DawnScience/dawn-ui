@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.ObjectInputStream;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.apache.commons.lang.ArrayUtils;
 import org.dawnsci.processing.ui.model.AbstractOperationModelWizardPage;
@@ -13,6 +14,7 @@ import org.eclipse.dawnsci.analysis.api.processing.IOperation;
 import org.eclipse.dawnsci.analysis.api.processing.OperationData;
 
 import org.eclipse.dawnsci.analysis.api.processing.model.IOperationModel;
+import org.eclipse.january.dataset.ShapeUtils;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -122,7 +124,16 @@ public class SavuPluginModelWizardPage extends AbstractOperationModelWizardPage 
 		pluginLayout.verticalSpan=1;
 		pluginLayout.verticalAlignment = GridData.END;	
 		pluginChooser.setLayoutData(pluginLayout);
-		String[] pluginNameArray = pluginDict.keySet().toArray(new String[0]);
+		
+		int[] shape = id.getData().getShape();
+		int rank = ShapeUtils.squeezeShape(shape, false).length;
+		
+		String[] pluginNameArray = 
+		pluginDict.entrySet()
+			.stream()
+			.filter(entry -> (Integer ) entry.getValue().get("input rank") == rank)
+			.map(Entry<String,Map<String,Object>>::getKey)
+			.toArray(String[]::new);
 		if (pluginName != null) {
 			Map<String, Object> currentPluginParamsDict = pluginDict.get(pluginName);
 			pluginOutputType = (int) currentPluginParamsDict.get("plugin_output_type");
