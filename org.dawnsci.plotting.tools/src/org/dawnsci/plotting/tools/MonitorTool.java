@@ -16,6 +16,7 @@ import org.eclipse.dawnsci.plotting.api.trace.ITrace;
 import org.eclipse.dawnsci.plotting.api.trace.ITraceListener;
 import org.eclipse.dawnsci.plotting.api.trace.TraceEvent;
 import org.eclipse.january.dataset.IDataset;
+import org.eclipse.january.dataset.RunningAverage;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ComboViewer;
 import org.eclipse.jface.viewers.IOpenListener;
@@ -26,6 +27,7 @@ import org.eclipse.jface.viewers.OpenEvent;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.StackLayout;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
@@ -49,12 +51,21 @@ public class MonitorTool extends AbstractToolPage {
 	
 	private IPlottingSystem<Composite> system;
 	private ITraceListener listener;
+	private ComboViewer modeViewer;
 	private ComboViewer colorViewer;
-	private LinkedList<ILineTrace> queue;
-	private int maxLength = 100;
-	private List<Color> colors;
+	
 	private Composite control;
+	
+	private OscilloscopeMonitor scopeMonitor;
+	private AverageMonitor averageMonitor;
 
+	private MonitorMode currentMode = MonitorMode.SCOPE_MODE;
+	
+	private StackLayout stackLayout;
+	private OscilloscopeComposite scopeComp;
+	private AverageComposite averageComp;
+	
+	private Composite stack;
 	
 	public MonitorTool() {
 		try {
@@ -72,9 +83,9 @@ public class MonitorTool extends AbstractToolPage {
 
 	@Override
 	public void createControl(Composite parent) {
-		queue = new LinkedList<ILineTrace>();
 		
-		colors = new ArrayList<Color>(maxLength);
+		scopeMonitor = new OscilloscopeMonitor();
+		averageMonitor = new AverageMonitor();
 		
 		listener = new ITraceListener.Stub() {
 			
@@ -124,7 +135,7 @@ public class MonitorTool extends AbstractToolPage {
 		Composite comp = new Composite(control, SWT.NONE);
 		Composite plotComp = new Composite(control, SWT.NONE);
 		comp.setLayoutData(new GridData());
-		comp.setLayout(new GridLayout(5, false));
+		comp.setLayout(new GridLayout(6, false));
 		
 		final IPaletteService pservice = (IPaletteService)PlatformUI.getWorkbench().getService(IPaletteService.class);
 		Collection<String> colorSchemes = pservice.getColorSchemes();
@@ -158,7 +169,9 @@ public class MonitorTool extends AbstractToolPage {
 			
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				queue.clear();
+				scopeMonitor.clear();
+				averageMonitor.clear();
+				averageComp.updateCount(0);
 				system.clear();
 				
 			}
@@ -170,55 +183,105 @@ public class MonitorTool extends AbstractToolPage {
 			}
 		});
 		
-		new Label(comp, SWT.NONE).setText("Max No.:");
+		modeViewer = new ComboViewer(comp, SWT.READ_ONLY);
+		modeViewer.getCombo().setLayoutData(new GridData());
+		modeViewer.setContentProvider(ArrayContentProvider.getInstance());
+		modeViewer.setLabelProvider(new LabelProvider());
+		modeViewer.setInput(new Object[] {MonitorMode.SCOPE_MODE,MonitorMode.AVERAGE_MODE});
+		modeViewer.getCombo().select(0);
 		
-		final Spinner spinner = new Spinner(comp, SWT.NONE);
-		spinner.setMaximum(MAXIMUM_NUMBER);
-		spinner.setSelection(maxLength);
-		spinner.setMinimum(1);
-		spinner.addSelectionListener(new SelectionAdapter() {
-			
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				if (getPlottingSystem() == null) return;
-				getPlottingSystem().removeTraceListener(listener);
-				maxLength = spinner.getSelection();
-				queue = new LinkedList<ILineTrace>();
-				system.clear();
-				updateColor(colorViewer.getSelection());
-				getPlottingSystem().addTraceListener(listener);
-				
-			}
-		});
-		
-		
-		colorViewer = new ComboViewer(comp, SWT.READ_ONLY);
-		colorViewer.getCombo().setLayoutData(new GridData());
-		colorViewer.setContentProvider(ArrayContentProvider.getInstance());
-		colorViewer.setLabelProvider(new LabelProvider());
-		colorViewer.setInput(colorSchemes.toArray());
-		
-		colorViewer.addSelectionChangedListener(new ISelectionChangedListener() {
+		modeViewer.addSelectionChangedListener(new ISelectionChangedListener() {
 			
 			@Override
 			public void selectionChanged(SelectionChangedEvent event) {
-				if (((StructuredSelection)event.getSelection()).getFirstElement() instanceof String) {
-					updateColor(event.getSelection());
+				if (((StructuredSelection)event.getSelection()).getFirstElement() instanceof MonitorMode) {
+					MonitorMode mode = (MonitorMode) ((StructuredSelection)event.getSelection()).getFirstElement();
+					if (!mode.equals(currentMode)) {
+						currentMode = mode;
+						
+						switch (currentMode) {
+						case AVERAGE_MODE:
+							stackLayout.topControl = averageComp;
+							break;
+						case SCOPE_MODE:
+							stackLayout.topControl = scopeComp;
+							break;
+						}
+						stack.layout();
+						
+						scopeMonitor.clear();
+						averageMonitor.clear();
+						averageComp.updateCount(0);
+						system.clear();
+					}
 				}
 			}
 		});
 		
-		colorViewer.addOpenListener(new IOpenListener() {
-			
-			@Override
-			public void open(OpenEvent event) {
-				if (getPlottingSystem() != null) getPlottingSystem().removeTraceListener(listener);
-				
-			}
-		});
+		stack = new Composite(comp, SWT.NONE);
+		stack.setLayoutData(new GridData());
+		stackLayout = new StackLayout();
+		stack.setLayout(stackLayout);
 		
-		colorViewer.getCombo().select(0);
-		updateColor(colorViewer.getSelection());
+		scopeComp = new OscilloscopeComposite(stack, SWT.NONE);
+		scopeComp.setLayoutData(new GridData());
+		
+		scopeComp.setInput(colorSchemes.toArray());
+		
+		averageComp = new AverageComposite(stack, SWT.NONE);
+		
+		stackLayout.topControl = scopeComp;
+		
+		stack.layout();
+		
+//		new Label(comp, SWT.NONE).setText("Max No.:");
+//		
+//		final Spinner spinner = new Spinner(comp, SWT.NONE);
+//		spinner.setMaximum(MAXIMUM_NUMBER);
+//		spinner.setSelection(scopeMonitor.getMaxLength());
+//		spinner.setMinimum(1);
+//		spinner.addSelectionListener(new SelectionAdapter() {
+//			
+//			@Override
+//			public void widgetSelected(SelectionEvent e) {
+//				if (getPlottingSystem() == null) return;
+//				getPlottingSystem().removeTraceListener(listener);
+//				scopeMonitor.setMaxLength(spinner.getSelection());
+//				system.clear();
+//				updateColor(colorViewer.getSelection());
+//				getPlottingSystem().addTraceListener(listener);
+//				
+//			}
+//		});
+//		
+//		
+//		colorViewer = new ComboViewer(comp, SWT.READ_ONLY);
+//		colorViewer.getCombo().setLayoutData(new GridData());
+//		colorViewer.setContentProvider(ArrayContentProvider.getInstance());
+//		colorViewer.setLabelProvider(new LabelProvider());
+//		colorViewer.setInput(colorSchemes.toArray());
+//		
+//		colorViewer.addSelectionChangedListener(new ISelectionChangedListener() {
+//			
+//			@Override
+//			public void selectionChanged(SelectionChangedEvent event) {
+//				if (((StructuredSelection)event.getSelection()).getFirstElement() instanceof String) {
+//					updateColor(event.getSelection());
+//				}
+//			}
+//		});
+//		
+//		colorViewer.addOpenListener(new IOpenListener() {
+//			
+//			@Override
+//			public void open(OpenEvent event) {
+//				if (getPlottingSystem() != null) getPlottingSystem().removeTraceListener(listener);
+//				
+//			}
+//		});
+//		
+//		colorViewer.getCombo().select(0);
+//		updateColor(colorViewer.getSelection());
 		
 		
 		plotComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1));
@@ -239,48 +302,39 @@ public class MonitorTool extends AbstractToolPage {
 	
 	private void updateColor(ISelection selection) {
 		String name = (String)((StructuredSelection)selection).getFirstElement();
-		final IPaletteService pservice = (IPaletteService)PlatformUI.getWorkbench().getService(IPaletteService.class);
-		PaletteData paletteData = pservice.getDirectPaletteData(name);
-		if (paletteData == null) return;
-		RGB[] rgbs = paletteData.getRGBs();
-		Display display = Display.getDefault();
-		List<Color> c = new ArrayList<Color>();
-		for (int i = 0 ; i < maxLength ; i++) {
-			c.add(new Color(display, rgbs[(255/maxLength)*i]));
-		}
+		
 		if (getPlottingSystem() != null) getPlottingSystem().removeTraceListener(listener);
-		List<Color> lc = colors;
-		colors = c;
+		scopeMonitor.updateColours(name);
+
 		if (getPlottingSystem() != null) getPlottingSystem().addTraceListener(listener);
-		for (Color co : lc) co.dispose();
-		updatePlot();
+
 	}
 	
 	private void processLineTrace(ILineTrace trace){
 		IDataset xData = trace.getXData();
 		IDataset yData = trace.getYData();
-		List<ITrace> traces = system.createPlot1D(xData, Arrays.asList(new IDataset[]{yData}), null);
 		
-		for (ITrace t : traces) {
-			queue.addFirst((ILineTrace)t);
-			if (queue.size() > maxLength) {
-				ILineTrace c = queue.removeLast();
-				system.removeTrace(c);
+		if (currentMode.equals(MonitorMode.AVERAGE_MODE)) {
+			
+			if (!averageMonitor.isCompatible(yData)) {
+				averageMonitor.clear();
 			}
+			
+			IDataset update = averageMonitor.update(yData);
+			update.setName("Average");
+			averageComp.updateCount(averageMonitor.getCount());
+			system.updatePlot1D(xData, Arrays.asList(new IDataset[]{update}), null);
+			system.repaint();
+			
+		} else {
+			List<ITrace> traces = system.createPlot1D(xData, Arrays.asList(new IDataset[]{yData}), null);
+			scopeMonitor.addTrace(traces);
 		}
 		
-		updatePlot();
-
+		
 	}
 	
-	private void updatePlot(){
-		int i = 0;
-		int delta = (int)Math.floor((maxLength-1)/(queue.size() == 1 ? queue.size() : queue.size()-1));
-		for (ILineTrace t : queue) {
-			t.setTraceColor(colors.get(i*delta));
-			i++;
-		}
-	}
+
 
 	@Override
 	public void setFocus() {
@@ -297,15 +351,209 @@ public class MonitorTool extends AbstractToolPage {
 	
 	@Override
 	public void deactivate() {
-		if (getPlottingSystem()!=null) getPlottingSystem().removeTraceListener(listener);
+		if (getPlottingSystem()!=null && listener != null) getPlottingSystem().removeTraceListener(listener);
 		super.deactivate();
 	}
 	
 	@Override
 	public void dispose() {
-		if (colors != null) for (Color c : colors) c.dispose();
 		system.dispose();
+		scopeMonitor.dispose();
 		super.dispose();
 	}
+	
+	private class OscilloscopeMonitor {
+		private LinkedList<ILineTrace> queue;
+		private int maxLength = 100;
+		public int getMaxLength() {
+			return maxLength;
+		}
 
+		public void setMaxLength(int maxLength) {
+			this.maxLength = maxLength;
+			queue = new LinkedList<ILineTrace>();
+		}
+
+		private List<Color> colors;
+		
+		public OscilloscopeMonitor() {
+			queue = new LinkedList<ILineTrace>();
+			colors = new ArrayList<Color>(maxLength);
+		}
+		
+		public void updateColours(String name) {
+			final IPaletteService pservice = (IPaletteService)PlatformUI.getWorkbench().getService(IPaletteService.class);
+			PaletteData paletteData = pservice.getDirectPaletteData(name);
+			if (paletteData == null) return;
+			RGB[] rgbs = paletteData.getRGBs();
+			Display display = Display.getDefault();
+			List<Color> c = new ArrayList<Color>();
+			for (int i = 0 ; i < maxLength ; i++) {
+				c.add(new Color(display, rgbs[(255/maxLength)*i]));
+			}
+//			if (getPlottingSystem() != null) getPlottingSystem().removeTraceListener(listener);
+			List<Color> lc = colors;
+			colors = c;
+//			if (getPlottingSystem() != null) getPlottingSystem().addTraceListener(listener);
+			for (Color co : lc) co.dispose();
+			
+			updatePlot();
+		}
+		
+		public void addTrace(List<ITrace> traces) {
+			for (ITrace t : traces) {
+				queue.addFirst((ILineTrace)t);
+				if (queue.size() > maxLength) {
+					ILineTrace c = queue.removeLast();
+					system.removeTrace(c);
+				}
+			}
+			
+			updatePlot();
+		}
+		
+		private void updatePlot(){
+			int i = 0;
+			int delta = (int)Math.floor((maxLength-1)/(queue.size() == 1 ? queue.size() : queue.size()-1));
+			for (ILineTrace t : queue) {
+				t.setTraceColor(colors.get(i*delta));
+				i++;
+			}
+		}
+		
+		
+		public void dispose() {
+			if (colors != null) for (Color c : colors) c.dispose();
+		}
+		
+		public void clear() {
+			queue.clear();
+		}
+	}
+	
+	private class AverageMonitor {
+		RunningAverage runningAverage;
+		
+		public int getCount() {
+			return runningAverage.getCount();
+		}
+		
+		public IDataset update(IDataset y) {
+			if (runningAverage == null) {
+				runningAverage = new RunningAverage(y);
+			}
+			runningAverage.update(y);
+			return runningAverage.getCurrentAverage();
+		}
+		
+		
+		public void clear() {
+			runningAverage = null;
+		}
+		
+		public boolean isCompatible(IDataset y) {
+			if (runningAverage == null) return true;
+			
+			return Arrays.equals(y.getShape(), runningAverage.getCurrentAverage().getShape());
+		}
+		
+	}
+	
+	private class AverageComposite extends Composite {
+
+		private Label count;
+		
+		public AverageComposite(Composite parent, int style) {
+			super(parent, style);
+			this.setLayout(new GridLayout(1, false));
+			
+			count = new Label(this, SWT.NONE);
+			updateCount(0);
+		}
+
+		private void updateCount(int i) {
+			count.setText("Average of " + Integer.toString(i));
+			this.layout();
+		}
+		
+	}
+	
+	private class OscilloscopeComposite extends Composite {
+
+		public OscilloscopeComposite(Composite parent, int style) {
+			super(parent, style);
+			
+			this.setLayout(new GridLayout(3, false));
+			
+			new Label(this, SWT.NONE).setText("Max No.:");
+			
+			final Spinner spinner = new Spinner(this, SWT.NONE);
+			spinner.setMaximum(MAXIMUM_NUMBER);
+			spinner.setSelection(scopeMonitor.getMaxLength());
+			spinner.setMinimum(1);
+			spinner.addSelectionListener(new SelectionAdapter() {
+				
+				@Override
+				public void widgetSelected(SelectionEvent e) {
+					if (getPlottingSystem() == null) return;
+					getPlottingSystem().removeTraceListener(listener);
+					scopeMonitor.setMaxLength(spinner.getSelection());
+					system.clear();
+					updateColor(colorViewer.getSelection());
+					getPlottingSystem().addTraceListener(listener);
+					
+				}
+			});
+			
+			
+			colorViewer = new ComboViewer(this, SWT.READ_ONLY);
+			colorViewer.getCombo().setLayoutData(new GridData());
+			colorViewer.setContentProvider(ArrayContentProvider.getInstance());
+			colorViewer.setLabelProvider(new LabelProvider());
+			
+			colorViewer.addSelectionChangedListener(new ISelectionChangedListener() {
+				
+				@Override
+				public void selectionChanged(SelectionChangedEvent event) {
+					if (((StructuredSelection)event.getSelection()).getFirstElement() instanceof String) {
+						updateColor(event.getSelection());
+					}
+				}
+			});
+			
+			colorViewer.addOpenListener(new IOpenListener() {
+				
+				@Override
+				public void open(OpenEvent event) {
+					if (getPlottingSystem() != null) getPlottingSystem().removeTraceListener(listener);
+					
+				}
+			});
+			
+			colorViewer.getCombo().select(0);
+//			updateColor(colorViewer.getSelection());
+		}
+		
+		public void setInput(Object[] input) {
+			colorViewer.setInput(input);
+			colorViewer.getCombo().select(0);
+			updateColor(colorViewer.getSelection());
+		}
+		
+	}
+	
+	private enum MonitorMode {
+		SCOPE_MODE {
+			@Override
+			public String toString() {
+				return "Oscilloscope";
+			}
+		}, 
+		AVERAGE_MODE {
+			@Override
+			public String toString() {
+				return "Running Average";
+			}
+		},
+	}
 }
