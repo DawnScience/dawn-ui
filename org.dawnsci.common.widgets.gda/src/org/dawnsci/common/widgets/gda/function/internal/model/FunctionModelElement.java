@@ -9,10 +9,11 @@
 package org.dawnsci.common.widgets.gda.function.internal.model;
 
 import org.dawnsci.common.widgets.gda.function.descriptors.FunctionInstantiationFailedException;
-import org.dawnsci.common.widgets.gda.function.jexl.JexlExpressionFunction;
-import org.dawnsci.common.widgets.gda.function.jexl.JexlExpressionFunction.JexlExpressionFunctionException;
 import org.eclipse.dawnsci.analysis.api.fitting.functions.IFunction;
 import org.eclipse.dawnsci.analysis.api.fitting.functions.IOperator;
+
+import uk.ac.diamond.scisoft.analysis.fitting.functions.JexlExpressionFunction;
+import uk.ac.diamond.scisoft.analysis.fitting.functions.JexlExpressionFunction.JexlExpressionFunctionException;
 
 /**
  * Common base element for all objects in the function model

@@ -18,8 +18,6 @@ import static org.mockito.Mockito.when;
 import java.util.Arrays;
 import java.util.HashMap;
 
-import org.dawnsci.common.widgets.gda.function.jexl.JexlExpressionFunction.JexlExpressionFunctionError;
-import org.dawnsci.common.widgets.gda.function.jexl.JexlExpressionFunction.JexlExpressionFunctionException;
 import org.dawnsci.jexl.internal.ExpressionServiceImpl;
 import org.eclipse.dawnsci.analysis.api.expressions.IExpressionEngine;
 import org.eclipse.dawnsci.analysis.api.expressions.IExpressionService;
@@ -32,6 +30,9 @@ import org.junit.Test;
 
 import uk.ac.diamond.scisoft.analysis.fitting.functions.CompositeFunction;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.Gaussian;
+import uk.ac.diamond.scisoft.analysis.fitting.functions.JexlExpressionFunction;
+import uk.ac.diamond.scisoft.analysis.fitting.functions.JexlExpressionFunction.JexlExpressionFunctionError;
+import uk.ac.diamond.scisoft.analysis.fitting.functions.JexlExpressionFunction.JexlExpressionFunctionException;
 
 @SuppressWarnings("restriction")
 public class JexlExpressionFunctionTest {

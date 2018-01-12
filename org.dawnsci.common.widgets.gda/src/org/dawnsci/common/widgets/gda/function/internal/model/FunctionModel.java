@@ -9,9 +9,10 @@
 package org.dawnsci.common.widgets.gda.function.internal.model;
 
 import org.apache.commons.lang.builder.EqualsBuilder;
-import org.dawnsci.common.widgets.gda.function.jexl.JexlExpressionFunction;
 import org.eclipse.dawnsci.analysis.api.fitting.functions.IFunction;
 import org.eclipse.dawnsci.analysis.api.fitting.functions.IOperator;
+
+import uk.ac.diamond.scisoft.analysis.fitting.functions.JexlExpressionFunction;
 
 /**
  *

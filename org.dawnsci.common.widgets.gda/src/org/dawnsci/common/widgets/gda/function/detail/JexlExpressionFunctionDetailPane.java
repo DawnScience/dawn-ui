@@ -18,9 +18,6 @@ import org.dawnsci.common.widgets.gda.function.IParameterModifiedEvent;
 import org.dawnsci.common.widgets.gda.function.internal.ContentProposalLabelProvider;
 import org.dawnsci.common.widgets.gda.function.internal.JexlContentProposalListener;
 import org.dawnsci.common.widgets.gda.function.jexl.ExpressionFunctionProposalProvider;
-import org.dawnsci.common.widgets.gda.function.jexl.JexlExpressionFunction;
-import org.dawnsci.common.widgets.gda.function.jexl.JexlExpressionFunction.JexlExpressionFunctionError;
-import org.dawnsci.common.widgets.gda.function.jexl.JexlExpressionFunction.JexlExpressionFunctionException;
 import org.eclipse.jface.fieldassist.ContentProposalAdapter;
 import org.eclipse.jface.fieldassist.TextContentAdapter;
 import org.eclipse.jface.layout.GridDataFactory;
@@ -37,6 +34,10 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
+
+import uk.ac.diamond.scisoft.analysis.fitting.functions.JexlExpressionFunction;
+import uk.ac.diamond.scisoft.analysis.fitting.functions.JexlExpressionFunction.JexlExpressionFunctionError;
+import uk.ac.diamond.scisoft.analysis.fitting.functions.JexlExpressionFunction.JexlExpressionFunctionException;
 
 public class JexlExpressionFunctionDetailPane implements IFunctionDetailPane {
 

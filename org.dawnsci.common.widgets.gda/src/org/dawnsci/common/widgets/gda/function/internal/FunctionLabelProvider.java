@@ -14,8 +14,6 @@ import org.dawnsci.common.widgets.gda.function.internal.model.FunctionModel;
 import org.dawnsci.common.widgets.gda.function.internal.model.OperatorModel;
 import org.dawnsci.common.widgets.gda.function.internal.model.ParameterModel;
 import org.dawnsci.common.widgets.gda.function.internal.model.SetFunctionModel;
-import org.dawnsci.common.widgets.gda.function.jexl.JexlExpressionFunction;
-import org.dawnsci.common.widgets.gda.function.jexl.JexlExpressionFunction.JexlExpressionFunctionError;
 import org.eclipse.dawnsci.analysis.api.fitting.functions.IFunction;
 import org.eclipse.dawnsci.analysis.api.fitting.functions.IOperator;
 import org.eclipse.jface.preference.JFacePreferences;
@@ -30,6 +28,9 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.TextStyle;
 import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.PlatformUI;
+
+import uk.ac.diamond.scisoft.analysis.fitting.functions.JexlExpressionFunction;
+import uk.ac.diamond.scisoft.analysis.fitting.functions.JexlExpressionFunction.JexlExpressionFunctionError;
 
 public class FunctionLabelProvider extends BaseLabelProvider implements
 		IStyledLabelProvider {

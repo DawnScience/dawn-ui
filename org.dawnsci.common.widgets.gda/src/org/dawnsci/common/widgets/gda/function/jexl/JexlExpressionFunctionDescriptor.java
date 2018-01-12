@@ -16,6 +16,8 @@ import org.eclipse.dawnsci.analysis.api.expressions.IExpressionEngine;
 import org.eclipse.dawnsci.analysis.api.expressions.IExpressionService;
 import org.eclipse.dawnsci.analysis.api.fitting.functions.IFunction;
 
+import uk.ac.diamond.scisoft.analysis.fitting.functions.JexlExpressionFunction;
+
 public class JexlExpressionFunctionDescriptor extends PlatformObject implements IFunctionDescriptor {
 	private JexlExpressionFunction jexl;
 

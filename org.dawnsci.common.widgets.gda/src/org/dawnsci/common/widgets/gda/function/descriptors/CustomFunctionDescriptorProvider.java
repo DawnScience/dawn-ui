@@ -13,10 +13,11 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.dawb.common.services.ServiceManager;
-import org.dawnsci.common.widgets.gda.function.jexl.JexlExpressionFunction;
 import org.dawnsci.common.widgets.gda.function.jexl.JexlExpressionFunctionDescriptor;
 import org.eclipse.dawnsci.analysis.api.expressions.IExpressionService;
 import org.eclipse.dawnsci.analysis.api.fitting.functions.IFunction;
+
+import uk.ac.diamond.scisoft.analysis.fitting.functions.JexlExpressionFunction;
 
 public class CustomFunctionDescriptorProvider implements
 		IFunctionDescriptorProvider {
