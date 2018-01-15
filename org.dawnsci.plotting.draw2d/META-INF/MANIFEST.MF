@@ -27,4 +27,3 @@ Export-Package: org.dawnsci.plotting.draw2d.swtxy,
  org.dawnsci.plotting.draw2d.swtxy.util
 Import-Package: org.eclipse.gef.ui.actions,
  org.slf4j;version="[1.7.2,2.0.0)"
-Service-Component: OSGI-INF/*.xml

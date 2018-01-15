@@ -1,39 +1,21 @@
 package org.dawnsci.plotting.draw2d.swtxy;
 
+import org.dawnsci.plotting.draw2d.Activator;
 import org.eclipse.dawnsci.macro.api.IMacroService;
 import org.eclipse.dawnsci.plotting.api.histogram.IImageService;
 import org.eclipse.dawnsci.plotting.api.histogram.IPaletteService;
 
 public class ServiceHolder {
 
-	protected static IMacroService mservice;
-	private static IImageService iservice;
-	private static IPaletteService pservice;
-
-	public ServiceHolder() {
-		// do nothing
-	}
-
-	public static void setMacroService(IMacroService s) {
-		mservice = s;
-	}
 	public static IMacroService getMacroService() {
-		return mservice;
-	}
-
-	public static void setImageService(IImageService is) {
-		iservice = is;
+		return Activator.getService(IMacroService.class);
 	}
 
 	public static IImageService getImageService() {
-		return iservice;
-	}
-
-	public static void setPaletteService(IPaletteService ps) {
-		pservice = ps;
+		return Activator.getService(IImageService.class);
 	}
 
 	public static IPaletteService getPaletteService() {
-		return pservice;
+		return Activator.getService(IPaletteService.class);
 	}
 }
