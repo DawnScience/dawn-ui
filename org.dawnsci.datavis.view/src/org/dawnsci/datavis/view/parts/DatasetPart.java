@@ -57,7 +57,6 @@ public class DatasetPart {
 	@PostConstruct
 	public void createComposite(Composite parent) {
 		plotController.init();
-		fileController = ServiceManager.getFileController();
 
 		parent.setLayout(new FormLayout());
 		FormData checkForm = new FormData();
@@ -65,7 +64,7 @@ public class DatasetPart {
 		checkForm.left = new FormAttachment(0,0);
 		checkForm.right = new FormAttachment(100,0);
 		checkForm.bottom = new FormAttachment(75,0);
-		viewer = new DataOptionTableViewer();
+		viewer = new DataOptionTableViewer(fileController);
 		viewer.createControl(parent);
 		viewer.getControl().setLayoutData(checkForm);
 		

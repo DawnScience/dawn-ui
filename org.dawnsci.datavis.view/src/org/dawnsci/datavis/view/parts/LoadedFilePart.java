@@ -86,6 +86,7 @@ public class LoadedFilePart {
 	@Inject EventAdmin eventAdmin;
 	@Inject IFileController fileController;
 	@Inject IPlotController plotController;
+	@Inject IRecentPlaces recentPlaces;
 	
 	private Image ticked;
 	private Image unticked;
@@ -151,35 +152,25 @@ public class LoadedFilePart {
 		viewer = new TableViewer(tableComposite, SWT.MULTI |SWT.FULL_SELECTION | SWT.BORDER);
 		viewer.getTable().setHeaderVisible(true);
 		
-		QuickFileWidget qfw = null;
-		
-		if (ServiceManager.getRecentPlaces() != null) {
-			qfw = new QuickFileWidget(parent);
-			FormData comboForm = new FormData();
-			checkForm.bottom = new FormAttachment(qfw);
-			comboForm.left = new FormAttachment(0,0);
-			comboForm.right = new FormAttachment(100,0);
-			comboForm.bottom = new FormAttachment(100,0);
-			comboForm.height = 32;
-			qfw.setLayoutData(comboForm);
-			
-			IRecentPlaces recentPlaces = ServiceManager.getRecentPlaces();
-			List<String> p = recentPlaces.getRecentPlaces();
-			if (p.isEmpty()) {
-				qfw.setDirectoryPath(System.getProperty("user.home"));
-			} else {
-				qfw.setDirectoryPath(p.get(0));
-			}
-			
+		QuickFileWidget qfw = new QuickFileWidget(parent);
+		FormData comboForm = new FormData();
+		checkForm.bottom = new FormAttachment(qfw);
+		comboForm.left = new FormAttachment(0,0);
+		comboForm.right = new FormAttachment(100,0);
+		comboForm.bottom = new FormAttachment(100,0);
+		comboForm.height = 32;
+		qfw.setLayoutData(comboForm);
+
+
+		List<String> p = recentPlaces.getRecentPlaces();
+		if (p.isEmpty()) {
+			qfw.setDirectoryPath(System.getProperty("user.home"));
 		} else {
-			checkForm.bottom = new FormAttachment(100,0);
+			qfw.setDirectoryPath(p.get(0));
 		}
+
+		qfw.addListener(new QuickFileWidgetListener());
 		
-		final QuickFileWidget quickFileWidget = qfw;
-		
-		if (quickFileWidget != null) {
-			qfw.addListener(new QuickFileWidgetListener());
-		}
 		
 		ticked = AbstractUIPlugin.imageDescriptorFromPlugin("org.dawnsci.datavis.view", "icons/ticked.png").createImage();
 		unticked = AbstractUIPlugin.imageDescriptorFromPlugin("org.dawnsci.datavis.view", "icons/unticked.gif").createImage();
@@ -271,13 +262,12 @@ public class LoadedFilePart {
 		
 		fileStateListener = event -> {
 			updateOnStateChange(event);
-	
-			if (quickFileWidget != null && ServiceManager.getRecentPlaces() != null) {
-				List<String> recentPlaces = ServiceManager.getRecentPlaces().getRecentPlaces();
-				if (recentPlaces != null && !recentPlaces.isEmpty()) {
-					Display.getDefault().asyncExec(() -> quickFileWidget.setDirectoryPath(ServiceManager.getRecentPlaces().getRecentPlaces().get(0)));
-				}
+
+			List<String> r = recentPlaces.getRecentPlaces();
+			if (r != null && !r.isEmpty()) {
+				Display.getDefault().asyncExec(() -> qfw.setDirectoryPath(recentPlaces.getRecentPlaces().get(0)));
 			}
+
 		};
 		
 		fileController.addStateListener(fileStateListener);

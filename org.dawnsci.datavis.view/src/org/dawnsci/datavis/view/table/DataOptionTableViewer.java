@@ -3,7 +3,7 @@ package org.dawnsci.datavis.view.table;
 import java.util.Arrays;
 
 import org.dawnsci.datavis.model.DataOptions;
-import org.dawnsci.datavis.view.parts.ServiceManager;
+import org.dawnsci.datavis.model.IFileController;
 import org.eclipse.jface.layout.TableColumnLayout;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.CellEditor;
@@ -32,8 +32,10 @@ public class DataOptionTableViewer {
 	private Image unticked;
 	private Composite tableComposite;
 	
-	public DataOptionTableViewer(){
-		
+	IFileController controller;
+	
+	public DataOptionTableViewer(IFileController controller){
+		this.controller = controller;
 	}
 	
 	public void dispose(){
@@ -158,7 +160,7 @@ public class DataOptionTableViewer {
 		@Override
 		protected void setValue(Object element, Object value) {
 			if (element instanceof DataOptions && value instanceof Boolean){
-				ServiceManager.getFileController().setCurrentData((DataOptions)element, (Boolean)value);
+				controller.setCurrentData((DataOptions)element, (Boolean)value);
 			}
 //			FileController.getInstance().setCurrentData((DataOptions)element, (Boolean)value);
 		}
