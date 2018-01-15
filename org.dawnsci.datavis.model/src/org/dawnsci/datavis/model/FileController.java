@@ -13,6 +13,7 @@ import org.dawnsci.datavis.model.fileconfig.ImageFileConfiguration;
 import org.dawnsci.datavis.model.fileconfig.NexusFileConfiguration;
 import org.dawnsci.datavis.model.fileconfig.XYEFileConfiguration;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.dawnsci.analysis.api.io.ILoaderService;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.progress.IProgressService;
@@ -20,6 +21,17 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class FileController implements IFileController {
+	
+	private ILoaderService loaderService;
+	private IRecentPlaces recentPlaces;
+	
+	public void setLoaderService(ILoaderService service) {
+		this.loaderService = service;
+	}
+	
+	public void setRecentPlaces(IRecentPlaces places) {
+		recentPlaces = places;
+	}
 	
 	private LoadedFiles loadedFiles;
 	private LoadedFile currentFile;
@@ -30,7 +42,7 @@ public class FileController implements IFileController {
 	
 	private Set<FileControllerStateEventListener> listeners = new HashSet<FileControllerStateEventListener>();
 	
-	private final static Logger logger = LoggerFactory.getLogger(FileController.class);
+	private static final Logger logger = LoggerFactory.getLogger(FileController.class);
 	
 	public FileController(){
 		loadedFiles = new LoadedFiles();
@@ -304,7 +316,7 @@ public class FileController implements IFileController {
 				if (monitor != null) monitor.subTask("Loading " + path + "...");
 				LoadedFile f = null;
 				try {
-					f = new LoadedFile(ServiceManager.getLoaderService().getData(path, null));
+					f = new LoadedFile(loaderService.getData(path, null));
 				} catch (Exception e) {
 					failedPaths.add(path);
 					logger.error("Exception loading file",e);
@@ -335,8 +347,7 @@ public class FileController implements IFileController {
 			
 			if (!files.isEmpty()) {
 				String name = files.get(0).getFilePath();
-				IRecentPlaces recentPlaces = ServiceManager.getRecentPlaces();
-				if (recentPlaces != null)recentPlaces.addPlace(name);
+				recentPlaces.addPlace(name);
 				loadedFiles.addFiles(files);
 			}
 			

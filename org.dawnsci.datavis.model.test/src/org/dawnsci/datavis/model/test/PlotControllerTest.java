@@ -1,18 +1,20 @@
 package org.dawnsci.datavis.model.test;
 
-import static org.junit.Assert.*;
-import java.util.Optional;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+
+import java.util.List;
 
 import org.dawnsci.datavis.api.IRecentPlaces;
 import org.dawnsci.datavis.model.DataOptions;
 import org.dawnsci.datavis.model.FileController;
-import org.dawnsci.datavis.model.IFileController;
 import org.dawnsci.datavis.model.IPlotMode;
 import org.dawnsci.datavis.model.LiveServiceManager;
 import org.dawnsci.datavis.model.LoadedFile;
 import org.dawnsci.datavis.model.NDimensions;
 import org.dawnsci.datavis.model.PlotController;
-import org.dawnsci.datavis.model.ServiceManager;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.trace.IImageTrace;
 import org.eclipse.dawnsci.plotting.api.trace.ILineTrace;
@@ -20,27 +22,40 @@ import org.eclipse.dawnsci.plotting.api.trace.ITrace;
 import org.eclipse.january.dataset.Slice;
 import org.junit.Before;
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Test;
 
-import uk.ac.diamond.scisoft.analysis.io.LoaderFactory;
 import uk.ac.diamond.scisoft.analysis.io.LoaderServiceImpl;
 
 public class PlotControllerTest extends AbstractTestModel {
 	
 	private static PlotController plotManager;
-	private static IFileController fileController;
-	private static IPlottingSystem plottingSystem;
+	private static FileController fileController;
+	private static IPlottingSystem<?> plottingSystem;
 	
 	@BeforeClass
 	public static void buildData() throws Exception {
+		
+		IRecentPlaces p = new IRecentPlaces() {
+
+			@Override
+			public void addPlace(String path) {
+				
+			}
+
+			@Override
+			public List<String> getRecentPlaces() {
+				return null;
+			}
+			
+		};
 			AbstractTestModel.buildData();
 			plottingSystem = new MockPlottingSystem();
-			ServiceManager.setLoaderService(new LoaderServiceImpl());
 			LiveServiceManager.setILiveFileService(null);
 			fileController = new FileController();
-			ServiceManager.setFileController(fileController);
-			plotManager = new PlotController(plottingSystem);
+			fileController.setRecentPlaces(p);
+			fileController.setLoaderService(new LoaderServiceImpl());
+			plotManager = new PlotController(plottingSystem,fileController);
+//			plotManager.setFileController();
 	}
 
 	@Before

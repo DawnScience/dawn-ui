@@ -1,7 +1,8 @@
 package org.dawnsci.datavis;
 
+import org.dawnsci.datavis.model.IPlotController;
+import org.dawnsci.datavis.model.ITraceColorProviderService;
 import org.dawnsci.datavis.model.ITraceColourProvider;
-import org.dawnsci.datavis.model.TraceColorProviderService;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
@@ -9,6 +10,8 @@ import org.eclipse.jface.action.MenuManager;
 import org.eclipse.ui.menus.ExtensionContributionFactory;
 import org.eclipse.ui.menus.IContributionRoot;
 import org.eclipse.ui.services.IServiceLocator;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.FrameworkUtil;
 
 public class LineTraceColorContributionFactory extends ExtensionContributionFactory {
 
@@ -17,6 +20,15 @@ public class LineTraceColorContributionFactory extends ExtensionContributionFact
 		MenuManager search = new MenuManager("Line Plot Colors",
                 "org.dawnsci.datavis.linecolormenu");
 		
+		BundleContext bundleContext =
+                FrameworkUtil.
+                getBundle(this.getClass()).
+                getBundleContext();
+		
+		final IPlotController plotController = bundleContext.getService(bundleContext.getServiceReference(IPlotController.class));
+		final ITraceColorProviderService traceColourProvider = bundleContext.getService(bundleContext.getServiceReference(ITraceColorProviderService.class));
+		
+		
 		search.addMenuListener(new IMenuListener() {
 			
 			@Override
@@ -24,12 +36,12 @@ public class LineTraceColorContributionFactory extends ExtensionContributionFact
 				
 				search.removeAll();
 				
-				ITraceColourProvider current = ServiceManager.getPlotController().getColorProvider();
+				ITraceColourProvider current = plotController.getColorProvider();
 				
 				Action a = new Action("Default Colours"){
 					@Override
 					public void run() {
-						ServiceManager.getPlotController().setColorProvider(null);
+						plotController.setColorProvider(null);
 					}
 				};
 				
@@ -43,7 +55,7 @@ public class LineTraceColorContributionFactory extends ExtensionContributionFact
 					
 				
 				
-				ITraceColourProvider[] pm = TraceColorProviderService.getInstance().getColorProviders();
+				ITraceColourProvider[] pm = traceColourProvider.getColorProviders();
 				
 				for (ITraceColourProvider f : pm) {
 					
@@ -51,7 +63,7 @@ public class LineTraceColorContributionFactory extends ExtensionContributionFact
 			        	
 			        	@Override
 			        	public void run() {
-			        		ServiceManager.getPlotController().setColorProvider(f);
+			        		plotController.setColorProvider(f);
 			        		
 			        	}
 					};

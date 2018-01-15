@@ -1,15 +1,14 @@
 package org.dawnsci.datavis.model.test;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 
+import java.util.List;
 import java.util.Optional;
-import java.util.stream.Stream;
 
-import org.dawnsci.datavis.model.DataOptions;
+import org.dawnsci.datavis.api.IRecentPlaces;
 import org.dawnsci.datavis.model.FileController;
-import org.dawnsci.datavis.model.IFileController;
 import org.dawnsci.datavis.model.LoadedFile;
-import org.dawnsci.datavis.model.ServiceManager;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -17,13 +16,28 @@ import uk.ac.diamond.scisoft.analysis.io.LoaderServiceImpl;
 
 public class FileControllerTest extends AbstractTestModel{
 	
-	private static IFileController fileController;
+	private static FileController fileController;
 	
 	@BeforeClass
 	public static void buildData() throws Exception {
 		AbstractTestModel.buildData();
-		ServiceManager.setLoaderService(new LoaderServiceImpl());
 		fileController = new FileController();
+		fileController.setLoaderService(new LoaderServiceImpl());
+		fileController.setRecentPlaces(new IRecentPlaces() {
+			
+			@Override
+			public List<String> getRecentPlaces() {
+				// TODO Auto-generated method stub
+				return null;
+			}
+			
+			@Override
+			public void addPlace(String path) {
+				// TODO Auto-generated method stub
+				
+			}
+		});
+		
 	}
 
 

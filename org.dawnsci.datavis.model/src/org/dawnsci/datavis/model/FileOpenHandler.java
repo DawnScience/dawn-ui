@@ -11,8 +11,10 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Shell;
-import org.osgi.service.event.EventAdmin;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.FrameworkUtil;
 import org.osgi.service.event.Event;
+import org.osgi.service.event.EventAdmin;
 
 public class FileOpenHandler extends AbstractHandler {
 
@@ -29,7 +31,13 @@ public class FileOpenHandler extends AbstractHandler {
 		Map<String,String[]> props = new HashMap<>();
 		props.put("paths", fileNames);
 
-		EventAdmin eventAdmin = ServiceManager.getEventAdmin();
+		BundleContext bundleContext =
+                FrameworkUtil.
+                getBundle(this.getClass()).
+                getBundleContext();
+		
+		EventAdmin eventAdmin = bundleContext.getService(bundleContext.getServiceReference(EventAdmin.class));
+		
 		eventAdmin.sendEvent(new Event("org/dawnsci/events/file/OPEN", props));
 		return null;
 	}

@@ -13,10 +13,11 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicReference;
-
+import javax.inject.Inject;
 import org.eclipse.dawnsci.analysis.dataset.slicer.SliceFromSeriesMetadata;
 import org.eclipse.dawnsci.analysis.dataset.slicer.SliceInformation;
 import org.eclipse.dawnsci.analysis.dataset.slicer.SourceInformation;
+import org.eclipse.dawnsci.plotting.api.IPlottingService;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.axis.IAxis;
 import org.eclipse.dawnsci.plotting.api.trace.ILineTrace;
@@ -60,6 +61,24 @@ import org.slf4j.LoggerFactory;
  */
 public class PlotController implements IPlotController {
 	
+	private  IPlottingService plotService;
+	private  IFileController fileController;
+	private  EventAdmin eventAdmin;
+	
+	//OSGI service injection
+	
+	public void setPlotService(IPlottingService service) {
+		plotService = service;
+	}
+	
+	public void setFileController(IFileController controller) {
+		fileController = controller;
+	}
+	
+	public void setEventAdmin(EventAdmin admin) {
+		eventAdmin = admin;
+	}
+	
 	private IPlottingSystem<?> system;
 
 	private IPlotMode[] modes = new IPlotMode[]{new PlotModeXY(), new PlotModeImage(), new PlotModeSurface(), new PlotModeHyper(), new PlotModeDataTable1D(),  new PlotModeDataTable2D()};
@@ -70,8 +89,6 @@ public class PlotController implements IPlotController {
 	
 	private ITraceColourProvider colorProvider;
 	private List<Color> colorcache = null;
-	
-	private IFileController fileController;
 	
 	private ISliceChangeListener sliceListener;
 	private FileControllerStateEventListener fileStateListener;
@@ -86,8 +103,9 @@ public class PlotController implements IPlotController {
 	
 	private final static Logger logger = LoggerFactory.getLogger(PlotController.class);
 	
-	public PlotController (IPlottingSystem<?> system) {
+	public PlotController (IPlottingSystem<?> system, IFileController controller) {
 		this.system = system;
+		this.fileController = controller;
 		init();
 	}
 	
@@ -100,8 +118,6 @@ public class PlotController implements IPlotController {
 		if (executor != null) return;
 		
 		executor = Executors.newSingleThreadExecutor();
-		
-		fileController = ServiceManager.getFileController();
 		
 		fileStateListener  = new FileControllerStateEventListener() {
 
@@ -310,7 +326,6 @@ public class PlotController implements IPlotController {
 		//"org/dawnsci/datavis/plot/UPDATE"
 		
 		Map<String,String> props = new HashMap<>();
-		EventAdmin eventAdmin = ServiceManager.getEventAdmin();
 		eventAdmin.postEvent(new Event("org/dawnsci/datavis/plot/UPDATE", props));
 	}
 	
@@ -568,7 +583,7 @@ public class PlotController implements IPlotController {
 	
 	private IPlottingSystem<?> getPlottingSystem() {
 		if (system == null) {
-			system = ServiceManager.getPlottingService().getPlottingSystem("Plot");
+			system = plotService.getPlottingSystem("Plot");
 		}
 		return system;
 	}
