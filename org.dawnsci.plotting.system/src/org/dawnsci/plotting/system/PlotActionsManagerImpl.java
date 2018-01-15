@@ -264,7 +264,7 @@ public class PlotActionsManagerImpl extends PlottingActionBarManager {
 
 	protected void createPaletteActions() {
 
-		final IPaletteService pservice = ServiceLoader.getPaletteService();
+		final IPaletteService pservice = PlottingSystemActivator.getService(IPaletteService.class);
 		final Collection<String> names = pservice.getColorSchemes();
 
 		String schemeName = PlottingSystemActivator.getPlottingPreferenceStore().getString(PlottingConstants.COLOUR_SCHEME);
@@ -373,7 +373,7 @@ public class PlotActionsManagerImpl extends PlottingActionBarManager {
 		
 		final Action invertColorScale = new Action("Invert color scale", IAction.AS_CHECK_BOX) {
 			public void run() {
-				ServiceLoader.getPaletteService().setInverted(this.isChecked());
+				PlottingSystemActivator.getService(IPaletteService.class).setInverted(this.isChecked());
 				Collection<IPaletteTrace> ps = system.getTracesByClass(IPaletteTrace.class);
 
 				if (ps != null && !ps.isEmpty()) {

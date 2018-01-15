@@ -464,7 +464,7 @@ public class LightWeightPlotViewer<T> extends AbstractPlottingViewer<T> implemen
 					final ImageTrace trace = xyGraph.getRegionArea().getImageTrace();
 					// Force functional creation of image rather than 8-bit
 					if (trace!=null) try {
-						IPaletteService pservice = ServiceLoader.getPaletteService();
+						IPaletteService pservice = PlottingSystemActivator.getService(IPaletteService.class);
 						if (pservice !=null) {
 							FunctionContainer container = pservice.getFunctionContainer(trace.getPaletteName());
 							if (container!=null) {
@@ -736,7 +736,7 @@ public class LightWeightPlotViewer<T> extends AbstractPlottingViewer<T> implemen
 		
 		final Action invertColorScale = new Action("Invert color scale", IAction.AS_CHECK_BOX) {
 			public void run() {
-				ServiceLoader.getPaletteService().setInverted(this.isChecked());
+				PlottingSystemActivator.getService(IPaletteService.class).setInverted(this.isChecked());
 				Collection<IPaletteTrace> ps = system.getTracesByClass(IPaletteTrace.class);
 
 				if (ps != null && !ps.isEmpty()) {
