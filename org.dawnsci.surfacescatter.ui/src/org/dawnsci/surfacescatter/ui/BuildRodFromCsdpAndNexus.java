@@ -147,7 +147,7 @@ public class BuildRodFromCsdpAndNexus {
 				try {
 					oe.outputCurvesDataPackagePopulateFromGroupNodeMethod(g, ocdp);
 				} catch (Exception j) {
-					System.out.println(j.getMessage() + " OverviewNexusObjectBuilderEnum:  " + oe.getFirstName());
+					System.out.println(j.getMessage() + " OutputCurvesDataPackageEnum:  " + oe.getFirstName());
 				}
 
 			}

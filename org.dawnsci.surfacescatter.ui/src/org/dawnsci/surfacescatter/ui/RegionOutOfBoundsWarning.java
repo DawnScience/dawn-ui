@@ -26,10 +26,12 @@ public class RegionOutOfBoundsWarning extends Dialog {
 
 	public RegionOutOfBoundsWarning(Shell parentShell, int selector, String note) {
 
+
 		super(parentShell);
 		this.selector = selector;
 		this.note = note;		
 		setShellStyle(getShellStyle() | SWT.RESIZE);
+		
 
 		//		createDialogArea(parentShell.getParent());
 

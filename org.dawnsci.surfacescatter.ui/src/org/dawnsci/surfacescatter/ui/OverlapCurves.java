@@ -61,7 +61,6 @@ public class OverlapCurves extends Composite {
 	private CurveStitchDataPackage csdp;
 	private Color red;
 
-
 	public OverlapCurves(Composite parent, int style, ArrayList<IDataset> arrayILDy, ArrayList<IDataset> arrayILDx,
 			String title, OverlapUIModel model, GeneralOverlapHandlerView gohv, SurfaceScatterPresenter ssp) {
 
@@ -204,7 +203,6 @@ public class OverlapCurves extends Composite {
 
 			}
 
-
 		});
 
 		Composite includeControls = new Composite(controls, SWT.NULL);
@@ -265,7 +263,7 @@ public class OverlapCurves extends Composite {
 				disregardPoint.setText("Disregard Point");
 				addCurves();
 				gohv.getStitchedCurves().resetAll(model.getxAxis(), model.getyAxis(), true);
-				
+
 				model.setUseNegativevalues(true);
 				model.poke();
 			}
@@ -277,13 +275,14 @@ public class OverlapCurves extends Composite {
 		InputTileGenerator yPoint = new InputTileGenerator("Y Value:  ", "0", controls);
 		yValueText = yPoint.getText();
 
-//		Composite normGroup = new Composite(form, SWT.NONE);
-//		GridLayout normGroupLayout = new GridLayout(1, true);
-//		normGroup.setLayout(normGroupLayout);
-//		GridData normGroupData = new GridData(SWT.FILL, SWT.FILL, true, true);
-//		normGroupData.grabExcessVerticalSpace = true;
-//		normGroupData.heightHint = 100;
-//		normGroup.setLayoutData(new GridData(GridData.FILL_HORIZONTAL | GridData.FILL_VERTICAL));
+		// Composite normGroup = new Composite(form, SWT.NONE);
+		// GridLayout normGroupLayout = new GridLayout(1, true);
+		// normGroup.setLayout(normGroupLayout);
+		// GridData normGroupData = new GridData(SWT.FILL, SWT.FILL, true, true);
+		// normGroupData.grabExcessVerticalSpace = true;
+		// normGroupData.heightHint = 100;
+		// normGroup.setLayoutData(new GridData(GridData.FILL_HORIZONTAL |
+		// GridData.FILL_VERTICAL));
 
 		slider = new Slider(controls, SWT.HORIZONTAL);
 
@@ -320,7 +319,7 @@ public class OverlapCurves extends Composite {
 		GridData stitchedCurvesData = new GridData(GridData.FILL_HORIZONTAL);
 		unstitchedCurves.setLayout(stitchedCurvesLayout);
 		unstitchedCurves.setLayoutData(stitchedCurvesData);
-//		unstitchedCurves.setText("Unstitched Curves");
+		// unstitchedCurves.setText("Unstitched Curves");
 
 		ActionBarWrapper actionBarComposite = ActionBarWrapper.createActionBars(unstitchedCurves, null);
 
@@ -334,10 +333,8 @@ public class OverlapCurves extends Composite {
 
 		plotSystem.getPlotComposite().setLayoutData(gdSecondField);
 
-		
 		plotSystem.getAxes().get(0).setTitle(ScannedVariableName.SCANNED_VARIABLE_NAME.getName());
-				
-				
+
 		ArrayList<IRectangularROI> roiList = new ArrayList<IRectangularROI>();
 		IRectangularROI nullROI = null;
 
@@ -360,7 +357,6 @@ public class OverlapCurves extends Composite {
 
 			if (overlap[k][1] < 999999) {
 
-			
 				roiList.set(k, new RectangularROI(overlap[k][1], 0.1, overlap[k][0] - overlap[k][1], 0.1, 0));
 
 				String regionName = root + Integer.toString(k);
@@ -397,22 +393,22 @@ public class OverlapCurves extends Composite {
 
 				});
 			}
-			
+
 			else {
 				String regionName = root + Integer.toString(k);
-				
-				RectangularROI redROI =  new RectangularROI(nonOverlap[k][1], 0.1, nonOverlap[k][0] - nonOverlap[k][1], 0.1, 0);
 
-				
+				RectangularROI redROI = new RectangularROI(nonOverlap[k][1], 0.1, nonOverlap[k][0] - nonOverlap[k][1],
+						0.1, 0);
+
 				try {
 					IRegion redRegion = plotSystem.createRegion(regionName, RegionType.XAXIS);
 					redRegion.setROI(redROI);
 					plotSystem.addRegion(redRegion);
 					redRegion.setRegionColor(red);
 					redRegion.setMobile(false);
-					
+
 					nonOverlapRegionArray[k] = redRegion;
-					
+
 				} catch (Exception e1) {
 					e1.printStackTrace();
 				}
@@ -460,8 +456,7 @@ public class OverlapCurves extends Composite {
 
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				
-				
+
 				buildAndSetOverlapRegions(model, arrayILDx, arrayILDy);
 
 				gohv.getStitchedCurves().resetAll(model.getxAxis(), model.getyAxis());
@@ -473,7 +468,7 @@ public class OverlapCurves extends Composite {
 			}
 		});
 
-		form.setWeights(new int[] {20, 67, 4 });
+		form.setWeights(new int[] { 20, 67, 4 });
 
 		IAxis yAxisR = plotSystem.getSelectedYAxis();
 
@@ -533,23 +528,24 @@ public class OverlapCurves extends Composite {
 		IDataset coordinateDatasets[][] = gps.goodPointStripper(csdp, yM, xM);
 
 		for (int r = 0; r < coordinateDatasets.length; r++) {
+			if (coordinateDatasets[r] != null) {
+				j = coordinateDatasets[r][0];
+				i = coordinateDatasets[r][1];
+				l = coordinateDatasets[r][2];
 
-			j = coordinateDatasets[r][0];
-			i = coordinateDatasets[r][1];
-			l = coordinateDatasets[r][2];
+				i.setErrors(l);
 
-			i.setErrors(l);
+				ILineTrace lt = plotSystem.createLineTrace(
+						Double.toString(j.getDouble(0)) + "-" + Double.toString(j.getDouble(j.getSize() - 1)));
+				lt.setData(j, i);
 
-			ILineTrace lt = plotSystem.createLineTrace(
-					Double.toString(j.getDouble(0)) + "-" + Double.toString(j.getDouble(j.getSize() - 1)));
-			lt.setData(j, i);
+				ltList.add(lt);
 
-			ltList.add(lt);
+				plotSystem.addTrace(lt);
+				plotSystem.repaint();
 
-			plotSystem.addTrace(lt);
-			plotSystem.repaint();
-
-			lt.setErrorBarEnabled(gohv.isErrorFlag());
+				lt.setErrorBarEnabled(gohv.isErrorFlag());
+			}
 		}
 
 	}
@@ -669,7 +665,6 @@ public class OverlapCurves extends Composite {
 
 			if (overlap[k][1] < 999999) {
 
-			
 				roiList.set(k, new RectangularROI(overlap[k][1], 0.1, overlap[k][0] - overlap[k][1], 0.1, 0));
 
 				String regionName = root + Integer.toString(k);
@@ -706,79 +701,83 @@ public class OverlapCurves extends Composite {
 
 				});
 			}
-			
+
 			else {
 				String regionName = root + Integer.toString(k);
-				
-				RectangularROI redROI =  new RectangularROI(nonOverlap[k][1], 0.1, nonOverlap[k][0] - nonOverlap[k][1], 0.1, 0);
 
-				
+				RectangularROI redROI = new RectangularROI(nonOverlap[k][1], 0.1, nonOverlap[k][0] - nonOverlap[k][1],
+						0.1, 0);
+
 				try {
 					IRegion redRegion = plotSystem.createRegion(regionName, RegionType.XAXIS);
 					redRegion.setROI(redROI);
 					plotSystem.addRegion(redRegion);
 					redRegion.setRegionColor(red);
 					redRegion.setMobile(false);
-					
+
 					nonOverlapRegionArray[k] = redRegion;
 				} catch (Exception e1) {
 					e1.printStackTrace();
 				}
 			}
 		}
-		
-		
-//		
-//		for (k = 0; k < (roiList.size()); k++) {
-//
-//			if (overlap[k][1] < 999999) {
-//
-//				if (DEBUG == 1) {
-//					System.out.println("k in overlapCurves: " + k);
-//					System.out.println("overlap[k][1]: " + overlap[k][1]);
-//					System.out.println("overlap[k][0]: " + overlap[k][0]);
-//					System.out.println("roiList.size() : " + roiList.size());
-//				}
-//
-//				roiList.set(k, new RectangularROI(overlap[k][1], 0.1, overlap[k][0] - overlap[k][1], 0.1, 0));
-//
-//				String regionName = root + Integer.toString(k);
-//
-//				try {
-//					overlapRegionArray[k] = plotSystem.createRegion(regionName, RegionType.XAXIS);
-//					overlapRegionArray[k].setROI(roiList.get(k));
-//					overlapRegionArray[k].toBack();
-//					plotSystem.addRegion(overlapRegionArray[k]);
-//
-//				} catch (Exception e1) {
-//					e1.printStackTrace();
-//				}
-//
-//				int ktemp = k;
-//				((IRegion) overlapRegionArray[k]).addROIListener(new IROIListener() {
-//
-//					@Override
-//					public void roiDragged(ROIEvent evt) {
-//						model.setROIListElementEst(overlapRegionArray[ktemp].getROI().getBounds(), ktemp);
-//					}
-//
-//					@Override
-//					public void roiChanged(ROIEvent evt) {
-//						model.setROIListElementEst(overlapRegionArray[ktemp].getROI().getBounds(), ktemp);
-//
-//					}
-//
-//					@Override
-//					public void roiSelected(ROIEvent evt) {
-//						model.setROIListElementEst(overlapRegionArray[ktemp].getROI().getBounds(), ktemp);
-//					}
-//
-//				});
-//			}
-//		}
+
+		//
+		// for (k = 0; k < (roiList.size()); k++) {
+		//
+		// if (overlap[k][1] < 999999) {
+		//
+		// if (DEBUG == 1) {
+		// System.out.println("k in overlapCurves: " + k);
+		// System.out.println("overlap[k][1]: " + overlap[k][1]);
+		// System.out.println("overlap[k][0]: " + overlap[k][0]);
+		// System.out.println("roiList.size() : " + roiList.size());
+		// }
+		//
+		// roiList.set(k, new RectangularROI(overlap[k][1], 0.1, overlap[k][0] -
+		// overlap[k][1], 0.1, 0));
+		//
+		// String regionName = root + Integer.toString(k);
+		//
+		// try {
+		// overlapRegionArray[k] = plotSystem.createRegion(regionName,
+		// RegionType.XAXIS);
+		// overlapRegionArray[k].setROI(roiList.get(k));
+		// overlapRegionArray[k].toBack();
+		// plotSystem.addRegion(overlapRegionArray[k]);
+		//
+		// } catch (Exception e1) {
+		// e1.printStackTrace();
+		// }
+		//
+		// int ktemp = k;
+		// ((IRegion) overlapRegionArray[k]).addROIListener(new IROIListener() {
+		//
+		// @Override
+		// public void roiDragged(ROIEvent evt) {
+		// model.setROIListElementEst(overlapRegionArray[ktemp].getROI().getBounds(),
+		// ktemp);
+		// }
+		//
+		// @Override
+		// public void roiChanged(ROIEvent evt) {
+		// model.setROIListElementEst(overlapRegionArray[ktemp].getROI().getBounds(),
+		// ktemp);
+		//
+		// }
+		//
+		// @Override
+		// public void roiSelected(ROIEvent evt) {
+		// model.setROIListElementEst(overlapRegionArray[ktemp].getROI().getBounds(),
+		// ktemp);
+		// }
+		//
+		// });
+		// }
+		// }
 
 		model.setROIList(roiList);
-//		model.setROIListElementEst(overlapRegionArray[1].getROI().getBounds(), 1);
+		// model.setROIListElementEst(overlapRegionArray[1].getROI().getBounds(), 1);
 		model.poke();
 	}
 
