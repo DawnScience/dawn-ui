@@ -3,7 +3,6 @@ package org.dawnsci.mapping.ui.datamodel;
 import java.util.Arrays;
 import java.util.List;
 
-import org.dawnsci.mapping.ui.LocalServiceManager;
 import org.eclipse.dawnsci.analysis.api.io.IDataHolder;
 import org.eclipse.dawnsci.analysis.api.io.ILoaderService;
 import org.eclipse.dawnsci.analysis.api.io.IRemoteDatasetService;
@@ -28,16 +27,16 @@ public class MappedFileFactory {
 	
 	public static MappedDataFile getMappedDataFile(String path, AssociatedImage image) {
 		
-		MappedDataFile file = new MappedDataFile(path);
+		MappedDataFile file = new MappedDataFile(path, null);
 		file.addMapObject(image.toString(), image);
 		
 		return file;
 		
 	}
 	
-	public static MappedDataFile getMappedDataFile(String path, MappedDataFileBean bean, IMonitor monitor) {
+	public static MappedDataFile getMappedDataFile(String path, MappedDataFileBean bean, IMonitor monitor, ILoaderService loaderService, IRemoteDatasetService rService) {
 		
-		MappedDataFile file = new MappedDataFile(path, bean);
+		MappedDataFile file = new MappedDataFile(path, bean, loaderService);
 		
 		for (MappedBlockBean b : bean.getBlocks()) {
 			String name = b.getName();
@@ -47,7 +46,7 @@ public class MappedFileFactory {
 			}
 			
 			try {
-				MappedDataBlock block = setUpBlock(path, name, b, bean.getLiveBean(),bean.getScanRank());
+				MappedDataBlock block = setUpBlock(path, name, b, bean.getLiveBean(),bean.getScanRank(), loaderService,rService);
 				file.addMapObject(name, block);
 			} catch (Exception e) {
 				logger.error("Could not build block named " + name, e);
@@ -67,13 +66,13 @@ public class MappedFileFactory {
 					block = file.getDataBlockMap().values().iterator().next();
 				}
 				
-				AbstractMapData m = setUpMap(path, b.getName(),block, bean.getLiveBean());
+				AbstractMapData m = setUpMap(path, b.getName(),block, bean.getLiveBean(), loaderService, rService);
 				if (bean.getLiveBean() == null) m.getData().setName(m.toString());
  				file.addMapObject(b.getName(), m);
 		}
 		
 		for (AssociatedImageBean b : bean.getImages()) {
-			AssociatedImage im = getAssociatedImage(path,b);
+			AssociatedImage im = getAssociatedImage(path,b, loaderService);
 			file.addMapObject(im.getLongName(), im);
 		}
 		
@@ -81,23 +80,23 @@ public class MappedFileFactory {
 	}
 	
 	
-	private static MappedDataBlock setUpBlock(String path, String blockName, MappedBlockBean bean, LiveDataBean live, int scanRank) {
+	private static MappedDataBlock setUpBlock(String path, String blockName, MappedBlockBean bean, LiveDataBean live, int scanRank, ILoaderService lService, IRemoteDatasetService rService) {
 		MappedDataBlock block = null;
 		
 		MapScanDimensions msd = new MapScanDimensions(bean.getxDim(), bean.getyDim(), scanRank);
 		
 		List<String> axesNames = Arrays.asList(bean.getAxes());
 		if (live != null) {
-			IDynamicDataset lz = getRemoteDataset(path,blockName,live);
-			LiveRemoteAxes remoteAxes = getRemoteAxes(axesNames, path, bean, live);
+			IDynamicDataset lz = getRemoteDataset(path,blockName,live, rService);
+			LiveRemoteAxes remoteAxes = getRemoteAxes(axesNames, path, bean, live, rService);
 			block = new MappedDataBlock(blockName, lz, msd,path, remoteAxes, live.getHost(),live.getPort());
 			return block;
 		}
 		
 		try {
-			ILazyDataset lz = getLazyDataset(path,blockName);
+			ILazyDataset lz = getLazyDataset(path,blockName, lService);
 			lz.clearMetadata(AxesMetadata.class);
-			AxesMetadata axm = checkAndBuildAxesMetadata(axesNames, path, bean);
+			AxesMetadata axm = checkAndBuildAxesMetadata(axesNames, path, bean, lService);
 			lz.setMetadata(axm);
 			block = new MappedDataBlock(blockName, lz,path,msd);
 		} catch (Exception e) {
@@ -108,20 +107,20 @@ public class MappedFileFactory {
 	}
 	
 		
-	private static AbstractMapData setUpMap(String path, String mapName, MappedDataBlock block, LiveDataBean live) {
+	private static AbstractMapData setUpMap(String path, String mapName, MappedDataBlock block, LiveDataBean live, ILoaderService lService, IRemoteDatasetService rService) {
 		
 		if (live != null && block.isLive()) {
 			
 			if (block.isRemappingRequired()) {
-				return new ReMappedData(mapName, getRemoteDataset(path,mapName,live), block, path, true);
+				return new ReMappedData(mapName, getRemoteDataset(path,mapName,live,rService), block, path, true);
 			}
 			
-			return new MappedData(mapName, getRemoteDataset(path,mapName,live),block, path, true);
+			return new MappedData(mapName, getRemoteDataset(path,mapName,live,rService),block, path, true);
 		}
 		
 		
 		try {
-			ILazyDataset lz = getLazyDataset(path,mapName);
+			ILazyDataset lz = getLazyDataset(path,mapName, lService);
 			
 			lz.clearMetadata(AxesMetadata.class);
 
@@ -155,12 +154,12 @@ public class MappedFileFactory {
 
 	}
 	
-	private static AssociatedImage getAssociatedImage(String path, AssociatedImageBean b) {
+	private static AssociatedImage getAssociatedImage(String path, AssociatedImageBean b, ILoaderService lService) {
 		try {
-			Dataset d = DatasetUtils.sliceAndConvertLazyDataset(getLazyDataset(path, b.getName()));
+			Dataset d = DatasetUtils.sliceAndConvertLazyDataset(getLazyDataset(path, b.getName(),lService));
 			AxesMetadata ax = MetadataFactory.createMetadata(AxesMetadata.class, 2);
-			ax.addAxis(0,getLazyDataset(path, b.getAxes()[0]));
-			ax.addAxis(1,getLazyDataset(path, b.getAxes()[1]));
+			ax.addAxis(0,getLazyDataset(path, b.getAxes()[0],lService));
+			ax.addAxis(1,getLazyDataset(path, b.getAxes()[1],lService));
 			
 			if (d.getRank() == 3) {
 				
@@ -181,7 +180,7 @@ public class MappedFileFactory {
 		
 	}
 	
-	private static LiveRemoteAxes getRemoteAxes(List<String> axes, String path, MappedBlockBean bean, LiveDataBean live) {
+	private static LiveRemoteAxes getRemoteAxes(List<String> axes, String path, MappedBlockBean bean, LiveDataBean live, IRemoteDatasetService rService) {
 		IDynamicDataset[] r = new IDynamicDataset[axes.size()];
 		String[] axesNames = new String[axes.size()];
 		
@@ -189,7 +188,7 @@ public class MappedFileFactory {
 			String s = axes.get(i);
 			axesNames[i] = s;
 			if (s != null) {
-					r[i] = getRemoteDataset(path, s, live);
+					r[i] = getRemoteDataset(path, s, live, rService);
 					if (r[i] != null) r[i].setName(s);
 			}
 
@@ -201,7 +200,7 @@ public class MappedFileFactory {
 		
 		String s = bean.getxAxisForRemapping();
 		if (s != null){
-			IDynamicDataset rd = getRemoteDataset(path, s, live);
+			IDynamicDataset rd = getRemoteDataset(path, s, live, rService);
 			rd.setName(s);
 			lra.setxAxisForRemapping(rd);
 			lra.setxAxisForRemappingName(s);
@@ -210,7 +209,7 @@ public class MappedFileFactory {
 		return lra;
 	}
 	
-	private static AxesMetadata checkAndBuildAxesMetadata(List<String> axes, String path, MappedBlockBean bean) {
+	private static AxesMetadata checkAndBuildAxesMetadata(List<String> axes, String path, MappedBlockBean bean, ILoaderService lService) {
 		
 		AxesMetadata axm = null; 
 		
@@ -218,7 +217,7 @@ public class MappedFileFactory {
 			axm = MetadataFactory.createMetadata(AxesMetadata.class, axes.size());
 			for (int i = 0; i < axes.size(); i++) {
 				if (axes.get(i) == null) continue;
-				ILazyDataset lz = getLazyDataset(path, axes.get(i));
+				ILazyDataset lz = getLazyDataset(path, axes.get(i), lService);
 				lz.setName(axes.get(i));
 				int[] ss = lz.getShape();
 				
@@ -228,7 +227,7 @@ public class MappedFileFactory {
 					String second = null;
 					if (bean.getxDim() == i && bean.getxAxisForRemapping() != null) second = bean.getxAxisForRemapping();
 					if (second != null) {
-						ILazyDataset l = getLazyDataset(path, second);
+						ILazyDataset l = getLazyDataset(path, second, lService);
 						l.setName(second);
 						axm.addAxis(i, l);
 					}
@@ -262,24 +261,22 @@ public class MappedFileFactory {
 		
 	}
 	
-	private static ILazyDataset getLazyDataset(String path, String name, LiveDataBean lb) throws Exception {
+	private static ILazyDataset getLazyDataset(String path, String name, LiveDataBean lb, ILoaderService lService, IRemoteDatasetService rService) throws Exception {
 		if (lb == null) {
-			ILoaderService lService = LocalServiceManager.getLoaderService();
 			IDataHolder dh = lService.getData(path, null);
 			ILazyDataset lazyDataset = dh.getLazyDataset(name);
 			lazyDataset.clearMetadata(null);
 			return lazyDataset;
 		} 
 		
-		return getRemoteDataset(path, name, lb).getDataset();
+		return getRemoteDataset(path, name, lb, rService).getDataset();
 	}
 	
-	private static ILazyDataset getLazyDataset(String path, String name) throws Exception {
-		return getLazyDataset(path, name, null);
+	private static ILazyDataset getLazyDataset(String path, String name, ILoaderService lService) throws Exception {
+		return getLazyDataset(path, name, null,lService,null);
 	}
 	
-	private static IDynamicDataset getRemoteDataset(String path, String name, LiveDataBean lb) {
-		IRemoteDatasetService rds = LocalServiceManager.getRemoteDatasetService();
+	private static IDynamicDataset getRemoteDataset(String path, String name, LiveDataBean lb, IRemoteDatasetService rds) {
 		IDatasetConnector remote = rds.createRemoteDataset(lb.getHost(), lb.getPort());
 		remote.setPath(path);
 		remote.setDatasetName(name);

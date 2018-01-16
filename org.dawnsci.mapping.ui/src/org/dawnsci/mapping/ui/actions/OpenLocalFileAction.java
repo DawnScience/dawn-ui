@@ -2,8 +2,6 @@ package org.dawnsci.mapping.ui.actions;
 
 import java.io.File;
 
-import org.dawnsci.mapping.ui.FileManagerSingleton;
-import org.dawnsci.mapping.ui.LocalServiceManager;
 import org.dawnsci.mapping.ui.api.IMapFileController;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
@@ -12,6 +10,8 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.IWorkbenchWindowActionDelegate;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.FrameworkUtil;
 
 public class OpenLocalFileAction extends Action implements IWorkbenchWindowActionDelegate {
 
@@ -34,8 +34,12 @@ public class OpenLocalFileAction extends Action implements IWorkbenchWindowActio
 		
 		if (names != null) {
 			filterPath =  dialog.getFilterPath();
+			BundleContext bundleContext =
+	                FrameworkUtil.
+	                getBundle(this.getClass()).
+	                getBundleContext();
 			
-			IMapFileController manager = LocalServiceManager.getFileController();
+			IMapFileController manager = bundleContext.getService(bundleContext.getServiceReference(IMapFileController.class));
 			if (manager != null) {
 				for (int i = 0; i < names.length; i++) {
 					names[i] = dialog.getFilterPath() + File.separator +names[i];

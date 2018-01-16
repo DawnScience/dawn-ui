@@ -8,6 +8,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.eclipse.dawnsci.analysis.api.io.ILoaderService;
+
 
 public class MappedDataFile implements MapObject{
 
@@ -19,22 +21,25 @@ public class MappedDataFile implements MapObject{
 	private MappedDataFileBean descriptionBean;
 	private String parentPath;
 	
+	private ILoaderService lService;
+	
 //	private final static Logger logger = LoggerFactory.getLogger(MappedDataFile.class);
 	
-	public MappedDataFile(String path, MappedDataFileBean liveBean) {
-		this(path);
+	public MappedDataFile(String path, MappedDataFileBean liveBean, ILoaderService lService) {
+		this(path, lService);
 		this.descriptionBean = liveBean;
 	}
 	
-	public MappedDataFile(String path) {
+	public MappedDataFile(String path, ILoaderService service) {
 		this.path = path;
+		this.lService = service;
 		fullDataMap = new HashMap<String,MappedDataBlock>();
 		mapDataMap = new HashMap<String,AbstractMapData>();
 		microscopeDataMap = new HashMap<String,AssociatedImage>();
 	}
 	
-	public MappedDataFile(String path, LiveDataBean bean) {
-		this(path);
+	public MappedDataFile(String path, LiveDataBean bean, ILoaderService lService) {
+		this(path, lService);
 		if (bean != null) {
 			descriptionBean = new MappedDataFileBean();
 			descriptionBean.setLiveBean(bean);
@@ -56,7 +61,7 @@ public class MappedDataFile implements MapObject{
 	public void locallyReloadLiveFile(){
 		if (descriptionBean == null) return;
 		descriptionBean.setLiveBean(null);
-		MappedDataFile tmp = MappedFileFactory.getMappedDataFile(path, descriptionBean, null);
+		MappedDataFile tmp = MappedFileFactory.getMappedDataFile(path, descriptionBean, null,lService,null);
 		
 		Iterator<Entry<String, MappedDataBlock>> it = fullDataMap.entrySet().iterator();
 		

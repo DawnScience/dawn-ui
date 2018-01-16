@@ -1,22 +1,20 @@
 package org.dawnsci.mapping.ui.test;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 
-import org.dawnsci.mapping.ui.LocalServiceManager;
 import org.dawnsci.mapping.ui.datamodel.MappedDataFileBean;
-import org.dawnsci.mapping.ui.test.MapNexusFileBuilderUtils;
 import org.dawnsci.mapping.ui.wizards.MapBeanBuilder;
 import org.eclipse.dawnsci.analysis.api.io.IDataHolder;
 import org.junit.BeforeClass;
 import org.junit.ClassRule;
-import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 
 import uk.ac.diamond.scisoft.analysis.io.LoaderFactory;
-import uk.ac.diamond.scisoft.analysis.io.LoaderServiceImpl;
 
 public class MapBeanBuilderTest {
 
@@ -32,7 +30,6 @@ public class MapBeanBuilderTest {
 		file1 = folder.newFile("file2.nxs");
 		MapNexusFileBuilderUtils.makeGridScanWithSum(file.getAbsolutePath());
 		MapNexusFileBuilderUtils.makeGridScanWithZandSum(file1.getAbsolutePath());
-		LocalServiceManager.setLoaderService(new LoaderServiceImpl());
 	}
 	
 	

@@ -1,7 +1,5 @@
 package org.dawnsci.mapping.ui.actions;
 
-import org.dawnsci.mapping.ui.FileManagerSingleton;
-import org.dawnsci.mapping.ui.LocalServiceManager;
 import org.dawnsci.mapping.ui.api.IMapFileController;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.jface.action.Action;
@@ -9,6 +7,8 @@ import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.ui.IWorkbenchPage;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.FrameworkUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -62,7 +62,12 @@ private static final Logger logger = LoggerFactory.getLogger(OpenMappedDataActio
 				IFile file = (IFile)sSelection.getFirstElement();
 				String loc = file.getRawLocation().toOSString();
 				
-				IMapFileController manager = LocalServiceManager.getFileController();
+				BundleContext bundleContext =
+		                FrameworkUtil.
+		                getBundle(this.getClass()).
+		                getBundleContext();
+				
+				IMapFileController manager = bundleContext.getService(bundleContext.getServiceReference(IMapFileController.class));
 				if (manager != null) {
 					manager.loadFiles(new String[] {loc}, null);
 				} else {

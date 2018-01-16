@@ -6,6 +6,7 @@ import org.dawnsci.mapping.ui.datamodel.AssociatedImage;
 import org.eclipse.dawnsci.analysis.api.tree.DataNode;
 import org.eclipse.dawnsci.analysis.api.tree.GroupNode;
 import org.eclipse.dawnsci.analysis.tree.impl.AttributeImpl;
+import org.eclipse.dawnsci.nexus.INexusFileFactory;
 import org.eclipse.dawnsci.nexus.NexusException;
 import org.eclipse.dawnsci.nexus.NexusFile;
 import org.eclipse.dawnsci.plotting.api.trace.MetadataPlotUtils;
@@ -246,8 +247,11 @@ public class MappingUtils {
 		return new int[]{yOut,xOut};
 	}
 	
-	public static void saveRegisteredImage(AssociatedImage image, String path) {
-		NexusFile nexus = LocalServiceManager.getNexusFactory().newNexusFile(path);
+	public static void saveRegisteredImage(AssociatedImage image, String path, INexusFileFactory fileFactory) {
+		
+		
+		
+		NexusFile nexus = fileFactory.newNexusFile(path);
 		try {
 			nexus.openToWrite(true);
 			GroupNode group = nexus.getGroup("/entry", true);

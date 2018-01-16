@@ -15,12 +15,12 @@ import org.dawnsci.mapping.ui.AcquisitionServiceManager;
 import org.dawnsci.mapping.ui.BeanBuilderWizard;
 import org.dawnsci.mapping.ui.IBeanBuilderHelper;
 import org.dawnsci.mapping.ui.IRegistrationHelper;
-import org.dawnsci.mapping.ui.LocalServiceManager;
 import org.dawnsci.mapping.ui.api.IMapFileController;
 import org.dawnsci.mapping.ui.wizards.LegacyMapBeanBuilder;
 import org.dawnsci.mapping.ui.wizards.MapBeanBuilder;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.dawnsci.analysis.api.io.IDataHolder;
+import org.eclipse.dawnsci.analysis.api.io.ILoaderService;
 import org.eclipse.dawnsci.analysis.api.io.IRemoteDatasetService;
 import org.eclipse.dawnsci.analysis.api.tree.Tree;
 import org.eclipse.dawnsci.analysis.tree.TreeToMapUtils;
@@ -36,6 +36,17 @@ import org.slf4j.LoggerFactory;
 public class MappedFileManager implements IMapFileController{
 
 	private final static Logger logger = LoggerFactory.getLogger(MappedFileManager.class);
+	
+	private ILoaderService loaderService;
+	private IRemoteDatasetService remoteService;
+	
+	public void setLoaderService(ILoaderService service) {
+		this.loaderService = service;
+	}
+	
+	public void setRemoveService(IRemoteDatasetService service) {
+		this.remoteService = service;
+	}
 	
 	private MappedDataArea mappedDataArea;
 	private IRegistrationHelper registrationHelper;
@@ -162,7 +173,7 @@ public class MappedFileManager implements IMapFileController{
 				
 				if (!reloaded) {
 					try {
-						IDataHolder dh = LocalServiceManager.getLoaderService().getData(path, null);
+						IDataHolder dh = loaderService.getData(path, null);
 						Tree tree = dh.getTree();
 						MappedDataFileBean b = buildBeanFromTree(tree);
 						
@@ -246,7 +257,7 @@ public class MappedFileManager implements IMapFileController{
 	
 	@Override
 	public void addAssociatedImage(AssociatedImage image) {
-		MappedDataFile file = new MappedDataFile(image.getPath());
+		MappedDataFile file = new MappedDataFile(image.getPath(),null);
 		file.addMapObject(image.toString(), image);
 		mappedDataArea.addMappedDataFile(file);
 		fireListeners(file);
@@ -281,7 +292,7 @@ public class MappedFileManager implements IMapFileController{
 	}
 	
 	private void innerImportFile(final String path, final MappedDataFileBean bean, final IMonitor monitor, String parentPath) {
-		final MappedDataFile mdf = MappedFileFactory.getMappedDataFile(path, bean, monitor);
+		final MappedDataFile mdf = MappedFileFactory.getMappedDataFile(path, bean, monitor,loaderService,remoteService);
 		if (monitor != null && monitor.isCancelled()) return;
 		if (mdf != null && parentPath != null) mdf.setParentPath(parentPath);
 		mappedDataArea.addMappedDataFile(mdf);
@@ -315,8 +326,8 @@ public class MappedFileManager implements IMapFileController{
 				IMetadata meta = null;
 				IDataHolder dh = null;
 				try {
-				meta = LocalServiceManager.getLoaderService().getMetadata(path, null);
-				dh = LocalServiceManager.getLoaderService().getData(path, null);
+				meta = loaderService.getMetadata(path, null);
+				dh =loaderService.getData(path, null);
 				} catch (Exception e) {
 					e.printStackTrace();
 					return;
@@ -325,7 +336,7 @@ public class MappedFileManager implements IMapFileController{
 				if (datasetNames != null && datasetNames.size() == 1 && datasetNames.containsKey("image-01")) {
 					IDataset im = null;
 					try {
-						im = LocalServiceManager.getLoaderService().getDataset(path, null);
+						im = loaderService.getDataset(path, null);
 						
 					} catch (Exception e) {
 						logger.error("Couldn't load data from {}", path);
@@ -391,13 +402,12 @@ public class MappedFileManager implements IMapFileController{
 		@Override
 		public void run() {
 			if (parentFile != null && !mappedDataArea.contains(parentFile)) return;
-			IRemoteDatasetService rds = LocalServiceManager.getRemoteDatasetService();
-			if (rds == null) {
+			if (remoteService == null) {
 				logger.error("Could not acquire remote dataset service");
 				return;
 			}
 			
-			IRemoteData rd = rds.createRemoteData(bean.getHost(), bean.getPort());
+			IRemoteData rd = remoteService.createRemoteData(bean.getHost(), bean.getPort());
 			
 			if (rd == null) {
 				logger.error("Could not acquire remote data on :" + bean.getHost() + ":" + bean.getPort());
@@ -427,7 +437,7 @@ public class MappedFileManager implements IMapFileController{
 			}
 			
 			
-			MappedDataFile mdf = new MappedDataFile(path,bean);
+			MappedDataFile mdf = new MappedDataFile(path,bean,loaderService);
 			mdf.setParentPath(parentFile);
 			mappedDataArea.addMappedDataFile(mdf);
 			fireListeners(null);

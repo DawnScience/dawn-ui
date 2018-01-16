@@ -9,13 +9,11 @@ import java.io.File;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
-import org.dawnsci.mapping.ui.LocalServiceManager;
 import org.dawnsci.mapping.ui.datamodel.IMapFileEventListener;
 import org.dawnsci.mapping.ui.datamodel.LiveStreamMapObject;
 import org.dawnsci.mapping.ui.datamodel.MappedDataFile;
 import org.dawnsci.mapping.ui.datamodel.MappedFileManager;
 import org.dawnsci.mapping.ui.datamodel.PlottableMapObject;
-import org.dawnsci.mapping.ui.datamodel.LiveStreamMapObject.IAxisMoveListener;
 import org.eclipse.january.dataset.IDataset;
 import org.eclipse.january.dataset.IDynamicShape;
 import org.junit.BeforeClass;
@@ -36,7 +34,6 @@ public class MappedFileManagerTest {
 	public static void buildData() throws Exception {
 		file = folder.newFile("file1.nxs");
 		MapNexusFileBuilderUtils.makeGridScanWithSum(file.getAbsolutePath());
-		LocalServiceManager.setLoaderService(new LoaderServiceImpl());
 		
 	}
 	
@@ -44,6 +41,7 @@ public class MappedFileManagerTest {
 	@Test
 	public void test() throws InterruptedException {
 		MappedFileManager manager = new MappedFileManager();
+		manager.setLoaderService(new LoaderServiceImpl());
 		
 		AtomicReference<MappedDataFile> af = new AtomicReference<MappedDataFile>();
 		

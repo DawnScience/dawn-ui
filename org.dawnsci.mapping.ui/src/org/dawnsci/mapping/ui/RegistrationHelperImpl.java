@@ -1,5 +1,6 @@
 package org.dawnsci.mapping.ui;
 
+import org.dawnsci.mapping.ui.api.IMapFileController;
 import org.dawnsci.mapping.ui.datamodel.AssociatedImage;
 import org.dawnsci.mapping.ui.dialog.RectangleRegistrationDialog;
 import org.eclipse.january.dataset.IDataset;
@@ -7,6 +8,8 @@ import org.eclipse.january.dataset.RGBDataset;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.PlatformUI;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.FrameworkUtil;
 
 public class RegistrationHelperImpl implements IRegistrationHelper {
 
@@ -30,7 +33,15 @@ public class RegistrationHelperImpl implements IRegistrationHelper {
 		RGBDataset ds = (RGBDataset)dialog.getRegisteredImage();
 		ds.setName("Registered");
 		AssociatedImage asIm = new AssociatedImage("Registered", ds, path);
-		LocalServiceManager.getFileController().addAssociatedImage(asIm);
+		
+		BundleContext bundleContext =
+                FrameworkUtil.
+                getBundle(this.getClass()).
+                getBundleContext();
+		
+		IMapFileController f = bundleContext.getService(bundleContext.getServiceReference(IMapFileController.class));
+		
+		f.addAssociatedImage(asIm);
 
 	}
 

@@ -1,13 +1,13 @@
 package org.dawnsci.mapping.ui.test;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 import java.util.Map.Entry;
 
-import org.dawnsci.mapping.ui.LocalServiceManager;
 import org.dawnsci.mapping.ui.datamodel.AbstractMapData;
-import org.dawnsci.mapping.ui.datamodel.MappedData;
 import org.dawnsci.mapping.ui.datamodel.MappedDataBlock;
 import org.dawnsci.mapping.ui.datamodel.MappedDataFile;
 import org.dawnsci.mapping.ui.datamodel.MappedDataFileBean;
@@ -15,8 +15,8 @@ import org.dawnsci.mapping.ui.datamodel.MappedFileFactory;
 import org.dawnsci.mapping.ui.datamodel.ReMappedData;
 import org.dawnsci.mapping.ui.wizards.MapBeanBuilder;
 import org.eclipse.dawnsci.analysis.api.io.IDataHolder;
+import org.eclipse.dawnsci.analysis.api.io.ILoaderService;
 import org.eclipse.january.dataset.IDataset;
-import org.eclipse.january.dataset.ILazyDataset;
 import org.junit.BeforeClass;
 import org.junit.ClassRule;
 import org.junit.Test;
@@ -38,6 +38,7 @@ public class MappedFileFactoryTest {
 	private static File gridZDiode = null;
 	private static File lineDiode = null;
 	private static File lineZDiode = null;
+	private static ILoaderService loaderService;
 	
 	@BeforeClass
 	public static void buildData() throws Exception {
@@ -49,6 +50,7 @@ public class MappedFileFactoryTest {
 		gridZDiode = folder.newFile("gridZDiode.nxs");
 		lineDiode = folder.newFile("lineDiode.nxs");
 		lineZDiode = folder.newFile("lineZDiode.nxs");
+		loaderService = new LoaderServiceImpl();
 
 		
 		MapNexusFileBuilderUtils.makeGridScanWithSum(grid.getAbsolutePath());
@@ -61,12 +63,14 @@ public class MappedFileFactoryTest {
 		MapNexusFileBuilderUtils.makeDiodeLineScanEnergy(lineZDiode.getAbsolutePath());
 		
 		
-		LocalServiceManager.setLoaderService(new LoaderServiceImpl());
 	}
 	
 	@Test
 	public void loadGridScan() throws Exception{
 
+		
+		
+		
 		IDataHolder data = LoaderFactory.getData(grid.getAbsolutePath());
 		MappedDataFileBean buildBean = MapBeanBuilder.buildBean(data.getTree(), MapNexusFileBuilderUtils.STAGE_X,
 				MapNexusFileBuilderUtils.STAGE_Y);
@@ -75,7 +79,7 @@ public class MappedFileFactoryTest {
 		assertEquals(2, buildBean.getScanRank());
 		assertTrue(buildBean.checkValid());
 		
-		MappedDataFile mdf = MappedFileFactory.getMappedDataFile(grid.getAbsolutePath(), buildBean, null);
+		MappedDataFile mdf = MappedFileFactory.getMappedDataFile(grid.getAbsolutePath(), buildBean, null,loaderService,null);
 		assertNotNull(mdf);
 		
 		buildBean = MapBeanBuilder.buildBean(data.getTree());
@@ -84,7 +88,7 @@ public class MappedFileFactoryTest {
 		assertEquals(2, buildBean.getScanRank());
 		assertTrue(buildBean.checkValid());
 		
-		mdf = MappedFileFactory.getMappedDataFile(grid.getAbsolutePath(), buildBean, null);
+		mdf = MappedFileFactory.getMappedDataFile(grid.getAbsolutePath(), buildBean, null,loaderService,null);
 		assertNotNull(mdf);
 	}
 	
@@ -99,7 +103,7 @@ public class MappedFileFactoryTest {
 		assertEquals(3, buildBean.getScanRank());
 		assertTrue(buildBean.checkValid());
 		
-		MappedDataFile mdf = MappedFileFactory.getMappedDataFile(gridZ.getAbsolutePath(), buildBean, null);
+		MappedDataFile mdf = MappedFileFactory.getMappedDataFile(gridZ.getAbsolutePath(), buildBean, null,loaderService,null);
 		assertNotNull(mdf);
 		
 		Entry<String, MappedDataBlock> next = mdf.getDataBlockMap().entrySet().iterator().next();
@@ -116,7 +120,7 @@ public class MappedFileFactoryTest {
 		assertEquals(3, buildBean.getScanRank());
 		assertTrue(buildBean.checkValid());
 		
-		mdf = MappedFileFactory.getMappedDataFile(gridZ.getAbsolutePath(), buildBean, null);
+		mdf = MappedFileFactory.getMappedDataFile(gridZ.getAbsolutePath(), buildBean, null,loaderService,null);
 		assertNotNull(mdf);
 	}
 	
@@ -131,7 +135,7 @@ public class MappedFileFactoryTest {
 		assertEquals(1, buildBean.getScanRank());
 		assertTrue(buildBean.checkValid());
 		
-		MappedDataFile mdf = MappedFileFactory.getMappedDataFile(line.getAbsolutePath(), buildBean, null);
+		MappedDataFile mdf = MappedFileFactory.getMappedDataFile(line.getAbsolutePath(), buildBean, null,loaderService,null);
 		assertNotNull(mdf);
 		AbstractMapData map = mdf.getMap();
 		assertEquals(2,map.getMap().getRank());
@@ -143,7 +147,7 @@ public class MappedFileFactoryTest {
 		assertEquals(1, buildBean.getScanRank());
 		assertTrue(buildBean.checkValid());
 		
-		mdf = MappedFileFactory.getMappedDataFile(line.getAbsolutePath(), buildBean, null);
+		mdf = MappedFileFactory.getMappedDataFile(line.getAbsolutePath(), buildBean, null,loaderService,null);
 		assertNotNull(mdf);
 	}
 	
@@ -158,7 +162,7 @@ public class MappedFileFactoryTest {
 		assertEquals(2, buildBean.getScanRank());
 		assertTrue(buildBean.checkValid());
 		
-		MappedDataFile mdf = MappedFileFactory.getMappedDataFile(lineZ.getAbsolutePath(), buildBean, null);
+		MappedDataFile mdf = MappedFileFactory.getMappedDataFile(lineZ.getAbsolutePath(), buildBean, null,loaderService,null);
 		assertNotNull(mdf);
 		assertEquals(2,mdf.getMap().getMap().getRank());
 		assertEquals(2,mdf.getMap().getData().getRank());
@@ -169,7 +173,7 @@ public class MappedFileFactoryTest {
 		assertEquals(2, buildBean.getScanRank());
 		assertTrue(buildBean.checkValid());
 		
-		mdf = MappedFileFactory.getMappedDataFile(lineZ.getAbsolutePath(), buildBean, null);
+		mdf = MappedFileFactory.getMappedDataFile(lineZ.getAbsolutePath(), buildBean, null,loaderService,null);
 		assertNotNull(mdf);
 		
 		assertEquals(2,mdf.getMap().getMap().getRank());
@@ -188,7 +192,7 @@ public class MappedFileFactoryTest {
 		assertEquals(2, buildBean.getScanRank());
 		assertTrue(buildBean.checkValid());
 		
-		MappedDataFile mdf = MappedFileFactory.getMappedDataFile(gridDiode.getAbsolutePath(), buildBean, null);
+		MappedDataFile mdf = MappedFileFactory.getMappedDataFile(gridDiode.getAbsolutePath(), buildBean, null,loaderService,null);
 		assertNotNull(mdf);
 		
 		buildBean = MapBeanBuilder.buildBean(data.getTree());
@@ -197,7 +201,7 @@ public class MappedFileFactoryTest {
 		assertEquals(2, buildBean.getScanRank());
 		assertTrue(buildBean.checkValid());
 		
-		mdf = MappedFileFactory.getMappedDataFile(gridDiode.getAbsolutePath(), buildBean, null);
+		mdf = MappedFileFactory.getMappedDataFile(gridDiode.getAbsolutePath(), buildBean, null,loaderService,null);
 		assertNotNull(mdf);
 	}
 	
@@ -212,7 +216,7 @@ public class MappedFileFactoryTest {
 		assertEquals(3, buildBean.getScanRank());
 		assertTrue(buildBean.checkValid());
 		
-		MappedDataFile mdf = MappedFileFactory.getMappedDataFile(gridZDiode.getAbsolutePath(), buildBean, null);
+		MappedDataFile mdf = MappedFileFactory.getMappedDataFile(gridZDiode.getAbsolutePath(), buildBean, null,loaderService,null);
 		assertNotNull(mdf);
 		
 		Entry<String, MappedDataBlock> next = mdf.getDataBlockMap().entrySet().iterator().next();
@@ -229,7 +233,7 @@ public class MappedFileFactoryTest {
 		assertEquals(3, buildBean.getScanRank());
 		assertTrue(buildBean.checkValid());
 		
-		mdf = MappedFileFactory.getMappedDataFile(gridZDiode.getAbsolutePath(), buildBean, null);
+		mdf = MappedFileFactory.getMappedDataFile(gridZDiode.getAbsolutePath(), buildBean, null,loaderService,null);
 		assertNotNull(mdf);
 	}
 	
@@ -243,7 +247,7 @@ public class MappedFileFactoryTest {
 		assertNotNull(buildBean);
 		assertTrue(buildBean.checkValid());
 		
-		MappedDataFile mdf = MappedFileFactory.getMappedDataFile(lineDiode.getAbsolutePath(), buildBean, null);
+		MappedDataFile mdf = MappedFileFactory.getMappedDataFile(lineDiode.getAbsolutePath(), buildBean, null,loaderService,null);
 		assertNotNull(mdf);
 		MappedDataBlock b = mdf.getDataBlockMap().values().iterator().next();
 		assertEquals(1,b.getLazy().getRank());
@@ -254,7 +258,7 @@ public class MappedFileFactoryTest {
 		assertNotNull(buildBean);
 		assertTrue(buildBean.checkValid());
 		
-		mdf = MappedFileFactory.getMappedDataFile(lineDiode.getAbsolutePath(), buildBean, null);
+		mdf = MappedFileFactory.getMappedDataFile(lineDiode.getAbsolutePath(), buildBean, null,loaderService,null);
 		assertNotNull(mdf);
 	}
 	
@@ -268,7 +272,7 @@ public class MappedFileFactoryTest {
 		assertNotNull(buildBean);
 		assertTrue(buildBean.checkValid());
 		
-		MappedDataFile mdf = MappedFileFactory.getMappedDataFile(lineZDiode.getAbsolutePath(), buildBean, null);
+		MappedDataFile mdf = MappedFileFactory.getMappedDataFile(lineZDiode.getAbsolutePath(), buildBean, null,loaderService,null);
 		assertNotNull(mdf);
 		MappedDataBlock b = mdf.getDataBlockMap().values().iterator().next();
 		assertEquals(2,b.getLazy().getRank());
@@ -279,7 +283,7 @@ public class MappedFileFactoryTest {
 		assertNotNull(buildBean);
 		assertTrue(buildBean.checkValid());
 		
-		mdf = MappedFileFactory.getMappedDataFile(lineZDiode.getAbsolutePath(), buildBean, null);
+		mdf = MappedFileFactory.getMappedDataFile(lineZDiode.getAbsolutePath(), buildBean, null,loaderService,null);
 		assertNotNull(mdf);
 		
 		b = mdf.getDataBlockMap().values().iterator().next();

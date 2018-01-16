@@ -23,6 +23,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.dawnsci.analysis.dataset.roi.PointROI;
+import org.eclipse.dawnsci.nexus.INexusFileFactory;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.PlotType;
 import org.eclipse.dawnsci.plotting.api.axis.IAxis;
@@ -51,6 +52,8 @@ import org.eclipse.january.metadata.AxesMetadata;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.PlatformUI;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.FrameworkUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -77,7 +80,14 @@ public class MapPlotManager {
 	public MapPlotManager(IPlottingSystem<Composite> map, IPlottingSystem<Composite> data) {
 		this.map = map;
 		this.data = data;
-		this.fileManager = LocalServiceManager.getFileController();
+		
+		BundleContext bundleContext =
+                FrameworkUtil.
+                getBundle(this.getClass()).
+                getBundleContext();
+		
+		this.fileManager = bundleContext.getService(bundleContext.getServiceReference(IMapFileController.class));
+		
 		atomicPosition = new AtomicInteger(0);
 		layers = new ConcurrentLinkedDeque<MapTrace>();
 		job = new PlotJob("Plot point...",false);

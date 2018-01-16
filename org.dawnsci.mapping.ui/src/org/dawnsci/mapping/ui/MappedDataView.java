@@ -20,6 +20,8 @@ import org.dawnsci.mapping.ui.datamodel.MappedDataFile;
 import org.dawnsci.mapping.ui.datamodel.MappedFileManager;
 import org.dawnsci.mapping.ui.datamodel.PlottableMapObject;
 import org.eclipse.core.resources.IFile;
+import org.eclipse.dawnsci.analysis.api.persistence.IMarshallerService;
+import org.eclipse.dawnsci.analysis.api.persistence.IPersistenceService;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.PlotType;
 import org.eclipse.dawnsci.plotting.api.axis.ClickEvent;
@@ -58,7 +60,10 @@ import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.part.ResourceTransfer;
 import org.eclipse.ui.part.ViewPart;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.FrameworkUtil;
 import org.osgi.service.event.Event;
+import org.osgi.service.event.EventAdmin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -145,7 +150,12 @@ public class MappedDataView extends ViewPart {
 			throw new RuntimeException("Could not create the spectrum view", e);
 		}
 		
-		fileController = LocalServiceManager.getFileController();
+		BundleContext bundleContext =
+                FrameworkUtil.
+                getBundle(this.getClass()).
+                getBundleContext();
+		
+		fileController = bundleContext.getService(bundleContext.getServiceReference(IMapFileController.class));
 		plotManager = new MapPlotManager(map, spectrum);
 		fileController.setRegistrationHelper(new RegistrationHelperImpl(plotManager));
 		
@@ -170,7 +180,15 @@ public class MappedDataView extends ViewPart {
 					path = p.getParentPath();
 				}
 				props.put("event", new MapClickEvent(evt, isDoubleClick, path));
-				LocalServiceManager.getEventAdmin().postEvent(new Event(EVENT_TOPIC_MAPVIEW_CLICK, props));
+				
+				BundleContext bundleContext =
+		                FrameworkUtil.
+		                getBundle(this.getClass()).
+		                getBundleContext();
+				
+				EventAdmin a = bundleContext.getService(bundleContext.getServiceReference(EventAdmin.class));
+				
+				a.postEvent(new Event(EVENT_TOPIC_MAPVIEW_CLICK, props));
 			}
 		});
 		
@@ -306,7 +324,7 @@ public class MappedDataView extends ViewPart {
 				
 			if (!maps.isEmpty()) {
 				manager.add(new Separator());
-				manager.add(MapActionUtils.getUnPlotAllAction(plotManager, viewer));
+				manager.add(MapActionUtils.getUnPlotAllAction(plotManager, viewer, fileController));
 			}
 					
 			if (!mdfs.isEmpty()) {
@@ -422,7 +440,14 @@ public class MappedDataView extends ViewPart {
 			try {
 				final String savedState = memento.getString(getSavedStateKey());
 				if (savedState != null) {
-					initialState = LocalServiceManager.getMarshallerService().unmarshal(savedState,
+					BundleContext bundleContext =
+			                FrameworkUtil.
+			                getBundle(this.getClass()).
+			                getBundleContext();
+					
+					IMarshallerService m = bundleContext.getService(bundleContext.getServiceReference(IMarshallerService.class));
+					
+					initialState = m.unmarshal(savedState,
 							MappedDataViewState.class);
 				}
 			} catch (Exception e) {
@@ -445,7 +470,14 @@ public class MappedDataView extends ViewPart {
 					state.setFilesInView(filesInView);
 					logger.info("Saving view state: {}", state);
 
-					final String stateString = LocalServiceManager.getMarshallerService().marshal(state);
+					BundleContext bundleContext =
+			                FrameworkUtil.
+			                getBundle(this.getClass()).
+			                getBundleContext();
+					
+					IMarshallerService m = bundleContext.getService(bundleContext.getServiceReference(IMarshallerService.class));
+					
+					final String stateString = m.marshal(state);
 					memento.putString(getSavedStateKey(), stateString);
 				}
 			} catch (Exception e) {

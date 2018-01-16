@@ -5,15 +5,16 @@ import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.Map;
 
-import org.dawnsci.mapping.ui.LocalServiceManager;
-import org.dawnsci.mapping.ui.datamodel.MappedDataFileBean;
 import org.dawnsci.mapping.ui.Activator;
+import org.dawnsci.mapping.ui.datamodel.MappedDataFileBean;
 import org.eclipse.dawnsci.analysis.api.persistence.IPersistenceService;
 import org.eclipse.january.metadata.IMetadata;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.swt.widgets.Composite;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.FrameworkUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -52,7 +53,13 @@ public class ImportMappedDataWizard extends Wizard {
 		IPreferenceStore ps = Activator.getDefault().getPreferenceStore();
 		String jsonArray = ps.getString("TestDescriptionList");
 		if (jsonArray != null) {
-			IPersistenceService p = LocalServiceManager.getPersistenceService();
+			BundleContext bundleContext =
+	                FrameworkUtil.
+	                getBundle(this.getClass()).
+	                getBundleContext();
+			
+			IPersistenceService p = bundleContext.getService(bundleContext.getServiceReference(IPersistenceService.class));
+			
 			try {
 				persistedList = p.unmarshal(jsonArray,MappedDataFileBean[].class);
 				for (MappedDataFileBean d : persistedList) {
@@ -106,7 +113,12 @@ public class ImportMappedDataWizard extends Wizard {
 	
 	@Override
 	public boolean performFinish() {
-		IPersistenceService ps = LocalServiceManager.getPersistenceService();
+		BundleContext bundleContext =
+                FrameworkUtil.
+                getBundle(this.getClass()).
+                getBundleContext();
+		
+		IPersistenceService ps = bundleContext.getService(bundleContext.getServiceReference(IPersistenceService.class));
 		try {
 			IPreferenceStore p = Activator.getDefault().getPreferenceStore();
 			updatePersistanceList();

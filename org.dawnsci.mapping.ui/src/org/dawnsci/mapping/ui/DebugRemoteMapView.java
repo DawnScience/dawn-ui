@@ -18,6 +18,8 @@ import org.eclipse.ui.IViewPart;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.part.ViewPart;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.FrameworkUtil;
 
 public class DebugRemoteMapView extends ViewPart {
 
@@ -64,7 +66,14 @@ public class DebugRemoteMapView extends ViewPart {
 			
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				IPersistenceService p = LocalServiceManager.getPersistenceService();
+				
+				BundleContext bundleContext =
+		                FrameworkUtil.
+		                getBundle(this.getClass()).
+		                getBundleContext();
+				
+				IPersistenceService p = bundleContext.getService(bundleContext.getServiceReference(IPersistenceService.class));
+
 				try {
 					
 					if (tbean.getText() == null || tbean.getText().isEmpty()) {

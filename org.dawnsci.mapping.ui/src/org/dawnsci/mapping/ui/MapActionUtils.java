@@ -18,6 +18,8 @@ import org.dawnsci.mapping.ui.dialog.ImageGridDialog;
 import org.dawnsci.mapping.ui.dialog.MapPropertiesDialog;
 import org.dawnsci.mapping.ui.dialog.RGBMixerDialog;
 import org.dawnsci.mapping.ui.dialog.VectorMixerDialog;
+import org.eclipse.dawnsci.analysis.api.persistence.IMarshallerService;
+import org.eclipse.dawnsci.nexus.INexusFileFactory;
 import org.eclipse.january.dataset.IDataset;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
@@ -26,6 +28,8 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.PlatformUI;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.FrameworkUtil;
 
 public class MapActionUtils {
 
@@ -187,11 +191,11 @@ public class MapActionUtils {
 		
 	}
 	
-	public static IAction getUnPlotAllAction(final MapPlotManager manager, final TreeViewer viewer) {
+	public static IAction getUnPlotAllAction(final MapPlotManager manager, final TreeViewer viewer, IMapFileController controller) {
 		return new Action("Clear plot") {
 			@Override
 			public void run() {
-				LocalServiceManager.getFileController().removeAllFromDisplay();
+				controller.removeAllFromDisplay();
 			}
 		};
 
@@ -230,8 +234,15 @@ public class MapActionUtils {
 			
 				dialog.create();
 				
+				BundleContext bundleContext =
+		                FrameworkUtil.
+		                getBundle(this.getClass()).
+		                getBundleContext();
+				
+				INexusFileFactory f = bundleContext.getService(bundleContext.getServiceReference(INexusFileFactory.class));
+				
 				if (dialog.open() == Dialog.OK) {
-					MappingUtils.saveRegisteredImage(image, dialog.getPath());
+					MappingUtils.saveRegisteredImage(image, dialog.getPath(), f);
 				}
 			}
 		};

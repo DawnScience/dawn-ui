@@ -4,7 +4,6 @@ import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 
-import org.dawnsci.mapping.ui.LocalServiceManager;
 import org.dawnsci.mapping.ui.datamodel.MappedDataArea;
 import org.dawnsci.mapping.ui.datamodel.MappedDataFile;
 import org.dawnsci.mapping.ui.datamodel.MappedDataFileBean;
@@ -30,18 +29,16 @@ public class MappedDataAreaTest {
 	public static void buildData() throws Exception {
 		grid = folder.newFile("grid.nxs");
 		MapNexusFileBuilderUtils.makeGridScanWithSum(grid.getAbsolutePath());
-		LocalServiceManager.setLoaderService(new LoaderServiceImpl());
 	}
 	
 	
 	@Test
 	public void test() throws Exception {
-		LocalServiceManager.setLoaderService(new LoaderServiceImpl());
 		IDataHolder data = LoaderFactory.getData(grid.getAbsolutePath());
 		MappedDataFileBean buildBean = MapBeanBuilder.buildBean(data.getTree(), MapNexusFileBuilderUtils.STAGE_X,
 				MapNexusFileBuilderUtils.STAGE_Y);
 		
-		MappedDataFile mdf = MappedFileFactory.getMappedDataFile(grid.getAbsolutePath(), buildBean, null);
+		MappedDataFile mdf = MappedFileFactory.getMappedDataFile(grid.getAbsolutePath(), buildBean, null,new LoaderServiceImpl(),null);
 		MappedDataArea mda = new MappedDataArea();
 		mda.addMappedDataFile(mdf);
 		

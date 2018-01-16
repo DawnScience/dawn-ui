@@ -2,12 +2,15 @@ package org.dawnsci.mapping.ui;
 
 import java.util.Map;
 
+import org.dawnsci.mapping.ui.api.IMapFileController;
 import org.dawnsci.mapping.ui.wizards.ImportMappedDataWizard;
 import org.eclipse.january.metadata.IMetadata;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.PlatformUI;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.FrameworkUtil;
 
 public class BeanBuilderWizard implements IBeanBuilderHelper {
 
@@ -33,7 +36,14 @@ public class BeanBuilderWizard implements IBeanBuilderHelper {
 		
 		if (wd.open() == WizardDialog.CANCEL) return;
 		
-		LocalServiceManager.getFileController().loadFile(path, wiz.getMappedDataFileBean(), null);
+		BundleContext bundleContext =
+                FrameworkUtil.
+                getBundle(this.getClass()).
+                getBundleContext();
+		
+		IMapFileController f = bundleContext.getService(bundleContext.getServiceReference(IMapFileController.class));
+		
+		f.loadFile(path, wiz.getMappedDataFileBean(), null);
 
 	}
 

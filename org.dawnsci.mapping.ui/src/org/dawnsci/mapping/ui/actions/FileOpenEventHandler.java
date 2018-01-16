@@ -1,12 +1,12 @@
 package org.dawnsci.mapping.ui.actions;
 
-import org.dawnsci.mapping.ui.FileManagerSingleton;
-import org.dawnsci.mapping.ui.LocalServiceManager;
 import org.dawnsci.mapping.ui.api.IMapFileController;
 import org.dawnsci.mapping.ui.datamodel.LiveDataBean;
 import org.dawnsci.mapping.ui.datamodel.MappedDataFileBean;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.PlatformUI;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.FrameworkUtil;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
 
@@ -27,7 +27,14 @@ public class FileOpenEventHandler implements EventHandler {
 			return;
 		}
 		
-		IMapFileController fm = LocalServiceManager.getFileController();
+		BundleContext bundleContext =
+                FrameworkUtil.
+                getBundle(this.getClass()).
+                getBundleContext();
+		
+		IMapFileController fm = bundleContext.getService(bundleContext.getServiceReference(IMapFileController.class));
+		
+
 		if (fm == null) return;
 		
 		String path = (String)event.getProperty("path");
