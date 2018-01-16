@@ -4,4 +4,6 @@
    <service>
       <provide interface="org.dawnsci.mapping.ui.api.IMapFileController"/>
    </service>
+   <reference bind="setLoaderService" cardinality="1..1" interface="org.eclipse.dawnsci.analysis.api.io.ILoaderService" name="ILoaderService" policy="static"/>
+   <reference bind="setRemoveService" cardinality="1..1" interface="org.eclipse.dawnsci.analysis.api.io.IRemoteDatasetService" name="IRemoteDatasetService" policy="static"/>
 </scr:component>
