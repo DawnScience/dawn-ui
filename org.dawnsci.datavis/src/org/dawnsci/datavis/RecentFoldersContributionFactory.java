@@ -37,51 +37,51 @@ public class RecentFoldersContributionFactory extends ExtensionContributionFacto
 		MenuManager search = new MenuManager("Recent Places",
                 "org.dawnsci.cake");
 		
-//		BundleContext bundleContext =
-//                FrameworkUtil.
-//                getBundle(this.getClass()).
-//                getBundleContext();
-//		
-//		final IRecentPlaces recentPlaces = bundleContext.getService(bundleContext.getServiceReference(IRecentPlaces.class));
-//		final EventAdmin admin = bundleContext.getService(bundleContext.getServiceReference(EventAdmin.class));
-//		
-//		search.addMenuListener(new IMenuListener() {
-//			
-//			@Override
-//			public void menuAboutToShow(IMenuManager manager) {
-//				search.removeAll();
-//				Collection<String> lf = recentPlaces.getRecentPlaces();
-//				if (lf.isEmpty()) {
-//					search.add(new Action("No History"){
-//						@Override
-//						public void run() {
-//							//do nothing
-//						}
-//					});
-//				}
-//				
-//				for (String f : lf) {
-//					search.add(new OpenFileDialogAction(f,admin));
-//				}
-//				
-//				search.add(new Separator());
-//				try {
-//					String property = System.getProperty("user.home");
-//					search.add(new OpenFileDialogAction(property,admin));
-//				} catch (Exception e) {
-//					//TODO log
-//				}
-//				
-//			
-//				try {
-//					String property = ResourcesPlugin.getWorkspace().getRoot().getLocation().toString();
-//					search.add(new OpenFileDialogAction(property,admin));
-//				} catch (Exception e) {
-//					//TODO log
-//				}
-//				
-//			}
-//		});
+		BundleContext bundleContext =
+                FrameworkUtil.
+                getBundle(this.getClass()).
+                getBundleContext();
+		
+		final IRecentPlaces recentPlaces = bundleContext.getService(bundleContext.getServiceReference(IRecentPlaces.class));
+		final EventAdmin admin = bundleContext.getService(bundleContext.getServiceReference(EventAdmin.class));
+		
+		search.addMenuListener(new IMenuListener() {
+			
+			@Override
+			public void menuAboutToShow(IMenuManager manager) {
+				search.removeAll();
+				Collection<String> lf = recentPlaces.getRecentPlaces();
+				if (lf.isEmpty()) {
+					search.add(new Action("No History"){
+						@Override
+						public void run() {
+							//do nothing
+						}
+					});
+				}
+				
+				for (String f : lf) {
+					search.add(new OpenFileDialogAction(f,admin));
+				}
+				
+				search.add(new Separator());
+				try {
+					String property = System.getProperty("user.home");
+					search.add(new OpenFileDialogAction(property,admin));
+				} catch (Exception e) {
+					//TODO log
+				}
+				
+			
+				try {
+					String property = ResourcesPlugin.getWorkspace().getRoot().getLocation().toString();
+					search.add(new OpenFileDialogAction(property,admin));
+				} catch (Exception e) {
+					//TODO log
+				}
+				
+			}
+		});
 
 		search.add(new Action("") {
         	
