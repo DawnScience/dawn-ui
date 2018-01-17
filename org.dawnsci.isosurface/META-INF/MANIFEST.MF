@@ -19,5 +19,4 @@ Export-Package: org.dawnsci.isosurface,
  org.dawnsci.isosurface.tool
 Import-Package: org.dawnsci.plotting.util,
  org.slf4j;version="[1.7.2,2.0.0)"
-Bundle-ClassPath: .,
- swing2swt.jar
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
