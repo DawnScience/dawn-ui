@@ -117,6 +117,10 @@
          id="org.dawnsci.logging.feature"
          version="0.0.0"/>
 
+   <includes
+         id="org.dawnsci.jzy3d.feature"
+         version="0.0.0"/>
+
    <plugin
          id="uk.ac.diamond.scisoft.analysis.rcp.contributions"
          download-size="0"
