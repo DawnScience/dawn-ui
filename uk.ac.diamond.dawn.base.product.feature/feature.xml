@@ -38,10 +38,6 @@
          version="0.0.0"/>
 
    <includes
-         id="uk.ac.diamond.tomography.reconstruction.feature"
-         version="0.0.0"/>
-
-   <includes
          id="uk.ac.diamond.scisoft.diffraction.powder.feature"
          version="0.0.0"/>
 
@@ -123,13 +119,6 @@
 
    <plugin
          id="uk.ac.diamond.scisoft.arpes.calibration"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
-         id="uk.ac.diamond.tomography.reconstruction.dawn"
          download-size="0"
          install-size="0"
          version="0.0.0"
