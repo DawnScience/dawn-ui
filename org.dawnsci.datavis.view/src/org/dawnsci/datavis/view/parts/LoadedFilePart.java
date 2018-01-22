@@ -230,6 +230,13 @@ public class LoadedFilePart {
 				
 				return icon;
 			}
+			
+			@Override
+			public String getToolTipText(Object element) {
+				if (element instanceof LoadedFile) return ((LoadedFile)element).getFilePath();
+				return null;
+				
+			};
 		});
 		
 		name.getColumn().setText("Filename");
