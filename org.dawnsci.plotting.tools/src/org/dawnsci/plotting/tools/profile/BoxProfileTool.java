@@ -128,42 +128,37 @@ public class BoxProfileTool extends ProfileTool {
 		Dataset data = DatasetUtils.convertToDataset(image.getData());
 		if (data instanceof RGBDataset) data = ((RGBDataset)data).getRedView();
 		Dataset[] box = ROIProfile.box(data, DatasetUtils.convertToDataset(image.getMask()), bounds, true);
-        if (box==null) return null;
-        
-        Dataset xi = null;
-        Dataset yi = null;
-        
-        double ang = bounds.getAngle();
-        //TODO probably better to deal with this in ROIProfile class, but this will do for now.
-        if (image.getAxes() !=  null && ang == 0) {
-        	List<IDataset> axes = image.getAxes();
-        	
-        	int[] spt = bounds.getIntPoint();
-    		int[] len = bounds.getIntLengths();
-        	
-        	final int xstart  = Math.max(0,  spt[1]);
+		if (box==null) return null;
+		
+		Dataset xi = null;
+		Dataset yi = null;
+		
+		double ang = bounds.getAngle();
+		//TODO probably better to deal with this in ROIProfile class, but this will do for now.
+		if (image.getAxes() !=  null && ang == 0) {
+			List<IDataset> axes = image.getAxes();
+			
+			int[] spt = bounds.getIntPoint();
+			int[] len = bounds.getIntLengths();
+			
+			final int xstart  = Math.max(0,  spt[1]);
 			final int xend   = Math.min(spt[1] + len[1],  image.getData().getShape()[0]);
 			final int ystart = Math.max(0,  spt[0]);
 			final int yend   = Math.min(spt[0] + len[0],  image.getData().getShape()[1]);
 			
-			try {
-				IDataset xFull = axes.get(0);
-			    xi = DatasetUtils.convertToDataset(xFull.getSlice(new int[]{ystart}, new int[]{yend},new int[]{1}));
-			    xi.setName(xFull.getName());
-			} catch (Exception ne) {
-				//ignore
+			IDataset xFull = axes.get(0);
+			if (xFull != null) {
+				xi = DatasetUtils.convertToDataset(xFull.getSlice(new int[] { ystart }, new int[] { yend }, new int[] { 1 }));
+				xi.setName(xFull.getName());
 			}
-			
-			try {
-				IDataset yFull = axes.get(1);
-			    yi = DatasetUtils.convertToDataset(yFull.getSlice(new int[]{xstart}, new int[]{xend},new int[]{1}));
-			    yi.setName(yFull.getName());
-			} catch (Exception ne) {
-				//ignore
+
+			IDataset yFull = axes.get(1);
+			if (yFull != null) {
+				yi = DatasetUtils.convertToDataset(yFull.getSlice(new int[]{xstart}, new int[]{xend},new int[]{1}));
+				yi.setName(yFull.getName());
 			}
-        	
-        }
-        
+		}
+
 		//if (monitor.isCanceled()) return;
 				
 		final Dataset x_intensity = box[0];
