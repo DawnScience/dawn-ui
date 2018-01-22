@@ -63,9 +63,7 @@ public class PlotDataPage extends Page implements IAdaptable {
 	
 	private static final Collection<String> INACTIVE_PERSPECTIVES;
 	static {
-		INACTIVE_PERSPECTIVES = Arrays.asList("uk.ac.diamond.scisoft.ncd.rcp.ncdperspective",
-				                              "uk.ac.diamond.scisoft.ncd.rcp.ncdcalibrationperspective",
-				                              "uk.ac.diamond.scisoft.dataexplorationperspective");
+		INACTIVE_PERSPECTIVES = Arrays.asList("uk.ac.diamond.scisoft.dataexplorationperspective");
 	}
 	/**
 	 * Checks perspective to see if a 'Data' page is required.
@@ -144,7 +142,10 @@ public class PlotDataPage extends Page implements IAdaptable {
 				public void resourceChanged(IResourceChangeEvent event) {
 					
 					if (event==null || event.getDelta()==null) return;
-					
+					if (editor == null) {
+						return;
+					}
+
 					final IFile content = (IFile)editor.getAdapter(IFile.class);
 					if (content==null) return;
 					
