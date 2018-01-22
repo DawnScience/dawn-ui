@@ -31,10 +31,14 @@ import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.StyledCellLabelProvider;
 import org.eclipse.jface.viewers.StyledString;
 import org.eclipse.jface.viewers.ViewerCell;
+import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.FormAttachment;
 import org.eclipse.swt.layout.FormData;
 import org.eclipse.swt.layout.FormLayout;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Label;
 
 public class DatasetPart {
 	
@@ -86,11 +90,19 @@ public class DatasetPart {
 	comboForm.left = new FormAttachment(0,0);
 	comboForm.right = new FormAttachment(100,0);
 	
-	optionsViewer = new ComboViewer(parent);
+	Composite plotTypeComposite = new Composite(parent, SWT.NONE);
+	plotTypeComposite.setLayoutData(comboForm);
+	plotTypeComposite.setLayout(new GridLayout(2, false));
+	
+	Label plotTypeLabel = new Label(plotTypeComposite, SWT.NONE);
+	plotTypeLabel.setText("Plot Type:");
+	plotTypeLabel.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, false, false));
+	
+	optionsViewer = new ComboViewer(plotTypeComposite);
 	table = new DataConfigurationTable();
 	table.createControl(parent);
 	
-	optionsViewer.getCombo().setLayoutData(comboForm);
+	optionsViewer.getCombo().setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 	optionsViewer.setContentProvider(new ArrayContentProvider());
 	optionsViewer.setLabelProvider(new LabelProvider() {
 		@Override
@@ -128,7 +140,7 @@ public class DatasetPart {
 		
 		
 		FormData tableForm = new FormData();
-		tableForm.top = new FormAttachment(optionsViewer.getCombo());
+		tableForm.top = new FormAttachment(plotTypeComposite);
 		tableForm.left = new FormAttachment(0,0);
 		tableForm.right = new FormAttachment(100,0);
 		tableForm.bottom = new FormAttachment(100,0);
