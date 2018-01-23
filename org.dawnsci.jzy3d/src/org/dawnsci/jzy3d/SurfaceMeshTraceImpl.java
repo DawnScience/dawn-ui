@@ -53,7 +53,7 @@ public class SurfaceMeshTraceImpl extends AbstractColorMapTrace implements ISurf
 		xArray = (axes != null && axes[0] != null) ? DatasetUtils.cast(FloatDataset.class, axes[0]).getData() : getRange(x);
 		yArray = (axes != null && axes[1] != null) ? DatasetUtils.cast(FloatDataset.class, axes[1]).getData() : getRange(y);
 
-		final Shape surface  = MeshTessellator.buildShape(yArray, xArray, z.getData());
+		final Shape surface  = MeshTessellator.buildShape(xArray, yArray, z.getData());
 			
 	
 		if (colorMapper == null) {

@@ -21,8 +21,8 @@ public class MeshTessellator {
 	public static List<AbstractDrawable> getSquarePolygonsOnCoordinates(float[] x, float[] y, float[] z){
 		List<AbstractDrawable> polygons = new ArrayList<AbstractDrawable>();
 		
-		for(int xi=0; xi<x.length-1; xi++){
-			for(int yi=0; yi<y.length-1; yi++){
+		for(int yi=0; yi<y.length-1; yi++){
+			for(int xi=0; xi<x.length-1; xi++){
 				// Compute quad making a polygon 
 				Point p[] = getRealQuadStandingOnPoint(xi, yi, x, y, z);
 				// Store quad
@@ -36,17 +36,16 @@ public class MeshTessellator {
 	private static Point[] getRealQuadStandingOnPoint(int xi, int yi, float[] x, float[] y, float[] z){
 		Point p[]  = new Point[4];
 		
-		int nx = x.length;
-		int ny = y.length;
-		
-		int pos = yi+xi*y.length;
-		int posNext = yi+(xi+1)*y.length;
+		int pos = xi+yi*x.length;
+		int posNext = xi+(yi+1)*x.length;
 		
 		p[0] = new Point(new Coord3d(x[xi],   y[yi],   z[pos]    ));
-		p[1] = new Point(new Coord3d(x[xi+1], y[yi],   z[posNext]  ));
+		p[1] = new Point(new Coord3d(x[xi+1], y[yi],   z[pos+1]  ));
 		p[2] = new Point(new Coord3d(x[xi+1], y[yi+1], z[posNext+1]));
-		p[3] = new Point(new Coord3d(x[xi],   y[yi+1], z[pos+1]  ));
+		p[3] = new Point(new Coord3d(x[xi],   y[yi+1], z[posNext]  ));
 
+		
+		
 		return p;
 	}
 	
