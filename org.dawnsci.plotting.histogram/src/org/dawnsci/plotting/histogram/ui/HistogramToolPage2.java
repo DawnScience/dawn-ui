@@ -379,6 +379,7 @@ public class HistogramToolPage2 extends AbstractToolPage implements IToolPage {
 			logger.debug("HistogramToolPage: activate - palette trace " + p.hashCode());
 			updateHistogramUIElements(p);
 		} else {
+			updateHistogramUIElements(null);
 			logger.debug("HistogramToolPage: activate - palette trace is null.");
 		}
 
@@ -504,7 +505,11 @@ public class HistogramToolPage2 extends AbstractToolPage implements IToolPage {
 	 * there is a new trace or trace has been modified.
 	 */
 	private void updateHistogramUIElements(IPaletteTrace it) {
-		if (histogramWidget != null)
+		if (it == null && histogramWidget != null) {
+			histogramWidget.clear();
+		}
+		
+		if (histogramWidget != null && it != null)
 			histogramWidget.setInput(it);
 		int categoryIdx  = categoryViewer.getCombo().getSelectionIndex();
 		if (categoryIdx < 0)

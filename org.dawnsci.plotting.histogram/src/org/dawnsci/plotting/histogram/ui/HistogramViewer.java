@@ -244,6 +244,14 @@ public class HistogramViewer extends ContentViewer {
 		}
 	}
 
+	public void clear() {
+		histoTrace.setVisible(false);
+		redTrace.setVisible(false);
+		greenTrace.setVisible(false);
+		blueTrace.setVisible(false);
+		region.setVisible(false);
+	}
+	
 	/**
 	 * Update the min and max widgets if the value has changed.
 	 *
@@ -307,10 +315,15 @@ public class HistogramViewer extends ContentViewer {
 	 */
 	private void updateTraces() {
 		IHistogramDatasets data = getHistogramProvider().getDatasets();
+		
 		histoTrace.setData(data.getX(), data.getY());
+		histoTrace.setVisible(true);
 		redTrace.setData(data.getRGBX(), data.getR());
+		redTrace.setVisible(true);
 		greenTrace.setData(data.getRGBX(), data.getG());
+		greenTrace.setVisible(true);
 		blueTrace.setData(data.getRGBX(), data.getB());
+		blueTrace.setVisible(true);
 		blueTrace.repaint();
 		IAxis xAxis = histogramPlottingSystem.getSelectedXAxis();
 		xAxis.setLog10(getHistogramProvider().isLogColorScale());
@@ -490,6 +503,9 @@ public class HistogramViewer extends ContentViewer {
 		if (!updatingROI) {
 			updateRegion(min, max);
 		}
+		
+		region.setVisible(true);
+		
 		updateMinMax(min, max);
 		updateTraces();
 	}
