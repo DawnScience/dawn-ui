@@ -21,6 +21,7 @@ import org.eclipse.january.dataset.DatasetFactory;
 import org.eclipse.january.dataset.DatasetUtils;
 import org.eclipse.january.dataset.DoubleDataset;
 import org.eclipse.january.dataset.IDataset;
+import org.eclipse.january.dataset.RunningAverage;
 
 public class AverageProcess extends AbstractProcess {
 
@@ -36,7 +37,7 @@ public class AverageProcess extends AbstractProcess {
 		StringBuilder sb = new StringBuilder();
 		sb.append("Average of: ");
 		sb.append("\n");
-		MultivariateSummaryStatistics ms = new MultivariateSummaryStatistics(x0.getSize(),false);
+		RunningAverage ave  = null;
 		for (IContain1DData file : list) {
 			
 			sb.append(file.getName() +":");
@@ -50,8 +51,11 @@ public class AverageProcess extends AbstractProcess {
 				else {
 					dd = (DoubleDataset)DatasetUtils.cast(ds, Dataset.FLOAT64);
 				}
-				double[] raw = dd.getData();
-				ms.addValue(raw);
+				 if (ave == null) {
+					 ave = new RunningAverage(dd);
+				 } else {
+					 ave.update(dd);
+				 }
 			}
 			
 			sb.deleteCharAt(sb.length()-1);
@@ -59,7 +63,7 @@ public class AverageProcess extends AbstractProcess {
 			sb.append("\n");
 		}
 		List<IDataset> sets = new ArrayList<IDataset>();
-		Dataset dd = DatasetFactory.createFromObject(ms.getMean());
+		Dataset dd = DatasetFactory.createFromObject(ave.getCurrentAverage());
 		
 		dd.setName("Average");
 		sets.add(dd);
