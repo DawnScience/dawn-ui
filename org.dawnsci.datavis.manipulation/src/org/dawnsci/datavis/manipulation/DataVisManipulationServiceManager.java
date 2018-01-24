@@ -10,10 +10,7 @@ public class DataVisManipulationServiceManager {
 		return nexusFactory;
 	}
 
-	public static  void setNexusFactory(INexusFileFactory nexusFactory) {
+	public void setNexusFactory(INexusFileFactory nexusFactory) {
 		DataVisManipulationServiceManager.nexusFactory = nexusFactory;
 	}
-	
-	
-
 }
