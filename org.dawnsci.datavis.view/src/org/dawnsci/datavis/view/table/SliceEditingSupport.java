@@ -14,6 +14,7 @@ import org.eclipse.swt.events.MouseListener;
 import org.eclipse.swt.events.MouseTrackListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.events.VerifyEvent;
 import org.eclipse.swt.events.VerifyListener;
 import org.eclipse.swt.graphics.Point;
@@ -24,6 +25,8 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Listener;
+import org.eclipse.swt.widgets.Menu;
+import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Slider;
 import org.eclipse.swt.widgets.Text;
@@ -41,6 +44,20 @@ public class SliceEditingSupport extends EditingSupport {
 	public SliceEditingSupport(ColumnViewer viewer) {
 		super(viewer);
 		editor = new TextCellEditor((Composite) getViewer().getControl(), SWT.NONE);
+//		Menu menu = new Menu(editor.getControl());
+//		MenuItem item = new MenuItem(menu, SWT.PUSH);
+//		item.setText("Set from axis..");
+//		item.addSelectionListener(new SelectionAdapter() {
+//			
+//			@Override
+//			public void widgetSelected(SelectionEvent e) {
+//				AxisSliceDialog d = new AxisSliceDialog(getViewer().getControl().getShell(), (NDimensions)getViewer().getInput(), currentDimension);
+//				d.create();
+//				d.open();
+//			}
+//
+//		});
+//		editor.getControl().setMenu(menu);
 		Control control = editor.getControl();
 		editor.getControl().addListener(SWT.Activate, new Listener() {
 			

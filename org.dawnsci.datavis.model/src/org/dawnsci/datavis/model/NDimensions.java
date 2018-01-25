@@ -13,7 +13,7 @@ import org.eclipse.january.dataset.SliceND;
 
 public class NDimensions {
 
-	private static final String INDICES = "indices";
+	public static final String INDICES = "indices";
 	
 	private Dimension[] dimensions;
 	private HashSet<ISliceChangeListener > listeners;
