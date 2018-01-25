@@ -62,4 +62,20 @@ public class LoadedFiles implements IDataObject, Iterable<LoadedFile> {
 		
 	}
 	
+	public void moveBefore(List<LoadedFile> files, LoadedFile marker) {
+		fileList.removeAll(files);
+		
+		if (marker == null) {
+			fileList.addAll(files);
+			return;
+		}
+		
+		for (int i = 0; i < fileList.size(); i++) {
+			if (fileList.get(i) == marker) {
+				fileList.addAll(i, files);
+				return;
+			}
+		}
+	}
+	
 }

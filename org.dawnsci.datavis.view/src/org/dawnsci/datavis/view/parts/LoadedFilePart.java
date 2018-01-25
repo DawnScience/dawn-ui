@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.FilenameFilter;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 
 import javax.annotation.PostConstruct;
@@ -13,6 +14,7 @@ import javax.inject.Inject;
 
 import org.apache.commons.io.filefilter.WildcardFileFilter;
 import org.dawnsci.datavis.api.IRecentPlaces;
+import org.dawnsci.datavis.model.FileController;
 import org.dawnsci.datavis.model.FileControllerStateEvent;
 import org.dawnsci.datavis.model.FileControllerStateEventListener;
 import org.dawnsci.datavis.model.IFileController;
@@ -47,8 +49,11 @@ import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.jface.viewers.TreeSelection;
 import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.jface.viewers.ViewerCell;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.dnd.DND;
+import org.eclipse.swt.dnd.DragSourceEvent;
+import org.eclipse.swt.dnd.DragSourceListener;
 import org.eclipse.swt.dnd.DropTarget;
 import org.eclipse.swt.dnd.DropTargetAdapter;
 import org.eclipse.swt.dnd.DropTargetEvent;
@@ -58,6 +63,7 @@ import org.eclipse.swt.dnd.Transfer;
 import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.events.KeyListener;
 import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.FormAttachment;
 import org.eclipse.swt.layout.FormData;
 import org.eclipse.swt.layout.FormLayout;
@@ -285,6 +291,7 @@ public class LoadedFilePart {
 		DropTargetAdapter dropListener = new DropTargetAdapter() {
 			@Override
 			public void drop(DropTargetEvent event) {
+				
 				Object dropData = event.data;
 				if (dropData instanceof TreeSelection) {
 					TreeSelection selectedNode = (TreeSelection) dropData;
@@ -303,6 +310,27 @@ public class LoadedFilePart {
 					
 				} else if (dropData instanceof String[]) {
 					loadData((String[])dropData);
+				} else if (dropData instanceof StructuredSelection) {
+					StructuredSelection ss = (StructuredSelection)dropData;
+					List<LoadedFile> lf = new ArrayList<LoadedFile>();
+					
+					Iterator<?> it = ss.iterator();
+					
+					while (it.hasNext()) {
+						Object next = it.next();
+						if (next instanceof LoadedFile) {
+							lf.add((LoadedFile)next);
+						}
+					}
+					
+					if (!lf.isEmpty()) {
+						Point p2 = new Point(event.x, event.y);
+						Point p1 = viewer.getControl().toControl(p2);
+						
+						ViewerCell cell = viewer.getCell(p1);
+						LoadedFile f = cell == null ? null : (LoadedFile)cell.getElement();
+						((FileController)fileController).moveBefore(lf, f);
+					}
 				}
 			}
 		};
@@ -312,6 +340,28 @@ public class LoadedFilePart {
 				FileTransfer.getInstance(),
 				LocalSelectionTransfer.getTransfer() });
 		dt.addDropListener(dropListener);
+		
+		
+		viewer.addDragSupport(DND.DROP_MOVE, new Transfer[] {LocalSelectionTransfer.getTransfer() }, new DragSourceListener() {
+			
+			@Override
+			public void dragStart(DragSourceEvent event) {
+				event.toString();
+				
+			}
+			
+			@Override
+			public void dragSetData(DragSourceEvent event) {
+				StructuredSelection selection = (StructuredSelection)viewer.getSelection();
+		        event.data = selection;
+		        LocalSelectionTransfer.getTransfer().setSelection(selection);
+			}
+			
+			@Override
+			public void dragFinished(DragSourceEvent event) {
+				
+			}
+		});
 		
 		//hook up delete key to remove from list
 		viewer.getTable().addKeyListener(new KeyListener() {

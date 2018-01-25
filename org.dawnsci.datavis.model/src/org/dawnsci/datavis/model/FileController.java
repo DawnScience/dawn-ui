@@ -189,6 +189,11 @@ public class FileController implements IFileController {
 		return currentData;
 	}
 	
+	public void moveBefore(List<LoadedFile> files, LoadedFile marker) {
+		loadedFiles.moveBefore(files, marker);
+		fireStateChangeListeners(true, true);
+	}
+	
 	/* (non-Javadoc)
 	 * @see org.dawnsci.datavis.model.IFileController#unloadFile(org.dawnsci.datavis.model.LoadedFile)
 	 */
