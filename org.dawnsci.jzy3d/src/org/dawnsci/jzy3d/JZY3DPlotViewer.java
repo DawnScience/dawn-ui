@@ -37,7 +37,6 @@ public class JZY3DPlotViewer extends IPlottingSystemViewer.Stub<Composite> {
 	private Composite control;
 	
 	public JZY3DPlotViewer() {
-		System.out.println("hi");
 	}
 	
 	public void createControl(final Composite parent) {
