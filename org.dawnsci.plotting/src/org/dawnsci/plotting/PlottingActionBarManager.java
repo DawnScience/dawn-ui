@@ -81,6 +81,7 @@ public class PlottingActionBarManager implements IPlotActionSystem {
 	protected Map<String, IToolPage> toolPages;
 	protected AbstractPlottingSystem<?> system;
 	protected Map<ActionType, List<ActionContainer>> actionMap;
+	protected Map<Class<? extends ITrace>, List<ActionContainer>> traceClassActionMap;
 	protected MenuAction                imageMenu;
 	protected MenuAction                xyMenu;
 	protected ITraceActionProvider      traceActionProvider;
@@ -90,6 +91,7 @@ public class PlottingActionBarManager implements IPlotActionSystem {
 	public PlottingActionBarManager(AbstractPlottingSystem<?> system) {
 		this.system = system;
 		this.actionMap = new HashMap<ActionType, List<ActionContainer>>(ActionType.values().length);
+		this.traceClassActionMap = new HashMap<>();
 	}
 	
 	private final static String defaultGroupName = "org.dawb.common.ui.plot.groupAll";
@@ -121,6 +123,50 @@ public class PlottingActionBarManager implements IPlotActionSystem {
 
 	
 	private PlotType lastPlotTypeUpdate = null;
+	private Class<? extends ITrace> lastTraceClassUpdate = null;
+	
+	
+	public boolean switchActions(Class<? extends ITrace> clazz) {
+		if (clazz == lastTraceClassUpdate) return false;
+		
+		try {
+			
+			final IActionBars bars = system.getActionBars();
+			if (bars==null) return false;
+
+			//TODO switch from PlotType to Class<U extends ITrace>
+			for (ActionType actionType : ActionType.values()) {
+
+				final List<ActionContainer> actions = actionMap.get(actionType);
+				if (actions!=null) for (ActionContainer ac : actions) {
+					ac.remove();
+				}
+
+			}
+
+			if (bars.getToolBarManager()!=null)    bars.getToolBarManager().update(true);
+			if (bars.getMenuManager()!=null)       bars.getMenuManager().update(true);
+			if (bars.getStatusLineManager()!=null) bars.getStatusLineManager().update(true);
+			bars.updateActionBars();
+
+			clearTool(ToolPageRole.ROLE_1D);
+			clearTool(ToolPageRole.ROLE_2D);
+			clearTool(ToolPageRole.ROLE_3D);
+			
+
+	    	firePropertyChangeListeners(new PropertyChangeEvent(this, "TraceClass", lastTraceClassUpdate, clazz));
+	    	if (bars.getToolBarManager()!=null)    bars.getToolBarManager().update(true);
+	    	if (bars.getMenuManager()!=null)       bars.getMenuManager().update(true);
+	    	if (bars.getStatusLineManager()!=null) bars.getStatusLineManager().update(true);
+	    	bars.updateActionBars();
+
+	    	return true;
+		} finally {
+			lastTraceClassUpdate = clazz;
+			lastPlotTypeUpdate = null;
+		}
+		
+	}
 	
 	public boolean switchActions(final PlotType type) {
 		
@@ -723,6 +769,27 @@ public class PlottingActionBarManager implements IPlotActionSystem {
 		registerAction(groupName, action, actionType, ManagerType.TOOLBAR);
 	}
 
+	public void registerAction(String groupName, IAction action, Class<? extends ITrace> clazz, ManagerType manType) {
+
+		groupName = system.getPlotName()+"/"+groupName;
+		
+		// We generate an id!
+		if (action.getId()==null) {
+			action.setId(groupName+action.getText());
+		}
+		final IContributionManager man = manType==ManagerType.MENUBAR 
+				                       ? getActionBars().getMenuManager() 
+				                       : getActionBars().getToolBarManager();
+				                       
+		final ActionContainer ac = new ActionContainer(groupName, action, man);
+		List<ActionContainer> actions = traceClassActionMap.get(clazz);
+		if (actions==null) {
+			actions = new ArrayList<ActionContainer>(7);
+			traceClassActionMap.put(clazz, actions);
+		}
+		actions.add(ac);
+		ac.insert(true);
+	}
 
 
 	public void registerAction(String groupName, IAction action, ActionType actionType, ManagerType manType) {
