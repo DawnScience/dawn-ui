@@ -322,8 +322,6 @@ public class FileController implements IFileController {
 					logger.error("Exception loading file",e);
 				}
 				
-				if (monitor != null) monitor.worked(1);
-				
 				if (f != null) {
 					
 					List<DataStateObject> state = getImmutableFileState();
