@@ -600,4 +600,14 @@ public abstract class ProfileTool extends AbstractToolPage  implements IROIListe
 		// TODO Auto-generated method stub
 
 	}
+
+	@Override
+	public int getExportIndex() {
+		return exportIndex;
+	}
+
+	@Override
+	public void setExportIndex(int exportIndex) {
+		this.exportIndex = exportIndex;
+	}
 }

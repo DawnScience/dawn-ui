@@ -42,6 +42,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.dawnsci.analysis.api.roi.IROI;
+import org.eclipse.dawnsci.analysis.api.tree.Node;
 import org.eclipse.dawnsci.analysis.dataset.roi.LinearROI;
 import org.eclipse.dawnsci.analysis.dataset.roi.PointROI;
 import org.eclipse.dawnsci.analysis.dataset.roi.RectangularROI;
@@ -328,7 +329,7 @@ public class RegionEditorTool extends AbstractToolPage implements IResettableExp
 					return;
 				Collection<IRegion> regions = evt.getRegions();
 				for (IRegion region : regions) {
-					RegionEditorNode regionNode = (RegionEditorNode) model.getNode("/" + region.getName());
+					RegionEditorNode regionNode = (RegionEditorNode) model.getNode(Node.SEPARATOR + region.getName());
 					if (regionNode == null)
 						return;
 					model.removeRegion(regionNode);

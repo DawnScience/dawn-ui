@@ -14,11 +14,13 @@ import java.util.List;
 import org.dawb.common.ui.plot.tools.IDataReductionToolPage;
 import org.dawb.common.ui.plot.tools.IDataReductionToolPage.DataReductionInfo;
 import org.dawb.common.ui.plot.tools.IDataReductionToolPage.DataReductionSlice;
+import org.dawnsci.plotting.tools.ServiceLoader;
 import org.eclipse.dawnsci.analysis.api.conversion.IConversionContext;
 import org.eclipse.dawnsci.analysis.api.conversion.IConversionVisitor;
-import org.eclipse.dawnsci.hdf.object.HierarchicalDataFactory;
-import org.eclipse.dawnsci.hdf.object.IHierarchicalDataFile;
-import org.eclipse.dawnsci.hdf.object.Nexus;
+import org.eclipse.dawnsci.analysis.api.tree.GroupNode;
+import org.eclipse.dawnsci.analysis.api.tree.Node;
+import org.eclipse.dawnsci.analysis.tree.impl.AttributeImpl;
+import org.eclipse.dawnsci.nexus.NexusFile;
 import org.eclipse.dawnsci.plotting.api.tool.IToolPage;
 import org.eclipse.january.dataset.Dataset;
 import org.eclipse.january.dataset.DatasetUtils;
@@ -48,13 +50,14 @@ class ToolConversionVisitor implements IConversionVisitor {
 		return tool.getTitle();
 	}
 
-	private IHierarchicalDataFile output;
+	private NexusFile             output;
 	private String                group;
 	private String                initName;
 	
 	@Override
 	public void init(IConversionContext context) throws Exception {
-		output = HierarchicalDataFactory.getWriter(context.getOutputPath());
+		output = ServiceLoader.getNexusFileFactory().newNexusFile(context.getOutputPath());
+		output.openToWrite(true);
 		initName = tool.exportInit();
 	}
 
@@ -71,6 +74,11 @@ class ToolConversionVisitor implements IConversionVisitor {
 		bean.setExpandedDatasetNames(getExpandedDatasets());
 		DataReductionInfo  info = tool.export(bean);
 		if (info.getStatus().isOK()) object = info.getUserData();
+
+		// increment export index
+		int idx = tool.getExportIndex();
+		idx++;
+		tool.setExportIndex(idx);
 
 		if (context.getMonitor()!=null) context.getMonitor().worked(1);
 	}
@@ -148,8 +156,9 @@ class ToolConversionVisitor implements IConversionVisitor {
 		
 		//Group made and not h5, return group
 		if (group != null && context.getSelectedH5Path() == null) {
-			
-			return output.group(group);
+			output.getGroup(group, true);
+//			return output.group(group);
+			return group;
 		}
 		
 		String path = initName == null ?"data" : initName;
@@ -183,13 +192,15 @@ class ToolConversionVisitor implements IConversionVisitor {
 			}
 		}
 		
-		String entryGroup = output.group("entry");
-		output.setNexusAttribute(entryGroup, Nexus.ENTRY);
-		group = output.group(path, entryGroup);
+		GroupNode groupNode = output.getGroup("/entry", true);
+		output.addAttribute(groupNode, new AttributeImpl(NexusFile.NXCLASS, "NXentry"));
+		
+		String dataPath = "/entry" + Node.SEPARATOR + path;
+		groupNode = output.getGroup(dataPath, true);
 		// Fix to http://jira.diamond.ac.uk/browse/SCI-1898
 		// We switch this to NXsubentry later and must have enough chars to change attribute
-		output.setNexusAttribute(group, Nexus.DATA+"     ");
-		return group;
+		output.addAttribute(groupNode, new AttributeImpl(NexusFile.NXCLASS, "NXdata" + "     "));
+		return dataPath;
 		
 	}
 

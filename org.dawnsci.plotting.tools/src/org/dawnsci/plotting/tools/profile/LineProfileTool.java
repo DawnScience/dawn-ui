@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012 Diamond Light Source Ltd.
+ * Copyright (c) 2012, 2017 Diamond Light Source Ltd.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -133,7 +133,7 @@ public class LineProfileTool extends ProfileTool {
 			Dataset[] profileData = ROIProfile.line(DatasetUtils.convertToDataset(slice.getData()), DatasetUtils.convertToDataset(image.getMask()), (LinearROI)region.getROI(), 1d, false);
 			final Dataset intensity = profileData[0];
 			intensity.setName(region.getName().replace(' ', '_'));
-			slice.appendData(intensity);
+			slice.appendData(lazyWritables, intensity, exportIndex);
 		}
         return new DataReductionInfo(Status.OK_STATUS);
 	}
