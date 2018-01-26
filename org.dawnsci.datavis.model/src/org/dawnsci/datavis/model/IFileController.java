@@ -10,10 +10,12 @@ public interface IFileController {
 
 	public void loadFile(String path);
 
+	public void joinFiles(List<LoadedFile> files);
+
 	public void attachLive();
-	
+
 	public void detachLive();
-	
+
 	public List<LoadedFile> getLoadedFiles();
 
 	public void deselect(List<IDataObject> objects);

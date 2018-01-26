@@ -39,6 +39,8 @@ public class LoadedFileMenuListener implements IMenuListener {
 			manager.add(new CheckAction(fileController, viewer));
 			manager.add(new UncheckAction(fileController, viewer));
 			manager.add(new Separator());
+			manager.add(new JoinAction(fileController,viewer));
+			manager.add(new Separator());
 			manager.add(new DeselectAction(fileController,viewer));
 			manager.add(new Separator());
 			manager.add(new CloseAction(fileController, viewer));
@@ -172,6 +174,21 @@ public class LoadedFileMenuListener implements IMenuListener {
 				Object ob = viewer.getTable().getItem(i-1).getData();
 				viewer.setSelection(new StructuredSelection(ob),true);
 			}
+			view.refresh();
+		}
+	}
+	
+	public class JoinAction extends LoadedFileMenuAction {
+
+		public JoinAction(IFileController fileController, TableViewer viewer) {
+			super("Create joined file",null, fileController, viewer);
+		}
+
+		@Override
+		public void run() {
+			List<LoadedFile> loadedFiles = getLoadedFiles();
+			if (loadedFiles.isEmpty()) return;
+			file.joinFiles(loadedFiles);
 			view.refresh();
 		}
 	}
