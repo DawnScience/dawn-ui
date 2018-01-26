@@ -134,7 +134,6 @@ public class FileController implements IFileController {
 			tempFile.setWritable(true);
 			tempFile.deleteOnExit();
 			
-			System.out.println(tempFile.getAbsolutePath());
 			fileWriter = new BufferedWriter(new FileWriter(tempFile.getAbsoluteFile()));
 			fileWriter.write(directoryPath + datasetsString + fileNamesString);
 			fileWriter.close();
