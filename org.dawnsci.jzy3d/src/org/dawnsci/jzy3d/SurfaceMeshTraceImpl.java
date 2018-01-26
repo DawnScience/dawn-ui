@@ -6,6 +6,7 @@ import org.eclipse.dawnsci.plotting.api.histogram.IImageService;
 import org.eclipse.dawnsci.plotting.api.histogram.IPaletteService;
 import org.eclipse.dawnsci.plotting.api.histogram.ImageServiceBean;
 import org.eclipse.dawnsci.plotting.api.histogram.ImageServiceBean.HistoType;
+import org.eclipse.dawnsci.plotting.api.preferences.BasePlottingConstants;
 import org.eclipse.dawnsci.plotting.api.trace.ISurfaceMeshTrace;
 import org.eclipse.january.dataset.DatasetUtils;
 import org.eclipse.january.dataset.FloatDataset;
@@ -13,17 +14,20 @@ import org.eclipse.january.dataset.IDataset;
 import org.jzy3d.colors.Color;
 import org.jzy3d.colors.ColorMapper;
 import org.jzy3d.colors.colormaps.ColorMapGrayscale;
+import org.jzy3d.colors.colormaps.ColorMapRainbow;
+import org.jzy3d.plot3d.primitives.AbstractDrawable;
 import org.jzy3d.plot3d.primitives.Shape;
 
 public class SurfaceMeshTraceImpl extends AbstractColorMapTrace implements ISurfaceMeshTrace {
 
-	private Shape shape;
+	private AbstractDrawable shape;
 	private IDataset data;
 	
 	private ColorMapper colorMapper;
 	
-	public SurfaceMeshTraceImpl(IPaletteService pService, IImageService iService) {
+	public SurfaceMeshTraceImpl(IPaletteService pService, IImageService iService, String palette) {
 		super(pService,iService);
+		setPalette(palette);
 	}
 
 	@Override
@@ -41,6 +45,8 @@ public class SurfaceMeshTraceImpl extends AbstractColorMapTrace implements ISurf
 		float max = bean.getMax().floatValue();
 		float min = bean.getMin().floatValue();
 
+		setPaletteData(getPaletteData());
+		
 		this.data = data;
 		int x = data.getShape()[1];
 		int y = data.getShape()[0];
@@ -53,15 +59,20 @@ public class SurfaceMeshTraceImpl extends AbstractColorMapTrace implements ISurf
 		xArray = (axes != null && axes[0] != null) ? DatasetUtils.cast(FloatDataset.class, axes[0]).getData() : getRange(x);
 		yArray = (axes != null && axes[1] != null) ? DatasetUtils.cast(FloatDataset.class, axes[1]).getData() : getRange(y);
 
-		final Shape surface  = MeshTessellator.buildShape(xArray, yArray, z.getData());
-			
+//		final AbstractDrawable surface  = MeshTessellator.buildShape(xArray, yArray, z.getData(),colorMapper);
+		final AbstractDrawable surface  = MeshTessellator.buildShape(xArray, yArray, z.getData());
 	
 		if (colorMapper == null) {
 			colorMapper = new ColorMapper(new ColorMapGrayscale(), min, max, new Color(1, 1, 1, .5f));
 		}
-		surface.setColorMapper(colorMapper);
-		surface.setFaceDisplayed(true);
-		surface.setWireframeDisplayed(false);
+		
+		if (surface instanceof Shape) {
+			((Shape)surface).setColorMapper(colorMapper);
+			((Shape)surface).setFaceDisplayed(true);
+			((Shape)surface).setWireframeDisplayed(false);
+		}
+		
+
 		
 		shape = surface;
 	       
@@ -84,7 +95,7 @@ public class SurfaceMeshTraceImpl extends AbstractColorMapTrace implements ISurf
 	}
 	
 	
-	public Shape getShape(){
+	public AbstractDrawable getShape(){
 		return shape;
 	}
 	
@@ -98,7 +109,7 @@ public class SurfaceMeshTraceImpl extends AbstractColorMapTrace implements ISurf
 	@Override
 	protected void setColorMap(ColorMapper mapper) {
 		colorMapper = mapper;
-		this.shape.setColorMapper(colorMapper);
+//		this.shape.setColorMapper(colorMapper);
 		
 	}
 

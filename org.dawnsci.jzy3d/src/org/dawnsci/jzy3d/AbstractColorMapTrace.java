@@ -140,6 +140,7 @@ public abstract class AbstractColorMapTrace implements IPaletteTrace {
 	public void setPaletteData(PaletteData paletteData) {
 		if (paletteData == null) return;
 		this.paletteData = paletteData; 
+		if (bean == null) return;
 		AbstractColorMap map = new AbstractColorMap() {
 			
 			@Override
@@ -156,7 +157,7 @@ public abstract class AbstractColorMapTrace implements IPaletteTrace {
 
 		        
 				RGB rgb = paletteData.getRGB((int)(rel_value*255));
-				return new Color((float)(rgb.red/255.), (float)(rgb.green/255.), (float)(rgb.blue/255.));
+				return new Color((float)(rgb.red/255.), (float)(rgb.green/255.), (float)(rgb.blue/255.), 1);
 			}
 		};
 		

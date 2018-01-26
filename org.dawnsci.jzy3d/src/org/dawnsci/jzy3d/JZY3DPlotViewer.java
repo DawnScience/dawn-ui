@@ -28,6 +28,7 @@ import org.jzy3d.plot3d.primitives.Shape;
 import org.jzy3d.plot3d.primitives.axes.layout.IAxeLayout;
 import org.jzy3d.plot3d.rendering.canvas.Quality;
 import org.jzy3d.plot3d.rendering.legends.colorbars.AWTColorbarLegend;
+import org.jzy3d.plot3d.rendering.ordering.DefaultOrderingStrategy;
 import org.jzy3d.plot3d.rendering.scene.Graph;
 import org.jzy3d.plot3d.rendering.view.modes.CameraMode;
 
@@ -45,6 +46,8 @@ public class JZY3DPlotViewer extends IPlottingSystemViewer.Stub<Composite> {
 		Settings.getInstance().setHardwareAccelerated(true);
 		chart = SWTChartComponentFactory.chart(control, Quality.Intermediate);
 		chart.getView().setCameraMode(CameraMode.ORTHOGONAL);
+//		chart.getScene().getGraph().setSort(false);
+//		chart.getScene().getGraph().setStrategy(new DefaultOrderingStrategy());
 //		chart.getView().setSquared(false);
 		ChartLauncher.openChart(chart);
 	}
@@ -57,12 +60,12 @@ public class JZY3DPlotViewer extends IPlottingSystemViewer.Stub<Composite> {
 //			ChartLauncher.openChart(chart);
 //			chart.getScene().remove(((SurfaceMeshTraceImpl)trace).getShape());
 			((SurfaceMeshTraceImpl) trace).setPalette(getPreferenceStore().getString(BasePlottingConstants.COLOUR_SCHEME));
-			IAxeLayout layout = chart.getView().getAxe().getLayout();
-			Shape shape = ((SurfaceMeshTraceImpl)trace).getShape();
-			AWTColorbarLegend legend = new AWTColorbarLegend(shape, layout);
-			shape.setLegend(legend);
+//			IAxeLayout layout = chart.getView().getAxe().getLayout();
+//			AbstractDrawable shape = ((SurfaceMeshTraceImpl)trace).getShape();
+//			AWTColorbarLegend legend = new AWTColorbarLegend(shape, layout);
+//			shape.setLegend(legend);
 			
-			List<IDataset> axes = ((SurfaceMeshTraceImpl)trace).getAxes();
+//			List<IDataset> axes = ((SurfaceMeshTraceImpl)trace).getAxes();
 			
 			chart.getScene().add(((SurfaceMeshTraceImpl)trace).getShape());
 			
@@ -77,7 +80,7 @@ public class JZY3DPlotViewer extends IPlottingSystemViewer.Stub<Composite> {
 //			chart.clear();
 //			ChartLauncher.openChart(chart);
 //			chart.getScene().remove(((SurfaceMeshTraceImpl)trace).getShape());
-			((WaterfallTraceImpl) trace).setPalette(getPreferenceStore().getString(BasePlottingConstants.COLOUR_SCHEME));
+//			((WaterfallTraceImpl) trace).setPalette(getPreferenceStore().getString(BasePlottingConstants.COLOUR_SCHEME));
 			chart.resumeAnimator();
 			chart.getScene().add(((WaterfallTraceImpl)trace).getShape());
 			
@@ -149,7 +152,7 @@ public class JZY3DPlotViewer extends IPlottingSystemViewer.Stub<Composite> {
 	 */
 	public <U extends ITrace> U createTrace(String name, Class<? extends ITrace> clazz){
 		if (clazz == ISurfaceMeshTrace.class) {
-			SurfaceMeshTraceImpl trace = new SurfaceMeshTraceImpl(ServiceManager.getPaletteService(),ServiceManager.getImageService());
+			SurfaceMeshTraceImpl trace = new SurfaceMeshTraceImpl(ServiceManager.getPaletteService(),ServiceManager.getImageService(),getPreferenceStore().getString(BasePlottingConstants.COLOUR_SCHEME));
 			trace.setName(name);
 			return (U)trace;
 		}
