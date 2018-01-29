@@ -12,6 +12,8 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
+import org.dawb.common.ui.menu.MenuAction;
+import org.dawnsci.plotting.tools.Activator;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.dawnsci.analysis.api.roi.IROI;
@@ -33,6 +35,9 @@ import org.eclipse.january.dataset.DatasetUtils;
 import org.eclipse.january.dataset.IDataset;
 import org.eclipse.january.dataset.IntegerDataset;
 import org.eclipse.january.dataset.RGBDataset;
+import org.eclipse.january.dataset.Slice;
+import org.eclipse.jface.action.Action;
+import org.eclipse.jface.action.IAction;
 import org.eclipse.swt.SWT;
 
 import uk.ac.diamond.scisoft.analysis.roi.ROIProfile;
@@ -41,6 +46,8 @@ public class BoxProfileTool extends ProfileTool {
 
 	private IAxis xPixelAxis;
 	private IAxis yPixelAxis;
+	private boolean showX = true;
+	private boolean showY = true;
 
 	@Override
 	protected void configurePlottingSystem(IPlottingSystem<?> plotter) {
@@ -50,11 +57,36 @@ public class BoxProfileTool extends ProfileTool {
 		}
 		
 		if (yPixelAxis==null) {
-			this.yPixelAxis = plotter.createAxis("Y Pixel", false, SWT.TOP);		
+			this.yPixelAxis = plotter.createAxis("Y Pixel", false, SWT.TOP);
 			plotter.getSelectedYAxis().setTitle("Intensity");
 		}
+
+		final MenuAction plots = new MenuAction("Profile plots");
+		plots.setImageDescriptor(Activator.getImageDescriptor("icons/plotindex.png"));
+		getSite().getActionBars().getToolBarManager().add(plots);
+		getSite().getActionBars().getMenuManager().add(plots);
+
+		final Action xAction = new Action("X", IAction.AS_CHECK_BOX) {
+			@Override
+			public void run() {
+				showX = isChecked();
+				update(null, null, false);
+			}
+		};
+		plots.add(xAction);
+		xAction.setChecked(true);
+
+		final Action yAction = new Action("Y", IAction.AS_CHECK_BOX) {
+			@Override
+			public void run() {
+				showY = isChecked();
+				update(null, null, false);
+			}
+		};
+		plots.add(yAction);
+		yAction.setChecked(true);
 	}
-	
+
 	@Override
 	protected Collection<? extends ITrace> createProfile(IImageTrace  image, 
 			                     IRegion      region, 
@@ -62,41 +94,52 @@ public class BoxProfileTool extends ProfileTool {
 			                     boolean      tryUpdate,
 			                     boolean      isDrag,
 			                     IProgressMonitor monitor) {
-        
-		Dataset[] profile = getProfile(image, region, rbs, tryUpdate, isDrag, monitor);
-		if (profile == null) return null;
 
-		final Dataset x_indices   = profile[0];
-		final Dataset x_intensity = profile[1];
-		final Dataset y_indices   = profile[2];
-		final Dataset y_intensity = profile[3];
-		
 		//if (monitor.isCanceled()) return null;
 		final ILineTrace x_trace = (ILineTrace)profilePlottingSystem.getTrace("X "+region.getName());
 		final ILineTrace y_trace = (ILineTrace)profilePlottingSystem.getTrace("Y "+region.getName());
 		
-		if (tryUpdate && x_trace!=null && y_trace!=null) {
-			getControl().getDisplay().syncExec(new Runnable() {
-				public void run() {
-					profilePlottingSystem.setSelectedXAxis(xPixelAxis);
-					x_trace.setData(x_indices, x_intensity);
-					profilePlottingSystem.setSelectedXAxis(yPixelAxis);
-					y_trace.setData(y_indices, y_intensity);
-				}
-			});
-		} else {
-			profilePlottingSystem.setSelectedXAxis(xPixelAxis);
-			Collection<ITrace> plotted = profilePlottingSystem.updatePlot1D(x_indices, Arrays.asList(new IDataset[]{x_intensity}), monitor);
-			registerTraces(region, plotted);
-			
-			profilePlottingSystem.setSelectedXAxis(yPixelAxis);
-			plotted = profilePlottingSystem.updatePlot1D(y_indices, Arrays.asList(new IDataset[]{y_intensity}), monitor);
-			registerTraces(region, plotted);
+		Dataset[] profile = showX || showY ? getProfile(image, region, rbs, tryUpdate, isDrag, monitor) : null;
+		final Dataset x_indices   = showX ? profile[0] : null;
+		final Dataset x_intensity = showX ? profile[1] : null;
+		final Dataset y_indices   = showY ? profile[2] : null;
+		final Dataset y_intensity = showY ? profile[3] : null;
+
+		updatePlot(monitor, tryUpdate, showX, region, xPixelAxis, x_trace, x_indices, x_intensity);
+		updatePlot(monitor, tryUpdate, showY, region, yPixelAxis, y_trace, y_indices, y_intensity);
+		if (!showX && !showY) { // avoid ugly empty plot
+			xPixelAxis.setVisible(true);
 		}
-		
 		return Arrays.asList(y_trace, x_trace);
 	}
-	
+
+	private void updatePlot(IProgressMonitor monitor, boolean tryUpdate, boolean show,
+			IRegion region, IAxis axis, ILineTrace trace, final Dataset indices, final Dataset intensity) {
+		if (!tryUpdate || trace == null) {
+			getControl().getDisplay().syncExec(new Runnable() {
+				public void run() {
+					axis.setVisible(show);
+				}
+			});
+			if (show) {
+				profilePlottingSystem.setSelectedXAxis(axis);
+				Collection<ITrace> plotted = profilePlottingSystem.updatePlot1D(indices, Arrays.asList(new IDataset[]{intensity}), monitor);
+				registerTraces(region, plotted);
+			}
+		} else {
+			getControl().getDisplay().syncExec(new Runnable() {
+				public void run() {
+					axis.setVisible(show);
+					trace.setVisible(show);
+					if (show) {
+						profilePlottingSystem.setSelectedXAxis(axis);
+						trace.setData(indices, intensity);
+					}
+				}
+			});
+		}
+	}
+
 	/**
 	 * 
 	 * @param image
@@ -144,19 +187,19 @@ public class BoxProfileTool extends ProfileTool {
 			int[] len = bounds.getIntLengths();
 			
 			final int xstart  = Math.max(0,  spt[1]);
-			final int xend   = Math.min(spt[1] + len[1],  image.getData().getShape()[0]);
+			final int xend   = Math.min(spt[1] + len[1],  data.getShapeRef()[0]);
 			final int ystart = Math.max(0,  spt[0]);
-			final int yend   = Math.min(spt[0] + len[0],  image.getData().getShape()[1]);
+			final int yend   = Math.min(spt[0] + len[0],  data.getShapeRef()[1]);
 			
 			IDataset xFull = axes.get(0);
 			if (xFull != null) {
-				xi = DatasetUtils.convertToDataset(xFull.getSlice(new int[] { ystart }, new int[] { yend }, new int[] { 1 }));
+				xi = DatasetUtils.convertToDataset(xFull.getSlice(new Slice(ystart , yend)));
 				xi.setName(xFull.getName());
 			}
 
 			IDataset yFull = axes.get(1);
 			if (yFull != null) {
-				yi = DatasetUtils.convertToDataset(yFull.getSlice(new int[]{xstart}, new int[]{xend},new int[]{1}));
+				yi = DatasetUtils.convertToDataset(yFull.getSlice(new Slice(xstart , xend)));
 				yi.setName(yFull.getName());
 			}
 		}
@@ -183,9 +226,9 @@ public class BoxProfileTool extends ProfileTool {
 		}
 		final Dataset y_indices = yi; // Maths.add(yi, bounds.getY()); // Real position
 		
-        return new Dataset[]{x_indices, x_intensity, y_indices, y_intensity};
+		return new Dataset[]{x_indices, x_intensity, y_indices, y_intensity};
 	}
-	
+
 	@Override
 	protected boolean isRegionTypeSupported(RegionType type) {
 		return (type==RegionType.BOX)||(type==RegionType.XAXIS)||(type==RegionType.YAXIS)||type==RegionType.PERIMETERBOX;
@@ -233,17 +276,21 @@ public class BoxProfileTool extends ProfileTool {
 			file.getGroup(groupNode, "profile", "NXdata", true);
 			slice.setParent(regionGroup);
 
-			Dataset[] box = ROIProfile.box(DatasetUtils.convertToDataset(slice.getData()), DatasetUtils.convertToDataset(image.getMask()),
-					(RectangularROI)region.getROI(), false);
+			Dataset[] box = showX || showY ? ROIProfile.box(DatasetUtils.convertToDataset(slice.getData()), DatasetUtils.convertToDataset(image.getMask()),
+					(RectangularROI)region.getROI(), false) : null;
 
-			final Dataset x_intensity = box[0];
-			x_intensity.setName("X_Profile");
-			
-			slice.appendData(lazyWritables, x_intensity, exportIndex);
+			if (showX) {
+				final Dataset x_intensity = box[0];
+				x_intensity.setName("X_Profile");
+				
+				slice.appendData(lazyWritables, x_intensity, exportIndex);
+			}
 
-			final Dataset y_intensity = box[1];
-			y_intensity.setName("Y_Profile");
-			slice.appendData(lazyWritables, y_intensity, exportIndex);
+			if (showY) {
+				final Dataset y_intensity = box[1];
+				y_intensity.setName("Y_Profile");
+				slice.appendData(lazyWritables, y_intensity, exportIndex);
+			}
 
 			// Mean, Sum, Std deviation and region
 			int xInc = bounds.getPoint()[0]<bounds.getEndPoint()[0] ? 1 : -1;
