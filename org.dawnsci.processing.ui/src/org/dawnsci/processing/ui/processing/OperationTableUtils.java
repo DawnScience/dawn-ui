@@ -3,8 +3,8 @@ package org.dawnsci.processing.ui.processing;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.dawb.common.services.ServiceManager;
 import org.dawnsci.processing.ui.Activator;
+import org.dawnsci.processing.ui.ServiceHolder;
 import org.dawnsci.processing.ui.slice.IOperationErrorInformer;
 import org.dawnsci.processing.ui.slice.OperationInformerImpl;
 import org.eclipse.core.resources.IFile;
@@ -62,8 +62,8 @@ public class OperationTableUtils {
 	}
 	
 	private static void readOperationsToSeriesTableFromFile(String filename, SeriesTable table, OperationFilter opFilter) throws Exception {
-		IPersistenceService service = (IPersistenceService)ServiceManager.getService(IPersistenceService.class);
-		IOperationService os = (IOperationService)ServiceManager.getService(IOperationService.class);
+		IPersistenceService service = ServiceHolder.getPersistenceService();
+		IOperationService os = ServiceHolder.getOperationService();
 		IPersistentFile pf = service.getPersistentFile(filename);
 		IOperation<? extends IOperationModel, ? extends OperationData>[] operations = pf.getOperations();
 		pf.close();
