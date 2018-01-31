@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.FilenameFilter;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 
@@ -62,6 +63,9 @@ import org.eclipse.swt.dnd.TextTransfer;
 import org.eclipse.swt.dnd.Transfer;
 import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.events.KeyListener;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.FormAttachment;
@@ -98,6 +102,9 @@ public class LoadedFilePart {
 	private Image unticked;
 	
 	private FileControllerStateEventListener fileStateListener;
+	
+	Comparator<LoadedFile> fileCompare = Comparator.comparing((LoadedFile file) -> file.getName());
+	Comparator<LoadedFile> labelCompare = Comparator.comparing((LoadedFile file) -> file.getLabel());
 	
 	private class QuickFileWidgetListener implements IQuickFileWidgetListener {
 		@Override
@@ -248,9 +255,49 @@ public class LoadedFilePart {
 		name.getColumn().setText("Filename");
 		name.getColumn().setWidth(200);
 		
+		name.getColumn().addSelectionListener(new SelectionAdapter() {
+		
+			
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				fileCompare = fileCompare.reversed();
+				((FileController)fileController).setComparator(fileCompare);
+				viewer.refresh();
+				
+			}
+			
+
+		});
+		
+		TableViewerColumn labelColumn = new TableViewerColumn(viewer, SWT.LEFT);
+		labelColumn.setLabelProvider(new ColumnLabelProvider() {
+			@Override
+			public String getText(Object element) {
+				
+				return ((LoadedFile)element).getLabel();
+			}
+		});
+		
+		labelColumn.getColumn().setText("Label");
+		labelColumn.getColumn().setWidth(200);
+		
+		labelColumn.getColumn().addSelectionListener(new SelectionAdapter() {
+		
+			
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				labelCompare = labelCompare.reversed();
+				((FileController)fileController).setComparator(labelCompare);
+				viewer.refresh();
+			}
+			
+
+		});
+		
 		TableColumnLayout columnLayout = new TableColumnLayout();
 	    columnLayout.setColumnData(check.getColumn(), new ColumnPixelData(24));
 	    columnLayout.setColumnData(name.getColumn(), new ColumnWeightData(100,20));
+	    columnLayout.setColumnData(labelColumn.getColumn(), new ColumnWeightData(50,20));
 	    
 	    tableComposite.setLayout(columnLayout);
 		

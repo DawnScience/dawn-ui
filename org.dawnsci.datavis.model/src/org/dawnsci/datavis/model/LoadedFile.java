@@ -23,7 +23,9 @@ import org.eclipse.dawnsci.analysis.api.tree.Node;
 import org.eclipse.dawnsci.analysis.api.tree.NodeLink;
 import org.eclipse.dawnsci.analysis.api.tree.Tree;
 import org.eclipse.dawnsci.analysis.api.tree.TreeUtils;
+import org.eclipse.january.DatasetException;
 import org.eclipse.january.dataset.Dataset;
+import org.eclipse.january.dataset.IDataset;
 import org.eclipse.january.dataset.ILazyDataset;
 import org.eclipse.january.dataset.LazyDatasetBase;
 import org.slf4j.Logger;
@@ -38,11 +40,15 @@ public class LoadedFile implements IDataObject, IDataFilePackage {
 	
 	protected AtomicReference<IDataHolder> dataHolder;
 	protected Map<String,DataOptions> dataOptions;
+	protected Map<String, ILazyDataset> possibleLabels;
 	private boolean selected = false;
+	private String labelName = "";
+	private String label = "";
 
 	public LoadedFile(IDataHolder dataHolder) {
 		this.dataHolder = new AtomicReference<IDataHolder>(dataHolder);		
 		dataOptions = new LinkedHashMap<>();
+		possibleLabels = new HashMap<>();
 		String[] names = null;
 		if (dataHolder.getTree() != null) {
 			try {
@@ -66,6 +72,10 @@ public class LoadedFile implements IDataObject, IDataFilePackage {
 			if (lazyDataset != null && ((LazyDatasetBase)lazyDataset).getDType() != Dataset.STRING && lazyDataset.getSize() != 1) {
 				DataOptions d = new DataOptions(n, this);
 				dataOptions.put(d.getName(),d);
+			}
+			
+			if (lazyDataset != null && lazyDataset.getSize() == 1) {
+				possibleLabels.put(n,lazyDataset);
 			}
 		}
 	}
@@ -205,6 +215,39 @@ public class LoadedFile implements IDataObject, IDataFilePackage {
 		
 		return out;
 		
-		
+	}
+	
+	public String getLabel() {
+		return label;
+	}
+
+	public void setLabel(String label) {
+		this.label = label;
+	}
+	
+	public String getLabelName() {
+		return labelName;
+	}
+	
+	public List<String> getLabelOptions() {
+		return new ArrayList<>(possibleLabels.keySet());
+	}
+
+	public void setLabelName(String labelName) {
+		this.labelName = labelName;
+		if (possibleLabels.containsKey(labelName)) {
+			ILazyDataset l = possibleLabels.get(labelName);
+			
+			try {
+				IDataset slice = l.getSlice();
+				slice = slice.squeeze();
+				label = slice.getString();
+			} catch (DatasetException e) {
+				logger.error("Could not read label {}", labelName,e);
+				label = "";
+			}
+		} else {
+			label = "";
+		}
 	}
 }

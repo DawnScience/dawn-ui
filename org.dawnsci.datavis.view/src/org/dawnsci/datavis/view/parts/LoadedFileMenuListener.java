@@ -6,17 +6,29 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.dawnsci.datavis.model.DataOptions;
+import org.dawnsci.datavis.model.FileController;
 import org.dawnsci.datavis.model.IDataObject;
 import org.dawnsci.datavis.model.IFileController;
 import org.dawnsci.datavis.model.LoadedFile;
+
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
+import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
+import org.eclipse.jface.dialogs.Dialog;
+import org.eclipse.jface.layout.TableColumnLayout;
 import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.jface.viewers.ArrayContentProvider;
+import org.eclipse.jface.viewers.ColumnWeightData;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Layout;
+import org.eclipse.swt.widgets.TableColumn;
+import org.eclipse.ui.dialogs.ListDialog;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 
 public class LoadedFileMenuListener implements IMenuListener {
@@ -39,13 +51,17 @@ public class LoadedFileMenuListener implements IMenuListener {
 			manager.add(new CheckAction(fileController, viewer));
 			manager.add(new UncheckAction(fileController, viewer));
 			manager.add(new Separator());
+			
+			MenuManager menuDisplay = new MenuManager("Display");
+			menuDisplay.add(new SetLabelAction(fileController, viewer));
+			menuDisplay.add(new ClearLabelAction(fileController, viewer));
+			manager.add(menuDisplay);
+			manager.add(new Separator());
 			manager.add(new JoinAction(fileController,viewer));
 			manager.add(new Separator());
 			manager.add(new DeselectAction(fileController,viewer));
 			manager.add(new Separator());
 			manager.add(new CloseAction(fileController, viewer));
-			
-			
 			
 			if (((IStructuredSelection)viewer.getSelection()).size()==1) {
 				manager.add(new Separator());
@@ -190,6 +206,73 @@ public class LoadedFileMenuListener implements IMenuListener {
 			if (loadedFiles.isEmpty()) return;
 			file.joinFiles(loadedFiles);
 			view.refresh();
+		}
+	}
+	
+	private class SetLabelAction extends LoadedFileMenuAction {
+
+		public SetLabelAction(IFileController fileController, TableViewer viewer) {
+			super("Set Label",null, fileController, viewer);
+		}
+
+		@Override
+		public void run() {
+			List<LoadedFile> loadedFiles = getLoadedFiles();
+			if (loadedFiles.isEmpty()) return;
+			
+			List<String> options = loadedFiles.get(0).getLabelOptions();
+			
+			ListDialog d = new ListDialog(Display.getDefault().getActiveShell());
+			d.setContentProvider(new ArrayContentProvider());
+			d.setLabelProvider(new LabelProvider());
+			
+			if (options.isEmpty()) {
+				return;
+			}
+			
+			d.setInput(options.toArray());
+			
+			if (Dialog.OK != d.open()) {
+				return;
+			}
+			
+			String labelName = d.getResult()[0].toString();
+			
+			((FileController)fileController).setLabelName(labelName);
+			
+			Layout layout = view.getTable().getParent().getLayout();
+			
+			if (layout instanceof TableColumnLayout) {
+				TableColumn column = view.getTable().getColumn(2);
+				column.setText(labelName);
+				((TableColumnLayout)layout).setColumnData(column, new ColumnWeightData(50,20));
+			}
+			
+			view.refresh();
+			view.getTable().getParent().layout();
+		}
+	}
+	
+	private class ClearLabelAction extends LoadedFileMenuAction {
+
+		public ClearLabelAction(IFileController fileController, TableViewer viewer) {
+			super("Clear",null, fileController, viewer);
+		}
+
+		@Override
+		public void run() {
+			
+			((FileController)fileController).setLabelName("");
+			
+			Layout layout = view.getTable().getParent().getLayout();
+			
+			if (layout instanceof TableColumnLayout) {
+				TableColumn column = view.getTable().getColumn(2);
+				((TableColumnLayout)layout).setColumnData(column, new ColumnWeightData(0,0));
+			}
+			
+			view.refresh();
+			view.getTable().getParent().layout();
 		}
 	}
 }
