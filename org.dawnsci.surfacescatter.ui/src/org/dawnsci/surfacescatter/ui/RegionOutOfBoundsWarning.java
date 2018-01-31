@@ -89,7 +89,7 @@ public class RegionOutOfBoundsWarning extends Dialog {
 			warning.setText("Can't find files corresponding to the entered values.");	
 			break;
 		case 13:
-			warning.setText("NO! STOP IT!");	
+			warning.setText("NO! STOP IT! I DON'T LIKE THE NUMBER 13!!!!");	
 			break;
 		case 14:
 			warning.setText("No curve selected to save.");	
@@ -105,6 +105,12 @@ public class RegionOutOfBoundsWarning extends Dialog {
 			break;
 		case 18:
 			warning.setText("Error While Saving.");	
+			break;
+		case 19:
+			warning.setText("A Parameter Alias Has Not Been Set!!");	
+			break;
+		case 20:
+			warning.setText("The Flux File Has Not Been Set!!");	
 			break;
 		default:
 			warning.setText("Unknown or novel error.");	

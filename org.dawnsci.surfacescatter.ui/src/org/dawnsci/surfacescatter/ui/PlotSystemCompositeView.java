@@ -1044,9 +1044,12 @@ public class PlotSystemCompositeView extends Composite {
 			polarisation.setText(String.valueOf(ssp.getCurrentPolarisationCorrection()));
 
 			double raw = ssp.getCurrentRawIntensity();
-			rawIntensity.setText(String.valueOf(raw));
-			areaCorrection.setText(String.valueOf(ssp.getCurrentAreaCorrection()));
+			try {
+				rawIntensity.setText(String.valueOf(raw));
+				areaCorrection.setText(String.valueOf(ssp.getCurrentAreaCorrection()));
+			} catch (NullPointerException np) {
 
+			}
 		}
 
 		if (ssp.getCorrectionSelection() == MethodSetting.Reflectivity_with_Flux_Correction_Gaussian_Profile
@@ -1057,23 +1060,33 @@ public class PlotSystemCompositeView extends Composite {
 			double f = ssp.getCurrentReflectivityFluxCorrection();
 
 			String fluxCorr = String.valueOf(f);
+			try {
+				reflectivityFluxCorr.setText(fluxCorr);
+				reflectivityAreaCorr.setText(String.valueOf(ssp.getCurrentReflectivityAreaCorrection()));
+			} catch (NullPointerException np) {
 
-			reflectivityFluxCorr.setText(fluxCorr);
-			reflectivityAreaCorr.setText(String.valueOf(ssp.getCurrentReflectivityAreaCorrection()));
-
+			}
 		}
 
 		if (ssp.getCorrectionSelection() == MethodSetting.Reflectivity_without_Flux_Correction_Gaussian_Profile
 				|| ssp.getCorrectionSelection() == MethodSetting.Reflectivity_without_Flux_Correction_Simple_Scaling) {
+			try {
+				rawIntensity.setText(String.valueOf(ssp.getCurrentRawIntensity()));
+				reflectivityAreaCorr.setText(String.valueOf(ssp.getCurrentReflectivityAreaCorrection()));
 
-			rawIntensity.setText(String.valueOf(ssp.getCurrentRawIntensity()));
-			reflectivityAreaCorr.setText(String.valueOf(ssp.getCurrentReflectivityAreaCorrection()));
+			} catch (NullPointerException np) {
+
+			}
 
 		}
 
 		if (ssp.getCorrectionSelection() == MethodSetting.Reflectivity_NO_Correction) {
+			try {
+				rawIntensity.setText(String.valueOf(ssp.getCurrentRawIntensity()));
+			} catch (NullPointerException np) {
 
-			rawIntensity.setText(String.valueOf(ssp.getCurrentRawIntensity()));
+			}
+
 		}
 
 		this.update();

@@ -1694,11 +1694,22 @@ public class SurfaceScatterViewStart extends Dialog {
 
 		ssp.createGm();
 
-		customComposite.resetCorrectionsTab();
+		int[] test = correctionsDropDownArray;
+		int t = correctionsDropDown.getSelectionIndex();
+		MethodSetting ms = MethodSetting.toMethod(test[t]);
 
+		ssp.getGm().setExperimentMethod(ms);
+		
+		customComposite.resetCorrectionsTab();
+	
+
+	
 		rsw.getAnglesAliasWindow().writeOutValues();
 
 		paramField.geometricParametersUpdate();
+		
+	
+		
 
 		try {
 			for (IRegion g : ssp.getInterpolatorRegions()) {
@@ -1725,14 +1736,15 @@ public class SurfaceScatterViewStart extends Dialog {
 				: new int[][] { { 0, 0 }, { 0, 0 } };
 		bolp = ssp.getBoxOffsetLenPt();
 
-		int[] test = correctionsDropDownArray;
-		int t = correctionsDropDown.getSelectionIndex();
+		
 
-		MethodSetting ms = MethodSetting.toMethod(test[t]);
-
-		ssp.getGm().setExperimentMethod(ms.getCorrectionsName());
+		
+		/////build parameters checker!!!
+		
 		ssp.surfaceScatterPresenterBuildWithFrames(filepaths, rsw.getDatDisplayer().getSelectedOption(), ms);
 
+		
+		
 		ScannedVariableName.SCANNED_VARIABLE_NAME.setSetName(rsw.getDatDisplayer().getSelectedOption());
 
 		try {
@@ -1745,6 +1757,8 @@ public class SurfaceScatterViewStart extends Dialog {
 			System.out.println(m.getMessage());
 		}
 
+
+	
 		if (ssp.isqConvert()) {
 			double energy = Double.parseDouble(paramField.getEnergy().getText());
 			ssp.setEnergy(energy);
@@ -1760,6 +1774,10 @@ public class SurfaceScatterViewStart extends Dialog {
 			}
 		}
 
+		
+		ssp.setSelection(0);
+		ssp.setSliderPos(0);
+		
 		folder.setSelection(2);
 
 		customComposite.getSlider().setSelection(0);
@@ -1811,8 +1829,7 @@ public class SurfaceScatterViewStart extends Dialog {
 
 		}
 
-		ssp.setSelection(0);
-		ssp.setSliderPos(0);
+
 
 		if (isThereAParamFile) {
 			setParametersFromFile(paramFile, rsw.getDatDisplayer().getUseTrajectory(), stareMode);
@@ -1861,8 +1878,12 @@ public class SurfaceScatterViewStart extends Dialog {
 			}
 
 		});
-
+		
+	
+		ssp.fireStateListeners();
 	}
+	
+	
 
 	public void buildRodFromCsdp(CurveStitchDataPackage csdp) {
 

@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.EnumMap;
 import java.util.HashSet;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.concurrent.locks.ReadWriteLock;
@@ -50,6 +51,7 @@ import org.dawnsci.surfacescatter.PolynomialOverlap;
 import org.dawnsci.surfacescatter.ProcessingMethodsEnum;
 import org.dawnsci.surfacescatter.ProcessingMethodsEnum.ProccessingMethod;
 import org.dawnsci.surfacescatter.ReflectivityAngleAliasEnum;
+import org.dawnsci.surfacescatter.ReflectivityFluxCorrectionsForDialog;
 import org.dawnsci.surfacescatter.ReflectivityFluxParametersAliasEnum;
 import org.dawnsci.surfacescatter.ReflectivityMetadataTitlesForDialog;
 import org.dawnsci.surfacescatter.ReflectivityNormalisation;
@@ -526,6 +528,15 @@ public class SurfaceScatterPresenter {
 
 				}
 			}
+			
+			Dataset fluxCorrection = DatasetFactory.createFromObject(0);
+			
+			if(correctionSelection == MethodSetting.Reflectivity_with_Flux_Correction_Gaussian_Profile ||
+					correctionSelection == MethodSetting.Reflectivity_with_Flux_Correction_Simple_Scaling) {
+			
+				fluxCorrection = ReflectivityFluxCorrectionsForDialog.fluxCorrectionDataset(xArrayCon,
+					gm.getUseNegativeQ(), gm.getFluxPath());
+			}
 
 			for (int f = 0; f < imageRefList.size(); f++) {
 
@@ -558,6 +569,13 @@ public class SurfaceScatterPresenter {
 					exitedCorrectionsWarnings();
 					break;
 				}
+
+				if (correctionSelection == MethodSetting.Reflectivity_with_Flux_Correction_Gaussian_Profile
+						|| correctionSelection == MethodSetting.Reflectivity_with_Flux_Correction_Simple_Scaling) {
+
+					fm.setReflectivityFluxCorrection(fluxCorrection.getDouble(f));
+				}
+
 				fm.setScannedVariable(xArrayCon.getDouble(f));
 
 			}
@@ -1411,7 +1429,7 @@ public class SurfaceScatterPresenter {
 	public void setLenPt(int sliderpos, int[][] lenPt) {
 
 		int[][] test = getLenPt();
-		
+
 		if (!Arrays.equals(lenPt[0], getLenPt()[0]) || !Arrays.equals(lenPt[1], getLenPt()[1])) {
 
 			drm.setInitialLenPt(sliderpos, lenPt);
@@ -2632,7 +2650,7 @@ public class SurfaceScatterPresenter {
 		listeners.add(listener);
 	}
 
-	private void fireStateListeners() {
+	public void fireStateListeners() {
 		for (IPresenterStateChangeEventListener l : listeners) {
 			l.update();
 		}
@@ -2787,20 +2805,78 @@ public class SurfaceScatterPresenter {
 	}
 
 	public void writeOutAngleAliases(EnumMap<SXRDAngleAliasEnum, String> sXRDMap,
-			EnumMap<ReflectivityAngleAliasEnum, String> reflectivityMap,
+			EnumMap<ReflectivityAngleAliasEnum, String> reflectivityAnglesMap,
 			EnumMap<ReflectivityFluxParametersAliasEnum, String> reflectivityFluxMap) {
 
-		gm.setsXRDMap(sXRDMap);
-		gm.setReflectivityFluxMap(reflectivityFluxMap);
-		gm.setReflectivityFluxMap(reflectivityFluxMap);
+		MethodSetting g = gm.getExperimentMethodEnum();
+
+		switch (g) {
+
+		case SXRD:
+
+			for (Entry<SXRDAngleAliasEnum, String> entry : sXRDMap.entrySet()) {
+				if (StringUtils.isBlank(entry.getValue())) {
+					aliasWarning(entry.getKey().getAngleVariable());
+					break;
+				}
+			}
+
+			gm.setsXRDMap(sXRDMap);
+			break;
+
+		case Reflectivity_NO_Correction:
+			break;
+
+		case Reflectivity_with_Flux_Correction_Gaussian_Profile:
+		case Reflectivity_with_Flux_Correction_Simple_Scaling:
+		case Reflectivity_without_Flux_Correction_Gaussian_Profile:
+		case Reflectivity_without_Flux_Correction_Simple_Scaling:
+
+			for (Entry<ReflectivityAngleAliasEnum, String> entry : reflectivityAnglesMap.entrySet()) {
+				if (StringUtils.isBlank(entry.getValue())) {
+					aliasWarning(entry.getKey().getAngleVariable());
+					break;
+				}
+			}
+
+			for (Entry<ReflectivityFluxParametersAliasEnum, String> entry : reflectivityFluxMap.entrySet()) {
+				if (StringUtils.isBlank(entry.getValue())) {
+					aliasWarning(entry.getKey().getFluxVariable());
+					break;
+				}
+			}
+
+			gm.setReflectivityFluxMap(reflectivityFluxMap);
+			gm.setReflectivityAnglesMap(reflectivityAnglesMap);
+			
+			break;
+
+		default:
+			// defensive
+		}
 
 	}
 
+	public void aliasWarning(String in) {
+		RegionOutOfBoundsWarning roobw = new RegionOutOfBoundsWarning(parentShell, 19, in);
+		roobw.open();
+	}
+
 	public void writeFluxFilePathToGeometricModel(String f, boolean useInternalFlux) {
+		
+		if(!useInternalFlux && StringUtils.isBlank(f) && gm.getExperimentMethodEnum() != MethodSetting.SXRD) {
+			fluxFileWarning(null);
+		}
 		gm.setFluxPath(f);
 		gm.setUseInternalFlux(useInternalFlux);
 	}
 
+	public void fluxFileWarning(String in) {
+		RegionOutOfBoundsWarning roobw = new RegionOutOfBoundsWarning(parentShell,20, in);
+		roobw.open();
+	}
+
+	
 	public void arbitrarySavingMethod(boolean useQ, boolean writeOnlyGoodPoints, Shell shell, SaveFormatSetting sfs,
 			CurveStitchDataPackage csdpToSave, AxisEnums.yAxes yAxis) throws OutputException {
 
@@ -2934,10 +3010,6 @@ public class SurfaceScatterPresenter {
 		return drm.getSetRegions();
 	}
 
-	private void rebuildCorrections() {
-
-	}
-
 	private void buildCorrections(int f, int pos, FrameModel fm, MethodSetting correctionSelection,
 			String[] datNamesInOrder, ArrayList<Integer> imageNoInDatList, Dataset dcdThetaCon, Dataset hArrayCon,
 			Dataset kArrayCon, Dataset lArrayCon, Dataset thetaArrayCon, Dataset qdcdCon) throws CorrectionsException {
@@ -3005,6 +3077,17 @@ public class SurfaceScatterPresenter {
 									footprint);
 
 					fm.setReflectivityAreaCorrection(reflectivityAreaCorrection);
+
+				}
+
+				if (correctionSelection == MethodSetting.Reflectivity_with_Flux_Correction_Gaussian_Profile
+						|| correctionSelection == MethodSetting.Reflectivity_with_Flux_Correction_Simple_Scaling) {
+
+					// double reflectivityFluxCorrection =
+					// ReflectivityFluxCorrectionsForDialog.reflectivityFluxCorrectionsDouble(//
+					// SurfaceScatterViewStart.this.getParamField().getFluxPath().getText(),
+					// QdcdDat.getDouble(0), gm.getUseNegativeQ(), gm.getFluxPath());
+					//
 
 				}
 

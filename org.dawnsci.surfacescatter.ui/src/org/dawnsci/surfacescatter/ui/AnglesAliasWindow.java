@@ -147,21 +147,6 @@ public class AnglesAliasWindow extends Composite {
 			public void modifyText(ModifyEvent e) {
 
 				pokeFluxFileText();
-
-				// fluxpathStorage = fluxPath.getText();
-				//
-				// IDataHolder dh1 = null;
-				//
-				// try {
-				// dh1 = LoaderFactory.getData(fluxpathStorage);
-				// } catch (Exception e1) {
-				// // TODO Auto-generated catch block
-				// e1.printStackTrace();
-				// }
-				//
-				// String[] fluxOptions = dh1.getNames();
-				// updateFluxWithOptions(fluxOptions, true);
-
 			}
 
 		});
@@ -436,7 +421,7 @@ public class AnglesAliasWindow extends Composite {
 	public void writeOutValues() {
 
 		EnumMap<SXRDAngleAliasEnum, String> sXRDStringMap = new EnumMap<>(SXRDAngleAliasEnum.class);
-		EnumMap<ReflectivityAngleAliasEnum, String> reflectivityStringMap = new EnumMap<>(
+		EnumMap<ReflectivityAngleAliasEnum, String> reflectivityAnglesStringMap = new EnumMap<>(
 				ReflectivityAngleAliasEnum.class);
 		EnumMap<ReflectivityFluxParametersAliasEnum, String> reflectivityFluxStringMap = new EnumMap<>(
 				ReflectivityFluxParametersAliasEnum.class);
@@ -453,7 +438,7 @@ public class AnglesAliasWindow extends Composite {
 			if (ae != ReflectivityAngleAliasEnum.NULL) {
 				String alias = reflectivityMap.get(ae).getText();
 				ae.setAngleAlias(alias);
-				reflectivityStringMap.put(ae, alias);
+				reflectivityAnglesStringMap.put(ae, alias);
 			}
 		}
 
@@ -465,9 +450,11 @@ public class AnglesAliasWindow extends Composite {
 			}
 		}
 
-		ssp.writeOutAngleAliases(sXRDStringMap, reflectivityStringMap, reflectivityFluxStringMap);
-
 		ssp.writeFluxFilePathToGeometricModel(fluxpathStorage, useInternalFluxFlag);
+		
+		ssp.writeOutAngleAliases(sXRDStringMap, reflectivityAnglesStringMap, reflectivityFluxStringMap);
+
+	
 
 	}
 
