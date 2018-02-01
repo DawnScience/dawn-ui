@@ -55,6 +55,8 @@ public class LoadedFileMenuListener implements IMenuListener {
 			MenuManager menuDisplay = new MenuManager("Display");
 			menuDisplay.add(new SetLabelAction(fileController, viewer));
 			menuDisplay.add(new ClearLabelAction(fileController, viewer));
+			menuDisplay.add(new Separator());
+			menuDisplay.add(new DisableSort(fileController, viewer));
 			manager.add(menuDisplay);
 			manager.add(new Separator());
 			manager.add(new JoinAction(fileController,viewer));
@@ -273,6 +275,20 @@ public class LoadedFileMenuListener implements IMenuListener {
 			
 			view.refresh();
 			view.getTable().getParent().layout();
+		}
+	}
+	
+	private class DisableSort extends LoadedFileMenuAction {
+
+		public DisableSort(IFileController fileController, TableViewer viewer) {
+			super("Disable sort",null, fileController, viewer);
+		}
+
+		@Override
+		public void run() {
+			
+			((FileController)fileController).setComparator(null);
+			view.refresh();
 		}
 	}
 }

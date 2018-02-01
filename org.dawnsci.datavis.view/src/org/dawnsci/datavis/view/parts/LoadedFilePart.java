@@ -65,7 +65,6 @@ import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.events.KeyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.FormAttachment;
@@ -190,8 +189,6 @@ public class LoadedFilePart {
 		
 		viewer.setContentProvider(new IStructuredContentProvider() {
 
-
-
 			@Override
 			public Object[] getElements(Object inputElement) {
 				return ((IFileController)inputElement).getLoadedFiles().toArray();
@@ -297,7 +294,7 @@ public class LoadedFilePart {
 		TableColumnLayout columnLayout = new TableColumnLayout();
 	    columnLayout.setColumnData(check.getColumn(), new ColumnPixelData(24));
 	    columnLayout.setColumnData(name.getColumn(), new ColumnWeightData(100,20));
-	    columnLayout.setColumnData(labelColumn.getColumn(), new ColumnWeightData(50,20));
+	    columnLayout.setColumnData(labelColumn.getColumn(), new ColumnWeightData(0,0));
 	    
 	    tableComposite.setLayout(columnLayout);
 		

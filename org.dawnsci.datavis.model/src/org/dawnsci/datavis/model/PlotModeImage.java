@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.List;
 
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
+import org.eclipse.dawnsci.plotting.api.histogram.ImageServiceBean;
 import org.eclipse.dawnsci.plotting.api.trace.IImageTrace;
 import org.eclipse.dawnsci.plotting.api.trace.ITrace;
 import org.eclipse.dawnsci.plotting.api.trace.MetadataPlotUtils;
@@ -19,11 +20,13 @@ import org.eclipse.january.metadata.AxesMetadata;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class PlotModeImage implements IPlotMode {
+public class PlotModeImage implements IPlotModeColored {
 
 	private final static Logger logger = LoggerFactory.getLogger(PlotModeImage.class);
 	
 	protected static final String[] options =  new String[]{"X","Y"};
+	
+	protected Number[] minMax;
 
 	public String[] getOptions() {
 		return options;
@@ -188,6 +191,13 @@ public class PlotModeImage implements IPlotMode {
 		
 		trace.setData(d, ax, false);
 		trace.setUserObject(userObject);
+		if (minMax != null) {
+			trace.setRescaleHistogram(false);
+			ImageServiceBean imageServiceBean = trace.getImageServiceBean();
+			imageServiceBean.setMin(minMax[0]);
+			imageServiceBean.setMax(minMax[1]);
+		}
+		
 		system.setTitle(d.getName());
 		if (!isUpdate)system.addTrace(trace);
 		logger.info("Display time " + (System.currentTimeMillis()-t) + " ms");
@@ -224,6 +234,11 @@ public class PlotModeImage implements IPlotMode {
 			}
 		}
 		return dataDims;
+	}
+
+	@Override
+	public void setMinMax(Number[] minMax) {
+		this.minMax = minMax;
 	}
 	
 }

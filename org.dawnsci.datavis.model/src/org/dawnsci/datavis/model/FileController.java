@@ -476,6 +476,7 @@ public class FileController implements IFileController {
 	
 	public void setComparator(Comparator<LoadedFile> comparator) {
 		loadedFiles.setComparator(comparator);
+		fireStateChangeListeners(true, true);
 	}
 	
 	public void setLabelName(String label) {

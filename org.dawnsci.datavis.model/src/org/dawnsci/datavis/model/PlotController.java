@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -13,14 +12,16 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicReference;
-import javax.inject.Inject;
+
 import org.eclipse.dawnsci.analysis.dataset.slicer.SliceFromSeriesMetadata;
 import org.eclipse.dawnsci.analysis.dataset.slicer.SliceInformation;
 import org.eclipse.dawnsci.analysis.dataset.slicer.SourceInformation;
 import org.eclipse.dawnsci.plotting.api.IPlottingService;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.axis.IAxis;
+import org.eclipse.dawnsci.plotting.api.histogram.ImageServiceBean;
 import org.eclipse.dawnsci.plotting.api.trace.ILineTrace;
+import org.eclipse.dawnsci.plotting.api.trace.IPaletteTrace;
 import org.eclipse.dawnsci.plotting.api.trace.ITrace;
 import org.eclipse.january.dataset.IDataset;
 import org.eclipse.january.dataset.ILazyDataset;
@@ -218,57 +219,49 @@ public class PlotController implements IPlotController {
 		
 		IPlottingSystem<?> system = getPlottingSystem();
 		if (localCurrentMode != mode) system.reset();
-
-		final Map<DataOptions, List<ITrace>> traceMap = collectTracesFromPlot();
-
-		if (state == null) state = new ArrayList<DataStateObject>();
 		
-		Map<DataOptions, List<ITrace>> updateMap = new LinkedHashMap<>();
-		//have to do multiple iterations so image traces arent removed after correct
-		// one added
-		for (DataStateObject object : state) {
-			if (traceMap.get(object.getOption()) != null 
-					&& traceMap.get(object.getOption()).get(0) != null 
-					&& mode.isThisMode((traceMap.get(object.getOption()).get(0)))) {
-				updateMap.put(object.getOption(), traceMap.remove(object.getOption()));	
+		final Collection<ITrace> traces = system.getTraces();
+		
+		if (!traces.isEmpty() && localCurrentMode instanceof IPlotModeColored) {
+			ITrace next = traces.iterator().next();
+			if (next instanceof IPaletteTrace && !((IPaletteTrace)next).isRescaleHistogram()) {
+				ImageServiceBean bean = ((IPaletteTrace)next).getImageServiceBean();
+				
+				Number[] minMax = new Number[] {bean.getMin(),bean.getMax()};
+				((IPlotModeColored)localCurrentMode).setMinMax(minMax);
+			} else {
+				((IPlotModeColored)localCurrentMode).setMinMax(null);
 			}
 		}
 		
-		Runnable r = new Runnable() {
-			
-			@Override
-			public void run() {
-				for (List<ITrace> traces : traceMap.values()) {
-					for (ITrace t : traces) system.removeTrace(t);
-				}
-			}
-		};
 		
 		final List<Runnable> uiRunnables = new ArrayList<>();
 		
-		uiRunnables.add(r);
+		if (!traces.isEmpty()) {
+			Runnable r = new Runnable() {
+				
+				@Override
+				public void run() {
+					
+					for (ITrace t : traces) {
+						system.removeTrace(t);
+					}
+					
+				}
+			};
+			
+			uiRunnables.add(r);
+		}
 		
 		for (DataStateObject object : state) {
-
-			List<ITrace> list = updateMap.remove(object.getOption());
-			
-			if (list == null) list = new ArrayList<ITrace>();
-
-			if (!object.isChecked() && !list.isEmpty()) {
-				final List<ITrace> fList = list;
-				 uiRunnables.add(() -> {for (ITrace t : fList){
-					system.removeTrace(t);
-				}});
-			} else if (object.isChecked()) {
-				uiRunnables.add(updatePlottedData(object, list, localCurrentMode, localModifier));
-			}
-			
+				uiRunnables.add(updatePlottedData(object, new ArrayList<ITrace>(), localCurrentMode, localModifier));
 		}
 		
 		Display.getDefault().syncExec(new Runnable() {
 			
 			@Override
 			public void run() {
+				
 				for (Runnable r : uiRunnables) {
 					r.run();
 				}
@@ -276,10 +269,6 @@ public class PlotController implements IPlotController {
 				if (colorProvider != null) {
 					List<Color> local = null;
 					if (colorcache == null) {
-//						final IPaletteService pservice = (IPaletteService) PlatformUI.getWorkbench()
-//								.getService(IPaletteService.class);
-////						PaletteData paletteData = pservice.getDirectPaletteData("Viridis (blue-green-yellow)");
-//						PaletteData paletteData = pservice.getDirectPaletteData("Jet (Blue-Cyan-Green-Yellow-Red)");
 						RGB[] rgbs = colorProvider.getRGBs();
 						local = new ArrayList<Color>(rgbs.length);
 						Display display = Display.getDefault();
@@ -555,30 +544,6 @@ public class PlotController implements IPlotController {
 		}
 		
 		if (!objects.isEmpty()) fileController.deselect(objects);
-	}
-
-	private Map<DataOptions, List<ITrace>> collectTracesFromPlot() {
-		
-		IPlottingSystem<?> system = getPlottingSystem();
-		
-		Collection<ITrace> traces = system.getTraces();
-		
-		Map<DataOptions, List<ITrace>> optionTraceMap = new LinkedHashMap<>();
-		
-		for (ITrace t : traces) {
-			if (t.getUserObject() instanceof DataOptions) {
-				DataOptions option = (DataOptions)t.getUserObject();
-				if (optionTraceMap.containsKey(option)) {
-					optionTraceMap.get(option).add(t);
-				} else {
-					List<ITrace> list = new ArrayList<ITrace>();
-					list.add(t);
-					optionTraceMap.put(option, list);
-				}
-			}
-		}
-		
-		return optionTraceMap;
 	}
 	
 	private IPlottingSystem<?> getPlottingSystem() {
