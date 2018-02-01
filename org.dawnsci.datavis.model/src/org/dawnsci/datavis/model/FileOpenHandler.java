@@ -4,6 +4,7 @@ import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.dawnsci.datavis.api.IRecentPlaces;
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
@@ -22,7 +23,18 @@ public class FileOpenHandler extends AbstractHandler {
 	public Object execute(ExecutionEvent event) throws ExecutionException {
 		Shell shell = Display.getDefault().getActiveShell();
 		FileDialog dialog = new FileDialog(shell,SWT.MULTI);
+		
+		BundleContext bundleContext =
+                FrameworkUtil.
+                getBundle(this.getClass()).
+                getBundleContext();
+		
+		IRecentPlaces recentPlaces = bundleContext.getService(bundleContext.getServiceReference(IRecentPlaces.class));
 
+		if (!recentPlaces.getRecentPlaces().isEmpty()) {
+			dialog.setFilterPath(recentPlaces.getRecentPlaces().get(0));
+		}
+		
 		if (dialog.open() == null) return null;
 
 		String[] fileNames = dialog.getFileNames();
@@ -30,11 +42,6 @@ public class FileOpenHandler extends AbstractHandler {
 
 		Map<String,String[]> props = new HashMap<>();
 		props.put("paths", fileNames);
-
-		BundleContext bundleContext =
-                FrameworkUtil.
-                getBundle(this.getClass()).
-                getBundleContext();
 		
 		EventAdmin eventAdmin = bundleContext.getService(bundleContext.getServiceReference(EventAdmin.class));
 		

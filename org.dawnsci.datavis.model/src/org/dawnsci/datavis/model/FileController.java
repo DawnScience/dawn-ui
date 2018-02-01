@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -471,6 +472,17 @@ public class FileController implements IFileController {
 		currentData = null;
 		
 		fireStateChangeListeners(true, true);
+	}
+	
+	public void setComparator(Comparator<LoadedFile> comparator) {
+		loadedFiles.setComparator(comparator);
+		fireStateChangeListeners(true, true);
+	}
+	
+	public void setLabelName(String label) {
+		for (LoadedFile file : loadedFiles) {
+			file.setLabelName(label);
+		}
 	}
 	
 	/* (non-Javadoc)

@@ -1,13 +1,15 @@
 package org.dawnsci.datavis.model;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 
 public class LoadedFiles implements IDataObject, Iterable<LoadedFile> {
 
-	private List<LoadedFile> fileList; 
+	private List<LoadedFile> fileList;
+	private Comparator<LoadedFile> comparator; 
 	
 	public LoadedFiles() {
 		fileList = new ArrayList<LoadedFile>();
@@ -22,7 +24,10 @@ public class LoadedFiles implements IDataObject, Iterable<LoadedFile> {
 	}
 	
 	public List<LoadedFile> getLoadedFiles() {
-		return new ArrayList<LoadedFile>(fileList);
+		
+		ArrayList<LoadedFile> arrayList = new ArrayList<LoadedFile>(fileList);
+		if (comparator != null) arrayList.sort(comparator);
+		return arrayList;
 	}
 	
 	public boolean contains(String path) {
@@ -51,10 +56,14 @@ public class LoadedFiles implements IDataObject, Iterable<LoadedFile> {
 	public void unloadFile(LoadedFile file) {
 		fileList.remove(file);
 	}
+	
+	public void setComparator(Comparator<LoadedFile> comparator) {
+		this.comparator = comparator;
+	}
 
 	@Override
 	public Iterator<LoadedFile> iterator() {
-		return fileList.iterator();
+		return getLoadedFiles().iterator();
 	}
 
 	public void unloadAllFiles() {
@@ -63,6 +72,9 @@ public class LoadedFiles implements IDataObject, Iterable<LoadedFile> {
 	}
 	
 	public void moveBefore(List<LoadedFile> files, LoadedFile marker) {
+		
+		if (files.contains(marker)) return;
+		
 		fileList.removeAll(files);
 		
 		if (marker == null) {
