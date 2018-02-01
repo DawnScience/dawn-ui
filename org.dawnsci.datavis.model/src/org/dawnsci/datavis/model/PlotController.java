@@ -263,7 +263,12 @@ public class PlotController implements IPlotController {
 			public void run() {
 				
 				for (Runnable r : uiRunnables) {
-					r.run();
+					try {
+						r.run();
+					} catch (Exception e) {
+						logger.error("Error running plot update",e);
+					}
+					
 				}
 				
 				if (colorProvider != null) {

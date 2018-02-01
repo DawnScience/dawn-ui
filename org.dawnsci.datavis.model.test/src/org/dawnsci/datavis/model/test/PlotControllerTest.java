@@ -79,10 +79,25 @@ public class PlotControllerTest extends AbstractTestModel {
 		fileController.loadFile(file.getAbsolutePath());
 	}
 	
+	private void setUpAndSelectFirstFile3D(){
+		setUpAndSelectFile3D(file.getAbsolutePath());
+		fileController.loadFile(file.getAbsolutePath());
+	}
+	
 	private void setUpAndSelectFile2D(String path){
 		fileController.loadFile(path);
 		LoadedFile lf = fileController.getLoadedFiles().stream().filter(f -> f.getFilePath().equals(path)).findFirst().get();
 		DataOptions dop = lf.getDataOption("/entry/dataset2");
+		fileController.setCurrentFile(lf,true);
+		fileController.setCurrentData(dop, true);
+		plotManager.waitOnJob();
+		assertEquals(1, plottingSystem.getTraces().size());
+	}
+	
+	private void setUpAndSelectFile3D(String path){
+		fileController.loadFile(path);
+		LoadedFile lf = fileController.getLoadedFiles().stream().filter(f -> f.getFilePath().equals(path)).findFirst().get();
+		DataOptions dop = lf.getDataOption("/entry/dataset3");
 		fileController.setCurrentFile(lf,true);
 		fileController.setCurrentData(dop, true);
 		plotManager.waitOnJob();
@@ -374,7 +389,7 @@ public class PlotControllerTest extends AbstractTestModel {
 	
 	@Test
 	public void testPlotModeImageWithSlice() {
-		setUpAndSelectFirstFile2D();
+		setUpAndSelectFirstFile3D();
 
 		ITrace next = plottingSystem.getTraces().iterator().next();
 		assertTrue(next instanceof IImageTrace);

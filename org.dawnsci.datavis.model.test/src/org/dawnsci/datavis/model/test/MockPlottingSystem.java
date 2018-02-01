@@ -138,7 +138,7 @@ public class MockPlottingSystem implements IPlottingSystem<Object> {
 
 	@Override
 	public Collection<ITrace> getTraces() {
-		return traces;
+		return new ArrayList<>(traces);
 	}
 
 	@Override
