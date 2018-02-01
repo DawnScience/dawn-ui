@@ -1,6 +1,7 @@
 package org.dawnsci.datavis.model;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
@@ -12,7 +13,7 @@ public class LoadedFiles implements IDataObject, Iterable<LoadedFile> {
 	private Comparator<LoadedFile> comparator; 
 	
 	public LoadedFiles() {
-		fileList = new ArrayList<LoadedFile>();
+		fileList = Collections.synchronizedList(new ArrayList<LoadedFile>());
 	}
 	
 	public void addFile(LoadedFile f){
