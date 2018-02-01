@@ -542,7 +542,7 @@ public class MockPlottingSystem implements IPlottingSystem<Object> {
 
 	@Override
 	public void reset() {
-		// TODO Auto-generated method stub
+		traces.clear();
 		
 	}
 

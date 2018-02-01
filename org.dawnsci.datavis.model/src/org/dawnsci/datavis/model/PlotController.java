@@ -315,7 +315,7 @@ public class PlotController implements IPlotController {
 		//"org/dawnsci/datavis/plot/UPDATE"
 		
 		Map<String,String> props = new HashMap<>();
-		eventAdmin.postEvent(new Event("org/dawnsci/datavis/plot/UPDATE", props));
+		if (eventAdmin != null) eventAdmin.postEvent(new Event("org/dawnsci/datavis/plot/UPDATE", props));
 	}
 	
 	private Runnable updatePlottedData(DataStateObject stateObject,final List<ITrace> traces, IPlotMode mode, IPlotDataModifier modifier) {

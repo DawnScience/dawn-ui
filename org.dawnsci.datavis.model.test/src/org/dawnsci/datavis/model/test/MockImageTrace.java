@@ -19,6 +19,7 @@ public class MockImageTrace implements IImageTrace {
 
 	String name;
 	private Object userObject;
+	private ImageServiceBean bean = new ImageServiceBean();
 	
 	public MockImageTrace(String name) {
 		this.name = name;
@@ -56,8 +57,7 @@ public class MockImageTrace implements IImageTrace {
 
 	@Override
 	public ImageServiceBean getImageServiceBean() {
-		// TODO Auto-generated method stub
-		return null;
+		return bean;
 	}
 
 	@Override
