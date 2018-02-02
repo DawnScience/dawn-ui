@@ -236,8 +236,12 @@ public class LoadedFile implements IDataObject, IDataFilePackage {
 			if (s != null && s.containsAttribute(NexusTreeUtils.NX_CLASS) && NexusTreeUtils.NX_DATA.equals(s.getAttribute(NexusTreeUtils.NX_CLASS).getFirstElement())) {
 				if (s.containsAttribute(NexusTreeUtils.NX_SIGNAL)) {
 					String name = s.getAttribute(NexusTreeUtils.NX_SIGNAL).getFirstElement();
-					if (e.getKey().equals(name)) {
-						signals.add("/" + name);
+					
+					String key = e.getKey();
+					String[] split = key.split("/");
+					
+					if (split[split.length-1].equals(name)) {
+						signals.add("/" + key);
 						ILazyDataset lz = NexusTreeUtils.getAugmentedSignalDataset((GroupNode)s);
 						if (lz != null) {
 							dataHolder.get().addDataset("/" + name, lz);
