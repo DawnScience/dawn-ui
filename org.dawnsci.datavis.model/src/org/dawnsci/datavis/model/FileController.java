@@ -48,6 +48,8 @@ public class FileController implements IFileController {
 	private DataOptions currentData;
 	private ILiveFileListener listener;
 	
+	private String labelName;
+	
 	private ILoadedFileConfiguration[] fileConfigs = new ILoadedFileConfiguration[]{new CurrentStateFileConfiguration(), new NexusFileConfiguration(), new ImageFileConfiguration(), new XYEFileConfiguration()};
 	
 	private Set<FileControllerStateEventListener> listeners = new HashSet<FileControllerStateEventListener>();
@@ -436,6 +438,8 @@ public class FileController implements IFileController {
 						}
 					}
 					
+					f.setLabelName(labelName);
+					
 					files.add(f);
 				}
 				
@@ -480,6 +484,7 @@ public class FileController implements IFileController {
 	}
 	
 	public void setLabelName(String label) {
+		labelName = label;
 		for (LoadedFile file : loadedFiles) {
 			file.setLabelName(label);
 		}
