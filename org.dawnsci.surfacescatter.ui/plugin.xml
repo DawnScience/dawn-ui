@@ -15,7 +15,7 @@
             allPopups="false"
             locationURI="menu:org.eclipse.ui.main.menu">
          <menu
-               id="org.dawnsc.menu.main.tools"
+               id="org.dawnsci.menu.main.tools"
                label="Tools">
             <command
                   commandId="org.dawnsci.surfacescatter.ui.dialog"

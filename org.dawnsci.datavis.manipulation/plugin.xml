@@ -6,7 +6,7 @@
       <menuContribution
             allPopups="false"
             class="org.dawnsci.datavis.manipulation.DataManipulationExtensionContributionFactory"
-            locationURI="menu:org.dawnsc.menu.main.tools">
+            locationURI="menu:org.dawnsci.menu.main.tools">
       </menuContribution>
    </extension>
 
