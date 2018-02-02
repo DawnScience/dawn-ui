@@ -12,6 +12,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.dawnsci.datavis.api.IRecentPlaces;
 import org.dawnsci.datavis.model.fileconfig.CurrentStateFileConfiguration;
@@ -48,6 +49,8 @@ public class FileController implements IFileController {
 	private DataOptions currentData;
 	private ILiveFileListener listener;
 	
+	private boolean onlySignals = false;
+
 	private String labelName;
 	
 	private ILoadedFileConfiguration[] fileConfigs = new ILoadedFileConfiguration[]{new CurrentStateFileConfiguration(), new NexusFileConfiguration(), new ImageFileConfiguration(), new XYEFileConfiguration()};
@@ -122,7 +125,6 @@ public class FileController implements IFileController {
 		
 		// Now create a fileWriter
 		BufferedWriter fileWriter = null;
-		
 		// Then come up with the output filename
 		String firstFileName = files.get(0).getName();
 		String lastFileName = files.get(files.size()-1).getName();
@@ -439,7 +441,7 @@ public class FileController implements IFileController {
 					}
 					
 					f.setLabelName(labelName);
-					
+					f.setOnlySignals(onlySignals);
 					files.add(f);
 				}
 				
@@ -490,6 +492,15 @@ public class FileController implements IFileController {
 		}
 	}
 	
+	public boolean isOnlySignals() {
+		return onlySignals;
+	}
+
+	public void setOnlySignals(boolean onlySignals) {
+		this.onlySignals = onlySignals;
+		loadedFiles.getLoadedFiles().stream().forEach(f-> f.setOnlySignals(onlySignals));
+	}
+	
 	/* (non-Javadoc)
 	 * @see org.dawnsci.datavis.model.IFileController#applyToAll(org.dawnsci.datavis.model.LoadedFile)
 	 */
@@ -533,10 +544,38 @@ public class FileController implements IFileController {
 				@Override
 				public void run() {
 
-					getLoadedFiles().stream()
-					.filter(IRefreshable.class::isInstance)
-					.map(IRefreshable.class::cast)
-					.forEach(IRefreshable::refresh);
+					List<DataStateObject> fs = getImmutableFileState();
+
+					ILoadedFileConfiguration loadedConfig = null;
+
+					if (!fs.isEmpty()) {
+						loadedConfig = new CurrentStateFileConfiguration();
+						loadedConfig.setCurrentState(fs);
+					}
+
+					ILoadedFileConfiguration nexusConfig = new NexusFileConfiguration();
+
+					List<IRefreshable> files = getLoadedFiles().stream()
+							.filter(IRefreshable.class::isInstance)
+							.map(IRefreshable.class::cast).collect(Collectors.toList());
+
+					for (IRefreshable file : files) {
+
+						if (file.isEmpty()) {
+
+							file.refresh();
+
+							if (!file.isEmpty()) {
+								if (loadedConfig != null && !loadedConfig.configure((LoadedFile)file)) {
+									nexusConfig.configure((LoadedFile)file);
+								}
+							}
+
+						} else {
+							file.refresh();
+						}
+					}
+
 
 					Display.getDefault().syncExec( () -> fireStateChangeListeners(true, true));
 
@@ -557,6 +596,32 @@ public class FileController implements IFileController {
 
 		@Override
 		public void fileLoaded(LoadedFile loadedFile) {
+			
+			List<DataStateObject> fs = getImmutableFileState();
+			
+			loadedFile.setOnlySignals(onlySignals);
+
+			if (loadedFile instanceof IRefreshable && !((IRefreshable)loadedFile).isEmpty()) {
+
+				
+				ILoadedFileConfiguration loadedConfig = null;
+
+				if (!fs.isEmpty()) {
+					loadedConfig = new CurrentStateFileConfiguration();
+					loadedConfig.setCurrentState(fs);
+				}
+
+				ILoadedFileConfiguration nexusConfig = new NexusFileConfiguration();
+
+				
+				if (loadedConfig == null || !loadedConfig.configure(loadedFile)) {
+					nexusConfig.configure((LoadedFile)loadedFile);
+				}
+
+			}
+			
+			loadedFile.setLabelName(labelName);
+			
 			loadedFiles.addFile(loadedFile);
 			fireStateChangeListeners(false, false);
 		}

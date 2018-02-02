@@ -1,8 +1,6 @@
 package org.dawnsci.datavis.live;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -13,13 +11,13 @@ import org.dawnsci.datavis.model.LoadedFile;
 import org.dawnsci.datavis.model.NDimensions;
 import org.eclipse.dawnsci.analysis.api.io.IDataHolder;
 import org.eclipse.dawnsci.analysis.api.io.ILoaderService;
-import org.eclipse.dawnsci.analysis.api.processing.NXCite;
 import org.eclipse.dawnsci.analysis.api.tree.Attribute;
 import org.eclipse.dawnsci.analysis.api.tree.DataNode;
 import org.eclipse.dawnsci.analysis.api.tree.GroupNode;
 import org.eclipse.dawnsci.analysis.api.tree.IFindInTree;
 import org.eclipse.dawnsci.analysis.api.tree.Node;
 import org.eclipse.dawnsci.analysis.api.tree.NodeLink;
+import org.eclipse.dawnsci.analysis.api.tree.SymbolicNode;
 import org.eclipse.dawnsci.analysis.api.tree.Tree;
 import org.eclipse.dawnsci.analysis.api.tree.TreeUtils;
 import org.eclipse.dawnsci.analysis.tree.TreeToMapUtils;
@@ -49,25 +47,17 @@ public class LiveLoadedFile extends LoadedFile implements IRefreshable {
 	private String host;
 	private int port;
 	
-	private final static Logger logger = LoggerFactory.getLogger(LiveLoadedFile.class);
+	private static final Logger logger = LoggerFactory.getLogger(LiveLoadedFile.class);
 	
 	public LiveLoadedFile(String path, String host, int port) {
-		this(createDataHolder(path,host,port));
+		super(new DataHolder());
 		this.host = host;
 		this.port = port;
-	}
-
-	private LiveLoadedFile(IDataHolder dh) {
-		super(dh);
-	}
-	
-	@Override
-	public List<DataOptions> getDataOptions() {
 		
-		return new ArrayList<>(dataOptions.values());
+		dataHolder.set(createDataHolder(path, host, port));
 	}
 
-	private static IDataHolder createDataHolder(String path, String host, int port) {
+	private IDataHolder createDataHolder(String path, String host, int port) {
 		DataHolder dh = new DataHolder();
 		dh.setFilePath(path);
 		Tree tree = getTree(path,host,port);
@@ -78,12 +68,13 @@ public class LiveLoadedFile extends LoadedFile implements IRefreshable {
 		
 		if (result == null) return dh;
 		dh.setMetadata(new Metadata());
-		fillDataHolder(dh, result, tree, null,null, path, host, port);
+		dh.setTree(tree);
+		fillDataHolder(dh, result);
 		
 		return dh;
 	}
 	
-	private static void fillDataHolder(IDataHolder dh, Map<String, NodeLink> result, Tree tree, Map<String, DataOptions> options, LoadedFile file, String path, String host, int port) {
+	private void fillDataHolder(IDataHolder dh, Map<String, NodeLink> result) {
 		IMetadata md = dh.getMetadata();
 		
 		Map<String, String[]> axesMap = new HashMap<>();
@@ -92,21 +83,24 @@ public class LiveLoadedFile extends LoadedFile implements IRefreshable {
 			
 			String name = "/"+s.getKey();
 			
-			if (options != null && options.containsKey(name)) continue;
+			if (dataOptions.containsKey(name)) continue;
 			
-			IDynamicDataset dataset = buildDataset(s.getKey(),path,host,port);
+			IDynamicDataset dataset = buildDataset(s.getKey(),dh.getFilePath(),host,port);
 			
 			long[] maxShape = ((DataNode)s.getValue().getDestination()).getMaxShape();
 			
 			if (maxShape.length == 0 || allOnes(maxShape)) {
+				if (!possibleLabels.containsKey(name)) {
+					possibleLabels.put(name, dataset);
+				}
 				continue;
 			}
 			
 			addDataset(dataset,maxShape,dh,md);
 			
-			if ( options != null && ((LazyDatasetBase)dataset).getDType() != Dataset.STRING) {
-				DataOptions d = new DataOptions(name, file);
-				options.put(d.getName(),d);
+			if (((LazyDatasetBase)dataset).getDType() != Dataset.STRING) {
+				DataOptions d = new DataOptions(name, this);
+				dataOptions.put(d.getName(),d);
 			}
 			
 			String[] split = name.split("/");
@@ -114,18 +108,23 @@ public class LiveLoadedFile extends LoadedFile implements IRefreshable {
 			String shortName = split[split.length-1];
 			
 			String[] axes = getAxes(dataset,s.getValue(), shortName);
-			if (axes != null) axesMap.put(name, axes);
+			if (axes != null) {
+				signals.add(name);
+				axesMap.put(name, axes);
+			}
 		
 		}
 		
 		dh.setMetadata(md);
 		
-		dh.setTree(tree);
-		
 		try {
 			buildAxes(axesMap, dh);
 		} catch (MetadataException e) {
 			logger.error("Could not build AxesMetadata!", e);
+		}
+		
+		if (getLabel().isEmpty() && !getLabelName().isEmpty()){
+			setLabelName(getLabelName());
 		}
 	}
 	
@@ -214,13 +213,18 @@ public class LiveLoadedFile extends LoadedFile implements IRefreshable {
 		return TreeToMapUtils.mapToTree(map, path);
 	}
 	
-	private static Map<String, NodeLink> findNodes(Tree tree){
+	private Map<String, NodeLink> findNodes(Tree tree){
 
 		IFindInTree finder = new IFindInTree() {
 			
 			@Override
 			public boolean found(NodeLink node) {
 				Node d = node.getDestination();
+				
+				if (d instanceof SymbolicNode) {
+					System.out.println("BREAK " + node.getName());
+				}
+				
 				return d instanceof DataNode;
 			}
 		};
@@ -275,7 +279,7 @@ public class LiveLoadedFile extends LoadedFile implements IRefreshable {
 		
 		Map<String, NodeLink> result = findNodes(tree);
 		
-		fillDataHolder(dataHolder.get(), result, tree, dataOptions, this, path, host, port);
+		fillDataHolder(dataHolder.get(), result);
 		
 	}
 	
@@ -358,18 +362,18 @@ public class LiveLoadedFile extends LoadedFile implements IRefreshable {
 	}
 
 	@Override
-	public void refresh() {
-		if (!live) return;
+	public IRefreshable refresh() {
+		if (!live) return this;
 		
 		if (finished) {
 			locallyReload();
-			return;
+			return this;
 		}
 		
 		if (dataHolder.get().getList().isEmpty()){
 			String path = dataHolder.get().getFilePath();
 			dataHolder.set(createDataHolder(path, host, port));
-			if (dataHolder.get().getList().isEmpty()) return;
+			if (dataHolder.get().getList().isEmpty()) return this;
 		}
 		
 		
@@ -381,12 +385,12 @@ public class LiveLoadedFile extends LoadedFile implements IRefreshable {
 			}
 			
 			if (!dataOptions.isEmpty()) {
-				return;
+				return this;
 			}
 			
 			updateDataHolder();
 			
-			return;
+			return this;
 		} else {
 			updateDataHolder();
 		}
@@ -394,6 +398,7 @@ public class LiveLoadedFile extends LoadedFile implements IRefreshable {
 		refreshAllDatasets();
 		updateDataOptions();
 		
+		return this;
 	}
 
 	@Override
@@ -450,6 +455,11 @@ public class LiveLoadedFile extends LoadedFile implements IRefreshable {
 	@Override
 	public boolean hasFinished() {
 		return finished;
+	}
+
+	@Override
+	public boolean isEmpty() {
+		return dataOptions.isEmpty();
 	}
 	
 }

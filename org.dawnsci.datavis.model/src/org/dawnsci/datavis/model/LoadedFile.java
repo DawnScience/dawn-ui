@@ -41,12 +41,15 @@ public class LoadedFile implements IDataObject, IDataFilePackage {
 	protected AtomicReference<IDataHolder> dataHolder;
 	protected Map<String,DataOptions> dataOptions;
 	protected Map<String, ILazyDataset> possibleLabels;
+	protected boolean onlySignals = false;
+	protected Set<String> signals;
 	private boolean selected = false;
 	private String labelName = "";
 	private String label = "";
 
 	public LoadedFile(IDataHolder dataHolder) {
-		this.dataHolder = new AtomicReference<IDataHolder>(dataHolder);		
+		this.dataHolder = new AtomicReference<IDataHolder>(dataHolder);
+		this.signals = new HashSet<>();
 		dataOptions = new LinkedHashMap<>();
 		possibleLabels = new HashMap<>();
 		String[] names = null;
@@ -81,6 +84,15 @@ public class LoadedFile implements IDataObject, IDataFilePackage {
 	}
 
 	public List<DataOptions> getDataOptions() {
+		
+		if (onlySignals && !signals.isEmpty()) {
+			ArrayList<DataOptions> sig = new ArrayList<>();
+			for (String s : signals) {
+				sig.add(dataOptions.get(s));
+			}
+			return sig;
+		}
+		
 		return new ArrayList<>(dataOptions.values());
 	}
 	
@@ -184,9 +196,20 @@ public class LoadedFile implements IDataObject, IDataFilePackage {
 			@Override
 			public boolean found(NodeLink node) {
 				Node d = node.getDestination();
-				if (d != null && d instanceof DataNode && !nodes.contains(d)) {
-					nodes.add((DataNode)d);
-					return true;
+				Node s = node.getSource();
+				
+				boolean nxData = false;
+				
+				if (s != null && s.containsAttribute(NexusTreeUtils.NX_CLASS) && NexusTreeUtils.NX_DATA.equals(s.getAttribute(NexusTreeUtils.NX_CLASS))) {
+					nxData = true;
+				}
+				
+				if (d != null && d instanceof DataNode) {
+					
+					if (nxData || !nodes.contains(d)) {
+						nodes.add((DataNode)d);
+						return true;
+					}
 				}
 				return false;
 			}
@@ -195,16 +218,6 @@ public class LoadedFile implements IDataObject, IDataFilePackage {
 		Map<String, NodeLink> results = TreeUtils.treeBreadthFirstSearch(node, tree, false, true, null);
 		
 		Map<DataNode, String> out = new LinkedHashMap<DataNode, String>();
-		
-		for (Entry<String, NodeLink> e: results.entrySet()) {
-			Node d = e.getValue().getDestination();
-			if (d instanceof DataNode) {
-				Node source = e.getValue().getSource();
-				if (source != null && source.containsAttribute(NexusTreeUtils.NX_CLASS) && NexusTreeUtils.NX_DATA.equals(source.getAttribute(NexusTreeUtils.NX_CLASS))) {
-					out.put((DataNode)d, e.getKey());
-				}
-			}
-		}
 		
 		for (Entry<String, NodeLink> e: results.entrySet()) {
 			Node d = e.getValue().getDestination();
@@ -234,6 +247,11 @@ public class LoadedFile implements IDataObject, IDataFilePackage {
 	}
 
 	public void setLabelName(String labelName) {
+		if (labelName == null) {
+			this.labelName = "";
+			this.label = "";
+			return;
+		}
 		this.labelName = labelName;
 		if (possibleLabels.containsKey(labelName)) {
 			ILazyDataset l = possibleLabels.get(labelName);
@@ -249,5 +267,13 @@ public class LoadedFile implements IDataObject, IDataFilePackage {
 		} else {
 			label = "";
 		}
+	}
+	
+	public boolean isOnlySignals() {
+		return onlySignals;
+	}
+
+	public void setOnlySignals(boolean onlySignals) {
+		this.onlySignals = onlySignals;
 	}
 }
