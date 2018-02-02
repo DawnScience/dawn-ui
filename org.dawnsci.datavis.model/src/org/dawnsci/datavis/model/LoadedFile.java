@@ -8,8 +8,8 @@ import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
@@ -48,7 +48,7 @@ public class LoadedFile implements IDataObject, IDataFilePackage {
 	private String label = "";
 
 	public LoadedFile(IDataHolder dataHolder) {
-		this.dataHolder = new AtomicReference<IDataHolder>(dataHolder);
+		this.dataHolder = new AtomicReference<IDataHolder>(dataHolder.clone());
 		this.signals = new HashSet<>();
 		dataOptions = new LinkedHashMap<>();
 		possibleLabels = new HashMap<>();
@@ -65,6 +65,7 @@ public class LoadedFile implements IDataObject, IDataFilePackage {
 //				names = values.toArray(new String[values.size()]);
 			} catch ( Exception e) {
 				logger.error("Could not get unique nodes",e);
+				this.signals = new HashSet<>();
 			}
 			
 		}
@@ -72,9 +73,14 @@ public class LoadedFile implements IDataObject, IDataFilePackage {
 		if (names == null) names = dataHolder.getNames();
 		for (String n : names) {
 			ILazyDataset lazyDataset = dataHolder.getLazyDataset(n);
+			
 			if (lazyDataset != null && ((LazyDatasetBase)lazyDataset).getDType() != Dataset.STRING && lazyDataset.getSize() != 1) {
 				DataOptions d = new DataOptions(n, this);
 				dataOptions.put(d.getName(),d);
+			} else {
+				if (signals.contains(n)) {
+					signals.remove(n);
+				}
 			}
 			
 			if (lazyDataset != null && lazyDataset.getSize() == 1) {
@@ -188,7 +194,7 @@ public class LoadedFile implements IDataObject, IDataFilePackage {
 		return dataOptions.values().stream().toArray(size ->new IDataPackage[size]);
 	}
 	
-	public static Map<DataNode,String> getUniqueDataNodes(GroupNode node) {
+	public Map<DataNode,String> getUniqueDataNodes(GroupNode node) {
 		Set<DataNode> nodes = new HashSet<>();
 		
 		IFindInTree tree = new IFindInTree() {
@@ -200,7 +206,7 @@ public class LoadedFile implements IDataObject, IDataFilePackage {
 				
 				boolean nxData = false;
 				
-				if (s != null && s.containsAttribute(NexusTreeUtils.NX_CLASS) && NexusTreeUtils.NX_DATA.equals(s.getAttribute(NexusTreeUtils.NX_CLASS))) {
+				if (s != null && s.containsAttribute(NexusTreeUtils.NX_CLASS) && NexusTreeUtils.NX_DATA.equals(s.getAttribute(NexusTreeUtils.NX_CLASS).getFirstElement())) {
 					nxData = true;
 				}
 				
@@ -223,6 +229,28 @@ public class LoadedFile implements IDataObject, IDataFilePackage {
 			Node d = e.getValue().getDestination();
 			if (d instanceof DataNode) {
 				out.put((DataNode)d, e.getKey());
+			}
+			
+			Node s = e.getValue().getSource();
+			
+			if (s != null && s.containsAttribute(NexusTreeUtils.NX_CLASS) && NexusTreeUtils.NX_DATA.equals(s.getAttribute(NexusTreeUtils.NX_CLASS).getFirstElement())) {
+				if (s.containsAttribute(NexusTreeUtils.NX_SIGNAL)) {
+					String name = s.getAttribute(NexusTreeUtils.NX_SIGNAL).getFirstElement();
+					if (e.getKey().equals(name)) {
+						signals.add("/" + name);
+						ILazyDataset lz = NexusTreeUtils.getAugmentedSignalDataset((GroupNode)s);
+						if (lz != null) {
+							dataHolder.get().addDataset("/" + name, lz);
+						}
+					}
+				} else if (d.containsAttribute(NexusTreeUtils.NX_SIGNAL)) {
+					signals.add("/" + e.getKey());
+					ILazyDataset lz = NexusTreeUtils.getAugmentedSignalDataset((GroupNode)s);
+					if (lz != null) {
+						dataHolder.get().addDataset("/" + e.getKey(), lz);
+					}
+				}
+				
 			}
 		}
 		

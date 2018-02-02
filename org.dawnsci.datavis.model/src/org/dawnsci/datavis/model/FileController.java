@@ -499,6 +499,8 @@ public class FileController implements IFileController {
 	public void setOnlySignals(boolean onlySignals) {
 		this.onlySignals = onlySignals;
 		loadedFiles.getLoadedFiles().stream().forEach(f-> f.setOnlySignals(onlySignals));
+		
+		fireStateChangeListeners(true, true);
 	}
 	
 	/* (non-Javadoc)
