@@ -25,7 +25,7 @@ public class ServiceLoader {
 		return pservice;
 	}
 
-	public static void setPaletteService(IPaletteService pservice) {
+	public void setPaletteService(IPaletteService pservice) {
 		ServiceLoader.pservice = pservice;
 	}
 
@@ -33,7 +33,7 @@ public class ServiceLoader {
 		return lservice;
 	}
 
-	public static void setLoaderService(ILoaderService lservice) {
+	public void setLoaderService(ILoaderService lservice) {
 		ServiceLoader.lservice = lservice;
 	}
 }

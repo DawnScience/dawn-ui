@@ -25,7 +25,7 @@ public class ServiceHolder {
 		return loaderService;
 	}
 
-	public static void setLoaderService(ILoaderService ls) {
+	public void setLoaderService(ILoaderService ls) {
 		loaderService = ls;
 	}
 
@@ -33,7 +33,7 @@ public class ServiceHolder {
 		return nexusFactory;
 	}
 
-	public static void setNexusFactory(INexusFileFactory nf) {
+	public void setNexusFactory(INexusFileFactory nf) {
 		nexusFactory = nf;
 	}
 }

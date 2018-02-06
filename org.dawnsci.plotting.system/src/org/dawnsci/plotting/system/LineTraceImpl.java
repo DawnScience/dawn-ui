@@ -46,7 +46,7 @@ import org.eclipse.ui.preferences.ScopedPreferenceStore;
 public class LineTraceImpl implements ILineTrace, ITraceListener{
 
 	private static IMacroService mservice;
-	public static void setMacroService(IMacroService s) {
+	public void setMacroService(IMacroService s) {
 		mservice = s;
 	}
 	public LineTraceImpl() { // Used for OSGi

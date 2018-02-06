@@ -14,11 +14,11 @@ public class ServiceManager {
 		return dservice;
 	}
 
-	public static void setRemoteDatasetService(IRemoteDatasetService d) {
+	public void setRemoteDatasetService(IRemoteDatasetService d) {
 		dservice = d;
 	}
 	
-	public static void setIEventService(IEventService service) {
+	public void setIEventService(IEventService service) {
 		eventService = service;
 	}
 
@@ -30,7 +30,7 @@ public class ServiceManager {
 		return loaderService;
 	}
 	
-	public static void setILoaderService(ILoaderService service) {
+	public void setILoaderService(ILoaderService service) {
 		loaderService = service;
 	}
 }

@@ -10,7 +10,7 @@ public class EventServiceHolder {
 		return eService;
 	}
 	
-	public static void setEventService(IEventService eService) {
+	public void setEventService(IEventService eService) {
 		EventServiceHolder.eService = eService;
 	}
 	

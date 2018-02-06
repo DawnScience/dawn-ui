@@ -139,7 +139,7 @@ public class PaletteService extends AbstractServiceFactory implements IPaletteSe
 	 * used by osgi injection
 	 * @param ps
 	 */
-	public static void setPaletteService(IPaletteService ps) {
+	public void setPaletteService(IPaletteService ps) {
 		pservice = ps;
 	}
 

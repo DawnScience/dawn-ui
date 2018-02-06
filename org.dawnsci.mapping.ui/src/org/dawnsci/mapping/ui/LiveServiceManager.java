@@ -8,7 +8,7 @@ public class LiveServiceManager {
 		return liveMappingFileService;
 	}
 
-	public static void setLiveMappingFileService(ILiveMappingFileService liveMappingFileService) {
+	public void setLiveMappingFileService(ILiveMappingFileService liveMappingFileService) {
 		LiveServiceManager.liveMappingFileService = liveMappingFileService;
 	}
 	

@@ -27,7 +27,7 @@ public class ServiceLoader {
 	 * 
 	 * @param it
 	 */
-	public static void setImageFilter(IImageFilterService ifs) {
+	public void setImageFilter(IImageFilterService ifs) {
 		filter = ifs;
 	}
 
@@ -40,7 +40,7 @@ public class ServiceLoader {
 	 * 
 	 * @param it
 	 */
-	public static void setImageTransform(IImageTransform it) {
+	public void setImageTransform(IImageTransform it) {
 		transformer = it;
 	}
 
@@ -48,7 +48,7 @@ public class ServiceLoader {
 		return transformer;
 	}
 
-	public static void setLoaderService(ILoaderService ls) {
+	public void setLoaderService(ILoaderService ls) {
 		loaderservice = ls;
 	}
 
@@ -60,7 +60,7 @@ public class ServiceLoader {
 		return expressiononbjectservice;
 	}
 
-	public static void setExpressionObjectService(IExpressionObjectService eservice) {
+	public void setExpressionObjectService(IExpressionObjectService eservice) {
 		expressiononbjectservice = eservice;
 	}
 
@@ -68,7 +68,7 @@ public class ServiceLoader {
 		return conversionservice;
 	}
 
-	public static void setConversionService(IConversionService cservice) {
+	public void setConversionService(IConversionService cservice) {
 		conversionservice = cservice;
 	}
 	
@@ -76,7 +76,7 @@ public class ServiceLoader {
 		return persistenceService;
 	}
 
-	public static void setPersistenceService(IPersistenceService pservice) {
+	public void setPersistenceService(IPersistenceService pservice) {
 		persistenceService = pservice;
 	}
 
@@ -84,7 +84,7 @@ public class ServiceLoader {
 		return nexusFileFactory;
 	}
 
-	public static void setNexusFileFactory(INexusFileFactory nexusFileFactory) {
+	public void setNexusFileFactory(INexusFileFactory nexusFileFactory) {
 		ServiceLoader.nexusFileFactory = nexusFileFactory;
 	}
 }

@@ -4,7 +4,7 @@ public class LiveServiceManager {
 
 	private static ILiveFileService lfservice;
 	
-	public static void setILiveFileService(ILiveFileService s){
+	public void setILiveFileService(ILiveFileService s){
 		lfservice = s;
 	}
 	

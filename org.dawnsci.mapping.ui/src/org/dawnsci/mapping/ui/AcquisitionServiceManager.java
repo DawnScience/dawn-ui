@@ -12,11 +12,11 @@ public class AcquisitionServiceManager {
 		return stageConfiguration;
 	}
 
-	public static void setStageConfiguration(IStageScanConfiguration stageConfiguration) {
+	public void setStageConfiguration(IStageScanConfiguration stageConfiguration) {
 		AcquisitionServiceManager.stageConfiguration = stageConfiguration;
 	}
 	
-	public static void setEventService(IEventService eService) {
+	public void setEventService(IEventService eService) {
 		eventService = eService;
 	}
 	

@@ -19,7 +19,7 @@ public class ServiceLoader {
 	 * Injected by OSGi
 	 * @param ps
 	 */
-	public static void setPaletteService(IPaletteService ps) {
+	public void setPaletteService(IPaletteService ps) {
 		paletteService = ps;
 	}
 

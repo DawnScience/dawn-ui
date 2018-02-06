@@ -18,7 +18,7 @@ public class ServiceLoader {
 		//used to load osgi service
 	}
 
-	public static void setSystemService(ISystemService<?> s) {
+	public void setSystemService(ISystemService<?> s) {
 		sservice = s;
 	}
 

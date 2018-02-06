@@ -26,7 +26,7 @@ public class ServiceHolder {
 		return expressionService;
 	}
 
-	public static void setExpressionService(IExpressionService expressionService) {
+	public void setExpressionService(IExpressionService expressionService) {
 		ServiceHolder.expressionService = expressionService;
 	}
 
@@ -34,11 +34,11 @@ public class ServiceHolder {
 		return eventTrackerService;
 	}
 
-	public static void setEventTrackerService(EventTracker eventTrackerService) {
+	public void setEventTrackerService(EventTracker eventTrackerService) {
 		ServiceHolder.eventTrackerService = eventTrackerService;
 	}
 
-	public static void setConversionService(IConversionService s) {
+	public void setConversionService(IConversionService s) {
 		conversionService = s;
 	}
 
@@ -46,7 +46,7 @@ public class ServiceHolder {
 		return conversionService;
 	}
 
-	public static void setOperationService(IOperationService s) {
+	public void setOperationService(IOperationService s) {
 		operationService = s;
 	}
 
@@ -54,7 +54,7 @@ public class ServiceHolder {
 		return operationService;
 	}
 
-	public static void setLoaderService(ILoaderService s) {
+	public void setLoaderService(ILoaderService s) {
 		loaderService = s;
 	}
 
@@ -62,7 +62,7 @@ public class ServiceHolder {
 		return loaderService;
 	}
 
-	public static void setOperationExporter(IOperationExporterService s) {
+	public void setOperationExporter(IOperationExporterService s) {
 		exporterService = s;
 	}
 
@@ -74,7 +74,7 @@ public class ServiceHolder {
 		return eventAdmin;
 	}
 
-	public static void setEventAdmin(EventAdmin eventAdmin) {
+	public void setEventAdmin(EventAdmin eventAdmin) {
 		ServiceHolder.eventAdmin = eventAdmin;
 	}
 
@@ -82,7 +82,7 @@ public class ServiceHolder {
 		return persistenceService;
 	}
 
-	public static void setPersistenceService(IPersistenceService persistenceService) {
+	public void setPersistenceService(IPersistenceService persistenceService) {
 		ServiceHolder.persistenceService = persistenceService;
 	}
 	
@@ -90,7 +90,7 @@ public class ServiceHolder {
 		return operationUIService;
 	}
 	
-	public static void setOperationUIService(IOperationUIService operationUIService) {
+	public void setOperationUIService(IOperationUIService operationUIService) {
 		ServiceHolder.operationUIService = operationUIService;
 	}
 }
