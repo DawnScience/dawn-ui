@@ -6,7 +6,7 @@ public class LocalServiceManager {
 
 	private static ILoaderService lservice;
 	
-	public static void setLoaderService(ILoaderService s) {
+	public void setLoaderService(ILoaderService s) {
 		lservice = s;
 	}
 

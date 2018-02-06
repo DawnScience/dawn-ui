@@ -37,7 +37,7 @@ public class MapNexusFileBuilderUtils {
 	public static final String[] FASTEST_AXES = new String[] {STAGE_X,STAGE_Y,STAGE_Z,TEMPERATURE};
 	
 	public static void makeGridScanWithSum(String path) throws NexusException {
-		ServiceHolder.setNexusFileFactory(new NexusFileFactoryHDF5());
+		new ServiceHolder().setNexusFileFactory(new NexusFileFactoryHDF5());
 		NexusFileBuilder fileBuilder = new DefaultNexusFileBuilder(path);
 		NXroot nXroot = fileBuilder.getNXroot();
 		NXentry entry = NexusNodeFactory.createNXentry();
@@ -54,7 +54,7 @@ public class MapNexusFileBuilderUtils {
 	}
 	
 	public static void makeGridScanWithZandSum(String path) throws NexusException {
-		ServiceHolder.setNexusFileFactory(new NexusFileFactoryHDF5());
+		new ServiceHolder().setNexusFileFactory(new NexusFileFactoryHDF5());
 		NexusFileBuilder fileBuilder = new DefaultNexusFileBuilder(path);
 		NXroot nXroot = fileBuilder.getNXroot();
 		NXentry entry = NexusNodeFactory.createNXentry();
@@ -71,7 +71,7 @@ public class MapNexusFileBuilderUtils {
 	}
 	
 	public static void makeGridScanWithEnergyZ(String path) throws NexusException {
-		ServiceHolder.setNexusFileFactory(new NexusFileFactoryHDF5());
+		new ServiceHolder().setNexusFileFactory(new NexusFileFactoryHDF5());
 		NexusFileBuilder fileBuilder = new DefaultNexusFileBuilder(path);
 		NXroot nXroot = fileBuilder.getNXroot();
 		NXentry entry = NexusNodeFactory.createNXentry();
@@ -87,7 +87,7 @@ public class MapNexusFileBuilderUtils {
 	}
 	
 	public static void makeDiagLineScanWithSum(String path) throws NexusException {
-		ServiceHolder.setNexusFileFactory(new NexusFileFactoryHDF5());
+		new ServiceHolder().setNexusFileFactory(new NexusFileFactoryHDF5());
 		NexusFileBuilder fileBuilder = new DefaultNexusFileBuilder(path);
 		NXroot nXroot = fileBuilder.getNXroot();
 		NXentry entry = NexusNodeFactory.createNXentry();
@@ -104,7 +104,7 @@ public class MapNexusFileBuilderUtils {
 	}
 	
 	public static void makeDiagLineScanWithSumZ(String path) throws NexusException {
-		ServiceHolder.setNexusFileFactory(new NexusFileFactoryHDF5());
+		new ServiceHolder().setNexusFileFactory(new NexusFileFactoryHDF5());
 		NexusFileBuilder fileBuilder = new DefaultNexusFileBuilder(path);
 		NXroot nXroot = fileBuilder.getNXroot();
 		NXentry entry = NexusNodeFactory.createNXentry();
@@ -121,7 +121,7 @@ public class MapNexusFileBuilderUtils {
 	}
 	
 	public static void makeDiodeGridScan(String path) throws NexusException {
-		ServiceHolder.setNexusFileFactory(new NexusFileFactoryHDF5());
+		new ServiceHolder().setNexusFileFactory(new NexusFileFactoryHDF5());
 		NexusFileBuilder fileBuilder = new DefaultNexusFileBuilder(path);
 		NXroot nXroot = fileBuilder.getNXroot();
 		NXentry entry = NexusNodeFactory.createNXentry();
@@ -135,7 +135,7 @@ public class MapNexusFileBuilderUtils {
 	}
 	
 	public static void makeDiodeGridScanEnergy(String path) throws NexusException {
-		ServiceHolder.setNexusFileFactory(new NexusFileFactoryHDF5());
+		new ServiceHolder().setNexusFileFactory(new NexusFileFactoryHDF5());
 		NexusFileBuilder fileBuilder = new DefaultNexusFileBuilder(path);
 		NXroot nXroot = fileBuilder.getNXroot();
 		NXentry entry = NexusNodeFactory.createNXentry();
@@ -149,7 +149,7 @@ public class MapNexusFileBuilderUtils {
 	}
 	
 	public static void makeDiodeLineScan(String path) throws NexusException {
-		ServiceHolder.setNexusFileFactory(new NexusFileFactoryHDF5());
+		new ServiceHolder().setNexusFileFactory(new NexusFileFactoryHDF5());
 		NexusFileBuilder fileBuilder = new DefaultNexusFileBuilder(path);
 		NXroot nXroot = fileBuilder.getNXroot();
 		NXentry entry = NexusNodeFactory.createNXentry();
@@ -162,7 +162,7 @@ public class MapNexusFileBuilderUtils {
 	}
 	
 	public static void makeDiodeLineScanEnergy(String path) throws NexusException {
-		ServiceHolder.setNexusFileFactory(new NexusFileFactoryHDF5());
+		new ServiceHolder().setNexusFileFactory(new NexusFileFactoryHDF5());
 		NexusFileBuilder fileBuilder = new DefaultNexusFileBuilder(path);
 		NXroot nXroot = fileBuilder.getNXroot();
 		NXentry entry = NexusNodeFactory.createNXentry();
