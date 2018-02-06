@@ -1,5 +1,6 @@
 package org.dawnsci.jzy3d;
 
+import java.util.Arrays;
 import java.util.List;
 
 import org.eclipse.dawnsci.plotting.api.histogram.IImageService;
@@ -21,6 +22,8 @@ public class WaterfallTraceImpl extends AbstractColorMapTrace implements IWaterf
 
 	private Shape shape;
 	private IDataset data;
+	private IDataset xAxis;
+	private IDataset yAxis;
 	
 	private ColorMapper colorMapper;
 	
@@ -51,7 +54,9 @@ public class WaterfallTraceImpl extends AbstractColorMapTrace implements IWaterf
 		float[] xArray = null;
 		float[] yArray = null;
 
-
+		xAxis = axes[0];
+		yAxis = axes[1];
+		
 		xArray = (axes != null && axes[0] != null) ? DatasetUtils.cast(FloatDataset.class, axes[0]).getData() : getRange(x);
 		yArray = (axes != null && axes[1] != null) ? DatasetUtils.cast(FloatDataset.class, axes[1]).getData() : getRange(y);
 
@@ -106,8 +111,7 @@ public class WaterfallTraceImpl extends AbstractColorMapTrace implements IWaterf
 
 	@Override
 	public List<IDataset> getAxes() {
-		// TODO Auto-generated method stub
-		return null;
+		return Arrays.asList(new IDataset[] {xAxis,yAxis});
 	}
 
 	@Override

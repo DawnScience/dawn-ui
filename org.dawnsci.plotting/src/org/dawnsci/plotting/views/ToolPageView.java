@@ -1328,6 +1328,7 @@ public class ToolPageView extends ViewPart implements IPartListener, IToolChange
 		if (getSite().getId().endsWith(".1D")) return ToolPageRole.ROLE_1D;
 		if (getSite().getId().endsWith(".2D")) return ToolPageRole.ROLE_2D;
 		if (getSite().getId().endsWith(".3D")) return ToolPageRole.ROLE_3D;
+		if (getSite().getId().endsWith(".Color")) return ToolPageRole.ROLE_JUST_COLOUR;
 		return ToolPageRole.ROLE_1D_AND_2D;
 	}
 

@@ -28,6 +28,12 @@
             label="Colour mapping"
             tooltip="Colour mapping tool for adjusting contrast, brightness and other image colour settings">
       </plotting_tool_page>
+      <plotting_tool_page
+            class="org.dawnsci.plotting.histogram.ui.HistogramToolPageColor"
+            icon="icons/color--pencil.png"
+            id="org.dawnsci.plotting.histogram.ui.HistogramToolPageColor"
+            label="Histogram">
+      </plotting_tool_page>
    </extension>
    <extension
          point="org.dawnsci.plotting.histogram.channelColourScheme">

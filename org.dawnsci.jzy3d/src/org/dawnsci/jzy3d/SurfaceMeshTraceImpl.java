@@ -1,5 +1,7 @@
 package org.dawnsci.jzy3d;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.eclipse.dawnsci.plotting.api.histogram.IImageService;
@@ -8,9 +10,12 @@ import org.eclipse.dawnsci.plotting.api.histogram.ImageServiceBean;
 import org.eclipse.dawnsci.plotting.api.histogram.ImageServiceBean.HistoType;
 import org.eclipse.dawnsci.plotting.api.preferences.BasePlottingConstants;
 import org.eclipse.dawnsci.plotting.api.trace.ISurfaceMeshTrace;
+import org.eclipse.january.DatasetException;
 import org.eclipse.january.dataset.DatasetUtils;
 import org.eclipse.january.dataset.FloatDataset;
 import org.eclipse.january.dataset.IDataset;
+import org.eclipse.january.dataset.ILazyDataset;
+import org.eclipse.january.metadata.AxesMetadata;
 import org.jzy3d.colors.Color;
 import org.jzy3d.colors.ColorMapper;
 import org.jzy3d.colors.colormaps.ColorMapGrayscale;
@@ -22,6 +27,8 @@ public class SurfaceMeshTraceImpl extends AbstractColorMapTrace implements ISurf
 
 	private AbstractDrawable shape;
 	private IDataset data;
+	private IDataset xAxis;
+	private IDataset yAxis;
 	
 	private ColorMapper colorMapper;
 	
@@ -54,7 +61,9 @@ public class SurfaceMeshTraceImpl extends AbstractColorMapTrace implements ISurf
 		FloatDataset z = DatasetUtils.cast(FloatDataset.class, data);
 		float[] xArray = null;
 		float[] yArray = null;
-
+		
+		xAxis = axes[0];
+		yAxis = axes[1];
 
 		xArray = (axes != null && axes[0] != null) ? DatasetUtils.cast(FloatDataset.class, axes[0]).getData() : getRange(x);
 		yArray = (axes != null && axes[1] != null) ? DatasetUtils.cast(FloatDataset.class, axes[1]).getData() : getRange(y);
@@ -71,8 +80,6 @@ public class SurfaceMeshTraceImpl extends AbstractColorMapTrace implements ISurf
 			((Shape)surface).setFaceDisplayed(true);
 			((Shape)surface).setWireframeDisplayed(false);
 		}
-		
-
 		
 		shape = surface;
 	       
@@ -109,14 +116,17 @@ public class SurfaceMeshTraceImpl extends AbstractColorMapTrace implements ISurf
 	@Override
 	protected void setColorMap(ColorMapper mapper) {
 		colorMapper = mapper;
-//		this.shape.setColorMapper(colorMapper);
+		if (shape instanceof Shape) {
+			((Shape)this.shape).setColorMapper(colorMapper);
+		}
+		
 		
 	}
 
 	@Override
 	public List<IDataset> getAxes() {
-		// TODO Auto-generated method stub
-		return null;
+		
+		return Arrays.asList(new IDataset[] {xAxis,yAxis});
 	}
 
 	@Override

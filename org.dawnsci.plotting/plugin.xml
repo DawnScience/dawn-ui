@@ -54,6 +54,13 @@
             id="org.dawb.workbench.application.data.analysis.tools"
             name="Data Analysis - Tools">
       </category>
+      <view
+            category="org.dawb.workbench.application.data.analysis.tools"
+            class="org.dawnsci.plotting.views.ToolPageView"
+            id="org.dawb.workbench.plotting.views.toolPageView.Color"
+            name="Colour Tools"
+            restorable="true">
+      </view>
    </extension>
    <extension
          point="org.eclipse.ui.services">

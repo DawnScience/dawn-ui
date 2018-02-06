@@ -275,6 +275,12 @@ public class PlottingActionBarManager implements IPlotActionSystem {
 			try {
 				MenuAction toolSet = createToolActions(role, viewId);
 				if (toolSet==null) return;
+				
+				if (role == ToolPageRole.ROLE_JUST_COLOUR) {
+					final String groupName=role.getId();
+					registerToolBarGroup(groupName);
+					registerAction(groupName, toolSet, ActionType.JZY3D_COLOR);
+				}
 
 				if (role.is1D()&&!role.is2D()) {
 					final String groupName=role.getId();
@@ -291,7 +297,7 @@ public class PlottingActionBarManager implements IPlotActionSystem {
 					registerToolBarGroup(groupName);
 					registerAction(groupName, toolSet, ActionType.THREED);
 				}
-
+				
 				if (role.is2D()) {
 					toolSet.addActionsTo(imageMenu);
 					this.imageMenu.addSeparator();

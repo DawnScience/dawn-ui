@@ -1,34 +1,38 @@
 package org.dawnsci.jzy3d;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 
 import org.eclipse.core.runtime.preferences.InstanceScope;
+import org.eclipse.dawnsci.plotting.api.ActionType;
+import org.eclipse.dawnsci.plotting.api.IPlotActionSystem;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystemViewer;
+import org.eclipse.dawnsci.plotting.api.ManagerType;
 import org.eclipse.dawnsci.plotting.api.preferences.BasePlottingConstants;
-import org.eclipse.dawnsci.plotting.api.trace.ILineTrace;
+import org.eclipse.dawnsci.plotting.api.tool.IToolPage.ToolPageRole;
 import org.eclipse.dawnsci.plotting.api.trace.ISurfaceMeshTrace;
 import org.eclipse.dawnsci.plotting.api.trace.ITrace;
 import org.eclipse.dawnsci.plotting.api.trace.IWaterfallTrace;
+import org.eclipse.dawnsci.plotting.api.trace.MetadataPlotUtils;
 import org.eclipse.january.dataset.IDataset;
+import org.eclipse.jface.action.Action;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.ui.preferences.ScopedPreferenceStore;
 import org.jzy3d.chart.Chart;
 import org.jzy3d.chart.ChartLauncher;
 import org.jzy3d.chart.Settings;
+import org.jzy3d.chart.factories.AWTChartComponentFactory;
 import org.jzy3d.chart.swt.SWTChartComponentFactory;
 import org.jzy3d.plot3d.primitives.AbstractDrawable;
-import org.jzy3d.plot3d.primitives.Shape;
-import org.jzy3d.plot3d.primitives.axes.layout.IAxeLayout;
 import org.jzy3d.plot3d.rendering.canvas.Quality;
-import org.jzy3d.plot3d.rendering.legends.colorbars.AWTColorbarLegend;
-import org.jzy3d.plot3d.rendering.ordering.DefaultOrderingStrategy;
 import org.jzy3d.plot3d.rendering.scene.Graph;
 import org.jzy3d.plot3d.rendering.view.modes.CameraMode;
 
@@ -50,10 +54,70 @@ public class JZY3DPlotViewer extends IPlottingSystemViewer.Stub<Composite> {
 //		chart.getScene().getGraph().setStrategy(new DefaultOrderingStrategy());
 //		chart.getView().setSquared(false);
 		ChartLauncher.openChart(chart);
+		
+		createToolbar();
 	}
+	
+	private void createToolbar() {
+		IPlotActionSystem plotActionSystem = system.getPlotActionSystem();
+		Action saveAction = new Action() {
+			@Override
+			public void run() {
+				try {
+					
+					FileDialog fd = new FileDialog(Display.getDefault().getActiveShell(),SWT.SAVE);
+					fd.setFilterExtensions(new String[] {".png"});
+					String file = fd.open();
+				
+					if (file == null) return;
+					File f = new File(file);
+//					chart.screenshot(createTempFile);
+					int h = chart.getCanvas().getRendererHeight();
+					int w = chart.getCanvas().getRendererWidth();
+					Chart chart2 = AWTChartComponentFactory.chart(Quality.Intermediate, "offscreen,"+4000+","+2000);
+					chart2.getScene().add(chart.getScene().getGraph().getAll());
+					chart2.setViewPoint(chart.getViewPoint());
+					chart2.screenshot(f);
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				
+			}
+		};
+		saveAction.setToolTipText("Save as png");
+		saveAction.setImageDescriptor(Activator.getImageDescriptor("icons/picture_save.png"));
+		
+		plotActionSystem.registerGroup("org.dawnsci.jzy3.jzy3dplotviewer.actions", ManagerType.TOOLBAR);
+		plotActionSystem.registerAction("org.dawnsci.jzy3.jzy3dplotviewer.actions", saveAction, ActionType.JZY3D_COLOR, ManagerType.TOOLBAR);
+		
+		plotActionSystem.createToolDimensionalActions(ToolPageRole.ROLE_JUST_COLOUR, "org.dawb.workbench.plotting.views.toolPageView.Color");
+	}
+
 	
 	@Override
 	public boolean addTrace(ITrace trace){
+		
+		List<IDataset> axes = ((AbstractColorMapTrace)trace).getAxes();
+		
+		IDataset xD = axes.get(0);
+		IDataset yD = axes.get(1);
+		
+		String x = "X";
+		
+		if (xD != null && xD.getName() != null) {
+			x = MetadataPlotUtils.removeSquareBrackets(xD.getName());
+		}
+		
+		String y = "Y";
+		
+		if (yD != null && yD.getName() != null) {
+			y = MetadataPlotUtils.removeSquareBrackets(yD.getName());
+		}
+		
+		chart.getAxeLayout().setXAxeLabel(x);
+		chart.getAxeLayout().setYAxeLabel(y);
+		
 		if (trace instanceof SurfaceMeshTraceImpl) {
 			chart.pauseAnimator();
 //			chart.clear();
@@ -68,9 +132,6 @@ public class JZY3DPlotViewer extends IPlottingSystemViewer.Stub<Composite> {
 //			List<IDataset> axes = ((SurfaceMeshTraceImpl)trace).getAxes();
 			
 			chart.getScene().add(((SurfaceMeshTraceImpl)trace).getShape());
-			
-			
-			
 			
 			chart.resumeAnimator();
 			return true;
