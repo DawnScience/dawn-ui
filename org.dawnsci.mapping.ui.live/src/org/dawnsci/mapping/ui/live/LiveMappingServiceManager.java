@@ -10,7 +10,7 @@ public class LiveMappingServiceManager {
 		return iEventService;
 	}
 
-	public static void setIEventService(IEventService iEventService) {
+	public void setIEventService(IEventService iEventService) {
 		LiveMappingServiceManager.iEventService = iEventService;
 	}
 	
