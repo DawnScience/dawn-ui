@@ -41,18 +41,13 @@ public class JZY3DPlotViewer extends IPlottingSystemViewer.Stub<Composite> {
 	private Chart chart;
 	private Composite control;
 	
-	public JZY3DPlotViewer() {
-	}
-	
+	@Override
 	public void createControl(final Composite parent) {
 		control = new Composite(parent, SWT.NONE);
 		control.setLayout(new FillLayout());
 		Settings.getInstance().setHardwareAccelerated(true);
 		chart = SWTChartComponentFactory.chart(control, Quality.Intermediate);
 		chart.getView().setCameraMode(CameraMode.ORTHOGONAL);
-//		chart.getScene().getGraph().setSort(false);
-//		chart.getScene().getGraph().setStrategy(new DefaultOrderingStrategy());
-//		chart.getView().setSquared(false);
 		ChartLauncher.openChart(chart);
 		
 		createToolbar();
@@ -71,15 +66,13 @@ public class JZY3DPlotViewer extends IPlottingSystemViewer.Stub<Composite> {
 				
 					if (file == null) return;
 					File f = new File(file);
-//					chart.screenshot(createTempFile);
 					int h = chart.getCanvas().getRendererHeight();
 					int w = chart.getCanvas().getRendererWidth();
-					Chart chart2 = AWTChartComponentFactory.chart(Quality.Intermediate, "offscreen,"+4000+","+2000);
+					Chart chart2 = AWTChartComponentFactory.chart(Quality.Intermediate, "offscreen,"+w+","+h);
 					chart2.getScene().add(chart.getScene().getGraph().getAll());
 					chart2.setViewPoint(chart.getViewPoint());
 					chart2.screenshot(f);
 				} catch (IOException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 				
@@ -120,31 +113,16 @@ public class JZY3DPlotViewer extends IPlottingSystemViewer.Stub<Composite> {
 		
 		if (trace instanceof SurfaceMeshTraceImpl) {
 			chart.pauseAnimator();
-//			chart.clear();
-//			ChartLauncher.openChart(chart);
-//			chart.getScene().remove(((SurfaceMeshTraceImpl)trace).getShape());
 			((SurfaceMeshTraceImpl) trace).setPalette(getPreferenceStore().getString(BasePlottingConstants.COLOUR_SCHEME));
-//			IAxeLayout layout = chart.getView().getAxe().getLayout();
-//			AbstractDrawable shape = ((SurfaceMeshTraceImpl)trace).getShape();
-//			AWTColorbarLegend legend = new AWTColorbarLegend(shape, layout);
-//			shape.setLegend(legend);
-			
-//			List<IDataset> axes = ((SurfaceMeshTraceImpl)trace).getAxes();
-			
 			chart.getScene().add(((SurfaceMeshTraceImpl)trace).getShape());
-			
 			chart.resumeAnimator();
 			return true;
 		}
 		if (trace instanceof WaterfallTraceImpl) {
 			chart.pauseAnimator();
-//			chart.clear();
-//			ChartLauncher.openChart(chart);
-//			chart.getScene().remove(((SurfaceMeshTraceImpl)trace).getShape());
-//			((WaterfallTraceImpl) trace).setPalette(getPreferenceStore().getString(BasePlottingConstants.COLOUR_SCHEME));
-			chart.resumeAnimator();
+			((WaterfallTraceImpl) trace).setPalette(getPreferenceStore().getString(BasePlottingConstants.COLOUR_SCHEME));
 			chart.getScene().add(((WaterfallTraceImpl)trace).getShape());
-			
+			chart.resumeAnimator();
 			return true;
 		}
 		return false;
