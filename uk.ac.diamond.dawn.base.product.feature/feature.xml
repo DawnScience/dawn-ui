@@ -50,10 +50,6 @@
          version="0.0.0"/>
 
    <includes
-         id="org.dawnsci.dde.feature"
-         version="0.0.0"/>
-
-   <includes
          id="org.dawnsci.python.feature"
          version="0.0.0"/>
 
