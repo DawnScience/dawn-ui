@@ -30,12 +30,12 @@ public class LiveFileServiceTest {
 		fileController = new FileController();
 		fileController.setLoaderService(new LoaderServiceImpl());
 		mock = new MockLiveFileService();
-		LiveServiceManager.setILiveFileService(mock);
+		new LiveServiceManager().setILiveFileService(mock);
 	}
 	
 	@AfterClass
 	public static void clean() throws Exception {
-		LiveServiceManager.setILiveFileService(null);
+		new LiveServiceManager().setILiveFileService(null);
 	}
 	
 	@Test

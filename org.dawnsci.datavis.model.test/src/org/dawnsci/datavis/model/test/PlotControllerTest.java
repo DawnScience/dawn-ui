@@ -50,7 +50,7 @@ public class PlotControllerTest extends AbstractTestModel {
 		};
 			AbstractTestModel.buildData();
 			plottingSystem = new MockPlottingSystem();
-			LiveServiceManager.setILiveFileService(null);
+			new LiveServiceManager().setILiveFileService(null);
 			fileController = new FileController();
 			fileController.setRecentPlaces(p);
 			fileController.setLoaderService(new LoaderServiceImpl());
