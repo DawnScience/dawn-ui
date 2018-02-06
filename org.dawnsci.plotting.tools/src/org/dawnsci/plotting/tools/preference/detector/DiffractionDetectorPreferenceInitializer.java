@@ -225,6 +225,46 @@ public class DiffractionDetectorPreferenceInitializer extends AbstractPreference
 		dd16.setNumberOfPixelsY(2069);
 		dds.addDiffractionDetector(dd16);
 
+		DiffractionDetector dd17 = new DiffractionDetector();
+		dd17.setDetectorName("Eiger 500k");
+		dd17.setxPixelSize(Amount.valueOf(75, SI.MICRO(SI.METRE)));
+		dd17.setyPixelSize(Amount.valueOf(75, SI.MICRO(SI.METRE)));
+		dd17.setNumberOfPixelsX(1030);
+		dd17.setNumberOfPixelsY(514);
+		dds.addDiffractionDetector(dd17);
+
+		DiffractionDetector dd18 = new DiffractionDetector();
+		dd18.setDetectorName("Eiger 1M");
+		dd18.setxPixelSize(Amount.valueOf(75, SI.MICRO(SI.METRE)));
+		dd18.setyPixelSize(Amount.valueOf(75, SI.MICRO(SI.METRE)));
+		dd18.setNumberOfPixelsX(1030);
+		dd18.setNumberOfPixelsY(1065);
+		dds.addDiffractionDetector(dd18);
+
+		DiffractionDetector dd19 = new DiffractionDetector();
+		dd19.setDetectorName("Eiger 4M");
+		dd19.setxPixelSize(Amount.valueOf(75, SI.MICRO(SI.METRE)));
+		dd19.setyPixelSize(Amount.valueOf(75, SI.MICRO(SI.METRE)));
+		dd19.setNumberOfPixelsX(2070);
+		dd19.setNumberOfPixelsY(2167);
+		dds.addDiffractionDetector(dd19);
+
+		DiffractionDetector dd20 = new DiffractionDetector();
+		dd20.setDetectorName("Eiger 9M");
+		dd20.setxPixelSize(Amount.valueOf(75, SI.MICRO(SI.METRE)));
+		dd20.setyPixelSize(Amount.valueOf(75, SI.MICRO(SI.METRE)));
+		dd20.setNumberOfPixelsX(3110);
+		dd20.setNumberOfPixelsY(3269);
+		dds.addDiffractionDetector(dd20);
+
+		DiffractionDetector dd21 = new DiffractionDetector();
+		dd21.setDetectorName("Eiger 16M");
+		dd21.setxPixelSize(Amount.valueOf(75, SI.MICRO(SI.METRE)));
+		dd21.setyPixelSize(Amount.valueOf(75, SI.MICRO(SI.METRE)));
+		dd21.setNumberOfPixelsX(4150);
+		dd21.setNumberOfPixelsY(4371);
+		dds.addDiffractionDetector(dd21);
+
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		XMLEncoder xmlEncoder = new XMLEncoder(baos);
 		xmlEncoder.writeObject(dds);
