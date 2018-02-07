@@ -561,9 +561,13 @@ public class DataFileSliceView extends ViewPart {
 	}
 	
 	private void clearSelected() {
-		fileManager.getFilePaths().remove(selectedFile);
+		List<String> paths = fileManager.getFilePaths();
+		if (paths == null) {
+			return;
+		}
+		paths.remove(selectedFile);
 		
-		if (fileManager.getFilePaths().isEmpty()) {
+		if (paths.isEmpty()) {
 			fileManager.clear();
 			csw.disable();
 			currentSliceLabel.setText("Current slice of data: [ - - - - -]");
