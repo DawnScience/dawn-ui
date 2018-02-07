@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
@@ -52,7 +53,7 @@ public class LoadedFile implements IDataObject, IDataFilePackage {
 		this.dataHolder = new AtomicReference<IDataHolder>(dataHolder.clone());
 		this.signals = new LinkedHashSet<>();
 		dataOptions = new LinkedHashMap<>();
-		possibleLabels = new HashMap<>();
+		possibleLabels = new TreeMap<>();
 		String[] names = null;
 		if (dataHolder.getTree() != null) {
 			try {
