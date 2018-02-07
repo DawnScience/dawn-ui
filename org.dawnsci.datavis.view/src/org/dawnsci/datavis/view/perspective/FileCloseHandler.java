@@ -15,7 +15,7 @@ import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.handlers.HandlerUtil;
 
-public class FileCloseHander extends AbstractHandler {
+public class FileCloseHandler extends AbstractHandler {
 
 	private static IFileController controller;
 	

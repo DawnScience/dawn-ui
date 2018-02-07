@@ -37,7 +37,7 @@
    <extension
          point="org.eclipse.ui.commands">
       <command
-            defaultHandler="org.dawnsci.datavis.view.perspective.FileCloseHander"
+            defaultHandler="org.dawnsci.datavis.view.perspective.FileCloseHandler"
             id="org.dawnsci.datavis.model.fileclose"
             name="File Close Command">
       </command>
