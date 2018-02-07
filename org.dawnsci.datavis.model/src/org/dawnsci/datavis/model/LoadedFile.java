@@ -93,16 +93,11 @@ public class LoadedFile implements IDataObject, IDataFilePackage {
 	public List<DataOptions> getDataOptions() {
 		
 		if (onlySignals && !signals.isEmpty()) {
-			ArrayList<DataOptions> sig = new ArrayList<>();
-			for (String s : signals) {
-				sig.add(dataOptions.get(s));
-			}
-			return sig;
+			return signals.stream().map(s -> dataOptions.get(s)).collect(Collectors.toList());
 		}
-		
 		return new ArrayList<>(dataOptions.values());
 	}
-	
+
 	public List<DataOptions> getSelectedDataOptions() {
 		List<DataOptions> list = dataOptions.values().stream()
 		.filter(dOp -> dOp.isSelected())
