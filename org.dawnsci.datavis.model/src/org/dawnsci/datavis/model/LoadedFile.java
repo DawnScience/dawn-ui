@@ -271,8 +271,8 @@ public class LoadedFile implements IDataObject, IDataFilePackage {
 		return labelName;
 	}
 	
-	public List<String> getLabelOptions() {
-		return new ArrayList<>(possibleLabels.keySet());
+	public Collection<String> getLabelOptions() {
+		return possibleLabels.keySet();
 	}
 
 	public void setLabelName(String labelName) {

@@ -39,6 +39,8 @@ public class FileOpenEventHandler implements EventHandler {
 		
 		String path = (String)event.getProperty("path");
 
+		if (path == null) return;
+
 		if (event.getTopic().endsWith("CLOSE")) {
 			fm.removeFile(path);
 			return;

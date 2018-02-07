@@ -2,6 +2,7 @@ package org.dawnsci.datavis.view.parts;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -222,7 +223,7 @@ public class LoadedFileMenuListener implements IMenuListener {
 			List<LoadedFile> loadedFiles = getLoadedFiles();
 			if (loadedFiles.isEmpty()) return;
 			
-			List<String> options = loadedFiles.get(0).getLabelOptions();
+			Collection<String> options = loadedFiles.get(0).getLabelOptions();
 			
 			ListDialog d = new ListDialog(Display.getDefault().getActiveShell());
 			d.setContentProvider(new ArrayContentProvider());
@@ -232,7 +233,7 @@ public class LoadedFileMenuListener implements IMenuListener {
 				return;
 			}
 			
-			d.setInput(options.toArray());
+			d.setInput(options);
 			
 			if (Dialog.OK != d.open()) {
 				return;

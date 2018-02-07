@@ -5,10 +5,10 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.dawnsci.common.widgets.dialog.FileSelectionDialog;
 import org.dawnsci.datavis.api.IDataFilePackage;
 import org.dawnsci.datavis.api.IXYData;
 import org.dawnsci.datavis.api.utils.DataPackageUtils;
@@ -213,6 +213,10 @@ public class DataManipulationExtensionContributionFactory extends ExtensionContr
 
 		List<IDataFilePackage> suitableData = getData();
 		List<IXYData> xyData = DataPackageUtils.getXYData(suitableData, false);
+		if (xyData.isEmpty()) {
+			return null;
+		}
+
 		xyData = getCompatibleDatasets(xyData);
 
 		return combine(xyData);
@@ -228,7 +232,7 @@ public class DataManipulationExtensionContributionFactory extends ExtensionContr
 
 		}
 
-		return new ArrayList<>();
+		return Collections.emptyList();
 	}
 
 	public static List<IXYData> getCompatibleDatasets(List<IXYData> data){
