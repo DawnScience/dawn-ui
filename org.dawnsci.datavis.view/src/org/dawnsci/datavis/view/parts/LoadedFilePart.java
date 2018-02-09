@@ -19,7 +19,6 @@ import org.dawnsci.datavis.model.FileController;
 import org.dawnsci.datavis.model.FileControllerStateEvent;
 import org.dawnsci.datavis.model.FileControllerStateEventListener;
 import org.dawnsci.datavis.model.IFileController;
-import org.dawnsci.datavis.model.IPlotController;
 import org.dawnsci.datavis.model.IRefreshable;
 import org.dawnsci.datavis.model.LoadedFile;
 import org.dawnsci.datavis.view.Activator;
@@ -94,7 +93,6 @@ public class LoadedFilePart {
 	@Inject ESelectionService selectionService;
 	@Inject EventAdmin eventAdmin;
 	@Inject IFileController fileController;
-	@Inject IPlotController plotController;
 	@Inject IRecentPlaces recentPlaces;
 	
 	private Image ticked;
@@ -330,7 +328,6 @@ public class LoadedFilePart {
 		fileController.addStateListener(fileStateListener);
 		
 		fileController.attachLive();
-		plotController.init();
 		
 		DropTargetAdapter dropListener = new DropTargetAdapter() {
 			@Override

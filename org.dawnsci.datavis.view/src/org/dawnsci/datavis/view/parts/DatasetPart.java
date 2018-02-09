@@ -60,7 +60,6 @@ public class DatasetPart {
 	
 	@PostConstruct
 	public void createComposite(Composite parent) {
-		plotController.init();
 
 		parent.setLayout(new FormLayout());
 		FormData checkForm = new FormData();
