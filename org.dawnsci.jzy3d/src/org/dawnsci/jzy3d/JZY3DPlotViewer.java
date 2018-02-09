@@ -55,7 +55,19 @@ public class JZY3DPlotViewer extends IPlottingSystemViewer.Stub<Composite> {
 	
 	private void createToolbar() {
 		IPlotActionSystem plotActionSystem = system.getPlotActionSystem();
-		Action saveAction = new Action() {
+		
+		Action squareAction = new Action("Square", Action.AS_CHECK_BOX) {
+			@Override
+			public void run() {
+				chart.getView().setSquared(this.isChecked());
+				
+			}
+		};
+		squareAction.setChecked(true);
+		squareAction.setToolTipText("Set axes equal or use data aspect ratio");
+		squareAction.setImageDescriptor(Activator.getImageDescriptor("icons/orthographic.png"));
+		
+		Action saveAction = new Action("Save Screenshot") {
 			@Override
 			public void run() {
 				try {
@@ -82,6 +94,7 @@ public class JZY3DPlotViewer extends IPlottingSystemViewer.Stub<Composite> {
 		saveAction.setImageDescriptor(Activator.getImageDescriptor("icons/picture_save.png"));
 		
 		plotActionSystem.registerGroup("org.dawnsci.jzy3.jzy3dplotviewer.actions", ManagerType.TOOLBAR);
+		plotActionSystem.registerAction("org.dawnsci.jzy3.jzy3dplotviewer.actions", squareAction, ActionType.JZY3D_COLOR, ManagerType.TOOLBAR);
 		plotActionSystem.registerAction("org.dawnsci.jzy3.jzy3dplotviewer.actions", saveAction, ActionType.JZY3D_COLOR, ManagerType.TOOLBAR);
 		
 		plotActionSystem.createToolDimensionalActions(ToolPageRole.ROLE_JUST_COLOUR, "org.dawb.workbench.plotting.views.toolPageView.Color");
