@@ -25,6 +25,7 @@ import org.eclipse.dawnsci.analysis.api.tree.Node;
 import org.eclipse.dawnsci.analysis.api.tree.NodeLink;
 import org.eclipse.dawnsci.analysis.api.tree.Tree;
 import org.eclipse.dawnsci.analysis.api.tree.TreeUtils;
+import org.eclipse.dawnsci.nexus.NexusConstants;
 import org.eclipse.january.DatasetException;
 import org.eclipse.january.dataset.Dataset;
 import org.eclipse.january.dataset.IDataset;
@@ -203,7 +204,7 @@ public class LoadedFile implements IDataObject, IDataFilePackage {
 				
 				boolean nxData = false;
 				
-				if (s != null && s.containsAttribute(NexusTreeUtils.NX_CLASS) && NexusTreeUtils.NX_DATA.equals(s.getAttribute(NexusTreeUtils.NX_CLASS).getFirstElement())) {
+				if (s != null && s.containsAttribute(NexusConstants.NXCLASS) && NexusConstants.DATA.equals(s.getAttribute(NexusConstants.NXCLASS).getFirstElement())) {
 					nxData = true;
 				}
 				
@@ -230,9 +231,9 @@ public class LoadedFile implements IDataObject, IDataFilePackage {
 			
 			Node s = e.getValue().getSource();
 			
-			if (s != null && s.containsAttribute(NexusTreeUtils.NX_CLASS) && NexusTreeUtils.NX_DATA.equals(s.getAttribute(NexusTreeUtils.NX_CLASS).getFirstElement())) {
-				if (s.containsAttribute(NexusTreeUtils.NX_SIGNAL)) {
-					String name = s.getAttribute(NexusTreeUtils.NX_SIGNAL).getFirstElement();
+			if (s != null && s.containsAttribute(NexusConstants.NXCLASS) && NexusConstants.DATA.equals(s.getAttribute(NexusConstants.NXCLASS).getFirstElement())) {
+				if (s.containsAttribute(NexusConstants.DATA_SIGNAL)) {
+					String name = s.getAttribute(NexusConstants.DATA_SIGNAL).getFirstElement();
 					
 					String key = e.getKey();
 					String[] split = key.split("/");
@@ -244,7 +245,7 @@ public class LoadedFile implements IDataObject, IDataFilePackage {
 							dataHolder.get().addDataset("/" + name, lz);
 						}
 					}
-				} else if (d.containsAttribute(NexusTreeUtils.NX_SIGNAL)) {
+				} else if (d.containsAttribute(NexusConstants.DATA_SIGNAL)) {
 					signals.add("/" + e.getKey());
 					ILazyDataset lz = NexusTreeUtils.getAugmentedSignalDataset((GroupNode)s);
 					if (lz != null) {
