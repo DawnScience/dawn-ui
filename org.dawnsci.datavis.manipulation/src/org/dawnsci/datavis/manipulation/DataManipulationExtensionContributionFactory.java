@@ -16,8 +16,9 @@ import org.dawnsci.datavis.api.utils.XYDataImpl;
 import org.dawnsci.datavis.model.IFileController;
 import org.eclipse.dawnsci.analysis.api.tree.GroupNode;
 import org.eclipse.dawnsci.analysis.dataset.roi.ROISliceUtils;
-import org.eclipse.dawnsci.analysis.tree.impl.AttributeImpl;
+import org.eclipse.dawnsci.analysis.tree.TreeFactory;
 import org.eclipse.dawnsci.nexus.INexusFileFactory;
+import org.eclipse.dawnsci.nexus.NexusConstants;
 import org.eclipse.dawnsci.nexus.NexusException;
 import org.eclipse.dawnsci.nexus.NexusFile;
 import org.eclipse.dawnsci.plotting.api.trace.MetadataPlotUtils;
@@ -48,7 +49,6 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
 
 import uk.ac.diamond.scisoft.analysis.dataset.function.Interpolation1D;
-import uk.ac.diamond.scisoft.analysis.io.NexusTreeUtils;
 
 public class DataManipulationExtensionContributionFactory extends ExtensionContributionFactory {
 
@@ -132,13 +132,13 @@ public class DataManipulationExtensionContributionFactory extends ExtensionContr
 
 						try (NexusFile nexus = fileFactory.newNexusFile(f.getAbsolutePath())) {
 							nexus.openToWrite(true);
-							mean.setName("data");
+							mean.setName(NexusConstants.DATA_DATA);
 							GroupNode nxdata = nexus.getGroup("/entry/average", true);
-							nexus.addAttribute(nxdata, new AttributeImpl(NexusTreeUtils.NX_CLASS, NexusTreeUtils.NX_DATA));
+							nexus.addAttribute(nxdata, TreeFactory.createAttribute(NexusConstants.NXCLASS, NexusConstants.DATA));
 							GroupNode nxentry = nexus.getGroup("/entry", true);
-							nexus.addAttribute(nxentry,new AttributeImpl(NexusTreeUtils.NX_CLASS, "NXentry"));
+							nexus.addAttribute(nxentry,TreeFactory.createAttribute(NexusConstants.NXCLASS, NexusConstants.ENTRY));
 							nexus.createData(nxdata, mean);
-							nexus.addAttribute(nxdata, new AttributeImpl(NexusTreeUtils.NX_SIGNAL, "data"));
+							nexus.addAttribute(nxdata, TreeFactory.createAttribute(NexusConstants.DATA_SIGNAL, NexusConstants.DATA_DATA));
 
 							AxesMetadata md = d.getFirstMetadata(AxesMetadata.class);
 
@@ -156,10 +156,10 @@ public class DataManipulationExtensionContributionFactory extends ExtensionContr
 									axName = "y_axis";
 								}
 								nexus.createData(nxdata, y);
-								nexus.addAttribute(nxdata, new AttributeImpl(axName + NexusTreeUtils.NX_INDICES_SUFFIX, 0));
+								nexus.addAttribute(nxdata, TreeFactory.createAttribute(axName + NexusConstants.DATA_INDICES_SUFFIX, 0));
 							}
 
-							nexus.addAttribute(nxdata, new AttributeImpl(NexusTreeUtils.NX_AXES, axName));
+							nexus.addAttribute(nxdata, TreeFactory.createAttribute(NexusConstants.DATA_AXES, axName));
 
 						} catch (NexusException e) {
 							// TODO Auto-generated catch block

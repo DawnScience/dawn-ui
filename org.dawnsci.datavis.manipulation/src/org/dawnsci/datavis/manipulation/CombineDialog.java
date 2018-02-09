@@ -7,7 +7,8 @@ import org.dawnsci.common.widgets.dialog.FileSelectionDialog;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.dawnsci.analysis.api.io.IDataHolder;
 import org.eclipse.dawnsci.analysis.api.tree.GroupNode;
-import org.eclipse.dawnsci.analysis.tree.impl.AttributeImpl;
+import org.eclipse.dawnsci.analysis.tree.TreeFactory;
+import org.eclipse.dawnsci.nexus.NexusConstants;
 import org.eclipse.dawnsci.nexus.NexusFile;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.PlotType;
@@ -40,7 +41,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import uk.ac.diamond.scisoft.analysis.io.LoaderFactory;
-import uk.ac.diamond.scisoft.analysis.io.NexusTreeUtils;
 
 public class CombineDialog extends Dialog implements IAdaptable{
 
@@ -210,11 +210,11 @@ public class CombineDialog extends Dialog implements IAdaptable{
 					nexus.openToWrite(true);
 					data.setName("data");
 					GroupNode nxdata = nexus.getGroup("/entry/data", true);
-					nexus.addAttribute(nxdata, new AttributeImpl(NexusTreeUtils.NX_CLASS, NexusTreeUtils.NX_DATA));
+					nexus.addAttribute(nxdata, TreeFactory.createAttribute(NexusConstants.NXCLASS, NexusConstants.DATA));
 					GroupNode nxentry = nexus.getGroup("/entry", true);
-					nexus.addAttribute(nxentry,new AttributeImpl(NexusTreeUtils.NX_CLASS, "NXentry"));
+					nexus.addAttribute(nxentry,TreeFactory.createAttribute(NexusConstants.NXCLASS, NexusConstants.ENTRY));
 					nexus.createData(nxdata, data);
-					nexus.addAttribute(nxdata, new AttributeImpl(NexusTreeUtils.NX_SIGNAL, "data"));
+					nexus.addAttribute(nxdata, TreeFactory.createAttribute(NexusConstants.DATA_SIGNAL, NexusConstants.DATA_DATA));
 					
 					AxesMetadata md = data.getFirstMetadata(AxesMetadata.class);
 					
@@ -235,7 +235,7 @@ public class CombineDialog extends Dialog implements IAdaptable{
 							names[0] = "y_axis";
 						}
 						nexus.createData(nxdata, y);
-						nexus.addAttribute(nxdata, new AttributeImpl(names[0] + NexusTreeUtils.NX_INDICES_SUFFIX, 0));
+						nexus.addAttribute(nxdata, TreeFactory.createAttribute(names[0] + NexusConstants.DATA_INDICES_SUFFIX, 0));
 					}
 					
 					if (axes[1] != null) {
@@ -248,14 +248,14 @@ public class CombineDialog extends Dialog implements IAdaptable{
 						}
 						x = x.squeeze();
 						nexus.createData(nxdata, x);
-						nexus.addAttribute(nxdata, new AttributeImpl(names[1] + NexusTreeUtils.NX_INDICES_SUFFIX, 1));
+						nexus.addAttribute(nxdata, TreeFactory.createAttribute(names[1] + NexusConstants.DATA_INDICES_SUFFIX, 1));
 					}
 					
-					nexus.addAttribute(nxdata, new AttributeImpl(NexusTreeUtils.NX_AXES, names));
+					nexus.addAttribute(nxdata, TreeFactory.createAttribute(NexusConstants.DATA_AXES, names));
 					
 					if (CombineDialog.this.names != null) {
 						nexus.createData(nxdata, CombineDialog.this.names);
-						nexus.addAttribute(nxdata, new AttributeImpl( CombineDialog.this.names.getName() + NexusTreeUtils.NX_INDICES_SUFFIX, 0));
+						nexus.addAttribute(nxdata, TreeFactory.createAttribute( CombineDialog.this.names.getName() + NexusConstants.DATA_INDICES_SUFFIX, 0));
 					}
 					
 					

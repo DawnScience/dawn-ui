@@ -13,8 +13,7 @@ import org.eclipse.dawnsci.analysis.api.tree.Node;
 import org.eclipse.dawnsci.analysis.api.tree.NodeLink;
 import org.eclipse.dawnsci.analysis.api.tree.Tree;
 import org.eclipse.dawnsci.analysis.api.tree.TreeUtils;
-
-import uk.ac.diamond.scisoft.analysis.io.NexusTreeUtils;
+import org.eclipse.dawnsci.nexus.NexusConstants;
 
 public class NexusFileConfiguration implements ILoadedFileConfiguration {
 
@@ -29,18 +28,18 @@ public class NexusFileConfiguration implements ILoadedFileConfiguration {
 			@Override
 			public boolean found(NodeLink node) {
 				Node n = node.getDestination();
-				if (n.containsAttribute("signal")){
+				if (n.containsAttribute(NexusConstants.DATA_SIGNAL)) {
 
-					if (n.containsAttribute(NexusTreeUtils.NX_CLASS)) {
-						if (n.getAttribute(NexusTreeUtils.NX_CLASS).getFirstElement().equals(NexusTreeUtils.NX_DATA)) {
+					if (n.containsAttribute(NexusConstants.NXCLASS)) {
+						if (n.getAttribute(NexusConstants.NXCLASS).getFirstElement().equals(NexusConstants.DATA)) {
 							return true;
 						}
 					}
 
 					n = node.getSource();
 
-					if (n.containsAttribute(NexusTreeUtils.NX_CLASS)) {
-						if (n.getAttribute(NexusTreeUtils.NX_CLASS).getFirstElement().equals(NexusTreeUtils.NX_DATA)) {
+					if (n.containsAttribute(NexusConstants.NXCLASS)) {
+						if (n.getAttribute(NexusConstants.NXCLASS).getFirstElement().equals(NexusConstants.DATA)) {
 							return true;
 						}
 					}

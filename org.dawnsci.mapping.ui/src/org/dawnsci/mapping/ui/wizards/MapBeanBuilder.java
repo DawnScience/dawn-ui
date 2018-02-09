@@ -19,11 +19,10 @@ import org.eclipse.dawnsci.analysis.api.tree.Node;
 import org.eclipse.dawnsci.analysis.api.tree.NodeLink;
 import org.eclipse.dawnsci.analysis.api.tree.Tree;
 import org.eclipse.dawnsci.analysis.api.tree.TreeUtils;
+import org.eclipse.dawnsci.nexus.NexusConstants;
 import org.eclipse.january.dataset.DatasetFactory;
 import org.eclipse.january.dataset.IDataset;
 import org.eclipse.january.dataset.StringDataset;
-
-import uk.ac.diamond.scisoft.analysis.io.NexusTreeUtils;
 
 public class MapBeanBuilder {
 
@@ -106,7 +105,7 @@ public class MapBeanBuilder {
 				while (it.hasNext()) {
 					Attribute next = it.next();
 					String name = next.getName();
-					if(name.startsWith(names[0]) && name.endsWith(NexusTreeUtils.NX_AXES_SET+NexusTreeUtils.NX_INDICES_SUFFIX)) {
+					if (name.startsWith(names[0]) && name.endsWith(NexusConstants.DATA_AXESSET_SUFFIX+NexusConstants.DATA_INDICES_SUFFIX)) {
 						IDataset v = next.getValue();
 						int index = v.getShape().length == 0 ? Integer.parseInt(v.getString()) : Integer.parseInt(v.getString(0));
 						axNames[index] = names[1] + name.substring(names[0].length(), name.length()-8);
@@ -150,7 +149,7 @@ public class MapBeanBuilder {
 			while (it.hasNext()) {
 				Attribute next = it.next();
 				name = next.getName();
-				if (name.endsWith(NexusTreeUtils.NX_AXES_SET +NexusTreeUtils.NX_INDICES_SUFFIX)) {
+				if (name.endsWith(NexusConstants.DATA_AXESSET_SUFFIX + NexusConstants.DATA_INDICES_SUFFIX)) {
 					IDataset value = next.getValue();
 					if (value.getSize() != 1) continue;
 					value.squeeze();
@@ -159,12 +158,12 @@ public class MapBeanBuilder {
 						indexKey = index;
 						break;
 					}
-					nameDimMap.put(index, name.substring(0,name.length()-NexusTreeUtils.NX_INDICES_SUFFIX.length()));
+					nameDimMap.put(index, name.substring(0,name.length()-NexusConstants.DATA_INDICES_SUFFIX.length()));
 				}
 			}
 			if (indexKey != null && nameDimMap.containsKey(indexKey)) {
 				for (DataInfo di : datasets) {
-					di.axes[indexKey] = name.substring(0,name.length()-NexusTreeUtils.NX_INDICES_SUFFIX.length());
+					di.axes[indexKey] = name.substring(0,name.length()-NexusConstants.DATA_INDICES_SUFFIX.length());
 					di.xAxisForRemapping = nameDimMap.get(indexKey);
 				}		
 			}
@@ -358,7 +357,8 @@ public class MapBeanBuilder {
 		@Override
 		public boolean found(NodeLink node) {
 			Node n = node.getDestination();
-			if (n.containsAttribute("signal") && n.containsAttribute("NX_class") && n.getAttribute("NX_class").getFirstElement().equals(NexusTreeUtils.NX_DATA)) {
+			if (n.containsAttribute(NexusConstants.DATA_SIGNAL) && n.containsAttribute(NexusConstants.NXCLASS)
+					&& n.getAttribute(NexusConstants.NXCLASS).getFirstElement().equals(NexusConstants.DATA)) {
 				return true;
 			}
 
@@ -381,7 +381,8 @@ public class MapBeanBuilder {
 		@Override
 		public boolean found(NodeLink node) {
 			Node n = node.getDestination();
-			if (n.containsAttribute("signal") && n.containsAttribute("NX_class") && n.getAttribute("NX_class").getFirstElement().equals(NexusTreeUtils.NX_DATA)) {
+			if (n.containsAttribute(NexusConstants.DATA_SIGNAL) && n.containsAttribute(NexusConstants.NXCLASS)
+					&& n.getAttribute(NexusConstants.NXCLASS).getFirstElement().equals(NexusConstants.DATA)) {
 				if (containedInAxes(n,xName,yName)) {
 					return true;
 				}
@@ -412,7 +413,7 @@ public class MapBeanBuilder {
 			while (it.hasNext()) {
 				Attribute next = it.next();
 				String name = next.getName();
-				if(name.startsWith(xName) && name.endsWith(NexusTreeUtils.NX_AXES_SET+NexusTreeUtils.NX_INDICES_SUFFIX)) {
+				if (name.startsWith(xName) && name.endsWith(NexusConstants.DATA_AXESSET_SUFFIX+NexusConstants.DATA_INDICES_SUFFIX)) {
 					foundx = true;
 					IDataset value = next.getValue();
 					if (index == null) {
@@ -425,7 +426,7 @@ public class MapBeanBuilder {
 					}
 				}
 				
-				if(name.startsWith(yName) && name.endsWith(NexusTreeUtils.NX_AXES_SET+NexusTreeUtils.NX_INDICES_SUFFIX)) {
+				if (name.startsWith(yName) && name.endsWith(NexusConstants.DATA_AXESSET_SUFFIX+NexusConstants.DATA_INDICES_SUFFIX)) {
 					foundy = true;
 					IDataset value = next.getValue();
 					if (index == null) {
@@ -446,7 +447,7 @@ public class MapBeanBuilder {
 		}
 		
 		private boolean containedInAxes(Node n, String xName, String yName){
-			Attribute at = n.getAttribute(NexusTreeUtils.NX_AXES);
+			Attribute at = n.getAttribute(NexusConstants.DATA_AXES);
 			if (at == null) return false;
 			IDataset ad = at.getValue();
 			if (!(ad instanceof StringDataset)) return false;

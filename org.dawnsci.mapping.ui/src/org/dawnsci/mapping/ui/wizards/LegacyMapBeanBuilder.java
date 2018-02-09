@@ -11,11 +11,10 @@ import org.eclipse.dawnsci.analysis.api.tree.GroupNode;
 import org.eclipse.dawnsci.analysis.api.tree.Node;
 import org.eclipse.dawnsci.analysis.api.tree.NodeLink;
 import org.eclipse.dawnsci.analysis.api.tree.Tree;
+import org.eclipse.dawnsci.nexus.NexusConstants;
 import org.eclipse.january.dataset.Dataset;
 import org.eclipse.january.dataset.DatasetUtils;
 import org.eclipse.january.dataset.Stats;
-
-import uk.ac.diamond.scisoft.analysis.io.NexusTreeUtils;
 
 public class LegacyMapBeanBuilder {
 
@@ -155,7 +154,7 @@ public static MappedDataFileBean buildBeani08Energyin2016(Tree tree) {
 		
 		NodeLink nl = tree.findNodeLink(XPRESS);
 		Node n = nl.getDestination();
-		if (n.containsAttribute(NexusTreeUtils.NX_AXES)) return null;
+		if (n.containsAttribute(NexusConstants.DATA_AXES)) return null;
 		if (n instanceof GroupNode) {
 			GroupNode gn = (GroupNode)n;
 			if (!gn.containsDataNode(ALLELEMENT)) return null;
@@ -199,7 +198,7 @@ public static MappedDataFileBean buildBeani08Energyin2016(Tree tree) {
 		
 		NodeLink nl = tree.findNodeLink(I05ANALYSER);
 		Node n = nl.getDestination();
-		if (n.containsAttribute(NexusTreeUtils.NX_AXES)) return null;
+		if (n.containsAttribute(NexusConstants.DATA_AXES)) return null;
 		if (n instanceof GroupNode) {
 			GroupNode gn = (GroupNode)n;
 			if (!gn.containsDataNode(I05DATA)) return null;
@@ -251,8 +250,8 @@ public static MappedDataFileBean buildBeani08Energyin2016(Tree tree) {
 			
 			if (gn.containsDataNode(name)) {
 				DataNode dataNode = gn.getDataNode(name);
-				if (dataNode.containsAttribute("axis")){
-					String at = dataNode.getAttribute("axis").getFirstElement();
+				if (dataNode.containsAttribute(NexusConstants.DATA_AXIS)){
+					String at = dataNode.getAttribute(NexusConstants.DATA_AXIS).getFirstElement();
 					if ("1,2".equals(at)) {
 						if (xAxis == null) xAxis = name;
 						else yAxis = name;
@@ -358,7 +357,7 @@ public static MappedDataFileBean buildBeani08Energyin2016(Tree tree) {
 	private static MappedBlockBean buildI22Block(String name, NodeLink link) {
 		if (link == null) return null;
 		Node n = link.getDestination();
-		if (n.containsAttribute(NexusTreeUtils.NX_AXES)) return null;
+		if (n.containsAttribute(NexusConstants.DATA_AXES)) return null;
 		if (n instanceof GroupNode) {
 			GroupNode gn = (GroupNode)n;
 			DataNode dataNode = gn.getDataNode(I22data);

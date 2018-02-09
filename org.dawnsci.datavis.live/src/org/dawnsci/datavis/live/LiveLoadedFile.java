@@ -21,6 +21,7 @@ import org.eclipse.dawnsci.analysis.api.tree.SymbolicNode;
 import org.eclipse.dawnsci.analysis.api.tree.Tree;
 import org.eclipse.dawnsci.analysis.api.tree.TreeUtils;
 import org.eclipse.dawnsci.analysis.tree.TreeToMapUtils;
+import org.eclipse.dawnsci.nexus.NexusConstants;
 import org.eclipse.january.MetadataException;
 import org.eclipse.january.dataset.Dataset;
 import org.eclipse.january.dataset.IDataset;
@@ -38,7 +39,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import uk.ac.diamond.scisoft.analysis.io.DataHolder;
-import uk.ac.diamond.scisoft.analysis.io.NexusTreeUtils;
 
 public class LiveLoadedFile extends LoadedFile implements IRefreshable {
 
@@ -164,7 +164,7 @@ public class LiveLoadedFile extends LoadedFile implements IRefreshable {
 
 		if (s instanceof GroupNode) {
 			GroupNode g = (GroupNode)s;
-			if (getNXClass(g).equals(NexusTreeUtils.NX_DATA)) {
+			if (getNXClass(g).equals(NexusConstants.DATA)) {
 				String signal = getNXSignal(g);
 				if (signal != null && signal.equals(name)) {
 					return getNXaxes(g);
@@ -176,19 +176,19 @@ public class LiveLoadedFile extends LoadedFile implements IRefreshable {
 	}
 	
 	private static String getNXClass(GroupNode g){
-		Attribute attribute = g.getAttribute(NexusTreeUtils.NX_CLASS);
+		Attribute attribute = g.getAttribute(NexusConstants.NXCLASS);
 		if (attribute != null) return attribute.getFirstElement();
 		return "";
 	}
 	
 	private static String getNXSignal(GroupNode g){
-		Attribute attribute = g.getAttribute(NexusTreeUtils.NX_SIGNAL);
+		Attribute attribute = g.getAttribute(NexusConstants.DATA_SIGNAL);
 		if (attribute != null) return attribute.getFirstElement();
 		return null;
 	}
 	
 	private static String[] getNXaxes(GroupNode g){
-		Attribute attribute = g.getAttribute(NexusTreeUtils.NX_AXES);
+		Attribute attribute = g.getAttribute(NexusConstants.DATA_AXES);
 		if (attribute == null) return null;
 		IDataset value = attribute.getValue();
 		if (value instanceof StringDataset) {
