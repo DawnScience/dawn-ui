@@ -8,8 +8,6 @@ import org.eclipse.dawnsci.plotting.api.histogram.IPaletteService;
 import org.eclipse.dawnsci.plotting.api.histogram.ImageServiceBean;
 import org.eclipse.dawnsci.plotting.api.trace.IPaletteListener;
 import org.eclipse.dawnsci.plotting.api.trace.IPaletteTrace;
-import org.eclipse.dawnsci.plotting.api.trace.ITrace;
-import org.eclipse.january.dataset.IDataset;
 import org.eclipse.swt.graphics.PaletteData;
 import org.eclipse.swt.graphics.RGB;
 import org.jzy3d.colors.Color;
@@ -256,7 +254,7 @@ public abstract class AbstractColorMapTrace implements IPaletteTrace {
 	@Override
 	public void setMin(Number min) {
 		if (bean==null) return;
-		bean.setMax(min);
+		bean.setMin(min);
 		
 		
 	}

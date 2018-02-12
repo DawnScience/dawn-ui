@@ -24,17 +24,23 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.FileDialog;
+import org.eclipse.swt.widgets.Listener;
 import org.eclipse.ui.preferences.ScopedPreferenceStore;
 import org.jzy3d.chart.Chart;
-import org.jzy3d.chart.ChartLauncher;
 import org.jzy3d.chart.Settings;
 import org.jzy3d.chart.factories.AWTChartComponentFactory;
+import org.jzy3d.chart.swt.CanvasNewtSWT;
 import org.jzy3d.chart.swt.SWTChartComponentFactory;
 import org.jzy3d.plot3d.primitives.AbstractDrawable;
 import org.jzy3d.plot3d.rendering.canvas.Quality;
 import org.jzy3d.plot3d.rendering.scene.Graph;
 import org.jzy3d.plot3d.rendering.view.modes.CameraMode;
+
+import com.jogamp.newt.event.MouseAdapter;
+import com.jogamp.newt.event.MouseEvent;
+import com.jogamp.newt.swt.NewtCanvasSWT;
 
 public class JZY3DPlotViewer extends IPlottingSystemViewer.Stub<Composite> {
 	
@@ -48,7 +54,30 @@ public class JZY3DPlotViewer extends IPlottingSystemViewer.Stub<Composite> {
 		Settings.getInstance().setHardwareAccelerated(true);
 		chart = SWTChartComponentFactory.chart(control, Quality.Intermediate);
 		chart.getView().setCameraMode(CameraMode.ORTHOGONAL);
-		ChartLauncher.openChart(chart);
+		chart.getCanvas().addMouseController(new MouseAdapter() {
+
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				if (!JZY3DPlotViewer.this.getControl().isFocusControl()) JZY3DPlotViewer.this.setFocus();
+				
+			}
+		});
+		
+		NewtCanvasSWT canvas = ((CanvasNewtSWT)chart.getCanvas()).getCanvas();
+		canvas.addListener(SWT.FocusOut, new Listener() {
+			
+			@Override
+			public void handleEvent(Event event) {
+				if (event.type == SWT.FocusOut) {
+					canvas.getNEWTChild().setVisible(false);
+					canvas.getNEWTChild().setVisible(true);
+				}
+				
+			}
+		});
+		chart.addKeyboardCameraController();
+		chart.addMouseCameraController();
+		chart.render();
 		
 		createToolbar();
 	}
