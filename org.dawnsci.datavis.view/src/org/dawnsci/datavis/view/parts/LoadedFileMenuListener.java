@@ -1,8 +1,9 @@
 package org.dawnsci.datavis.view.parts;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -11,7 +12,6 @@ import org.dawnsci.datavis.model.FileController;
 import org.dawnsci.datavis.model.IDataObject;
 import org.dawnsci.datavis.model.IFileController;
 import org.dawnsci.datavis.model.LoadedFile;
-
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
@@ -48,7 +48,6 @@ public class LoadedFileMenuListener implements IMenuListener {
 		if (viewer.getSelection().isEmpty())
 			return;
 		if (viewer.getSelection() instanceof IStructuredSelection) {
-
 			manager.add(new CheckAction(fileController, viewer));
 			manager.add(new UncheckAction(fileController, viewer));
 			manager.add(new Separator());
@@ -86,10 +85,9 @@ public class LoadedFileMenuListener implements IMenuListener {
 			this.file = fileController;
 		}
 		
-		protected List<LoadedFile> getLoadedFiles(){
+		protected List<LoadedFile> getFileSelection() {
 			if (view.getSelection() instanceof IStructuredSelection) {
 				final IStructuredSelection selection = (IStructuredSelection) view.getSelection();
-
 
 				return Arrays.stream(selection.toArray())
 						.filter(LoadedFile.class::isInstance)
@@ -98,10 +96,8 @@ public class LoadedFileMenuListener implements IMenuListener {
 
 			}
 			
-			return new ArrayList<>();
+			return Collections.emptyList();
 		}
-		
-		
 	}
 	
 	private class CheckAction extends LoadedFileMenuAction {
@@ -112,7 +108,7 @@ public class LoadedFileMenuListener implements IMenuListener {
 
 		@Override
 		public void run() {
-			List<LoadedFile> loadedFiles = getLoadedFiles();
+			List<LoadedFile> loadedFiles = getFileSelection();
 			if (loadedFiles.isEmpty()) return;
 			file.selectFiles(loadedFiles, true);
 			view.refresh();
@@ -127,7 +123,7 @@ public class LoadedFileMenuListener implements IMenuListener {
 
 		@Override
 		public void run() {
-			List<LoadedFile> loadedFiles = getLoadedFiles();
+			List<LoadedFile> loadedFiles = getFileSelection();
 			if (loadedFiles.isEmpty()) return;
 			file.selectFiles(loadedFiles, false);
 			view.refresh();
@@ -143,7 +139,7 @@ public class LoadedFileMenuListener implements IMenuListener {
 		
 		@Override
 		public void run() {
-			List<LoadedFile> loadedFiles = getLoadedFiles();
+			List<LoadedFile> loadedFiles = getFileSelection();
 			if (loadedFiles.isEmpty()) return;
 			
 			fileController.applyToAll(loadedFiles.get(0));
@@ -161,11 +157,14 @@ public class LoadedFileMenuListener implements IMenuListener {
 
 		@Override
 		public void run() {
-			List<LoadedFile> loadedFiles = getLoadedFiles();
+			List<LoadedFile> loadedFiles = getFileSelection();
 			if (loadedFiles.isEmpty()) return;
 			
-			List<IDataObject> options = loadedFiles.stream().flatMap(l -> l.getDataOptions().stream())
-					.filter(DataOptions::isSelected).map(IDataObject.class::cast).collect(Collectors.toList());;
+			List<IDataObject> options = loadedFiles.stream()
+					.flatMap(l -> l.getDataOptions().stream())
+					.filter(DataOptions::isSelected)
+					.map(IDataObject.class::cast)
+					.collect(Collectors.toList());;
 
 			if (options.isEmpty()) return;
 
@@ -183,15 +182,32 @@ public class LoadedFileMenuListener implements IMenuListener {
 
 		@Override
 		public void run() {
-			List<LoadedFile> loadedFiles = getLoadedFiles();
-			if (loadedFiles.isEmpty()) return;
-			file.unloadFiles(loadedFiles);
-			
-			int i = view.getTable().getItemCount();
-			
-			if (i > 0) {
-				Object ob = viewer.getTable().getItem(i-1).getData();
-				viewer.setSelection(new StructuredSelection(ob),true);
+			List<LoadedFile> deselected = getFileSelection();
+			if (deselected.isEmpty()) return;
+
+			LoadedFile unselected = null;
+			List<LoadedFile> files = file.getLoadedFiles();
+
+			if (deselected.size() < files.size()) {
+				files = new LinkedList<>(files);
+				LoadedFile selected = file.getCurrentFile();
+				for (LoadedFile f : deselected) {
+					if (f != selected) {
+						files.remove(f);
+					}
+				}
+				int n = files.size(); // number of files left + selected
+				int i = files.indexOf(selected) + 1;
+				if (i < n) { // unselected
+					unselected = files.get(i);
+				} else {
+					unselected = files.get(i - 2);
+				}
+			}
+			file.unloadFiles(deselected);
+
+			if (unselected != null) {
+				viewer.setSelection(new StructuredSelection(unselected), true);
 			}
 			view.refresh();
 		}
@@ -205,7 +221,7 @@ public class LoadedFileMenuListener implements IMenuListener {
 
 		@Override
 		public void run() {
-			List<LoadedFile> loadedFiles = getLoadedFiles();
+			List<LoadedFile> loadedFiles = getFileSelection();
 			if (loadedFiles.isEmpty()) return;
 			file.joinFiles(loadedFiles);
 			view.refresh();
@@ -220,12 +236,13 @@ public class LoadedFileMenuListener implements IMenuListener {
 
 		@Override
 		public void run() {
-			List<LoadedFile> loadedFiles = getLoadedFiles();
+			List<LoadedFile> loadedFiles = getFileSelection();
 			if (loadedFiles.isEmpty()) return;
 			
 			Collection<String> options = loadedFiles.get(0).getLabelOptions();
 			
 			ListDialog d = new ListDialog(Display.getDefault().getActiveShell());
+			d.setTitle("Select item for label");
 			d.setContentProvider(new ArrayContentProvider());
 			d.setLabelProvider(new LabelProvider());
 			
