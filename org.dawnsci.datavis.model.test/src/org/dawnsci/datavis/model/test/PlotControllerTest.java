@@ -7,10 +7,10 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.List;
 
+import org.dawnsci.datavis.api.IPlotMode;
 import org.dawnsci.datavis.api.IRecentPlaces;
 import org.dawnsci.datavis.model.DataOptions;
 import org.dawnsci.datavis.model.FileController;
-import org.dawnsci.datavis.model.IPlotMode;
 import org.dawnsci.datavis.model.LiveServiceManager;
 import org.dawnsci.datavis.model.LoadedFile;
 import org.dawnsci.datavis.model.NDimensions;

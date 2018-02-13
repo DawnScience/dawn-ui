@@ -7,12 +7,12 @@ import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.inject.Inject;
 
+import org.dawnsci.datavis.api.IPlotMode;
 import org.dawnsci.datavis.model.DataOptions;
 import org.dawnsci.datavis.model.FileControllerStateEvent;
 import org.dawnsci.datavis.model.FileControllerStateEventListener;
 import org.dawnsci.datavis.model.IFileController;
 import org.dawnsci.datavis.model.IPlotController;
-import org.dawnsci.datavis.model.IPlotMode;
 import org.dawnsci.datavis.model.LoadedFile;
 import org.dawnsci.datavis.model.PlotModeChangeEventListener;
 import org.dawnsci.datavis.model.PlotModeEvent;

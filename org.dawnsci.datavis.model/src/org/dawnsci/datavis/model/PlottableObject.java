@@ -1,5 +1,7 @@
 package org.dawnsci.datavis.model;
 
+import org.dawnsci.datavis.api.IPlotMode;
+
 public class PlottableObject {
 
 	private IPlotMode mode;

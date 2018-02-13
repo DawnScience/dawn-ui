@@ -4,7 +4,8 @@ Bundle-Name: Model
 Bundle-SymbolicName: org.dawnsci.datavis.model;singleton:=true
 Bundle-Version: 1.0.0.qualifier
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
-Service-Component: OSGI-INF/*.xml
+Service-Component: OSGI-INF/*.xml,
+ OSGI-INF/plotmodeservice.xml
 Bundle-ActivationPolicy: lazy
 Export-Package: org.dawnsci.datavis.model
 Require-Bundle: org.eclipse.january;bundle-version="1.0.0",

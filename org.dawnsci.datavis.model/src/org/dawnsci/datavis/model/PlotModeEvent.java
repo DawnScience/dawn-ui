@@ -2,6 +2,8 @@ package org.dawnsci.datavis.model;
 
 import java.util.EventObject;
 
+import org.dawnsci.datavis.api.IPlotMode;
+
 public class PlotModeEvent extends EventObject {
 
 	private static final long serialVersionUID = 1L;

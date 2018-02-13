@@ -1,4 +1,4 @@
-package org.dawnsci.datavis.model;
+package org.dawnsci.datavis.api;
 
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.trace.ITrace;

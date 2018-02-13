@@ -13,6 +13,10 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicReference;
 
+import org.dawnsci.datavis.api.IPlotMode;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IConfigurationElement;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.dawnsci.analysis.dataset.slicer.SliceFromSeriesMetadata;
 import org.eclipse.dawnsci.analysis.dataset.slicer.SliceInformation;
 import org.eclipse.dawnsci.analysis.dataset.slicer.SourceInformation;
@@ -62,6 +66,75 @@ import org.slf4j.LoggerFactory;
  */
 public class PlotController implements IPlotController {
 	
+	private static final Logger logger = LoggerFactory.getLogger(PlotController.class);
+	
+	private static class PlotModeData implements Comparable<PlotModeData> {
+		private IPlotMode mode;
+		private String name;
+		private int priority;
+		
+		PlotModeData(IPlotMode mode, String name, int priority) {
+			this.mode = mode;
+			this.name = name;
+			this.priority = priority;
+		}
+		
+		PlotModeData(IPlotMode mode, String name) {
+			this.mode = mode;
+			this.name = name;
+			this.priority = Integer.MAX_VALUE;
+		}
+		
+		@Override
+		public int compareTo(PlotModeData o) {
+			if (this.priority == o.priority) {
+				return this.name.compareTo(o.name);
+			}
+			return o.priority - this.priority;
+		}
+		
+		@Override
+		public boolean equals(Object obj) {
+			if (obj == null)
+			    return false;
+
+			if (this.getClass() != obj.getClass())
+			    return false;
+			
+			return this.mode == ((PlotModeData) obj).mode;
+		}
+	}
+	
+	static {
+		List<PlotModeData> modeDataList = new ArrayList<>();
+		// look for the extension points
+		IConfigurationElement[] eles = Platform.getExtensionRegistry().getConfigurationElementsFor("org.dawnsci.datavis.api.plotmode");
+		for (IConfigurationElement e : eles) {
+			if (!e.getName().equals("plotmode"))
+				continue;
+			IPlotMode plotMode = null;
+			int priority = 0;
+			try {
+				plotMode = (IPlotMode) e.createExecutableExtension("class");
+			} catch (CoreException e1) {
+				logger.error("Exception in createExecutableExtension", e1);
+				continue;
+			}
+			try {
+				priority = Integer.parseInt(e.getAttribute("priority"));
+			} catch (NumberFormatException e2) {
+				// bad string means 0
+			}
+			String name = e.getAttribute("name");
+			modeDataList.add(new PlotModeData(plotMode, name, priority));
+		}
+		modeDataList.sort(null);
+		modeDataList.add(0, new PlotModeData(new PlotModeImage(), "PlotModeImage"));
+		modeDataList.add(0, new PlotModeData(new PlotModeXY(), "PlotModeXY"));
+		
+		modes = modeDataList.stream().map(data -> data.mode).toArray(IPlotMode[]::new);
+	}
+	
 	private  IPlottingService plotService;
 	private  IFileController fileController;
 	private  EventAdmin eventAdmin;
@@ -82,7 +155,9 @@ public class PlotController implements IPlotController {
 	
 	private IPlottingSystem<?> system;
 
-	private IPlotMode[] modes = new IPlotMode[]{new PlotModeXY(), new PlotModeImage(), new PlotModeSurfaceMesh(), new PlotModeWaterfall(), new PlotModeHyper(), new PlotModeDataTable1D(),  new PlotModeDataTable2D()};
+	
+	private static final IPlotMode[] modes;
+	
 	private IPlotMode currentMode;
 	
 	private IPlotDataModifier[] modifiers = new IPlotDataModifier[]{ new PlotDataModifierStack()};
@@ -94,15 +169,14 @@ public class PlotController implements IPlotController {
 	private ISliceChangeListener sliceListener;
 	private FileControllerStateEventListener fileStateListener;
 	
-	private Set<PlotModeChangeEventListener> listeners = new HashSet<PlotModeChangeEventListener>();
+	private Set<PlotModeChangeEventListener> listeners = new HashSet<>();
 	
 	private ExecutorService executor;
 	private AtomicReference<Runnable> atomicRunnable = new AtomicReference<>();
-	private AtomicReference<Future<?>> atomicFuture = new AtomicReference<Future<?>>();
+	private AtomicReference<Future<?>> atomicFuture = new AtomicReference<>();
 	
-	private static String id = "org.dawnsci.prototype.nano.model.PlotManager";
+	private static final String ID = "org.dawnsci.prototype.nano.model.PlotManager";
 	
-	private final static Logger logger = LoggerFactory.getLogger(PlotController.class);
 	
 	public PlotController (IPlottingSystem<?> system, IFileController controller) {
 		this.system = system;
@@ -206,7 +280,7 @@ public class PlotController implements IPlotController {
 				for (Shell s : shells) {
 					if (s!= null) {
 						s.setCursor(cursor);
-						s.setData(id);
+						s.setData(ID);
 					}
 				}
 				
@@ -308,7 +382,7 @@ public class PlotController implements IPlotController {
 				
 				Shell[] shells = Display.getCurrent().getShells();
 				for (Shell s : shells) {
-					if (s!= null && id.equals(s.getData())) {
+					if (s!= null && ID.equals(s.getData())) {
 						s.setCursor(null);
 					}
 				}

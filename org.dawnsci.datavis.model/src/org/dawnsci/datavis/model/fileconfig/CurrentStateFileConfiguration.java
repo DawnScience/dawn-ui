@@ -5,9 +5,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import org.dawnsci.datavis.api.IPlotMode;
 import org.dawnsci.datavis.model.DataOptions;
 import org.dawnsci.datavis.model.DataStateObject;
-import org.dawnsci.datavis.model.IPlotMode;
 import org.dawnsci.datavis.model.LoadedFile;
 import org.dawnsci.datavis.model.NDimensions;
 import org.dawnsci.datavis.model.PlottableObject;

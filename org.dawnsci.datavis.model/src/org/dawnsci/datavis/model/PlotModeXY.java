@@ -1,5 +1,6 @@
 package org.dawnsci.datavis.model;
 
+import org.dawnsci.datavis.api.IPlotMode;
 import org.eclipse.dawnsci.analysis.dataset.slicer.SliceFromSeriesMetadata;
 import org.eclipse.dawnsci.analysis.dataset.slicer.SliceViewIterator;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
