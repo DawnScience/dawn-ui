@@ -8,5 +8,18 @@
             id="org.dawnsci.jzy3d.jzy3dplotviewer">
       </plottingViewer>
    </extension>
+   <extension
+         point="org.dawnsci.datavis.api.plotmode">
+      <plotmode
+            class="org.dawnsci.jzy3d.plotmodes.PlotModeSurfaceMesh"
+            name="SurfaceMesh"
+            priority="0">
+      </plotmode>
+      <plotmode
+            class="org.dawnsci.jzy3d.plotmodes.PlotModeWaterfall"
+            name="Waterfall"
+            priority="0">
+      </plotmode>
+   </extension>
 
 </plugin>

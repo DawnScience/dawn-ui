@@ -1,18 +1,19 @@
-package org.dawnsci.datavis.model;
+package org.dawnsci.jzy3d.plotmodes;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import org.dawnsci.datavis.model.PlotModeImage;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
-import org.eclipse.dawnsci.plotting.api.trace.ISurfaceMeshTrace;
 import org.eclipse.dawnsci.plotting.api.trace.ITrace;
+import org.eclipse.dawnsci.plotting.api.trace.IWaterfallTrace;
 import org.eclipse.dawnsci.plotting.api.trace.MetadataPlotUtils;
 import org.eclipse.january.dataset.IDataset;
 import org.eclipse.january.dataset.ILazyDataset;
 import org.eclipse.january.metadata.AxesMetadata;
 
-public class PlotModeSurfaceMesh extends PlotModeImage {
+public class PlotModeWaterfall extends PlotModeImage {
 
 	@Override
 	public String[] getOptions() {
@@ -21,12 +22,12 @@ public class PlotModeSurfaceMesh extends PlotModeImage {
 
 	@Override
 	public String getName() {
-		return "SurfaceMesh";
+		return "Waterfall";
 	}
 
 	@Override
 	public boolean isThisMode(ITrace trace) {
-		return trace instanceof ISurfaceMeshTrace;
+		return trace instanceof IWaterfallTrace;
 	}
 	
 	@Override
@@ -46,7 +47,7 @@ public class PlotModeSurfaceMesh extends PlotModeImage {
 			}
 		}
 		
-		ISurfaceMeshTrace trace = null;
+		IWaterfallTrace trace = null;
 		
 		String name = MetadataPlotUtils.removeSquareBrackets(d.getName());
 		d.setName(name);
@@ -58,7 +59,7 @@ public class PlotModeSurfaceMesh extends PlotModeImage {
 			for (ITrace t : update) system.removeTrace(t);
 		}
 
-		trace = system.createTrace(d.getName(),ISurfaceMeshTrace.class);
+		trace = system.createTrace(d.getName(),IWaterfallTrace.class);
 		trace.setDataName(d.getName());
 
 
