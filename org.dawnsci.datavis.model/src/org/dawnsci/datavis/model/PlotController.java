@@ -13,6 +13,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicReference;
 
+import org.dawnsci.datavis.api.ILazyPlotMode;
 import org.dawnsci.datavis.api.IPlotMode;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
@@ -110,6 +111,7 @@ public class PlotController implements IPlotController {
 		// look for the extension points
 		IConfigurationElement[] eles = Platform.getExtensionRegistry().getConfigurationElementsFor("org.dawnsci.datavis.api.plotmode");
 		for (IConfigurationElement e : eles) {
+			logger.debug("Found Plot Mode: {}", e.getAttribute("name"));
 			if (!e.getName().equals("plotmode"))
 				continue;
 			IPlotMode plotMode = null;

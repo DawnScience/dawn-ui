@@ -72,5 +72,13 @@
             id="org.dawnsci.slicing.tools.hyper.HyperPlotViewer">
       </plottingViewer>
    </extension>
+   <extension
+         point="org.dawnsci.datavis.api.plotmode">
+      <plotmode
+            class="org.dawnsci.slicing.tools.hyper.PlotModeHyper"
+            name="Hyper3d"
+            priority="0">
+      </plotmode>
+   </extension>
 
 </plugin>

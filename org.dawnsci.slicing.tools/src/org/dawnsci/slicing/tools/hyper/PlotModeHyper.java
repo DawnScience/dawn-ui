@@ -1,6 +1,6 @@
-package org.dawnsci.datavis.model;
+package org.dawnsci.slicing.tools.hyper;
 
-import org.dawnsci.slicing.tools.hyper.IHyperTrace;
+import org.dawnsci.datavis.api.ILazyPlotMode;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.trace.ITrace;
 import org.eclipse.january.dataset.IDataset;
