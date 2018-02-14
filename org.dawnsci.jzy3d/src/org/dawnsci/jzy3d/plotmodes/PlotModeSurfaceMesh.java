@@ -16,11 +16,6 @@ import org.eclipse.january.metadata.AxesMetadata;
 public class PlotModeSurfaceMesh extends PlotModeImage {
 
 	@Override
-	public String[] getOptions() {
-		return options;
-	}
-
-	@Override
 	public String getName() {
 		return "SurfaceMesh";
 	}

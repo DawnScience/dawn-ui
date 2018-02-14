@@ -22,9 +22,9 @@ import org.slf4j.LoggerFactory;
 
 public class PlotModeImage implements IPlotModeColored {
 
-	private final static Logger logger = LoggerFactory.getLogger(PlotModeImage.class);
+	private static final Logger logger = LoggerFactory.getLogger(PlotModeImage.class);
 	
-	protected static final String[] options =  new String[]{"X","Y"};
+	private static final String[] options =  new String[]{"X","Y"};
 	
 	protected Number[] minMax;
 

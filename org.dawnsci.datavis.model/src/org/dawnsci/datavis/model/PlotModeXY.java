@@ -21,7 +21,7 @@ import org.slf4j.LoggerFactory;
 
 public class PlotModeXY implements IPlotMode {
 
-	protected static final String[] options =  new String[]{"X"};
+	private static final String[] options =  new String[]{"X"};
 	private long count = 0;
 	
 	private final static Logger logger = LoggerFactory.getLogger(PlotModeXY.class);

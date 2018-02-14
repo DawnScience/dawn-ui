@@ -16,11 +16,6 @@ import org.eclipse.january.metadata.AxesMetadata;
 public class PlotModeWaterfall extends PlotModeImage {
 
 	@Override
-	public String[] getOptions() {
-		return options;
-	}
-
-	@Override
 	public String getName() {
 		return "Waterfall";
 	}
