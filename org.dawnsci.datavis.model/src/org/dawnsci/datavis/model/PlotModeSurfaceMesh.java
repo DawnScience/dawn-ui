@@ -5,9 +5,7 @@ import java.util.Collections;
 import java.util.List;
 
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
-import org.eclipse.dawnsci.plotting.api.PlotType;
 import org.eclipse.dawnsci.plotting.api.trace.ISurfaceMeshTrace;
-import org.eclipse.dawnsci.plotting.api.trace.ISurfaceTrace;
 import org.eclipse.dawnsci.plotting.api.trace.ITrace;
 import org.eclipse.dawnsci.plotting.api.trace.MetadataPlotUtils;
 import org.eclipse.january.dataset.IDataset;
@@ -16,6 +14,7 @@ import org.eclipse.january.metadata.AxesMetadata;
 
 public class PlotModeSurfaceMesh extends PlotModeImage {
 
+	@Override
 	public String[] getOptions() {
 		return options;
 	}
@@ -30,14 +29,14 @@ public class PlotModeSurfaceMesh extends PlotModeImage {
 		return trace instanceof ISurfaceMeshTrace;
 	}
 	
-	
+	@Override
 	public void displayData(IDataset[] data, ITrace[] update, IPlottingSystem<?> system, Object userObject) throws Exception {
 		IDataset d = data[0];
 		AxesMetadata metadata = d.getFirstMetadata(AxesMetadata.class);
 		List<IDataset> ax = null;
 		
 		if (metadata != null) {
-			ax = new ArrayList<IDataset>();
+			ax = new ArrayList<>();
 			ILazyDataset[] axes = metadata.getAxes();
 			if (axes != null) {
 				for (ILazyDataset a : axes) {
