@@ -32,12 +32,12 @@ public class PlotModeImage implements IPlotModeColored {
 		return options;
 	}
 	
-	public static boolean transposeNeeded(Object[] options){
+	public boolean transposeNeeded(Object[] options){
 		
 		boolean transpose = false;
 		for (int i = 0; i < options.length; i++) {
 			if (options[i] != null && !((String)options[i]).isEmpty()) {
-				if (options[i].equals("Y")) {
+				if (options[i].equals(getOptions()[1])) {
 					transpose = false;
 					break;
 				} else {
