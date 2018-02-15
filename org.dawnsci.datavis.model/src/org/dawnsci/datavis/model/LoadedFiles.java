@@ -10,33 +10,35 @@ import java.util.Optional;
 public class LoadedFiles implements IDataObject, Iterable<LoadedFile> {
 
 	private List<LoadedFile> fileList;
-	private Comparator<LoadedFile> comparator; 
-	
+	private Comparator<LoadedFile> comparator;
+
 	public LoadedFiles() {
 		fileList = Collections.synchronizedList(new ArrayList<LoadedFile>());
 	}
-	
-	public void addFile(LoadedFile f){
+
+	public void addFile(LoadedFile f) {
 		fileList.add(f);
 	}
-	
-	public void addFiles(List<LoadedFile> f){
+
+	public void addFiles(List<LoadedFile> f) {
 		fileList.addAll(f);
 	}
-	
+
 	public List<LoadedFile> getLoadedFiles() {
-		
-		ArrayList<LoadedFile> arrayList = new ArrayList<LoadedFile>(fileList);
-		if (comparator != null) arrayList.sort(comparator);
+		List<LoadedFile> arrayList = new ArrayList<LoadedFile>(fileList);
+		if (comparator != null) {
+			arrayList.sort(comparator);
+		}
 		return arrayList;
 	}
-	
+
 	public boolean contains(String path) {
-		Optional<LoadedFile> findAny = fileList.stream().filter(f -> path.equals(f.getFilePath())).findAny();
+		Optional<LoadedFile> findAny = fileList.stream()
+				.filter(f -> path.equals(f.getFilePath())).findAny();
 		return findAny.isPresent();
 	}
-	
-	public Object[] getChildren(){
+
+	public Object[] getChildren() {
 		return fileList.toArray();
 	}
 
@@ -44,20 +46,28 @@ public class LoadedFiles implements IDataObject, Iterable<LoadedFile> {
 	public String getName() {
 		return "";
 	}
-	
+
 	public void deselectOthers(String path) {
-		for (LoadedFile file : fileList) if (!path.equals(file.getFilePath())) file.setSelected(false);
+		for (LoadedFile file : fileList) {
+			if (!path.equals(file.getFilePath())) {
+				file.setSelected(false);
+			}
+		}
 	}
-	
+
 	public LoadedFile getLoadedFile(String path) {
-		for (LoadedFile file : fileList) if (path.equals(file.getFilePath())) return file;
+		for (LoadedFile file : fileList) {
+			if (path.equals(file.getFilePath())) {
+				return file;
+			}
+		}
 		return null;
 	}
-	
+
 	public void unloadFile(LoadedFile file) {
 		fileList.remove(file);
 	}
-	
+
 	public void setComparator(Comparator<LoadedFile> comparator) {
 		this.comparator = comparator;
 	}
@@ -69,20 +79,21 @@ public class LoadedFiles implements IDataObject, Iterable<LoadedFile> {
 
 	public void unloadAllFiles() {
 		fileList.clear();
-		
 	}
-	
+
 	public void moveBefore(List<LoadedFile> files, LoadedFile marker) {
-		
-		if (files.contains(marker)) return;
-		
+
+		if (files.contains(marker)) {
+			return;
+		}
+
 		fileList.removeAll(files);
-		
+
 		if (marker == null) {
 			fileList.addAll(files);
 			return;
 		}
-		
+
 		for (int i = 0; i < fileList.size(); i++) {
 			if (fileList.get(i) == marker) {
 				fileList.addAll(i, files);
@@ -90,5 +101,4 @@ public class LoadedFiles implements IDataObject, Iterable<LoadedFile> {
 			}
 		}
 	}
-	
 }

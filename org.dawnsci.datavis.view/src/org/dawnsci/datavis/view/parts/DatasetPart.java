@@ -84,38 +84,39 @@ public class DatasetPart {
 				
 			}
 		});
-	FormData comboForm = new FormData();
-	comboForm.top = new FormAttachment(viewer.getControl());
-	comboForm.left = new FormAttachment(0,0);
-	comboForm.right = new FormAttachment(100,0);
-	
-	Composite plotTypeComposite = new Composite(parent, SWT.NONE);
-	plotTypeComposite.setLayoutData(comboForm);
-	plotTypeComposite.setLayout(new GridLayout(2, false));
-	
-	Label plotTypeLabel = new Label(plotTypeComposite, SWT.NONE);
-	plotTypeLabel.setText("Plot Type:");
-	plotTypeLabel.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, false, false));
-	
-	optionsViewer = new ComboViewer(plotTypeComposite);
-	table = new DataConfigurationTable();
-	table.createControl(parent);
-	
-	optionsViewer.getCombo().setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
-	optionsViewer.setContentProvider(new ArrayContentProvider());
-	optionsViewer.setLabelProvider(new LabelProvider() {
-		@Override
-		public String getText(Object element) {
-			String name = "";
-			
-			if (element instanceof IPlotMode) {
-				name = ((IPlotMode)element).getName();
+
+		FormData comboForm = new FormData();
+		comboForm.top = new FormAttachment(viewer.getControl());
+		comboForm.left = new FormAttachment(0,0);
+		comboForm.right = new FormAttachment(100,0);
+
+		Composite plotTypeComposite = new Composite(parent, SWT.NONE);
+		plotTypeComposite.setLayoutData(comboForm);
+		plotTypeComposite.setLayout(new GridLayout(2, false));
+
+		Label plotTypeLabel = new Label(plotTypeComposite, SWT.NONE);
+		plotTypeLabel.setText("Plot Type:");
+		plotTypeLabel.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, false, false));
+
+		optionsViewer = new ComboViewer(plotTypeComposite);
+		table = new DataConfigurationTable();
+		table.createControl(parent);
+
+		optionsViewer.getCombo().setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+		optionsViewer.setContentProvider(new ArrayContentProvider());
+		optionsViewer.setLabelProvider(new LabelProvider() {
+			@Override
+			public String getText(Object element) {
+				String name = "";
+
+				if (element instanceof IPlotMode) {
+					name = ((IPlotMode)element).getName();
+				}
+
+				return name;
 			}
-			
-			return name;
-		}
-	});
-		 
+		});
+
 		optionsViewer.addSelectionChangedListener(new ISelectionChangedListener() {
 			
 			@Override
@@ -136,8 +137,7 @@ public class DatasetPart {
 				}
 			}
 		});
-		
-		
+
 		FormData tableForm = new FormData();
 		tableForm.top = new FormAttachment(plotTypeComposite);
 		tableForm.left = new FormAttachment(0,0);
