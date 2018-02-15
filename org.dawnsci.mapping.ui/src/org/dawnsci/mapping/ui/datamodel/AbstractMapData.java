@@ -97,8 +97,8 @@ public abstract class AbstractMapData implements PlottableMapObject{
 		((IDynamicDataset)baseMap).refreshShape();
 		try {
 			ax = MetadataFactory.createMetadata(AxesMetadata.class, baseMap.getRank());
-			ILazyDataset ly = parent.getYAxis()[0];
-			ILazyDataset lx = parent.getXAxis()[0];
+			ILazyDataset ly = parent.getYAxis()[0].getSliceView().squeezeEnds();
+			ILazyDataset lx = parent.getXAxis()[0].getSliceView().squeezeEnds();
 			MapScanDimensions md = parent.getMapDims();
 			int xd = md.getxDim();
 			int yd = md.getyDim();

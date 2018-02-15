@@ -23,30 +23,24 @@ public class MappedDataBlock implements MapObject, PlottableMapObject {
 	private String path;
 	ILazyDataset dataset;
 	private MapScanDimensions mapDims;
+	private boolean live = false;
 
 	private AbstractMapData mapRepresentation;
 	
 	private double[] range;
 
-	private LiveRemoteAxes axes;
 	private boolean plotted;
 	
 	private static final Logger logger = LoggerFactory.getLogger(MappedDataBlock.class);
 	
-	public MappedDataBlock(String name, ILazyDataset dataset, String path, MapScanDimensions dims) {
+	public MappedDataBlock(String name, ILazyDataset dataset, String path, MapScanDimensions dims, boolean live) {
 		this.name = name;
 		this.dataset = dataset;
 		this.mapDims = dims;
 		this.range = calculateRange(dataset);
 		this.path = path;
+		this.live = live;
 		
-	}
-	
-	public MappedDataBlock(String name, IDynamicDataset dataset,MapScanDimensions dims, String path, LiveRemoteAxes axes, String host, int port) {
-		this(name, null, path,dims);
-		this.axes = axes;
-		this.dataset = dataset;
-
 	}
 	
 	public int getScanRank() {
@@ -59,7 +53,6 @@ public class MappedDataBlock implements MapObject, PlottableMapObject {
 	
 	public void replaceLiveDataset(ILazyDataset lz) {
 		this.dataset = lz;
-		axes = null;
 		range = calculateRange(lz);
 		mapRepresentation = null;
 	}
@@ -80,7 +73,7 @@ public class MappedDataBlock implements MapObject, PlottableMapObject {
 	}
 	
 	public ILazyDataset getSpectrum(int x, int y) {
-		if (axes != null) return getLiveSpectrum(x, y);
+		if (live) return getLiveSpectrum(x, y);
 		
 		SliceND slice = getMatchingDataSlice(x,y);
 		ILazyDataset sv = dataset.getSliceView(slice);
@@ -96,7 +89,7 @@ public class MappedDataBlock implements MapObject, PlottableMapObject {
 	}
 	
 	public IDataset getSpectrum(int index) {
-		if (axes != null) return getLiveSpectrum(index);
+		if (live) return getLiveSpectrum(index);
 		
 		SliceND slice = mapDims.getSlice(index, index, dataset.getShape());
 		
@@ -120,21 +113,21 @@ public class MappedDataBlock implements MapObject, PlottableMapObject {
 	}
 	
 	public ILazyDataset[] getXAxis() {
-		if (axes != null) return getLiveXAxis();
+		if (live) return getLiveXAxis();
 		AxesMetadata md = dataset.getFirstMetadata(AxesMetadata.class);
 		if (md == null) return null;
 		return md.getAxis(mapDims.getxDim());
 	}
 	
 	public ILazyDataset[] getYAxis() {
-		if (axes != null) return getLiveYAxis();
+		if (live) return getLiveYAxis();
 		AxesMetadata md = dataset.getFirstMetadata(AxesMetadata.class);
 		if (md == null) return null;
 		return md.getAxis(mapDims.getyDim());
 	}
 	
 	public ILazyDataset[] getAxis(int dim) {
-		if (axes != null) return getLiveAxis(dim);
+		if (live) return getLiveAxis(dim);
 		AxesMetadata md = dataset.getFirstMetadata(AxesMetadata.class);
 		if (md == null) return null;
 		return md.getAxis(dim);
@@ -239,51 +232,48 @@ public class MappedDataBlock implements MapObject, PlottableMapObject {
 	}
 
 	public boolean isLive() {
-		return axes != null;
+		return live;
 	}
 	
 	private void buildAxesMetadata() throws Exception{
 		
-		AxesMetadata ax = MetadataFactory.createMetadata(AxesMetadata.class, dataset.getRank());
-		ILazyDataset[] lazyAx = axes.getAxes();
-		for (int i = 0; i < lazyAx.length; i++) {
-			ax.addAxis(i, lazyAx[i]);
-		}
-		
-		if (axes.getxAxisForRemapping() != null) {
-			ax.addAxis(mapDims.getxDim(),axes.getxAxisForRemapping());
-		}
-		
-		int[] refresh = ax.refresh(dataset.getShape());
-		((IDynamicDataset)dataset).resize(refresh);
-		dataset.addMetadata(ax);
+//		AxesMetadata ax = MetadataFactory.createMetadata(AxesMetadata.class, dataset.getRank());
+//		ILazyDataset[] lazyAx = axes.getAxes();
+//		for (int i = 0; i < lazyAx.length; i++) {
+//			ax.addAxis(i, lazyAx[i]);
+//		}
+//		
+//		if (axes.getxAxisForRemapping() != null) {
+//			ax.addAxis(mapDims.getxDim(),axes.getxAxisForRemapping());
+//		}
+//		
+//		int[] refresh = ax.refresh(dataset.getShape());
+//		((IDynamicDataset)dataset).resize(refresh);
+//		dataset.addMetadata(ax);
 		
 	}
 	
 	private ILazyDataset[] getLiveXAxis() {
 		
-		axes.update();
-		
-		if (axes.getxAxisForRemapping() != null) return new ILazyDataset[]{axes.getxAxisForRemapping()};
-		return new ILazyDataset[]{axes.getAxes()[mapDims.getxDim()]};
+		return getLiveAxis(mapDims.getxDim());
 	}
 	
 	private ILazyDataset[] getLiveYAxis() {
-		axes.update();
-		return new ILazyDataset[]{axes.getAxes()[mapDims.getyDim()]};
+		return getLiveAxis(mapDims.getyDim());
 	}
 	
 	private ILazyDataset[] getLiveAxis(int dim) {
-		axes.update();
-		return new ILazyDataset[]{axes.getAxes()[dim]};
+		AxesMetadata md = dataset.getFirstMetadata(AxesMetadata.class);
+		return md.getAxis(dim);
 	}
 
 	
 	private MetadataType generateLiveSliceMetadata(int x, int y){
-		SourceInformation si = new SourceInformation(getPath(), toString(), dataset);
-		SliceND slice = getMatchingDataSlice(x, y);
-		SliceInformation sl = new SliceInformation(slice, slice, new SliceND(dataset.getShape()), getDataDimensions(), 1, 0);
-		return new SliceFromLiveSeriesMetadata(si,sl,axes.getHost(),axes.getPort(),axes.getAxesNames(),axes.getxAxisForRemappingName());
+		return null;
+//		SourceInformation si = new SourceInformation(getPath(), toString(), dataset);
+//		SliceND slice = getMatchingDataSlice(x, y);
+//		SliceInformation sl = new SliceInformation(slice, slice, new SliceND(dataset.getShape()), getDataDimensions(), 1, 0);
+//		return new SliceFromLiveSeriesMetadata(si,sl,axes.getHost(),axes.getPort(),axes.getAxesNames(),axes.getxAxisForRemappingName());
 	}
 
 	@Override
@@ -324,7 +314,14 @@ public class MappedDataBlock implements MapObject, PlottableMapObject {
 	
 	@Override
 	public void update() {
-		((IDynamicDataset)dataset).refreshShape();
+		if (dataset instanceof IDynamicDataset) {
+			((IDynamicDataset)dataset).refreshShape();
+			AxesMetadata ax = dataset.getFirstMetadata(AxesMetadata.class);
+			if (ax != null) {
+				int[] refresh = ax.refresh(dataset.getShape());
+				((IDynamicDataset) dataset).resize(refresh);
+			}
+		}
 	}
 
 	@Override

@@ -98,20 +98,7 @@ public class MapPlotManager {
 			
 			@Override
 			public void run(){
-				try {
-
-					for (MapTrace t : layers) {
-						if (t.getMap().isLive()) {
-							t.getMap().update();
-							t.switchMap(t.getMap());
-						}
-					}
-					plotLayers();
-					
-				} catch (RuntimeException ne) { 
-					// Unchecked exceptions here show a dialog to the user
-					logger.error("Cannot update map!", ne);
-				}
+				updateState();
 			}
 		};
 		
@@ -328,10 +315,7 @@ public class MapPlotManager {
 		job.schedule();
 	}
 	
-	public void refresh() {
-		updateState();
-	}
-	
+
 	private void updateState() {
 		
 		List<PlottableMapObject> plottedObjects = fileManager.getPlottedObjects();
@@ -399,6 +383,14 @@ public class MapPlotManager {
 				if (!(l.getMap() instanceof LiveStreamMapObject)) l.rebuildTrace();
 			}
 		}
+		
+		for (MapTrace t : layers) {
+			if (t.getMap().isLive()) {
+				t.getMap().update();
+				t.switchMap(t.getMap());
+			}
+		}
+		plotLayers();
 		
 		plotLayers();
 	}
@@ -518,7 +510,7 @@ public class MapPlotManager {
 	}
 	
 	
-	public void plotLayers(){
+	private void plotLayers(){
 		
 		if (Display.getCurrent() == null) {
 			PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
@@ -569,7 +561,7 @@ public class MapPlotManager {
 	}
 	
 	
-	public void updatePlottedRange(){
+	private void updatePlottedRange(){
 		
 		double[] range = null;
 		

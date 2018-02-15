@@ -9,6 +9,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import org.eclipse.dawnsci.analysis.api.io.ILoaderService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 public class MappedDataFile implements MapObject{
@@ -21,25 +23,22 @@ public class MappedDataFile implements MapObject{
 	private MappedDataFileBean descriptionBean;
 	private String parentPath;
 	
-	private ILoaderService lService;
+	private static final Logger logger = LoggerFactory.getLogger(MappedDataFile.class);
 	
-//	private final static Logger logger = LoggerFactory.getLogger(MappedDataFile.class);
-	
-	public MappedDataFile(String path, MappedDataFileBean liveBean, ILoaderService lService) {
-		this(path, lService);
+	public MappedDataFile(String path, MappedDataFileBean liveBean) {
+		this(path);
 		this.descriptionBean = liveBean;
 	}
 	
-	public MappedDataFile(String path, ILoaderService service) {
+	public MappedDataFile(String path) {
 		this.path = path;
-		this.lService = service;
 		fullDataMap = new HashMap<String,MappedDataBlock>();
 		mapDataMap = new HashMap<String,AbstractMapData>();
 		microscopeDataMap = new HashMap<String,AssociatedImage>();
 	}
 	
-	public MappedDataFile(String path, LiveDataBean bean, ILoaderService lService) {
-		this(path, lService);
+	public MappedDataFile(String path, LiveDataBean bean) {
+		this(path);
 		if (bean != null) {
 			descriptionBean = new MappedDataFileBean();
 			descriptionBean.setLiveBean(bean);
@@ -50,18 +49,22 @@ public class MappedDataFile implements MapObject{
 		return path;
 	}
 	
-	public void updateXandYDimensions(String xName, String yName) {
-		
-	}
-	
 	public boolean isDescriptionSet() {
 		return descriptionBean != null && !descriptionBean.isEmpty();
 	}
 	
-	public void locallyReloadLiveFile(){
+	public void locallyReloadLiveFile(ILoaderService lService){
 		if (descriptionBean == null) return;
 		descriptionBean.setLiveBean(null);
-		MappedDataFile tmp = MappedFileFactory.getMappedDataFile(path, descriptionBean, null,lService,null);
+		
+		MappedDataFile tmp;
+		try {
+			tmp = MappedFileFactory.getMappedDataFile(path, descriptionBean, null,lService.getData(path, null));
+		} catch (Exception e) {
+			logger.error("Failed local reload");
+			return;
+		}
+		
 		
 		Iterator<Entry<String, MappedDataBlock>> it = fullDataMap.entrySet().iterator();
 		
@@ -126,15 +129,6 @@ public class MappedDataFile implements MapObject{
 		range[3]  = r[3] > range[3] ? r[3] : range[3];
 		
 	}
-	
-//	public void addMap(String mapName, MappedDataBlock parent) {
-//		try {
-//			ILazyDataset lz = LocalServiceManager.getLoaderService().getData(path, null).getLazyDataset(mapName);
-//			mapDataMap.put(mapName, new MappedData(mapName, lz.getSlice(), parent, path));
-//		} catch (Exception e) {
-//			logger.error("Error loading mapped data!", e);
-//		}
-//	}
 	
 	public AbstractMapData getMap() {
 		return mapDataMap.size() > 0 ? mapDataMap.values().iterator().next() : null;

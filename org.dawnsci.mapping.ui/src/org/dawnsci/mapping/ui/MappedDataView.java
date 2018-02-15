@@ -123,7 +123,7 @@ public class MappedDataView extends ViewPart {
 	private MapPlotManager plotManager;
 	private MappedDataViewState initialState;
 	
-	private LiveMapFileListener liveMapListener;
+//	private LiveMapFileListener liveMapListener;
 	private IMapFileEventListener mapFileListener;
 	
 	private IMapFileController fileController;
@@ -380,24 +380,8 @@ public class MappedDataView extends ViewPart {
 			filesToReload = filesInView.toArray(new String[filesInView.size()]);
 		}
 		
-		ILiveMappingFileService liveService = LiveServiceManager.getLiveMappingFileService();
+		fileController.attachLive(filesToReload);
 		
-		//check for live
-		if (liveService != null) {
-			liveMapListener = new LiveMapFileListener();
-			liveService.setInitialFiles(filesToReload);
-			filesToReload = null;
-			liveService.addLiveFileListener(liveMapListener);
-		}
-
-		// Restore state of view
-		if (filesToReload != null) {
-			logger.info("Loading view state: {}", initialState);
-			final IMapFileController mappedFileManager = fileController;
-//			for (String f : filesToReload) {
-				mappedFileManager.loadFiles(filesToReload, null);
-//			}
-		}
 	}
 	
 //	private void openImportWizard(String path) {
@@ -418,11 +402,11 @@ public class MappedDataView extends ViewPart {
 		fileController.removeListener(mapFileListener);
 		FileManagerSingleton.clearManager();
 		
-		ILiveMappingFileService liveService = LiveServiceManager.getLiveMappingFileService();
+//		ILiveMappingFileService liveService = LiveServiceManager.getLiveMappingFileService();
 		
-		if (liveService != null && liveMapListener != null) {
-			liveService.removeLiveFileListener(liveMapListener);
-		}
+//		if (liveService != null && liveMapListener != null) {
+//			liveService.removeLiveFileListener(liveMapListener);
+//		}
 		
 	}
 	
@@ -532,34 +516,6 @@ public class MappedDataView extends ViewPart {
 			props.setProperty(kv[0].trim(), kv[1].trim());
 		}
 		return props;
-	}
-	
-	private class LiveMapFileListener implements ILiveMapFileListener{
-
-		@Override
-		public void fileLoadRequest(String path, String host, int port, String parent) {
-			if (host != null) {
-				LiveDataBean b = new LiveDataBean();
-				b.setHost(host);
-				b.setPort(port);
-				fileController.loadLiveFile(path, b, parent);
-			} else {
-				fileController.loadFiles(new String[] {path}, null);
-			}
-			
-			
-		}
-
-		@Override
-		public void refreshRequest() {
-			plotManager.updatePlot();
-		}
-
-		@Override
-		public void localReload(String path) {
-			fileController.localReloadFile(path);
-		}
-		
 	}
 
 	private void updateViewer(final MappedDataFile file) {

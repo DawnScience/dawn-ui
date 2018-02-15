@@ -6,4 +6,6 @@
    </service>
    <reference bind="setLoaderService" cardinality="1..1" interface="org.eclipse.dawnsci.analysis.api.io.ILoaderService" name="ILoaderService" policy="static"/>
    <reference bind="setRemoveService" cardinality="1..1" interface="org.eclipse.dawnsci.analysis.api.io.IRemoteDatasetService" name="IRemoteDatasetService" policy="static"/>
+   <reference bind="setStageScanConfiguration" cardinality="0..1" interface="org.eclipse.scanning.api.ui.IStageScanConfiguration" name="IStageScanConfiguration" policy="static"/>
+   <reference bind="setLiveMappingService" cardinality="0..1" interface="org.dawnsci.mapping.ui.ILiveMappingFileService" name="ILiveMappingFileService" policy="static"/>
 </scr:component>

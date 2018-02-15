@@ -4,15 +4,12 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.eclipse.dawnsci.analysis.api.io.IDataHolder;
-import org.eclipse.dawnsci.analysis.api.io.ILoaderService;
-import org.eclipse.dawnsci.analysis.api.io.IRemoteDatasetService;
 import org.eclipse.january.IMonitor;
 import org.eclipse.january.dataset.Dataset;
 import org.eclipse.january.dataset.DatasetFactory;
 import org.eclipse.january.dataset.DatasetUtils;
+import org.eclipse.january.dataset.DoubleDataset;
 import org.eclipse.january.dataset.IDataset;
-import org.eclipse.january.dataset.IDatasetConnector;
-import org.eclipse.january.dataset.IDynamicDataset;
 import org.eclipse.january.dataset.ILazyDataset;
 import org.eclipse.january.dataset.RGBDataset;
 import org.eclipse.january.dataset.Slice;
@@ -22,21 +19,29 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class MappedFileFactory {
+	
+	private MappedFileFactory() {
+		//static only
+	}
 
-	private final static Logger logger = LoggerFactory.getLogger(MappedFileFactory.class);
+	private static final Logger logger = LoggerFactory.getLogger(MappedFileFactory.class);
 	
 	public static MappedDataFile getMappedDataFile(String path, AssociatedImage image) {
 		
-		MappedDataFile file = new MappedDataFile(path, null);
+		MappedDataFile file = new MappedDataFile(path);
 		file.addMapObject(image.toString(), image);
 		
 		return file;
 		
 	}
 	
-	public static MappedDataFile getMappedDataFile(String path, MappedDataFileBean bean, IMonitor monitor, ILoaderService loaderService, IRemoteDatasetService rService) {
+	public static MappedDataFile getMappedDataFile(String path, MappedDataFileBean bean, IMonitor monitor, IDataHolder dataHolder) {
 		
-		MappedDataFile file = new MappedDataFile(path, bean, loaderService);
+		MappedDataFile file = new MappedDataFile(path, bean);
+		
+		if (dataHolder == null) {
+			return null;
+		}
 		
 		for (MappedBlockBean b : bean.getBlocks()) {
 			String name = b.getName();
@@ -46,7 +51,7 @@ public class MappedFileFactory {
 			}
 			
 			try {
-				MappedDataBlock block = setUpBlock(path, name, b, bean.getLiveBean(),bean.getScanRank(), loaderService,rService);
+				MappedDataBlock block = setUpBlock(path, name, b, bean.getLiveBean(),bean.getScanRank(), dataHolder);
 				file.addMapObject(name, block);
 			} catch (Exception e) {
 				logger.error("Could not build block named " + name, e);
@@ -58,21 +63,25 @@ public class MappedFileFactory {
 		
 		for (MapBean b : bean.getMaps()) {
 
-				if (monitor != null && monitor.isCancelled()) return null;
-				if (monitor != null) monitor.subTask(b.getName());
-				MappedDataBlock block = file.getDataBlockMap().get(b.getParent());
-				
-				if (block == null && !file.getDataBlockMap().isEmpty()) {
-					block = file.getDataBlockMap().values().iterator().next();
-				}
-				
-				AbstractMapData m = setUpMap(path, b.getName(),block, bean.getLiveBean(), loaderService, rService);
-				if (bean.getLiveBean() == null) m.getData().setName(m.toString());
- 				file.addMapObject(b.getName(), m);
+			if (monitor != null && monitor.isCancelled()) return null;
+			if (monitor != null) monitor.subTask(b.getName());
+			MappedDataBlock block = file.getDataBlockMap().get(b.getParent());
+
+			if (block == null && !file.getDataBlockMap().isEmpty()) {
+				block = file.getDataBlockMap().values().iterator().next();
+			}
+
+			AbstractMapData m = setUpMap(path, b.getName(),block, bean.getLiveBean(),dataHolder);
+
+			if (bean.getLiveBean() == null && m != null) {
+				m.getData().setName(m.toString());
+			}
+
+			file.addMapObject(b.getName(), m);
 		}
 		
 		for (AssociatedImageBean b : bean.getImages()) {
-			AssociatedImage im = getAssociatedImage(path,b, loaderService);
+			AssociatedImage im = getAssociatedImage(path,b, dataHolder);
 			file.addMapObject(im.getLongName(), im);
 		}
 		
@@ -80,86 +89,73 @@ public class MappedFileFactory {
 	}
 	
 	
-	private static MappedDataBlock setUpBlock(String path, String blockName, MappedBlockBean bean, LiveDataBean live, int scanRank, ILoaderService lService, IRemoteDatasetService rService) {
+	private static MappedDataBlock setUpBlock(String path, String blockName, MappedBlockBean bean, LiveDataBean live, int scanRank, IDataHolder dataHolder) {
 		MappedDataBlock block = null;
 		
 		MapScanDimensions msd = new MapScanDimensions(bean.getxDim(), bean.getyDim(), scanRank);
 		
 		List<String> axesNames = Arrays.asList(bean.getAxes());
-		if (live != null) {
-			IDynamicDataset lz = getRemoteDataset(path,blockName,live, rService);
-			LiveRemoteAxes remoteAxes = getRemoteAxes(axesNames, path, bean, live, rService);
-			block = new MappedDataBlock(blockName, lz, msd,path, remoteAxes, live.getHost(),live.getPort());
-			return block;
-		}
-		
-		try {
-			ILazyDataset lz = getLazyDataset(path,blockName, lService);
-			lz.clearMetadata(AxesMetadata.class);
-			AxesMetadata axm = checkAndBuildAxesMetadata(axesNames, path, bean, lService);
-			lz.setMetadata(axm);
-			block = new MappedDataBlock(blockName, lz,path,msd);
-		} catch (Exception e) {
-			
-		}
-		
+
+		ILazyDataset lz = dataHolder.getLazyDataset(blockName);
+		lz.clearMetadata(AxesMetadata.class);
+		AxesMetadata axm = checkAndBuildAxesMetadata(axesNames, bean, dataHolder);
+		lz.setMetadata(axm);
+		block = new MappedDataBlock(blockName, lz,path,msd,live != null);
+
 		return block;
 	}
 	
 		
-	private static AbstractMapData setUpMap(String path, String mapName, MappedDataBlock block, LiveDataBean live, ILoaderService lService, IRemoteDatasetService rService) {
+	private static AbstractMapData setUpMap(String path, String mapName, MappedDataBlock block, LiveDataBean live, IDataHolder dataHolder) {
 		
-		if (live != null && block.isLive()) {
-			
-			if (block.isRemappingRequired()) {
-				return new ReMappedData(mapName, getRemoteDataset(path,mapName,live,rService), block, path, true);
-			}
-			
-			return new MappedData(mapName, getRemoteDataset(path,mapName,live,rService),block, path, true);
-		}
+		boolean isLive = (live != null && block.isLive());
 		
-		
-		try {
-			ILazyDataset lz = getLazyDataset(path,mapName, lService);
+
+			ILazyDataset lz =dataHolder.getLazyDataset(mapName);
 			
 			lz.clearMetadata(AxesMetadata.class);
 
-			//hack for old i18
-			if (block.getScanRank() < lz.getRank()) {
-				Dataset d = DatasetUtils.sliceAndConvertLazyDataset(lz);
-				d= d.sum(d.getRank()-1);
-				lz = d;
-			}
-			
-			block.getMapDims().setMapAxes(block.getLazy(), lz);
-			
-			IDataset d = DatasetUtils.sliceAndConvertLazyDataset(lz);
-			
-			if (block.isTransposed()) {
-				Dataset ds = DatasetUtils.convertToDataset(d);
-				d = ds.transpose();
+			if (!isLive) {
+
+				try {
+				//hack for old i18
+				if (block.getScanRank() < lz.getRank()) {
+					Dataset d = DatasetUtils.sliceAndConvertLazyDataset(lz);
+					d= d.sum(d.getRank()-1);
+					lz = d;
+				}
+
+				block.getMapDims().setMapAxes(block.getLazy(), lz);
+
+				lz = DatasetUtils.sliceAndConvertLazyDataset(lz);
+
+				if (block.isTransposed()) {
+					Dataset ds = DatasetUtils.convertToDataset((IDataset)lz);
+					lz = ds.transpose();
+
+				}
 				
-			}
+				} catch (Exception e) {
+					logger.error("Could not slice map",e);
+					return null;
+				}
+			} 
 			
 			if (block.isRemappingRequired()) {
-				return new ReMappedData(mapName,d,block,path, false);
+				return new ReMappedData(mapName,lz,block,path, isLive);
 			}
 
-			return new MappedData(mapName,d,block,path, false);
-		}
-		catch (Exception e) {
-			logger.error("Could not build map", e);
-		}
-		return null;
+			return new MappedData(mapName,lz,block,path, isLive);
+		
 
 	}
 	
-	private static AssociatedImage getAssociatedImage(String path, AssociatedImageBean b, ILoaderService lService) {
+	private static AssociatedImage getAssociatedImage(String path, AssociatedImageBean b, IDataHolder dataHolder) {
 		try {
-			Dataset d = DatasetUtils.sliceAndConvertLazyDataset(getLazyDataset(path, b.getName(),lService));
+			Dataset d = DatasetUtils.sliceAndConvertLazyDataset(dataHolder.getLazyDataset(b.getName()));
 			AxesMetadata ax = MetadataFactory.createMetadata(AxesMetadata.class, 2);
-			ax.addAxis(0,getLazyDataset(path, b.getAxes()[0],lService));
-			ax.addAxis(1,getLazyDataset(path, b.getAxes()[1],lService));
+			ax.addAxis(0,dataHolder.getLazyDataset(b.getAxes()[0]));
+			ax.addAxis(1,dataHolder.getLazyDataset(b.getAxes()[1]));
 			
 			if (d.getRank() == 3) {
 				
@@ -180,36 +176,7 @@ public class MappedFileFactory {
 		
 	}
 	
-	private static LiveRemoteAxes getRemoteAxes(List<String> axes, String path, MappedBlockBean bean, LiveDataBean live, IRemoteDatasetService rService) {
-		IDynamicDataset[] r = new IDynamicDataset[axes.size()];
-		String[] axesNames = new String[axes.size()];
-		
-		for (int i = 0; i < axes.size(); i++) {
-			String s = axes.get(i);
-			axesNames[i] = s;
-			if (s != null) {
-					r[i] = getRemoteDataset(path, s, live, rService);
-					if (r[i] != null) r[i].setName(s);
-			}
-
-		}
-		
-		
-		
-		LiveRemoteAxes lra = new LiveRemoteAxes(r, axesNames,live.getHost(),live.getPort());
-		
-		String s = bean.getxAxisForRemapping();
-		if (s != null){
-			IDynamicDataset rd = getRemoteDataset(path, s, live, rService);
-			rd.setName(s);
-			lra.setxAxisForRemapping(rd);
-			lra.setxAxisForRemappingName(s);
-		}
-		
-		return lra;
-	}
-	
-	private static AxesMetadata checkAndBuildAxesMetadata(List<String> axes, String path, MappedBlockBean bean, ILoaderService lService) {
+	private static AxesMetadata checkAndBuildAxesMetadata(List<String> axes, MappedBlockBean bean, IDataHolder dataHolder) {
 		
 		AxesMetadata axm = null; 
 		
@@ -217,7 +184,7 @@ public class MappedFileFactory {
 			axm = MetadataFactory.createMetadata(AxesMetadata.class, axes.size());
 			for (int i = 0; i < axes.size(); i++) {
 				if (axes.get(i) == null) continue;
-				ILazyDataset lz = getLazyDataset(path, axes.get(i), lService);
+				ILazyDataset lz = dataHolder.getLazyDataset(axes.get(i));
 				lz.setName(axes.get(i));
 				int[] ss = lz.getShape();
 				
@@ -227,7 +194,7 @@ public class MappedFileFactory {
 					String second = null;
 					if (bean.getxDim() == i && bean.getxAxisForRemapping() != null) second = bean.getxAxisForRemapping();
 					if (second != null) {
-						ILazyDataset l = getLazyDataset(path, second, lService);
+						ILazyDataset l =  dataHolder.getLazyDataset(second);
 						l.setName(second);
 						axm.addAxis(i, l);
 					}
@@ -237,15 +204,7 @@ public class MappedFileFactory {
 					IDataset ds = lz.getSlice();
 					double min = ds.min(true).doubleValue();
 					double max = ds.max(true).doubleValue();
-					ILazyDataset s = DatasetFactory.createLinearSpace(min, max, ss[i], Dataset.FLOAT64);
-					
-//					int[] start = new int[ss.length];
-//					int[] stop = start.clone();
-//					Arrays.fill(stop, 1);
-//					int[] step = stop.clone();
-//					SliceND slice = new SliceND(ss,start,stop,step);
-//					slice.setSlice(i, 0, ss[i], 1);
-//					ILazyDataset s = lz.getSlice(slice).squeeze();
+					ILazyDataset s = DatasetFactory.createLinearSpace(DoubleDataset.class,min, max, ss[i]);
 					s.setName(axes.get(i));
 					axm.addAxis(i, s);
 				}
@@ -260,29 +219,4 @@ public class MappedFileFactory {
 		return axm;
 		
 	}
-	
-	private static ILazyDataset getLazyDataset(String path, String name, LiveDataBean lb, ILoaderService lService, IRemoteDatasetService rService) throws Exception {
-		if (lb == null) {
-			IDataHolder dh = lService.getData(path, null);
-			ILazyDataset lazyDataset = dh.getLazyDataset(name);
-			lazyDataset.clearMetadata(null);
-			return lazyDataset;
-		} 
-		
-		return getRemoteDataset(path, name, lb, rService).getDataset();
-	}
-	
-	private static ILazyDataset getLazyDataset(String path, String name, ILoaderService lService) throws Exception {
-		return getLazyDataset(path, name, null,lService,null);
-	}
-	
-	private static IDynamicDataset getRemoteDataset(String path, String name, LiveDataBean lb, IRemoteDatasetService rds) {
-		IDatasetConnector remote = rds.createRemoteDataset(lb.getHost(), lb.getPort());
-		remote.setPath(path);
-		remote.setDatasetName(name);
-		
-		return (IDynamicDataset)remote.getDataset();
-	}
-	
-	
 }

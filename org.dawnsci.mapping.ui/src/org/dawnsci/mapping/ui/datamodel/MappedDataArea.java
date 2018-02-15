@@ -7,6 +7,8 @@ import java.util.List;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
+import org.eclipse.dawnsci.analysis.api.io.ILoaderService;
+
 public class MappedDataArea implements MapObject {
 
 	private List<MappedDataFile> files = new ArrayList<MappedDataFile>();
@@ -83,12 +85,12 @@ public class MappedDataArea implements MapObject {
 		return null;
 	}
 	
-	public boolean locallyReloadLiveFile(String path) {
+	public boolean locallyReloadLiveFile(String path, ILoaderService lservice) {
 		
 		for (MappedDataFile file : files) {
 			if (path.equals(file.getPath())) {
 				if (file.isDescriptionSet()) {
-					file.locallyReloadLiveFile();
+					file.locallyReloadLiveFile(lservice);
 					return true;
 				}
 				

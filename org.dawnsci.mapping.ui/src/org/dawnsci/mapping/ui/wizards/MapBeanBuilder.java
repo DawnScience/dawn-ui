@@ -42,8 +42,6 @@ public class MapBeanBuilder {
 		Map<String,NodeLink> nodes = TreeUtils.treeBreadthFirstSearch(groupNode, finder, false, null);
 
 		List<String> images= new ArrayList<String>();
-//		String highestRanking = null;
-//		int highestRank = 0;
 		List<DataInfo> datasets = new ArrayList<DataInfo>();
 
 		MappedDataFileBean bean = new MappedDataFileBean();
@@ -478,9 +476,4 @@ public class MapBeanBuilder {
 			return true;
 		}
 	}
-	
-	
-	
-	
-	
 }
