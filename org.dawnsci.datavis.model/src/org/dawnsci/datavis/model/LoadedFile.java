@@ -26,9 +26,8 @@ import org.eclipse.dawnsci.analysis.api.tree.NodeLink;
 import org.eclipse.dawnsci.analysis.api.tree.Tree;
 import org.eclipse.dawnsci.analysis.api.tree.TreeUtils;
 import org.eclipse.dawnsci.nexus.NexusConstants;
-import org.eclipse.january.DatasetException;
 import org.eclipse.january.dataset.Dataset;
-import org.eclipse.january.dataset.IDataset;
+import org.eclipse.january.dataset.DatasetUtils;
 import org.eclipse.january.dataset.ILazyDataset;
 import org.eclipse.january.dataset.LazyDatasetBase;
 import org.slf4j.Logger;
@@ -202,11 +201,7 @@ public class LoadedFile implements IDataObject, IDataFilePackage {
 				Node d = node.getDestination();
 				Node s = node.getSource();
 				
-				boolean nxData = false;
-				
-				if (s != null && s.containsAttribute(NexusConstants.NXCLASS) && NexusConstants.DATA.equals(s.getAttribute(NexusConstants.NXCLASS).getFirstElement())) {
-					nxData = true;
-				}
+				boolean nxData = NexusTreeUtils.isNXClass(s, NexusConstants.DATA);
 				
 				if (d != null && d instanceof DataNode) {
 					
@@ -231,33 +226,28 @@ public class LoadedFile implements IDataObject, IDataFilePackage {
 			
 			Node s = e.getValue().getSource();
 			
-			if (s != null && s.containsAttribute(NexusConstants.NXCLASS) && NexusConstants.DATA.equals(s.getAttribute(NexusConstants.NXCLASS).getFirstElement())) {
-				if (s.containsAttribute(NexusConstants.DATA_SIGNAL)) {
-					String name = s.getAttribute(NexusConstants.DATA_SIGNAL).getFirstElement();
-					
-					String key = e.getKey();
-					String[] split = key.split("/");
-					
-					if (split[split.length-1].equals(name)) {
-						signals.add("/" + key);
+			if (NexusTreeUtils.isNXClass(s, NexusConstants.DATA)) {
+				String name = NexusTreeUtils.getFirstString(s.getAttribute(NexusConstants.DATA_SIGNAL));
+				String key = e.getKey();
+				if (name != null) {
+					if (key.equals(name) || key.endsWith(Node.SEPARATOR + name)) {
+						signals.add(Tree.ROOT + key);
 						ILazyDataset lz = NexusTreeUtils.getAugmentedSignalDataset((GroupNode)s);
 						if (lz != null) {
-							dataHolder.get().addDataset("/" + name, lz);
+							dataHolder.get().addDataset(Tree.ROOT + name, lz);
 						}
 					}
 				} else if (d.containsAttribute(NexusConstants.DATA_SIGNAL)) {
-					signals.add("/" + e.getKey());
+					signals.add(Tree.ROOT + key);
 					ILazyDataset lz = NexusTreeUtils.getAugmentedSignalDataset((GroupNode)s);
 					if (lz != null) {
-						dataHolder.get().addDataset("/" + e.getKey(), lz);
+						dataHolder.get().addDataset(Tree.ROOT + key, lz);
 					}
 				}
-				
 			}
 		}
 		
 		return out;
-		
 	}
 	
 	public String getLabel() {
@@ -283,22 +273,24 @@ public class LoadedFile implements IDataObject, IDataFilePackage {
 			return;
 		}
 		this.labelName = labelName;
+		Dataset d = getLabelValue();
+		label = d == null ? "" : d.getString();
+	}
+
+	public Dataset getLabelValue() {
 		if (possibleLabels.containsKey(labelName)) {
 			ILazyDataset l = possibleLabels.get(labelName);
 			
 			try {
-				IDataset slice = l.getSlice();
-				slice = slice.squeeze();
-				label = slice.getString();
-			} catch (DatasetException e) {
+				Dataset slice = DatasetUtils.sliceAndConvertLazyDataset(l);
+				return slice.squeeze();
+			} catch (Exception e) {
 				logger.error("Could not read label {}", labelName,e);
-				label = "";
 			}
-		} else {
-			label = "";
 		}
+		return null;
 	}
-	
+
 	public boolean isOnlySignals() {
 		return onlySignals;
 	}
