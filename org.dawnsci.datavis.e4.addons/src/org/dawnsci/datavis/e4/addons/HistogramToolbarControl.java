@@ -35,10 +35,10 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.osgi.service.event.Event;
 
-public class HistrogramToolbarControl {
+public class HistogramToolbarControl {
 
-	public static final String CLASS_URI = "bundleclass://org.dawnsci.datavis.e4.addons/" + HistrogramToolbarControl.class.getName();
-	public static final String ID = "org.dawnsci.datavis.e4.addons.HistrogramToolbarControl";
+	public static final String CLASS_URI = "bundleclass://org.dawnsci.datavis.e4.addons/" + HistogramToolbarControl.class.getName();
+	public static final String ID = "org.dawnsci.datavis.e4.addons.histogramtoolbar";
 	
 	@Inject
 	private IPlottingService plottingService;
@@ -202,20 +202,20 @@ public class HistrogramToolbarControl {
 				Object source = evt.getSource();
 				if (source instanceof IPaletteTrace) {
 					IPaletteTrace pt = (IPaletteTrace)source;
-					HistrogramToolbarControl.this.trace = pt;
+					HistogramToolbarControl.this.trace = pt;
 					enable(true);
-					HistrogramToolbarControl.this.lock.setSelection(!pt.isRescaleHistogram());
+					HistogramToolbarControl.this.lock.setSelection(!pt.isRescaleHistogram());
 					
 					if ((pt.getMin() != null) && (pt.getMax() != null)) {
-						HistrogramToolbarControl.this.low.setText(pt.getMin().toString());
-						HistrogramToolbarControl.this.high.setText(pt.getMax().toString());
+						HistogramToolbarControl.this.low.setText(pt.getMin().toString());
+						HistogramToolbarControl.this.high.setText(pt.getMax().toString());
 					}
 					
-					HistrogramToolbarControl.this.trace.addPaletteListener(listener);
+					HistogramToolbarControl.this.trace.addPaletteListener(listener);
 					
 				} else {
 					enable(false);
-					HistrogramToolbarControl.this.trace = null;
+					HistogramToolbarControl.this.trace = null;
 				}
 				
 			}
@@ -225,15 +225,15 @@ public class HistrogramToolbarControl {
 				Object source = evt.getSource();
 				if (source instanceof IPaletteTrace) {
 					IPaletteTrace pt = (IPaletteTrace)source;
-					HistrogramToolbarControl.this.trace = pt;
+					HistogramToolbarControl.this.trace = pt;
 					enable(true);
-					HistrogramToolbarControl.this.lock.setSelection(!pt.isRescaleHistogram());
-					HistrogramToolbarControl.this.low.setText(pt.getMin().toString());
-					HistrogramToolbarControl.this.high.setText(pt.getMax().toString());
+					HistogramToolbarControl.this.lock.setSelection(!pt.isRescaleHistogram());
+					HistogramToolbarControl.this.low.setText(pt.getMin().toString());
+					HistogramToolbarControl.this.high.setText(pt.getMax().toString());
 					
 				} else {
 					enable(false);
-					HistrogramToolbarControl.this.trace = null;
+					HistogramToolbarControl.this.trace = null;
 				}
 				
 			}
@@ -241,9 +241,9 @@ public class HistrogramToolbarControl {
 			@Override
 			public void traceRemoved(TraceEvent evt) {
 				Object source = evt.getSource();
-				if (source == HistrogramToolbarControl.this.trace) {
-					HistrogramToolbarControl.this.trace.removePaletteListener(listener);
-					HistrogramToolbarControl.this.trace = null;
+				if (source == HistogramToolbarControl.this.trace) {
+					HistogramToolbarControl.this.trace.removePaletteListener(listener);
+					HistogramToolbarControl.this.trace = null;
 				}
 				
 				enable(false);
@@ -255,7 +255,7 @@ public class HistrogramToolbarControl {
 			public void plottingSystemCreated(PlotRegistrationEvent evt) {
 				IPlottingSystem<Object> plottingSystem = evt.getPlottingSystem();
 				if (plottingSystem.getPlotName().equals("Plot")) {
-					HistrogramToolbarControl.this.system = plottingSystem;
+					HistogramToolbarControl.this.system = plottingSystem;
 					system.addTraceListener(traceListener);
 				}
 			}
@@ -271,9 +271,9 @@ public class HistrogramToolbarControl {
 			protected void updateEvent(PaletteEvent evt) {
 				IPaletteTrace t = evt.getTrace();
 				enable(true);
-				HistrogramToolbarControl.this.lock.setSelection(!t.isRescaleHistogram());
-				HistrogramToolbarControl.this.low.setText(t.getMin().toString());
-				HistrogramToolbarControl.this.high.setText(t.getMax().toString());
+				HistogramToolbarControl.this.lock.setSelection(!t.isRescaleHistogram());
+				HistogramToolbarControl.this.low.setText(t.getMin().toString());
+				HistogramToolbarControl.this.high.setText(t.getMax().toString());
 			}
 		};
 	}

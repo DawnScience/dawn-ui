@@ -46,8 +46,8 @@ public class HistogramToolbarAddon {
 			MTrimBar topTrimBar = getTopTrimBar();
 			topTrimBar.getTags().add("Draggable");
 			control = MMenuFactory.INSTANCE.createToolControl();
-			control.setElementId(HistrogramToolbarControl.ID);
-			control.setContributionURI(HistrogramToolbarControl.CLASS_URI);
+			control.setElementId(HistogramToolbarControl.ID);
+			control.setContributionURI(HistogramToolbarControl.CLASS_URI);
 			topTrimBar.getChildren().add(0, control);
 		}
         control.setVisible(true);
@@ -129,7 +129,7 @@ public class HistogramToolbarAddon {
 			return null;
 		}
 		for (MTrimElement trimElement : topTrimBar.getChildren()) {
-			if (HistrogramToolbarControl.ID.equals(trimElement.getElementId())) {
+			if (HistogramToolbarControl.ID.equals(trimElement.getElementId())) {
 				return (MToolControl) trimElement;
 			}
 		}

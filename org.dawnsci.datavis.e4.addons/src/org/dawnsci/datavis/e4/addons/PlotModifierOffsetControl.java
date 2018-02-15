@@ -28,7 +28,7 @@ import org.osgi.service.event.Event;
 public class PlotModifierOffsetControl {
 	
 	public static final String CLASS_URI = "bundleclass://org.dawnsci.datavis.e4.addons/" + PlotModifierOffsetControl.class.getName();
-	public static final String ID = "org.dawnsci.datavis.e4.addons.PlotModifierOffsetControl";
+	public static final String ID = "org.dawnsci.datavis.e4.addons.plotmodifieroffsetslider";
 	
 	private Button normButton;
 	private Image normImage;
