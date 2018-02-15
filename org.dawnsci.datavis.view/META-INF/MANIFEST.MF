@@ -9,6 +9,7 @@ Require-Bundle: org.eclipse.ui.ide,
  org.eclipse.dawnsci.analysis.api,
  org.eclipse.jface,
  org.eclipse.e4.ui.workbench,
+ org.eclipse.e4.ui.model.workbench,
  org.dawnsci.datavis.model,
  org.eclipse.e4.ui.di,
  org.eclipse.dawnsci.plotting.api,
@@ -31,3 +32,4 @@ Import-Package: javax.annotation;version="1.2.0",
 Service-Component: OSGI-INF/*.xml
 Bundle-Activator: org.dawnsci.datavis.view.Activator
 Bundle-Vendor: Diamond Light Source
+Export-Package: org.dawnsci.datavis.view.parts

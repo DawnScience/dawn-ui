@@ -6,6 +6,8 @@ import org.eclipse.ui.progress.IProgressService;
 
 public interface IFileController {
 
+	public void setID(String id);
+
 	public List<String> loadFiles(String[] paths, IProgressService progressService);
 
 	public void loadFile(String path);

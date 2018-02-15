@@ -29,6 +29,11 @@ import org.eclipse.dawnsci.analysis.api.io.ILoaderService;
 import org.eclipse.e4.core.di.annotations.Optional;
 import org.eclipse.e4.ui.di.Focus;
 import org.eclipse.e4.ui.di.UIEventTopic;
+import org.eclipse.e4.ui.model.application.ui.advanced.MPerspective;
+import org.eclipse.e4.ui.model.application.ui.advanced.MPerspectiveStack;
+import org.eclipse.e4.ui.model.application.ui.basic.MPart;
+import org.eclipse.e4.ui.workbench.UIEvents;
+import org.eclipse.e4.ui.workbench.modeling.EPartService;
 import org.eclipse.e4.ui.workbench.modeling.ESelectionService;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -95,6 +100,8 @@ public class LoadedFilePart {
 	@Inject IFileController fileController;
 	@Inject IRecentPlaces recentPlaces;
 	
+	private String partId = null;
+
 	private Image ticked;
 	private Image unticked;
 	
@@ -148,8 +155,10 @@ public class LoadedFilePart {
 	}
 
 	@PostConstruct
-	public void createComposite(Composite parent) {
-		logger.info("Perspective Created: DataVis");
+	public void createComposite(Composite parent, MPart part) {
+		partId = part.getElementId();
+		fileController.setID(partId);
+		logger.info("LoadedFile view: {} created", partId);
 		parent.setLayout(new FormLayout());
 		FormData checkForm = new FormData();
 		checkForm.top = new FormAttachment(0,0);
@@ -260,7 +269,6 @@ public class LoadedFilePart {
 				viewer.refresh();
 				
 			}
-			
 
 		});
 		
@@ -421,7 +429,7 @@ public class LoadedFilePart {
 
 	}
 	
-	private void loadData(String[] paths){
+	private void loadData(String[] paths) {
 		List<String> loadFiles = fileController.loadFiles(paths,(IProgressService) PlatformUI.getWorkbench().getService(IProgressService.class));
 		
 		if (loadFiles != null && !loadFiles.isEmpty()) {
@@ -438,11 +446,11 @@ public class LoadedFilePart {
 			Display.getDefault().syncExec(() -> updateOnStateChange(event));
 			return;
 		}
-		viewer.refresh();
+		viewer.setInput(fileController);
 	}
 	
 	@PreDestroy
-	public void dispose(){
+	public void dispose() {
 		fileController.removeStateListener(fileStateListener);
 		fileController.detachLive();
 		ticked.dispose();
@@ -453,21 +461,37 @@ public class LoadedFilePart {
 	public void setFocus() {
 		if (viewer != null) viewer.getControl().setFocus();
 	}
-	
+
 	@Inject
 	@Optional
-	private void subscribeFileOpenE3(@UIEventTopic("org/dawnsci/events/file/OPEN") Event data ) {
-		String[] paths = (String[])data.getProperty("paths");
-		if (paths == null) {
-			String path = (String)data.getProperty("path");
-			paths = new String[]{path};
+	private void subscribeFileOpenE3(@UIEventTopic("org/dawnsci/events/file/OPEN") Event data, MPart part) {
+		if (part != null && part.getElementId() != partId) {
+			return;
 		}
-		
-		if (data.getProperty("live_bean") != null) return;
-		
-		loadData(paths);
 
-	} 
+		String[] paths = (String[]) data.getProperty("paths");
+		if (paths == null) {
+			String path = (String) data.getProperty("path");
+			paths = new String[] { path };
+		}
+
+		if (data.getProperty("live_bean") != null) return;
+
+		loadData(paths);
+	}
+
+	@Inject
+	@Optional
+	private void perspectiveChanged(@UIEventTopic("org/eclipse/e4/ui/model/ui/ElementContainer/selectedElement/SET") Event data, EPartService service) {
+		Object property = data.getProperty(UIEvents.EventTags.ELEMENT);
+		if (property instanceof MPerspectiveStack) {
+			MPerspective p = ((MPerspectiveStack) property).getSelectedElement();
+			if (p != null && partId != null && service.isPartOrPlaceholderInPerspective(partId, p)) {
+				logger.debug("Switching filecontroller to {} for {}", partId, p.getElementId());
+				fileController.setID(partId);
+			}
+		}
+	}
 	
 	private class CheckBoxEditSupport extends EditingSupport {
 
