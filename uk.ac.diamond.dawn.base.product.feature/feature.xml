@@ -57,6 +57,10 @@
          id="uk.ac.diamond.scisoft.analysis.powder.matcher.ccdc.feature"
          version="0.0.0"/>
 
+   <includes
+         id="uk.ac.diamond.scisoft.rixs.feature"
+         version="0.0.0"/>
+
    <plugin
          id="uk.ac.diamond.scisoft.xpdf"
          download-size="0"
