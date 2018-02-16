@@ -339,7 +339,7 @@ private static final String PROCESSING_QUEUE_NAME = "scisoft.operation.STATUS_QU
 			ISubmitter<StatusBean> queueConnection = eService.createSubmitter(uri, extractor.getQueueName());
 			queueConnection.setStatusTopicName(EventConstants.STATUS_TOPIC);
 
-			List<StatusBean> queue = queueConnection.getQueue(extractor.getQueueName(), null);
+			List<StatusBean> queue = queueConnection.getQueue(extractor.getQueueName());
 
 			for (StatusBean b : queue) {
 				if (b.getStatus().isActive()) {

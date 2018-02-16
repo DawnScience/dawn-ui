@@ -183,7 +183,7 @@ public class LiveFileServiceImpl implements ILiveFileService {
 			ISubmitter<StatusBean> queueConnection = eService.createSubmitter(uri, extractor.getQueueName());
 			queueConnection.setStatusTopicName(EventConstants.STATUS_TOPIC);
 
-			List<StatusBean> queue = queueConnection.getQueue(extractor.getQueueName(), null);
+			List<StatusBean> queue = queueConnection.getQueue(extractor.getQueueName());
 
 			for (StatusBean b : queue) {
 				if (b.getStatus().isActive()) {
