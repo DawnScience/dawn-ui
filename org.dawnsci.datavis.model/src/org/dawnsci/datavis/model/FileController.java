@@ -58,28 +58,40 @@ public class FileController implements IFileController {
 	
 	private ILoadedFileConfiguration[] fileConfigs = new ILoadedFileConfiguration[]{new CurrentStateFileConfiguration(), new NexusFileConfiguration(), new ImageFileConfiguration(), new XYEFileConfiguration()};
 	
-	private Map<String, Set<FileControllerStateEventListener>> allListeners;
+//	private Map<String, Set<FileControllerStateEventListener>> allListeners;
 	private Set<FileControllerStateEventListener> listeners = new HashSet<>();
 	
 	private static final Logger logger = LoggerFactory.getLogger(FileController.class);
-	
+
+	private String currentId;
+
 	public FileController(){
 		store = new HashMap<>();
-		allListeners = new HashMap<>();
+//		allListeners = new HashMap<>();
 	};
 
 	@Override
 	public synchronized void setID(String id) {
+		if (id == currentId) {
+			return;
+		}
 		if (!store.containsKey(id)) {
 			store.put(id, new LoadedFiles());
 		}
 		loadedFiles = store.get(id);
-		if (allListeners.isEmpty()) { // reuse default as first ID to avoid an NPE
-			allListeners.put(id, listeners);
-		} else if (!allListeners.containsKey(id)) {
-			allListeners.put(id, new HashSet<>());
-		}
-		listeners = allListeners.get(id);
+		currentFile = null;
+		currentData = null;
+		currentId = id;
+//		if (allListeners.isEmpty()) { // reuse default as first ID to avoid an NPE
+//			allListeners.put(id, listeners);
+//		} else if (!allListeners.containsKey(id)) {
+//			allListeners.put(id, new HashSet<>());
+//		}
+//		listeners = allListeners.get(id);
+	}
+
+	public String getCurrentId() {
+		return currentId;
 	}
 
 	/* (non-Javadoc)

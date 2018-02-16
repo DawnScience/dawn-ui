@@ -324,6 +324,9 @@ public class LoadedFilePart {
 		viewer.getControl().setMenu(menu);
 		
 		fileStateListener = event -> {
+			if (!((FileController)fileController).getCurrentId().equals(partId)) {
+				return; // ignore other sources of state changes
+			}
 			updateOnStateChange(event);
 
 			List<String> r = recentPlaces.getRecentPlaces();

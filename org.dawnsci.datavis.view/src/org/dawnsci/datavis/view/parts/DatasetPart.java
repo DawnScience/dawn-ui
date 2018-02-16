@@ -9,6 +9,7 @@ import javax.inject.Inject;
 
 import org.dawnsci.datavis.api.IPlotMode;
 import org.dawnsci.datavis.model.DataOptions;
+import org.dawnsci.datavis.model.FileController;
 import org.dawnsci.datavis.model.FileControllerStateEvent;
 import org.dawnsci.datavis.model.FileControllerStateEventListener;
 import org.dawnsci.datavis.model.IFileController;
@@ -16,6 +17,7 @@ import org.dawnsci.datavis.model.IPlotController;
 import org.dawnsci.datavis.model.LoadedFile;
 import org.dawnsci.datavis.model.PlotModeChangeEventListener;
 import org.dawnsci.datavis.model.PlotModeEvent;
+import org.dawnsci.datavis.view.perspective.DataVisPerspective;
 import org.dawnsci.datavis.view.table.DataConfigurationTable;
 import org.dawnsci.datavis.view.table.DataOptionTableViewer;
 import org.eclipse.e4.ui.di.Focus;
@@ -150,7 +152,9 @@ public class DatasetPart {
 			
 			@Override
 			public void stateChanged(FileControllerStateEvent event) {
-			
+				if (!DataVisPerspective.LOADED_FILE_ID.equals(((FileController) fileController).getCurrentId())) {
+					return; // ignore other sources of state changes
+				}
 				updateOnStateChange(event.isSelectedFileChanged());
 				
 			}

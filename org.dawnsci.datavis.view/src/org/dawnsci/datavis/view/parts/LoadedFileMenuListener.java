@@ -37,10 +37,12 @@ public class LoadedFileMenuListener implements IMenuListener {
 
 	private TableViewer viewer;
 	private IFileController fileController;
+	private String id;
 
 	public LoadedFileMenuListener(IFileController fileController, TableViewer viewer) {
 		this.fileController = fileController;
 		this.viewer = viewer;
+		id = ((FileController) fileController).getCurrentId();
 	}
 
 	@Override
@@ -86,9 +88,10 @@ public class LoadedFileMenuListener implements IMenuListener {
 		}
 		
 		protected List<LoadedFile> getFileSelection() {
-			if (view.getSelection() instanceof IStructuredSelection) {
+			if (LoadedFileMenuListener.this.id.equals(((FileController) fileController).getCurrentId()) && view.getSelection() instanceof IStructuredSelection) {
 				final IStructuredSelection selection = (IStructuredSelection) view.getSelection();
 
+				System.err.println("Selection size: " + selection.size());
 				return Arrays.stream(selection.toArray())
 						.filter(LoadedFile.class::isInstance)
 						.map(LoadedFile.class::cast)
