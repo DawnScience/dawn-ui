@@ -517,6 +517,7 @@ public class FileController implements IFileController {
 		for (LoadedFile file : loadedFiles) {
 			file.setLabelName(label);
 		}
+		fireStateChangeListeners(false, true);
 	}
 	
 	public boolean isOnlySignals() {
