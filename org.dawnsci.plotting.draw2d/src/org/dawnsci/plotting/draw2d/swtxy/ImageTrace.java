@@ -1041,7 +1041,6 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 	private IntensityLabelPainter intensityLabelPainter;
 	@Override
 	protected void paintFigure(Graphics graphics) {
-		
 		super.paintFigure(graphics);
 
 		/**
@@ -1419,7 +1418,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 		}
 
 		// We are just assigning the data before the image is live.
-		if (getParent()==null && !performAuto) {
+		if (getParent()==null && !performAuto && globalRange == null) {
 			this.image = im;
 			this.axes  = (List<IDataset>)axes;
 			// is this enough?
@@ -1513,6 +1512,18 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 		} else if (axes.get(1)==null) {
 			getYAxis().setTitle("");
 		}
+		
+		if (globalRange != null && xAxis instanceof AspectAxis && yAxis instanceof AspectAxis) {
+			
+			AspectAxis ax = (AspectAxis)xAxis;
+			AspectAxis ay = (AspectAxis)yAxis;
+			
+			if (ax.isKeepAspect() && ay.isKeepAspect()) {
+				ax.setKeepAspectWith(ay);
+				ay.setKeepAspectWith(ax);
+			}
+		}
+		
 		if (performAuto) {
 	 		try {
 				setAxisRedrawActive(false);

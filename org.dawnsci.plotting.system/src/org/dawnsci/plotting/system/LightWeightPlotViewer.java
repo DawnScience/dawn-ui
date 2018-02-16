@@ -1150,7 +1150,10 @@ public class LightWeightPlotViewer<T> extends AbstractPlottingViewer<T> implemen
 		if (trace instanceof IImageTrace) {
 
 			final IImageTrace image = (IImageTrace)trace;
-		    if (!image.setData(evt.getImage(), evt.getAxes(), true)) return false; // But not plotted
+			
+			boolean autoscale = image.getGlobalRange()!= null && !system.isRescale() ? false : true;
+			
+		    if (!image.setData(evt.getImage(), evt.getAxes(), autoscale)) return false; // But not plotted
 
 			
 			xyGraph.addImageTrace((ImageTrace)image);
