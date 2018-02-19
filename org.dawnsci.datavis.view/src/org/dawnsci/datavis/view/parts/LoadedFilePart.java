@@ -15,7 +15,6 @@ import javax.inject.Inject;
 
 import org.apache.commons.io.filefilter.WildcardFileFilter;
 import org.dawnsci.datavis.api.IRecentPlaces;
-import org.dawnsci.datavis.model.FileController;
 import org.dawnsci.datavis.model.FileControllerStateEvent;
 import org.dawnsci.datavis.model.FileControllerStateEventListener;
 import org.dawnsci.datavis.model.IFileController;
@@ -265,7 +264,7 @@ public class LoadedFilePart {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				fileCompare = fileCompare.reversed();
-				((FileController)fileController).setComparator(fileCompare);
+				fileController.setComparator(fileCompare);
 				viewer.refresh();
 				
 			}
@@ -290,7 +289,7 @@ public class LoadedFilePart {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				labelCompare = labelCompare.reversed();
-				((FileController)fileController).setComparator(labelCompare);
+				fileController.setComparator(labelCompare);
 				viewer.refresh();
 			}
 			
@@ -324,7 +323,7 @@ public class LoadedFilePart {
 		viewer.getControl().setMenu(menu);
 		
 		fileStateListener = event -> {
-			if (!((FileController)fileController).getCurrentId().equals(partId)) {
+			if (!fileController.getID().equals(partId)) {
 				return; // ignore other sources of state changes
 			}
 			updateOnStateChange(event);
@@ -381,7 +380,7 @@ public class LoadedFilePart {
 						
 						ViewerCell cell = viewer.getCell(p1);
 						LoadedFile f = cell == null ? null : (LoadedFile)cell.getElement();
-						((FileController)fileController).moveBefore(lf, f);
+						fileController.moveBefore(lf, f);
 					}
 				}
 			}

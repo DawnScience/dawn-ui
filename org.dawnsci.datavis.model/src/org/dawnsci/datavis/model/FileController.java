@@ -46,7 +46,7 @@ public class FileController implements IFileController {
 		recentPlaces = places;
 	}
 	
-	private Map<String, LoadedFiles> store;
+	private Map<String, LoadedFiles> allLoadedFiles;
 	private LoadedFiles loadedFiles;
 	private LoadedFile currentFile;
 	private DataOptions currentData;
@@ -66,7 +66,7 @@ public class FileController implements IFileController {
 	private String currentId;
 
 	public FileController(){
-		store = new HashMap<>();
+		allLoadedFiles = new HashMap<>();
 //		allListeners = new HashMap<>();
 	};
 
@@ -75,22 +75,24 @@ public class FileController implements IFileController {
 		if (id == currentId) {
 			return;
 		}
-		if (!store.containsKey(id)) {
-			store.put(id, new LoadedFiles());
+		if (!allLoadedFiles.containsKey(id)) {
+			allLoadedFiles.put(id, new LoadedFiles());
 		}
-		loadedFiles = store.get(id);
-		currentFile = null;
-		currentData = null;
-		currentId = id;
+		loadedFiles = allLoadedFiles.get(id);
 //		if (allListeners.isEmpty()) { // reuse default as first ID to avoid an NPE
 //			allListeners.put(id, listeners);
 //		} else if (!allListeners.containsKey(id)) {
 //			allListeners.put(id, new HashSet<>());
 //		}
 //		listeners = allListeners.get(id);
+
+		currentFile = null;
+		currentData = null;
+		currentId = id;
 	}
 
-	public String getCurrentId() {
+	@Override
+	public String getID() {
 		return currentId;
 	}
 
@@ -321,7 +323,8 @@ public class FileController implements IFileController {
 	public DataOptions getCurrentDataOption() {
 		return currentData;
 	}
-	
+
+	@Override
 	public void moveBefore(List<LoadedFile> files, LoadedFile marker) {
 		loadedFiles.moveBefore(files, marker);
 		fireStateChangeListeners(true, true);
@@ -518,12 +521,14 @@ public class FileController implements IFileController {
 		
 		fireStateChangeListeners(true, true);
 	}
-	
+
+	@Override
 	public void setComparator(Comparator<LoadedFile> comparator) {
 		loadedFiles.setComparator(comparator);
 		fireStateChangeListeners(true, true);
 	}
-	
+
+	@Override
 	public void setLabelName(String label) {
 		labelName = label;
 		for (LoadedFile file : loadedFiles) {
@@ -531,11 +536,13 @@ public class FileController implements IFileController {
 		}
 		fireStateChangeListeners(false, true);
 	}
-	
+
+	@Override
 	public boolean isOnlySignals() {
 		return onlySignals;
 	}
 
+	@Override
 	public void setOnlySignals(boolean onlySignals) {
 		this.onlySignals = onlySignals;
 		loadedFiles.getLoadedFiles().stream().forEach(f-> f.setOnlySignals(onlySignals));

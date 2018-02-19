@@ -8,7 +8,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.dawnsci.datavis.model.DataOptions;
-import org.dawnsci.datavis.model.FileController;
 import org.dawnsci.datavis.model.IDataObject;
 import org.dawnsci.datavis.model.IFileController;
 import org.dawnsci.datavis.model.LoadedFile;
@@ -42,7 +41,7 @@ public class LoadedFileMenuListener implements IMenuListener {
 	public LoadedFileMenuListener(IFileController fileController, TableViewer viewer) {
 		this.fileController = fileController;
 		this.viewer = viewer;
-		id = ((FileController) fileController).getCurrentId();
+		id = fileController.getID();
 	}
 
 	@Override
@@ -88,7 +87,7 @@ public class LoadedFileMenuListener implements IMenuListener {
 		}
 		
 		protected List<LoadedFile> getFileSelection() {
-			if (LoadedFileMenuListener.this.id.equals(((FileController) fileController).getCurrentId()) && view.getSelection() instanceof IStructuredSelection) {
+			if (LoadedFileMenuListener.this.id.equals(fileController.getID()) && view.getSelection() instanceof IStructuredSelection) {
 				final IStructuredSelection selection = (IStructuredSelection) view.getSelection();
 
 				System.err.println("Selection size: " + selection.size());
@@ -261,7 +260,7 @@ public class LoadedFileMenuListener implements IMenuListener {
 			
 			String labelName = d.getResult()[0].toString();
 			
-			((FileController)fileController).setLabelName(labelName);
+			fileController.setLabelName(labelName);
 			
 			Layout layout = view.getTable().getParent().getLayout();
 			
@@ -285,7 +284,7 @@ public class LoadedFileMenuListener implements IMenuListener {
 		@Override
 		public void run() {
 			
-			((FileController)fileController).setLabelName("");
+			fileController.setLabelName("");
 			
 			Layout layout = view.getTable().getParent().getLayout();
 			
@@ -308,7 +307,7 @@ public class LoadedFileMenuListener implements IMenuListener {
 		@Override
 		public void run() {
 			
-			((FileController)fileController).setComparator(null);
+			fileController.setComparator(null);
 			view.refresh();
 		}
 	}

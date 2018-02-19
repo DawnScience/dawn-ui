@@ -1,5 +1,6 @@
 package org.dawnsci.datavis.model;
 
+import java.util.Comparator;
 import java.util.List;
 
 import org.eclipse.ui.progress.IProgressService;
@@ -7,6 +8,18 @@ import org.eclipse.ui.progress.IProgressService;
 public interface IFileController {
 
 	public void setID(String id);
+
+	public String getID();
+
+	public void setComparator(Comparator<LoadedFile> comparator);
+	
+	public void setLabelName(String label);
+
+	public boolean isOnlySignals();
+
+	public void setOnlySignals(boolean onlySignals);
+
+	public void moveBefore(List<LoadedFile> files, LoadedFile marker);
 
 	public List<String> loadFiles(String[] paths, IProgressService progressService);
 

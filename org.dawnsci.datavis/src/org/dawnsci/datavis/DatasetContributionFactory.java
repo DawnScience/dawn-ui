@@ -1,6 +1,5 @@
 package org.dawnsci.datavis;
 
-import org.dawnsci.datavis.model.FileController;
 import org.dawnsci.datavis.model.IFileController;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IMenuListener;
@@ -38,12 +37,12 @@ public class DatasetContributionFactory extends ExtensionContributionFactory {
 				Action a = new Action("Filter Datasets"){
 					@Override
 					public void run() {
-						boolean onlySignals = ((FileController)fileController).isOnlySignals();
-						((FileController)fileController).setOnlySignals(!onlySignals);
+						boolean onlySignals = fileController.isOnlySignals();
+						fileController.setOnlySignals(!onlySignals);
 					}
 				};
 
-				a.setChecked(((FileController)fileController).isOnlySignals());
+				a.setChecked(fileController.isOnlySignals());
 
 				search.add(a);
 			}
