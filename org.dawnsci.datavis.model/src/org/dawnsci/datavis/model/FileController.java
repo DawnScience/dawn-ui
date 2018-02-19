@@ -17,6 +17,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.dawnsci.datavis.api.IRecentPlaces;
+import org.dawnsci.datavis.model.JoinFiles;
 import org.dawnsci.datavis.model.fileconfig.CurrentStateFileConfiguration;
 import org.dawnsci.datavis.model.fileconfig.ILoadedFileConfiguration;
 import org.dawnsci.datavis.model.fileconfig.ImageFileConfiguration;
@@ -133,84 +134,7 @@ public class FileController implements IFileController {
 	 */
 	@Override
 	public void joinFiles(List<LoadedFile> files) {
-		// First, let's set up some variables that we'll be adding to
-		LoadedFile firstFile = files.get(0);
-		String neXusPath = "";
-		String datasetsString = "";
-		String fileNamesString = "# FILE_NAME";
-		String directoryPath = "# DIR_NAME: " + firstFile.getParent() + "\n";
-		
-		// Then let's get some information about the NeXus tree
-		Tree tree = firstFile.getTree();
-		GroupNode groupNode = tree.getGroupNode();
-		
-		// Check that the file isn't empty...
-		if (groupNode != null) {
-			// And find all the datanodes within the file
-			datasetsString = this.nodeSearcher(groupNode, neXusPath, datasetsString);
-		}
-		
-		// Then generate the string for all the files within the passed list
-		for (Iterator<LoadedFile> loopIter = files.iterator(); loopIter.hasNext(); ) {
-			LoadedFile file = loopIter.next();
-			fileNamesString += "\n" + file.getName();
-		}
-		
-		// Now create a fileWriter
-		BufferedWriter fileWriter = null;
-		// Then come up with the output filename
-		String firstFileName = files.get(0).getName();
-		String lastFileName = files.get(files.size()-1).getName();
-		
-		int extensionLocation = firstFileName.lastIndexOf(".");
-		String outputName = firstFileName.substring(0, extensionLocation) + "--" + lastFileName.substring(0, extensionLocation) + " ";
-		File tempFile = null;
-		
-		// Now output the text into the .dawn file
-		try {
-			tempFile = File.createTempFile(outputName, ".dawn");
-			tempFile.setWritable(true);
-			tempFile.deleteOnExit();
-			
-			fileWriter = new BufferedWriter(new FileWriter(tempFile.getAbsoluteFile()));
-			fileWriter.write(directoryPath + datasetsString + fileNamesString);
-			fileWriter.close();
-		} catch (IOException fileError) {
-			// Print out if we have any errors
-			logger.error("There was a problem creating the .dawn linker file: " + fileError.toString());
-		}
-		
-		// And open the resulting file
-		if (tempFile != null) {
-			this.loadFile(tempFile.getAbsolutePath());
-		}
-	}
-	
-	
-	private String nodeSearcher(GroupNode groupNode, String neXusPath, String datasetsString) {
-		// Find out what we've been passed
-		Collection<String> subNodeNames = groupNode.getNames();
-		
-		// And loop through it
-		for (Iterator<String> subNodeNameIterator = subNodeNames.iterator(); subNodeNameIterator.hasNext(); ) {
-			// Creating an iterator and going through all the nodes 
-			String subNodeName = subNodeNameIterator.next();
-			Node subNode = groupNode.getNode(subNodeName);
-			// Building this as needed for our output file
-			String currentPath = neXusPath + "/" + subNodeName;
-		
-			// Recursing if we've been passed a group node
-			if (subNode.isGroupNode()) {
-				datasetsString = this.nodeSearcher((GroupNode) subNode, currentPath, datasetsString);
-			}
-			
-			// Logging it if we've been passed a data node
-			if (subNode.isDataNode()) {
-				datasetsString += "# DATASET_NAME: " + currentPath + "\n";
-			}
-		}
-		// And returning the results of our investigation
-		return datasetsString;
+		this.loadFile(JoinFiles.fileJoiner(files));
 	}
 	
 	
