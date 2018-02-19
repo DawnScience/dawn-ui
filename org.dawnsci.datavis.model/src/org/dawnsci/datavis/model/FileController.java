@@ -135,6 +135,12 @@ public class FileController implements IFileController {
 	@Override
 	public void joinFiles(List<LoadedFile> files) {
 		this.loadFile(JoinFiles.fileJoiner(files));
+		
+		// TODO: Temporary workaround, this should be reviewed/fixed for release.
+		LoadedFile firstFile = files.get(0);
+		String filePath = firstFile.getFilePath();
+		this.unloadFile(firstFile);
+		this.loadFile(filePath);
 	}
 	
 	
