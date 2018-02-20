@@ -60,7 +60,7 @@ public class FileController implements IFileController {
 	private ILoadedFileConfiguration[] fileConfigs = new ILoadedFileConfiguration[]{new CurrentStateFileConfiguration(), new NexusFileConfiguration(), new ImageFileConfiguration(), new XYEFileConfiguration()};
 	
 //	private Map<String, Set<FileControllerStateEventListener>> allListeners;
-	private Set<FileControllerStateEventListener> listeners = new HashSet<>();
+	private Set<FileControllerStateEventListener> listeners;
 	
 	private static final Logger logger = LoggerFactory.getLogger(FileController.class);
 
@@ -68,6 +68,8 @@ public class FileController implements IFileController {
 
 	public FileController(){
 		allLoadedFiles = new HashMap<>();
+		loadedFiles = new LoadedFiles();
+		listeners = new HashSet<>();
 //		allListeners = new HashMap<>();
 	};
 
@@ -76,10 +78,13 @@ public class FileController implements IFileController {
 		if (id == currentId) {
 			return;
 		}
-		if (!allLoadedFiles.containsKey(id)) {
+		if (allLoadedFiles.isEmpty()) { // reuse default as first ID to avoid an NPE
+			allLoadedFiles.put(id, loadedFiles);
+		} else if (!allLoadedFiles.containsKey(id)) {
 			allLoadedFiles.put(id, new LoadedFiles());
 		}
 		loadedFiles = allLoadedFiles.get(id);
+
 //		if (allListeners.isEmpty()) { // reuse default as first ID to avoid an NPE
 //			allListeners.put(id, listeners);
 //		} else if (!allListeners.containsKey(id)) {
