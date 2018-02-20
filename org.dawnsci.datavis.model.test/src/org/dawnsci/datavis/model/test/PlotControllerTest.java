@@ -109,7 +109,7 @@ public class PlotControllerTest extends AbstractTestModel {
 		//Open file and select 1D data
 		setUpAndSelectFirstFile1D();
 		assertNotNull(plotManager.getCurrentPlotModes());
-		assertEquals(2, plotManager.getCurrentPlotModes().length);
+		assertEquals(1, plotManager.getCurrentPlotModes().length);
 
 		testSingleTraceAddRemoveUnload();
 		
@@ -442,8 +442,8 @@ public class PlotControllerTest extends AbstractTestModel {
 	
 	@Test
 	public void testMultiFileXYAndImage() throws Exception{
-		fileController.loadFile(file.getAbsolutePath());
-		fileController.loadFile(file1.getAbsolutePath());
+		assertTrue(fileController.loadFile(file.getAbsolutePath()));
+		assertTrue(fileController.loadFile(file1.getAbsolutePath()));
 		LoadedFile lf = fileController.getLoadedFiles().stream().filter(f -> f.getFilePath().equals(file.getAbsolutePath())).findFirst().get();
 		LoadedFile lf1 = fileController.getLoadedFiles().stream().filter(f -> f.getFilePath().equals(file1.getAbsolutePath())).findFirst().get();
 

@@ -1,23 +1,17 @@
 package org.dawnsci.datavis.model;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.dawnsci.datavis.api.IRecentPlaces;
-import org.dawnsci.datavis.model.JoinFiles;
 import org.dawnsci.datavis.model.fileconfig.CurrentStateFileConfiguration;
 import org.dawnsci.datavis.model.fileconfig.ILoadedFileConfiguration;
 import org.dawnsci.datavis.model.fileconfig.ImageFileConfiguration;
@@ -25,9 +19,6 @@ import org.dawnsci.datavis.model.fileconfig.NexusFileConfiguration;
 import org.dawnsci.datavis.model.fileconfig.XYEFileConfiguration;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.dawnsci.analysis.api.io.ILoaderService;
-import org.eclipse.dawnsci.analysis.api.tree.GroupNode;
-import org.eclipse.dawnsci.analysis.api.tree.Node;
-import org.eclipse.dawnsci.analysis.api.tree.Tree;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.progress.IProgressService;
@@ -129,8 +120,8 @@ public class FileController implements IFileController {
 	 * @see org.dawnsci.datavis.model.IFileController#loadFile(java.lang.String)
 	 */
 	@Override
-	public void loadFile(String path) {
-		loadFiles(new String[]{path}, null);
+	public boolean loadFile(String path) {
+		return loadFiles(new String[]{path}, null).isEmpty();
 	}
 	
 	
