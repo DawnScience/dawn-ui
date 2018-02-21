@@ -11,6 +11,7 @@ import org.eclipse.january.dataset.DatasetUtils;
 import org.eclipse.january.dataset.IDataset;
 import org.eclipse.january.dataset.IDynamicDataset;
 import org.eclipse.january.dataset.ILazyDataset;
+import org.eclipse.january.metadata.AxesMetadata;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,7 +38,9 @@ public class ReMappedData extends AbstractMapData {
 	
 	@Override
 	public IDataset getMap(){
-		if (map == null) updateRemappedData(shape);
+		if (map == null && !live) updateRemappedData(shape);
+		
+		if (map == null) return null;
 		
 		Dataset d = null;
 		try {
@@ -59,6 +62,7 @@ public class ReMappedData extends AbstractMapData {
 				if (baseMap.getRank() == 1) {
 
 					fm = DatasetUtils.sliceAndConvertLazyDataset(baseMap);
+					fm.toString();
 
 				} else {
 					fm = baseMap.getSlice(parent.getMapDims().getMapSlice(baseMap));
@@ -71,6 +75,11 @@ public class ReMappedData extends AbstractMapData {
 		}
 		
 		MapScanDimensions mapDims = oParent.getMapDims();
+		
+		if (fm.getFirstMetadata(AxesMetadata.class) == null) {
+			logger.error("Map requires have axes metadata");
+			return;
+		}
 		
 		fm = LivePlottingUtils.cropNanValuesFromAxes(fm,!mapDims.isRemappingRequired());
 		IDataset[] remapData = MappingUtils.remapData(fm, shape, 0);

@@ -309,7 +309,9 @@ public class MappedDataBlock implements MapObject, PlottableMapObject {
 	}
 
 	public boolean isReady() {
-		return ((IDynamicDataset)dataset).refreshShape();
+		boolean refreshShape = ((IDynamicDataset)dataset).refreshShape();
+		
+		return refreshShape ? refreshShape : dataset.getSize() > 1;
 	}
 	
 	@Override
