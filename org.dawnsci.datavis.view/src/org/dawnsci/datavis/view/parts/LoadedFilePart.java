@@ -24,6 +24,7 @@ import org.dawnsci.datavis.view.Activator;
 import org.dawnsci.datavis.view.quickfile.IQuickFileWidgetListener;
 import org.dawnsci.datavis.view.quickfile.QuickFileWidget;
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.dawnsci.analysis.api.io.ILoaderService;
 import org.eclipse.e4.core.di.annotations.Optional;
 import org.eclipse.e4.ui.di.Focus;
@@ -48,10 +49,10 @@ import org.eclipse.jface.viewers.ColumnWeightData;
 import org.eclipse.jface.viewers.EditingSupport;
 import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.ITreeSelection;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
-import org.eclipse.jface.viewers.TreeSelection;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerCell;
 import org.eclipse.swt.SWT;
@@ -344,13 +345,15 @@ public class LoadedFilePart {
 			public void drop(DropTargetEvent event) {
 				
 				Object dropData = event.data;
-				if (dropData instanceof TreeSelection) {
-					TreeSelection selectedNode = (TreeSelection) dropData;
-					Object[] obj = selectedNode.toArray();
+				if (dropData instanceof ITreeSelection) {
+					ITreeSelection selectedNode = (ITreeSelection) dropData;
 					List<String> paths = new ArrayList<>();
-					for (int i = 0; i < obj.length; i++) {
-						if (obj[i] instanceof IFile) {
-							IFile file = (IFile) obj[i];
+					for (Object o : selectedNode.toArray()) {
+						if (!(o instanceof IFile) && o instanceof IAdaptable) {
+							o = ((IAdaptable) o).getAdapter(IFile.class);
+						}
+						if (o instanceof IFile) {
+							IFile file = (IFile) o;
 							paths.add(file.getLocation().toOSString());
 						}
 					}
