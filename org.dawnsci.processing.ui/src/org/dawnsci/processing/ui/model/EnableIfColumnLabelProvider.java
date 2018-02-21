@@ -34,8 +34,8 @@ class EnableIfColumnLabelProvider extends ColumnLabelProvider {
 			return null;
 		} else {
 			if (italic == null) {
-				final FontData shellFd = Display.getDefault().getActiveShell().getFont().getFontData()[0];
-				FontData fd = new FontData(shellFd.getName(), shellFd.getHeight(), SWT.ITALIC);
+				final FontData sysFd = Display.getDefault().getSystemFont().getFontData()[0];
+				FontData fd = new FontData(sysFd.getName(), sysFd.getHeight(), SWT.ITALIC);
 				italic = new Font(null, fd);
 			}
 			return italic;
