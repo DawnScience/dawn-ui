@@ -456,6 +456,21 @@
              label="PCA"
              visible="true">
        </plotting_tool_page>
+       <plotting_tool_page
+             class="org.dawnsci.plotting.tools.reduction.DataReduction2DTool"
+             icon="icons/data-reduction.png"
+             id="org.dawnsci.plotting.tools.reduction.DataReduction2DTool"
+             label="Data Reduction"
+             visible="true">
+       </plotting_tool_page>
+       <plotting_tool_page
+             category="org.dawnsci.plotting.tools.category.Science"
+             class="org.dawnsci.plotting.tools.filter.FilterTool"
+             icon="icons/filter.png"
+             id="org.dawnsci.plotting.tools.filter.filterTool"
+             label="Image Filter"
+             tooltip="Use to filter images with different algorithms, for instance Fano factor">
+       </plotting_tool_page>
    </extension>
 
   <extension
@@ -641,17 +656,6 @@
             label="Pseudo-Flat field correction"
             ui="org.dawnsci.plotting.tools.filter.PseudoFlatFieldConfiguration">
       </plottingFilter>
-   </extension>
-   <extension
-         point="org.eclipse.dawnsci.plotting.api.toolPage">
-      <plotting_tool_page
-            category="org.dawnsci.plotting.tools.category.Science"
-            class="org.dawnsci.plotting.tools.filter.FilterTool"
-            icon="icons/filter.png"
-            id="org.dawnsci.plotting.tools.filter.filterTool"
-            label="Image Filter"
-            tooltip="Use to filter images with different algorithms, for instance Fano factor">
-      </plotting_tool_page>
    </extension>
 
 </plugin>
