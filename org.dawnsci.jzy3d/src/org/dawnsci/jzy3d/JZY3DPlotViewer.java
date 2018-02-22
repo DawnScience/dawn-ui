@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import org.dawnsci.jzy3d.preferences.PreferenceDialog;
 import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.dawnsci.plotting.api.ActionType;
 import org.eclipse.dawnsci.plotting.api.IPlotActionSystem;
@@ -85,6 +86,16 @@ public class JZY3DPlotViewer extends IPlottingSystemViewer.Stub<Composite> {
 	private void createToolbar() {
 		IPlotActionSystem plotActionSystem = system.getPlotActionSystem();
 		
+		Action configureAction = new Action("Configure") {
+			@Override
+			public void run() {
+				PreferenceDialog prefs = new PreferenceDialog(Display.getDefault().getActiveShell(), chart);
+				prefs.open();
+			}
+		};
+		configureAction.setToolTipText("Configure plot labels");
+		configureAction.setImageDescriptor(Activator.getImageDescriptor("icons/Configure.png"));
+		
 		Action squareAction = new Action("Square", Action.AS_CHECK_BOX) {
 			@Override
 			public void run() {
@@ -123,6 +134,7 @@ public class JZY3DPlotViewer extends IPlottingSystemViewer.Stub<Composite> {
 		saveAction.setImageDescriptor(Activator.getImageDescriptor("icons/picture_save.png"));
 		
 		plotActionSystem.registerGroup("org.dawnsci.jzy3.jzy3dplotviewer.actions", ManagerType.TOOLBAR);
+		plotActionSystem.registerAction("org.dawnsci.jzy3.jzy3dplotviewer.actions", configureAction, ActionType.JZY3D_COLOR, ManagerType.TOOLBAR);
 		plotActionSystem.registerAction("org.dawnsci.jzy3.jzy3dplotviewer.actions", squareAction, ActionType.JZY3D_COLOR, ManagerType.TOOLBAR);
 		plotActionSystem.registerAction("org.dawnsci.jzy3.jzy3dplotviewer.actions", saveAction, ActionType.JZY3D_COLOR, ManagerType.TOOLBAR);
 		

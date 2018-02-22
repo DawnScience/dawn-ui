@@ -23,7 +23,12 @@ public interface IFileController {
 
 	public List<String> loadFiles(String[] paths, IProgressService progressService);
 
-	public void loadFile(String path);
+	/** load file path
+	 * 
+	 * @param path
+	 * @return true if file was loaded successfully, false otherwise
+	 */
+	public boolean loadFile(String path);
 
 	public void joinFiles(List<LoadedFile> files);
 

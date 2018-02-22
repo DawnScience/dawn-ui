@@ -21,6 +21,7 @@ import java.util.Map;
 
 import org.dawb.common.services.ServiceManager;
 import org.dawb.common.ui.monitor.ProgressMonitorWrapper;
+import org.dawb.common.ui.selection.SelectionUtils;
 import org.dawnsci.common.widgets.dialog.FileSelectionDialog;
 import org.dawnsci.conversion.schemes.ProcessConversionScheme;
 import org.dawnsci.processing.ui.Activator;
@@ -29,7 +30,6 @@ import org.dawnsci.processing.ui.ProcessingOutputView;
 import org.dawnsci.processing.ui.ServiceHolder;
 import org.dawnsci.processing.ui.preference.ProcessingConstants;
 import org.dawnsci.processing.ui.processing.OperationDescriptor;
-import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -77,10 +77,10 @@ import org.eclipse.jface.viewers.ColumnViewerToolTipSupport;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredContentProvider;
+import org.eclipse.jface.viewers.ITreeSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
-import org.eclipse.jface.viewers.TreeSelection;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.jface.wizard.WizardDialog;
@@ -180,19 +180,11 @@ public class DataFileSliceView extends ViewPart {
 			@Override
 			public void drop(DropTargetEvent event) {
 				Object dropData = event.data;
-				if (dropData instanceof TreeSelection) {
-					TreeSelection selectedNode = (TreeSelection) dropData;
-					Object obj[] = selectedNode.toArray();
-					List<String> paths = new ArrayList<String>();
-					for (int i = 0; i < obj.length; i++) {
-						if (obj[i] instanceof IFile) {
-							IFile file = (IFile) obj[i];
-							paths.add(file.getLocation().toOSString());
-						}
+				if (dropData instanceof ITreeSelection) {
+					List<String> paths = SelectionUtils.parseTreeSelectionAsFilePaths((ITreeSelection) dropData);
+					if (!paths.isEmpty()) {
+						fileManager.addFiles(paths.toArray(new String[paths.size()]));
 					}
-					
-					if (!paths.isEmpty()) fileManager.addFiles(paths.toArray(new String[paths.size()]));
-					
 				} else if (dropData instanceof String[]) {
 					fileManager.addFiles((String[])dropData);
 				}

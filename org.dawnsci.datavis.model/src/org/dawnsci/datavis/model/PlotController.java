@@ -109,7 +109,7 @@ public class PlotController implements IPlotController {
 	static {
 		List<PlotModeData> modeDataList = new ArrayList<>();
 		// look for the extension points
-		IConfigurationElement[] eles = Platform.getExtensionRegistry().getConfigurationElementsFor("org.dawnsci.datavis.api.plotmode");
+		IConfigurationElement[] eles = Platform.isRunning() ? Platform.getExtensionRegistry().getConfigurationElementsFor("org.dawnsci.datavis.api.plotmode") : new IConfigurationElement[0];
 		for (IConfigurationElement e : eles) {
 			logger.debug("Found Plot Mode: {}", e.getAttribute("name"));
 			if (!e.getName().equals("plotmode"))
