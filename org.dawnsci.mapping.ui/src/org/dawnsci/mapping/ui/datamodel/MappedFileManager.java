@@ -91,7 +91,6 @@ public class MappedFileManager implements IMapFileController{
 	@Override
 	public void toggleDisplay(PlottableMapObject object) {
 		boolean plotted = !object.isPlotted();
-		System.err.println("Cli! " + System.currentTimeMillis());
 		MappedDataFile f = mappedDataArea.getParentFile(object);
 		
 		if (f != null) {
