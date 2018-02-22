@@ -52,7 +52,7 @@ public class MappedDataTest {
 		
 		MapScanDimensions msd = new MapScanDimensions(1, 0, 2);
 		gridScanBlock = new MappedDataBlock(MapNexusFileBuilderUtils.DETECTOR_PATH,
-				lazyDataset, file.getAbsolutePath(),msd);
+				lazyDataset, file.getAbsolutePath(),msd,false);
 		
 		ILazyDataset sum = data.getLazyDataset(MapNexusFileBuilderUtils.SUM_PATH);
 		
@@ -147,7 +147,7 @@ public class MappedDataTest {
 		IDynamicDataset dataset = MappedDataBlockTest.getLiveDataset();
 		LiveRemoteAxes axes = MappedDataBlockTest.getLiveAxes();
 		
-		MappedDataBlock liveBlock = new MappedDataBlock("live", dataset, msd, "livePath", axes, "host", 8690);
+		MappedDataBlock liveBlock =  new MappedDataBlock("live", dataset,"livePath", msd, true);
 		
 		MappedData md = new MappedData("map", MappedDataBlockTest.getLiveMap(), liveBlock, "livePath", true);
 		
@@ -179,7 +179,7 @@ public class MappedDataTest {
 		
 		MapScanDimensions msd = new MapScanDimensions(2, 1, 3);
 		MappedDataBlock b = new MappedDataBlock(MapNexusFileBuilderUtils.DETECTOR_PATH,
-				lazyDataset, file.getAbsolutePath(),msd);
+				lazyDataset, file.getAbsolutePath(),msd,false);
 		
 		ILazyDataset sum = data.getLazyDataset(MapNexusFileBuilderUtils.SUM_PATH);
 		

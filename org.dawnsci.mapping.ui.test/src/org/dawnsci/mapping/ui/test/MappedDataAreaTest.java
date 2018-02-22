@@ -37,8 +37,8 @@ public class MappedDataAreaTest {
 		IDataHolder data = LoaderFactory.getData(grid.getAbsolutePath());
 		MappedDataFileBean buildBean = MapBeanBuilder.buildBean(data.getTree(), MapNexusFileBuilderUtils.STAGE_X,
 				MapNexusFileBuilderUtils.STAGE_Y);
-		
-		MappedDataFile mdf = MappedFileFactory.getMappedDataFile(grid.getAbsolutePath(), buildBean, null,new LoaderServiceImpl(),null);
+		LoaderServiceImpl loaderServiceImpl = new LoaderServiceImpl();
+		MappedDataFile mdf = MappedFileFactory.getMappedDataFile(grid.getAbsolutePath(), buildBean, null, loaderServiceImpl.getData(grid.getAbsolutePath(), null));
 		MappedDataArea mda = new MappedDataArea();
 		mda.addMappedDataFile(mdf);
 		
