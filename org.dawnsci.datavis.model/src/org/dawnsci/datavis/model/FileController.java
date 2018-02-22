@@ -583,20 +583,24 @@ public class FileController implements IFileController {
 			loadedFile.setOnlySignals(onlySignals);
 
 			if (loadedFile instanceof IRefreshable && !((IRefreshable)loadedFile).isEmpty()) {
-
 				
-				ILoadedFileConfiguration loadedConfig = null;
+				try {
 
-				if (!fs.isEmpty()) {
-					loadedConfig = new CurrentStateFileConfiguration();
-					loadedConfig.setCurrentState(fs);
-				}
+					ILoadedFileConfiguration loadedConfig = null;
 
-				ILoadedFileConfiguration nexusConfig = new NexusFileConfiguration();
+					if (!fs.isEmpty()) {
+						loadedConfig = new CurrentStateFileConfiguration();
+						loadedConfig.setCurrentState(fs);
+					}
 
-				
-				if (loadedConfig == null || !loadedConfig.configure(loadedFile)) {
-					nexusConfig.configure((LoadedFile)loadedFile);
+					ILoadedFileConfiguration nexusConfig = new NexusFileConfiguration();
+
+
+					if (loadedConfig == null || !loadedConfig.configure(loadedFile)) {
+						nexusConfig.configure((LoadedFile)loadedFile);
+					}
+				} catch (Exception e) {
+						logger.warn("Could not configure file",e);
 				}
 
 			}
