@@ -33,6 +33,7 @@ public class PreferenceDialog extends Dialog {
 	private Button tickLineButton;
 	private ColorSelector gridColorSelector;
 	private Button showAxisButton;
+	private ColorSelector backgroundColorSelector;
 
 	public PreferenceDialog(Shell parentShell, Chart chart) {
 		super(parentShell);
@@ -67,7 +68,7 @@ public class PreferenceDialog extends Dialog {
 			Group axisConfigGroup = new Group(axisConfigComposite, SWT.NONE);
 			axisConfigGroup.setText("Change Settings");
 			axisConfigGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-			AxisPreferenceConfig axisConfigPage = new AxisPreferenceConfig(axeLayout, i);
+			AxisPreferenceConfig axisConfigPage = new AxisPreferenceConfig(chart, i);
 			axisConfigPageList.add(axisConfigPage);
 			axisConfigPage.createComposite(axisConfigGroup);
 		}
@@ -84,14 +85,18 @@ public class PreferenceDialog extends Dialog {
 		Group plotConfigGroup = new Group(container, SWT.NONE);
 		plotConfigGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		plotConfigGroup.setText("Plot options");
-		plotConfigGroup.setLayout(new GridLayout(1, false));
+		plotConfigGroup.setLayout(new GridLayout(2, false));
 		
 		tickLineButton = new Button(plotConfigGroup, SWT.CHECK);
 		configCheckButton(tickLineButton, "Show Tick Line");
 		tickLineButton.setSelection(axeLayout.isTickLineDisplayed());
 
+		showAxisButton = new Button(plotConfigGroup, SWT.CHECK);
+		configCheckButton(showAxisButton, "Show box");
+		showAxisButton.setSelection(axeLayout.isFaceDisplayed());
+
 		Label gridColorLabel = new Label(plotConfigGroup, 0);
-		gridColorLabel.setText("Grid Color");
+		gridColorLabel.setText("Grid Color: ");
 		GridData gd = new GridData(SWT.FILL, SWT.CENTER, false, false, 1, 1);
 		gridColorLabel.setLayoutData(gd);
 
@@ -101,9 +106,16 @@ public class PreferenceDialog extends Dialog {
 		Color color = axeLayout.getMainColor();
 		gridColorSelector.setColorValue(new RGB(getRGBInt(color.r), getRGBInt(color.g), getRGBInt(color.b)));
 
-		showAxisButton = new Button(plotConfigGroup, SWT.CHECK);
-		configCheckButton(showAxisButton, "Show box");
-		showAxisButton.setSelection(axeLayout.isFaceDisplayed());
+		Label backgroundColorLabel = new Label(plotConfigGroup, 0);
+		backgroundColorLabel.setText("Background Color: ");
+		gd = new GridData(SWT.FILL, SWT.CENTER, false, false, 1, 1);
+		backgroundColorLabel.setLayoutData(gd);
+
+		backgroundColorSelector = new ColorSelector(plotConfigGroup);
+		gd = new GridData(SWT.BEGINNING, SWT.CENTER, false, false, 1, 1);
+		backgroundColorSelector.getButton().setLayoutData(gd);
+		color = chart.getView().getBackgroundColor();
+		backgroundColorSelector.setColorValue(new RGB(getRGBInt(color.r), getRGBInt(color.g), getRGBInt(color.b)));
 
 		return container;
 	}
@@ -119,7 +131,12 @@ public class PreferenceDialog extends Dialog {
 		return result;
 	}
 
-	private void configCheckButton(Button button, String text) {
+	/**
+	 * 
+	 * @param button
+	 * @param text
+	 */
+	public static void configCheckButton(Button button, String text) {
 		button.setText(text);
 		button.setLayoutData(new GridData(SWT.BEGINNING, SWT.BEGINNING, false, false, 3, 2));
 	}
@@ -156,6 +173,8 @@ public class PreferenceDialog extends Dialog {
 		RGB color = gridColorSelector.getColorValue();
 		axeLayout.setMainColor(new Color(color.red, color.green, color.blue));
 		axeLayout.setFaceDisplayed(showAxisButton.getSelection());
+		color = backgroundColorSelector.getColorValue();
+		chart.getView().setBackgroundColor(new Color(color.red, color.green, color.blue));
 	}
 
 	@Override

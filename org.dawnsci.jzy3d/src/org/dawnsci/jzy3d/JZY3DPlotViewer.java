@@ -93,7 +93,7 @@ public class JZY3DPlotViewer extends IPlottingSystemViewer.Stub<Composite> {
 				prefs.open();
 			}
 		};
-		configureAction.setToolTipText("Configure plot labels");
+		configureAction.setToolTipText("Configure plot settings");
 		configureAction.setImageDescriptor(Activator.getImageDescriptor("icons/Configure.png"));
 		
 		Action squareAction = new Action("Square", Action.AS_CHECK_BOX) {
