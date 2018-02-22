@@ -157,6 +157,8 @@ public class MapPlotManager {
 			
 			@Override
 			public void run() {
+				try {
+					
 				IDataset s = topMap.getSpectrum(x,y);
 				if (s == null) {
 					data.clear();
@@ -183,6 +185,9 @@ public class MapPlotManager {
 					}
 					
 				});
+				} catch (Exception e) {
+					logger.error("Error plotting spectrum");
+				}
 				
 			}
 		};

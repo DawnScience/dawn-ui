@@ -32,9 +32,9 @@ public class MappedDataFile implements MapObject{
 	
 	public MappedDataFile(String path) {
 		this.path = path;
-		fullDataMap = new HashMap<String,MappedDataBlock>();
-		mapDataMap = new HashMap<String,AbstractMapData>();
-		microscopeDataMap = new HashMap<String,AssociatedImage>();
+		fullDataMap = new HashMap<>();
+		mapDataMap = new HashMap<>();
+		microscopeDataMap = new HashMap<>();
 	}
 	
 	public MappedDataFile(String path, LiveDataBean bean) {

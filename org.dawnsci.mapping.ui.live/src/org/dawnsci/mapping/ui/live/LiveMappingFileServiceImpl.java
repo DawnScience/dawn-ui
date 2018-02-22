@@ -223,9 +223,11 @@ private static final String PROCESSING_QUEUE_NAME = "scisoft.operation.STATUS_QU
 
 			}
 			
-			if (beanNoScanReq.scanEnd()) {
+			if (beanNoScanReq.scanEnd() || beanNoScanReq.getStatus().isTerminated()) {
 
-				for (ILiveMapFileListener l : listeners) l.localReload(filePath);
+				for (ILiveMapFileListener l : listeners) {
+					l.localReload(filePath);
+				}
 			}
 		}
 		
@@ -241,12 +243,7 @@ private static final String PROCESSING_QUEUE_NAME = "scisoft.operation.STATUS_QU
 			StatusBean bean = evt.getBean();
 			
 			if (Status.RUNNING.equals(bean.getStatus()) && !Status.RUNNING.equals(bean.getPreviousStatus())) {
-				String host = getDataServerHost();
-				int port    = getDataServerPort();
-				
-
-//				LiveLoadedFile f = new LiveLoadedFile(((IOperationBean)evt.getBean()).getOutputFilePath(), host, port);
-//				
+			
 				fireListeners(((IOperationBean)evt.getBean()).getOutputFilePath(),((IOperationBean)evt.getBean()).getFilePath());
 				
 				return;

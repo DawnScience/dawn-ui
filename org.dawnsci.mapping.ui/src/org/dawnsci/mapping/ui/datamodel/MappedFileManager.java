@@ -226,6 +226,8 @@ public class MappedFileManager implements IMapFileController{
 						//ignore
 					}
 				}
+				
+				fireListeners(null);
 			}
 		};
 		ExecutorService ex = Executors.newSingleThreadExecutor();
