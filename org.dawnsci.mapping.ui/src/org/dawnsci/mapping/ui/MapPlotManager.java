@@ -359,8 +359,7 @@ public class MapPlotManager {
 
 		for (PlottableMapObject o : plottedObjects) {
 			if (o instanceof LiveStreamMapObject){
-				IImageTrace stream = createLiveStreamTrace((LiveStreamMapObject) o);
-				MapTrace t = new MapTrace(o, stream);
+				MapTrace t = new MapTrace(o, null);
 				layers.addLast(t);
 			} else if (o instanceof VectorMapData) {
 				// Initialise a vector trace
@@ -421,8 +420,14 @@ public class MapPlotManager {
 			
 			while (it.hasNext()) {
 				MapTrace m = it.next();
-				map.addTrace(m.getTrace());
+				if (m.getTrace() != null) {
+					map.addTrace(m.getTrace());
+				}
 				if (m.getMap() instanceof LiveStreamMapObject) {
+					if (m.getTrace() == null) {
+						m.trace = createLiveStreamTrace((LiveStreamMapObject) m.getMap());
+						map.addTrace(m.getTrace());
+					}
 					LiveStreamMapObject l = (LiveStreamMapObject)m.getMap();
 					l.addAxisListener(moveListener);
 				}
