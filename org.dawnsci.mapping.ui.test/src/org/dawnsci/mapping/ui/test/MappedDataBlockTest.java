@@ -15,6 +15,8 @@ import org.eclipse.january.dataset.DatasetUtils;
 import org.eclipse.january.dataset.IDataset;
 import org.eclipse.january.dataset.IDynamicDataset;
 import org.eclipse.january.dataset.ILazyDataset;
+import org.eclipse.january.metadata.AxesMetadata;
+import org.eclipse.january.metadata.MetadataFactory;
 import org.junit.BeforeClass;
 import org.junit.ClassRule;
 import org.junit.Test;
@@ -129,6 +131,11 @@ public class MappedDataBlockTest {
 		IDynamicDataset dataset = getLiveDataset();
 		LiveRemoteAxes axes = getLiveAxes();
 		
+		AxesMetadata axm = MetadataFactory.createMetadata(AxesMetadata.class, dataset.getRank());
+		axm.setAxis(0, axes.getAxes()[0]);
+		axm.setAxis(1, axes.getAxes()[0]);
+		dataset.addMetadata(axm);
+		
 		MappedDataBlock liveBlock = new MappedDataBlock("live", dataset,"livePath", msd, true);
 		
 		ILazyDataset spectrum = liveBlock.getSpectrum(1, 1);
@@ -149,8 +156,14 @@ public class MappedDataBlockTest {
 		IDynamicDataset dataset = getLivePointDataset();
 		LiveRemoteAxes axes = getLiveAxes();
 		
+		AxesMetadata axm = MetadataFactory.createMetadata(AxesMetadata.class, dataset.getRank());
+		axm.setAxis(0, axes.getAxes()[0]);
+		axm.setAxis(1, axes.getAxes()[0]);
+		dataset.addMetadata(axm);
+		
 		MappedDataBlock liveBlock =  new MappedDataBlock("live", dataset,"livePath", msd, true);
 		
+		liveBlock.update();
 		
 		IDataset map = liveBlock.getMap();
 		

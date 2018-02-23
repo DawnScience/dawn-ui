@@ -147,7 +147,7 @@ public class MappedFileFactoryTest {
 		assertEquals(1, buildBean.getScanRank());
 		assertTrue(buildBean.checkValid());
 		
-		mdf = MappedFileFactory.getMappedDataFile(line.getAbsolutePath(), buildBean, null,loaderService.getData(gridZ.getAbsolutePath(),null));
+		mdf = MappedFileFactory.getMappedDataFile(line.getAbsolutePath(), buildBean, null,loaderService.getData(line.getAbsolutePath(),null));
 		assertNotNull(mdf);
 	}
 	

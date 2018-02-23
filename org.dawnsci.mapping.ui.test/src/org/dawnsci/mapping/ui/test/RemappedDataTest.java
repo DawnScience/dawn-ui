@@ -12,6 +12,7 @@ import org.eclipse.january.dataset.IDataset;
 import org.eclipse.january.dataset.IDynamicDataset;
 import org.eclipse.january.dataset.ILazyDataset;
 import org.eclipse.january.metadata.AxesMetadata;
+import org.eclipse.january.metadata.MetadataFactory;
 import org.junit.Test;
 
 public class RemappedDataTest {
@@ -23,6 +24,10 @@ public class RemappedDataTest {
 		
 		IDynamicDataset dataset = MappedDataBlockTest.getLiveLinearDataset();
 		LiveRemoteAxes axes = MappedDataBlockTest.getLiveLinearAxes();
+		AxesMetadata axm = MetadataFactory.createMetadata(AxesMetadata.class, dataset.getRank());
+		axm.setAxis(0, axes.getAxes()[0]);
+		axm.addAxis(0, axes.getxAxisForRemapping());
+		dataset.addMetadata(axm);
 		
 		MappedDataBlock liveBlock = new MappedDataBlock("live", dataset,"livePath", msd, true);
 		

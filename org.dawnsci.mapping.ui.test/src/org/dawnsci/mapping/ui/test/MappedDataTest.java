@@ -23,6 +23,7 @@ import org.eclipse.january.dataset.IDynamicDataset;
 import org.eclipse.january.dataset.ILazyDataset;
 import org.eclipse.january.dataset.Random;
 import org.eclipse.january.metadata.AxesMetadata;
+import org.eclipse.january.metadata.MetadataFactory;
 import org.eclipse.january.metadata.MetadataType;
 import org.junit.BeforeClass;
 import org.junit.ClassRule;
@@ -146,6 +147,11 @@ public class MappedDataTest {
 		
 		IDynamicDataset dataset = MappedDataBlockTest.getLiveDataset();
 		LiveRemoteAxes axes = MappedDataBlockTest.getLiveAxes();
+		
+		AxesMetadata axm = MetadataFactory.createMetadata(AxesMetadata.class, dataset.getRank());
+		axm.setAxis(0, axes.getAxes()[0]);
+		axm.setAxis(1, axes.getAxes()[0]);
+		dataset.addMetadata(axm);
 		
 		MappedDataBlock liveBlock =  new MappedDataBlock("live", dataset,"livePath", msd, true);
 		
