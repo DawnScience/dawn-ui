@@ -52,6 +52,8 @@ public interface IMapFileController {
 	List<String> loadFile(String path, MappedDataFileBean bean, IProgressService progressService);
 
 	List<String> loadFiles(String[] paths, IProgressService progressService);
+	
+	void attachLive(String[] paths);
 
 	void toggleDisplay(PlottableMapObject object);
 

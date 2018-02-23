@@ -11,9 +11,10 @@ import java.util.concurrent.Executors;
 
 import org.dawb.common.ui.monitor.ProgressMonitorWrapper;
 import org.dawb.common.ui.util.DatasetNameUtils;
-import org.dawnsci.mapping.ui.AcquisitionServiceManager;
 import org.dawnsci.mapping.ui.BeanBuilderWizard;
 import org.dawnsci.mapping.ui.IBeanBuilderHelper;
+import org.dawnsci.mapping.ui.ILiveMapFileListener;
+import org.dawnsci.mapping.ui.ILiveMappingFileService;
 import org.dawnsci.mapping.ui.IRegistrationHelper;
 import org.dawnsci.mapping.ui.api.IMapFileController;
 import org.dawnsci.mapping.ui.wizards.LegacyMapBeanBuilder;
@@ -29,16 +30,19 @@ import org.eclipse.january.dataset.IDataset;
 import org.eclipse.january.dataset.IRemoteData;
 import org.eclipse.january.metadata.IMetadata;
 import org.eclipse.jface.operation.IRunnableWithProgress;
+import org.eclipse.scanning.api.ui.IStageScanConfiguration;
 import org.eclipse.ui.progress.IProgressService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class MappedFileManager implements IMapFileController{
 
-	private final static Logger logger = LoggerFactory.getLogger(MappedFileManager.class);
+	private static final Logger logger = LoggerFactory.getLogger(MappedFileManager.class);
 	
 	private ILoaderService loaderService;
 	private IRemoteDatasetService remoteService;
+	private IStageScanConfiguration stageScanConfig;
+	private ILiveMappingFileService liveService;
 	
 	public void setLoaderService(ILoaderService service) {
 		this.loaderService = service;
@@ -48,9 +52,19 @@ public class MappedFileManager implements IMapFileController{
 		this.remoteService = service;
 	}
 	
+	public void setStageScanConfiguration(IStageScanConfiguration scanConfig) {
+		this.stageScanConfig = scanConfig;
+	}
+	
+	public void setLiveMappingService(ILiveMappingFileService lServ) {
+		liveService = lServ;
+	}
+	
 	private MappedDataArea mappedDataArea;
 	private IRegistrationHelper registrationHelper;
 	private IBeanBuilderHelper beanHelper;
+	
+	private LiveMapFileListener liveMapListener;
 	
 	private Set<IMapFileEventListener> listeners;
 	
@@ -58,6 +72,7 @@ public class MappedFileManager implements IMapFileController{
 		listeners = new HashSet<>();
 		mappedDataArea = new MappedDataArea();
 		beanHelper = new BeanBuilderWizard();
+		
 	}
 
 	@Override
@@ -76,7 +91,6 @@ public class MappedFileManager implements IMapFileController{
 	@Override
 	public void toggleDisplay(PlottableMapObject object) {
 		boolean plotted = !object.isPlotted();
-
 		MappedDataFile f = mappedDataArea.getParentFile(object);
 		
 		if (f != null) {
@@ -107,7 +121,32 @@ public class MappedFileManager implements IMapFileController{
 		fireListeners(null);
 	}
 	
+	
 
+	@Override
+	public void attachLive(String[] paths) {
+	
+		//check for live
+		if (liveService != null) {
+			liveMapListener = new LiveMapFileListener();
+			liveService.setInitialFiles(paths);
+			paths = null;
+			liveService.addLiveFileListener(liveMapListener);
+		}
+
+		// Restore state of view
+		if (paths != null) {
+//			for (String f : filesToReload) {
+			lazyAddFiles(paths);
+//			}
+		}
+		
+	}
+	
+	private void lazyAddFiles(String[] paths) {
+		
+	}
+	
 	@Override
 	public List<String> loadFiles(String[] paths, IProgressService progressService) {
 		
@@ -169,7 +208,7 @@ public class MappedFileManager implements IMapFileController{
 			
 			@Override
 			public void run() {
-				boolean reloaded = mappedDataArea.locallyReloadLiveFile(path);
+				boolean reloaded = mappedDataArea.locallyReloadLiveFile(path,loaderService);
 				
 				if (!reloaded) {
 					try {
@@ -186,6 +225,8 @@ public class MappedFileManager implements IMapFileController{
 						//ignore
 					}
 				}
+				
+				fireListeners(null);
 			}
 		};
 		ExecutorService ex = Executors.newSingleThreadExecutor();
@@ -240,11 +281,11 @@ public class MappedFileManager implements IMapFileController{
 	
 	private MappedDataFileBean buildBeanFromTree(Tree tree){
 		MappedDataFileBean b = null;
-		if (AcquisitionServiceManager.getStageConfiguration()==null){
+		if (stageScanConfig == null){
 			b = MapBeanBuilder.buildBean(tree);
 		} else {
-			String x = AcquisitionServiceManager.getStageConfiguration().getActiveFastScanAxis();
-			String y = AcquisitionServiceManager.getStageConfiguration().getActiveSlowScanAxis();
+			String x = stageScanConfig.getActiveFastScanAxis();
+			String y = stageScanConfig.getActiveSlowScanAxis();
 			b = MapBeanBuilder.buildBean(tree,x,y);
 		}
 		return b;
@@ -257,7 +298,7 @@ public class MappedFileManager implements IMapFileController{
 	
 	@Override
 	public void addAssociatedImage(AssociatedImage image) {
-		MappedDataFile file = new MappedDataFile(image.getPath(),null);
+		MappedDataFile file = new MappedDataFile(image.getPath());
 		file.addMapObject(image.toString(), image);
 		mappedDataArea.addMappedDataFile(file);
 		fireListeners(file);
@@ -285,14 +326,19 @@ public class MappedFileManager implements IMapFileController{
 		fireListeners(null);
 	}
 	
-
-	public PlottableMapObject getTopMap() {
-		return null;
-
-	}
-	
 	private void innerImportFile(final String path, final MappedDataFileBean bean, final IMonitor monitor, String parentPath) {
-		final MappedDataFile mdf = MappedFileFactory.getMappedDataFile(path, bean, monitor,loaderService,remoteService);
+		IDataHolder dataHolder = null;
+		
+		if (bean.getLiveBean() != null) {
+			dataHolder = remoteService.createRemoteDataHolder(path, bean.getLiveBean().getHost(), bean.getLiveBean().getPort());
+		} else {
+			try {
+				dataHolder = loaderService.getData(path, null);
+			} catch (Exception e) {
+				
+			}
+		}
+		final MappedDataFile mdf = MappedFileFactory.getMappedDataFile(path, bean, monitor,dataHolder);
 		if (monitor != null && monitor.isCancelled()) return;
 		if (mdf != null && parentPath != null) mdf.setParentPath(parentPath);
 		mappedDataArea.addMappedDataFile(mdf);
@@ -437,7 +483,7 @@ public class MappedFileManager implements IMapFileController{
 			}
 			
 			
-			MappedDataFile mdf = new MappedDataFile(path,bean,loaderService);
+			MappedDataFile mdf = new MappedDataFile(path,bean);
 			mdf.setParentPath(parentFile);
 			mappedDataArea.addMappedDataFile(mdf);
 			fireListeners(null);
@@ -450,6 +496,34 @@ public class MappedFileManager implements IMapFileController{
 	public void addLiveStream(LiveStreamMapObject stream) {
 		mappedDataArea.setStream(stream);
 		fireListeners(null);
+		
+	}
+	
+	private class LiveMapFileListener implements ILiveMapFileListener{
+
+		@Override
+		public void fileLoadRequest(String path, String host, int port, String parent) {
+			if (host != null) {
+				LiveDataBean b = new LiveDataBean();
+				b.setHost(host);
+				b.setPort(port);
+				loadLiveFile(path, b, parent);
+			} else {
+				loadFiles(new String[] {path}, null);
+			}
+			
+			
+		}
+
+		@Override
+		public void refreshRequest() {
+			MappedFileManager.this.fireListeners(null);
+		}
+
+		@Override
+		public void localReload(String path) {
+			localReloadFile(path);
+		}
 		
 	}
 }

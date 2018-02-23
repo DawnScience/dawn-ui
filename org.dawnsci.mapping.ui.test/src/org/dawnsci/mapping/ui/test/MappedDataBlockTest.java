@@ -44,7 +44,7 @@ public class MappedDataBlockTest {
 		ILazyDataset lazyDataset = data.getLazyDataset(MapNexusFileBuilderUtils.DETECTOR_PATH);
 		MapScanDimensions msd = new MapScanDimensions(1, 0, 2);
 		gridScanBlock = new MappedDataBlock(MapNexusFileBuilderUtils.DETECTOR_PATH,
-				lazyDataset, file.getAbsolutePath(),msd);
+				lazyDataset, file.getAbsolutePath(),msd,false);
 		
 		MapNexusFileBuilderUtils.makeGridScanWithZandSum(file1.getAbsolutePath());
 		
@@ -52,7 +52,7 @@ public class MappedDataBlockTest {
 		lazyDataset = data.getLazyDataset(MapNexusFileBuilderUtils.DETECTOR_PATH);
 		msd = new MapScanDimensions(2, 1, 3);
 		gridScanBlock3D = new MappedDataBlock(MapNexusFileBuilderUtils.DETECTOR_PATH,
-				lazyDataset, file1.getAbsolutePath(), msd);
+				lazyDataset, file1.getAbsolutePath(), msd,false);
 		
 		MapNexusFileBuilderUtils.makeGridScanWithEnergyZ(file2.getAbsolutePath());
 		
@@ -60,7 +60,7 @@ public class MappedDataBlockTest {
 		lazyDataset = data.getLazyDataset(MapNexusFileBuilderUtils.DETECTOR_PATH);
 		msd = new MapScanDimensions(2, 1, 3);
 		gridScanBlockEnergy = new MappedDataBlock(MapNexusFileBuilderUtils.DETECTOR_PATH,
-				lazyDataset,file2.getAbsolutePath(),msd);
+				lazyDataset,file2.getAbsolutePath(),msd,false);
 		
 	}
 
@@ -129,7 +129,7 @@ public class MappedDataBlockTest {
 		IDynamicDataset dataset = getLiveDataset();
 		LiveRemoteAxes axes = getLiveAxes();
 		
-		MappedDataBlock liveBlock = new MappedDataBlock("live", dataset, msd, "livePath", axes, "host", 8690);
+		MappedDataBlock liveBlock = new MappedDataBlock("live", dataset,"livePath", msd, true);
 		
 		ILazyDataset spectrum = liveBlock.getSpectrum(1, 1);
 		
@@ -149,7 +149,7 @@ public class MappedDataBlockTest {
 		IDynamicDataset dataset = getLivePointDataset();
 		LiveRemoteAxes axes = getLiveAxes();
 		
-		MappedDataBlock liveBlock = new MappedDataBlock("live", dataset, msd, "livePath", axes, "host", 8690);
+		MappedDataBlock liveBlock =  new MappedDataBlock("live", dataset,"livePath", msd, true);
 		
 		
 		IDataset map = liveBlock.getMap();

@@ -3,6 +3,7 @@ package org.dawnsci.mapping.ui;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Deque;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.ConcurrentLinkedDeque;
@@ -23,7 +24,6 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.dawnsci.analysis.dataset.roi.PointROI;
-import org.eclipse.dawnsci.nexus.INexusFileFactory;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.PlotType;
 import org.eclipse.dawnsci.plotting.api.axis.IAxis;
@@ -98,20 +98,7 @@ public class MapPlotManager {
 			
 			@Override
 			public void run(){
-				try {
-
-					for (MapTrace t : layers) {
-						if (t.getMap().isLive()) {
-							t.getMap().update();
-							t.switchMap(t.getMap());
-						}
-					}
-					plotLayers();
-					
-				} catch (RuntimeException ne) { 
-					// Unchecked exceptions here show a dialog to the user
-					logger.error("Cannot update map!", ne);
-				}
+				updateState();
 			}
 		};
 		
@@ -125,7 +112,7 @@ public class MapPlotManager {
 			
 			@Override
 			public void mapFileStateChanged(MappedDataFile file) {
-				updateState();
+				updatePlot();
 			}
 		});
 		
@@ -170,6 +157,8 @@ public class MapPlotManager {
 			
 			@Override
 			public void run() {
+				try {
+					
 				IDataset s = topMap.getSpectrum(x,y);
 				if (s == null) {
 					data.clear();
@@ -196,6 +185,9 @@ public class MapPlotManager {
 					}
 					
 				});
+				} catch (Exception e) {
+					logger.error("Error plotting spectrum");
+				}
 				
 			}
 		};
@@ -328,12 +320,8 @@ public class MapPlotManager {
 		job.schedule();
 	}
 	
-	public void refresh() {
-		updateState();
-	}
-	
+
 	private void updateState() {
-		
 		List<PlottableMapObject> plottedObjects = fileManager.getPlottedObjects();
 		
 		if (plottedObjects.isEmpty()) {
@@ -359,7 +347,6 @@ public class MapPlotManager {
 		layers.removeAll(stale);
 		
 		for (MapTrace t : stale) {
-			map.removeTrace(t.getTrace());
 			if (t.getMap() instanceof LiveStreamMapObject) {
 				try {
 					((LiveStreamMapObject)t.getMap()).disconnect();
@@ -369,14 +356,12 @@ public class MapPlotManager {
 			}
 		}
 		
-		boolean needsClear = false;
 
 		for (PlottableMapObject o : plottedObjects) {
 			if (o instanceof LiveStreamMapObject){
 				IImageTrace stream = createLiveStreamTrace((LiveStreamMapObject) o);
 				MapTrace t = new MapTrace(o, stream);
 				layers.addLast(t);
-				needsClear = true;
 			} else if (o instanceof VectorMapData) {
 				// Initialise a vector trace
 				IVectorTrace vectorTrace = createVectorTrace(o);
@@ -384,7 +369,6 @@ public class MapPlotManager {
 			} else if (o instanceof AssociatedImage){
 				MapTrace t = new MapTrace((AssociatedImage)o, null);
 				layers.addLast(t);
-				needsClear = true;
 
 			}else {
 
@@ -393,14 +377,60 @@ public class MapPlotManager {
 			}
 		}
 		
-		if (needsClear) {
-			map.clearTraces();
-			for (MapTrace l : layers) {
-				if (!(l.getMap() instanceof LiveStreamMapObject)) l.rebuildTrace();
+//		if (needsClear) {
+//			map.clearTraces();
+//			for (MapTrace l : layers) {
+//				if (!(l.getMap() instanceof LiveStreamMapObject)) l.rebuildTrace();
+//			}
+//		}
+		
+		for (MapTrace t : layers) {
+			if (t.getMap().isLive()) {
+				t.getMap().update();
 			}
+			t.rebuildTrace();
 		}
 		
-		plotLayers();
+		plotLayers(layers, stale);
+	}
+	
+	private void plotLayers(Deque<MapTrace> localLayers, List<MapTrace> stale){
+		
+		if (Display.getCurrent() == null) {
+			PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
+				
+				@Override
+				public void run() {
+					plotLayers(localLayers, stale);
+				}
+			});
+			return;
+		}
+		
+		if (!map.is2D()) map.setPlotType(PlotType.IMAGE);
+		
+		map.clearTraces();
+		
+		updatePlottedRange();
+		
+		try {
+			
+				layerCounter = 0;
+
+			Iterator<MapTrace> it = localLayers.descendingIterator();
+			
+			while (it.hasNext()) {
+				MapTrace m = it.next();
+				map.addTrace(m.getTrace());
+				if (m.getMap() instanceof LiveStreamMapObject) {
+					LiveStreamMapObject l = (LiveStreamMapObject)m.getMap();
+					l.addAxisListener(moveListener);
+				}
+			}
+			this.map.repaint();
+		} catch (Exception e) {
+			logger.error("Error plotting mapped data", e);
+		}
 	}
 	
 	private IImageTrace createLiveStreamTrace(LiveStreamMapObject o) {
@@ -518,58 +548,7 @@ public class MapPlotManager {
 	}
 	
 	
-	public void plotLayers(){
-		
-		if (Display.getCurrent() == null) {
-			PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
-				
-				@Override
-				public void run() {
-					plotLayers();
-				}
-			});
-			return;
-		}
-		
-		if (!map.is2D()) map.setPlotType(PlotType.IMAGE);
-		
-		updatePlottedRange();
-		
-		try {
-			
-			if (layers.isEmpty()) {
-				map.clearTraces();
-				layerCounter = 0;
-				return;
-			} else {
-				
-			}
-			
-			Iterator<MapTrace> it = layers.descendingIterator();
-			
-			Collection<ITrace> traces = map.getTraces(IImageTrace.class);
-			
-			while (it.hasNext()) {
-				MapTrace m = it.next();
-				if (!traces.contains(m.getTrace())) {
-					if (m.getTrace() != null) {
-						map.addTrace(m.getTrace());
-						if (m.getMap() instanceof LiveStreamMapObject) {
-							LiveStreamMapObject l = (LiveStreamMapObject)m.getMap();
-							l.addAxisListener(moveListener);
-						}
-					}
-				}
-				
-			}
-			this.map.repaint();
-		} catch (Exception e) {
-			logger.error("Error plotting mapped data", e);
-		}
-	}
-	
-	
-	public void updatePlottedRange(){
+	private void updatePlottedRange(){
 		
 		double[] range = null;
 		
@@ -706,49 +685,49 @@ public class MapPlotManager {
 			return trace;
 		}
 		
-		public void switchMap(final PlottableMapObject ob) {
-			try {
-				final IDataset d = ob.getMap();
-				switchMap(ob.getLongName(),d);
-				map = ob;
-			} catch (Exception e) {
-				logger.error("Error updating live!",e);
-			}
-
-		}
+//		public void switchMap(final PlottableMapObject ob) {
+//			try {
+//				final IDataset d = ob.getMap();
+//				switchMap(ob.getLongName(),d);
+//				map = ob;
+//			} catch (Exception e) {
+//				logger.error("Error updating live!",e);
+//			}
+//
+//		}
 
 		public void rebuildTrace(){
 			trace = createImageTrace(map);
 		}
 
-		private void switchMap(final String name, final IDataset d) {
-			if (Display.getCurrent() == null) {
-				PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
-
-					@Override
-					public void run() {
-						switchMap(name, d);
-					}
-				});
-				return;
-			}
-			
-			if (d == null) return;
-
-			if (d.getRank() > 2) {
-				d.setShape(new int[]{d.getShape()[0],d.getShape()[1]});
-			}
-
-			if (trace == null) {
-				trace = createImageTrace(map);
-			} else {
-				if (trace instanceof IVectorTrace) {
-					// TODO Passing this over for now, must sort
-				}
-				else {
-					MetadataPlotUtils.switchData(name,d, (IImageTrace) trace);
-				}
-			}
-		}
+//		private void switchMap(final String name, final IDataset d) {
+//			if (Display.getCurrent() == null) {
+//				PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
+//
+//					@Override
+//					public void run() {
+//						switchMap(name, d);
+//					}
+//				});
+//				return;
+//			}
+//			
+//			if (d == null) return;
+//
+//			if (d.getRank() > 2) {
+//				d.setShape(new int[]{d.getShape()[0],d.getShape()[1]});
+//			}
+//
+//			if (trace == null) {
+//				trace = createImageTrace(map);
+//			} else {
+//				if (trace instanceof IVectorTrace) {
+//					// TODO Passing this over for now, must sort
+//				}
+//				else {
+//					MetadataPlotUtils.switchData(name,d, (IImageTrace) trace);
+//				}
+//			}
+//		}
 	}
 }

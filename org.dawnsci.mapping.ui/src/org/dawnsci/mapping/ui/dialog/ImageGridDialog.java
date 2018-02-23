@@ -1,13 +1,9 @@
 package org.dawnsci.mapping.ui.dialog;
 
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.ArrayList;
-import java.util.EventListener;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
-import org.dawnsci.mapping.ui.AcquisitionServiceManager;
 import org.dawnsci.mapping.ui.ILiveMapFileListener;
 import org.dawnsci.mapping.ui.LiveServiceManager;
 import org.dawnsci.mapping.ui.datamodel.AbstractMapData;
@@ -21,16 +17,6 @@ import org.eclipse.dawnsci.plotting.api.PlottingFactory;
 import org.eclipse.dawnsci.plotting.api.trace.MetadataPlotUtils;
 import org.eclipse.january.dataset.IDataset;
 import org.eclipse.jface.dialogs.Dialog;
-import org.eclipse.scanning.api.event.EventConstants;
-import org.eclipse.scanning.api.event.EventException;
-import org.eclipse.scanning.api.event.bean.BeanEvent;
-import org.eclipse.scanning.api.event.bean.IBeanListener;
-import org.eclipse.scanning.api.event.core.IPropertyFilter.FilterAction;
-import org.eclipse.scanning.api.event.core.ISubscriber;
-import org.eclipse.scanning.api.event.scan.IScanListener;
-import org.eclipse.scanning.api.event.scan.ScanEvent;
-import org.eclipse.scanning.api.event.status.StatusBean;
-import org.eclipse.scanning.api.ui.CommandConstants;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Point;

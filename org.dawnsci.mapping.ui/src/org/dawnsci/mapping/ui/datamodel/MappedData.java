@@ -4,7 +4,6 @@ import org.dawnsci.mapping.ui.MappingUtils;
 import org.eclipse.dawnsci.plotting.api.trace.MetadataPlotUtils;
 import org.eclipse.january.DatasetException;
 import org.eclipse.january.dataset.IDataset;
-import org.eclipse.january.dataset.IDynamicDataset;
 import org.eclipse.january.dataset.ILazyDataset;
 
 

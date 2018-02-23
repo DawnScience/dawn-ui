@@ -358,8 +358,6 @@ public class RegionArea extends PlotArea implements IPlotArea {
 	
 
 	public ImageTrace createImageTrace(String name, Axis xAxis, Axis yAxis, ColorMapRamp intensity) {
-
-        if (imageTraces.containsKey(name)) throw new RuntimeException("There is an image called '"+name+"' already plotted!");
         
 		final ImageTrace trace = new ImageTrace(name, xAxis, yAxis, intensity);
 		fireImageTraceCreated(new TraceEvent(trace));
@@ -382,6 +380,9 @@ public class RegionArea extends PlotArea implements IPlotArea {
 	 * @param trace the trace to be added.
 	 */
 	public void addImageTrace(final ImageTrace trace){
+		
+		 if (imageTraces.containsKey(trace.getName())) throw new RuntimeException("There is an image called '"+trace.getName()+"' already plotted!");
+		
 		imageTraces.put(trace.getName(), trace);
 		add(trace);
 		

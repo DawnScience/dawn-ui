@@ -167,7 +167,7 @@ public class LivePlottingUtils {
 		try {
 			y = laa[0].getSlice();
 			x = laa[1].getSlice();
-		} catch (DatasetException e) {
+		} catch (Exception e) {
 			return null;
 		}
 		

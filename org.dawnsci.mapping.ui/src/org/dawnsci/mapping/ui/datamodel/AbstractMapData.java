@@ -97,8 +97,8 @@ public abstract class AbstractMapData implements PlottableMapObject{
 		((IDynamicDataset)baseMap).refreshShape();
 		try {
 			ax = MetadataFactory.createMetadata(AxesMetadata.class, baseMap.getRank());
-			ILazyDataset ly = parent.getYAxis()[0];
-			ILazyDataset lx = parent.getXAxis()[0];
+			ILazyDataset ly = parent.getYAxis()[0].getSliceView().squeezeEnds();
+			ILazyDataset lx = parent.getXAxis()[parent.getMapDims().isRemappingRequired() ? 1 : 0].getSliceView().squeezeEnds();
 			MapScanDimensions md = parent.getMapDims();
 			int xd = md.getxDim();
 			int yd = md.getyDim();
@@ -111,7 +111,9 @@ public abstract class AbstractMapData implements PlottableMapObject{
 				for (int i : md.getNonXYScanDimensions()) {
 					ILazyDataset[] axis = parent.getAxis(i);
 					if (axis != null && axis[0] != null) {
-						ax.addAxis(i, axis[0]);
+						ILazyDataset sv = axis[0].getSliceView();
+						sv.squeezeEnds();
+						ax.addAxis(i, sv);
 					}
 				}
 			}
@@ -130,7 +132,9 @@ public abstract class AbstractMapData implements PlottableMapObject{
 		if (!parent.isReady()) return false;
 		
 		if (baseMap instanceof IDynamicDataset) {
-			return ((IDynamicDataset) baseMap).refreshShape();
+			boolean refreshShape = ((IDynamicDataset)baseMap).refreshShape();
+			
+			return refreshShape ? refreshShape : baseMap.getSize() > 1;
 		}
 		
 		return true;

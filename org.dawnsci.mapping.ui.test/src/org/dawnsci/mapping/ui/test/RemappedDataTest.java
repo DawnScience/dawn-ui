@@ -24,7 +24,7 @@ public class RemappedDataTest {
 		IDynamicDataset dataset = MappedDataBlockTest.getLiveLinearDataset();
 		LiveRemoteAxes axes = MappedDataBlockTest.getLiveLinearAxes();
 		
-		MappedDataBlock liveBlock = new MappedDataBlock("live", dataset, msd, "livePath", axes, "host", 8690);
+		MappedDataBlock liveBlock = new MappedDataBlock("live", dataset,"livePath", msd, true);
 		
 		ReMappedData md = new ReMappedData("map", MappedDataBlockTest.getLiveLinearMap(), liveBlock, "livePath", true);
 		
