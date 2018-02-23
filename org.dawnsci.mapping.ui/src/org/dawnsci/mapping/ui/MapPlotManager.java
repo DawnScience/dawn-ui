@@ -457,8 +457,8 @@ public class MapPlotManager {
 		if (dataset == null) return null;
 		
 		IImageTrace trace = map.createImageTrace(o.getPath());
-		trace.setGlobalRange(o.getRange());
 		trace.setDynamicData(dataset);
+		trace.setGlobalRange(o.getRange());
 		trace.setAxes(o.getAxes(), false);
 		return trace;
 	
