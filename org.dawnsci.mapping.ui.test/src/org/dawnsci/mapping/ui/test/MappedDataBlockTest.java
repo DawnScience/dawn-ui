@@ -164,6 +164,7 @@ public class MappedDataBlockTest {
 		MappedDataBlock liveBlock =  new MappedDataBlock("live", dataset,"livePath", msd, true);
 		
 		liveBlock.update();
+		liveBlock.update();
 		
 		IDataset map = liveBlock.getMap();
 		
