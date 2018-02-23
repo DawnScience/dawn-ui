@@ -48,15 +48,27 @@ public class JoinFiles {
 		String fileNamesString = "# FILE_NAME";
 		String directoryPath = "# DIR_NAME: " + firstFile.getParent() + "\n";
 		
-		// Then let's get some information about the NeXus tree
-		Tree tree = firstFile.getTree();
-		GroupNode groupNode = tree.getGroupNode();
-		
-		// Check that the file isn't empty...
-		if (groupNode != null) {
-			// And find all the datanodes within the file
-			datasetsString = nodeSearcher(groupNode, neXusPath, datasetsString);
+		if (firstFile.getTree() != null) {
+			// Then let's get some information about the NeXus tree
+			Tree tree = firstFile.getTree();
+			GroupNode groupNode = tree.getGroupNode();
+			
+			// Check that the file isn't empty...
+			if (groupNode != null) {
+				// And find all the datanodes within the file
+				datasetsString = nodeSearcher(groupNode, neXusPath, datasetsString);
+			}
+		} else {
+			
+			List<DataOptions> dop = firstFile.getDataOptions();
+			for (DataOptions d : dop) {
+				String name = d.getName();
+				datasetsString += "# DATASET_NAME: " + name + "\n";
+			}
+			
 		}
+		
+		
 		
 		// Then generate the string for all the files within the passed list
 		for (Iterator<LoadedFile> loopIter = files.iterator(); loopIter.hasNext(); ) {

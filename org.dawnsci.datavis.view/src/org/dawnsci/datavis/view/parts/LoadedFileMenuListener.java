@@ -10,6 +10,7 @@ import java.util.stream.Collectors;
 import org.dawnsci.datavis.model.DataOptions;
 import org.dawnsci.datavis.model.IDataObject;
 import org.dawnsci.datavis.model.IFileController;
+import org.dawnsci.datavis.model.JoinFiles;
 import org.dawnsci.datavis.model.LoadedFile;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IMenuListener;
@@ -60,7 +61,7 @@ public class LoadedFileMenuListener implements IMenuListener {
 			menuDisplay.add(new DisableSort(fileController, viewer));
 			manager.add(menuDisplay);
 			manager.add(new Separator());
-			manager.add(new JoinAction(fileController,viewer));
+			manager.add(new JoinFilesAction(fileController,viewer));
 			manager.add(new Separator());
 			manager.add(new DeselectAction(fileController,viewer));
 			manager.add(new Separator());
@@ -150,7 +151,6 @@ public class LoadedFileMenuListener implements IMenuListener {
 		
 	}
 	
-	
 	private class DeselectAction extends LoadedFileMenuAction {
 
 		public DeselectAction(IFileController fileController, TableViewer viewer) {
@@ -211,21 +211,6 @@ public class LoadedFileMenuListener implements IMenuListener {
 			if (unselected != null) {
 				viewer.setSelection(new StructuredSelection(unselected), true);
 			}
-			view.refresh();
-		}
-	}
-	
-	public class JoinAction extends LoadedFileMenuAction {
-
-		public JoinAction(IFileController fileController, TableViewer viewer) {
-			super("Create joined file",null, fileController, viewer);
-		}
-
-		@Override
-		public void run() {
-			List<LoadedFile> loadedFiles = getFileSelection();
-			if (loadedFiles.isEmpty()) return;
-			file.joinFiles(loadedFiles);
 			view.refresh();
 		}
 	}
@@ -308,6 +293,22 @@ public class LoadedFileMenuListener implements IMenuListener {
 		public void run() {
 			
 			fileController.setComparator(null);
+			view.refresh();
+		}
+	}
+	
+	private class JoinFilesAction extends LoadedFileMenuAction {
+
+		public JoinFilesAction(IFileController fileController, TableViewer viewer) {
+			super("Create joined file",null, fileController, viewer);
+		}
+
+		@Override
+		public void run() {
+			
+			List<LoadedFile> loadedFiles = getFileSelection();
+			String joined = JoinFiles.fileJoiner(loadedFiles);
+			fileController.loadFile(joined);
 			view.refresh();
 		}
 	}

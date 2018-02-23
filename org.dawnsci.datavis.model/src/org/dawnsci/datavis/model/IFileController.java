@@ -29,9 +29,7 @@ public interface IFileController {
 	 * @return true if file was loaded successfully, false otherwise
 	 */
 	public boolean loadFile(String path);
-
-	public void joinFiles(List<LoadedFile> files);
-
+	
 	public void attachLive();
 
 	public void detachLive();

@@ -123,22 +123,6 @@ public class FileController implements IFileController {
 		return loadFiles(new String[]{path}, null).isEmpty();
 	}
 	
-	
-	/* (non-Javadoc)
-	 * @see org.dawnsci.datavis.model.IFileController#joinFiles(java.lang.String)
-	 */
-	@Override
-	public void joinFiles(List<LoadedFile> files) {
-		this.loadFile(JoinFiles.fileJoiner(files));
-		
-		// TODO: Temporary workaround, this should be reviewed/fixed for release.
-		LoadedFile firstFile = files.get(0);
-		String filePath = firstFile.getFilePath();
-		this.unloadFile(firstFile);
-		this.loadFile(filePath);
-	}
-	
-	
 	public void attachLive() {
 		if (LiveServiceManager.getILiveFileService() != null) {
 			
