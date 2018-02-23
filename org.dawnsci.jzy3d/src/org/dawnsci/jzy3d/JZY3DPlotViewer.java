@@ -55,27 +55,36 @@ public class JZY3DPlotViewer extends IPlottingSystemViewer.Stub<Composite> {
 		Settings.getInstance().setHardwareAccelerated(true);
 		chart = SWTChartComponentFactory.chart(control, Quality.Intermediate);
 		chart.getView().setCameraMode(CameraMode.ORTHOGONAL);
-		chart.getCanvas().addMouseController(new MouseAdapter() {
-
-			@Override
-			public void mouseClicked(MouseEvent e) {
-				if (!JZY3DPlotViewer.this.getControl().isFocusControl()) JZY3DPlotViewer.this.setFocus();
-				
-			}
-		});
 		
-		NewtCanvasSWT canvas = ((CanvasNewtSWT)chart.getCanvas()).getCanvas();
-		canvas.addListener(SWT.FocusOut, new Listener() {
-			
-			@Override
-			public void handleEvent(Event event) {
-				if (event.type == SWT.FocusOut) {
-					canvas.getNEWTChild().setVisible(false);
-					canvas.getNEWTChild().setVisible(true);
+		String os = System.getProperty("os.name");
+		if (!os.toLowerCase().contains("windows")) {
+
+			chart.getCanvas().addMouseController(new MouseAdapter() {
+
+				@Override
+				public void mouseClicked(MouseEvent e) {
+					if (!JZY3DPlotViewer.this.getControl().isFocusControl()) {
+						JZY3DPlotViewer.this.setFocus();
+					}
+
 				}
+			});
+			
+			NewtCanvasSWT canvas = ((CanvasNewtSWT)chart.getCanvas()).getCanvas();
+			canvas.addListener(SWT.FocusOut, new Listener() {
 				
-			}
-		});
+				@Override
+				public void handleEvent(Event event) {
+					if (event.type == SWT.FocusOut) {
+						canvas.getNEWTChild().setVisible(false);
+						canvas.getNEWTChild().setVisible(true);
+					}
+					
+				}
+			});
+		}
+		
+		
 		chart.addKeyboardCameraController();
 		chart.addMouseCameraController();
 		chart.render();
