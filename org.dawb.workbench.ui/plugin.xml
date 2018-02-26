@@ -304,7 +304,7 @@
          point="org.eclipse.ui.navigator.navigatorContent">
       <commonFilter
             description="Hides HDF5 files"
-            id="uk.ac.diamond.scisoft.ncd.rcp.hide.h5"
+            id="org.dawb.workbench.ui.hide.h5"
             name="*.h5 HDF5 files"
             activeByDefault="false">
          <filterExpression>
