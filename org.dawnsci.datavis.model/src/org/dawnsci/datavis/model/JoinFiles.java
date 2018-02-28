@@ -17,74 +17,72 @@ import java.util.List;
 import java.util.Iterator;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.Collection;
+import java.util.ArrayList;
 import java.io.BufferedWriter;
 
 // Imports from org.eclipse
-import org.eclipse.dawnsci.analysis.api.tree.Node;
-import org.eclipse.dawnsci.analysis.api.tree.Tree;
-import org.eclipse.dawnsci.analysis.api.tree.GroupNode;
+import org.eclipse.dawnsci.analysis.api.io.IDataHolder;
 
 // Imports from org.slf4j
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+// Imports from uk.ac.diamond.scisoft
+import uk.ac.diamond.scisoft.analysis.io.LoaderFactory;
+
 
 // Currently this class just joins files with a NeXus tree, however, class
 // should be extended to work with other filetypes! (2018-02-19)
 public class JoinFiles {
-
+	
 	
 	// First, set up a logger
 	private static final Logger logger = LoggerFactory.getLogger(JoinFiles.class);
 	
 	
-	public static String fileJoiner(List<LoadedFile> files) {
-
-		// First, let's set up some variables that we'll be adding to
-		LoadedFile firstFile = files.get(0);
-		String neXusPath = "";
-		String datasetsString = "";
-		String fileNamesString = "# FILE_NAME";
-		String directoryPath = "# DIR_NAME: " + firstFile.getParent() + "\n";
+	public static String AutoFileJoiner(List<String> filePathList) {
+		// First, let's find out something about the files
+		String firstFilePath = filePathList.get(0);
+		List<String> fileList = new ArrayList<String>();
+		String directoryPath = firstFilePath.substring(0, firstFilePath.lastIndexOf(File.separator));
 		
-		if (firstFile.getTree() != null) {
-			// Then let's get some information about the NeXus tree
-			Tree tree = firstFile.getTree();
-			GroupNode groupNode = tree.getGroupNode();
+		// Now let's look at the file path list to work out whether to look deeper
+		if (filePathList.size() == 1) {
+			File onlyEntry = new File(firstFilePath);
 			
-			// Check that the file isn't empty...
-			if (groupNode != null) {
-				// And find all the datanodes within the file
-				datasetsString = nodeSearcher(groupNode, neXusPath, datasetsString);
+			if (onlyEntry.isDirectory()) {
+				directoryPath = firstFilePath;
+				String[] directoryFileArray = onlyEntry.list();
+				firstFilePath = directoryPath + File.separator + directoryFileArray[0];
+				
+				for (int iter = 0; iter < directoryFileArray.length; iter ++) {
+					fileList.add(directoryFileArray[iter]);
+				}
+				
+			} else {
+				throw new IndexOutOfBoundsException();
 			}
+		// Or just take the list literally and get ready to link these files together
 		} else {
+			Iterator<String> filePathIterator = filePathList.iterator();
 			
-			List<DataOptions> dop = firstFile.getDataOptions();
-			for (DataOptions d : dop) {
-				String name = d.getName();
-				datasetsString += "# DATASET_NAME: " + name + "\n";
+			while (filePathIterator.hasNext()) {
+				String currentFilePath = filePathIterator.next();
+				fileList.add(currentFilePath.substring(currentFilePath.lastIndexOf(File.separator) + 1));
 			}
-			
 		}
 		
+		List<String> fileDatasets = DatasetsAsList(firstFilePath);
 		
-		
-		// Then generate the string for all the files within the passed list
-		for (Iterator<LoadedFile> loopIter = files.iterator(); loopIter.hasNext(); ) {
-			LoadedFile file = loopIter.next();
-			fileNamesString += "\n" + file.getName();
-		}
+		String directoryString = "# DIR_NAME: " + directoryPath + "\n";
+		String datasetsString = JoinFilesStringBuilder("# DATASET_NAME: ", fileDatasets, "\n");
+		String fileNamesString = "# FILE_NAME";
+		fileNamesString += JoinFilesStringBuilder("\n", fileList, "");
 		
 		// Now create a fileWriter
 		BufferedWriter fileWriter = null;
-		// Then come up with the output filename
-		String firstFileName = files.get(0).getName();
-		String lastFileName = files.get(files.size()-1).getName();
-		
-		int extensionLocation = firstFileName.lastIndexOf(".");
-		String outputName = firstFileName.substring(0, extensionLocation) + "--" + lastFileName.substring(0, extensionLocation) + " ";
 		File tempFile = null;
+		String outputName = JoinedFileName(fileList.get(0), fileList.get(fileList.size() - 1));
 		
 		// Now output the text into the .dawn file
 		try {
@@ -93,11 +91,11 @@ public class JoinFiles {
 			tempFile.deleteOnExit();
 			
 			fileWriter = new BufferedWriter(new FileWriter(tempFile.getAbsoluteFile()));
-			fileWriter.write(directoryPath + datasetsString + fileNamesString);
+			fileWriter.write(directoryString + datasetsString + fileNamesString + "\n");
 			fileWriter.close();
 		} catch (IOException fileError) {
 			// Print out if we have any errors
-			logger.error("There was a problem creating the .dawn linker file: " + fileError.toString());
+			logger.error("There was a problem creating the .dawn linker file: " + fileError.toString() + " ");
 		}
 		
 		// Return the absolute path to this linker file for the calling method to open
@@ -105,29 +103,52 @@ public class JoinFiles {
 	}
 	
 	
-	private static String nodeSearcher(GroupNode groupNode, String neXusPath, String datasetsString) {
-		// Find out what we've been passed
-		Collection<String> subNodeNames = groupNode.getNames();
+	private static String JoinedFileName(String firstFileName, String lastFileName) {
+		int firstExtensionLocation = firstFileName.lastIndexOf(".");
+		int lastExtensionLocation = lastFileName.lastIndexOf(".");
+		String outputName = firstFileName.substring(0, firstExtensionLocation) + "--" + lastFileName.substring(0, lastExtensionLocation) + " ";
+		return outputName;
+	}
+	
+	private static List<String> DatasetsAsList(String filePath) {
+		IDataHolder loadedFile;
+		List<String> fileDatasets = new ArrayList<String>();
 		
-		// And loop through it
-		for (Iterator<String> subNodeNameIterator = subNodeNames.iterator(); subNodeNameIterator.hasNext(); ) {
-			// Creating an iterator and going through all the nodes 
-			String subNodeName = subNodeNameIterator.next();
-			Node subNode = groupNode.getNode(subNodeName);
-			// Building this as needed for our output file
-			String currentPath = neXusPath + "/" + subNodeName;
-		
-			// Recursing if we've been passed a group node
-			if (subNode.isGroupNode()) {
-				datasetsString = nodeSearcher((GroupNode) subNode, currentPath, datasetsString);
-			}
+		try {
+			loadedFile = LoaderFactory.getData(filePath);
+			String[] datasetNameArray = loadedFile.getNames();
 			
-			// Logging it if we've been passed a data node
-			if (subNode.isDataNode()) {
-				datasetsString += "# DATASET_NAME: " + currentPath + "\n";
+			for (int iter = 0; iter < datasetNameArray.length; iter ++) {
+				String currentString = datasetNameArray[iter];
+				
+				if (currentString.startsWith("/")) {
+					fileDatasets.add(currentString);
+				}else {
+					logger.info("Ignoring dataset: " + currentString);
+				} 
 			}
+		} catch (Exception e) {
+			logger.error("Error opening file " + filePath.substring(filePath.lastIndexOf(File.separator)) + "\n\n");
 		}
-		// And returning the results of our investigation
-		return datasetsString;
+		
+		return fileDatasets;
+	}
+	
+	
+	private static String JoinFilesStringBuilder (String beginning, List<String> middle, String end) {
+		// Set up our returnable
+		String builtString = "";
+		
+		// Set up our iterator
+		Iterator<String> stringIterator = middle.iterator();
+		
+		// Loop over our iterator
+		while (stringIterator.hasNext()) {
+			String currentString = stringIterator.next();
+			builtString += beginning + currentString + end;
+		}
+		
+		// Return the built string
+		return builtString;
 	}
 }

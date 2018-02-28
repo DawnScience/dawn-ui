@@ -1,8 +1,10 @@
 package org.dawnsci.datavis.view.parts;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -305,11 +307,21 @@ public class LoadedFileMenuListener implements IMenuListener {
 
 		@Override
 		public void run() {
-			
-			List<LoadedFile> loadedFiles = getFileSelection();
-			String joined = JoinFiles.fileJoiner(loadedFiles);
-			fileController.loadFile(joined);
+			String joinedFilePath = JoinFiles.AutoFileJoiner(FilepathGenerator(getFileSelection()));
+			fileController.loadFile(joinedFilePath);
 			view.refresh();
+		}
+		
+		private List<String> FilepathGenerator(List<LoadedFile> loadedFileList) {
+			Iterator<LoadedFile> fileIterator = loadedFileList.iterator();
+			List<String> filePaths = new ArrayList<String>();
+			
+			while (fileIterator.hasNext()) {
+				LoadedFile currentFile = fileIterator.next();
+				filePaths.add(currentFile.getFilePath());
+			}
+			
+			return filePaths;
 		}
 	}
 }
