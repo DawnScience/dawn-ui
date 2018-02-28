@@ -44,8 +44,10 @@ import org.eclipse.richbeans.widgets.cell.CComboWithEntryCellEditorData;
 import org.eclipse.richbeans.widgets.cell.NumberCellEditor;
 import org.eclipse.richbeans.widgets.file.FileDialogCellEditor;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.ISelectionListener;
 import org.eclipse.ui.IWorkbenchPart;
@@ -140,7 +142,7 @@ public class ModelFieldEditors {
         	if (anot!=null) {
         		String hint = anot.hint();
         		if (hint!=null && !"".equals(hint)) {
-        			showHint(hint, parent);
+        			showHint(hint, ed.getControl());
         		}
         	}
         }
@@ -186,16 +188,18 @@ public class ModelFieldEditors {
 	    return true;
 	}
 
-	private static void showHint(final String hint, final Composite parent) {
+	private static void showHint(final String hint, final Control control) {
 		
-		if (parent.isDisposed()) return;
-		if (parent!=null) parent.getDisplay().asyncExec(new Runnable() {
+		if (control.isDisposed()) return;
+		if (control!=null) control.getDisplay().asyncExec(new Runnable() {
 			public void run() {
 				
-				currentHint = new DefaultToolTip(parent, ToolTip.NO_RECREATE, true);
+				currentHint = new DefaultToolTip(control, ToolTip.NO_RECREATE, true);
 				((DefaultToolTip)currentHint).setText(hint);
 				currentHint.setHideOnMouseDown(true);
-				currentHint.show(new Point(0, parent.getSize().y));
+				FontData[] fd = control.getFont().getFontData();
+				int h = fd.length > 0 ? fd[0].getHeight() : 12;
+				currentHint.show(new Point(0, -(5*h)/2));
 				
 				if (selectionListener==null) {
 					if (EclipseUtils.getPage()!=null) {
