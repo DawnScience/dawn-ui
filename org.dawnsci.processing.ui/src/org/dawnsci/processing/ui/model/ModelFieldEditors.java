@@ -190,7 +190,7 @@ public class ModelFieldEditors {
 
 	private static void showHint(final String hint, final Control control) {
 		
-		if (control.isDisposed()) return;
+		if (control == null || control.isDisposed()) return;
 		if (control!=null) control.getDisplay().asyncExec(new Runnable() {
 			public void run() {
 				
