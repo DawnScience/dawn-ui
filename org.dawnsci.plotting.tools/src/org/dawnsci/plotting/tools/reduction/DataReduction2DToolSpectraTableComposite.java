@@ -232,7 +232,7 @@ class DataReduction2DToolSpectraTableComposite extends DataReduction2DToolObserv
 				DataReduction2DToolSpectraRegionDataNode node = (DataReduction2DToolSpectraRegionDataNode) data;
 				int start = node.getStart().getIndex();
 				int end = node.getEnd().getIndex();
-				if (newStart >= start && newStart <= end || newEnd >= start && newEnd <= end) {
+				if (newEnd >= start && newStart <= end) {
 					DataReduction2DToolHelper.showWarning("Cannot add region with bounds " + Integer.toString(newStart) + ":" + Integer.toString(newEnd), "These indices are already in use by " + node.getRegion().getName() + ". Delete the region first and try again.");
 					return false;
 				}
