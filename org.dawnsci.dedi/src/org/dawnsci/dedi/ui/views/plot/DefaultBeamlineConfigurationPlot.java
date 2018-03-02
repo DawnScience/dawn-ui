@@ -37,6 +37,7 @@ import uk.ac.diamond.scisoft.analysis.crystallography.CalibrantSelectedListener;
 import uk.ac.diamond.scisoft.analysis.crystallography.CalibrantSelectionEvent;
 import uk.ac.diamond.scisoft.analysis.crystallography.CalibrantSpacing;
 import uk.ac.diamond.scisoft.analysis.crystallography.CalibrationFactory;
+import uk.ac.diamond.scisoft.analysis.crystallography.CalibrationStandards;
 
 public class DefaultBeamlineConfigurationPlot extends AbstractBeamlineConfigurationPlot
              implements  PropertyChangeListener, ColourChangeListener, CalibrantSelectedListener {
@@ -212,9 +213,10 @@ public class DefaultBeamlineConfigurationPlot extends AbstractBeamlineConfigurat
 	
 	@Override
 	public void propertyChange(PropertyChangeEvent evt) {
-		updatePlot();
+		if (evt.getSource() instanceof BeamlineConfiguration || evt.getSource() instanceof CalibrationStandards) {
+			updatePlot();
+		}
 	}
-	
 	
 	
 	@Override
@@ -225,10 +227,12 @@ public class DefaultBeamlineConfigurationPlot extends AbstractBeamlineConfigurat
 	
 	@Override
 	public void calibrantSelectionChanged(CalibrantSelectionEvent evt) {
-		selectedCalibrant = CalibrationFactory.getCalibrationStandards().getCalibrant();
-		if(selectedCalibrant != null) selectedCalibrantLabel.setText(selectedCalibrant.getName());
-		plotConfigurationPanel.layout();
-		updatePlot();
+		if (evt.getSource() instanceof BeamlineConfiguration || evt.getSource() instanceof CalibrationStandards) {
+			selectedCalibrant = CalibrationFactory.getCalibrationStandards().getCalibrant();
+			if(selectedCalibrant != null) selectedCalibrantLabel.setText(selectedCalibrant.getName());
+			plotConfigurationPanel.layout();
+			updatePlot();
+		}
 	}
 	
 	
