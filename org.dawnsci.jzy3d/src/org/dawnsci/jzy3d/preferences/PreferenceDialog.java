@@ -93,7 +93,7 @@ public class PreferenceDialog extends Dialog {
 
 		showAxisButton = new Button(plotConfigGroup, SWT.CHECK);
 		configCheckButton(showAxisButton, "Show box");
-		showAxisButton.setSelection(axeLayout.isFaceDisplayed());
+		showAxisButton.setSelection(chart.getView().isAxeBoxDisplayed());
 
 		Label gridColorLabel = new Label(plotConfigGroup, 0);
 		gridColorLabel.setText("Grid Color: ");
@@ -172,7 +172,7 @@ public class PreferenceDialog extends Dialog {
 		axeLayout.setTickLineDisplayed(tickLineButton.getSelection());
 		RGB color = gridColorSelector.getColorValue();
 		axeLayout.setMainColor(new Color(color.red, color.green, color.blue));
-		axeLayout.setFaceDisplayed(showAxisButton.getSelection());
+		chart.getView().setAxeBoxDisplayed(showAxisButton.getSelection());
 		color = backgroundColorSelector.getColorValue();
 		chart.getView().setBackgroundColor(new Color(color.red, color.green, color.blue));
 	}
