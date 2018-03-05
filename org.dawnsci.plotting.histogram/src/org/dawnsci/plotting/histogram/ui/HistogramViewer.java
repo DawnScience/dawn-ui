@@ -36,6 +36,7 @@ import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.ui.IActionBars;
 import org.slf4j.Logger;
@@ -324,19 +325,12 @@ public class HistogramViewer extends ContentViewer {
 		greenTrace.setVisible(true);
 		blueTrace.setData(data.getRGBX(), data.getB());
 		blueTrace.setVisible(true);
-		blueTrace.repaint();
+//		blueTrace.repaint();
 		IAxis xAxis = histogramPlottingSystem.getSelectedXAxis();
 		xAxis.setLog10(getHistogramProvider().isLogColorScale());
 		xAxis.setAxisAutoscaleTight(true);
 
 		histogramPlottingSystem.getSelectedYAxis().setAxisAutoscaleTight(true);
-
-		rescaleAxis(firstUpdateTraces);
-		if (firstUpdateTraces) {
-			firstUpdateTraces = false;
-		}
-
-		updateMinMaxSpinnerIncrements();
 
 	}
 
@@ -498,6 +492,34 @@ public class HistogramViewer extends ContentViewer {
 
 	@Override
 	public void refresh() {
+		
+		updateTraces();
+		updateUIComponents();
+		
+	}
+	
+	private void updateUIComponents() {
+		if (Display.getCurrent() == null) {
+			Display.getDefault().asyncExec(new Runnable() {
+				
+				@Override
+				public void run() {
+					updateUIComponents();
+					
+				}
+			});
+			return;
+		}
+		
+		histogramPlottingSystem.repaint();
+		
+		rescaleAxis(firstUpdateTraces);
+		if (firstUpdateTraces) {
+			firstUpdateTraces = false;
+		}
+
+		updateMinMaxSpinnerIncrements();
+		
 		double min = getHistogramProvider().getMin();
 		double max = getHistogramProvider().getMax();
 		if (!updatingROI) {
@@ -505,9 +527,7 @@ public class HistogramViewer extends ContentViewer {
 		}
 		
 		region.setVisible(true);
-		
 		updateMinMax(min, max);
-		updateTraces();
 	}
 
 	/**

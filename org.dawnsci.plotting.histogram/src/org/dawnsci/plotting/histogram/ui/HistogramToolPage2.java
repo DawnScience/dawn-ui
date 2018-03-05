@@ -15,6 +15,10 @@ import org.dawnsci.plotting.histogram.functions.ColourCategoryContribution;
 import org.dawnsci.plotting.histogram.preferences.HistogramPreferencePage;
 import org.dawnsci.plotting.histogram.service.PaletteService;
 import org.eclipse.core.runtime.Assert;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.histogram.IPaletteService;
 import org.eclipse.dawnsci.plotting.api.preferences.PlottingConstants;
@@ -80,6 +84,7 @@ public class HistogramToolPage2 extends AbstractToolPage implements IToolPage {
 	private Button logScaleCheck;
 	private Button invertedCheck;
 	private SelectionAdapter colourCategoryListener;
+	private Job updateJob;
 
 	private IAction lockAction;
 
@@ -107,7 +112,20 @@ public class HistogramToolPage2 extends AbstractToolPage implements IToolPage {
 		form.reflow(true); // create view with no scrollbars reflowing at this
 							// point
 		form.getBody().setLayout(GridLayoutFactory.fillDefaults().create());
-
+		
+		updateJob =  new Job("Histo update") {
+			
+			@Override
+			protected IStatus run(IProgressMonitor monitor) {
+				IPaletteTrace t = activePaletteTrace.get();
+				if (t == null) return Status.OK_STATUS;
+				histogramWidget.setInput(t);
+				return Status.OK_STATUS;
+			}
+		};
+		
+		updateJob.setPriority(Job.INTERACTIVE);
+		
 		createImageSettings(form.getBody());
 
 		createHistogramControl(form.getBody());
@@ -424,7 +442,9 @@ public class HistogramToolPage2 extends AbstractToolPage implements IToolPage {
 				}
 			}
 			
-			histogramWidget.getContentProvider().dispose();
+			if (histogramWidget != null && histogramWidget.getContentProvider() != null) {
+				histogramWidget.getContentProvider().dispose();
+			}
 		}
 		
 
@@ -506,13 +526,15 @@ public class HistogramToolPage2 extends AbstractToolPage implements IToolPage {
 	 * Update all the Histogram UI elements, widgets etc. typically done when
 	 * there is a new trace or trace has been modified.
 	 */
-	private void updateHistogramUIElements(IPaletteTrace it) {
+	private void updateHistogramUIElements(final IPaletteTrace it) {
 		if (it == null && histogramWidget != null) {
 			histogramWidget.clear();
 		}
 		
-		if (histogramWidget != null && it != null)
-			histogramWidget.setInput(it);
+		if (histogramWidget != null && it != null && updateJob != null) {
+			updateJob.schedule();
+		}
+			
 		int categoryIdx  = categoryViewer.getCombo().getSelectionIndex();
 		if (categoryIdx < 0)
 			categoryIdx = 0;
@@ -527,17 +549,6 @@ public class HistogramToolPage2 extends AbstractToolPage implements IToolPage {
 	private final class TraceListener implements ITraceListener {
 		@Override
 		public void traceWillPlot(TraceWillPlotEvent evt) {
-			// use this event to modify the trace before we plot it
-			// i.e. set colour palette etc
-			// note the trace may include lots of null settings e.g. min/max
-
-			// When we get this notification, the data is not ready in the trace
-			// e.g. min gets set but not max/
-			// we would have to turn off listeners or something
-			if (!(evt.getSource() instanceof IPaletteTrace)) return;
-			IPaletteTrace it = (IPaletteTrace) evt.getSource();
-			activePaletteTrace.set(it);
-			histogramWidget.setInput(it);
 		}
 
 		@Override
@@ -561,7 +572,7 @@ public class HistogramToolPage2 extends AbstractToolPage implements IToolPage {
 			IPaletteTrace p = (IPaletteTrace) evt.getSource();
 			activePaletteTrace.set(p);
 			updateHistogramUIElements(p);
-			p.addPaletteListener(paletteListener);
+			if (p != null) p.addPaletteListener(paletteListener);
 		}
 
 		@Override
