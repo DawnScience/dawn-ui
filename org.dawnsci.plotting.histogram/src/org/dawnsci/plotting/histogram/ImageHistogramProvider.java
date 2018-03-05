@@ -224,6 +224,9 @@ public class ImageHistogramProvider implements IHistogramProvider {
 
 	@Override
 	public void dispose() {
+		if (image != null) {
+			image.removePaletteListener(imageListener);
+		}
 	}
 
 	@Override
