@@ -33,11 +33,11 @@ import uk.ac.diamond.scisoft.analysis.io.LoaderFactory;
 
 // Currently this class just joins files with a NeXus tree, however, class
 // should be extended to work with other filetypes! (2018-02-19)
-public class JoinFiles {
+public class FileJoining {
 	
 	
 	// First, set up a logger
-	private static final Logger logger = LoggerFactory.getLogger(JoinFiles.class);
+	private static final Logger logger = LoggerFactory.getLogger(FileJoining.class);
 	
 	
 	public static String AutoFileJoiner(List<String> filePathList) {
@@ -120,12 +120,7 @@ public class JoinFiles {
 			
 			for (int iter = 0; iter < datasetNameArray.length; iter ++) {
 				String currentString = datasetNameArray[iter];
-				
-				if (currentString.startsWith("/")) {
-					fileDatasets.add(currentString);
-				}else {
-					logger.info("Ignoring dataset: " + currentString);
-				} 
+				fileDatasets.add(currentString);
 			}
 		} catch (Exception e) {
 			logger.error("Error opening file " + filePath.substring(filePath.lastIndexOf(File.separator)) + "\n\n");

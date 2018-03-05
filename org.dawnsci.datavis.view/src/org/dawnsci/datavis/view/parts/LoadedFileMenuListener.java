@@ -12,7 +12,7 @@ import java.util.stream.Collectors;
 import org.dawnsci.datavis.model.DataOptions;
 import org.dawnsci.datavis.model.IDataObject;
 import org.dawnsci.datavis.model.IFileController;
-import org.dawnsci.datavis.model.JoinFiles;
+import org.dawnsci.datavis.model.FileJoining;
 import org.dawnsci.datavis.model.LoadedFile;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IMenuListener;
@@ -307,7 +307,7 @@ public class LoadedFileMenuListener implements IMenuListener {
 
 		@Override
 		public void run() {
-			String joinedFilePath = JoinFiles.AutoFileJoiner(FilepathGenerator(getFileSelection()));
+			String joinedFilePath = FileJoining.AutoFileJoiner(FilepathGenerator(getFileSelection()));
 			fileController.loadFile(joinedFilePath);
 			view.refresh();
 		}
