@@ -31,7 +31,6 @@ import org.eclipse.swt.widgets.Listener;
 import org.eclipse.ui.preferences.ScopedPreferenceStore;
 import org.jzy3d.chart.Chart;
 import org.jzy3d.chart.Settings;
-import org.jzy3d.chart.factories.AWTChartComponentFactory;
 import org.jzy3d.chart.swt.CanvasNewtSWT;
 import org.jzy3d.chart.swt.SWTChartComponentFactory;
 import org.jzy3d.plot3d.primitives.AbstractDrawable;
@@ -127,16 +126,16 @@ public class JZY3DPlotViewer extends IPlottingSystemViewer.Stub<Composite> {
 				
 					if (file == null) return;
 					File f = new File(file);
-					int h = chart.getCanvas().getRendererHeight();
-					int w = chart.getCanvas().getRendererWidth();
-					Chart chart2 = AWTChartComponentFactory.chart(Quality.Intermediate, "offscreen,"+w+","+h);
-					chart2.getScene().add(chart.getScene().getGraph().getAll());
-					chart2.setViewPoint(chart.getViewPoint());
-					chart2.screenshot(f);
+//					int h = chart.getCanvas().getRendererHeight();
+//					int w = chart.getCanvas().getRendererWidth();
+//					Chart chart2 = AWTChartComponentFactory.chart(Quality.Intermediate, "offscreen,"+w+","+h);
+//					chart2.getScene().add(chart.getScene().getGraph().getAll());
+//					chart2.setViewPoint(chart.getViewPoint());
+					chart.render();
+					chart.screenshot(f);
 				} catch (IOException e) {
 					e.printStackTrace();
 				}
-				
 			}
 		};
 		saveAction.setToolTipText("Save as png");
