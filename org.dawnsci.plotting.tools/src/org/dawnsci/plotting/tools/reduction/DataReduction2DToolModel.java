@@ -38,13 +38,14 @@ class DataReduction2DToolModel extends DataReduction2DToolObservableModel {
 
 	private static final Logger logger = LoggerFactory.getLogger(DataReduction2DToolModel.class);
 	private IImageTrace imageTrace;
-	private IDataset axis0;
-	private IDataset axis1;
+	private IDataset[] axes0;
+	private IDataset[] axes1;
 	private File dataFile;
 	private IPlottingSystem<Composite> dataImagePlotting;
 	private IPlottingSystem<Composite> spectraPlotting;
 	private final List<Integer> deletedIndices = new ArrayList<>();
 	private final List<DataReduction2DToolSpectrumDataNode> spectrumDataNodes = new ArrayList<>();
+	private final List<String> axesNames = new ArrayList<>();
 
 	private static final double DEFAULT_STACK_OFFSET = 0.1;
 
@@ -61,20 +62,20 @@ class DataReduction2DToolModel extends DataReduction2DToolObservableModel {
 		this.imageTrace = imageTrace;
 	}
 
-	public IDataset getAxis0() {
-		return axis0;
+	public IDataset[] getAxes0() {
+		return axes0;
 	}
 
-	public void setAxis0(IDataset axis0) {
-		this.axis0 = axis0;
+	public void setAxes0(IDataset[] axes0) {
+		this.axes0 = axes0;
 	}
 	
-	public IDataset getAxis1() {
-		return axis1;
+	public IDataset[] getAxes1() {
+		return axes1;
 	}
 	
-	public void setAxis1(IDataset axis1) {
-		this.axis1 = axis1;
+	public void setAxes1(IDataset[] axes1) {
+		this.axes1 = axes1;
 	}
 	
 	public File getDataFile() {
@@ -465,5 +466,9 @@ class DataReduction2DToolModel extends DataReduction2DToolObservableModel {
 		}
 		
 		return rv;
+	}
+
+	public List<String> getAxesNames() {
+		return axesNames;
 	} 
 }

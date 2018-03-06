@@ -4,7 +4,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Comparator;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -17,25 +20,159 @@ import org.eclipse.dawnsci.plotting.api.region.RegionUtils;
 import org.eclipse.draw2d.ColorConstants;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.MenuManager;
+import org.eclipse.jface.dialogs.Dialog;
+import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.InputDialog;
+import org.eclipse.jface.viewers.CheckboxTableViewer;
+import org.eclipse.jface.viewers.ICheckStateProvider;
+import org.eclipse.jface.viewers.ILabelProvider;
+import org.eclipse.jface.viewers.ILabelProviderListener;
+import org.eclipse.jface.viewers.IStructuredContentProvider;
+import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.BusyIndicator;
 import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Menu;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.swt.widgets.ToolItem;
+import org.eclipse.ui.ISharedImages;
+import org.eclipse.ui.PlatformUI;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 class DataReduction2DToolSpectraTableComposite extends DataReduction2DToolObservableResourceComposite {
+
+	private final class ColumnToggleDialog extends Dialog {
+		private ColumnToggleDialog(Shell parentShell) {
+			super(parentShell);
+		}
+
+		@Override
+		protected void createButtonsForButtonBar(Composite parent) {
+			// create OK and Cancel buttons by default
+			createButton(parent, IDialogConstants.OK_ID, IDialogConstants.CLOSE_LABEL,
+					true);
+		}
+
+		@Override
+		protected Control createDialogArea(Composite parent) {
+		    Composite container = (Composite) super.createDialogArea(parent);	
+		    final CheckboxTableViewer ctv = CheckboxTableViewer.newCheckList(container, SWT.BORDER | SWT.H_SCROLL | SWT.V_SCROLL);
+		    ctv.getTable().setLayoutData(new GridData(GridData.FILL_BOTH));
+		    ctv.setContentProvider(new IStructuredContentProvider() {
+
+				@Override
+				public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
+					// no need
+				}
+				
+				@Override
+				public void dispose() {
+					// no need
+				}
+
+				@Override
+				public Object[] getElements(Object inputElement) {
+					@SuppressWarnings("unchecked")
+					Map<TableColumn,Boolean> map = (Map<TableColumn, Boolean>) inputElement;
+					if (map.isEmpty())
+						return new Object[0];
+					
+					return map.entrySet().toArray(new Entry[map.size()]);
+				}
+			});
+		    ctv.setLabelProvider(new ILabelProvider() {
+				
+				@Override
+				public void removeListener(ILabelProviderListener listener) {
+					// no need
+				}
+				
+				@Override
+				public boolean isLabelProperty(Object element, String property) {
+					return false;
+				}
+				
+				@Override
+				public void dispose() {
+					// no need
+				}
+				
+				@Override
+				public void addListener(ILabelProviderListener listener) {
+					// no need
+				}
+				
+				@SuppressWarnings("unchecked")
+				@Override
+				public String getText(Object element) {
+					Entry<TableColumn,Boolean> entry = (Entry<TableColumn, Boolean>) element;
+					return entry.getKey().getText();
+				}
+				
+				@Override
+				public Image getImage(Object element) {
+					return null;
+				}
+			});
+		    ctv.setCheckStateProvider(new ICheckStateProvider() {
+				
+				@Override
+				public boolean isGrayed(Object element) {
+					return false;
+				}
+				
+				@SuppressWarnings("unchecked")
+				@Override
+				public boolean isChecked(Object element) {
+					Entry<TableColumn,Boolean> entry = (Entry<TableColumn, Boolean>) element;
+					return entry.getValue();
+				}
+			});
+		    ctv.setInput(dataColumns);
+		    ctv.addCheckStateListener(event -> {
+				@SuppressWarnings("unchecked")
+				Entry<TableColumn,Boolean> entry = (Entry<TableColumn, Boolean>) event.getElement();
+				boolean checked = event.getChecked();
+				entry.setValue(checked);
+				if (checked) {
+					// show
+					entry.getKey().setWidth(COLUMN_WIDTH);
+					entry.getKey().setResizable(true);
+				} else {
+					// show
+					entry.getKey().setWidth(0);
+					entry.getKey().setResizable(false);
+				}
+			});
+		    
+		    return container;
+		}
+
+		// overriding this methods allows you to set the
+		// title of the custom dialog
+		@Override
+		protected void configureShell(Shell newShell) {
+		    super.configureShell(newShell);
+		    newShell.setText("Column Selection");
+		}
+
+		@Override
+		protected Point getInitialSize() {
+		    return new Point(450, 300);
+		}
+	}
 
 	protected static final Logger logger = LoggerFactory.getLogger(DataReduction2DToolSpectraTableComposite.class);
 
@@ -48,6 +185,8 @@ class DataReduction2DToolSpectraTableComposite extends DataReduction2DToolObserv
 
 	private Table spectraTable;
 	private final DataReduction2DToolModel toolPageModel;
+	private final Map<TableColumn, Boolean> dataColumns = new LinkedHashMap<>();
+	private static final int COLUMN_WIDTH = 120;
 	
 	private final InputDialog dlg = new InputDialog(Display.getCurrent().getActiveShell(),
 			"", "Enter number", "", newText -> {
@@ -127,10 +266,6 @@ class DataReduction2DToolSpectraTableComposite extends DataReduction2DToolObserv
 
 	public void clearSelectedSpectraList() {
 		selectedSpectraList.clear();
-	}
-	
-	public void setAxisColumnName(String name) {
-		spectraTable.getColumn(1).setText(name);
 	}
 	
 	private final Action createRegionAvgEveryAction = new Action("Create region and average every...") {
@@ -265,19 +400,23 @@ class DataReduction2DToolSpectraTableComposite extends DataReduction2DToolObserv
 		stackoffsetChangeIcon.dispose();
 	}
 
-	private void setup() {
-		createToolbarForSpectraTable(this);
-		spectraTable = new Table(this, SWT.MULTI | SWT.BORDER | SWT.H_SCROLL | SWT.V_SCROLL /* | SWT.VIRTUAL */);
-		spectraTable.setHeaderVisible(true);
-		spectraTable.setLinesVisible(true);
-		spectraTable.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+	public void createDataColumnsAndPopulate() {
+		spectraTable.setRedraw(false);
+		while (spectraTable.getColumnCount() > 0 ) {
+		    spectraTable.getColumns()[0].dispose();
+		}
+		dataColumns.clear();
+		
 		TableColumn nameColumn = new TableColumn(spectraTable, SWT.LEFT);
 		nameColumn.setText("Name");
 		nameColumn.setWidth(155);
 
-		TableColumn timeColumn = new TableColumn(spectraTable, SWT.CENTER);
-		timeColumn.setText("Y-Axis"); // FIXME
-		timeColumn.setWidth(120);
+		for (String axisName : toolPageModel.getAxesNames()) {
+			TableColumn column = new TableColumn(spectraTable, SWT.CENTER);
+			column.setText(axisName);
+			column.setWidth(COLUMN_WIDTH);
+			dataColumns.put(column, true);
+		}
 		
 		final MenuManager menuManager = new MenuManager();
 		Menu menu = menuManager.createContextMenu(spectraTable);
@@ -300,10 +439,23 @@ class DataReduction2DToolSpectraTableComposite extends DataReduction2DToolObserv
 		for (DataReduction2DToolSpectrumDataNode spectrumNode : toolPageModel.getSpectrumDataNodes()) {
 			TableItem tableItem = new TableItem(spectraTable, SWT.NONE);
 			tableItem.setText(0, spectrumNode.toString());
-			tableItem.setText(1, DataReduction2DToolHelper.roundDoubletoString(spectrumNode.getAxisValue()));
-			// TODO: add support for multiple columns for multiple axes
+			double[] axisValues = spectrumNode.getAxisValues();
+			int columnNr = 1;
+			for (double axisValue : axisValues) {
+				tableItem.setText(columnNr++, DataReduction2DToolHelper.roundDoubletoString(axisValue));
+			}
 			tableItem.setData(SPECTRUM_NODE, spectrumNode);
 		}
+		spectraTable.setRedraw(true);
+	}
+	
+	private void setup() {
+		createToolbarForSpectraTable(this);
+		spectraTable = new Table(this, SWT.MULTI | SWT.BORDER | SWT.H_SCROLL | SWT.V_SCROLL /* | SWT.VIRTUAL */);
+		spectraTable.setHeaderVisible(true);
+		spectraTable.setLinesVisible(true);
+		spectraTable.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		createDataColumnsAndPopulate();
 	}
 
 	private void createToolbarForSpectraTable(final Composite treeParent) {
@@ -314,7 +466,7 @@ class DataReduction2DToolSpectraTableComposite extends DataReduction2DToolObserv
 		stackToggle.setImage(stackoffsetChangeIcon);
 		stackToggle.setToolTipText(Double.toString(toolPageModel.getTraceStack()));
 		stackToggle.addListener(SWT.Selection, event -> {
-			InputDialog dlg = new InputDialog(stackToggle.getDisplay().getActiveShell(), "Stack offset", "Enter new offset", Double.toString(toolPageModel.getTraceStack()), newText ->  {
+			InputDialog offsetDlg = new InputDialog(stackToggle.getDisplay().getActiveShell(), "Stack offset", "Enter new offset", Double.toString(toolPageModel.getTraceStack()), newText ->  {
 				try {
 					double value = Double.parseDouble(newText);
 					if (value >= 0) {
@@ -325,12 +477,19 @@ class DataReduction2DToolSpectraTableComposite extends DataReduction2DToolObserv
 					return "Invalid input";
 				}
 			});
-			if (dlg.open() ==  Window.OK) {
-				toolPageModel.setTraceStack(Double.parseDouble(dlg.getValue()));
+			if (offsetDlg.open() ==  Window.OK) {
+				toolPageModel.setTraceStack(Double.parseDouble(offsetDlg.getValue()));
 				stackToggle.setToolTipText(Double.toString(toolPageModel.getTraceStack()));
 			}
 		});
 
+		final ToolItem columnToggle = new ToolItem(toolBar, SWT.PUSH);
+		columnToggle.setImage(PlatformUI.getWorkbench().getSharedImages().getImage(ISharedImages.IMG_ETOOL_CLEAR));
+		columnToggle.setToolTipText("Set column visibility");
+		columnToggle.addListener(SWT.Selection, event -> {
+			Dialog columnToggleDialog = new ColumnToggleDialog(columnToggle.getDisplay().getActiveShell());
+			columnToggleDialog.open();
+		});
 	}
 
 	private DataReduction2DToolRegionData findSpectraAndCreateRegion() {

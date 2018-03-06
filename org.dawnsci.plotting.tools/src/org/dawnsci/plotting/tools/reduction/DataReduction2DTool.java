@@ -1,12 +1,12 @@
 package org.dawnsci.plotting.tools.reduction;
 
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import org.dawb.common.ui.widgets.ActionBarWrapper;
@@ -18,9 +18,9 @@ import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.PlotType;
 import org.eclipse.dawnsci.plotting.api.PlottingFactory;
 import org.eclipse.dawnsci.plotting.api.region.IRegion;
+import org.eclipse.dawnsci.plotting.api.region.IRegion.RegionType;
 import org.eclipse.dawnsci.plotting.api.region.IRegionListener;
 import org.eclipse.dawnsci.plotting.api.region.RegionEvent;
-import org.eclipse.dawnsci.plotting.api.region.IRegion.RegionType;
 import org.eclipse.dawnsci.plotting.api.tool.AbstractToolPage;
 import org.eclipse.dawnsci.plotting.api.tool.IToolPageSystem;
 import org.eclipse.dawnsci.plotting.api.trace.IImageTrace;
@@ -32,12 +32,10 @@ import org.eclipse.dawnsci.plotting.api.trace.TraceEvent;
 import org.eclipse.dawnsci.plotting.api.trace.TraceWillPlotEvent;
 import org.eclipse.january.DatasetException;
 import org.eclipse.january.dataset.Dataset;
-import org.eclipse.january.dataset.DatasetFactory;
 import org.eclipse.january.dataset.DatasetUtils;
 import org.eclipse.january.dataset.DoubleDataset;
 import org.eclipse.january.dataset.IDataset;
 import org.eclipse.january.dataset.ILazyDataset;
-import org.eclipse.january.dataset.IntegerDataset;
 import org.eclipse.january.metadata.AxesMetadata;
 import org.eclipse.january.metadata.IMetadata;
 import org.eclipse.swt.SWT;
@@ -76,8 +74,8 @@ public class DataReduction2DTool extends AbstractToolPage implements IRegionList
 	private final List<ILineTrace> stackList = new LinkedList<>();
 	private final List<IRegion> cachedPlottedRegions = new ArrayList<>();
 	private Label statusLabel;
-	private Dataset axis0;
-	private Dataset axis1;
+	private Dataset[] axes0;
+	private Dataset[] axes1;
 
 	
 	@Override
@@ -95,7 +93,6 @@ public class DataReduction2DTool extends AbstractToolPage implements IRegionList
 		rootComposite.setWeights(new int[]{1,3});
 		createActions();
 		doBinding();
-		spectraTableComposite.setAxisColumnName(MetadataPlotUtils.removeSquareBrackets(axis0.getName().substring(axis0.getName().lastIndexOf('/')+1))); // FIXME
 	}
 
 	private String getDataFilePath(IImageTrace image) {
@@ -141,8 +138,11 @@ public class DataReduction2DTool extends AbstractToolPage implements IRegionList
 		data.squeeze();
 		String name = Integer.toString(spectrum.getIndex());
 		ILineTrace trace = plottingSystem.createLineTrace(name);
-		IDataset energyClone = axis1.clone().squeeze(); // FIXME
-		energyClone.setName(axis1.getName());
+		IDataset energyClone = null;
+		if (axes1.length > 1) {
+			energyClone = axes1[0].clone().squeeze(); // FIXME
+			energyClone.setName(axes1[0].getName());
+		}
 		IDataset dataClone = data.clone();
 		dataClone.setName(name.trim());
 		trace.setData(energyClone, dataClone);
@@ -255,7 +255,7 @@ public class DataReduction2DTool extends AbstractToolPage implements IRegionList
 			dataItem.squeeze();
 			ILineTrace trace = plottingSystem.createLineTrace(name + " " + i);
 			region.addTrace(trace);
-			trace.setData(axis1.getSlice(null, new int[]{1, axis1.getShape()[1]}, null).squeeze(), dataItem); // FIXME
+			trace.setData(axes1.length == 0 ? null : axes1[0].getSlice(null, new int[]{1, axes1[0].getShape()[1]}, null).squeeze(), dataItem); // FIXME
 			addToPlottingSystem(trace);
 		}
 	}
@@ -270,11 +270,32 @@ public class DataReduction2DTool extends AbstractToolPage implements IRegionList
 	private void createActions() {
 		createToolPageActions();
 	}
+
+	private Dataset[] getAllAxes(int axisNr, AxesMetadata firstAxesMetadata) {
+		List<Dataset> rvList = new ArrayList<>();
+		ILazyDataset[] allAxes = firstAxesMetadata != null ? firstAxesMetadata.getAxis(axisNr) : new ILazyDataset[0];
+		
+		if (allAxes == null)
+			allAxes = new ILazyDataset[0];
+		
+		for (ILazyDataset axis : allAxes) {
+			if (axis == null)
+				continue;
+			try {
+				Dataset tempAxis = DatasetUtils.sliceAndConvertLazyDataset(axis);
+				rvList.add(tempAxis);
+			} catch (DatasetException e) {
+				// move on to the next
+			}
+		}
+		
+		return rvList.toArray(new Dataset[rvList.size()]);
+	}
 	
 	private void validateAndLoadSpectra(IImageTrace image) {
 		dataLoaded = false;
-		axis0 = null;
-		axis1 = null;
+		axes0 = null;
+		axes1 = null;
 		imageTrace = image;
 		String fullFilePath = getDataFilePath(image);
 		if (fullFilePath == null) {
@@ -286,33 +307,13 @@ public class DataReduction2DTool extends AbstractToolPage implements IRegionList
 		AxesMetadata firstAxesMetadata = image.getData().getFirstMetadata(AxesMetadata.class);
 		
 		if (firstAxesMetadata != null) {
-			ILazyDataset[] axes0 = firstAxesMetadata.getAxis(0);
-			if (axes0 != null && axes0.length > 0 && axes0[0] != null) {
-				try {
-					axis0 = DatasetUtils.sliceAndConvertLazyDataset(axes0[0]);
-				} catch (DatasetException e) {
-				}
-			}
-			ILazyDataset[] axes1 = firstAxesMetadata.getAxis(1);
-			if (axes1 != null && axes1.length > 0 && axes1[0] != null) {
-				try {
-					axis1 = DatasetUtils.sliceAndConvertLazyDataset(axes1[0]);
-				} catch (DatasetException e) {
-				}
-			}
-		}
-		if (axis0 == null) {
-			axis0 = DatasetFactory.createRange(IntegerDataset.class, image.getData().getShape()[0]);
-			axis0.setShape(axis0.getSize(), 1);
-		}
-		if (axis1 == null) {
-			axis1 = DatasetFactory.createRange(IntegerDataset.class, image.getData().getShape()[1]);
-			axis1.setShape(1, axis1.getSize());
+			axes0 = getAllAxes(0, firstAxesMetadata);
+			axes1 = getAllAxes(1, firstAxesMetadata);
 		}
 
 		// update model??
-		toolPageModel.setAxis0(axis0);
-		toolPageModel.setAxis1(axis1);
+		toolPageModel.setAxes0(axes0);
+		toolPageModel.setAxes1(axes1);
 		toolPageModel.setDataFile(dataFile);
 		toolPageModel.setDataImagePlotting(getPlottingSystem());
 		toolPageModel.setImageTrace(imageTrace);
@@ -320,27 +321,21 @@ public class DataReduction2DTool extends AbstractToolPage implements IRegionList
 		int totalNumberOfSpectra = image.getData().getShape()[0]; // TODO: support both axes!
 		final List<DataReduction2DToolSpectrumDataNode> spectrumDataNodes = toolPageModel.getSpectrumDataNodes();
 		spectrumDataNodes.clear();
-		IntStream.range(0, totalNumberOfSpectra).forEachOrdered(i -> spectrumDataNodes.add(new DataReduction2DToolSpectrumDataNode(i, toolPageModel.getAxis0().getDouble(i,0))));
+		IntStream.range(0, totalNumberOfSpectra)
+				 .forEachOrdered(i -> spectrumDataNodes.add(new DataReduction2DToolSpectrumDataNode(i, Arrays.stream(axes0).mapToDouble(axis -> axis.getDouble(i,0)).toArray())));
 		
+		toolPageModel.getAxesNames().clear();
+		toolPageModel.getAxesNames().addAll(Arrays.stream(axes0)
+												  .map(axis -> MetadataPlotUtils.removeSquareBrackets(axis.getName().substring(axis.getName().lastIndexOf('/')+1))).collect(Collectors.toList())
+												  );
 		dataLoaded = true;
 	}
 
 	private void createSpectraTable(Composite parent) {
 		spectraTableComposite = new DataReduction2DToolSpectraTableComposite(parent, SWT.None, toolPageModel);
 		spectraTableComposite.setLayout(DataReduction2DToolHelper.createGridLayoutWithNoMargin(1, false));
-		toolPageModel.addPropertyChangeListener(DataReduction2DToolModel.TRACE_STACK_PROP_NAME, new PropertyChangeListener() {
-			@Override
-			public void propertyChange(PropertyChangeEvent evt) {
-				updateStackOffset((double) evt.getOldValue(), (double) evt.getNewValue());
-			}
-		});
-		spectraTableComposite.addPropertyChangeListener(DataReduction2DToolSpectraTableComposite.NEW_REGION_PROP_NAME, new PropertyChangeListener() {
-
-			@Override
-			public void propertyChange(PropertyChangeEvent evt) {
-				addSpectraRegion((DataReduction2DToolSpectraRegionDataNode) evt.getNewValue());
-		}
-		});
+		toolPageModel.addPropertyChangeListener(DataReduction2DToolModel.TRACE_STACK_PROP_NAME, evt	-> updateStackOffset((double) evt.getOldValue(), (double) evt.getNewValue()));
+		spectraTableComposite.addPropertyChangeListener(DataReduction2DToolSpectraTableComposite.NEW_REGION_PROP_NAME, evt -> addSpectraRegion((DataReduction2DToolSpectraRegionDataNode) evt.getNewValue()));
 	}
 
 	private void createSpectraRegionTable(Composite parent) {
@@ -383,7 +378,10 @@ public class DataReduction2DTool extends AbstractToolPage implements IRegionList
 						this.getViewPart());
 				plottingSystem.getPlotComposite().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 				plottingSystem.getSelectedXAxis().setAxisAutoscaleTight(true);
-				plottingSystem.getSelectedXAxis().setTitle(axis1.getName());
+				if (axes1.length == 0)
+					plottingSystem.getSelectedXAxis().setTitle("Indices");
+				else
+					plottingSystem.getSelectedXAxis().setTitle(axes1[0].getName());
 				plottingSystem.setRescale(true);
 				toolPageModel.setSpectraPlotting(plottingSystem);
 			}

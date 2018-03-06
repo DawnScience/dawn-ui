@@ -5,12 +5,12 @@ import org.eclipse.dawnsci.plotting.api.trace.ITrace;
 class DataReduction2DToolSpectrumDataNode {
 	private final int index;
 	private final String name;
-	private final double axisValue;
+	private final double[] axisValues;
 	private ITrace trace;
 	
-	public DataReduction2DToolSpectrumDataNode(int index, double axisValue) {
+	public DataReduction2DToolSpectrumDataNode(int index, double... axisValues) {
 		this.index = index;
-		this.axisValue = axisValue;
+		this.axisValues = axisValues;
 		this.name = "Spectrum " + index;
 	}
 	
@@ -39,7 +39,7 @@ class DataReduction2DToolSpectrumDataNode {
 		return name;
 	}
 	
-	public double getAxisValue() {
-		return axisValue;
+	public double[] getAxisValues() {
+		return axisValues;
 	}
 }
