@@ -257,7 +257,7 @@ public class AspectAxis extends DAxis implements IAxis {
 				} else {
 					setRange(0, ran);
 				}
-				return true;
+				return false;
 
 			} else if ((upper+d1)>trace.getData().getShape()[index]) {
 				if (isAxisFlipped) {
@@ -265,7 +265,7 @@ public class AspectAxis extends DAxis implements IAxis {
 				} else {
 					setRange(trace.getData().getShape()[index]-ran, trace.getData().getShape()[index]);
 				}
-				return true;
+				return false;
 			}
 
 		}
