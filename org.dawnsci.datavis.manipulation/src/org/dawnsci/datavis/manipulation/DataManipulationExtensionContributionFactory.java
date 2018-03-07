@@ -10,10 +10,12 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.dawnsci.datavis.api.IDataFilePackage;
+import org.dawnsci.datavis.api.IRecentPlaces;
 import org.dawnsci.datavis.api.IXYData;
 import org.dawnsci.datavis.api.utils.DataPackageUtils;
 import org.dawnsci.datavis.api.utils.XYDataImpl;
 import org.dawnsci.datavis.model.IFileController;
+import org.eclipse.dawnsci.analysis.api.io.ScanFileHolderException;
 import org.eclipse.dawnsci.analysis.api.tree.GroupNode;
 import org.eclipse.dawnsci.analysis.dataset.roi.ROISliceUtils;
 import org.eclipse.dawnsci.analysis.tree.TreeFactory;
@@ -40,7 +42,9 @@ import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.StructuredSelection;
+import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.menus.ExtensionContributionFactory;
 import org.eclipse.ui.menus.IContributionRoot;
@@ -49,6 +53,9 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
 
 import uk.ac.diamond.scisoft.analysis.dataset.function.Interpolation1D;
+import uk.ac.diamond.scisoft.analysis.io.ASCIIDataHolderSaver;
+import uk.ac.diamond.scisoft.analysis.io.DataHolder;
+import uk.ac.diamond.scisoft.analysis.io.RawTextSaver;
 
 public class DataManipulationExtensionContributionFactory extends ExtensionContributionFactory {
 
@@ -104,78 +111,136 @@ public class DataManipulationExtensionContributionFactory extends ExtensionContr
 						String name = "average";
 
 						if (n instanceof StringDataset) {
-							
+
 							StringBuilder builder = new StringBuilder(name);
 							builder.append("_");
 							builder.append(new File(n.getStringAbs(0)).getName());
 							builder.append("_");
 							builder.append(new File(n.getStringAbs(n.getSize()-1)).getName());
-							
+
 							name = builder.toString();
 						}
 
-						File f;
-						try {
-							f = File.createTempFile(name, ".nxs");
-						} catch (IOException e) {
-							
-							return;
-						}
-						
+						FileDialog fd = new FileDialog(Display.getDefault().getActiveShell(), SWT.SAVE);
+						String[] exts = new String[] {".dat",".xye",".nxs",".h5"};
+						fd.setFilterExtensions(exts);
+						fd.setFileName(name);
+
 						BundleContext bundleContext =
-				                FrameworkUtil.
-				                getBundle(this.getClass()).
-				                getBundleContext();
-						
-						INexusFileFactory fileFactory = (INexusFileFactory)bundleContext.getService(bundleContext.getServiceReference(INexusFileFactory.class));
-						
+								FrameworkUtil.
+								getBundle(this.getClass()).
+								getBundleContext();
 
-						try (NexusFile nexus = fileFactory.newNexusFile(f.getAbsolutePath())) {
-							nexus.openToWrite(true);
-							mean.setName(NexusConstants.DATA_DATA);
-							GroupNode nxdata = nexus.getGroup("/entry/average", true);
-							nexus.addAttribute(nxdata, TreeFactory.createAttribute(NexusConstants.NXCLASS, NexusConstants.DATA));
-							GroupNode nxentry = nexus.getGroup("/entry", true);
-							nexus.addAttribute(nxentry,TreeFactory.createAttribute(NexusConstants.NXCLASS, NexusConstants.ENTRY));
-							nexus.createData(nxdata, mean);
-							nexus.addAttribute(nxdata, TreeFactory.createAttribute(NexusConstants.DATA_SIGNAL, NexusConstants.DATA_DATA));
+						IRecentPlaces recentPlaces = (IRecentPlaces)bundleContext.getService(bundleContext.getServiceReference(IRecentPlaces.class));
 
+						fd.setFilterPath(recentPlaces.getRecentPlaces().get(0));
+
+						String open = fd.open();
+
+						if (open == null) return;
+
+						int filterIndex = fd.getFilterIndex();
+
+						if (filterIndex == -1) {
+							filterIndex = 0;
+						}
+
+						String ext = exts[filterIndex];
+
+						if (!open.endsWith(ext)) {
+							open = open + ext;
+						}
+
+						if (ext.equals(exts[2]) || ext.equals(exts[3])) {
+
+							INexusFileFactory fileFactory = (INexusFileFactory)bundleContext.getService(bundleContext.getServiceReference(INexusFileFactory.class));
+
+
+							try (NexusFile nexus = fileFactory.newNexusFile(open)) {
+								nexus.openToWrite(true);
+								mean.setName(NexusConstants.DATA_DATA);
+								GroupNode nxdata = nexus.getGroup("/entry/average", true);
+								nexus.addAttribute(nxdata, TreeFactory.createAttribute(NexusConstants.NXCLASS, NexusConstants.DATA));
+								GroupNode nxentry = nexus.getGroup("/entry", true);
+								nexus.addAttribute(nxentry,TreeFactory.createAttribute(NexusConstants.NXCLASS, NexusConstants.ENTRY));
+								nexus.createData(nxdata, mean);
+								nexus.addAttribute(nxdata, TreeFactory.createAttribute(NexusConstants.DATA_SIGNAL, NexusConstants.DATA_DATA));
+
+								AxesMetadata md = d.getFirstMetadata(AxesMetadata.class);
+
+								ILazyDataset[] axes = md.getAxes();
+
+								String axName = null;
+
+								if (axes[1] != null) {
+									IDataset y = axes[1].getSlice();
+									y = y.squeeze();
+									if (y.getName() != null) {
+										axName = MetadataPlotUtils.removeSquareBrackets(y.getName());
+										y.setName(axName);
+									} else {
+										axName = "y_axis";
+									}
+									nexus.createData(nxdata, y);
+									nexus.addAttribute(nxdata, TreeFactory.createAttribute(axName + NexusConstants.DATA_INDICES_SUFFIX, 0));
+								}
+
+								nexus.addAttribute(nxdata, TreeFactory.createAttribute(NexusConstants.DATA_AXES, axName));
+
+								IFileController fc = (IFileController)bundleContext.getService(bundleContext.getServiceReference(IFileController.class));
+
+								fc.loadFile(open);
+
+							} catch (NexusException e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+							} catch (DatasetException e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+							}
+
+
+						}
+						else {
+							RawTextSaver saver = new RawTextSaver(open);
+							DataHolder dh = new DataHolder();
 							AxesMetadata md = d.getFirstMetadata(AxesMetadata.class);
-
+							IDataset y = null;
 							ILazyDataset[] axes = md.getAxes();
 
 							String axName = null;
-							
+
 							if (axes[1] != null) {
-								IDataset y = axes[1].getSlice();
-								y = y.squeeze();
-								if (y.getName() != null) {
-									axName = MetadataPlotUtils.removeSquareBrackets(y.getName());
-									y.setName(axName);
-								} else {
-									axName = "y_axis";
+								try {
+									y = axes[1].getSlice();
+									y = y.squeeze();
+									mean.setShape(mean.getShape()[0],1);
+									y.setShape(y.getShape()[0],1);
+									mean = DatasetUtils.concatenate(new IDataset[]{y,mean}, 1);
+								} catch (DatasetException e) {
+									// TODO Auto-generated catch block
+									e.printStackTrace();
 								}
-								nexus.createData(nxdata, y);
-								nexus.addAttribute(nxdata, TreeFactory.createAttribute(axName + NexusConstants.DATA_INDICES_SUFFIX, 0));
+								
+
 							}
 
-							nexus.addAttribute(nxdata, TreeFactory.createAttribute(NexusConstants.DATA_AXES, axName));
+							dh.addDataset("mean", mean);
+							
+							try {
+								saver.saveFile(dh);
+							} catch (ScanFileHolderException e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+							}
+							
+							IFileController fc = (IFileController)bundleContext.getService(bundleContext.getServiceReference(IFileController.class));
 
-						} catch (NexusException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
-						} catch (DatasetException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
+							fc.loadFile(open);
 						}
-						
-						IFileController fc = (IFileController)bundleContext.getService(bundleContext.getServiceReference(IFileController.class));
-						
-						fc.loadFile(f.getAbsolutePath());
 					}
 				};
 				
-
 				if (data == null || data.isEmpty()) {
 					a.setEnabled(false);
 					average.setEnabled(false);
@@ -183,7 +248,6 @@ public class DataManipulationExtensionContributionFactory extends ExtensionContr
 
 				search.add(a);
 				search.add(average);
-
 
 			}
 
