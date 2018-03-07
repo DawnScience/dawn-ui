@@ -15,6 +15,7 @@ import org.eclipse.jface.viewers.ColumnViewer;
 import org.eclipse.jface.viewers.ColumnViewerEditor;
 import org.eclipse.jface.viewers.ColumnViewerEditorActivationEvent;
 import org.eclipse.jface.viewers.ColumnViewerEditorActivationStrategy;
+import org.eclipse.jface.viewers.ColumnViewerToolTipSupport;
 import org.eclipse.jface.viewers.EditingSupport;
 import org.eclipse.jface.viewers.FocusCellOwnerDrawHighlighter;
 import org.eclipse.jface.viewers.IContentProvider;
@@ -90,6 +91,7 @@ public class OperationModelViewer implements ISelectionListener, ISelectionChang
 		
 		this.viewer = new TableViewer(parent, SWT.SINGLE | SWT.BORDER | SWT.FULL_SELECTION);
 		viewer.setContentProvider(createContentProvider());
+		ColumnViewerToolTipSupport.enableFor(viewer);
 		
 		viewer.getTable().setLinesVisible(true);
 		viewer.getTable().setHeaderVisible(true);
@@ -212,6 +214,11 @@ public class OperationModelViewer implements ISelectionListener, ISelectionChang
 		var.setLabelProvider(new EnableIfColumnLabelProvider() {
 			public String getText(Object element) {
 				return ((ModelField)element).getDisplayName();
+			}
+
+			@Override
+			public String getToolTipText(Object element) {
+				return ((ModelField)element).getDescription();
 			}
 		});
 		
