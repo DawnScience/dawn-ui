@@ -14,7 +14,7 @@ import org.eclipse.january.metadata.MetadataFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public abstract class AbstractMapData implements PlottableMapObject{
+public abstract class AbstractMapData implements LockableMapObject{
 
 	private String name;
 	protected String path;
@@ -27,6 +27,7 @@ public abstract class AbstractMapData implements PlottableMapObject{
 	
 	protected boolean live;
 	private boolean plotted;
+	private Object lock;
 	
 	private static final Logger logger = LoggerFactory.getLogger(AbstractMapData.class);
 	
@@ -273,5 +274,13 @@ public abstract class AbstractMapData implements PlottableMapObject{
 	
 	public void setPlotted(boolean plot) {
 		this.plotted = plot;
+	}
+	
+	public void setLock(Object lock) {
+		this.lock = lock;
+	}
+	
+	public Object getLock() {
+		return this.lock;
 	}
 }

@@ -17,7 +17,7 @@ import org.eclipse.january.metadata.MetadataType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class MappedDataBlock implements MapObject, PlottableMapObject {
+public class MappedDataBlock implements LockableMapObject {
 
 	private String name;
 	private String path;
@@ -30,6 +30,7 @@ public class MappedDataBlock implements MapObject, PlottableMapObject {
 	private double[] range;
 
 	private boolean plotted;
+	private Object lock;
 	
 	private static final Logger logger = LoggerFactory.getLogger(MappedDataBlock.class);
 	
@@ -188,6 +189,9 @@ public class MappedDataBlock implements MapObject, PlottableMapObject {
 	
 	public IDataset getLiveSpectrum(int x, int y) {
 		
+		IDataset out = null;
+		synchronized (getLock()) {
+		
 		if (dataset instanceof IDynamicDataset) {
 			
 			if (dataset.getFirstMetadata(AxesMetadata.class) == null) {
@@ -210,19 +214,19 @@ public class MappedDataBlock implements MapObject, PlottableMapObject {
 		
 		SliceND slice = mapDims.getSlice(x, y, dataset.getShape());
 		
-		IDataset slice2;
 		try {
-			slice2 = dataset.getSlice(slice);
-			slice2.squeeze();
+			out = dataset.getSlice(slice);
+			out.squeeze();
 		} catch (Exception e) {
 			logger.error("Could not get data from lazy dataset", e);
 			return null;
 		}
 		
 		MetadataType sslsm = generateLiveSliceMetadata(x,y);
-		slice2.setMetadata(sslsm);
+		out.setMetadata(sslsm);
+		}
+		return out;
 		
-		return slice2;
 	}
 	
 	public IDataset getLiveSpectrum(int x) {
@@ -287,6 +291,7 @@ public class MappedDataBlock implements MapObject, PlottableMapObject {
 			if (mapDims.isRemappingRequired()) {
 
 				mapRepresentation = new ReMappedData(this.toString(), dataset.getSliceView() ,this, path, isLive());
+				mapRepresentation.setLock(getLock());
 				if (isLive()) mapRepresentation.update();
 				range = mapRepresentation.getRange();
 				return mapRepresentation;
@@ -295,6 +300,7 @@ public class MappedDataBlock implements MapObject, PlottableMapObject {
 			} else {
 
 				mapRepresentation = new MappedData(this.toString(),dataset.getSliceView(),this, path, isLive());
+				mapRepresentation.setLock(getLock());
 				if (isLive()) mapRepresentation.update();
 				range = mapRepresentation.getRange();
 				return mapRepresentation;
@@ -309,7 +315,13 @@ public class MappedDataBlock implements MapObject, PlottableMapObject {
 	}
 
 	public boolean isReady() {
-		boolean refreshShape = ((IDynamicDataset)dataset).refreshShape();
+		
+		boolean refreshShape = false;
+		
+		synchronized (getLock()) {
+			refreshShape = ((IDynamicDataset)dataset).refreshShape();
+		}
+		
 		
 		return refreshShape ? refreshShape : dataset.getSize() > 1;
 	}
@@ -317,11 +329,13 @@ public class MappedDataBlock implements MapObject, PlottableMapObject {
 	@Override
 	public void update() {
 		if (dataset instanceof IDynamicDataset) {
-			((IDynamicDataset)dataset).refreshShape();
-			AxesMetadata ax = dataset.getFirstMetadata(AxesMetadata.class);
-			if (ax != null) {
-				int[] refresh = ax.refresh(dataset.getShape());
-				((IDynamicDataset) dataset).resize(refresh);
+			synchronized (getLock()) {
+				((IDynamicDataset)dataset).refreshShape();
+				AxesMetadata ax = dataset.getFirstMetadata(AxesMetadata.class);
+				if (ax != null) {
+					int[] refresh = ax.refresh(dataset.getShape());
+					((IDynamicDataset) dataset).resize(refresh);
+				}
 			}
 		}
 	}
@@ -370,6 +384,14 @@ public class MappedDataBlock implements MapObject, PlottableMapObject {
 	
 	public void setPlotted(boolean plot) {
 		this.plotted = plot;
+	}
+	
+	public void setLock(Object lock) {
+		this.lock = lock;
+	}
+	
+	public Object getLock() {
+		return this.lock;
 	}
 }
 	

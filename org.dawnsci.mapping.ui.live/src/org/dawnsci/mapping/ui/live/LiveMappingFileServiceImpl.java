@@ -216,7 +216,6 @@ private static final String PROCESSING_QUEUE_NAME = "scisoft.operation.STATUS_QU
 			final String filePath = beanNoScanReq.getFilePath();
 			// Scan started
 			if (beanNoScanReq.scanStart()) {
-
 //				LiveLoadedFile f = new LiveLoadedFile(filePath, host, port);
 				
 				fireListeners(filePath, null);

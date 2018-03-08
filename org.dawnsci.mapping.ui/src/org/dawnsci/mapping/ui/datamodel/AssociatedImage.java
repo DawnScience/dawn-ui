@@ -86,4 +86,5 @@ public class AssociatedImage implements PlottableMapObject {
 	public void setPlotted(boolean plot) {
 		this.plotted = plot;
 	}
+	
 }

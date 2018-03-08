@@ -44,6 +44,7 @@ public class MappedFileManager implements IMapFileController{
 	private IStageScanConfiguration stageScanConfig;
 	private ILiveMappingFileService liveService;
 	
+	
 	public void setLoaderService(ILoaderService service) {
 		this.loaderService = service;
 	}
@@ -67,11 +68,14 @@ public class MappedFileManager implements IMapFileController{
 	private LiveMapFileListener liveMapListener;
 	
 	private Set<IMapFileEventListener> listeners;
+
+	private ExecutorService liveLoadExector;
 	
 	public MappedFileManager() {
 		listeners = new HashSet<>();
 		mappedDataArea = new MappedDataArea();
 		beanHelper = new BeanBuilderWizard();
+		liveLoadExector = Executors.newSingleThreadExecutor();
 		
 	}
 
@@ -195,9 +199,7 @@ public class MappedFileManager implements IMapFileController{
 		
 		LiveMapLoadingRunnable r = new LiveMapLoadingRunnable(path, bean, parentFile);
 		
-		ExecutorService ex = Executors.newSingleThreadExecutor();
-		ex.submit(r);
-		ex.shutdown();
+		liveLoadExector.submit(r);
 	}
 	
 	@Override
@@ -229,9 +231,8 @@ public class MappedFileManager implements IMapFileController{
 				fireListeners(null);
 			}
 		};
-		ExecutorService ex = Executors.newSingleThreadExecutor();
-		ex.submit(r);
-		ex.shutdown();
+		
+		liveLoadExector.submit(r);
 	}
 	
 	
@@ -447,7 +448,10 @@ public class MappedFileManager implements IMapFileController{
 		
 		@Override
 		public void run() {
-			if (parentFile != null && !mappedDataArea.contains(parentFile)) return;
+			if (parentFile != null && !mappedDataArea.contains(parentFile)) {
+				logger.error("Attempting to load already loaded live file - multiple start events?");
+				return;
+			}
 			if (remoteService == null) {
 				logger.error("Could not acquire remote dataset service");
 				return;

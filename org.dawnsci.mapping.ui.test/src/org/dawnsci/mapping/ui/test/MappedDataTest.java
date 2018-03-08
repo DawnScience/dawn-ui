@@ -152,11 +152,11 @@ public class MappedDataTest {
 		axm.setAxis(0, axes.getAxes()[0]);
 		axm.setAxis(1, axes.getAxes()[0]);
 		dataset.addMetadata(axm);
-		
+		Object lock = new Object();
 		MappedDataBlock liveBlock =  new MappedDataBlock("live", dataset,"livePath", msd, true);
-		
+		liveBlock.setLock(lock);
 		MappedData md = new MappedData("map", MappedDataBlockTest.getLiveMap(), liveBlock, "livePath", true);
-		
+		md.setLock(lock);
 		md.update();
 		
 		IDataset map = md.getMap();

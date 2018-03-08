@@ -22,6 +22,7 @@ public class MappedDataFile implements MapObject{
 	private double[] range;
 	private MappedDataFileBean descriptionBean;
 	private String parentPath;
+	private final Object lock = new Object();
 	
 	private static final Logger logger = LoggerFactory.getLogger(MappedDataFile.class);
 	
@@ -101,7 +102,9 @@ public class MappedDataFile implements MapObject{
 	}
 	
 	public void addMapObject(String name, MapObject object) {
-		
+		if (object instanceof LockableMapObject) {
+			((LockableMapObject)object).setLock(lock);
+		}
 		if (object instanceof MappedDataBlock) {
 			fullDataMap.put(name, (MappedDataBlock)object);
 		}else if (object instanceof AbstractMapData) {
@@ -192,5 +195,5 @@ public class MappedDataFile implements MapObject{
 	public void setParentPath(String parentPath) {
 		this.parentPath = parentPath;
 	}
-	
+
 }

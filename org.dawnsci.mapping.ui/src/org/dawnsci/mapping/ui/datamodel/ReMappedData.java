@@ -1,7 +1,5 @@
 package org.dawnsci.mapping.ui.datamodel;
 
-import java.util.Arrays;
-
 import org.dawnsci.mapping.ui.LivePlottingUtils;
 import org.dawnsci.mapping.ui.MappingUtils;
 import org.eclipse.dawnsci.plotting.api.trace.MetadataPlotUtils;
@@ -131,8 +129,10 @@ public class ReMappedData extends AbstractMapData {
 
 	
 	public void update() {
-		flatMap = updateMap();
-		updateRemappedData(null);
+		synchronized (getLock()) {
+			flatMap = updateMap();
+			updateRemappedData(null);
+		}
 	}
 	
 	@Override

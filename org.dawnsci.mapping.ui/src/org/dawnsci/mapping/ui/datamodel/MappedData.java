@@ -52,7 +52,11 @@ public class MappedData extends AbstractMapData{
 	}
 	
 	public void update() {
-		if (live) map = updateMap();
+		if (live) {
+			synchronized (getLock()) {
+			map = updateMap();
+			}
+		}
 	}
 
 	@Override

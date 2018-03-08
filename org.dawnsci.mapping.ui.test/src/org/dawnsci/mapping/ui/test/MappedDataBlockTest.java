@@ -136,8 +136,10 @@ public class MappedDataBlockTest {
 		axm.setAxis(1, axes.getAxes()[0]);
 		dataset.addMetadata(axm);
 		
-		MappedDataBlock liveBlock = new MappedDataBlock("live", dataset,"livePath", msd, true);
+		Object lock = new Object();
 		
+		MappedDataBlock liveBlock = new MappedDataBlock("live", dataset,"livePath", msd, true);
+		liveBlock.setLock(lock);
 		ILazyDataset spectrum = liveBlock.getSpectrum(1, 1);
 		
 		assertNotNull(spectrum);
@@ -162,7 +164,8 @@ public class MappedDataBlockTest {
 		dataset.addMetadata(axm);
 		
 		MappedDataBlock liveBlock =  new MappedDataBlock("live", dataset,"livePath", msd, true);
-		
+		Object lock = new Object();
+		liveBlock.setLock(lock);
 		liveBlock.update();
 		liveBlock.update();
 		
