@@ -155,7 +155,8 @@ class DataReduction2DToolModel extends DataReduction2DToolObservableModel {
 	
 	private static String showSaveDirectory(File nexusFile, Shell shell) {
 		DirectoryDialog dlg = new DirectoryDialog(shell);
-		dlg.setFilterPath(nexusFile.getParent());
+		if (nexusFile != null)
+			dlg.setFilterPath(nexusFile.getParent());
 		dlg.setText("Select a directory to store new data files");
 		return dlg.open();
 	}
@@ -261,6 +262,20 @@ class DataReduction2DToolModel extends DataReduction2DToolObservableModel {
 		MEAN,
 		FIRST,
 	}
+	private static DoubleDataset[] getReducedAxes(ILazyDataset[] rawAxes, List<RangeData> rangeDataList, List<Integer> deletedIndices) {
+		return Arrays
+				.stream(rawAxes)
+				.map(axis -> {
+					if (axis == null)
+						return null;
+					try {
+						return applyRangesAndDeletionsToDataset(AxisMode.FIRST, DatasetUtils.sliceAndConvertLazyDataset(axis), rangeDataList, deletedIndices);
+					} catch (Exception e) {
+						return null;
+					}
+				})
+				.toArray(DoubleDataset[]::new);
+	}
 	
 	private static void exportToGenericNexusFile(String newFilePath, IImageTrace trace, List<RangeData> rangeDataList, List<Integer> deletedIndices) throws Exception {
 		// generate main dataset
@@ -272,31 +287,8 @@ class DataReduction2DToolModel extends DataReduction2DToolObservableModel {
 		ILazyDataset[] rawAxesY = axesMetadata.getAxis(1);
 		
 		reducedData = applyRangesAndDeletionsToDataset(AxisMode.MEAN, rawData, rangeDataList, deletedIndices);
-		DoubleDataset[] reducedAxesX = Arrays
-				.stream(rawAxesX)
-				.map(axis -> {
-					if (axis == null)
-						return null;
-					try {
-						return applyRangesAndDeletionsToDataset(AxisMode.FIRST, DatasetUtils.sliceAndConvertLazyDataset(axis), rangeDataList, deletedIndices);
-					} catch (Exception e) {
-						return null;
-					}
-				})
-				.toArray(DoubleDataset[]::new);
-		
-		DoubleDataset[] reducedAxesY = Arrays
-				.stream(rawAxesY)
-				.map(axis -> {
-					if (axis == null)
-						return null;
-					try {
-						return applyRangesAndDeletionsToDataset(AxisMode.FIRST, DatasetUtils.sliceAndConvertLazyDataset(axis), rangeDataList, deletedIndices);
-					} catch (Exception e) {
-						return null;
-					}
-				})
-				.toArray(DoubleDataset[]::new);
+		DoubleDataset[] reducedAxesX = getReducedAxes(rawAxesX, rangeDataList, deletedIndices); 
+		DoubleDataset[] reducedAxesY = getReducedAxes(rawAxesY, rangeDataList, deletedIndices); 
 		
 		// data is ready -> prepare to write to file
 		try (NexusFile file = new NexusFileHDF5(newFilePath)) {

@@ -302,7 +302,7 @@ public class DataReduction2DTool extends AbstractToolPage implements IRegionList
 			DataReduction2DToolHelper.showError("Could not determine file path", "unknown");
 			//not sure what the consequences will be ...
 		}
-		File dataFile = new File(fullFilePath); // to be fed to model
+		toolPageModel.setDataFile(fullFilePath == null ? null : new File(fullFilePath));
 		// image.getAxes is a bit weird and unreliable to work with
 		AxesMetadata firstAxesMetadata = image.getData().getFirstMetadata(AxesMetadata.class);
 		
@@ -314,7 +314,6 @@ public class DataReduction2DTool extends AbstractToolPage implements IRegionList
 		// update model??
 		toolPageModel.setAxes0(axes0);
 		toolPageModel.setAxes1(axes1);
-		toolPageModel.setDataFile(dataFile);
 		toolPageModel.setDataImagePlotting(getPlottingSystem());
 		toolPageModel.setImageTrace(imageTrace);
 		
