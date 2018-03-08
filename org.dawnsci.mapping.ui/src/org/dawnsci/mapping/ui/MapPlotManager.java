@@ -702,7 +702,27 @@ public class MapPlotManager {
 //		}
 
 		public void rebuildTrace(){
+			Number min = null;
+			Number max = null;
+			boolean locked = false;
+			
+			if (trace != null && trace instanceof IImageTrace) {
+				IImageTrace t = (IImageTrace)trace;
+				locked = !t.isRescaleHistogram();
+				if (locked) {
+					min = t.getMin();
+					max = t.getMax();
+				}
+			}
+			
 			trace = createImageTrace(map);
+			
+			if (locked && trace != null) {
+				IImageTrace t = (IImageTrace)trace;
+				t.setRescaleHistogram(false);
+				t.setMin(min);
+				t.setMax(max);
+			}
 		}
 
 //		private void switchMap(final String name, final IDataset d) {
