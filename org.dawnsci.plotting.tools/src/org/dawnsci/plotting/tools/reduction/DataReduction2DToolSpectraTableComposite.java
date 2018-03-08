@@ -180,6 +180,7 @@ class DataReduction2DToolSpectraTableComposite extends DataReduction2DToolObserv
 	private static final String SPECTRUM_NODE = "spectrumNode";
 
 	private final Image stackoffsetChangeIcon = Activator.getImage("icons/ui-slider.png");
+	private final Image columnsIcon = Activator.getImage("icons/columns.png");
 
 	private final List<DataReduction2DToolSpectrumDataNode> selectedSpectraList = new ArrayList<>();
 
@@ -398,6 +399,7 @@ class DataReduction2DToolSpectraTableComposite extends DataReduction2DToolObserv
 	@Override
 	protected void disposeResource() {
 		stackoffsetChangeIcon.dispose();
+		columnsIcon.dispose();
 	}
 
 	public void createDataColumnsAndPopulate() {
@@ -485,6 +487,7 @@ class DataReduction2DToolSpectraTableComposite extends DataReduction2DToolObserv
 
 		final ToolItem columnToggle = new ToolItem(toolBar, SWT.PUSH);
 		columnToggle.setImage(PlatformUI.getWorkbench().getSharedImages().getImage(ISharedImages.IMG_ETOOL_CLEAR));
+		columnToggle.setImage(columnsIcon);
 		columnToggle.setToolTipText("Set column visibility");
 		columnToggle.addListener(SWT.Selection, event -> {
 			Dialog columnToggleDialog = new ColumnToggleDialog(columnToggle.getDisplay().getActiveShell());
