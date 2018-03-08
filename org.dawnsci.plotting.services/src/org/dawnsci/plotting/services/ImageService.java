@@ -258,13 +258,15 @@ public class ImageService extends AbstractServiceFactory implements IImageServic
 			
 			Dataset imageIaN = setOfNumbers(image);
 			
+			Dataset mask = bean.getMask() == null ? null : DatasetUtils.convertToDataset(bean.getMask());
+			
 			try {
-			    double[] stats = Stats.outlierValues(imageIaN, bean.getLo(), bean.getHi(), -1);
+			    double[] stats = Stats.outlierValues(imageIaN,mask,true, bean.getLo(), bean.getHi(), -1);
 			    ret = new double[]{stats[0], stats[1], -1};
 			} catch (IllegalArgumentException iae) {
 				bean.setLo(10);
 				bean.setHi(90);
-			    double[] stats = Stats.outlierValues(imageIaN, bean.getLo(), bean.getHi(), -1);
+			    double[] stats = Stats.outlierValues(imageIaN,mask,true, bean.getLo(), bean.getHi(), -1);
 			    ret = new double[]{stats[0], stats[1], -1};
 			}
 
