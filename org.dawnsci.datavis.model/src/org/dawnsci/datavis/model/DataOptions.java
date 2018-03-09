@@ -120,7 +120,6 @@ public class DataOptions implements IDataObject, IDataPackage {
 							
 							try {
 								lzAxes = lzAxes.getSliceView();
-								lzAxes.clearMetadata(AxesMetadata.class);
 								lzAxes.setShape(newShape);
 								ax.setAxis(i, lzAxes);
 							} catch (Exception e) {
@@ -129,7 +128,8 @@ public class DataOptions implements IDataObject, IDataPackage {
 							}
 							
 						} else {
-							ax.setAxis(i, parent.getLazyDataset(axes[i]));
+							ILazyDataset l = parent.getLazyDataset(axes[i]);
+							ax.setAxis(i,l);
 						}
 						
 					}

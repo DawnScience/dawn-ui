@@ -72,15 +72,27 @@ public class PlotModeImage implements IPlotModeColored {
 		
 		try {
 
-			IDataset[] md =MetadataPlotUtils.getAxesAsIDatasetArray(data);
+//			IDataset[] md =MetadataPlotUtils.getAxesAsIDatasetArray(data);
+			AxesMetadata m = data.getFirstMetadata(AxesMetadata.class);
+			if (m == null) return;
+			ILazyDataset[] md = m.getAxes();
 			if (md == null) return;
 
 			StringBuilder builder = new StringBuilder(name);
 
 			builder.append("[");
 			Slice[] s = slice.convertToSlice();
+			int[] shape = slice.getShape();
 			for (int i = 0 ; i < md.length; i++){
-				IDataset d = md[i];
+				
+				if (md[i] == null && shape[i] != 1) {
+					builder.append(s[i].toString());
+					builder.append(",");
+					continue;
+				}
+				
+				
+				IDataset d = md[i].getSlice();
 				if (d == null || d.getSize() != 1){
 					builder.append(s[i].toString());
 				} else {
@@ -126,9 +138,6 @@ public class PlotModeImage implements IPlotModeColored {
 						axis.setName(MetadataPlotUtils.removeSquareBrackets(axis.getName()));
 						ax.add(axis);
 					}
-					
-					
-					
 				}
 				if (axes[1] == null) {
 					ax.add(null);

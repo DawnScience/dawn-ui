@@ -82,9 +82,8 @@ public class PlotModeXY implements IPlotMode {
 		try {
 			
 			SliceFromSeriesMetadata sm = data.getFirstMetadata(SliceFromSeriesMetadata.class);
-			IDataset[] md =MetadataPlotUtils.getAxesAsIDatasetArray(data);
-			if (md == null) return;
-
+			AxesMetadata m = data.getFirstMetadata(AxesMetadata.class);
+			ILazyDataset[] md = m.getAxes();
 			StringBuilder builder = new StringBuilder(name);
 
 			builder.append("[");
@@ -92,19 +91,27 @@ public class PlotModeXY implements IPlotMode {
 			Slice[] s = combined.convertToSlice();
 			
 			for (int i = 0 ; i < md.length; i++){
-				IDataset d = md[i];
-				if (d == null || i == dataDim){
+				if (i == dataDim || md[i] == null){
+					if (md[i] != null) {
+						md[i].getSlice();
+					}
 					builder.append(s[i].toString());
 				} else {
-					if (d.getSize() == 1) d.setShape(new int[]{1});
 					
-					if (d instanceof StringDataset) {
-						builder.append(d.getString(0));
+					IDataset d = md[i].getSlice();
+					
+					if (d == null) {
+						builder.append(s[i].toString());
 					} else {
-						double val = DatasetUtils.convertToDataset(d).getElementDoubleAbs(0);
-						builder.append(Double.toString(val));
+						if (d.getSize() == 1) d.setShape(new int[]{1});
+						
+						if (d instanceof StringDataset) {
+							builder.append(d.getString(0));
+						} else {
+							double val = DatasetUtils.convertToDataset(d).getElementDoubleAbs(0);
+							builder.append(Double.toString(val));
+						}
 					}
-					
 					
 				}
 				builder.append(",");
