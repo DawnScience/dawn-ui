@@ -57,8 +57,16 @@ public class WaterfallTraceImpl extends AbstractColorMapTrace implements IWaterf
 		xAxis = axes[0];
 		yAxis = axes[1];
 		
-		xArray = (axes != null && axes[0] != null) ? DatasetUtils.cast(FloatDataset.class, axes[0]).getData() : getRange(x);
-		yArray = (axes != null && axes[1] != null) ? DatasetUtils.cast(FloatDataset.class, axes[1]).getData() : getRange(y);
+		if (axes[0] != null && axes[0].getSize() != data.getShape()[1]) {
+			axes[0] = null;
+		}
+		
+		if (axes[1] != null && axes[1].getSize() != data.getShape()[0]) {
+			axes[1] = null;
+		}
+		
+		xArray = (axes[0] != null) ? DatasetUtils.cast(FloatDataset.class, axes[0]).getData() : getRange(x);
+		yArray = (axes[1] != null) ? DatasetUtils.cast(FloatDataset.class, axes[1]).getData() : getRange(y);
 
 		WaterfallTessellator t = new WaterfallTessellator();
 		Shape waterfall = t.build(xArray, yArray, z.getData());
