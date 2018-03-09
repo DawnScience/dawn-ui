@@ -10,7 +10,7 @@ public interface IPlotMode {
 
 	public String[] getOptions();
 	
-	public IDataset[] sliceForPlot(ILazyDataset lz, SliceND slice,Object[] options) throws Exception;
+	public IDataset[] sliceForPlot(ILazyDataset lz, SliceND slice,Object[] options,IPlottingSystem<?> system) throws Exception;
 	
 	public void displayData(IDataset[] data, ITrace[] update, IPlottingSystem<?> system, Object userObject) throws Exception;
 	

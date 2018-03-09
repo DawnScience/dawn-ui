@@ -20,7 +20,7 @@ public class PlotModeHyper implements ILazyPlotMode {
 	}
 
 	@Override
-	public IDataset[] sliceForPlot(ILazyDataset lz, SliceND slice, Object[] options) throws Exception {
+	public IDataset[] sliceForPlot(ILazyDataset lz, SliceND slice, Object[] options, IPlottingSystem<?> system) throws Exception {
 		
 		view3d = lz.getSliceView();
 		this.slice = slice;

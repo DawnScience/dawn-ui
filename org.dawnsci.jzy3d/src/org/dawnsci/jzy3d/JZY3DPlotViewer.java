@@ -126,11 +126,6 @@ public class JZY3DPlotViewer extends IPlottingSystemViewer.Stub<Composite> {
 				
 					if (file == null) return;
 					File f = new File(file);
-//					int h = chart.getCanvas().getRendererHeight();
-//					int w = chart.getCanvas().getRendererWidth();
-//					Chart chart2 = AWTChartComponentFactory.chart(Quality.Intermediate, "offscreen,"+w+","+h);
-//					chart2.getScene().add(chart.getScene().getGraph().getAll());
-//					chart2.setViewPoint(chart.getViewPoint());
 					chart.render();
 					chart.screenshot(f);
 				} catch (IOException e) {
@@ -173,40 +168,26 @@ public class JZY3DPlotViewer extends IPlottingSystemViewer.Stub<Composite> {
 		chart.getAxeLayout().setXAxeLabel(x);
 		chart.getAxeLayout().setYAxeLabel(y);
 		
-		if (trace instanceof SurfaceMeshTraceImpl) {
+		if (trace instanceof Abstract2DJZY3DTrace) {
 			chart.pauseAnimator();
-			((SurfaceMeshTraceImpl) trace).setPalette(getPreferenceStore().getString(BasePlottingConstants.COLOUR_SCHEME));
-			chart.getScene().add(((SurfaceMeshTraceImpl)trace).getShape());
+			((Abstract2DJZY3DTrace) trace).setPalette(getPreferenceStore().getString(BasePlottingConstants.COLOUR_SCHEME));
+			chart.getScene().add(((Abstract2DJZY3DTrace)trace).getShape());
 			chart.resumeAnimator();
 			return true;
 		}
-		if (trace instanceof WaterfallTraceImpl) {
-			chart.pauseAnimator();
-			((WaterfallTraceImpl) trace).setPalette(getPreferenceStore().getString(BasePlottingConstants.COLOUR_SCHEME));
-			chart.getScene().add(((WaterfallTraceImpl)trace).getShape());
-			chart.resumeAnimator();
-			return true;
-		}
+
 		return false;
 	}
 	
 	@Override
 	public void removeTrace(ITrace trace) {
-		if (trace instanceof SurfaceMeshTraceImpl) {
-//			chart.clear();
-//			ChartLauncher.openChart(chart);
+		if (trace instanceof Abstract2DJZY3DTrace) {
 			chart.pauseAnimator();
-			chart.getScene().remove(((SurfaceMeshTraceImpl)trace).getShape(),false);
+			chart.getScene().remove(((Abstract2DJZY3DTrace)trace).getShape(),false);
 
 		}
 		
-		if (trace instanceof WaterfallTraceImpl) {
-//			chart.clear();
-//			ChartLauncher.openChart(chart);
-			chart.pauseAnimator();
-			chart.getScene().remove(((WaterfallTraceImpl)trace).getShape(),false);
 
-		}
 	}
 	
 	@Override
@@ -259,7 +240,7 @@ public class JZY3DPlotViewer extends IPlottingSystemViewer.Stub<Composite> {
 		}
 		
 		if (clazz == IWaterfallTrace.class) {
-			IWaterfallTrace trace = new WaterfallTraceImpl(ServiceManager.getPaletteService(),ServiceManager.getImageService());
+			IWaterfallTrace trace = new WaterfallTraceImpl(ServiceManager.getPaletteService(),ServiceManager.getImageService(),getPreferenceStore().getString(BasePlottingConstants.COLOUR_SCHEME));
 			trace.setName(name);
 			return (U)trace;
 		}

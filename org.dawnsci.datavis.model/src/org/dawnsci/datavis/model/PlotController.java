@@ -423,7 +423,7 @@ public class PlotController implements IPlotController {
 			File f = new File(dataOp.getFilePath());
 			view.setName(f.getName() + ":" + dataOp.getName());
 
-			data = mode.sliceForPlot(view, slice,options);
+			data = mode.sliceForPlot(view, slice,options,system);
 		} catch (Exception e) {
 			logger.error("Could not slice data for plotting", e);
 		}

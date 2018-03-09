@@ -33,9 +33,10 @@ public abstract class AbstractColorMapTrace implements IPaletteTrace {
 	private Object userObject;
 	
 	
-	public AbstractColorMapTrace(IPaletteService paletteService, IImageService imageService) {
+	public AbstractColorMapTrace(IPaletteService paletteService, IImageService imageService, String palette) {
 		this.paletteService = paletteService;
 		this.imageService = imageService;
+		setPalette(palette);
 	}
 	
 	@Override

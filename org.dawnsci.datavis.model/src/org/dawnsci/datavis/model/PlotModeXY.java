@@ -51,7 +51,7 @@ public class PlotModeXY implements IPlotMode {
 	}
 
 	@Override
-	public IDataset[] sliceForPlot(ILazyDataset lz, SliceND slice, Object[] options) throws Exception {
+	public IDataset[] sliceForPlot(ILazyDataset lz, SliceND slice, Object[] options,IPlottingSystem<?> system) throws Exception {
 		
 		long t = System.currentTimeMillis();
 		IDataset allData = lz.getSlice(slice);
