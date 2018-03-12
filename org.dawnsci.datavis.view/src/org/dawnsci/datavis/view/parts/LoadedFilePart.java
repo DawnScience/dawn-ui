@@ -8,6 +8,7 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
+import java.util.function.Function;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
@@ -53,6 +54,7 @@ import org.eclipse.jface.viewers.ITreeSelection;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
+import org.eclipse.jface.viewers.TextCellEditor;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerCell;
 import org.eclipse.swt.SWT;
@@ -107,8 +109,7 @@ public class LoadedFilePart {
 	
 	private FileControllerStateEventListener fileStateListener;
 	
-	Comparator<LoadedFile> fileCompare = Comparator.comparing((LoadedFile file) -> file.getName());
-	Comparator<LoadedFile> labelCompare = Comparator.comparing((LoadedFile file) -> file.getLabel());
+	private CompareObject sorter = null;
 	
 	private class QuickFileWidgetListener implements IQuickFileWidgetListener {
 		@Override
@@ -261,11 +262,17 @@ public class LoadedFilePart {
 		
 		name.getColumn().addSelectionListener(new SelectionAdapter() {
 		
-			
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				fileCompare = fileCompare.reversed();
-				fileController.setComparator(fileCompare);
+				if (sorter == null || !sorter.isThisColumn(name)) {
+					sorter = new CompareObject(name, (LoadedFile file) -> file.getName());
+				} else {
+					sorter.increment();
+				}
+				
+				viewer.getTable().setSortDirection(sorter.getDirection());
+				viewer.getTable().setSortColumn(name.getColumn());
+				fileController.setComparator(sorter.getComparator());
 				viewer.refresh();
 				
 			}
@@ -289,13 +296,22 @@ public class LoadedFilePart {
 			
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				labelCompare = labelCompare.reversed();
-				fileController.setComparator(labelCompare);
+				if (sorter == null || !sorter.isThisColumn(labelColumn)) {
+					sorter = new CompareObject(labelColumn, (LoadedFile file) -> file.getLabel());
+				} else {
+					sorter.increment();
+				}
+				
+				viewer.getTable().setSortDirection(sorter.getDirection());
+				viewer.getTable().setSortColumn(labelColumn.getColumn());
+				fileController.setComparator(sorter.getComparator());
 				viewer.refresh();
 			}
-			
-
 		});
+		
+		LabelEditingSupport editSupport = new LabelEditingSupport(viewer);
+		
+		labelColumn.setEditingSupport(editSupport);
 		
 		TableColumnLayout columnLayout = new TableColumnLayout();
 	    columnLayout.setColumnData(check.getColumn(), new ColumnPixelData(24));
@@ -303,7 +319,7 @@ public class LoadedFilePart {
 	    columnLayout.setColumnData(labelColumn.getColumn(), new ColumnWeightData(0,0));
 	    
 	    tableComposite.setLayout(columnLayout);
-		
+	    
 		ColumnViewerToolTipSupport.enableFor(viewer);
 		viewer.setInput(fileController);
 		
@@ -319,7 +335,7 @@ public class LoadedFilePart {
 		
 		MenuManager menuMgr = new MenuManager();
 		Menu menu = menuMgr.createContextMenu(viewer.getControl());
-		menuMgr.addMenuListener(new LoadedFileMenuListener(fileController, viewer));
+		menuMgr.addMenuListener(new LoadedFileMenuListener(fileController, viewer,editSupport));
 		menuMgr.setRemoveAllWhenShown(true);
 		viewer.getControl().setMenu(menu);
 		
@@ -427,7 +443,7 @@ public class LoadedFilePart {
 			@Override
 			public void keyPressed(KeyEvent e) {
 				if (e.keyCode == SWT.DEL) {
-					new LoadedFileMenuListener(fileController,viewer).new CloseAction(fileController,viewer).run();
+					new LoadedFileMenuListener(fileController,viewer, null).new CloseAction(fileController,viewer).run();
 				}
 			}
 		});
@@ -532,5 +548,96 @@ public class LoadedFilePart {
 		
 	}
 
+	public class LabelEditingSupport extends EditingSupport {
+		
+	    private TextCellEditor cellEditor;
+	    private boolean canEdit = false;
+	    
+	    public LabelEditingSupport(ColumnViewer viewer) {
+	        super(viewer);
+	        cellEditor = new TextCellEditor((Composite) getViewer().getControl());
+	    }
+	    
+	    protected CellEditor getCellEditor(Object element) {
+	        return cellEditor;
+	    }
+	    
+	    protected boolean canEdit(Object element) {
+	        return canEdit;
+	    }
+	    
+	    protected Object getValue(Object element) {
+	    	
+	    	if (element instanceof LoadedFile) {
+	    		return ((LoadedFile)element).getLabel();
+	    	}
+	    	
+	        return "";
+	    }
+	    
+	    protected void setValue(Object element, Object value) {
+	    	if (element instanceof LoadedFile) {
+	    		((LoadedFile)element).setLabel(value.toString());
+	    	}
+	    	viewer.refresh();
+	    }
+	    
+	    public boolean isCanEdit() {
+	    	return canEdit;
+	    }
+	    
+	    public void setCanEdit(boolean canEdit) {
+	    	this.canEdit = canEdit;
+	    }
+	}
+	
+	private class CompareObject {
+		
+		private Function<? super LoadedFile, ? extends String> comparatorFunction;
+		private Comparator<LoadedFile> comparator;
+		private TableViewerColumn column;
+		private int direction;
+		
+		public CompareObject(TableViewerColumn column, Function<? super LoadedFile, ? extends String> keyExtractor) {
+			this.column = column;
+			this.comparatorFunction = keyExtractor;
+			this.comparator = Comparator.comparing(keyExtractor);
+			direction = SWT.DOWN;
+		}
+		
+		public boolean isThisColumn(TableViewerColumn column) {
+			return this.column == column;
+		}
+		
+		public int getDirection() {
+			return direction;
+		}
+		
+		public Comparator<LoadedFile> getComparator(){
+			return comparator;
+		}
+		
+		public void increment() {
+			switch (direction) {
+			case SWT.DOWN:
+				direction = SWT.UP;
+				comparator = Comparator.comparing(comparatorFunction);
+				comparator = comparator.reversed();
+				break;
+			case SWT.UP:
+				direction = SWT.NONE;
+				comparator = null;
+				break;
+			case SWT.NONE:
+				direction = SWT.DOWN;
+				comparator = Comparator.comparing(comparatorFunction);
+				break;
+
+			default:
+				break;
+			}
+		}
+		
+	}
 
 }

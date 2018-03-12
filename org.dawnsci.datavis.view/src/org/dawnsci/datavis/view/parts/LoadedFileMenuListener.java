@@ -10,10 +10,11 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.dawnsci.datavis.model.DataOptions;
+import org.dawnsci.datavis.model.FileJoining;
 import org.dawnsci.datavis.model.IDataObject;
 import org.dawnsci.datavis.model.IFileController;
-import org.dawnsci.datavis.model.FileJoining;
 import org.dawnsci.datavis.model.LoadedFile;
+import org.dawnsci.datavis.view.parts.LoadedFilePart.LabelEditingSupport;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
@@ -39,11 +40,13 @@ public class LoadedFileMenuListener implements IMenuListener {
 
 	private TableViewer viewer;
 	private IFileController fileController;
+	private LabelEditingSupport editColumn;
 	private String id;
 
-	public LoadedFileMenuListener(IFileController fileController, TableViewer viewer) {
+	public LoadedFileMenuListener(IFileController fileController, TableViewer viewer,LabelEditingSupport editColumn) {
 		this.fileController = fileController;
 		this.viewer = viewer;
+		this.editColumn = editColumn;
 		id = fileController.getID();
 	}
 
@@ -57,10 +60,9 @@ public class LoadedFileMenuListener implements IMenuListener {
 			manager.add(new Separator());
 			
 			MenuManager menuDisplay = new MenuManager("Display");
-			menuDisplay.add(new SetLabelAction(fileController, viewer));
-			menuDisplay.add(new ClearLabelAction(fileController, viewer));
-			menuDisplay.add(new Separator());
-			menuDisplay.add(new DisableSort(fileController, viewer));
+			menuDisplay.add(new SetLabelAction(fileController, viewer, editColumn));
+			menuDisplay.add(new ClearLabelAction(fileController, viewer, editColumn));
+			menuDisplay.add(new EditLabelAction(fileController,viewer, editColumn));
 			manager.add(menuDisplay);
 			manager.add(new Separator());
 			manager.add(new JoinFilesAction(fileController,viewer));
@@ -92,8 +94,6 @@ public class LoadedFileMenuListener implements IMenuListener {
 		protected List<LoadedFile> getFileSelection() {
 			if (LoadedFileMenuListener.this.id.equals(fileController.getID()) && view.getSelection() instanceof IStructuredSelection) {
 				final IStructuredSelection selection = (IStructuredSelection) view.getSelection();
-
-				System.err.println("Selection size: " + selection.size());
 				return Arrays.stream(selection.toArray())
 						.filter(LoadedFile.class::isInstance)
 						.map(LoadedFile.class::cast)
@@ -168,7 +168,7 @@ public class LoadedFileMenuListener implements IMenuListener {
 					.flatMap(l -> l.getDataOptions().stream())
 					.filter(DataOptions::isSelected)
 					.map(IDataObject.class::cast)
-					.collect(Collectors.toList());;
+					.collect(Collectors.toList());
 
 			if (options.isEmpty()) return;
 
@@ -219,8 +219,11 @@ public class LoadedFileMenuListener implements IMenuListener {
 	
 	private class SetLabelAction extends LoadedFileMenuAction {
 
-		public SetLabelAction(IFileController fileController, TableViewer viewer) {
+		private LabelEditingSupport editColumn;
+		
+		public SetLabelAction(IFileController fileController, TableViewer viewer, LabelEditingSupport editColumn) {
 			super("Set Label",null, fileController, viewer);
+			this.editColumn = editColumn;
 		}
 
 		@Override
@@ -230,16 +233,19 @@ public class LoadedFileMenuListener implements IMenuListener {
 			
 			Collection<String> options = loadedFiles.get(0).getLabelOptions();
 			
-			ListDialog d = new ListDialog(Display.getDefault().getActiveShell());
-			d.setTitle("Select item for label");
-			d.setContentProvider(new ArrayContentProvider());
-			d.setLabelProvider(new LabelProvider());
-			
 			if (options.isEmpty()) {
 				return;
 			}
 			
-			d.setInput(options);
+			List<String> copyOptions = new ArrayList<>(options);
+			Collections.sort(copyOptions);
+			
+			ListDialog d = new ListDialog(Display.getDefault().getActiveShell());
+			d.setTitle("Select item for label");
+			d.setContentProvider(new ArrayContentProvider());
+			d.setLabelProvider(new LabelProvider());
+
+			d.setInput(copyOptions);
 			
 			if (Dialog.OK != d.open()) {
 				return;
@@ -257,6 +263,36 @@ public class LoadedFileMenuListener implements IMenuListener {
 				((TableColumnLayout)layout).setColumnData(column, new ColumnWeightData(50,20));
 			}
 			
+			editColumn.setCanEdit(false);
+			
+			view.refresh();
+			view.getTable().getParent().layout();
+		}
+	}
+	
+	private class EditLabelAction extends LoadedFileMenuAction {
+
+		private LabelEditingSupport editColumn;
+		
+		public EditLabelAction(IFileController fileController, TableViewer viewer, LabelEditingSupport editColumn) {
+			super("User Editable Labels",null, fileController, viewer);
+			this.editColumn = editColumn;
+		}
+
+		@Override
+		public void run() {
+			fileController.setLabelName("User Editable Label");
+			
+			Layout layout = view.getTable().getParent().getLayout();
+			
+			if (layout instanceof TableColumnLayout) {
+				TableColumn column = view.getTable().getColumn(2);
+				column.setText("User Editable Label");
+				((TableColumnLayout)layout).setColumnData(column, new ColumnWeightData(50,20));
+			}
+			
+			editColumn.setCanEdit(true);
+			
 			view.refresh();
 			view.getTable().getParent().layout();
 		}
@@ -264,8 +300,11 @@ public class LoadedFileMenuListener implements IMenuListener {
 	
 	private class ClearLabelAction extends LoadedFileMenuAction {
 
-		public ClearLabelAction(IFileController fileController, TableViewer viewer) {
+		private LabelEditingSupport editColumn;
+		
+		public ClearLabelAction(IFileController fileController, TableViewer viewer, LabelEditingSupport editColumn) {
 			super("Clear",null, fileController, viewer);
+			this.editColumn = editColumn;
 		}
 
 		@Override
@@ -280,22 +319,9 @@ public class LoadedFileMenuListener implements IMenuListener {
 				((TableColumnLayout)layout).setColumnData(column, new ColumnWeightData(0,0));
 			}
 			
+			editColumn.setCanEdit(false);
 			view.refresh();
 			view.getTable().getParent().layout();
-		}
-	}
-	
-	private class DisableSort extends LoadedFileMenuAction {
-
-		public DisableSort(IFileController fileController, TableViewer viewer) {
-			super("Disable sort",null, fileController, viewer);
-		}
-
-		@Override
-		public void run() {
-			
-			fileController.setComparator(null);
-			view.refresh();
 		}
 	}
 	
@@ -307,14 +333,14 @@ public class LoadedFileMenuListener implements IMenuListener {
 
 		@Override
 		public void run() {
-			String joinedFilePath = FileJoining.AutoFileJoiner(FilepathGenerator(getFileSelection()));
+			String joinedFilePath = FileJoining.AutoFileJoiner(filepathGenerator(getFileSelection()));
 			fileController.loadFile(joinedFilePath);
 			view.refresh();
 		}
 		
-		private List<String> FilepathGenerator(List<LoadedFile> loadedFileList) {
+		private List<String> filepathGenerator(List<LoadedFile> loadedFileList) {
 			Iterator<LoadedFile> fileIterator = loadedFileList.iterator();
-			List<String> filePaths = new ArrayList<String>();
+			List<String> filePaths = new ArrayList<>();
 			
 			while (fileIterator.hasNext()) {
 				LoadedFile currentFile = fileIterator.next();
@@ -324,5 +350,6 @@ public class LoadedFileMenuListener implements IMenuListener {
 			return filePaths;
 		}
 	}
+	
 }
 
