@@ -1,8 +1,5 @@
 package org.dawnsci.plotting.histogram.ui;
 
-import java.text.DecimalFormat;
-
-import org.dawnsci.common.widgets.spinner.FloatSpinner;
 import org.dawnsci.plotting.histogram.IHistogramProvider;
 import org.dawnsci.plotting.histogram.IHistogramProvider.IHistogramDatasets;
 import org.eclipse.core.runtime.Assert;
@@ -12,17 +9,15 @@ import org.eclipse.dawnsci.analysis.dataset.roi.RectangularROI;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.PlotType;
 import org.eclipse.dawnsci.plotting.api.PlottingFactory;
-import org.eclipse.dawnsci.plotting.api.axis.AxisEvent;
 import org.eclipse.dawnsci.plotting.api.axis.IAxis;
-import org.eclipse.dawnsci.plotting.api.axis.IAxisListener;
 import org.eclipse.dawnsci.plotting.api.region.IROIListener;
 import org.eclipse.dawnsci.plotting.api.region.IRegion;
 import org.eclipse.dawnsci.plotting.api.region.IRegion.RegionType;
 import org.eclipse.dawnsci.plotting.api.region.ROIEvent;
 import org.eclipse.dawnsci.plotting.api.trace.ILineTrace;
 import org.eclipse.dawnsci.plotting.api.trace.ILineTrace.TraceType;
-import org.eclipse.draw2d.ColorConstants;
 import org.eclipse.dawnsci.plotting.api.trace.IPaletteTrace;
+import org.eclipse.draw2d.ColorConstants;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.viewers.ContentViewer;
@@ -30,14 +25,17 @@ import org.eclipse.jface.viewers.IContentProvider;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.DisposeEvent;
-import org.eclipse.swt.events.SelectionAdapter;
-import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.FocusEvent;
+import org.eclipse.swt.events.FocusListener;
+import org.eclipse.swt.events.TraverseEvent;
+import org.eclipse.swt.events.TraverseListener;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.IActionBars;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -69,8 +67,8 @@ public class HistogramViewer extends ContentViewer {
 	private IPlottingSystem<Composite> histogramPlottingSystem = null;
 	private IRegion region;
 
-	private FloatSpinner minText;
-	private FloatSpinner maxText;
+	private Text minText;
+	private Text maxText;
 
 	private ILineTrace histoTrace;
 	private ILineTrace redTrace;
@@ -103,7 +101,7 @@ public class HistogramViewer extends ContentViewer {
 			} finally {
 				updatingROI = false;
 			}
-		};
+		}
 	};
 
 	/**
@@ -169,30 +167,26 @@ public class HistogramViewer extends ContentViewer {
 	}
 
 	private void createMinMaxSettings(Composite comp) {
-		Composite composite = new Composite(comp, SWT.NONE);
-		composite.setLayout(GridLayoutFactory.swtDefaults().numColumns(4)
+		Composite c = new Composite(comp, SWT.NONE);
+		c.setLayout(GridLayoutFactory.swtDefaults().numColumns(4)
 				.create());
-		composite.setLayoutData(GridDataFactory.fillDefaults()
+		c.setLayoutData(GridDataFactory.fillDefaults()
 				.grab(true, false).create());
 
-		Label minLabel = new Label(composite, SWT.NONE);
+		Label minLabel = new Label(c, SWT.NONE);
 		minLabel.setText("Min:");
 		minLabel.setLayoutData(new GridData(SWT.BEGINNING, SWT.CENTER, false,
 				false));
-		minText = new FloatSpinner(composite, SWT.BORDER);
+		minText = new Text(c, SWT.BORDER);
 		minText.setLayoutData(new GridData(SWT.BEGINNING, SWT.CENTER, false,
 				false));
-		Label maxLabel = new Label(composite, SWT.NONE);
+		Label maxLabel = new Label(c, SWT.NONE);
 		maxLabel.setLayoutData(new GridData(SWT.END, SWT.CENTER, true, false));
 		maxLabel.setText("Max:");
-		maxText = new FloatSpinner(composite, SWT.BORDER);
+		maxText = new Text(c, SWT.BORDER);
 		maxText.setLayoutData(new GridData(SWT.BEGINNING, SWT.CENTER, false,
 				false));
 
-		minText.setFormat(9, 4);
-		maxText.setFormat(9, 4);
-		minText.setIncrement(1.0);
-		maxText.setIncrement(1.0);
 	}
 
 	/**
@@ -252,32 +246,6 @@ public class HistogramViewer extends ContentViewer {
 		blueTrace.setVisible(false);
 		region.setVisible(false);
 	}
-	
-	/**
-	 * Update the min and max widgets if the value has changed.
-	 *
-	 * @param min the new minimum value
-	 * @param max the new maximum value
-	 */
-	private void updateMinMax(double min, double max) {
-		double[] values = calculateIncrementAndPrecision(Math.max(Math.abs(min), Math.abs(max)));
-		double increment = values[0];
-		int precision = (int) values[1];
-		int width = (int) values[2];
-		if (maxText.getDouble() != max) {
-			maxText.setPrecision(precision);
-			maxText.setIncrement(increment);
-			maxText.setDouble(max);
-			maxText.setWidth(width);
-		}
-
-		if (minText.getDouble() != min) {
-			minText.setPrecision(precision);
-			minText.setIncrement(increment);
-			minText.setDouble(min);
-			minText.setWidth(width);
-		}
-	}
 
 	/**
 	 * Create traces
@@ -334,107 +302,98 @@ public class HistogramViewer extends ContentViewer {
 
 	}
 
-	private void updateMinMaxSpinnerIncrements() {
-		// Neither of these increments work properly on log scale where
-		// depending on the current location
-		// in the log scale affects how much the increment should be
-
-		// Option 1:
-		// // Set the increment to divide the whole range in 200 values
-		// double xMin = data.getX().min(true).doubleValue();
-		// double xMax = data.getX().max(true).doubleValue();
-		// double increment = Math.abs(xMax - xMin) / 200;
-		// minText.setIncrement(increment);
-		// maxText.setIncrement(increment);
-
-		// Option 2:
-		// Set the increment to be the difference between two x pixels.
-		IAxis xAxis = histogramPlottingSystem.getSelectedXAxis();
-		double val1 = xAxis.getPositionValue(1);
-		double val2 = xAxis.getPositionValue(2);
-		// update precision too
-		double[] values = calculateIncrementAndPrecision(Math.abs(val2 - val1));
-		double increment = values[0];
-		int precision = (int) values[1];
-		minText.setPrecision(Math.min(minText.getPrecision(), precision));
-		minText.setIncrement(increment);
-		maxText.setPrecision(Math.min(maxText.getPrecision(), precision));
-		maxText.setIncrement(increment);
-		maxText.getParent().layout();
-	}
-
-	private static double[] calculateIncrementAndPrecision(double value) {
-		// Let's format our incoming number as a string
-		// Currently one million should be a maximum value
-		String valueAsString = new DecimalFormat("#######.########").format(Math.abs(value)).replace(",", ".");
-		int integerPlaces = valueAsString.indexOf('.');
-		int decimalPlaces = valueAsString.length() - integerPlaces - 1;
-		int numberWidth = valueAsString.length() - 1;
-
-		// Let's get ready to handle whole numbers
-		if (integerPlaces == -1) {			
-			numberWidth += 2;
-			decimalPlaces = 1;
-		}
-		
-		// Float spinners can't accept a width of greater than 10, so that's 9 with a separator
-		// And subtracting another to catch a number of float spinner oddities
-		if (numberWidth > 8) {
-			decimalPlaces = Math.max(0, 8 - integerPlaces);
-		}
-
-		// Work out the minimum increment
-		double decimalIncrement = Math.pow(10, -decimalPlaces);
-		
-		// Return, ready for formatting
-		return new double[] {decimalIncrement, decimalPlaces, 10};
-	}
 
 	private void installMinMaxListeners() {
-		minText.addSelectionListener(new SelectionAdapter() {
+		
+		minText.addFocusListener(new FocusListener() {
+			
 			@Override
-			public void widgetSelected(SelectionEvent e) {
-				double minValue = minText.getDouble();
-				if (validateMin(minValue)) {
-					getHistogramProvider().setMin(minValue);
-					if (!updatingROI) {
-						updateRegion(minValue, getHistogramProvider().getMax());
-					}
-					maxText.setMinimum(minValue);
-					maxText.getParent().layout();
-					rescaleAxis(false);
+			public void focusLost(FocusEvent e) {
+				updateMin();
+				
+			}
+			
+			@Override
+			public void focusGained(FocusEvent e) {
+				//do nothing
+				
+			}
+		});
+		
+		//force focus loss on enter
+		minText.addTraverseListener(new TraverseListener() {
+			
+			@Override
+			public void keyTraversed(TraverseEvent e) {
+				if (SWT.TRAVERSE_RETURN == e.detail) {
+					updateMin();
+				}
+			}
+		});
+		
+		
+		maxText.addFocusListener(new FocusListener() {
+			
+			@Override
+			public void focusLost(FocusEvent e) {
+				updateMax();
+				
+			}
+			
+			@Override
+			public void focusGained(FocusEvent e) {
+				//do nothing
+				
+			}
+		});
+		
+		//force focus loss on enter
+		maxText.addTraverseListener(new TraverseListener() {
+
+			@Override
+			public void keyTraversed(TraverseEvent e) {
+				if (SWT.TRAVERSE_RETURN == e.detail) {
+					updateMax();
 				}
 			}
 		});
 
-		maxText.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				double maxValue = maxText.getDouble();
-				if (validateMax(maxValue)) {
-					getHistogramProvider().setMax(maxValue);
-					if (!updatingROI) {
-						updateRegion(getHistogramProvider().getMin(), maxValue);
-					}
-					minText.setMaximum(maxValue);
-					minText.getParent().layout();
-					rescaleAxis(false);
-				}
+	}
+	
+	private void updateMin() {
+		Double d = parseDouble(minText);
+		
+		if (d == null) {
+			minText.setText(Double.toString(getHistogramProvider().getMin()));
+			return;
+		}
+		
+		if (validateMin(d)) {
+			getHistogramProvider().setMin(d);
+			if (!updatingROI) {
+				updateRegion(d, getHistogramProvider().getMax());
 			}
-		});
-
-		histogramPlottingSystem.getSelectedXAxis().addAxisListener(
-				new IAxisListener() {
-
-					@Override
-					public void revalidated(AxisEvent evt) {
-					}
-
-					@Override
-					public void rangeChanged(AxisEvent evt) {
-						updateMinMaxSpinnerIncrements();
-					}
-				});
+//			maxText.getParent().layout();
+			rescaleAxis(false);
+		}
+	}
+	
+	private void updateMax() {
+		Double d = parseDouble(maxText);
+		
+		if (d == null) {
+			maxText.setText(Double.toString(getHistogramProvider().getMax()));
+			return;
+		}
+		
+		if (validateMax(d)) {
+			getHistogramProvider().setMax(d);
+			if (!updatingROI) {
+				updateRegion(getHistogramProvider().getMin(),d);
+			}
+//			maxText.getParent().layout();
+			rescaleAxis(false);
+		}
 	}
 
 	/**
@@ -442,7 +401,11 @@ public class HistogramViewer extends ContentViewer {
 	 * applying them
 	 */
 	private boolean validateMin(double minValue) {
-		if (minValue > maxText.getDouble()) {
+		Double d = parseDouble(maxText);
+		if (d == null) {
+			return false;
+		}
+		if (minValue > d) {
 			return false;
 		}
 		return true;
@@ -453,7 +416,11 @@ public class HistogramViewer extends ContentViewer {
 	 * applying them
 	 */
 	private boolean validateMax(double mainValue){
-		if (mainValue < minText.getDouble()) {
+		Double d = parseDouble(maxText);
+		if (d == null) {
+			return false;
+		}
+		if (mainValue < d) {
 			return false;
 		}
 		return true;
@@ -517,8 +484,6 @@ public class HistogramViewer extends ContentViewer {
 		if (firstUpdateTraces) {
 			firstUpdateTraces = false;
 		}
-
-		updateMinMaxSpinnerIncrements();
 		
 		double min = getHistogramProvider().getMin();
 		double max = getHistogramProvider().getMax();
@@ -528,6 +493,11 @@ public class HistogramViewer extends ContentViewer {
 		
 		region.setVisible(true);
 		updateMinMax(min, max);
+	}
+	
+	private void updateMinMax(double min, double max) {
+		minText.setText(Double.toString(min));
+		maxText.setText(Double.toString(max));
 	}
 
 	/**
@@ -632,21 +602,18 @@ public class HistogramViewer extends ContentViewer {
 		return new ILineTrace[] { redTrace, greenTrace, blueTrace };
 	}
 
-	/**
-	 * For test purposes only. Return the max spinner.
-	 */
-	protected FloatSpinner getMaxSpinner(){
-		return maxText;
-	}
-
-	/**
-	 * For test purposes only. Return the min spinner
-	 */
-	protected FloatSpinner getMinSpinner(){
-		return minText;
-	}
-
 	public void setFocus() {
 		histogramPlottingSystem.setFocus();
+	}
+	
+	private Double parseDouble(Text widget) {
+		String text = widget.getText();
+		
+		try {
+			return Double.parseDouble(text);
+		} catch (Exception e) {
+			return null;
+		}
+		
 	}
 }
