@@ -23,7 +23,7 @@ public class PlotModeXY implements IPlotMode {
 
 	private static final String[] options =  new String[]{"X"};
 	private long count = 0;
-	private boolean errorBarEnabled = true;
+	private boolean errorBarEnabled = false;
 	
 	private final static Logger logger = LoggerFactory.getLogger(PlotModeXY.class);
 
