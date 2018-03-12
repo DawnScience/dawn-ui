@@ -85,7 +85,7 @@ public class PlotModeImage implements IPlotModeColored {
 			int[] shape = slice.getShape();
 			for (int i = 0 ; i < md.length; i++){
 				
-				if (md[i] == null && shape[i] != 1) {
+				if (md[i] == null || shape[i] != 1) {
 					builder.append(s[i].toString());
 					builder.append(",");
 					continue;
