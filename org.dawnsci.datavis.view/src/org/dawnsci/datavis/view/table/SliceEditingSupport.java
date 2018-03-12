@@ -2,6 +2,7 @@ package org.dawnsci.datavis.view.table;
 
 import org.dawnsci.datavis.model.NDimensions;
 import org.eclipse.january.dataset.Slice;
+import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.ColumnViewer;
 import org.eclipse.jface.viewers.EditingSupport;
@@ -14,7 +15,6 @@ import org.eclipse.swt.events.MouseListener;
 import org.eclipse.swt.events.MouseTrackListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.events.VerifyEvent;
 import org.eclipse.swt.events.VerifyListener;
 import org.eclipse.swt.graphics.Point;
@@ -44,20 +44,40 @@ public class SliceEditingSupport extends EditingSupport {
 	public SliceEditingSupport(ColumnViewer viewer) {
 		super(viewer);
 		editor = new TextCellEditor((Composite) getViewer().getControl(), SWT.NONE);
-//		Menu menu = new Menu(editor.getControl());
-//		MenuItem item = new MenuItem(menu, SWT.PUSH);
-//		item.setText("Set from axis..");
-//		item.addSelectionListener(new SelectionAdapter() {
-//			
-//			@Override
-//			public void widgetSelected(SelectionEvent e) {
-//				AxisSliceDialog d = new AxisSliceDialog(getViewer().getControl().getShell(), (NDimensions)getViewer().getInput(), currentDimension);
-//				d.create();
-//				d.open();
-//			}
-//
-//		});
-//		editor.getControl().setMenu(menu);
+		Menu menu = new Menu(editor.getControl());
+		MenuItem item = new MenuItem(menu, SWT.PUSH);
+		item.setText("Set from axis..");
+		item.addSelectionListener(new SelectionAdapter() {
+			
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				NDimensions nd =(NDimensions)getViewer().getInput();
+				AxisSliceDialog d = new AxisSliceDialog(getViewer().getControl().getShell(), (NDimensions)getViewer().getInput(), currentDimension);
+				d.create();
+				if (Dialog.OK == d.open()) {
+					Integer start = d.getStart();
+					Integer stop = d.getStop();
+					
+					if (start == null) {
+						start = 0;
+					}
+					
+					if (stop == null) {
+						stop = nd.getSize(currentDimension);
+					}
+					
+					Slice s = new Slice();
+					
+					s.setStart(start);
+					s.setStop(stop);
+					s.setStep(1);
+					setSlice(currentDimension, s);
+					viewer.refresh();
+				}
+			}
+
+		});
+		editor.getControl().setMenu(menu);
 		Control control = editor.getControl();
 		editor.getControl().addListener(SWT.Activate, new Listener() {
 			

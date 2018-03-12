@@ -8,6 +8,8 @@ import org.eclipse.january.dataset.Dataset;
 import org.eclipse.january.dataset.DatasetUtils;
 import org.eclipse.january.dataset.IDataset;
 import org.eclipse.january.dataset.ILazyDataset;
+import org.eclipse.january.dataset.Maths;
+import org.eclipse.january.dataset.SliceND;
 import org.eclipse.january.metadata.AxesMetadata;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.swt.SWT;
@@ -25,6 +27,11 @@ public class AxisSliceDialog extends Dialog {
 
 	private NDimensions nDimensions;
 	private int dim = 0;
+	private Text tmin;
+	private Text tmax;
+	private Dataset axis;
+	private Integer start;
+	private Integer stop;
 	
 	protected AxisSliceDialog(Shell parentShell, NDimensions nDims, int dim) {
 		super(parentShell);
@@ -34,21 +41,16 @@ public class AxisSliceDialog extends Dialog {
 	
 	protected Control createDialogArea(Composite parent) {
 		Composite container = (Composite) super.createDialogArea(parent);
-		container.setLayout(new GridLayout(3, false));
+		container.setLayout(new GridLayout(4, false));
 		container.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
-		String axis = nDimensions.getAxis(dim);
 		Label l1 = new Label(container, SWT.NONE);
 		l1.setText("Start");
-		Text tmin = new Text(container,SWT.NONE);
+		tmin = new Text(container,SWT.BORDER);
 
 		Label l2 = new Label(container, SWT.NONE);
 		l2.setText("Stop");
-		Text tmax = new Text(container,SWT.NONE);
-		
-		if (NDimensions.INDICES.equals(nDimensions.getAxis(dim))){
-			System.out.println();
-		}
+		tmax = new Text(container,SWT.BORDER);
 		
 		BundleContext bundleContext =
                 FrameworkUtil.
@@ -59,17 +61,19 @@ public class AxisSliceDialog extends Dialog {
 		
 		DataOptions d = fileController.getCurrentDataOption();
 		
-		ILazyDataset sliceView = d.getLazyDataset().getSliceView(nDimensions.buildSliceND());
+		SliceND slice = nDimensions.buildSliceND();
+		slice.setSlice(dim, 0, null, 1);
+		
+		ILazyDataset sliceView = d.getLazyDataset().getSliceView(slice);
 		AxesMetadata meta = sliceView.getFirstMetadata(AxesMetadata.class);
 		ILazyDataset ax = meta.getAxes()[dim];
 		try {
 			IDataset dax = ax.getSlice();
-			Dataset squeeze = DatasetUtils.convertToDataset(dax.squeeze());
-			tmin.setText(squeeze.getStringAbs(0));
-			tmax.setText(squeeze.getStringAbs(squeeze.getSize()-1));
+			axis = DatasetUtils.convertToDataset(dax.squeeze());
+			tmin.setText(axis.getStringAbs(0));
+			tmax.setText(axis.getStringAbs(axis.getSize()-1));
 		} catch (DatasetException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+
 		}
 	
 		return container;
@@ -82,5 +86,46 @@ public class AxisSliceDialog extends Dialog {
 //	    newShell.setImage(image = Activator.getImageDescriptor("icons/spectrum.png").createImage());
 	  }
 	
+	private Double parseDouble(Text widget) {
+		String text = widget.getText();
+		
+		try {
+			return Double.parseDouble(text);
+		} catch (Exception e) {
+			return null;
+		}
+		
+	}
+	
+	
+	protected void okPressed() {
+		
+		Double min = parseDouble(tmin);
+		Double max = parseDouble(tmax);
+		
+		if (min != null) {
+			start = Maths.abs(Maths.subtract(axis, min)).argMin();
+		}
+		
+		if (max != null) {
+			stop = Maths.abs(Maths.subtract(axis, max)).argMin();
+			stop.toString();
+		}
+		
+		if (start != null && stop != null && start > stop) {
+			Integer tmp = stop;
+			stop = start;
+			start = tmp;
+		}
 
+		super.okPressed();
+	}
+	
+	public Integer getStart() {
+		return start;
+	}
+
+	public Integer getStop() {
+		return stop;
+	}
 }
