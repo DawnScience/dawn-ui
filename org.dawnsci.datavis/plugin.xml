@@ -95,6 +95,11 @@
             class="org.dawnsci.datavis.DatasetContributionFactory"
             locationURI="menu:org.dawnsci.datavis.file">
       </menuContribution>
+      <menuContribution
+            allPopups="false"
+            class="org.dawnsci.datavis.LinePlotContributionFactory"
+            locationURI="menu:org.dawnsci.datavis.plot">
+      </menuContribution>
    </extension>
    <extension
          point="org.eclipse.ui.perspectiveExtensions">

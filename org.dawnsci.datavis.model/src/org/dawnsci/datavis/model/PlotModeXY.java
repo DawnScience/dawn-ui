@@ -23,6 +23,7 @@ public class PlotModeXY implements IPlotMode {
 
 	private static final String[] options =  new String[]{"X"};
 	private long count = 0;
+	private boolean errorBarEnabled = true;
 	
 	private final static Logger logger = LoggerFactory.getLogger(PlotModeXY.class);
 
@@ -199,6 +200,7 @@ public class PlotModeXY implements IPlotMode {
 		trace.setDataName(data.getName());
 		trace.setData(ax, data);
 		trace.setUserObject(userObject);
+		trace.setErrorBarEnabled(errorBarEnabled);
 		if (!canUpdate)system.addTrace(trace);
 		
 		if (axName != null) system.getSelectedXAxis().setTitle(axName);
@@ -215,5 +217,13 @@ public class PlotModeXY implements IPlotMode {
 		}
 		
 		return dataDims;
+	}
+
+	public boolean isErrorBarEnabled() {
+		return errorBarEnabled;
+	}
+
+	public void setErrorBarEnabled(boolean errorBarEnabled) {
+		this.errorBarEnabled = errorBarEnabled;
 	}
 }

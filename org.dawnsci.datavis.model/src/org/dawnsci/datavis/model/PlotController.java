@@ -505,7 +505,7 @@ public class PlotController implements IPlotController {
 		
 	}
 	
-	private IPlotMode[] getPlotModes(int rank) {
+	public IPlotMode[] getPlotModes(int rank) {
 		
 		List<IPlotMode> m = new ArrayList<>();
 		for (IPlotMode mode : modes) {
