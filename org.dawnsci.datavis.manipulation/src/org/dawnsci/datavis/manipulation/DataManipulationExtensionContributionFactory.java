@@ -24,6 +24,7 @@ import org.eclipse.january.dataset.DatasetFactory;
 import org.eclipse.january.dataset.DatasetUtils;
 import org.eclipse.january.dataset.IDataset;
 import org.eclipse.january.dataset.ILazyDataset;
+import org.eclipse.january.dataset.Maths;
 import org.eclipse.january.dataset.SliceND;
 import org.eclipse.january.dataset.StringDataset;
 import org.eclipse.january.metadata.AxesMetadata;
@@ -33,12 +34,17 @@ import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.MenuManager;
+import org.eclipse.jface.dialogs.Dialog;
+import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.widgets.DirectoryDialog;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.dialogs.ListDialog;
 import org.eclipse.ui.menus.ExtensionContributionFactory;
 import org.eclipse.ui.menus.IContributionRoot;
 import org.eclipse.ui.services.IServiceLocator;
@@ -151,92 +157,9 @@ public class DataManipulationExtensionContributionFactory extends ExtensionContr
 
 							success = FileWritingUtils.writeNexus(open, fileFactory, mean);
 							
-							
-							
-//							try (NexusFile nexus = fileFactory.newNexusFile(open)) {
-//								nexus.openToWrite(true);
-//								mean.setName(NexusConstants.DATA_DATA);
-//								GroupNode nxdata = nexus.getGroup("/entry/average", true);
-//								nexus.addAttribute(nxdata, TreeFactory.createAttribute(NexusConstants.NXCLASS, NexusConstants.DATA));
-//								GroupNode nxentry = nexus.getGroup("/entry", true);
-//								nexus.addAttribute(nxentry,TreeFactory.createAttribute(NexusConstants.NXCLASS, NexusConstants.ENTRY));
-//								nexus.createData(nxdata, mean);
-//								nexus.addAttribute(nxdata, TreeFactory.createAttribute(NexusConstants.DATA_SIGNAL, NexusConstants.DATA_DATA));
-//
-//								AxesMetadata md = d.getFirstMetadata(AxesMetadata.class);
-//
-//								ILazyDataset[] axes = md.getAxes();
-//
-//								String axName = null;
-//
-//								if (axes[1] != null) {
-//									IDataset y = axes[1].getSlice();
-//									y = y.squeeze();
-//									if (y.getName() != null) {
-//										axName = MetadataPlotUtils.removeSquareBrackets(y.getName());
-//										y.setName(axName);
-//									} else {
-//										axName = "y_axis";
-//									}
-//									nexus.createData(nxdata, y);
-//									nexus.addAttribute(nxdata, TreeFactory.createAttribute(axName + NexusConstants.DATA_INDICES_SUFFIX, 0));
-//								}
-//
-//								nexus.addAttribute(nxdata, TreeFactory.createAttribute(NexusConstants.DATA_AXES, axName));
-//
-//								IFileController fc = (IFileController)bundleContext.getService(bundleContext.getServiceReference(IFileController.class));
-//
-//								fc.loadFile(open);
-//
-//							} catch (NexusException e) {
-//								// TODO Auto-generated catch block
-//								e.printStackTrace();
-//							} catch (DatasetException e) {
-//								// TODO Auto-generated catch block
-//								e.printStackTrace();
-//							}
-
-
 						}
 						else {
-							
 							success = FileWritingUtils.writeText(open, mean);
-							
-//							RawTextSaver saver = new RawTextSaver(open);
-//							DataHolder dh = new DataHolder();
-//							AxesMetadata md = d.getFirstMetadata(AxesMetadata.class);
-//							IDataset y = null;
-//							ILazyDataset[] axes = md.getAxes();
-//
-//							String axName = null;
-//
-//							if (axes[1] != null) {
-//								try {
-//									y = axes[1].getSlice();
-//									y = y.squeeze();
-//									mean.setShape(mean.getShape()[0],1);
-//									y.setShape(y.getShape()[0],1);
-//									mean = DatasetUtils.concatenate(new IDataset[]{y,mean}, 1);
-//								} catch (DatasetException e) {
-//									// TODO Auto-generated catch block
-//									e.printStackTrace();
-//								}
-//								
-//
-//							}
-//
-//							dh.addDataset("mean", mean);
-//							
-//							try {
-//								saver.saveFile(dh);
-//							} catch (ScanFileHolderException e) {
-//								// TODO Auto-generated catch block
-//								e.printStackTrace();
-//							}
-//							
-//							IFileController fc = (IFileController)bundleContext.getService(bundleContext.getServiceReference(IFileController.class));
-//
-//							fc.loadFile(open);
 						}
 						
 						if (success) {
@@ -247,13 +170,88 @@ public class DataManipulationExtensionContributionFactory extends ExtensionContr
 					}
 				};
 				
+				
+				
+				Action sub = new Action("Subtract"){
+					@Override
+					public void run() {
+
+						List<IXYData> xy = getCompatibleXY();
+						
+						ListDialog d = new ListDialog(Display.getDefault().getActiveShell());
+						d.setTitle("Select file to subtract");
+						d.setContentProvider(new ArrayContentProvider());
+						d.setLabelProvider(new LabelProvider());
+
+						d.setInput(xy.toArray());
+						
+						if (Dialog.OK != d.open()) {
+							return;
+						}
+						
+						if (d.getResult().length == 0) return;
+						
+						BundleContext bundleContext =
+								FrameworkUtil.
+								getBundle(this.getClass()).
+								getBundleContext();
+
+						IRecentPlaces recentPlaces = (IRecentPlaces)bundleContext.getService(bundleContext.getServiceReference(IRecentPlaces.class));
+
+						DirectoryDialog dirDi = new DirectoryDialog(Display.getDefault().getActiveShell());
+						dirDi.setFilterPath(recentPlaces.getRecentPlaces().get(0));
+						
+						String output = dirDi.open();
+						
+						if (output == null) {
+							return;
+						}
+						
+						IXYData subtrahend = (IXYData)d.getResult()[0];
+						AxesMetadata axes = null;
+						try {
+							axes = MetadataFactory.createMetadata(AxesMetadata.class, 1);
+							axes.setAxis(0, subtrahend.getX().getSlice());
+						} catch (MetadataException e) {
+						}
+						
+						List<String> paths = new ArrayList<>();
+						
+						for (IXYData ixy : xy) {
+							
+							String outputfile = output + File.separator + new File(ixy.getFileName()).getName() + "-" + new File(subtrahend.getFileName()).getName() + ".dat";
+							
+							if (ixy == subtrahend) {
+								continue;
+							}
+							
+							Dataset dif = Maths.subtract(ixy.getY(),subtrahend.getY());
+							dif.setMetadata(axes.clone());
+							
+							if (FileWritingUtils.writeText(outputfile, dif)) {
+								paths.add(outputfile);
+							}
+						}
+						
+						if (!paths.isEmpty()) {
+							IFileController fc = (IFileController)bundleContext.getService(bundleContext.getServiceReference(IFileController.class));
+							fc.loadFiles(paths.toArray(new String[paths.size()]), null);
+						}
+						
+					}
+				};
+				
 				if (data == null || data.isEmpty()) {
 					a.setEnabled(false);
 					average.setEnabled(false);
+					sub.setEnabled(false);
 				}
+				
+
 
 				search.add(a);
 				search.add(average);
+				search.add(sub);
 
 			}
 
@@ -305,17 +303,23 @@ public class DataManipulationExtensionContributionFactory extends ExtensionContr
 		return;
 	}
 
-	private IDataset buildCombined() {
-
+	private List<IXYData> getCompatibleXY(){
 		List<IDataFilePackage> suitableData = getData();
 		List<IXYData> xyData = DataPackageUtils.getXYData(suitableData, false);
 		if (xyData.isEmpty()) {
 			return null;
 		}
 
-		xyData = getCompatibleDatasets(xyData);
+		return getCompatibleDatasets(xyData);
+	}
+	
+	private IDataset buildCombined() {
 
-		return combine(xyData);
+		List<IXYData> compatibleXY = getCompatibleXY();
+		
+		if (compatibleXY == null) return null;
+
+		return combine(compatibleXY);
 	}
 
 	private List<IDataFilePackage> getSuitableData(ISelection selection){

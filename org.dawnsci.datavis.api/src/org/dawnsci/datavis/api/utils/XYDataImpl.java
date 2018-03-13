@@ -45,4 +45,8 @@ public class XYDataImpl implements IXYData {
 		return slice;
 	}
 	
+	@Override
+	public String toString() {
+		return fileName;
+	}
 }
