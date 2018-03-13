@@ -1,5 +1,6 @@
 package org.dawnsci.datavis.view.parts;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -9,11 +10,13 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.dawnsci.conversion.ui.ConvertWizard;
 import org.dawnsci.datavis.model.DataOptions;
 import org.dawnsci.datavis.model.FileJoining;
 import org.dawnsci.datavis.model.IDataObject;
 import org.dawnsci.datavis.model.IFileController;
 import org.dawnsci.datavis.model.LoadedFile;
+import org.dawnsci.datavis.view.Activator;
 import org.dawnsci.datavis.view.parts.LoadedFilePart.LabelEditingSupport;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IMenuListener;
@@ -29,11 +32,14 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
+import org.eclipse.jface.wizard.WizardDialog;
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Layout;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.ui.dialogs.ListDialog;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
+
 
 public class LoadedFileMenuListener implements IMenuListener {
 
@@ -42,6 +48,7 @@ public class LoadedFileMenuListener implements IMenuListener {
 	private IFileController fileController;
 	private LabelEditingSupport editColumn;
 	private String id;
+	private ImageDescriptor convertImage = Activator.getImageDescriptor("icons/convert.png");
 
 	public LoadedFileMenuListener(IFileController fileController, TableViewer viewer,LabelEditingSupport editColumn) {
 		this.fileController = fileController;
@@ -70,6 +77,8 @@ public class LoadedFileMenuListener implements IMenuListener {
 			manager.add(new DeselectAction(fileController,viewer));
 			manager.add(new Separator());
 			manager.add(new CloseAction(fileController, viewer));
+			manager.add(new Separator());
+			manager.add(new ConvertFilesAction(fileController, viewer));
 			
 			if (((IStructuredSelection)viewer.getSelection()).size()==1) {
 				manager.add(new Separator());
@@ -350,6 +359,27 @@ public class LoadedFileMenuListener implements IMenuListener {
 			return filePaths;
 		}
 	}
-	
+
+	private class ConvertFilesAction extends LoadedFileMenuAction {
+		public ConvertFilesAction(IFileController fileController, TableViewer viewer) {
+			super("Convert", convertImage, fileController, viewer);
+		}
+
+		@SuppressWarnings("unchecked")
+		@Override
+		public void run() {
+			ConvertWizard cwizard = new ConvertWizard();
+			@SuppressWarnings("rawtypes")
+			List selFiles = getFileSelection()
+								.stream()
+								.map(loadedFile -> new File(loadedFile.getFilePath()))
+								.collect(Collectors.toList());
+			cwizard.setSelectionOverride(selFiles);
+			WizardDialog dialog = new WizardDialog(Display.getDefault().getActiveShell(), cwizard);
+			dialog.setPageSize(new Point(400, 450));
+			dialog.create();
+			dialog.open();
+		}
+	}
 }
 
