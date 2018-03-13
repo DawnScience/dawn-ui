@@ -93,9 +93,6 @@ public class PlotModeXY implements IPlotMode {
 			
 			for (int i = 0 ; i < md.length; i++){
 				if (i == dataDim || md[i] == null){
-					if (md[i] != null) {
-						md[i].getSlice();
-					}
 					builder.append(s[i].toString());
 				} else {
 					
