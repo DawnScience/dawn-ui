@@ -13,12 +13,12 @@
       <plotmode
             class="org.dawnsci.jzy3d.plotmodes.PlotModeSurfaceMesh"
             name="SurfaceMesh"
-            priority="0">
+            priority="2">
       </plotmode>
       <plotmode
             class="org.dawnsci.jzy3d.plotmodes.PlotModeWaterfall"
             name="Waterfall"
-            priority="0">
+            priority="1">
       </plotmode>
    </extension>
 
