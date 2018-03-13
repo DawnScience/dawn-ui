@@ -32,6 +32,7 @@ import org.eclipse.january.dataset.IDataset;
 import org.eclipse.january.dataset.ILazyDataset;
 import org.eclipse.richbeans.api.generator.IGuiGeneratorService;
 import org.eclipse.richbeans.api.generator.IListenableProxyFactory;
+import org.eclipse.richbeans.widgets.internal.GridUtils;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
@@ -69,7 +70,7 @@ public class IsosurfaceTool extends AbstractSlicingTool {
 		IGuiGeneratorService guiGeneratorService = Activator.getService(IGuiGeneratorService.class);
 		gui = guiGeneratorService.generateGui(isoBean, parent);
 		gui.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		gui.setVisible(false);
+		GridUtils.setVisible(gui, false);
 		
 		isoController = new RenderingPropertyChangeListener(isoBean,
 				new IsosurfaceJob("isoSurfaceJob", slicingSystem.getPlottingSystem()), 
@@ -84,8 +85,7 @@ public class IsosurfaceTool extends AbstractSlicingTool {
 	 */
 	@Override
 	public void militarize(boolean newData) {
-		((GridData) gui.getLayoutData()).exclude = false;
-		gui.setVisible(true);	
+		GridUtils.setVisible(gui, true);
 		gui.getParent().getParent().pack();
 		
 		ISliceSystem slicingSystem = getSlicingSystem();
@@ -117,7 +117,7 @@ public class IsosurfaceTool extends AbstractSlicingTool {
 		isoController.setData(dataSlice, acquireAxes(dataSlice, null));
 		isoController.propertyChange(null);
 
-		gui.setVisible(true);
+		GridUtils.setVisible(gui, true);
 	}
 
 	private ILazyDataset createSlice(ISliceSystem sliceSystem) {
@@ -143,8 +143,7 @@ public class IsosurfaceTool extends AbstractSlicingTool {
 	 */
 	@Override
 	public void demilitarize() {
-		gui.setVisible(false);
-		((GridData) gui.getLayoutData()).exclude = true;
+		GridUtils.setVisible(gui, false);
 
 		getSlicingSystem().removeDimensionalListener(dimensionalListener);
 		getSlicingSystem().removeAxisChoiceListener(axisChoiceListener);
