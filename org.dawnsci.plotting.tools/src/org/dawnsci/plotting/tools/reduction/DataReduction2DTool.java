@@ -88,6 +88,7 @@ public class DataReduction2DTool extends AbstractToolPage implements IRegionList
 		tableComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		createSpectraTable(tableComposite);
 		createSpectraRegionTable(tableComposite);
+		spectraTableComposite.createDataColumnsAndPopulate();
 		tableComposite.setWeights(new int[]{1,1});
 		createPlotView(rootComposite);
 		rootComposite.setWeights(new int[]{1,3});
@@ -139,7 +140,7 @@ public class DataReduction2DTool extends AbstractToolPage implements IRegionList
 		String name = Integer.toString(spectrum.getIndex());
 		ILineTrace trace = plottingSystem.createLineTrace(name);
 		IDataset energyClone = null;
-		if (axes1.length > 1) {
+		if (axes1.length > 0) {
 			energyClone = axes1[0].clone().squeeze(); // FIXME
 			energyClone.setName(axes1[0].getName());
 		}
@@ -293,7 +294,8 @@ public class DataReduction2DTool extends AbstractToolPage implements IRegionList
 	}
 	
 	private void validateAndLoadSpectra(IImageTrace image) {
-		dataLoaded = false;
+		if (dataLoaded)
+			return;
 		axes0 = null;
 		axes1 = null;
 		imageTrace = image;
@@ -327,6 +329,14 @@ public class DataReduction2DTool extends AbstractToolPage implements IRegionList
 		toolPageModel.getAxesNames().addAll(Arrays.stream(axes0)
 												  .map(axis -> MetadataPlotUtils.removeSquareBrackets(axis.getName().substring(axis.getName().lastIndexOf('/')+1))).collect(Collectors.toList())
 												  );
+		if (axes1.length == 0)
+			plottingSystem.getSelectedXAxis().setTitle("Indices");
+		else
+			plottingSystem.getSelectedXAxis().setTitle(axes1[0].getName());
+	
+		if (spectraTableComposite != null)
+			spectraTableComposite.createDataColumnsAndPopulate();
+
 		dataLoaded = true;
 	}
 
@@ -377,10 +387,6 @@ public class DataReduction2DTool extends AbstractToolPage implements IRegionList
 						this.getViewPart());
 				plottingSystem.getPlotComposite().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 				plottingSystem.getSelectedXAxis().setAxisAutoscaleTight(true);
-				if (axes1.length == 0)
-					plottingSystem.getSelectedXAxis().setTitle("Indices");
-				else
-					plottingSystem.getSelectedXAxis().setTitle(axes1[0].getName());
 				plottingSystem.setRescale(true);
 				toolPageModel.setSpectraPlotting(plottingSystem);
 			}
@@ -428,10 +434,19 @@ public class DataReduction2DTool extends AbstractToolPage implements IRegionList
 			for (Object plottedRegion : spectraRegionTableComposite.getCheckedRegionSpectraList()) {
 				cachedPlottedRegions.add(((DataReduction2DToolSpectraRegionDataNode) plottedRegion).getRegion());
 			}
+			spectraTableComposite.getSelectedSpectraList().forEach(spectrum -> {
+				if (!plottingSystem.isDisposed()) {
+					removeFromPlottingSystem((ILineTrace) spectrum.getTrace());
+				}
+				spectrum.clearTrace();
+			});
 		}
 		dataLoaded = false;
-		if (spectraTableComposite != null)
+		if (spectraTableComposite != null) {
 			spectraTableComposite.clearSelectedSpectraList();
+			if (!spectraTableComposite.getSpectraTable().isDisposed())
+				spectraTableComposite.getSpectraTable().removeAll();
+		}
 		if (spectraRegionTableComposite != null)
 			spectraRegionTableComposite.clearRegionData();
 		toolPageModel.getDeletedIndices().clear();

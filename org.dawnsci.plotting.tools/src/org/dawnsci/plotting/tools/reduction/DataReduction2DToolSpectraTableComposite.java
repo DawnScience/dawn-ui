@@ -410,7 +410,7 @@ class DataReduction2DToolSpectraTableComposite extends DataReduction2DToolObserv
 		dataColumns.clear();
 		
 		TableColumn nameColumn = new TableColumn(spectraTable, SWT.LEFT);
-		nameColumn.setText("Name");
+		nameColumn.setText("Index");
 		nameColumn.setWidth(155);
 
 		for (String axisName : toolPageModel.getAxesNames()) {
@@ -437,6 +437,8 @@ class DataReduction2DToolSpectraTableComposite extends DataReduction2DToolObserv
 		});
 		menuManager.setRemoveAllWhenShown(true);
 		spectraTable.setMenu(menu);
+	
+		logger.debug("number of columns: {}", spectraTable.getColumnCount());
 		
 		for (DataReduction2DToolSpectrumDataNode spectrumNode : toolPageModel.getSpectrumDataNodes()) {
 			TableItem tableItem = new TableItem(spectraTable, SWT.NONE);
@@ -457,7 +459,6 @@ class DataReduction2DToolSpectraTableComposite extends DataReduction2DToolObserv
 		spectraTable.setHeaderVisible(true);
 		spectraTable.setLinesVisible(true);
 		spectraTable.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		createDataColumnsAndPopulate();
 	}
 
 	private void createToolbarForSpectraTable(final Composite treeParent) {
@@ -466,7 +467,7 @@ class DataReduction2DToolSpectraTableComposite extends DataReduction2DToolObserv
 
 		final ToolItem stackToggle = new ToolItem(toolBar, SWT.PUSH);
 		stackToggle.setImage(stackoffsetChangeIcon);
-		stackToggle.setToolTipText(Double.toString(toolPageModel.getTraceStack()));
+		stackToggle.setToolTipText(String.format("Stack offset: %g", toolPageModel.getTraceStack()));
 		stackToggle.addListener(SWT.Selection, event -> {
 			InputDialog offsetDlg = new InputDialog(stackToggle.getDisplay().getActiveShell(), "Stack offset", "Enter new offset", Double.toString(toolPageModel.getTraceStack()), newText ->  {
 				try {
