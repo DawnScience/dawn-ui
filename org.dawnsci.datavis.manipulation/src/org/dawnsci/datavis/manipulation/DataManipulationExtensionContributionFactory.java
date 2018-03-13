@@ -2,7 +2,6 @@ package org.dawnsci.datavis.manipulation;
 
 
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -15,14 +14,8 @@ import org.dawnsci.datavis.api.IXYData;
 import org.dawnsci.datavis.api.utils.DataPackageUtils;
 import org.dawnsci.datavis.api.utils.XYDataImpl;
 import org.dawnsci.datavis.model.IFileController;
-import org.eclipse.dawnsci.analysis.api.io.ScanFileHolderException;
-import org.eclipse.dawnsci.analysis.api.tree.GroupNode;
 import org.eclipse.dawnsci.analysis.dataset.roi.ROISliceUtils;
-import org.eclipse.dawnsci.analysis.tree.TreeFactory;
 import org.eclipse.dawnsci.nexus.INexusFileFactory;
-import org.eclipse.dawnsci.nexus.NexusConstants;
-import org.eclipse.dawnsci.nexus.NexusException;
-import org.eclipse.dawnsci.nexus.NexusFile;
 import org.eclipse.dawnsci.plotting.api.trace.MetadataPlotUtils;
 import org.eclipse.january.DatasetException;
 import org.eclipse.january.MetadataException;
@@ -53,9 +46,6 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
 
 import uk.ac.diamond.scisoft.analysis.dataset.function.Interpolation1D;
-import uk.ac.diamond.scisoft.analysis.io.ASCIIDataHolderSaver;
-import uk.ac.diamond.scisoft.analysis.io.DataHolder;
-import uk.ac.diamond.scisoft.analysis.io.RawTextSaver;
 
 public class DataManipulationExtensionContributionFactory extends ExtensionContributionFactory {
 
@@ -100,7 +90,7 @@ public class DataManipulationExtensionContributionFactory extends ExtensionContr
 						Dataset d = DatasetUtils.convertToDataset(comb);
 						Dataset mean = d.mean(0, true);
 						mean.squeeze();
-
+						mean.setName("average");
 						Dataset n;
 						try {
 							n = DatasetUtils.sliceAndConvertLazyDataset(d.getFirstMetadata(AxesMetadata.class).getAxes()[0]);
@@ -120,6 +110,8 @@ public class DataManipulationExtensionContributionFactory extends ExtensionContr
 
 							name = builder.toString();
 						}
+						
+						transferAxisOne(d,mean);
 
 						FileDialog fd = new FileDialog(Display.getDefault().getActiveShell(), SWT.SAVE);
 						String[] exts = new String[] {".dat",".xye",".nxs",".h5"};
@@ -150,94 +142,108 @@ public class DataManipulationExtensionContributionFactory extends ExtensionContr
 						if (!open.endsWith(ext)) {
 							open = open + ext;
 						}
+						
+						boolean success = false;
 
 						if (ext.equals(exts[2]) || ext.equals(exts[3])) {
 
 							INexusFileFactory fileFactory = (INexusFileFactory)bundleContext.getService(bundleContext.getServiceReference(INexusFileFactory.class));
 
-
-							try (NexusFile nexus = fileFactory.newNexusFile(open)) {
-								nexus.openToWrite(true);
-								mean.setName(NexusConstants.DATA_DATA);
-								GroupNode nxdata = nexus.getGroup("/entry/average", true);
-								nexus.addAttribute(nxdata, TreeFactory.createAttribute(NexusConstants.NXCLASS, NexusConstants.DATA));
-								GroupNode nxentry = nexus.getGroup("/entry", true);
-								nexus.addAttribute(nxentry,TreeFactory.createAttribute(NexusConstants.NXCLASS, NexusConstants.ENTRY));
-								nexus.createData(nxdata, mean);
-								nexus.addAttribute(nxdata, TreeFactory.createAttribute(NexusConstants.DATA_SIGNAL, NexusConstants.DATA_DATA));
-
-								AxesMetadata md = d.getFirstMetadata(AxesMetadata.class);
-
-								ILazyDataset[] axes = md.getAxes();
-
-								String axName = null;
-
-								if (axes[1] != null) {
-									IDataset y = axes[1].getSlice();
-									y = y.squeeze();
-									if (y.getName() != null) {
-										axName = MetadataPlotUtils.removeSquareBrackets(y.getName());
-										y.setName(axName);
-									} else {
-										axName = "y_axis";
-									}
-									nexus.createData(nxdata, y);
-									nexus.addAttribute(nxdata, TreeFactory.createAttribute(axName + NexusConstants.DATA_INDICES_SUFFIX, 0));
-								}
-
-								nexus.addAttribute(nxdata, TreeFactory.createAttribute(NexusConstants.DATA_AXES, axName));
-
-								IFileController fc = (IFileController)bundleContext.getService(bundleContext.getServiceReference(IFileController.class));
-
-								fc.loadFile(open);
-
-							} catch (NexusException e) {
-								// TODO Auto-generated catch block
-								e.printStackTrace();
-							} catch (DatasetException e) {
-								// TODO Auto-generated catch block
-								e.printStackTrace();
-							}
+							success = FileWritingUtils.writeNexus(open, fileFactory, mean);
+							
+							
+							
+//							try (NexusFile nexus = fileFactory.newNexusFile(open)) {
+//								nexus.openToWrite(true);
+//								mean.setName(NexusConstants.DATA_DATA);
+//								GroupNode nxdata = nexus.getGroup("/entry/average", true);
+//								nexus.addAttribute(nxdata, TreeFactory.createAttribute(NexusConstants.NXCLASS, NexusConstants.DATA));
+//								GroupNode nxentry = nexus.getGroup("/entry", true);
+//								nexus.addAttribute(nxentry,TreeFactory.createAttribute(NexusConstants.NXCLASS, NexusConstants.ENTRY));
+//								nexus.createData(nxdata, mean);
+//								nexus.addAttribute(nxdata, TreeFactory.createAttribute(NexusConstants.DATA_SIGNAL, NexusConstants.DATA_DATA));
+//
+//								AxesMetadata md = d.getFirstMetadata(AxesMetadata.class);
+//
+//								ILazyDataset[] axes = md.getAxes();
+//
+//								String axName = null;
+//
+//								if (axes[1] != null) {
+//									IDataset y = axes[1].getSlice();
+//									y = y.squeeze();
+//									if (y.getName() != null) {
+//										axName = MetadataPlotUtils.removeSquareBrackets(y.getName());
+//										y.setName(axName);
+//									} else {
+//										axName = "y_axis";
+//									}
+//									nexus.createData(nxdata, y);
+//									nexus.addAttribute(nxdata, TreeFactory.createAttribute(axName + NexusConstants.DATA_INDICES_SUFFIX, 0));
+//								}
+//
+//								nexus.addAttribute(nxdata, TreeFactory.createAttribute(NexusConstants.DATA_AXES, axName));
+//
+//								IFileController fc = (IFileController)bundleContext.getService(bundleContext.getServiceReference(IFileController.class));
+//
+//								fc.loadFile(open);
+//
+//							} catch (NexusException e) {
+//								// TODO Auto-generated catch block
+//								e.printStackTrace();
+//							} catch (DatasetException e) {
+//								// TODO Auto-generated catch block
+//								e.printStackTrace();
+//							}
 
 
 						}
 						else {
-							RawTextSaver saver = new RawTextSaver(open);
-							DataHolder dh = new DataHolder();
-							AxesMetadata md = d.getFirstMetadata(AxesMetadata.class);
-							IDataset y = null;
-							ILazyDataset[] axes = md.getAxes();
-
-							String axName = null;
-
-							if (axes[1] != null) {
-								try {
-									y = axes[1].getSlice();
-									y = y.squeeze();
-									mean.setShape(mean.getShape()[0],1);
-									y.setShape(y.getShape()[0],1);
-									mean = DatasetUtils.concatenate(new IDataset[]{y,mean}, 1);
-								} catch (DatasetException e) {
-									// TODO Auto-generated catch block
-									e.printStackTrace();
-								}
-								
-
-							}
-
-							dh.addDataset("mean", mean);
 							
-							try {
-								saver.saveFile(dh);
-							} catch (ScanFileHolderException e) {
-								// TODO Auto-generated catch block
-								e.printStackTrace();
-							}
+							success = FileWritingUtils.writeText(open, mean);
 							
+//							RawTextSaver saver = new RawTextSaver(open);
+//							DataHolder dh = new DataHolder();
+//							AxesMetadata md = d.getFirstMetadata(AxesMetadata.class);
+//							IDataset y = null;
+//							ILazyDataset[] axes = md.getAxes();
+//
+//							String axName = null;
+//
+//							if (axes[1] != null) {
+//								try {
+//									y = axes[1].getSlice();
+//									y = y.squeeze();
+//									mean.setShape(mean.getShape()[0],1);
+//									y.setShape(y.getShape()[0],1);
+//									mean = DatasetUtils.concatenate(new IDataset[]{y,mean}, 1);
+//								} catch (DatasetException e) {
+//									// TODO Auto-generated catch block
+//									e.printStackTrace();
+//								}
+//								
+//
+//							}
+//
+//							dh.addDataset("mean", mean);
+//							
+//							try {
+//								saver.saveFile(dh);
+//							} catch (ScanFileHolderException e) {
+//								// TODO Auto-generated catch block
+//								e.printStackTrace();
+//							}
+//							
+//							IFileController fc = (IFileController)bundleContext.getService(bundleContext.getServiceReference(IFileController.class));
+//
+//							fc.loadFile(open);
+						}
+						
+						if (success) {
 							IFileController fc = (IFileController)bundleContext.getService(bundleContext.getServiceReference(IFileController.class));
-
 							fc.loadFile(open);
 						}
+						
 					}
 				};
 				
@@ -272,6 +278,32 @@ public class DataManipulationExtensionContributionFactory extends ExtensionContr
 		return getSuitableData(selection);
 	}
 
+	private void transferAxisOne(Dataset a, Dataset b) {
+		AxesMetadata md = a.getFirstMetadata(AxesMetadata.class);
+		if (md == null) return;
+
+		ILazyDataset[] axes = md.getAxes();
+
+		if (axes[1] == null) return;
+
+		try {
+			IDataset y = axes[1].getSlice();
+			y = y.squeeze();
+			if (y.getName() != null) {
+				String axName = MetadataPlotUtils.removeSquareBrackets(y.getName());
+				y.setName(axName);
+			} else {
+				y.setName("y_axis");
+			}
+			AxesMetadata m = MetadataFactory.createMetadata(AxesMetadata.class, 1);
+			m.setAxis(0, y);
+			b.setMetadata(m);
+		} catch (Exception e){
+			//TODO log
+		}
+
+		return;
+	}
 
 	private IDataset buildCombined() {
 

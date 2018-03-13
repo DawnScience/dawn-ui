@@ -482,6 +482,7 @@ public class FileController implements IFileController {
 						
 						PlottableObject plotOb = new PlottableObject(d.getPlottableObject().getPlotMode(), ndims);
 						d2.setPlottableObject(plotOb);
+						d2.setAxes(ndims.buildAxesNames());
 					}
 					
 				}
