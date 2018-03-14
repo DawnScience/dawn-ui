@@ -97,6 +97,8 @@ public class FileController implements IFileController {
 	 */
 	@Override
 	public List<String> loadFiles(String[] paths, IProgressService progressService) {
+	
+		int nCurrentlyLoadedFiles = getLoadedFiles().size();
 		
 		FileLoadingRunnable runnable = new FileLoadingRunnable(loadedFiles, listeners, paths);
 		
@@ -110,8 +112,14 @@ public class FileController implements IFileController {
 			} 
 		}
 		
-		List<String> failed = runnable.getFailedLoadingFiles();
-		return failed;
+		if (nCurrentlyLoadedFiles == 0) {
+			List<LoadedFile> newLoadedFiles = getLoadedFiles();
+			if (!newLoadedFiles.isEmpty()) {
+				setCurrentFile(newLoadedFiles.get(0), true); 
+			}
+		}
+		
+		return runnable.getFailedLoadingFiles();
 	}
 	
 	
