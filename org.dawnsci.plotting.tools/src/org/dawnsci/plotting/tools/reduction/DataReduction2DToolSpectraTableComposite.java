@@ -404,6 +404,7 @@ class DataReduction2DToolSpectraTableComposite extends DataReduction2DToolObserv
 
 	public void createDataColumnsAndPopulate() {
 		spectraTable.setRedraw(false);
+		spectraTable.removeAll();
 		while (spectraTable.getColumnCount() > 0 ) {
 		    spectraTable.getColumns()[0].dispose();
 		}
@@ -411,7 +412,7 @@ class DataReduction2DToolSpectraTableComposite extends DataReduction2DToolObserv
 		
 		TableColumn nameColumn = new TableColumn(spectraTable, SWT.LEFT);
 		nameColumn.setText("Index");
-		nameColumn.setWidth(155);
+		nameColumn.setWidth(80);
 
 		for (String axisName : toolPageModel.getAxesNames()) {
 			TableColumn column = new TableColumn(spectraTable, SWT.CENTER);

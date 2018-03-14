@@ -72,7 +72,6 @@ public class DataReduction2DTool extends AbstractToolPage implements IRegionList
 	private DataReduction2DToolSpectraTableComposite spectraTableComposite; 
 	private DataReduction2DToolSpectraRegionComposite spectraRegionTableComposite;
 	private final List<ILineTrace> stackList = new LinkedList<>();
-	private final List<IRegion> cachedPlottedRegions = new ArrayList<>();
 	private Label statusLabel;
 	private Dataset[] axes0;
 	private Dataset[] axes1;
@@ -80,7 +79,6 @@ public class DataReduction2DTool extends AbstractToolPage implements IRegionList
 	
 	@Override
 	public void createControl(Composite parent) {
-		loadExistingData();
 
 		rootComposite = new SashForm(parent, SWT.VERTICAL);
 		rootComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
@@ -88,12 +86,12 @@ public class DataReduction2DTool extends AbstractToolPage implements IRegionList
 		tableComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		createSpectraTable(tableComposite);
 		createSpectraRegionTable(tableComposite);
-		spectraTableComposite.createDataColumnsAndPopulate();
 		tableComposite.setWeights(new int[]{1,1});
 		createPlotView(rootComposite);
 		rootComposite.setWeights(new int[]{1,3});
 		createActions();
 		doBinding();
+		loadExistingData();
 	}
 
 	private String getDataFilePath(IImageTrace image) {
@@ -350,13 +348,9 @@ public class DataReduction2DTool extends AbstractToolPage implements IRegionList
 	private void createSpectraRegionTable(Composite parent) {
 		spectraRegionTableComposite = new DataReduction2DToolSpectraRegionComposite(parent, SWT.None, toolPageModel);
 		spectraRegionTableComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		repopulateCachedSpectraRegion();
+		//repopulateCachedSpectraRegion();
 	}
 	
-	private void repopulateCachedSpectraRegion() {
-		spectraRegionTableComposite.populateSpectraRegion(cachedPlottedRegions);
-		cachedPlottedRegions.clear();
-	}
 	private void addSpectraRegion(DataReduction2DToolSpectraRegionDataNode spectraRegion) {
 		spectraRegionTableComposite.getSpectraRegionList().add(spectraRegion);
 	}
@@ -431,9 +425,6 @@ public class DataReduction2DTool extends AbstractToolPage implements IRegionList
 
 	private void clearData() {
 		if (spectraRegionTableComposite != null) {
-			for (Object plottedRegion : spectraRegionTableComposite.getCheckedRegionSpectraList()) {
-				cachedPlottedRegions.add(((DataReduction2DToolSpectraRegionDataNode) plottedRegion).getRegion());
-			}
 			spectraTableComposite.getSelectedSpectraList().forEach(spectrum -> {
 				if (!plottingSystem.isDisposed()) {
 					removeFromPlottingSystem((ILineTrace) spectrum.getTrace());
