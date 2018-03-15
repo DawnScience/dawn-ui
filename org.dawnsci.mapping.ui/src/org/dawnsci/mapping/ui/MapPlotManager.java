@@ -120,6 +120,11 @@ public class MapPlotManager {
 			
 			@Override
 			public void axisMoved() {
+				if (Display.getCurrent() == null) {
+					Display.getDefault().syncExec(() -> axisMoved());
+					return;
+				}
+				
 				for (MapTrace t : layers) {
 					if (t.getMap() instanceof LiveStreamMapObject) {
 						LiveStreamMapObject l = (LiveStreamMapObject)t.getMap();
