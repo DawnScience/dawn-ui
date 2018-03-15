@@ -250,7 +250,12 @@ public class PlotController implements IPlotController {
 			localMode = currentMode;
 		} else if (plotObject == null) {
 			plotObject = getPlottableObject();
-			if (selected) currentMode = plotObject.getPlotMode();
+			if (selected) {
+				currentMode = plotObject.getPlotMode();
+				if (currentMode != localMode) {
+					system.setTitle("");
+				}
+			}
 			localMode = plotObject.getPlotMode();
 		}
 		dOption.getPlottableObject().getNDimensions().addSliceListener(sliceListener);
