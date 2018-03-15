@@ -300,20 +300,6 @@
          </service>
       </serviceFactory>
    </extension>
-   <extension 
-         point="org.eclipse.ui.navigator.navigatorContent">
-      <commonFilter
-            description="Hides HDF5 files"
-            id="org.dawb.workbench.ui.hide.h5"
-            name="*.h5 HDF5 files"
-            activeByDefault="false">
-         <filterExpression>
-            <adapt type="org.eclipse.core.resources.IResource">
-               <test property="org.eclipse.core.resources.name" value="*.h5"/>
-            </adapt>
-         </filterExpression>
-         </commonFilter>
-   </extension>
    <extension
          point="org.eclipse.ui.perspectiveExtensions">
       <perspectiveExtension
