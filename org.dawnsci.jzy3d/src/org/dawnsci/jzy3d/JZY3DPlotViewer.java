@@ -5,7 +5,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-
+import org.dawb.common.ui.menu.MenuAction;
 import org.dawnsci.jzy3d.preferences.PreferenceDialog;
 import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.dawnsci.plotting.api.ActionType;
@@ -37,6 +37,12 @@ import org.jzy3d.plot3d.primitives.AbstractDrawable;
 import org.jzy3d.plot3d.rendering.canvas.Quality;
 import org.jzy3d.plot3d.rendering.scene.Graph;
 import org.jzy3d.plot3d.rendering.view.modes.CameraMode;
+import org.jzy3d.plot3d.transform.squarifier.XYSquarifier;
+import org.jzy3d.plot3d.transform.squarifier.XZSquarifier;
+import org.jzy3d.plot3d.transform.squarifier.YXSquarifier;
+import org.jzy3d.plot3d.transform.squarifier.YZSquarifier;
+import org.jzy3d.plot3d.transform.squarifier.ZXSquarifier;
+import org.jzy3d.plot3d.transform.squarifier.ZYSquarifier;
 
 import com.jogamp.newt.event.MouseAdapter;
 import com.jogamp.newt.event.MouseEvent;
@@ -104,17 +110,6 @@ public class JZY3DPlotViewer extends IPlottingSystemViewer.Stub<Composite> {
 		configureAction.setToolTipText("Configure plot settings");
 		configureAction.setImageDescriptor(Activator.getImageDescriptor("icons/Configure.png"));
 		
-		Action squareAction = new Action("Square", Action.AS_CHECK_BOX) {
-			@Override
-			public void run() {
-				chart.getView().setSquared(this.isChecked());
-				
-			}
-		};
-		squareAction.setChecked(true);
-		squareAction.setToolTipText("Set axes equal or use data aspect ratio");
-		squareAction.setImageDescriptor(Activator.getImageDescriptor("icons/orthographic.png"));
-		
 		Action saveAction = new Action("Save Screenshot") {
 			@Override
 			public void run() {
@@ -136,9 +131,82 @@ public class JZY3DPlotViewer extends IPlottingSystemViewer.Stub<Composite> {
 		saveAction.setToolTipText("Save as png");
 		saveAction.setImageDescriptor(Activator.getImageDescriptor("icons/picture_save.png"));
 		
+		MenuAction menuAction = new MenuAction("Axes Aspect Ratio");
+		menuAction.setToolTipText("Set squaring of axes");
+		menuAction.setImageDescriptor(Activator.getImageDescriptor("icons/orthographic.png"));
+		
+		Action s = new Action("Square", Action.AS_RADIO_BUTTON) {
+			@Override
+			public void run() {
+				chart.getView().setSquarifier(null);
+				chart.getView().setSquared(true);
+				
+			}
+		};
+		
+		s.setChecked(true);
+		
+		menuAction.add(s);
+		
+		menuAction.add(new Action("Axes Aspect Ratio", Action.AS_RADIO_BUTTON) {
+			@Override
+			public void run() {
+				chart.getView().setSquared(false);
+				
+			}
+		});
+		
+		menuAction.add(new Action("Square XZ", Action.AS_RADIO_BUTTON) {
+			@Override
+			public void run() {
+				chart.getView().setSquarifier(new XZSquarifier());
+				chart.getView().setSquared(true);
+			}
+		});
+		
+		menuAction.add(new Action("Square ZX", Action.AS_RADIO_BUTTON) {
+			@Override
+			public void run() {
+				chart.getView().setSquarifier(new ZXSquarifier());
+				chart.getView().setSquared(true);
+			}
+		});
+		
+		menuAction.add(new Action("Square YZ", Action.AS_RADIO_BUTTON) {
+			@Override
+			public void run() {
+				chart.getView().setSquarifier(new YZSquarifier());
+				chart.getView().setSquared(true);
+			}
+		});
+		
+		menuAction.add(new Action("Square ZY", Action.AS_RADIO_BUTTON) {
+			@Override
+			public void run() {
+				chart.getView().setSquarifier(new ZYSquarifier());
+				chart.getView().setSquared(true);
+			}
+		});
+		
+		menuAction.add(new Action("Square XY", Action.AS_RADIO_BUTTON) {
+			@Override
+			public void run() {
+				chart.getView().setSquarifier(new XYSquarifier());
+				chart.getView().setSquared(true);
+			}
+		});
+		
+		menuAction.add(new Action("Square YX", Action.AS_RADIO_BUTTON) {
+			@Override
+			public void run() {
+				chart.getView().setSquarifier(new YXSquarifier());
+				chart.getView().setSquared(true);
+			}
+		});
+		
 		plotActionSystem.registerGroup("org.dawnsci.jzy3.jzy3dplotviewer.actions", ManagerType.TOOLBAR);
 		plotActionSystem.registerAction("org.dawnsci.jzy3.jzy3dplotviewer.actions", configureAction, ActionType.JZY3D_COLOR, ManagerType.TOOLBAR);
-		plotActionSystem.registerAction("org.dawnsci.jzy3.jzy3dplotviewer.actions", squareAction, ActionType.JZY3D_COLOR, ManagerType.TOOLBAR);
+		plotActionSystem.registerAction("org.dawnsci.jzy3.jzy3dplotviewer.actions", menuAction, ActionType.JZY3D_COLOR, ManagerType.TOOLBAR);
 		plotActionSystem.registerAction("org.dawnsci.jzy3.jzy3dplotviewer.actions", saveAction, ActionType.JZY3D_COLOR, ManagerType.TOOLBAR);
 		
 		plotActionSystem.createToolDimensionalActions(ToolPageRole.ROLE_JUST_COLOUR, "org.dawb.workbench.plotting.views.toolPageView.Color");

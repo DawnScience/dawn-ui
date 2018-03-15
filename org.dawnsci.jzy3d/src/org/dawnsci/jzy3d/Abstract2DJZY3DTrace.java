@@ -5,8 +5,6 @@ import java.util.List;
 
 import org.eclipse.dawnsci.plotting.api.histogram.IImageService;
 import org.eclipse.dawnsci.plotting.api.histogram.IPaletteService;
-import org.eclipse.dawnsci.plotting.api.histogram.ImageServiceBean;
-import org.eclipse.dawnsci.plotting.api.histogram.ImageServiceBean.HistoType;
 import org.eclipse.january.dataset.DatasetUtils;
 import org.eclipse.january.dataset.FloatDataset;
 import org.eclipse.january.dataset.IDataset;
@@ -32,8 +30,10 @@ public abstract class Abstract2DJZY3DTrace extends AbstractColorMapTrace {
 	public void setData(IDataset data, IDataset[] axes) {
 		
 		if (getImageServiceBean() == null) {
-			bean = new ImageServiceBean(data, HistoType.OUTLIER_VALUES);
+			bean = imageService.createBeanFromPreferences();
 		}
+		
+		bean.setImage(data);
 		
 		double[] fs = imageService.getFastStatistics(bean);
 		
