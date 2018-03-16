@@ -49,12 +49,12 @@ public class DataOptions implements IDataObject, IDataPackage {
 		if (am.getAxes() == null) return null;
 		String[] ax = new String[am.getAxes().length];
 		ILazyDataset[] axes = am.getAxes();
+		// check for Nexus style name
 		int index = name.lastIndexOf(Node.SEPARATOR);
-		if (index < 0) return null;
-		String sub = name.substring(0, index);
+		String sub = index < 0 ? "" : name.substring(0, index + 1);
 		for (int i = 0; i < axes.length; i++) {
 			if (axes[i] != null) {
-				String full =  sub + Node.SEPARATOR + axes[i].getName();
+				String full =  sub + axes[i].getName();
 				ax[i] = parent.getDataShapes().containsKey(full) ? full : null;
 			} else {
 				ax[i] = null;
