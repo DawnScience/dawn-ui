@@ -52,6 +52,7 @@ public class JZY3DPlotViewer extends IPlottingSystemViewer.Stub<Composite> {
 	
 	private Chart chart;
 	private Composite control;
+	private int[] shape;
 	
 	@Override
 	public void createControl(final Composite parent) {
@@ -103,7 +104,7 @@ public class JZY3DPlotViewer extends IPlottingSystemViewer.Stub<Composite> {
 		Action configureAction = new Action("Configure") {
 			@Override
 			public void run() {
-				PreferenceDialog prefs = new PreferenceDialog(Display.getDefault().getActiveShell(), chart);
+				PreferenceDialog prefs = new PreferenceDialog(Display.getDefault().getActiveShell(), chart, shape);
 				prefs.open();
 			}
 		};
@@ -216,6 +217,11 @@ public class JZY3DPlotViewer extends IPlottingSystemViewer.Stub<Composite> {
 	@Override
 	public boolean addTrace(ITrace trace){
 		
+		// set shape where [0] is x, [1] is y, and [2] is z max value
+		int[] originalShape = trace.getData().getShape();
+		int maxDataValue = trace.getData().max(true).intValue();
+		shape = new int[] { originalShape[0], originalShape[1], maxDataValue };
+
 		List<IDataset> axes = ((AbstractColorMapTrace)trace).getAxes();
 		
 		IDataset xD = axes.get(0);

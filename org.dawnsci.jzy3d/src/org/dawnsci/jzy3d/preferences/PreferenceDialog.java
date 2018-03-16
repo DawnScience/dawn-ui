@@ -11,6 +11,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StackLayout;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.layout.GridData;
@@ -19,12 +20,16 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.jzy3d.chart.Chart;
 import org.jzy3d.colors.Color;
+import org.jzy3d.plot3d.primitives.axes.AxeBox;
 import org.jzy3d.plot3d.primitives.axes.layout.IAxeLayout;
+import org.jzy3d.plot3d.text.renderers.TextBitmapRenderer;
+import org.jzy3d.plot3d.text.renderers.TextBitmapRenderer.Font;
 
 public class PreferenceDialog extends Dialog {
 
@@ -34,10 +39,14 @@ public class PreferenceDialog extends Dialog {
 	private ColorSelector gridColorSelector;
 	private Button showAxisButton;
 	private ColorSelector backgroundColorSelector;
+	private int[] shape;
+	private Label scaleFontLabel;
+	private Combo fontCombo;
 
-	public PreferenceDialog(Shell parentShell, Chart chart) {
+	public PreferenceDialog(Shell parentShell, Chart chart, int[] shape) {
 		super(parentShell);
 		this.chart = chart;
+		this.shape = shape;
 		axisConfigPageList = new ArrayList<AxisPreferenceConfig>();
 		setShellStyle(getShellStyle() | SWT.RESIZE);
 	}
@@ -47,6 +56,7 @@ public class PreferenceDialog extends Dialog {
 		IAxeLayout axeLayout = chart.getAxeLayout();
 
 		Composite container = (Composite) super.createDialogArea(parent);
+		container.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		// axes config
 		Group axisSelectGroup = new Group(container, SWT.NONE);
 		axisSelectGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
@@ -68,7 +78,7 @@ public class PreferenceDialog extends Dialog {
 			Group axisConfigGroup = new Group(axisConfigComposite, SWT.NONE);
 			axisConfigGroup.setText("Change Settings");
 			axisConfigGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-			AxisPreferenceConfig axisConfigPage = new AxisPreferenceConfig(chart, i);
+			AxisPreferenceConfig axisConfigPage = new AxisPreferenceConfig(chart, i, shape);
 			axisConfigPageList.add(axisConfigPage);
 			axisConfigPage.createComposite(axisConfigGroup);
 		}
@@ -83,10 +93,10 @@ public class PreferenceDialog extends Dialog {
 		
 		//plot config
 		Group plotConfigGroup = new Group(container, SWT.NONE);
-		plotConfigGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		plotConfigGroup.setText("Plot options");
 		plotConfigGroup.setLayout(new GridLayout(2, false));
-		
+		plotConfigGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+
 		tickLineButton = new Button(plotConfigGroup, SWT.CHECK);
 		configCheckButton(tickLineButton, "Show Tick Line");
 		tickLineButton.setSelection(axeLayout.isTickLineDisplayed());
@@ -117,7 +127,57 @@ public class PreferenceDialog extends Dialog {
 		color = chart.getView().getBackgroundColor();
 		backgroundColorSelector.setColorValue(new RGB(getRGBInt(color.r), getRGBInt(color.g), getRGBInt(color.b)));
 
+		//font
+		Label fontLabel = new Label(plotConfigGroup, SWT.NONE);
+		fontLabel.setText("Choose Font Style: ");
+//		gd = new GridData(SWT.FILL, SWT.CENTER, false, false, 1, 1);
+		
+		Composite fontComp = new Composite(plotConfigGroup, SWT.NONE);
+		fontComp.setLayout(new GridLayout(2, true));
+		
+		fontCombo = new Combo(fontComp, SWT.DROP_DOWN | SWT.READ_ONLY);
+		fontCombo.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
+		TextBitmapRenderer.Font[] fonts = TextBitmapRenderer.Font.values();
+		for (int i = 0; i < fonts.length; i++) {
+			fontCombo.add(fonts[i].toString());
+		}
+		fontCombo.select(0);
+		fontCombo.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				int idx = fontCombo.getSelectionIndex();
+				org.eclipse.swt.graphics.Font font = getSWTFont(fonts[idx]);
+				scaleFontLabel.setText(fontCombo.getText());
+				scaleFontLabel.setFont(font);
+			}
+		});
+		scaleFontLabel = new Label(fontComp, SWT.NONE);
+		scaleFontLabel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1));
+		scaleFontLabel.setText(fontCombo.getText());
+		
 		return container;
+	}
+
+	private org.eclipse.swt.graphics.Font getSWTFont(Font font) {
+		FontData fData = null;
+		switch (font) {
+		case Helvetica_10:
+			fData = new FontData("Helvetica", 10, SWT.NORMAL);
+			break;
+		case Helvetica_12:
+			fData = new FontData("Helvetica", 12, SWT.NORMAL);
+			break;
+		case Helvetica_18:
+			fData = new FontData("Helvetica", 18, SWT.NORMAL);
+			break;
+		case TimesRoman_10:
+			fData = new FontData("Times New Roman", 10, SWT.NORMAL);
+			break;
+		case TimesRoman_24:
+			fData = new FontData("Times New Roman", 24, SWT.NORMAL);
+			break;
+		}
+		return new org.eclipse.swt.graphics.Font(Display.getDefault(), fData);
 	}
 
 	/**
@@ -175,6 +235,32 @@ public class PreferenceDialog extends Dialog {
 		chart.getView().setAxeBoxDisplayed(showAxisButton.getSelection());
 		color = backgroundColorSelector.getColorValue();
 		chart.getView().setBackgroundColor(new Color(color.red, color.green, color.blue));
+
+		AxeBox axeBox = (AxeBox)chart.getView().getAxe();
+		Font selectedFont = getSelectedFont(fontCombo.getText());
+		axeBox.setTextRenderer(new TextBitmapRenderer(selectedFont));
+	}
+
+	private Font getSelectedFont(String fontText) {
+		Font font = null;
+		switch (fontText) {
+		case "Helvetica_10":
+			font = Font.Helvetica_10;
+			break;
+		case "Helvetica_12":
+			font = Font.Helvetica_12;
+			break;
+		case "Helvetica_18":
+			font = Font.Helvetica_18;
+			break;
+		case "TimesRoman_10":
+			font = Font.TimesRoman_10;
+			break;
+		case "TimesRoman_24":
+			font = Font.TimesRoman_24;
+			break;
+		}
+		return font;
 	}
 
 	@Override
@@ -185,7 +271,7 @@ public class PreferenceDialog extends Dialog {
 
 	@Override
 	protected Point getInitialSize() {
-		return new Point(450, 750);
+		return new Point(500, 750);
 	}
 
 }

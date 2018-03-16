@@ -13,7 +13,8 @@ Require-Bundle: org.eclipse.dawnsci.plotting.api,
  org.eclipse.ui.workbench,
  org.eclipse.core.runtime;bundle-version="3.11.1",
  org.jogamp.jogl.ebr;bundle-version="2.3.2",
- org.dawnsci.datavis.model
+ org.dawnsci.datavis.model,
+ org.dawnsci.common.widgets
 Import-Package: org.dawb.common.ui.menu,
  org.eclipse.core.runtime.preferences;version="3.3.0",
  org.eclipse.swt.graphics,

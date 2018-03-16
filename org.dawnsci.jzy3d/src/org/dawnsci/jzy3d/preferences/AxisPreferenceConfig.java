@@ -1,4 +1,6 @@
 package org.dawnsci.jzy3d.preferences;
+
+import org.dawnsci.common.widgets.spinner.FloatSpinner;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -13,6 +15,7 @@ import org.eclipse.swt.widgets.FontDialog;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.jzy3d.chart.Chart;
+import org.jzy3d.maths.BoundingBox3d;
 import org.jzy3d.plot3d.primitives.axes.layout.IAxeLayout;
 import org.jzy3d.plot3d.primitives.axes.layout.renderers.DateTickRenderer;
 import org.jzy3d.plot3d.primitives.axes.layout.renderers.DefaultDecimalTickRenderer;
@@ -37,13 +40,20 @@ public class AxisPreferenceConfig {
 	private Button axeLabelButton;
 	private Combo axisTypeCombo;
 	private Chart chart;
+	private FloatSpinner minText;
+	private FloatSpinner maxText;
+
+	private double minimum;
+	private double maximum;
+	private int[] shape;
 	
 	private enum AxisType {
 		DECIMAL(0, "Decimal"),
 		INTEGER(1, "Integer"),
 		DATE(2, "Date"),
 		SI(3, "Scientific Notation"),
-		PITCH(4, "Pitch");
+		PITCH(4, "Pitch"),
+		FONT (5, "Font");
 	
 		private int value;
 		private String name;
@@ -69,10 +79,13 @@ public class AxisPreferenceConfig {
 	 *            chart
 	 * @param i
 	 *            index of axis
+	 * @param shape
+	 *            shape of data
 	 */
-	public AxisPreferenceConfig(Chart chart, int i) {
+	public AxisPreferenceConfig(Chart chart, int i, int[] shape) {
 		this.chart = chart;
 		this.index = i;
+		this.shape = shape;
 	}
 
 	public void createComposite(final Composite composite) {
@@ -89,29 +102,6 @@ public class AxisPreferenceConfig {
 		titleText = new Text(composite, SWT.BORDER | SWT.SINGLE);
 		gd = new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1);
 		titleText.setLayoutData(gd);
-
-//		titleFontLabel = new Label(composite, 0);
-//		labelGd = new GridData(SWT.FILL, SWT.CENTER, false, false, 2, 1);
-//		titleFontLabel.setLayoutData(labelGd);
-//		final Button titleFontButton = new Button(composite, SWT.PUSH);
-//		titleFontButton.setText("Change...");
-//		gd = new GridData(SWT.BEGINNING, SWT.CENTER, false, false, 1, 1);
-//		titleFontButton.setLayoutData(gd);
-//		titleFontButton.addSelectionListener(new SelectionAdapter() {
-//			@Override
-//			public void widgetSelected(SelectionEvent e) {
-//				FontDialog fontDialog = new FontDialog(composite.getShell());
-//				if (titleFont != null)
-//					fontDialog.setFontList(titleFont.getFontData());
-//				FontData fontData = fontDialog.open();
-//				if (fontData != null) {
-//					titleFont = XYGraphMediaFactory.getInstance().getFont(fontData);
-//					titleFontLabel.setFont(titleFont);
-//					titleFontLabel.setText("Title Font: " + fontData.getName());
-//					composite.getShell().layout(true, true);
-//				}
-//			}
-//		});
 
 		scaleFontLabel = new Label(composite, 0);
 		labelGd = new GridData(SWT.FILL, SWT.CENTER, false, false, 2, 1);
@@ -136,22 +126,7 @@ public class AxisPreferenceConfig {
 				}
 			}
 		});
-
-		final Label colorLabel = new Label(composite, 0);
-		colorLabel.setText("Tick Color:");
-		labelGd = new GridData(SWT.FILL, SWT.CENTER, false, false, 2, 1);
-		colorLabel.setLayoutData(labelGd);
-
-//		tickColorSelector = new ColorSelector(composite);
-//		gd = new GridData(SWT.BEGINNING, SWT.CENTER, false, false, 1, 1);
-//		tickColorSelector.getButton().setLayoutData(gd);
-//		tickColorSelector.addListener(new IPropertyChangeListener() {
-//			public void propertyChange(PropertyChangeEvent event) {
-//				scaleFontLabel.setForeground(XYGraphMediaFactory.getInstance().getColor(axisColorSelector.getColorValue()));
-//				titleFontLabel.setForeground(XYGraphMediaFactory.getInstance().getColor(axisColorSelector.getColorValue()));
-//			}
-//		});
-
+		
 		axeLabelButton = new Button(composite, SWT.CHECK);
 		PreferenceDialog.configCheckButton(axeLabelButton, "Show Title");
 
@@ -166,55 +141,32 @@ public class AxisPreferenceConfig {
 		for (int i = 0; i < types.length; i++) {
 			axisTypeCombo.add(types[i].name);
 		}
+
+		// axis range
+		Label rangeLabel = new Label(composite, SWT.NONE);
+		rangeLabel.setText("Select Axis Range:");
+		labelGd = new GridData(SWT.FILL, SWT.CENTER, false, false, 2, 1);
+		rangeLabel.setLayoutData(labelGd);
+
+		Composite comp = new Composite(composite, SWT.NONE);
+		comp.setLayout(new GridLayout(4, false));
+		comp.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 3, 1));
 		
+		Label minLabel = new Label(comp, SWT.NONE);
+		minLabel.setText("Min:");
+		minLabel.setLayoutData(new GridData(SWT.BEGINNING, SWT.CENTER, false, false));
+		minText = new FloatSpinner(comp, SWT.BORDER);
+		minText.setLayoutData(new GridData(SWT.BEGINNING, SWT.CENTER, false, false));
+		Label maxLabel = new Label(comp, SWT.NONE);
+		maxLabel.setLayoutData(new GridData(SWT.END, SWT.CENTER, true, false));
+		maxLabel.setText("Max:");
+		maxText = new FloatSpinner(comp, SWT.BORDER);
+		maxText.setLayoutData(new GridData(SWT.BEGINNING, SWT.CENTER, false, false));
 
-//		dateEnabledButton = new Button(composite, SWT.CHECK);
-//		configCheckButton(dateEnabledButton, "Time Format Enabled");
-//
-//		autoFormat = new Button(composite, SWT.CHECK);
-//		configCheckButton(autoFormat, "Auto Format");
-//
-//		formatLabel = new Label(composite, 0);
-//		labelGd = new GridData(SWT.FILL, SWT.CENTER, false, false, 1, 1);
-//		formatLabel.setLayoutData(labelGd);
-//		formatText = new Text(composite, SWT.BORDER | SWT.MULTI);
-//		gd = new GridData(SWT.FILL, SWT.FILL, true, true, 2, 2);
-//		gd.minimumHeight = 40;
-//		formatText.setLayoutData(gd);
-//
-//		dateEnabledButton.addSelectionListener(new SelectionAdapter() {
-//			@Override
-//			public void widgetSelected(SelectionEvent e) {
-//				boolean saveDateEnabled = axis.isDateEnabled();
-//				boolean saveAutoFormat = axis.isAutoFormat();
-//				axis.setDateEnabled(dateEnabledButton.getSelection());
-//				axis.setAutoFormat(true);
-//				formatLabel.setText(dateEnabledButton.getSelection() ? "Time Format: " : "Numeric Format: ");
-//				formatText.setText(axis.getFormatPattern());
-//				axis.setDateEnabled(saveDateEnabled);
-//				axis.setAutoFormat(saveAutoFormat);
-//				composite.getShell().layout(true, true);
-//			}
-//		});
-
-//		autoFormat.addSelectionListener(new SelectionAdapter() {
-//			@Override
-//			public void widgetSelected(SelectionEvent e) {
-//				formatText.setEnabled(!autoFormat.getSelection());
-//				if (autoFormat.getSelection()) {
-//					boolean saveDateEnabled = axis.isDateEnabled();
-//					boolean saveAutoFormat = axis.isAutoFormat();
-//					axis.setDateEnabled(dateEnabledButton.getSelection());
-//					axis.setAutoFormat(autoFormat.getSelection());
-//					formatText.setText(axis.getFormatPattern());
-//					axis.setDateEnabled(saveDateEnabled);
-//					axis.setAutoFormat(saveAutoFormat);
-//				}
-//			}
-//		});
-
-//		Label sep = new Label(composite, SWT.SEPARATOR | SWT.HORIZONTAL);
-//		sep.setLayoutData(new GridData(SWT.FILL, SWT.NONE, true, false, 3, 1));
+		minText.setFormat(9, 4);
+		maxText.setFormat(9, 4);
+		minText.setIncrement(1.0);
+		maxText.setIncrement(1.0);
 
 		initialize();
 	}
@@ -228,27 +180,36 @@ public class AxisPreferenceConfig {
 
 	public void applyChanges() {
 		IAxeLayout axeLayout = chart.getAxeLayout();
+		
+		BoundingBox3d bounds = chart.getView().getBounds();
 		if (index == 0) { // x axis
 			axeLayout.setXAxeLabel(titleText.getText());
 			axeLayout.setXTickRenderer(getUpdatedRenderer());
 			axeLayout.setXTickLabelDisplayed(tickLabelButton.getSelection());
 			axeLayout.setXAxeLabelDisplayed(axeLabelButton.getSelection());
+			bounds.setXmin((float) minText.getDouble());
+			bounds.setXmax((float) maxText.getDouble());
 		} else if (index == 1) { // y axis
 			axeLayout.setYAxeLabel(titleText.getText());
 			axeLayout.setYTickRenderer(getUpdatedRenderer());
 			axeLayout.setYTickLabelDisplayed(tickLabelButton.getSelection());
 			axeLayout.setYAxeLabelDisplayed(axeLabelButton.getSelection());
+			bounds.setYmin((float) minText.getDouble());
+			bounds.setYmax((float) maxText.getDouble());
 		} else if (index == 2) { // z axis
 			axeLayout.setZAxeLabel(titleText.getText());
 			axeLayout.setZTickRenderer(getUpdatedRenderer());
 			axeLayout.setZTickLabelDisplayed(tickLabelButton.getSelection());
 			axeLayout.setZAxeLabelDisplayed(axeLabelButton.getSelection());
+			bounds.setZmin((float) minText.getDouble());
+			bounds.setZmax((float) maxText.getDouble());
 		}
 
 	}
 
 	private void initialize() {
 		IAxeLayout axeLayout = chart.getAxeLayout();
+		BoundingBox3d bounds = chart.getView().getBounds();
 
 		if (index == 0) {
 			titleText.setText(axeLayout.getXAxeLabel());
@@ -258,9 +219,11 @@ public class AxisPreferenceConfig {
 //			scaleFontLabel.setForeground(getaxis.getForegroundColor());
 //			scaleFontLabel.setFont(scaleFont);
 //			scaleFontLabel.setText("Scale Font: " + scaleFont.getFontData()[0].getName());
-//			color = axeLayout.getXTickColor();
 			tickLabelButton.setSelection(axeLayout.isXTickLabelDisplayed());
 			axeLabelButton.setSelection(axeLayout.isXAxeLabelDisplayed());
+			
+			minText.setDouble(bounds.getXmin());
+			maxText.setDouble(bounds.getXmax());
 
 		} else if (index == 1) {
 			titleText.setText(axeLayout.getYAxeLabel());
@@ -268,7 +231,10 @@ public class AxisPreferenceConfig {
 
 			tickLabelButton.setSelection(axeLayout.isYTickLabelDisplayed());
 			axeLabelButton.setSelection(axeLayout.isYAxeLabelDisplayed());
-
+			
+			minText.setDouble(bounds.getYmin());
+			maxText.setDouble(bounds.getYmax());
+			
 		} else if (index == 2) {
 			titleText.setText(axeLayout.getZAxeLabel());
 			initializeRenderer(axeLayout.getZTickRenderer());
@@ -276,7 +242,16 @@ public class AxisPreferenceConfig {
 			tickLabelButton.setSelection(axeLayout.isZTickLabelDisplayed());
 			axeLabelButton.setSelection(axeLayout.isZAxeLabelDisplayed());
 
+			minText.setDouble(bounds.getZmin());
+			maxText.setDouble(bounds.getZmax());
 		}
+		minimum = 0;
+		maximum = shape[index];
+		minText.setMinimum(minimum);
+		minText.setMaximum(maximum);
+		maxText.setMinimum(minimum);
+		maxText.setMaximum(maximum);
+
 	}
 
 	private void initializeRenderer(ITickRenderer renderer) {
