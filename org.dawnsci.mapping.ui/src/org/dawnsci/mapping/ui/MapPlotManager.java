@@ -681,6 +681,7 @@ public class MapPlotManager {
 		
 		private PlottableMapObject map;
 		private ITrace trace;
+		private HistoInfo histoInfo = null;
 
 		public MapTrace(PlottableMapObject map, ITrace trace) {
 			this.map = map;
@@ -692,6 +693,15 @@ public class MapPlotManager {
 		}
 
 		public ITrace getTrace() {
+			
+			if (histoInfo != null) {
+				IImageTrace t = (IImageTrace)trace;
+				t.setRescaleHistogram(false);
+				t.setMin(histoInfo.min);
+				t.setMax(histoInfo.max);
+				histoInfo = null;
+			}
+			
 			return trace;
 		}
 		
@@ -723,41 +733,19 @@ public class MapPlotManager {
 			trace = createImageTrace(map);
 			
 			if (locked && trace != null) {
-				IImageTrace t = (IImageTrace)trace;
-				t.setRescaleHistogram(false);
-				t.setMin(min);
-				t.setMax(max);
+				histoInfo = new HistoInfo(min, max);
 			}
 		}
+		
+		private class HistoInfo {
+			
+			public Number min;
+			public Number max;
 
-//		private void switchMap(final String name, final IDataset d) {
-//			if (Display.getCurrent() == null) {
-//				PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
-//
-//					@Override
-//					public void run() {
-//						switchMap(name, d);
-//					}
-//				});
-//				return;
-//			}
-//			
-//			if (d == null) return;
-//
-//			if (d.getRank() > 2) {
-//				d.setShape(new int[]{d.getShape()[0],d.getShape()[1]});
-//			}
-//
-//			if (trace == null) {
-//				trace = createImageTrace(map);
-//			} else {
-//				if (trace instanceof IVectorTrace) {
-//					// TODO Passing this over for now, must sort
-//				}
-//				else {
-//					MetadataPlotUtils.switchData(name,d, (IImageTrace) trace);
-//				}
-//			}
-//		}
+			public HistoInfo(Number min, Number max) {
+				this.min = min;
+				this.max = max;
+			}
+		}
 	}
 }
