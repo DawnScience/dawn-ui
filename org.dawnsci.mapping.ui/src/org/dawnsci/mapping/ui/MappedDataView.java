@@ -248,7 +248,7 @@ public class MappedDataView extends ViewPart {
 			if (e instanceof MappedDataFile) {
 				MappedDataFile mdf = (MappedDataFile)e;
 				if (mdf.getLiveDataBean() !=null)
-					fileController.loadLiveFile(mdf.getPath(), mdf.getLiveDataBean(),mdf.getParentPath());
+					fileController.loadLiveFile(mdf.getPath(), mdf.getLiveDataBean(),mdf.getParentPath(),false);
 			}
 			viewer.refresh();
 		});

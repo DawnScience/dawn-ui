@@ -47,7 +47,7 @@ public interface IMapFileController {
 
 	void localReloadFile(String path);
 
-	void loadLiveFile(final String path, LiveDataBean bean, String parentFile);
+	void loadLiveFile(final String path, LiveDataBean bean, String parentFile, boolean lazy);
 
 	List<String> loadFile(String path, MappedDataFileBean bean, IProgressService progressService);
 

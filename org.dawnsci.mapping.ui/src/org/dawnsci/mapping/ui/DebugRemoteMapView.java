@@ -86,7 +86,7 @@ public class DebugRemoteMapView extends ViewPart {
 
 						final IMapFileController manager = (IMapFileController)view.getAdapter(MappedFileManager.class);
 						if (manager != null) {
-							manager.loadLiveFile(filename.getText(), l,null);
+							manager.loadLiveFile(filename.getText(), l,null,false);
 						}
 					}
 					

@@ -59,7 +59,7 @@ public class FileOpenEventHandler implements EventHandler {
 		
 		if (event.containsProperty("live_bean")) {
 			Object p = event.getProperty("live_bean");
-			if (p instanceof LiveDataBean) fm.loadLiveFile(path, (LiveDataBean)p,null);
+			if (p instanceof LiveDataBean) fm.loadLiveFile(path, (LiveDataBean)p,null, true);
 			return;
 		}
 		
@@ -67,7 +67,7 @@ public class FileOpenEventHandler implements EventHandler {
 			LiveDataBean b = new LiveDataBean();
 			b.setHost(event.getProperty("host").toString());
 			b.setPort(Integer.parseInt(event.getProperty("port").toString()));
-			fm.loadLiveFile(path, (LiveDataBean)b,null);
+			fm.loadLiveFile(path, (LiveDataBean)b,null, true);
 			return;
 		}
 

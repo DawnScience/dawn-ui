@@ -194,10 +194,10 @@ public class MappedFileManager implements IMapFileController{
 	}	
 	
 	@Override
-	public void loadLiveFile(final String path, LiveDataBean bean, String parentFile) {
+	public void loadLiveFile(final String path, LiveDataBean bean, String parentFile, boolean lazy) {
 		if (parentFile != null && !mappedDataArea.contains(parentFile)) return;
 		
-		LiveMapLoadingRunnable r = new LiveMapLoadingRunnable(path, bean, parentFile);
+		LiveMapLoadingRunnable r = new LiveMapLoadingRunnable(path, bean, parentFile, lazy);
 		
 		liveLoadExector.submit(r);
 	}
@@ -439,11 +439,13 @@ public class MappedFileManager implements IMapFileController{
 		private LiveDataBean bean;
 		private String path;
 		private String parentFile;
+		private boolean lazy = false;
 
-		public LiveMapLoadingRunnable(final String path, LiveDataBean bean, String parentFile) {
+		public LiveMapLoadingRunnable(final String path, LiveDataBean bean, String parentFile, boolean lazy) {
 			this.path = path;
 			this.bean = bean;
 			this.parentFile = parentFile;
+			this.lazy = lazy;
 		}
 		
 		@Override
@@ -457,35 +459,36 @@ public class MappedFileManager implements IMapFileController{
 				return;
 			}
 			
-			IRemoteData rd = remoteService.createRemoteData(bean.getHost(), bean.getPort());
-			
-			if (rd == null) {
-				logger.error("Could not acquire remote data on :" + bean.getHost() + ":" + bean.getPort());
-				return;
-			}
-			
-			try {
-				rd.setPath(path);
-				Map<String, Object> map = rd.getTree();
-				map.toString();
-				Tree tree = TreeToMapUtils.mapToTree(map, path);
+			if (!lazy) {
+				IRemoteData rd = remoteService.createRemoteData(bean.getHost(), bean.getPort());
 				
-				MappedDataFileBean buildBean = buildBeanFromTree(tree);
-				
-				if (buildBean != null) {
-					buildBean.setLiveBean(bean);
-					innerImportFile(path, buildBean, null,parentFile);
-				} else {
-					logger.error("Bean from live tree is null!");
+				if (rd == null) {
+					logger.error("Could not acquire remote data on :" + bean.getHost() + ":" + bean.getPort());
+					return;
 				}
 				
-				return;
-				
-			} catch (Exception e) {
-				//It is possible that building the live bean will fail
-				logger.info("Could not build live map bean from " + path, e);
+				try {
+					rd.setPath(path);
+					Map<String, Object> map = rd.getTree();
+					map.toString();
+					Tree tree = TreeToMapUtils.mapToTree(map, path);
+					
+					MappedDataFileBean buildBean = buildBeanFromTree(tree);
+					
+					if (buildBean != null) {
+						buildBean.setLiveBean(bean);
+						innerImportFile(path, buildBean, null,parentFile);
+					} else {
+						logger.error("Bean from live tree is null!");
+					}
+					
+					return;
+					
+				} catch (Exception e) {
+					//It is possible that building the live bean will fail
+					logger.info("Could not build live map bean from " + path, e);
+				}
 			}
-			
 			
 			MappedDataFile mdf = new MappedDataFile(path,bean);
 			mdf.setParentPath(parentFile);
@@ -511,7 +514,7 @@ public class MappedFileManager implements IMapFileController{
 				LiveDataBean b = new LiveDataBean();
 				b.setHost(host);
 				b.setPort(port);
-				loadLiveFile(path, b, parent);
+				loadLiveFile(path, b, parent, true);
 			} else {
 				loadFiles(new String[] {path}, null);
 			}
