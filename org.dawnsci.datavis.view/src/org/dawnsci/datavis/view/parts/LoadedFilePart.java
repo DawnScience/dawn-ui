@@ -467,6 +467,11 @@ public class LoadedFilePart {
 			Display.getDefault().syncExec(() -> updateOnStateChange(event));
 			return;
 		}
+		if (!fileController.getLoadedFiles().isEmpty() &&
+			fileController.getCurrentFile() == fileController.getLoadedFiles().get(0) &&
+			viewer.getTable().getSelectionIndex() == -1) {
+			viewer.getTable().setSelection(0); // setSelection() does not fire a selection event, which is a good thing!
+		}
 		viewer.setInput(fileController);
 	}
 	
