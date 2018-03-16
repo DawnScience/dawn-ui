@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import org.dawb.common.ui.menu.MenuAction;
-import org.dawnsci.jzy3d.preferences.PreferenceDialog;
+import org.dawnsci.jzy3d.toolbar.ConfigDialog;
 import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.dawnsci.plotting.api.ActionType;
 import org.eclipse.dawnsci.plotting.api.IPlotActionSystem;
@@ -104,7 +104,7 @@ public class JZY3DPlotViewer extends IPlottingSystemViewer.Stub<Composite> {
 		Action configureAction = new Action("Configure") {
 			@Override
 			public void run() {
-				PreferenceDialog prefs = new PreferenceDialog(Display.getDefault().getActiveShell(), chart, shape);
+				ConfigDialog prefs = new ConfigDialog(Display.getDefault().getActiveShell(), chart, shape);
 				prefs.open();
 			}
 		};

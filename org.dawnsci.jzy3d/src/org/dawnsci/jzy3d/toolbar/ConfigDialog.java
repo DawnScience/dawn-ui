@@ -1,4 +1,4 @@
-package org.dawnsci.jzy3d.preferences;
+package org.dawnsci.jzy3d.toolbar;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,9 +31,9 @@ import org.jzy3d.plot3d.primitives.axes.layout.IAxeLayout;
 import org.jzy3d.plot3d.text.renderers.TextBitmapRenderer;
 import org.jzy3d.plot3d.text.renderers.TextBitmapRenderer.Font;
 
-public class PreferenceDialog extends Dialog {
+public class ConfigDialog extends Dialog {
 
-	private List<AxisPreferenceConfig> axisConfigPageList;
+	private List<AxisConfigArea> axisConfigPageList;
 	private Chart chart;
 	private Button tickLineButton;
 	private ColorSelector gridColorSelector;
@@ -43,11 +43,11 @@ public class PreferenceDialog extends Dialog {
 	private Label scaleFontLabel;
 	private Combo fontCombo;
 
-	public PreferenceDialog(Shell parentShell, Chart chart, int[] shape) {
+	public ConfigDialog(Shell parentShell, Chart chart, int[] shape) {
 		super(parentShell);
 		this.chart = chart;
 		this.shape = shape;
-		axisConfigPageList = new ArrayList<AxisPreferenceConfig>();
+		axisConfigPageList = new ArrayList<AxisConfigArea>();
 		setShellStyle(getShellStyle() | SWT.RESIZE);
 	}
 
@@ -78,7 +78,7 @@ public class PreferenceDialog extends Dialog {
 			Group axisConfigGroup = new Group(axisConfigComposite, SWT.NONE);
 			axisConfigGroup.setText("Change Settings");
 			axisConfigGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-			AxisPreferenceConfig axisConfigPage = new AxisPreferenceConfig(chart, i, shape);
+			AxisConfigArea axisConfigPage = new AxisConfigArea(chart, i, shape);
 			axisConfigPageList.add(axisConfigPage);
 			axisConfigPage.createComposite(axisConfigGroup);
 		}
@@ -225,7 +225,7 @@ public class PreferenceDialog extends Dialog {
 	}
 
 	private void applyChanges() {
-		for (AxisPreferenceConfig axisConfigPage : axisConfigPageList) {
+		for (AxisConfigArea axisConfigPage : axisConfigPageList) {
 			axisConfigPage.applyChanges();
 		}
 		IAxeLayout axeLayout = chart.getAxeLayout();

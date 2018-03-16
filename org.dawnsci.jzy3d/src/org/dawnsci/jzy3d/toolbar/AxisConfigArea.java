@@ -1,4 +1,4 @@
-package org.dawnsci.jzy3d.preferences;
+package org.dawnsci.jzy3d.toolbar;
 
 import org.dawnsci.common.widgets.spinner.FloatSpinner;
 import org.eclipse.swt.SWT;
@@ -29,7 +29,7 @@ import org.jzy3d.plot3d.primitives.axes.layout.renderers.ScientificNotationTickR
  * properties.
  * 
  */
-public class AxisPreferenceConfig {
+public class AxisConfigArea {
 	private Text titleText;
 	private Label scaleFontLabel;
 	private Font scaleFont;
@@ -82,7 +82,7 @@ public class AxisPreferenceConfig {
 	 * @param shape
 	 *            shape of data
 	 */
-	public AxisPreferenceConfig(Chart chart, int i, int[] shape) {
+	public AxisConfigArea(Chart chart, int i, int[] shape) {
 		this.chart = chart;
 		this.index = i;
 		this.shape = shape;
@@ -128,10 +128,10 @@ public class AxisPreferenceConfig {
 		});
 		
 		axeLabelButton = new Button(composite, SWT.CHECK);
-		PreferenceDialog.configCheckButton(axeLabelButton, "Show Title");
+		ConfigDialog.configCheckButton(axeLabelButton, "Show Title");
 
 		tickLabelButton = new Button(composite, SWT.CHECK);
-		PreferenceDialog.configCheckButton(tickLabelButton, "Show Tick");
+		ConfigDialog.configCheckButton(tickLabelButton, "Show Tick");
 
 		Label axisTypeLabel = new Label(composite, SWT.NONE);
 		axisTypeLabel.setText("Select axis type:");
