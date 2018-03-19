@@ -91,17 +91,24 @@ public class FileController implements IFileController {
 	public String getID() {
 		return currentId;
 	}
-
+	
 	/* (non-Javadoc)
 	 * @see org.dawnsci.datavis.model.IFileController#loadFiles(java.lang.String[], org.eclipse.ui.progress.IProgressService)
 	 */
 	@Override
 	public List<String> loadFiles(String[] paths, IProgressService progressService) {
+		return loadFiles(paths, progressService, true);
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.dawnsci.datavis.model.IFileController#loadFiles(java.lang.String[], org.eclipse.ui.progress.IProgressService)
+	 */
+	public List<String> loadFiles(String[] paths, IProgressService progressService, boolean addToRecentPlaces) {
 		
 		FileLoadingRunnable runnable = new FileLoadingRunnable(loadedFiles, listeners, paths);
 		
 		if (progressService == null) {
-			runnable.run(null);
+			runnable.run(null, addToRecentPlaces);
 		} else {
 			try {
 				progressService.busyCursorWhile(runnable);
@@ -362,6 +369,10 @@ public class FileController implements IFileController {
 		
 		@Override
 		public void run(IProgressMonitor monitor) {
+			run(monitor, true);
+		}
+		
+		public void run(IProgressMonitor monitor, boolean addToRecentPlaces) {
 			
 			List<LoadedFile> files = new ArrayList<>();
 			
@@ -405,7 +416,9 @@ public class FileController implements IFileController {
 			
 			if (!files.isEmpty()) {
 				String name = files.get(0).getFilePath();
-				recentPlaces.addPlace(name);
+				if (addToRecentPlaces) {
+					recentPlaces.addPlace(name);
+				}
 				lFiles.addFiles(files);
 			}
 			
