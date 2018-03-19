@@ -12,6 +12,7 @@ import java.util.stream.Collectors;
 
 import org.dawnsci.conversion.ui.ConvertWizard;
 import org.dawnsci.datavis.model.DataOptions;
+import org.dawnsci.datavis.model.FileController;
 import org.dawnsci.datavis.model.FileJoining;
 import org.dawnsci.datavis.model.IDataObject;
 import org.dawnsci.datavis.model.IFileController;
@@ -343,7 +344,9 @@ public class LoadedFileMenuListener implements IMenuListener {
 		@Override
 		public void run() {
 			String joinedFilePath = FileJoining.AutoFileJoiner(filepathGenerator(getFileSelection()));
-			fileController.loadFile(joinedFilePath);
+			if (fileController instanceof FileController) {
+				((FileController)fileController).loadFiles(new String[]{joinedFilePath}, null, false);
+			}
 			view.refresh();
 		}
 		

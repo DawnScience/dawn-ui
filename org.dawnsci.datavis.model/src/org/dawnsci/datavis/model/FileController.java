@@ -101,7 +101,7 @@ public class FileController implements IFileController {
 	}
 	
 	/* (non-Javadoc)
-	 * @see org.dawnsci.datavis.model.IFileController#loadFiles(java.lang.String[], org.eclipse.ui.progress.IProgressService)
+	 * @see org.dawnsci.datavis.model.IFileController#loadFiles(java.lang.String[], org.eclipse.ui.progress.IProgressService, boolean)
 	 */
 	public List<String> loadFiles(String[] paths, IProgressService progressService, boolean addToRecentPlaces) {
 		
