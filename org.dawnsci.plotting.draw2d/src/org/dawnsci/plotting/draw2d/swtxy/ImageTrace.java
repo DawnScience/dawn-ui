@@ -1429,8 +1429,9 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 			imageServiceBean.setImage(im);
 			
 			imageServiceBean.setLogColorScale(getPreferenceStore().getBoolean(PlottingConstants.CM_LOGSCALE));
-			if(imageServiceBean.isLogColorScale())
-				rehistogram();
+			//shouldn't rehistogram here, may not be UI thread
+//			if(imageServiceBean.isLogColorScale())
+//				rehistogram();
 			
 			return false;
 		}
