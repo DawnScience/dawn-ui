@@ -40,7 +40,7 @@ public class FileJoining {
 	private static final Logger logger = LoggerFactory.getLogger(FileJoining.class);
 	
 	
-	public static String AutoFileJoiner(List<String> filePathList) {
+	public static String autoFileJoiner(List<String> filePathList) {
 		// First, let's find out something about the files
 		String firstFilePath = filePathList.get(0);
 		List<String> fileList = new ArrayList<String>();
@@ -72,17 +72,17 @@ public class FileJoining {
 			}
 		}
 		
-		List<String> fileDatasets = DatasetsAsList(firstFilePath);
+		List<String> fileDatasets = datasetsAsList(firstFilePath);
 		
 		String directoryString = "# DIR_NAME: " + directoryPath + "\n";
-		String datasetsString = JoinFilesStringBuilder("# DATASET_NAME: ", fileDatasets, "\n");
+		String datasetsString = stringBuilder("# DATASET_NAME: ", fileDatasets, "\n");
 		String fileNamesString = "# FILE_NAME";
-		fileNamesString += JoinFilesStringBuilder("\n", fileList, "");
+		fileNamesString += stringBuilder("\n", fileList, "");
 		
 		// Now create a fileWriter
 		BufferedWriter fileWriter = null;
 		File tempFile = null;
-		String outputName = JoinedFileName(fileList.get(0), fileList.get(fileList.size() - 1));
+		String outputName = fileNameJoiner(fileList.get(0), fileList.get(fileList.size() - 1));
 		
 		// Now output the text into the .dawn file
 		try {
@@ -103,14 +103,14 @@ public class FileJoining {
 	}
 	
 	
-	private static String JoinedFileName(String firstFileName, String lastFileName) {
+	private static String fileNameJoiner(String firstFileName, String lastFileName) {
 		int firstExtensionLocation = firstFileName.lastIndexOf(".");
 		int lastExtensionLocation = lastFileName.lastIndexOf(".");
 		String outputName = firstFileName.substring(0, firstExtensionLocation) + "--" + lastFileName.substring(0, lastExtensionLocation) + " ";
 		return outputName;
 	}
 	
-	private static List<String> DatasetsAsList(String filePath) {
+	private static List<String> datasetsAsList(String filePath) {
 		IDataHolder loadedFile;
 		List<String> fileDatasets = new ArrayList<String>();
 		
@@ -130,9 +130,9 @@ public class FileJoining {
 	}
 	
 	
-	private static String JoinFilesStringBuilder (String beginning, List<String> middle, String end) {
-		// Set up our returnable
-		String builtString = "";
+	private static String stringBuilder (String beginning, List<String> middle, String end) {
+		// Set up our engine
+		StringBuilder buildEngine = new StringBuilder();
 		
 		// Set up our iterator
 		Iterator<String> stringIterator = middle.iterator();
@@ -140,10 +140,12 @@ public class FileJoining {
 		// Loop over our iterator
 		while (stringIterator.hasNext()) {
 			String currentString = stringIterator.next();
-			builtString += beginning + currentString + end;
+			buildEngine.append(beginning);
+			buildEngine.append(currentString);
+			buildEngine.append(end);
 		}
 		
 		// Return the built string
-		return builtString;
+		return buildEngine.toString();
 	}
 }

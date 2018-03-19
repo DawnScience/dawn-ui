@@ -343,7 +343,7 @@ public class LoadedFileMenuListener implements IMenuListener {
 
 		@Override
 		public void run() {
-			String joinedFilePath = FileJoining.AutoFileJoiner(filepathGenerator(getFileSelection()));
+			String joinedFilePath = FileJoining.autoFileJoiner(filepathGenerator(getFileSelection()));
 			if (fileController instanceof FileController) {
 				((FileController)fileController).loadFiles(new String[]{joinedFilePath}, null, false);
 			}
