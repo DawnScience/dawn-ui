@@ -521,7 +521,9 @@ public class HistogramViewer extends ContentViewer {
 	@Override
 	protected void handleDispose(DisposeEvent event) {
 		region.removeROIListener(histogramRegionListener);
-		histogramPlottingSystem.dispose();
+		if (!histogramPlottingSystem.isDisposed()) {
+			histogramPlottingSystem.dispose();
+		}
 		super.handleDispose(event);
 	}
 
