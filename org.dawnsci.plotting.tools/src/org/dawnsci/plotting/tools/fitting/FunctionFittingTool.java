@@ -473,30 +473,9 @@ public class FunctionFittingTool extends AbstractToolPage implements IFunctionSe
 	private void openPeakPrepopulateWizard() {
 		
 		getPlottingSystem().removeTraceListener(traceListener);
-		PeakPrepopulateWizard peakFindOptions = new PeakPrepopulateWizard(this);
-		
-		final Wizard wiz = new Wizard() {
-			//set 
-			@Override
-			public boolean performFinish() {
-				//TODO: grab peaks
-				//IWizardPage peakFindpage = wiz.getStartingPage();
-				PeakPrepopulateWizard peakToolpage = (PeakPrepopulateWizard) this.getStartingPage();
-				setInitialPeaks(peakToolpage.gatherPeaksFunc());
-				return true;
-			}
-		};
-		
-		wiz.setNeedsProgressMonitor(true);
-		wiz.addPage(peakFindOptions);
-
-		final WizardDialog wd = new WizardDialog(getSite().getShell(),wiz);
-		wd.setPageSize(new Point(900, 500));
-		wd.create();
-		wd.getCurrentPage();
-		if (wd.open() == WizardDialog.OK)
-		
-		getPlottingSystem().addTraceListener(traceListener);	
+		PeakPrepopulateTool peakFindOptions = new PeakPrepopulateTool(Display.getDefault().getActiveShell(), this, getFirstUserTraceROI());
+		peakFindOptions.open();
+		getPlottingSystem().addTraceListener(traceListener);
 	}
 
 	public void setInitialPeaks(Add initPeakCompFunc) {
