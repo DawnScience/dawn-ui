@@ -79,7 +79,6 @@ import org.eclipse.draw2d.BorderLayout;
 import org.eclipse.draw2d.ColorConstants;
 import org.eclipse.draw2d.Cursors;
 import org.eclipse.draw2d.Figure;
-import org.eclipse.draw2d.FigureCanvas;
 import org.eclipse.draw2d.GridData;
 import org.eclipse.draw2d.GridLayout;
 import org.eclipse.draw2d.IFigure;
@@ -218,6 +217,7 @@ public class LightWeightPlotViewer<T> extends AbstractPlottingViewer<T> implemen
 	        this.figureCanvas = xyCanvas;
 		}
 		this.xyGraph = new XYRegionGraph();
+		setEnabled(true);
 		xyGraph.setSelectionProvider(system.getSelectionProvider());
 		IActionBars bars = system.getActionBars();
  		PlotActionsManagerImpl actionBarManager = (PlotActionsManagerImpl)system.getPlotActionSystem();
