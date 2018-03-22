@@ -201,9 +201,25 @@ public class LiveFileServiceImpl implements ILiveFileService {
 	}
 	
 	private void detach() {
+		if (scanSubscriber != null && scanListener != null) {
+			scanSubscriber.removeListener(scanListener);
+			try {
+				scanSubscriber.disconnect();
+			} catch (EventException e) {
+				logger.error("Could not disconnect subscriber to scan topic", e);
+			}
+			scanSubscriber = null;
+		}
 		
-		if (scanSubscriber != null && scanListener != null) scanSubscriber.removeListener(scanListener);
-		if (procSubscriber != null && beanListener != null) procSubscriber.removeListener(beanListener);
+		if (procSubscriber != null && beanListener != null) {
+			procSubscriber.removeListener(beanListener);
+			try {
+				procSubscriber.disconnect();
+			} catch (EventException e) {
+				logger.error("Could not disconnect subscriber to processing topic", e);
+			}
+			procSubscriber = null;
+		}
 		
 		attached = false;
 	}
