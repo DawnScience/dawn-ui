@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="ASCII"?>
+<fragment:ModelFragments xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:advanced="http://www.eclipse.org/ui/2010/UIModel/application/ui/advanced" xmlns:basic="http://www.eclipse.org/ui/2010/UIModel/application/ui/basic" xmlns:fragment="http://www.eclipse.org/ui/2010/UIModel/fragment" xmi:id="_sLJ9MDDtEeijoYpfNQacNA">
+  <fragments xsi:type="fragment:StringModelFragment" xmi:id="_41KGcDD0EeijoYpfNQacNA" featurename="snippets" parentElementId="org.eclipse.e4.legacy.ide.application">
+    <elements xsi:type="advanced:Perspective" xmi:id="_DlD-sDD1EeijoYpfNQacNA" elementId="org.dawnsci.datavis.e4.perspective" label="DataVis e4" iconURI="platform:/plugin/org.dawnsci.datavis.view/icons/color-swatch.png">
+      <children xsi:type="basic:PartSashContainer" xmi:id="_VMKYQDD1EeijoYpfNQacNA" elementId="org.dawnsci.datavis.view.partsashcontainer.0" selectedElement="_n7cscDD2EeijoYpfNQacNA" horizontal="true">
+        <children xsi:type="basic:PartStack" xmi:id="_n7cscDD2EeijoYpfNQacNA" elementId="org.dawnsci.datavis.view.partstack.0" containerData="2200">
+          <children xsi:type="basic:Part" xmi:id="_aoGcgDD1EeijoYpfNQacNA" elementId="org.dawnsci.datavis.view.parts.LoadedFilePart" contributionURI="bundleclass://org.dawnsci.datavis.view/org.dawnsci.datavis.view.parts.LoadedFilePart" label="Data Files">
+            <toolbar xmi:id="_dmBJsDD2EeijoYpfNQacNA" elementId="org.dawnsci.datavis.view.toolbar.2"/>
+          </children>
+        </children>
+        <children xsi:type="basic:PartSashContainer" xmi:id="_jNHKgDD1EeijoYpfNQacNA" elementId="org.dawnsci.datavis.view.partsashcontainer.1" horizontal="true">
+          <children xsi:type="basic:PartStack" xmi:id="_KeilsDD6EeijoYpfNQacNA" elementId="org.dawnsci.datavis.view.partstack.1" containerData="6000">
+            <children xsi:type="basic:Part" xmi:id="_kXHfgDD1EeijoYpfNQacNA" elementId="org.dawnsci.datavis.view.parts.Plot" contributionURI="bundleclass://org.eclipse.ui.workbench/org.eclipse.ui.internal.e4.compatibility.CompatibilityView" label="Plot">
+              <toolbar xmi:id="_cBpM4DD2EeijoYpfNQacNA" elementId="org.dawnsci.datavis.view.toolbar.0"/>
+            </children>
+          </children>
+          <children xsi:type="basic:PartStack" xmi:id="_LAHBsDD6EeijoYpfNQacNA" elementId="org.dawnsci.datavis.view.partstack.2" containerData="1800">
+            <children xsi:type="basic:Part" xmi:id="_qDfzgDD1EeijoYpfNQacNA" elementId="org.dawnsci.datavis.view.parts.DatasetPart" contributionURI="bundleclass://org.dawnsci.datavis.view/org.dawnsci.datavis.view.parts.DatasetPart" label="Datasets">
+              <toolbar xmi:id="_dG92MDD2EeijoYpfNQacNA" elementId="org.dawnsci.datavis.view.toolbar.1"/>
+            </children>
+          </children>
+        </children>
+      </children>
+    </elements>
+  </fragments>
+</fragment:ModelFragments>

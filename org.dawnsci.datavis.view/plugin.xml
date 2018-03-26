@@ -1,46 +1,53 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<?eclipse version="3.4"?>
 <plugin>
-<extension
+
+   <extension
          point="org.eclipse.ui.perspectives">
       <perspective
-            class="org.dawnsci.datavis.view.perspective.DataVisPerspective"
+            name="DataVis"
             icon="icons/color-swatch.png"
-            id="org.dawnsci.datavis.DataVisPerspective"
-            name="DataVis">
+            class="org.dawnsci.datavis.view.perspective.DataVisPerspective"
+            id="org.dawnsci.datavis.DataVisPerspective">
       </perspective>
    </extension>
    <extension
          point="org.eclipse.ui.views">
       <e4view
-            class="org.dawnsci.datavis.view.parts.LoadedFilePart"
-            icon="icons/ui-layered-pane.png"
-            id="org.dawnsci.datavis.view.parts.LoadedFilePart"
             name="Data Files"
-            restorable="true">
+            icon="icons/ui-layered-pane.png"
+            class="org.dawnsci.datavis.view.parts.LoadedFilePart"
+            restorable="true"
+            id="org.dawnsci.datavis.view.parts.LoadedFilePart">
       </e4view>
       <e4view
-            class="org.dawnsci.datavis.view.parts.DatasetPart"
-            icon="icons/ui-layered-pane.png"
-            id="org.dawnsci.datavis.view.parts.DatasetPart"
             name="Datasets"
-            restorable="true">
+            icon="icons/ui-layered-pane.png"
+            class="org.dawnsci.datavis.view.parts.DatasetPart"
+            restorable="true"
+            id="org.dawnsci.datavis.view.parts.DatasetPart">
       </e4view>
       <view
-            class="org.eclipse.dawnsci.plotting.api.VanillaPlottingSystemView"
-            icon="icons/color-swatch.png"
-            id="org.dawnsci.datavis.view.parts.Plot"
             name="Plot"
-            restorable="true">
+            icon="icons/color-swatch.png"
+            class="org.eclipse.dawnsci.plotting.api.VanillaPlottingSystemView"
+            restorable="true"
+            id="org.dawnsci.datavis.view.parts.Plot">
       </view>
    </extension>
    <extension
          point="org.eclipse.ui.commands">
       <command
             defaultHandler="org.dawnsci.datavis.view.perspective.FileCloseHandler"
-            id="org.dawnsci.datavis.model.fileclose"
-            name="File Close Command">
+            name="File Close Command"
+            id="org.dawnsci.datavis.model.fileclose">
       </command>
+   </extension>
+   <extension
+         id="org.dawnsci.datavis.view.fragment"
+         point="org.eclipse.e4.workbench.model">
+      <fragment
+            uri="fragment.e4xmi">
+      </fragment>
    </extension>
 
 </plugin>
