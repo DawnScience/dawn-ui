@@ -71,7 +71,7 @@ public class MeshTessellator {
 	
 	public static DrawableVBO buildShape(float[] x, float[] y, float[] z, ColorMapper mapper) {
 		
-		DrawableVBO v =  new DrawableVBO(new ColoredMeshVBO(x, y, z, mapper)) {
+		DrawableVBO v =  new DrawableVBO(new ColoredMeshVBOBuilder(x, y, z, mapper)) {
 			
 			boolean disposed = false;
 			private GLSLProgram shaderProgram; 
