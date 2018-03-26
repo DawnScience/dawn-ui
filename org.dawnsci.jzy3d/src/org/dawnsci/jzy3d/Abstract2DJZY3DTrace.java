@@ -66,8 +66,20 @@ public abstract class Abstract2DJZY3DTrace extends AbstractColorMapTrace {
 
 		xArray = (axes[0] != null) ? DatasetUtils.cast(FloatDataset.class, axes[0]).getData() : getRange(x);
 		yArray = (axes[1] != null) ? DatasetUtils.cast(FloatDataset.class, axes[1]).getData() : getRange(y);
-
-		final AbstractDrawable surface = buildShape(xArray, yArray, z.getData(), colorMapper);
+		float[] zArray = z.getData();
+		
+//		xArray = new float[] {0,1,2};
+//		yArray = new float[] {3,4,5,6};
+//		zArray= new float[] {10,11,12,13,14,15,16,17,18,19,20,21};
+//		min = 10;
+//		max = 21;
+//		
+		
+		if (colorMapper != null) {
+			colorMapper.setMin(min);
+			colorMapper.setMax(max);
+		}
+		final AbstractDrawable surface = buildShape(xArray, yArray, zArray, colorMapper);
 		
 ////		final AbstractDrawable surface  = MeshTessellator.buildShape(xArray, yArray, z.getData(),colorMapper);
 //		final AbstractDrawable surface  = MeshTessellator.buildShape(xArray, yArray, z.getData());
