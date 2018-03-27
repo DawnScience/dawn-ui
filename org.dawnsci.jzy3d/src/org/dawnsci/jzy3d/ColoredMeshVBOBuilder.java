@@ -1,5 +1,6 @@
 package org.dawnsci.jzy3d;
 
+import java.lang.reflect.Method;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 import java.util.ArrayList;
@@ -21,6 +22,7 @@ public class ColoredMeshVBOBuilder extends VBOBuilder {
 	private float[] y;
 	private float[] z;
 	private ColorMapper mapper;
+	private FloatVBO vbo;
 	
 	public ColoredMeshVBOBuilder(float[] x, float[] y, float[] z, ColorMapper mapper) {
 		this.x = x;
@@ -29,11 +31,14 @@ public class ColoredMeshVBOBuilder extends VBOBuilder {
 		this.mapper = mapper;
 	}
 	
+	public void earlyInitalise(DrawableVBO drawable) {
+		vbo = initFloatVBO(drawable, true, (y.length-1)*(x.length-1)*4);
+		fillFromArray(drawable, x,y,z,mapper, vbo);
+		drawable.doSetBoundingBox(vbo.getBounds());
+	}
 
 	@Override
 	public void load(GL gl, DrawableVBO drawable) throws Exception {
-		FloatVBO vbo = initFloatVBO(drawable, true, (y.length-1)*(x.length-1)*4);
-		fillFromArray(drawable, x,y,z,mapper, vbo);
         drawable.setData(gl, vbo);
         drawable.setGeometry(GL2.GL_QUADS);
 	}

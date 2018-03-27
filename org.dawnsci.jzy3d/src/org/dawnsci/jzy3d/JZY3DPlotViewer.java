@@ -257,8 +257,12 @@ public class JZY3DPlotViewer extends IPlottingSystemViewer.Stub<Composite> {
 	public void removeTrace(ITrace trace) {
 		if (trace instanceof Abstract2DJZY3DTrace) {
 			chart.pauseAnimator();
+			AbstractDrawable s = ((Abstract2DJZY3DTrace)trace).getShape();
+			if (s instanceof ShaderMeshDrawableVBO) {
+				((ShaderMeshDrawableVBO)s).dispose();
+			}
+			chart.render();
 			chart.getScene().remove(((Abstract2DJZY3DTrace)trace).getShape(),false);
-
 		}
 		
 
