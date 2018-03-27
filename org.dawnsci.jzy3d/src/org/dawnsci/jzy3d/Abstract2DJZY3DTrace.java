@@ -135,6 +135,9 @@ public abstract class Abstract2DJZY3DTrace extends AbstractColorMapTrace {
 			((Shape)this.shape).setColorMapper(colorMapper);
 		}
 		
+		if (shape instanceof ShaderMeshDrawableVBO) {
+			((ShaderMeshDrawableVBO)shape).setMapper(mapper);
+		}
 		
 	}
 

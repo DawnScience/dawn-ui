@@ -101,6 +101,10 @@ public class ShaderMeshDrawableVBO extends DrawableVBO {
 	public void dispose() {
 		disposed = true;
 	}
+	
+	public void setMapper(ColorMapper mapper) {
+		this.mapper = mapper;
+	}
 
 
 }
