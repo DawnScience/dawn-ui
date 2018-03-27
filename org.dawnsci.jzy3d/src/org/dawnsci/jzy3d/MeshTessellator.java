@@ -164,7 +164,7 @@ public class MeshTessellator {
         	if (t > maxZ) maxZ = t;
         }
 		
-		v.doSetBoundingBox(new BoundingBox3d(minX, maxX, minY, maxY, minZ, maxZ));
+//		v.doSetBoundingBox(new BoundingBox3d(minX, maxX, minY, maxY, minZ, maxZ));
 //		v.setWidth(1f);
 		
 		return v;

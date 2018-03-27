@@ -15,7 +15,10 @@ public class SurfaceMeshTraceImpl extends Abstract2DJZY3DTrace implements ISurfa
 
 	protected AbstractDrawable buildShape(float[] x, float[] y, float[] z, ColorMapper mapper) {
 //		return  MeshTessellator.buildShape(x, y, z, mapper);
-		return new ShaderMeshDrawableVBO(new ColoredMeshVBOBuilder(x, y, z, mapper), mapper);
+		ColoredMeshVBOBuilder coloredMeshVBOBuilder = new ColoredMeshVBOBuilder(x, y, z, mapper);
+		ShaderMeshDrawableVBO shaderMeshDrawableVBO = new ShaderMeshDrawableVBO(coloredMeshVBOBuilder, mapper);
+		coloredMeshVBOBuilder.earlyInitalise(shaderMeshDrawableVBO);
+		return shaderMeshDrawableVBO;
 	}
 
 	@Override
