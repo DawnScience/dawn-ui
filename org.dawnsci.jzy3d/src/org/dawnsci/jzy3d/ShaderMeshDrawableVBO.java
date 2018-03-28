@@ -33,6 +33,8 @@ public class ShaderMeshDrawableVBO extends DrawableVBO {
 			this.doSetBoundingBox(this.getBounds());
 		}
 		
+		colormapTexure.update(gl);
+		
 		gl.getGL2().glDisable(GL.GL_BLEND);
 		shaderProgram.bind(gl.getGL2());
 		shaderProgram.setUniform(gl.getGL2(), "min_max", new float[] {(float) mapper.getMin(), (float) mapper.getMax(),(float) mapper.getMin(), (float) mapper.getMax()},4);
@@ -72,6 +74,7 @@ public class ShaderMeshDrawableVBO extends DrawableVBO {
 	
 	public void setMapper(ColorMapper mapper) {
 		this.mapper = mapper;
+		if (colormapTexure != null) colormapTexure.updateColormap(mapper);
 	}
 
 
