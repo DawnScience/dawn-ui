@@ -16,6 +16,7 @@ public class ColormapTexture {
 	private int texID;
     private ByteBuffer image;
     private int[] shape;
+    private boolean isUpdate = false;
     
     public ColormapTexture(ColorMapper mapper) {
     	double min = mapper.getMin();
@@ -35,6 +36,32 @@ public class ColormapTexture {
     		image.putFloat(c.a);
     	}
     	image.rewind();
+    }
+    
+    public void updateColormap(ColorMapper mapper) {
+    	double min = mapper.getMin();
+    	double max = mapper.getMax();
+    	
+    	int nColors = 256;
+    	
+    	double step = (max-min)/nColors;
+    	
+    	for (int i = 0; i < nColors; i++) {
+    		Color c = mapper.getColor(min + (i*step));
+    		image.putFloat(c.r);
+    		image.putFloat(c.g);
+    		image.putFloat(c.b);
+    		image.putFloat(c.a);
+    	}
+    	image.rewind();
+    	
+    	isUpdate = true;
+    }
+    
+    public void update(GL gl) {
+    	if (!isUpdate) return;
+    	setTextureData(gl, image, shape);
+    	isUpdate = false;
     }
 
 	
