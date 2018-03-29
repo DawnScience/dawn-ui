@@ -587,9 +587,7 @@ public abstract class AbstractProcessingTool extends AbstractToolPage {
 			return;
 		}
 		
-		ISubmitter<StatusBean> submitter = EventServiceHolder.getEventService().createSubmitter(uri, "scisoft.operation.SUBMISSION_QUEUE");
-		
-		try {
+		try (ISubmitter<StatusBean> submitter = EventServiceHolder.getEventService().createSubmitter(uri, "scisoft.operation.SUBMISSION_QUEUE")) {
 			if (b instanceof StatusBean) submitter.submit((StatusBean)b);
 		} catch (EventException e) {
 			logger.error("TODO put description of error here", e);
