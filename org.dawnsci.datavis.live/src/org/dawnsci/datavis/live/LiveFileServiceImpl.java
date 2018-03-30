@@ -177,7 +177,10 @@ public class LiveFileServiceImpl implements ILiveFileService {
 		if (suri==null) return output; // Nothing to start, standard DAWN.
 
 
-		try (ISubmitter<StatusBean> queueConnection = eService.createSubmitter(new URI(suri), extractor.getQueueName())) {
+		try {
+			final URI uri = new URI(suri);
+
+			ISubmitter<StatusBean> queueConnection = eService.createSubmitter(uri, extractor.getQueueName());
 			queueConnection.setStatusTopicName(EventConstants.STATUS_TOPIC);
 
 			List<StatusBean> queue = queueConnection.getQueue(extractor.getQueueName());
