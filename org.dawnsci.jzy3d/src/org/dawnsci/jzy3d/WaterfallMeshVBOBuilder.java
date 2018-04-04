@@ -3,6 +3,7 @@ package org.dawnsci.jzy3d;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 
+import org.jzy3d.colors.Color;
 import org.jzy3d.colors.ColorMapper;
 import org.jzy3d.maths.BoundingBox3d;
 import org.jzy3d.maths.Coord3d;
@@ -95,16 +96,27 @@ public class WaterfallMeshVBOBuilder extends VBOBuilder {
 				
 				indices.put(size++);
 	            putCoord(vertices, c0);
-	            putColor(vertices, colors.getColor(c0));
+	            
+	            if (j == 0 || j == x.length-2) {
+	            	putColor(vertices, new Color(0, 0, 255));
+	            } else {
+	            	putColor(vertices, new Color(255, 0, 0));
+	            }
+	            
+//	            putColor(vertices, new Color(255, 0, 0));
 	            indices.put(size++);
 	            putCoord(vertices, c1);
-	            putColor(vertices, colors.getColor(c1));
+	            putColor(vertices, new Color(0, 255, 0));
 	            indices.put(size++);
 	            putCoord(vertices, c2);
-	            putColor(vertices, colors.getColor(c2));
+	            if (j == 0 || j == x.length-2) {
+	            	putColor(vertices, new Color(0, 0, 255));
+	            } else {
+	            	putColor(vertices, new Color(0, 255, 0));
+	            }
 	            indices.put(size++);
 	            putCoord(vertices, c3);
-	            putColor(vertices, colors.getColor(c3));
+	            putColor(vertices, new Color(255, 0, 0));
 
 			}
 		}
