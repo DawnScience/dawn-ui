@@ -30,7 +30,7 @@ public class WaterfallMeshVBOBuilder extends VBOBuilder {
 	}
 	
 	public void earlyInitalise(DrawableVBO drawable) {
-		vbo = initFloatVBO(drawable, true, (y.length)*(x.length-1)*4);
+		vbo = initFloatVBO(drawable, true, (y.length)*(x.length-1)*6);
 		fillFromArray(drawable, x,y,z,mapper, vbo);
 		drawable.doSetBoundingBox(vbo.getBounds());
 	}
@@ -38,7 +38,7 @@ public class WaterfallMeshVBOBuilder extends VBOBuilder {
 	@Override
 	public void load(GL gl, DrawableVBO drawable) throws Exception {
         drawable.setData(gl, vbo);
-        drawable.setGeometry(GL2.GL_QUADS);
+        drawable.setGeometry(GL2.GL_TRIANGLES);
 	}
 	
 	private void fillFromArray(DrawableVBO drawable, float[] x, float[] y, float[] z, ColorMapper colors, FloatVBO vbo) {
@@ -94,25 +94,47 @@ public class WaterfallMeshVBOBuilder extends VBOBuilder {
 
 				Coord3d c3 = new Coord3d(x[j+1],y[i], min);
 				
+//				indices.put(size++);
+//	            putCoord(vertices, c0);
+//	            
+//
+//	            putColor(vertices, new Color(0, 1f, 0));
+//
+//	            
+////	            putColor(vertices, new Color(255, 0, 0));
+//	            indices.put(size++);
+//	            putCoord(vertices, c1);
+//	            putColor(vertices, new Color(0, 0, 1f));
+//	            indices.put(size++);
+//	            putCoord(vertices, c2);
+//
+//	            putColor(vertices, new Color(1f, 0, 0));
+//	            
+//	            indices.put(size++);
+//	            putCoord(vertices, c3);
+//	            putColor(vertices, new Color(0, 0, 1f));
+				
 				indices.put(size++);
 	            putCoord(vertices, c0);
-	            
-
-	            putColor(vertices, new Color(0, 1f, 0));
-
-	            
-//	            putColor(vertices, new Color(255, 0, 0));
+	            putColor(vertices, new Color(0, 0f, 1f));
+	            indices.put(size++);
+	            putCoord(vertices, c3);
+	            putColor(vertices, new Color(1f, 0, 0f));
 	            indices.put(size++);
 	            putCoord(vertices, c1);
-	            putColor(vertices, new Color(0, 0, 1f));
-	            indices.put(size++);
-	            putCoord(vertices, c2);
-
-	            putColor(vertices, new Color(1f, 0, 0));
+	            putColor(vertices, new Color(0f, 1f, 0));
 	            
 	            indices.put(size++);
 	            putCoord(vertices, c3);
+	            putColor(vertices, new Color(0f, 1f, 0));
+	            indices.put(size++);
+	            putCoord(vertices, c2);
 	            putColor(vertices, new Color(0, 0, 1f));
+	            indices.put(size++);
+	            putCoord(vertices, c1);
+	            putColor(vertices, new Color(1f, 0f, 0));
+
+
 
 			}
 		}
