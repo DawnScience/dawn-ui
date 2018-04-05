@@ -97,26 +97,22 @@ public class WaterfallMeshVBOBuilder extends VBOBuilder {
 				indices.put(size++);
 	            putCoord(vertices, c0);
 	            
-	            if (j == 0 || j == x.length-2) {
-	            	putColor(vertices, new Color(0, 0, 255));
-	            } else {
-	            	putColor(vertices, new Color(255, 0, 0));
-	            }
+
+	            putColor(vertices, new Color(0, 1f, 0));
+
 	            
 //	            putColor(vertices, new Color(255, 0, 0));
 	            indices.put(size++);
 	            putCoord(vertices, c1);
-	            putColor(vertices, new Color(0, 255, 0));
+	            putColor(vertices, new Color(0, 0, 1f));
 	            indices.put(size++);
 	            putCoord(vertices, c2);
-	            if (j == 0 || j == x.length-2) {
-	            	putColor(vertices, new Color(0, 0, 255));
-	            } else {
-	            	putColor(vertices, new Color(0, 255, 0));
-	            }
+
+	            putColor(vertices, new Color(1f, 0, 0));
+	            
 	            indices.put(size++);
 	            putCoord(vertices, c3);
-	            putColor(vertices, new Color(255, 0, 0));
+	            putColor(vertices, new Color(0, 0, 1f));
 
 			}
 		}
