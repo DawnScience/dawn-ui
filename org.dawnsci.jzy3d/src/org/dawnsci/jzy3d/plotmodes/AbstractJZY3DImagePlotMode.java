@@ -26,7 +26,7 @@ public abstract class AbstractJZY3DImagePlotMode extends PlotModeImage {
 	@Override
 	public IDataset[] sliceForPlot(ILazyDataset lz, SliceND slice, Object[] options, IPlottingSystem<?> system) throws Exception {
 		IDataset[] data = super.sliceForPlot(lz, slice, options, system);
-		IDataset d = data[0];
+		IDataset d = data[0].getSlice();
 		AxesMetadata metadata = d.getFirstMetadata(AxesMetadata.class);
 		List<IDataset> ax = null;
 		
