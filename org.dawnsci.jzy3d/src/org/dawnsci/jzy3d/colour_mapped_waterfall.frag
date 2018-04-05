@@ -9,9 +9,16 @@ void main() {
 
 		//vec4 d = abs(dFdx(vVaryingColor)) + abs(dFdy(vVaryingColor));
 		vec4 d = fwidth(vVaryingColor);
-		vec4 a3 = smoothstep(vec4(0.0),d*2,vVaryingColor);
+		vec4 a3 = smoothstep(vec4(0.0),d*1,vVaryingColor);
 		float m = min(min(a3.x,a3.y),a3.z);
-
+		
+		if (true) {
+		vFragColor = mix(vMappedColor,vec4(1.0),m);
+		} else {
+		 vFragColor = vec4(1.0);
+		}
+		
+		return;
 
 		//if (a3.x > 0.99) {
 		//	vFragColor = vVaryingColor;
