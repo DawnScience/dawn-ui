@@ -230,8 +230,7 @@ public class ImageService extends AbstractServiceFactory implements IImageServic
 		}
 		if (bean.isLogColorScale()) {
 			double offset = bean.getLogOffset();
-			if (!Double.isNaN(offset) &&
-				!Double.isInfinite(offset)) {
+			if (Double.isFinite(offset)) {
 				ret = Maths.subtract(ret, offset);
 			}
 			ret = Maths.log10(ret);
