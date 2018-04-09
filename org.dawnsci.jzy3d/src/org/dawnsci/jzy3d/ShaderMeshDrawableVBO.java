@@ -76,6 +76,13 @@ public class ShaderMeshDrawableVBO extends DrawableVBO {
 		this.mapper = mapper;
 		if (colormapTexure != null) colormapTexure.updateColormap(mapper);
 	}
+	
+	protected void pointers(GL gl) {
+		gl.getGL2().glVertexPointer(dimensions, GL.GL_FLOAT, 0, pointer);
+//        gl.getGL2().glVertexPointer(dimensions, GL.GL_FLOAT, byteOffset, pointer);
+//        gl.getGL2().glNormalPointer(GL.GL_FLOAT, byteOffset, normalOffset);
+    }
+
 
 
 }
