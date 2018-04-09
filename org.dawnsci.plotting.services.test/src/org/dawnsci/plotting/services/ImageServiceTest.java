@@ -23,12 +23,12 @@ public class ImageServiceTest {
 
 		// Test dataset of 10 doubles [0.0,..9.0]
 		ImageServiceBean imageServiceBean = new ImageServiceBean();
-		Dataset image = DatasetFactory.createRange(10, Dataset.FLOAT64);
+		Dataset image = DatasetFactory.createRange(10);
 		imageServiceBean.setImage(image);
 		imageServiceBean.setLogColorScale(true);
 
 		// Offset should be dataset min value -1
-		assertEquals(-1, imageServiceBean.getLogOffset(), 0.0);
+		assertEquals(-9e-6, imageServiceBean.getLogOffset(), 0.0);
 
 	}
 
@@ -39,13 +39,15 @@ public class ImageServiceTest {
 	public void testPlot() {
 
 		// Test dataset of 4 doubles [0.0,..3.0]
-		Dataset image = DatasetFactory.createRange(4, Dataset.FLOAT64);
+		Dataset image = DatasetFactory.createRange(4);
 		ImageService imageService = new ImageService();
 
 		// The expected results, to check against
+		double offset = 3e-6;
+		double delta = 1 - offset;
 		double[] expectedResultNoLogging = { 0.0, 1.0, 2.0, 3.0 };
-		double[] expectedResultWithLogging = { Math.log10(1.0),
-				Math.log10(2.0), Math.log10(3.0), Math.log10(4.0) };
+		double[] expectedResultWithLogging = { Math.log10(1.0 - delta),
+				Math.log10(2.0 - delta), Math.log10(3.0  - delta), Math.log10(4.0 - delta) };
 
 		Map<Boolean, double[]> expectedResults = new HashMap<Boolean, double[]>();
 		expectedResults.put(false, expectedResultNoLogging);
@@ -75,7 +77,7 @@ public class ImageServiceTest {
 			imageServiceBean1.setLogColorScale(toggle);
 
 			// We expect the offset to be -1 if logging on, else 0
-			assertEquals(toggle ? -1 : 0, imageServiceBean1.getLogOffset(), 0.0);
+			assertEquals(toggle ? -offset : 0, imageServiceBean1.getLogOffset(), 0.0);
 			Dataset resultD = imageService
 					.getImageLoggedData(imageServiceBean1);
 			double result[] = (double[]) resultD.getBuffer();
