@@ -32,7 +32,9 @@ public class ColoredMeshVBOBuilder extends VBOBuilder {
 	}
 	
 	public void earlyInitalise(DrawableVBO drawable) {
-		vbo = initFloatVBO(drawable, true, (y.length-1)*(x.length-1)*4);
+//		vbo = initFloatVBO(drawable, true, (y.length-1)*(x.length-1)*4);
+		int size = (y.length-1)*(x.length-1);
+		vbo = new FloatVBO(size*36, size*4);
 		fillFromArray(drawable, x,y,z,mapper, vbo);
 		drawable.doSetBoundingBox(vbo.getBounds());
 	}
@@ -46,7 +48,7 @@ public class ColoredMeshVBOBuilder extends VBOBuilder {
 	private void fillFromArray(DrawableVBO drawable, float[] x, float[] y, float[] z, ColorMapper colors, FloatVBO vbo) {
 		FloatBuffer vertices= vbo.getVertices();
 		IntBuffer indices = vbo.getIndices();
-        drawable.setHasColorBuffer(true);
+//        drawable.setHasColorBuffer(true);
 
         int size = 0;
         Coord3d c = new Coord3d();
@@ -84,7 +86,7 @@ public class ColoredMeshVBOBuilder extends VBOBuilder {
 	        	if (c.z > maxZ) maxZ = c.z;
 				
 	            putCoord(vertices, c);
-	            putColor(vertices, colors.getColor(c));
+//	            putColor(vertices, colors.getColor(c));
 				
 				indices.put(size++);
 				c.x = x[xi];
@@ -95,7 +97,7 @@ public class ColoredMeshVBOBuilder extends VBOBuilder {
 	        	if (c.z > maxZ) maxZ = c.z;
 				
 	            putCoord(vertices, c);
-	            putColor(vertices, colors.getColor(c));
+//	            putColor(vertices, colors.getColor(c));
 	            
 	            indices.put(size++);
 				c.x = x[xi+1];
@@ -106,7 +108,7 @@ public class ColoredMeshVBOBuilder extends VBOBuilder {
 	        	if (c.z > maxZ) maxZ = c.z;
 				
 	            putCoord(vertices, c);
-	            putColor(vertices, colors.getColor(c));
+//	            putColor(vertices, colors.getColor(c));
 	            
 	            
 	            indices.put(size++);
@@ -118,7 +120,7 @@ public class ColoredMeshVBOBuilder extends VBOBuilder {
 	        	if (c.z > maxZ) maxZ = c.z;
 				
 	            putCoord(vertices, c);
-	            putColor(vertices, colors.getColor(c));
+//	            putColor(vertices, colors.getColor(c));
                 
 			}
 		}	
