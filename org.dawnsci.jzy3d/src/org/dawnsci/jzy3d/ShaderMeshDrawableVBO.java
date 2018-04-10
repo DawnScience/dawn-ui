@@ -5,10 +5,12 @@ import org.jzy3d.colors.ColorMapper;
 import org.jzy3d.io.IGLLoader;
 import org.jzy3d.maths.BoundingBox3d;
 import org.jzy3d.plot3d.primitives.vbo.drawable.DrawableVBO;
+import org.jzy3d.plot3d.rendering.compat.GLES2CompatUtils;
 import org.jzy3d.plot3d.rendering.view.Camera;
 
 import com.jogamp.opengl.GL;
 import com.jogamp.opengl.GL2;
+import com.jogamp.opengl.GL2GL3;
 import com.jogamp.opengl.glu.GLU;
 
 public class ShaderMeshDrawableVBO extends DrawableVBO {
@@ -81,6 +83,19 @@ public class ShaderMeshDrawableVBO extends DrawableVBO {
 		gl.getGL2().glVertexPointer(dimensions, GL.GL_FLOAT, 0, pointer);
 //        gl.getGL2().glVertexPointer(dimensions, GL.GL_FLOAT, byteOffset, pointer);
 //        gl.getGL2().glNormalPointer(GL.GL_FLOAT, byteOffset, normalOffset);
+    }
+	
+	protected void configure(GL gl) {
+        // gl.glPolygonMode(GL2.GL_FRONT, GL2.GL_FILL);
+        // gl.glPolygonMode(GL2.GL_FRONT, GL2.GL_LINE);
+        // gl.glColor4f(1f,0f,1f,0.6f);
+        // gl.glLineWidth(0.00001f);
+        if (gl.isGL2()) {
+            gl.getGL2().glPolygonMode(GL.GL_FRONT_AND_BACK, GL2GL3.GL_FILL);
+        } else {
+            GLES2CompatUtils.glPolygonMode(GL.GL_FRONT_AND_BACK, GL2GL3.GL_FILL);
+        }
+        call(gl, color);
     }
 
 
