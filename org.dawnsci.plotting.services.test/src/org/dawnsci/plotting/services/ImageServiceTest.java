@@ -27,9 +27,8 @@ public class ImageServiceTest {
 		imageServiceBean.setImage(image);
 		imageServiceBean.setLogColorScale(true);
 
-		// Offset should be dataset min value -1
+		// Offset should be dataset min -(dataset range * 1e-6)
 		assertEquals(-9e-6, imageServiceBean.getLogOffset(), 0.0);
-
 	}
 
 	/**
