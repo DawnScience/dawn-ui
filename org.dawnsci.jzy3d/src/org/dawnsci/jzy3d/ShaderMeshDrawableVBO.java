@@ -18,7 +18,7 @@ public class ShaderMeshDrawableVBO extends DrawableVBO {
 	public ShaderMeshDrawableVBO(ColoredMeshVBOBuilder loader, ColorMapper mapper) {
 		super(loader);
 		this.mapper = mapper;
-		this.setGeometry(GL2.GL_QUADS);
+		this.setGeometry(GL2.GL_TRIANGLES);
 	}
 
 	boolean disposed = false;

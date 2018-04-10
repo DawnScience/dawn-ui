@@ -34,7 +34,8 @@ public class ColoredMeshVBOBuilder extends VBOBuilder {
 	public void earlyInitalise(DrawableVBO drawable) {
 //		vbo = initFloatVBO(drawable, true, (y.length-1)*(x.length-1)*4);
 		int size = (y.length-1)*(x.length-1);
-		vbo = new FloatVBO(size*36, size*4);
+		//xyz for quads give 3*4
+		vbo = new FloatVBO(x.length*y.length*3, size*6);
 		fillFromArray(drawable, x,y,z,mapper, vbo);
 		drawable.doSetBoundingBox(vbo.getBounds());
 	}
@@ -42,7 +43,7 @@ public class ColoredMeshVBOBuilder extends VBOBuilder {
 	@Override
 	public void load(GL gl, DrawableVBO drawable) throws Exception {
         drawable.setData(gl, vbo);
-        drawable.setGeometry(GL2.GL_QUADS);
+        drawable.setGeometry(GL2.GL_TRIANGLES);
 	}
 	
 	private void fillFromArray(DrawableVBO drawable, float[] x, float[] y, float[] z, ColorMapper colors, FloatVBO vbo) {
@@ -70,60 +71,92 @@ public class ColoredMeshVBOBuilder extends VBOBuilder {
         	if (t < minY) minY = t;
         	if (t > maxY) maxY = t;
         }
-        
-        for(int yi=0; yi<y.length-1; yi++){
-			for(int xi=0; xi<x.length-1; xi++){
-				
+        //add Coords
+        for(int yi=0; yi<y.length; yi++){
+			for(int xi=0; xi<x.length; xi++){
 				int pos = xi+yi*x.length;
-				int posNext = xi+(yi+1)*x.length;
-				
-				indices.put(size++);
-				c.x = x[xi];
-				c.y = y[yi+1];
-				c.z = z[posNext];
-				
-				if (c.z < minZ) minZ = c.z;
-	        	if (c.z > maxZ) maxZ = c.z;
-				
-	            putCoord(vertices, c);
-//	            putColor(vertices, colors.getColor(c));
-				
-				indices.put(size++);
 				c.x = x[xi];
 				c.y = y[yi];
 				c.z = z[pos];
-				
 				if (c.z < minZ) minZ = c.z;
 	        	if (c.z > maxZ) maxZ = c.z;
 				
-	            putCoord(vertices, c);
-//	            putColor(vertices, colors.getColor(c));
-	            
-	            indices.put(size++);
-				c.x = x[xi+1];
-				c.y = y[yi];
-				c.z = z[pos+1];
-				
-				if (c.z < minZ) minZ = c.z;
-	        	if (c.z > maxZ) maxZ = c.z;
-				
-	            putCoord(vertices, c);
-//	            putColor(vertices, colors.getColor(c));
-	            
-	            
-	            indices.put(size++);
-				c.x = x[xi+1];
-				c.y = y[yi+1];
-				c.z = z[posNext+1];
-				
-				if (c.z < minZ) minZ = c.z;
-	        	if (c.z > maxZ) maxZ = c.z;
-				
-	            putCoord(vertices, c);
-//	            putColor(vertices, colors.getColor(c));
-                
+				putCoord(vertices, c);
 			}
-		}	
+        }
+        
+      //add indicies
+        for(int yi=0; yi<y.length-1; yi++){
+			for(int xi=0; xi<x.length-1; xi++){
+				int idx00 = xi+yi*x.length;
+				int idx01 = xi+yi*x.length+1;
+				int idx10 = xi+(yi+1)*x.length;
+				int idx11 = xi+(yi+1)*x.length+1;
+				//Triangle1
+				indices.put(idx00);
+				indices.put(idx01);
+				indices.put(idx10);
+				
+				//Triangle2
+				indices.put(idx01);
+				indices.put(idx11);
+				indices.put(idx10);
+			}
+        }
+        
+//        for(int yi=0; yi<y.length-1; yi++){
+//			for(int xi=0; xi<x.length-1; xi++){
+//				
+//				int pos = xi+yi*x.length;
+//				int posNext = xi+(yi+1)*x.length;
+//				
+//				indices.put(size++);
+//				c.x = x[xi];
+//				c.y = y[yi+1];
+//				c.z = z[posNext];
+//				
+//				if (c.z < minZ) minZ = c.z;
+//	        	if (c.z > maxZ) maxZ = c.z;
+//				
+//	            putCoord(vertices, c);
+////	            putColor(vertices, colors.getColor(c));
+//				
+//				indices.put(size++);
+//				c.x = x[xi];
+//				c.y = y[yi];
+//				c.z = z[pos];
+//				
+//				if (c.z < minZ) minZ = c.z;
+//	        	if (c.z > maxZ) maxZ = c.z;
+//				
+//	            putCoord(vertices, c);
+////	            putColor(vertices, colors.getColor(c));
+//	            
+//	            indices.put(size++);
+//				c.x = x[xi+1];
+//				c.y = y[yi];
+//				c.z = z[pos+1];
+//				
+//				if (c.z < minZ) minZ = c.z;
+//	        	if (c.z > maxZ) maxZ = c.z;
+//				
+//	            putCoord(vertices, c);
+////	            putColor(vertices, colors.getColor(c));
+//	            
+//	            
+//	            indices.put(size++);
+//				c.x = x[xi+1];
+//				c.y = y[yi+1];
+//				c.z = z[posNext+1];
+//				
+//				if (c.z < minZ) minZ = c.z;
+//	        	if (c.z > maxZ) maxZ = c.z;
+//				
+//	            putCoord(vertices, c);
+////	            putColor(vertices, colors.getColor(c));
+//                
+//			}
+//		}	
         
         vertices.rewind();
         indices.rewind();
