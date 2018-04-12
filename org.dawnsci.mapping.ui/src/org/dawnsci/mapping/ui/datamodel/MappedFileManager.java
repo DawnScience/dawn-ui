@@ -493,7 +493,7 @@ public class MappedFileManager implements IMapFileController{
 			MappedDataFile mdf = new MappedDataFile(path,bean);
 			mdf.setParentPath(parentFile);
 			mappedDataArea.addMappedDataFile(mdf);
-			fireListeners(null);
+			fireListeners(mdf);
 			
 		}
 		

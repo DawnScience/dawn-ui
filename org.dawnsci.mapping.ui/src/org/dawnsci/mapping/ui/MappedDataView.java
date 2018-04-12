@@ -532,7 +532,7 @@ public class MappedDataView extends ViewPart {
 		
 		viewer.refresh();
 		
-		if (file != null && viewer instanceof TreeViewer) {
+		if (file != null && file.hasChildren() && viewer instanceof TreeViewer) {
 			((TreeViewer)viewer).expandToLevel(file, 1);
 		}
 	}
