@@ -16,6 +16,7 @@ import org.eclipse.dawnsci.plotting.api.preferences.BasePlottingConstants;
 import org.eclipse.dawnsci.plotting.api.tool.IToolPage.ToolPageRole;
 import org.eclipse.dawnsci.plotting.api.trace.ISurfaceMeshTrace;
 import org.eclipse.dawnsci.plotting.api.trace.ITrace;
+import org.eclipse.dawnsci.plotting.api.trace.IVolumeTrace;
 import org.eclipse.dawnsci.plotting.api.trace.IWaterfallTrace;
 import org.eclipse.dawnsci.plotting.api.trace.MetadataPlotUtils;
 import org.eclipse.january.dataset.IDataset;
@@ -61,7 +62,7 @@ public class JZY3DPlotViewer extends IPlottingSystemViewer.Stub<Composite> {
 		Settings.getInstance().setHardwareAccelerated(true);
 		chart = SWTChartComponentFactory.chart(control, Quality.Intermediate);
 		chart.getView().setCameraMode(CameraMode.ORTHOGONAL);
-		
+		createToolbar();
 		String os = System.getProperty("os.name");
 		if (!os.toLowerCase().contains("windows")) {
 
@@ -95,7 +96,7 @@ public class JZY3DPlotViewer extends IPlottingSystemViewer.Stub<Composite> {
 		chart.addMouseCameraController();
 		chart.render();
 		
-		createToolbar();
+		
 	}
 	
 	private void createToolbar() {
@@ -249,6 +250,14 @@ public class JZY3DPlotViewer extends IPlottingSystemViewer.Stub<Composite> {
 			chart.resumeAnimator();
 			return true;
 		}
+		
+		if (trace instanceof VolumeTraceImpl) {
+			chart.pauseAnimator();
+			((VolumeTraceImpl) trace).setPalette(getPreferenceStore().getString(BasePlottingConstants.COLOUR_SCHEME));
+			chart.getScene().add(((VolumeTraceImpl)trace).getShape());
+			chart.resumeAnimator();
+			return true;
+		}
 
 		return false;
 	}
@@ -258,8 +267,8 @@ public class JZY3DPlotViewer extends IPlottingSystemViewer.Stub<Composite> {
 		if (trace instanceof Abstract2DJZY3DTrace) {
 			chart.pauseAnimator();
 			AbstractDrawable s = ((Abstract2DJZY3DTrace)trace).getShape();
-			if (s instanceof ShaderMeshDrawableVBO) {
-				((ShaderMeshDrawableVBO)s).dispose();
+			if (s instanceof ShaderMeshDrawableVBO || s instanceof Texture3D) {
+				s.dispose();
 			}
 			chart.render();
 			chart.getScene().remove(((Abstract2DJZY3DTrace)trace).getShape(),false);
@@ -291,6 +300,11 @@ public class JZY3DPlotViewer extends IPlottingSystemViewer.Stub<Composite> {
 		if (IWaterfallTrace.class.isAssignableFrom(trace)) {
 			return true;
 		}
+		
+		if (IVolumeTrace.class.isAssignableFrom(trace)) {
+			return true;
+		}
+		
 		return false;
 	}
 	
@@ -302,6 +316,7 @@ public class JZY3DPlotViewer extends IPlottingSystemViewer.Stub<Composite> {
 		List<Class<? extends ITrace>> l = new ArrayList<>();
 		l.add(ISurfaceMeshTrace.class);
 		l.add(IWaterfallTrace.class);
+		l.add(IVolumeTrace.class);
 		return l;
 	}
 	
@@ -322,6 +337,13 @@ public class JZY3DPlotViewer extends IPlottingSystemViewer.Stub<Composite> {
 			trace.setName(name);
 			return (U)trace;
 		}
+		
+		if (clazz == IVolumeTrace.class) {
+			IVolumeTrace trace = new VolumeTraceImpl(ServiceManager.getPaletteService(),ServiceManager.getImageService(),getPreferenceStore().getString(BasePlottingConstants.COLOUR_SCHEME));
+			trace.setName(name);
+			return (U)trace;
+		}
+		
 		return null;
 	}
 	

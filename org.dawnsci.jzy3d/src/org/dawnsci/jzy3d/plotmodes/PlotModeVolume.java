@@ -3,29 +3,47 @@ package org.dawnsci.jzy3d.plotmodes;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicReference;
 
-import org.dawnsci.datavis.model.PlotModeImage;
 import org.dawnsci.jzy3d.Abstract2DJZY3DTrace;
+import org.dawnsci.jzy3d.VolumeTraceImpl;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.trace.ITrace;
+import org.eclipse.dawnsci.plotting.api.trace.IVolumeTrace;
 import org.eclipse.dawnsci.plotting.api.trace.MetadataPlotUtils;
+import org.eclipse.january.dataset.Dataset;
+import org.eclipse.january.dataset.DatasetUtils;
 import org.eclipse.january.dataset.IDataset;
 import org.eclipse.january.dataset.ILazyDataset;
 import org.eclipse.january.dataset.SliceND;
 import org.eclipse.january.metadata.AxesMetadata;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-public abstract class AbstractJZY3DImagePlotMode extends PlotModeImage {
+public class PlotModeVolume extends AbstractJZY3DImagePlotMode {
 
-	private static final Logger logger = LoggerFactory.getLogger(PlotModeSurfaceMesh.class);
+	@Override
+	public String[] getOptions() {
+		return new String[] {"X","Y","Z"};
+	}
+
+	@Override
+	protected ITrace createTrace(String name, IPlottingSystem<?> system) {
+		return system.createTrace(name,IVolumeTrace.class);
+	}
+
 	
-	protected AtomicReference<ITrace> atomicTrace = new AtomicReference<>();
+	@Override
+	public String getName() {
+		return "Volume";
+	}
+
+	@Override
+	public boolean isThisMode(ITrace trace) {
+		return trace instanceof IVolumeTrace;
+	}
+
 	
 	@Override
 	public IDataset[] sliceForPlot(ILazyDataset lz, SliceND slice, Object[] options, IPlottingSystem<?> system) throws Exception {
-		IDataset[] data = super.sliceForPlot(lz, slice, options, system);
+		IDataset[] data = sliceForPlotInner(lz, slice, options, system);
 		IDataset d = data[0].getSlice();
 		AxesMetadata metadata = d.getFirstMetadata(AxesMetadata.class);
 		List<IDataset> ax = null;
@@ -51,36 +69,28 @@ public abstract class AbstractJZY3DImagePlotMode extends PlotModeImage {
 
 		long t = System.currentTimeMillis();
 		setData(trace,d, ax.toArray(new IDataset[ax.size()]));
-		logger.info("Tesselation time {} ms for slice {} of {}", (System.currentTimeMillis()-t), slice.toString(), lz.getName());
+//		logger.info("Tesselation time {} ms for slice {} of {}", (System.currentTimeMillis()-t), slice.toString(), lz.getName());
 		atomicTrace.set(trace);
 		
 		return data;
 	}
 	
 	private void setData(ITrace trace, IDataset d, IDataset[] axes) {
-		if (trace instanceof Abstract2DJZY3DTrace) {
-			((Abstract2DJZY3DTrace)trace).setData(d, axes);
+		if (trace instanceof VolumeTraceImpl) {
+			((VolumeTraceImpl)trace).setData(d, axes,d.min(true),d.max(true));
 		}
 	}
 	
-	protected abstract ITrace createTrace(String name, IPlottingSystem<?> system);
-	
-	
-	@Override
-	public void displayData(IDataset[] data, ITrace[] update, IPlottingSystem<?> system, Object userObject) throws Exception {
-		
-		if (update != null) {
-			for (ITrace t : update) system.removeTrace(t);
-		}
-
-		ITrace trace = atomicTrace.getAndSet(null);
-		
-		if (trace == null) return;
-		
-		trace.setUserObject(userObject);
-		system.addTrace(trace);
-
-		system.repaint();
-		
+	public IDataset[] sliceForPlotInner(ILazyDataset lz, SliceND slice, Object[] options, IPlottingSystem<?> system) throws Exception {
+		long t = System.currentTimeMillis();
+		Dataset data = DatasetUtils.convertToDataset(lz.getSlice(slice));
+//		logger.info("Slice time {} ms for slice {} of {}", (System.currentTimeMillis()-t), slice.toString(), lz.getName());
+		data.setErrors(null);
+//		updateName(lz.getName(),data,slice);
+		data.squeeze();
+		if (data.getRank() != 3) return null;
+		return new IDataset[]{data};
 	}
+
+
 }

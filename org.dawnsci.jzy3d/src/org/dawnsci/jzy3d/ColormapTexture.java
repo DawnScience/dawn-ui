@@ -17,6 +17,15 @@ public class ColormapTexture {
     private ByteBuffer image;
     private int[] shape;
     private boolean isUpdate = false;
+    private String name = null;
+	private int id;
+    
+    
+    public ColormapTexture(ColorMapper mapper, String name, int id) {
+    	this(mapper);
+    	this.name = name;
+    	this.id = id;
+    }
     
     public ColormapTexture(ColorMapper mapper) {
     	double min = mapper.getMin();
@@ -69,13 +78,16 @@ public class ColormapTexture {
 		gl.glEnable(GL2.GL_TEXTURE_1D);
         validateTexID(gl, true);
         gl.glBindTexture(GL2.GL_TEXTURE_1D, texID);
+        if (name != null) {
+        	gl.glActiveTexture(GL.GL_TEXTURE1);
+        }
         gl.glTexParameteri(GL2.GL_TEXTURE_1D, GL2.GL_TEXTURE_WRAP_S, GL2.GL_CLAMP_TO_EDGE);
 //        gl.glTexParameteri(GL2.GL_TEXTURE_3D, GL2.GL_TEXTURE_WRAP_T, GL2.GL_CLAMP);
 //        gl.glTexParameteri(GL2.GL_TEXTURE_3D, GL2.GL_TEXTURE_WRAP_R, GL2.GL_CLAMP);
         gl.glTexParameteri(GL2.GL_TEXTURE_1D, GL2.GL_TEXTURE_MAG_FILTER,
-                GL.GL_LINEAR);
+                GL.GL_NEAREST);
         gl.glTexParameteri(GL2.GL_TEXTURE_1D, GL2.GL_TEXTURE_MIN_FILTER,
-                GL.GL_LINEAR);
+                GL.GL_NEAREST);
         setTextureData(gl,image,shape);
     }
 	
@@ -88,8 +100,21 @@ public class ColormapTexture {
 //		gl.glTexParameteri(GL2.GL_TEXTURE_3D, GL2.GL_TEXTURE_WRAP_R, GL.GL_CLAMP_TO_EDGE);
 	}
 	
+	public int getID() {
+		return id;
+	}
+	
 	private boolean validateTexID(final GL gl, final boolean throwException) {
-        if( 0 == texID ) {
+		
+		if (name != null) {
+			gl.glActiveTexture(GL.GL_TEXTURE1);
+			gl.glEnable(GL2.GL_TEXTURE_1D);
+			int id = gl.getGL2().glGetUniformLocation(this.id, name);
+			
+			if ( id >= 0) {
+				texID = id;
+			}
+		} else if( 0 == texID ) {
             if( null != gl ) {
                 final int[] tmp = new int[1];
                 gl.glGenTextures(1, tmp, 0);

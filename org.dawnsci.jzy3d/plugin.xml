@@ -20,6 +20,11 @@
             name="Waterfall"
             priority="1">
       </plotmode>
+      <plotmode
+            class="org.dawnsci.jzy3d.plotmodes.PlotModeVolume"
+            name="Volume"
+            priority="0">
+      </plotmode>
    </extension>
 
 </plugin>
