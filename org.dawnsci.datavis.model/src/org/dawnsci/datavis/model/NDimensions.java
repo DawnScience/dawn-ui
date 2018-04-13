@@ -266,15 +266,19 @@ public class NDimensions {
 		}
 		
 		for (Entry<String,int[]> e : axes.entrySet()) {
-			if (e.getValue() != null) for (Integer i : e.getValue()) {
-				for (int j = 0; j < dimensions.length ; j++) {
-					if (dimensions[j].getSize() == i && !e.getKey().equals(name)) options[j].add(e.getKey());
-				}	
+			if (e.getValue() != null) {
+				for (Integer i : e.getValue()) {
+					for (int j = 0; j < dimensions.length ; j++) {
+						if (dimensions[j].getSize() == i && !e.getKey().equals(name))
+							options[j].add(e.getKey());
+					}
+				}
 			}	
 		}
 		
 		for (int i = 0 ; i < dimensions.length ; i++) {
-			dimensions[i].setAxisOptions(options[i].toArray(new String[options[i].size()]));
+			String[] uniqueOptions = options[i].stream().distinct().toArray(String[]::new);
+			dimensions[i].setAxisOptions(uniqueOptions);
 		}
 		
 	}
