@@ -38,13 +38,13 @@ public class BeamlineConfigurationPreferenceInitializer extends AbstractPreferen
 		BeamlineConfigurations beamlineConfigurations = new BeamlineConfigurations(); 
 		
 		BeamlineConfigurationBean bc1 = new BeamlineConfigurationBean();
-		bc1.setName("I22 SAXS");
+		bc1.setName("I22 SAXS Anisotropic");
 		bc1.setBeamstopDiameter(4);
-		bc1.setBeamstopXCentre(737.5);
-		bc1.setBeamstopYCentre(839.5);
-		bc1.setCameraTubeDiameter(350);
-		bc1.setCameraTubeXCentre(737.5);
-		bc1.setCameraTubeYCentre(839.5);
+		bc1.setBeamstopXCentre(738);
+		bc1.setBeamstopYCentre(840);
+		bc1.setCameraTubeDiameter(310);
+		bc1.setCameraTubeXCentre(738);
+		bc1.setCameraTubeYCentre(840);
 		bc1.setClearance(10);
 		bc1.setMinWavelength(0.062);
 		bc1.setMaxWavelength(0.3351);
@@ -54,19 +54,67 @@ public class BeamlineConfigurationPreferenceInitializer extends AbstractPreferen
 		
 		
 		BeamlineConfigurationBean bc2 = new BeamlineConfigurationBean();
-		bc2.setName("I22 WAXS");
+		bc2.setName("I22 SAXS Isotropic");
 		bc2.setBeamstopDiameter(4);
-		bc2.setBeamstopXCentre(737.5);
-		bc2.setBeamstopYCentre(839.5);
-		bc2.setCameraTubeDiameter(0);  // Set the camera tube diameter to 0 to "disable" the camera tube.
-		bc2.setCameraTubeXCentre(0);
-		bc2.setCameraTubeYCentre(0);
+		bc2.setBeamstopXCentre(738);
+		bc2.setBeamstopYCentre(100);
+		bc2.setCameraTubeDiameter(310);
+		bc2.setCameraTubeXCentre(738);
+		bc2.setCameraTubeYCentre(840);
 		bc2.setClearance(10);
 		bc2.setMinWavelength(0.062);
 		bc2.setMaxWavelength(0.3351);
-		bc2.setMinCameraLength(0.18);
-		bc2.setMaxCameraLength(0.58);
-		bc2.setCameraLengthStepSize(0.01);
+		bc2.setMinCameraLength(1.9);
+		bc2.setMaxCameraLength(9.9);
+		bc2.setCameraLengthStepSize(0.25);
+		
+		
+		BeamlineConfigurationBean bc3 = new BeamlineConfigurationBean();
+		bc3.setName("I22 GiSAXS");
+		bc3.setBeamstopDiameter(4);
+		bc3.setBeamstopXCentre(725);
+		bc3.setBeamstopYCentre(1400);
+		bc3.setCameraTubeDiameter(310);  // Set the camera tube diameter to 0 to "disable" the camera tube.
+		bc3.setCameraTubeXCentre(725);
+		bc3.setCameraTubeYCentre(840);
+		bc3.setClearance(10);
+		bc3.setMinWavelength(0.062);
+		bc3.setMaxWavelength(0.3351);
+		bc3.setMinCameraLength(0.18);
+		bc3.setMaxCameraLength(0.58);
+		bc3.setCameraLengthStepSize(0.01);
+		
+		
+		BeamlineConfigurationBean bc4 = new BeamlineConfigurationBean();
+		bc4.setName("I22 WAXS");
+		bc4.setBeamstopDiameter(4);
+		bc4.setBeamstopXCentre(1100);
+		bc4.setBeamstopYCentre(1080);
+		bc4.setCameraTubeDiameter(0);  // Set the camera tube diameter to 0 to "disable" the camera tube.
+		bc4.setCameraTubeXCentre(0);
+		bc4.setCameraTubeYCentre(0);
+		bc4.setClearance(10);
+		bc4.setMinWavelength(0.062);
+		bc4.setMaxWavelength(0.3351);
+		bc4.setMinCameraLength(0.18);
+		bc4.setMaxCameraLength(0.58);
+		bc4.setCameraLengthStepSize(0.01);
+		
+		
+		BeamlineConfigurationBean bc5 = new BeamlineConfigurationBean();
+		bc5.setName("I22 GiWAXS");
+		bc5.setBeamstopDiameter(4);
+		bc5.setBeamstopXCentre(1240);
+		bc5.setBeamstopYCentre(1600);
+		bc5.setCameraTubeDiameter(0);  // Set the camera tube diameter to 0 to "disable" the camera tube.
+		bc5.setCameraTubeXCentre(0);
+		bc5.setCameraTubeYCentre(0);
+		bc5.setClearance(10);
+		bc5.setMinWavelength(0.062);
+		bc5.setMaxWavelength(0.3351);
+		bc5.setMinCameraLength(0.18);
+		bc5.setMaxCameraLength(0.58);
+		bc5.setCameraLengthStepSize(0.01);
 		
 		
 		// Pilatus 2M - the default detector for bc1
@@ -86,8 +134,12 @@ public class BeamlineConfigurationPreferenceInitializer extends AbstractPreferen
 			int index = detectors.indexOf(dd);
 			if(index != -1){
 				bc1.setDetector(detectors.get(index));
+				bc2.setDetector(detectors.get(index));
+				bc3.setDetector(detectors.get(index));
 			} else if (!detectors.isEmpty()){
 				bc1.setDetector(detectors.get(0));
+				bc2.setDetector(detectors.get(0));
+				bc3.setDetector(detectors.get(0));
 			}
 		}
 		
@@ -114,17 +166,21 @@ public class BeamlineConfigurationPreferenceInitializer extends AbstractPreferen
 		if(detectors != null){
 			int index = detectors.indexOf(dd2);
 			if(index != -1){
-				bc2.setDetector(detectors.get(index));
+				bc4.setDetector(detectors.get(index));
+				bc5.setDetector(detectors.get(index));
 			} else if (!detectors.isEmpty()){
-				bc2.setDetector(detectors.get(0));
+				bc4.setDetector(detectors.get(0));
+				bc5.setDetector(detectors.get(0));
 			}
 		}
-		
 		
 		
 		beamlineConfigurations.addBeamlineConfiguration(bc1);
 		beamlineConfigurations.setBeamlineConfiguration(bc1);
 		beamlineConfigurations.addBeamlineConfiguration(bc2);
+		beamlineConfigurations.addBeamlineConfiguration(bc3);
+		beamlineConfigurations.addBeamlineConfiguration(bc4);
+		beamlineConfigurations.addBeamlineConfiguration(bc5);
 		
 		return beamlineConfigurations;
 	}
