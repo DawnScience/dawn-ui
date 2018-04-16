@@ -19,6 +19,7 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.dawnsci.analysis.api.processing.IOperation;
 import org.eclipse.dawnsci.analysis.api.processing.OperationData;
+import org.eclipse.dawnsci.analysis.api.processing.OperationDataForDisplay;
 import org.eclipse.dawnsci.analysis.api.processing.PlotAdditionalData;
 import org.eclipse.dawnsci.analysis.api.processing.model.IOperationModel;
 import org.eclipse.dawnsci.analysis.api.processing.model.ModelUtils;
@@ -406,7 +407,26 @@ public class ConfigureOperationModelWizardPage extends AbstractOperationModelWiz
 										} else {
 											MetadataPlotUtils.plotDataWithMetadata(additional, output, false);
 										}
- 
+									}
+									if (od instanceof OperationDataForDisplay) {
+										OperationDataForDisplay odd = (OperationDataForDisplay) od;
+										IDataset[] dd = odd.getDisplayData();
+										if (dd != null) {
+											if (input != null && odd.isShowSeparately()) {
+												for (IDataset d : dd) {
+													IDataset view = d.getSliceView().squeeze();
+													MetadataPlotUtils.plotDataWithMetadata(view, input, false);
+												}
+												input.repaint();
+											} else {
+												for (IDataset d : dd) {
+													IDataset view = d.getSliceView().squeeze();
+													if (view.getRank() == 1) {
+														MetadataPlotUtils.plotDataWithMetadata(view, output, false);
+													}
+												}
+											}
+										}
 									}
 									errorLabel.setText("");
 								} catch (Exception e) {
