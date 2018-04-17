@@ -15,19 +15,29 @@ vec4 UnderCompositing(vec4 src, vec4 dst) {
   return result;
 }
 
+vec4 TopCompositing(vec4 initial, vec4 sample) {
+  vec4 result = initial;
+  result.rgb   +=  ((1.0-initial.a)*sample.rgb*sample.a);
+  result.a     += ((1.0-initial.a)*sample.a);
+
+  return result;
+}
+
 void main() {
 
 	//vec4 ttest =texture(transfer,val);
-	//vFragColor = ttest;
-	//return;
+
+//	vFragColor = vVaryingColor;
+//	return;
 	vec4 test = vVaryingColor;
-	vec4 value = texture(volumeTexture,test.xyz);
+	vec4 value = texture(volumeTexture,(test.xyz));
 	
 	float val = clamp((value.r-minMax.x)/(minMax.y-minMax.x),0,1);
 	vec4 t =texture(transfer,val);
 	value = t;
-	value.a = val;
-	
+
+	value.a = val*val;
+
 		for (int i = 1; i < 200; i++) {
 			vec3 tmp = test.xyz;
 			tmp = tmp - eye*0.005*i;
@@ -36,11 +46,21 @@ void main() {
 			}
 			vec4 v = texture(volumeTexture,tmp);
 			float val0 = clamp((v.r-minMax.x)/(minMax.y-minMax.x),0,1);
-	vec4 t0 =texture(transfer,val0);
+			vec4 t0 =texture(transfer,val0);
+
+
 
 			v = t0;
-			v.a = val0;
-			value = UnderCompositing(v,value);
+			v.a = val0*val0;
+
+//			value = UnderCompositing(v,value);
+			value = TopCompositing(value,v);
+
+			if (value.a > 0.99) {
+				vFragColor = value;
+				return;
+			}
+
 		}
 
 		vFragColor = value;

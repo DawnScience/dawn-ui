@@ -186,6 +186,7 @@ public class Texture3D extends AbstractDrawable implements IGLBindedResource{
     	
     	
        gl.glEnable(GL2.GL_BLEND);
+       gl.glEnable(GL2.GL_CULL_FACE);
        gl.glBlendFunc(GL2.GL_SRC_ALPHA, GL2.GL_ONE_MINUS_SRC_ALPHA);
        gl.getGL2().glPolygonMode(GL.GL_FRONT, GL2GL3.GL_FILL);
        gl.glCullFace(gl.GL_BACK);
@@ -311,7 +312,7 @@ public static class CubeVBO extends VBOBuilder {
 
 		int size = 0;
 		Coord3d c = new Coord3d();
-		//first
+		//zMin
 		indices.put(size++);
 		c.x = xMin;
 		c.y = yMin;
@@ -343,7 +344,10 @@ public static class CubeVBO extends VBOBuilder {
 
 		putCoord(vertices, c);
 		putColor(vertices, new Color(255,0,0));
-		//second
+		
+		
+		
+		//xMin
 		indices.put(size++);
 		c.x = xMin;
 		c.y = yMin;
@@ -354,11 +358,11 @@ public static class CubeVBO extends VBOBuilder {
 		
 		indices.put(size++);
 		c.x = xMin;
-		c.y = yMax;
-		c.z = zMin;
+		c.y = yMin;
+		c.z = zMax;
 
 		putCoord(vertices, c);
-		putColor(vertices, new Color(0,255,0));
+		putColor(vertices, new Color(0,0,255));
 		
 		indices.put(size++);
 		c.x = xMin;
@@ -370,13 +374,17 @@ public static class CubeVBO extends VBOBuilder {
 		
 		indices.put(size++);
 		c.x = xMin;
-		c.y = yMin;
-		c.z = zMax;
+		c.y = yMax;
+		c.z = zMin;
 
 		putCoord(vertices, c);
-		putColor(vertices, new Color(0,0,255));
+		putColor(vertices, new Color(0,255,0));
+		
+		
+		
+		
 
-		//third
+		//yMin
 		indices.put(size++);
 		c.x = xMin;
 		c.y = yMin;
@@ -386,12 +394,12 @@ public static class CubeVBO extends VBOBuilder {
 		putColor(vertices, new Color(0,0,0));
 		
 		indices.put(size++);
-		c.x = xMin;
+		c.x = xMax;
 		c.y = yMin;
-		c.z = zMax;
+		c.z = zMin;
 
 		putCoord(vertices, c);
-		putColor(vertices, new Color(0,0,255));
+		putColor(vertices, new Color(255,0,0));
 		
 		indices.put(size++);
 		c.x = xMax;
@@ -402,14 +410,18 @@ public static class CubeVBO extends VBOBuilder {
 		putColor(vertices, new Color(255,0,255));
 		
 		indices.put(size++);
-		c.x = xMax;
+		c.x = xMin;
 		c.y = yMin;
-		c.z = zMin;
+		c.z = zMax;
 
 		putCoord(vertices, c);
-		putColor(vertices, new Color(255,0,0));
+		putColor(vertices, new Color(0,0,255));
 		
-		//first - 2
+		
+		
+		
+		
+		//zMax
 				indices.put(size++);
 				c.x = xMax;
 				c.y = yMax;
@@ -419,12 +431,12 @@ public static class CubeVBO extends VBOBuilder {
 				putColor(vertices, new Color(255,255,255));
 				
 				indices.put(size++);
-				c.x = xMax;
-				c.y = yMin;
+				c.x = xMin;
+				c.y = yMax;
 				c.z = zMax;
 
 				putCoord(vertices, c);
-				putColor(vertices, new Color(255,0,255));
+				putColor(vertices, new Color(0,255,255));
 				
 				indices.put(size++);
 				c.x = xMin;
@@ -435,13 +447,17 @@ public static class CubeVBO extends VBOBuilder {
 				putColor(vertices, new Color(0,0,255));
 				
 				indices.put(size++);
-				c.x = xMin;
-				c.y = yMax;
+				c.x = xMax;
+				c.y = yMin;
 				c.z = zMax;
 
 				putCoord(vertices, c);
-				putColor(vertices, new Color(0,255,255));
-				//second -2
+				putColor(vertices, new Color(255,0,255));
+				
+				
+				
+				
+				//xMax
 				indices.put(size++);
 				c.x = xMax;
 				c.y = yMax;
@@ -474,14 +490,7 @@ public static class CubeVBO extends VBOBuilder {
 				putCoord(vertices, c);
 				putColor(vertices, new Color(255,255,0));
 
-				//third -2
-				indices.put(size++);
-				c.x = xMax;
-				c.y = yMax;
-				c.z = zMax;
-
-				putCoord(vertices, c);
-				putColor(vertices, new Color(255,255,255));
+				//yMax
 				
 				indices.put(size++);
 				c.x = xMax;
@@ -506,6 +515,19 @@ public static class CubeVBO extends VBOBuilder {
 
 				putCoord(vertices, c);
 				putColor(vertices, new Color(0,255,255));
+				indices.put(size++);
+				c.x = xMax;
+				c.y = yMax;
+				c.z = zMax;
+
+				putCoord(vertices, c);
+				putColor(vertices, new Color(255,255,255));
+				
+				
+				
+				
+				
+				
 		
 		vertices.rewind();
 		indices.rewind();

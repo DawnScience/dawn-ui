@@ -104,17 +104,22 @@ public class VolumeTraceImpl extends Abstract2DJZY3DTrace implements IVolumeTrac
 		
 //		shape = new int[] {3,3,3};
 		
-//		dataf = new float[] {1,0,1,0,1,0,1,0,1,0,0,0,0,1,0,0,0,0,1,0,1,0,1,0,1,0,1};
+//		dataf = new float[] {1,0,2,0,3,0,4,0,5,0,0,0,0,6,0,0,0,0,7,0,8,0,9,0,10,0,11};
 //		dataf = new float[] {1,0,1,0,0,0,1,0,1,0,0,0,0,0,0,0,0,0,1,0,1,0,1,0,1,0,1};
 		
-		
+//		max = 11;
+//		min = 1;
+//		
+//		colorMapper.setMax(11);
+//		colorMapper.setMin(0);
+//		
 		ByteBuffer buffer = GLBuffers.newDirectByteBuffer(dataf.length*4);
-		
+//		
 		for (int i = 0; i < dataf.length; i++) {
 			buffer.putFloat(dataf[i]);
 		}
 		
-		float diff = max.floatValue() - min.floatValue();
+//		float diff = max.floatValue() - min.floatValue();
 		
 		volume = new Texture3D(buffer, shape,min.floatValue(),max.floatValue(),colorMapper);
 //		
