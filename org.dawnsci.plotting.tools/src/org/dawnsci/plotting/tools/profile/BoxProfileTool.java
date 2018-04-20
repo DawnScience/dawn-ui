@@ -108,7 +108,11 @@ public class BoxProfileTool extends ProfileTool {
 		updatePlot(monitor, tryUpdate, showX, region, xPixelAxis, x_trace, x_indices, x_intensity);
 		updatePlot(monitor, tryUpdate, showY, region, yPixelAxis, y_trace, y_indices, y_intensity);
 		if (!showX && !showY) { // avoid ugly empty plot
-			xPixelAxis.setVisible(true);
+			getControl().getDisplay().syncExec(new Runnable() {
+				public void run() {
+					xPixelAxis.setVisible(true);
+				}
+			});
 		}
 		return Arrays.asList(y_trace, x_trace);
 	}
