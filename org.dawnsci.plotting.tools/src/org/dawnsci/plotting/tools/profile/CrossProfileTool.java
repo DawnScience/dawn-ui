@@ -112,6 +112,9 @@ public class CrossProfileTool extends LineProfileTool {
 			if (image!=null && image.getData()!=null && rbs instanceof LinearROI) {
 
 				IDataset             data   = image.getData();
+				if (data == null) {
+					return null;
+				}
 				List<OriginMetadata> origin = data.getMetadata(OriginMetadata.class);
 				OriginMetadata       odata  = origin!=null && !origin.isEmpty() ? origin.get(0) : null;
 

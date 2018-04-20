@@ -120,20 +120,23 @@ public class SpotTool extends ZoomTool {
 		if ((region.getRegionType()!=RegionType.BOX)&&(region.getRegionType()!=RegionType.PERIMETERBOX)) return null;
 
 		Dataset slice = createZoom(image, region, rbs, tryUpdate, isDrag, monitor);
-		
-        Dataset yData = slice.sum(0);
+		if (slice == null) {
+			return null;
+		}
+
+		Dataset yData = slice.sum(0);
 		yData.setName("Intensity");
         Dataset xData = slice.sum(1);
         xData.setName("Intensity");
 	
 		final RectangularROI bounds = (RectangularROI) (rbs==null ? region.getROI() : rbs);
- 		final Dataset y_indices   = DatasetFactory.createRange(bounds.getPoint()[0], bounds.getPoint()[0]+bounds.getLength(0), 1, Dataset.FLOAT);
+ 		final Dataset y_indices   = DatasetFactory.createRange(bounds.getPoint()[0], bounds.getPoint()[0]+bounds.getLength(0), 1);
 		y_indices.setName("X Location");
 		
 		topSystem.updatePlot1D(y_indices, Arrays.asList(new IDataset[]{yData}), monitor);
 		topSystem.repaint();
 
-		final Dataset x_indices   = DatasetFactory.createRange(bounds.getPoint()[1]+bounds.getLength(1), bounds.getPoint()[1], -1, Dataset.FLOAT);
+		final Dataset x_indices   = DatasetFactory.createRange(bounds.getPoint()[1]+bounds.getLength(1), bounds.getPoint()[1], -1);
 		x_indices.setName("Y Location");
 	
 		final Collection<ITrace> right = rightSystem.updatePlot1D(xData, Arrays.asList(new IDataset[]{x_indices}), monitor);

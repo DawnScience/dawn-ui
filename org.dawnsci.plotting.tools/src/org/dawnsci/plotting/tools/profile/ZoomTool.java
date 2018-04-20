@@ -93,6 +93,9 @@ public class ZoomTool extends ProfileTool {
 		final int xInc = bounds.getPoint()[0]<bounds.getEndPoint()[0] ? 1 : -1;
 
 		Dataset im    = DatasetUtils.convertToDataset(image.getData());
+		if (im == null) {
+			return null;
+		}
 		Dataset slice = DatasetUtils.convertToDataset(ToolUtils.getClippedSlice(im, bounds));
 		slice.setName(region.getName());
 		// Calculate axes to have real values not size

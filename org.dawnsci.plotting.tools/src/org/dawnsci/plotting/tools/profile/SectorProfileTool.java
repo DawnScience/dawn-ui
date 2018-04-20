@@ -135,7 +135,7 @@ public abstract class SectorProfileTool extends ProfileTool implements IDetector
 			lastSymmetry = sroi.getSymmetry();
 		}
 
-        super.roiChanged(evt);
+		super.roiChanged(evt);
 	}
 	
 	private int     preferredSymmetry = SectorROI.NONE;
@@ -177,8 +177,8 @@ public abstract class SectorProfileTool extends ProfileTool implements IDetector
 								                "\n\nPlease try a different symmetry for "+(notPossible.size()==1?"it.":"them."));
 					}
 				}
-			};	
-            group.add(action);
+			};
+			group.add(action);
 			symmetry.add(action);
 		}
 	
@@ -199,14 +199,12 @@ public abstract class SectorProfileTool extends ProfileTool implements IDetector
 				//clear plotting system to make sure uncombined traces are cleared
 				profilePlottingSystem.clear();
 				update(null, null, false);
-			    
 			}
 		};
 		combineSymmetry.setImageDescriptor(Activator.getImageDescriptor("icons/sector-symmetry-combine.png"));
 		getSite().getActionBars().getToolBarManager().add(combineSymmetry);
 		getSite().getActionBars().getMenuManager().add(combineSymmetry);
-		
-		
+
 		final Action lock = new Action("Lock center of all current sectors", IAction.AS_CHECK_BOX) {
 			@Override
 			public void run() {
@@ -225,10 +223,9 @@ public abstract class SectorProfileTool extends ProfileTool implements IDetector
 		lock.setImageDescriptor(Activator.getImageDescriptor("icons/lock.png"));
 
 		getSite().getActionBars().getToolBarManager().add(new Separator());
-    	getSite().getActionBars().getToolBarManager().add(lock);
+		getSite().getActionBars().getToolBarManager().add(lock);
 		getSite().getActionBars().getMenuManager().add(new Separator());
-    	getSite().getActionBars().getMenuManager().add(lock);
-		
+		getSite().getActionBars().getMenuManager().add(lock);
 	}
 
 	public void activate() {
@@ -288,7 +285,10 @@ public abstract class SectorProfileTool extends ProfileTool implements IDetector
 		if (monitor.isCanceled()) return null;
 		final IDataset data = isDrag ? image.getDownsampled()     : image.getData();
 		final IDataset mask = isDrag ? image.getDownsampledMask() : image.getMask();
-		
+		if (data == null) {
+			return null;
+		}
+
 		SectorROI downsroi = null;
 		if (isDrag) {
 			downsroi = sroi.copy();

@@ -37,6 +37,7 @@ import org.eclipse.dawnsci.plotting.api.trace.PaletteEvent;
 import org.eclipse.dawnsci.plotting.api.trace.TraceEvent;
 import org.eclipse.january.dataset.Dataset;
 import org.eclipse.january.dataset.DatasetUtils;
+import org.eclipse.january.dataset.IDataset;
 import org.eclipse.january.metadata.IMetadata;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.Separator;
@@ -267,8 +268,11 @@ public class ImageTableTool extends AbstractToolPage  implements IROIListener {
 		
 		if (isDrag) return; // Table tool slow to be that live.
 		if (monitor.isCanceled()) return;
-		if (image==null || image.getData() == null) return;
-		
+		if (image==null) return;
+		IDataset im = image.getData();
+		if (im == null) {
+			return;
+		}
 		if (region.getRegionType()!=RegionType.BOX) return;
 
 		final RectangularROI bounds = (RectangularROI) (rbs==null ? region.getROI() : rbs);
@@ -281,7 +285,7 @@ public class ImageTableTool extends AbstractToolPage  implements IROIListener {
 		final int xInc = bounds.getPoint()[0]<bounds.getEndPoint()[0] ? 1 : -1;
 		
 		try {
-			final Dataset slice = DatasetUtils.convertToDataset(image.getData().getSlice(new int[] { (int) bounds.getPoint()[1],    (int) bounds.getPoint()[0] },
+			final Dataset slice = DatasetUtils.convertToDataset(im.getSlice(new int[] { (int) bounds.getPoint()[1],    (int) bounds.getPoint()[0] },
 					                                               new int[] { (int) bounds.getEndPoint()[1], (int) bounds.getEndPoint()[0] },
 					                                               new int[] {yInc, xInc}));
 		

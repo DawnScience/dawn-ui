@@ -21,6 +21,7 @@ import org.eclipse.dawnsci.analysis.api.tree.GroupNode;
 import org.eclipse.dawnsci.analysis.api.tree.Node;
 import org.eclipse.dawnsci.analysis.dataset.roi.RectangularROI;
 import org.eclipse.dawnsci.analysis.tree.impl.AttributeImpl;
+import org.eclipse.dawnsci.nexus.NexusConstants;
 import org.eclipse.dawnsci.nexus.NexusFile;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.axis.IAxis;
@@ -99,7 +100,13 @@ public class BoxProfileTool extends ProfileTool {
 		final ILineTrace x_trace = (ILineTrace)profilePlottingSystem.getTrace("X "+region.getName());
 		final ILineTrace y_trace = (ILineTrace)profilePlottingSystem.getTrace("Y "+region.getName());
 		
-		Dataset[] profile = showX || showY ? getProfile(image, region, rbs, tryUpdate, isDrag, monitor) : null;
+		Dataset[] profile = null;
+		if (showX || showY) {
+			profile = getProfile(image, region, rbs, tryUpdate, isDrag, monitor);
+			if (profile == null) {
+				return null;
+			}
+		}
 		final Dataset x_indices   = showX ? profile[0] : null;
 		final Dataset x_intensity = showX ? profile[1] : null;
 		final Dataset y_indices   = showY ? profile[2] : null;
@@ -175,8 +182,15 @@ public class BoxProfileTool extends ProfileTool {
 		if (monitor.isCanceled()) return null;
 		
 		Dataset data = DatasetUtils.convertToDataset(image.getData());
+		if (data == null) {
+			return null;
+		}
+		Dataset md = DatasetUtils.convertToDataset(image.getMask());
+		List<IDataset> axes = image.getAxes();
+
 		if (data instanceof RGBDataset) data = ((RGBDataset)data).getRedView();
-		Dataset[] box = ROIProfile.box(data, DatasetUtils.convertToDataset(image.getMask()), bounds, true);
+
+		Dataset[] box = ROIProfile.box(data, md, bounds, true);
 		if (box==null) return null;
 		
 		Dataset xi = null;
@@ -184,9 +198,7 @@ public class BoxProfileTool extends ProfileTool {
 		
 		double ang = bounds.getAngle();
 		//TODO probably better to deal with this in ROIProfile class, but this will do for now.
-		if (image.getAxes() !=  null && ang == 0) {
-			List<IDataset> axes = image.getAxes();
-			
+		if (axes !=  null && ang == 0) {
 			int[] spt = bounds.getIntPoint();
 			int[] len = bounds.getIntLengths();
 			
@@ -256,7 +268,7 @@ public class BoxProfileTool extends ProfileTool {
 		String dataGroupPath = slice.getParent();
 		// Fix to http://jira.diamond.ac.uk/browse/SCI-1898
 		GroupNode groupNode = file.getGroup(dataGroupPath, true);
-		file.addAttribute(groupNode, new AttributeImpl(NexusFile.NXCLASS, "NXsubentry"));
+		file.addAttribute(groupNode, new AttributeImpl(NexusConstants.NXCLASS, "NXsubentry"));
 
 		if (slice.getMonitor()!=null && slice.getMonitor().isCancelled()) return null;
 		String dataPath = "";

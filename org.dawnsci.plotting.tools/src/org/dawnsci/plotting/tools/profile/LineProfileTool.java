@@ -57,8 +57,12 @@ public class LineProfileTool extends ProfileTool {
 		if (!region.isVisible()) return null;
 
 		if (monitor.isCanceled()) return null;
-		Dataset[] profileData = ROIProfile.line(DatasetUtils.convertToDataset(image.getData()), DatasetUtils.convertToDataset(image.getMask()), bounds, 1d, true);
-        if (profileData==null) return null;
+		Dataset im = DatasetUtils.convertToDataset(image.getData());
+		if (im == null) {
+			return null;
+		}
+		Dataset[] profileData = ROIProfile.line(im, DatasetUtils.convertToDataset(image.getMask()), bounds, 1d, true);
+		if (profileData==null) return null;
 
 		if (monitor.isCanceled()) return null;
 				

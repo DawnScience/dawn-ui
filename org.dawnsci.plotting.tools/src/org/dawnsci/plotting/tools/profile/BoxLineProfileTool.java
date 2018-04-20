@@ -344,6 +344,7 @@ public class BoxLineProfileTool extends ProfileTool implements IProfileToolPage 
 		}
 
 		Dataset md = DatasetUtils.convertToDataset(image.getMask());
+		List<IDataset> axes = image.getAxes();
 
 		Dataset[] boxLine = ROIProfile.boxLine(data, md, bounds, true, isVertical);
 		if (boxLine == null)
@@ -362,8 +363,7 @@ public class BoxLineProfileTool extends ProfileTool implements IProfileToolPage 
 		Dataset xi = null;
 
 		double ang = bounds.getAngle();
-		if (image.getAxes() != null && ang == 0) {
-			List<IDataset> axes = image.getAxes();
+		if (axes != null && ang == 0) {
 
 			int[] spt = bounds.getIntPoint();
 			int[] len = bounds.getIntLengths();
