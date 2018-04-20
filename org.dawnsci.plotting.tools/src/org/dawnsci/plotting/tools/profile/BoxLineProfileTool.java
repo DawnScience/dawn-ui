@@ -35,7 +35,7 @@ import org.eclipse.january.dataset.DatasetFactory;
 import org.eclipse.january.dataset.DatasetUtils;
 import org.eclipse.january.dataset.IDataset;
 import org.eclipse.january.dataset.IntegerDataset;
-import org.eclipse.january.dataset.RGBDataset;
+import org.eclipse.january.dataset.Slice;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.Separator;
@@ -339,19 +339,19 @@ public class BoxLineProfileTool extends ProfileTool implements IProfileToolPage 
 			return null;
 
 		Dataset data = DatasetUtils.convertToDataset(image.getData());
-		if (data instanceof RGBDataset)
-			data = ((RGBDataset) data).getRedView();
+		if (data == null) {
+			return null;
+		}
 
-		Dataset id = DatasetUtils.convertToDataset(image.getData());
 		Dataset md = DatasetUtils.convertToDataset(image.getMask());
 
-		Dataset[] boxLine = ROIProfile.boxLine(id, md, bounds, true, isVertical);
+		Dataset[] boxLine = ROIProfile.boxLine(data, md, bounds, true, isVertical);
 		if (boxLine == null)
 			return null;
 
 		Dataset average = null;
 		if (isAveragePlotted) {
-			Dataset[] boxMean = ROIProfile.boxMean(id, md, bounds, true);
+			Dataset[] boxMean = ROIProfile.boxMean(data, md, bounds, true);
 			if (isVertical)
 				average = boxMean[1];
 			else
@@ -368,51 +368,31 @@ public class BoxLineProfileTool extends ProfileTool implements IProfileToolPage 
 			int[] spt = bounds.getIntPoint();
 			int[] len = bounds.getIntLengths();
 
-			int xstart = 0;
-			int xend = 0;
-			if (isVertical) {
-				xstart = Math.max(0, spt[1]);
-				xend = Math.min(spt[1] + len[1], image.getData().getShape()[1]);
-			} else {
-				xstart = Math.max(0, spt[0]);
-				xend = Math.min(spt[0] + len[0], image.getData().getShape()[0]); // ,
-			}
-			if (isVertical) {
-				try {
-					IDataset xFull = axes.get(1);
-					xi = DatasetUtils.convertToDataset(
-							xFull.getSlice(new int[] { xstart }, new int[] { xend + 1 }, new int[] { 1 }));
-					xi.setName(xFull.getName());
-				} catch (Exception ne) {
-					// ignore
-				}
-			} else {
-				try {
-					IDataset xFull = axes.get(0);
-					xi = DatasetUtils.convertToDataset(
-							xFull.getSlice(new int[] { xstart }, new int[] { xend + 1 }, new int[] { 1 }));
-					xi.setName(xFull.getName());
-				} catch (Exception ne) {
-					// ignore
-				}
+			int a = isVertical ? 1 : 0;
+			IDataset xFull = axes.get(a);
+
+			if (xFull != null) {
+				int xstart = Math.max(0, spt[a]);
+				int xend = Math.min(spt[a] + len[a] + 1, data.getShapeRef()[a]);
+				xend = Math.min(xend, xFull.getSize()); // assume axis is 1D
+				xi = DatasetUtils.convertToDataset(xFull.getSlice(new Slice(xstart, xend)));
+				xi.setName(xFull.getName());
 			}
 		}
 
 		Dataset intensity1 = boxLine[0];
 		intensity1.setName(EDGE1);
-		if (xi == null || !Arrays.equals(xi.getShape(), intensity1.getShape())) {
+		if (xi == null || !Arrays.equals(xi.getShapeRef(), intensity1.getShapeRef())) {
 			double xStart = bounds.getPointX();
 			double xEnd = bounds.getPointX() + bounds.getLength(0);
 			xi = DatasetFactory.createRange(IntegerDataset.class, xStart, xEnd, 1);
 			xi.setName("X Pixel");
 		}
-		final Dataset indices = xi; // Maths.add(xi, bounds.getX()); // Real
-									// position
 
 		Dataset intensity2 = boxLine[1];
 		intensity2.setName(EDGE2);
 
-		return new Dataset[] { indices, intensity1, intensity2, average};
+		return new Dataset[] { xi, intensity1, intensity2, average};
 	}
 
 	/**
