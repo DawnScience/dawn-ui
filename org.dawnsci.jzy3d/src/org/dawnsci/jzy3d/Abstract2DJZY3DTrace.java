@@ -139,6 +139,10 @@ public abstract class Abstract2DJZY3DTrace extends AbstractColorMapTrace {
 			((ShaderMeshDrawableVBO)shape).setMapper(mapper);
 		}
 		
+		if (shape instanceof Texture3D) {
+			((Texture3D)shape).setMapper(mapper);
+		}
+		
 	}
 
 	@Override

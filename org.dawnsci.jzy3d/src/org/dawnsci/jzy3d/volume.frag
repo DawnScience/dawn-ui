@@ -38,7 +38,7 @@ void main() {
 
 	value.a = val*val;
 
-		for (int i = 1; i < 200; i++) {
+		for (int i = 1; i < 300; i++) {
 			vec3 tmp = test.xyz;
 			tmp = tmp - eye*0.005*i;
 			if (tmp.x > 1 || tmp.y > 1 || tmp.z > 1 || tmp.x < 0 || tmp.y < 0 || tmp.z < 0) {

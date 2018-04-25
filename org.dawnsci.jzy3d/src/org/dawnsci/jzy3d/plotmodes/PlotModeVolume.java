@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import org.dawnsci.jzy3d.Abstract2DJZY3DTrace;
 import org.dawnsci.jzy3d.VolumeTraceImpl;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.trace.ITrace;
@@ -39,7 +38,11 @@ public class PlotModeVolume extends AbstractJZY3DImagePlotMode {
 	public boolean isThisMode(ITrace trace) {
 		return trace instanceof IVolumeTrace;
 	}
-
+	
+	@Override
+	public int getMinimumRank() {
+		return 3;
+	}
 	
 	@Override
 	public IDataset[] sliceForPlot(ILazyDataset lz, SliceND slice, Object[] options, IPlottingSystem<?> system) throws Exception {

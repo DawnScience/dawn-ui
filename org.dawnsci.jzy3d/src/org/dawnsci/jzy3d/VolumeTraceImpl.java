@@ -13,6 +13,7 @@ import org.eclipse.january.dataset.IDataset;
 import org.jzy3d.colors.Color;
 import org.jzy3d.colors.ColorMapper;
 import org.jzy3d.colors.colormaps.ColorMapGrayscale;
+import org.jzy3d.maths.BoundingBox3d;
 import org.jzy3d.plot3d.primitives.AbstractDrawable;
 import org.jzy3d.plot3d.primitives.Shape;
 
@@ -93,11 +94,10 @@ public class VolumeTraceImpl extends Abstract2DJZY3DTrace implements IVolumeTrac
 //		float[] zArray = z.getData();
 //
 //		
-//		if (colorMapper != null) {
-//			colorMapper.setMin(min);
-//			colorMapper.setMax(max);
-//		}
-		
+		if (colorMapper != null) {
+			colorMapper.setMin(min.floatValue());
+			colorMapper.setMax(max.floatValue());
+		}
 		
 		int[] shape = data.getShape();
 		float[] dataf = v.getData();
@@ -121,20 +121,7 @@ public class VolumeTraceImpl extends Abstract2DJZY3DTrace implements IVolumeTrac
 		
 //		float diff = max.floatValue() - min.floatValue();
 		
-		volume = new Texture3D(buffer, shape,min.floatValue(),max.floatValue(),colorMapper);
-//		
-//////		final AbstractDrawable surface  = MeshTessellator.buildShape(xArray, yArray, z.getData(),colorMapper);
-////		final AbstractDrawable surface  = MeshTessellator.buildShape(xArray, yArray, z.getData());
-//	
-//		if (colorMapper == null) {
-//			colorMapper = new ColorMapper(new ColorMapGrayscale(), min, max, new Color(1, 1, 1, .5f));
-//		}
-//		
-//		if (surface instanceof Shape) {
-//			configureShape((Shape)surface);
-//		}
-//		
-//		shape = volume;
+		volume = new Texture3D(buffer, shape,min.floatValue(),max.floatValue(),colorMapper,new BoundingBox3d(0.f,1.f,0.f,1.f,0.f,1f));
 		
 	}
 
@@ -154,13 +141,13 @@ public class VolumeTraceImpl extends Abstract2DJZY3DTrace implements IVolumeTrac
 
 	@Override
 	protected AbstractDrawable buildShape(float[] x, float[] y, float[] z, ColorMapper mapper) {
-		// TODO Auto-generated method stub
+		// nothing here
 		return null;
 	}
 
 	@Override
 	protected void configureShape(Shape shape) {
-		// TODO Auto-generated method stub
+		// nothing here
 		
 	}
 
