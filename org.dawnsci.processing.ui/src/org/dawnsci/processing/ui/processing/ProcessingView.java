@@ -40,6 +40,8 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.richbeans.widgets.table.ISeriesItemDescriptor;
 import org.eclipse.richbeans.widgets.table.SeriesTable;
+import org.eclipse.richbeans.widgets.table.event.SeriesItemEvent;
+import org.eclipse.richbeans.widgets.table.event.SeriesItemListener;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
@@ -82,6 +84,26 @@ public class ProcessingView extends ViewPart {
 
 	public ProcessingView() {
 		this.seriesTable    = new SeriesTable();
+		this.seriesTable.addSeriesEventListener(new SeriesItemListener() {
+			
+			@Override
+			public void itemRemoved(SeriesItemEvent evt) {
+				ISeriesItemDescriptor descriptor = evt.getDescriptor();
+				if (descriptor instanceof OperationDescriptor) {
+					OperationDescriptor operationDescriptor = (OperationDescriptor) descriptor;
+					try {
+						operationDescriptor.getSeriesObject().destroy();
+					} catch (Exception e) {
+						logger.warn("Could not get operation from descriptor", e);
+					}
+				}
+			}
+
+			@Override
+			public void itemAdded(SeriesItemEvent evt) {
+				// do nothing
+			}
+		});
 		this.operationFiler = new OperationFilter();
 	}
 	
