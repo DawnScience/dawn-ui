@@ -3,7 +3,7 @@
 in vec4 vVaryingColor;
 uniform sampler3D volumeTexture;
 uniform sampler1D transfer;
-uniform vec3 eye;
+uniform vec4 eye;
 out vec4 vFragColor;
 uniform vec2 minMax;
 
@@ -40,7 +40,7 @@ void main() {
 
 		for (int i = 1; i < 300; i++) {
 			vec3 tmp = test.xyz;
-			tmp = tmp - eye*0.005*i;
+			tmp = tmp - eye.xyz*0.005*i;
 			if (tmp.x > 1 || tmp.y > 1 || tmp.z > 1 || tmp.x < 0 || tmp.y < 0 || tmp.z < 0) {
 				break;
 			}

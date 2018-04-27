@@ -21,6 +21,9 @@ import com.jogamp.opengl.GL2;
 import com.jogamp.opengl.GL2GL3;
 import com.jogamp.opengl.GLException;
 import com.jogamp.opengl.glu.GLU;
+import com.jogamp.opengl.math.FloatUtil;
+import com.jogamp.opengl.math.Matrix4;
+import com.jogamp.opengl.math.VectorUtil;
 
 public class Texture3D extends AbstractDrawable implements IGLBindedResource{
 
@@ -137,8 +140,19 @@ public class Texture3D extends AbstractDrawable implements IGLBindedResource{
     	gl.getGL2().glGetFloatv(GL2.GL_MODELVIEW_MATRIX, mvmatrix, 0);
     	gl.getGL2().glGetFloatv(GL2.GL_PROJECTION_MATRIX, projmatrix, 0);
     	
+    	float[] pmat = mvmatrix.clone();
+    	
+    	float[] success = FloatUtil.invertMatrix(mvmatrix, pmat);
+    	
+    	float[] eye1 = new float[] {eye.x,eye.y,eye.z,1};
+    	
+    	if (success != null) {
+    		FloatUtil.multMatrixVec(success, eye1, eye1);
+    		VectorUtil.normalizeVec3(eye1);
+    	}
+    	
     	shaderProgram.bind(gl.getGL2());
-    	shaderProgram.setUniform(gl.getGL2(), "eye", eye.toArray(),3);
+    	shaderProgram.setUniform(gl.getGL2(), "eye", eye1,4);
     	shaderProgram.setUniform(gl.getGL2(), "minMax", new float[] {min,max},2);
     	int idt = gl.getGL2().glGetUniformLocation(shaderProgram.getProgramId(), "volumeTexture");
     	int idc = gl.getGL2().glGetUniformLocation(shaderProgram.getProgramId(), "transfer");
