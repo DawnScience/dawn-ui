@@ -9,7 +9,6 @@
 package org.dawnsci.spectrum.ui.processing;
 
 import java.io.File;
-import java.util.Arrays;
 import java.util.List;
 
 import org.dawb.common.services.ServiceManager;
@@ -27,16 +26,14 @@ public class SaveProcess extends AbstractSaveProcess {
 		IPersistentFile     pf=null;
 		
 		try {
-    		IPersistenceService service = (IPersistenceService)ServiceManager.getService(IPersistenceService.class);
-    		file = new File(this.path);
-    		pf = service.createPersistentFile(file.getAbsolutePath());
-		    
-    		for (IDataset ds : list.get(0).getyDatasets()) {
-		    	pf.setData(ds);
-		    }
-    		
-		    pf.setAxes(Arrays.asList(new IDataset[] {list.get(0).getxDataset(), null}));
-		        		    
+			IPersistenceService service = (IPersistenceService) ServiceManager.getService(IPersistenceService.class);
+			file = new File(this.path);
+			pf = service.createPersistentFile(file.getAbsolutePath());
+			IContain1DData data = list.get(0);
+			IDataset[] x = new IDataset[] { data.getxDataset() };
+			for (IDataset ds : data.getyDatasets()) {
+				pf.setData(ds, x);
+			}
 		} catch (Throwable ne) {
 			ne.printStackTrace();
 		} finally {
