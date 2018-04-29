@@ -51,6 +51,7 @@ import org.eclipse.dawnsci.plotting.api.trace.ITableDataTrace;
 import org.eclipse.dawnsci.plotting.api.trace.ITrace;
 import org.eclipse.dawnsci.plotting.api.trace.ITraceListener;
 import org.eclipse.dawnsci.plotting.api.trace.IVolumeRenderTrace;
+import org.eclipse.dawnsci.plotting.api.trace.IVolumeTrace;
 import org.eclipse.dawnsci.plotting.api.trace.IWaterfallTrace;
 import org.eclipse.dawnsci.plotting.api.trace.TraceEvent;
 import org.eclipse.dawnsci.plotting.api.trace.TraceWillPlotEvent;
@@ -994,6 +995,7 @@ public abstract class AbstractPlottingSystem<T> implements IPlottingSystem<T>, I
 		if (ITableDataTrace.class.isAssignableFrom(clazz)) return PlotType.DATA;
 		if (ISurfaceMeshTrace.class.isAssignableFrom(clazz)) return PlotType.JZY3D_COLOR;
 		if (IWaterfallTrace.class.isAssignableFrom(clazz)) return PlotType.JZY3D_COLOR;
+		if (IVolumeTrace.class.isAssignableFrom(clazz)) return PlotType.JZY3D_COLOR;
 
 		return null;
 

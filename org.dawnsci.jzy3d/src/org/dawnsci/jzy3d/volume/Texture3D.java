@@ -1,0 +1,199 @@
+package org.dawnsci.jzy3d.volume;
+
+import java.nio.Buffer;
+import java.nio.FloatBuffer;
+import java.nio.IntBuffer;
+
+import org.dawnsci.jzy3d.glsl.ColormapTexture;
+import org.dawnsci.jzy3d.glsl.GLSLProgram;
+import org.dawnsci.jzy3d.glsl.ShaderFilePair;
+import org.jzy3d.colors.Color;
+import org.jzy3d.colors.ColorMapper;
+import org.jzy3d.maths.BoundingBox3d;
+import org.jzy3d.maths.Coord3d;
+import org.jzy3d.plot3d.primitives.AbstractDrawable;
+import org.jzy3d.plot3d.primitives.IGLBindedResource;
+import org.jzy3d.plot3d.primitives.vbo.buffers.FloatVBO;
+import org.jzy3d.plot3d.primitives.vbo.builders.VBOBuilder;
+import org.jzy3d.plot3d.primitives.vbo.drawable.DrawableVBO;
+import org.jzy3d.plot3d.rendering.view.Camera;
+import org.jzy3d.plot3d.transform.Transform;
+
+import com.jogamp.opengl.GL;
+import com.jogamp.opengl.GL2;
+import com.jogamp.opengl.GL2GL3;
+import com.jogamp.opengl.GLException;
+import com.jogamp.opengl.glu.GLU;
+import com.jogamp.opengl.math.FloatUtil;
+import com.jogamp.opengl.math.Matrix4;
+import com.jogamp.opengl.math.VectorUtil;
+
+public class Texture3D extends AbstractDrawable implements IGLBindedResource{
+
+	/** The GL texture ID. */
+    private int texID;
+    private Buffer buffer;
+    private int[] shape;
+    private boolean mounted = false;
+    private DrawableVBO shapeVBO;
+    private GLSLProgram shaderProgram;
+    private float min;
+    private float max;
+    private ColormapTexture colormapTexure;
+    
+	private boolean disposed;
+	private ColorMapper mapper;
+    
+    public Texture3D(Buffer buffer, int[] shape, float min, float max, ColorMapper mapper, BoundingBox3d bbox) {
+    	this.buffer = buffer;
+    	buffer.rewind();
+    	this.shape = shape;
+    	this.bbox = bbox;
+    	this.shapeVBO = new CubeVBO(new CubeVBOBuilder(bbox));
+    	this.min = min;
+    	this.max = max;
+    	this.mapper = mapper;
+    }
+	
+	@Override
+	public void mount(GL gl) {
+		if (!mounted) {
+			shapeVBO.mount(gl);
+			shaderProgram = new GLSLProgram();
+			ShaderFilePair sfp = new ShaderFilePair(this.getClass(), "volume.vert", "volume.frag");
+			shaderProgram.loadAndCompileShaders(gl.getGL2(),sfp);
+			shaderProgram.link(gl.getGL2());
+			bind(gl);
+			colormapTexure = new ColormapTexture(mapper,"transfer",shaderProgram.getProgramId());
+			colormapTexure.bind(gl);
+			mounted = true;
+		}
+		
+	}
+	
+	public void setMin(Number min) {
+		this.min = min.floatValue();
+	}
+	
+	public void setMax(Number max) {
+		this.max = max.floatValue();
+	}
+
+	@Override
+	public boolean hasMountedOnce() {
+		return mounted;
+	}
+	
+	public void bind(final GL gl) throws GLException {
+		gl.glEnable(GL2.GL_TEXTURE_3D);
+        validateTexID(gl, true);
+        gl.glBindTexture(GL2.GL_TEXTURE_3D, texID);
+        gl.glActiveTexture(GL.GL_TEXTURE0);
+        gl.glTexParameteri(GL2.GL_TEXTURE_3D, GL2.GL_TEXTURE_WRAP_S, GL2.GL_CLAMP);
+        gl.glTexParameteri(GL2.GL_TEXTURE_3D, GL2.GL_TEXTURE_WRAP_T, GL2.GL_CLAMP);
+        gl.glTexParameteri(GL2.GL_TEXTURE_3D, GL2.GL_TEXTURE_WRAP_R, GL2.GL_CLAMP);
+        gl.glTexParameteri(GL2.GL_TEXTURE_3D, GL2.GL_TEXTURE_MAG_FILTER,
+                GL.GL_LINEAR);
+        gl.glTexParameteri(GL2.GL_TEXTURE_3D, GL2.GL_TEXTURE_MIN_FILTER,
+                GL.GL_LINEAR);
+        
+        setTextureData(gl,buffer,shape);
+    }
+	
+	public void setTextureData(final GL gl, Buffer buffer, int[] shape) {
+		gl.glPixelStorei(GL.GL_UNPACK_ALIGNMENT, 1);
+		gl.getGL2().glTexImage3D(GL2.GL_TEXTURE_3D, 0, GL.GL_R32F, shape[2], shape[1], shape[0], 0, GL2.GL_RED, GL.GL_FLOAT, buffer);
+	}
+	
+	private boolean validateTexID(final GL gl, final boolean throwException) {
+		gl.glActiveTexture(GL.GL_TEXTURE0);
+		gl.glEnable(GL2.GL_TEXTURE_3D);
+		int id = gl.getGL2().glGetUniformLocation(shaderProgram.getProgramId(), "volumeTexture");
+		
+		if ( id >= 0) {
+			texID = id;
+		}
+		
+        return 0 != texID;
+    }
+	
+	public void setMapper(ColorMapper mapper) {
+		this.mapper = mapper;
+		if (colormapTexure != null) colormapTexure.updateColormap(mapper);
+	}
+
+	@Override
+	public void draw(GL gl, GLU glu, Camera cam) {
+		
+		if (!mounted) {
+			mount(gl);
+		}
+		
+		colormapTexure.update(gl);
+		
+		doTransform(gl, glu, cam);
+    	
+    	float mvmatrix[] = new float[16];
+    	float projmatrix[] = new float[16];
+    	
+    	Coord3d eye = cam.getEye();
+    	eye = eye.sub(cam.getTarget());
+    	eye = eye.normalizeTo(1);
+    	
+    	gl.getGL2().glGetFloatv(GL2.GL_MODELVIEW_MATRIX, mvmatrix, 0);
+    	gl.getGL2().glGetFloatv(GL2.GL_PROJECTION_MATRIX, projmatrix, 0);
+    	
+    	float[] pmat = mvmatrix.clone();
+    	
+    	float[] success = FloatUtil.invertMatrix(mvmatrix, pmat);
+    	
+    	float[] eye1 = new float[] {eye.x,eye.y,eye.z,1};
+    	
+//    	if (success != null) {
+//    		FloatUtil.multMatrixVec(success, eye1, eye1);
+//    		VectorUtil.normalizeVec3(eye1);
+//    	}
+//    	
+    	shaderProgram.bind(gl.getGL2());
+    	shaderProgram.setUniform(gl.getGL2(), "eye", eye1,4);
+    	shaderProgram.setUniform(gl.getGL2(), "minMax", new float[] {min,max},2);
+    	int idt = gl.getGL2().glGetUniformLocation(shaderProgram.getProgramId(), "volumeTexture");
+    	int idc = gl.getGL2().glGetUniformLocation(shaderProgram.getProgramId(), "transfer");
+    	gl.getGL2().glUniform1i(idt, 0);
+    	gl.getGL2().glUniform1i(idc, 1);
+    	
+    	
+       gl.glEnable(GL2.GL_BLEND);
+       gl.glEnable(GL2.GL_CULL_FACE);
+       gl.glBlendFunc(GL2.GL_SRC_ALPHA, GL2.GL_ONE_MINUS_SRC_ALPHA);
+       gl.getGL2().glPolygonMode(GL.GL_FRONT, GL2GL3.GL_FILL);
+       gl.glCullFace(GL.GL_BACK);
+		
+       shapeVBO.draw(gl, glu, cam);
+       shaderProgram.unbind(gl.getGL2());
+       
+       if (disposed) {
+    	   gl.glDeleteTextures(1, new int[] {texID}, 0);
+    	   shaderProgram.destroy(gl.getGL2());
+       }
+         
+	}
+
+	@Override
+	public void applyGeometryTransform(Transform transform) {
+		// TODO Auto-generated method stub
+		
+	}
+	
+	@Override
+	public void dispose() {
+		disposed = true;
+		shapeVBO.dispose();
+	}
+
+	@Override
+	public void updateBounds() {
+		bbox = new BoundingBox3d(0,1,0,1,0,1);
+		
+	}
+}

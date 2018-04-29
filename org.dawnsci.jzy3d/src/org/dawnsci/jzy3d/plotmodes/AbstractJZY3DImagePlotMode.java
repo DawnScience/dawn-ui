@@ -21,7 +21,7 @@ public abstract class AbstractJZY3DImagePlotMode extends PlotModeImage {
 
 	private static final Logger logger = LoggerFactory.getLogger(PlotModeSurfaceMesh.class);
 	
-	private AtomicReference<ITrace> atomicTrace = new AtomicReference<>();
+	protected AtomicReference<ITrace> atomicTrace = new AtomicReference<>();
 	
 	@Override
 	public IDataset[] sliceForPlot(ILazyDataset lz, SliceND slice, Object[] options, IPlottingSystem<?> system) throws Exception {

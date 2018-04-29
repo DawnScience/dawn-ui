@@ -16,6 +16,7 @@ import org.eclipse.dawnsci.plotting.api.preferences.BasePlottingConstants;
 import org.eclipse.dawnsci.plotting.api.tool.IToolPage.ToolPageRole;
 import org.eclipse.dawnsci.plotting.api.trace.ISurfaceMeshTrace;
 import org.eclipse.dawnsci.plotting.api.trace.ITrace;
+import org.eclipse.dawnsci.plotting.api.trace.IVolumeTrace;
 import org.eclipse.dawnsci.plotting.api.trace.IWaterfallTrace;
 import org.eclipse.dawnsci.plotting.api.trace.MetadataPlotUtils;
 import org.eclipse.january.dataset.IDataset;
@@ -287,6 +288,11 @@ public class JZY3DPlotViewer extends IPlottingSystemViewer.Stub<Composite> {
 		if (IWaterfallTrace.class.isAssignableFrom(trace)) {
 			return true;
 		}
+		
+		if (IVolumeTrace.class.isAssignableFrom(trace)) {
+			return true;
+		}
+		
 		return false;
 	}
 	
@@ -298,6 +304,7 @@ public class JZY3DPlotViewer extends IPlottingSystemViewer.Stub<Composite> {
 		List<Class<? extends ITrace>> l = new ArrayList<>();
 		l.add(ISurfaceMeshTrace.class);
 		l.add(IWaterfallTrace.class);
+		l.add(IVolumeTrace.class);
 		return l;
 	}
 	
@@ -315,6 +322,12 @@ public class JZY3DPlotViewer extends IPlottingSystemViewer.Stub<Composite> {
 		
 		if (clazz == IWaterfallTrace.class) {
 			IWaterfallTrace trace = new WaterfallTraceImpl(ServiceManager.getPaletteService(),ServiceManager.getImageService(),getPreferenceStore().getString(BasePlottingConstants.COLOUR_SCHEME));
+			trace.setName(name);
+			return (U)trace;
+		}
+		
+		if (clazz == IVolumeTrace.class) {
+			IVolumeTrace trace = new VolumeTraceImpl(ServiceManager.getPaletteService(),ServiceManager.getImageService(),getPreferenceStore().getString(BasePlottingConstants.COLOUR_SCHEME));
 			trace.setName(name);
 			return (U)trace;
 		}
