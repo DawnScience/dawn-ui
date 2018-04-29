@@ -121,7 +121,7 @@ public class VolumeTraceImpl extends Abstract2DJZY3DTrace implements IVolumeTrac
 		
 //		float diff = max.floatValue() - min.floatValue();
 		
-		volume = new Texture3D(buffer, shape,min.floatValue(),max.floatValue(),colorMapper,new BoundingBox3d(0.f,1.f,0.f,1.f,0.f,1f));
+		volume = new Texture3D(buffer, shape,min.floatValue(),max.floatValue(),colorMapper,new BoundingBox3d(0.f,x,0.f,y,0.f,z));
 		
 	}
 
