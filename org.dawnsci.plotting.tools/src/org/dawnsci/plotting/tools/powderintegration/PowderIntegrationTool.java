@@ -27,6 +27,7 @@ import org.dawnsci.plotting.tools.diffraction.DiffractionUtils;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.dawnsci.analysis.api.diffraction.DetectorProperties;
 import org.eclipse.dawnsci.analysis.api.io.ILoaderService;
+import org.eclipse.dawnsci.nexus.NexusConstants;
 import org.eclipse.dawnsci.nexus.NexusFile;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.PlotType;
@@ -561,7 +562,7 @@ public class PowderIntegrationTool extends AbstractToolPage implements IDataRedu
 			if (md != null && md.getFilePath()!= null) {
 				String collection = resultGroup + Node.SEPARATOR + "files";
 				GroupNode filesNode = file.getGroup(collection, true);
-				file.addAttribute(filesNode, new AttributeImpl("NXcollection", collection));
+				file.addAttribute(filesNode, new AttributeImpl(NexusConstants.COLLECTION, collection));
 				String path = slice.getData().getFirstMetadata(IMetadata.class).getFilePath();
 				file.createData(filesNode, DatasetFactory.createFromObject(path));
 			}
@@ -581,18 +582,18 @@ public class PowderIntegrationTool extends AbstractToolPage implements IDataRedu
 			switch (model.getAxisType()) {
 			case Q:
 				String angstrom = unitFormat.format(NonSI.ANGSTROM.inverse());
-				file.addAttribute(axisNode, new AttributeImpl("units", angstrom));
+				file.addAttribute(axisNode, new AttributeImpl(NexusConstants.UNITS, angstrom));
 				break;
 			case ANGLE:
 				String degrees = unitFormat.format(NonSI.DEGREE_ANGLE);
-				file.addAttribute(axisNode, new AttributeImpl("units", degrees));
+				file.addAttribute(axisNode, new AttributeImpl(NexusConstants.UNITS, degrees));
 				break;
 			case RESOLUTION:
 				String ang = unitFormat.format(NonSI.ANGSTROM);
-				file.addAttribute(axisNode, new AttributeImpl("units", ang));
+				file.addAttribute(axisNode, new AttributeImpl(NexusConstants.UNITS, ang));
 				break;
 			case PIXEL:
-				file.addAttribute(axisNode, new AttributeImpl("units", "pixels"));
+				file.addAttribute(axisNode, new AttributeImpl(NexusConstants.UNITS, "pixels"));
 				break;
 			}
 			
@@ -601,7 +602,7 @@ public class PowderIntegrationTool extends AbstractToolPage implements IDataRedu
 				axis = out.get(2);
 				axis = axis.squeeze();
 				DataNode s2 = file.createData(resultGroupNode, axis);
-				file.addAttribute(s2, new AttributeImpl("units", unitFormat.format(NonSI.DEGREE_ANGLE)));
+				file.addAttribute(s2, new AttributeImpl(NexusConstants.UNITS, unitFormat.format(NonSI.DEGREE_ANGLE)));
 				file.addAttribute(s2, new AttributeImpl("axis", 2));
 			} else {
 				file.addAttribute(axisNode, new AttributeImpl("axis", 2));
@@ -622,8 +623,8 @@ public class PowderIntegrationTool extends AbstractToolPage implements IDataRedu
 		
 		if (firstExportIteration) {
 			String parentPath = slice.getParent();
-			DataNode datanode = file.getData(parentPath + Node.SEPARATOR + "data");
-			file.addAttribute(datanode, new AttributeImpl("signal", 1));
+			DataNode datanode = file.getData(parentPath + Node.SEPARATOR + NexusConstants.DATA_DATA);
+			file.addAttribute(datanode, new AttributeImpl(NexusConstants.DATA_SIGNAL, 1));
 		}
 		
 		firstExportIteration = false;
@@ -632,14 +633,14 @@ public class PowderIntegrationTool extends AbstractToolPage implements IDataRedu
 	}
 	
 	private void writeProcessInformation(NexusFile file, GroupNode group) throws Exception {
-		GroupNode processGroup = file.getGroup(group, "process", "NXprocess", true);
+		GroupNode processGroup = file.getGroup(group, "process", NexusConstants.PROCESS, true);
 		createDataset("program", processGroup, file, "DAWN-powder integration tool");
 		
 		String version =  BundleUtils.getDawnVersion();
 		if (version != null)
 			createDataset("version", processGroup, file, version);
 		
-		GroupNode correctionGroup = file.getGroup(processGroup, "1_correction", "NXnote", true);
+		GroupNode correctionGroup = file.getGroup(processGroup, "1_correction", NexusConstants.NOTE, true);
 		createDataset("description", correctionGroup, file, "Correction process details");
 		
 		String solid = "No";
@@ -667,7 +668,7 @@ public class PowderIntegrationTool extends AbstractToolPage implements IDataRedu
 		
 		createDataset("detector_tranmission_corrected", correctionGroup, file, trans);
 		
-		GroupNode integrationNode = file.getGroup(processGroup, "2_integration", "NXnote", true);
+		GroupNode integrationNode = file.getGroup(processGroup, "2_integration", NexusConstants.NOTE, true);
 		createDataset("description", integrationNode, file, "Integration process details");
 		
 		String integrationRoutine = "unknown";

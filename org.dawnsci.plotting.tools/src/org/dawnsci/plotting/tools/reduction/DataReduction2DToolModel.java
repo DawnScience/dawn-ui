@@ -294,7 +294,7 @@ class DataReduction2DToolModel extends DataReduction2DToolObservableModel {
 		try (NexusFile file = new NexusFileHDF5(newFilePath)) {
 			file.createAndOpenToWrite();
 			GroupNode rootNode = TreeFactory.createGroupNode(0);
-			rootNode.addAttribute(TreeFactory.createAttribute(NexusConstants.NXCLASS, "NXroot"));
+			rootNode.addAttribute(TreeFactory.createAttribute(NexusConstants.NXCLASS, NexusConstants.ROOT));
 			DateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 			Date currentDate = new Date();
 			rootNode.addAttribute(TreeFactory.createAttribute("file_name", newFilePath));
@@ -303,7 +303,7 @@ class DataReduction2DToolModel extends DataReduction2DToolObservableModel {
 			rootNode.addAttribute(TreeFactory.createAttribute("default", "entry1"));
 
 			GroupNode entryNode = TreeFactory.createGroupNode(0);
-			entryNode.addAttribute(TreeFactory.createAttribute(NexusConstants.NXCLASS, "NXentry"));
+			entryNode.addAttribute(TreeFactory.createAttribute(NexusConstants.NXCLASS, NexusConstants.ENTRY));
 			entryNode.addAttribute(TreeFactory.createAttribute("default", reducedData.getName() + "-reduced"));
 			
 			GroupNode dataNode = TreeFactory.createGroupNode(0);

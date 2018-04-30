@@ -20,6 +20,7 @@ import org.eclipse.dawnsci.analysis.api.conversion.IConversionVisitor;
 import org.eclipse.dawnsci.analysis.api.tree.GroupNode;
 import org.eclipse.dawnsci.analysis.api.tree.Node;
 import org.eclipse.dawnsci.analysis.tree.impl.AttributeImpl;
+import org.eclipse.dawnsci.nexus.NexusConstants;
 import org.eclipse.dawnsci.nexus.NexusFile;
 import org.eclipse.dawnsci.plotting.api.tool.IToolPage;
 import org.eclipse.january.dataset.Dataset;
@@ -193,13 +194,13 @@ class ToolConversionVisitor implements IConversionVisitor {
 		}
 		
 		GroupNode groupNode = output.getGroup("/entry", true);
-		output.addAttribute(groupNode, new AttributeImpl(NexusFile.NXCLASS, "NXentry"));
+		output.addAttribute(groupNode, new AttributeImpl(NexusConstants.NXCLASS, NexusConstants.ENTRY));
 		
 		String dataPath = "/entry" + Node.SEPARATOR + path;
 		groupNode = output.getGroup(dataPath, true);
 		// Fix to http://jira.diamond.ac.uk/browse/SCI-1898
 		// We switch this to NXsubentry later and must have enough chars to change attribute
-		output.addAttribute(groupNode, new AttributeImpl(NexusFile.NXCLASS, "NXdata" + "     "));
+		output.addAttribute(groupNode, new AttributeImpl(NexusConstants.NXCLASS, NexusConstants.DATA + "     "));
 		return dataPath;
 		
 	}
