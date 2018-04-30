@@ -8,6 +8,8 @@ import java.util.concurrent.atomic.AtomicReference;
 import org.dawnsci.datavis.model.PlotModeImage;
 import org.dawnsci.jzy3d.Abstract2DJZY3DTrace;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
+import org.eclipse.dawnsci.plotting.api.histogram.ImageServiceBean;
+import org.eclipse.dawnsci.plotting.api.trace.IPaletteTrace;
 import org.eclipse.dawnsci.plotting.api.trace.ITrace;
 import org.eclipse.dawnsci.plotting.api.trace.MetadataPlotUtils;
 import org.eclipse.january.dataset.IDataset;
@@ -78,6 +80,14 @@ public abstract class AbstractJZY3DImagePlotMode extends PlotModeImage {
 		if (trace == null) return;
 		
 		trace.setUserObject(userObject);
+		
+		if (minMax != null && trace instanceof IPaletteTrace) {
+			((IPaletteTrace)trace).setRescaleHistogram(false);
+			ImageServiceBean imageServiceBean = ((IPaletteTrace)trace).getImageServiceBean();
+			imageServiceBean.setMin(minMax[0]);
+			imageServiceBean.setMax(minMax[1]);
+		}
+		
 		system.addTrace(trace);
 
 		system.repaint();
