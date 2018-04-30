@@ -365,6 +365,7 @@ public class ConfigureOperationModelWizardPage extends AbstractOperationModelWiz
 				@Override
 				protected IStatus run(IProgressMonitor monitor) {
 					try {
+						operation.init();
 						od = operation.execute(id.getData(),new ProgressMonitorWrapper(monitor));
 						if (od == null) {
 							return Status.OK_STATUS;
@@ -449,6 +450,8 @@ public class ConfigureOperationModelWizardPage extends AbstractOperationModelWiz
 							}
 						});
 						
+					} finally {
+						operation.dispose();
 					}
 					return Status.OK_STATUS;
 				}
