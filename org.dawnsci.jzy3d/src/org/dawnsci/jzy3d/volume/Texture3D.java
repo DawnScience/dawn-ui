@@ -174,6 +174,7 @@ public class Texture3D extends AbstractDrawable implements IGLBindedResource{
        
        if (disposed) {
     	   gl.glDeleteTextures(1, new int[] {texID}, 0);
+    	   buffer = null;
     	   shaderProgram.destroy(gl.getGL2());
        }
          

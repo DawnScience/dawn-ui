@@ -35,6 +35,7 @@ import org.jzy3d.chart.Settings;
 import org.jzy3d.chart.swt.CanvasNewtSWT;
 import org.jzy3d.chart.swt.SWTChartComponentFactory;
 import org.jzy3d.plot3d.primitives.AbstractDrawable;
+import org.jzy3d.plot3d.primitives.IGLBindedResource;
 import org.jzy3d.plot3d.rendering.canvas.Quality;
 import org.jzy3d.plot3d.rendering.scene.Graph;
 import org.jzy3d.plot3d.rendering.view.modes.CameraMode;
@@ -258,11 +259,16 @@ public class JZY3DPlotViewer extends IPlottingSystemViewer.Stub<Composite> {
 	public void removeTrace(ITrace trace) {
 		if (trace instanceof Abstract2DJZY3DTrace) {
 			chart.pauseAnimator();
+
+			AbstractDrawable s = ((Abstract2DJZY3DTrace)trace).getShape();
+
+			if (s instanceof IGLBindedResource) {
+				s.dispose();
+				chart.render();
+			}
 			chart.getScene().remove(((Abstract2DJZY3DTrace)trace).getShape(),false);
 
 		}
-		
-
 	}
 	
 	@Override
@@ -338,18 +344,25 @@ public class JZY3DPlotViewer extends IPlottingSystemViewer.Stub<Composite> {
 	public void clearTraces() {
 		Graph graph = chart.getScene().getGraph();
 		List<AbstractDrawable> all = graph.getAll();
+		
+		chart.pauseAnimator();
+		
+		for (AbstractDrawable a : all) {
+			if (a instanceof IGLBindedResource) {
+				a.dispose();
+				
+			}
+		}
+		chart.render();
+		
 		for (AbstractDrawable a : all) {
 			graph.remove(a);
 		}
-		
 	}
+	
 	@Override
 	public void reset(boolean force) {
-		Graph graph = chart.getScene().getGraph();
-		List<AbstractDrawable> all = graph.getAll();
-		for (AbstractDrawable a : all) {
-			graph.remove(a);
-		}
+		clearTraces();
 		
 	}
 	
