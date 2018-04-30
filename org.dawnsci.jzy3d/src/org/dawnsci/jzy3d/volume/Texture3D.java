@@ -3,10 +3,12 @@ package org.dawnsci.jzy3d.volume;
 import java.nio.Buffer;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
+import java.util.Arrays;
 
 import org.dawnsci.jzy3d.glsl.ColormapTexture;
 import org.dawnsci.jzy3d.glsl.GLSLProgram;
 import org.dawnsci.jzy3d.glsl.ShaderFilePair;
+import org.eclipse.dawnsci.plotting.api.jreality.util.ArrayPoolUtility;
 import org.jzy3d.colors.Color;
 import org.jzy3d.colors.ColorMapper;
 import org.jzy3d.maths.BoundingBox3d;
@@ -149,11 +151,21 @@ public class Texture3D extends AbstractDrawable implements IGLBindedResource{
     	
     	float[] eye1 = new float[] {eye.x,eye.y,eye.z,1};
     	
-//    	if (success != null) {
-//    		FloatUtil.multMatrixVec(success, eye1, eye1);
-//    		VectorUtil.normalizeVec3(eye1);
-//    	}
-//    	
+    	Coord3d range = bbox.getRange();
+    	
+    	float[] frange = new float[] {range.x,range.y,range.z,1};
+    	
+    	if (success != null) {
+    		VectorUtil.normalizeVec3(frange);
+    		success = success.clone();
+//    		Arrays.fill(success, 0);
+    		success[0] /= frange[0];
+    		success[5] /= frange[1];
+    		success[10] /= (1*frange[2]);
+    		FloatUtil.multMatrixVec(success, eye1, eye1);
+    		VectorUtil.normalizeVec3(eye1);
+    	}
+////    	
     	shaderProgram.bind(gl.getGL2());
     	shaderProgram.setUniform(gl.getGL2(), "eye", eye1,4);
     	shaderProgram.setUniform(gl.getGL2(), "minMax", new float[] {min,max},2);

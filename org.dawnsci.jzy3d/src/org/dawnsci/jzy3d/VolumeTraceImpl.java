@@ -73,9 +73,28 @@ public class VolumeTraceImpl extends Abstract2DJZY3DTrace implements IVolumeTrac
 		
 		xAxis = axes[0];
 		yAxis = axes[1];
+		zAxis = axes[2];
 		
-		if (axes[0] != null && axes[0].getSize() != data.getShape()[1]) {
-			axes[0] = null;
+		float xmin = 0;
+		float xmax = x-1;
+		float ymin = 0;
+		float ymax = y-1;
+		float zmin = 0;
+		float zmax = z-1;
+		
+		if (xAxis != null) {
+			xmin = xAxis.min(true).floatValue();
+			xmax = xAxis.max(true).floatValue();
+		}
+		
+		if (yAxis != null) {
+			ymin = yAxis.min(true).floatValue();
+			ymax = yAxis.max(true).floatValue();
+		}
+		
+		if (zAxis != null) {
+			zmin = zAxis.min(true).floatValue();
+			zmax = zAxis.max(true).floatValue();
 		}
 
 		
@@ -93,7 +112,7 @@ public class VolumeTraceImpl extends Abstract2DJZY3DTrace implements IVolumeTrac
 			buffer.putFloat(dataf[i]);
 		}
 		
-		volume = new Texture3D(buffer, shape,min.floatValue(),max.floatValue(),colorMapper,new BoundingBox3d(0.f,x,0.f,y,0.f,z));
+		volume = new Texture3D(buffer, shape,min.floatValue(),max.floatValue(),colorMapper,new BoundingBox3d(xmin,xmax,ymin,ymax,zmin,zmax));
 		
 	}
 

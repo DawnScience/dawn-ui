@@ -241,8 +241,15 @@ public class JZY3DPlotViewer extends IPlottingSystemViewer.Stub<Composite> {
 			y = MetadataPlotUtils.removeSquareBrackets(yD.getName());
 		}
 		
+		String z = "Z";
+		
+		if (axes.size() > 2 && axes.get(2) != null) {
+			z = MetadataPlotUtils.removeSquareBrackets( axes.get(2).getName());
+		}
+		
 		chart.getAxeLayout().setXAxeLabel(x);
 		chart.getAxeLayout().setYAxeLabel(y);
+		chart.getAxeLayout().setZAxeLabel(z);
 		
 		if (trace instanceof Abstract2DJZY3DTrace) {
 			chart.pauseAnimator();
