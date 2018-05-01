@@ -1,9 +1,9 @@
-#version 130
+#version 110
 
 uniform mat4 modelViewMatrix;
 uniform mat4 projectionMatrix;
-in vec4 vt;
-out vec4 vVaryingColor;
+attribute vec4 vt;
+varying vec4 vVaryingColor;
 
 void main() {
 	vVaryingColor=gl_Color;
