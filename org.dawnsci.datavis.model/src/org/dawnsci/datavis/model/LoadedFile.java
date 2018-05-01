@@ -3,6 +3,7 @@ package org.dawnsci.datavis.model;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -92,8 +93,14 @@ public class LoadedFile implements IDataObject, IDataFilePackage {
 	}
 
 	public List<DataOptions> getDataOptions() {
-		
-		if (onlySignals && !signals.isEmpty()) {
+		return getDataOptions(onlySignals && !signals.isEmpty());
+	}
+
+	public List<DataOptions> getDataOptions(boolean signalsOnly) {
+		if (signalsOnly) {
+			if (signals.isEmpty()) {
+				return Collections.emptyList();
+			}
 			return signals.stream().map(s -> dataOptions.get(s)).collect(Collectors.toList());
 		}
 		return new ArrayList<>(dataOptions.values());
