@@ -578,27 +578,26 @@ public class SliceSystemImpl extends AbstractSliceSystem {
 					if (dd.getSlice()>=dataShape[i]) {
 						dd.setSlice(0);
 					}
+	 				if (sliceSource!=null && sliceSource.getLazySet()!=null) {
+	 					final int max = LazyDataset.getMaxSliceLength(sliceSource.getLazySet(), i);
+	 					dd.setSliceSpan(Math.min(dd.getSliceSpan(), max));
+	 				}
 				}
- 				if (sliceSource!=null && sliceSource.getLazySet()!=null) {
- 					final int max = LazyDataset.getMaxSliceLength(sliceSource.getLazySet(), i);
- 					dd.setSliceSpan(Math.min(dd.getSliceSpan(), max));
- 				}
 			}
-
 		}
 
 		if (sliceType==null) sliceType = PlotType.XY;
 		reverse.setEnabled(sliceType==PlotType.IMAGE||sliceType==PlotType.SURFACE);
 		
 		// Parse if ranges allowed to try to assign at least one dims data to a range
-		if (getRangeMode().isRange() && lazySet!=null) {
-			final int[] shape = this.lazySet.getShape();
-			for (int dim = 0; dim < shape.length; dim++) {
+		if (getRangeMode().isRange() && lazySet!=null) { // TODO why switch only one???
+			int rank = lazySet.getRank();
+			for (int dim = 0; dim < rank; dim++) {
 				DimsData dd = dimsDataList.getDimsData(dim);
-			    if (dd.isSlice() && shape[dim]>1) { // Slice found
-			    	dd.setPlotAxis(AxisType.RANGE);
-			    	break;
-			    }
+				if (dd.isSlice()) {
+					dd.setPlotAxis(AxisType.RANGE);
+					break;
+				}
 			}
 		}
 		

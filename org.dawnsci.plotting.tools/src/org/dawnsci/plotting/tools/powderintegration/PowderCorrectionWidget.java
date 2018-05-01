@@ -8,6 +8,7 @@
  */
 package org.dawnsci.plotting.tools.powderintegration;
 
+import org.eclipse.nebula.widgets.opal.checkboxgroup.CheckBoxGroup;
 import org.eclipse.richbeans.widgets.decorator.FloatDecorator;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
@@ -20,7 +21,6 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
-import org.mihalis.opal.checkBoxGroup.CheckBoxGroup;
 
 public class PowderCorrectionWidget {
 
