@@ -1,6 +1,8 @@
 package org.dawnsci.jzy3d;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.eclipse.dawnsci.plotting.api.histogram.HistogramBound;
 import org.eclipse.dawnsci.plotting.api.histogram.IImageService;
@@ -8,6 +10,7 @@ import org.eclipse.dawnsci.plotting.api.histogram.IPaletteService;
 import org.eclipse.dawnsci.plotting.api.histogram.ImageServiceBean;
 import org.eclipse.dawnsci.plotting.api.trace.IPaletteListener;
 import org.eclipse.dawnsci.plotting.api.trace.IPaletteTrace;
+import org.eclipse.dawnsci.plotting.api.trace.PaletteEvent;
 import org.eclipse.swt.graphics.PaletteData;
 import org.eclipse.swt.graphics.RGB;
 import org.jzy3d.colors.Color;
@@ -32,6 +35,7 @@ public abstract class AbstractColorMapTrace implements IPaletteTrace {
 	
 	private Object userObject;
 	
+	private Set<IPaletteListener> paletteListeners;
 	
 	public AbstractColorMapTrace(IPaletteService paletteService, IImageService imageService, String palette) {
 		this.paletteService = paletteService;
@@ -167,6 +171,8 @@ public abstract class AbstractColorMapTrace implements IPaletteTrace {
 		
 		setColorMap(colorMapper);
 		
+		firePaletteDataListeners(paletteData);
+		
 	}
 	
 	protected abstract void setColorMap(ColorMapper mapper);
@@ -199,16 +205,22 @@ public abstract class AbstractColorMapTrace implements IPaletteTrace {
 
 	@Override
 	public void addPaletteListener(IPaletteListener pl) {
-		// TODO Auto-generated method stub
-		
+		if (paletteListeners==null) paletteListeners = new HashSet<IPaletteListener>(11);
+		paletteListeners.add(pl);
 	}
 
 	@Override
 	public void removePaletteListener(IPaletteListener pl) {
-		// TODO Auto-generated method stub
-		
+		if (paletteListeners==null) return;
+		paletteListeners.remove(pl);
 	}
 
+	private void firePaletteDataListeners(PaletteData paletteData) {
+		if (paletteListeners==null) return;
+		final PaletteEvent evt = new PaletteEvent(this, getPaletteData()); // Important do not let Mark get at it :)
+		for (IPaletteListener pl : paletteListeners) pl.paletteChanged(evt);
+	}
+	
 	@Override
 	public Number getMin() {
 		return bean.getMin();
