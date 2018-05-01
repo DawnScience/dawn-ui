@@ -112,14 +112,21 @@
          unpack="false"/>
 
    <plugin
-         id="org.mihalis.opal"
+         id="org.dawnsci.common.widgets.gda"
          download-size="0"
          install-size="0"
          version="0.0.0"
          unpack="false"/>
 
    <plugin
-         id="org.dawnsci.common.widgets.gda"
+         id="org.eclipse.nebula.widgets.opal.checkboxgroup"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="org.eclipse.nebula.widgets.opal.rangeslider"
          download-size="0"
          install-size="0"
          version="0.0.0"

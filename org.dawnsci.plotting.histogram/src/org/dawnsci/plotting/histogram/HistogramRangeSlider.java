@@ -11,6 +11,7 @@ package org.dawnsci.plotting.histogram;
 import java.util.ArrayList;
 import java.util.EventObject;
 
+import org.eclipse.nebula.widgets.opal.rangeslider.RangeSlider;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.events.KeyListener;
@@ -20,7 +21,6 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
-import org.mihalis.opal.rangeSlider.RangeSlider;
 
 
 /**

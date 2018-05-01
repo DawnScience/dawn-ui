@@ -20,15 +20,14 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.dawnsci.nexus,
  org.dawnsci.common.widgets,
  org.eclipse.scanning.api;bundle-version="1.0.0",
- org.mihalis.opal;bundle-version="1.0.7",
- org.dawb.common.util
+ org.dawb.common.util,
+ org.eclipse.nebula.widgets.opal.rangeslider;bundle-version="1.0.0"
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-ActivationPolicy: lazy
 Service-Component: OSGI-INF/*.xml
 Import-Package: org.eclipse.core.resources,
  org.eclipse.ui.navigator,
  org.eclipse.ui.part,
- org.mihalis.opal,
  org.slf4j;version="[1.7.2,2.0.0)",
  uk.ac.diamond.sda.navigator.actions,
  uk.ac.diamond.sda.navigator.views

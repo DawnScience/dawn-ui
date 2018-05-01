@@ -60,6 +60,7 @@ import org.eclipse.dawnsci.plotting.api.trace.TraceEvent;
 import org.eclipse.january.dataset.IDataset;
 import org.eclipse.jface.action.IContributionItem;
 import org.eclipse.jface.action.IContributionManager;
+import org.eclipse.nebula.widgets.opal.rangeslider.RangeSlider;
 import org.eclipse.richbeans.api.event.ValueAdapter;
 import org.eclipse.richbeans.api.event.ValueEvent;
 import org.eclipse.richbeans.widgets.scalebox.IntegerBox;
@@ -75,7 +76,6 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
-import org.mihalis.opal.rangeSlider.RangeSlider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
