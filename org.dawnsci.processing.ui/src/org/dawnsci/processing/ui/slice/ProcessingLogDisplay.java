@@ -43,6 +43,7 @@ public class ProcessingLogDisplay {
 				logDisplay.setText(string);
 				sc.setMinSize(logDisplay.computeSize(SWT.DEFAULT, SWT.DEFAULT));
 				sc.showControl(logDisplay);
+				sc.setOrigin(0, Integer.MAX_VALUE);
 			}
 		});
 	}
