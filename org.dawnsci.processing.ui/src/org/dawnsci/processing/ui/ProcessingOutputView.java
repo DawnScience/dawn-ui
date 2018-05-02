@@ -1,6 +1,5 @@
 package org.dawnsci.processing.ui;
 
-import org.dawb.common.ui.widgets.ActionBarWrapper;
 import org.dawnsci.processing.ui.slice.ProcessingLogDisplay;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.PlotType;
