@@ -214,7 +214,7 @@ class LightWeightDataProvider implements IDataProvider {
 		}
 
 		if (size > 0 && x != null) {
-			if (x.getSize() > size) {
+			if (x.getSize() == size + 1) {
 				size++;
 				hasExtraXPoint = true;
 			}
