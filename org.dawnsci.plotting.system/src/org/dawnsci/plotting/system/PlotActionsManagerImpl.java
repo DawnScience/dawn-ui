@@ -160,7 +160,7 @@ public class PlotActionsManagerImpl extends PlottingActionBarManager {
 			}			
 		};
 		
-		final Action convert = new Action("Export plot data to tif/dat...", PlottingSystemActivator.getImageDescriptor("icons/save_edit.png")) {
+		final Action convert = new Action("Export plot data to tif/dat/csv...", PlottingSystemActivator.getImageDescriptor("icons/save_edit.png")) {
 			public void run() {
 				try {
 					PlotDataConversionWizard wiz = (PlotDataConversionWizard)EclipseUtils.openWizard(PlotDataConversionWizard.ID, false);
@@ -175,7 +175,7 @@ public class PlotActionsManagerImpl extends PlottingActionBarManager {
 				} catch (Exception e) {
 					final Status status = new Status(IStatus.ERROR, "org.dawnsci.plotting.system", e.getMessage());
 					ErrorDialog.openError(Display.getDefault().getActiveShell(), "Cannot Export Plot", 
-							                "Cannot export the plot to tif/dat.\n\n"+
+							                "Cannot export the plot to tif/dat/csv.\n\n"+
 									        "The location might be in a read only directory or invalid.", status);
 
 					logger.error("Problem exporting!", e);
