@@ -316,21 +316,20 @@ public class FileController implements IFileController {
 		List<DataStateObject> list = new ArrayList<DataStateObject>();
 		
 		for (LoadedFile f : getLoadedFiles()) {
-			for (DataOptions d : f.getDataOptions()) {
-				
-				PlottableObject plotObject = null; 
-				
-				if (d.getPlottableObject() != null) {
-					PlottableObject p = d.getPlottableObject();
-					plotObject = new PlottableObject(p.getPlotMode(), new NDimensions(p.getNDimensions()));
+			if (f.isSelected()) {
+				for (DataOptions d : f.getDataOptions()) {
+					if (d.isSelected()) {
+						PlottableObject plotObject = null;
+
+						if (d.getPlottableObject() != null) {
+							PlottableObject p = d.getPlottableObject();
+							plotObject = new PlottableObject(p.getPlotMode(), new NDimensions(p.getNDimensions()));
+						}
+
+						DataStateObject dso = new DataStateObject(d, true, plotObject);
+						list.add(dso);
+					}
 				}
-				
-				if (f.isSelected() && d.isSelected()) {
-					DataStateObject dso = new DataStateObject(d, f.isSelected() && d.isSelected(), plotObject);
-					
-					list.add(dso);
-				}
-				
 			}
 		}
 		
