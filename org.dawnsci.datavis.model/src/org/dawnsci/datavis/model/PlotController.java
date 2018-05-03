@@ -426,7 +426,12 @@ public class PlotController implements IPlotController {
 		try {
 			ILazyDataset view = dataOp.getLazyDataset().getSliceView();
 			File f = new File(dataOp.getFilePath());
-			view.setName(f.getName() + ":" + dataOp.getName());
+			String n = f.getName() + ":" + dataOp.getName();
+			String l = dataOp.getLabel();
+			if (!l.isEmpty()) {
+				n = String.format("%s (%s)", n, l);
+			}
+			view.setName(n);
 
 			data = mode.sliceForPlot(view, slice,options,system);
 		} catch (Exception e) {

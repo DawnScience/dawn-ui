@@ -21,6 +21,7 @@ public class DataOptions implements IDataObject, IDataPackage {
 	private boolean selected;
 
 	private PlottableObject plottableObject;
+	private String label;
 	
 	public DataOptions(String name, LoadedFile parent) {
 		this.name = name;
@@ -196,5 +197,13 @@ public class DataOptions implements IDataObject, IDataPackage {
 	
 	public SliceND getSlice() {
 		return plottableObject == null ? null : plottableObject.getNDimensions().buildSliceND();
+	}
+
+	public void setLabel(String label) {
+		this.label = label;
+	}
+
+	public String getLabel() {
+		return label;
 	}
 }

@@ -317,8 +317,10 @@ public class FileController implements IFileController {
 		
 		for (LoadedFile f : getLoadedFiles()) {
 			if (f.isSelected()) {
+				String l = f.getLabel();
 				for (DataOptions d : f.getDataOptions()) {
 					if (d.isSelected()) {
+						d.setLabel(l);
 						PlottableObject plotObject = null;
 
 						if (d.getPlottableObject() != null) {
