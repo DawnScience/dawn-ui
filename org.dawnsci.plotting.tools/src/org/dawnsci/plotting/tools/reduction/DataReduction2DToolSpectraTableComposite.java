@@ -242,7 +242,7 @@ class DataReduction2DToolSpectraTableComposite extends DataReduction2DToolObserv
 				spectraRegion = new DataReduction2DToolSpectraRegionDataNode(createRegionROI(region.getStartIndex(), region.getEndIndex()), toolPageModel, region);
 				addRegionAction(spectraRegion);
 			} catch (Exception e) {
-				e.printStackTrace();
+				logger.error("Unable to create regions for spectra", e);
 				DataReduction2DToolHelper.showError("Unable to create regions for spectra", e.getMessage());
 			}
 		}
@@ -259,8 +259,8 @@ class DataReduction2DToolSpectraTableComposite extends DataReduction2DToolObserv
 				DataReduction2DToolAvgSpectraRegionDataNode spectraRegion = new DataReduction2DToolAvgSpectraRegionDataNode(createRegionROI(region.getStartIndex(), region.getEndIndex()), toolPageModel, region);
 				addRegionAction(spectraRegion);
 			} catch (Exception e) {
-				e.printStackTrace();
-				DataReduction2DToolHelper.showError("Unable to create regions for spectra", e.getMessage());
+				logger.error("Unable to create averaged regions for spectra", e);
+				DataReduction2DToolHelper.showError("Unable to create averaged regions for spectra", e.getMessage());
 			}
 		}
 	};
@@ -294,10 +294,18 @@ class DataReduction2DToolSpectraTableComposite extends DataReduction2DToolObserv
 						addRegionAction(spectraRegion);
 					}
 				} catch (Exception e) {
-					e.printStackTrace();
-					DataReduction2DToolHelper.showError("Unable to create regions for spectra", e.getMessage());
+					logger.error("Unable to create averaged regions for every # spectra", e);
+					DataReduction2DToolHelper.showError("Unable to create regions for every # spectra", e.getMessage());
 				}
 			}
+		}
+	};
+
+	private final Action deselectAllAction = new Action("Deselect all spectra") {
+		@Override
+		public void run() {
+			spectraTable.deselectAll();
+			spectraTable.notifyListeners(SWT.Selection, new Event());
 		}
 	};
 	
@@ -435,6 +443,7 @@ class DataReduction2DToolSpectraTableComposite extends DataReduction2DToolObserv
 			menuManager.add(createRegionAvgAction);
 			menuManager.add(createRegionAvgEveryAction);
 			menuManager.add(deleteSpectraAction);
+			menuManager.add(deselectAllAction);
 		});
 		menuManager.setRemoveAllWhenShown(true);
 		spectraTable.setMenu(menu);
