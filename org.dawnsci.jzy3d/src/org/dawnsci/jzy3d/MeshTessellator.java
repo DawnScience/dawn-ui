@@ -5,6 +5,8 @@ import java.nio.IntBuffer;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.dawnsci.jzy3d.vbo.ShaderMeshDrawableVBO;
+import org.dawnsci.jzy3d.vbo.ShaderMeshVBOBuilder;
 import org.jzy3d.colors.Color;
 import org.jzy3d.colors.ColorMapper;
 import org.jzy3d.maths.BoundingBox3d;
@@ -30,6 +32,15 @@ public class MeshTessellator {
 		s.add(getSquarePolygonsOnCoordinates(x,y,z));
 		return s;
 	}
+	
+	public static AbstractDrawable buildShapeVBO(float[] x, float[] y, float[] z, ColorMapper mapper) {
+		ShaderMeshVBOBuilder builder = new ShaderMeshVBOBuilder(x, y, z, mapper);
+		ShaderMeshDrawableVBO vbo = new  ShaderMeshDrawableVBO(builder, mapper);
+		builder.earlyInitalise(vbo);
+		
+		return vbo;
+	}
+	
 	
 	public static List<AbstractDrawable> getSquarePolygonsOnCoordinates(float[] x, float[] y, float[] z){
 		List<AbstractDrawable> polygons = new ArrayList<AbstractDrawable>();

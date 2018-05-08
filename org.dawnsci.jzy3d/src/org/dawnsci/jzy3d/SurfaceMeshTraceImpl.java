@@ -14,6 +14,7 @@ public class SurfaceMeshTraceImpl extends Abstract2DJZY3DTrace implements ISurfa
 	}
 
 	protected AbstractDrawable buildShape(float[] x, float[] y, float[] z, ColorMapper mapper) {
+//		return  MeshTessellator.buildShapeVBO(x, y, z,mapper);
 		return  MeshTessellator.buildShape(x, y, z);
 	}
 
