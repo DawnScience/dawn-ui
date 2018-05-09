@@ -135,7 +135,8 @@ public class SurfaceScatterViewStart extends Dialog {
 
 		});
 
-		setShellStyle(getShellStyle() | SWT.RESIZE | SWT.PRIMARY_MODAL);
+		setShellStyle(SWT.CLOSE | SWT.RESIZE | SWT.MODELESS | SWT.BORDER);
+		setBlockOnOpen(false);
 	}
 
 	@Override
