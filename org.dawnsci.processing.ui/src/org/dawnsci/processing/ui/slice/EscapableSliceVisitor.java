@@ -73,13 +73,13 @@ public class EscapableSliceVisitor implements SliceVisitor {
 
 	@Override
 	public void visit(IDataset slice) throws Exception {
+		if (series == null)
+			return;
 
 		OperationData data = new OperationData(slice);
 		SliceFromSeriesMetadata ssm = slice.getMetadata(SliceFromSeriesMetadata.class).get(0);
 
 		try {
-			if (series == null)
-				return;
 			for (IOperation op : series)
 				op.init();
 
