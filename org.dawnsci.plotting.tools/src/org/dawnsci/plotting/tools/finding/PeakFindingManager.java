@@ -8,7 +8,6 @@ import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -16,7 +15,6 @@ import org.dawnsci.plotting.tools.Activator;
 import org.dawnsci.plotting.tools.preference.PeakFindingConstants;
 import org.eclipse.january.dataset.Dataset;
 import org.eclipse.january.dataset.DatasetUtils;
-import org.eclipse.january.dataset.IDataset;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.ServiceReference;
@@ -35,6 +33,8 @@ import uk.ac.diamond.scisoft.analysis.peakfinding.IPeakFindingService;
  * @author Dean P. Ottewell
  */
 public class PeakFindingManager {
+
+	private static final String CONVOLVE_WIDTH_SIZE = "Convolve Width Size";
 
 	private static final Logger logger = LoggerFactory.getLogger(PeakFindingManager.class);
 	
@@ -121,29 +121,29 @@ public class PeakFindingManager {
 		String peakfinder = Activator.getPlottingPreferenceStore().getString(PeakFindingConstants.PeakAlgorithm);	
 		//TODO: tmp as only wavelet has the adjustment configured correctly
 		if(peakfinder.equals("Wavelet Transform")){
-			Activator.getPlottingPreferenceStore().setValue("Conolve Width Size", searchScaleThreshold);
+			Activator.getPlottingPreferenceStore().setValue(CONVOLVE_WIDTH_SIZE, searchScaleThreshold);
 			
 		}
-		String curVal = Activator.getPlottingPreferenceStore().getString("Conolve Width Size");
+		String curVal = Activator.getPlottingPreferenceStore().getString(CONVOLVE_WIDTH_SIZE);
 		this.searchScaleThreshold = searchScaleThreshold;
 	}
 	
 	/*TRIGGERS*/
 	
 	public void setPeaksId(List<IdentifiedPeak> peaksId) {
-		IPeakOpportunity peakOpp = new PeakOppurtunity();
+		IPeakOpportunity peakOpp = new PeakOpportunity();
 		peakOpp.setPeaksId(peaksId);
 		everythingChangesListeners(new PeakOpportunityEvent(this, peakOpp));
 	}
 	
-	public void setPeaks(Map<Integer,Double> peakpos,IDataset xData, IDataset yData) {
-		IPeakOpportunity peakOpp = new PeakOppurtunity();
-		peakOpp.setPeaksId(convertIntoPeaks(peakpos, (Dataset) xData, (Dataset) yData));
+	public void setPeaks(Map<Integer,Double> peakpos,Dataset xData, Dataset yData) {
+		IPeakOpportunity peakOpp = new PeakOpportunity();
+		peakOpp.setPeaksId(convertIntoPeaks(peakpos, xData, yData));
 		everythingChangesListeners(new PeakOpportunityEvent(this, peakOpp));
 	}
 	
 	public void setPeakSearching() {
-		IPeakOpportunity peakOpp = new PeakOppurtunity();
+		IPeakOpportunity peakOpp = new PeakOpportunity();
 		peakOpp.setPeakSearching(false);
 		everythingChangesListeners(new PeakOpportunityEvent(this, peakOpp));
 	}
@@ -155,7 +155,7 @@ public class PeakFindingManager {
 	}
 	
 	public void finishedPeakSearching() {
-		IPeakOpportunity peakOpp = new PeakOppurtunity();
+		IPeakOpportunity peakOpp = new PeakOpportunity();
 		peakOpp.setPeakSearching(true);
 		everythingChangesListeners(new PeakOpportunityEvent(this, peakOpp));
 	}
@@ -193,16 +193,12 @@ public class PeakFindingManager {
 		}
 	}
 
-	public void loadPeakOppurtunity(IPeakOpportunity peaksOpp){
+	public void loadPeakOpportunity(IPeakOpportunity peaksOpp) {
 		everythingChangesListeners(new PeakOpportunityEvent(this, peaksOpp));
 	}
 	
 	public void destroyAllListeners(){
-		Iterator<IPeakOpportunityListener> itr = listeners.iterator();
-		while(itr.hasNext()){
-			listeners.remove(itr);
-			itr.next();
-		}
+		listeners.clear();
 	}
 
 	/**
@@ -214,7 +210,7 @@ public class PeakFindingManager {
 	 * @param yData 
 	 * @return every peak pos inside @peakpos cast to identified Peak
 	 */
-	List<IdentifiedPeak> convertIntoPeaks(Map<Integer, Double> peakpos, Dataset xData, Dataset yData){
+	List<IdentifiedPeak> convertIntoPeaks(Map<Integer, Double> peakpos, Dataset xData, Dataset yData) {
 		
 		if(xData.getSize() != yData.getSize())
 			logger.error("Signal data must be matching size");
@@ -226,7 +222,7 @@ public class PeakFindingManager {
 		return peaksID;
 	}
 	
-	public IdentifiedPeak generateIdentifedPeak(Integer pos, Dataset xData, Dataset yData){
+	public IdentifiedPeak generateIdentifedPeak(Integer pos, Dataset xData, Dataset yData) {
 		int backPos, forwardPos;	
 		double backTotal, forwardTotal;
 		double backValue, forwardValue;
@@ -279,8 +275,8 @@ public class PeakFindingManager {
 		int[] stop = { forwardPos };
 		int[] step = { 1 };
 		
-		Dataset slicedXData = (Dataset) xData.getSlice(start, stop, step);
-		Dataset slicedYData = (Dataset) yData.getSlice(start, stop, step);
+		Dataset slicedXData = xData.getSlice(start, stop, step);
+		Dataset slicedYData = yData.getSlice(start, stop, step);
 		
 		List<Double> crossings = DatasetUtils.crossings(slicedXData, slicedYData, slicedYData.max()
 				.doubleValue() / 2);
@@ -307,7 +303,7 @@ public class PeakFindingManager {
 	}
 	
 	
-	public void sendPeakfindingEvent(List<IdentifiedPeak> peaksId){
+	public void sendPeakfindingEvent(List<IdentifiedPeak> peaksId) {
 		//TODO:Spawn plug in view
 		
 		BundleContext ctx = FrameworkUtil.getBundle(Activator.class).getBundleContext();

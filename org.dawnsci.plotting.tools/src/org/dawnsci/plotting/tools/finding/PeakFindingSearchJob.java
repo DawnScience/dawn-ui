@@ -17,7 +17,6 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.dawnsci.analysis.api.peakfinding.IPeakFinderParameter;
 import org.eclipse.january.dataset.Dataset;
-import org.eclipse.january.dataset.IDataset;
 import org.eclipse.swt.widgets.Display;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,13 +37,13 @@ public class PeakFindingSearchJob extends Job {
 
 	IPeakFindingService peakFindServ = (IPeakFindingService) Activator.getService(IPeakFindingService.class);
 
-	IDataset xData;
-	IDataset yData;
+	Dataset xData;
+	Dataset yData;
 
 	String peakAlgorithm;
 	Map<String, IPeakFinderParameter> peakParams;
 
-	public PeakFindingSearchJob(PeakFindingManager manager, IDataset xData, IDataset yData) {
+	public PeakFindingSearchJob(PeakFindingManager manager, Dataset xData, Dataset yData) {
 		super("Peak Search");
 		this.manager = manager;
 		this.xData = xData;
@@ -241,7 +240,7 @@ public class PeakFindingSearchJob extends Job {
 			@Override
 			public void run() {
 
-				List<IdentifiedPeak> peaksId = manager.convertIntoPeaks(peaksPos, (Dataset) xData, (Dataset) yData);
+				List<IdentifiedPeak> peaksId = manager.convertIntoPeaks(peaksPos, xData, yData);
 				manager.setPeaks(peaksPos, xData, yData);
 
 				manager.finishedPeakSearching();

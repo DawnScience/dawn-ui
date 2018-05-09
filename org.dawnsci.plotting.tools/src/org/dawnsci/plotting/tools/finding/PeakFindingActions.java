@@ -1,28 +1,18 @@
 package org.dawnsci.plotting.tools.finding;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.dawb.common.ui.util.EclipseUtils;
-import org.dawnsci.common.widgets.dialog.FileSelectionDialog;
 import org.dawnsci.plotting.tools.Activator;
 import org.dawnsci.plotting.tools.preference.PeakFindingPreferencePage;
-import org.eclipse.dawnsci.analysis.dataset.roi.RectangularROI;
-import org.eclipse.dawnsci.plotting.api.trace.ILineTrace;
-import org.eclipse.january.dataset.IDataset;
+import org.eclipse.january.dataset.Dataset;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.preference.PreferenceDialog;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.PreferencesUtil;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.FrameworkUtil;
-import org.osgi.framework.ServiceReference;
-import org.osgi.service.event.Event;
-import org.osgi.service.event.EventAdmin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -68,7 +58,7 @@ public class PeakFindingActions {
 			}
 
 			@Override
-			public void dataChanged(IDataset nXData, IDataset nYData) {
+			public void dataChanged(Dataset nXData, Dataset nYData) {
 				// xData = nXData;
 				// yData = nYData;
 			}

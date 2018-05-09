@@ -2,7 +2,7 @@ package org.dawnsci.plotting.tools.finding;
 
 import java.util.EventListener;
 
-import org.eclipse.january.dataset.IDataset;
+import org.eclipse.january.dataset.Dataset;
 
 /**
  * TODO: data pass for peaks
@@ -15,7 +15,7 @@ public interface IPeakOpportunityListener extends EventListener {
 	
 	public void boundsChanged(double upper, double lower);
 	
-	public void dataChanged(IDataset nXData, IDataset nYData);
+	public void dataChanged(Dataset nXData, Dataset nYData);
 	
 	public void isPeakFinding();
 	

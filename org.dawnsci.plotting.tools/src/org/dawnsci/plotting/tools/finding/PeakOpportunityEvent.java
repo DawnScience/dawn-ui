@@ -1,7 +1,6 @@
 package org.dawnsci.plotting.tools.finding;
 
 import java.util.EventObject;
-import java.util.List;
 
 /**
  * @author Dean P. Ottewell

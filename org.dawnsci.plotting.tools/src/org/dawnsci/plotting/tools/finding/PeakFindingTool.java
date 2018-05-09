@@ -2,8 +2,8 @@ package org.dawnsci.plotting.tools.finding;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.List;
+
 import org.dawb.common.ui.util.GridUtils;
 import org.dawb.common.ui.widgets.ActionBarWrapper;
 import org.dawnsci.plotting.tools.fitting.PeakFittingTool;
@@ -15,19 +15,19 @@ import org.eclipse.dawnsci.plotting.api.axis.ClickEvent;
 import org.eclipse.dawnsci.plotting.api.axis.IClickListener;
 import org.eclipse.dawnsci.plotting.api.region.IROIListener;
 import org.eclipse.dawnsci.plotting.api.region.IRegion;
+import org.eclipse.dawnsci.plotting.api.region.IRegion.RegionType;
 import org.eclipse.dawnsci.plotting.api.region.IRegionListener;
 import org.eclipse.dawnsci.plotting.api.region.ROIEvent;
 import org.eclipse.dawnsci.plotting.api.region.RegionEvent;
 import org.eclipse.dawnsci.plotting.api.region.RegionUtils;
-import org.eclipse.dawnsci.plotting.api.region.IRegion.RegionType;
 import org.eclipse.dawnsci.plotting.api.tool.AbstractToolPage;
 import org.eclipse.dawnsci.plotting.api.trace.ILineTrace;
+import org.eclipse.dawnsci.plotting.api.trace.ILineTrace.PointStyle;
+import org.eclipse.dawnsci.plotting.api.trace.ILineTrace.TraceType;
 import org.eclipse.dawnsci.plotting.api.trace.ITrace;
 import org.eclipse.dawnsci.plotting.api.trace.ITraceListener;
 import org.eclipse.dawnsci.plotting.api.trace.TraceEvent;
 import org.eclipse.dawnsci.plotting.api.trace.TraceWillPlotEvent;
-import org.eclipse.dawnsci.plotting.api.trace.ILineTrace.PointStyle;
-import org.eclipse.dawnsci.plotting.api.trace.ILineTrace.TraceType;
 import org.eclipse.draw2d.ColorConstants;
 import org.eclipse.january.dataset.BooleanDataset;
 import org.eclipse.january.dataset.Comparisons;
@@ -87,16 +87,16 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 	private Double upperBnd;
 	private Double lowerBnd;
 
-	private IDataset interestXData;
-	private IDataset interestYData;
+	private Dataset interestXData;
+	private Dataset interestYData;
 
 	private ITraceListener traceListener;
 	private IClickListener clickListener;
 	
-	public IDataset gettingXData() {
+	public Dataset gettingXData() {
 		return this.interestXData;
 	}
-	public IDataset gettingYData() {
+	public Dataset gettingYData() {
 		return this.interestYData;
 	}
 	
@@ -126,9 +126,9 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 			searchRegion.setVisible(true);
 	}
 
-	public PeakFindingTool(IPlottingSystem system) {
+	public PeakFindingTool(IPlottingSystem<?> system) {
 		this.manager = new PeakFindingManager();
-		this.setPlottingSystem(system);
+		setPlottingSystem(system);
 	}
 
 	@Override
@@ -209,7 +209,7 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 			}
 
 			@Override
-			public void dataChanged(IDataset nXData, IDataset nYData) {
+			public void dataChanged(Dataset nXData, Dataset nYData) {
 				// xData = nXData;
 				// yData = nYData;
 			}
@@ -269,7 +269,7 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 
 			@Override
 			public void tracesAdded(TraceEvent evt) {
-				List<ILineTrace> traceUpdate = (ArrayList<ILineTrace>) evt.getSource();
+				List<ILineTrace> traceUpdate = (List<ILineTrace>) evt.getSource();
 				
 				for(ILineTrace trace : traceUpdate){
 					if (isValidTraceForSearch((ITrace) trace)) {
@@ -326,7 +326,7 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 	private void runTraceSearch(ILineTrace trace){
 		setSearchDataOnBounds(trace);
 		// Load in new search bounds to beacon
-		PeakOppurtunity peakOpp = new PeakOppurtunity();
+		PeakOpportunity peakOpp = new PeakOpportunity();
 		peakOpp.setXData(interestXData);
 		peakOpp.setYData(interestYData);
 		
@@ -337,7 +337,7 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 		peakOpp.setLowerBound(start[0]);
 		peakOpp.setUpperBound(end[0]);
 		
-		manager.loadPeakOppurtunity(peakOpp);
+		manager.loadPeakOpportunity(peakOpp);
 		manager.setPeakSearching();
 	}
 
@@ -410,7 +410,7 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 			}
 
 			// Initialise to upper and low limit of sample trace
-			Dataset xData = (Dataset) sampleTrace.getXData();
+			Dataset xData = DatasetUtils.convertToDataset(sampleTrace.getXData());
 			
 			Double lwrBnd = xData.getDouble(0);
 			Double uprBnd = xData.getDouble(xData.argMax());
@@ -442,27 +442,25 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 
 	public void createNewSearch() {
 		try {
-			Collection<IRegion> regions = getPlottingSystem().getRegions();
-			if (!regions.isEmpty()) {
-				for (IRegion i : regions) {
-					getPlottingSystem().removeRegion(i);
-				}
+			IPlottingSystem<?> system = getPlottingSystem();
+			for (IRegion i : system.getRegions()) {
+				getPlottingSystem().removeRegion(i);
 			}
 
 			if (peaksId != null && !peaksId.isEmpty()) {
 				// Regenerate the trace to older times
-				getPlottingSystem().removeTrace(peaksTrace);
+				system.removeTrace(peaksTrace);
 				peaksTrace.dispose();
 				//Update reset
-				PeakOppurtunity peakOpp = new PeakOppurtunity();
+				PeakOpportunity peakOpp = new PeakOpportunity();
 				manager.setPeaksId(peaksId);
-				manager.loadPeakOppurtunity(peakOpp);
+				manager.loadPeakOpportunity(peakOpp);
 			}
 
-			getPlottingSystem().addRegionListener(this);
-			this.searchRegion = getPlottingSystem().createRegion(
-					RegionUtils.getUniqueName("Search selection", getPlottingSystem()),
-					getPlottingSystem().is2D() ? IRegion.RegionType.BOX : IRegion.RegionType.XAXIS);
+			system.addRegionListener(this);
+			this.searchRegion = system.createRegion(
+					RegionUtils.getUniqueName("Search selection", system),
+					system.is2D() ? IRegion.RegionType.BOX : IRegion.RegionType.XAXIS);
 
 			searchRegion.setLineWidth(5);
 			searchRegion.setRegionColor(ColorConstants.red);
@@ -488,17 +486,11 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 					// TODO Auto-generated method stub
 					RectangularROI rectangle = (RectangularROI) searchRegion.getROI();
 					updateSearchBnds(rectangle);
-					if (!getPlottingSystem().getTraces().isEmpty()) {
-						Iterator<ITrace> traces = getPlottingSystem().getTraces().iterator();
-						while(traces.hasNext()){
-							ITrace trace = traces.next();
-							getPlottingSystem().getTraces().iterator().next();
-							if (isValidTraceForSearch(trace)) {
-								runTraceSearch((ILineTrace) trace); //Default to first valid trace found
-							}
+					for (ITrace trace : getPlottingSystem().getTraces()) {
+						if (isValidTraceForSearch(trace)) {
+							runTraceSearch((ILineTrace) trace);
 						}
 					}
-
 				}
 			});
 

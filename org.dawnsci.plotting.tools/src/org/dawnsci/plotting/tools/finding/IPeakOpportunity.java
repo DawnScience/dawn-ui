@@ -2,7 +2,7 @@ package org.dawnsci.plotting.tools.finding;
 
 import java.util.List;
 
-import org.eclipse.january.dataset.IDataset;
+import org.eclipse.january.dataset.Dataset;
 
 import uk.ac.diamond.scisoft.analysis.fitting.functions.IdentifiedPeak;
 
@@ -13,11 +13,11 @@ public interface IPeakOpportunity {
 	public List<IdentifiedPeak>  getPeaksId();
 	public void setPeaksId(List<IdentifiedPeak> peaks);
 	
-	public IDataset getXData();
-	public void  setXData(IDataset xData);
+	public Dataset getXData();
+	public void  setXData(Dataset xData);
 	
-	public IDataset getYData();
-	public void setYData(IDataset yData);
+	public Dataset getYData();
+	public void setYData(Dataset yData);
 	
 	public double getUpperBound();
 	public double getLowerBound();

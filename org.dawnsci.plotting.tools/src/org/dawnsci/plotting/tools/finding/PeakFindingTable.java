@@ -3,7 +3,7 @@ package org.dawnsci.plotting.tools.finding;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.eclipse.january.dataset.IDataset;
+import org.eclipse.january.dataset.Dataset;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.TableViewer;
@@ -70,7 +70,7 @@ public class PeakFindingTable {
 			}
 
 			@Override
-			public void dataChanged(IDataset nXData, IDataset nYData) {
+			public void dataChanged(Dataset nXData, Dataset nYData) {
 				// TODO Auto-generated method stub
 			}
 

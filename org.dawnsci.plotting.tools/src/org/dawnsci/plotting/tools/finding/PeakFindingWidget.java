@@ -7,7 +7,7 @@ import java.util.List;
 import org.dawnsci.common.widgets.spinner.FloatSpinner;
 import org.dawnsci.plotting.tools.Activator;
 import org.dawnsci.plotting.tools.preference.PeakFindingConstants;
-import org.eclipse.january.dataset.IDataset;
+import org.eclipse.january.dataset.Dataset;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -48,8 +48,8 @@ public class PeakFindingWidget {
 	Button runPeakSearch;
 	
 	List<IdentifiedPeak> peaks = new ArrayList<IdentifiedPeak>();
-	IDataset xData = null;
-	IDataset yData = null ;
+	Dataset xData = null;
+	Dataset yData = null ;
 	
 	public PeakFindingWidget(PeakFindingManager controller){
 		this.manager = controller;
@@ -92,10 +92,10 @@ public class PeakFindingWidget {
 		lwrBndVal.setPrecision(4);
 		lwrBndVal.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
-				PeakOppurtunity peakOpp = new PeakOppurtunity();
+				PeakOpportunity peakOpp = new PeakOpportunity();
 				peakOpp.setUpperBound(uprBndVal.getDouble());
 				peakOpp.setLowerBound(lwrBndVal.getDouble());
-				manager.loadPeakOppurtunity(peakOpp);
+				manager.loadPeakOpportunity(peakOpp);
 			}
 		});
 		
@@ -108,10 +108,10 @@ public class PeakFindingWidget {
 		uprBndVal.setPrecision(4);
 		uprBndVal.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
-				PeakOppurtunity peakOpp = new PeakOppurtunity();
+				PeakOpportunity peakOpp = new PeakOpportunity();
 				peakOpp.setUpperBound(uprBndVal.getDouble());
 				peakOpp.setLowerBound(lwrBndVal.getDouble());
-				manager.loadPeakOppurtunity(peakOpp);
+				manager.loadPeakOpportunity(peakOpp);
 			}
 		});
 
@@ -217,12 +217,12 @@ public class PeakFindingWidget {
 				//Bounds check 
 				if(upper > lower){
 					//Well they want a boudnd setup. So give them it swapped 
-					PeakOppurtunity peakOpp = new PeakOppurtunity();
+					PeakOpportunity peakOpp = new PeakOpportunity();
 					peakOpp.setLowerBound(uprBndVal.getDouble());
 					peakOpp.setUpperBound(lwrBndVal.getDouble());
 					
 					manager.setSearchThreshold(searchThreshold.getDouble());
-					manager.loadPeakOppurtunity(peakOpp);
+					manager.loadPeakOpportunity(peakOpp);
 				} 	
 				
 				// Run peakSearch
@@ -247,7 +247,7 @@ public class PeakFindingWidget {
 			
 			//TODO: trigger this intially on a base search
 			@Override
-			public void dataChanged(IDataset nXData, IDataset nYData) {
+			public void dataChanged(Dataset nXData, Dataset nYData) {
 				xData = nXData;
 				yData = nYData;
 			}

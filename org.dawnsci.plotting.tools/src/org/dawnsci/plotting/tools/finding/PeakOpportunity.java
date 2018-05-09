@@ -2,19 +2,19 @@ package org.dawnsci.plotting.tools.finding;
 
 import java.util.List;
 
-import org.eclipse.january.dataset.IDataset;
+import org.eclipse.january.dataset.Dataset;
 
 import uk.ac.diamond.scisoft.analysis.fitting.functions.IdentifiedPeak;
 
 /**
  * @author Dean P. Ottewell
  */
-public class PeakOppurtunity implements IPeakOpportunity {
+public class PeakOpportunity implements IPeakOpportunity {
 
 	List<IdentifiedPeak> peaksId = null;
 	
-	private IDataset xData; 
-	private IDataset yData;
+	private Dataset xData; 
+	private Dataset yData;
 	
 	private double upperBound;
 	private double lowerBound;
@@ -22,23 +22,23 @@ public class PeakOppurtunity implements IPeakOpportunity {
 	private Boolean isSearching = null;
 
 	@Override
-	public IDataset getXData() {
+	public Dataset getXData() {
 		return xData;
 	}
 
 	@Override
-	public IDataset getYData() {
+	public Dataset getYData() {
 		return yData;
 	}
 
 
 	@Override
-	public void setXData(IDataset xData) {
+	public void setXData(Dataset xData) {
 		this.xData = xData;
 	}
 
 	@Override
-	public void setYData(IDataset yData) {
+	public void setYData(Dataset yData) {
 		this.yData = yData;
 	}
 

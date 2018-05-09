@@ -9,13 +9,10 @@
 
 package org.dawnsci.plotting.tools.finding;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import org.dawnsci.plotting.tools.Activator;
 import org.eclipse.dawnsci.analysis.api.processing.model.AbstractOperationModel;
-import org.eclipse.january.dataset.Dataset;
 import org.eclipse.january.dataset.IDataset;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
