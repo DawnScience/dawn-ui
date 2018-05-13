@@ -1,4 +1,4 @@
-#version 130
+#version 110
 
 attribute vec4 vt;
 uniform sampler1D transfer;

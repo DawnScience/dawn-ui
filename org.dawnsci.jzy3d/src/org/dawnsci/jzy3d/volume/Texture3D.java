@@ -11,6 +11,7 @@ import org.dawnsci.jzy3d.glsl.ShaderFilePair;
 import org.eclipse.dawnsci.plotting.api.jreality.util.ArrayPoolUtility;
 import org.jzy3d.colors.Color;
 import org.jzy3d.colors.ColorMapper;
+import org.jzy3d.colors.IMultiColorable;
 import org.jzy3d.maths.BoundingBox3d;
 import org.jzy3d.maths.Coord3d;
 import org.jzy3d.plot3d.primitives.AbstractDrawable;
@@ -30,7 +31,7 @@ import com.jogamp.opengl.math.FloatUtil;
 import com.jogamp.opengl.math.Matrix4;
 import com.jogamp.opengl.math.VectorUtil;
 
-public class Texture3D extends AbstractDrawable implements IGLBindedResource{
+public class Texture3D extends AbstractDrawable implements IGLBindedResource,IMultiColorable{
 
 	/** The GL texture ID. */
     private int texID;
@@ -118,11 +119,6 @@ public class Texture3D extends AbstractDrawable implements IGLBindedResource{
 		
         return 0 != texID;
     }
-	
-	public void setMapper(ColorMapper mapper) {
-		this.mapper = mapper;
-		if (colormapTexure != null) colormapTexure.updateColormap(mapper);
-	}
 
 	@Override
 	public void draw(GL gl, GLU glu, Camera cam) {
@@ -208,5 +204,16 @@ public class Texture3D extends AbstractDrawable implements IGLBindedResource{
 	public void updateBounds() {
 		bbox = new BoundingBox3d(0,1,0,1,0,1);
 		
+	}
+
+	@Override
+	public ColorMapper getColorMapper() {
+		return mapper;
+	}
+
+	@Override
+	public void setColorMapper(ColorMapper mapper) {
+		this.mapper = mapper;
+		if (colormapTexure != null) colormapTexure.updateColormap(mapper);
 	}
 }

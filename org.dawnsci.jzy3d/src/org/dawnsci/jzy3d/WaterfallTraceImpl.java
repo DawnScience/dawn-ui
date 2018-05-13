@@ -2,10 +2,12 @@ package org.dawnsci.jzy3d;
 
 import org.dawnsci.jzy3d.vbo.ShaderWaterfallDrawableVBO;
 import org.dawnsci.jzy3d.vbo.ShaderWaterfallVBOBuilder;
+import org.dawnsci.jzy3d.volume.Texture3D;
 import org.eclipse.dawnsci.plotting.api.histogram.IImageService;
 import org.eclipse.dawnsci.plotting.api.histogram.IPaletteService;
 import org.eclipse.dawnsci.plotting.api.trace.IWaterfallTrace;
 import org.jzy3d.colors.ColorMapper;
+import org.jzy3d.colors.IMultiColorable;
 import org.jzy3d.plot3d.builder.concrete.WaterfallTessellator;
 import org.jzy3d.plot3d.primitives.AbstractDrawable;
 import org.jzy3d.plot3d.primitives.Shape;
@@ -17,12 +19,12 @@ public class WaterfallTraceImpl extends Abstract2DJZY3DTrace implements IWaterfa
 	}
 
 	protected AbstractDrawable buildShape(float[] x, float[] y, float[] z, ColorMapper mapper) {
-		WaterfallTessellator t = new WaterfallTessellator();
-		return t.build(x, y, z);
-//		ShaderWaterfallVBOBuilder builder = new ShaderWaterfallVBOBuilder(x, y, z, mapper);
-//		ShaderWaterfallDrawableVBO vbo = new  ShaderWaterfallDrawableVBO(builder, mapper);
-//		builder.earlyInitalise(vbo);
-//		return vbo;
+//		WaterfallTessellator t = new WaterfallTessellator();
+//		return t.build(x, y, z);
+		ShaderWaterfallVBOBuilder builder = new ShaderWaterfallVBOBuilder(x, y, z, mapper);
+		ShaderWaterfallDrawableVBO vbo = new  ShaderWaterfallDrawableVBO(builder, mapper);
+		builder.earlyInitalise(vbo);
+		return vbo;
 	}
 
 	@Override
@@ -30,5 +32,4 @@ public class WaterfallTraceImpl extends Abstract2DJZY3DTrace implements IWaterfa
 		shape.setColorMapper(colorMapper);
 		
 	}
-
 }

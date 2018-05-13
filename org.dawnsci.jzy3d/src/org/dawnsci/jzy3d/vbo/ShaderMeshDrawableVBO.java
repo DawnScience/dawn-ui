@@ -5,6 +5,7 @@ import org.dawnsci.jzy3d.glsl.GLSLProgram;
 import org.dawnsci.jzy3d.glsl.ShaderFilePair;
 import org.jzy3d.colors.Color;
 import org.jzy3d.colors.ColorMapper;
+import org.jzy3d.colors.IMultiColorable;
 import org.jzy3d.io.IGLLoader;
 import org.jzy3d.maths.BoundingBox3d;
 import org.jzy3d.plot3d.primitives.vbo.drawable.DrawableVBO;
@@ -16,7 +17,7 @@ import com.jogamp.opengl.GL2;
 import com.jogamp.opengl.GL2GL3;
 import com.jogamp.opengl.glu.GLU;
 
-public class ShaderMeshDrawableVBO extends DrawableVBO {
+public class ShaderMeshDrawableVBO extends DrawableVBO implements IMultiColorable{
 	
 	private ColorMapper mapper;
 	
@@ -77,11 +78,6 @@ public class ShaderMeshDrawableVBO extends DrawableVBO {
 		disposed = true;
 	}
 	
-	public void setMapper(ColorMapper mapper) {
-		this.mapper = mapper;
-		if (colormapTexure != null) colormapTexure.updateColormap(mapper);
-	}
-	
 	protected void pointers(GL gl) {
 		gl.getGL2().glVertexPointer(dimensions, GL.GL_FLOAT, 0, pointer);
 //        gl.getGL2().glVertexPointer(dimensions, GL.GL_FLOAT, byteOffset, pointer);
@@ -100,6 +96,18 @@ public class ShaderMeshDrawableVBO extends DrawableVBO {
         }
         call(gl, color);
     }
+
+	@Override
+	public ColorMapper getColorMapper() {
+		return mapper;
+	}
+
+	@Override
+	public void setColorMapper(ColorMapper mapper) {
+		this.mapper = mapper;
+		if (colormapTexure != null) colormapTexure.updateColormap(mapper);
+		
+	}
 
 
 

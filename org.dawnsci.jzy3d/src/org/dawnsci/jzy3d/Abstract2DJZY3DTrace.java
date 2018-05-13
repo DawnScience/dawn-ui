@@ -10,6 +10,7 @@ import org.eclipse.january.dataset.FloatDataset;
 import org.eclipse.january.dataset.IDataset;
 import org.jzy3d.colors.Color;
 import org.jzy3d.colors.ColorMapper;
+import org.jzy3d.colors.IMultiColorable;
 import org.jzy3d.colors.colormaps.ColorMapGrayscale;
 import org.jzy3d.plot3d.primitives.AbstractDrawable;
 import org.jzy3d.plot3d.primitives.Shape;
@@ -119,8 +120,8 @@ public abstract class Abstract2DJZY3DTrace extends AbstractColorMapTrace {
 	@Override
 	protected void setColorMap(ColorMapper mapper) {
 		colorMapper = mapper;
-		if (shape instanceof Shape) {
-			((Shape)this.shape).setColorMapper(colorMapper);
+		if (shape instanceof IMultiColorable) {
+			((IMultiColorable)this.shape).setColorMapper(colorMapper);
 		}
 		
 		

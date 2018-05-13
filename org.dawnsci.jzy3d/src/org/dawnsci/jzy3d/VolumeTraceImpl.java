@@ -121,7 +121,7 @@ public class VolumeTraceImpl extends Abstract2DJZY3DTrace implements IVolumeTrac
 		if (volume != null) {
 			((Texture3D)volume).setMin(mapper.getMin());
 			((Texture3D)volume).setMax(mapper.getMax());
-			((Texture3D)volume).setMapper(mapper);
+			((Texture3D)volume).setColorMapper(mapper);
 		}
 		colorMapper = mapper;
 	}
