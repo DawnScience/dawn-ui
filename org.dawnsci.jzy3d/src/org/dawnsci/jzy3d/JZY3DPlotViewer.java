@@ -21,6 +21,7 @@ import org.eclipse.dawnsci.plotting.api.trace.IWaterfallTrace;
 import org.eclipse.dawnsci.plotting.api.trace.MetadataPlotUtils;
 import org.eclipse.january.dataset.IDataset;
 import org.eclipse.jface.action.Action;
+import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.FillLayout;
@@ -204,6 +205,21 @@ public class JZY3DPlotViewer extends IPlottingSystemViewer.Stub<Composite> {
 			public void run() {
 				chart.getView().setSquarifier(new YXSquarifier());
 				chart.getView().setSquared(true);
+			}
+		});
+		
+		menuAction.add(new Action("Custom...", Action.AS_RADIO_BUTTON) {
+			@Override
+			public void run() {
+				if (!this.isChecked()) {
+					return;
+				}
+				CustomSquarifier customSquarifier = new CustomSquarifier();
+				chart.getView().setSquarifier(customSquarifier);
+				chart.getView().setSquared(true);
+				Dialog d = new AxesAspectDialog(Display.getDefault().getActiveShell(), customSquarifier);
+				d.create();
+				d.open();
 			}
 		});
 		
