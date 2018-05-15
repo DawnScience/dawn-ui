@@ -49,6 +49,8 @@ public class ShaderWaterfallDrawableVBO extends DrawableVBO implements IMultiCol
 		gl.getGL2().glDisable(GL.GL_BLEND);
 		shaderProgram.bind(gl.getGL2());
 		shaderProgram.setUniform(gl.getGL2(), "min_max", new float[] {(float) mapper.getMin(), (float) mapper.getMax(),(float) 0,},3);
+		int idc = gl.getGL2().glGetUniformLocation(shaderProgram.getProgramId(), "transfer");
+    	gl.getGL2().glUniform1i(idc, 1);
 		this.setGeometry(GL2.GL_LINES);
 		super.draw(gl, glu, cam);
 //		this.setGeometry(GL2.GL_LINES);
@@ -81,7 +83,7 @@ public class ShaderWaterfallDrawableVBO extends DrawableVBO implements IMultiCol
 			ShaderFilePair sfp = new ShaderFilePair(this.getClass(), "colour_mapped_waterfall.vert", "colour_mapped_waterfall.frag");
 			shaderProgram.loadAndCompileShaders(gl.getGL2(),sfp);
 			shaderProgram.link(gl.getGL2());
-			colormapTexure = new ColormapTexture(mapper);
+			colormapTexure = new ColormapTexture(mapper,"transfer",shaderProgram.getProgramId());
 			colormapTexure.bind(gl);
 		} catch (Exception e) {
 			e.printStackTrace();

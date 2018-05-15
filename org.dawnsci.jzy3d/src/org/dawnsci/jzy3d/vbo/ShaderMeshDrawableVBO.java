@@ -44,7 +44,8 @@ public class ShaderMeshDrawableVBO extends DrawableVBO implements IMultiColorabl
 		gl.getGL2().glDisable(GL.GL_BLEND);
 		shaderProgram.bind(gl.getGL2());
 		shaderProgram.setUniform(gl.getGL2(), "min_max", new float[] {(float) mapper.getMin(), (float) mapper.getMax(),(float) mapper.getMin(), (float) mapper.getMax()},4);
-		
+		int idc = gl.getGL2().glGetUniformLocation(shaderProgram.getProgramId(), "transfer");
+    	gl.getGL2().glUniform1i(idc, 1);
 		super.draw(gl, glu, cam);
 		shaderProgram.unbind(gl.getGL2());
 		gl.getGL2().glEnable(GL.GL_BLEND);
@@ -65,7 +66,7 @@ public class ShaderMeshDrawableVBO extends DrawableVBO implements IMultiColorabl
 			ShaderFilePair sfp = new ShaderFilePair(this.getClass(), "colour_mapped_surface.vert", "colour_mapped_surface.frag");
 			shaderProgram.loadAndCompileShaders(gl.getGL2(),sfp);
 			shaderProgram.link(gl.getGL2());
-			colormapTexure = new ColormapTexture(mapper);
+			colormapTexure = new ColormapTexture(mapper,"transfer",shaderProgram.getProgramId());
 			colormapTexure.bind(gl);
 		} catch (Exception e) {
 			e.printStackTrace();
