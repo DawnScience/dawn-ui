@@ -71,9 +71,11 @@ public class VolumeTraceImpl extends Abstract2DJZY3DTrace implements IVolumeTrac
 		
 		FloatDataset v = DatasetUtils.cast(FloatDataset.class, data);
 		
-		xAxis = axes[0];
-		yAxis = axes[1];
-		zAxis = axes[2];
+		if (axes != null) {
+			xAxis = axes[0];
+			yAxis = axes[1];
+			zAxis = axes[2];
+		}
 		
 		float xmin = 0;
 		float xmax = x-1;

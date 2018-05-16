@@ -54,19 +54,21 @@ public abstract class Abstract2DJZY3DTrace extends AbstractColorMapTrace {
 		float[] xArray = null;
 		float[] yArray = null;
 		
-		xAxis = axes[0];
-		yAxis = axes[1];
-		
-		if (axes[0] != null && axes[0].getSize() != data.getShape()[1]) {
-			axes[0] = null;
+		if (axes != null) {
+			xAxis = axes[0];
+			yAxis = axes[1];
 		}
 		
-		if (axes[1] != null && axes[1].getSize() != data.getShape()[0]) {
-			axes[1] = null;
+		if (xAxis != null && xAxis.getSize() != data.getShape()[1]) {
+			xAxis = null;
+		}
+		
+		if (yAxis != null && yAxis.getSize() != data.getShape()[0]) {
+			yAxis = null;
 		}
 
-		xArray = (axes[0] != null) ? DatasetUtils.cast(FloatDataset.class, axes[0]).getData() : getRange(x);
-		yArray = (axes[1] != null) ? DatasetUtils.cast(FloatDataset.class, axes[1]).getData() : getRange(y);
+		xArray = (xAxis != null) ? DatasetUtils.cast(FloatDataset.class, xAxis).getData() : getRange(x);
+		yArray = (yAxis != null) ? DatasetUtils.cast(FloatDataset.class, yAxis).getData() : getRange(y);
 
 		final AbstractDrawable surface = buildShape(xArray, yArray, z.getData(), colorMapper);
 		
