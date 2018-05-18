@@ -20,6 +20,7 @@ public class MillerSpaceMapperBeanTest {
 	@Test
 	public void testWriteRead() {
 		MillerSpaceMapperBean orig = new MillerSpaceMapperBean();
+		orig.setInputs("blah");
 
 		ObjectMapper mapper = new ObjectMapper();
 		String testName = "output.json";
@@ -53,7 +54,7 @@ public class MillerSpaceMapperBeanTest {
 		orig.setMillerStep(0.002);
 
 		ObjectMapper mapper = new ObjectMapper();
-		String testName = "i16.json";
+		String testName = "test-files/i16.json";
 		File f = null;
 		try {
 			f = new File(testName);
