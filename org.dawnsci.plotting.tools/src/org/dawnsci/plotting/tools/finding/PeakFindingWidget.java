@@ -188,14 +188,14 @@ public class PeakFindingWidget {
 			}
 		});
 		
-		manager.setPeakFindServ((IPeakFindingService) Activator.getService(IPeakFindingService.class));
+		PeakFindingManager.setPeakFindServ((IPeakFindingService) Activator.getService(IPeakFindingService.class));
 		//Load in peak finders
-		Collection<String> peakFinders = manager.getPeakFindServ().getRegisteredPeakFinders();
+		Collection<String> peakFinders = PeakFindingManager.getPeakFindServ().getRegisteredPeakFinders();
 
-		manager.setPeakFindData(new PeakFindingData(manager.getPeakFindServ()));
+		manager.setPeakFindData(new PeakFindingData(PeakFindingManager.getPeakFindServ()));
 
 		for (String pfID : peakFinders) {
-			String nameID = manager.getPeakFindServ().getPeakFinderName(pfID);
+			String nameID = PeakFindingManager.getPeakFindServ().getPeakFinderName(pfID);
 			peakfinderCombo.add(nameID);
 			manager.setPeakFinderID(pfID); 
 		}			

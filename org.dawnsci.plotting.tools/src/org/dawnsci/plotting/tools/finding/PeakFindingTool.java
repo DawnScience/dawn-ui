@@ -164,8 +164,9 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 		widget = new PeakFindingWidget(manager);
 		widget.createControl(composite);
 		
-		//TODO: additioanl plot serivce
-		getPlottingSystem().createPlotPart(composite, getTitle(), actionbars, PlotType.XY, this.getViewPart());
+		//TODO: additional plot service
+		IPlottingSystem<Composite> system = getPlottingSystem();
+		system.createPlotPart(composite, getTitle(), actionbars, PlotType.XY, this.getViewPart());
 		
 		// TODO: id the listener...
 		listener = new IPeakOpportunityListener() {
@@ -202,8 +203,9 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 					searchRegion.setROI(rectBounds);
 
 
-					if (!getPlottingSystem().getTraces().isEmpty()) {
-						setSearchDataOnBounds((ILineTrace) getPlottingSystem().getTraces().iterator().next());
+					Collection<ITrace> traces = getPlottingSystem().getTraces();
+					if (!traces.isEmpty()) {
+						setSearchDataOnBounds((ILineTrace) traces.iterator().next());
 					}
 				}
 			}
@@ -250,7 +252,7 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 		
 		
 		// Control Peak Removal + Addition
-		getPlottingSystem().addClickListener(clickListener);
+		system.addClickListener(clickListener);
 
 		
 		traceListener = new ITraceListener() {
@@ -288,8 +290,8 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 				ILineTrace traceUpdate = (ILineTrace) evt.getSource();
 				
 				//TODO: check against object but unfortunately do not have it hanging around ...
-				traceUpdate.equals(peaksTrace);
-				traceUpdate.equals(getPlottingSystem().getTrace(BOUNDTRACENAME));
+//				traceUpdate.equals(peaksTrace);
+//				traceUpdate.equals(getPlottingSystem().getTrace(BOUNDTRACENAME));
 				if (isValidTraceForSearch(traceUpdate)) {
 					runTraceSearch(traceUpdate);
 				}
@@ -316,7 +318,7 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 			}
 		};
 		
-		getPlottingSystem().addTraceListener(traceListener);
+		system.addTraceListener(traceListener);
 
 		// Begin with the search tool ready to then run on
 		createNewSearch();
@@ -398,15 +400,17 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 	}
 
 	public void configureTraces() {
-		if (!getPlottingSystem().getTraces().isEmpty()) {
+		IPlottingSystem<?> system = getPlottingSystem();
+		Collection<ITrace> traces = system.getTraces();
+		if (!traces.isEmpty()) {
 			// XXX:assumes base trace is sample trace
-			ILineTrace sampleTrace = (ILineTrace) getPlottingSystem().getTraces().iterator().next(); 
+			ILineTrace sampleTrace = (ILineTrace) traces.iterator().next(); 
 			// Setup Upper & lower bound for search region
-			if (getPlottingSystem().getTrace(BOUNDTRACENAME) == null) {
-				regionBndsTrace = generateBoundTrace(BOUNDTRACENAME);
-				getPlottingSystem().addTrace(regionBndsTrace);
+			if (system.getTrace(BOUNDTRACENAME) == null) {
+				regionBndsTrace = generateBoundTrace(system, BOUNDTRACENAME);
+				system.addTrace(regionBndsTrace);
 			} else {
-				regionBndsTrace = (ILineTrace) getPlottingSystem().getTrace(BOUNDTRACENAME);
+				regionBndsTrace = (ILineTrace) system.getTrace(BOUNDTRACENAME);
 			}
 
 			// Initialise to upper and low limit of sample trace
@@ -419,20 +423,20 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 			Dataset xBnds = DatasetFactory.createFromObject(new double[] { lwrBnd, uprBnd });
 			Dataset bndHeight = genBoundsHeight();
 
-			updateTraceBounds(xBnds, bndHeight);
+			updateTraceBounds(system, xBnds, bndHeight);
 		}
 	}
 
-	private ILineTrace generateBoundTrace(String tracename) {
-		ILineTrace trace = getPlottingSystem().createLineTrace(BOUNDTRACENAME);
+	private ILineTrace generateBoundTrace(IPlottingSystem<?> system, String tracename) {
+		ILineTrace trace = system.createLineTrace(BOUNDTRACENAME);
 		trace.setLineWidth(3);
 		trace.setTraceType(TraceType.HISTO);
 		trace.setTraceColor(ColorConstants.orange);
 		return trace;
 	}
 
-	private ILineTrace generatePeakTrace(String tracename) {
-		ILineTrace trace = getPlottingSystem().createLineTrace(tracename);
+	private ILineTrace generatePeakTrace(IPlottingSystem<?> system, String tracename) {
+		ILineTrace trace = system.createLineTrace(tracename);
 		trace.setLineWidth(1);
 		trace.setPointStyle(PointStyle.CIRCLE);
 		trace.setPointSize(3);
@@ -444,7 +448,7 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 		try {
 			IPlottingSystem<?> system = getPlottingSystem();
 			for (IRegion i : system.getRegions()) {
-				getPlottingSystem().removeRegion(i);
+				system.removeRegion(i);
 			}
 
 			if (peaksId != null && !peaksId.isEmpty()) {
@@ -553,13 +557,13 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 		Dataset xdata = DatasetFactory.createFromObject(x);
 		Dataset ydata = genBoundsHeight();
 
-		updateTraceBounds(xdata, ydata); // TODO: this is already triggered
+		updateTraceBounds(getPlottingSystem(), xdata, ydata); // TODO: this is already triggered
 	}
 
-	private void updateTraceBounds(Dataset x, Dataset y) {
+	private void updateTraceBounds(IPlottingSystem<?> system, Dataset x, Dataset y) {
 		if(regionBndsTrace == null) {
-			regionBndsTrace = generateBoundTrace(BOUNDTRACENAME);
-			getPlottingSystem().addTrace(regionBndsTrace);
+			regionBndsTrace = generateBoundTrace(system, BOUNDTRACENAME);
+			system.addTrace(regionBndsTrace);
 		}
 		regionBndsTrace.setData(x, y);
 		
@@ -567,14 +571,14 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 		if (!regionBndsTrace.isVisible())
 			regionBndsTrace.setVisible(true);
 
-		if (getPlottingSystem() != null)
-			getPlottingSystem().repaint();
+		system.repaint();
 	}
 
 	public void updatePeakTrace(Dataset x, Dataset y) {
-		if (getPlottingSystem().getTrace(PEAKSTRACENAME) == null) {
-			peaksTrace = generatePeakTrace(PEAKSTRACENAME);
-			getPlottingSystem().addTrace(peaksTrace);
+		IPlottingSystem<?> system = getPlottingSystem();
+		if (system.getTrace(PEAKSTRACENAME) == null) {
+			peaksTrace = generatePeakTrace(system, PEAKSTRACENAME);
+			system.addTrace(peaksTrace);
 		}
 
 		peaksTrace.setData(x, y);
@@ -583,7 +587,7 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 			peaksTrace.setVisible(true);		
 		}
 
-		getPlottingSystem().repaint();
+		system.repaint();
 	}
 	
 	private void updatePeakTrace(List<IdentifiedPeak> peakSet) {
@@ -708,7 +712,7 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 		// getPlottingSystem()!=null
 		
 		IPlottingSystem<?> system = getPlottingSystem();
-		if (getPlottingSystem() != null) {
+		if (system != null) {
 			if (searchRegion != null)
 				system.removeRegion(searchRegion);
 
@@ -721,16 +725,13 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 			system.removeTraceListener(traceListener);
 			system.removeClickListener(clickListener);
 
+			for (IRegion region : system.getRegions()) {
+				system.removeRegion(region);
+			}
 		}
 
 		//TODO: just kill manager?
 		manager.destroyAllListeners();
-
-		Collection<IRegion> regions = getPlottingSystem().getRegions();
-		for (IRegion region : regions) {
-			getPlottingSystem().removeRegion(region);
-		}
-
 	}
 
 	@Override

@@ -127,10 +127,10 @@ public class PeakFindingTable {
 		ret.add(table);
 
 		/* Pack the columns */
-	    for (TableViewerColumn column : ret){
-	        column.getColumn().setWidth(200);
-	    }	
-	    
+		for (TableViewerColumn column : ret) {
+			column.getColumn().setWidth(200);
+		}
+
 		return ret;
 	}
 

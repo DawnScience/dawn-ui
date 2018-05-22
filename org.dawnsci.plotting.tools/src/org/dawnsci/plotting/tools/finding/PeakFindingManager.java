@@ -171,20 +171,20 @@ public class PeakFindingManager {
 
 	private void everythingChangesListeners(PeakOpportunityEvent evt) {
 		for(IPeakOpportunityListener listener : listeners) {
-			
-			if(evt.getPeakOpp().getPeaksId() != null){
+			IPeakOpportunity po = evt.getPeakOpp();
+			if(po.getPeaksId() != null){
 				
-				sendPeakfindingEvent(evt.getPeakOpp().getPeaksId()); //TODO: way to enable and disable this degree of sending
+				sendPeakfindingEvent(po.getPeaksId()); //TODO: way to enable and disable this degree of sending
 				listener.peaksChanged(evt);
 			}
-			if(evt.getPeakOpp().getLowerBound() != 0 && evt.getPeakOpp().getUpperBound() != 0)
-				listener.boundsChanged(evt.getPeakOpp().getUpperBound() , evt.getPeakOpp().getLowerBound());
+			if(po.getLowerBound() != 0 && po.getUpperBound() != 0)
+				listener.boundsChanged(po.getUpperBound() , po.getLowerBound());
 
-			if (evt.getPeakOpp().getXData() != null && evt.getPeakOpp().getYData() != null)
-				listener.dataChanged(evt.getPeakOpp().getXData(),evt.getPeakOpp().getYData());
+			if (po.getXData() != null && po.getYData() != null)
+				listener.dataChanged(po.getXData(), po.getYData());
 			
-			if (evt.getPeakOpp().getSearchingStatus() != null) {
-				if(evt.getPeakOpp().getSearchingStatus()){
+			if (po.getSearchingStatus() != null) {
+				if(po.getSearchingStatus()){
 					listener.finishedPeakFinding();
 				} else {
 					listener.isPeakFinding();
@@ -241,7 +241,7 @@ public class PeakFindingManager {
 		backTotal = 0;
 		while(backDescending){
 			if(backPos > 0) {
-				double nextBackVal = yData.getElementDoubleAbs(backPos+-1); //get nextPos
+				double nextBackVal = yData.getElementDoubleAbs(backPos - 1); //get nextPos
 				backValue = yData.getElementDoubleAbs(backPos);
 				if (backValue >= nextBackVal) { 
 					backTotal += backValue;
@@ -295,9 +295,8 @@ public class PeakFindingManager {
 		double height = yData.getElementDoubleAbs(pos); //slicedYData.peakToPeak().doubleValue(); //or just yData.getElementDoubleAbs(pos);
 		int indexOfMinXVal = backPos; 
 		int indexofMaxXVal = forwardPos;
-		List<Double> crossingsFnd = crossings;
 		
-		IdentifiedPeak newPeak = new IdentifiedPeak(positionVal, minXValue,maxXValue,area,height,indexOfMinXVal, indexofMaxXVal,crossingsFnd);
+		IdentifiedPeak newPeak = new IdentifiedPeak(positionVal, minXValue,maxXValue,area,height,indexOfMinXVal, indexofMaxXVal,crossings);
 		
 		return newPeak;
 	}

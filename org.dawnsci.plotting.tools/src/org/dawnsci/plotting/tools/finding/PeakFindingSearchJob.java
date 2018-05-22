@@ -22,6 +22,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import uk.ac.diamond.scisoft.analysis.fitting.functions.IdentifiedPeak;
+import uk.ac.diamond.scisoft.analysis.peakfinding.IPeakFindingData;
 import uk.ac.diamond.scisoft.analysis.peakfinding.IPeakFindingService;
 
 /**
@@ -74,15 +75,16 @@ public class PeakFindingSearchJob extends Job {
 	private void loadPeakFinderParams() {
 		// TODO: clean control function
 		// Free up active peakfinder calls
-		if (manager.getPeakFindData().hasActivePeakFinders()) {
-			Collection<String> actives = manager.getPeakFindData().getActivePeakFinders();
+		IPeakFindingData fpd = manager.getPeakFindData();
+		if (fpd.hasActivePeakFinders()) {
+			Collection<String> actives = fpd.getActivePeakFinders();
 			for (String active : actives) {
-				manager.getPeakFindData().deactivatePeakFinder(active);
+				fpd.deactivatePeakFinder(active);
 			}
 		}
 
 		peakAlgorithm = Activator.getPlottingPreferenceStore().getString(PeakFindingConstants.PeakAlgorithm);
-		manager.getPeakFindData().activatePeakFinder(peakAlgorithm);
+		fpd.activatePeakFinder(peakAlgorithm);
 		// Configure peak finder on preference store go through all the params
 		// that match
 		peakParams = peakFindServ.getPeakFinderParameters(peakAlgorithm);
@@ -94,9 +96,9 @@ public class PeakFindingSearchJob extends Job {
 				val = (int) val.doubleValue();
 			param.setValue(val);
 			// TODO: allow single param pass
-			manager.getPeakFindData().setPFParameterByName(peakAlgorithm, param.getName(), param.getValue());
+			fpd.setPFParameterByName(peakAlgorithm, param.getName(), param.getValue());
 		}
-		manager.getPeakFindData().setPFParametersByPeakFinder(peakAlgorithm, peakParams);
+		fpd.setPFParametersByPeakFinder(peakAlgorithm, peakParams);
 	}
 
 	@Override
@@ -105,9 +107,10 @@ public class PeakFindingSearchJob extends Job {
 		// Free up active peakfinder calls
 		loadPeakFinderParams();
 
-		manager.getPeakFindData().setPFParametersByPeakFinder(peakAlgorithm, peakParams);
-		manager.getPeakFindData().setData(xData, yData);
-		manager.getPeakFindData().setNPeaks(20);
+		IPeakFindingData fpd = manager.getPeakFindData();
+		fpd.setPFParametersByPeakFinder(peakAlgorithm, peakParams);
+		fpd.setData(xData, yData);
+		fpd.setNPeaks(20);
 
 		TreeMap<Integer, Double> peaksPos = new TreeMap<Integer, Double>();
 
@@ -146,7 +149,7 @@ public class PeakFindingSearchJob extends Job {
 
 		/* Perform Peak Search */
 		try {
-			manager.getPeakFindServ().findPeaks(manager.getPeakFindData());
+			PeakFindingManager.getPeakFindServ().findPeaks(fpd);
 		} catch (Exception e) {
 			logger.debug("Finding peaks data resulted in error in peak service");
 			// thread.stop();
@@ -155,7 +158,7 @@ public class PeakFindingSearchJob extends Job {
 		}
 
 		/* Extract Peak Search Data */
-		peaksPos = (TreeMap<Integer, Double>) manager.getPeakFindData().getPeaks(peakAlgorithm);
+		peaksPos = (TreeMap<Integer, Double>) fpd.getPeaks(peakAlgorithm);
 
 		if (peaksPos.isEmpty()) {
 			logger.debug("No peaks found with " + peakAlgorithm);
