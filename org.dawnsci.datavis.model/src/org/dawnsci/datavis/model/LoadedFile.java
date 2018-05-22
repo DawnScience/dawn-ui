@@ -11,6 +11,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.concurrent.atomic.AtomicReference;
@@ -30,7 +31,6 @@ import org.eclipse.dawnsci.nexus.NexusConstants;
 import org.eclipse.january.dataset.Dataset;
 import org.eclipse.january.dataset.DatasetUtils;
 import org.eclipse.january.dataset.ILazyDataset;
-import org.eclipse.january.dataset.LazyDatasetBase;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -63,7 +63,7 @@ public class LoadedFile implements IDataObject, IDataFilePackage {
 				names = new String[values.size()];
 				int count = 0;
 				for (String v : values) {
-					names[count++] = "/" + v;
+					names[count++] = Tree.ROOT + v;
 				}
 //				names = values.toArray(new String[values.size()]);
 			} catch ( Exception e) {
@@ -76,18 +76,25 @@ public class LoadedFile implements IDataObject, IDataFilePackage {
 		if (names == null) names = dataHolder.getNames();
 		for (String n : names) {
 			ILazyDataset lazyDataset = dataHolder.getLazyDataset(n);
-			
-			if (lazyDataset != null && ((LazyDatasetBase)lazyDataset).getDType() != Dataset.STRING && lazyDataset.getSize() != 1) {
-				DataOptions d = new DataOptions(n, this);
-				dataOptions.put(d.getName(),d);
-			} else {
+			if (lazyDataset == null) {
 				if (signals.contains(n)) {
 					signals.remove(n);
 				}
+				continue;
 			}
-			
-			if (lazyDataset != null && lazyDataset.getSize() == 1) {
-				possibleLabels.put(n,lazyDataset);
+
+			boolean notString = !lazyDataset.getElementClass().equals(String.class);
+			if (notString && lazyDataset.getSize() != 1) {
+				DataOptions d = new DataOptions(n, this);
+				dataOptions.put(d.getName(),d);
+			} else {
+				if (!notString && signals.contains(n)) {
+					signals.remove(n);
+				}
+			}
+
+			if (lazyDataset.getSize() == 1) {
+				possibleLabels.put(n, lazyDataset);
 			}
 		}
 	}
@@ -101,7 +108,7 @@ public class LoadedFile implements IDataObject, IDataFilePackage {
 			if (signals.isEmpty()) {
 				return Collections.emptyList();
 			}
-			return signals.stream().map(s -> dataOptions.get(s)).collect(Collectors.toList());
+			return signals.stream().filter(Objects::nonNull).map(s -> dataOptions.get(s)).filter(Objects::nonNull).collect(Collectors.toList());
 		}
 		return new ArrayList<>(dataOptions.values());
 	}
@@ -299,6 +306,10 @@ public class LoadedFile implements IDataObject, IDataFilePackage {
 			}
 		}
 		return null;
+	}
+
+	public boolean isSignal(String name) {
+		return signals.contains(name);
 	}
 
 	public boolean isOnlySignals() {
