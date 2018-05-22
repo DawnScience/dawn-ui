@@ -114,7 +114,6 @@ public class LoadedFile implements IDataObject, IDataFilePackage {
 	}
 	
 	public DataOptions getDataOption(String name) {
-		
 		return dataOptions.get(name);
 	}
 	
@@ -285,6 +284,10 @@ public class LoadedFile implements IDataObject, IDataFilePackage {
 	}
 
 	public Dataset getLabelValue() {
+		return getLabelValue(labelName);
+	}
+
+	public Dataset getLabelValue(String labelName) {
 		if (possibleLabels.containsKey(labelName)) {
 			ILazyDataset l = possibleLabels.get(labelName);
 			
