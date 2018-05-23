@@ -96,7 +96,7 @@ public class OperationModelWizard extends Wizard implements IOperationModelWizar
 	@Override
 	public void saveOutputFile(String filename) throws Exception {
 		IPersistenceService service = ServiceHolder.getPersistenceService();
-		IPersistentFile pf = service.getPersistentFile(filename);
+		IPersistentFile pf = service.createPersistentFile(filename);
 		
 		List<IOperation> operationsList = new ArrayList<>();
 		

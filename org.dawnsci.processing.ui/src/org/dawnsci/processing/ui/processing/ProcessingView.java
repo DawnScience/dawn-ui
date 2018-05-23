@@ -193,7 +193,7 @@ public class ProcessingView extends ViewPart {
 			}
 			
 			IPersistenceService service = (IPersistenceService)ServiceManager.getService(IPersistenceService.class);
-			IPersistentFile pf = service.getPersistentFile(filename);
+			IPersistentFile pf = service.createPersistentFile(filename);
 			pf.setOperations(op);
 			pf.close();
 		} catch (Exception e) {
