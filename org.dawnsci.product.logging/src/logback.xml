@@ -69,7 +69,7 @@
 	<appender name="GrayLog" class="me.moocar.logbackgelf.GelfUDPAppender">
 		<!-- Graylog server details -->
 		<remoteHost>${graylog.host}</remoteHost>
-		<port>12201</port>
+		<port>${graylog.port}</port>
 		<encoder class="me.moocar.logbackgelf.GZIPEncoder">
 			<layout class="me.moocar.logbackgelf.GelfLayout">
 				<shortMessageLayout class="ch.qos.logback.classic.PatternLayout">
