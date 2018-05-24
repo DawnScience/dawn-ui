@@ -108,6 +108,8 @@
 	
 	<logger name="hdf.hdf5lib" level="ERROR"/>
 	
+	<logger name="org.python.netty" level="WARN"/>
+	
 	<root>
 		<level value="ALL" />
 		<appender-ref ref="DebugFILE" />
