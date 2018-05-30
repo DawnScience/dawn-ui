@@ -33,6 +33,8 @@ public abstract class AbstractColorMapTrace implements IPaletteTrace {
 	private boolean isVisible = true;
 	private boolean isUserTrace = true;
 	
+	private boolean rescaleHistogram = true;
+	
 	private Object userObject;
 	
 	private Set<IPaletteListener> paletteListeners;
@@ -64,14 +66,13 @@ public abstract class AbstractColorMapTrace implements IPaletteTrace {
 
 	@Override
 	public void setRescaleHistogram(boolean rescaleHistogram) {
-		// TODO Auto-generated method stub
+		this.rescaleHistogram = rescaleHistogram;
 
 	}
 
 	@Override
 	public boolean isRescaleHistogram() {
-		// TODO Auto-generated method stub
-		return false;
+		return rescaleHistogram;
 	}
 
 	@Override
