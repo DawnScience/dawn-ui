@@ -1,5 +1,6 @@
 package org.dawnsci.datavis.model.fileconfig;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -25,22 +26,23 @@ public class NexusFileConfiguration implements ILoadedFileConfiguration {
 
 		Tree tree = f.getTree();
 
-		String prefix = "";
+		Map<String, NodeLink> found = null;
 		
 		// if the NXS file has correct post-2014 tagging, there should be a default attribute in the root node to
 		// identify the default NXentry group. This entry group should contain a default attribute itself containing
 		// the name of the default NXdata group within.
 		GroupNode rootNode = tree.getGroupNode();
 		Attribute defaultRootAttribute = rootNode.getAttribute("default");
-		GroupNode defaultDataNode = null;
 		if (defaultRootAttribute != null) {
 			// get default entry node
 			GroupNode defaultEntryNode = rootNode.getGroupNode(defaultRootAttribute.getFirstElement());
 			Attribute defaultEntryAttribute = defaultEntryNode.getAttribute("default");
 			if (defaultEntryAttribute != null) {
 				// get default NXdata group in this entry
-				defaultDataNode = defaultEntryNode.getGroupNode(defaultEntryAttribute.getFirstElement());
-				prefix = Node.SEPARATOR + defaultRootAttribute.getFirstElement() + Node.SEPARATOR + defaultEntryAttribute.getFirstElement();
+				// GroupNode defaultDataNode = defaultEntryNode.getGroupNode(defaultEntryAttribute.getFirstElement());
+				String prefix = defaultRootAttribute.getFirstElement() + Node.SEPARATOR + defaultEntryAttribute.getFirstElement();
+				found = new HashMap<>();
+				found.put(prefix, null);
 			}
 		}
 		
@@ -65,19 +67,15 @@ public class NexusFileConfiguration implements ILoadedFileConfiguration {
 		String maxRank = null;
 		int max = -1;
 
-		Map<String, NodeLink> found = null;
-		
-		if (defaultDataNode != null) {
-			found = TreeUtils.treeBreadthFirstSearch(defaultDataNode, findNXData, true, null);
-		}
-		
 		if (found == null || found.isEmpty()) {
 			found = TreeUtils.treeBreadthFirstSearch(tree.getGroupNode(), findNXData, false, null);
 		}
 		
 		for (String key : found.keySet()) {
-			String path = prefix + Node.SEPARATOR + key;
+			String path = Node.SEPARATOR + key;
 			NodeLink nl = tree.findNodeLink(path);
+			if (nl == null)
+				continue;
 			Node dest = nl.getDestination();
 			String signal = dest.getAttribute(NexusConstants.DATA_SIGNAL).getFirstElement();
 			

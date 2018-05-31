@@ -4,8 +4,10 @@ import java.io.File;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -75,6 +77,7 @@ public class DataReduction2DTool extends AbstractToolPage implements IRegionList
 	private Label statusLabel;
 	private Dataset[] axes0;
 	private Dataset[] axes1;
+	private boolean ignoreCheckedRegionListener = false;
 
 	
 	@Override
@@ -226,13 +229,27 @@ public class DataReduction2DTool extends AbstractToolPage implements IRegionList
 		});
 
 		spectraRegionTableComposite.addPropertyChangeListener(DataReduction2DToolSpectraRegionComposite.SPECTRA_REGION_TRACE_SHOULD_ADD, evt -> {
+			ignoreCheckedRegionListener = true;
 			DataReduction2DToolSpectraRegionDataNode spectraRegion = (DataReduction2DToolSpectraRegionDataNode) evt.getNewValue();
 			addTracesForRegion(spectraRegion);
 		});
 
 		spectraRegionTableComposite.addPropertyChangeListener(DataReduction2DToolSpectraRegionComposite.SPECTRA_REGION_TRACE_SHOULD_REMOVE, evt -> {
+			ignoreCheckedRegionListener = true;
 			DataReduction2DToolSpectraRegionDataNode spectraRegion = (DataReduction2DToolSpectraRegionDataNode) evt.getNewValue();
 			removeTracesForRegion(spectraRegion);
+		});
+		spectraRegionTableComposite.getCheckedRegionSpectraList().addSetChangeListener(event -> {
+			if (ignoreCheckedRegionListener) {
+				ignoreCheckedRegionListener = false;
+				return;
+			}
+			@SuppressWarnings("unchecked")
+			Set<DataReduction2DToolSpectraRegionDataNode> diffAdditions = event.diff.getAdditions();
+			diffAdditions.forEach(DataReduction2DTool.this::addTracesForRegion);
+			@SuppressWarnings("unchecked")
+			Set<DataReduction2DToolSpectraRegionDataNode> diffRemovals = event.diff.getRemovals();
+			diffRemovals.forEach(DataReduction2DTool.this::removeTracesForRegion);
 		});
 	}
 	
@@ -304,8 +321,8 @@ public class DataReduction2DTool extends AbstractToolPage implements IRegionList
 		}
 		toolPageModel.setDataFile(fullFilePath == null ? null : new File(fullFilePath));
 		// image.getAxes is a bit weird and unreliable to work with
-		AxesMetadata firstAxesMetadata = image.getData().getFirstMetadata(AxesMetadata.class);
-		
+		AxesMetadata firstAxesMetadata = DataReduction2DToolModel.getFirstAxesMetadata(image);
+	
 		if (firstAxesMetadata != null) {
 			axes0 = getAllAxes(0, firstAxesMetadata);
 			axes1 = getAllAxes(1, firstAxesMetadata);
@@ -543,8 +560,13 @@ public class DataReduction2DTool extends AbstractToolPage implements IRegionList
 	
 	@Override
 	public void activate() {
+		if (isActive())
+			return;
 		getPlottingSystem().addRegionListener(this);
 		getPlottingSystem().addTraceListener(this);
 		super.activate();
+		Collection<IImageTrace> traces = getPlottingSystem().getTracesByClass(IImageTrace.class);
+		if (!traces.isEmpty())
+			validateAndLoadSpectra(traces.stream().findFirst().get());
 	}
 }

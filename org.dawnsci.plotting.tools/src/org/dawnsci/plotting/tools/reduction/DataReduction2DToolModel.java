@@ -6,10 +6,15 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.lang3.ObjectUtils;
+import org.dawnsci.plotting.tools.ServiceLoader;
+import org.eclipse.dawnsci.analysis.api.io.ILoaderService;
 import org.eclipse.dawnsci.analysis.api.tree.GroupNode;
+import org.eclipse.dawnsci.analysis.dataset.slicer.SliceFromSeriesMetadata;
 import org.eclipse.dawnsci.analysis.tree.TreeFactory;
 import org.eclipse.dawnsci.hdf5.nexus.NexusFileHDF5;
 import org.eclipse.dawnsci.nexus.NexusConstants;
@@ -29,6 +34,8 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.DirectoryDialog;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
+import org.osgi.service.event.Event;
+import org.osgi.service.event.EventAdmin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -151,6 +158,10 @@ class DataReduction2DToolModel extends DataReduction2DToolObservableModel {
 		RangeData.assertValidRangeData(rangeDataList);
 		String newFilePath = DataReduction2DToolHelper.getUniqueFilenameWithSuffixInDirectory(nexusFile, "reduced", dirToStoreReducedFiles);
 		exportToGenericNexusFile(newFilePath, imageTrace, rangeDataList, deletedIndices);
+		Map<String,String> props = new HashMap<>();
+		props.put("path", newFilePath);
+		EventAdmin eventAdmin = ServiceLoader.getEventAdmin();
+		eventAdmin.postEvent(new Event("org/dawnsci/events/file/OPEN", props));
 	}
 	
 	private static String showSaveDirectory(File nexusFile, Shell shell) {
@@ -282,9 +293,10 @@ class DataReduction2DToolModel extends DataReduction2DToolObservableModel {
 		Dataset rawData = DatasetUtils.convertToDataset(trace.getData());
 		DoubleDataset reducedData = null;
 	
-		AxesMetadata axesMetadata = trace.getData().getFirstMetadata(AxesMetadata.class);
-		ILazyDataset[] rawAxesX = axesMetadata.getAxis(0);
-		ILazyDataset[] rawAxesY = axesMetadata.getAxis(1);
+		AxesMetadata firstAxesMetadata = getFirstAxesMetadata(trace);
+		
+		ILazyDataset[] rawAxesX = firstAxesMetadata.getAxis(0);
+		ILazyDataset[] rawAxesY = firstAxesMetadata.getAxis(1);
 		
 		reducedData = applyRangesAndDeletionsToDataset(AxisMode.MEAN, rawData, rangeDataList, deletedIndices);
 		DoubleDataset[] reducedAxesX = getReducedAxes(rawAxesX, rangeDataList, deletedIndices); 
@@ -299,7 +311,7 @@ class DataReduction2DToolModel extends DataReduction2DToolObservableModel {
 			Date currentDate = new Date();
 			rootNode.addAttribute(TreeFactory.createAttribute("file_name", newFilePath));
 			rootNode.addAttribute(TreeFactory.createAttribute("file_time", dateFormatter.format(currentDate)));
-			rootNode.addAttribute(TreeFactory.createAttribute("producer", "DAWN - Time Resolved EDE Tool"));
+			rootNode.addAttribute(TreeFactory.createAttribute("producer", "DAWN - Data Reduction 2D Tool"));
 			rootNode.addAttribute(TreeFactory.createAttribute("default", "entry1"));
 
 			GroupNode entryNode = TreeFactory.createGroupNode(0);
@@ -332,7 +344,7 @@ class DataReduction2DToolModel extends DataReduction2DToolObservableModel {
 				dataNode.addDataNode(axisY.getName(), NexusTreeUtils.createDataNode(axisY.getName(), axisY.squeeze(), getDatasetUnitName(axisY)));
 			}
 			
-			dataNode.addDataNode("data", NexusTreeUtils.createDataNode("data", reducedData, getDatasetUnitName(reducedData)));
+			dataNode.addDataNode("data", NexusTreeUtils.createDataNode(reducedData.getName(), reducedData, getDatasetUnitName(reducedData)));
 	
 			file.addNode("/", rootNode);
 			file.addNode("/entry1", entryNode);
@@ -462,5 +474,24 @@ class DataReduction2DToolModel extends DataReduction2DToolObservableModel {
 
 	public List<String> getAxesNames() {
 		return axesNames;
-	} 
+	}
+	
+	public static AxesMetadata getFirstAxesMetadata(IImageTrace trace) {
+		AxesMetadata rv = null;
+	
+		SliceFromSeriesMetadata sliceMetadata = trace.getData().getFirstMetadata(SliceFromSeriesMetadata.class);
+		if (sliceMetadata != null) {
+			ILoaderService loaderService = ServiceLoader.getLoaderService();
+			try {
+				IDataset dataset = loaderService.getDataset(sliceMetadata.getFilePath(), sliceMetadata.getDatasetName(), null).getSlice(sliceMetadata.getSliceInfo().getSliceFromInput());
+				rv = dataset.getFirstMetadata(AxesMetadata.class);
+			} catch (Exception e) {
+				rv = trace.getData().getFirstMetadata(AxesMetadata.class);
+			}
+		} else {
+			rv = trace.getData().getFirstMetadata(AxesMetadata.class);
+		}
+		
+		return rv;
+	}
 }
