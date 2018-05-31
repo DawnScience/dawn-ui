@@ -7,6 +7,7 @@ import org.eclipse.dawnsci.analysis.api.io.ILoaderService;
 import org.eclipse.dawnsci.analysis.api.persistence.IPersistenceService;
 import org.eclipse.dawnsci.nexus.INexusFileFactory;
 import org.eclipse.dawnsci.plotting.api.expressions.IExpressionObjectService;
+import org.osgi.service.event.EventAdmin;
 
 public class ServiceLoader {
 
@@ -17,6 +18,7 @@ public class ServiceLoader {
 	private static IConversionService conversionservice;
 	private static IPersistenceService persistenceService;
 	private static INexusFileFactory nexusFileFactory;
+	private static EventAdmin eventAdmin;
 
 	public ServiceLoader() {
 		
@@ -87,4 +89,13 @@ public class ServiceLoader {
 	public void setNexusFileFactory(INexusFileFactory nexusFileFactory) {
 		ServiceLoader.nexusFileFactory = nexusFileFactory;
 	}
+	
+	public static EventAdmin getEventAdmin() {
+		return eventAdmin;
+	}
+
+	public void setEventAdmin(EventAdmin eventAdmin) {
+		ServiceLoader.eventAdmin = eventAdmin;
+	}
+
 }

@@ -6,9 +6,12 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.lang3.ObjectUtils;
+import org.dawnsci.plotting.tools.ServiceLoader;
 import org.eclipse.dawnsci.analysis.api.tree.GroupNode;
 import org.eclipse.dawnsci.analysis.tree.TreeFactory;
 import org.eclipse.dawnsci.hdf5.nexus.NexusFileHDF5;
@@ -29,6 +32,8 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.DirectoryDialog;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
+import org.osgi.service.event.Event;
+import org.osgi.service.event.EventAdmin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -151,6 +156,10 @@ class DataReduction2DToolModel extends DataReduction2DToolObservableModel {
 		RangeData.assertValidRangeData(rangeDataList);
 		String newFilePath = DataReduction2DToolHelper.getUniqueFilenameWithSuffixInDirectory(nexusFile, "reduced", dirToStoreReducedFiles);
 		exportToGenericNexusFile(newFilePath, imageTrace, rangeDataList, deletedIndices);
+		Map<String,String> props = new HashMap<>();
+		props.put("path", newFilePath);
+		EventAdmin eventAdmin = ServiceLoader.getEventAdmin();
+		eventAdmin.postEvent(new Event("org/dawnsci/events/file/OPEN", props));
 	}
 	
 	private static String showSaveDirectory(File nexusFile, Shell shell) {
