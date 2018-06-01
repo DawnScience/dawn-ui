@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -75,6 +76,7 @@ public class DataReduction2DTool extends AbstractToolPage implements IRegionList
 	private Label statusLabel;
 	private Dataset[] axes0;
 	private Dataset[] axes1;
+	private boolean ignoreCheckedRegionListener = false;
 
 	
 	@Override
@@ -226,13 +228,27 @@ public class DataReduction2DTool extends AbstractToolPage implements IRegionList
 		});
 
 		spectraRegionTableComposite.addPropertyChangeListener(DataReduction2DToolSpectraRegionComposite.SPECTRA_REGION_TRACE_SHOULD_ADD, evt -> {
+			ignoreCheckedRegionListener = true;
 			DataReduction2DToolSpectraRegionDataNode spectraRegion = (DataReduction2DToolSpectraRegionDataNode) evt.getNewValue();
 			addTracesForRegion(spectraRegion);
 		});
 
 		spectraRegionTableComposite.addPropertyChangeListener(DataReduction2DToolSpectraRegionComposite.SPECTRA_REGION_TRACE_SHOULD_REMOVE, evt -> {
+			ignoreCheckedRegionListener = true;
 			DataReduction2DToolSpectraRegionDataNode spectraRegion = (DataReduction2DToolSpectraRegionDataNode) evt.getNewValue();
 			removeTracesForRegion(spectraRegion);
+		});
+		spectraRegionTableComposite.getCheckedRegionSpectraList().addSetChangeListener(event -> {
+			if (ignoreCheckedRegionListener) {
+				ignoreCheckedRegionListener = false;
+				return;
+			}
+			@SuppressWarnings("unchecked")
+			Set<DataReduction2DToolSpectraRegionDataNode> diffAdditions = event.diff.getAdditions();
+			diffAdditions.forEach(DataReduction2DTool.this::addTracesForRegion);
+			@SuppressWarnings("unchecked")
+			Set<DataReduction2DToolSpectraRegionDataNode> diffRemovals = event.diff.getRemovals();
+			diffRemovals.forEach(DataReduction2DTool.this::removeTracesForRegion);
 		});
 	}
 	
