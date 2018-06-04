@@ -74,6 +74,8 @@ public class NexusFileConfiguration implements ILoadedFileConfiguration {
 		for (String key : found.keySet()) {
 			String path = Node.SEPARATOR + key;
 			NodeLink nl = tree.findNodeLink(path);
+			if (nl == null)
+				continue;
 			Node dest = nl.getDestination();
 			String signal = dest.getAttribute(NexusConstants.DATA_SIGNAL).getFirstElement();
 			
