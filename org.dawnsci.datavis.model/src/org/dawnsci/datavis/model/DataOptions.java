@@ -55,7 +55,12 @@ public class DataOptions implements IDataObject, IDataPackage {
 		String sub = index < 0 ? "" : name.substring(0, index + 1);
 		for (int i = 0; i < axes.length; i++) {
 			if (axes[i] != null) {
-				String full =  sub + axes[i].getName();
+				String full = null;
+				if (axes[i].getName().startsWith(Node.SEPARATOR)) {
+					full = axes[i].getName();
+				} else {
+					full =  sub + axes[i].getName();
+				}
 				ax[i] = parent.getDataShapes().containsKey(full) ? full : null;
 			} else {
 				ax[i] = null;
