@@ -4,6 +4,7 @@ import java.io.File;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
@@ -559,8 +560,13 @@ public class DataReduction2DTool extends AbstractToolPage implements IRegionList
 	
 	@Override
 	public void activate() {
+		if (isActive())
+			return;
 		getPlottingSystem().addRegionListener(this);
 		getPlottingSystem().addTraceListener(this);
 		super.activate();
+		Collection<IImageTrace> traces = getPlottingSystem().getTracesByClass(IImageTrace.class);
+		if (!traces.isEmpty())
+			validateAndLoadSpectra(traces.stream().findFirst().get());
 	}
 }
