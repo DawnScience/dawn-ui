@@ -308,7 +308,7 @@ class DataReduction2DToolModel extends DataReduction2DToolObservableModel {
 			Date currentDate = new Date();
 			rootNode.addAttribute(TreeFactory.createAttribute("file_name", newFilePath));
 			rootNode.addAttribute(TreeFactory.createAttribute("file_time", dateFormatter.format(currentDate)));
-			rootNode.addAttribute(TreeFactory.createAttribute("producer", "DAWN - Time Resolved EDE Tool"));
+			rootNode.addAttribute(TreeFactory.createAttribute("producer", "DAWN - Data Reduction 2D Tool"));
 			rootNode.addAttribute(TreeFactory.createAttribute("default", "entry1"));
 
 			GroupNode entryNode = TreeFactory.createGroupNode(0);
@@ -341,7 +341,7 @@ class DataReduction2DToolModel extends DataReduction2DToolObservableModel {
 				dataNode.addDataNode(axisY.getName(), NexusTreeUtils.createDataNode(axisY.getName(), axisY.squeeze(), getDatasetUnitName(axisY)));
 			}
 			
-			dataNode.addDataNode("data", NexusTreeUtils.createDataNode("data", reducedData, getDatasetUnitName(reducedData)));
+			dataNode.addDataNode("data", NexusTreeUtils.createDataNode(reducedData.getName(), reducedData, getDatasetUnitName(reducedData)));
 	
 			file.addNode("/", rootNode);
 			file.addNode("/entry1", entryNode);
