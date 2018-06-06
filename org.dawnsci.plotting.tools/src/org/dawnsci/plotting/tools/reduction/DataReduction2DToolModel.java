@@ -12,7 +12,9 @@ import java.util.Map;
 
 import org.apache.commons.lang3.ObjectUtils;
 import org.dawnsci.plotting.tools.ServiceLoader;
+import org.eclipse.dawnsci.analysis.api.io.ILoaderService;
 import org.eclipse.dawnsci.analysis.api.tree.GroupNode;
+import org.eclipse.dawnsci.analysis.dataset.slicer.SliceFromSeriesMetadata;
 import org.eclipse.dawnsci.analysis.tree.TreeFactory;
 import org.eclipse.dawnsci.hdf5.nexus.NexusFileHDF5;
 import org.eclipse.dawnsci.nexus.NexusConstants;
@@ -291,9 +293,10 @@ class DataReduction2DToolModel extends DataReduction2DToolObservableModel {
 		Dataset rawData = DatasetUtils.convertToDataset(trace.getData());
 		DoubleDataset reducedData = null;
 	
-		AxesMetadata axesMetadata = trace.getData().getFirstMetadata(AxesMetadata.class);
-		ILazyDataset[] rawAxesX = axesMetadata.getAxis(0);
-		ILazyDataset[] rawAxesY = axesMetadata.getAxis(1);
+		AxesMetadata firstAxesMetadata = getFirstAxesMetadata(trace);
+		
+		ILazyDataset[] rawAxesX = firstAxesMetadata.getAxis(0);
+		ILazyDataset[] rawAxesY = firstAxesMetadata.getAxis(1);
 		
 		reducedData = applyRangesAndDeletionsToDataset(AxisMode.MEAN, rawData, rangeDataList, deletedIndices);
 		DoubleDataset[] reducedAxesX = getReducedAxes(rawAxesX, rangeDataList, deletedIndices); 
@@ -471,5 +474,24 @@ class DataReduction2DToolModel extends DataReduction2DToolObservableModel {
 
 	public List<String> getAxesNames() {
 		return axesNames;
-	} 
+	}
+	
+	public static AxesMetadata getFirstAxesMetadata(IImageTrace trace) {
+		AxesMetadata rv = null;
+	
+		SliceFromSeriesMetadata sliceMetadata = trace.getData().getFirstMetadata(SliceFromSeriesMetadata.class);
+		if (sliceMetadata != null) {
+			ILoaderService loaderService = ServiceLoader.getLoaderService();
+			try {
+				IDataset dataset = loaderService.getDataset(sliceMetadata.getFilePath(), sliceMetadata.getDatasetName(), null).getSlice(sliceMetadata.getSliceInfo().getSliceFromInput());
+				rv = dataset.getFirstMetadata(AxesMetadata.class);
+			} catch (Exception e) {
+				rv = trace.getData().getFirstMetadata(AxesMetadata.class);
+			}
+		} else {
+			rv = trace.getData().getFirstMetadata(AxesMetadata.class);
+		}
+		
+		return rv;
+	}
 }

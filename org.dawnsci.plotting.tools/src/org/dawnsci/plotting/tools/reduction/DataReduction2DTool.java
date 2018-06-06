@@ -321,8 +321,8 @@ public class DataReduction2DTool extends AbstractToolPage implements IRegionList
 		}
 		toolPageModel.setDataFile(fullFilePath == null ? null : new File(fullFilePath));
 		// image.getAxes is a bit weird and unreliable to work with
-		AxesMetadata firstAxesMetadata = image.getData().getFirstMetadata(AxesMetadata.class);
-		
+		AxesMetadata firstAxesMetadata = DataReduction2DToolModel.getFirstAxesMetadata(image);
+	
 		if (firstAxesMetadata != null) {
 			axes0 = getAllAxes(0, firstAxesMetadata);
 			axes1 = getAllAxes(1, firstAxesMetadata);
