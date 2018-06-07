@@ -60,7 +60,9 @@
 			</layout>
 		</encoder>
 	</appender>
-	
+
+	<if condition='isDefined("graylog.host")'>
+	<then>
 	<!-- This appender is using the GELF (http://docs.graylog.org/en/latest/pages/gelf.html) 
 		messaging format to send the messages to Graylog. The appender used here 
 		is from: https://github.com/Moocar/logback-gelf This definition was written 
@@ -69,7 +71,7 @@
 	<appender name="GrayLog" class="me.moocar.logbackgelf.GelfUDPAppender">
 		<!-- Graylog server details -->
 		<remoteHost>${graylog.host}</remoteHost>
-		<port>${graylog.port}</port>
+		<port>${graylog.port:-12201}</port>
 		<encoder class="me.moocar.logbackgelf.GZIPEncoder">
 			<layout class="me.moocar.logbackgelf.GelfLayout">
 				<shortMessageLayout class="ch.qos.logback.classic.PatternLayout">
@@ -96,13 +98,14 @@
 			</layout>
 		</encoder>
 
-
 		<!-- Filter out events below DEBUG level -->
 		<filter class="ch.qos.logback.classic.filter.ThresholdFilter">
 			<level>DEBUG</level>
 		</filter>
 
 	</appender>
+	</then>
+	</if>
 
 	<logger name="org.apache.commons" level="ERROR"/>
 	
