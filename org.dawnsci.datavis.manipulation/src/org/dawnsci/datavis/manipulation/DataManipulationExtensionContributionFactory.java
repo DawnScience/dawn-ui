@@ -13,6 +13,7 @@ import org.dawnsci.datavis.api.IRecentPlaces;
 import org.dawnsci.datavis.api.IXYData;
 import org.dawnsci.datavis.api.utils.DataPackageUtils;
 import org.dawnsci.datavis.api.utils.XYDataImpl;
+import org.dawnsci.datavis.model.FileControllerUtils;
 import org.dawnsci.datavis.model.IFileController;
 import org.eclipse.dawnsci.analysis.dataset.roi.ROISliceUtils;
 import org.eclipse.dawnsci.nexus.INexusFileFactory;
@@ -164,7 +165,7 @@ public class DataManipulationExtensionContributionFactory extends ExtensionContr
 						
 						if (success) {
 							IFileController fc = (IFileController)bundleContext.getService(bundleContext.getServiceReference(IFileController.class));
-							fc.loadFile(open);
+							FileControllerUtils.loadFile(fc,open);
 						}
 						
 					}
@@ -235,7 +236,7 @@ public class DataManipulationExtensionContributionFactory extends ExtensionContr
 						
 						if (!paths.isEmpty()) {
 							IFileController fc = (IFileController)bundleContext.getService(bundleContext.getServiceReference(IFileController.class));
-							fc.loadFiles(paths.toArray(new String[paths.size()]), null);
+							FileControllerUtils.loadFiles(fc,paths.toArray(new String[paths.size()]), null);
 						}
 						
 					}

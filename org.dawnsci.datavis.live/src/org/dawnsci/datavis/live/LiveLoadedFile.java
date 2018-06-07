@@ -46,6 +46,7 @@ public class LiveLoadedFile extends LoadedFile implements IRefreshable {
 	private boolean finished = false;
 	private String host;
 	private int port;
+	private boolean initialised;
 	
 	private static final Logger logger = LoggerFactory.getLogger(LiveLoadedFile.class);
 	
@@ -63,6 +64,12 @@ public class LiveLoadedFile extends LoadedFile implements IRefreshable {
 		Tree tree = getTree(path,host,port);
 		
 		if (tree == null) return dh;
+		
+		Map<String, NodeLink> symbolics = TreeUtils.treeBreadthFirstSearch(tree.getGroupNode(), n -> n.getDestination() instanceof SymbolicNode, true, null);
+		
+		if (!symbolics.isEmpty()) {
+			return dh;
+		}
 		
 		Map<String, NodeLink> result = findNodes(tree);
 		
@@ -296,6 +303,8 @@ public class LiveLoadedFile extends LoadedFile implements IRefreshable {
 				dataOptions.put(d.getName(),d);
 			}
 		}
+		
+		updateDataOptions();
 	}
 	
 	private void addNonStringDataset(ILazyDataset lazyDataset, String name){
@@ -318,8 +327,7 @@ public class LiveLoadedFile extends LoadedFile implements IRefreshable {
 		
 		if (shape.length == 0 || allOnes(shape)) return;
 		
-		if (lazyDataset != null && ((LazyDatasetBase)lazyDataset).getDType() != Dataset.STRING) {
-			
+		if (((LazyDatasetBase)lazyDataset).getDType() != Dataset.STRING) {
 			DataOptions d = new DataOptions(name, this);
 			dataOptions.put(d.getName(),d);
 		}
@@ -362,18 +370,18 @@ public class LiveLoadedFile extends LoadedFile implements IRefreshable {
 	}
 
 	@Override
-	public IRefreshable refresh() {
-		if (!live) return this;
+	public void refresh() {
+		if (!live) return;
 		
 		if (finished) {
 			locallyReload();
-			return this;
+			return;
 		}
 		
 		if (dataHolder.get().getList().isEmpty()){
 			String path = dataHolder.get().getFilePath();
 			dataHolder.set(createDataHolder(path, host, port));
-			if (dataHolder.get().getList().isEmpty()) return this;
+			if (dataHolder.get().getList().isEmpty()) return;
 		}
 		
 		
@@ -385,12 +393,12 @@ public class LiveLoadedFile extends LoadedFile implements IRefreshable {
 			}
 			
 			if (!dataOptions.isEmpty()) {
-				return this;
+				return;
 			}
 			
 			updateDataHolder();
 			
-			return this;
+			return;
 		} else {
 			updateDataHolder();
 		}
@@ -398,7 +406,7 @@ public class LiveLoadedFile extends LoadedFile implements IRefreshable {
 		refreshAllDatasets();
 		updateDataOptions();
 		
-		return this;
+		return;
 	}
 
 	@Override
@@ -453,13 +461,19 @@ public class LiveLoadedFile extends LoadedFile implements IRefreshable {
 	}
 
 	@Override
-	public boolean hasFinished() {
-		return finished;
+	public boolean isEmpty() {
+		return dataOptions.isEmpty();
 	}
 
 	@Override
-	public boolean isEmpty() {
-		return dataOptions.isEmpty();
+	public boolean isInitialised() {
+		return initialised;
+	}
+
+	@Override
+	public void setInitialised() {
+		initialised = true;
+		
 	}
 	
 }

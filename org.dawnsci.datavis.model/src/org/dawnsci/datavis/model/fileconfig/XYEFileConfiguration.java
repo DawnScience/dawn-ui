@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.dawnsci.datavis.model.DataOptions;
-import org.dawnsci.datavis.model.DataStateObject;
 import org.dawnsci.datavis.model.LoadedFile;
 
 public class XYEFileConfiguration implements ILoadedFileConfiguration {
@@ -34,7 +33,7 @@ public class XYEFileConfiguration implements ILoadedFileConfiguration {
 	}
 	
 	@Override
-	public void setCurrentState(List<DataStateObject> state) {
+	public void setCurrentState(List<DataOptions> state) {
 		//doesn't need state
 	}
 

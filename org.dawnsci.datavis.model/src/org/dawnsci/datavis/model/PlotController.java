@@ -29,6 +29,7 @@ import org.eclipse.dawnsci.plotting.api.trace.ILineTrace;
 import org.eclipse.dawnsci.plotting.api.trace.IPaletteTrace;
 import org.eclipse.dawnsci.plotting.api.trace.ITrace;
 import org.eclipse.january.dataset.IDataset;
+import org.eclipse.january.dataset.IDynamicDataset;
 import org.eclipse.january.dataset.ILazyDataset;
 import org.eclipse.january.dataset.ShapeUtils;
 import org.eclipse.january.dataset.SliceND;
@@ -65,7 +66,7 @@ import org.slf4j.LoggerFactory;
  * 
  * @author jacobfilik
  */
-public class PlotController implements IPlotController {
+public class PlotController implements IPlotController, ILoadedFileInitialiser {
 	
 	private static final Logger logger = LoggerFactory.getLogger(PlotController.class);
 	
@@ -168,7 +169,6 @@ public class PlotController implements IPlotController {
 	private ITraceColourProvider colorProvider;
 	private List<Color> colorcache = null;
 	
-	private ISliceChangeListener sliceListener;
 	private FileControllerStateEventListener fileStateListener;
 	
 	private Set<PlotModeChangeEventListener> listeners = new HashSet<>();
@@ -179,10 +179,10 @@ public class PlotController implements IPlotController {
 	
 	private static final String ID = "org.dawnsci.prototype.nano.model.PlotManager";
 	
-	
-	public PlotController (IPlottingSystem<?> system, IFileController controller) {
+	public PlotController (IPlottingSystem<?> system, IFileController controller, ExecutorService exService) {
 		this.system = system;
 		this.fileController = controller;
+		this.executor = exService;
 		init();
 	}
 	
@@ -192,78 +192,52 @@ public class PlotController implements IPlotController {
 	
 	public void init(){
 		
-		if (executor != null) return;
+		if (fileStateListener != null) return;
 		
-		executor = Executors.newSingleThreadExecutor();
+		if (executor == null) executor = Executors.newSingleThreadExecutor();
 		
 		fileStateListener  = new FileControllerStateEventListener() {
 
 			@Override
 			public void stateChanged(FileControllerStateEvent event) {
 				if (!event.isSelectedDataChanged() && !event.isSelectedFileChanged()) return;
-				updateOnFileStateChange();	
+				updateOnFileStateChange(event.getLoadedFile(),event.getOption());	
 			}
+
+			@Override
+			public void liveUpdate() {
+				// TODO Auto-generated method stub
+				
+			}
+			
+			
 		};
 		
 		fileController.addStateListener(fileStateListener);
-		
-		sliceListener = new ISliceChangeListener() {
-
-			@Override
-			public void sliceChanged(SliceChangeEvent event) {
-				//respond to this happening elsewhere
-				if (event.isOptionsChanged()) return;
-				if (!fileController.getCurrentFile().isSelected()) return;
-				if (!fileController.getCurrentDataOption().isSelected()) return;
-				final List<DataStateObject> state =fileController.getImmutableFileState();
-				
-				updatePlotStateInJob(state, currentMode);	
-			};
-		};
+		fileController.setFileInitialiser(this);
 	}
 	
-	private void updateOnFileStateChange() {
+	private void updateOnFileStateChange(LoadedFile f, DataOptions d) {
 		IPlottingSystem<?> system = getPlottingSystem();
 		if (system == null) return;
+		//TODO UPDATE FILE STATE
 		
-		DataOptions dOption = fileController.getCurrentDataOption();
-		LoadedFile file = fileController.getCurrentFile();
-		if (dOption == null) { 
-			final List<DataStateObject> state = fileController.getImmutableFileState();
-			updatePlotStateInJob(state, currentMode);
-			return;
-		}
-		
-		boolean selected = file.isSelected() && dOption.isSelected();
-		
-		PlottableObject plotObject = dOption.getPlottableObject();
-		IPlotMode localMode = currentMode;
-		
-		if (plotObject != null && plotObject.getPlotMode() != currentMode && selected) {
-			currentMode = plotObject.getPlotMode();
+		if (d != null && d.isSelected()) {
+			IPlotMode localMode = currentMode;
+			currentMode = d.getPlottableObject().getPlotMode();
 			if (currentMode != localMode) {
 				system.reset();
 				if (system.getSelectedXAxis() != null) system.getSelectedXAxis().setTitle("");
 				if (system.getSelectedYAxis() != null) system.getSelectedYAxis().setTitle("");
 				system.setTitle("");
+				for (PlotModeChangeEventListener l : listeners) l.plotModeChanged();
 			}
-			localMode = currentMode;
-		} else if (plotObject == null) {
-			plotObject = getPlottableObject();
-			if (selected) {
-				currentMode = plotObject.getPlotMode();
-				if (currentMode != localMode) {
-					system.setTitle("");
-				}
-			}
-			localMode = plotObject.getPlotMode();
 		}
-		dOption.getPlottableObject().getNDimensions().addSliceListener(sliceListener);
-		//update file state
-		if (selected) updateFileState(file, dOption, currentMode);
-		firePlotModeListeners(localMode, getCurrentPlotModes());
+		
+		if (d != null) updateFileState(d, currentMode);
+		
 		//make immutable state object
-		final List<DataStateObject> state = fileController.getImmutableFileState();
+		final List<DataOptions> state = fileController.getImmutableFileState();
 		//update plot
 		
 		if (state.isEmpty()) {
@@ -276,7 +250,7 @@ public class PlotController implements IPlotController {
 		
 	}
 	
-	private void updatePlotState(List<DataStateObject> state, IPlotMode mode) {
+	private void updatePlotState(List<DataOptions> state, IPlotMode mode) {
 
 		Display.getDefault().syncExec(new Runnable() {
 			
@@ -334,7 +308,7 @@ public class PlotController implements IPlotController {
 			uiRunnables.add(r);
 		}
 		
-		for (DataStateObject object : state) {
+		for (DataOptions object : state) {
 				uiRunnables.add(updatePlottedData(object, new ArrayList<ITrace>(), localCurrentMode, localModifier));
 		}
 		
@@ -404,13 +378,13 @@ public class PlotController implements IPlotController {
 		if (eventAdmin != null) eventAdmin.postEvent(new Event("org/dawnsci/datavis/plot/UPDATE", props));
 	}
 	
-	private Runnable updatePlottedData(DataStateObject stateObject,final List<ITrace> traces, IPlotMode mode, IPlotDataModifier modifier) {
+	private Runnable updatePlottedData(DataOptions dataOp,final List<ITrace> traces, IPlotMode mode, IPlotDataModifier modifier) {
 		//remove traces if not the same as mode
 		//update the data in the plot
 		
 		IPlottingSystem<?> system = getPlottingSystem();
 		
-		PlottableObject plotObject = stateObject.getPlotObject();
+		PlottableObject plotObject = dataOp.getPlottableObject();
 		
 		NDimensions nd = plotObject.getNDimensions();
 		
@@ -419,7 +393,6 @@ public class PlotController implements IPlotController {
 		SliceND slice= nd.buildSliceND();
 		Object[] options = nd.getOptions();
 		
-		DataOptions dataOp = stateObject.getOption();
 		dataOp.setAxes(axes);
 		
 		IDataset[] data = null;
@@ -452,7 +425,9 @@ public class PlotController implements IPlotController {
 		}
 	
 		
-		if (data == null) return null;
+		if (data == null) {
+			return null;
+		}
 		
 		SourceInformation si = new SourceInformation(dataOp.getFilePath(), dataOp.getName(), dataOp.getLazyDataset());
 		SliceInformation s = new SliceInformation(slice, slice, new SliceND(dataOp.getLazyDataset().getShape()), mode.getDataDimensions(options), 1, 0);
@@ -482,8 +457,8 @@ public class PlotController implements IPlotController {
 	}
 	
 	
-	public IPlotMode[] getCurrentPlotModes() {
-		Integer rank = getDataRank();
+	public IPlotMode[] getPlotModes(DataOptions dOptions) {
+		Integer rank = getDataRank(dOptions);
 		if (rank == null) return null;
 
 		return getPlotModes(rank);
@@ -494,10 +469,10 @@ public class PlotController implements IPlotController {
 		return getPlotModifiers(minimumRank);
 	}
 	
-	private Integer getDataRank() {
-		if (fileController.getCurrentDataOption() == null) return null;
+	private Integer getDataRank(DataOptions dOptions) {
+		if (dOptions == null) return null;
 		
-		int[] shape = fileController.getCurrentDataOption().getLazyDataset().getShape();
+		int[] shape = dOptions.getLazyDataset().getShape();
 		shape = ShapeUtils.squeezeShape(shape, false);
 		return shape.length;
 	}
@@ -534,14 +509,13 @@ public class PlotController implements IPlotController {
 	public void enablePlotModifier(IPlotDataModifier modifier) {
 		if (modifier == currentModifier) return;
 		if (modifier != null) modifier.configure(getPlottingSystem());
-//		System.out.println("enabled " + modifier.getName());
 		currentModifier = modifier;
 		forceReplot();
 	}
 	
 	@Override
 	public void forceReplot() {
-		final List<DataStateObject> state = fileController.getImmutableFileState();
+		final List<DataOptions> state = fileController.getImmutableFileState();
 		//update plot
 		updatePlotStateInJob(state, currentMode);
 	}
@@ -550,31 +524,28 @@ public class PlotController implements IPlotController {
 		return currentModifier;
 	}
 	
-	public void switchPlotMode(IPlotMode mode) {
+	public void switchPlotMode(IPlotMode mode, DataOptions dOption) {
 		if (mode == currentMode) return;
-		
-		DataOptions dOption = fileController.getCurrentDataOption();
-		
-		boolean selected =  dOption.isSelected() && fileController.getCurrentDataOption().isSelected();
-		if (!selected) return;
 		
 		getPlottingSystem().reset();
 		getPlottingSystem().setTitle("");
 		
 		currentMode = mode;
-		PlottableObject po = getPlottableObject();
+		PlottableObject po = dOption.getPlottableObject();
 		NDimensions nd = po.getNDimensions();
 		nd.setOptions(currentMode.getOptions());
 		
 		dOption.setPlottableObject(new PlottableObject(currentMode, nd));
 		
-		updateFileState(fileController.getCurrentFile(), fileController.getCurrentDataOption(),currentMode);
-		final List<DataStateObject> state = fileController.getImmutableFileState();
+		updateFileState(dOption,currentMode);
+		final List<DataOptions> state = fileController.getImmutableFileState();
 		//update plot
 		updatePlotStateInJob(state, currentMode);
+		
+		for (PlotModeChangeEventListener l : listeners) l.plotModeChanged();
 	}
 	
-	private void updatePlotStateInJob(List<DataStateObject> state, IPlotMode mode){
+	private void updatePlotStateInJob(List<DataOptions> state, IPlotMode mode){
 		
 		Runnable r = new Runnable() {
 			
@@ -603,38 +574,34 @@ public class PlotController implements IPlotController {
 		}));
 	}
 	
-	private void updateFileState(LoadedFile file, DataOptions option, IPlotMode mode) {
+	private void updateFileState(DataOptions option, IPlotMode mode) {
 		
-		List<IDataObject> objects = new ArrayList<>();
-		
-		for (LoadedFile f : fileController.getLoadedFiles()) {
-			if (!f.isSelected()) continue;
+		IFileStateValidator v = new IFileStateValidator() {
 			
-			boolean thisFile = f == file;
-			
-			for (DataOptions o : f.getDataOptions()) {
-				if (!o.isSelected()) continue;
-				if (option == o) continue;
-				if (o.getPlottableObject() == null) {
-					PlottableObject po = getPlottableObject(o,mode);
-					if (po == null) {
-						f.setSelected(false); //cant plot in this mode
-						continue;
-					} else {
-						o.setPlottableObject(po);
-					}
-				}
-				if (!mode.supportsMultiple() || o.getPlottableObject().getPlotMode() != mode) {
-					if (thisFile) {
-						objects.add(o);
-					} else {
-						objects.add(f);
-					}
-				}
-			}	
-		}
+			@Override
+			public boolean validate(LoadedFile f) {
+				
+					if (!f.isSelected()) return true;			
+					boolean thisFile = f == option.getParent();			
+					for (DataOptions o : f.getDataOptions()) {
+						if (!o.isSelected()) continue;
+						if (option.getName().equals(o.getName()) && option.getFilePath().equals(o.getFilePath())) continue;
+						if (!mode.supportsMultiple() || o.getPlottableObject().getPlotMode() != mode) {
+							if (thisFile) {
+								o.setSelected(false);
+							} else {
+								f.setSelected(false);
+							}
+						}
+					}	
+				
+				return false;
+			}
+		};
 		
-		if (!objects.isEmpty()) fileController.deselect(objects);
+		fileController.validateState(v);
+		
+
 	}
 	
 	private IPlottingSystem<?> getPlottingSystem() {
@@ -644,46 +611,24 @@ public class PlotController implements IPlotController {
 		return system;
 	}
 	
-	private void firePlotModeListeners(IPlotMode mode, IPlotMode[] modes) {
-		PlotModeEvent e = new PlotModeEvent(this, mode, modes);
-		for (PlotModeChangeEventListener l : listeners) l.plotModeChanged(e);
-	}
-	
-	public void addPlotModeListener(PlotModeChangeEventListener l) {
-		listeners.add(l);
-	}
-	
-	public void removePlotModeListener(PlotModeChangeEventListener l) {
-		listeners.remove(l);
-	}
-	
 
 	public IPlotMode getCurrentMode() {
 		return currentMode;
 	}
 	
-	public PlottableObject getPlottableObject(){
-		DataOptions dataOptions = fileController.getCurrentDataOption();
-		if (dataOptions == null) return null;
-		if (dataOptions.getPlottableObject() != null) return dataOptions.getPlottableObject();
-		
-		NDimensions nd = dataOptions.buildNDimensions();
-		int[] shape = ShapeUtils.squeezeShape(dataOptions.getLazyDataset().getShape(), false);
-		int rank = shape.length;
-		IPlotMode defaultMode = getDefaultMode(rank);
-		nd.setOptions(defaultMode.getOptions());
-		
-		PlottableObject po = new PlottableObject(defaultMode, nd);
-		dataOptions.setPlottableObject(po);
-		
-		return po;
-		
-	}
-	
 	private PlottableObject getPlottableObject(DataOptions d, IPlotMode mode) {
 		
 		NDimensions nd = d.buildNDimensions();
-		int[] shape = ShapeUtils.squeezeShape(d.getLazyDataset().getShape(), false);
+		
+		int[] shape = d.getLazyDataset().getShape();
+		int[] max = shape;
+		if (d.getLazyDataset() instanceof IDynamicDataset) {
+			max = ((IDynamicDataset)d.getLazyDataset()).getMaxShape();
+		}
+		if (!(shape.length == 1 && shape [0] == 1 && max[0] != 1)) {
+			shape = ShapeUtils.squeezeShape(shape, false);
+		} 
+		
 		int rank = shape.length;
 		if (mode == null) {
 			IPlotMode defaultMode = getDefaultMode(rank);
@@ -719,6 +664,7 @@ public class PlotController implements IPlotController {
 
 	@Override
 	public void dispose() {
+		system.dispose();
 		system = null;
 	}
 
@@ -738,8 +684,31 @@ public class PlotController implements IPlotController {
 			system.clearTraces();
 		}
 		
-		final List<DataStateObject> state = fileController.getImmutableFileState();
+		final List<DataOptions> state = fileController.getImmutableFileState();
 		//update plot
 		updatePlotStateInJob(state, currentMode);
+	}
+
+	@Override
+	public void initialise(LoadedFile file) {
+		List<DataOptions> dataOptions = file.getDataOptions(false);
+		
+		for (DataOptions d : dataOptions) {
+			PlottableObject po = d.getPlottableObject();
+			if (po == null) {
+				po = getPlottableObject(d, getDefaultMode(d.getLazyDataset().getRank()));
+				d.setPlottableObject(po);
+			}
+		}
+	}
+	
+	@Override
+	public void addPlotModeListener(PlotModeChangeEventListener l) {
+		listeners.add(l);
+	}
+	
+	@Override
+	public void removePlotModeListener(PlotModeChangeEventListener l) {
+		listeners.remove(l);
 	}
 }

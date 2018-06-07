@@ -1,19 +1,19 @@
 package org.dawnsci.datavis.model;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 public class LoadedFiles implements IDataObject, Iterable<LoadedFile> {
 
-	private List<LoadedFile> fileList;
+	private final List<LoadedFile> fileList;
 	private Comparator<LoadedFile> comparator;
 
 	public LoadedFiles() {
-		fileList = Collections.synchronizedList(new ArrayList<LoadedFile>());
+		fileList = new CopyOnWriteArrayList<>();
 	}
 
 	public void addFile(LoadedFile f) {
@@ -25,7 +25,7 @@ public class LoadedFiles implements IDataObject, Iterable<LoadedFile> {
 	}
 
 	public List<LoadedFile> getLoadedFiles() {
-		List<LoadedFile> arrayList = new ArrayList<LoadedFile>(fileList);
+		List<LoadedFile> arrayList = new ArrayList<>(fileList);
 		if (comparator != null) {
 			arrayList.sort(comparator);
 		}

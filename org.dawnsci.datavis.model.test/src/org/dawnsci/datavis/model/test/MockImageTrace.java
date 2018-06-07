@@ -1,5 +1,7 @@
 package org.dawnsci.datavis.model.test;
 
+import static org.hamcrest.CoreMatchers.instanceOf;
+
 import java.util.List;
 
 import org.eclipse.dawnsci.analysis.api.roi.IROI;
@@ -20,6 +22,7 @@ public class MockImageTrace implements IImageTrace {
 	String name;
 	private Object userObject;
 	private ImageServiceBean bean = new ImageServiceBean();
+	private IDataset data;
 	
 	public MockImageTrace(String name) {
 		this.name = name;
@@ -170,8 +173,7 @@ public class MockImageTrace implements IImageTrace {
 
 	@Override
 	public IDataset getData() {
-		// TODO Auto-generated method stub
-		return null;
+		return data;
 	}
 
 	@Override
@@ -295,7 +297,9 @@ public class MockImageTrace implements IImageTrace {
 
 	@Override
 	public boolean setData(ILazyDataset image, List<? extends IDataset> axes, boolean performAutoScale) {
-		// TODO Auto-generated method stub
+		if (image instanceof IDataset) {
+			data = (IDataset) image;
+		}
 		return false;
 	}
 

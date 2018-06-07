@@ -6,7 +6,6 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -199,29 +198,12 @@ public class LoadedFileMenuListener implements IMenuListener {
 			List<LoadedFile> deselected = getFileSelection();
 			if (deselected.isEmpty()) return;
 
-			LoadedFile unselected = null;
+			file.unloadFiles(deselected);
+			
 			List<LoadedFile> files = file.getLoadedFiles();
 
-			if (deselected.size() < files.size()) {
-				files = new LinkedList<>(files);
-				LoadedFile selected = file.getCurrentFile();
-				for (LoadedFile f : deselected) {
-					if (f != selected) {
-						files.remove(f);
-					}
-				}
-				int n = files.size(); // number of files left + selected
-				int i = files.indexOf(selected) + 1;
-				if (i < n) { // unselected
-					unselected = files.get(i);
-				} else {
-					unselected = files.get(i - 2);
-				}
-			}
-			file.unloadFiles(deselected);
-
-			if (unselected != null) {
-				viewer.setSelection(new StructuredSelection(unselected), true);
+			if (!files.isEmpty()) {
+				viewer.setSelection(new StructuredSelection(files.get(0)), true);
 			}
 			view.refresh();
 		}

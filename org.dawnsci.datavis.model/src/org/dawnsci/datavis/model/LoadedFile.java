@@ -36,10 +36,13 @@ import org.slf4j.LoggerFactory;
 
 import uk.ac.diamond.scisoft.analysis.io.NexusTreeUtils;
 
-
+/**
+ * Class to represent a data file loaded in the IFileController
+ *
+ */
 public class LoadedFile implements IDataObject, IDataFilePackage {
 
-	private final static Logger logger = LoggerFactory.getLogger(LoadedFile.class);
+	private static final Logger logger = LoggerFactory.getLogger(LoadedFile.class);
 	
 	protected AtomicReference<IDataHolder> dataHolder;
 	protected Map<String,DataOptions> dataOptions;
@@ -51,7 +54,7 @@ public class LoadedFile implements IDataObject, IDataFilePackage {
 	private String label = "";
 
 	public LoadedFile(IDataHolder dataHolder) {
-		this.dataHolder = new AtomicReference<IDataHolder>(dataHolder.clone());
+		this.dataHolder = new AtomicReference<>(dataHolder.clone());
 		this.signals = new LinkedHashSet<>();
 		dataOptions = new LinkedHashMap<>();
 		possibleLabels = new TreeMap<>();
@@ -65,7 +68,6 @@ public class LoadedFile implements IDataObject, IDataFilePackage {
 				for (String v : values) {
 					names[count++] = Tree.ROOT + v;
 				}
-//				names = values.toArray(new String[values.size()]);
 			} catch ( Exception e) {
 				logger.error("Could not get unique nodes",e);
 				this.signals = new HashSet<>();

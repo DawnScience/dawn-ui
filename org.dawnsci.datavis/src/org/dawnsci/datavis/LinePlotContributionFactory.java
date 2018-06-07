@@ -29,45 +29,36 @@ public class LinePlotContributionFactory extends ExtensionContributionFactory {
 		
 		final IPlotController plotController = bundleContext.getService(bundleContext.getServiceReference(IPlotController.class));
 		
-		menu.addMenuListener(new IMenuListener() {
+		menu.addMenuListener( manager -> {
 
-			@Override
-			public void menuAboutToShow(IMenuManager manager) {
-				menu.removeAll();
+			menu.removeAll();
 
-				PlotModeXY xy = null;
-				if (plotController instanceof PlotController) {
-					PlotController pc = (PlotController)plotController;
-					IPlotMode[] plotModes = pc.getPlotModes(1);
-					
-					
-					for (IPlotMode m : plotModes) {
-						if (m instanceof PlotModeXY) {
-							xy = (PlotModeXY)m;
-							break;
-						}
+			PlotModeXY xy = null;
+
+			IPlotMode[] plotModes = plotController.getPlotModes(1);
+
+			for (IPlotMode m : plotModes) {
+				if (m instanceof PlotModeXY) {
+					xy = (PlotModeXY)m;
+					break;
+				}
+			}
+
+			if (xy != null) {
+
+				final PlotModeXY finalXY = xy;
+
+				Action a = new Action("Show Error Bars"){
+					@Override
+					public void run() {
+						finalXY.setErrorBarEnabled(!finalXY.isErrorBarEnabled());
+						plotController.forceReplot();
 					}
-					
-				}
-				
-				if (xy != null) {
-					
-					final PlotModeXY finalXY = xy;
-					
-					Action a = new Action("Show Error Bars"){
-						@Override
-						public void run() {
-							finalXY.setErrorBarEnabled(!finalXY.isErrorBarEnabled());
-							plotController.forceReplot();
-						}
-					};
+				};
 
-					a.setChecked(xy.isErrorBarEnabled());
+				a.setChecked(xy.isErrorBarEnabled());
 
-					menu.add(a);
-				}
-				
-				
+				menu.add(a);
 			}
 		});
 
@@ -75,7 +66,7 @@ public class LinePlotContributionFactory extends ExtensionContributionFactory {
 
 			@Override
 			public void run() {
-
+				//do nothing
 			}
 		});
 

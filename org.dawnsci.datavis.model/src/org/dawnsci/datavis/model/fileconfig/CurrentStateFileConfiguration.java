@@ -7,7 +7,6 @@ import java.util.Optional;
 
 import org.dawnsci.datavis.api.IPlotMode;
 import org.dawnsci.datavis.model.DataOptions;
-import org.dawnsci.datavis.model.DataStateObject;
 import org.dawnsci.datavis.model.LoadedFile;
 import org.dawnsci.datavis.model.NDimensions;
 import org.dawnsci.datavis.model.PlottableObject;
@@ -15,7 +14,7 @@ import org.eclipse.january.dataset.Slice;
 
 public class CurrentStateFileConfiguration implements ILoadedFileConfiguration {
 
-	private List<DataStateObject> state;
+	private List<DataOptions> state;
 	
 	@Override
 	public boolean configure(LoadedFile f) {
@@ -25,12 +24,12 @@ public class CurrentStateFileConfiguration implements ILoadedFileConfiguration {
 		
 		boolean found = false;
 		
-		for (DataStateObject o : state) {
-			if (o.isChecked() && o.getPlotObject() != null && dataShapes.containsKey(o.getOption().getName())) {
-				PlottableObject plotObject = o.getPlotObject();
-				DataOptions dataOption = f.getDataOption(o.getOption().getName());
+		for (DataOptions o : state) {
+			if (o.isSelected() && o.getPlottableObject() != null && dataShapes.containsKey(o.getName())) {
+				PlottableObject plotObject = o.getPlottableObject();
+				DataOptions dataOption = f.getDataOption(o.getName());
 				if (plotObject.getNDimensions() == null) continue;
-				if (dataShapes.get(o.getOption().getName()).length == plotObject.getNDimensions().getRank()) {
+				if (dataShapes.get(o.getName()).length == plotObject.getNDimensions().getRank()) {
 					NDimensions nDimensions = plotObject.getNDimensions();
 					IPlotMode plotMode = plotObject.getPlotMode();
 					NDimensions newND = dataOption.buildNDimensions();
@@ -66,7 +65,7 @@ public class CurrentStateFileConfiguration implements ILoadedFileConfiguration {
 	}
 
 	@Override
-	public void setCurrentState(List<DataStateObject> state) {
+	public void setCurrentState(List<DataOptions> state) {
 		this.state = state;
 	}
 

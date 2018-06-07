@@ -8,6 +8,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
 import org.dawnsci.datavis.api.IRecentPlaces;
@@ -19,7 +20,6 @@ import org.dawnsci.datavis.model.fileconfig.XYEFileConfiguration;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.dawnsci.analysis.api.io.ILoaderService;
 import org.eclipse.jface.operation.IRunnableWithProgress;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.progress.IProgressService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,28 +39,22 @@ public class FileController implements IFileController {
 	
 	private Map<String, LoadedFiles> allLoadedFiles;
 	private LoadedFiles loadedFiles;
-	private LoadedFile currentFile;
-	private DataOptions currentData;
 	private ILiveFileListener listener;
-	
-	private boolean onlySignals = false;
-
+	private AtomicBoolean onlySignals = new AtomicBoolean(false);
 	private String labelName;
 	
 	private ILoadedFileConfiguration[] fileConfigs = new ILoadedFileConfiguration[]{new CurrentStateFileConfiguration(), new NexusFileConfiguration(), new ImageFileConfiguration(), new XYEFileConfiguration()};
-	
-//	private Map<String, Set<FileControllerStateEventListener>> allListeners;
 	private Set<FileControllerStateEventListener> listeners;
-	
-	private static final Logger logger = LoggerFactory.getLogger(FileController.class);
 
 	private String currentId;
+	private ILoadedFileInitialiser fileInitialiser;
+	
+	private static final Logger logger = LoggerFactory.getLogger(FileController.class);
 
 	public FileController(){
 		allLoadedFiles = new HashMap<>();
 		loadedFiles = new LoadedFiles();
 		listeners = new HashSet<>();
-//		allListeners = new HashMap<>();
 	};
 
 	@Override
@@ -75,15 +69,6 @@ public class FileController implements IFileController {
 		}
 		loadedFiles = allLoadedFiles.get(id);
 
-//		if (allListeners.isEmpty()) { // reuse default as first ID to avoid an NPE
-//			allListeners.put(id, listeners);
-//		} else if (!allListeners.containsKey(id)) {
-//			allListeners.put(id, new HashSet<>());
-//		}
-//		listeners = allListeners.get(id);
-
-		currentFile = null;
-		currentData = null;
 		currentId = id;
 	}
 
@@ -93,19 +78,11 @@ public class FileController implements IFileController {
 	}
 	
 	/* (non-Javadoc)
-	 * @see org.dawnsci.datavis.model.IFileController#loadFiles(java.lang.String[], org.eclipse.ui.progress.IProgressService)
-	 */
-	@Override
-	public List<String> loadFiles(String[] paths, IProgressService progressService) {
-		return loadFiles(paths, progressService, true);
-	}
-	
-	/* (non-Javadoc)
 	 * @see org.dawnsci.datavis.model.IFileController#loadFiles(java.lang.String[], org.eclipse.ui.progress.IProgressService, boolean)
 	 */
 	public List<String> loadFiles(String[] paths, IProgressService progressService, boolean addToRecentPlaces) {
 		
-		FileLoadingRunnable runnable = new FileLoadingRunnable(loadedFiles, listeners, paths);
+		FileLoadingRunnable runnable = new FileLoadingRunnable(loadedFiles, listeners, paths, fileInitialiser);
 		
 		if (progressService == null) {
 			runnable.run(null, addToRecentPlaces);
@@ -119,15 +96,6 @@ public class FileController implements IFileController {
 		
 		List<String> failed = runnable.getFailedLoadingFiles();
 		return failed;
-	}
-	
-	
-	/* (non-Javadoc)
-	 * @see org.dawnsci.datavis.model.IFileController#loadFile(java.lang.String)
-	 */
-	@Override
-	public boolean loadFile(String path) {
-		return loadFiles(new String[]{path}, null).isEmpty();
 	}
 	
 	public void attachLive() {
@@ -162,6 +130,8 @@ public class FileController implements IFileController {
 	@Override
 	public void deselect(List<IDataObject> objects) {
 		
+		if (objects.isEmpty()) return;
+		
 		for (IDataObject o : objects) {
 			if (o instanceof DataOptions) {
 				((DataOptions)o).setSelected(false);
@@ -170,7 +140,7 @@ public class FileController implements IFileController {
 			}
 		}
 		
-		fireStateChangeListeners(false,false);
+		fireStateChangeListeners(false,false,null,null);
 	}
 	
 	
@@ -179,8 +149,9 @@ public class FileController implements IFileController {
 	 */
 	@Override
 	public void selectFiles(List<LoadedFile> files, boolean selected) {
+		if (files.isEmpty())return;
 		for (LoadedFile file : files) file.setSelected(selected);
-		fireStateChangeListeners(true,true);
+		fireStateChangeListeners(true,true, files.get(0),null);
 		
 	}
 	
@@ -188,76 +159,39 @@ public class FileController implements IFileController {
 	 * @see org.dawnsci.datavis.model.IFileController#setCurrentFile(org.dawnsci.datavis.model.LoadedFile, boolean)
 	 */
 	@Override
-	public void setCurrentFile(LoadedFile file, boolean selected) {
-		if (file == currentFile && selected == currentFile.isSelected()) return;
-		currentFile = file;
-		if (currentFile == null) {
-			currentData = null;
-			return;
-		}
-		
-		
+	public void setFileSelected(LoadedFile file, boolean selected) {
 		file.setSelected(selected);
-		
-		DataOptions option = null;
-		
-		for (DataOptions op : file.getDataOptions()) {
-			if (op.isSelected()) {
-				option = op;
-				break;
-			}
-		}
-		
-		if (option == null && file.getDataOptions().size() != 0) {
-			option = file.getDataOptions().get(0);
-		}
-		
-		setCurrentDataOnFileChange(option);
-		
+		fireStateChangeListeners(true,true,file,getFirstSelectedOption(file));
 	}
 	
-	private void setCurrentDataOnFileChange(DataOptions data) {
-		currentData = data;
-		fireStateChangeListeners(true,true);
+	private DataOptions getFirstSelectedOption(LoadedFile f) {
+		DataOptions out = null;
+		List<DataOptions> dd = f.getDataOptions();
+		
+		for (DataOptions d : dd) {
+			if (d.isSelected())return d;
+		}
+		
+		return out;
 	}
+	
 	
 	/* (non-Javadoc)
 	 * @see org.dawnsci.datavis.model.IFileController#setCurrentData(org.dawnsci.datavis.model.DataOptions, boolean)
 	 */
 	@Override
-	public void setCurrentData(DataOptions data, boolean selected) {
-		if (currentData == data && data.isSelected() == selected) return;
-		currentData = data;
+	public void setDataSelected(DataOptions data, boolean selected) {
 		data.setSelected(selected);
-		fireStateChangeListeners(false,true);
+		fireStateChangeListeners(false,true, data.getParent(),data);
 	}
 	
-	/* (non-Javadoc)
-	 * @see org.dawnsci.datavis.model.IFileController#getCurrentDataOption()
-	 */
-	@Override
-	public DataOptions getCurrentDataOption() {
-		return currentData;
-	}
 
 	@Override
 	public void moveBefore(List<LoadedFile> files, LoadedFile marker) {
 		loadedFiles.moveBefore(files, marker);
-		fireStateChangeListeners(true, true);
+		fireStateChangeListeners(true, true,null,null);
 	}
 	
-	/* (non-Javadoc)
-	 * @see org.dawnsci.datavis.model.IFileController#unloadFile(org.dawnsci.datavis.model.LoadedFile)
-	 */
-	@Override
-	public void unloadFile(LoadedFile file){
-		loadedFiles.unloadFile(file);
-		if (currentFile == file)  {
-			currentFile = null;
-			currentData = null;
-		}
-		fireStateChangeListeners(true, true);
-	}
 	
 	/* (non-Javadoc)
 	 * @see org.dawnsci.datavis.model.IFileController#unloadFiles(java.util.List)
@@ -265,24 +199,15 @@ public class FileController implements IFileController {
 	@Override
 	public void unloadFiles(List<LoadedFile> files){
 		
+		if (files.isEmpty()) return;
+		
 		for (LoadedFile file : files){
 
 			loadedFiles.unloadFile(file);
-		if (currentFile == file)  {
-			currentFile = null;
-			currentData = null;
-		}
 	}
-		fireStateChangeListeners(true, true);
+		fireStateChangeListeners(true, true, files.get(0),null);
 	}
 	
-	/* (non-Javadoc)
-	 * @see org.dawnsci.datavis.model.IFileController#getCurrentFile()
-	 */
-	@Override
-	public LoadedFile getCurrentFile() {
-		return currentFile;
-	}
 	
 	/* (non-Javadoc)
 	 * @see org.dawnsci.datavis.model.IFileController#getSelectedFiles()
@@ -298,38 +223,36 @@ public class FileController implements IFileController {
 		return checked;
 	}
 	
-	private void fireStateChangeListeners(boolean file, boolean dataset) {
-		fireStateChangeListeners(listeners, file, dataset);
+	private void fireStateChangeListeners(boolean file, boolean dataset, LoadedFile f, DataOptions o) {
+		fireStateChangeListeners(listeners, file, dataset,f,o);
 	}
 	
-	private void fireStateChangeListeners(Set<FileControllerStateEventListener> listeners, boolean file, boolean dataset) {
-		FileControllerStateEvent e = new FileControllerStateEvent(this, file, dataset);
+	private void fireStateChangeListeners(Set<FileControllerStateEventListener> listeners, boolean file, boolean dataset, LoadedFile f, DataOptions o) {
+		FileControllerStateEvent e = new FileControllerStateEvent(this, file, dataset, f , o);
 		for (FileControllerStateEventListener l : listeners) l.stateChanged(e);
+	}
+	
+	private void fireLiveUpdateListeners(Set<FileControllerStateEventListener> listeners) {
+
+		for (FileControllerStateEventListener l : listeners) l.liveUpdate();
 	}
 
 	/* (non-Javadoc)
 	 * @see org.dawnsci.datavis.model.IFileController#getImmutableFileState()
 	 */
 	@Override
-	public List<DataStateObject> getImmutableFileState() {
+	public List<DataOptions> getImmutableFileState() {
 		
-		List<DataStateObject> list = new ArrayList<DataStateObject>();
+		List<DataOptions> list = new ArrayList<DataOptions>();
 		
 		for (LoadedFile f : getLoadedFiles()) {
 			if (f.isSelected()) {
 				String l = f.getLabel();
 				for (DataOptions d : f.getDataOptions()) {
 					if (d.isSelected()) {
-						d.setLabel(l);
-						PlottableObject plotObject = null;
-
-						if (d.getPlottableObject() != null) {
-							PlottableObject p = d.getPlottableObject();
-							plotObject = new PlottableObject(p.getPlotMode(), new NDimensions(p.getNDimensions()));
-						}
-
-						DataStateObject dso = new DataStateObject(d, true, plotObject);
-						list.add(dso);
+						DataOptions dClone = new DataOptions(d);
+						dClone.setLabel(l);
+						list.add(dClone);
 					}
 				}
 			}
@@ -360,11 +283,13 @@ public class FileController implements IFileController {
 		private final Set<FileControllerStateEventListener> fListeners;
 		private final String[] paths;
 		private final List<String> failedPaths;
+		private final ILoadedFileInitialiser initer;
 		
-		public FileLoadingRunnable(LoadedFiles files, Set<FileControllerStateEventListener> listeners, String[] paths) {
+		public FileLoadingRunnable(LoadedFiles files, Set<FileControllerStateEventListener> listeners, String[] paths, ILoadedFileInitialiser initer) {
 			this.lFiles = files;
 			this.fListeners = listeners;
 			this.paths = paths;
+			this.initer = initer;
 			failedPaths = new ArrayList<String>();
 		}
 		
@@ -394,7 +319,7 @@ public class FileController implements IFileController {
 				
 				if (f != null) {
 					
-					List<DataStateObject> state = getImmutableFileState();
+					List<DataOptions> state = getImmutableFileState();
 					
 					for (ILoadedFileConfiguration c : fileConfigs) {
 						c.setCurrentState(state);
@@ -404,7 +329,8 @@ public class FileController implements IFileController {
 					}
 					
 					f.setLabelName(labelName);
-					f.setOnlySignals(onlySignals);
+					f.setOnlySignals(onlySignals.get());
+					if (initer != null) initer.initialise(f);
 					files.add(f);
 				}
 				
@@ -420,10 +346,12 @@ public class FileController implements IFileController {
 				if (addToRecentPlaces) {
 					recentPlaces.addPlace(name);
 				}
+				
 				lFiles.addFiles(files);
+				
 			}
 			
-			fireStateChangeListeners(fListeners, false,false);
+			fireStateChangeListeners(fListeners, false,false,null,null);
 			
 		}
 		
@@ -432,45 +360,32 @@ public class FileController implements IFileController {
 		}
 	}
 
-	/* (non-Javadoc)
-	 * @see org.dawnsci.datavis.model.IFileController#unloadAll()
-	 */
-	@Override
-	public void unloadAll() {
-		loadedFiles.unloadAllFiles();
-
-		currentFile = null;
-		currentData = null;
-		
-		fireStateChangeListeners(true, true);
-	}
-
 	@Override
 	public void setComparator(Comparator<LoadedFile> comparator) {
 		loadedFiles.setComparator(comparator);
-		fireStateChangeListeners(true, true);
+		fireStateChangeListeners(true, true, null,null);
 	}
 
 	@Override
-	public void setLabelName(String label) {
+	public synchronized void setLabelName(String label) {
 		labelName = label;
 		for (LoadedFile file : loadedFiles) {
 			file.setLabelName(label);
 		}
-		fireStateChangeListeners(false, true);
+		fireStateChangeListeners(false, true,null,null);
 	}
 
 	@Override
 	public boolean isOnlySignals() {
-		return onlySignals;
+		return onlySignals.get();
 	}
 
 	@Override
 	public void setOnlySignals(boolean onlySignals) {
-		this.onlySignals = onlySignals;
+		this.onlySignals.set(onlySignals);
 		loadedFiles.getLoadedFiles().stream().forEach(f-> f.setOnlySignals(onlySignals));
 		
-		fireStateChangeListeners(true, true);
+		fireStateChangeListeners(true, true,null, null);
 	}
 	
 	/* (non-Javadoc)
@@ -503,7 +418,7 @@ public class FileController implements IFileController {
 			}
 		}
 		
-		fireStateChangeListeners(false, true);
+		fireStateChangeListeners(false, true,null,null);
 		
 	}
 	
@@ -523,41 +438,41 @@ public class FileController implements IFileController {
 
 				@Override
 				public void run() {
-
-					List<DataStateObject> fs = getImmutableFileState();
-
-					ILoadedFileConfiguration loadedConfig = null;
-
-					if (!fs.isEmpty()) {
-						loadedConfig = new CurrentStateFileConfiguration();
-						loadedConfig.setCurrentState(fs);
-					}
-
-					ILoadedFileConfiguration nexusConfig = new NexusFileConfiguration();
-
-					List<IRefreshable> files = lFiles.getLoadedFiles().stream()
+					
+					
+					List<IRefreshable> fileList = lFiles.getLoadedFiles().stream()
 							.filter(IRefreshable.class::isInstance)
-							.map(IRefreshable.class::cast).collect(Collectors.toList());
+							.map(IRefreshable.class::cast)
+							.filter(IRefreshable::isLive)
+							.collect(Collectors.toList());
+					
+					boolean toInit = false;
+					
+					for (IRefreshable r : fileList) {
+						r.refresh();
+						
+						if (!r.isEmpty() && !r.isInitialised()) {
+							toInit = true;
+						}
+					}
+					
+					if (toInit) {
+						List<DataOptions> fs = getImmutableFileState();
+						ILoadedFileConfiguration loadedConfig = null;
+						if (!fs.isEmpty()) {
+							loadedConfig = new CurrentStateFileConfiguration();
+							loadedConfig.setCurrentState(fs);
+						}
 
-					for (IRefreshable file : files) {
-
-						if (file.isEmpty()) {
-
-							file.refresh();
-
-							if (!file.isEmpty()) {
-								if (loadedConfig != null && !loadedConfig.configure((LoadedFile)file)) {
-									nexusConfig.configure((LoadedFile)file);
-								}
+						ILoadedFileConfiguration nexusConfig = new NexusFileConfiguration();
+						for (IRefreshable r : fileList) {
+							if (!r.isEmpty() && !r.isInitialised()) {
+								initialiseLiveFile((LoadedFile)r, loadedConfig, nexusConfig);
 							}
-
-						} else {
-							file.refresh();
 						}
 					}
 
-
-					Display.getDefault().syncExec( () -> fireStateChangeListeners(fListeners, true, true));
+					fireLiveUpdateListeners(fListeners);
 
 				}
 			};
@@ -571,18 +486,19 @@ public class FileController implements IFileController {
 			if (loadedFile instanceof IRefreshable) {
 				((IRefreshable)loadedFile).locallyReload();
 			}
+			
+			fireStateChangeListeners(true, true, loadedFile, null);
 
 		}
 
 		@Override
 		public void fileLoaded(LoadedFile loadedFile) {
 			
-			List<DataStateObject> fs = getImmutableFileState();
-			
-			loadedFile.setOnlySignals(onlySignals);
+			loadedFile.setOnlySignals(onlySignals.get());
+			loadedFile.setLabelName(labelName);
 
 			if (loadedFile instanceof IRefreshable && !((IRefreshable)loadedFile).isEmpty()) {
-				
+				List<DataOptions> fs = getImmutableFileState();
 				try {
 
 					ILoadedFileConfiguration loadedConfig = null;
@@ -593,22 +509,51 @@ public class FileController implements IFileController {
 					}
 
 					ILoadedFileConfiguration nexusConfig = new NexusFileConfiguration();
-
-
-					if (loadedConfig == null || !loadedConfig.configure(loadedFile)) {
-						nexusConfig.configure((LoadedFile)loadedFile);
-					}
+					
+					initialiseLiveFile(loadedFile, loadedConfig, nexusConfig);
+					
 				} catch (Exception e) {
 						logger.warn("Could not configure file",e);
 				}
 
 			}
 			
-			loadedFile.setLabelName(labelName);
-			
 			lFiles.addFile(loadedFile);
-			fireStateChangeListeners(fListeners, false, false);
+			fireStateChangeListeners(fListeners, false, false, loadedFile, null);
 		}
+		
+		private void initialiseLiveFile(LoadedFile file, ILoadedFileConfiguration primary, ILoadedFileConfiguration secondary) {
+			if (primary == null || !primary.configure(file)) {
+				secondary.configure(file);
+			}
+			
+			if (fileInitialiser != null) {
+				fileInitialiser.initialise(file);
+				((IRefreshable)file).setInitialised();
+			}
+		}
+	}
+	
 
+	
+	public void validateState(IFileStateValidator validator) {
+		
+		List<LoadedFile> lf = loadedFiles.getLoadedFiles();
+		
+		LoadedFile changed = null;
+		
+		for (LoadedFile f : lf) {
+			boolean valid= validator.validate(f);
+			if (changed == null && !valid) {
+				changed = f;
+			}
+		}
+		
+		fireStateChangeListeners(false, false, null, null);
+		
+	}
+	
+	public void setFileInitialiser(ILoadedFileInitialiser initialiser) {
+		fileInitialiser = initialiser;
 	}
 }

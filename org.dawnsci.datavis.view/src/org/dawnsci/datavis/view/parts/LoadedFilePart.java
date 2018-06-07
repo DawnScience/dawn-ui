@@ -18,10 +18,12 @@ import org.apache.commons.io.filefilter.WildcardFileFilter;
 import org.dawnsci.datavis.api.IRecentPlaces;
 import org.dawnsci.datavis.model.FileControllerStateEvent;
 import org.dawnsci.datavis.model.FileControllerStateEventListener;
+import org.dawnsci.datavis.model.FileControllerUtils;
 import org.dawnsci.datavis.model.IFileController;
 import org.dawnsci.datavis.model.IRefreshable;
 import org.dawnsci.datavis.model.LoadedFile;
 import org.dawnsci.datavis.view.Activator;
+import org.dawnsci.datavis.view.DataVisSelectionUtils;
 import org.dawnsci.datavis.view.quickfile.IQuickFileWidgetListener;
 import org.dawnsci.datavis.view.quickfile.QuickFileWidget;
 import org.eclipse.core.resources.IFile;
@@ -82,6 +84,7 @@ import org.eclipse.swt.widgets.Menu;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.eclipse.ui.progress.IProgressService;
+import org.omg.PortableServer.LifespanPolicyValue;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
 import org.slf4j.Logger;
@@ -325,10 +328,10 @@ public class LoadedFilePart {
 		
 		viewer.addSelectionChangedListener(event -> {
 			IStructuredSelection selection = viewer.getStructuredSelection();
-			if (selection.getFirstElement() instanceof LoadedFile) {
-			  	LoadedFile selected = (LoadedFile)selection.getFirstElement();
-			   	fileController.setCurrentFile(selected, selected.isSelected());
-			}
+//			if (selection.getFirstElement() instanceof LoadedFile) {
+//			  	LoadedFile selected = (LoadedFile)selection.getFirstElement();
+////			   	fileController.setCurrentFile(selected, selected.isSelected());
+//			}
 			    
 			selectionService.setSelection(new StructuredSelection(selection.toArray()));
 		});
@@ -339,17 +342,37 @@ public class LoadedFilePart {
 		menuMgr.setRemoveAllWhenShown(true);
 		viewer.getControl().setMenu(menu);
 		
-		fileStateListener = event -> {
-			if (!fileController.getID().equals(partId)) {
-				return; // ignore other sources of state changes
-			}
-			updateOnStateChange(event);
+		fileStateListener = new FileControllerStateEventListener() {
+			
+			@Override
+			public void stateChanged(FileControllerStateEvent event) {
+				if (!fileController.getID().equals(partId)) {
+					return; // ignore other sources of state changes
+				}
+				updateOnStateChange(event);
 
-			List<String> r = recentPlaces.getRecentPlaces();
-			if (r != null && !r.isEmpty()) {
-				Display.getDefault().asyncExec(() -> qfw.setDirectoryPath(recentPlaces.getRecentPlaces().get(0)));
+				List<String> r = recentPlaces.getRecentPlaces();
+				if (r != null && !r.isEmpty()) {
+					Display.getDefault().asyncExec(() -> qfw.setDirectoryPath(recentPlaces.getRecentPlaces().get(0)));
+				}
+				
 			}
-
+			
+			@Override
+			public void liveUpdate() {
+				
+				if (Display.getCurrent() == null) {
+					Display.getDefault().asyncExec(()->liveUpdate());
+					return;
+				}
+				
+ 				IStructuredSelection selection = viewer.getStructuredSelection();
+				List<LoadedFile> s = DataVisSelectionUtils.getFromSelection(selection, LoadedFile.class);
+				
+				if (!s.isEmpty() && s.get(0) instanceof IRefreshable) {
+					selectionService.setSelection(new StructuredSelection(selection.toArray()));
+				}
+			}
 		};
 		
 		fileController.addStateListener(fileStateListener);
@@ -451,7 +474,7 @@ public class LoadedFilePart {
 	}
 	
 	private void loadData(String[] paths) {
-		List<String> loadFiles = fileController.loadFiles(paths,(IProgressService) PlatformUI.getWorkbench().getService(IProgressService.class));
+		List<String> loadFiles = FileControllerUtils.loadFiles(fileController,paths,(IProgressService) PlatformUI.getWorkbench().getService(IProgressService.class));
 		
 		if (loadFiles != null && !loadFiles.isEmpty()) {
 			MessageDialog.openError(
@@ -468,6 +491,19 @@ public class LoadedFilePart {
 			return;
 		}
 		viewer.setInput(fileController);
+		
+		IStructuredSelection selection = viewer.getStructuredSelection();
+		List<LoadedFile> s = DataVisSelectionUtils.getFromSelection(selection, LoadedFile.class);
+		
+		if (s.isEmpty() && event.getLoadedFile() != null) {
+			viewer.getTable().setSelection(0);
+			selection = viewer.getStructuredSelection();
+			s = DataVisSelectionUtils.getFromSelection(selection, LoadedFile.class);
+		}
+		
+		if (!s.isEmpty() && s.get(0) instanceof IRefreshable) {
+			selectionService.setSelection(new StructuredSelection(selection.toArray()));
+		}
 	}
 	
 	@PreDestroy
@@ -541,7 +577,7 @@ public class LoadedFilePart {
 		@Override
 		protected void setValue(Object element, Object value) {
 			if (element instanceof LoadedFile && value instanceof Boolean){
-				fileController.setCurrentFile((LoadedFile)element, (Boolean)value);
+				fileController.setFileSelected((LoadedFile)element, (Boolean)value);
 			}
 //			fileController().setCurrentData((DataOptions)element, (Boolean)value);
 		}

@@ -9,6 +9,7 @@ public class MockLineTrace implements ILineTrace {
 	
 	private String name;
 	private Object userObject;
+	private IDataset data;
 
 	public MockLineTrace(String name) {
 		this.name = name;
@@ -28,8 +29,7 @@ public class MockLineTrace implements ILineTrace {
 
 	@Override
 	public IDataset getData() {
-		// TODO Auto-generated method stub
-		return null;
+		return data;
 	}
 
 	@Override
@@ -255,7 +255,7 @@ public class MockLineTrace implements ILineTrace {
 
 	@Override
 	public void setData(IDataset xData, IDataset yData) {
-		// TODO Auto-generated method stub
+		data = yData;
 
 	}
 

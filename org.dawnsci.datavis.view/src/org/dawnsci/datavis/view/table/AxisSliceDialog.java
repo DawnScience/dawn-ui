@@ -1,8 +1,10 @@
 package org.dawnsci.datavis.view.table;
 
+import java.util.List;
+
 import org.dawnsci.datavis.model.DataOptions;
-import org.dawnsci.datavis.model.IFileController;
 import org.dawnsci.datavis.model.NDimensions;
+import org.dawnsci.datavis.view.DataVisSelectionUtils;
 import org.eclipse.january.DatasetException;
 import org.eclipse.january.dataset.Dataset;
 import org.eclipse.january.dataset.DatasetUtils;
@@ -12,6 +14,7 @@ import org.eclipse.january.dataset.Maths;
 import org.eclipse.january.dataset.SliceND;
 import org.eclipse.january.metadata.AxesMetadata;
 import org.eclipse.jface.dialogs.Dialog;
+import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -20,10 +23,13 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.FrameworkUtil;
+import org.eclipse.ui.PlatformUI;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class AxisSliceDialog extends Dialog {
+	
+	private static final Logger logger = LoggerFactory.getLogger(AxisSliceDialog.class);
 
 	private NDimensions nDimensions;
 	private int dim = 0;
@@ -39,6 +45,7 @@ public class AxisSliceDialog extends Dialog {
 		this.nDimensions = nDims;
 	}
 	
+	@Override
 	protected Control createDialogArea(Composite parent) {
 		Composite container = (Composite) super.createDialogArea(parent);
 		container.setLayout(new GridLayout(4, false));
@@ -52,14 +59,15 @@ public class AxisSliceDialog extends Dialog {
 		l2.setText("Stop");
 		tmax = new Text(container,SWT.BORDER);
 		
-		BundleContext bundleContext =
-                FrameworkUtil.
-                getBundle(this.getClass()).
-                getBundleContext();
+		ISelection selection = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getSelectionService().getSelection("org.dawnsci.datavis.view.parts.DatasetPart");
 		
-		IFileController fileController = (IFileController)bundleContext.getService(bundleContext.getServiceReference(IFileController.class));
+		List<DataOptions> all = DataVisSelectionUtils.getFromSelection(selection, DataOptions.class);
 		
-		DataOptions d = fileController.getCurrentDataOption();
+		if (all.isEmpty()) {
+			return container;
+		}
+		
+		DataOptions d = all.get(0);
 		
 		SliceND slice = nDimensions.buildSliceND();
 		slice.setSlice(dim, 0, null, 1);
@@ -73,7 +81,7 @@ public class AxisSliceDialog extends Dialog {
 			tmin.setText(axis.getStringAbs(0));
 			tmax.setText(axis.getStringAbs(axis.getSize()-1));
 		} catch (DatasetException e) {
-
+			logger.error("Could not slice axis dataset", e);
 		}
 	
 		return container;
@@ -83,7 +91,6 @@ public class AxisSliceDialog extends Dialog {
 	  protected void configureShell(Shell newShell) {
 	    super.configureShell(newShell);
 	    newShell.setText("Set Start:Stop from Axis");
-//	    newShell.setImage(image = Activator.getImageDescriptor("icons/spectrum.png").createImage());
 	  }
 	
 	private Double parseDouble(Text widget) {
@@ -98,6 +105,7 @@ public class AxisSliceDialog extends Dialog {
 	}
 	
 	
+	@Override
 	protected void okPressed() {
 		
 		Double min = parseDouble(tmin);
@@ -109,7 +117,6 @@ public class AxisSliceDialog extends Dialog {
 		
 		if (max != null) {
 			stop = Maths.abs(Maths.subtract(axis, max)).argMin();
-			stop.toString();
 		}
 		
 		if (start != null && stop != null && start > stop) {

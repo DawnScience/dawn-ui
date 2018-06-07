@@ -11,7 +11,7 @@ public class NDimensionsTest {
 	@Test
 	public void test() {
 		int[] shape = new int[]{9,10,11,12};
-		NDimensions ndims = new NDimensions(shape);
+		NDimensions ndims = new NDimensions(shape, null);
 		String[] optionsXY = new String[]{"X","Y"};
 		ndims.setOptions(optionsXY);
 		
@@ -40,7 +40,7 @@ public class NDimensionsTest {
 	@Test
 	public void testSingleDimensions() {
 		int[] shape = new int[]{1,10,1,12};
-		NDimensions ndims = new NDimensions(shape);
+		NDimensions ndims = new NDimensions(shape,null);
 		String[] optionsXY = new String[]{"X","Y"};
 		ndims.setOptions(optionsXY);
 		

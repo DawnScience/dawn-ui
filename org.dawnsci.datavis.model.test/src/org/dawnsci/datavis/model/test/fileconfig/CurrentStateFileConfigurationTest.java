@@ -1,11 +1,11 @@
 package org.dawnsci.datavis.model.test.fileconfig;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.util.Arrays;
 
 import org.dawnsci.datavis.model.DataOptions;
-import org.dawnsci.datavis.model.DataStateObject;
 import org.dawnsci.datavis.model.LoadedFile;
 import org.dawnsci.datavis.model.NDimensions;
 import org.dawnsci.datavis.model.PlotModeXY;
@@ -50,10 +50,9 @@ public class CurrentStateFileConfigurationTest {
 		DataOptions dataOptiontest = ftest.getDataOption("x");
 
 		CurrentStateFileConfiguration c = new CurrentStateFileConfiguration();
+
 		
-		DataStateObject o = new DataStateObject(dataOption, true, po);
-		
-		c.setCurrentState(Arrays.asList(new DataStateObject[]{o}));
+		c.setCurrentState(Arrays.asList(new DataOptions[]{dataOption}));
 		
 		assertTrue(c.configure(ftest));
 		

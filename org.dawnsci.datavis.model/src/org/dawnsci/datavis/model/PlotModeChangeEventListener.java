@@ -4,6 +4,6 @@ import java.util.EventListener;
 
 public interface PlotModeChangeEventListener extends EventListener {
 
-	public void plotModeChanged(PlotModeEvent event);
+	public void plotModeChanged();
 	
 }

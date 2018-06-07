@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.dawnsci.datavis.model.DataOptions;
-import org.dawnsci.datavis.model.DataStateObject;
 import org.dawnsci.datavis.model.LoadedFile;
 import org.eclipse.dawnsci.analysis.api.tree.Attribute;
 import org.eclipse.dawnsci.analysis.api.tree.DataNode;
@@ -117,7 +116,7 @@ public class NexusFileConfiguration implements ILoadedFileConfiguration {
 	}
 	
 	@Override
-	public void setCurrentState(List<DataStateObject> state) {
+	public void setCurrentState(List<DataOptions> state) {
 		//doesn't need state
 	}
 

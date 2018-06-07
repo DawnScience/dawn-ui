@@ -160,7 +160,10 @@ public class DataOptionTableViewer {
 		@Override
 		protected void setValue(Object element, Object value) {
 			if (element instanceof DataOptions && value instanceof Boolean){
-				controller.setCurrentData((DataOptions)element, (Boolean)value);
+				
+				IStructuredSelection ss = getStructuredSelection();
+				
+				controller.setDataSelected((DataOptions)element, (Boolean)value);
 			}
 //			FileController.getInstance().setCurrentData((DataOptions)element, (Boolean)value);
 		}

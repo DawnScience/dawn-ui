@@ -9,8 +9,6 @@ import javax.inject.Inject;
 import org.dawnsci.datavis.model.IPlotController;
 import org.dawnsci.datavis.model.IPlotDataModifier;
 import org.dawnsci.datavis.model.PlotDataModifierStack;
-import org.eclipse.e4.core.di.annotations.Optional;
-import org.eclipse.e4.ui.di.UIEventTopic;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -23,7 +21,6 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Scale;
-import org.osgi.service.event.Event;
 
 public class PlotModifierOffsetControl {
 	
@@ -152,11 +149,11 @@ public class PlotModifierOffsetControl {
 			
 		});
 		
+		controller.addPlotModeListener(this::plotControllerUpdate);
+		
 	}
 	
-	@Inject
-	@Optional
-	private void plotControllerUpdate(@UIEventTopic("org/dawnsci/datavis/plot/UPDATE") Event data ) {
+	private void plotControllerUpdate() {
 
 		boolean selected = false;
 		

@@ -41,6 +41,11 @@
             id="org.dawnsci.datavis.model.fileclose"
             name="File Close Command">
       </command>
+      <command
+            defaultHandler="org.dawnsci.datavis.view.perspective.FileOpenHandler"
+            id="org.dawnsci.datavis.model.fileopen"
+            name="File Open Command">
+      </command>
    </extension>
 
 </plugin>

@@ -18,11 +18,13 @@ public class NDimensions {
 	private Dimension[] dimensions;
 	private HashSet<ISliceChangeListener > listeners;
 	private Object[] options = null;
+	private Object parent = null;
 	
-	public NDimensions(int[] shape) {
+	public NDimensions(int[] shape, Object parent) {
 		dimensions = new Dimension[shape.length];
 		for (int i = 0; i < dimensions.length; i++) dimensions[i] = new Dimension(i, shape[i]);
 		listeners = new HashSet<>();
+		this.parent = parent;
 	}
 	
 	public NDimensions(NDimensions toCopy) {
@@ -32,6 +34,7 @@ public class NDimensions {
 		}
 		this.options = toCopy.options != null ? toCopy.options.clone() : null;
 		listeners = new HashSet<>();
+		this.parent = toCopy.parent;
 	}
 	
 	public void setOptions(Object[] options) {
@@ -111,7 +114,7 @@ public class NDimensions {
 	}
 	
 	private void update(boolean optionChange) {
-		SliceChangeEvent sliceChangeEvent = new SliceChangeEvent(new NDimensions(this), optionChange);
+		SliceChangeEvent sliceChangeEvent = new SliceChangeEvent(new NDimensions(this), optionChange, parent);
 		fireSliceListeners(sliceChangeEvent);
 	}
 	
@@ -228,28 +231,6 @@ public class NDimensions {
 			}
 		}
 	}
-	
-//	private boolean validOptions(Object[] opts){
-//		
-//		List<Object> list = Arrays.asList(opts);
-//		
-//		boolean valid = true;
-//		
-//		for (Object o : options) {
-//			if (!list.contains(o)) {
-//				valid = false;
-//				break;
-//			}
-//			
-//			if (Collections.frequency(list, o) != 1) {
-//				valid = false;
-//				break;
-//			}
-//		}
-//		
-//		
-//		return valid;
-//	}
 	
 	public void setUpAxes(String name, Map<String,int[]> axes, String[] primary) {
 		

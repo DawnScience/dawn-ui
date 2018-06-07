@@ -63,14 +63,19 @@ public class LiveFileServiceTest {
 			
 			@Override
 			public void stateChanged(FileControllerStateEvent event) {
+			}
+
+			@Override
+			public void liveUpdate() {
 				fired.set(true);
+				
 			}
 		});
 		
-//		next.refreshRequest();
-//		//happens in a separate thread so sleep for a bit
-//		Thread.sleep(100);
-//		assertTrue(fired.get());
+		next.refreshRequest();
+		//happens in a separate thread so sleep for a bit
+		Thread.sleep(100);
+		assertTrue(fired.get());
 		
 	}
 

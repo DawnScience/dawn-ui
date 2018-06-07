@@ -3,6 +3,7 @@ package org.dawnsci.datavis.model;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.dawnsci.datavis.api.IDataPackage;
 import org.eclipse.dawnsci.analysis.api.tree.Node;
@@ -12,13 +13,17 @@ import org.eclipse.january.dataset.SliceND;
 import org.eclipse.january.metadata.AxesMetadata;
 import org.eclipse.january.metadata.MetadataFactory;
 
+/**
+ * Class to represent a dataset in contained in a LoadedFile
+ * in the IFileController
+ */
 public class DataOptions implements IDataObject, IDataPackage {
 
 	private String name;
 	private LoadedFile parent;
 	private String[] axes;
 	private ILazyDataset data;
-	private boolean selected;
+	private AtomicBoolean selected = new AtomicBoolean(false);
 
 	private PlottableObject plottableObject;
 	private String label;
@@ -26,6 +31,17 @@ public class DataOptions implements IDataObject, IDataPackage {
 	public DataOptions(String name, LoadedFile parent) {
 		this.name = name;
 		this.parent = parent;
+	}
+	
+	public DataOptions(DataOptions toCopy) {
+		this.name = toCopy.name;
+		this.data = toCopy.data != null ? toCopy.data.getSliceView() : null;
+		this.parent = toCopy.parent;
+		this.axes = axes != null ? axes.clone() : null;
+		this.selected = new AtomicBoolean(toCopy.selected.get());
+		this.plottableObject = new PlottableObject(toCopy.plottableObject.getPlotMode(),
+				new NDimensions(toCopy.plottableObject.getNDimensions()));
+		this.label = toCopy.label;
 	}
 
 	@Override
@@ -69,6 +85,10 @@ public class DataOptions implements IDataObject, IDataPackage {
 		return ax;
 	}
 	
+	public LoadedFile getParent() {
+		return parent;
+	}
+
 	public ILazyDataset getLazyDataset() {
 		if (data == null || !Arrays.equals(data.getShape(), parent.getLazyDataset(name).getShape())) {
 			ILazyDataset local = parent.getLazyDataset(name).getSliceView();
@@ -182,15 +202,15 @@ public class DataOptions implements IDataObject, IDataPackage {
 	}
 
 	public boolean isSelected() {
-		return selected;
+		return selected.get();
 	}
 
 	public void setSelected(boolean selected) {
-		this.selected = selected;
+		this.selected.set(selected);
 	}
 	
 	public NDimensions buildNDimensions() {
-		NDimensions ndims = new NDimensions(getLazyDataset().getShape());
+		NDimensions ndims = new NDimensions(getLazyDataset().getShape(), this);
 		ndims.setUpAxes((String)null, getAllPossibleAxes(), getPrimaryAxes());
 		if (axes != null) {
 			for (int i = 0 ; i < axes.length; i++){
