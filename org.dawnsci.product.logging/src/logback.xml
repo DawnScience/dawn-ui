@@ -1,59 +1,64 @@
 <configuration debug="false">
-  
-  <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
-    <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
-			<level>DEBUG</level>
-	</filter>
-    <encoder>
-      <pattern>%d{HH:mm:ss.SSS} %-5level %msg %n</pattern>
-    </encoder>
-  </appender>
 
-	<appender name="DebugFILE"
-		class="ch.qos.logback.core.rolling.RollingFileAppender">
-		<file>${java.io.tmpdir}/${user.name}-dawn.log</file>
-		
-        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-            <!-- daily rollover -->
-            <fileNamePattern>${java.io.tmpdir}/${user.name}-dawn_%d{yyyy-MM-dd}.%i.log</fileNamePattern>
-            <timeBasedFileNamingAndTriggeringPolicy
-                class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
-                <!-- or whenever the file size reaches 20MB -->
-                <maxFileSize>20MB</maxFileSize>
-            </timeBasedFileNamingAndTriggeringPolicy>
-			<!-- keep 1 days' worth of history we are only a GUI -->
-            <maxHistory>1</maxHistory>
-            <cleanHistoryOnStart>true</cleanHistoryOnStart>
-        </rollingPolicy>
-		
+	<appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+		<filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+			<level>DEBUG</level>
+		</filter>
+
+		<encoder>
+			<pattern>%d{HH:mm:ss.SSS} %-5level %msg %n</pattern>
+		</encoder>
+	</appender>
+
+	<appender name="DebugFILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
 		<filter class="ch.qos.logback.classic.filter.ThresholdFilter">
 			<level>ERROR</level>
 		</filter>
+
+		<file>${java.io.tmpdir}/${user.name}-dawn.log</file>
+
+		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+			<!-- daily rollover -->
+			<fileNamePattern>${java.io.tmpdir}/${user.name}-dawn_%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+
+			<timeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+				<!-- or whenever the file size reaches 20MB -->
+				<maxFileSize>20MB</maxFileSize>
+			</timeBasedFileNamingAndTriggeringPolicy>
+
+			<!-- keep 1 days' worth of history as we are only a GUI -->
+			<maxHistory>1</maxHistory>
+
+			<cleanHistoryOnStart>true</cleanHistoryOnStart>
+		</rollingPolicy>
+
 		<encoder>
 			<pattern>%d %-5level %logger - %m %ex %n</pattern>
 		</encoder>
 	</appender>
 
-	<appender name="HTML"
-		class="ch.qos.logback.core.rolling.RollingFileAppender">
-		<file>${user.home}/dawnlog.html</file>
-		
-        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-            <!-- daily rollover -->
-            <fileNamePattern>${user.home}/dawnlog_%d{yyyy-MM-dd}.%i.html</fileNamePattern>
-            <timeBasedFileNamingAndTriggeringPolicy
-                class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
-                <!-- or whenever the file size reaches 20MB -->
-                <maxFileSize>20MB</maxFileSize>
-            </timeBasedFileNamingAndTriggeringPolicy>
-			<!-- keep 1 days' worth of history we are only a GUI -->
-            <maxHistory>1</maxHistory>
-            <cleanHistoryOnStart>true</cleanHistoryOnStart>
-        </rollingPolicy>
-    
+	<appender name="HTML" class="ch.qos.logback.core.rolling.RollingFileAppender">
 		<filter class="ch.qos.logback.classic.filter.ThresholdFilter">
 			<level>ERROR</level>
 		</filter>
+
+		<file>${user.home}/dawnlog.html</file>
+
+		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+			<!-- daily rollover -->
+			<fileNamePattern>${user.home}/dawnlog_%d{yyyy-MM-dd}.%i.html</fileNamePattern>
+
+			<timeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+				<!-- or whenever the file size reaches 20MB -->
+				<maxFileSize>20MB</maxFileSize>
+			</timeBasedFileNamingAndTriggeringPolicy>
+
+			<!-- keep 1 days' worth of history as we are only a GUI -->
+			<maxHistory>1</maxHistory>
+
+			<cleanHistoryOnStart>true</cleanHistoryOnStart>
+		</rollingPolicy>
+
 		<encoder class="ch.qos.logback.core.encoder.LayoutWrappingEncoder">
 			<layout class="ch.qos.logback.classic.html.HTMLLayout">
 				<pattern>%relative%date{dd-MMM-yyyy;HH:mm:ss}%thread%level%logger%msg</pattern>
@@ -69,50 +74,55 @@
 		for v0.3 -->
 	<!-- Use UDP protocol message delivery is NOT guaranteed -->
 	<appender name="GrayLog" class="me.moocar.logbackgelf.GelfUDPAppender">
+		<filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+			<level>DEBUG</level>
+		</filter>
+
 		<!-- Graylog server details -->
 		<remoteHost>${graylog.host}</remoteHost>
 		<port>${graylog.port:-12201}</port>
+
 		<encoder class="me.moocar.logbackgelf.GZIPEncoder">
 			<layout class="me.moocar.logbackgelf.GelfLayout">
 				<shortMessageLayout class="ch.qos.logback.classic.PatternLayout">
 					<pattern>%level - %message</pattern>
 				</shortMessageLayout>
+
 				<fullMessageLayout class="ch.qos.logback.classic.PatternLayout">
 					<pattern>%message%n%rootException</pattern>
 				</fullMessageLayout>
+
 				<useLoggerName>true</useLoggerName>
+
 				<useThreadName>false</useThreadName> <!-- Disable - We are currently running in the log server where the thread 
 					name is always 'logback-1' -->
+
 				<staticField class="me.moocar.logbackgelf.Field">
 					<key>_application_name</key>
 					<value>dawn</value> <!-- Set to 'dawn' for all logging -->
 				</staticField>
+
 				<staticField class="me.moocar.logbackgelf.Field">
 					<key>_username</key>
 					<value>${user.name}</value>
 				</staticField>
+
 				<staticField class="me.moocar.logbackgelf.Field">
 					<key>_dawnversion</key>
 					<value>${dawn.version}</value>
 				</staticField>
 			</layout>
 		</encoder>
-
-		<!-- Filter out events below DEBUG level -->
-		<filter class="ch.qos.logback.classic.filter.ThresholdFilter">
-			<level>DEBUG</level>
-		</filter>
-
 	</appender>
 	</then>
 	</if>
 
 	<logger name="org.apache.commons" level="ERROR"/>
-	
+
 	<logger name="hdf.hdf5lib" level="ERROR"/>
-	
+
 	<logger name="org.python.netty" level="WARN"/>
-	
+
 	<root>
 		<level value="ALL" />
 		<appender-ref ref="DebugFILE" />
@@ -120,4 +130,5 @@
 		<appender-ref ref="STDOUT" />
 		<appender-ref ref="GrayLog" />
 	</root>
+
 </configuration>
