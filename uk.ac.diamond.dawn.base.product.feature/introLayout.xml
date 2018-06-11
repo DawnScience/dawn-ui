@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<extensions>
+   <page id="tutorials">
+      <group path="page-content/bottom-left" default="true">
+         <extension id="uk.ac.diamond.scisoft.analysis.rcp.cheatsheets" importance="low"/>
+      </group>
+      <group path="page-content/bottom-right" default="true">
+         <extension id="basic-dataviewing-tutorials" importance="low"/>
+         <separator id="1354966972"/>
+         <extension id="plotting-tools-tutorials" importance="low"/>
+      </group>
+      <group path="page-content/top-left">
+      </group>
+      <group path="page-content/top-right">
+      </group>
+   </page>
+   <page id="webresources">
+      <group path="page-content/bottom-left" default="true">
+         <extension id="org.dawnsci.intro.webresources" importance="low"/>
+      </group>
+      <group path="page-content/bottom-right" default="true">
+      </group>
+   </page>
+   <page id="samples">
+      <group path="page-content/bottom-left" default="true">
+         <extension id="uk.ac.diamond.scisoft.analysis.rcp.datawizard" importance="low"/>
+         <extension id="uk.ac.diamond.scisoft.beamlineexplorer.rcp.beamlinedatawizard" importance="low"/>
+         <extension id="uk.ac.diamond.scisoft.icatexplorer.v4.rcp.icatwizard" importance="low"/>
+         <extension id="org.dawb.passerelle.common.workflowprojectwizard" importance="low"/>
+      </group>
+      <group path="page-content/bottom-right" default="true">
+         <extension id="uk.ac.diamond.scisoft.ispybexplorer.rcp.ispybwizard" importance="low"/>
+      </group>
+   </page>
+   <page id="whatsnew">
+      <group path="page-content/bottom-left" default="true">
+         <extension id="org.dawnsci.intro.webresources" importance="low"/>
+      </group>
+      <group path="page-content/bottom-right" default="true">
+      </group>
+   </page>
+   <page id="firststeps">
+      <group path="page-content/bottom-left" default="true">
+         <extension id="org.dawnsci.intro.firststeps" importance="low"/>
+      </group>
+      <group path="page-content/bottom-right" default="true">
+      </group>
+   </page>
+   <page id="perspectives">
+      <group path="page-content/bottom-left" default="true">
+         <extension id="arpes-perspective-extension" importance="low"/>
+         <extension id="databrowsing-perspective-extension" importance="low"/>
+         <extension id="dexplore-perspective-extension" importance="low"/>
+         <extension id="mxlive-analysis-perspective-extension" importance="low"/>
+         <extension id="peema-perspective-extension" importance="low"/>
+      </group>
+      <group path="page-content/bottom-right" default="true">
+         <extension id="prerelease-perspectives" importance="low"/>
+      </group>
+      <group path="page-content/top-left">
+      </group>
+   </page>
+   <page id="overview">
+      <group path="page-content/bottom-left" default="true">
+         <extension id="org.dawnsci.intro.workbench" importance="low"/>
+      </group>
+      <group path="page-content/bottom-right" default="true">
+      </group>
+   </page>
+</extensions>
