@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feature
+      id="uk.ac.diamond.dawn.base.product.feature"
+      label="DAWN Science"
+      version="2.10.0.qualifier"
+      provider-name="Diamond Light Source">
+
+   <description url="http://www.example.com/description">
+      [Enter Feature Description here.]
+   </description>
+
+   <copyright url="http://www.example.com/copyright">
+      [Enter Copyright Description here.]
+   </copyright>
+
+   <license url="http://www.example.com/license">
+      [Enter License Description here.]
+   </license>
+
+   <includes
+         id="org.dawnsci.base.product.feature"
+         version="0.0.0"/>
+
+   <includes
+         id="org.dawnsci.commandserver.feature"
+         version="0.0.0"/>
+
+   <includes
+         id="uk.ac.diamond.scisoft.peema.feature"
+         version="0.0.0"/>
+
+   <includes
+         id="uk.ac.diamond.scisoft.spectroscopy.feature"
+         version="0.0.0"/>
+
+   <includes
+         id="uk.ac.diamond.scisoft.diffraction.powder.feature"
+         version="0.0.0"/>
+
+   <includes
+         id="uk.ac.diamond.scisoft.ptychography.feature"
+         version="0.0.0"/>
+
+   <includes
+         id="uk.ac.diamond.optid.feature"
+         version="0.0.0"/>
+
+   <includes
+         id="org.dawnsci.python.feature"
+         version="0.0.0"/>
+
+   <includes
+         id="uk.ac.diamond.scisoft.analysis.powder.indexer.feature"
+         version="0.0.0"/>
+
+   <includes
+         id="uk.ac.diamond.scisoft.analysis.powder.matcher.ccdc.feature"
+         version="0.0.0"/>
+
+   <includes
+         id="uk.ac.diamond.scisoft.rixs.feature"
+         version="0.0.0"/>
+
+   <plugin
+         id="uk.ac.diamond.scisoft.xpdf"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="uk.ac.diamond.scisoft.applications"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="org.dawnsci.processing.python"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="uk.ac.diamond.scisoft.pydev.rcp.dawn"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         fragment="true"
+         unpack="false"/>
+
+   <plugin
+         id="uk.ac.diamond.scisoft.arpes.calibration"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="uk.ac.diamond.scisoft.surfacescatter"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"/>
+
+   <plugin
+         id="org.dawnsci.surfacescatter.ui"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="org.dawnsci.processing.python.ui"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="uk.ac.diamond.scisoft.rixs.rcp"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+</feature>
