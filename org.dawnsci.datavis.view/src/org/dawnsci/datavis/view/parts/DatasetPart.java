@@ -137,7 +137,9 @@ public class DatasetPart {
 						
 					if (ob instanceof IPlotMode && !ob.equals(plotController.getCurrentMode())) {
 						 DataOptions dataOptions = DataVisSelectionUtils.getFromSelection(viewer.getStructuredSelection(), DataOptions.class).get(0);
-						plotController.switchPlotMode((IPlotMode)ob,dataOptions);
+						if (dataOptions.isSelected() && dataOptions.getParent().isSelected()) {
+							plotController.switchPlotMode((IPlotMode)ob,dataOptions);
+						}
 						table.setInput(dataOptions.getPlottableObject().getNDimensions());
 						if (((IPlotMode)ob).supportsMultiple()) {
 							table.setMaxSliceNumber(50);

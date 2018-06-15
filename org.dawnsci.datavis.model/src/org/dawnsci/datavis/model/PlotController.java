@@ -29,9 +29,7 @@ import org.eclipse.dawnsci.plotting.api.trace.ILineTrace;
 import org.eclipse.dawnsci.plotting.api.trace.IPaletteTrace;
 import org.eclipse.dawnsci.plotting.api.trace.ITrace;
 import org.eclipse.january.dataset.IDataset;
-import org.eclipse.january.dataset.IDynamicDataset;
 import org.eclipse.january.dataset.ILazyDataset;
-import org.eclipse.january.dataset.ShapeUtils;
 import org.eclipse.january.dataset.SliceND;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Color;
@@ -472,9 +470,7 @@ public class PlotController implements IPlotController, ILoadedFileInitialiser {
 	private Integer getDataRank(DataOptions dOptions) {
 		if (dOptions == null) return null;
 		
-		int[] shape = dOptions.getLazyDataset().getShape();
-		shape = ShapeUtils.squeezeShape(shape, false);
-		return shape.length;
+		return PlotShapeUtils.getPlottableRank(dOptions.getLazyDataset());
 	}
 	
 	private IPlotDataModifier[] getPlotModifiers(int rank) {
@@ -581,6 +577,11 @@ public class PlotController implements IPlotController, ILoadedFileInitialiser {
 			@Override
 			public boolean validate(LoadedFile f) {
 				
+					if (!option.isSelected() && !option.getParent().isSelected()) {
+						//state should be valid on deselection only
+						return true;
+					}
+				
 					if (!f.isSelected()) return true;			
 					boolean thisFile = f == option.getParent();			
 					for (DataOptions o : f.getDataOptions()) {
@@ -620,16 +621,7 @@ public class PlotController implements IPlotController, ILoadedFileInitialiser {
 		
 		NDimensions nd = d.buildNDimensions();
 		
-		int[] shape = d.getLazyDataset().getShape();
-		int[] max = shape;
-		if (d.getLazyDataset() instanceof IDynamicDataset) {
-			max = ((IDynamicDataset)d.getLazyDataset()).getMaxShape();
-		}
-		if (!(shape.length == 1 && shape [0] == 1 && max[0] != 1)) {
-			shape = ShapeUtils.squeezeShape(shape, false);
-		} 
-		
-		int rank = shape.length;
+		int rank = PlotShapeUtils.getPlottableRank(d.getLazyDataset());
 		if (mode == null) {
 			IPlotMode defaultMode = getDefaultMode(rank);
 			nd.setOptions(defaultMode.getOptions());
@@ -696,7 +688,10 @@ public class PlotController implements IPlotController, ILoadedFileInitialiser {
 		for (DataOptions d : dataOptions) {
 			PlottableObject po = d.getPlottableObject();
 			if (po == null) {
-				po = getPlottableObject(d, getDefaultMode(d.getLazyDataset().getRank()));
+				ILazyDataset lz = d.getLazyDataset();
+				int rank = PlotShapeUtils.getPlottableRank(lz);
+				
+				po = getPlottableObject(d, getDefaultMode(rank));
 				d.setPlottableObject(po);
 			}
 		}
