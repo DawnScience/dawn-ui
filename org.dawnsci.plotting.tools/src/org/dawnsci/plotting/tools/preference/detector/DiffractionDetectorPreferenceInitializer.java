@@ -265,6 +265,15 @@ public class DiffractionDetectorPreferenceInitializer extends AbstractPreference
 		dd21.setNumberOfPixelsY(4371);
 		dds.addDiffractionDetector(dd21);
 
+		// MAR 165 CCD Camera
+		DiffractionDetector dd22 = new DiffractionDetector();
+		dd22.setDetectorName("MAR 165 CCD");
+		dd22.setxPixelSize(Amount.valueOf(15, SI.MICRO(SI.METRE)));
+		dd22.setyPixelSize(Amount.valueOf(15, SI.MICRO(SI.METRE)));
+		dd22.setNumberOfPixelsX(4096);
+		dd22.setNumberOfPixelsY(4096);
+		dds.addDiffractionDetector(dd22);
+
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		XMLEncoder xmlEncoder = new XMLEncoder(baos);
 		xmlEncoder.writeObject(dds);
