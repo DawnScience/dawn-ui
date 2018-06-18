@@ -25,7 +25,6 @@ import org.eclipse.dawnsci.plotting.api.trace.MetadataPlotUtils;
 import org.eclipse.january.dataset.Dataset;
 import org.eclipse.january.dataset.DatasetFactory;
 import org.eclipse.january.dataset.DatasetUtils;
-import org.eclipse.january.dataset.DoubleDataset;
 import org.eclipse.january.dataset.IDataset;
 import org.eclipse.january.dataset.ILazyDataset;
 import org.eclipse.january.metadata.AxesMetadata;
@@ -273,7 +272,7 @@ class DataReduction2DToolModel extends DataReduction2DToolObservableModel {
 		MEAN,
 		FIRST,
 	}
-	private static DoubleDataset[] getReducedAxes(ILazyDataset[] rawAxes, List<RangeData> rangeDataList, List<Integer> deletedIndices) {
+	private static Dataset[] getReducedAxes(ILazyDataset[] rawAxes, List<RangeData> rangeDataList, List<Integer> deletedIndices) {
 		return Arrays
 				.stream(rawAxes)
 				.map(axis -> {
@@ -285,13 +284,13 @@ class DataReduction2DToolModel extends DataReduction2DToolObservableModel {
 						return null;
 					}
 				})
-				.toArray(DoubleDataset[]::new);
+				.toArray(Dataset[]::new);
 	}
 	
 	private static void exportToGenericNexusFile(String newFilePath, IImageTrace trace, List<RangeData> rangeDataList, List<Integer> deletedIndices) throws Exception {
 		// generate main dataset
 		Dataset rawData = DatasetUtils.convertToDataset(trace.getData());
-		DoubleDataset reducedData = null;
+		Dataset reducedData = null;
 	
 		AxesMetadata firstAxesMetadata = getFirstAxesMetadata(trace);
 		
@@ -299,8 +298,8 @@ class DataReduction2DToolModel extends DataReduction2DToolObservableModel {
 		ILazyDataset[] rawAxesY = firstAxesMetadata.getAxis(1);
 		
 		reducedData = applyRangesAndDeletionsToDataset(AxisMode.MEAN, rawData, rangeDataList, deletedIndices);
-		DoubleDataset[] reducedAxesX = getReducedAxes(rawAxesX, rangeDataList, deletedIndices); 
-		DoubleDataset[] reducedAxesY = getReducedAxes(rawAxesY, rangeDataList, deletedIndices); 
+		Dataset[] reducedAxesX = getReducedAxes(rawAxesX, rangeDataList, deletedIndices); 
+		Dataset[] reducedAxesY = getReducedAxes(rawAxesY, rangeDataList, deletedIndices); 
 		
 		// data is ready -> prepare to write to file
 		try (NexusFile file = new NexusFileHDF5(newFilePath)) {
@@ -323,21 +322,21 @@ class DataReduction2DToolModel extends DataReduction2DToolObservableModel {
 			dataNode.addAttribute(TreeFactory.createAttribute(NexusConstants.DATA_SIGNAL, NexusConstants.DATA_DATA));
 			
 			// primary axes
-			DoubleDataset primaryAxisX = ObjectUtils.firstNonNull(reducedAxesX);
-			DoubleDataset primaryAxisY = ObjectUtils.firstNonNull(reducedAxesY);
+			Dataset primaryAxisX = ObjectUtils.firstNonNull(reducedAxesX);
+			Dataset primaryAxisY = ObjectUtils.firstNonNull(reducedAxesY);
 			dataNode.addAttribute(TreeFactory.createAttribute(NexusConstants.DATA_AXES, new String[]{
 					primaryAxisX != null ? primaryAxisX.getName() : ".",
 					primaryAxisY != null ? primaryAxisY.getName() : "."
 			}));
 			
-			for (DoubleDataset axisX : reducedAxesX) {
+			for (Dataset axisX : reducedAxesX) {
 				if (axisX == null)
 					continue;
 				dataNode.addAttribute(TreeFactory.createAttribute(axisX.getName() + NexusConstants.DATA_INDICES_SUFFIX, Long.valueOf(0)));
 				dataNode.addDataNode(axisX.getName(), NexusTreeUtils.createDataNode(axisX.getName(), axisX.squeeze(), getDatasetUnitName(axisX)));
 			}
 			
-			for (DoubleDataset axisY : reducedAxesY) {
+			for (Dataset axisY : reducedAxesY) {
 				if (axisY == null)
 					continue;
 				dataNode.addAttribute(TreeFactory.createAttribute(axisY.getName() + NexusConstants.DATA_INDICES_SUFFIX, Long.valueOf(1)));
@@ -359,11 +358,11 @@ class DataReduction2DToolModel extends DataReduction2DToolObservableModel {
 		return "arbitrary";
 	}
 	
-	private static DoubleDataset applyRangesAndDeletionsToDataset(AxisMode mode, Dataset rawData, List<RangeData> rangeDataList, List<Integer> deletedIndices) throws Exception {
-		DoubleDataset rv = null;
+	private static Dataset applyRangesAndDeletionsToDataset(AxisMode mode, Dataset rawData, List<RangeData> rangeDataList, List<Integer> deletedIndices) throws Exception {
+		Dataset rv = null;
 	
 		if (rawData.getShape()[0] == 1) {
-			rv = DatasetUtils.cast(DoubleDataset.class, rawData);
+			rv = rawData;
 			String newName = MetadataPlotUtils.removeSquareBrackets(rawData.getName());
 			newName = newName.substring(newName.lastIndexOf('/') + 1);
 			rv.setName(newName);
@@ -374,15 +373,15 @@ class DataReduction2DToolModel extends DataReduction2DToolObservableModel {
 		int noOfChannels = rawData.getShape()[1];
 		
 		if (rangeDataList.isEmpty() && deletedIndices.isEmpty()) {
-			rv = DatasetUtils.cast(DoubleDataset.class, rawData);
+			rv = rawData;
 		} else if (!rangeDataList.isEmpty()) {
-				DoubleDataset dataToAvgAndAdd = DatasetFactory.zeros(DoubleDataset.class, 0, noOfChannels);
+				Dataset dataToAvgAndAdd = DatasetFactory.zeros(rawData.getClass(), 0, noOfChannels);
 				int j = 0;
 				for (RangeData avgInfo : rangeDataList) {
-					DoubleDataset avgDataItem = null;
+					Dataset avgDataItem = null;
 					switch (mode) {
 					case MEAN:
-						avgDataItem = (DoubleDataset) getProperSlice(
+						avgDataItem = getProperSlice(
 							rawData,
 							new int[]{avgInfo.getStartIndex(), 0},
 							new int[]{avgInfo.getEndIndex() + 1, noOfChannels},
@@ -407,19 +406,19 @@ class DataReduction2DToolModel extends DataReduction2DToolObservableModel {
 								new int[]{avgInfo.getStartIndex(), noOfChannels},
 								null,
 								deletedIndices);
-						dataToAvgAndAdd = (DoubleDataset) DatasetUtils.append(dataToAvgAndAdd, sliceToAppend, 0);
+						dataToAvgAndAdd = DatasetUtils.append(dataToAvgAndAdd, sliceToAppend, 0);
 					}
-					dataToAvgAndAdd = (DoubleDataset) DatasetUtils.append(dataToAvgAndAdd, avgDataItem, 0);
+					dataToAvgAndAdd = DatasetUtils.append(dataToAvgAndAdd, avgDataItem, 0);
 					j = avgInfo.getEndIndex() + 1;
 				}
 				if (j < noOfSpectrum) {
-					DoubleDataset sliceToAppend = getProperSlice(
+					Dataset sliceToAppend = getProperSlice(
 							rawData,
 							new int[]{j, 0},
 							new int[]{noOfSpectrum, noOfChannels},
 							null,
 							deletedIndices);
-					dataToAvgAndAdd = (DoubleDataset) DatasetUtils.append(dataToAvgAndAdd, sliceToAppend, 0);
+					dataToAvgAndAdd = DatasetUtils.append(dataToAvgAndAdd, sliceToAppend, 0);
 				}
 				rv = dataToAvgAndAdd;
 		} else  {
@@ -437,7 +436,7 @@ class DataReduction2DToolModel extends DataReduction2DToolObservableModel {
 		return rv;
 	}
 	
-	public static DoubleDataset getProperSlice(Dataset data, int[] start, int[] stop, int[] step, List<Integer> deletedIndices) throws Exception {
+	public static Dataset getProperSlice(Dataset data, int[] start, int[] stop, int[] step, List<Integer> deletedIndices) throws Exception {
 		// data must be 2D!
 		if (data.getRank() != 2)
 			throw new Exception("data must be 2D!");
@@ -458,7 +457,7 @@ class DataReduction2DToolModel extends DataReduction2DToolObservableModel {
 		
 		// start with zeros
 		long badIndices = deletedIndices.stream().filter(index -> index >= startFinal[0] && index < stopFinal[0]).count();
-		DoubleDataset rv = DatasetFactory.zeros(DoubleDataset.class, stop[0] - start[0] - (int) badIndices, stop[1] - start[1]);
+		Dataset rv = DatasetFactory.zeros(data.getClass(), stop[0] - start[0] - (int) badIndices, stop[1] - start[1]);
 		
 		// there may be a slightly more efficient way to do this, but it will do for now...
 		int j = 0;

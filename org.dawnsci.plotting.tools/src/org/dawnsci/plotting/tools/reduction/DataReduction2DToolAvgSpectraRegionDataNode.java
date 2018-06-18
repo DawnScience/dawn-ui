@@ -1,9 +1,9 @@
 package org.dawnsci.plotting.tools.reduction;
 
 import org.eclipse.dawnsci.plotting.api.region.IRegion;
+import org.eclipse.january.dataset.Dataset;
 import org.eclipse.january.dataset.DatasetFactory;
 import org.eclipse.january.dataset.DatasetUtils;
-import org.eclipse.january.dataset.DoubleDataset;
 
 class DataReduction2DToolAvgSpectraRegionDataNode extends DataReduction2DToolSpectraRegionDataNode {
 
@@ -12,15 +12,15 @@ class DataReduction2DToolAvgSpectraRegionDataNode extends DataReduction2DToolSpe
 	}
 	
 	@Override
-	public DoubleDataset getDataset(DoubleDataset fullData) {
-		DoubleDataset result = DatasetFactory.zeros(DoubleDataset.class, 0, fullData.getShapeRef()[1]);
+	public Dataset getDataset(Dataset fullData) {
+		Dataset result = DatasetFactory.zeros(fullData.getClass(), 0, fullData.getShapeRef()[1]);
 		for (DataReduction2DToolSpectrumDataNode node : this.getSpectra()) {
 			int i = node.getIndex();
-			DoubleDataset data = (DoubleDataset) fullData.getSliceView(new int[]{i, 0}, new int[]{i + 1, fullData.getShape()[1]}, new int[]{1,1});
+			Dataset data = fullData.getSliceView(new int[]{i, 0}, new int[]{i + 1, fullData.getShape()[1]}, new int[]{1,1});
 			data.setShape(1, fullData.getShape()[1]);
-			result = (DoubleDataset) DatasetUtils.append(result, data, 0);
+			result = DatasetUtils.append(result, data, 0);
 		}
-		result = (DoubleDataset) result.mean(0);
+		result = result.mean(0);
 		result.setShape(1, fullData.getShape()[1]);
 		return result;
 	}
