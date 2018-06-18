@@ -35,7 +35,6 @@ import org.eclipse.dawnsci.plotting.api.trace.TraceWillPlotEvent;
 import org.eclipse.january.DatasetException;
 import org.eclipse.january.dataset.Dataset;
 import org.eclipse.january.dataset.DatasetUtils;
-import org.eclipse.january.dataset.DoubleDataset;
 import org.eclipse.january.dataset.IDataset;
 import org.eclipse.january.dataset.ILazyDataset;
 import org.eclipse.january.metadata.AxesMetadata;
@@ -125,8 +124,8 @@ public class DataReduction2DTool extends AbstractToolPage implements IRegionList
 		stackList.remove(index);
 		plottingSystem.removeTrace(trace);
 		for (ILineTrace myTrace : stackList.subList(index, stackList.size())) {
-			DoubleDataset xData = DatasetUtils.cast(DoubleDataset.class, myTrace.getXData());
-			DoubleDataset yData = DatasetUtils.cast(DoubleDataset.class, myTrace.getYData());
+			Dataset xData = DatasetUtils.convertToDataset(myTrace.getXData());
+			Dataset yData = DatasetUtils.convertToDataset(myTrace.getYData());
 			yData.isubtract(toolPageModel.getTraceStack());
 			myTrace.setData(xData, yData);
 		}
@@ -136,7 +135,7 @@ public class DataReduction2DTool extends AbstractToolPage implements IRegionList
 	
 	private ILineTrace plotSpectrum(DataReduction2DToolSpectrumDataNode spectrum) {
 		int index  = spectrum.getIndex();
-		DoubleDataset data = (DoubleDataset) imageTrace.getData().getSlice(new int[]{index,0}, new int[]{index + 1, imageTrace.getData().getShape()[1]}, new int[]{1, 1});
+		Dataset data = DatasetUtils.convertToDataset(imageTrace.getData().getSlice(new int[]{index,0}, new int[]{index + 1, imageTrace.getData().getShape()[1]}, new int[]{1, 1}));
 		data.squeeze();
 		String name = Integer.toString(spectrum.getIndex());
 		ILineTrace trace = plottingSystem.createLineTrace(name);
@@ -154,7 +153,7 @@ public class DataReduction2DTool extends AbstractToolPage implements IRegionList
 	}
 	
 	private void addToPlottingSystem(ILineTrace trace) {
-		((DoubleDataset) trace.getYData()).iadd(stackList.size() * toolPageModel.getTraceStack());
+		DatasetUtils.convertToDataset(trace.getYData()).iadd(stackList.size() * toolPageModel.getTraceStack());
 		plottingSystem.addTrace(trace);
 		stackList.add(trace);
 		plottingSystem.repaint();
@@ -261,12 +260,12 @@ public class DataReduction2DTool extends AbstractToolPage implements IRegionList
 	}
 	
 	private void addTracesForRegion(DataReduction2DToolSpectraRegionDataNode region) {
-		DoubleDataset data = region.getDataset((DoubleDataset) imageTrace.getData());
+		Dataset data = region.getDataset(DatasetUtils.convertToDataset(imageTrace.getData()));
 		int noOfSpectra = data.getShape()[0];
 		int noOfChannels = data.getShape()[1];
 		String name = region.toString();
 		for (int i = 0; i < noOfSpectra; i++) {
-			DoubleDataset dataItem = (DoubleDataset) data.getSliceView(new int[]{i, 0}, new int[]{i + 1, noOfChannels}, null);
+			Dataset dataItem = data.getSliceView(new int[]{i, 0}, new int[]{i + 1, noOfChannels}, null);
 			dataItem.setName(name + " " + i);
 			dataItem.squeeze();
 			ILineTrace trace = plottingSystem.createLineTrace(name + " " + i);
@@ -374,8 +373,8 @@ public class DataReduction2DTool extends AbstractToolPage implements IRegionList
 	
 	private void updateStackOffset(double oldOffset, double newOffset) {
 		for (ILineTrace myTrace : stackList) {
-			DoubleDataset xData = DatasetUtils.cast(DoubleDataset.class, myTrace.getXData());
-			DoubleDataset yData = DatasetUtils.cast(DoubleDataset.class, myTrace.getYData());
+			Dataset xData = DatasetUtils.convertToDataset(myTrace.getXData());
+			Dataset yData = DatasetUtils.convertToDataset(myTrace.getYData());
 			yData.isubtract(stackList.indexOf(myTrace) * oldOffset);
 			yData.iadd(stackList.indexOf(myTrace) * newOffset);
 			myTrace.setData(xData, yData);

@@ -9,9 +9,9 @@ import org.eclipse.dawnsci.plotting.api.region.IROIListener;
 import org.eclipse.dawnsci.plotting.api.region.IRegion;
 import org.eclipse.dawnsci.plotting.api.region.ROIEvent;
 import org.eclipse.dawnsci.plotting.api.trace.ITrace;
+import org.eclipse.january.dataset.Dataset;
 import org.eclipse.january.dataset.DatasetFactory;
 import org.eclipse.january.dataset.DatasetUtils;
-import org.eclipse.january.dataset.DoubleDataset;
 
 class DataReduction2DToolSpectraRegionDataNode extends DataReduction2DToolObservableModel implements IROIListener {
 
@@ -131,11 +131,11 @@ class DataReduction2DToolSpectraRegionDataNode extends DataReduction2DToolObserv
 		// Do nothing
 	}
 
-	public DoubleDataset getDataset(DoubleDataset fullData) {
-		DoubleDataset result = DatasetFactory.zeros(DoubleDataset.class, 0, fullData.getShapeRef()[1]);
+	public Dataset getDataset(Dataset fullData) {
+		Dataset result = DatasetFactory.zeros(fullData.getClass(), 0, fullData.getShapeRef()[1]);
 		for (DataReduction2DToolSpectrumDataNode spectrum : this.getSpectra()) {
-			DoubleDataset data = (DoubleDataset) fullData.getSliceView(new int[]{spectrum.getIndex(), 0}, new int[]{spectrum.getIndex() + 1, fullData.getShape()[1]}, new int[]{1,1});
-			result = (DoubleDataset) DatasetUtils.append(result, data, 0);
+			Dataset data = fullData.getSliceView(new int[]{spectrum.getIndex(), 0}, new int[]{spectrum.getIndex() + 1, fullData.getShape()[1]}, new int[]{1,1});
+			result = DatasetUtils.append(result, data, 0);
 		}
 		return result;
 	}
