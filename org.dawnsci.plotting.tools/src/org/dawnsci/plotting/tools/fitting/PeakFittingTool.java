@@ -25,6 +25,7 @@ import org.dawb.common.ui.plot.tools.IDataReductionToolPage;
 import org.dawb.common.ui.util.EclipseUtils;
 import org.dawnsci.plotting.tools.Activator;
 import org.dawnsci.plotting.tools.preference.FittingPreferencePage;
+import org.dawnsci.plotting.tools.reduction.DataReductionToolPageUtils;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.dawnsci.analysis.api.fitting.functions.IPeak;
 import org.eclipse.dawnsci.analysis.api.tree.GroupNode;
@@ -56,6 +57,7 @@ import org.eclipse.jface.viewers.ColumnViewerToolTipSupport;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.jface.window.ToolTip;
+import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -518,8 +520,19 @@ public class PeakFittingTool extends AbstractFittingTool implements IRegionListe
 				createNewFit();
 			}
 		};
+		
 		createNewSelection.setImageDescriptor(Activator.getImageDescriptor("icons/plot-tool-peak-fit.png"));
 		getSite().getActionBars().getToolBarManager().add(createNewSelection);
+		
+		dataReduction = new Action("Data reduction...", Activator.getImageDescriptor("icons/run_workflow.gif")) {
+			@Override
+			public void run() {
+				WizardDialog wd = DataReductionToolPageUtils.getToolPageReductionWizardDialog(sliceMetadata,PeakFittingTool.this);
+				wd.open();
+			}
+		};
+		
+		getSite().getActionBars().getToolBarManager().add(dataReduction);
 		
 		final Action addMode = new Action("Add peaks to those already found", IAction.AS_CHECK_BOX) {
 			public void run() {
