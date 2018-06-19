@@ -25,6 +25,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.dawnsci.analysis.dataset.roi.RectangularROI;
+import org.eclipse.dawnsci.analysis.dataset.slicer.SliceFromSeriesMetadata;
 import org.eclipse.dawnsci.plotting.api.region.IRegion;
 import org.eclipse.dawnsci.plotting.api.region.IRegion.RegionType;
 import org.eclipse.dawnsci.plotting.api.region.IRegionListener;
@@ -88,7 +89,10 @@ public abstract class AbstractFittingTool extends AbstractToolPage implements IR
 
 	private ISelectionChangedListener viewUpdateListener;
 	private ITraceListener traceListener;
-
+	
+	protected Action dataReduction;
+	protected SliceFromSeriesMetadata sliceMetadata;
+	
 	private boolean addingPeaks=false;
 
 	public AbstractFittingTool() {
@@ -613,6 +617,8 @@ public abstract class AbstractFittingTool extends AbstractToolPage implements IR
 			tracesMenu.add(selectNone);			
 		}
 		
+		sliceMetadata = null;
+		
 		for (final ITrace iTrace : traces) {
 			if (!(iTrace instanceof ILineTrace)) continue;
 			
@@ -637,7 +643,15 @@ public abstract class AbstractFittingTool extends AbstractToolPage implements IR
 			
 			index++;
 		}
-
+		
+		if (selected != null && selected.getData() != null) {
+			sliceMetadata = selected.getData().getFirstMetadata(SliceFromSeriesMetadata.class);
+		}
+		
+		if (dataReduction != null) {
+			dataReduction.setEnabled(sliceMetadata != null);
+		}
+		
 		getSite().getActionBars().updateActionBars();
 		
 		return index;

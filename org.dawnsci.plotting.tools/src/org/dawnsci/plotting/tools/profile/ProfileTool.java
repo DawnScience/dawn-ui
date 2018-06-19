@@ -16,11 +16,13 @@ import java.util.Map;
 
 import org.dawb.common.ui.plot.tools.IDataReductionToolPage;
 import org.dawnsci.plotting.tools.Activator;
+import org.dawnsci.plotting.tools.reduction.DataReductionToolPageUtils;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.dawnsci.analysis.api.roi.IROI;
+import org.eclipse.dawnsci.analysis.dataset.slicer.SliceFromSeriesMetadata;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.PlotType;
 import org.eclipse.dawnsci.plotting.api.PlottingFactory;
@@ -28,11 +30,11 @@ import org.eclipse.dawnsci.plotting.api.preferences.BasePlottingConstants;
 import org.eclipse.dawnsci.plotting.api.preferences.PlottingConstants;
 import org.eclipse.dawnsci.plotting.api.region.IROIListener;
 import org.eclipse.dawnsci.plotting.api.region.IRegion;
+import org.eclipse.dawnsci.plotting.api.region.IRegion.RegionType;
 import org.eclipse.dawnsci.plotting.api.region.IRegionListener;
 import org.eclipse.dawnsci.plotting.api.region.ROIEvent;
 import org.eclipse.dawnsci.plotting.api.region.RegionEvent;
 import org.eclipse.dawnsci.plotting.api.region.RegionUtils;
-import org.eclipse.dawnsci.plotting.api.region.IRegion.RegionType;
 import org.eclipse.dawnsci.plotting.api.tool.AbstractToolPage;
 import org.eclipse.dawnsci.plotting.api.tool.IToolPageSystem;
 import org.eclipse.dawnsci.plotting.api.trace.IImageTrace;
@@ -43,7 +45,9 @@ import org.eclipse.dawnsci.plotting.api.trace.ITraceListener;
 import org.eclipse.dawnsci.plotting.api.trace.PaletteEvent;
 import org.eclipse.dawnsci.plotting.api.trace.TraceEvent;
 import org.eclipse.jface.action.Action;
+import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.Separator;
+import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.ui.IActionBars;
@@ -65,6 +69,9 @@ public abstract class ProfileTool extends AbstractToolPage  implements IROIListe
 	private   Map<String,Collection<ITrace>> registeredTraces;
 	private   boolean                isUIJob = false;
 	protected boolean                alwaysDownsample = false;
+	
+	private SliceFromSeriesMetadata sliceMetadata;
+	private IAction reduceAction;
 
 	public ProfileTool() {
 		
@@ -92,10 +99,15 @@ public abstract class ProfileTool extends AbstractToolPage  implements IROIListe
 						return;
 					}
 					if (getImageTrace()!=null) getImageTrace().addPaletteListener(paletteListener);
+					sliceMetadata = getImageTrace().getData().getFirstMetadata(SliceFromSeriesMetadata.class);
 					ProfileTool.this.update(null, null, false);
 				}
 				@Override
 				protected void update(TraceEvent evt) {
+					IImageTrace t = ((IImageTrace)evt.getSource());
+					if (t.getData() != null) {
+						 sliceMetadata = t.getData().getFirstMetadata(SliceFromSeriesMetadata.class);
+					}
 					ProfileTool.this.update(null, null, false);
 				}
 			};
@@ -238,8 +250,21 @@ public abstract class ProfileTool extends AbstractToolPage  implements IROIListe
 				createNewRegion(true);
 			}
 		};
+		
+		reduceAction = new Action("Data reduction...", Activator.getImageDescriptor("icons/run_workflow.gif")) {
+			@Override
+			public void run() {
+				WizardDialog wd = DataReductionToolPageUtils.getToolPageReductionWizardDialog(sliceMetadata,ProfileTool.this);
+				wd.open();
+			}
+		};
+		
+		reduceAction.setEnabled(false);
+		
+		
 		if (actionbars != null){
 			actionbars.getToolBarManager().add(new Separator("org.dawb.workbench.plotting.tools.profile.newProfileGroup"));
+			actionbars.getToolBarManager().insertAfter("org.dawb.workbench.plotting.tools.profile.newProfileGroup", reduceAction);
 			actionbars.getToolBarManager().insertAfter("org.dawb.workbench.plotting.tools.profile.newProfileGroup", reselect);
 			actionbars.getToolBarManager().add(new Separator("org.dawb.workbench.plotting.tools.profile.newProfileGroupAfter"));
 		}
@@ -308,6 +333,12 @@ public abstract class ProfileTool extends AbstractToolPage  implements IROIListe
 	
 	public void activate() {
 		super.activate();
+		
+		IImageTrace imageTrace = getImageTrace();
+		if (imageTrace != null && imageTrace.getData() != null) {
+			 sliceMetadata = imageTrace.getData().getFirstMetadata(SliceFromSeriesMetadata.class);
+		}
+		
 		update(null, null, false);
 		if (getPlottingSystem()!=null) {
 			getPlottingSystem().addTraceListener(traceListener);
@@ -455,6 +486,11 @@ public abstract class ProfileTool extends AbstractToolPage  implements IROIListe
 	
 	protected synchronized void update(IRegion r, IROI rb, boolean isDrag) {
 		if (!isActive()) return;
+		
+		if (reduceAction != null) {
+			reduceAction.setEnabled(sliceMetadata != null);
+		}
+		
 		if (r!=null) {
 			if(!isRegionTypeSupported(r.getRegionType())) return; // Nothing to do.
 			if (!r.isUserRegion()) return; // Likewise

@@ -10,6 +10,8 @@ package org.dawnsci.plotting.tools.reduction;
 
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.dawb.common.ui.monitor.ProgressMonitorWrapper;
 import org.dawb.common.ui.plot.tools.IDataReductionToolPage;
@@ -33,11 +35,17 @@ import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IExportWizard;
 import org.eclipse.ui.IWorkbench;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.FrameworkUtil;
+import org.osgi.service.event.Event;
+import org.osgi.service.event.EventAdmin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class DataReductionWizard extends Wizard implements IExportWizard {
 
+	public static enum AutoOpenMode {NONE,IDE,EVENT};
+	
 	public static final String ID = "org.dawb.workbench.plotting.dataReductionExportWizard";
 	
 	private static final Logger logger = LoggerFactory.getLogger(DataReductionWizard.class);
@@ -49,6 +57,8 @@ public class DataReductionWizard extends Wizard implements IExportWizard {
 	private IConversionVisitor            visitor;
 
 	private DimsDataList           dimsList;
+	
+	private AutoOpenMode autoOpenMode;
 	
 	public DataReductionWizard() {
 		super();
@@ -114,8 +124,26 @@ public class DataReductionWizard extends Wizard implements IExportWizard {
 						monitor.worked(1);
 						service.process(context);
 						
-						EclipseUtils.refreshAndOpen(context.getOutputPath(), true, monitor);
-
+						switch (autoOpenMode) {
+						case IDE:
+							EclipseUtils.refreshAndOpen(context.getOutputPath(), true, monitor);
+							break;
+						case EVENT:
+							BundleContext bundleContext =
+			                FrameworkUtil.
+			                getBundle(this.getClass()).
+			                getBundleContext();
+							
+							final EventAdmin eventAdmin = bundleContext.getService(bundleContext.getServiceReference(EventAdmin.class));
+							
+							Map<String,String> props = new HashMap<>();
+							props.put("path", context.getOutputPath());
+							eventAdmin.postEvent(new Event("org/dawnsci/events/file/OPEN", props));
+							break;
+						default:
+							break;
+						}
+						
 					} catch (final Exception ne) {
 
 						logger.error("Cannot run export process for data reduction from tool '"+visitor.getConversionSchemeName()+"'", ne);
@@ -175,5 +203,10 @@ public class DataReductionWizard extends Wizard implements IExportWizard {
 			}
 		}
 	}
+	
+	public void setAutoOpenMode(AutoOpenMode autoOpenMode) {
+		this.autoOpenMode = autoOpenMode;
+	}
+
 
 }
