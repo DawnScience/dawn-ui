@@ -163,37 +163,37 @@ public class MapPlotManager {
 			@Override
 			public void run() {
 				try {
-					
-				IDataset s = topMap.getSpectrum(x,y);
-				if (s == null) {
-					data.clear();
-					return;
-				}
-				
-				if (s.getSize() == 1) return;
-				
-				if (s != null) MetadataPlotUtils.plotDataWithMetadata(s, data);
-				
-				Display.getDefault().asyncExec(new Runnable() {
-
-					@Override
-					public void run() {
-						Collection<IRegion> regions = map.getRegions();
-						Iterator<IRegion> it = regions.iterator();
-						while (it.hasNext()) {
-							IRegion r = it.next();
-							if (r.getUserObject() ==  MapPlotManager.this){
-								map.removeRegion(r);
-							}
-						}
-						map.repaint(false);
+					long t = System.currentTimeMillis();
+					IDataset s = topMap.getSpectrum(x,y);
+					if (s == null) {
+						data.clear();
+						return;
 					}
-					
-				});
+					logger.info("Slice time {} ms for shape {} of {}", (System.currentTimeMillis()-t), Arrays.toString(s.getShape()), topMap.toString());
+					if (s.getSize() == 1) return;
+
+					MetadataPlotUtils.plotDataWithMetadata(s, data);
+
+					Display.getDefault().asyncExec(new Runnable() {
+
+						@Override
+						public void run() {
+							Collection<IRegion> regions = map.getRegions();
+							Iterator<IRegion> it = regions.iterator();
+							while (it.hasNext()) {
+								IRegion r = it.next();
+								if (r.getUserObject() ==  MapPlotManager.this){
+									map.removeRegion(r);
+								}
+							}
+							map.repaint(false);
+						}
+
+					});
 				} catch (Exception e) {
 					logger.error("Error plotting spectrum");
 				}
-				
+
 			}
 		};
 		
