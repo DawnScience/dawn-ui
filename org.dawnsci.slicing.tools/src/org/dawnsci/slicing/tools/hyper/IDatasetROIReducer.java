@@ -20,10 +20,14 @@ import org.eclipse.january.dataset.Slice;
 /**
  * Interface for creating an object to reduce an ND array for display in the Hyperwindow
  * 
- * TODO FIXME Interfaces require Javadoc!
  */
 public interface IDatasetROIReducer {
 
+	/**
+	 * Whether the reducer produces 1D (a line plot) or 2D (an image) data
+	 * 
+	 * @return is1D
+	 */
 	boolean isOutput1D();
 	
 	/**
@@ -32,11 +36,11 @@ public interface IDatasetROIReducer {
 	 * UI with a cancelable IMonitor because it can create "infinitely" running jobs
 	 * when the ILazyDataset is operating a directory of images.
 	 * 
-	 * @param data
-	 * @param axes
-	 * @param roi
-	 * @param slices
-	 * @param order
+	 * @param data - The multi dimensional dataset
+	 * @param axes - a list of the axes, the order in the list corresponds to the order array
+	 * @param roi - the ROI to use for slicing
+	 * @param slices - how the data is sliced to generate the sub-dataset
+	 * @param order - how the dimensions are mapped to the output data
 	 * @param monitor
 	 * @return
 	 * @throws Exception
@@ -45,6 +49,16 @@ public interface IDatasetROIReducer {
 	
 	List<RegionType> getSupportedRegionType();
 	
+	/**
+	 * Build the initial ROI for the reducer
+	 * 
+	 * Order of the axes list here matches the re-arranged order,
+	 * not the same as the lazydataset
+	 * 
+	 * @param axes
+	 * @param order
+	 * @return
+	 */
 	IROI getInitialROI(List<IDataset> axes, int[] order);
 	
 	boolean supportsMultipleRegions();

@@ -29,6 +29,17 @@ public class HyperPlotViewer extends IPlottingSystemViewer.Stub<Composite> {
 	
 	@Override
 	public boolean addTrace(ITrace trace){
+		
+		if (trace instanceof Hyper4DTrace) {
+			Hyper4DTrace h = (Hyper4DTrace)trace;
+			this.trace = h;
+			
+			HyperDataPackage dp = buildDataPackage(h);
+			hyper.setData(dp.lazyDataset, dp.axes, dp.slices, dp.order, new Hyper4DMapReducer(), new Hyper4DImageReducer());
+			((Hyper4DTrace) trace).setViewer(this);
+			return true;
+		}
+		
 		if (trace instanceof HyperTrace) {
 			HyperTrace h = (HyperTrace)trace;
 			this.trace = h;
@@ -67,8 +78,9 @@ public class HyperPlotViewer extends IPlottingSystemViewer.Stub<Composite> {
 	private HyperDataPackage buildDataPackage(IHyperTrace hyperTrace) {
 		ILazyDataset lazyDataset = hyperTrace.getLazyDataset();
 		int[] order = hyperTrace.getOrder();
+		int rank = order.length;
 		
-		IDataset[] daxes = new IDataset[3];
+		IDataset[] daxes = new IDataset[rank];
 		
 		AxesMetadata md = lazyDataset.getFirstMetadata(AxesMetadata.class);
 		
@@ -81,7 +93,7 @@ public class HyperPlotViewer extends IPlottingSystemViewer.Stub<Composite> {
 			
 		} else {
 
-			for (int i = 0; i < 3;i++) {
+			for (int i = 0; i < rank;i++) {
 				ILazyDataset[] axis = md.getAxis(order[i]);
 				IDataset d = null;
 				if (axis == null || axis[0] == null) {
@@ -115,6 +127,13 @@ public class HyperPlotViewer extends IPlottingSystemViewer.Stub<Composite> {
 	
 	@Override
 	public  <U extends ITrace> U createTrace(String name, Class<? extends ITrace> clazz) {
+		
+		if (clazz == IHyper4DTrace.class) {
+			HyperTrace hyperTrace = new Hyper4DTrace();
+			hyperTrace.setName(name);
+			return (U)hyperTrace;
+		}
+		
 		if (clazz == IHyperTrace.class) {
 			HyperTrace hyperTrace = new HyperTrace();
 			hyperTrace.setName(name);
@@ -125,6 +144,11 @@ public class HyperPlotViewer extends IPlottingSystemViewer.Stub<Composite> {
 	
 	@Override
 	public boolean isTraceTypeSupported(Class<? extends ITrace> trace) {
+		
+		if (IHyper4DTrace.class.isAssignableFrom(trace)) {
+			return true;
+		}
+		
 		if (IHyperTrace.class.isAssignableFrom(trace)) {
 			return true;
 		}

@@ -79,6 +79,11 @@
             name="Hyper3d"
             priority="0">
       </plotmode>
+      <plotmode
+            class="org.dawnsci.slicing.tools.hyper.PlotModeHyper4D"
+            name="Hyper4d"
+            priority="0">
+      </plotmode>
    </extension>
 
 </plugin>
