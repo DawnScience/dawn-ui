@@ -10,6 +10,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.dawnsci.plotting.tools.ServiceLoader;
 import org.eclipse.dawnsci.analysis.api.io.ILoaderService;
@@ -474,6 +475,37 @@ class DataReduction2DToolModel extends DataReduction2DToolObservableModel {
 	public List<String> getAxesNames() {
 		return axesNames;
 	}
+
+	private static void ensureImageAxisIsPrimary(AxesMetadata full, AxesMetadata trace, int axis) {
+		ILazyDataset firstNonNull = ObjectUtils.firstNonNull(trace.getAxis(axis));
+		if (firstNonNull == null)
+			return;
+		String firstNonNullName = firstNonNull.getName();
+		firstNonNullName = firstNonNullName.substring(firstNonNullName.lastIndexOf('/') + 1);
+		ILazyDataset match = null;
+		ILazyDataset[] axes = full.getAxis(axis);
+		for (ILazyDataset ds : axes) {
+			// match names
+			String dsName = ds.getName();
+			// compare starting at last slash
+			if (dsName.substring(dsName.lastIndexOf('/') + 1).equals(firstNonNullName)) {
+				match = ds;
+				break;
+			}
+		}
+
+		if (match != null) {
+			int index = ArrayUtils.indexOf(axes, match);
+			if (index > 0) {
+				ILazyDataset temp = axes[0];
+				axes[0] = match;
+				axes[index] = temp;
+				full.setAxis(axis, axes);
+			}
+		} else {
+			logger.warn("Trace axisX not found in parent dataset!");
+		}
+	}
 	
 	public static AxesMetadata getFirstAxesMetadata(IImageTrace trace) {
 		AxesMetadata rv = null;
@@ -484,6 +516,11 @@ class DataReduction2DToolModel extends DataReduction2DToolObservableModel {
 			try {
 				IDataset dataset = loaderService.getDataset(sliceMetadata.getFilePath(), sliceMetadata.getDatasetName(), null).getSlice(sliceMetadata.getSliceInfo().getSliceFromInput());
 				rv = dataset.getFirstMetadata(AxesMetadata.class);
+				// assume that primary axes are those in the trace
+				AxesMetadata traceAxesMetadata = trace.getData().getFirstMetadata(AxesMetadata.class);
+
+				ensureImageAxisIsPrimary(rv, traceAxesMetadata, 0);
+				ensureImageAxisIsPrimary(rv, traceAxesMetadata, 1);
 			} catch (Exception e) {
 				rv = trace.getData().getFirstMetadata(AxesMetadata.class);
 			}
