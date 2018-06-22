@@ -513,6 +513,7 @@ class DataReduction2DToolModel extends DataReduction2DToolObservableModel {
 		SliceFromSeriesMetadata sliceMetadata = trace.getData().getFirstMetadata(SliceFromSeriesMetadata.class);
 		if (sliceMetadata != null) {
 			ILoaderService loaderService = ServiceLoader.getLoaderService();
+			loaderService.clearSoftReferenceCache(sliceMetadata.getFilePath());
 			try {
 				IDataset dataset = loaderService.getDataset(sliceMetadata.getFilePath(), sliceMetadata.getDatasetName(), null).getSlice(sliceMetadata.getSliceInfo().getSliceFromInput());
 				rv = dataset.getFirstMetadata(AxesMetadata.class);
