@@ -128,9 +128,6 @@
          <hiddenToolBarItem
                id="org.dawb.tango.extensions.shared.memory">
          </hiddenToolBarItem>
-         <actionSet
-               id="org.dawnsci.spectrum.ui.fileOpenActionSet">
-         </actionSet>
          <hiddenMenuItem
                id="org.eclipse.search.menu">
          </hiddenMenuItem>
