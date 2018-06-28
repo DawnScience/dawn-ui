@@ -96,7 +96,7 @@ public class NDimensions {
 	
 	public void setAxis(int i, String axis) {
 		dimensions[i].setAxis(axis);
-		update(false);
+		updateAxis();
 	}
 	
 	public String[] getAxisOptions(int i) {
@@ -105,8 +105,7 @@ public class NDimensions {
 
 	public void setDescription(int i, String description) {
 		updateDescription(dimensions[i], description);
-//		dimensions[i].setDescription(description);
-		update(false);
+		updateOption();
 	}
 	
 	public String getDimensionWithSize(int i) {
@@ -116,6 +115,16 @@ public class NDimensions {
 	private void update(boolean optionChange) {
 		SliceChangeEvent sliceChangeEvent = new SliceChangeEvent(new NDimensions(this), optionChange, parent);
 		fireSliceListeners(sliceChangeEvent);
+	}
+	
+	private void updateAxis() {
+		SliceChangeEvent sliceChangeEvent = new SliceChangeEvent(new NDimensions(this), false, parent);
+		fireAxisListeners(sliceChangeEvent);
+	}
+	
+	private void updateOption() {
+		SliceChangeEvent sliceChangeEvent = new SliceChangeEvent(new NDimensions(this), true, parent);
+		fireOptionListeners(sliceChangeEvent);
 	}
 	
 	private void updateDescription(Dimension dim, String desc) {
@@ -173,10 +182,6 @@ public class NDimensions {
 				dimensions[fastest].setSlice(new Slice(dimensions[fastest].getSize()));
 			}
 		}
-		
-		
-//		update();
-
 	}
 	
 	private int getDimensionFromDescription(String description){
@@ -286,6 +291,16 @@ public class NDimensions {
 	private void fireSliceListeners(SliceChangeEvent event) {
 		for (ISliceChangeListener listener : listeners)
 			listener.sliceChanged(event);
+	}
+	
+	private void fireAxisListeners(SliceChangeEvent event) {
+		for (ISliceChangeListener listener : listeners)
+			listener.axisChanged(event);
+	}
+	
+	private void fireOptionListeners(SliceChangeEvent event) {
+		for (ISliceChangeListener listener : listeners)
+			listener.optionsChanged(event);
 	}
 	
 	public Object[] getOptions(){

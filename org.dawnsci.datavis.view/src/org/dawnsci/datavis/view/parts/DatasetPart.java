@@ -178,16 +178,29 @@ public class DatasetPart {
 
 			@Override
 			public void sliceChanged(SliceChangeEvent event) {
-				//respond to this happening elsewhere
-				if (event.isOptionsChanged()) return;
+				actOnEvent(event);	
+			}
+
+			@Override
+			public void axisChanged(SliceChangeEvent event) {
+				actOnEvent(event);	
+			}
+
+			@Override
+			public void optionsChanged(SliceChangeEvent event) {
+				//do nothing here
+			}
+
+			private void actOnEvent(SliceChangeEvent event) {
 				if (event.getParent() instanceof DataOptions) {
 					DataOptions dOptions = (DataOptions)event.getParent();
 					if (!dOptions.isSelected() && !dOptions.getParent().isSelected()) {
 						return;
 					}
 				}
-				plotController.forceReplot();	
-			};
+
+				plotController.forceReplot();
+			}
 		};
 		
 		Object selection = selectionService.getSelection("org.dawnsci.datavis.view.parts.LoadedFilePart");

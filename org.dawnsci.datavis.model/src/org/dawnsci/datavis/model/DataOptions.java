@@ -28,15 +28,34 @@ public class DataOptions implements IDataObject, IDataPackage {
 	private PlottableObject plottableObject;
 	private String label;
 	
+	private ISliceChangeListener listener;
+	
 	public DataOptions(String name, LoadedFile parent) {
 		this.name = name;
 		this.parent = parent;
+		
+		this.listener = new ISliceChangeListener() {
+			
+			@Override
+			public void sliceChanged(SliceChangeEvent event) {
+				//do nothing
+			}
+			
+			@Override
+			public void optionsChanged(SliceChangeEvent event) {
+				//do nothing
+			}
+			
+			@Override
+			public void axisChanged(SliceChangeEvent event) {
+				setAxes(event.getAxesNames());
+			}
+		};
 	}
 	
 	public DataOptions(DataOptions toCopy) {
-		this.name = toCopy.name;
+		this(toCopy.name,toCopy.parent);
 		this.data = toCopy.data != null ? toCopy.data.getSliceView() : null;
-		this.parent = toCopy.parent;
 		this.axes = axes != null ? axes.clone() : null;
 		this.selected = new AtomicBoolean(toCopy.selected.get());
 		this.plottableObject = new PlottableObject(toCopy.plottableObject.getPlotMode(),
@@ -217,6 +236,7 @@ public class DataOptions implements IDataObject, IDataPackage {
 				ndims.setAxis(i, axes[i]);
 			}
 		}
+		ndims.addSliceListener(listener);
 		return ndims;
 	}
 	

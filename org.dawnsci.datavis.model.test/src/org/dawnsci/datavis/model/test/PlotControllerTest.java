@@ -149,6 +149,16 @@ public class PlotControllerTest extends AbstractTestModel {
 					}
 				}
 				plotManager.forceReplot();	
+			}
+
+			@Override
+			public void axisChanged(SliceChangeEvent event) {
+				//do nothing
+			}
+
+			@Override
+			public void optionsChanged(SliceChangeEvent event) {
+				//do nothing
 			};
 		};
 		
@@ -391,6 +401,18 @@ public class PlotControllerTest extends AbstractTestModel {
 					}
 				}
 				plotManager.forceReplot();	
+			}
+
+			@Override
+			public void axisChanged(SliceChangeEvent event) {
+				// TODO Auto-generated method stub
+				
+			}
+
+			@Override
+			public void optionsChanged(SliceChangeEvent event) {
+				// TODO Auto-generated method stub
+				
 			};
 		};
 		
