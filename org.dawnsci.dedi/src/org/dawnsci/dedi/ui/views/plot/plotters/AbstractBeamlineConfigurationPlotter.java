@@ -28,6 +28,8 @@ import org.eclipse.dawnsci.plotting.api.region.IRegion;
 import org.eclipse.dawnsci.plotting.api.trace.IImageTrace;
 import org.eclipse.dawnsci.plotting.api.trace.ITrace;
 import org.eclipse.dawnsci.plotting.api.trace.IImageTrace.DownsampleType;
+import org.eclipse.dawnsci.plotting.api.trace.ILine3DTrace;
+import org.eclipse.dawnsci.plotting.api.trace.ILineTrace;
 import org.eclipse.january.dataset.Dataset;
 import org.eclipse.january.dataset.DatasetFactory;
 import org.eclipse.january.dataset.Slice;
@@ -181,12 +183,12 @@ public abstract class AbstractBeamlineConfigurationPlotter implements IBeamlineC
 	
 	
 	private void createRay() {
-		removeRegions(new String[] {"Ray1", "Ray2", "Ray3", "Ray4"});
-		
-		IRegion visibleRangeRegion1;
-		IRegion visibleRangeRegion2;
-		IRegion inaccessibleRangeRegion;
-		IRegion requestedRangeRegion;
+		int lineWidth = 6;
+		system.clearTraces();
+		ILineTrace visibleRange1;
+		ILineTrace visibleRange2;
+		ILineTrace inaccessibleRange;
+		ILineTrace requestedRange;
 		
 		Vector2d visibleRangeStartPoint = resultsController.getVisibleRangeStartPoint();
 		Vector2d visibleRangeEndPoint = resultsController.getVisibleRangeEndPoint();
@@ -196,49 +198,59 @@ public abstract class AbstractBeamlineConfigurationPlotter implements IBeamlineC
 		if(visibleRangeStartPoint == null || visibleRangeEndPoint == null) return;
 		
 		try {
-			visibleRangeRegion1 = system.createRegion("Ray1", IRegion.RegionType.LINE);
-			visibleRangeRegion2 = system.createRegion("Ray2", IRegion.RegionType.LINE);
-			inaccessibleRangeRegion = system.createRegion("Ray3", IRegion.RegionType.LINE);
-			requestedRangeRegion = system.createRegion("Ray4", IRegion.RegionType.LINE);
+			visibleRange1 = system.createLineTrace("Inner Visible Range");
+			visibleRange2 = system.createLineTrace("Outer Visible Range");
+			inaccessibleRange = system.createLineTrace("Inaccessible Range");
+			requestedRange = system.createLineTrace("Requested Range");
 		} catch (Exception e) {
 			e.printStackTrace();
 			return;
 		}
 		
-		IROI inaccessibleRangeROI = new LinearROI(new double[] {getBeamstopCentreX(), 
-				                                           getBeamstopCentreY()},
-											 new double[] {getVisibleRangeStartPointX(), 
-											 		       getVisibleRangeStartPointY()});
+		inaccessibleRange.setData(createCoordinatePair(getBeamstopCentreX(), getVisibleRangeStartPointX()), 
+										createCoordinatePair(getBeamstopCentreY(), getVisibleRangeStartPointY()));
 		
-		addRegion(inaccessibleRangeRegion, inaccessibleRangeROI, Display.getDefault().getSystemColor(SWT.COLOR_RED));
+		inaccessibleRange.setLineWidth(lineWidth);
+		inaccessibleRange.setTraceColor(Display.getDefault().getSystemColor(SWT.COLOR_RED));
+		system.addTrace(inaccessibleRange);
 		
-		if(!resultsController.getIsSatisfied() || requestedRangeStartPoint == null || requestedRangeEndPoint == null){	
-			IROI visibleRangeROI1 = new LinearROI(new double[] {getVisibleRangeStartPointX(), 
-														   getVisibleRangeStartPointY()}, 
-					                         new double[] {getVisibleRangeEndPointX(), 
-					                        		       getVisibleRangeEndPointY()});
-	
-			addRegion(visibleRangeRegion1, visibleRangeROI1, new Color(Display.getDefault(), 205, 133, 63));
+		
+		if(!resultsController.getIsSatisfied() || requestedRangeStartPoint == null || requestedRangeEndPoint == null){
+			visibleRange1.setData(createCoordinatePair(getVisibleRangeStartPointX(), getVisibleRangeEndPointX()), 
+								  createCoordinatePair(getVisibleRangeStartPointY(), getVisibleRangeEndPointY()));
+			
+			visibleRange1.setLineWidth(lineWidth);
+			visibleRange1.setName("Visible Range");
+			visibleRange1.setTraceColor(new Color(Display.getDefault(), 205, 133, 63));
+			system.addTrace(visibleRange1);
+			
 		} else {
-			IROI visibleRangeROI1 = new LinearROI(new double[] {getVisibleRangeStartPointX(), 
-										                   getVisibleRangeStartPointY()}, 
-										      new double[] {getRequestedRangeStartPointX(), 
-										    		        getRequestedRangeStartPointY()});
+			visibleRange1.setData(createCoordinatePair(getVisibleRangeStartPointX(), getRequestedRangeStartPointX()), 
+					  createCoordinatePair(getVisibleRangeStartPointY(), getRequestedRangeStartPointY()));
 			
-			IROI visibleRangeROI2 = new LinearROI(new double[] {getRequestedRangeEndPointX(), 
-														   getRequestedRangeEndPointY()}, 
-										      new double[] {getVisibleRangeEndPointX(), 
-										    		        getVisibleRangeEndPointY()});
+			visibleRange1.setLineWidth(lineWidth);
+			visibleRange1.setTraceColor(new Color(Display.getDefault(), 205, 133, 63));
+			system.addTrace(visibleRange1);
 			
-			IROI requestedRangeROI = new LinearROI(new double[] {getRequestedRangeStartPointX(),	
-															getRequestedRangeStartPointY()}, 
-					                          new double[] {getRequestedRangeEndPointX(),
-					                        		        getRequestedRangeEndPointY()});
+			visibleRange2.setData(createCoordinatePair(getRequestedRangeEndPointX(), getVisibleRangeEndPointX()), 
+								  createCoordinatePair(getRequestedRangeEndPointY(), getVisibleRangeEndPointY()));
 			
-			addRegion(visibleRangeRegion1, visibleRangeROI1, new Color(Display.getDefault(), 205, 133, 63));
-			addRegion(visibleRangeRegion2, visibleRangeROI2, new Color(Display.getDefault(), 205, 133, 63));
-			addRegion(requestedRangeRegion, requestedRangeROI, Display.getDefault().getSystemColor(SWT.COLOR_DARK_GREEN));
+			visibleRange2.setLineWidth(lineWidth);
+			visibleRange2.setTraceColor(new Color(Display.getDefault(), 205, 133, 63));
+			system.addTrace(visibleRange2);
+			
+			requestedRange.setData(createCoordinatePair(getRequestedRangeStartPointX(), getRequestedRangeEndPointX()), 
+								   createCoordinatePair(getRequestedRangeStartPointY(), getRequestedRangeEndPointY()));
+			
+			requestedRange.setLineWidth(lineWidth);
+			requestedRange.setTraceColor(Display.getDefault().getSystemColor(SWT.COLOR_DARK_GREEN));
+			system.addTrace(requestedRange);
 		}
+	}
+	
+	
+	private Dataset createCoordinatePair(double pointA, double pointB) {
+		return DatasetFactory.createFromObject(new double[] {pointA, pointB});
 	}
 	
 	
