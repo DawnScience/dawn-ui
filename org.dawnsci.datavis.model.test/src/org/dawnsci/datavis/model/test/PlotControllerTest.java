@@ -58,6 +58,11 @@ public class PlotControllerTest extends AbstractTestModel {
 			public List<String> getRecentPlaces() {
 				return null;
 			}
+
+			@Override
+			public String getCurrentDefaultPlace() {
+				return null;
+			}
 			
 		};
 		plottingSystem = new MockPlottingSystem();

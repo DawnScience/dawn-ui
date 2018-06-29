@@ -8,4 +8,6 @@ public interface IRecentPlaces {
 	
 	public List<String> getRecentPlaces();
 	
+	public String getCurrentDefaultPlace();
+	
 }

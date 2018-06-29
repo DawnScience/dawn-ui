@@ -56,4 +56,14 @@ public class RecentPlacesImpl implements IRecentPlaces {
 		return new ArrayList<String>(lastFile);
 	}
 
+	@Override
+	public String getCurrentDefaultPlace() {
+		if (!lastFile.isEmpty()) {
+			return lastFile.get(0);
+		}
+		
+		return System.getProperty("user.home");
+		
+	}
+
 }

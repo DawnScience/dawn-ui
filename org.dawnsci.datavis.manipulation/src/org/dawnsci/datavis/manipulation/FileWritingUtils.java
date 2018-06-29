@@ -74,16 +74,21 @@ public class FileWritingUtils {
 		RawTextSaver saver = new RawTextSaver(path);
 		DataHolder dh = new DataHolder();
 		AxesMetadata md = data.getFirstMetadata(AxesMetadata.class);
-		IDataset y = null;
-		ILazyDataset[] axes = md.getAxes();
-
+		ILazyDataset[] axes = md.getAxis(0);
+		IDataset[] dArray = null;
 		if (axes[0] != null) {
+			
+			dArray = new IDataset[axes[1] == null ? 2 : 3];
+			
 			try {
-				y = axes[0].getSlice();
-				y = y.squeeze();
+				
+				dArray[0] = getAxisPadded(axes[0]);
 				data.setShape(data.getShape()[0],1);
-				y.setShape(y.getShape()[0],1);
-				data = DatasetUtils.concatenate(new IDataset[]{y,data}, 1);
+				dArray[1] = data;
+				if (axes[1] != null) {
+					dArray[2] = getAxisPadded(axes[1]);
+				}
+				data = DatasetUtils.concatenate(dArray, 1);
 			} catch (DatasetException e) {
 				return false;
 			}
@@ -98,6 +103,13 @@ public class FileWritingUtils {
 		}
 		
 		return true;
+	}
+	
+	private static IDataset getAxisPadded(ILazyDataset l) throws DatasetException {
+		IDataset y = l.getSlice();
+		y = y.squeeze();
+		y.setShape(y.getShape()[0],1);
+		return y;
 	}
 		
 		

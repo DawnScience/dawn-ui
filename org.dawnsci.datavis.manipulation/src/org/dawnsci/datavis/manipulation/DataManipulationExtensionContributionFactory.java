@@ -36,6 +36,7 @@ import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.dialogs.Dialog;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.LabelProvider;
@@ -242,17 +243,51 @@ public class DataManipulationExtensionContributionFactory extends ExtensionContr
 					}
 				};
 				
+				
+				Action xmcd = new Action("XMCD"){
+					@Override
+					public void run() {
+
+						List<IXYData> data = getCompatibleXY();
+						
+						if (data != null && data.size() == 2) {
+							RegionNormalisedDifferenceDialog d = new RegionNormalisedDifferenceDialog(Display.getDefault().getActiveShell(), data.get(0), data.get(1));
+							if (d.open() == Dialog.OK) {
+								BundleContext bundleContext =
+										FrameworkUtil.
+										getBundle(this.getClass()).
+										getBundleContext();
+								IRecentPlaces recentPlaces = bundleContext.getService(bundleContext.getServiceReference(IRecentPlaces.class));
+								FileDialog f = new FileDialog(Display.getDefault().getActiveShell(), SWT.SAVE);
+								f.setFilterPath(recentPlaces.getCurrentDefaultPlace());
+								f.setFileName(d.getTemplateName() + ".dat");
+								String open = f.open();
+								
+								if (open != null && FileWritingUtils.writeText(open, d.getData())) {
+									IFileController fc = bundleContext.getService(bundleContext.getServiceReference(IFileController.class));
+									FileControllerUtils.loadFile(fc,open);
+								}
+							}
+						} else {
+							MessageDialog.openError(Display.getDefault().getActiveShell(), "Error", "XMCD requires two files to be selected in the table");
+						}
+						
+					}
+				};
+				
+				
 				if (data == null || data.isEmpty()) {
 					a.setEnabled(false);
 					average.setEnabled(false);
 					sub.setEnabled(false);
+					xmcd.setEnabled(false);
 				}
 				
-
 
 				search.add(a);
 				search.add(average);
 				search.add(sub);
+				search.add(xmcd);
 
 			}
 
@@ -414,12 +449,12 @@ public class DataManipulationExtensionContributionFactory extends ExtensionContr
 	}
 
 	private static double[] checkXaxisHasCommonRangeForInterpolation(IDataset[] xaxis) {
-		double min = Double.NEGATIVE_INFINITY;
-		double max = Double.POSITIVE_INFINITY;
+		double min = Double.POSITIVE_INFINITY;
+		double max = Double.NEGATIVE_INFINITY;
 
 		for (IDataset x : xaxis) {
-			if (x.min().doubleValue() > min) min = x.min().doubleValue();
-			if (x.max().doubleValue() < max) max = x.max().doubleValue();
+			if (x.min().doubleValue() < min) min = x.min().doubleValue();
+			if (x.max().doubleValue() > max) max = x.max().doubleValue();
 		}
 
 		if (min > max) return null;

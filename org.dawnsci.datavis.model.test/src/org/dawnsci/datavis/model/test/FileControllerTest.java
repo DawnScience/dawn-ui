@@ -34,14 +34,17 @@ public class FileControllerTest extends AbstractTestModel{
 			
 			@Override
 			public List<String> getRecentPlaces() {
-				// TODO Auto-generated method stub
 				return null;
 			}
 			
 			@Override
 			public void addPlace(String path) {
-				// TODO Auto-generated method stub
 				
+			}
+
+			@Override
+			public String getCurrentDefaultPlace() {
+				return null;
 			}
 		});
 		
