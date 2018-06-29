@@ -20,16 +20,14 @@ import org.dawnsci.plotting.tools.preference.detector.DiffractionDetector;
 import org.eclipse.dawnsci.analysis.api.roi.IROI;
 import org.eclipse.dawnsci.analysis.api.roi.IRectangularROI;
 import org.eclipse.dawnsci.analysis.dataset.roi.EllipticalROI;
-import org.eclipse.dawnsci.analysis.dataset.roi.LinearROI;
 import org.eclipse.dawnsci.analysis.dataset.roi.RectangularROI;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.axis.IAxis;
 import org.eclipse.dawnsci.plotting.api.region.IRegion;
 import org.eclipse.dawnsci.plotting.api.trace.IImageTrace;
-import org.eclipse.dawnsci.plotting.api.trace.ITrace;
 import org.eclipse.dawnsci.plotting.api.trace.IImageTrace.DownsampleType;
-import org.eclipse.dawnsci.plotting.api.trace.ILine3DTrace;
 import org.eclipse.dawnsci.plotting.api.trace.ILineTrace;
+import org.eclipse.dawnsci.plotting.api.trace.ITrace;
 import org.eclipse.january.dataset.Dataset;
 import org.eclipse.january.dataset.DatasetFactory;
 import org.eclipse.january.dataset.Slice;
@@ -48,20 +46,19 @@ public abstract class AbstractBeamlineConfigurationPlotter implements IBeamlineC
 	private AbstractResultsController resultsController;
 	private IPlottingSystem<Composite> system;
 	private Legend legend;
-	
+
 	private static final String DETECTOR_REGION = "Detector";
 	private static final String CAMERA_TUBE_REGION = "Camera Tube";
 	private static final String BEAMSTOP_REGION = "Beamstop";
 	private static final String CLEARANCE_REGION = "Clearance";
 	private static final String MASK_TRACE = "Mask";
-	
+
 	private List<IRegion> calibrantRingRegions = new ArrayList<>();
-    private CalibrantSpacing selectedCalibrant;
-	
+	private CalibrantSpacing selectedCalibrant;
+
 	private Map<Integer, Dataset> maskCache;
 	private static final int MAX_CACHE_SIZE = 10;
 
-    
 	public AbstractBeamlineConfigurationPlotter(DefaultBeamlineConfigurationPlot context){
 		this.context = context;
 		this.beamlineConfiguration = context.getBeamlineConfiguration();
@@ -71,8 +68,7 @@ public abstract class AbstractBeamlineConfigurationPlotter implements IBeamlineC
 		
 		createMaskCache();
 	}
-	
-	
+
 	@SuppressWarnings("serial")
 	private void createMaskCache() {
 		maskCache = new LinkedHashMap<Integer, Dataset>(MAX_CACHE_SIZE+1, 0.75F, true){
@@ -82,10 +78,9 @@ public abstract class AbstractBeamlineConfigurationPlotter implements IBeamlineC
 			}
 		};
 	}
-	
-	
+
 	@Override
-	public void createPlot(){
+	public void createPlot() {
 		this.selectedCalibrant = context.getSelectedCalibrant();
 		
 		if(beamlineConfiguration.getDetector() != null && context.isDetectorPlot()) 
@@ -116,9 +111,8 @@ public abstract class AbstractBeamlineConfigurationPlotter implements IBeamlineC
 		createEmptyTrace();
 		rescalePlot();
 	}
-	
-	
-	private void createDetectorRegion(){
+
+	private void createDetectorRegion() {
 		removeRegion(DETECTOR_REGION); 
 		
 		IRegion detectorRegion;
@@ -131,8 +125,7 @@ public abstract class AbstractBeamlineConfigurationPlotter implements IBeamlineC
 		IROI detectorROI = new RectangularROI(getDetectorTopLeftX(), getDetectorTopLeftY(), getDetectorWidth(), getDetectorHeight(), 0);
 		addRegion(detectorRegion, detectorROI, legend.getColour("Detector"));
 	}
-	
-	
+
 	private void createBeamstopRegion(){
 		removeRegions(new String[]{BEAMSTOP_REGION, CLEARANCE_REGION});
 		
@@ -530,20 +523,19 @@ public abstract class AbstractBeamlineConfigurationPlotter implements IBeamlineC
 	private double getRequestedRangeEndPointY(){
 		return getDetectorTopLeftY() + getVerticalLengthFromMM(resultsController.getRequestedRangeEndPoint().y);
 	}
-	
-	
-	private double getCalibrantRingMajor(Q q){
-		return getHorizontalLengthFromMM(1.0e3*BeamlineConfigurationUtil.calculateDistanceFromQValue(q.getValue().to(Q.BASE_UNIT).getEstimatedValue(), 
-                beamlineConfiguration.getCameraLength(), beamlineConfiguration.getWavelength())); 
+
+	private double getCalibrantRingMajor(Q q) {
+		return getHorizontalLengthFromMM(1.0e3 * BeamlineConfigurationUtil.calculateDistanceFromQValue(
+				q.getValue().to(Q.BASE_UNIT).getValue().doubleValue(), beamlineConfiguration.getCameraLength(),
+				beamlineConfiguration.getWavelength()));
 	}
-	
-	
-	private double getCalibrantRingMinor(Q q){
-		return getVerticalLengthFromMM(1.0e3*BeamlineConfigurationUtil.calculateDistanceFromQValue(q.getValue().to(Q.BASE_UNIT).getEstimatedValue(), 
-                beamlineConfiguration.getCameraLength(), beamlineConfiguration.getWavelength()));
+
+	private double getCalibrantRingMinor(Q q) {
+		return getVerticalLengthFromMM(1.0e3 * BeamlineConfigurationUtil.calculateDistanceFromQValue(
+				q.getValue().to(Q.BASE_UNIT).getValue().doubleValue(), beamlineConfiguration.getCameraLength(),
+				beamlineConfiguration.getWavelength()));
 	}
-	
-	
+
 	private void removeRegion(String name){
 		IRegion region = system.getRegion(name);
 		if(region != null) system.removeRegion(region);

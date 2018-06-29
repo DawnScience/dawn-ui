@@ -13,13 +13,14 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 
-import javax.measure.quantity.Quantity;
-import javax.measure.unit.NonSI;
-import javax.measure.unit.Unit;
+import javax.measure.Quantity;
+import javax.measure.Unit;
 import javax.swing.tree.TreeNode;
 
-import org.jscience.physics.amount.Amount;
-import org.jscience.physics.amount.Constants;
+import org.eclipse.dawnsci.analysis.api.unit.UnitUtils;
+
+import si.uom.NonSI;
+import tec.units.indriya.quantity.Quantities;
 
 /**
  * This class may be used with TreeNodeContentProvider to create a Tree of editable
@@ -33,23 +34,22 @@ import org.jscience.physics.amount.Constants;
  *
  */
 @SuppressWarnings({"rawtypes", "unchecked"})
-public class NumericNode<E extends Quantity> extends LabelNode {
-			
-	private Amount     value;  // Intentionally not E
-	private Amount<E>  defaultValue;
-	private Amount<E>  lowerBound;
-	private Amount<E>  upperBound;
-	private Unit<E>    defaultUnit;
-	private double     increment;
-	
+public class NumericNode<E extends Quantity<E>> extends LabelNode {
+	private Quantity<E> value;  // Intentionally not E
+	private Quantity<E> defaultValue;
+	private Quantity<E> lowerBound;
+	private Quantity<E> upperBound;
+	private Unit<E> defaultUnit;
+	private double  increment;
+
 	/**
 	 * allowedUnits does not have to be E intentionally
-	 * For instance angstrom and eV are compatible using jscience
+	 * For instance angstrom and eV are compatible using unit-api
 	 * which knows about the Planck constant relationship.
 	 */
 	private List<Unit> allowedUnits;
 	private String format;
-	
+
 	/**
 	 * Unit must not be null.
 	 * @param label
@@ -70,23 +70,23 @@ public class NumericNode<E extends Quantity> extends LabelNode {
 		return value==null&&defaultValue==null;
 	}
 
-    /**
-     * The double value in the current unit set.
-     * @return
-     */
-	public Amount<E> getValue() {
+	/**
+	 * The double value in the current unit set.
+	 * @return quantity
+	 */
+	public Quantity<E> getValue() {
 		if (value!=null)        return value;
 		if (defaultValue!=null) return defaultValue;
 		return null;
 	}
-	
+
 	public double getValue(Unit requiredUnit) {
-		Amount<E> val=getValue();
+		Quantity<E> val=getValue();
 		if (isInAngstroms(val, requiredUnit)) {	
-			return Constants.ℎ.times(Constants.c).divide(val).doubleValue(requiredUnit);
+			return UnitUtils.convert(UnitUtils.h.multiply(UnitUtils.c).divide(val), requiredUnit);
 		} else {
 			if (val!=null) {
-				return val.doubleValue(requiredUnit);
+				return UnitUtils.convert(val, requiredUnit);
 			}
 		}
 
@@ -94,34 +94,34 @@ public class NumericNode<E extends Quantity> extends LabelNode {
 	}
 
 	public double getDoubleValue() {
-		final Amount<E> val = getValue();
-		return  val!=null? val.doubleValue(val.getUnit()) : Double.NaN;
+		final Quantity<E> val = getValue();
+		return  val!=null? val.getValue().doubleValue() : Double.NaN;
 	}
-	
+
 	public double getDefaultDoubleValue() {
-		final Amount<E> val = getDefaultValue();
-		return  val!=null? val.doubleValue(val.getUnit()) : Double.NaN;
+		final Quantity<E> val = getDefaultValue();
+		return  val!=null? val.getValue().doubleValue() : Double.NaN;
 	}
-	
+
 	public void setDoubleValue(double val) {
 		if (value!=null)        {
-			value = Amount.valueOf(val, value.getUnit());
+			value = UnitUtils.getQuantity(val, value.getUnit());
 			fireAmountChanged(value);
 			return;
 		}
 		if (defaultValue!=null) {
-			value = Amount.valueOf(val, defaultValue.getUnit());
+			value = UnitUtils.getQuantity(val, defaultValue.getUnit());
 			fireAmountChanged(value);
 			return;
 		}
-		value = Amount.valueOf(val, defaultUnit);
+		value = UnitUtils.getQuantity(val, defaultUnit);
 		fireAmountChanged(value);
 		return;
 	}
-	
+
 	private Collection<AmountListener<E>> listeners;
-	
-	protected void fireAmountChanged(Amount<E> value, AmountListener<E>... ignored) {
+
+	protected void fireAmountChanged(Quantity<E> value, AmountListener<E>... ignored) {
 		if (listeners==null) return;
 
 		Collection<AmountListener<E>> informees;
@@ -139,19 +139,19 @@ public class NumericNode<E extends Quantity> extends LabelNode {
 			l.amountChanged(evt);
 		}
 	}
-	
+
 	public void addAmountListener(AmountListener<E> l) {
 		if (listeners==null) listeners = new HashSet<AmountListener<E>>(3);
 		listeners.add(l);
 	}
-	
+
 	public void removeAmountListener(AmountListener<E> l) {
 		if (listeners==null) return;
 		listeners.remove(l);
 	}
-	
+
 	private Collection<UnitListener> unitListeners;
-	
+
 	protected void fireUnitChanged(Unit<E> unit) {
 		if (unitListeners==null) return;
 		final UnitEvent<E> evt = new UnitEvent<E>(this, unit);
@@ -159,12 +159,12 @@ public class NumericNode<E extends Quantity> extends LabelNode {
 			l.unitChanged(evt);
 		}
 	}
-	
+
 	public void addUnitListener(UnitListener l) {
 		if (unitListeners==null) unitListeners = new HashSet<UnitListener>(3);
 		unitListeners.add(l);
 	}
-	
+
 	public void removeUnitListener(UnitListener l) {
 		if (listeners==null) return;
 		unitListeners.remove(l);
@@ -174,7 +174,7 @@ public class NumericNode<E extends Quantity> extends LabelNode {
 	 * May be null
 	 * @param val
 	 */
-	public void setValueQuietly(Amount<E> val) {
+	public void setValueQuietly(Quantity<E> val) {
 		value = val;
 	}
 
@@ -182,7 +182,7 @@ public class NumericNode<E extends Quantity> extends LabelNode {
 	 * May be null
 	 * @param val
 	 */
-	public void setValue(Amount<E> val) {
+	public void setValue(Quantity<E> val) {
 		setValue(val, (AmountListener<E>[]) null);
 	}
 
@@ -191,8 +191,8 @@ public class NumericNode<E extends Quantity> extends LabelNode {
 	 * @param val
 	 * @param ignored amount listeners
 	 */
-	public void setValue(Amount<E> val, AmountListener<E>... ignored) {
-		Amount oldValue = value;
+	public void setValue(Quantity<E> val, AmountListener<E>... ignored) {
+		Quantity<E> oldValue = value;
 		setValueQuietly(val);
 		if (value != null) {
 			fireAmountChanged(val, ignored);
@@ -211,12 +211,12 @@ public class NumericNode<E extends Quantity> extends LabelNode {
 	public void setValueQuietly(double val, Unit<E> unit) {
 		if (Double.isNaN(val)) {
 			value=null;
-			return;// The value is NaN, doing Amount.valueOf(...) would set to 0
+			return;// The value is NaN, doing Quantities.getQuantity(...) would set to 0
 		}
 		if (unit==null) {
 			unit = value != null ? value.getUnit() : (defaultValue != null ? defaultValue.getUnit() : defaultUnit);
 		}
-		value = Amount.valueOf(val, unit);
+		value = UnitUtils.getQuantity(val, unit);
 	}
 
 	/**
@@ -233,7 +233,7 @@ public class NumericNode<E extends Quantity> extends LabelNode {
 	 * @param ignored amount listeners
 	 */
 	public void setValue(double val, Unit<E> unit, AmountListener<E>... ignored) {
-		Amount oldValue = value;
+		Quantity<E> oldValue = value;
 		setValueQuietly(val, unit);
 		if (value == null)
 			return;
@@ -246,17 +246,16 @@ public class NumericNode<E extends Quantity> extends LabelNode {
 	}
 
 	public boolean mergeValue(TreeNode node) throws Throwable {
-		
 		if (equals(node)) return false;
-		
-		Amount<E> newValue = null;
+
+		E newValue = null;
 		if (node instanceof ObjectNode) {
 			ObjectNode on = (ObjectNode)node;
 			newValue = parseValue(on.getValue());
 		}
 		if (node instanceof NumericNode) {
 			NumericNode nn = (NumericNode)node;
-			newValue = nn.getValue();
+			newValue = (E) nn.getValue();
 		}
 		
 		if (newValue!=null) {
@@ -265,58 +264,57 @@ public class NumericNode<E extends Quantity> extends LabelNode {
 		}
 		return false;
 	}
-	
-	private Amount parseValue(Object val) throws Throwable {
+
+	private E parseValue(Object val) throws Throwable {
 		try {
-			if (val instanceof Amount) return (Amount<E>)val;
-			
+			if (val instanceof Quantity) return (E) val;
+
 			final double dbl = Double.parseDouble(val.toString());
-			return Amount.valueOf(dbl, getValue().getUnit());
-					
+			return UnitUtils.getQuantity(dbl, getValue().getUnit());
 		} catch (Throwable ne) {
 			try {
-				return (Amount)Amount.valueOf(val.toString()); //e.g. "100.0 mm"
-				
+				return (E) Quantities.getQuantity(val.toString()); //e.g. "100.0 mm"
 			} catch (Throwable e) {
 				throw e;
 			}
 		}
 	}
 
-	public void setDefault(Amount<E> amount) {
+	public void setDefault(Quantity<E> amount) {
 		this.defaultValue = amount;
 	}
+
 	/**
 	 * Sets the default value and sets the bounds to
 	 * the values 0 and 10000.
 	 * @param value
 	 */
 	public void setDefault(double value, Unit<E> unit) {
-		if (Double.isNaN(value)) return;// The value is NaN, doing Amount.valueOf(...) would set to 0
-		this.defaultValue = Amount.valueOf(value, unit);
-		this.lowerBound   = Amount.valueOf(Integer.MIN_VALUE, unit);
-		this.upperBound   = Amount.valueOf(Integer.MAX_VALUE, unit);
+		if (Double.isNaN(value)) return;// The value is NaN, doing Quantities.getQuantity(...) would set to 0
+		this.defaultValue = UnitUtils.getQuantity(value, unit);
+		this.lowerBound   = UnitUtils.getQuantity(Integer.MIN_VALUE, unit);
+		this.upperBound   = UnitUtils.getQuantity(Integer.MAX_VALUE, unit);
 	}
 
-    /**
-     * The double value in the current unit set.
-     * @return
-     */
-	public Amount<E> getDefaultValue() {
+	/**
+	 * The double value in the current unit set.
+	 * @return quantity
+	 */
+	public Quantity<E> getDefaultValue() {
 		if (defaultValue!=null) return defaultValue;
-		return Amount.valueOf(Double.NaN, getUnit());
+		return UnitUtils.getQuantity(Double.NaN, getUnit());
 	}
-	
+
 	public Unit<E> getDefaultUnit() {
 		return defaultUnit;
 	}
-	
+
 	public Unit<E> getUnit() {
 		if (value!=null)        return value.getUnit();
 		if (defaultValue!=null) return defaultValue.getUnit();
 		return defaultUnit;
 	}
-	
+
 	public int getUnitIndex() {
 		if (allowedUnits==null) return 0;
 		return allowedUnits.indexOf(getUnit());
@@ -324,30 +322,30 @@ public class NumericNode<E extends Quantity> extends LabelNode {
 
 	public void setUnitIndex(int index) {
 		if (allowedUnits==null) return;
-		final Unit<E> to = allowedUnits.get(index);
+		final Unit to = allowedUnits.get(index);
 		if (value==null&&defaultValue!=null) {
-			value = defaultValue.copy();
+			value = UnitUtils.copy(defaultValue);
 		}
 		if (value!=null) {
 			// BODGE for A and eV !
-			if (isInAngstroms(value, to)) {	
-				value = Constants.ℎ.times(Constants.c).divide(value).to(to); 
+			if (isInAngstroms(value, to)) {
+				value = (E) UnitUtils.h.multiply(UnitUtils.c).divide(value).to(to);
 			} else {
-			    value = value.to(to);
+				value = (E) value.to(to);
 			}
 			fireUnitChanged(to);
 		}
 	}
 
-	private boolean isInAngstroms(Amount val, Unit to) {
+	private boolean isInAngstroms(Quantity<?> val, Unit to) {
 		boolean isAngstrom = allowedUnits!=null && allowedUnits.contains(NonSI.ANGSTROM) && allowedUnits.contains(NonSI.ELECTRON_VOLT);
-	    if (!isAngstrom) return false;
-	    return !val.getUnit().isCompatible(to); // Only convert incompatible.
+		if (!isAngstrom) return false;
+		return !val.getUnit().isCompatible(to); // Only convert incompatible.
 	}
 
 	public void setUnit(Unit<E> unit) {
-		if (value!=null)        value        = Amount.valueOf(value.doubleValue(unit), unit);
-		if (defaultValue!=null) defaultValue = Amount.valueOf(defaultValue.doubleValue(unit), unit);
+		if (value!=null)        value        = UnitUtils.getQuantity(value.getValue(), unit);
+		if (defaultValue!=null) defaultValue = UnitUtils.getQuantity(defaultValue.getValue(), unit);
 		fireUnitChanged(unit);
 	}
 
@@ -356,34 +354,36 @@ public class NumericNode<E extends Quantity> extends LabelNode {
 		fireAmountChanged(getValue());
 	}
 
-	public Amount<E> getLowerBound() {
+	public Quantity<E> getLowerBound() {
 		return lowerBound;
 	}
+
 	public double getLowerBoundDouble() {
-		return lowerBound.doubleValue(lowerBound.getUnit());
+		return lowerBound.getValue().doubleValue();
 	}
 
-	public void setLowerBound(Amount<E> lowerBound) {
+	public void setLowerBound(Quantity<E> lowerBound) {
 		this.lowerBound = lowerBound;
 	}
 	
 	public void setLowerBound(double lb) {
-		this.lowerBound = Amount.valueOf(lb, getUnit());
+		this.lowerBound = UnitUtils.getQuantity(lb, getUnit());
 	}
 
-	public Amount<E> getUpperBound() {
+	public Quantity<E> getUpperBound() {
 		return upperBound;
 	}
+
 	public double getUpperBoundDouble() {
-		return upperBound.doubleValue(upperBound.getUnit());
+		return upperBound.getValue().doubleValue();
 	}
 
-	public void setUpperBound(Amount<E> upperBound) {
+	public void setUpperBound(Quantity<E> upperBound) {
 		this.upperBound = upperBound;
 	}
 	
 	public void setUpperBound(double ub) {
-		this.upperBound = Amount.valueOf(ub, getUnit());
+		this.upperBound = UnitUtils.getQuantity(ub, getUnit());
 	}
 
 	public double getIncrement() {
@@ -401,9 +401,10 @@ public class NumericNode<E extends Quantity> extends LabelNode {
 	public void setUnits(List<Unit> allowedUnits) {
 		this.allowedUnits = allowedUnits;
 	}
+
 	public void setUnits(Unit... allowedUnits) {
 		this.allowedUnits = Arrays.asList(allowedUnits);
-		
+
 		if (value!=null)        {
 			value = convertToNewSet(value, allowedUnits);
 			fireAmountChanged(value);
@@ -411,13 +412,12 @@ public class NumericNode<E extends Quantity> extends LabelNode {
 		if (defaultValue!=null) defaultValue = convertToNewSet(defaultValue, allowedUnits);
 	}
 
-	private Amount<E> convertToNewSet(Amount<E> val, Unit[] au) {
-
+	private Quantity<E> convertToNewSet(Quantity<E> val, Unit[] au) {
 		for (Unit unit : au) {
 			// This unit is active and may have just 
 			if (val.getUnit().toString().equals(unit.toString())) {
-				Amount standard = val.to(val.getUnit().getStandardUnit());
-				return standard.to(unit);
+				Quantity<?> standard = val.to(val.getUnit());
+				return (E) standard.to(unit);
 			}
 		}
 		return val;
@@ -444,11 +444,11 @@ public class NumericNode<E extends Quantity> extends LabelNode {
 			}
 		}
 		allowedUnits = null;
-		
-		value        =null;
-		defaultValue =null;
-		lowerBound   =null;
-		upperBound   =null;
+
+		value        = null;
+		defaultValue = null;
+		lowerBound   = null;
+		upperBound   = null;
 	}
 
 	@Override

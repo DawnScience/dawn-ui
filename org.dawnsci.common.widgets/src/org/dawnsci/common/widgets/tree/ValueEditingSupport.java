@@ -8,7 +8,7 @@
  */
 package org.dawnsci.common.widgets.tree;
 
-import javax.measure.quantity.Quantity;
+import javax.measure.Quantity;
 
 import org.dawnsci.common.widgets.celleditor.FloatSpinnerCellEditor;
 import org.eclipse.jface.viewers.CellEditor;
@@ -58,13 +58,12 @@ public class ValueEditingSupport extends EditingSupport {
 	}
 
 	private boolean somethingChanged = false;
-	
+
 	protected CellEditor createNumericEditor(final NumericNode<?> element) {
-		
-		final NumericNode<? extends Quantity> node = element;
-		
+		final NumericNode<? extends Quantity<?>> node = element;
+
 		somethingChanged = false;
-		
+
 		final FloatSpinnerCellEditor fse = new NumericNodeEditor(element, (Composite)viewer.getControl(), SWT.NONE);
 		fse.setFormat(7, getDecimalPlaces(node));
 		fse.setIncrement(node.getIncrement());
@@ -86,13 +85,12 @@ public class ValueEditingSupport extends EditingSupport {
 		});
 		return fse;
 	}
-	
 
 	/**
 	 * Gets the decimal places used to view the number
 	 * @return
 	 */
-	private int getDecimalPlaces(NumericNode<? extends Quantity> node) {
+	private int getDecimalPlaces(NumericNode<? extends Quantity<?>> node) {
 		final String formatString = node.getFormat();
 		try {
 			if (formatString!=null && formatString.indexOf('.')>-1) {
@@ -104,33 +102,35 @@ public class ValueEditingSupport extends EditingSupport {
 		return 4;
 	}
 
-	
 	private class NumericNodeEditor extends FloatSpinnerCellEditor {
-		
 		private NumericNode<?> element;
+
 		public NumericNodeEditor(NumericNode<?> element, Composite control, int switches) {
 			super(control, switches);
 			this.element = element;
 		}
+
 		@Override
 		protected Object doGetValue() {
 			if (somethingChanged) {
-			    return super.doGetValue();
+				return super.doGetValue();
 			} else {
 				return element.getDoubleValue();
 			}
 		}
+
 		@Override
 		protected void doSetValue(Object value) {
 			super.doSetValue(value);
 		}
+
 		@Override
 		public void dispose() {
 			super.dispose();
 			somethingChanged = false;
 		}
 	}
-	
+
 	protected CellEditor createComboEditor(final ComboNode element) {
 		final CComboCellEditor cce = new CComboCellEditor((Composite)viewer.getControl(), element.getStringValues(), SWT.READ_ONLY);
 		cce.getCombo().addSelectionListener(new SelectionAdapter() {
@@ -150,7 +150,7 @@ public class ValueEditingSupport extends EditingSupport {
 	@Override
 	protected Object getValue(Object element) {
 		if (element instanceof NumericNode) {
-			NumericNode<? extends Quantity> node = (NumericNode<?>)element;
+			NumericNode<? extends Quantity<?>> node = (NumericNode<?>)element;
 			return node.getDoubleValue();
 		}
 		if (element instanceof ColorNode) {
@@ -171,7 +171,7 @@ public class ValueEditingSupport extends EditingSupport {
 	@Override
 	protected void setValue(Object element, Object value) {
 		if (element instanceof NumericNode) {
-			NumericNode<? extends Quantity> node = (NumericNode<?>) element;
+			NumericNode<? extends Quantity<?>> node = (NumericNode<?>) element;
 			node.setDoubleValue((Double) value);
 		}
 
@@ -184,7 +184,7 @@ public class ValueEditingSupport extends EditingSupport {
 			}
 			viewer.setSelection(null);
 		}
-		
+
 		if (element instanceof ComboNode) {
 			ComboNode node = (ComboNode)element;
 			node.setValue((Integer) value);
@@ -195,8 +195,9 @@ public class ValueEditingSupport extends EditingSupport {
 		}
 		if (element instanceof BooleanNode) {
 			BooleanNode node = (BooleanNode)element;
-			if (node.value instanceof Boolean)
+			if (node.value instanceof Boolean) {
 				node.setValue(node.value);
+			}
 		}
 		viewer.refresh(element);
 	}

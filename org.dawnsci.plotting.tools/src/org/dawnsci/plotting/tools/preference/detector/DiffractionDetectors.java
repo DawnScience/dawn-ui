@@ -8,21 +8,25 @@
  */
 package org.dawnsci.plotting.tools.preference.detector;
 
+import java.beans.XMLDecoder;
+import java.beans.XMLEncoder;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class DiffractionDetectors implements Serializable {
-	
+import org.eclipse.dawnsci.analysis.api.unit.UnitUtils;
 
+public class DiffractionDetectors implements Serializable {
 	private static final long serialVersionUID = 7297838000309018668L;
-	
+
 	private List<DiffractionDetector> diffractionDetectors;
-	
+
 	public DiffractionDetectors() {
 		diffractionDetectors = new ArrayList<DiffractionDetector>();
 	}
-	
+
 	public List<DiffractionDetector> getDiffractionDetectors() {
 		return diffractionDetectors;
 	}
@@ -33,11 +37,11 @@ public class DiffractionDetectors implements Serializable {
 	}
 
 	private DiffractionDetector selected;
-	
+
 	public void addDiffractionDetector(DiffractionDetector detector) {
 		diffractionDetectors.add(detector);
 	}
-	
+
 	public void removeDiffractionDetector(DiffractionDetector detector) {
 		diffractionDetectors.remove(detector);
 	}
@@ -88,5 +92,24 @@ public class DiffractionDetectors implements Serializable {
 		} else if (!selected.equals(other.selected))
 			return false;
 		return true;
+	}
+
+	/**
+	 * @return a serialized string (in XML)
+	 */
+	public String toSerializedString() {
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		try (XMLEncoder xmlEncoder = new XMLEncoder(baos)) {
+			UnitUtils.addUnitPersistenceDelegate(xmlEncoder);
+			xmlEncoder.writeObject(this);
+		}
+
+		return baos.toString();
+	}
+
+	public static final DiffractionDetectors createDetectors(String serializedDetectors) {
+		try (XMLDecoder xmlDecoder = new XMLDecoder(new ByteArrayInputStream(serializedDetectors.getBytes()))) {
+			return (DiffractionDetectors) xmlDecoder.readObject();
+		}
 	}
 }

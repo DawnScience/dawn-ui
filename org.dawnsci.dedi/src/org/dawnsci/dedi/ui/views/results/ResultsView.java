@@ -4,7 +4,7 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
 
-import javax.measure.unit.Unit;
+import javax.measure.Unit;
 
 import org.dawnsci.dedi.configuration.calculations.NumericRange;
 import org.dawnsci.dedi.configuration.calculations.results.controllers.AbstractResultsController;

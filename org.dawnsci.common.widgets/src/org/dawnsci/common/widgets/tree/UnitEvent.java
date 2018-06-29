@@ -10,21 +10,17 @@ package org.dawnsci.common.widgets.tree;
 
 import java.util.EventObject;
 
-import javax.measure.quantity.Quantity;
-import javax.measure.unit.Unit;
+import javax.measure.Quantity;
+import javax.measure.Unit;
 
-public class UnitEvent<E extends Quantity> extends EventObject {
+public class UnitEvent<E extends Quantity<E>> extends EventObject {
 
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = 3954307816969836173L;
 	private Unit<E> unit;
 
 	public UnitEvent(Object source, Unit<E> unit) {
 		super(source);
 		this.unit = unit;
-		
 	}
 
 	public Unit<E> getUnit() {

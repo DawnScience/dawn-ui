@@ -6,13 +6,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import javax.measure.unit.SI;
-
 import org.dawnsci.dedi.Activator;
 import org.dawnsci.plotting.tools.preference.detector.DiffractionDetector;
 import org.eclipse.core.runtime.preferences.AbstractPreferenceInitializer;
+import org.eclipse.dawnsci.analysis.api.unit.UnitUtils;
 import org.eclipse.jface.preference.IPreferenceStore;
-import org.jscience.physics.amount.Amount;
 
 public class BeamlineConfigurationPreferenceInitializer extends AbstractPreferenceInitializer {
 
@@ -120,8 +118,8 @@ public class BeamlineConfigurationPreferenceInitializer extends AbstractPreferen
 		// Pilatus 2M - the default detector for bc1
 		DiffractionDetector dd = new DiffractionDetector();
 		dd.setDetectorName("Pilatus P3-2M");
-		dd.setxPixelSize(Amount.valueOf(0.172, SI.MILLIMETRE));
-		dd.setyPixelSize(Amount.valueOf(0.172, SI.MILLIMETRE));
+		dd.setxPixelSize(UnitUtils.getQuantity(0.172, UnitUtils.MILLIMETRE));
+		dd.setyPixelSize(UnitUtils.getQuantity(0.172, UnitUtils.MILLIMETRE));
 		dd.setNumberOfPixelsX(1475);
 		dd.setNumberOfPixelsY(1679);
 		dd.setNumberOfHorizontalModules(3);
@@ -147,8 +145,8 @@ public class BeamlineConfigurationPreferenceInitializer extends AbstractPreferen
 		// Pilatus 2M for WAXS - the default detector for bc2
 		DiffractionDetector dd2 = new DiffractionDetector();
 		dd2.setDetectorName("Pilatus P3-2M-DLS-L (for WAXS)");
-		dd2.setxPixelSize(Amount.valueOf(0.172, SI.MILLIMETRE));
-		dd2.setyPixelSize(Amount.valueOf(0.172, SI.MILLIMETRE));
+		dd2.setxPixelSize(UnitUtils.getQuantity(0.172, UnitUtils.MILLIMETRE));
+		dd2.setyPixelSize(UnitUtils.getQuantity(0.172, UnitUtils.MILLIMETRE));
 		dd2.setNumberOfPixelsX(1475);
 		dd2.setNumberOfPixelsY(1679);
 		dd2.setNumberOfHorizontalModules(3);

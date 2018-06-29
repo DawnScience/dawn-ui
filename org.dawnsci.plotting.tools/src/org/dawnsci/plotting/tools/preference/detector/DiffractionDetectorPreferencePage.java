@@ -8,11 +8,6 @@
  */
 package org.dawnsci.plotting.tools.preference.detector;
 
-import java.beans.XMLDecoder;
-import java.beans.XMLEncoder;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-
 import org.dawb.common.ui.util.GridUtils;
 import org.dawnsci.plotting.tools.Activator;
 import org.eclipse.jface.preference.PreferencePage;
@@ -30,13 +25,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class DiffractionDetectorPreferencePage extends PreferencePage implements IWorkbenchPreferencePage {
-	
 	private static Logger logger = LoggerFactory.getLogger(DiffractionDetectorPreferencePage.class);
-	
+
 	private DiffractionDetectors detectors;
 	private VerticalListEditor detectorEditor;
 	public static final String ID = "org.dawnsci.plotting.preference.detector";
-	
+
 	@Override
 	public void init(IWorkbench workbench) {
 		setPreferenceStore(Activator.getPlottingPreferenceStore());
@@ -49,11 +43,11 @@ public class DiffractionDetectorPreferencePage extends PreferencePage implements
 		main.setLayout(new GridLayout(1, false));
 		GridData gdc = new GridData(SWT.FILL, SWT.FILL, true, true);
 		main.setLayoutData(gdc);
-		
+
 		detectorEditor  = new VerticalListEditor(main, SWT.BORDER);
 		Composite detectorComposite = new DiffractionDetectorComposite(detectorEditor, SWT.NONE); 
 		detectorComposite.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
-		
+
 		detectorEditor.setRequireSelectionPack(false);
 		detectorEditor.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
 		detectorEditor.setMinItems(0);
@@ -63,14 +57,14 @@ public class DiffractionDetectorPreferencePage extends PreferencePage implements
 		// TODO make editor UI
 		detectorEditor.setEditorUI(detectorComposite);
 		detectorEditor.setNameField("detectorName");
-		detectorEditor.setAdditionalFields(new String[]{"XPixelMM","YPixelMM","NumberOfPixelsX","NumberOfPixelsY", 
-				                                        "NumberOfHorizontalModules", "NumberOfVerticalModules",
-				                                        "XGap", "YGap", "MissingModules"});
-		detectorEditor.setColumnWidths(80,80,80,80,80, 150, 150, 150, 150, 120);
-		detectorEditor.setColumnNames("Name", "X Pixel (mm)", "Y Pixel (mm)","X (pixels)", "Y (pixels)",
-		                              "Horizontal number of modules", 
-		                              "Vertical number of modules", 
-		                              "Horizontal gap size (pixels)", "Vertical gap size (pixels)", "Missing modules");
+		detectorEditor.setAdditionalFields(new String[] { "XPixelMM", "YPixelMM",
+				"NumberOfPixelsX", "NumberOfPixelsY",
+				"NumberOfHorizontalModules", "NumberOfVerticalModules",
+				"XGap", "YGap", "MissingModules" });
+		detectorEditor.setColumnWidths(80, 80, 80, 80, 80, 150, 150, 150, 150, 120);
+		detectorEditor.setColumnNames("Name", "X Pixel (mm)", "Y Pixel (mm)", "X (pixels)", "Y (pixels)",
+				"Horizontal number of modules", "Vertical number of modules",
+				"Horizontal gap size (pixels)", "Vertical gap size (pixels)", "Missing modules");
 		detectorEditor.setColumnFormat("##0.####");
 		detectorEditor.setListHeight(150);
 		detectorEditor.setAddButtonText("Add Detector");
@@ -78,66 +72,49 @@ public class DiffractionDetectorPreferencePage extends PreferencePage implements
 
 		GridUtils.setVisible(detectorEditor, true);
 		detectorEditor.getParent().layout(new Control[]{detectorEditor});
-		
-		
+
 		getDetectorsFromPreference();
 		detectorEditor.setShowAdditionalFields(true);
 		return main;
 	}
-	
+
 	public VerticalListEditor getDiffractionDetectors() {
 		return detectorEditor;
 	}
-	
+
 	@Override
 	public boolean performOk() {
-		try {			
+		try {
 			IBeanService service = (IBeanService)Activator.getService(IBeanService.class);
 			IBeanController controller = service.createController(this, detectors);
 			controller.uiToBean();
-			setDetectorsToPreference();
-			
+			saveDetectors();
 		} catch (Exception e) {
 			logger.warn("Internal error, could not merge bean and ui!", e);
 		}
 		return super.performOk();
 	}
-	
+
 	@Override
 	protected void performDefaults() {
 		getDefaultDetectorsFromPreference();
 	}
-	
-	private void setDetectorsToPreference() {
-		ByteArrayOutputStream baos = new ByteArrayOutputStream();
-		XMLEncoder xmlEncoder = new XMLEncoder(baos);
-		xmlEncoder.writeObject(detectors);
-		xmlEncoder.close();
-		getPreferenceStore().setValue(DiffractionDetectorConstants.DETECTOR, baos.toString());
-	}
-	
-	@SuppressWarnings("resource")
-	private void getDetectorsFromPreference() {
-		String xml = getPreferenceStore().getString(DiffractionDetectorConstants.DETECTOR);
-		XMLDecoder xmlDecoder = new XMLDecoder(new ByteArrayInputStream(xml.getBytes()));
-		detectors = (DiffractionDetectors) xmlDecoder.readObject();
-		setBean(detectors);
-	}
-	
-	@SuppressWarnings("resource")
-	private void getDefaultDetectorsFromPreference() {
-		ByteArrayOutputStream baos = new ByteArrayOutputStream();
-		XMLEncoder xmlEncoder = new XMLEncoder(baos);
-		xmlEncoder.writeObject(detectors);
-		xmlEncoder.close();
-		String xml = getPreferenceStore().getDefaultString(DiffractionDetectorConstants.DETECTOR);
-		XMLDecoder xmlDecoder = new XMLDecoder(new ByteArrayInputStream(xml.getBytes()));
-		detectors = (DiffractionDetectors) xmlDecoder.readObject();
-		setDetectorsToPreference();
-		setBean(detectors);
 
+	private void saveDetectors() {
+		getPreferenceStore().setValue(DiffractionDetectorConstants.DETECTOR, detectors.toSerializedString());
 	}
-	
+
+	private void getDetectorsFromPreference() {
+		detectors = DiffractionDetectors.createDetectors(getPreferenceStore().getString(DiffractionDetectorConstants.DETECTOR));
+		setBean(detectors);
+	}
+
+	private void getDefaultDetectorsFromPreference() {
+		detectors = DiffractionDetectors.createDetectors(getPreferenceStore().getDefaultString(DiffractionDetectorConstants.DETECTOR));
+		saveDetectors();
+		setBean(detectors);
+	}
+
 	private void setBean(Object bean) {
 		try {
 			IBeanService service = (IBeanService)Activator.getService(IBeanService.class);

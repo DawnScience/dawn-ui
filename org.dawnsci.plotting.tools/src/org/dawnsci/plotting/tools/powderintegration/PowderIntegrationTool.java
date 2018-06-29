@@ -13,8 +13,7 @@ import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.util.List;
 
-import javax.measure.unit.NonSI;
-import javax.measure.unit.UnitFormat;
+import javax.measure.format.UnitFormat;
 
 import org.dawb.common.ui.menu.MenuAction;
 import org.dawb.common.ui.plot.tools.IDataReductionToolPage;
@@ -68,13 +67,14 @@ import org.eclipse.ui.IViewPart;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.part.IPageSite;
 
+import si.uom.NonSI;
+import tec.units.indriya.format.SimpleUnitFormat;
 import uk.ac.diamond.scisoft.analysis.diffraction.powder.AbstractPixelIntegration;
 import uk.ac.diamond.scisoft.analysis.diffraction.powder.PixelIntegrationUtils.IntegrationMode;
 import uk.ac.diamond.scisoft.analysis.io.NexusDiffractionCalibrationReader;
 import uk.ac.diamond.scisoft.analysis.roi.XAxis;
 
 public class PowderIntegrationTool extends AbstractToolPage implements IDataReductionToolPage {
-	
 	private IPlottingSystem<Composite> system;
 	private ITraceListener traceListener;
 	private IDiffractionMetadata metadata;
@@ -90,7 +90,7 @@ public class PowderIntegrationTool extends AbstractToolPage implements IDataRedu
 	PowderCorrectionModel corModel;
 	IntegrationSetupWidget integratorSetup;
 	String lastPath = null;
-	
+
 	public PowderIntegrationTool() {
 		try {
 			system = PlottingFactory.createPlottingSystem();
@@ -98,10 +98,8 @@ public class PowderIntegrationTool extends AbstractToolPage implements IDataRedu
 			e.printStackTrace();
 			return;
 		}
-		
-		
+
 		this.traceListener = new ITraceListener.Stub() {
-			
 			@Override
 			public void traceWillPlot(TraceWillPlotEvent evt) {
 				PowderIntegrationTool.this.update(evt.getImage());
@@ -110,7 +108,6 @@ public class PowderIntegrationTool extends AbstractToolPage implements IDataRedu
 			public void traceRemoved(TraceEvent evt) {
 				if (system!= null) system.clear();
 			}
-			
 		};
 		
 		this.service = ServiceLoader.getLoaderService();
@@ -121,19 +118,18 @@ public class PowderIntegrationTool extends AbstractToolPage implements IDataRedu
 	public ToolPageRole getToolPageRole() {
 		return ToolPageRole.ROLE_2D;
 	}
-	
+
 	@Override
 	public void activate() {
-		
 		if (isActive()) return;
 		super.activate();
 		getPlottingSystem().addTraceListener(traceListener);
-		
+
 		IImageTrace im = getImageTrace();
-		
+
 		if (im != null && im.getData() != null) update(im.getData()); 
 	}
-	
+
 	@Override
 	public void deactivate() {
 		getPlottingSystem().removeTraceListener(traceListener);
@@ -495,28 +491,25 @@ public class PowderIntegrationTool extends AbstractToolPage implements IDataRedu
 	}
 	
 	private IDiffractionMetadata getUpdatedMetadata(IDataset ds, String[] statusString) {
-		
 		//look in data set
 		IDiffractionMetadata m = ds.getFirstMetadata(IDiffractionMetadata.class);
 		if (m != null) {
 			statusMessage.setText("Metadata from data set");
 			statusMessage.setForeground(Display.getDefault().getSystemColor(SWT.COLOR_DARK_GRAY));
 		}
-		
+
 		//read from preferences first time
 		if (m == null && metadata == null) m = getDiffractionMetaData(ds);
-		
+
 		if (m != null) {
 			if (statusString[0] != null) {
 				statusMessage.setText(statusString[0]);
 				statusString[0] = null;
 			}
 		}
-		
 		return m;
 	}
-	
-	
+
 	private IDiffractionMetadata getDiffractionMetaData(IDataset image) {
 		IWorkbenchPart part = getPart();
 		String altPath = null;
@@ -534,25 +527,24 @@ public class PowderIntegrationTool extends AbstractToolPage implements IDataRedu
 		}
 		return DiffractionUtils.getDiffractionMetadata(image, altPath, service, statusString);
 	}
-	
+
 	boolean firstExportIteration = false;
-	
+
 	@Override
 	public String exportInit() {
 		super.exportInit();
 		firstExportIteration = true;
-		//FIXME needs to be this name so the NCD to ascii convert works
+		// FIXME needs to be this name so the NCD to ascii convert works
 		return "integration_result";
 	}
-	
+
 	/**
 	 * Same tool called recursively from the DataReductionWizard
 	 */
 	@Override
 	public DataReductionInfo export(DataReductionSlice slice) throws Exception {
-		
 		if (fullImageJob == null) throw new IllegalArgumentException("Integration not correctly configured!");
-		
+
 		NexusFile file = slice.getFile();
 		String resultGroup = slice.getParent();
 		GroupNode resultGroupNode = file.getGroup(resultGroup, true);
@@ -569,16 +561,16 @@ public class PowderIntegrationTool extends AbstractToolPage implements IDataRedu
 		} catch (Exception e) {
 			//ignore
 		}
-		
+
 		List<Dataset> out = fullImageJob.process(DatasetUtils.convertToDataset(slice.getData()));
-		
+
 		Dataset axis = out.get(0);
 
 		if (firstExportIteration) {
 			axis = axis.squeeze();
 			DataNode axisNode = file.createData(resultGroupNode, axis);
-			UnitFormat unitFormat = UnitFormat.getUCUMInstance();
-			
+			UnitFormat unitFormat = SimpleUnitFormat.getInstance();
+
 			switch (model.getAxisType()) {
 			case Q:
 				String angstrom = unitFormat.format(NonSI.ANGSTROM.inverse());
@@ -607,49 +599,49 @@ public class PowderIntegrationTool extends AbstractToolPage implements IDataRedu
 			} else {
 				file.addAttribute(axisNode, new AttributeImpl("axis", 2));
 			}
-			
+
 //			IPersistenceService service = (IPersistenceService)ServiceManager.getService(IPersistenceService.class);
 //			IPersistentFile pf = service.createPersistentFile(file);
 //			pf.setDiffractionMetadata(metadata);
-			
+
 			String parent = resultGroup.substring(0, resultGroup.lastIndexOf("/"));
 			writeProcessInformation(file, file.getGroup(parent, false));
-			
+
 		}
 		
 		Dataset signal = out.get(1);
 		signal.setName("data");
 		slice.appendData(lazyWritables, signal, exportIndex);
-		
+
 		if (firstExportIteration) {
 			String parentPath = slice.getParent();
 			DataNode datanode = file.getData(parentPath + Node.SEPARATOR + NexusConstants.DATA_DATA);
 			file.addAttribute(datanode, new AttributeImpl(NexusConstants.DATA_SIGNAL, 1));
 		}
-		
+
 		firstExportIteration = false;
-		
+
 		return new DataReductionInfo(Status.OK_STATUS);
 	}
-	
+
 	private void writeProcessInformation(NexusFile file, GroupNode group) throws Exception {
 		GroupNode processGroup = file.getGroup(group, "process", NexusConstants.PROCESS, true);
 		createDataset("program", processGroup, file, "DAWN-powder integration tool");
-		
+
 		String version =  BundleUtils.getDawnVersion();
 		if (version != null)
 			createDataset("version", processGroup, file, version);
-		
+
 		GroupNode correctionGroup = file.getGroup(processGroup, "1_correction", NexusConstants.NOTE, true);
 		createDataset("description", correctionGroup, file, "Correction process details");
-		
+
 		String solid = "No";
 		if (corModel.isApplySolidAngleCorrection()) {
 			solid = "Yes";
 		}
-		
+
 		createDataset("solid_angle_corrected", correctionGroup, file, solid);
-		
+
 		String polar = "No";
 		if (corModel.isApplyPolarisationCorrection()) {
 			polar = "Yes";
@@ -657,23 +649,23 @@ public class PowderIntegrationTool extends AbstractToolPage implements IDataRedu
 			
 			createDataset("polarisation_angular", correctionGroup, file, new double[]{corModel.getPolarisationAngularOffset()});
 		}
-		
+
 		createDataset("polarisation_corrected", correctionGroup, file, polar);
-		
+
 		String trans = "No";
 		if (corModel.isAppyDetectorTransmissionCorrection()) {
 			trans = "Yes";
 			createDataset("transmitted_fraction", correctionGroup, file, new double[]{corModel.getTransmittedFraction()});
 		}
-		
+
 		createDataset("detector_tranmission_corrected", correctionGroup, file, trans);
-		
+
 		GroupNode integrationNode = file.getGroup(processGroup, "2_integration", NexusConstants.NOTE, true);
 		createDataset("description", integrationNode, file, "Integration process details");
-		
+
 		String integrationRoutine = "unknown";
 		String integrationDirection = "unknown";
-		
+
 		switch (model.getIntegrationMode()) {
 		case NONSPLITTING:
 			integrationRoutine = "Non-pixel splitting 1D";
@@ -693,28 +685,27 @@ public class PowderIntegrationTool extends AbstractToolPage implements IDataRedu
 			break;
 		default:
 			break;
-
 		}
-		
+
 		createDataset("integration_routine", integrationNode, file, integrationRoutine);
 		createDataset("integration_direction", integrationNode, file, integrationDirection);
-		
+
 		if (model.getRadialRange() != null) {
 			createDataset("radial_range", integrationNode, file, model.getRadialRange());
 		}
-		
+
 		if (model.getAzimuthalRange() != null) {
 			createDataset("azimuthal_range", integrationNode, file, model.getAzimuthalRange());
 		}
 		
 	}
-	
+
 	private static void createDataset(String name, GroupNode group, NexusFile file, Object object) throws Exception {
 		Dataset dataset = DatasetFactory.createFromObject(object);
 		dataset.setName(name);
 		file.createData(group, dataset);
 	}
-	
+
 	@Override
 	public Object getAdapter(@SuppressWarnings("rawtypes") Class clazz) {
 		if (clazz == IToolPageSystem.class) {
@@ -733,5 +724,4 @@ public class PowderIntegrationTool extends AbstractToolPage implements IDataRedu
 	public void setExportIndex(int exportIndex) {
 		this.exportIndex = exportIndex;
 	}
-
 }

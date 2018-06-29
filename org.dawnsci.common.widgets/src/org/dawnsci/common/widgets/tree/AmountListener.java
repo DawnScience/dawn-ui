@@ -10,9 +10,9 @@ package org.dawnsci.common.widgets.tree;
 
 import java.util.EventListener;
 
-import javax.measure.quantity.Quantity;
+import javax.measure.Quantity;
 
-public interface AmountListener<E extends Quantity> extends EventListener {
+public interface AmountListener<E extends Quantity<E>> extends EventListener {
 
 	void amountChanged(AmountEvent<E> evt);
 }

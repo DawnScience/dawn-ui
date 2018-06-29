@@ -8,37 +8,51 @@
  */
 package org.dawnsci.plotting.tools.grid;
 
-import javax.measure.converter.RationalConverter;
-import javax.measure.converter.UnitConverter;
-import javax.measure.unit.Unit;
+import java.util.Map;
 
-public class PerMilliMetre extends Unit<Resolution>{
+import javax.measure.Dimension;
+import javax.measure.Unit;
+import javax.measure.UnitConverter;
+
+import tec.units.indriya.AbstractUnit;
+import tec.units.indriya.function.RationalConverter;
+import tec.units.indriya.quantity.QuantityDimension;
+
+public class PerMilliMetre extends AbstractUnit<Resolution> {
 
 	private static final long serialVersionUID = 1170501988959781081L;
 
 	public PerMilliMetre() {
 		super();
 	}
-	
+
 	@Override
-	public boolean equals(Object arg0) {
-		return false;
+	public Map<? extends Unit<?>, Integer> getBaseUnits() {
+		return null;
 	}
 
 	@Override
-	public Unit<? super Resolution> getStandardUnit() {
+	public Dimension getDimension() {
+		return QuantityDimension.LENGTH.pow(-1);
+	}
+
+	@Override
+	public UnitConverter getSystemConverter() {
+		return new RationalConverter(1000, 1);
+	}
+
+	@Override
+	protected Unit<Resolution> toSystemUnit() {
 		return Resolution.UNIT;
+	}
+
+	@Override
+	public boolean equals(Object arg0) {
+		return this == arg0;
 	}
 
 	@Override
 	public int hashCode() {
 		return 0;
 	}
-
-	@Override
-	public UnitConverter toStandardUnit() {
-		return new RationalConverter(1000,1);
-	}
-
-
 }

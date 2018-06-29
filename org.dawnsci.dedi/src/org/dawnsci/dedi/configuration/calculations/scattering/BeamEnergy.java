@@ -1,28 +1,28 @@
 package org.dawnsci.dedi.configuration.calculations.scattering;
 
+import javax.measure.Quantity;
 import javax.measure.quantity.Energy;
-import javax.measure.unit.SI;
+import javax.measure.quantity.Length;
 
-import org.jscience.physics.amount.Amount;
-import org.jscience.physics.amount.Constants;
-
+import org.eclipse.dawnsci.analysis.api.unit.UnitUtils;
 
 public class BeamEnergy extends BeamQuantity<Energy> {
 
 	public BeamEnergy() {
 	}
-	
-	public BeamEnergy(Amount<Energy> value) {
+
+	public BeamEnergy(Quantity<Energy> value) {
 		super(value);
 	}
-	
+
+	@SuppressWarnings("unchecked")
 	@Override
 	public Wavelength toWavelength() {
-		return new Wavelength(this.getValue().inverse().times(Constants.c).times(Constants.ℎ).to(SI.METER));
+		return new Wavelength((Quantity<Length>) getValue().inverse().multiply(UnitUtils.c).multiply(UnitUtils.h));
 	}
 
 	@Override
 	public void setValue(Wavelength wavelength) {
-		setValue(wavelength.getValue().inverse().times(Constants.c).times(Constants.ℎ).to(Energy.UNIT));
+		setValue(wavelength.getValue().inverse().multiply(UnitUtils.c).multiply(UnitUtils.h));
 	}
 }

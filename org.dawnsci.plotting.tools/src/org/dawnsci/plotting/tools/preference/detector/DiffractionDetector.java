@@ -12,18 +12,16 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.measure.Quantity;
 import javax.measure.quantity.Length;
-import javax.measure.unit.SI;
 
-import org.jscience.physics.amount.Amount;
+import org.eclipse.dawnsci.analysis.api.unit.UnitUtils;
 
 public class DiffractionDetector implements Serializable {
-
 	private static final long serialVersionUID = -1133345866155946034L;
-	
 	private String detectorName;
-	private Amount<Length> xPixelSize;
-	private Amount<Length> yPixelSize;
+	private Quantity<Length> xPixelSize;
+	private Quantity<Length> yPixelSize;
 	private int numberOfPixelsX;
 	private int numberOfPixelsY;
 	private int numberOfHorizontalModules;
@@ -31,13 +29,11 @@ public class DiffractionDetector implements Serializable {
 	private int xGap; // in pixels
 	private int yGap; // in pixels
 	private List<Integer> missingModules;
-	
-	
+
 	public DiffractionDetector() {
 		missingModules = new ArrayList<>();
 	}
-	
-	
+
 	/**
 	 * Copy constructor. Creates a deep copy of the given detector.
 	 * @throws NullPointerException if the given detector is null.
@@ -45,8 +41,8 @@ public class DiffractionDetector implements Serializable {
 	public DiffractionDetector(DiffractionDetector detector){
 		if(detector == null) throw new NullPointerException();
 		detectorName = detector.getDetectorName();
-		xPixelSize = (detector.getxPixelSize() == null) ? null : detector.getxPixelSize().copy();
-		yPixelSize = (detector.getyPixelSize() == null) ? null : detector.getyPixelSize().copy();
+		xPixelSize = (detector.getxPixelSize() == null) ? null : UnitUtils.copy(detector.getxPixelSize());
+		yPixelSize = (detector.getyPixelSize() == null) ? null : UnitUtils.copy(detector.getyPixelSize());
 		numberOfPixelsX = detector.getNumberOfPixelsX();
 		numberOfPixelsY = detector.getNumberOfPixelsY();
 		numberOfHorizontalModules = detector.getNumberOfHorizontalModules();
@@ -56,17 +52,15 @@ public class DiffractionDetector implements Serializable {
 		// This creates only a shallow copy of the List, but the elements are Integers, hence immutable, so it shouldn't matter.
 		missingModules = (detector.getMissingModules() == null) ? null : new ArrayList<>(detector.getMissingModules()); 
 	}
-	
-	
-	public int getNumberOfHorizontalModules(){
+
+	public int getNumberOfHorizontalModules() {
 		return numberOfHorizontalModules;
 	}
-	
-	public void setNumberOfHorizontalModules(int numberOfHorizontalModules){
+
+	public void setNumberOfHorizontalModules(int numberOfHorizontalModules) {
 		this.numberOfHorizontalModules = numberOfHorizontalModules;
 	}
-	
-	
+
 	public int getNumberOfVerticalModules() {
 		return numberOfVerticalModules;
 	}
@@ -75,7 +69,6 @@ public class DiffractionDetector implements Serializable {
 		this.numberOfVerticalModules = numberOfVerticalModules;
 	}
 
-	
 	public int getXGap() {
 		return xGap;
 	}
@@ -83,11 +76,11 @@ public class DiffractionDetector implements Serializable {
 	public void setXGap(int xGap) {
 		this.xGap = xGap;
 	}
-	
+
 	public int getYGap() {
 		return yGap;
 	}
-	
+
 	public void setYGap(int yGap) {
 		this.yGap = yGap;
 	}
@@ -95,67 +88,73 @@ public class DiffractionDetector implements Serializable {
 	public int getNumberOfPixelsX() {
 		return numberOfPixelsX;
 	}
+
 	public void setNumberOfPixelsX(int numberOfPixelsX) {
 		this.numberOfPixelsX = numberOfPixelsX;
 	}
+
 	public int getNumberOfPixelsY() {
 		return numberOfPixelsY;
 	}
+
 	public void setNumberOfPixelsY(int numberOfPixelsY) {
 		this.numberOfPixelsY = numberOfPixelsY;
 	}
 
 	private String units;
-	
+
 	public String getDetectorName() {
 		return detectorName;
 	}
+
 	public void setDetectorName(String name) {
 		this.detectorName = name;
 	}
-	public Amount<Length> getxPixelSize() {
+
+	public Quantity<Length> getxPixelSize() {
 		return xPixelSize;
 	}
-	public void setxPixelSize(Amount<Length> xPixelSize) {
+
+	public void setxPixelSize(Quantity<Length> xPixelSize) {
 		this.xPixelSize = xPixelSize;
 	}
-	
-	public Amount<Length> getyPixelSize() {
+
+	public Quantity<Length> getyPixelSize() {
 		return yPixelSize;
 	}
-	public void setyPixelSize(Amount<Length> yPixelSize) {
+
+	public void setyPixelSize(Quantity<Length> yPixelSize) {
 		this.yPixelSize = yPixelSize;
 	}
-	
+
 	public double getXPixelMM() {
-		if (xPixelSize ==  null) return Double.NaN;
-		return xPixelSize.doubleValue(SI.MILLIMETRE);
+		if (xPixelSize == null)
+			return Double.NaN;
+		return UnitUtils.convertToMM(xPixelSize);
 	}
-	
+
 	public void setXPixelMM(double pixmm) {
-		xPixelSize = Amount.valueOf(pixmm, SI.MILLIMETRE);
+		xPixelSize = UnitUtils.getQuantity(pixmm, UnitUtils.MILLIMETRE);
 	}
-	
+
 	public double getYPixelMM() {
-		if (yPixelSize ==  null) return Double.NaN;
-		return yPixelSize.doubleValue(SI.MILLIMETRE);
+		if (yPixelSize == null)
+			return Double.NaN;
+		return UnitUtils.convertToMM(yPixelSize);
 	}
-	
+
 	public void setYPixelMM(double pixmm) {
-		yPixelSize = Amount.valueOf(pixmm, SI.MILLIMETRE);
+		yPixelSize = UnitUtils.getQuantity(pixmm, UnitUtils.MILLIMETRE);
 	}
-	
-	
-	public List<Integer> getMissingModules(){
+
+	public List<Integer> getMissingModules() {
 		return missingModules;
 	}
-	
-	
-	public void setMissingModules(List<Integer> missingModules){
+
+	public void setMissingModules(List<Integer> missingModules) {
 		this.missingModules = missingModules;
 	}
-	
-	
+
 	@Override
 	public int hashCode() {
 		final int prime = 31;
@@ -177,6 +176,7 @@ public class DiffractionDetector implements Serializable {
 				+ ((missingModules == null) ? 0 : missingModules.hashCode());
 		return result;
 	}
+
 	@Override
 	public boolean equals(Object obj) {
 		if (this == obj)
@@ -225,8 +225,7 @@ public class DiffractionDetector implements Serializable {
 			return false;
 		return true;
 	}
-	
-	
+
 	@Override
 	public String toString(){
 		return detectorName;

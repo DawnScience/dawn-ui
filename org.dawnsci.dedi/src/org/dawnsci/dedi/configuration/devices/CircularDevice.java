@@ -1,9 +1,9 @@
 package org.dawnsci.dedi.configuration.devices;
 
+import javax.measure.Quantity;
 import javax.measure.quantity.Length;
-import javax.measure.unit.SI;
 
-import org.jscience.physics.amount.Amount;
+import org.eclipse.dawnsci.analysis.api.unit.UnitUtils;
 
 // TODO Test immutability.
 
@@ -15,11 +15,10 @@ import org.jscience.physics.amount.Amount;
  *
  */
 public class CircularDevice {
-	private Amount<Length> diameter;
+	private Quantity<Length> diameter;
 	private Double xcentre; // in pixels
 	private Double ycentre; // in pixels
-	
-	
+
 	/**
 	 * @param diameter
 	 *           The diameter of the device.
@@ -28,18 +27,16 @@ public class CircularDevice {
 	 * @param ycentre
 	 *           The y coordinate of the centre of the device in pixels.
 	 */
-	public CircularDevice(Amount<Length> diameter, Double xcentre, Double ycentre) {
+	public CircularDevice(Quantity<Length> diameter, Double xcentre, Double ycentre) {
 		super();
-		this.diameter = (diameter == null) ? null : diameter.copy();
+		this.diameter = (diameter == null) ? null : UnitUtils.copy(diameter);
 		this.xcentre = xcentre;
 		this.ycentre = ycentre;
 	}
 
-
-	public Amount<Length> getDiameter() {
-		return (diameter == null) ? null : diameter.copy();
+	public Quantity<Length> getDiameter() {
+		return (diameter == null) ? null : UnitUtils.copy(diameter);
 	}
-
 
 	/**
 	 * @return The x coordinate of the centre of the device in pixels.
@@ -48,7 +45,6 @@ public class CircularDevice {
 		return xcentre;
 	}
 
-
 	/**
 	 * @return The y coordinate of the centre of the device in pixels.
 	 */
@@ -56,22 +52,19 @@ public class CircularDevice {
 		return ycentre;
 	}
 
-
 	/**
-	 * @return The diameter of the device in millimeters.
+	 * @return The diameter of the device in millimetres.
 	 */
 	public Double getDiameterMM(){
-		return diameter.doubleValue(SI.MILLIMETER);
+		return UnitUtils.convertToMM(diameter);
 	}
-	
-	
+
 	/**
-	 * @return The radius of the device in millimeters.
+	 * @return The radius of the device in millimetres.
 	 */
 	public Double getRadiusMM(){
 		return getDiameterMM()/2;
 	}
-
 
 	@Override
 	public int hashCode() {
@@ -94,11 +87,14 @@ public class CircularDevice {
 			return false;
 		CircularDevice other = (CircularDevice) obj;
 		if (diameter == null) {
-			if (other.diameter != null)
+			if (other.diameter != null) {
 				return false;
-		} else if(other.diameter == null) return false; 
-		  else if (!diameter.equals(other.diameter) && diameter.doubleValue(SI.METER) != other.diameter.doubleValue(SI.METER))
+			}
+		} else if(other.diameter == null) {
 			return false;
+		} else if (!diameter.equals(other.diameter) && UnitUtils.convertToMM(diameter) != UnitUtils.convertToMM(other.diameter)) {
+			return false;
+		}
 		if (xcentre == null) {
 			if (other.xcentre != null)
 				return false;

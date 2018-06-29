@@ -10,7 +10,7 @@ package org.dawnsci.plotting.tools.region;
 
 import java.text.DecimalFormat;
 
-import javax.measure.quantity.Quantity;
+import javax.measure.Quantity;
 
 import org.dawnsci.common.widgets.Activator;
 import org.dawnsci.common.widgets.tree.ComboNode;
@@ -62,7 +62,7 @@ public class RegionEditorLabelProvider extends ColumnLabelProvider implements IS
 	}
 
 	private StyledString getStyledText(StyledString ret, RegionEditorNode node) {
-		if(column == 0) { // Name
+		if (column == 0) { // Name
 			if (node.isEditable()) {
 				ret.append(node.getLabel());
 				ret.append(" *", StyledString.QUALIFIER_STYLER);
@@ -73,13 +73,11 @@ public class RegionEditorLabelProvider extends ColumnLabelProvider implements IS
 		return ret;
 	}
 
-	private StyledString getStyledText(StyledString ret, NumericNode<? extends Quantity> node) {
-
-		
+	private StyledString getStyledText(StyledString ret, NumericNode<? extends Quantity<?>> node) {
 		String pattern = node.getFormat();
 		DecimalFormat format = new DecimalFormat(pattern);
-		
-        switch(column) {
+
+		switch(column) {
 		case 0: // Name
 			return ret.append(node.getLabel(), StyledString.QUALIFIER_STYLER);
 		case 1: // Value
@@ -109,7 +107,6 @@ public class RegionEditorLabelProvider extends ColumnLabelProvider implements IS
 		}
 		return ret;
 	}
-
 
 	@Override
 	public String getToolTipText(Object element) {

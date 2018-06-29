@@ -32,17 +32,18 @@ import org.dawnsci.common.widgets.tree.UnitEditingSupport;
 import org.dawnsci.common.widgets.tree.ValueEditingSupport;
 import org.dawnsci.plotting.tools.Activator;
 import org.eclipse.core.runtime.preferences.InstanceScope;
+import org.eclipse.dawnsci.analysis.api.unit.UnitUtils;
 import org.eclipse.dawnsci.analysis.dataset.roi.GridPreferences;
 import org.eclipse.dawnsci.analysis.dataset.roi.GridROI;
 import org.eclipse.dawnsci.analysis.dataset.roi.LinearROI;
 import org.eclipse.dawnsci.plotting.api.axis.IAxis;
 import org.eclipse.dawnsci.plotting.api.region.IROIListener;
 import org.eclipse.dawnsci.plotting.api.region.IRegion;
+import org.eclipse.dawnsci.plotting.api.region.IRegion.RegionType;
 import org.eclipse.dawnsci.plotting.api.region.IRegionListener;
 import org.eclipse.dawnsci.plotting.api.region.ROIEvent;
 import org.eclipse.dawnsci.plotting.api.region.RegionEvent;
 import org.eclipse.dawnsci.plotting.api.region.RegionUtils;
-import org.eclipse.dawnsci.plotting.api.region.IRegion.RegionType;
 import org.eclipse.dawnsci.plotting.api.tool.AbstractToolPage;
 import org.eclipse.dawnsci.plotting.api.trace.ITraceListener;
 import org.eclipse.dawnsci.plotting.api.trace.TraceEvent;
@@ -82,7 +83,6 @@ import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.PreferencesUtil;
 import org.eclipse.ui.preferences.ScopedPreferenceStore;
-import org.jscience.physics.amount.Amount;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -165,13 +165,11 @@ public class GridTool extends AbstractToolPage implements IResettableExpansion{
 		};
 	}
 
-
-
 	@Override
 	public ToolPageRole getToolPageRole() {
 		return ToolPageRole.ROLE_2D;
 	}
-	
+
 //  Example metadata object expected by the grid tool to correctly populate the grid preferences
 //	private IMetadata getGDAGridPreferences() {
 //
@@ -186,14 +184,13 @@ public class GridTool extends AbstractToolPage implements IResettableExpansion{
 
 	@Override
 	public void createControl(Composite parent) {
-				
 		final Action reselect = new Action("Create new grid.", getImageDescriptor()) {
 			@Override
 			public void run() {
 				createNewRegion(true);
 			}
 		};
-		
+
 		IActionBars actionbars = getSite()!=null?getSite().getActionBars():null;
 		if (actionbars != null){
 			actionbars.getToolBarManager().add(new Separator("org.dawb.workbench.plotting.tools.profile.newProfileGroup"));
@@ -223,7 +220,7 @@ public class GridTool extends AbstractToolPage implements IResettableExpansion{
 		label.setForeground(new Color(label.getDisplay(), defaultRGB));
 		label.setBackground(Display.getDefault().getSystemColor(SWT.COLOR_WHITE));
 		label.setText("* Click to change value  ");
-		
+
 		createGridModel();
 		createActions();
 
@@ -295,7 +292,7 @@ public class GridTool extends AbstractToolPage implements IResettableExpansion{
 				}
 			}
 		});
-		
+
 		tree.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseDown(MouseEvent e) {
@@ -312,8 +309,9 @@ public class GridTool extends AbstractToolPage implements IResettableExpansion{
 					}
 					
 				}
-			}			
+			}
 		});
+
 		gridPreferences = getGridPreferences();
 		
 		connectBeamCenterControls();
@@ -330,51 +328,50 @@ public class GridTool extends AbstractToolPage implements IResettableExpansion{
 
 		if (model != null) model.newGridPreferences(gridPreferences);
 	}
-	
+
 	private void updateBeamCentre() {
 		this.beamCenter = getBeamCenter();
 		@SuppressWarnings("unchecked")
 		final NumericNode<Length> x = (NumericNode<Length>)model.getNode("/Detector/Beam Centre/X");
-		x.setValueQuietly(Amount.valueOf(beamCenter[0], x.getUnit()));
+		x.setValueQuietly(UnitUtils.getQuantity(beamCenter[0], x.getUnit()));
 		viewer.update(x, new String[]{"Value"});
-		
+
 		@SuppressWarnings("unchecked")
 		final NumericNode<Length> y = (NumericNode<Length>)model.getNode("/Detector/Beam Centre/Y");
-		y.setValueQuietly(Amount.valueOf(beamCenter[1], y.getUnit()));
+		y.setValueQuietly(UnitUtils.getQuantity(beamCenter[1], y.getUnit()));
 		viewer.update(y, new String[]{"Value"});
 	}
-	
+
 	private void connectBeamCenterControls() {
 		// TODO FIXME Define beamCenter differently to actual center?
 		//Now gets beamcentre from GDA metadata if supplied
 		this.beamCenter = getBeamCenter();
-		
+
 		@SuppressWarnings("unchecked")
 		final NumericNode<Length> x = (NumericNode<Length>)model.getNode("/Detector/Beam Centre/X");
-		x.setDefault(Amount.valueOf(beamCenter[0], x.getUnit()));
+		x.setDefault(UnitUtils.getQuantity(beamCenter[0], x.getUnit()));
 		x.setLowerBound(-1*Double.MAX_VALUE);
 		x.setUpperBound(Double.MAX_VALUE);
-		x.addAmountListener(new AmountListener<Length>() {		
+		x.addAmountListener(new AmountListener<Length>() {
 			@Override
 			public void amountChanged(AmountEvent<Length> evt) {
 				beamCenter[0] = x.getDoubleValue();
 				drawBeamCentre(beamCenterAction.isChecked());
 			}
 		});
-		
+
 		@SuppressWarnings("unchecked")
 		final NumericNode<Length> y = (NumericNode<Length>)model.getNode("/Detector/Beam Centre/Y");
-		y.setDefault(Amount.valueOf(beamCenter[1], y.getUnit()));
+		y.setDefault(UnitUtils.getQuantity(beamCenter[1], y.getUnit()));
 		y.setLowerBound(-1*Double.MAX_VALUE);
 		y.setUpperBound(Double.MAX_VALUE);
-		y.addAmountListener(new AmountListener<Length>() {		
+		y.addAmountListener(new AmountListener<Length>() {
 			@Override
 			public void amountChanged(AmountEvent<Length> evt) {
 				beamCenter[1] = y.getDoubleValue();
 				drawBeamCentre(beamCenterAction.isChecked());
 			}
 		});
-		
 	}
 
 	private double[] beamCenter;
@@ -387,14 +384,13 @@ public class GridTool extends AbstractToolPage implements IResettableExpansion{
 	 * @return
 	 */
 	private double[] getBeamCenter() {
-		
 		if (gridPreferences != null) {
 			double x = gridPreferences.getBeamlinePosX();
 			double y = gridPreferences.getBeamlinePosY();
 			
 			return new double[]{x,y};
 		}
-		
+
 		double[] ret = new double[2];
 		final List<? extends IDataset> axes = getImageTrace().getAxes();
 		if (axes!=null) {
@@ -405,16 +401,17 @@ public class GridTool extends AbstractToolPage implements IResettableExpansion{
 		final int[] shape = getImageTrace().getData().getShape();
 		ret[0] = shape[1]/2;
 		ret[1] = shape[0]/2;
-		
+
 		return ret;
 	}
-	
+
 	@SuppressWarnings("unused")
 	private double getMaxX() {
 		final List<? extends IDataset> axes = getImageTrace().getAxes();
 		if (axes!=null) return axes.get(0).max().doubleValue();
 		return getImageTrace().getData().getShape()[1];
 	}
+
 	@SuppressWarnings("unused")
 	private double getMaxY() {
 		final List<IDataset> axes = getImageTrace().getAxes();
@@ -422,33 +419,34 @@ public class GridTool extends AbstractToolPage implements IResettableExpansion{
 		return getImageTrace().getData().getShape()[0];
 	}
 
-
 	private void createActions() {
 
 		createToolPageActions();
-		
+
 		this.beamCenterAction = new Action("Beam centre", Activator.getImageDescriptor("/icons/beam_centre.png")) {
 			@Override
 			public void run() {
-	    		drawBeamCentre(isChecked());
+				drawBeamCentre(isChecked());
 			}
 		};
 		beamCenterAction.setChecked(false);
-		
+
 		getSite().getActionBars().getToolBarManager().add(beamCenterAction);
 		getSite().getActionBars().getToolBarManager().add(new Separator());
 
 		final Action preferences = new Action("Preferences...") {
 			@Override
 			public void run() {
-				//if (!isActive()) return;
-				PreferenceDialog pref = PreferencesUtil.createPreferenceDialogOn(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(), "uk.ac.diamond.scisoft.analysis.rcp.gridScanPreferencePage", null, null);
-				if (pref != null) pref.open();
-        	}
-        };
-        getSite().getActionBars().getMenuManager().add(preferences);
+				// if (!isActive()) return;
+				PreferenceDialog pref = PreferencesUtil.createPreferenceDialogOn(
+						PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(),
+						"uk.ac.diamond.scisoft.analysis.rcp.gridScanPreferencePage", null, null);
+				if (pref != null)
+					pref.open();
+			}
+		};
+		getSite().getActionBars().getMenuManager().add(preferences);
 	}
-	
 	
 	protected void drawBeamCentre(boolean isChecked) {
 		if (!isActive()) return; // We are likely off screen.
@@ -491,7 +489,7 @@ public class GridTool extends AbstractToolPage implements IResettableExpansion{
 				break;
 			}
 		}
-        return region;
+		return region;
 	}
 
 	protected IRegion drawCrosshairs(double[] beamCentre, double length, Color colour, Color labelColour, String nameStub, String labelText) {
@@ -525,20 +523,18 @@ public class GridTool extends AbstractToolPage implements IResettableExpansion{
 	
 		return region;
 	}
-	
+
 	private void createGridModel() {
-		
 		model = new GridTreeModel();
 		model.setViewer(viewer);
 		viewer.setInput(model.getRoot());
-		
-        resetExpansion();
+
+		resetExpansion();
 		getSite().setSelectionProvider(viewer);
 	}
 
 
 	private void createColumns(TreeViewer viewer) {
-		
 		viewer.setColumnProperties(new String[] { "Name", "Value", "Unit" });
 		ColumnViewerToolTipSupport.enableFor(viewer);
 
@@ -546,7 +542,7 @@ public class GridTool extends AbstractToolPage implements IResettableExpansion{
 		var.getColumn().setText("Name"); // Selected
 		var.getColumn().setWidth(220);
 		var.setLabelProvider(new NodeLabelProvider(0));
-				
+
 		var = new TreeViewerColumn(viewer, SWT.LEFT, 1);
 		var.getColumn().setText("Value"); // Selected
 		var.getColumn().setWidth(140);
@@ -558,9 +554,7 @@ public class GridTool extends AbstractToolPage implements IResettableExpansion{
 		var.getColumn().setWidth(90);
 		var.setLabelProvider(new DelegatingProviderWithTooltip(new NodeLabelProvider(3)));
 		var.setEditingSupport(new UnitEditingSupport(viewer));
-		
 	}
-
 
 	@Override
 	public void activate() {
@@ -577,14 +571,14 @@ public class GridTool extends AbstractToolPage implements IResettableExpansion{
 		}
 		createNewRegion(false);
 	}
-	
+
 	@Override
 	public void deactivate() {
 		super.deactivate();
 		if (getPlottingSystem()!=null) {
 			resetAxes();
 			Collection<IRegion> regions = getPlottingSystem().getRegions();
-		    if (regions!=null) for (IRegion region : regions) {
+			if (regions!=null) for (IRegion region : regions) {
 				if (region!=null && region.getRegionType()==RegionType.GRID) {
 					region.removeROIListener(roiListener);
 				}
@@ -618,9 +612,8 @@ public class GridTool extends AbstractToolPage implements IResettableExpansion{
 		}
 	}
 
-	
 	private Object getMarker() {
-	    return getToolPageRole().getClass().getName().intern();
+		return getToolPageRole().getClass().getName().intern();
 	}
 
 
@@ -669,7 +662,7 @@ public class GridTool extends AbstractToolPage implements IResettableExpansion{
 			// intentionally silent
 		}
 	}
-	
+
 	private GridPreferences getGridPreferences() {
 		try {
 			IMetadata m = getImageTrace().getData().getFirstMetadata(IMetadata.class);
@@ -685,7 +678,7 @@ public class GridTool extends AbstractToolPage implements IResettableExpansion{
 		return getGridFromStore();
 		
 	}
-	
+
 	private GridPreferences getGridFromStore() {
 		final IPreferenceStore preferenceStore = new ScopedPreferenceStore(InstanceScope.INSTANCE, "uk.ac.diamond.scisoft.analysis.rcp");
 		double xRes = preferenceStore.getDouble(GridTreeModel.GRIDSCAN_RESOLUTION_X);

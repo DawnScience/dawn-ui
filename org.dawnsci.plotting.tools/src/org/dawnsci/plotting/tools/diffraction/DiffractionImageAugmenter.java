@@ -10,12 +10,10 @@ package org.dawnsci.plotting.tools.diffraction;
 
 import java.text.DecimalFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import javax.measure.unit.NonSI;
 import javax.vecmath.Vector3d;
 
 import org.dawb.common.ui.menu.MenuAction;
@@ -30,7 +28,9 @@ import org.eclipse.dawnsci.analysis.api.diffraction.DiffractionCrystalEnvironmen
 import org.eclipse.dawnsci.analysis.api.diffraction.IDetectorPropertyListener;
 import org.eclipse.dawnsci.analysis.api.diffraction.IDiffractionCrystalEnvironmentListener;
 import org.eclipse.dawnsci.analysis.api.io.ILoaderService;
+import org.eclipse.dawnsci.analysis.api.metadata.IDiffractionMetadata;
 import org.eclipse.dawnsci.analysis.api.roi.IROI;
+import org.eclipse.dawnsci.analysis.api.unit.UnitUtils;
 import org.eclipse.dawnsci.analysis.dataset.roi.EllipticalROI;
 import org.eclipse.dawnsci.analysis.dataset.roi.HyperbolicROI;
 import org.eclipse.dawnsci.analysis.dataset.roi.LinearROI;
@@ -44,7 +44,6 @@ import org.eclipse.dawnsci.plotting.api.region.IRegion.RegionType;
 import org.eclipse.dawnsci.plotting.api.region.ROIEvent;
 import org.eclipse.dawnsci.plotting.api.region.RegionUtils;
 import org.eclipse.draw2d.ColorConstants;
-import org.eclipse.dawnsci.analysis.api.metadata.IDiffractionMetadata;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IContributionManager;
 import org.eclipse.swt.graphics.Color;
@@ -52,6 +51,7 @@ import org.eclipse.swt.widgets.Display;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import si.uom.NonSI;
 import uk.ac.diamond.scisoft.analysis.crystallography.CalibrantSelectedListener;
 import uk.ac.diamond.scisoft.analysis.crystallography.CalibrantSelectionEvent;
 import uk.ac.diamond.scisoft.analysis.crystallography.CalibrantSpacing;
@@ -77,31 +77,35 @@ public class DiffractionImageAugmenter implements IDetectorPropertyListener, IDi
 	private static Action standardRings;
 	private static Action iceRings;
 	private static Action calibrantRings;
-	
+
 	static {
-        standardRings = new Action("Standard rings", Activator.getImageDescriptor("/icons/standard_rings.png")) {
-	    	@Override
-	    	public void run() {
-	    		if (activeAugmenter==null) return;
-	    		activeAugmenter.drawStandardRings(isChecked());
-	    	}
+		standardRings = new Action("Standard rings", Activator.getImageDescriptor("/icons/standard_rings.png")) {
+			@Override
+			public void run() {
+				if (activeAugmenter == null)
+					return;
+				activeAugmenter.drawStandardRings(isChecked());
+			}
 		};
 		standardRings.setChecked(false);
-  
+
 		iceRings = new Action("Ice rings", Activator.getImageDescriptor("/icons/ice_rings.png")) {
 			@Override
 			public void run() {
-	    		if (activeAugmenter==null) return;
+				if (activeAugmenter == null)
+					return;
 				activeAugmenter.drawIceRings(isChecked());
 			}
 		};
 		iceRings.setChecked(false);
-	
+
 		calibrantRings = new Action("Calibrant", Activator.getImageDescriptor("/icons/calibrant_rings.png")) {
 			@Override
 			public void run() {
-	    		if (activeAugmenter==null) return;
-				activeAugmenter.drawCalibrantRings(isChecked(), CalibrationFactory.getCalibrationStandards().getCalibrant());
+				if (activeAugmenter == null)
+					return;
+				activeAugmenter.drawCalibrantRings(isChecked(),
+						CalibrationFactory.getCalibrationStandards().getCalibrant());
 			}
 		};
 		calibrantRings.setChecked(false);
@@ -109,15 +113,16 @@ public class DiffractionImageAugmenter implements IDetectorPropertyListener, IDi
 		beamCentre = new Action("Beam centre", Activator.getImageDescriptor("/icons/beam_centre.png")) {
 			@Override
 			public void run() {
-	    		if (activeAugmenter==null) return;
+				if (activeAugmenter == null)
+					return;
 				activeAugmenter.drawBeamCentre(isChecked());
 			}
 		};
 		beamCentre.setChecked(false);
-	}	
-	
+	}
+
 	private static Logger logger = LoggerFactory.getLogger(DiffractionImageAugmenter.class);
-	
+
 	private IPlottingSystem<?> plottingSystem;
 	private DetectorProperties detprop;
 	private DiffractionCrystalEnvironment diffenv;
@@ -125,9 +130,9 @@ public class DiffractionImageAugmenter implements IDetectorPropertyListener, IDi
 	private IRegion beamPosition;
 	private IROIListener roilistener;
 
-    private enum RING_TYPE {
-    	ICE, STANDARD, CALIBRANT, BEAM_CENTRE, BEAM_POSITION_HANDLE;
-    }
+	private enum RING_TYPE {
+		ICE, STANDARD, CALIBRANT, BEAM_CENTRE, BEAM_POSITION_HANDLE;
+	}
 
 	private double[] imageCentrePC;
 
@@ -220,11 +225,11 @@ public class DiffractionImageAugmenter implements IDetectorPropertyListener, IDi
 	public boolean isShowingBeamCenter() {
 		return beamCentre.isChecked();
 	}
-	
+
 	public void setMaxCalibrantRings(int maxRings){
 		this.maxRings = maxRings;
 	}
-	
+
 	public void setRingSet(Set<Integer> rings){
 		if (rings == null) {
 			this.rings = null;
@@ -232,7 +237,6 @@ public class DiffractionImageAugmenter implements IDetectorPropertyListener, IDi
 		}
 		this.rings = new HashSet<>(rings);
 	}
-
 
 	public void drawBeamCentre(boolean isChecked) {
 		if (!active) return; // We are likely off screen.
@@ -268,31 +272,35 @@ public class DiffractionImageAugmenter implements IDetectorPropertyListener, IDi
 		 */
 		if (calibrantRings!=null) drawCalibrantRings(calibrantRings.isChecked(), standards.getCalibrant());
 	}
-	
+
 	public void drawCalibrantRings(boolean isChecked, CalibrantSpacing spacing) {
-		if (!active) return; // We are likely off screen.
-	
+		if (!active)
+			return; // We are likely off screen.
+
 		if (isChecked) {
 			if (!calibrantRings.isChecked()) // override setting
 				calibrantRings.setChecked(true);
 			List<ResolutionRing> calibrantRingsList = new ArrayList<ResolutionRing>(7);
-	
+
 			int count = 0;
 			for (HKL hkl : spacing.getHKLs()) {
-				final double d = Double.valueOf(hkl.getD().doubleValue(NonSI.ANGSTROM));
-				
+				final double d = UnitUtils.convert(hkl.getD(), NonSI.ANGSTROM);
+
 				boolean highlight = count >= maxRings;
-				if (rings != null && !rings.isEmpty()) highlight = rings.contains(count);
-				
+				if (rings != null && !rings.isEmpty())
+					highlight = rings.contains(count);
+
 				try {
-					calibrantRingsList.add(new ResolutionRing(d, true, highlight ? ColorConstants.yellow :ColorConstants.red, true, false, false));
+					calibrantRingsList.add(new ResolutionRing(d, true,
+							highlight ? ColorConstants.yellow : ColorConstants.red, true, false, false));
 				} catch (NumberFormatException e) {
 					logger.warn("Could not parse item {} in standard distances", d);
 				}
 				count++;
 			}
 			drawResolutionConics(calibrantRingsList, "calibrant", RING_TYPE.CALIBRANT);
-			if (isShowingBeamCenter()) drawResolutionBeamPosition();
+			if (isShowingBeamCenter())
+				drawResolutionBeamPosition();
 		} else {
 			hideConics(RING_TYPE.CALIBRANT);
 			hideConics(RING_TYPE.BEAM_POSITION_HANDLE);
@@ -376,7 +384,7 @@ public class DiffractionImageAugmenter implements IDetectorPropertyListener, IDi
 		for (IRegion region : plottingSystem.getRegions()) {
 			try {
 				if (region.getUserObject()!=marker) continue;
-			    plottingSystem.removeRegion(region);
+				plottingSystem.removeRegion(region);
 			} catch (Throwable ne) {
 				// They can delete regions themselves.
 			}
@@ -384,7 +392,6 @@ public class DiffractionImageAugmenter implements IDetectorPropertyListener, IDi
 	}
 
 	private void drawResolutionConics(List<ResolutionRing> conicList, String typeName, final RING_TYPE marker) {
-		
 		if (!centreMoved || forceRedraw) {
 			Display.getDefault().syncExec(new Runnable() {
 				@Override
@@ -419,7 +426,7 @@ public class DiffractionImageAugmenter implements IDetectorPropertyListener, IDi
 			for (IRegion region : plottingSystem.getRegions()) {
 				try {
 					if (region.getUserObject()!=marker) continue;
-				    regions.add(region);
+					regions.add(region);
 				} catch (Throwable ne) {
 				}
 			}
@@ -510,7 +517,7 @@ public class DiffractionImageAugmenter implements IDetectorPropertyListener, IDi
 
 	private void drawIceRings(boolean isChecked) {
 		if (!active) return; // We are likely off screen.
-	    
+
 		if (isChecked) {
 			List<ResolutionRing> iceRingsList = new ArrayList<ResolutionRing>(7);
 			for (double res : iceResolution) {
@@ -521,10 +528,10 @@ public class DiffractionImageAugmenter implements IDetectorPropertyListener, IDi
 			hideConics(RING_TYPE.ICE);
 		}
 	}
-		
+
 	private void drawStandardRings(boolean isChecked) {
 		if (!active) return; // We are likely off screen.
-			
+
 		if (isChecked && diffenv!= null && detprop != null) {
 			List<ResolutionRing> standardRingsList = new ArrayList<ResolutionRing>(7);
 			Double numberEvenSpacedRings = 6.0;
@@ -538,7 +545,7 @@ public class DiffractionImageAugmenter implements IDetectorPropertyListener, IDi
 				// increase the length of the vector by step.
 				longestVector.normalize();
 				longestVector.scale(step + (step * i));
-	
+
 				toDetectorVector.add(beamVector, longestVector);
 				twoThetaSpacing = beamVector.angle(toDetectorVector);
 				d = lambda / Math.sin(twoThetaSpacing);
@@ -598,12 +605,10 @@ public class DiffractionImageAugmenter implements IDetectorPropertyListener, IDi
 
 	@Override
 	public void detectorPropertiesChanged(DetectorPropertyEvent evt) {
-		
 		if (evt.getType()  == EventType.BEAM_CENTRE) {
 			centreMoved = true;
 		}
 		updateAll();
-		
 	}
 
 	private void updateAll() {
@@ -615,9 +620,9 @@ public class DiffractionImageAugmenter implements IDetectorPropertyListener, IDi
 		standardRings.run();
 		iceRings.run();
 		calibrantRings.run();
-		
+
 		if ((!centreMoved || forceRedraw) && beamPosition!= null) beamPosition.toFront();
-		
+
 		centreMoved = false;
 		forceRedraw = false;
 	}
@@ -662,37 +667,35 @@ public class DiffractionImageAugmenter implements IDetectorPropertyListener, IDi
 	public IDiffractionMetadata getDiffractionMetadata() {
 		return dmd;
 	}
-	
+
 	public boolean isActive() {
 		return active;
 	}
 
 	private void registerListeners(boolean register) {
-		
 		if (register) {
 			CalibrationFactory.addCalibrantSelectionListener(this);
 		} else {
 			CalibrationFactory.removeCalibrantSelectionListener(this);
 		}
-		
-		if (diffenv!=null) {
+
+		if (diffenv != null) {
 			if (register) {
-			    diffenv.addDiffractionCrystalEnvironmentListener(this);
+				diffenv.addDiffractionCrystalEnvironmentListener(this);
 			} else {
 				diffenv.removeDiffractionCrystalEnvironmentListener(this);
 			}
 		} else {
 			logger.error("DiffractionCrystalEnvironment is null!");
 		}
-		if (detprop!=null) {
+		if (detprop != null) {
 			if (register) {
 				detprop.addDetectorPropertyListener(this);
 			} else {
 				detprop.removeDetectorPropertyListener(this);
-			}		    
+			}
 		} else {
 			logger.error("DetectorProperties is null!");
 		}
-        
 	}
 }

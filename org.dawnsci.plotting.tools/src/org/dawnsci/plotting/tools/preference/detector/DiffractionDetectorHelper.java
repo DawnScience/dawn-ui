@@ -8,29 +8,27 @@
  */
 package org.dawnsci.plotting.tools.preference.detector;
 
-import java.beans.XMLDecoder;
-import java.io.ByteArrayInputStream;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.measure.Quantity;
 import javax.measure.quantity.Length;
 
 import org.dawnsci.plotting.tools.Activator;
-import org.jscience.physics.amount.Amount;
 
 public class DiffractionDetectorHelper {
-	
+
 	private static int MIN_BIN = 2;
 	private static int MAX_BIN = 6;
-	
+
 	private static int PILATUSXGAP = 7;
 	private static int PILATUSYGAP = 17;
-	
+
 	private static int PILATUSMODULEX = 487;
 	private static int PILATUSMODULEY = 195;
-	
+
 	private static double PILATUSPIXELMM = 0.172;
-	
+
 	/**
 	 * Static method to determine the detector pixel size using the image dimensions.
 	 * Known detectors are stored in the preferences store.
@@ -97,48 +95,42 @@ public class DiffractionDetectorHelper {
 			imageSize[0] % (PILATUSMODULEY+ PILATUSYGAP) == PILATUSMODULEY) {
 			return pilatusPlate;
 		}
-		
+
 		return null;
 	}
-	
+
 	public static List<String> getDiffractionDetectorNames() {
 		DiffractionDetectors detectors = getDetectorsFromPreferences();
-		
+
 		List<DiffractionDetector> ds =detectors.getDiffractionDetectors();
 		int nd = ds.size();
-		
+
 		List<String> names = new ArrayList<String>(nd);
-		
+
 		for (int i = 0; i < nd; i++) {
 			names.add(ds.get(i).getDetectorName());
 		}
-		
 		return names;
 	}
-	
-	public static List<Amount<Length>> getXYPixelSizeAmount(String name) {
+
+	public static List<Quantity<Length>> getXYPixelSizeAmount(String name) {
 		DiffractionDetectors detectors = getDetectorsFromPreferences();
 		for (DiffractionDetector dd : detectors.getDiffractionDetectors()) {
 			if (dd.getDetectorName().equals(name)) {
-				
-				List<Amount<Length>> out = new ArrayList<Amount<Length>>(2);
+				List<Quantity<Length>> out = new ArrayList<>(2);
 				out.add(dd.getxPixelSize());
 				out.add(dd.getyPixelSize());
-				
 				return out;
 			}
 		}
 		return null;
 	}
-	
+
 	public static DiffractionDetectors getDetectorsFromPreferences() {
 		String xml = Activator.getPlottingPreferenceStore().getString(DiffractionDetectorConstants.DETECTOR);
-		XMLDecoder xmlDecoder =new XMLDecoder(new ByteArrayInputStream(xml.getBytes()));
-		DiffractionDetectors dd = (DiffractionDetectors) xmlDecoder.readObject();
-		xmlDecoder.close();
-		return dd;
+		return DiffractionDetectors.createDetectors(xml);
 	}
-	
+
 	private static DiffractionDetector checkForFullDetector(DiffractionDetectors detectors, int[] imageSize) {
 		for (DiffractionDetector det: detectors.getDiffractionDetectors()) {
 			if (imageSize[0] == det.getNumberOfPixelsX() && imageSize[1] == det.getNumberOfPixelsY()) {
@@ -147,11 +139,10 @@ public class DiffractionDetectorHelper {
 				return rotateDetector(det);
 			}
 		}
-		
+
 		return null;
-		
 	}
-	
+
 	private static DiffractionDetector checkForBinning(DiffractionDetectors detectors, int[] imageSize) {
 		for (DiffractionDetector det: detectors.getDiffractionDetectors()) {
 			
@@ -164,10 +155,10 @@ public class DiffractionDetectorHelper {
 				}
 			}
 		}
-		
+
 		return null;
 	}
-	
+
 	private static DiffractionDetector rotateDetector(DiffractionDetector detector) {
 		DiffractionDetector det = new DiffractionDetector();
 		det.setDetectorName(detector.getDetectorName() +" rotated");
@@ -175,7 +166,7 @@ public class DiffractionDetectorHelper {
 		det.setNumberOfPixelsY(detector.getNumberOfPixelsX());
 		det.setXPixelMM(detector.getYPixelMM());
 		det.setYPixelMM(detector.getXPixelMM());
-		
+
 		return det;
 	}
 
@@ -186,8 +177,7 @@ public class DiffractionDetectorHelper {
 		det.setYPixelMM(detector.getYPixelMM()*binning);
 		det.setNumberOfPixelsY(detector.getNumberOfPixelsY()/binning);
 		det.setNumberOfPixelsX(detector.getNumberOfPixelsX()/binning);
-		
+
 		return det;
 	}
-
 }

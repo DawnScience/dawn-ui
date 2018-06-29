@@ -2,8 +2,8 @@ package org.dawnsci.dedi.ui.widgets.units;
 
 import java.util.List;
 
-import javax.measure.quantity.Quantity;
-import javax.measure.unit.Unit;
+import javax.measure.Quantity;
+import javax.measure.Unit;
 
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ComboViewer;
@@ -16,7 +16,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 
-public class ComboUnitsProvider<T extends Quantity> extends WidgetUnitsProvider<T> {
+public class ComboUnitsProvider<T extends Quantity<T>> extends WidgetUnitsProvider<T> {
 	private Combo unitsCombo;
 	private ComboViewer unitsComboViewer;
 

@@ -8,69 +8,79 @@
  */
 package org.dawnsci.plotting.tools.grid;
 
-import javax.measure.Measure;
-import javax.measure.converter.UnitConverter;
-import javax.measure.quantity.Length;
-import javax.measure.unit.NonSI;
-import javax.measure.unit.SI;
-import javax.measure.unit.Unit;
-import javax.measure.unit.UnitFormat;
+import java.util.Map;
 
-public class Pixel extends Unit<Length>{
+import javax.measure.Dimension;
+import javax.measure.Quantity;
+import javax.measure.Unit;
+import javax.measure.UnitConverter;
+import javax.measure.quantity.Length;
+
+import org.eclipse.dawnsci.analysis.api.unit.UnitUtils;
+
+import si.uom.SI;
+import tec.units.indriya.AbstractUnit;
+import tec.units.indriya.format.SimpleUnitFormat;
+import tec.units.indriya.quantity.Quantities;
+import tec.units.indriya.quantity.QuantityDimension;
+
+public class Pixel extends AbstractUnit<Length>{
 
 	private static final long serialVersionUID = 1L;
 
 	public static void main(String[] args) {
-		
+
 		Unit<Resolution> ppmm = new PerMilliMetre();
-		Measure<Double, Resolution> res = Measure.valueOf(2.0, ppmm);
-		
+		Quantity<Resolution> res = Quantities.getQuantity(2.0, ppmm);
+
 		Pixel pixel = new Pixel(res, 40);
-		Measure<Double, Length> distInPixels = Measure.valueOf(1000.0, pixel);
-		
+		Quantity<Length> distInPixels = Quantities.getQuantity(1000.0, pixel);
+
 		System.out.println(distInPixels.to(pixel));
 		System.out.println(distInPixels.to(SI.METRE));
-		System.out.println(distInPixels.to(SI.MILLI(SI.METRE)));
-		System.out.println(distInPixels.to(NonSI.FOOT));
-
+		System.out.println(distInPixels.to(UnitUtils.MILLIMETRE));
+		// System.out.println(distInPixels.to(NonSI.FOOT));
 	}
 
 	public static Pixel pixel() {
 		return new Pixel();
 	}
-	
+
 	private PixelConverter converter;
-	
+
 	public Pixel() {
-		this(Measure.valueOf(1.0, new PerMilliMetre()), 0, "px");
+		this(Quantities.getQuantity(1.0, new PerMilliMetre()), 0, "px");
 	}
-	
+
 	public Pixel(String label) {
-		this(Measure.valueOf(1.0, new PerMilliMetre()), 0, label);
+		this(Quantities.getQuantity(1.0, new PerMilliMetre()), 0, label);
 	}
-	
-	public Pixel(Measure<Double, Resolution> resolution, double offset) {
+
+	public Pixel(Quantity<Resolution> resolution, double offset) {
 		this(resolution, offset, "px");
 	}
-	
-	public Pixel(Measure<Double, Resolution> resolution, double offset, String label) {
+
+	public Pixel(Quantity<Resolution> resolution, double offset, String label) {
 		this.converter = new PixelConverter(resolution, offset);
-		UnitFormat.getInstance().label(this, label);
+		SimpleUnitFormat.getInstance().label(this, label);
 	}
-	
-	public Measure<Double, Resolution> getResolution() {
+
+	public Quantity<Resolution> getResolution() {
 		return this.converter.getResolution();
 	}
+
 	public void setPixelsPerMm(double ppmm) {
 		this.converter.setPixelsPerMm(ppmm);
 	}
-	public void setResolution(Measure<Double, Resolution> resolution) {
+
+	public void setResolution(Quantity<Resolution> resolution) {
 		this.converter.setResolution(resolution);
 	}
+
 	public void setOffset(double offset) {
 		this.converter.setOffset(offset);
 	}
-	
+
 	@Override
 	public boolean equals(Object arg0) {
 		if (!(arg0 instanceof Pixel))
@@ -81,17 +91,27 @@ public class Pixel extends Unit<Length>{
 	}
 
 	@Override
-	public Unit<? super Length> getStandardUnit() {
-		return SI.METRE;
-	}
-
-	@Override
 	public int hashCode() {
 		return 0;
 	}
 
 	@Override
-	public UnitConverter toStandardUnit() {
-		return converter;
+	public Map<? extends Unit<?>, Integer> getBaseUnits() {
+		return null;
+	}
+
+	@Override
+	public Dimension getDimension() {
+		return QuantityDimension.LENGTH;
+	}
+
+	@Override
+	public UnitConverter getSystemConverter() {
+		return null;
+	}
+
+	@Override
+	protected Unit<Length> toSystemUnit() {
+		return SI.METRE;
 	}
 }

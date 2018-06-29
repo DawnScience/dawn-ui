@@ -1,7 +1,7 @@
 Manifest-Version: 1.0
 Dependency-Notes: 
- This plugin should be totally vanilla and not have dependencies on anything 
- other than jscience and eclipse/swt/jface things.
+ This plugin should be totally vanilla and not have dependencies on anything
+ other than unit and eclipse/swt/jface things.
 Bundle-ManifestVersion: 2
 Bundle-Name: DawnScience Widgets
 Bundle-SymbolicName: org.dawnsci.common.widgets;singleton:=true
@@ -22,11 +22,17 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
 Service-Component: OSGI-INF/*.xml
 Eclipse-BuddyPolicy: registered
-Import-Package: javax.measure.quantity;version="4.3.1",
- javax.measure.unit;version="4.3.1",
- org.jscience.physics.amount;version="4.3.1",
+Import-Package: javax.measure;version="[1.0.0,2.0.0)",
+ javax.measure.format;version="1.0.0",
+ javax.measure.quantity;version="[1.0.0,2.0.0)",
  org.osgi.framework;version="1.7.0",
- org.slf4j;version="[1.7.2,2.0.0)"
+ org.slf4j;version="[1.7.2,2.0.0)",
+ si.uom;version="0.9.0",
+ si.uom.quantity;version="0.9.0",
+ tec.units.indriya.format;version="1.0.0",
+ tec.units.indriya.quantity;version="1.0.0",
+ tec.units.indriya.unit;version="1.0.0",
+ tec.uom.lib.common.function;version="1.0.3"
 Export-Package: org.dawnsci.common.widgets,
  org.dawnsci.common.widgets.action,
  org.dawnsci.common.widgets.breadcrumb,

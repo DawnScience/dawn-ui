@@ -4,7 +4,7 @@ import java.beans.PropertyChangeEvent;
 import java.util.Observable;
 import java.util.Observer;
 
-import javax.measure.unit.Unit;
+import javax.measure.Unit;
 import javax.vecmath.Vector2d;
 
 import org.dawnsci.dedi.configuration.BeamlineConfiguration;
@@ -13,8 +13,7 @@ import org.dawnsci.dedi.configuration.calculations.results.models.IResultsModel;
 import org.dawnsci.dedi.configuration.calculations.results.models.ResultConstants;
 import org.dawnsci.dedi.configuration.calculations.scattering.Q;
 import org.dawnsci.dedi.configuration.calculations.scattering.ScatteringQuantity;
-import org.jscience.physics.amount.Amount;
-
+import org.eclipse.dawnsci.analysis.api.unit.UnitUtils;
 
 /**
  * An abstract controller for handling results of q-range calculations for a given {@link BeamlineConfiguration}
@@ -206,21 +205,21 @@ public abstract class AbstractResultsController extends AbstractController<IResu
 		
 		return (min == null || max == null) ? null : new NumericRange(min, max);
 	}
-	
-	
+
 	/**
-	 * 
 	 * @return - given value converted from the old quantity to the new quantity in the given units.
 	 *           Returns null if the given value was null.
 	 * 
 	 * @throws NullPointerException if any of the given scattering quantities are null.
 	 */
-	public Double convertValue(Double value, ScatteringQuantity<?> oldQuantity, ScatteringQuantity<?> newQuantity, 
-                           Unit<?> oldUnit, Unit<?> newUnit){
-		if(value == null) return null;
-		oldQuantity.setValue(Amount.valueOf(value, oldUnit));
-		ScatteringQuantity<?> newSQ = oldQuantity.to(newQuantity);
-		
-		return (newSQ == null) ? null : newSQ.getValue().to(newUnit).getEstimatedValue();
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	public Double convertValue(Double value, ScatteringQuantity<?> oldQuantity, ScatteringQuantity<?> newQuantity,
+			Unit<?> oldUnit, Unit<?> newUnit) {
+		if (value == null) return null;
+
+		oldQuantity.setValue(UnitUtils.getQuantity(value, oldUnit));
+		ScatteringQuantity newSQ = oldQuantity.to(newQuantity);
+
+		return (newSQ == null) ? null : newSQ.getValue().to(newUnit).getValue().doubleValue();
 	}
 }

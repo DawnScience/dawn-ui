@@ -14,10 +14,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import javax.measure.quantity.Dimensionless;
-import javax.measure.unit.NonSI;
-import javax.measure.unit.SI;
-import javax.measure.unit.Unit;
+import javax.measure.Unit;
 import javax.swing.tree.TreeNode;
 
 import org.dawb.common.ui.menu.MenuAction;
@@ -43,6 +40,7 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.dawnsci.analysis.api.roi.IROI;
 import org.eclipse.dawnsci.analysis.api.tree.Node;
+import org.eclipse.dawnsci.analysis.api.unit.UnitUtils;
 import org.eclipse.dawnsci.analysis.dataset.roi.LinearROI;
 import org.eclipse.dawnsci.analysis.dataset.roi.PointROI;
 import org.eclipse.dawnsci.analysis.dataset.roi.RectangularROI;
@@ -105,9 +103,13 @@ import org.eclipse.ui.dialogs.PreferencesUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import si.uom.NonSI;
+import si.uom.SI;
+import tec.units.indriya.AbstractUnit;
+
 /**
  * This tool is used to edit regions
- * 
+ *
  * @author wqk87977
  *
  */
@@ -371,7 +373,7 @@ public class RegionEditorTool extends AbstractToolPage implements IResettableExp
 					updateRegionNode(evt.getROI(), false);
 				}
 			}
-			
+
 			@Override
 			public void roiSelected(ROIEvent evt) {
 				IRegion region = (IRegion)evt.getSource();
@@ -458,7 +460,7 @@ public class RegionEditorTool extends AbstractToolPage implements IResettableExp
 						if (child instanceof NumericNode<?>) {
 							NumericNode<?> numNode = (NumericNode<?>) child;
 							Unit<?> unit = numNode.getUnit();
-							if (unit.equals(Dimensionless.UNIT)) {
+							if (unit.equals(AbstractUnit.ONE)) {
 								if (numNode.getLabel().contains(RegionEditorNodeFactory.INTENSITY))
 									numNode.setFormat(maxIntensityFormat);
 								else if (numNode.getLabel().contains(RegionEditorNodeFactory.SUM))
@@ -467,7 +469,7 @@ public class RegionEditorTool extends AbstractToolPage implements IResettableExp
 									|| unit.equals(SI.RADIAN)) {
 								numNode.setIncrement(ToolUtils.getDecimal(angleFormat));
 								numNode.setFormat(angleFormat);
-							} else if (unit.equals(NonSI.PIXEL)) {
+							} else if (unit.equals(UnitUtils.PIXEL)) {
 								numNode.setIncrement(ToolUtils.getDecimal(pointFormat));
 								numNode.setFormat(pointFormat);
 							}
@@ -534,7 +536,6 @@ public class RegionEditorTool extends AbstractToolPage implements IResettableExp
 	}
 
 	private void createActions() {
-
 		final IPreferenceStore store = Activator.getPlottingPreferenceStore();
 
 		IToolBarManager toolBarMan = getSite().getActionBars().getToolBarManager();
@@ -674,7 +675,7 @@ public class RegionEditorTool extends AbstractToolPage implements IResettableExp
 			}
 		};
 		preferences.setToolTipText("Open Region Editor preferences");
-		
+
 		final Action refresh = new Action("Refresh all regions") {
 			public void run() {
 				if (viewer != null) {
@@ -683,7 +684,6 @@ public class RegionEditorTool extends AbstractToolPage implements IResettableExp
 				}
 			}
 		};
-
 
 		//toolbar buttons
 		toolBarMan.add(new Separator());
