@@ -66,8 +66,8 @@
 		</encoder>
 	</appender>
 
-	<if condition='isDefined("graylog.host")'>
-	<then>
+<!-- 	<if condition='isDefined("graylog.host")'>
+	<then> -->
 	<!-- This appender is using the GELF (http://docs.graylog.org/en/latest/pages/gelf.html) 
 		messaging format to send the messages to Graylog. The appender used here 
 		is from: https://github.com/Moocar/logback-gelf This definition was written 
@@ -114,8 +114,8 @@
 			</layout>
 		</encoder>
 	</appender>
-	</then>
-	</if>
+<!-- 	</then>
+	</if> -->
 
 	<logger name="org.apache.commons" level="ERROR"/>
 
