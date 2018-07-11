@@ -188,7 +188,7 @@ public class DatasetPart {
 
 			@Override
 			public void optionsChanged(SliceChangeEvent event) {
-				//do nothing here
+				actOnEvent(event);	
 			}
 
 			private void actOnEvent(SliceChangeEvent event) {
