@@ -35,13 +35,14 @@ public class NexusFileConfiguration implements ILoadedFileConfiguration {
 		if (defaultRootAttribute != null) {
 			// get default entry node
 			GroupNode defaultEntryNode = rootNode.getGroupNode(defaultRootAttribute.getFirstElement());
-			Attribute defaultEntryAttribute = defaultEntryNode.getAttribute("default");
-			if (defaultEntryAttribute != null) {
-				// get default NXdata group in this entry
-				// GroupNode defaultDataNode = defaultEntryNode.getGroupNode(defaultEntryAttribute.getFirstElement());
-				String prefix = defaultRootAttribute.getFirstElement() + Node.SEPARATOR + defaultEntryAttribute.getFirstElement();
-				found = new HashMap<>();
-				found.put(prefix, null);
+			if (defaultEntryNode != null) {
+				Attribute defaultEntryAttribute = defaultEntryNode.getAttribute("default");
+				if (defaultEntryAttribute != null) {
+					// get default NXdata group in this entry
+					String prefix = defaultRootAttribute.getFirstElement() + Node.SEPARATOR + defaultEntryAttribute.getFirstElement();
+					found = new HashMap<>();
+					found.put(prefix, null);
+				}
 			}
 		}
 		
