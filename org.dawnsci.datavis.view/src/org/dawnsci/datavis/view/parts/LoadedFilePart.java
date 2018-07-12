@@ -36,6 +36,7 @@ import org.eclipse.e4.ui.model.application.ui.advanced.MPerspective;
 import org.eclipse.e4.ui.model.application.ui.advanced.MPerspectiveStack;
 import org.eclipse.e4.ui.model.application.ui.basic.MPart;
 import org.eclipse.e4.ui.workbench.UIEvents;
+import org.eclipse.e4.ui.workbench.modeling.EModelService;
 import org.eclipse.e4.ui.workbench.modeling.EPartService;
 import org.eclipse.e4.ui.workbench.modeling.ESelectionService;
 import org.eclipse.jface.action.MenuManager;
@@ -84,7 +85,6 @@ import org.eclipse.swt.widgets.Menu;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.eclipse.ui.progress.IProgressService;
-import org.omg.PortableServer.LifespanPolicyValue;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
 import org.slf4j.Logger;
@@ -521,11 +521,17 @@ public class LoadedFilePart {
 
 	@Inject
 	@Optional
-	private void subscribeFileOpenE3(@UIEventTopic("org/dawnsci/events/file/OPEN") Event data, MPart part) {
+	private void subscribeFileOpenE3(@UIEventTopic("org/dawnsci/events/file/OPEN") Event data, MPart part, EModelService modelService) {
 		if (part != null && part.getElementId() != partId) {
 			return;
 		}
 
+		MPerspective ap = modelService.getActivePerspective(modelService.getTopLevelWindowFor(part));
+		
+		if (!ap.getElementId().equals("org.dawnsci.datavis.DataVisPerspective")) {
+			return;
+		}
+		
 		String[] paths = (String[]) data.getProperty("paths");
 		if (paths == null) {
 			String path = (String) data.getProperty("path");

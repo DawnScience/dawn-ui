@@ -27,6 +27,15 @@ public class FileOpenEventHandler implements EventHandler {
 			return;
 		}
 		
+		try {
+			String id = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().getPerspective().getId();
+			if (!id.equals("org.dawnsci.mapping.ui.dawn.mappingperspective")) {
+				return;
+			}
+		} catch (Exception e) {
+			return;
+		}
+		
 		BundleContext bundleContext =
                 FrameworkUtil.
                 getBundle(this.getClass()).
