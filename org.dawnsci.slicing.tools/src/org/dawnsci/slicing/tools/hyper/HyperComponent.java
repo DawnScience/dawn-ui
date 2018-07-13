@@ -70,7 +70,6 @@ public class HyperComponent {
 	private IROIListener externalROIListenerRight;
 	private HyperDelegateJob leftJob;
 	private HyperDelegateJob rightJob;
-	private Composite mainComposite;
 	private IWorkbenchPart part;
 	private SashForm sashForm;
 	private static final Logger logger = LoggerFactory.getLogger(HyperComponent.class);
@@ -249,7 +248,9 @@ public class HyperComponent {
 	}
 
 	public void setFocus() {
-		mainComposite.setFocus();
+		if (mainSystem != null) {
+			mainSystem.setFocus();
+		}
 	}
 	
 	public void dispose() {
@@ -266,18 +267,19 @@ public class HyperComponent {
 		try {
 			mainSystem = PlottingFactory.createPlottingSystem();
 			mainSystem.setColorOption(ColorOption.NONE);
-			mainComposite = new Composite(sashForm, SWT.NONE);
+			Composite mainComposite = new Composite(sashForm, SWT.NONE);
 			mainComposite.setLayout(new GridLayout(1, false));
 			GridUtils.removeMargins(mainComposite);
 
 			ActionBarWrapper actionBarWrapper = ActionBarWrapper.createActionBars(mainComposite, null);
+			actionBarWrapper.getToolbarControl().setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 
 			Composite displayPlotComp  = new Composite(mainComposite, SWT.BORDER);
 			displayPlotComp.setLayout(new FillLayout());
 			displayPlotComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 			mainSystem.createPlotPart(displayPlotComp, 
 													HYPERIMAGE, 
-													 actionBarWrapper, 
+													actionBarWrapper, 
 													 PlotType.IMAGE, 
 													 part);
 			
@@ -289,13 +291,14 @@ public class HyperComponent {
 			sideComp.setLayout(new GridLayout(1, false));
 			GridUtils.removeMargins(sideComp);
 			ActionBarWrapper actionBarWrapper1 = ActionBarWrapper.createActionBars(sideComp, null);
+			actionBarWrapper1.getToolbarControl().setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 			Composite sidePlotComp  = new Composite(sideComp, SWT.BORDER);
 			sidePlotComp.setLayout(new FillLayout());
 			sidePlotComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 
 			sideSystem.createPlotPart(sidePlotComp, 
 													HYPERTRACE, 
-													 actionBarWrapper1, 
+													actionBarWrapper1, 
 													 PlotType.XY, 
 													 null);
 			
