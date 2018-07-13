@@ -40,6 +40,8 @@ import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.swt.widgets.ToolItem;
 import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.PlatformUI;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 class DataReduction2DToolSpectraRegionComposite extends DataReduction2DToolObservableResourceComposite {
 
@@ -55,6 +57,8 @@ class DataReduction2DToolSpectraRegionComposite extends DataReduction2DToolObser
 	private final IObservableSet checkedRegionSpectraList = new WritableSet(new HashSet<DataReduction2DToolSpectraRegionDataNode>(), DataReduction2DToolSpectraRegionDataNode.class);
 
 	private final DataReduction2DToolModel toolPageModel;
+	
+	private static final Logger logger = LoggerFactory.getLogger(DataReduction2DToolSpectraRegionComposite.class);
 	
 	@Override
 	protected void disposeResource() {
@@ -239,6 +243,7 @@ class DataReduction2DToolSpectraRegionComposite extends DataReduction2DToolObser
 			try {
 				toolPageModel.averageSpectrumAndExport(saveNexusToolItem.getDisplay());
 			} catch (Exception e) {
+				logger.error("Export exception", e);
 				Status status = new Status(IStatus.ERROR, Activator.PLUGIN_ID, e.getMessage());
 				ErrorDialog.openError(DataReduction2DToolSpectraRegionComposite.this.getShell(), "Error exporting data", "Could not export data to file", status);
 			}

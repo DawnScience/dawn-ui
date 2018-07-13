@@ -4,14 +4,13 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Comparator;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import org.dawnsci.plotting.tools.Activator;
+import org.dawnsci.plotting.tools.reduction.DataReduction2DToolModel.TableColumnAveragedRegionExportMode;
+import org.dawnsci.plotting.tools.reduction.DataReduction2DToolModel.TableColumnData;
 import org.eclipse.core.databinding.observable.list.IObservableList;
 import org.eclipse.dawnsci.analysis.dataset.roi.RectangularROI;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
@@ -23,11 +22,14 @@ import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.InputDialog;
+import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.CheckboxTableViewer;
+import org.eclipse.jface.viewers.ColumnLabelProvider;
+import org.eclipse.jface.viewers.ComboBoxCellEditor;
+import org.eclipse.jface.viewers.EditingSupport;
 import org.eclipse.jface.viewers.ICheckStateProvider;
-import org.eclipse.jface.viewers.ILabelProvider;
-import org.eclipse.jface.viewers.ILabelProviderListener;
 import org.eclipse.jface.viewers.IStructuredContentProvider;
+import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
@@ -52,8 +54,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 class DataReduction2DToolSpectraTableComposite extends DataReduction2DToolObservableResourceComposite {
-
+	
 	private final class ColumnToggleDialog extends Dialog {
+    	
 		private ColumnToggleDialog(Shell parentShell) {
 			super(parentShell);
 		}
@@ -67,9 +70,62 @@ class DataReduction2DToolSpectraTableComposite extends DataReduction2DToolObserv
 
 		@Override
 		protected Control createDialogArea(Composite parent) {
-		    Composite container = (Composite) super.createDialogArea(parent);	
-		    final CheckboxTableViewer ctv = CheckboxTableViewer.newCheckList(container, SWT.BORDER | SWT.H_SCROLL | SWT.V_SCROLL);
-		    ctv.getTable().setLayoutData(new GridData(GridData.FILL_BOTH));
+		    Composite container = (Composite) super.createDialogArea(parent);
+		    final Table table = new Table(container, SWT.CHECK | SWT.BORDER | SWT.H_SCROLL | SWT.V_SCROLL | SWT.FULL_SELECTION);
+		    table.setHeaderVisible(true);
+		    table.setLinesVisible(true);
+		    final CheckboxTableViewer ctv = new CheckboxTableViewer(table);
+		    table.setLayoutData(new GridData(GridData.FILL_BOTH));
+		    final TableViewerColumn col1 = new TableViewerColumn(ctv, SWT.NONE);
+		    col1.getColumn().setText("Axis");
+		    col1.getColumn().setWidth(100);
+		    col1.getColumn().setResizable(false);
+		    col1.setLabelProvider(new ColumnLabelProvider() {
+				@Override
+				public String getText(Object element) {
+					TableColumnData data = (TableColumnData) element;
+					return spectraTable.getColumn(data.getColumnNumber()).getText();
+				}
+			});
+		    final TableViewerColumn col2 = new TableViewerColumn(ctv, SWT.NONE);
+		    col2.getColumn().setText("Averaged Region Export Mode");
+		    col2.getColumn().setWidth(100);
+		    col2.getColumn().setResizable(false);
+		    col2.setLabelProvider(new ColumnLabelProvider() {
+		    	
+		    	@Override
+		    	public String getText(Object element) {
+					TableColumnData data = (TableColumnData) element;
+		    		return data.getExportMode().getLabel();
+		    	}
+		    	
+		    });
+		    col2.setEditingSupport(new EditingSupport(ctv) {
+				
+				@Override
+				protected void setValue(Object element, Object value) {
+					TableColumnData data = (TableColumnData) element;
+					data.setExportMode(TableColumnAveragedRegionExportMode.values()[(int) value]);
+					getViewer().update(element, null);
+				}
+				
+				@Override
+				protected Object getValue(Object element) {
+					TableColumnData data = (TableColumnData) element;
+					return data.getExportMode().ordinal();
+				}
+				
+				@Override
+				protected CellEditor getCellEditor(Object element) {
+					return new ComboBoxCellEditor(table, Arrays.stream(TableColumnAveragedRegionExportMode.values()).map(TableColumnAveragedRegionExportMode::getLabel).toArray(String[]::new), SWT.READ_ONLY);
+				}
+				
+				@Override
+				protected boolean canEdit(Object element) {
+					return true;
+				}
+			});
+		    
 		    ctv.setContentProvider(new IStructuredContentProvider() {
 
 				@Override
@@ -85,45 +141,11 @@ class DataReduction2DToolSpectraTableComposite extends DataReduction2DToolObserv
 				@Override
 				public Object[] getElements(Object inputElement) {
 					@SuppressWarnings("unchecked")
-					Map<TableColumn,Boolean> map = (Map<TableColumn, Boolean>) inputElement;
-					if (map.isEmpty())
+					List<TableColumnData> list = (List<TableColumnData>) inputElement;
+					if (list.isEmpty())
 						return new Object[0];
 					
-					return map.entrySet().toArray(new Entry[map.size()]);
-				}
-			});
-		    ctv.setLabelProvider(new ILabelProvider() {
-				
-				@Override
-				public void removeListener(ILabelProviderListener listener) {
-					// no need
-				}
-				
-				@Override
-				public boolean isLabelProperty(Object element, String property) {
-					return false;
-				}
-				
-				@Override
-				public void dispose() {
-					// no need
-				}
-				
-				@Override
-				public void addListener(ILabelProviderListener listener) {
-					// no need
-				}
-				
-				@SuppressWarnings("unchecked")
-				@Override
-				public String getText(Object element) {
-					Entry<TableColumn,Boolean> entry = (Entry<TableColumn, Boolean>) element;
-					return entry.getKey().getText();
-				}
-				
-				@Override
-				public Image getImage(Object element) {
-					return null;
+					return list.toArray(new TableColumnData[list.size()]);
 				}
 			});
 		    ctv.setCheckStateProvider(new ICheckStateProvider() {
@@ -133,28 +155,21 @@ class DataReduction2DToolSpectraTableComposite extends DataReduction2DToolObserv
 					return false;
 				}
 				
-				@SuppressWarnings("unchecked")
 				@Override
 				public boolean isChecked(Object element) {
-					Entry<TableColumn,Boolean> entry = (Entry<TableColumn, Boolean>) element;
-					return entry.getValue();
+					TableColumnData data = (TableColumnData) element;
+					return data.isShow();
 				}
+				
 			});
-		    ctv.setInput(dataColumns);
+		    ctv.setInput(toolPageModel.getTableColumnDataList());
 		    ctv.addCheckStateListener(event -> {
-				@SuppressWarnings("unchecked")
-				Entry<TableColumn,Boolean> entry = (Entry<TableColumn, Boolean>) event.getElement();
+				TableColumnData data = (TableColumnData) event.getElement();
 				boolean checked = event.getChecked();
-				entry.setValue(checked);
-				if (checked) {
-					// show
-					entry.getKey().setWidth(COLUMN_WIDTH);
-					entry.getKey().setResizable(true);
-				} else {
-					// show
-					entry.getKey().setWidth(0);
-					entry.getKey().setResizable(false);
-				}
+				data.setShow(checked);
+				TableColumn column = spectraTable.getColumn(data.getColumnNumber());
+				column.setResizable(checked);
+				column.setWidth(checked ? COLUMN_WIDTH : 0);
 			});
 		    
 		    return container;
@@ -186,7 +201,6 @@ class DataReduction2DToolSpectraTableComposite extends DataReduction2DToolObserv
 
 	private Table spectraTable;
 	private final DataReduction2DToolModel toolPageModel;
-	private final Map<TableColumn, Boolean> dataColumns = new LinkedHashMap<>();
 	private static final int COLUMN_WIDTH = 120;
 	
 	private final InputDialog dlg = new InputDialog(Display.getCurrent().getActiveShell(),
@@ -416,17 +430,18 @@ class DataReduction2DToolSpectraTableComposite extends DataReduction2DToolObserv
 		while (spectraTable.getColumnCount() > 0 ) {
 		    spectraTable.getColumns()[0].dispose();
 		}
-		dataColumns.clear();
+		toolPageModel.getTableColumnDataList().clear();
 		
 		TableColumn nameColumn = new TableColumn(spectraTable, SWT.LEFT);
 		nameColumn.setText("Index");
 		nameColumn.setWidth(80);
 
+		int columnNumber = 1;
 		for (String axisName : toolPageModel.getAxesNames()) {
 			TableColumn column = new TableColumn(spectraTable, SWT.CENTER);
 			column.setText(axisName);
 			column.setWidth(COLUMN_WIDTH);
-			dataColumns.put(column, true);
+			toolPageModel.getTableColumnDataList().add(new TableColumnData(columnNumber++));
 		}
 		
 		final MenuManager menuManager = new MenuManager();

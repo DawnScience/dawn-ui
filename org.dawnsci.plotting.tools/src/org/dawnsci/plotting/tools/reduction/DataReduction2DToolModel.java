@@ -23,6 +23,7 @@ import org.eclipse.dawnsci.nexus.NexusFile;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.trace.IImageTrace;
 import org.eclipse.dawnsci.plotting.api.trace.MetadataPlotUtils;
+import org.eclipse.january.DatasetException;
 import org.eclipse.january.dataset.Dataset;
 import org.eclipse.january.dataset.DatasetFactory;
 import org.eclipse.january.dataset.DatasetUtils;
@@ -60,6 +61,47 @@ class DataReduction2DToolModel extends DataReduction2DToolObservableModel {
 	private double traceStack = DEFAULT_STACK_OFFSET;
 	private DataReduction2DToolSpectraTableComposite spectraTableComposite;
 	private DataReduction2DToolSpectraRegionComposite spectraRegionTableComposite;
+	private final List<TableColumnData> tableColumnDataList = new ArrayList<>();
+	
+	enum TableColumnAveragedRegionExportMode {
+		FIRST("First"), LAST("Last"), AVERAGE("Average");
+		
+		private final String label;
+		
+		private TableColumnAveragedRegionExportMode(String label) {
+			this.label = label;
+		}
+		
+		String getLabel() {
+			return label;
+		}
+		
+	}
+	
+	static class TableColumnData {
+		private boolean show = true;
+		private TableColumnAveragedRegionExportMode exportMode = TableColumnAveragedRegionExportMode.FIRST;	
+		private final int columnNumber;
+		
+		public boolean isShow() {
+			return show;
+		}
+		public void setShow(boolean show) {
+			this.show = show;
+		}
+		public TableColumnAveragedRegionExportMode getExportMode() {
+			return exportMode;
+		}
+		public void setExportMode(TableColumnAveragedRegionExportMode exportMode) {
+			this.exportMode = exportMode;
+		}
+		public TableColumnData(int columnNumber) {
+			this.columnNumber = columnNumber;
+		}
+		public int getColumnNumber() {
+			return columnNumber;
+		}
+	}
 	
 	public IImageTrace getImageTrace() {
 		return imageTrace;
@@ -235,6 +277,11 @@ class DataReduction2DToolModel extends DataReduction2DToolObservableModel {
 				return startIndex - o.startIndex;
 			}
 		}
+		
+		@Override
+		public boolean equals(Object obj) {
+			return compareTo((RangeData) obj) == 0 ? true : false;
+		}
 	}
 	
 	public static int getNewIndex(int oldIndex, List<Integer> deletedIndices) {
@@ -269,26 +316,27 @@ class DataReduction2DToolModel extends DataReduction2DToolObservableModel {
 		return oldIndex;
 	}
 
-	private enum AxisMode {
-		MEAN,
-		FIRST,
-	}
-	private static Dataset[] getReducedAxes(ILazyDataset[] rawAxes, List<RangeData> rangeDataList, List<Integer> deletedIndices) {
-		return Arrays
-				.stream(rawAxes)
-				.map(axis -> {
-					if (axis == null)
-						return null;
-					try {
-						return applyRangesAndDeletionsToDataset(AxisMode.FIRST, DatasetUtils.sliceAndConvertLazyDataset(axis), rangeDataList, deletedIndices);
-					} catch (Exception e) {
-						return null;
-					}
-				})
-				.toArray(Dataset[]::new);
+	private Dataset[] getReducedAxes(ILazyDataset[] rawAxes, List<RangeData> rangeDataList, List<Integer> deletedIndices) {
+		List<Dataset> rv = new ArrayList<>();
+		int counter = 0;
+		
+		for (ILazyDataset axis : rawAxes) {
+			if (axis == null)
+				continue;
+			TableColumnData tableColumnData = tableColumnDataList.get(counter++);
+			if (tableColumnData.show) {
+				try {
+					rv.add(applyRangesAndDeletionsToDataset(tableColumnData.getExportMode(), DatasetUtils.sliceAndConvertLazyDataset(axis), rangeDataList, deletedIndices));
+				} catch (Exception e) {
+					continue;
+				}
+			}
+		}
+		
+		return rv.toArray(new Dataset[rv.size()]);
 	}
 	
-	private static void exportToGenericNexusFile(String newFilePath, IImageTrace trace, List<RangeData> rangeDataList, List<Integer> deletedIndices) throws Exception {
+	private void exportToGenericNexusFile(String newFilePath, IImageTrace trace, List<RangeData> rangeDataList, List<Integer> deletedIndices) throws Exception {
 		// generate main dataset
 		Dataset rawData = DatasetUtils.convertToDataset(trace.getData());
 		Dataset reducedData = null;
@@ -298,10 +346,20 @@ class DataReduction2DToolModel extends DataReduction2DToolObservableModel {
 		ILazyDataset[] rawAxesX = firstAxesMetadata.getAxis(0);
 		ILazyDataset[] rawAxesY = firstAxesMetadata.getAxis(1);
 		
-		reducedData = applyRangesAndDeletionsToDataset(AxisMode.MEAN, rawData, rangeDataList, deletedIndices);
+		reducedData = applyRangesAndDeletionsToDataset(TableColumnAveragedRegionExportMode.AVERAGE, rawData, rangeDataList, deletedIndices);
 		Dataset[] reducedAxesX = getReducedAxes(rawAxesX, rangeDataList, deletedIndices); 
-		Dataset[] reducedAxesY = getReducedAxes(rawAxesY, rangeDataList, deletedIndices); 
-		
+		Dataset[] reducedAxesY = Arrays.stream(rawAxesY).map(lazy -> {
+				try {
+					Dataset dataset = DatasetUtils.sliceAndConvertLazyDataset(lazy);
+					String newName = MetadataPlotUtils.removeSquareBrackets(dataset.getName());
+					newName = newName.substring(newName.lastIndexOf('/') + 1);
+					dataset.setName(newName);
+					return dataset;
+				} catch (DatasetException e) {
+					return null;
+				}
+			}).toArray(Dataset[]::new);
+
 		// data is ready -> prepare to write to file
 		try (NexusFile file = new NexusFileHDF5(newFilePath)) {
 			file.createAndOpenToWrite();
@@ -359,7 +417,7 @@ class DataReduction2DToolModel extends DataReduction2DToolObservableModel {
 		return "arbitrary";
 	}
 	
-	private static Dataset applyRangesAndDeletionsToDataset(AxisMode mode, Dataset rawData, List<RangeData> rangeDataList, List<Integer> deletedIndices) throws Exception {
+	private static Dataset applyRangesAndDeletionsToDataset(TableColumnAveragedRegionExportMode mode, Dataset rawData, List<RangeData> rangeDataList, List<Integer> deletedIndices) throws Exception {
 		Dataset rv = null;
 	
 		if (rawData.getShape()[0] == 1) {
@@ -381,15 +439,6 @@ class DataReduction2DToolModel extends DataReduction2DToolObservableModel {
 				for (RangeData avgInfo : rangeDataList) {
 					Dataset avgDataItem = null;
 					switch (mode) {
-					case MEAN:
-						avgDataItem = getProperSlice(
-							rawData,
-							new int[]{avgInfo.getStartIndex(), 0},
-							new int[]{avgInfo.getEndIndex() + 1, noOfChannels},
-							null,
-							deletedIndices)
-							.mean(0);
-						break;
 					case FIRST:
 						avgDataItem = getProperSlice(
 							rawData,
@@ -398,6 +447,25 @@ class DataReduction2DToolModel extends DataReduction2DToolObservableModel {
 							null,
 							deletedIndices);
 						break;
+					case LAST:
+						avgDataItem = getProperSlice(
+							rawData,
+							new int[]{avgInfo.getEndIndex(), 0},
+							new int[]{avgInfo.getEndIndex() + 1, noOfChannels},
+							null,
+							deletedIndices);
+						break;
+					case AVERAGE:
+						avgDataItem = getProperSlice(
+							rawData,
+							new int[]{avgInfo.getStartIndex(), 0},
+							new int[]{avgInfo.getEndIndex() + 1, noOfChannels},
+							null,
+							deletedIndices)
+							.mean(0);
+						break;
+					default:
+						return null;
 					}
 					avgDataItem.setShape(1, noOfChannels);
 					if (avgInfo.getStartIndex() - j > 0) {
@@ -530,5 +598,9 @@ class DataReduction2DToolModel extends DataReduction2DToolObservableModel {
 		}
 		
 		return rv;
+	}
+
+	public List<TableColumnData> getTableColumnDataList() {
+		return tableColumnDataList;
 	}
 }
