@@ -6,4 +6,5 @@ public interface IPlotModeColored extends IPlotMode {
 
 	public void setMinMax(Number[] minMax);
 	
+	public void setAxesRange(double[] range);
 }

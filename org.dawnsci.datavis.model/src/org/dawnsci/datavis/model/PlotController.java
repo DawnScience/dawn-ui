@@ -285,6 +285,14 @@ public class PlotController implements IPlotController, ILoadedFileInitialiser {
 			} else {
 				((IPlotModeColored)localCurrentMode).setMinMax(null);
 			}
+			
+			if (!system.isRescale() && system.getSelectedXAxis() != null && system.getSelectedYAxis() != null) {
+				IAxis xa = system.getSelectedXAxis();
+				IAxis ya = system.getSelectedYAxis();
+				((IPlotModeColored)localCurrentMode).setAxesRange(new double[] {xa.getLower(),xa.getUpper(),ya.getLower(),ya.getUpper()});
+			} else {
+				((IPlotModeColored)localCurrentMode).setAxesRange(null);
+			}
 		}
 		
 		

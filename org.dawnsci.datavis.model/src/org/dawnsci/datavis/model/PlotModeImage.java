@@ -27,7 +27,8 @@ public class PlotModeImage implements IPlotModeColored {
 	private static final String[] options =  new String[]{"X","Y"};
 	
 	protected Number[] minMax;
-
+	private double[] range;
+	
 	public String[] getOptions() {
 		return options;
 	}
@@ -209,6 +210,11 @@ public class PlotModeImage implements IPlotModeColored {
 		
 		system.setTitle(d.getName());
 		if (!isUpdate)system.addTrace(trace);
+		
+		if (range != null && system.getSelectedXAxis() != null && system.getSelectedYAxis() != null) {
+			system.getSelectedXAxis().setRange(range[0], range[1]);
+			system.getSelectedYAxis().setRange(range[2], range[3]);
+		}
 		logger.info("Display time " + (System.currentTimeMillis()-t) + " ms");
 		
 	}
@@ -248,6 +254,12 @@ public class PlotModeImage implements IPlotModeColored {
 	@Override
 	public void setMinMax(Number[] minMax) {
 		this.minMax = minMax;
+	}
+
+	@Override
+	public void setAxesRange(double[] range) {
+		this.range = range;
+		
 	}
 	
 }
