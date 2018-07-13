@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.apache.commons.lang.ArrayUtils;
 import org.dawb.common.services.ServiceManager;
 import org.dawb.common.ui.monitor.ProgressMonitorWrapper;
 import org.dawb.common.ui.widgets.ActionBarWrapper;
@@ -372,23 +373,21 @@ public class ConfigureOperationModelWizardPage extends AbstractOperationModelWiz
 						}
 						final IDataset out = od.getData();
 						PlotAdditionalData an = operation.getClass().getAnnotation(PlotAdditionalData.class);
-						IDataset aux = null;
+						final List<IDataset> aux = new ArrayList<>();
 						boolean onIn = false;
 						if (an != null) {
-							String name = an.dataName();
+							String[] names = an.dataName().split(":");
 							onIn = an.onInput();
 							for (Serializable s : od.getAuxData()) {
 								if (s instanceof IDataset) {
 									IDataset d = (IDataset)s;
-									if (name.equals(d.getName())) {
-										aux = d;
-										break;
+									if (ArrayUtils.contains(names, d.getName())) {
+										aux.add(d);
 									}
 								}
 							}
 						}
 						
-						final IDataset additional = aux;
 						final boolean onInput =onIn;
 
 						Display.getDefault().syncExec(new Runnable() {
@@ -399,14 +398,16 @@ public class ConfigureOperationModelWizardPage extends AbstractOperationModelWiz
 									output.clear();
 									output.clearTraces();
 									MetadataPlotUtils.plotDataWithMetadata(out,output);
-									if (additional!=null) {
+									if (!aux.isEmpty()) {
 										if (onInput) {
 											input.clear();
 											input.clearTraces();
 											MetadataPlotUtils.plotDataWithMetadata(id.getData(),input);
-											MetadataPlotUtils.plotDataWithMetadata(additional, input, false);
+											for (IDataset auxDataset : aux)
+												MetadataPlotUtils.plotDataWithMetadata(auxDataset, input, false);
 										} else {
-											MetadataPlotUtils.plotDataWithMetadata(additional, output, false);
+											for (IDataset auxDataset : aux)
+												MetadataPlotUtils.plotDataWithMetadata(auxDataset, output, false);
 										}
 									}
 									if (od instanceof OperationDataForDisplay) {
