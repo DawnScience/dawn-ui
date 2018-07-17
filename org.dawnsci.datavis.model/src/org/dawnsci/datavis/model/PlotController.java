@@ -664,7 +664,14 @@ public class PlotController implements IPlotController, ILoadedFileInitialiser {
 
 	@Override
 	public void dispose() {
-		system.dispose();
+		if (system != null && !system.isDisposed()) {
+			try {
+				system.dispose();
+			} catch (Exception e) {
+				logger.error("Error disposing plot");
+			}
+			
+		}
 		system = null;
 	}
 
@@ -681,7 +688,7 @@ public class PlotController implements IPlotController, ILoadedFileInitialiser {
 			colorcache = null;
 		}
 		if (colorProvider == null) {
-			system.clearTraces();
+			getPlottingSystem().clearTraces();
 		}
 		
 		final List<DataOptions> state = fileController.getImmutableFileState();

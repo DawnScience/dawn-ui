@@ -470,6 +470,11 @@ public class LoadedFilePart {
 				}
 			}
 		});
+		
+		if (!fileController.getLoadedFiles().isEmpty()) {
+			StructuredSelection s = new StructuredSelection(fileController.getLoadedFiles().get(0));
+			viewer.setSelection(s);
+		}
 
 	}
 	

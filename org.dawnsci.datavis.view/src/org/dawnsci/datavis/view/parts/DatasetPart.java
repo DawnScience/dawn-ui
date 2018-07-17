@@ -44,22 +44,25 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 
 public class DatasetPart {
-	
+
+	private static final String LOADED_FILE_PART_ID = "org.dawnsci.datavis.view.parts.LoadedFilePart";
+
 	@Inject
 	ESelectionService selectionService;
-	
+
 	@Inject IFileController fileController;
 	@Inject IPlotController plotController;
-	
+
 	private DataConfigurationTable table;
 	private ComboViewer plotModeOptionsViewer;
-	
+
 	private DataOptionTableViewer viewer;
-	
+
 	private FileControllerStateEventListener fileStateListener;
-	
+
 	private ISliceChangeListener sliceListener;
-	
+	private ISelectionListener selectionListener;
+
 	@PostConstruct
 	public void createComposite(Composite parent) {
 
@@ -72,9 +75,9 @@ public class DatasetPart {
 		viewer = new DataOptionTableViewer(fileController);
 		viewer.createControl(parent);
 		viewer.getControl().setLayoutData(checkForm);
-		
+
 		viewer.addSelectionChangedListener(new ISelectionChangedListener() {
-			
+
 			@Override
 			public void selectionChanged(SelectionChangedEvent event) {
 				IStructuredSelection selection = viewer.getStructuredSelection();
@@ -82,16 +85,16 @@ public class DatasetPart {
 				if (selection.getFirstElement() instanceof DataOptions) {
 					DataOptions op = (DataOptions)selection.getFirstElement();
 					updateOnSelectionChange(op);
-					
+
 					if (op.getParent() instanceof IRefreshable) {
 						IRefreshable r = (IRefreshable)op.getParent();
 						if (r.isLive()) {
 							plotController.forceReplot();
 						}
-						
+
 					}
 				}
-				
+
 			}
 		});
 
@@ -128,15 +131,15 @@ public class DatasetPart {
 		});
 
 		plotModeOptionsViewer.addSelectionChangedListener(new ISelectionChangedListener() {
-			
+
 			@Override
 			public void selectionChanged(SelectionChangedEvent event) {
 				ISelection selection = event.getSelection();
 				if (selection instanceof StructuredSelection) {
 					Object ob = ((StructuredSelection)selection).getFirstElement();
-						
+
 					if (ob instanceof IPlotMode && !ob.equals(plotController.getCurrentMode())) {
-						 DataOptions dataOptions = DataVisSelectionUtils.getFromSelection(viewer.getStructuredSelection(), DataOptions.class).get(0);
+						DataOptions dataOptions = DataVisSelectionUtils.getFromSelection(viewer.getStructuredSelection(), DataOptions.class).get(0);
 						if (dataOptions.isSelected() && dataOptions.getParent().isSelected()) {
 							plotController.switchPlotMode((IPlotMode)ob,dataOptions);
 						}
@@ -157,23 +160,25 @@ public class DatasetPart {
 		tableForm.left = new FormAttachment(0,0);
 		tableForm.right = new FormAttachment(100,0);
 		tableForm.bottom = new FormAttachment(100,0);
-		
+
 		table.setLayoutData(tableForm);
-		
-		selectionService.addSelectionListener("org.dawnsci.datavis.view.parts.LoadedFilePart", new ISelectionListener() {
-			
+
+
+		selectionListener = new ISelectionListener() {
+
 			@Override
 			public void selectionChanged(MPart part, Object selection) {
 				if (selection instanceof ISelection) {
 					List<LoadedFile> files = DataVisSelectionUtils.getFromSelection((ISelection)selection, LoadedFile.class);
-					
+
 					updateOnSelectionChange(files.isEmpty() ? null : files.get(0));
-					
+
 				}
-				
 			}
-		});
-		
+		};
+
+		selectionService.addSelectionListener(LOADED_FILE_PART_ID, selectionListener);
+
 		sliceListener = new ISliceChangeListener() {
 
 			@Override
@@ -202,77 +207,18 @@ public class DatasetPart {
 				plotController.forceReplot();
 			}
 		};
-		
-		Object selection = selectionService.getSelection("org.dawnsci.datavis.view.parts.LoadedFilePart");
+
+		Object selection = selectionService.getSelection(LOADED_FILE_PART_ID);
 		if (selection instanceof ISelection) {
 			List<LoadedFile> files = DataVisSelectionUtils.getFromSelection((ISelection)selection, LoadedFile.class);
-			
+
 			updateOnSelectionChange(files.isEmpty() ? null : files.get(0));
-			
+
+			plotController.forceReplot();
 		}
-		
-//		fileStateListener = new FileControllerStateEventListener() {
-//			
-//			@Override
-//			public void stateChanged(FileControllerStateEvent event) {
-//				if (!DataVisPerspective.LOADED_FILE_ID.equals(fileController.getID())) {
-//					return; // ignore other sources of state changes
-//				}
-//				updateOnStateChange(event.isSelectedFileChanged());
-//				
-//			}
-//		};
-		
-//		fileController.addStateListener(fileStateListener);
-		
-//		plotModeListener = new PlotModeChangeEventListener() {
-//			
-//			@Override
-//			public void plotModeChanged(PlotModeEvent event) {
-//				viewer.refresh();
-//				IPlotMode[] suitableModes = event.getPossibleModes();
-//				plotModeOptionsViewer.setInput(suitableModes);
-//				plotModeOptionsViewer.setSelection(new StructuredSelection(event.getMode()));
-//				if (event.getMode().supportsMultiple()) {
-//					table.setMaxSliceNumber(50);
-//				} else {
-//					table.setMaxSliceNumber(1);
-//				}
-//				
-//			}
-//		};
-//		
-//		plotController.addPlotModeListener(plotModeListener);
-		
-//		if (fileController.getCurrentFile() != null) {
-//			updateOnStateChange(true);
-//		}
+
 	}
-	
-//	private void updateOnStateChange(boolean selectedFileChanged){
-//		if (selectedFileChanged) {
-//			LoadedFile currentFile = fileController.getCurrentFile();
-//			if (currentFile == null) {
-//				viewer.setInput(null);
-//				table.setInput(null);
-//				optionsViewer.setInput(null);
-//				return;
-//			}
-//			List<DataOptions> dataOptions = currentFile.getDataOptions();
-//			viewer.setInput(dataOptions.toArray());
-//
-//			if (fileController.getCurrentDataOption() != null) {
-//				DataOptions op = fileController.getCurrentDataOption();
-//				viewer.setSelection(new StructuredSelection(op),true);
-//				table.setInput(plotController.getPlottableObject().getNDimensions());
-//				
-//			}
-//			
-//			
-//			viewer.refresh();
-//		}
-//	}
-	
+
 	private void updateOnSelectionChange(LoadedFile file){
 		if (file == null) {
 			viewer.setInput(null);
@@ -280,48 +226,43 @@ public class DatasetPart {
 			plotModeOptionsViewer.setInput(null);
 			return;
 		}
-		
-		
+
+
 		List<DataOptions> dataOptions = file.getDataOptions();
 		viewer.setInput(dataOptions.toArray());
 
 		DataOptions option = null;
-		
+
 		for (DataOptions op : file.getDataOptions()) {
 			if (op.isSelected()) {
 				option = op;
 				break;
 			}
 		}
-		
+
 		if (option == null && file.getDataOptions().size() != 0) {
 			option = file.getDataOptions().get(0);
 		}
-		
+
 		if (option != null) {
-//			DataOptions op = fileController.getCurrentDataOption();
-			
-			
-			
 			viewer.setSelection(new StructuredSelection(option),true);
 			table.setInput(option.getPlottableObject().getNDimensions());
-//
 		}
-
 
 		viewer.refresh();
 
 	}
-	
-	
-	
+
+
+
 	@PreDestroy
 	public void dispose(){
 		viewer.dispose();
 		fileController.removeStateListener(fileStateListener);
+		selectionService.removeSelectionListener(LOADED_FILE_PART_ID, selectionListener);
 		plotController.dispose();
 	}
-	
+
 	private void updateOnSelectionChange(DataOptions op){
 		op.getPlottableObject().getNDimensions().addSliceListener(sliceListener);
 		IPlotMode[] suitableModes = plotController.getPlotModes(op);
@@ -333,27 +274,27 @@ public class DatasetPart {
 		} else {
 			table.setMaxSliceNumber(1);
 		}
-		
-		
+
+
 		table.setInput(op.getPlottableObject().getNDimensions());
-		
+
 		viewer.refresh();
 	}
-	
+
 	@Focus
 	public void setFocus() {
 		if (viewer != null) viewer.getTable().setFocus();
 	}
-	
+
 	class ViewLabelLabelProvider extends StyledCellLabelProvider {
-		
+
 		@Override
-	    public void update(ViewerCell cell) {
-	      Object element = cell.getElement();
-	      StyledString text = new StyledString();
-	      text.append(((DataOptions)element).getName() + " " + Arrays.toString(((DataOptions)element).getLazyDataset().getShape()));
-	      cell.setText(text.toString());
-	      super.update(cell);
+		public void update(ViewerCell cell) {
+			Object element = cell.getElement();
+			StyledString text = new StyledString();
+			text.append(((DataOptions)element).getName() + " " + Arrays.toString(((DataOptions)element).getLazyDataset().getShape()));
+			cell.setText(text.toString());
+			super.update(cell);
 		}
 	}
 
