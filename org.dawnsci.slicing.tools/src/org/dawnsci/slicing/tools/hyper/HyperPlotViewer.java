@@ -14,17 +14,105 @@ import org.eclipse.january.dataset.IDataset;
 import org.eclipse.january.dataset.ILazyDataset;
 import org.eclipse.january.dataset.Slice;
 import org.eclipse.january.metadata.AxesMetadata;
+import org.eclipse.jface.viewers.ArrayContentProvider;
+import org.eclipse.jface.viewers.ComboViewer;
+import org.eclipse.jface.viewers.ISelectionChangedListener;
+import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.LabelProvider;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 
 public class HyperPlotViewer extends IPlottingSystemViewer.Stub<Composite> {
+	
+	private enum Hyper3Dmode {
+		AREA_TO_LINE("Average Regions") ,IMAGE_LINE_TO_IMAGE("Line Profile - as image"),LINE_TO_LINE("Line Profile - as lines");
+		
+		private String description;
+		
+		private Hyper3Dmode(String description) {
+			this.description = description;
+		}
+		
+		@Override
+		public String toString() {
+			return description;
+		}
+		
+	}
 
 	private HyperComponent hyper;
 	//Can only show one trace;
 	private HyperTrace trace;
+	private Composite control;
+	private GridData gridData;
+	private ComboViewer viewer;
+	private Hyper3Dmode currentMode = Hyper3Dmode.AREA_TO_LINE;
 	
 	public void createControl(final Composite parent) {
+		control = new Composite(parent, SWT.None);
+		GridLayout layout = new GridLayout(1, false);
+		control.setLayout(layout);
+		squashLayout(layout);
+		Composite hyperComp =new Composite(control, SWT.None);
+		layout = new GridLayout(1, false);
+		hyperComp.setLayout(layout);
+		squashLayout(layout);
+		hyperComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		hyper = new HyperComponent();
-		hyper.createControl(parent);
+		hyper.createControl(hyperComp);
+		viewer = new ComboViewer(control);
+		gridData = new GridData(SWT.LEFT, SWT.CENTER, false, false);
+		viewer.getControl().setLayoutData(gridData);
+		viewer.setContentProvider(new ArrayContentProvider());
+		viewer.setLabelProvider(new LabelProvider());
+		viewer.setInput(new Object[] {Hyper3Dmode.AREA_TO_LINE,Hyper3Dmode.IMAGE_LINE_TO_IMAGE,Hyper3Dmode.LINE_TO_LINE});
+		viewer.getCombo().select(0);
+		currentMode = Hyper3Dmode.AREA_TO_LINE;
+		
+		viewer.addSelectionChangedListener(new ISelectionChangedListener() {
+
+			@Override
+			public void selectionChanged(SelectionChangedEvent event) {
+				Hyper3Dmode mode = (Hyper3Dmode)((IStructuredSelection)event.getSelection()).getFirstElement();
+				if (mode == currentMode) return;
+				currentMode = mode;
+				if (trace == null || !(trace instanceof HyperTrace)) return;
+
+				plotHyper3D(trace);
+
+			}
+		});
+
+		showViewer(false);
+		
+	}
+	
+	private IDatasetROIReducer[] getReducers(Hyper3Dmode mode) {
+		
+		switch (mode) {
+		case AREA_TO_LINE:
+			return new IDatasetROIReducer[] {new TraceReducer(), new ImageTrapeziumBaselineReducer()};
+		case IMAGE_LINE_TO_IMAGE:
+			return new IDatasetROIReducer[] {new ArpesMainImageReducer(), new ArpesSideImageReducer()};
+		case LINE_TO_LINE:
+			return new IDatasetROIReducer[] {new TraceLineReducer(), new ImageTrapeziumBaselineReducer()};
+		}
+		
+		return null;
+	}
+	
+	private void squashLayout(GridLayout layout) {
+		layout.horizontalSpacing=0;
+		layout.verticalSpacing  =0;
+		layout.marginBottom     =0;
+		layout.marginTop        =0;
+		layout.marginLeft       =0;
+		layout.marginRight      =0;
+		layout.marginHeight     =0;
+		layout.marginWidth      =0;
 	}
 	
 	@Override
@@ -37,6 +125,7 @@ public class HyperPlotViewer extends IPlottingSystemViewer.Stub<Composite> {
 			HyperDataPackage dp = buildDataPackage(h);
 			hyper.setData(dp.lazyDataset, dp.axes, dp.slices, dp.order, new Hyper4DMapReducer(), new Hyper4DImageReducer());
 			((Hyper4DTrace) trace).setViewer(this);
+			showViewer(false);
 			return true;
 		}
 		
@@ -44,19 +133,28 @@ public class HyperPlotViewer extends IPlottingSystemViewer.Stub<Composite> {
 			HyperTrace h = (HyperTrace)trace;
 			this.trace = h;
 			
-			HyperDataPackage dp = buildDataPackage(h);
+			plotHyper3D(h);
 			
-			hyper.setData(dp.lazyDataset, dp.axes, dp.slices, dp.order);
-			((HyperTrace) trace).setViewer(this);
 			return true;
 		}
 		return false;
 	}
 	
+	private void plotHyper3D(HyperTrace trace) {
+		HyperDataPackage dp = buildDataPackage(trace);
+		IDatasetROIReducer[] reducers = getReducers(currentMode);
+		if (reducers == null) {
+			return;
+		}
+		hyper.setData(dp.lazyDataset, dp.axes, dp.slices, dp.order,reducers[0],reducers[1]);
+		trace.setViewer(this);
+		showViewer(true);
+	}
+	
 	@Override
 	public void removeTrace(ITrace trace) {
 		if (this.trace == trace){
-			trace = null;
+			this.trace = null;
 			hyper.clear();
 		}
 		
@@ -73,6 +171,12 @@ public class HyperPlotViewer extends IPlottingSystemViewer.Stub<Composite> {
 			
 		}
 		
+	}
+	
+	private void showViewer(boolean show) {
+		gridData.exclude = show;
+		viewer.getCombo().setVisible(show);
+		viewer.getCombo().pack();
 	}
 	
 	private HyperDataPackage buildDataPackage(IHyperTrace hyperTrace) {
@@ -120,8 +224,7 @@ public class HyperPlotViewer extends IPlottingSystemViewer.Stub<Composite> {
 	}
 	
 	public Composite getControl() {
-		if (hyper == null) return null;
-		return (Composite)hyper.getControl();
+		return control;
 	}
 	
 	
