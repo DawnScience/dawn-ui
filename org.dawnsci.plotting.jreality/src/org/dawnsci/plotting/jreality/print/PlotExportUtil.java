@@ -49,7 +49,6 @@ public class PlotExportUtil {
 
 	public static final String[] FILE_TYPES = new String[] { "PNG/JPEG File", "Postscript File", "SVG File" };
 	private static final Logger logger = LoggerFactory.getLogger(PlotExportUtil.class);
-	private static final String tempDirectory = System.getProperty("java.io.tmpdir");
 
 	private static void savePostScript(File imageFile, AbstractViewerApp viewerApp) throws FileNotFoundException {
 		PSRenderer rv;
@@ -72,10 +71,10 @@ public class PlotExportUtil {
 		rv.render();
 	}
 
-	private static void copytoClipboard(AbstractViewerApp viewerApp) {
+	private static void copytoClipboard(AbstractViewerApp viewerApp) throws IOException {
 		IWorkbenchPage page = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage();
 		IWorkbenchPart active = page.getActivePart();
-		File imageFile = new File(tempDirectory + "/" + active.getTitle() + ".png");
+		File imageFile = File.createTempFile(active.getTitle(), ".png");
 
 		ExportImage.exportImage(viewerApp.getCurrentViewer(), imageFile, 1);
 
@@ -137,11 +136,10 @@ public class PlotExportUtil {
 	 * 
 	 * @param viewerApp
 	 *            ViewerApp containing the current display
+	 * @throws IOException 
 	 */
-	public static synchronized void copyGraph(AbstractViewerApp viewerApp) {
-
+	public static synchronized void copyGraph(AbstractViewerApp viewerApp) throws IOException {
 		copytoClipboard(viewerApp);
-
 	}
 
 	/**
