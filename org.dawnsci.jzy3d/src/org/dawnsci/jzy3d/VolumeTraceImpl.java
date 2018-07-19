@@ -11,9 +11,7 @@ import org.eclipse.dawnsci.plotting.api.trace.IVolumeTrace;
 import org.eclipse.january.dataset.DatasetUtils;
 import org.eclipse.january.dataset.FloatDataset;
 import org.eclipse.january.dataset.IDataset;
-import org.jzy3d.colors.Color;
 import org.jzy3d.colors.ColorMapper;
-import org.jzy3d.colors.colormaps.ColorMapGrayscale;
 import org.jzy3d.maths.BoundingBox3d;
 import org.jzy3d.plot3d.primitives.AbstractDrawable;
 import org.jzy3d.plot3d.primitives.Shape;
@@ -30,6 +28,7 @@ public class VolumeTraceImpl extends Abstract2DJZY3DTrace implements IVolumeTrac
 	
 	protected ColorMapper colorMapper;
 	
+	private int downsampling = 1;
 	
 	public VolumeTraceImpl(IPaletteService paletteService, IImageService imageService, String palette) {
 		super(paletteService, imageService, palette);
@@ -115,7 +114,7 @@ public class VolumeTraceImpl extends Abstract2DJZY3DTrace implements IVolumeTrac
 		}
 		
 		volume = new Texture3D(buffer, shape,min.floatValue(),max.floatValue(),colorMapper,new BoundingBox3d(xmin,xmax,ymin,ymax,zmin,zmax));
-		
+		((Texture3D)volume).setDownsampling(downsampling);
 	}
 
 	@Override
@@ -141,6 +140,12 @@ public class VolumeTraceImpl extends Abstract2DJZY3DTrace implements IVolumeTrac
 	@Override
 	protected void configureShape(Shape shape) {
 		// nothing here
+		
+	}
+
+	@Override
+	public void setDownsampling(int downsample) {
+		downsampling = downsample;
 		
 	}
 

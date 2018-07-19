@@ -5,8 +5,10 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+
 import org.dawb.common.ui.menu.MenuAction;
 import org.dawnsci.jzy3d.toolbar.ConfigDialog;
+import org.dawnsci.jzy3d.volume.Texture3D;
 import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.dawnsci.plotting.api.ActionType;
 import org.eclipse.dawnsci.plotting.api.IPlotActionSystem;
@@ -57,6 +59,9 @@ public class JZY3DPlotViewer extends IPlottingSystemViewer.Stub<Composite> {
 	private Composite control;
 	private int[] shape;
 	
+	private MenuAction volumeQuality;
+	private int downsampling = 1;
+	
 	@Override
 	public void createControl(final Composite parent) {
 		control = new Composite(parent, SWT.NONE);
@@ -101,8 +106,71 @@ public class JZY3DPlotViewer extends IPlottingSystemViewer.Stub<Composite> {
 		createToolbar();
 	}
 	
+	private Texture3D getVolume() {
+		Graph graph = chart.getScene().getGraph();
+		List<AbstractDrawable> all = graph.getAll();
+		for (AbstractDrawable a : all) {
+			if (a instanceof Texture3D) {
+				return (Texture3D)a;
+			}
+		}
+		
+		return null;
+	}
+	
 	private void createToolbar() {
 		IPlotActionSystem plotActionSystem = system.getPlotActionSystem();
+		
+		volumeQuality = new MenuAction("Quality");
+		volumeQuality.setToolTipText("Set volume rendering speed/quality");
+		
+		Action best = new Action("Best/No downsampling", Action.AS_RADIO_BUTTON) {
+			@Override
+			public void run() {
+				downsampling = 1;
+				Texture3D volume = getVolume();
+				if (volume != null) volume.setDownsampling(1);
+				
+			}
+		};
+		
+		volumeQuality.add(best);
+		best.setChecked(true);
+		
+		Action good = new Action("Good/x2", Action.AS_RADIO_BUTTON) {
+			@Override
+			public void run() {
+				downsampling = 2;
+				Texture3D volume = getVolume();
+				if (volume != null) volume.setDownsampling(2);
+				
+			}
+		};
+		
+		volumeQuality.add(good);
+		
+		Action fast = new Action("Fast/x4", Action.AS_RADIO_BUTTON) {
+			@Override
+			public void run() {
+				downsampling = 4;
+				Texture3D volume = getVolume();
+				if (volume != null) volume.setDownsampling(4);
+				
+			}
+		};
+		
+		volumeQuality.add(fast);
+		
+		Action fastest = new Action("Fastest/x8", Action.AS_RADIO_BUTTON) {
+			@Override
+			public void run() {
+				Texture3D volume = getVolume();
+				if (volume != null) volume.setDownsampling(8);
+				
+			}
+		};
+		
+		volumeQuality.add(fastest);
 		
 		Action configureAction = new Action("Configure") {
 			@Override
@@ -224,6 +292,7 @@ public class JZY3DPlotViewer extends IPlottingSystemViewer.Stub<Composite> {
 		});
 		
 		plotActionSystem.registerGroup("org.dawnsci.jzy3.jzy3dplotviewer.actions", ManagerType.TOOLBAR);
+		plotActionSystem.registerAction("org.dawnsci.jzy3.jzy3dplotviewer.actions", volumeQuality, ActionType.JZY3D_COLOR, ManagerType.TOOLBAR);
 		plotActionSystem.registerAction("org.dawnsci.jzy3.jzy3dplotviewer.actions", configureAction, ActionType.JZY3D_COLOR, ManagerType.TOOLBAR);
 		plotActionSystem.registerAction("org.dawnsci.jzy3.jzy3dplotviewer.actions", menuAction, ActionType.JZY3D_COLOR, ManagerType.TOOLBAR);
 		plotActionSystem.registerAction("org.dawnsci.jzy3.jzy3dplotviewer.actions", saveAction, ActionType.JZY3D_COLOR, ManagerType.TOOLBAR);
@@ -267,6 +336,13 @@ public class JZY3DPlotViewer extends IPlottingSystemViewer.Stub<Composite> {
 		chart.getAxeLayout().setYAxeLabel(y);
 		chart.getAxeLayout().setZAxeLabel(z);
 		
+		if (trace instanceof IVolumeTrace) {
+			volumeQuality.setEnabled(true);
+			((IVolumeTrace)trace).setDownsampling(downsampling);
+		} else {
+			volumeQuality.setEnabled(false);
+		}
+		
 		if (trace instanceof Abstract2DJZY3DTrace) {
 			chart.pauseAnimator();
 			((Abstract2DJZY3DTrace) trace).setPalette(getPreferenceStore().getString(BasePlottingConstants.COLOUR_SCHEME));
@@ -274,6 +350,7 @@ public class JZY3DPlotViewer extends IPlottingSystemViewer.Stub<Composite> {
 			chart.resumeAnimator();
 			return true;
 		}
+		
 
 		return false;
 	}

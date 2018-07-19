@@ -1,23 +1,16 @@
 package org.dawnsci.jzy3d.volume;
 
 import java.nio.Buffer;
-import java.nio.FloatBuffer;
-import java.nio.IntBuffer;
-import java.util.Arrays;
 
 import org.dawnsci.jzy3d.glsl.ColormapTexture;
 import org.dawnsci.jzy3d.glsl.GLSLProgram;
 import org.dawnsci.jzy3d.glsl.ShaderFilePair;
-import org.eclipse.dawnsci.plotting.api.jreality.util.ArrayPoolUtility;
-import org.jzy3d.colors.Color;
 import org.jzy3d.colors.ColorMapper;
 import org.jzy3d.colors.IMultiColorable;
 import org.jzy3d.maths.BoundingBox3d;
 import org.jzy3d.maths.Coord3d;
 import org.jzy3d.plot3d.primitives.AbstractDrawable;
 import org.jzy3d.plot3d.primitives.IGLBindedResource;
-import org.jzy3d.plot3d.primitives.vbo.buffers.FloatVBO;
-import org.jzy3d.plot3d.primitives.vbo.builders.VBOBuilder;
 import org.jzy3d.plot3d.primitives.vbo.drawable.DrawableVBO;
 import org.jzy3d.plot3d.rendering.view.Camera;
 import org.jzy3d.plot3d.transform.Transform;
@@ -28,7 +21,6 @@ import com.jogamp.opengl.GL2GL3;
 import com.jogamp.opengl.GLException;
 import com.jogamp.opengl.glu.GLU;
 import com.jogamp.opengl.math.FloatUtil;
-import com.jogamp.opengl.math.Matrix4;
 import com.jogamp.opengl.math.VectorUtil;
 
 public class Texture3D extends AbstractDrawable implements IGLBindedResource,IMultiColorable{
@@ -43,9 +35,11 @@ public class Texture3D extends AbstractDrawable implements IGLBindedResource,IMu
     private float min;
     private float max;
     private ColormapTexture colormapTexure;
-    
+
 	private boolean disposed;
 	private ColorMapper mapper;
+	
+	private int downsampling = 1;
     
     public Texture3D(Buffer buffer, int[] shape, float min, float max, ColorMapper mapper, BoundingBox3d bbox) {
     	this.buffer = buffer;
@@ -151,6 +145,9 @@ public class Texture3D extends AbstractDrawable implements IGLBindedResource,IMu
     	
     	float[] frange = new float[] {range.x,range.y,range.z,1};
     	
+    	float step = 0.005f;
+    	float downSamp = downsampling;
+    	
     	if (success != null) {
     		VectorUtil.normalizeVec3(frange);
     		success = success.clone();
@@ -160,11 +157,17 @@ public class Texture3D extends AbstractDrawable implements IGLBindedResource,IMu
     		success[10] /= (1*frange[2]);
     		FloatUtil.multMatrixVec(success, eye1, eye1);
     		VectorUtil.normalizeVec3(eye1);
+    		double sqrt = Math.sqrt(Math.pow(shape[2]*eye1[0],2)+ 
+    				Math.pow(shape[2]*eye1[1],2)+ 
+    				Math.pow(shape[0]*eye1[2],2));
+    		step = (float)(1/sqrt);
     	}
+    	step *=downSamp;
 ////    	
     	shaderProgram.bind(gl.getGL2());
     	shaderProgram.setUniform(gl.getGL2(), "eye", eye1,4);
     	shaderProgram.setUniform(gl.getGL2(), "minMax", new float[] {min,max},2);
+    	shaderProgram.setUniform(gl.getGL2(), "stepDown", new float[] {step,downSamp},2);
     	int idt = gl.getGL2().glGetUniformLocation(shaderProgram.getProgramId(), "volumeTexture");
     	int idc = gl.getGL2().glGetUniformLocation(shaderProgram.getProgramId(), "transfer");
     	gl.getGL2().glUniform1i(idt, 0);
@@ -216,4 +219,13 @@ public class Texture3D extends AbstractDrawable implements IGLBindedResource,IMu
 		this.mapper = mapper;
 		if (colormapTexure != null) colormapTexure.updateColormap(mapper);
 	}
+	
+	public int getDownsampling() {
+		return downsampling;
+	}
+
+	public void setDownsampling(int downsampling) {
+		this.downsampling = downsampling;
+	}
+
 }
