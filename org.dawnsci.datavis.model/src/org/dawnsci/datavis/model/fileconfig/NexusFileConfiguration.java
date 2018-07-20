@@ -89,7 +89,8 @@ public class NexusFileConfiguration implements ILoadedFileConfiguration {
 			}
 			
 			if (signal != null && dest instanceof GroupNode) {
-				if (!((GroupNode)dest).getNode(signal).isDataNode()) {
+				Node node = ((GroupNode)dest).getNode(signal);
+				if (node == null || !node.isDataNode()) {
 					return false;
 				}
 				DataNode d = ((GroupNode)dest).getDataNode(signal);
