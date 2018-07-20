@@ -322,10 +322,15 @@ public class FileController implements IFileController {
 					List<DataOptions> state = getImmutableFileState();
 					
 					for (ILoadedFileConfiguration c : fileConfigs) {
-						c.setCurrentState(state);
-						if (c.configure(f)) {
-							break;
+						try {
+							c.setCurrentState(state);
+							if (c.configure(f)) {
+								break;
+							}
+						} catch (Exception e) {
+							logger.error("Error thrown in " + c.toString(), e);
 						}
+						
 					}
 					
 					f.setLabelName(labelName);
