@@ -151,19 +151,15 @@ public class Texture3D extends AbstractDrawable implements IGLBindedResource,IMu
     	if (success != null) {
     		VectorUtil.normalizeVec3(frange);
     		success = success.clone();
-//    		Arrays.fill(success, 0);
     		success[0] /= frange[0];
     		success[5] /= frange[1];
     		success[10] /= (1*frange[2]);
     		FloatUtil.multMatrixVec(success, eye1, eye1);
     		VectorUtil.normalizeVec3(eye1);
-    		double sqrt = Math.sqrt(Math.pow(shape[2]*eye1[0],2)+ 
-    				Math.pow(shape[2]*eye1[1],2)+ 
-    				Math.pow(shape[0]*eye1[2],2));
+    		double sqrt = Math.hypot(shape[2]*eye1[0], Math.hypot(shape[1]*eye1[1],shape[0]*eye1[2]));
     		step = (float)(1/sqrt);
     	}
-    	step *=downSamp;
-////    	
+    	step *=downSamp;  	
     	shaderProgram.bind(gl.getGL2());
     	shaderProgram.setUniform(gl.getGL2(), "eye", eye1,4);
     	shaderProgram.setUniform(gl.getGL2(), "minMax", new float[] {min,max},2);

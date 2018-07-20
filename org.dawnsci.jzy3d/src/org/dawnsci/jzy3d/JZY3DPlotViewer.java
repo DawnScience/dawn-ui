@@ -55,6 +55,8 @@ import com.jogamp.newt.swt.NewtCanvasSWT;
 
 public class JZY3DPlotViewer extends IPlottingSystemViewer.Stub<Composite> {
 	
+	private static final String ACTION_ID = "org.dawnsci.jzy3.jzy3dplotviewer.actions";
+	
 	private Chart chart;
 	private Composite control;
 	private int[] shape;
@@ -122,7 +124,7 @@ public class JZY3DPlotViewer extends IPlottingSystemViewer.Stub<Composite> {
 		IPlotActionSystem plotActionSystem = system.getPlotActionSystem();
 		
 		volumeQuality = new MenuAction("Quality");
-		volumeQuality.setToolTipText("Set volume rendering speed/quality");
+		volumeQuality.setToolTipText("Set volume rendering quality/speed");
 		
 		Action best = new Action("Best/No downsampling", Action.AS_RADIO_BUTTON) {
 			@Override
@@ -291,11 +293,11 @@ public class JZY3DPlotViewer extends IPlottingSystemViewer.Stub<Composite> {
 			}
 		});
 		
-		plotActionSystem.registerGroup("org.dawnsci.jzy3.jzy3dplotviewer.actions", ManagerType.TOOLBAR);
-		plotActionSystem.registerAction("org.dawnsci.jzy3.jzy3dplotviewer.actions", volumeQuality, ActionType.JZY3D_COLOR, ManagerType.TOOLBAR);
-		plotActionSystem.registerAction("org.dawnsci.jzy3.jzy3dplotviewer.actions", configureAction, ActionType.JZY3D_COLOR, ManagerType.TOOLBAR);
-		plotActionSystem.registerAction("org.dawnsci.jzy3.jzy3dplotviewer.actions", menuAction, ActionType.JZY3D_COLOR, ManagerType.TOOLBAR);
-		plotActionSystem.registerAction("org.dawnsci.jzy3.jzy3dplotviewer.actions", saveAction, ActionType.JZY3D_COLOR, ManagerType.TOOLBAR);
+		plotActionSystem.registerGroup(ACTION_ID, ManagerType.TOOLBAR);
+		plotActionSystem.registerAction(ACTION_ID, volumeQuality, ActionType.JZY3D_COLOR, ManagerType.TOOLBAR);
+		plotActionSystem.registerAction(ACTION_ID, configureAction, ActionType.JZY3D_COLOR, ManagerType.TOOLBAR);
+		plotActionSystem.registerAction(ACTION_ID, menuAction, ActionType.JZY3D_COLOR, ManagerType.TOOLBAR);
+		plotActionSystem.registerAction(ACTION_ID, saveAction, ActionType.JZY3D_COLOR, ManagerType.TOOLBAR);
 		
 		plotActionSystem.createToolDimensionalActions(ToolPageRole.ROLE_JUST_COLOUR, "org.dawb.workbench.plotting.views.toolPageView.Color");
 	}
