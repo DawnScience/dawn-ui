@@ -65,6 +65,7 @@ import org.eclipse.ui.part.FileEditorInput;
  */
 public class DataReduction2DTool extends AbstractToolPage implements IRegionListener, ITraceListener {
 
+	private static final int MAX_DISPLAYED_TRACES = 20;
 	private SashForm rootComposite;
 	private IPlottingSystem<Composite> plottingSystem;
 	private IImageTrace imageTrace;
@@ -120,6 +121,8 @@ public class DataReduction2DTool extends AbstractToolPage implements IRegionList
 	}
 
 	private void removeFromPlottingSystem(ILineTrace trace) {
+		if (trace == null)
+			return;
 		int index = stackList.indexOf(trace);
 		stackList.remove(index);
 		plottingSystem.removeTrace(trace);
@@ -182,11 +185,17 @@ public class DataReduction2DTool extends AbstractToolPage implements IRegionList
 						}
 						spectrum.clearTrace();
 					});
-					for (DataReduction2DToolSpectrumDataNode spectrum : newSelection) {
+					for (DataReduction2DToolSpectrumDataNode spectrum : newSelection.subList(0, Math.min(MAX_DISPLAYED_TRACES, newSelection.size()))) {
 						if (spectrum.getTrace() == null && !plottingSystem.isDisposed()) {
 							ITrace trace = DataReduction2DTool.this.plotSpectrum(spectrum);
 							spectrum.setTrace(trace);
 						}
+					}
+					if (newSelection.size() > MAX_DISPLAYED_TRACES) {
+						statusLabel.setText(String.format("Only displaying first %d traces!", MAX_DISPLAYED_TRACES));
+						statusLabel.setForeground(Display.getCurrent().getSystemColor(SWT.COLOR_RED));
+					} else {
+						statusLabel.setText("");
 					}
 				});
 				
@@ -407,6 +416,7 @@ public class DataReduction2DTool extends AbstractToolPage implements IRegionList
 		statusComponent.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 		statusComponent.setLayout(new GridLayout(1, false));
 		statusLabel = new Label(statusComponent, SWT.None);
+		statusLabel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 	}
 
 	@Override
