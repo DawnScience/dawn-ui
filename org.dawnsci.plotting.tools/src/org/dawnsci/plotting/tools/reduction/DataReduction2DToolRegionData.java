@@ -26,7 +26,7 @@ public class DataReduction2DToolRegionData {
 		return endIndex;
 	}
 
-	public int getnSpectra() {
+	public int getNSpectra() {
 		return nSpectra;
 	}
 	

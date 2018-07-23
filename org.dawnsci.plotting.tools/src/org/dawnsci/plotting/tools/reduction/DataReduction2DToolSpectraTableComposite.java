@@ -12,6 +12,7 @@ import org.dawnsci.plotting.tools.Activator;
 import org.dawnsci.plotting.tools.reduction.DataReduction2DToolModel.TableColumnAveragedRegionExportMode;
 import org.dawnsci.plotting.tools.reduction.DataReduction2DToolModel.TableColumnData;
 import org.eclipse.core.databinding.observable.list.IObservableList;
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.dawnsci.analysis.dataset.roi.RectangularROI;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.region.IRegion;
@@ -22,6 +23,7 @@ import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.InputDialog;
+import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.CheckboxTableViewer;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
@@ -289,24 +291,34 @@ class DataReduction2DToolSpectraTableComposite extends DataReduction2DToolObserv
 			if (dlg.open() == Window.OK) {
 				try {
 					int noOfSpectraToAvg = Integer.parseInt(dlg.getValue());
+					ProgressMonitorDialog progressDialog = new ProgressMonitorDialog(getShell());
+					progressDialog.setCancelable(false);
+					progressDialog.open();
+					IProgressMonitor monitor = progressDialog.getProgressMonitor();
 					DataReduction2DToolRegionData region = findSpectraAndCreateRegion();
-					for (int i = 0 ; i < region.getnSpectra() ; i += noOfSpectraToAvg) {
+					monitor.beginTask("Creating regions...", region.getNSpectra() / noOfSpectraToAvg);
+					for (int i = 0 ; i < region.getNSpectra() ; i += noOfSpectraToAvg) {
 						int newEndIndex;
 						int newStartIndex;
 						try {
 							newStartIndex = region.getNodes().get(i).getIndex();
 							newEndIndex = region.getNodes().get(i + noOfSpectraToAvg - 1).getIndex();
 						} catch (IndexOutOfBoundsException e) {
+							monitor.worked(1);
 							continue;
 						}
+						monitor.subTask(String.format("Averaging from index %d to %d", newStartIndex, newEndIndex));
 						// create new region
 						DataReduction2DToolRegionData newRegion = new DataReduction2DToolRegionData(newStartIndex, newEndIndex, region.getNodes().subList(i, i + noOfSpectraToAvg));
+						monitor.worked(1);
 						if (!validateRegion(newRegion))
 							continue;
 							
 						DataReduction2DToolAvgSpectraRegionDataNode spectraRegion = new DataReduction2DToolAvgSpectraRegionDataNode(createRegionROI(newStartIndex, newEndIndex), toolPageModel, newRegion);
 						addRegionAction(spectraRegion);
 					}
+					monitor.done();
+					progressDialog.close();
 				} catch (Exception e) {
 					logger.error("Unable to create averaged regions for every # spectra", e);
 					DataReduction2DToolHelper.showError("Unable to create regions for every # spectra", e.getMessage());

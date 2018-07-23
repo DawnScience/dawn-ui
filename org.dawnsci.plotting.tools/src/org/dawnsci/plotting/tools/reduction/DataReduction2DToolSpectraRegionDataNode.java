@@ -112,7 +112,7 @@ class DataReduction2DToolSpectraRegionDataNode extends DataReduction2DToolObserv
 	}
 	
 	public int getTotalSpectra() {
-		return regionData.getnSpectra();
+		return regionData.getNSpectra();
 	}
 	
 	@Override
