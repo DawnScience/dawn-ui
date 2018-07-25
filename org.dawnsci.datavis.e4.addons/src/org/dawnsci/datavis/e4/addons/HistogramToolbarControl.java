@@ -63,13 +63,10 @@ public class HistogramToolbarControl {
 		control = new Composite(parent, SWT.None);
 		control.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false));
 		
-		GridLayout layout = new GridLayout(6, false);
+		GridLayout layout = new GridLayout(4, false);
 		layout.marginHeight = 2;
 		layout.marginWidth = 2;
 		control.setLayout(layout);
-		
-		Label l =new Label(control, SWT.SEPARATOR | SWT.VERTICAL);
-		l.setLayoutData(new GridData(2,24));
 		
 		lock = new Button(control,SWT.TOGGLE);
 		
@@ -161,7 +158,7 @@ public class HistogramToolbarControl {
 		
 		low.addVerifyListener(v);
 		
-		l = new Label(control, SWT.NONE);
+		Label l = new Label(control, SWT.NONE);
 		l.setText("-");
 		
 		high = new Text(control, SWT.BORDER | SWT.RIGHT);
@@ -190,10 +187,6 @@ public class HistogramToolbarControl {
 		});
 		
 		high.addVerifyListener(v);
-		
-		l =new Label(control, SWT.SEPARATOR | SWT.VERTICAL);
-		l.setLayoutData(new GridData(2,24));
-		
 		
 		traceListener = new ITraceListener.Stub() {
 			

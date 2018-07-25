@@ -19,7 +19,6 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Scale;
 
 public class PlotModifierOffsetControl {
@@ -41,13 +40,10 @@ public class PlotModifierOffsetControl {
 		control = new Composite(parent, SWT.None);
 		control.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false));
 		
-		GridLayout layout = new GridLayout(5, false);
+		GridLayout layout = new GridLayout(3, false);
 		layout.marginHeight = 2;
 		layout.marginWidth = 2;
 		control.setLayout(layout);
-	
-		Label l =new Label(control, SWT.SEPARATOR | SWT.VERTICAL);
-		l.setLayoutData(new GridData(2,24));
 		
 		stackButton = new Button(control, SWT.TOGGLE);
 		
@@ -119,9 +115,6 @@ public class PlotModifierOffsetControl {
 			}
 			
 		});
-		
-		l = new Label(control, SWT.SEPARATOR | SWT.VERTICAL);
-		l.setLayoutData(new GridData(2,24));
 		
 		stackButton.addSelectionListener(new SelectionAdapter() {
 			

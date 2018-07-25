@@ -1,21 +1,14 @@
 package org.dawnsci.datavis.e4.addons;
 
-import java.util.Collection;
-
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
-import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
-import org.eclipse.dawnsci.plotting.api.trace.IPaletteTrace;
 import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.e4.core.di.annotations.Optional;
-import org.eclipse.e4.core.di.extensions.EventTopic;
+import org.eclipse.e4.ui.di.UIEventTopic;
 import org.eclipse.e4.ui.model.application.MApplication;
 import org.eclipse.e4.ui.model.application.ui.SideValue;
 import org.eclipse.e4.ui.model.application.ui.advanced.MPerspective;
-import org.eclipse.e4.ui.model.application.ui.basic.MPartSashContainer;
-import org.eclipse.e4.ui.model.application.ui.basic.MPartStack;
-import org.eclipse.e4.ui.model.application.ui.basic.MStackElement;
 import org.eclipse.e4.ui.model.application.ui.basic.MTrimBar;
 import org.eclipse.e4.ui.model.application.ui.basic.MTrimElement;
 import org.eclipse.e4.ui.model.application.ui.basic.MTrimmedWindow;
@@ -24,9 +17,6 @@ import org.eclipse.e4.ui.model.application.ui.menu.MMenuFactory;
 import org.eclipse.e4.ui.model.application.ui.menu.MToolControl;
 import org.eclipse.e4.ui.workbench.UIEvents;
 import org.eclipse.e4.ui.workbench.UIEvents.EventTags;
-import org.eclipse.ui.IViewPart;
-import org.eclipse.ui.PartInitException;
-import org.eclipse.ui.PlatformUI;
 import org.osgi.service.event.Event;
 
 public class HistogramToolbarAddon {
@@ -44,10 +34,10 @@ public class HistogramToolbarAddon {
         
         if (control == null) {
 			MTrimBar topTrimBar = getTopTrimBar();
-			topTrimBar.getTags().add("Draggable");
 			control = MMenuFactory.INSTANCE.createToolControl();
 			control.setElementId(HistogramToolbarControl.ID);
 			control.setContributionURI(HistogramToolbarControl.CLASS_URI);
+			control.getTags().add("Draggable");
 			topTrimBar.getChildren().add(0, control);
 		}
         control.setVisible(true);
@@ -58,8 +48,7 @@ public class HistogramToolbarAddon {
     @Inject
 	@Optional
 	public void subscribeTopicSelectedElement(
-			@EventTopic(UIEvents.ElementContainer.TOPIC_SELECTEDELEMENT) Event event) {
-//		Object newValue = event.getProperty(EventTags.ELEMENT);
+			@UIEventTopic(UIEvents.ElementContainer.TOPIC_SELECTEDELEMENT) Event event) {
 		
 		
 		Object newValue = event.getProperty(EventTags.NEW_VALUE);
@@ -76,51 +65,6 @@ public class HistogramToolbarAddon {
 		} else {
 			control.setVisible(false);
 		}
-		
-//		if (newValue instanceof MPartSashContainer) {
-//			newValue = ((MPartSashContainer)newValue).getSelectedElement();
-//		}
-//		
-//		if (newValue instanceof MPartSashContainer) {
-//			newValue = ((MPartSashContainer)newValue).getSelectedElement();
-//		}
-//		
-////		if (newValue instanceof MPlaceholder) {
-////			newValue = ((MPlaceholder)newValue).get
-////		}
-//		
-//		boolean visible = false;
-//		
-//		if (newValue instanceof MPartStack){
-//			MStackElement se = ((MPartStack)newValue).getSelectedElement();
-//			String elementId = se.getElementId();
-//			try {
-//				IViewPart view = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().showView(elementId);
-//				if (view != null) {
-//					IPlottingSystem<?> system = view.getAdapter(IPlottingSystem.class);
-//					if (system != null) {
-//						system.toString();
-//						Collection<IPaletteTrace> traces = system.getTracesByClass(IPaletteTrace.class);
-//						if (traces.isEmpty()) {
-//							control.setVisible(false);
-//						} else {
-//							IPaletteTrace next = traces.iterator().next();
-//							next.isRescaleHistogram();
-//							Object object = control.getObject();
-//							if (object instanceof HistrogramToolbarControl) {
-//								((HistrogramToolbarControl)object).setSystemTrace(system, next);
-//								visible = true;
-//							}
-//						}
-//					} 
-//				} 
-//			} catch (PartInitException e) {
-//
-//			}
-//		} 
-//		
-//		control.setVisible(visible);
-//		
 	}
     
     private MToolControl getMyControl() {

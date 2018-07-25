@@ -5,7 +5,7 @@ import javax.inject.Inject;
 
 import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.e4.core.di.annotations.Optional;
-import org.eclipse.e4.core.di.extensions.EventTopic;
+import org.eclipse.e4.ui.di.UIEventTopic;
 import org.eclipse.e4.ui.model.application.MApplication;
 import org.eclipse.e4.ui.model.application.ui.SideValue;
 import org.eclipse.e4.ui.model.application.ui.advanced.MPerspective;
@@ -34,10 +34,10 @@ public class PlotModifierOffsetAddon {
         
         if (control == null) {
 			MTrimBar topTrimBar = getTopTrimBar();
-			topTrimBar.getTags().add("Draggable");
 			control = MMenuFactory.INSTANCE.createToolControl();
 			control.setElementId(PlotModifierOffsetControl.ID);
 			control.setContributionURI(PlotModifierOffsetControl.CLASS_URI);
+			control.getTags().add("Draggable");
 			topTrimBar.getChildren().add(0, control);
 		}
         
@@ -48,9 +48,7 @@ public class PlotModifierOffsetAddon {
     @Inject
    	@Optional
    	public void subscribeTopicSelectedElement(
-   			@EventTopic(UIEvents.ElementContainer.TOPIC_SELECTEDELEMENT) Event event) {
-//   		Object newValue = event.getProperty(EventTags.ELEMENT);
-   		
+   			@UIEventTopic(UIEvents.ElementContainer.TOPIC_SELECTEDELEMENT) Event event) {
    		
    		Object newValue = event.getProperty(EventTags.NEW_VALUE);
    		
