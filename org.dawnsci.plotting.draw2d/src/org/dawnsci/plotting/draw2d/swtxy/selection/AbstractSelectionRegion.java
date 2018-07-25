@@ -540,14 +540,19 @@ public abstract class AbstractSelectionRegion<T extends IROI> extends AbstractRe
 		if (regionObjects!=null) for (IFigure ob : regionObjects) {
 			final IFigure par = ob.getParent();
 			if (par!=null) {
-				par.remove(ob);
-				final int end = par.getChildren()!=null 
-						      ? par.getChildren().size()
-						      : 0;
-				par.add(ob, end);
+				//manipulate the child list directly rather than removing/adding
+				//to the parent to avoid the revalidates - we are not adding new
+				//figures just changing the order of the list.
+				List children = par.getChildren();
+				for (Object c : children) {
+					if (ob == c) {
+						children.remove(ob);
+						children.add(ob);
+						break;
+					}
+				}
 			}
 		}		
-		
 	}
 
 	@Override
