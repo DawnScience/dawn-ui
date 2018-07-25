@@ -66,6 +66,7 @@ class AxisSelection extends AbstractSelectionRegion<RectangularROI> {
 
 	private FigureTranslator mover;
 
+	private boolean isMoving = false;
 	
 	AxisSelection(String name, ICoordinateSystem coords, RegionType regionType) {
 		super(name, coords);
@@ -376,6 +377,7 @@ class AxisSelection extends AbstractSelectionRegion<RectangularROI> {
 	@Override
 	public RectangularROI createROI(boolean recordResult) {
 		if (line1!=null) {
+			isMoving = !recordResult;
 			final Rectangle rect = getRectangleFromVertices();
 			final RectangularROI rroi = getRoiFromRectangle(rect);
 			rroi.setName(getName());
@@ -410,7 +412,7 @@ class AxisSelection extends AbstractSelectionRegion<RectangularROI> {
 
 	protected void updateRegion() {
 		
-		if (line1 == null || roi == null) return;
+		if (line1 == null || roi == null || isMoving) return;
 
 		double[] spt = null;
 		double[] ept = null;
@@ -431,7 +433,6 @@ class AxisSelection extends AbstractSelectionRegion<RectangularROI> {
 
 		final Rectangle local = new Rectangle(new PrecisionPoint(p1[0], p1[1]), new PrecisionPoint(p2[0], p2[1]));
 		setLocalBounds(local, line1.getParent().getBounds());
-		updateBounds();
 	}
 
 	@Override
