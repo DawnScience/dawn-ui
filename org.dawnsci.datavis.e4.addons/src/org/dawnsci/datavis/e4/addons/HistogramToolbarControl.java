@@ -15,8 +15,6 @@ import org.eclipse.dawnsci.plotting.api.trace.IPaletteTrace;
 import org.eclipse.dawnsci.plotting.api.trace.ITraceListener;
 import org.eclipse.dawnsci.plotting.api.trace.PaletteEvent;
 import org.eclipse.dawnsci.plotting.api.trace.TraceEvent;
-import org.eclipse.e4.core.di.annotations.Optional;
-import org.eclipse.e4.ui.di.UIEventTopic;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -33,7 +31,6 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
-import org.osgi.service.event.Event;
 
 public class HistogramToolbarControl {
 
@@ -270,22 +267,6 @@ public class HistogramToolbarControl {
 			}
 		};
 	}
-	
-	
-	@Inject
-	@Optional
-	private void plotControllerUpdate(@UIEventTopic("org/dawnsci/datavis/plot/UPDATE") Event data ) {
-
-		if (system == null) {
-			system = plottingService.getPlottingSystem("Plot");
-			
-			if (system != null) {
-				
-			}
-		}
-
-	} 
-	
 	
 	@PreDestroy
 	public void dispose() {

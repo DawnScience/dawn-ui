@@ -3,10 +3,8 @@ package org.dawnsci.datavis.model;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -37,8 +35,6 @@ import org.eclipse.swt.graphics.Cursor;
 import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
-import org.osgi.service.event.Event;
-import org.osgi.service.event.EventAdmin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -138,7 +134,6 @@ public class PlotController implements IPlotController, ILoadedFileInitialiser {
 	
 	private  IPlottingService plotService;
 	private  IFileController fileController;
-	private  EventAdmin eventAdmin;
 	
 	//OSGI service injection
 	
@@ -150,12 +145,7 @@ public class PlotController implements IPlotController, ILoadedFileInitialiser {
 		fileController = controller;
 	}
 	
-	public void setEventAdmin(EventAdmin admin) {
-		eventAdmin = admin;
-	}
-	
 	private IPlottingSystem<?> system;
-
 	
 	private static final IPlotMode[] modes;
 	
@@ -377,11 +367,7 @@ public class PlotController implements IPlotController, ILoadedFileInitialiser {
 		});
 		
 		List<IAxis> axes = system.getAxes();
-		if (axes != null) for (IAxis axis : axes) if (axis != null) axis.setAxisAutoscaleTight(true);
-		//"org/dawnsci/datavis/plot/UPDATE"
-		
-		Map<String,String> props = new HashMap<>();
-		if (eventAdmin != null) eventAdmin.postEvent(new Event("org/dawnsci/datavis/plot/UPDATE", props));
+		if (axes != null) for (IAxis axis : axes) if (axis != null) axis.setAxisAutoscaleTight(true);	
 	}
 	
 	private Runnable updatePlottedData(DataOptions dataOp,final List<ITrace> traces, IPlotMode mode, IPlotDataModifier modifier) {

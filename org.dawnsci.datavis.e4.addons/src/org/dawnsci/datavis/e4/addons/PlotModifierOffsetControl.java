@@ -9,6 +9,7 @@ import javax.inject.Inject;
 import org.dawnsci.datavis.model.IPlotController;
 import org.dawnsci.datavis.model.IPlotDataModifier;
 import org.dawnsci.datavis.model.PlotDataModifierStack;
+import org.dawnsci.datavis.model.PlotModeChangeEventListener;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -31,6 +32,7 @@ public class PlotModifierOffsetControl {
 	private Button stackButton;
 	private Image stackImage;
 	private Composite control;
+	private PlotModeChangeEventListener listener;
 	
 	@Inject
 	private IPlotController controller;
@@ -142,7 +144,9 @@ public class PlotModifierOffsetControl {
 			
 		});
 		
-		controller.addPlotModeListener(this::plotControllerUpdate);
+		listener = this::plotControllerUpdate;
+		
+		controller.addPlotModeListener(listener);
 		
 	}
 	
@@ -176,9 +180,12 @@ public class PlotModifierOffsetControl {
 	public void dispose() {
 		if (stackImage != null) stackImage.dispose();
 		if (normImage != null) normImage.dispose();
+		controller.removePlotModeListener(listener);
 	}
 
 	private void enable(boolean enable) {
+		
+		if (control.isDisposed()) return;
 		
 		if (!(controller.getEnabledPlotModifier() instanceof PlotDataModifierStack) && enable) {
 			stackButton.setEnabled(true);
