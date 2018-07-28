@@ -8,6 +8,23 @@
             class="org.dawnsci.datavis.manipulation.DataManipulationExtensionContributionFactory"
             locationURI="menu:org.dawnsci.menu.main.tools">
       </menuContribution>
+      <menuContribution
+            allPopups="false"
+            locationURI="menu:org.dawnsci.datavis.file?after=org.dawnsci.datavis.recentseparator">
+         <command
+               commandId="org.dawnsci.datavis.manipulation.folder.preview"
+               label="Preview Folder..."
+               style="push">
+         </command>
+      </menuContribution>
+   </extension>
+   <extension
+         point="org.eclipse.ui.commands">
+      <command
+            defaultHandler="org.dawnsci.datavis.manipulation.FolderPreviewHandler"
+            id="org.dawnsci.datavis.manipulation.folder.preview"
+            name="Folder Preview">
+      </command>
    </extension>
 
 </plugin>
