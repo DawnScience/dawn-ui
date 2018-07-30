@@ -146,6 +146,9 @@ public class VolumeTraceImpl extends Abstract2DJZY3DTrace implements IVolumeTrac
 	@Override
 	public void setDownsampling(int downsample) {
 		downsampling = downsample;
+		if (volume != null) {
+			((Texture3D)volume).setDownsampling(downsampling);
+		}
 		
 	}
 
