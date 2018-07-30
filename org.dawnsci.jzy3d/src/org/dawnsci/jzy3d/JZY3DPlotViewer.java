@@ -42,6 +42,7 @@ import org.jzy3d.plot3d.primitives.IGLBindedResource;
 import org.jzy3d.plot3d.rendering.canvas.Quality;
 import org.jzy3d.plot3d.rendering.scene.Graph;
 import org.jzy3d.plot3d.rendering.view.modes.CameraMode;
+import org.jzy3d.plot3d.rendering.view.modes.ViewBoundMode;
 import org.jzy3d.plot3d.transform.squarifier.XYSquarifier;
 import org.jzy3d.plot3d.transform.squarifier.XZSquarifier;
 import org.jzy3d.plot3d.transform.squarifier.YXSquarifier;
@@ -166,6 +167,7 @@ public class JZY3DPlotViewer extends IPlottingSystemViewer.Stub<Composite> {
 		Action fastest = new Action("Fastest/x8", Action.AS_RADIO_BUTTON) {
 			@Override
 			public void run() {
+				downsampling = 8;
 				Texture3D volume = getVolume();
 				if (volume != null) volume.setDownsampling(8);
 				
@@ -347,8 +349,9 @@ public class JZY3DPlotViewer extends IPlottingSystemViewer.Stub<Composite> {
 		
 		if (trace instanceof Abstract2DJZY3DTrace) {
 			chart.pauseAnimator();
+			chart.getView().setBoundMode(ViewBoundMode.AUTO_FIT);
 			((Abstract2DJZY3DTrace) trace).setPalette(getPreferenceStore().getString(BasePlottingConstants.COLOUR_SCHEME));
-			chart.getScene().add(((Abstract2DJZY3DTrace)trace).getShape());
+			chart.getScene().add(((Abstract2DJZY3DTrace)trace).getShape(),true);
 			chart.resumeAnimator();
 			return true;
 		}
