@@ -71,6 +71,10 @@
             class="org.dawnsci.slicing.tools.hyper.HyperPlotViewer"
             id="org.dawnsci.slicing.tools.hyper.HyperPlotViewer">
       </plottingViewer>
+      <plottingViewer
+            class="org.dawnsci.slicing.tools.volume.VolumeSlicesPlotViewer"
+            id="org.dawnsci.slicing.tools.volume.VolumeSlicesPlotViewer">
+      </plottingViewer>
    </extension>
    <extension
          point="org.dawnsci.datavis.api.plotmode">
@@ -82,7 +86,12 @@
       <plotmode
             class="org.dawnsci.slicing.tools.hyper.PlotModeHyper4D"
             name="Hyper4d"
-            priority="0">
+            priority="-2">
+      </plotmode>
+      <plotmode
+            class="org.dawnsci.slicing.tools.volume.PlotModeVolumeSlices"
+            name="&quot;Volume - Orthogonal Slices&quot;"
+            priority="-1">
       </plotmode>
    </extension>
 

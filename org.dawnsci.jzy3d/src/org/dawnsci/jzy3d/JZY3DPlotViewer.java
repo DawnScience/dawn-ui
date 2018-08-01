@@ -493,6 +493,7 @@ public class JZY3DPlotViewer extends IPlottingSystemViewer.Stub<Composite> {
 		for (AbstractDrawable a : all) {
 			graph.remove(a);
 		}
+		chart.render();
 	}
 	
 	@Override
