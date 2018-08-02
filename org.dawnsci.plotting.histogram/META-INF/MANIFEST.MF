@@ -20,7 +20,8 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-ActivationPolicy: lazy
 Import-Package: org.eclipse.draw2d,
  org.slf4j;version="[1.7.2,2.0.0)"
-Export-Package: org.dawnsci.plotting.histogram.functions.classes,
+Export-Package: org.dawnsci.plotting.histogram,
+ org.dawnsci.plotting.histogram.functions.classes,
  org.dawnsci.plotting.histogram.service,
  org.dawnsci.plotting.histogram.ui
 Service-Component: OSGI-INF/*.xml

@@ -75,12 +75,13 @@ public class HistogramViewer extends ContentViewer {
 	private ILineTrace greenTrace;
 	private ILineTrace blueTrace;
 	private boolean firstUpdateTraces = true;
+	
+	private boolean histogramOnly = false;
 
 	private IROIListener histogramRegionListener = new IROIListener.Stub() {
 
 		@Override
 		public void roiDragged(ROIEvent evt) {
-			// Do nothing
 		}
 
 		@Override
@@ -104,6 +105,8 @@ public class HistogramViewer extends ContentViewer {
 		}
 	};
 
+	
+	
 	/**
 	 * Create a new Histogram Widget with a newly created plotting system.
 	 *
@@ -141,11 +144,42 @@ public class HistogramViewer extends ContentViewer {
 	 */
 	public HistogramViewer(final Composite parent, String title,
 			IPlottingSystem<Composite> plot, IActionBars site) throws Exception {
+		this(parent, null, null, null, false);
+	}
+	
+	/**
+	 * Create a new Histogram Widget
+	 *
+	 * @param composite
+	 *            parent composite to add widget to. Must not be
+	 *            <code>null</code>
+	 * @param title
+	 *            Title string for plot
+	 * @param plot
+	 *            A plotting system to work with this widget. Can be
+	 *            <code>null</code>, in which case a default plotting system
+	 *            will be created
+	 * @param site
+	 *            the workbench site this widget sits in. This is used to set
+	 *            commands and handlers. Can be <code>null</code>, in which case
+	 *            handlers will not be added and a pop-up menu will not be
+	 *            added.
+	 * @param histogramOnly
+	 *            Whether the viewer displays the histogram, colormap RGB line and
+	 *            min/max boxes (default) or just the histogram.
+	 * @throws Exception
+	 *             throws an exception if there is a failure to create a default
+	 *             plotting system or region of interest
+	 */
+	public HistogramViewer(final Composite parent, String title,
+			IPlottingSystem<Composite> plot, IActionBars site, boolean histogramOnly) throws Exception {
 
+		this.histogramOnly = histogramOnly;
+		
 		composite = new Composite(parent, SWT.NONE);
 		composite.setLayout(GridLayoutFactory.fillDefaults().create());
 
-		createMinMaxSettings(composite);
+		if (!histogramOnly) createMinMaxSettings(composite);
 
 		if (plot != null) {
 			histogramPlottingSystem = plot;
@@ -161,7 +195,7 @@ public class HistogramViewer extends ContentViewer {
 
 		createRegion();
 		createTraces();
-		installMinMaxListeners();
+		if (!histogramOnly) installMinMaxListeners();
 
 		hookControl(getControl());
 	}
@@ -257,23 +291,27 @@ public class HistogramViewer extends ContentViewer {
 		histoTrace.setLineWidth(1);
 		histoTrace.setTraceColor(new Color(null, 0, 0, 0));
 
-		// Set up the RGB traces
-		redTrace = histogramPlottingSystem.createLineTrace("Red");
-		greenTrace = histogramPlottingSystem.createLineTrace("Green");
-		blueTrace = histogramPlottingSystem.createLineTrace("Blue");
-
-		redTrace.setLineWidth(2);
-		greenTrace.setLineWidth(2);
-		blueTrace.setLineWidth(2);
-
-		redTrace.setTraceColor(new Color(null, 255, 0, 0));
-		greenTrace.setTraceColor(new Color(null, 0, 255, 0));
-		blueTrace.setTraceColor(new Color(null, 0, 0, 255));
-
 		histogramPlottingSystem.addTrace(histoTrace);
-		histogramPlottingSystem.addTrace(redTrace);
-		histogramPlottingSystem.addTrace(greenTrace);
-		histogramPlottingSystem.addTrace(blueTrace);
+
+		if (!histogramOnly) {
+
+			// Set up the RGB traces
+			redTrace = histogramPlottingSystem.createLineTrace("Red");
+			greenTrace = histogramPlottingSystem.createLineTrace("Green");
+			blueTrace = histogramPlottingSystem.createLineTrace("Blue");
+
+			redTrace.setLineWidth(2);
+			greenTrace.setLineWidth(2);
+			blueTrace.setLineWidth(2);
+
+			redTrace.setTraceColor(new Color(null, 255, 0, 0));
+			greenTrace.setTraceColor(new Color(null, 0, 255, 0));
+			blueTrace.setTraceColor(new Color(null, 0, 0, 255));
+
+			histogramPlottingSystem.addTrace(redTrace);
+			histogramPlottingSystem.addTrace(greenTrace);
+			histogramPlottingSystem.addTrace(blueTrace);
+		}
 
 		histogramPlottingSystem.getSelectedXAxis().setTitle("Intensity");
 		histogramPlottingSystem.getSelectedYAxis().setTitle("Log(Frequency)");
@@ -287,13 +325,16 @@ public class HistogramViewer extends ContentViewer {
 		
 		histoTrace.setData(data.getX(), data.getY());
 		histoTrace.setVisible(true);
-		redTrace.setData(data.getRGBX(), data.getR());
-		redTrace.setVisible(true);
-		greenTrace.setData(data.getRGBX(), data.getG());
-		greenTrace.setVisible(true);
-		blueTrace.setData(data.getRGBX(), data.getB());
-		blueTrace.setVisible(true);
-//		blueTrace.repaint();
+		
+		if (!histogramOnly) {
+			redTrace.setData(data.getRGBX(), data.getR());
+			redTrace.setVisible(true);
+			greenTrace.setData(data.getRGBX(), data.getG());
+			greenTrace.setVisible(true);
+			blueTrace.setData(data.getRGBX(), data.getB());
+			blueTrace.setVisible(true);
+		}
+		
 		IAxis xAxis = histogramPlottingSystem.getSelectedXAxis();
 		xAxis.setLog10(getHistogramProvider().isLogColorScale());
 		xAxis.setAxisAutoscaleTight(true);
@@ -492,7 +533,7 @@ public class HistogramViewer extends ContentViewer {
 		}
 		
 		region.setVisible(true);
-		updateMinMax(min, max);
+		if (!histogramOnly) updateMinMax(min, max);
 	}
 	
 	private void updateMinMax(double min, double max) {
