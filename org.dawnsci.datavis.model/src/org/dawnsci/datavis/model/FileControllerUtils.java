@@ -1,6 +1,6 @@
 package org.dawnsci.datavis.model;
 
-import java.util.ArrayList;import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.ui.progress.IProgressService;

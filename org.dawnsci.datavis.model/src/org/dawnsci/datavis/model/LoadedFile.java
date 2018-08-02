@@ -86,7 +86,7 @@ public class LoadedFile implements IDataObject, IDataFilePackage {
 			}
 
 			boolean notString = !lazyDataset.getElementClass().equals(String.class);
-			if (notString && lazyDataset.getSize() != 1) {
+			if (notString && (lazyDataset.getSize() != 1 || signals.contains(n))) {
 				DataOptions d = new DataOptions(n, this);
 				dataOptions.put(d.getName(),d);
 			} else {
