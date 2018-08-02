@@ -15,9 +15,13 @@ import org.eclipse.january.dataset.IDataset;
 import org.eclipse.january.dataset.ILazyDataset;
 import org.eclipse.january.dataset.SliceND;
 import org.eclipse.january.metadata.AxesMetadata;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class PlotModeVolume extends AbstractJZY3DImagePlotMode {
 
+	private static final Logger logger = LoggerFactory.getLogger(PlotModeVolume.class);
+	
 	@Override
 	public String[] getOptions() {
 		return new String[] {"X","Y","Z"};
@@ -47,7 +51,7 @@ public class PlotModeVolume extends AbstractJZY3DImagePlotMode {
 	@Override
 	public IDataset[] sliceForPlot(ILazyDataset lz, SliceND slice, Object[] options, IPlottingSystem<?> system) throws Exception {
 		IDataset[] data = sliceForPlotInner(lz, slice, options, system);
-		IDataset d = data[0].getSlice();
+		IDataset d = data[0];
 		AxesMetadata metadata = d.getFirstMetadata(AxesMetadata.class);
 		List<IDataset> ax = null;
 		
@@ -70,9 +74,8 @@ public class PlotModeVolume extends AbstractJZY3DImagePlotMode {
 		trace = createTrace(d.getName(), system);
 		trace.setDataName(d.getName());
 
-		long t = System.currentTimeMillis();
+
 		setData(trace,d, ax == null ? null : ax.toArray(new IDataset[ax.size()]));
-//		logger.info("Tesselation time {} ms for slice {} of {}", (System.currentTimeMillis()-t), slice.toString(), lz.getName());
 		atomicTrace.set(trace);
 		
 		return data;
@@ -87,9 +90,8 @@ public class PlotModeVolume extends AbstractJZY3DImagePlotMode {
 	public IDataset[] sliceForPlotInner(ILazyDataset lz, SliceND slice, Object[] options, IPlottingSystem<?> system) throws Exception {
 		long t = System.currentTimeMillis();
 		Dataset data = DatasetUtils.convertToDataset(lz.getSlice(slice));
-//		logger.info("Slice time {} ms for slice {} of {}", (System.currentTimeMillis()-t), slice.toString(), lz.getName());
+		logger.info("Slice time {} ms for slice {} of {}", (System.currentTimeMillis()-t), slice.toString(), lz.getName());
 		data.setErrors(null);
-//		updateName(lz.getName(),data,slice);
 		data.squeeze();
 		if (data.getRank() != 3) return null;
 		return new IDataset[]{data};

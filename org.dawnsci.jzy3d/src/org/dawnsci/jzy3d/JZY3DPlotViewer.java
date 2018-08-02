@@ -16,11 +16,13 @@ import org.eclipse.dawnsci.plotting.api.IPlottingSystemViewer;
 import org.eclipse.dawnsci.plotting.api.ManagerType;
 import org.eclipse.dawnsci.plotting.api.preferences.BasePlottingConstants;
 import org.eclipse.dawnsci.plotting.api.tool.IToolPage.ToolPageRole;
+import org.eclipse.dawnsci.plotting.api.trace.IPaletteListener;
 import org.eclipse.dawnsci.plotting.api.trace.ISurfaceMeshTrace;
 import org.eclipse.dawnsci.plotting.api.trace.ITrace;
 import org.eclipse.dawnsci.plotting.api.trace.IVolumeTrace;
 import org.eclipse.dawnsci.plotting.api.trace.IWaterfallTrace;
 import org.eclipse.dawnsci.plotting.api.trace.MetadataPlotUtils;
+import org.eclipse.dawnsci.plotting.api.trace.PaletteEvent;
 import org.eclipse.january.dataset.IDataset;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.dialogs.Dialog;
@@ -49,6 +51,8 @@ import org.jzy3d.plot3d.transform.squarifier.YXSquarifier;
 import org.jzy3d.plot3d.transform.squarifier.YZSquarifier;
 import org.jzy3d.plot3d.transform.squarifier.ZXSquarifier;
 import org.jzy3d.plot3d.transform.squarifier.ZYSquarifier;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.jogamp.newt.event.MouseAdapter;
 import com.jogamp.newt.event.MouseEvent;
@@ -57,6 +61,8 @@ import com.jogamp.newt.swt.NewtCanvasSWT;
 public class JZY3DPlotViewer extends IPlottingSystemViewer.Stub<Composite> {
 	
 	private static final String ACTION_ID = "org.dawnsci.jzy3.jzy3dplotviewer.actions";
+	
+	private static final Logger logger = LoggerFactory.getLogger(JZY3DPlotViewer.class);
 	
 	private Chart chart;
 	private Composite control;
@@ -80,11 +86,13 @@ public class JZY3DPlotViewer extends IPlottingSystemViewer.Stub<Composite> {
 
 				@Override
 				public void mouseClicked(MouseEvent e) {
+					
 					if (!JZY3DPlotViewer.this.getControl().isFocusControl()) {
 						JZY3DPlotViewer.this.setFocus();
 					}
 
 				}
+
 			});
 			
 			NewtCanvasSWT canvas = ((CanvasNewtSWT)chart.getCanvas()).getCanvas();
@@ -95,15 +103,36 @@ public class JZY3DPlotViewer extends IPlottingSystemViewer.Stub<Composite> {
 					if (event.type == SWT.FocusOut) {
 						canvas.getNEWTChild().setVisible(false);
 						canvas.getNEWTChild().setVisible(true);
+						logger.debug("Manual focus out");
 					}
 					
 				}
 			});
 		}
 		
+		chart.getCanvas().addMouseController(new MouseAdapter() {
+
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				if (e.getClickCount()>1) {
+					chart.resumeAnimator();
+				}
+			}
+			
+			@Override
+			 public void mousePressed(final MouseEvent e) {
+				chart.resumeAnimator();
+			 }
+			 @Override
+			 public void mouseReleased(final MouseEvent e) {
+				 chart.pauseAnimator();
+			 }
+		});
+		
 		
 		chart.addKeyboardCameraController();
 		chart.addMouseCameraController();
+		chart.pauseAnimator();
 		chart.render();
 		
 		createToolbar();
@@ -348,11 +377,15 @@ public class JZY3DPlotViewer extends IPlottingSystemViewer.Stub<Composite> {
 		}
 		
 		if (trace instanceof Abstract2DJZY3DTrace) {
-			chart.pauseAnimator();
 			chart.getView().setBoundMode(ViewBoundMode.AUTO_FIT);
 			((Abstract2DJZY3DTrace) trace).setPalette(getPreferenceStore().getString(BasePlottingConstants.COLOUR_SCHEME));
+			((Abstract2DJZY3DTrace) trace).addPaletteListener(new IPaletteListener.Stub() {
+				
+				protected void updateEvent(PaletteEvent evt) {
+					chart.render();
+				}
+			});
 			chart.getScene().add(((Abstract2DJZY3DTrace)trace).getShape(),true);
-			chart.resumeAnimator();
 			return true;
 		}
 		
@@ -363,7 +396,6 @@ public class JZY3DPlotViewer extends IPlottingSystemViewer.Stub<Composite> {
 	@Override
 	public void removeTrace(ITrace trace) {
 		if (trace instanceof Abstract2DJZY3DTrace) {
-			chart.pauseAnimator();
 
 			AbstractDrawable s = ((Abstract2DJZY3DTrace)trace).getShape();
 
@@ -449,8 +481,6 @@ public class JZY3DPlotViewer extends IPlottingSystemViewer.Stub<Composite> {
 	public void clearTraces() {
 		Graph graph = chart.getScene().getGraph();
 		List<AbstractDrawable> all = graph.getAll();
-		
-		chart.pauseAnimator();
 		
 		for (AbstractDrawable a : all) {
 			if (a instanceof IGLBindedResource) {
