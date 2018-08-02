@@ -151,6 +151,8 @@ public class PlotController implements IPlotController, ILoadedFileInitialiser {
 	
 	private IPlotMode currentMode;
 	
+	private boolean modeSwitching = false;
+	
 	private IPlotDataModifier[] modifiers = new IPlotDataModifier[]{ new PlotDataModifierStack()};
 	private IPlotDataModifier currentModifier;
 	
@@ -505,6 +507,8 @@ public class PlotController implements IPlotController, ILoadedFileInitialiser {
 	
 	@Override
 	public void forceReplot() {
+		//should not force a replot while mode is switching
+		if (modeSwitching) return;
 		final List<DataOptions> state = fileController.getImmutableFileState();
 		//update plot
 		updatePlotStateInJob(state, currentMode);
@@ -517,20 +521,25 @@ public class PlotController implements IPlotController, ILoadedFileInitialiser {
 	public void switchPlotMode(IPlotMode mode, DataOptions dOption) {
 		if (mode == currentMode) return;
 		
-		getPlottingSystem().reset();
-		getPlottingSystem().setTitle("");
-		
-		currentMode = mode;
-		PlottableObject po = dOption.getPlottableObject();
-		NDimensions nd = po.getNDimensions();
-		nd.setOptions(currentMode.getOptions());
-		
-		dOption.setPlottableObject(new PlottableObject(currentMode, nd));
-		
-		updateFileState(dOption,currentMode);
-		final List<DataOptions> state = fileController.getImmutableFileState();
-		//update plot
-		updatePlotStateInJob(state, currentMode);
+		try {
+			modeSwitching = true;
+			getPlottingSystem().reset();
+			getPlottingSystem().setTitle("");
+			
+			currentMode = mode;
+			PlottableObject po = dOption.getPlottableObject();
+			NDimensions nd = po.getNDimensions();
+			nd.setOptions(currentMode.getOptions());
+			
+			dOption.setPlottableObject(new PlottableObject(currentMode, nd));
+			
+			updateFileState(dOption,currentMode);
+			final List<DataOptions> state = fileController.getImmutableFileState();
+			//update plot
+			updatePlotStateInJob(state, currentMode);
+		} finally {
+			modeSwitching = false;
+		}
 		
 		for (PlotModeChangeEventListener l : listeners) l.plotModeChanged();
 	}
