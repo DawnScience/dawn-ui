@@ -340,13 +340,12 @@ class DataReduction2DToolSpectraTableComposite extends DataReduction2DToolObserv
 		public void run() {
 			TableItem[] selection = spectraTable.getSelection();
 			Arrays.sort(selection, tableItemComparator);
-			IObservableList spectraRegionList = toolPageModel.getSpectraRegionTableComposite().getSpectraRegionList();
+			IObservableList<DataReduction2DToolSpectraRegionDataNode> spectraRegionList = toolPageModel.getSpectraRegionTableComposite().getSpectraRegionList();
 			Arrays.stream(selection).forEachOrdered(item -> {
 				DataReduction2DToolSpectrumDataNode spectrumDataNode = (DataReduction2DToolSpectrumDataNode) item.getData(SPECTRUM_NODE);
 				int index = spectrumDataNode.getIndex();
 				// check if this node is not already within a region!
-				for (Object data : spectraRegionList) {
-					DataReduction2DToolSpectraRegionDataNode node = (DataReduction2DToolSpectraRegionDataNode) data;
+				for (DataReduction2DToolSpectraRegionDataNode node : spectraRegionList) {
 					int start = node.getStart().getIndex();
 					int end = node.getEnd().getIndex();
 					if (index >= start && index <= end) {
@@ -393,19 +392,18 @@ class DataReduction2DToolSpectraTableComposite extends DataReduction2DToolObserv
 	}
 
 	private boolean validateRegion(DataReduction2DToolRegionData newRegion) {
-		IObservableList spectraRegionList = toolPageModel.getSpectraRegionTableComposite().getSpectraRegionList();
+		IObservableList<DataReduction2DToolSpectraRegionDataNode> spectraRegionList = toolPageModel.getSpectraRegionTableComposite().getSpectraRegionList();
 		
 		int newStart = newRegion.getStartIndex();
 		int newEnd = newRegion.getEndIndex();
 		
-		for (Object data : spectraRegionList) {
-				DataReduction2DToolSpectraRegionDataNode node = (DataReduction2DToolSpectraRegionDataNode) data;
-				int start = node.getStart().getIndex();
-				int end = node.getEnd().getIndex();
-				if (newEnd >= start && newStart <= end) {
-					DataReduction2DToolHelper.showWarning("Cannot add region with bounds " + Integer.toString(newStart) + ":" + Integer.toString(newEnd), "These indices are already in use by " + node.getRegion().getName() + ". Delete the region first and try again.");
-					return false;
-				}
+		for (DataReduction2DToolSpectraRegionDataNode node : spectraRegionList) {
+			int start = node.getStart().getIndex();
+			int end = node.getEnd().getIndex();
+			if (newEnd >= start && newStart <= end) {
+				DataReduction2DToolHelper.showWarning("Cannot add region with bounds " + Integer.toString(newStart) + ":" + Integer.toString(newEnd), "These indices are already in use by " + node.getRegion().getName() + ". Delete the region first and try again.");
+				return false;
+			}
 		}
 		return true;
 	}

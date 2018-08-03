@@ -12,8 +12,7 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import org.dawb.common.ui.widgets.ActionBarWrapper;
-import org.eclipse.core.databinding.observable.list.IListChangeListener;
-import org.eclipse.core.databinding.observable.list.ListChangeEvent;
+import org.eclipse.core.databinding.observable.list.ListDiff;
 import org.eclipse.core.databinding.observable.list.ListDiffVisitor;
 import org.eclipse.dawnsci.analysis.dataset.slicer.SliceFromSeriesMetadata;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
@@ -66,6 +65,7 @@ import org.eclipse.ui.part.FileEditorInput;
 public class DataReduction2DTool extends AbstractToolPage implements IRegionListener, ITraceListener {
 
 	private static final int MAX_DISPLAYED_TRACES = 20;
+	private static final int ADDED_ALPHA_FOR_SELECTED_VALUE = 20;
 	private SashForm rootComposite;
 	private IPlottingSystem<Composite> plottingSystem;
 	private IImageTrace imageTrace;
@@ -162,6 +162,7 @@ public class DataReduction2DTool extends AbstractToolPage implements IRegionList
 		plottingSystem.repaint();
 	}
 	
+	@SuppressWarnings("unchecked")
 	private void doBinding() {
 		spectraTableComposite.getSpectraTable().addSelectionListener(new SelectionListener() {
 			@Override
@@ -208,33 +209,30 @@ public class DataReduction2DTool extends AbstractToolPage implements IRegionList
 			}
 		});
 		
-		spectraRegionTableComposite.getSelectedRegionSpectraList().addListChangeListener(new IListChangeListener() {
-			private static final int ADDED_ALPHA_FOR_SELECTED_VALUE = 20;
-			@Override
-			public void handleListChange(ListChangeEvent event) {
-				event.diff.accept(new ListDiffVisitor() {
-					@Override
-					public void handleRemove(int index, Object element) {
-						IRegion region = ((DataReduction2DToolSpectraRegionDataNode) element).getRegion();
-						if (region.getAlpha() > 20) {
-							region.setAlpha(region.getAlpha() - ADDED_ALPHA_FOR_SELECTED_VALUE);
-						}
-						DataReduction2DTool.this.getPlottingSystem().repaint();
+		spectraRegionTableComposite.getSelectedRegionSpectraList().addListChangeListener(event ->
+			// circumvent eclipse bug https://bugs.eclipse.org/bugs/show_bug.cgi?id=497788
+			((ListDiff<DataReduction2DToolSpectraRegionDataNode>) event.diff).accept(new ListDiffVisitor<DataReduction2DToolSpectraRegionDataNode>() {
+				@Override
+				public void handleRemove(int index, DataReduction2DToolSpectraRegionDataNode element) {
+					IRegion region = element.getRegion();
+					if (region.getAlpha() > 20) {
+						region.setAlpha(region.getAlpha() - ADDED_ALPHA_FOR_SELECTED_VALUE);
 					}
+					DataReduction2DTool.this.getPlottingSystem().repaint();
+				}
 
-					@Override
-					public void handleAdd(int index, Object element) {
-						IRegion region = ((DataReduction2DToolSpectraRegionDataNode) element).getRegion();
-						if (region.getAlpha() < 255 - ADDED_ALPHA_FOR_SELECTED_VALUE) {
-							region.setAlpha(region.getAlpha() + ADDED_ALPHA_FOR_SELECTED_VALUE);
-						} else {
-							region.setAlpha(255);
-						}
-						DataReduction2DTool.this.getPlottingSystem().repaint();
+				@Override
+				public void handleAdd(int index, DataReduction2DToolSpectraRegionDataNode element) {
+					IRegion region = element.getRegion();
+					if (region.getAlpha() < 255 - ADDED_ALPHA_FOR_SELECTED_VALUE) {
+						region.setAlpha(region.getAlpha() + ADDED_ALPHA_FOR_SELECTED_VALUE);
+					} else {
+						region.setAlpha(255);
 					}
-				});
-			}
-		});
+					DataReduction2DTool.this.getPlottingSystem().repaint();
+				}
+			})
+		);
 
 		spectraRegionTableComposite.addPropertyChangeListener(DataReduction2DToolSpectraRegionComposite.SPECTRA_REGION_TRACE_SHOULD_ADD, evt -> {
 			ignoreCheckedRegionListener = true;
@@ -252,11 +250,9 @@ public class DataReduction2DTool extends AbstractToolPage implements IRegionList
 				ignoreCheckedRegionListener = false;
 				return;
 			}
-			@SuppressWarnings("unchecked")
-			Set<DataReduction2DToolSpectraRegionDataNode> diffAdditions = event.diff.getAdditions();
+			Set<? extends DataReduction2DToolSpectraRegionDataNode> diffAdditions = event.diff.getAdditions();
 			diffAdditions.forEach(DataReduction2DTool.this::addTracesForRegion);
-			@SuppressWarnings("unchecked")
-			Set<DataReduction2DToolSpectraRegionDataNode> diffRemovals = event.diff.getRemovals();
+			Set<? extends DataReduction2DToolSpectraRegionDataNode> diffRemovals = event.diff.getRemovals();
 			diffRemovals.forEach(DataReduction2DTool.this::removeTracesForRegion);
 		});
 	}
