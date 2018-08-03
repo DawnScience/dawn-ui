@@ -193,7 +193,7 @@ class DataReduction2DToolModel extends DataReduction2DToolObservableModel {
 		List<RangeData> rangeDataList = new ArrayList<>();
 		for (DataReduction2DToolSpectraRegionDataNode node : (DataReduction2DToolSpectraRegionDataNode[]) spectraRegionTableComposite.getCheckedRegionSpectraList().toArray(new DataReduction2DToolSpectraRegionDataNode[0])) {
 			if (node instanceof DataReduction2DToolAvgSpectraRegionDataNode) {
-				rangeDataList.add(new RangeData(getNewIndex(node.getStart().getIndex(), deletedIndices), getNewIndex(node.getEnd().getIndex(), deletedIndices)));
+				rangeDataList.add(new RangeData(node.getStart().getIndex(), node.getEnd().getIndex()));
 			}
 		}
 		rangeDataList.sort(null);
@@ -236,18 +236,6 @@ class DataReduction2DToolModel extends DataReduction2DToolObservableModel {
 			return startIndex + ":" + endIndex;
 		}
 
-		public static RangeData[] toRangeDataList(String commaSepString) throws Exception {
-			String[] rangesStr = commaSepString.split(",");
-			RangeData[] rangeData = new RangeData[rangesStr.length];
-			for (int i = 0; i < rangesStr.length; i++) {
-				String[] rangeStartEnd = rangesStr[i].split(":");
-				rangeData[i] = new RangeData(Integer.parseInt(rangeStartEnd[0]), Integer.parseInt(rangeStartEnd[1]));
-			}
-			Arrays.sort(rangeData);
-			assertValidRangeData(rangeData);
-			return rangeData;
-		}
-
 		public static void assertValidRangeData(RangeData[] rangeData) throws Exception {
 			if (rangeData.length <= 1)
 				return;
@@ -284,38 +272,6 @@ class DataReduction2DToolModel extends DataReduction2DToolObservableModel {
 		}
 	}
 	
-	public static int getNewIndex(int oldIndex, List<Integer> deletedIndices) {
-		if (deletedIndices == null || deletedIndices.isEmpty())
-			return oldIndex;
-		
-		int newIndex = oldIndex;
-		for (int deletedIndex : deletedIndices) {
-			if (deletedIndex < oldIndex)
-				newIndex--;
-			else
-				break;
-		}
-		if (getOldIndex(newIndex, deletedIndices) != oldIndex)
-			logger.debug("wrong index!!! {} vs {}", getOldIndex(newIndex, deletedIndices), oldIndex);
-		return newIndex;
-	}
-	
-	public static int getOldIndex(int newIndex, List<Integer> deletedIndices) {
-		
-		if (deletedIndices == null || deletedIndices.isEmpty())
-			return newIndex;
-		
-		int oldIndex = newIndex;
-		for (int deletedIndex : deletedIndices) {
-			if (deletedIndex <= oldIndex)
-				oldIndex++;
-			else
-				break;
-		}
-		
-		return oldIndex;
-	}
-
 	private Dataset[] getReducedAxes(ILazyDataset[] rawAxes, List<RangeData> rangeDataList, List<Integer> deletedIndices) {
 		List<Dataset> rv = new ArrayList<>();
 		int counter = 0;
@@ -467,6 +423,8 @@ class DataReduction2DToolModel extends DataReduction2DToolObservableModel {
 					default:
 						return null;
 					}
+					if (avgDataItem.getSize() == 0)
+						continue;
 					avgDataItem.setShape(1, noOfChannels);
 					if (avgInfo.getStartIndex() - j > 0) {
 						Dataset sliceToAppend = getProperSlice(
@@ -521,16 +479,17 @@ class DataReduction2DToolModel extends DataReduction2DToolObservableModel {
 		if (stop == null)
 			stop = new int[]{data.getShapeRef()[0], data.getShapeRef()[1]};
 		
-		final int[] startFinal = start;
-		final int[] stopFinal = stop;
-		
+		final int startFinal = start[0];
+		final int stopFinal = stop[0];
 		// start with zeros
-		long badIndices = deletedIndices.stream().filter(index -> index >= startFinal[0] && index < stopFinal[0]).count();
+		long badIndices = deletedIndices.stream().filter(index -> index >= startFinal && index < stopFinal).count();
+
 		Dataset rv = DatasetFactory.zeros(data.getClass(), stop[0] - start[0] - (int) badIndices, stop[1] - start[1]);
 		
-		// there may be a slightly more efficient way to do this, but it will do for now...
+		if (rv.getSize() == 0)
+			return rv;
 		int j = 0;
-		for (int i = start[0] ; i < stop[0] ; i++) {
+		for (int i = startFinal ; i < stopFinal ; i++) {
 			if (deletedIndices.contains(i))
 				continue;
 			rv.setSlice(data.getSlice(new int[]{i, start[1]}, new int[]{i + 1, stop[1]}, null), new int[]{j, start[1]}, new int[]{j + 1, stop[1]}, null);
