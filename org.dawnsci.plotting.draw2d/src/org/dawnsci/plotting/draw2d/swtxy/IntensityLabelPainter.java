@@ -8,9 +8,6 @@
  */
 package org.dawnsci.plotting.draw2d.swtxy;
 
-import java.text.DecimalFormat;
-import java.text.NumberFormat;
-
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.axis.IAxis;
 import org.eclipse.dawnsci.plotting.api.trace.IImageTrace;
@@ -34,12 +31,10 @@ class IntensityLabelPainter {
 	
 	private IImageTrace image;
 	private IPlottingSystem<?> system;
-	private NumberFormat format;
 
 	IntensityLabelPainter(IPlottingSystem<?> system, IImageTrace image) {
 		this.system = system;
 		this.image  = image;
-		this.format = DecimalFormat.getNumberInstance();
 	}
 
 	/**
@@ -72,7 +67,6 @@ class IntensityLabelPainter {
 			final int yLower = Math.max(0, (int)Math.floor(Math.min(yAxis.getLower(), yAxis.getUpper())));
 			final int yUpper = Math.min(shape[0], (int) Math.ceil(Math.max(yAxis.getLower(), yAxis.getUpper())));
 
-			data.setStringFormat(format);
 			for (int x = xLower; x < xUpper; x++) {
 				for (int y = yLower; y < yUpper; y++) {
 					// TODO FIXME check rotations.
