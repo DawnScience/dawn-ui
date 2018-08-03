@@ -2,7 +2,7 @@ package org.dawnsci.plotting.tools.reduction;
 
 import org.eclipse.dawnsci.plotting.api.trace.ITrace;
 
-class DataReduction2DToolSpectrumDataNode {
+class DataReduction2DToolSpectrumDataNode implements Comparable<DataReduction2DToolSpectrumDataNode>{
 	private final int index;
 	private final String name;
 	private final double[] axisValues;
@@ -41,5 +41,17 @@ class DataReduction2DToolSpectrumDataNode {
 	
 	public double[] getAxisValues() {
 		return axisValues;
+	}
+
+	@Override
+	public int compareTo(DataReduction2DToolSpectrumDataNode o) {
+		return this.index - o.index;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (obj == null)
+			return false;
+		return this.index == ((DataReduction2DToolSpectrumDataNode) obj).index;
 	}
 }

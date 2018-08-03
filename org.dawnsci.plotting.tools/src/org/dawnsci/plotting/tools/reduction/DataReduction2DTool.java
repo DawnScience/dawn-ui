@@ -175,6 +175,7 @@ public class DataReduction2DTool extends AbstractToolPage implements IRegionList
 						newSelection.add(spectrum);
 					}
 				}
+				newSelection.sort(null);
 				// currently selected spectra have been identified
 				// remove those that have been deselected
 				BusyIndicator.showWhile(Display.getCurrent(), () -> {
@@ -192,6 +193,12 @@ public class DataReduction2DTool extends AbstractToolPage implements IRegionList
 						}
 					}
 					if (newSelection.size() > MAX_DISPLAYED_TRACES) {
+						for (DataReduction2DToolSpectrumDataNode spectrum : newSelection.subList(MAX_DISPLAYED_TRACES, newSelection.size())) {
+							if (spectrum.getTrace() != null && !plottingSystem.isDisposed()) {
+								removeFromPlottingSystem((ILineTrace) spectrum.getTrace());
+								spectrum.clearTrace();
+							}
+						}
 						statusLabel.setText(String.format("Only displaying first %d traces!", MAX_DISPLAYED_TRACES));
 						statusLabel.setForeground(Display.getCurrent().getSystemColor(SWT.COLOR_RED));
 					} else {
