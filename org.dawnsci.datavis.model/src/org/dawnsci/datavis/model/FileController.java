@@ -390,7 +390,7 @@ public class FileController implements IFileController {
 		this.onlySignals.set(onlySignals);
 		loadedFiles.getLoadedFiles().stream().forEach(f-> f.setOnlySignals(onlySignals));
 		
-		fireStateChangeListeners(true, true,null, null);
+		fireStateChangeListeners(false, false,null, null);
 	}
 	
 	/* (non-Javadoc)

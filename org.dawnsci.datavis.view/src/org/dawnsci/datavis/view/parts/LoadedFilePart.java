@@ -24,6 +24,7 @@ import org.dawnsci.datavis.model.IRefreshable;
 import org.dawnsci.datavis.model.LoadedFile;
 import org.dawnsci.datavis.view.Activator;
 import org.dawnsci.datavis.view.DataVisSelectionUtils;
+import org.dawnsci.datavis.view.preference.DataVisPreferenceConstants;
 import org.dawnsci.datavis.view.quickfile.IQuickFileWidgetListener;
 import org.dawnsci.datavis.view.quickfile.QuickFileWidget;
 import org.eclipse.core.resources.IFile;
@@ -42,6 +43,7 @@ import org.eclipse.e4.ui.workbench.modeling.ESelectionService;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.layout.TableColumnLayout;
+import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.util.LocalSelectionTransfer;
 import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.CheckboxCellEditor;
@@ -183,6 +185,11 @@ public class LoadedFilePart {
 		comboForm.bottom = new FormAttachment(100,0);
 		comboForm.height = 32;
 		qfw.setLayoutData(comboForm);
+		
+		IPreferenceStore ps = Activator.getDefault().getPreferenceStore();
+		
+		boolean signalsOnly = ps.getBoolean(DataVisPreferenceConstants.SIGNALS_ONLY);
+		fileController.setOnlySignals(signalsOnly);
 
 
 		List<String> p = recentPlaces.getRecentPlaces();
@@ -506,7 +513,7 @@ public class LoadedFilePart {
 			s = DataVisSelectionUtils.getFromSelection(selection, LoadedFile.class);
 		}
 		
-		if (!s.isEmpty() && s.get(0) instanceof IRefreshable) {
+		if (!s.isEmpty()) {
 			selectionService.setSelection(new StructuredSelection(selection.toArray()));
 		}
 	}
@@ -517,6 +524,9 @@ public class LoadedFilePart {
 		fileController.detachLive();
 		ticked.dispose();
 		unticked.dispose();
+		
+		IPreferenceStore ps = Activator.getDefault().getPreferenceStore();
+		ps.setValue(DataVisPreferenceConstants.SIGNALS_ONLY,fileController.isOnlySignals());
 	}
 
 	@Focus

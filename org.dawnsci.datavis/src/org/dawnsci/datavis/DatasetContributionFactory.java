@@ -25,7 +25,6 @@ public class DatasetContributionFactory extends ExtensionContributionFactory {
 		
 		final IFileController fileController = bundleContext.getService(bundleContext.getServiceReference(IFileController.class));
 		
-
 		search.addMenuListener(new IMenuListener() {
 
 			@Override
