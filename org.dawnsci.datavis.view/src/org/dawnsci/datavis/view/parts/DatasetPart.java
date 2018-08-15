@@ -15,6 +15,8 @@ import org.dawnsci.datavis.model.IPlotController;
 import org.dawnsci.datavis.model.IRefreshable;
 import org.dawnsci.datavis.model.ISliceChangeListener;
 import org.dawnsci.datavis.model.LoadedFile;
+import org.dawnsci.datavis.model.NDimensions;
+import org.dawnsci.datavis.model.PlottableObject;
 import org.dawnsci.datavis.model.SliceChangeEvent;
 import org.dawnsci.datavis.view.DataVisSelectionUtils;
 import org.dawnsci.datavis.view.table.DataConfigurationTable;
@@ -142,7 +144,16 @@ public class DatasetPart {
 						DataOptions dataOptions = DataVisSelectionUtils.getFromSelection(viewer.getStructuredSelection(), DataOptions.class).get(0);
 						if (dataOptions.isSelected() && dataOptions.getParent().isSelected()) {
 							plotController.switchPlotMode((IPlotMode)ob,dataOptions);
+						} else {
+							PlottableObject po = dataOptions.getPlottableObject();
+							NDimensions nd = po.getNDimensions();
+							nd.setOptions(((IPlotMode)ob).getOptions());
+							
+							dataOptions.setPlottableObject(new PlottableObject((IPlotMode)ob, nd));
 						}
+						
+						
+						
 						table.setInput(dataOptions.getPlottableObject().getNDimensions());
 						if (((IPlotMode)ob).supportsMultiple()) {
 							table.setMaxSliceNumber(50);
@@ -239,6 +250,15 @@ public class DatasetPart {
 				break;
 			}
 		}
+		
+		if (option == null && !viewer.getStructuredSelection().isEmpty()) {
+			List<DataOptions> d = DataVisSelectionUtils.getFromSelection(viewer.getStructuredSelection(), DataOptions.class);
+			if (!d.isEmpty() && file.getDataOptions().contains(d.get(0))) {
+				option = d.get(0);
+			}
+			
+		}
+		
 
 		if (option == null && file.getDataOptions().size() != 0) {
 			option = file.getDataOptions().get(0);
