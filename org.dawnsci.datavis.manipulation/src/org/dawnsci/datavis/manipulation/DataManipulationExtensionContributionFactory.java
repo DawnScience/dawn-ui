@@ -80,8 +80,12 @@ public class DataManipulationExtensionContributionFactory extends ExtensionContr
 
 						IDataset comb = buildCombined();
 
-						CombineDialog c = new CombineDialog(Display.getDefault().getActiveShell(), comb);
-						c.open();
+						if (comb != null ) {
+							CombineDialog c = new CombineDialog(Display.getDefault().getActiveShell(), comb);
+							c.open();
+						} else {
+							MessageDialog.openError(Display.getDefault().getActiveShell(), "No valid data.", "No valid data was found to concatenate.\n(1D slices are currently not supported).");
+						}
 					}
 				};
 
@@ -95,6 +99,11 @@ public class DataManipulationExtensionContributionFactory extends ExtensionContr
 
 						IDataset comb = buildCombined();
 
+						if (comb == null) {
+							MessageDialog.openError(Display.getDefault().getActiveShell(), "No valid data.", "No valid data was found to average.\n(1D slices are currently not supported).");
+							return;
+						}
+						
 						Dataset d = DatasetUtils.convertToDataset(comb);
 						Dataset mean = d.mean(0, true);
 						mean.squeeze();
@@ -185,6 +194,11 @@ public class DataManipulationExtensionContributionFactory extends ExtensionContr
 						d.setContentProvider(new ArrayContentProvider());
 						d.setLabelProvider(new LabelProvider());
 
+						if (xy == null) {
+							MessageDialog.openError(Display.getDefault().getActiveShell(), "No valid data.", "No valid data was found to subtract.\n(1D slices are currently not supported).");
+							return;
+						}
+						
 						d.setInput(xy.toArray());
 						
 						if (Dialog.OK != d.open()) {
