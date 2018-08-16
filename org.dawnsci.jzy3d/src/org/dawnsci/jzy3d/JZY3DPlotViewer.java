@@ -39,6 +39,7 @@ import org.jzy3d.chart.Chart;
 import org.jzy3d.chart.Settings;
 import org.jzy3d.chart.swt.CanvasNewtSWT;
 import org.jzy3d.chart.swt.SWTChartComponentFactory;
+import org.jzy3d.maths.BoundingBox3d;
 import org.jzy3d.plot3d.primitives.AbstractDrawable;
 import org.jzy3d.plot3d.primitives.IGLBindedResource;
 import org.jzy3d.plot3d.rendering.canvas.Quality;
@@ -126,6 +127,11 @@ public class JZY3DPlotViewer extends IPlottingSystemViewer.Stub<Composite> {
 			 @Override
 			 public void mouseReleased(final MouseEvent e) {
 				 chart.pauseAnimator();
+			 }
+			 
+			 @Override
+			 public void mouseWheelMoved(final MouseEvent e) {
+				 chart.render();
 			 }
 		});
 		
@@ -377,7 +383,6 @@ public class JZY3DPlotViewer extends IPlottingSystemViewer.Stub<Composite> {
 		}
 		
 		if (trace instanceof Abstract2DJZY3DTrace) {
-			chart.getView().setBoundMode(ViewBoundMode.AUTO_FIT);
 			((Abstract2DJZY3DTrace) trace).setPalette(getPreferenceStore().getString(BasePlottingConstants.COLOUR_SCHEME));
 			((Abstract2DJZY3DTrace) trace).addPaletteListener(new IPaletteListener.Stub() {
 				
@@ -386,6 +391,7 @@ public class JZY3DPlotViewer extends IPlottingSystemViewer.Stub<Composite> {
 				}
 			});
 			chart.getScene().add(((Abstract2DJZY3DTrace)trace).getShape(),true);
+			chart.getView().setBoundMode(ViewBoundMode.AUTO_FIT);
 			return true;
 		}
 		
@@ -406,6 +412,7 @@ public class JZY3DPlotViewer extends IPlottingSystemViewer.Stub<Composite> {
 			chart.getScene().remove(((Abstract2DJZY3DTrace)trace).getShape(),false);
 
 		}
+		
 	}
 	
 	@Override
@@ -490,9 +497,10 @@ public class JZY3DPlotViewer extends IPlottingSystemViewer.Stub<Composite> {
 		}
 		chart.render();
 		
-		for (AbstractDrawable a : all) {
-			graph.remove(a);
-		}
+		all.clear();
+		
+		chart.getView().setBoundManual(new BoundingBox3d(0f,1f,0f,1f,0f,1f));
+		
 		chart.render();
 	}
 	

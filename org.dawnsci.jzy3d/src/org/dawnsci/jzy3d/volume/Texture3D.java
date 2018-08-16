@@ -121,6 +121,10 @@ public class Texture3D extends AbstractDrawable implements IGLBindedResource,IMu
 			mount(gl);
 		}
 		
+		 gl.glEnable(GL2.GL_TEXTURE_1D);
+	     gl.glEnable(GL2.GL_TEXTURE_3D);
+		gl.glActiveTexture(GL.GL_TEXTURE0);
+		
 		colormapTexure.update(gl);
 		
 		doTransform(gl, glu, cam);
@@ -178,6 +182,9 @@ public class Texture3D extends AbstractDrawable implements IGLBindedResource,IMu
 		
        shapeVBO.draw(gl, glu, cam);
        shaderProgram.unbind(gl.getGL2());
+       gl.glDisable(GL2.GL_TEXTURE_1D);
+       gl.glDisable(GL2.GL_TEXTURE_3D);
+       gl.glActiveTexture(GL.GL_TEXTURE0);
        
        if (disposed) {
     	   gl.glDeleteTextures(1, new int[] {texID}, 0);

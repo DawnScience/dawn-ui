@@ -1,23 +1,15 @@
 package org.dawnsci.jzy3d.vbo;
 
-import java.nio.IntBuffer;
-
 import org.dawnsci.jzy3d.glsl.ColormapTexture;
 import org.dawnsci.jzy3d.glsl.GLSLProgram;
 import org.dawnsci.jzy3d.glsl.ShaderFilePair;
-import org.jzy3d.colors.Color;
 import org.jzy3d.colors.ColorMapper;
 import org.jzy3d.colors.IMultiColorable;
-import org.jzy3d.io.IGLLoader;
-import org.jzy3d.maths.BoundingBox3d;
-import org.jzy3d.plot3d.primitives.vbo.buffers.FloatVBO;
 import org.jzy3d.plot3d.primitives.vbo.drawable.DrawableVBO;
 import org.jzy3d.plot3d.rendering.view.Camera;
 
-import com.jogamp.common.nio.Buffers;
 import com.jogamp.opengl.GL;
 import com.jogamp.opengl.GL2;
-import com.jogamp.opengl.GL2GL3;
 import com.jogamp.opengl.glu.GLU;
 
 public class ShaderWaterfallDrawableVBO extends DrawableVBO implements IMultiColorable {
@@ -58,6 +50,7 @@ public class ShaderWaterfallDrawableVBO extends DrawableVBO implements IMultiCol
 //		super.draw(gl, glu, cam);
 		shaderProgram.unbind(gl.getGL2());
 		gl.getGL2().glEnable(GL.GL_BLEND);
+		gl.glDisable(GL2.GL_TEXTURE_1D);
 		
 		if (disposed) {
 			gl.glDeleteBuffers(1, arrayName, 0);
