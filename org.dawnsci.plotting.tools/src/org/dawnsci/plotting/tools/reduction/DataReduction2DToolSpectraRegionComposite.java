@@ -1,8 +1,6 @@
 package org.dawnsci.plotting.tools.reduction;
 
 import java.beans.PropertyChangeListener;
-import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 
@@ -10,6 +8,7 @@ import org.dawnsci.plotting.tools.Activator;
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.databinding.beans.BeanProperties;
 import org.eclipse.core.databinding.observable.list.IObservableList;
+import org.eclipse.core.databinding.observable.list.ListDiff;
 import org.eclipse.core.databinding.observable.list.ListDiffVisitor;
 import org.eclipse.core.databinding.observable.list.WritableList;
 import org.eclipse.core.databinding.observable.map.IObservableMap;
@@ -52,9 +51,9 @@ class DataReduction2DToolSpectraRegionComposite extends DataReduction2DToolObser
 
 	private final DataBindingContext dataBindingCtx = new DataBindingContext();
 
-	private final IObservableList  spectraRegionList = new WritableList(new ArrayList<DataReduction2DToolSpectraRegionDataNode>(), DataReduction2DToolSpectraRegionDataNode.class);
-	private final IObservableList selectedRegionSpectraList = new WritableList(new ArrayList<DataReduction2DToolSpectraRegionDataNode>(), DataReduction2DToolSpectraRegionDataNode.class);
-	private final IObservableSet checkedRegionSpectraList = new WritableSet(new HashSet<DataReduction2DToolSpectraRegionDataNode>(), DataReduction2DToolSpectraRegionDataNode.class);
+	private final IObservableList<DataReduction2DToolSpectraRegionDataNode>  spectraRegionList = new WritableList<>();
+	private final IObservableList<DataReduction2DToolSpectraRegionDataNode> selectedRegionSpectraList = new WritableList<>();
+	private final IObservableSet<DataReduction2DToolSpectraRegionDataNode> checkedRegionSpectraList = new WritableSet<>();
 
 	private final DataReduction2DToolModel toolPageModel;
 	
@@ -73,24 +72,25 @@ class DataReduction2DToolSpectraRegionComposite extends DataReduction2DToolObser
 		doBinding();
 	}
 	
-	public IObservableSet getCheckedRegionSpectraList() {
+	public IObservableSet<DataReduction2DToolSpectraRegionDataNode> getCheckedRegionSpectraList() {
 		return checkedRegionSpectraList;
 	}
 
-	public IObservableList getSelectedRegionSpectraList() {
+	public IObservableList<DataReduction2DToolSpectraRegionDataNode> getSelectedRegionSpectraList() {
 		return selectedRegionSpectraList;
 	}
 
-	public IObservableList getSpectraRegionList() {
+	public IObservableList<DataReduction2DToolSpectraRegionDataNode> getSpectraRegionList() {
 		return spectraRegionList;
 	}
 	
+	@SuppressWarnings("unchecked")
 	private void doBinding() {
 		spectraRegionList.addListChangeListener(event -> 
-			event.diff.accept(new ListDiffVisitor() {
+			// circumvent eclipse bug https://bugs.eclipse.org/bugs/show_bug.cgi?id=497788
+			((ListDiff<DataReduction2DToolSpectraRegionDataNode>) event.diff).accept(new ListDiffVisitor<DataReduction2DToolSpectraRegionDataNode>() {
 				@Override
-				public void handleRemove(int index, Object element) {
-					DataReduction2DToolSpectraRegionDataNode spectraRegion = (DataReduction2DToolSpectraRegionDataNode) element;
+				public void handleRemove(int index, DataReduction2DToolSpectraRegionDataNode spectraRegion) {
 					spectraRegion.getRegion().removeROIListener(spectraRegion);
 					spectraRegion.removePropertyChangeListener(DataReduction2DToolSpectraRegionDataNode.SPECTRA_CHANGED, spectraChangedListener);
 					if (checkedRegionSpectraList.contains(spectraRegion)) {
@@ -100,8 +100,7 @@ class DataReduction2DToolSpectraRegionComposite extends DataReduction2DToolObser
 				}
 
 				@Override
-				public void handleAdd(int index, Object element) {
-					DataReduction2DToolSpectraRegionDataNode spectraRegion = (DataReduction2DToolSpectraRegionDataNode) element;
+				public void handleAdd(int index, DataReduction2DToolSpectraRegionDataNode spectraRegion) {
 					DataReduction2DToolSpectraRegionComposite.this.firePropertyChange(SPECTRA_REGION_TRACE_SHOULD_ADD, null, spectraRegion);
 					spectraRegion.addPropertyChangeListener(DataReduction2DToolSpectraRegionDataNode.SPECTRA_CHANGED, spectraChangedListener);
 					checkedRegionSpectraList.add(spectraRegion);
@@ -153,6 +152,7 @@ class DataReduction2DToolSpectraRegionComposite extends DataReduction2DToolObser
 		colRegionDesc.getColumn().setText("Description");
 		colRegionDesc.getColumn().setWidth(60);
 
+		// 2018-08-03: it seems to me that not all of the observables/databinding eclipse API was updated for generics: the next couple of lines are a prime example of this... 
 		ObservableListContentProvider contentProvider = new ObservableListContentProvider();
 		IObservableSet knownElements = contentProvider.getKnownElements();
 
@@ -173,7 +173,7 @@ class DataReduction2DToolSpectraRegionComposite extends DataReduction2DToolObser
 				case 1: return Integer.toString(spectraRegionToolDataModel.getStart().getIndex());
 				case 2: return Integer.toString(spectraRegionToolDataModel.getEnd().getIndex());
 				case 3: return spectraRegionToolDataModel.toString();
-				default : return "Unkown column";
+				default : return "Unknown column";
 				}
 			}
 		});

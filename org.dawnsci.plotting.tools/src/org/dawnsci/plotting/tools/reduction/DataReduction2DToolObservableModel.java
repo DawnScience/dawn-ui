@@ -5,7 +5,7 @@ import java.beans.PropertyChangeSupport;
 
 /** Copy of uk.ac.gda.beans.ObservableModel */
 class DataReduction2DToolObservableModel {
-	private transient final PropertyChangeSupport changeSupport =
+	private final PropertyChangeSupport changeSupport =
 			new PropertyChangeSupport(this);
 
 	public void addPropertyChangeListener(PropertyChangeListener

@@ -85,8 +85,6 @@ class DataReduction2DToolSpectraRegionDataNode extends DataReduction2DToolObserv
 				firePropertyChange(END, null, this.getEnd());
 				roi.setPoint(0, firstIndex);
 				((RectangularROI) roi).setLengths(new double[]{boxRoi.getLength(0), lastIndex - firstIndex + 1});
-				System.err.println("Point: " + firstIndex);
-				System.err.println("Length " + (lastIndex - firstIndex + 1));
 				plotRegion.setROI(roi);
 				break;
 			}
