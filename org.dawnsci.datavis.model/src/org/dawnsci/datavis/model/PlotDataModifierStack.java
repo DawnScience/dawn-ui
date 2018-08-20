@@ -2,7 +2,6 @@ package org.dawnsci.datavis.model;
 
 import java.util.Arrays;
 
-import org.apache.commons.math3.genetics.NPointCrossover;
 import org.eclipse.dawnsci.analysis.dataset.roi.ROISliceUtils;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.axis.IAxis;

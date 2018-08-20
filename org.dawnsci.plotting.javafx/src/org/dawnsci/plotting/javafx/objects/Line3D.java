@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.dawnsci.plotting.javafx.axis.objects.JavaFXProperties;
-import org.dawnsci.plotting.javafx.axis.objects.JavaFXProperties.ColourProperties;
 
 import javafx.geometry.Point3D;
 import javafx.scene.paint.Color;

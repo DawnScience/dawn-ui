@@ -9,7 +9,6 @@
 package org.dawnsci.plotting.services;
 
 import org.eclipse.dawnsci.analysis.api.io.ILoaderService;
-import org.eclipse.dawnsci.plotting.api.histogram.IImageService;
 import org.eclipse.dawnsci.plotting.api.histogram.IPaletteService;
 
 public class ServiceLoader {

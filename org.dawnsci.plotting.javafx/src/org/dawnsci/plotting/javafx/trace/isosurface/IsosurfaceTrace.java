@@ -21,7 +21,6 @@ import javafx.scene.shape.MeshView;
 import javafx.scene.shape.TriangleMesh;
 
 import org.dawnsci.plotting.javafx.SceneDisplayer;
-import org.dawnsci.plotting.javafx.trace.Image3DTrace;
 import org.dawnsci.plotting.javafx.trace.JavafxTrace;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystemViewer;
 import org.eclipse.dawnsci.plotting.api.trace.IIsosurfaceTrace;

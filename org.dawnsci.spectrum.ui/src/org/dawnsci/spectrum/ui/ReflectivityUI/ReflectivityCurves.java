@@ -1,6 +1,5 @@
 package org.dawnsci.spectrum.ui.ReflectivityUI;
 import java.util.ArrayList;
-import java.util.Iterator;
 
 import org.dawb.common.ui.widgets.ActionBarWrapper;
 import org.eclipse.dawnsci.analysis.api.roi.IROI;

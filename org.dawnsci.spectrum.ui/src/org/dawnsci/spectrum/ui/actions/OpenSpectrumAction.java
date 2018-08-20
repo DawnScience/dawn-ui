@@ -10,8 +10,6 @@ package org.dawnsci.spectrum.ui.actions;
 
 
 import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
 
 import org.dawnsci.spectrum.ui.file.SpectrumFileManager;
 import org.eclipse.core.resources.IFile;

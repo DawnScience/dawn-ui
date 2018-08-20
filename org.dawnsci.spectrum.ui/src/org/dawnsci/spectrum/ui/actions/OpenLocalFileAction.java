@@ -10,7 +10,6 @@ package org.dawnsci.spectrum.ui.actions;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import org.dawnsci.spectrum.ui.file.SpectrumFileManager;

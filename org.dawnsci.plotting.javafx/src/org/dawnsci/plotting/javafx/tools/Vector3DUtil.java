@@ -4,11 +4,9 @@ import javax.vecmath.Matrix3d;
 
 import javafx.collections.ObservableList;
 import javafx.geometry.Point3D;
-import javafx.scene.Group;
 import javafx.scene.transform.NonInvertibleTransformException;
 import javafx.scene.transform.Rotate;
 import javafx.scene.transform.Transform;
-import javafx.scene.transform.Translate;
 
 /**
  * class to hold basic vector calculations used throughout the plugin

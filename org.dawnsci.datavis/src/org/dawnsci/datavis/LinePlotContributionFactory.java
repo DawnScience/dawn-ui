@@ -2,11 +2,8 @@ package org.dawnsci.datavis;
 
 import org.dawnsci.datavis.api.IPlotMode;
 import org.dawnsci.datavis.model.IPlotController;
-import org.dawnsci.datavis.model.PlotController;
 import org.dawnsci.datavis.model.PlotModeXY;
 import org.eclipse.jface.action.Action;
-import org.eclipse.jface.action.IMenuListener;
-import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.ui.menus.ExtensionContributionFactory;
 import org.eclipse.ui.menus.IContributionRoot;

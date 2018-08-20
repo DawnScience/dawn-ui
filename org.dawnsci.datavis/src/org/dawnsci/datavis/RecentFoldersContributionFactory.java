@@ -6,7 +6,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.dawnsci.datavis.api.IRecentPlaces;
-import org.dawnsci.datavis.model.IPlotController;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IMenuListener;

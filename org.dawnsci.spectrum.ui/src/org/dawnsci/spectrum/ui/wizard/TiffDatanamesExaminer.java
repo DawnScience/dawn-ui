@@ -1,12 +1,10 @@
 package org.dawnsci.spectrum.ui.wizard;
 
 import java.util.Arrays;
-import java.util.StringJoiner;
 
 import org.eclipse.dawnsci.analysis.api.io.IDataHolder;
 
 import uk.ac.diamond.scisoft.analysis.io.LoaderFactory;
-import java.util.StringJoiner;
 
 public class TiffDatanamesExaminer {
 	

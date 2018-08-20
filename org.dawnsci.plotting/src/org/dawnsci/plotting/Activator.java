@@ -8,10 +8,6 @@
  */
 package org.dawnsci.plotting;
 
-import java.util.Hashtable;
-
-import org.dawnsci.plotting.service.ClassLoaderService;
-import org.eclipse.dawnsci.analysis.api.IClassLoaderService;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.ui.plugin.AbstractUIPlugin;

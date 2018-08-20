@@ -5,11 +5,7 @@ import java.beans.PropertyChangeSupport;
 
 import org.eclipse.dawnsci.analysis.api.roi.IROI;
 import org.eclipse.dawnsci.analysis.api.roi.IRectangularROI;
-import org.eclipse.dawnsci.plotting.api.region.IRegion;
-import org.eclipse.january.dataset.AggregateDataset;
 import org.eclipse.january.dataset.IDataset;
-import org.eclipse.january.dataset.ILazyDataset;
-import org.eclipse.swt.widgets.Slider;
 
 public class ExampleModel {
 	

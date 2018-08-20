@@ -1,8 +1,7 @@
 package org.dawnsci.slicing.tools.volume;
 
 import org.dawnsci.datavis.api.ILazyPlotMode;
-import org.dawnsci.datavis.api.IPlotMode;
-import org.dawnsci.slicing.tools.hyper.IHyperTrace;
+
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.trace.ITrace;
 import org.eclipse.january.dataset.IDataset;
