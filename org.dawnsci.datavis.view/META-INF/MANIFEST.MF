@@ -39,3 +39,4 @@ Service-Component: OSGI-INF/*.xml
 Bundle-Activator: org.dawnsci.datavis.view.Activator
 Bundle-Vendor: Diamond Light Source
 Export-Package: org.dawnsci.datavis.view.parts
+Automatic-Module-Name: org.dawnsci.datavis.view

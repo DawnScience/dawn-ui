@@ -41,3 +41,4 @@ Export-Package: org.dawnsci.common.widgets,
  org.dawnsci.common.widgets.tree,
  org.dawnsci.common.widgets.utils
 Bundle-ClassPath: .
+Automatic-Module-Name: org.dawnsci.common.widgets

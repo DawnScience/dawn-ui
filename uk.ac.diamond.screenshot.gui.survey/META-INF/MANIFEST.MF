@@ -4,4 +4,5 @@ Bundle-Name: GuiSurvey
 Bundle-SymbolicName: uk.ac.diamond.screenshot.gui.survey;singleton:=true
 Bundle-Version: 1.0.0.qualifier
 Fragment-Host: uk.ac.diamond.screenshot.gui;bundle-version="1.0.0"
-Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Automatic-Module-Name: uk.ac.diamond.screenshot.gui.survey

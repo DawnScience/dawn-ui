@@ -21,10 +21,11 @@ Require-Bundle: org.eclipse.ui,
  org.dawb.common.util,
  org.eclipse.nebula.widgets.opal.checkboxgroup;bundle-version="1.0.0"
 Bundle-ActivationPolicy: lazy
-Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Import-Package: com.ibm.icu.util;version="54.1.1",
  org.apache.commons.io.filefilter;version="1.4.0",
  org.slf4j;version="[1.7.2,2.0.0)"
 Bundle-Vendor: Diamond Light Source
 Export-Package: org.dawnsci.spectrum.ui.file,
  org.dawnsci.spectrum.ui.processing
+Automatic-Module-Name: org.dawnsci.spectrum.ui

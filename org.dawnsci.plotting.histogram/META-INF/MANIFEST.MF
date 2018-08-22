@@ -12,7 +12,7 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.ui.forms,
  org.eclipse.ui.cheatsheets;bundle-version="3.4.100",
  org.eclipse.dawnsci.plotting.api;bundle-version="1.0.0"
-Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
 Import-Package: org.eclipse.draw2d,
  org.slf4j;version="[1.7.2,2.0.0)"
@@ -21,3 +21,4 @@ Export-Package: org.dawnsci.plotting.histogram,
  org.dawnsci.plotting.histogram.service,
  org.dawnsci.plotting.histogram.ui
 Service-Component: OSGI-INF/*.xml
+Automatic-Module-Name: org.dawnsci.plotting.histogram

@@ -12,3 +12,4 @@ Require-Bundle: org.dawnsci.mapping.ui;bundle-version="1.0.0",
 Import-Package: org.slf4j
 Service-Component: OSGI-INF/*
 Bundle-ActivationPolicy: lazy
+Automatic-Module-Name: org.dawnsci.mapping.ui.live

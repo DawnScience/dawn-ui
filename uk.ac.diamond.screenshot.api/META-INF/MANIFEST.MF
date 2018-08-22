@@ -4,6 +4,7 @@ Bundle-Name: Screenshot API
 Bundle-SymbolicName: uk.ac.diamond.screenshot.api
 Bundle-Version: 1.0.0.qualifier
 Bundle-Vendor: Diamond Light Source
-Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Export-Package: uk.ac.diamond.screenshot.api;uses:="org.eclipse.swt.graphics"
 Require-Bundle: org.eclipse.swt
+Automatic-Module-Name: uk.ac.diamond.screenshot.api

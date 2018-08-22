@@ -8,3 +8,4 @@ Require-Bundle: org.eclipse.january,
  org.eclipse.jface,
  org.eclipse.dawnsci.analysis.api
 Export-Package: org.dawnsci.conversion.ui.api
+Automatic-Module-Name: org.dawnsci.conversion.ui.api

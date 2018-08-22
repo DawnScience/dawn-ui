@@ -19,3 +19,4 @@ Require-Bundle: org.eclipse.ui,
 Import-Package: org.slf4j
 Service-Component: OSGI-INF/dataVisManipulationServiceManager.xml
 Bundle-ActivationPolicy: lazy
+Automatic-Module-Name: org.dawnsci.datavis.manipulation
