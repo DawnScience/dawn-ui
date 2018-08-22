@@ -1,15 +1,20 @@
 package org.dawnsci.datavis.live;
 
+import static java.util.stream.Collectors.toList;
+
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.EventListener;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Function;
 
 import org.dawnsci.datavis.model.ILiveFileListener;
 import org.dawnsci.datavis.model.ILiveFileService;
@@ -34,11 +39,13 @@ import org.eclipse.scanning.api.event.status.StatusBean;
 import org.eclipse.scanning.api.ui.CommandConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import uk.ac.diamond.scisoft.analysis.processing.bean.OperationBean;
 
 public class LiveFileServiceImpl implements ILiveFileService {
 
-	private static final String PROCESSING_QUEUE_NAME = "scisoft.operation.STATUS_QUEUE";
+	private static final String PROCESSING_SUBMIT_QUEUE_NAME = "scisoft.operation.SUBMISSION_QUEUE";
+	private static final String PROCESSING_STATUS_SET_NAME = "scisoft.operation.STATUS_QUEUE";
 	
 	private Set<ILiveFileListener> listeners = new HashSet<>();
 	private ISubscriber<EventListener> scanSubscriber;
@@ -48,7 +55,7 @@ public class LiveFileServiceImpl implements ILiveFileService {
 	private IScanListener scanListener;
 	private IBeanListener<OperationBean> beanListener;
 	
-	private static long MIN_REFRESH_TIME = 2000;
+	private static final long MIN_REFRESH_TIME = 2000;
 	
 	private static final Logger logger = LoggerFactory.getLogger(LiveFileServiceImpl.class);
 	
@@ -166,67 +173,38 @@ public class LiveFileServiceImpl implements ILiveFileService {
 	}
 	
 	private List<String> getAllRunningFiles(){
-		List<String> scan = getRunningFiles(new LiveFileServiceImpl.BeanFileExtractor() {
-			
-			@Override
-			public String getQueueName() {
-				return EventConstants.STATUS_SET;
-			}
-			
-			@Override
-			public String getFileNameFromBean(StatusBean bean) {
-				return bean instanceof ScanBean ? ((ScanBean)bean).getFilePath() : null;
-			}
-
-		});
-		
-		List<String> processing = getRunningFiles(new LiveFileServiceImpl.BeanFileExtractor() {
-			
-			@Override
-			public String getQueueName() {
-				return PROCESSING_QUEUE_NAME;
-			}
-			
-			@Override
-			public String getFileNameFromBean(StatusBean bean) {
-				return bean instanceof IOperationBean ? ((IOperationBean)bean).getOutputFilePath() : null;
-			}
-
-			
-		});
-		
-		scan.addAll(processing);
-		
-		return scan;
+		List<String> fileNames = new ArrayList<>();
+		fileNames.addAll(getRunningFiles(EventConstants.SUBMISSION_QUEUE, EventConstants.STATUS_SET,
+				bean -> ((ScanBean) bean).getFilePath()));
+		fileNames.addAll(getRunningFiles(PROCESSING_SUBMIT_QUEUE_NAME, PROCESSING_STATUS_SET_NAME,
+				bean -> bean instanceof IOperationBean ? ((IOperationBean) bean).getOutputFilePath() : null));  
+		return fileNames;
 	}
 	
-	private List<String> getRunningFiles(BeanFileExtractor extractor){
-		
-		List<String> output = new ArrayList<>();
-		
+	private List<String> getRunningFiles(String submitQueueName, String statusSetName, 
+			Function<StatusBean, String> fileNameMapper) {
+		final List<StatusBean> beans = getRunningBeans(submitQueueName, statusSetName);
+		return beans.stream()
+				.filter(b -> b.getStatus().isActive())
+				.map(fileNameMapper)
+				.filter(Objects::nonNull)
+				.collect(toList());
+	}
+	
+	private List<StatusBean> getRunningBeans(String submitQueueName, String statusSetName) {
 		IEventService eService = ServiceManager.getIEventService();
 		final String suri = CommandConstants.getScanningBrokerUri();
-		if (suri==null) return output; // Nothing to start, standard DAWN.
-
-
-		try (ISubmitter<StatusBean> queueConnection = eService.createSubmitter(new URI(suri), extractor.getQueueName())) {
-			queueConnection.setStatusTopicName(EventConstants.STATUS_TOPIC);
-
-			List<StatusBean> queue = queueConnection.getQueue(extractor.getQueueName());
-
-			for (StatusBean b : queue) {
-				if (b.getStatus().isActive()) {
-
-					String filePath = extractor.getFileNameFromBean(b);
-					if (filePath != null) output.add(filePath);
-				}
+		if (suri != null) { // will be null for standard DAWN
+			try {
+				final URI uri = new URI(suri);
+				ISubmitter<StatusBean> queueConnection = eService.createSubmitter(uri, submitQueueName);
+				queueConnection.setStatusSetName(statusSetName);
+				return queueConnection.getRunningAndCompleted();
+			} catch (Exception e) {
+				logger.error("Could not get running files for status set {}", statusSetName, e);
 			}
-
-		} catch (Exception e) {
-			logger.error("Could not get running files", e);
 		}
-
-		return output;
+		return Collections.emptyList();
 	}
 	
 	private void detach() {
