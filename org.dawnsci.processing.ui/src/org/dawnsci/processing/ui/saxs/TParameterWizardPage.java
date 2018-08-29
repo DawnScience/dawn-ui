@@ -385,13 +385,4 @@ public class TParameterWizardPage extends AbstractOperationModelWizardPage imple
 		update();
 	}
 	
-	
-	public IOperationModel getModel() {
-		return model;
-	}
-	
-	
-	IOperation getOperation() {
-		return operation;
-	}
 }

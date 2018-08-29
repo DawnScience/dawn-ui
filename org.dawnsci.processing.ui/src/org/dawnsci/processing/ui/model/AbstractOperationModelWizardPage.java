@@ -105,7 +105,7 @@ public abstract class AbstractOperationModelWizardPage extends AbstractOperation
 		return model;
 	}
 	
-	IOperation getOperation() {
+	protected IOperation getOperation() {
 		return operation;
 	}
 }

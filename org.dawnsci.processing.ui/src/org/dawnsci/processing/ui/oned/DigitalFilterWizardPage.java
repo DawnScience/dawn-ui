@@ -297,12 +297,4 @@ public class DigitalFilterWizardPage extends AbstractOperationModelWizardPage im
 	}
 	
 	
-	public IOperationModel getModel() {
-		return model;
-	}
-	
-	
-	IOperation getOperation() {
-		return operation;
-	}
 }
