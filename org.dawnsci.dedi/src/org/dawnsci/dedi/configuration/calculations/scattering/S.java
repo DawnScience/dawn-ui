@@ -40,7 +40,7 @@ public class S extends ScatteringQuantity<WaveNumber> {
 	}
 
 	public S(Quantity<WaveNumber> value) {
-		super((WaveNumber) value);
+		super(value);
 	}
 
 	@Override
