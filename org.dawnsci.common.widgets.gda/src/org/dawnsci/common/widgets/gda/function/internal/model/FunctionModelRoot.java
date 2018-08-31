@@ -35,7 +35,7 @@ public class FunctionModelRoot {
 	private Add root;
 	private Add fittedRoot;
 	private IFunctionDescriptorProvider functionDescriptorProvider;
-	private ListenerList modelModifiedListeners;
+	private ListenerList<IModelModifiedListener> modelModifiedListeners;
 	private FunctionModelElement[] children = new FunctionModelElement[0];
 
 	/**
@@ -366,7 +366,7 @@ public class FunctionModelRoot {
 
 	public void addModelModifiedListener(IModelModifiedListener listener) {
 		if (modelModifiedListeners == null) {
-			modelModifiedListeners = new ListenerList();
+			modelModifiedListeners = new ListenerList<>();
 		}
 		modelModifiedListeners.add(listener);
 	}

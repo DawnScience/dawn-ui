@@ -76,7 +76,7 @@ public class FunctionTreeViewer implements IFunctionViewer {
 			.values().length];
 	private FunctionSelectionEditingSupport functionSelectionEditingSupport;
 	private IFunctionDescriptorProvider functionDescriptorProvider;
-	private ListenerList selectionChangedListeners;
+	private ListenerList<ISelectionChangedListener> selectionChangedListeners;
 
 	public FunctionTreeViewer(final Composite parent,
 			IFunctionDescriptorProvider functionDescriptorProvider) {
@@ -476,7 +476,7 @@ public class FunctionTreeViewer implements IFunctionViewer {
 	@Override
 	public void addSelectionChangedListener(ISelectionChangedListener listener) {
 		if (selectionChangedListeners == null) {
-			selectionChangedListeners = new ListenerList();
+			selectionChangedListeners = new ListenerList<>();
 		}
 		selectionChangedListeners.add(listener);
 	}
