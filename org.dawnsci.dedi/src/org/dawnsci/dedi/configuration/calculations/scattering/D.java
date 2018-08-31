@@ -31,7 +31,7 @@ public class D extends ScatteringQuantity<Length> {
 	}
 
 	public D(Quantity<Length> value) {
-		super((Length) value);
+		super(value);
 	}
 
 	/**
