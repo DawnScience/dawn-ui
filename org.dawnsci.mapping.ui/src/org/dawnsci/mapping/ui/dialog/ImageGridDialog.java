@@ -106,7 +106,7 @@ public class ImageGridDialog extends Dialog{
 				}
 				
 				@Override
-				public void localReload(String path) {
+				public void localReload(String path, boolean force) {
 					//do nothing
 				}
 				

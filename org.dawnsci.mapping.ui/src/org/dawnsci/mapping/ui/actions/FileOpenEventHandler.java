@@ -56,7 +56,7 @@ public class FileOpenEventHandler implements EventHandler {
 		}
 		
 		if (event.getTopic().endsWith("LOCALRELOAD")) {
-			fm.localReloadFile(path);
+			fm.localReloadFile(path, true);
 			return;
 		}
 		

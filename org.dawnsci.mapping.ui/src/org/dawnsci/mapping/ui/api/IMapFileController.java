@@ -45,7 +45,7 @@ public interface IMapFileController {
 
 	void removeFile(String path);
 
-	void localReloadFile(String path);
+	void localReloadFile(String path, boolean force);
 
 	void loadLiveFile(final String path, LiveDataBean bean, String parentFile, boolean lazy);
 

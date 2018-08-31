@@ -69,10 +69,6 @@ public class MappedFileManagerTest {
 		
 		assertEquals(file.getAbsolutePath(),mappedDataFile.getPath());
 		
-		List<PlottableMapObject> plottedObjects = manager.getPlottedObjects();
-		
-		assertTrue("Something plotted", !plottedObjects.isEmpty());
-		
 	}
 	
 	@Test

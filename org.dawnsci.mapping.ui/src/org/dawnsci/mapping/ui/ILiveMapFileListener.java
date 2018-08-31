@@ -8,6 +8,6 @@ public interface ILiveMapFileListener extends EventListener {
 	
 	public void refreshRequest();
 	
-	public void localReload(String path);
+	public void localReload(String path, boolean force);
 
 }

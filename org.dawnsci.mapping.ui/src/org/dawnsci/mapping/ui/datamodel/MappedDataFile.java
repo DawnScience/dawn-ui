@@ -54,9 +54,17 @@ public class MappedDataFile implements MapObject{
 		return descriptionBean != null && !descriptionBean.isEmpty();
 	}
 	
+	public void markFileFinished() {
+		if (descriptionBean != null) descriptionBean.setLiveBean(null);
+	}
+	
+	public boolean isFileFinished() {
+		return (descriptionBean == null || descriptionBean.getLiveBean() == null);
+	}
+	
 	public void locallyReloadLiveFile(ILoaderService lService){
 		if (descriptionBean == null) return;
-		descriptionBean.setLiveBean(null);
+		markFileFinished();
 		
 		MappedDataFile tmp;
 		try {
@@ -177,7 +185,7 @@ public class MappedDataFile implements MapObject{
 
 	@Override
 	public boolean hasChildren() {
-		return true;
+		return !isEmpty();
 	}
 	
 	public Object[] getChildren() {
@@ -186,6 +194,10 @@ public class MappedDataFile implements MapObject{
 		mo.addAll(mapDataMap.values());
 		mo.addAll(microscopeDataMap.values());
 		return mo.toArray();
+	}
+	
+	public boolean isEmpty() {
+		return fullDataMap.isEmpty() && mapDataMap.isEmpty() && microscopeDataMap.isEmpty();
 	}
 
 	public String getParentPath() {
