@@ -245,13 +245,6 @@ public class AxisConfigArea {
 			minText.setDouble(bounds.getZmin());
 			maxText.setDouble(bounds.getZmax());
 		}
-		minimum = 0;
-		maximum = shape[index];
-		minText.setMinimum(minimum);
-		minText.setMaximum(maximum);
-		maxText.setMinimum(minimum);
-		maxText.setMaximum(maximum);
-
 	}
 
 	private void initializeRenderer(ITickRenderer renderer) {
