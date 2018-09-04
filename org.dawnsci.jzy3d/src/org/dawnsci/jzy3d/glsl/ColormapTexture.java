@@ -92,6 +92,9 @@ public class ColormapTexture {
     }
 	
 	public void setTextureData(final GL gl, Buffer buffer, int[] shape) {
+		if (name != null) {
+			gl.glActiveTexture(GL.GL_TEXTURE1);
+		}
 		gl.glPixelStorei(GL.GL_UNPACK_ALIGNMENT, 1);
 		gl.getGL2().glTexImage1D(GL2.GL_TEXTURE_1D, 0, GL.GL_RGBA32F, 256, 0, GL2.GL_RGBA, GL.GL_FLOAT, buffer);
 //		gl.getGL2().glTexSubImage3D(GL2.GL_TEXTURE_3D,0,0, 0,0, shape[0], shape[1], shape[2], GL2ES2.GL_RGBA, GL.GL_UNSIGNED_BYTE, buffer);

@@ -7,6 +7,8 @@ import java.util.Collection;
 import java.util.List;
 
 import org.dawb.common.ui.menu.MenuAction;
+import org.dawnsci.jzy3d.hidpi.CanvasNewtScaledSWT;
+import org.dawnsci.jzy3d.hidpi.SWTScaledChartComponentFactory;
 import org.dawnsci.jzy3d.toolbar.ConfigDialog;
 import org.dawnsci.jzy3d.volume.Texture3D;
 import org.eclipse.core.runtime.preferences.InstanceScope;
@@ -38,7 +40,6 @@ import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.ui.preferences.ScopedPreferenceStore;
 import org.jzy3d.chart.Chart;
 import org.jzy3d.chart.Settings;
-import org.jzy3d.chart.swt.CanvasNewtSWT;
 import org.jzy3d.chart.swt.SWTChartComponentFactory;
 import org.jzy3d.maths.BoundingBox3d;
 import org.jzy3d.plot3d.primitives.AbstractDrawable;
@@ -75,14 +76,19 @@ public class JZY3DPlotViewer extends IPlottingSystemViewer.Stub<Composite> {
 	
 	@Override
 	public void createControl(final Composite parent) {
+		String os = System.getProperty("os.name").toLowerCase();
 		control = new Composite(parent, SWT.NONE);
 		control.setLayout(new FillLayout());
 		Settings.getInstance().setHardwareAccelerated(true);
-		chart = SWTChartComponentFactory.chart(control, Quality.Intermediate);
+		if (isMac(os)) {
+			chart = SWTChartComponentFactory.chart(control, Quality.Intermediate);
+		} else {
+			chart = SWTScaledChartComponentFactory.chart(control, Quality.Intermediate);
+		}
+		
 		chart.getView().setCameraMode(CameraMode.ORTHOGONAL);
 		
-		String os = System.getProperty("os.name");
-		if (!os.toLowerCase().contains("windows")) {
+		if (isNix(os)) {
 
 			chart.getCanvas().addMouseController(new MouseAdapter() {
 
@@ -97,7 +103,7 @@ public class JZY3DPlotViewer extends IPlottingSystemViewer.Stub<Composite> {
 
 			});
 			
-			NewtCanvasSWT canvas = ((CanvasNewtSWT)chart.getCanvas()).getCanvas();
+			NewtCanvasSWT canvas = ((CanvasNewtScaledSWT)chart.getCanvas()).getCanvas();
 			canvas.addListener(SWT.FocusOut, new Listener() {
 				
 				@Override
@@ -540,6 +546,15 @@ public class JZY3DPlotViewer extends IPlottingSystemViewer.Stub<Composite> {
 		if (store!=null) return store;
 		store = new ScopedPreferenceStore(InstanceScope.INSTANCE, "org.dawnsci.plotting");
 		return store;
+	}
+	
+	private boolean isMac(String os) {
+		return os.contains("mac");
+	}
+	
+	private boolean isNix(String os) {
+		//lets just say not mac or windows
+		return !(os.contains("mac") || os.contains("windows"));
 	}
 	
 }
