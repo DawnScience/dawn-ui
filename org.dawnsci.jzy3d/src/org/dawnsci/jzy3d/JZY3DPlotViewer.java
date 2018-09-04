@@ -36,6 +36,7 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Listener;
+import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.ui.preferences.ScopedPreferenceStore;
 import org.jzy3d.chart.Chart;
 import org.jzy3d.chart.Settings;
@@ -173,8 +174,10 @@ public class JZY3DPlotViewer extends IPlottingSystemViewer.Stub<Composite> {
 			public void run() {
 				downsampling = 1;
 				Texture3D volume = getVolume();
-				if (volume != null) volume.setDownsampling(1);
-				
+				if (volume != null) {
+					volume.setDownsampling(1);
+					chart.render();
+				}
 			}
 		};
 		
@@ -186,8 +189,10 @@ public class JZY3DPlotViewer extends IPlottingSystemViewer.Stub<Composite> {
 			public void run() {
 				downsampling = 2;
 				Texture3D volume = getVolume();
-				if (volume != null) volume.setDownsampling(2);
-				
+				if (volume != null) {
+					volume.setDownsampling(2);
+					chart.render();
+				}
 			}
 		};
 		
@@ -198,8 +203,10 @@ public class JZY3DPlotViewer extends IPlottingSystemViewer.Stub<Composite> {
 			public void run() {
 				downsampling = 4;
 				Texture3D volume = getVolume();
-				if (volume != null) volume.setDownsampling(4);
-				
+				if (volume != null) {
+					volume.setDownsampling(4);
+					chart.render();
+				}
 			}
 		};
 		
@@ -210,8 +217,10 @@ public class JZY3DPlotViewer extends IPlottingSystemViewer.Stub<Composite> {
 			public void run() {
 				downsampling = 8;
 				Texture3D volume = getVolume();
-				if (volume != null) volume.setDownsampling(8);
-				
+				if (volume != null) {
+					volume.setDownsampling(8);
+					chart.render();
+				}
 			}
 		};
 		
@@ -241,7 +250,11 @@ public class JZY3DPlotViewer extends IPlottingSystemViewer.Stub<Composite> {
 					chart.render();
 					chart.screenshot(f);
 				} catch (IOException e) {
-					e.printStackTrace();
+					MessageBox dialog = new MessageBox(control.getShell(),SWT.ICON_ERROR | SWT.OK);
+					dialog.setText("Error saving screenshot!");
+					dialog.setMessage(e.getMessage());
+					dialog.open();
+					logger.error("Error saving screenshot",e);
 				}
 			}
 		};
@@ -269,7 +282,7 @@ public class JZY3DPlotViewer extends IPlottingSystemViewer.Stub<Composite> {
 			@Override
 			public void run() {
 				chart.getView().setSquared(false);
-				
+				chart.render();
 			}
 		});
 		
@@ -278,6 +291,7 @@ public class JZY3DPlotViewer extends IPlottingSystemViewer.Stub<Composite> {
 			public void run() {
 				chart.getView().setSquarifier(new XZSquarifier());
 				chart.getView().setSquared(true);
+				chart.render();
 			}
 		});
 		
@@ -286,6 +300,7 @@ public class JZY3DPlotViewer extends IPlottingSystemViewer.Stub<Composite> {
 			public void run() {
 				chart.getView().setSquarifier(new ZXSquarifier());
 				chart.getView().setSquared(true);
+				chart.render();
 			}
 		});
 		
@@ -294,6 +309,7 @@ public class JZY3DPlotViewer extends IPlottingSystemViewer.Stub<Composite> {
 			public void run() {
 				chart.getView().setSquarifier(new YZSquarifier());
 				chart.getView().setSquared(true);
+				chart.render();
 			}
 		});
 		
@@ -302,6 +318,7 @@ public class JZY3DPlotViewer extends IPlottingSystemViewer.Stub<Composite> {
 			public void run() {
 				chart.getView().setSquarifier(new ZYSquarifier());
 				chart.getView().setSquared(true);
+				chart.render();
 			}
 		});
 		
@@ -310,6 +327,7 @@ public class JZY3DPlotViewer extends IPlottingSystemViewer.Stub<Composite> {
 			public void run() {
 				chart.getView().setSquarifier(new XYSquarifier());
 				chart.getView().setSquared(true);
+				chart.render();
 			}
 		});
 		
@@ -318,6 +336,7 @@ public class JZY3DPlotViewer extends IPlottingSystemViewer.Stub<Composite> {
 			public void run() {
 				chart.getView().setSquarifier(new YXSquarifier());
 				chart.getView().setSquared(true);
+				chart.render();
 			}
 		});
 		
