@@ -239,6 +239,8 @@ public class ConfigDialog extends Dialog {
 		AxeBox axeBox = (AxeBox)chart.getView().getAxe();
 		Font selectedFont = getSelectedFont(fontCombo.getText());
 		axeBox.setTextRenderer(new TextBitmapRenderer(selectedFont));
+		
+		chart.render();
 	}
 
 	private Font getSelectedFont(String fontText) {
