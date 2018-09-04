@@ -20,6 +20,7 @@ import org.dawnsci.datavis.model.fileconfig.XYEFileConfiguration;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.dawnsci.analysis.api.io.ILoaderService;
 import org.eclipse.jface.operation.IRunnableWithProgress;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.progress.IProgressService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -475,6 +476,17 @@ public class FileController implements IFileController {
 								initialiseLiveFile((LoadedFile)r, loadedConfig, nexusConfig);
 							}
 						}
+						if (!fileList.isEmpty()) {
+							IRefreshable r = fileList.get(0);
+							List<DataOptions> c = ((LoadedFile)r).getChecked();
+							//FIXME should not need display code in the file controller!
+							if (Display.getCurrent() == null) {
+								//This should be else where but it breaks the unit tests due to locking in Display (only for true,true)
+								Display.getDefault().asyncExec(() -> fireStateChangeListeners(true, true, (LoadedFile)fileList.get(0), !c.isEmpty() ? (DataOptions)c.get(0) : null));
+							} else {
+								fireStateChangeListeners(true, true, (LoadedFile)fileList.get(0), !c.isEmpty() ? (DataOptions)c.get(0) : null);
+							}
+						}
 					}
 
 					fireLiveUpdateListeners(fListeners);
@@ -487,13 +499,41 @@ public class FileController implements IFileController {
 
 		@Override
 		public void localReload(String path) {
+			DataOptions dop = null;
 			LoadedFile loadedFile = lFiles.getLoadedFile(path);
 			if (loadedFile instanceof IRefreshable) {
 				((IRefreshable)loadedFile).locallyReload();
-			}
-			
-			fireStateChangeListeners(true, true, loadedFile, null);
+				if (!((IRefreshable) loadedFile).isInitialised()) {
+					List<DataOptions> fs = getImmutableFileState();
+					try {
 
+						ILoadedFileConfiguration loadedConfig = null;
+
+						if (!fs.isEmpty()) {
+							loadedConfig = new CurrentStateFileConfiguration();
+							loadedConfig.setCurrentState(fs);
+						}
+
+						ILoadedFileConfiguration nexusConfig = new NexusFileConfiguration();
+						
+						initialiseLiveFile(loadedFile, loadedConfig, nexusConfig);
+						
+						List<DataOptions> c = loadedFile.getChecked();
+						dop = c.isEmpty() ? null : c.get(0);
+			
+						
+					} catch (Exception e) {
+							logger.warn("Could not configure file",e);
+					}
+				}
+			}
+			if (Display.getCurrent() == null) {
+				final DataOptions d = dop;
+				//This should be else where but it breaks the unit tests due to locking in Display (only for true,true)
+				Display.getDefault().asyncExec(() -> fireStateChangeListeners(true, true, loadedFile, d));
+			} else {
+				fireStateChangeListeners(true, true, loadedFile, dop);
+			}
 		}
 
 		@Override

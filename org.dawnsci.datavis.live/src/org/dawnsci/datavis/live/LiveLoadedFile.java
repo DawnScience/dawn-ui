@@ -1,6 +1,9 @@
 package org.dawnsci.datavis.live;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -228,10 +231,6 @@ public class LiveLoadedFile extends LoadedFile implements IRefreshable {
 			public boolean found(NodeLink node) {
 				Node d = node.getDestination();
 				
-				if (d instanceof SymbolicNode) {
-					System.out.println("BREAK " + node.getName());
-				}
-				
 				return d instanceof DataNode;
 			}
 		};
@@ -298,16 +297,20 @@ public class LiveLoadedFile extends LoadedFile implements IRefreshable {
 			if (dataOptions.containsKey(n)) continue;
 			
 			ILazyDataset lazyDataset = dataHolder.get().getLazyDataset(n);
-			if (lazyDataset != null && ((LazyDatasetBase)lazyDataset).getDType() != Dataset.STRING) {
-				DataOptions d = new DataOptions(n, this);
-				dataOptions.put(d.getName(),d);
-			}
+			addNonStringDataset(lazyDataset, n);
+			
 		}
 		
 		updateDataOptions();
 	}
 	
 	private void addNonStringDataset(ILazyDataset lazyDataset, String name){
+		
+		if(!name.startsWith("/")) {
+			//local.name dataset, messes with validation so don't add
+			return;
+		}
+		
 		if (lazyDataset instanceof IDynamicDataset) {
 			try {
 				((IDynamicDataset)lazyDataset).refreshShape();
@@ -341,6 +344,7 @@ public class LiveLoadedFile extends LoadedFile implements IRefreshable {
 				ILazyDataset lazyDataset = dh.getLazyDataset(n);
 				if (lazyDataset instanceof IDynamicDataset) {
 					((IDynamicDataset)lazyDataset).refreshShape();
+					
 					AxesMetadata ax = lazyDataset.getFirstMetadata(AxesMetadata.class);
 					if (ax != null) {
 						int[] refresh = ax.refresh(lazyDataset.getShape());
@@ -411,6 +415,7 @@ public class LiveLoadedFile extends LoadedFile implements IRefreshable {
 
 	@Override
 	public void locallyReload() {
+		if (finished) return;
 		
 		finished = true;
 		
@@ -433,7 +438,7 @@ public class LiveLoadedFile extends LoadedFile implements IRefreshable {
 					ILazyDataset lazyDataset = dataHolder.get().getLazyDataset(n);
 					addNonStringDataset(lazyDataset, n);
 				}
-				
+				live = false;
 				return;
 			} else {
 				updateOptionsNonLiveDataHolder();
@@ -475,5 +480,21 @@ public class LiveLoadedFile extends LoadedFile implements IRefreshable {
 		initialised = true;
 		
 	}
+
+	@Override
+	public List<DataOptions> getUninitialisedDataOptions() {
+		return new ArrayList<>(dataOptions.values());
+	}
 	
+	@Override
+	public List<DataOptions> getDataOptions(boolean signalsOnly) {
+		if (!initialised) return Collections.emptyList();
+		return super.getDataOptions(signalsOnly);
+	}
+	
+	@Override
+	public List<DataOptions> getDataOptions() {
+		if (!initialised) return Collections.emptyList();
+		return super.getDataOptions();
+	}
 }

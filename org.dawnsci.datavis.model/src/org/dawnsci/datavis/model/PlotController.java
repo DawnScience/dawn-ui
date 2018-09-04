@@ -191,6 +191,7 @@ public class PlotController implements IPlotController, ILoadedFileInitialiser {
 			@Override
 			public void stateChanged(FileControllerStateEvent event) {
 				if (!event.isSelectedDataChanged() && !event.isSelectedFileChanged()) return;
+				
 				updateOnFileStateChange(event.getLoadedFile(),event.getOption());	
 			}
 
@@ -693,7 +694,13 @@ public class PlotController implements IPlotController, ILoadedFileInitialiser {
 
 	@Override
 	public void initialise(LoadedFile file) {
-		List<DataOptions> dataOptions = file.getDataOptions(false);
+		List<DataOptions> dataOptions = new ArrayList<>();
+				
+		if (file instanceof IRefreshable) {
+			dataOptions = ((IRefreshable) file).getUninitialisedDataOptions();
+		} else {
+			dataOptions = file.getDataOptions(false);
+		}
 		
 		for (DataOptions d : dataOptions) {
 			PlottableObject po = d.getPlottableObject();
