@@ -1,5 +1,7 @@
 package org.dawnsci.datavis.model;
 
+import java.util.List;
+
 /**
  * Interface to describe something loaded into the datavis
  * perspective which might need to be refreshed, e.g. a 
@@ -50,5 +52,10 @@ public interface IRefreshable {
 	 * Set the flag to say the file has been initialised
 	 */
 	public void setInitialised();
+	
+	/**
+	 * Gets the data options before initialisation is complete
+	 */
+	public List<DataOptions>  getUninitialisedDataOptions();
 	
 }
