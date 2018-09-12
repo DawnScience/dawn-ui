@@ -17,7 +17,6 @@ import org.eclipse.jface.viewers.IBaseLabelProvider;
 import org.eclipse.jface.viewers.LabelProviderChangedEvent;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.ViewerFilter;
-import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Item;
 import org.eclipse.swt.widgets.Tree;
@@ -100,70 +99,6 @@ public class ProblemTreeViewer extends TreeViewer implements ResourceToItemsMapp
 		super.unmapAllElements();
 	}
 
-
-	// ---------------- filter sessions ----------------------------
-
-	/* (non-Javadoc)
-	 * @see org.eclipse.jface.viewers.StructuredViewer#addFilter(org.eclipse.jface.viewers.ViewerFilter)
-	 */
-	@Override
-	public void addFilter(ViewerFilter filter) {
-		super.addFilter(filter);
-	}
-
-	/* (non-Javadoc)
-	 * @see org.eclipse.jface.viewers.StructuredViewer#removeFilter(org.eclipse.jface.viewers.ViewerFilter)
-	 */
-	@Override
-	public void removeFilter(ViewerFilter filter) {
-		super.removeFilter(filter);
-	}
-
-	/* (non-Javadoc)
-	 * @see org.eclipse.jface.viewers.StructuredViewer#setFilters(org.eclipse.jface.viewers.ViewerFilter[])
-	 */
-	@Override
-	public void setFilters(ViewerFilter[] filters) {
-		ViewerFilter[] oldFilters= getFilters();
-    	endFilterSessions(oldFilters);
-		super.setFilters(filters);
-	}
-
-	/* (non-Javadoc)
-	 * @see org.eclipse.jface.viewers.StructuredViewer#resetFilters()
-	 */
-	@Override
-	public void resetFilters() {
-    	endFilterSessions(getFilters());
-		super.resetFilters();
-	}
-
-	private boolean findAndRemove(ViewerFilter[] filters, ViewerFilter filter) {
-		for (int i= 0; i < filters.length; i++) {
-			if (filters[i] == filter) {
-				filters[i]= null;
-				return true;
-			}
-		}
-		return false;
-	}
-
-	private void endFilterSessions(ViewerFilter[] filters) {
-		for (int i= 0; i < filters.length; i++) {
-			ViewerFilter curr= filters[i];
-		}
-	}
-
-	/* (non-Javadoc)
-	 * @see org.eclipse.jface.viewers.StructuredViewer#handleDispose(org.eclipse.swt.events.DisposeEvent)
-	 */
-    @Override
-	protected void handleDispose(DisposeEvent event) {
-    	endFilterSessions(getFilters());
-    	super.handleDispose(event);
-    }
-
-
 	/*
 	 * @see ContentViewer#handleLabelProviderChanged(LabelProviderChangedEvent)
 	 */
@@ -173,7 +108,7 @@ public class ProblemTreeViewer extends TreeViewer implements ResourceToItemsMapp
 		Object[] changed= addAditionalProblemParents(event.getElements());
 
 		if (changed != null && !fResourceToItemsMapper.isEmpty()) {
-			ArrayList<Object> others= new ArrayList<Object>();
+			ArrayList<Object> others= new ArrayList<>();
 			for (int i= 0; i < changed.length; i++) {
 				Object curr= changed[i];
 				if (curr instanceof IResource) {
@@ -239,7 +174,7 @@ public class ProblemTreeViewer extends TreeViewer implements ResourceToItemsMapp
 		if (!hasFilters() || elements.length == 0) {
 			return elements;
 		}
-		List<Object> list= new ArrayList<Object>(elements.length);
+		List<Object> list= new ArrayList<>(elements.length);
 		ViewerFilter[] filters = getFilters();
 		for (int i = 0; i < elements.length; i++) {
 			Object object = elements[i];
