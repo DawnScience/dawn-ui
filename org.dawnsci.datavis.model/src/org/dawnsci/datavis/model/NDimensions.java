@@ -203,6 +203,7 @@ public class NDimensions {
 	}
 	
 	public void updateShape(int[] shape) {
+		if (shape.length != dimensions.length) throw new IllegalArgumentException("shape length must match dimension length");
 		for (int i = 0 ; i < shape.length; i++) {
 			boolean containsEnd = false;
 			boolean isSingle = false;
@@ -234,6 +235,8 @@ public class NDimensions {
 				Slice slice = dimensions[i].getSlice();
 				slice.setStart(shape[i]-1);
 			}
+			
+			update(false);
 		}
 	}
 	

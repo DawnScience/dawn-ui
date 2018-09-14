@@ -1,36 +1,36 @@
 package org.dawnsci.datavis.model.test.live;
 
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.withSettings;
 
 import java.util.List;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.dawnsci.datavis.model.FileController;
-import org.dawnsci.datavis.model.FileControllerStateEvent;
-import org.dawnsci.datavis.model.FileControllerStateEventListener;
 import org.dawnsci.datavis.model.ILiveFileListener;
+import org.dawnsci.datavis.model.ILiveFileService;
+import org.dawnsci.datavis.model.IRefreshable;
 import org.dawnsci.datavis.model.LiveServiceManager;
 import org.dawnsci.datavis.model.LoadedFile;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
-
-import uk.ac.diamond.scisoft.analysis.io.DataHolder;
-import uk.ac.diamond.scisoft.analysis.io.LoaderServiceImpl;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Matchers;
 
 public class LiveFileServiceTest {
 
 	private static FileController fileController;
-	private static MockLiveFileService mock;
 	
 	@BeforeClass
 	public static void buildData() throws Exception {
-//		ServiceManager.setLoaderService(new LoaderServiceImpl());
 		fileController = new FileController();
-		fileController.setLoaderService(new LoaderServiceImpl());
-		mock = new MockLiveFileService();
-		new LiveServiceManager().setILiveFileService(mock);
 	}
 	
 	@AfterClass
@@ -41,41 +41,34 @@ public class LiveFileServiceTest {
 	@Test
 	public void testBasicServiceMethods() throws Exception {
 		
-		assertTrue(mock.getListeners().isEmpty());
-		assertTrue(fileController.getLoadedFiles().isEmpty());
+		String path = "/tmp/myfile.test";
 		
+		ILiveFileService liveFileService = mock(ILiveFileService.class);
+		new LiveServiceManager().setILiveFileService(liveFileService);
+		ArgumentCaptor<ILiveFileListener> listener = ArgumentCaptor.forClass(ILiveFileListener.class);
+		
+		assertTrue(fileController.getLoadedFiles().isEmpty());
 		fileController.attachLive();
+		verify(liveFileService).addLiveFileListener(listener.capture());
+		ILiveFileListener captured = listener.getValue();
+		
+		assertNotNull(captured);
 		
 		List<LoadedFile> loadedFiles = fileController.getLoadedFiles();
 		assertTrue(loadedFiles.isEmpty());
+
+		LoadedFile f = mock(LoadedFile.class, withSettings().extraInterfaces(IRefreshable.class));
 		
-		assertFalse(mock.getListeners().isEmpty());
+		when(f.getFilePath()).thenReturn(path);
 		
-		ILiveFileListener next = mock.getListeners().iterator().next();
-		
-		next.fileLoaded(new LoadedFile(new DataHolder()));
-		
+		captured.fileLoaded(f);
 		assertFalse(fileController.getLoadedFiles().isEmpty());
 		
-		final AtomicBoolean fired = new AtomicBoolean(false);
+		captured.refreshRequest();
+		verify(liveFileService,times(1)).runUpdate(any(Runnable.class),Matchers.eq(false));
 		
-		fileController.addStateListener(new FileControllerStateEventListener() {
-			
-			@Override
-			public void stateChanged(FileControllerStateEvent event) {
-			}
-
-			@Override
-			public void liveUpdate() {
-				fired.set(true);
-				
-			}
-		});
-		
-		next.refreshRequest();
-		//happens in a separate thread so sleep for a bit
-		Thread.sleep(100);
-		assertTrue(fired.get());
+		captured.localReload(path);
+		verify(liveFileService,times(1)).runUpdate(any(Runnable.class),Matchers.eq(true));
 		
 	}
 

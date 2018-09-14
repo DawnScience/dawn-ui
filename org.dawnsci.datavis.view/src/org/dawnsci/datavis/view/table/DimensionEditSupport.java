@@ -18,6 +18,7 @@ import org.eclipse.swt.widgets.Composite;
 
 public class DimensionEditSupport extends EditingSupport {
 
+	private ComboBoxViewerCellEditor dimEditor;
 	
 	public DimensionEditSupport(ColumnViewer viewer) {
 		super(viewer);
@@ -25,7 +26,7 @@ public class DimensionEditSupport extends EditingSupport {
 
 	@Override
 	protected CellEditor getCellEditor(Object element) {
-		final ComboBoxViewerCellEditor dimEditor = new ComboBoxViewerCellEditor((Composite) getViewer().getControl(), SWT.READ_ONLY);
+		dimEditor = new ComboBoxViewerCellEditor((Composite) getViewer().getControl(), SWT.READ_ONLY);
 		dimEditor.setLabelProvider(new LabelProvider());
 		dimEditor.setContentProvider(new ArrayContentProvider());
 		dimEditor.setActivationStyle(ComboBoxViewerCellEditor.DROP_DOWN_ON_MOUSE_ACTIVATION);
@@ -48,6 +49,10 @@ public class DimensionEditSupport extends EditingSupport {
 		});
 		
 		return dimEditor;
+	}
+	
+	public boolean isActive() {
+		return dimEditor != null && dimEditor.isActivated();
 	}
 
 	@Override

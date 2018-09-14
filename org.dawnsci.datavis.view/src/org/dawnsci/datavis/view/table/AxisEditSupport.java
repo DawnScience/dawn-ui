@@ -17,13 +17,15 @@ import org.eclipse.swt.widgets.Composite;
 
 public class AxisEditSupport extends EditingSupport {
 	
+	private ComboBoxViewerCellEditor axisEditor;
+	
 	public AxisEditSupport(ColumnViewer viewer) {
 		super(viewer);
 	}
 
 	@Override
 	protected CellEditor getCellEditor(Object element) {
-		final ComboBoxViewerCellEditor axisEditor = new ComboBoxViewerCellEditor((Composite) getViewer().getControl(), SWT.READ_ONLY);
+		axisEditor = new ComboBoxViewerCellEditor((Composite) getViewer().getControl(), SWT.READ_ONLY);
 		axisEditor.setLabelProvider(new LabelProvider());
 		axisEditor.setContentProvider(new ArrayContentProvider());
 		axisEditor.setActivationStyle(ComboBoxViewerCellEditor.DROP_DOWN_ON_MOUSE_ACTIVATION);
@@ -53,6 +55,10 @@ public class AxisEditSupport extends EditingSupport {
 		return true;
 	}
 
+	public boolean isActive() {
+		return axisEditor != null && axisEditor.isActivated();
+	}
+	
 	@Override
 	protected Object getValue(Object element) {
 		return ((NDimensions)getViewer().getInput()).getAxis((int)element);

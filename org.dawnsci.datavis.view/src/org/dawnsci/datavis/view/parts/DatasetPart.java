@@ -9,6 +9,7 @@ import javax.inject.Inject;
 
 import org.dawnsci.datavis.api.IPlotMode;
 import org.dawnsci.datavis.model.DataOptions;
+import org.dawnsci.datavis.model.FileControllerStateEvent;
 import org.dawnsci.datavis.model.FileControllerStateEventListener;
 import org.dawnsci.datavis.model.IFileController;
 import org.dawnsci.datavis.model.IPlotController;
@@ -43,6 +44,7 @@ import org.eclipse.swt.layout.FormLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 
 public class DatasetPart {
@@ -210,11 +212,12 @@ public class DatasetPart {
 			private void actOnEvent(SliceChangeEvent event) {
 				if (event.getParent() instanceof DataOptions) {
 					DataOptions dOptions = (DataOptions)event.getParent();
+					
 					if (!dOptions.isSelected() && !dOptions.getParent().isSelected()) {
 						return;
 					}
 				}
-
+				
 				plotController.forceReplot();
 			}
 		};
@@ -227,7 +230,32 @@ public class DatasetPart {
 
 			plotController.forceReplot();
 		}
+		
+		fileStateListener = new FileControllerStateEventListener() {
 
+			@Override
+			public void stateChanged(FileControllerStateEvent event) {
+				//do nothing
+			}
+
+			@Override
+			public void refreshRequest() {
+
+				if (Display.getCurrent() == null) {
+					Display.getDefault().asyncExec(()->refreshRequest());
+					return;
+				}
+				
+				List<DataOptions> s = DataVisSelectionUtils.getFromSelection(viewer.getStructuredSelection(), DataOptions.class);
+
+				if (!s.isEmpty() && s.get(0).getParent() instanceof IRefreshable) {
+					table.refresh();
+					viewer.refresh();
+				}
+			}
+		};
+		
+		fileController.addStateListener(fileStateListener);
 	}
 
 	private void updateOnSelectionChange(LoadedFile file){
