@@ -28,8 +28,8 @@ import org.eclipse.scanning.api.event.EventException;
 import org.eclipse.scanning.api.event.IEventService;
 import org.eclipse.scanning.api.event.bean.BeanEvent;
 import org.eclipse.scanning.api.event.bean.IBeanListener;
+import org.eclipse.scanning.api.event.core.IConsumer;
 import org.eclipse.scanning.api.event.core.IPropertyFilter.FilterAction;
-import org.eclipse.scanning.api.event.core.ISubmitter;
 import org.eclipse.scanning.api.event.core.ISubscriber;
 import org.eclipse.scanning.api.event.scan.IScanListener;
 import org.eclipse.scanning.api.event.scan.ScanBean;
@@ -174,16 +174,15 @@ public class LiveFileServiceImpl implements ILiveFileService {
 	
 	private List<String> getAllRunningFiles(){
 		List<String> fileNames = new ArrayList<>();
-		fileNames.addAll(getRunningFiles(EventConstants.SUBMISSION_QUEUE, EventConstants.STATUS_SET,
+		fileNames.addAll(getRunningFiles(EventConstants.SUBMISSION_QUEUE,
 				bean -> ((ScanBean) bean).getFilePath()));
-		fileNames.addAll(getRunningFiles(PROCESSING_SUBMIT_QUEUE_NAME, PROCESSING_STATUS_SET_NAME,
+		fileNames.addAll(getRunningFiles(PROCESSING_SUBMIT_QUEUE_NAME, 
 				bean -> bean instanceof IOperationBean ? ((IOperationBean) bean).getOutputFilePath() : null));  
 		return fileNames;
 	}
 	
-	private List<String> getRunningFiles(String submitQueueName, String statusSetName, 
-			Function<StatusBean, String> fileNameMapper) {
-		final List<StatusBean> beans = getRunningBeans(submitQueueName, statusSetName);
+	private List<String> getRunningFiles(String submitQueueName, Function<StatusBean, String> fileNameMapper) {
+		final List<StatusBean> beans = getRunningBeans(submitQueueName);
 		return beans.stream()
 				.filter(b -> b.getStatus().isActive())
 				.map(fileNameMapper)
@@ -191,22 +190,21 @@ public class LiveFileServiceImpl implements ILiveFileService {
 				.collect(toList());
 	}
 	
-	private List<StatusBean> getRunningBeans(String submitQueueName, String statusSetName) {
+	private List<StatusBean> getRunningBeans(String submitQueueName) {
 		IEventService eService = ServiceManager.getIEventService();
 		final String suri = CommandConstants.getScanningBrokerUri();
 		if (suri != null) { // will be null for standard DAWN
 			try {
 				final URI uri = new URI(suri);
-				ISubmitter<StatusBean> queueConnection = eService.createSubmitter(uri, submitQueueName);
-				queueConnection.setStatusSetName(statusSetName);
+				IConsumer<StatusBean> queueConnection = eService.createConsumerProxy(uri, submitQueueName);
 				return queueConnection.getRunningAndCompleted();
 			} catch (Exception e) {
-				logger.error("Could not get running files for status set {}", statusSetName, e);
+				logger.error("Could not get running files for submission queue {}", submitQueueName, e);
 			}
 		}
 		return Collections.emptyList();
 	}
-	
+
 	private void detach() {
 		if (scanSubscriber != null && scanListener != null) {
 			scanSubscriber.removeListener(scanListener);
