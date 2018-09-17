@@ -32,6 +32,7 @@ import org.eclipse.scanning.api.event.status.StatusBean;
 import org.eclipse.scanning.api.ui.CommandConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import uk.ac.diamond.scisoft.analysis.processing.bean.OperationBean;
 
 public class LiveFileServiceImpl implements ILiveFileService {
 
@@ -43,7 +44,7 @@ public class LiveFileServiceImpl implements ILiveFileService {
 	
 	private boolean attached = false;
 	private IScanListener scanListener;
-	private IBeanListener<StatusBean> beanListener;
+	private IBeanListener<OperationBean> beanListener;
 	
 	private static long MIN_REFRESH_TIME = 2000;
 	
@@ -97,6 +98,7 @@ public class LiveFileServiceImpl implements ILiveFileService {
 			scanSubscriber.addListener(scanListener);
 			
 			procSubscriber = eService.createSubscriber(uri, "scisoft.operation.STATUS_TOPIC");
+			
 			
 			if (beanListener == null) beanListener = new BeanListener();
 			
@@ -322,10 +324,10 @@ public class LiveFileServiceImpl implements ILiveFileService {
 		
 	}
 	
-	private class BeanListener implements IBeanListener<StatusBean> {
+	private class BeanListener implements IBeanListener<OperationBean> {
 		
 		@Override
-		public void beanChangePerformed(BeanEvent<StatusBean> evt) {
+		public void beanChangePerformed(BeanEvent<OperationBean> evt) {
 			
 			if (!(evt.getBean() instanceof IOperationBean)) return;
 			
@@ -360,8 +362,8 @@ public class LiveFileServiceImpl implements ILiveFileService {
 		}
 		
 		@Override
-		public Class<StatusBean> getBeanClass() {
-			return StatusBean.class;
+		public Class<OperationBean> getBeanClass() {
+			return OperationBean.class;
 		}
 	}
 
