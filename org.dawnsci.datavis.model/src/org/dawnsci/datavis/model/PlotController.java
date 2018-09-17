@@ -194,13 +194,6 @@ public class PlotController implements IPlotController, ILoadedFileInitialiser {
 				
 				updateOnFileStateChange(event.getLoadedFile(),event.getOption());	
 			}
-
-			@Override
-			public void liveUpdate() {
-				// TODO Auto-generated method stub
-				
-			}
-			
 			
 		};
 		

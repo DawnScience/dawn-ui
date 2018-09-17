@@ -4,9 +4,12 @@ import java.util.EventListener;
 
 public interface FileControllerStateEventListener extends EventListener {
 	
-	public void stateChanged(FileControllerStateEvent event);
+	void stateChanged(FileControllerStateEvent event);
 	
-	default public void liveUpdate() {
+	/**
+	 * Called when the state hasn't changed but something that alters the display (size change, filter datasets) has
+	 */
+	default void refreshRequest() {
 		//Do nothing as default
 	}
 

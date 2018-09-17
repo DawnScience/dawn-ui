@@ -71,6 +71,7 @@ public class LiveLoadedFile extends LoadedFile implements IRefreshable {
 		Map<String, NodeLink> symbolics = TreeUtils.treeBreadthFirstSearch(tree.getGroupNode(), n -> n.getDestination() instanceof SymbolicNode, true, null);
 		
 		if (!symbolics.isEmpty()) {
+			logger.info("Symbolic nodes still exist, {} in total, {} is first",symbolics.size(),symbolics.keySet().iterator().next());
 			return dh;
 		}
 		
@@ -365,11 +366,7 @@ public class LiveLoadedFile extends LoadedFile implements IRefreshable {
 			NDimensions nDimensions = o.getPlottableObject().getNDimensions();
 			o.setAxes(null);
 			int[] shape = o.getLazyDataset().getShape();
-			if (nDimensions.getRank() != shape.length) {
-				o.setPlottableObject(null);
-			} else {
-				nDimensions.updateShape(shape);
-			}
+			nDimensions.updateShape(shape);
 		}
 	}
 

@@ -7,6 +7,8 @@ import java.util.EventListener;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.dawnsci.datavis.model.ILiveFileListener;
@@ -50,7 +52,8 @@ public class LiveFileServiceImpl implements ILiveFileService {
 	
 	private static final Logger logger = LoggerFactory.getLogger(LiveFileServiceImpl.class);
 	
-	private UpdateJob job;
+	private ExecutorService executor =  Executors.newSingleThreadExecutor();
+	private AtomicReference<Runnable> atomicRunnable = new AtomicReference<>();
 	
 	@Override
 	public void addLiveFileListener(ILiveFileListener l) {
@@ -68,13 +71,33 @@ public class LiveFileServiceImpl implements ILiveFileService {
 	}
 	
 	@Override
-	public void runUpdate(Runnable runnable) {
-		if (job == null) {
-			job = new UpdateJob("Update Live Data");
-			job.setPriority(Job.INTERACTIVE);
+	public void runUpdate(Runnable runnable, boolean queue) {
+		
+		//not queued updates are allowed to be dropped
+		//Atomic runnable used as a length 1 queue
+		if (!queue) {
+			atomicRunnable.set(runnable);
+			executor.submit(new Runnable() {
+					
+				@Override
+				public void run() {
+					Runnable run = atomicRunnable.getAndSet(null);
+					if (run == null) return;
+					run.run();
+					
+					try {
+						//Wait so to not swamp the UI with updates
+						Thread.sleep(MIN_REFRESH_TIME);
+					} catch (InterruptedException e) {
+						//do nothing;
+					}
+				}
+			});
+		} else {
+			//queued are added to the executor queue
+			//and not dropped (reloads etc)
+			executor.submit(runnable);
 		}
-		job.setRunnable(runnable);
-		job.schedule();
 	}
 
 	private void attach() {
@@ -239,37 +262,6 @@ public class LiveFileServiceImpl implements ILiveFileService {
 		if (port<=0) port = Integer.getInteger("GDA/gda.dataserver.port", -1);
 		if (port<=0) port = Integer.getInteger("gda.dataserver.port", -1);
 		return port;
-	}
-	
-	private class UpdateJob extends Job {
-
-		private final AtomicReference<Runnable> task =new AtomicReference<>();
-		
-		public UpdateJob(String name) {
-			super(name);
-		}
-		
-		public void setRunnable(Runnable runnable) {
-			this.task.set(runnable);
-		}
-
-		@Override
-		protected IStatus run(IProgressMonitor monitor) {
-			Runnable local = task.getAndSet(null);
-			if (local == null) return org.eclipse.core.runtime.Status.OK_STATUS;
-			local.run();
-
-
-			try {
-				Thread.sleep(MIN_REFRESH_TIME);
-			} catch (InterruptedException e) {
-				return org.eclipse.core.runtime.Status.OK_STATUS;
-			}
-
-
-			return org.eclipse.core.runtime.Status.OK_STATUS;
-		}
-		
 	}
 	
 	interface BeanFileExtractor {

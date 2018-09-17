@@ -133,6 +133,10 @@ public class SliceEditingSupport extends EditingSupport {
 		if (sliderShell!=null&&sliderShell.isVisible()) return editor;
 		return editor;
 	}
+	
+	public boolean isActive() {
+		return editor.isActivated();
+	}
 
 	@Override
 	protected boolean canEdit(Object element) {

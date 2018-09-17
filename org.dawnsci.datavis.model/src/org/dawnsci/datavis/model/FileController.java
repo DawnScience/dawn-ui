@@ -224,6 +224,10 @@ public class FileController implements IFileController {
 		return checked;
 	}
 	
+	private void fireUpdateRequest() {
+		for (FileControllerStateEventListener l : listeners) l.refreshRequest();
+	}
+	
 	private void fireStateChangeListeners(boolean file, boolean dataset, LoadedFile f, DataOptions o) {
 		fireStateChangeListeners(listeners, file, dataset,f,o);
 	}
@@ -231,11 +235,6 @@ public class FileController implements IFileController {
 	private void fireStateChangeListeners(Set<FileControllerStateEventListener> listeners, boolean file, boolean dataset, LoadedFile f, DataOptions o) {
 		FileControllerStateEvent e = new FileControllerStateEvent(this, file, dataset, f , o);
 		for (FileControllerStateEventListener l : listeners) l.stateChanged(e);
-	}
-	
-	private void fireLiveUpdateListeners(Set<FileControllerStateEventListener> listeners) {
-
-		for (FileControllerStateEventListener l : listeners) l.liveUpdate();
 	}
 
 	/* (non-Javadoc)
@@ -487,53 +486,62 @@ public class FileController implements IFileController {
 								fireStateChangeListeners(true, true, (LoadedFile)fileList.get(0), !c.isEmpty() ? (DataOptions)c.get(0) : null);
 							}
 						}
+						
 					}
-
-					fireLiveUpdateListeners(fListeners);
-
+					
+					if (!fileList.isEmpty()) {
+						fireUpdateRequest();
+					}
 				}
 			};
 
-			LiveServiceManager.getILiveFileService().runUpdate(r);
+			LiveServiceManager.getILiveFileService().runUpdate(r,false);
 		}
 
 		@Override
 		public void localReload(String path) {
-			DataOptions dop = null;
-			LoadedFile loadedFile = lFiles.getLoadedFile(path);
-			if (loadedFile instanceof IRefreshable) {
-				((IRefreshable)loadedFile).locallyReload();
-				if (!((IRefreshable) loadedFile).isInitialised()) {
-					List<DataOptions> fs = getImmutableFileState();
-					try {
-
-						ILoadedFileConfiguration loadedConfig = null;
-
-						if (!fs.isEmpty()) {
-							loadedConfig = new CurrentStateFileConfiguration();
-							loadedConfig.setCurrentState(fs);
-						}
-
-						ILoadedFileConfiguration nexusConfig = new NexusFileConfiguration();
-						
-						initialiseLiveFile(loadedFile, loadedConfig, nexusConfig);
-						
-						List<DataOptions> c = loadedFile.getChecked();
-						dop = c.isEmpty() ? null : c.get(0);
 			
-						
-					} catch (Exception e) {
+			Runnable r = () -> {
+
+				DataOptions dop = null;
+				LoadedFile loadedFile = lFiles.getLoadedFile(path);
+				if (loadedFile instanceof IRefreshable) {
+					logger.info("Locally reloading {}",path);
+					((IRefreshable)loadedFile).locallyReload();
+					if (!((IRefreshable) loadedFile).isInitialised()) {
+						List<DataOptions> fs = getImmutableFileState();
+						try {
+
+							ILoadedFileConfiguration loadedConfig = null;
+
+							if (!fs.isEmpty()) {
+								loadedConfig = new CurrentStateFileConfiguration();
+								loadedConfig.setCurrentState(fs);
+							}
+
+							ILoadedFileConfiguration nexusConfig = new NexusFileConfiguration();
+
+							initialiseLiveFile(loadedFile, loadedConfig, nexusConfig);
+
+							List<DataOptions> c = loadedFile.getChecked();
+							dop = c.isEmpty() ? null : c.get(0);
+
+
+						} catch (Exception e) {
 							logger.warn("Could not configure file",e);
+						}
 					}
 				}
-			}
-			if (Display.getCurrent() == null) {
-				final DataOptions d = dop;
-				//This should be else where but it breaks the unit tests due to locking in Display (only for true,true)
-				Display.getDefault().asyncExec(() -> fireStateChangeListeners(true, true, loadedFile, d));
-			} else {
-				fireStateChangeListeners(true, true, loadedFile, dop);
-			}
+				if (Display.getCurrent() == null) {
+					final DataOptions d = dop;
+					//This should be else where but it breaks the unit tests due to locking in Display (only for true,true)
+					Display.getDefault().asyncExec(() -> fireStateChangeListeners(true, true, loadedFile, d));
+				} else {
+					fireStateChangeListeners(true, true, loadedFile, dop);
+				}
+			};
+			
+			LiveServiceManager.getILiveFileService().runUpdate(r,true);
 		}
 
 		@Override

@@ -364,22 +364,6 @@ public class LoadedFilePart {
 				}
 				
 			}
-			
-			@Override
-			public void liveUpdate() {
-				
-				if (Display.getCurrent() == null) {
-					Display.getDefault().asyncExec(()->liveUpdate());
-					return;
-				}
-				
- 				IStructuredSelection selection = viewer.getStructuredSelection();
-				List<LoadedFile> s = DataVisSelectionUtils.getFromSelection(selection, LoadedFile.class);
-				
-				if (!s.isEmpty() && s.get(0) instanceof IRefreshable) {
-					selectionService.setSelection(new StructuredSelection(selection.toArray()));
-				}
-			}
 		};
 		
 		fileController.addStateListener(fileStateListener);

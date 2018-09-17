@@ -6,5 +6,5 @@ public interface ILiveFileService {
 	
 	public void removeLiveFileListener(ILiveFileListener l);
 
-	public void runUpdate(Runnable runnable);
+	public void runUpdate(Runnable runnable, boolean queue);
 }

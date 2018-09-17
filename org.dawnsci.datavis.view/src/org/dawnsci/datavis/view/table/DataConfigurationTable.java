@@ -22,6 +22,7 @@ public class DataConfigurationTable {
 	
 	private SliceEditingSupport sliceSupport;
 	private DimensionEditSupport dimensionSupport;
+	private AxisEditSupport axisSupport;
 	
 	private Composite tableComposite;
 	
@@ -109,8 +110,8 @@ public class DataConfigurationTable {
 			  return axes == null ? "" : axes;
 			}
 		});
-		
-		axis.setEditingSupport(new AxisEditSupport(tableViewer));
+		axisSupport = new AxisEditSupport(tableViewer);
+		axis.setEditingSupport(axisSupport);
 		
 		
 		TableColumnLayout columnLayout = new TableColumnLayout();
@@ -152,6 +153,13 @@ public class DataConfigurationTable {
 	
 	public void setMaxSliceNumber(int n){
 		sliceSupport.setMaxSliceSize(n);
+	}
+	
+	public void refresh() {
+		if (!sliceSupport.isActive() && !dimensionSupport.isActive() && !axisSupport.isActive()) {
+			tableViewer.refresh();
+		}
+		
 	}
 	
 }
