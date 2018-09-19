@@ -76,7 +76,14 @@ public class LiveFileServiceImpl implements ILiveFileService {
 		//not queued updates are allowed to be dropped
 		//Atomic runnable used as a length 1 queue
 		if (!queue) {
-			atomicRunnable.set(runnable);
+			Runnable current = atomicRunnable.getAndSet(runnable);
+			
+			//if current is a runnable, the internal runnable hasn't been taken,
+			//no need to submit in this case, stops the queue being flooded.
+			if (current != null) {
+				return;
+			}
+			
 			executor.submit(new Runnable() {
 					
 				@Override
