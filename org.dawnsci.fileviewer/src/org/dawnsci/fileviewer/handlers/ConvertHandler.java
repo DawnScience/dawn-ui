@@ -1,6 +1,7 @@
 
 package org.dawnsci.fileviewer.handlers;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -29,8 +30,7 @@ public class ConvertHandler {
 	public void execute() {
 		ConvertWizard cwizard = new ConvertWizard();
 		IStructuredSelection sel = fileviewer.getSelections();
-		@SuppressWarnings("rawtypes")
-		List selFiles;
+		List<File> selFiles;
 		if (sel.getFirstElement() instanceof FileTableContent) {
 			selFiles = new ArrayList<>();
 			for (Object selElement : sel.toArray()) {
@@ -39,7 +39,7 @@ public class ConvertHandler {
 		} else {
 			selFiles = sel.toList();
 		}
-		cwizard.setSelectionOverride(selFiles);
+		cwizard.setFileSelectionOverride(selFiles);
 		WizardDialog dialog = new WizardDialog(Display.getDefault().getActiveShell(), cwizard);
 		dialog.setPageSize(new Point(400, 450));
 		dialog.create();

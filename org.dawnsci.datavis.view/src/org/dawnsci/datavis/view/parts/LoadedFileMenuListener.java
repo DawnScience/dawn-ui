@@ -9,7 +9,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.dawnsci.conversion.ui.ConvertWizard;
+import org.dawnsci.conversion.ui.api.IFileOverrideWizard;
 import org.dawnsci.datavis.model.DataOptions;
 import org.dawnsci.datavis.model.FileController;
 import org.dawnsci.datavis.model.FileJoining;
@@ -18,6 +18,7 @@ import org.dawnsci.datavis.model.IFileController;
 import org.dawnsci.datavis.model.LoadedFile;
 import org.dawnsci.datavis.view.Activator;
 import org.dawnsci.datavis.view.parts.LoadedFilePart.LabelEditingSupport;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
@@ -37,8 +38,11 @@ import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Layout;
 import org.eclipse.swt.widgets.TableColumn;
+import org.eclipse.ui.IWorkbenchWizard;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.ListDialog;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
+import org.eclipse.ui.wizards.IWizardDescriptor;
 
 
 public class LoadedFileMenuListener implements IMenuListener {
@@ -78,7 +82,7 @@ public class LoadedFileMenuListener implements IMenuListener {
 			manager.add(new Separator());
 			manager.add(new CloseAction(fileController, viewer));
 			manager.add(new Separator());
-			manager.add(new ConvertFilesAction(fileController, viewer));
+			if (getWiz()!=null) manager.add(new ConvertFilesAction(fileController, viewer));
 			
 			if (((IStructuredSelection)viewer.getSelection()).size()==1) {
 				manager.add(new Separator());
@@ -350,21 +354,36 @@ public class LoadedFileMenuListener implements IMenuListener {
 			super("Convert", convertImage, fileController, viewer);
 		}
 
-		@SuppressWarnings("unchecked")
 		@Override
 		public void run() {
-			ConvertWizard cwizard = new ConvertWizard();
-			@SuppressWarnings("rawtypes")
-			List selFiles = getFileSelection()
+			
+			IWizardDescriptor wiz = getWiz();
+			IWorkbenchWizard wizard = null;
+			try {
+				wizard = wiz.createWizard();
+			} catch (CoreException e) {
+				//TODO log
+			}
+			
+			if (wizard == null || !(wizard instanceof IFileOverrideWizard)) {
+				//log
+				return;
+			}
+			
+			List<File> selFiles = getFileSelection()
 								.stream()
 								.map(loadedFile -> new File(loadedFile.getFilePath()))
 								.collect(Collectors.toList());
-			cwizard.setSelectionOverride(selFiles);
-			WizardDialog dialog = new WizardDialog(Display.getDefault().getActiveShell(), cwizard);
+			((IFileOverrideWizard)wizard).setFileSelectionOverride(selFiles);
+			WizardDialog dialog = new WizardDialog(Display.getDefault().getActiveShell(), wizard);
 			dialog.setPageSize(new Point(400, 450));
 			dialog.create();
 			dialog.open();
 		}
+	}
+	
+	private static IWizardDescriptor getWiz() {
+		return PlatformUI.getWorkbench().getExportWizardRegistry().findWizard("org.dawnsci.conversion.ui.convertExportWizard");
 	}
 }
 
