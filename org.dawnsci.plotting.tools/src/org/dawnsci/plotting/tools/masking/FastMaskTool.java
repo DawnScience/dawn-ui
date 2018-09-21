@@ -43,6 +43,7 @@ import org.eclipse.january.dataset.IDataset;
 import org.eclipse.january.dataset.IndexIterator;
 import org.eclipse.january.dataset.SliceND;
 import org.eclipse.jface.dialogs.Dialog;
+import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.wizard.IWizard;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.SWT;
@@ -106,8 +107,7 @@ public class FastMaskTool extends AbstractToolPage {
 	public void createControl(Composite parent) {
 		this.job = new FastMaskJob();
 		this.control = new Composite(parent, SWT.NONE);
-		control.setLayout(new GridLayout(1, false));
-		removeMargins(control);
+		control.setLayout(GridLayoutFactory.fillDefaults().create());
 		
 		maskRegionComposite = new MaskRegionComposite(control, SWT.None);
 		maskRegionComposite.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
@@ -242,19 +242,6 @@ public class FastMaskTool extends AbstractToolPage {
 		dialog.create();
 		if (dialog.open() == Dialog.CANCEL) return null;
 		return dialog.getPath();
-	}
-	
-	private static void removeMargins(Composite area) {
-		final GridLayout layout = (GridLayout)area.getLayout();
-		if (layout==null) return;
-		layout.horizontalSpacing=0;
-		layout.verticalSpacing  =0;
-		layout.marginBottom     =0;
-		layout.marginTop        =0;
-		layout.marginLeft       =0;
-		layout.marginRight      =0;
-		layout.marginHeight     =0;
-		layout.marginWidth      =0;
 	}
 
 	private class NamedRegionType {
