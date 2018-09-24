@@ -20,12 +20,8 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import org.dawb.common.ui.image.CursorUtils;
-import org.dawb.common.ui.macro.ColorMacroEvent;
 import org.dawnsci.plotting.draw2d.swtxy.selection.AbstractSelectionRegion;
 import org.dawnsci.plotting.draw2d.swtxy.selection.SelectionRegionFactory;
-import org.eclipse.dawnsci.macro.api.DeleteEventObject;
-import org.eclipse.dawnsci.macro.api.MacroEventObject;
-import org.eclipse.dawnsci.macro.api.RenameEventObject;
 import org.eclipse.dawnsci.plotting.api.annotation.IAnnotation;
 import org.eclipse.dawnsci.plotting.api.area.IPlotArea;
 import org.eclipse.dawnsci.plotting.api.area.ZoomOption;
@@ -145,9 +141,6 @@ public class RegionArea extends PlotArea implements IPlotArea {
 		Color old = getBackgroundColor();
 		if (old!=null && old.equals(color)) return;
 		super.setBackgroundColor(color);
-		if (ServiceHolder.getMacroService()!=null) {
-			ServiceHolder.getMacroService().publish(new ColorMacroEvent("ps", this, color));
-		}
 	}
 
 	protected ClickEvent createClickEvent(MouseEvent me) {
@@ -629,9 +622,6 @@ public class RegionArea extends PlotArea implements IPlotArea {
 				continue;
 			}
 		}
-		if (ServiceHolder.getMacroService()!=null) {
-			ServiceHolder.getMacroService().publish(new MacroEventObject(evt.getRegion()));
-		}
 	}
 
 	protected void fireRegionNameChanged(RegionEvent evt, String oldName) {
@@ -644,9 +634,6 @@ public class RegionArea extends PlotArea implements IPlotArea {
 				continue;
 			}
 		}
-		if (ServiceHolder.getMacroService()!=null) {	
-			ServiceHolder.getMacroService().publish(new RenameEventObject(evt.getRegion(), evt.getRegion().getName(), oldName));
-		}
 	}
 	
 	protected void fireRegionRemoved(RegionEvent evt) {
@@ -658,9 +645,6 @@ public class RegionArea extends PlotArea implements IPlotArea {
 				logger.error("Notifying of region removal", ne);
 				continue;
 			}
-		}
-		if (ServiceHolder.getMacroService()!=null) {	
-			ServiceHolder.getMacroService().publish(new DeleteEventObject(evt.getRegion(), evt.getRegion().getName()));
 		}
 	}
 	protected void fireRegionsRemoved(RegionEvent evt) {

@@ -13,10 +13,8 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 
-import org.dawb.common.ui.macro.ColorMacroEvent;
 import org.dawnsci.plotting.draw2d.swtxy.selection.AbstractSelectionRegion;
 import org.eclipse.core.runtime.preferences.InstanceScope;
-import org.eclipse.dawnsci.macro.api.MethodEventObject;
 import org.eclipse.dawnsci.plotting.api.axis.IAxis;
 import org.eclipse.dawnsci.plotting.api.histogram.ImageServiceBean.ImageOrigin;
 import org.eclipse.dawnsci.plotting.api.preferences.BasePlottingConstants;
@@ -198,9 +196,6 @@ public class XYRegionGraph extends XYGraph {
 		boolean orig = isShowLegend();
 		super.setShowLegend(showLeg);
 		getPreferenceStore().setValue(BasePlottingConstants.XY_SHOWLEGEND, showLeg);
-		if (orig!=showLeg && ServiceHolder.getMacroService()!=null) {
-			ServiceHolder.getMacroService().publish(new MethodEventObject("ps", this, showLeg));
-		}
 	}
 	
 	/**
@@ -210,9 +205,6 @@ public class XYRegionGraph extends XYGraph {
 		String oldTitle = getTitle();
 		if (oldTitle!=null && oldTitle.equals(title)) return;
 		super.setTitle(title);
-		if (ServiceHolder.getMacroService()!=null) {
-			ServiceHolder.getMacroService().publish(new MethodEventObject("ps", this, title));
-		}
 	}
 	
 	public void setTitleColor(Color titleColor) {
@@ -220,9 +212,6 @@ public class XYRegionGraph extends XYGraph {
 		Color old = getTitleColor();
 		if (old!=null && old.equals(titleColor)) return;
 		super.setTitleColor(titleColor);
-		if (ServiceHolder.getMacroService()!=null) {
-			ServiceHolder.getMacroService().publish(new ColorMacroEvent("ps", this, titleColor));
-		}
 	}
 
 	/**
