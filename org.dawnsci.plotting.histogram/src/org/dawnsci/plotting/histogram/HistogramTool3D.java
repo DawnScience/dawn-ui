@@ -8,12 +8,14 @@
  */
 package org.dawnsci.plotting.histogram;
 
+import org.dawnsci.plotting.histogram.ui.HistogramToolPage2;
+
 /**
  * Histogram toolpage for 3D
  * @author wqk87977
  *
  */
-public class HistogramTool3D extends HistogramToolPage {
+public class HistogramTool3D extends HistogramToolPage2 {
 
 	@Override
 	public ToolPageRole getToolPageRole() {
