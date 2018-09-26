@@ -14,6 +14,7 @@ import org.eclipse.january.dataset.IDataset;
 import org.eclipse.january.dataset.ILazyDataset;
 import org.eclipse.january.dataset.Slice;
 import org.eclipse.january.metadata.AxesMetadata;
+import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ComboViewer;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
@@ -22,7 +23,6 @@ import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
-import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 
 public class HyperPlotViewer extends IPlottingSystemViewer.Stub<Composite> {
@@ -51,15 +51,12 @@ public class HyperPlotViewer extends IPlottingSystemViewer.Stub<Composite> {
 	private ComboViewer viewer;
 	private Hyper3Dmode currentMode = Hyper3Dmode.AREA_TO_LINE;
 	
+	@Override
 	public void createControl(final Composite parent) {
 		control = new Composite(parent, SWT.None);
-		GridLayout layout = new GridLayout(1, false);
-		control.setLayout(layout);
-		squashLayout(layout);
+		control.setLayout(GridLayoutFactory.fillDefaults().create());
 		Composite hyperComp =new Composite(control, SWT.None);
-		layout = new GridLayout(1, false);
-		hyperComp.setLayout(layout);
-		squashLayout(layout);
+		hyperComp.setLayout(GridLayoutFactory.fillDefaults().create());
 		hyperComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		hyper = new HyperComponent();
 		hyper.createControl(hyperComp);
@@ -102,17 +99,6 @@ public class HyperPlotViewer extends IPlottingSystemViewer.Stub<Composite> {
 		}
 		
 		return null;
-	}
-	
-	private void squashLayout(GridLayout layout) {
-		layout.horizontalSpacing=0;
-		layout.verticalSpacing  =0;
-		layout.marginBottom     =0;
-		layout.marginTop        =0;
-		layout.marginLeft       =0;
-		layout.marginRight      =0;
-		layout.marginHeight     =0;
-		layout.marginWidth      =0;
 	}
 	
 	@Override
@@ -228,6 +214,7 @@ public class HyperPlotViewer extends IPlottingSystemViewer.Stub<Composite> {
 	}
 	
 	
+	@SuppressWarnings("unchecked")
 	@Override
 	public  <U extends ITrace> U createTrace(String name, Class<? extends ITrace> clazz) {
 		
