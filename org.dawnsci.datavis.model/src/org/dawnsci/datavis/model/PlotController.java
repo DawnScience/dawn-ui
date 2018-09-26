@@ -13,6 +13,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import org.dawnsci.datavis.api.ILazyPlotMode;
 import org.dawnsci.datavis.api.IPlotMode;
+import org.dawnsci.datavis.model.PlotEventObject.PlotEventType;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.Platform;
@@ -236,21 +237,9 @@ public class PlotController implements IPlotController, ILoadedFileInitialiser {
 	
 	private void updatePlotState(List<DataOptions> state, IPlotMode mode) {
 
-		Display.getDefault().syncExec(new Runnable() {
-			
-			@Override
-			public void run() {
-				Cursor cursor = Display.getCurrent().getSystemCursor(SWT.CURSOR_WAIT);
-				Shell[] shells = Display.getCurrent().getShells();
-				for (Shell s : shells) {
-					if (s!= null) {
-						s.setCursor(cursor);
-						s.setData(ID);
-					}
-				}
-				
-			}
-		});
+		//start update
+		firePlotEvent(new PlotEventObject(PlotEventType.LOADING, "Loading data..."));
+		
 		
 		IPlotMode localCurrentMode = currentMode;
 		IPlotDataModifier localModifier = currentModifier;
@@ -309,10 +298,13 @@ public class PlotController implements IPlotController, ILoadedFileInitialiser {
 			@Override
 			public void run() {
 				
+				firePlotEvent(new PlotEventObject(PlotEventType.PAINTING, "Painting..."));
+				
 				for (Runnable r : uiRunnables) {
 					try {
 						r.run();
 					} catch (Exception e) {
+						firePlotEvent(new PlotEventObject(PlotEventType.ERROR, "Error painting..."));
 						logger.error("Error running plot update",e);
 					}
 					
@@ -353,12 +345,7 @@ public class PlotController implements IPlotController, ILoadedFileInitialiser {
 				
 				getPlottingSystem().repaint();
 				
-				Shell[] shells = Display.getCurrent().getShells();
-				for (Shell s : shells) {
-					if (s!= null && ID.equals(s.getData())) {
-						s.setCursor(null);
-					}
-				}
+				firePlotEvent(new PlotEventObject(PlotEventType.READY, "Ready"));
 			}
 		});
 		
@@ -396,6 +383,7 @@ public class PlotController implements IPlotController, ILoadedFileInitialiser {
 
 			data = mode.sliceForPlot(view, slice,options,system);
 		} catch (Exception e) {
+			firePlotEvent(new PlotEventObject(PlotEventType.ERROR, "Error loading data..."));
 			logger.error("Could not slice data for plotting", e);
 		}
 		
@@ -704,6 +692,12 @@ public class PlotController implements IPlotController, ILoadedFileInitialiser {
 				po = getPlottableObject(d, getDefaultMode(rank));
 				d.setPlottableObject(po);
 			}
+		}
+	}
+	
+	private void firePlotEvent(PlotEventObject event) {
+		for (PlotModeChangeEventListener l : listeners) {
+			l.plotStateEvent(event);
 		}
 	}
 	

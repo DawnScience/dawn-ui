@@ -9,6 +9,7 @@ import javax.inject.Inject;
 import org.dawnsci.datavis.model.IPlotController;
 import org.dawnsci.datavis.model.IPlotDataModifier;
 import org.dawnsci.datavis.model.PlotDataModifierStack;
+import org.dawnsci.datavis.model.PlotEventObject;
 import org.dawnsci.datavis.model.PlotModeChangeEventListener;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.swt.SWT;
@@ -144,7 +145,20 @@ public class PlotModifierOffsetControl {
 			
 		});
 		
-		listener = this::plotControllerUpdate;
+		listener = new PlotModeChangeEventListener() {
+			
+			@Override
+			public void plotStateEvent(PlotEventObject event) {
+				//do nothing
+				
+			}
+			
+			@Override
+			public void plotModeChanged() {
+				plotControllerUpdate();
+			}
+		};
+		
 		
 		controller.addPlotModeListener(listener);
 		

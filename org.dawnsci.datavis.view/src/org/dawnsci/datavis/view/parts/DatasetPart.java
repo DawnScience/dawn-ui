@@ -17,6 +17,8 @@ import org.dawnsci.datavis.model.IRefreshable;
 import org.dawnsci.datavis.model.ISliceChangeListener;
 import org.dawnsci.datavis.model.LoadedFile;
 import org.dawnsci.datavis.model.NDimensions;
+import org.dawnsci.datavis.model.PlotEventObject;
+import org.dawnsci.datavis.model.PlotModeChangeEventListener;
 import org.dawnsci.datavis.model.PlottableObject;
 import org.dawnsci.datavis.model.SliceChangeEvent;
 import org.dawnsci.datavis.view.DataVisSelectionUtils;
@@ -26,6 +28,8 @@ import org.eclipse.e4.ui.di.Focus;
 import org.eclipse.e4.ui.model.application.ui.basic.MPart;
 import org.eclipse.e4.ui.workbench.modeling.ESelectionService;
 import org.eclipse.e4.ui.workbench.modeling.ISelectionListener;
+import org.eclipse.jface.layout.GridDataFactory;
+import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ComboViewer;
 import org.eclipse.jface.viewers.ISelection;
@@ -46,6 +50,7 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.ProgressBar;
 
 public class DatasetPart {
 
@@ -66,6 +71,7 @@ public class DatasetPart {
 
 	private ISliceChangeListener sliceListener;
 	private ISelectionListener selectionListener;
+	private PlotModeChangeEventListener plotListener;
 
 	@PostConstruct
 	public void createComposite(Composite parent) {
@@ -117,7 +123,36 @@ public class DatasetPart {
 
 		plotModeOptionsViewer = new ComboViewer(plotTypeComposite);
 		table = new DataConfigurationTable();
-		table.createControl(parent);
+		
+		Composite lower = new Composite(parent, SWT.None);
+		lower.setLayout(GridLayoutFactory.fillDefaults().create());
+		table.createControl(lower);
+		table.setLayoutData(GridDataFactory.fillDefaults().grab(true, true).create());
+		
+		Label progress = new Label(lower,SWT.None);
+		progress.setLayoutData(GridDataFactory.fillDefaults().create());
+		progress.setText("Ready");
+		
+		plotListener = new PlotModeChangeEventListener() {
+			
+			@Override
+			public void plotStateEvent(PlotEventObject event) {
+				if (Display.getCurrent() == null) {
+					Display.getDefault().asyncExec(() -> plotStateEvent(event));
+					return;
+				}
+				
+				progress.setText(event.getMessage());
+			}
+			
+			@Override
+			public void plotModeChanged() {
+				//do nothing
+				
+			}
+		};
+		
+		plotController.addPlotModeListener(plotListener);
 
 		plotModeOptionsViewer.getCombo().setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 		plotModeOptionsViewer.setContentProvider(new ArrayContentProvider());
@@ -174,8 +209,7 @@ public class DatasetPart {
 		tableForm.right = new FormAttachment(100,0);
 		tableForm.bottom = new FormAttachment(100,0);
 
-		table.setLayoutData(tableForm);
-
+		lower.setLayoutData(tableForm);
 
 		selectionListener = new ISelectionListener() {
 
@@ -308,6 +342,7 @@ public class DatasetPart {
 		viewer.dispose();
 		fileController.removeStateListener(fileStateListener);
 		selectionService.removeSelectionListener(LOADED_FILE_PART_ID, selectionListener);
+		plotController.removePlotModeListener(plotListener);
 		plotController.dispose();
 	}
 
