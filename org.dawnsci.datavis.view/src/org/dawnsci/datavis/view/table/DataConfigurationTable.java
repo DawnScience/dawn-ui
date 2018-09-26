@@ -1,5 +1,6 @@
 package org.dawnsci.datavis.view.table;
 
+import org.dawnsci.datavis.model.ISliceAssist;
 import org.dawnsci.datavis.model.NDimensions;
 import org.eclipse.january.dataset.Slice;
 import org.eclipse.jface.layout.TableColumnLayout;
@@ -160,6 +161,10 @@ public class DataConfigurationTable {
 			tableViewer.refresh();
 		}
 		
+	}
+	
+	public void setSliceAssist(ISliceAssist sliceAssist) {
+		sliceSupport.setSliceAssist(sliceAssist);
 	}
 	
 }

@@ -7,6 +7,7 @@ import org.dawnsci.datavis.model.NDimensions;
 import org.dawnsci.datavis.view.DataVisSelectionUtils;
 import org.eclipse.january.DatasetException;
 import org.eclipse.january.dataset.Dataset;
+import org.eclipse.january.dataset.DatasetFactory;
 import org.eclipse.january.dataset.DatasetUtils;
 import org.eclipse.january.dataset.IDataset;
 import org.eclipse.january.dataset.ILazyDataset;
@@ -39,12 +40,12 @@ public class AxisSliceDialog extends Dialog {
 	private Integer start;
 	private Integer stop;
 	
-	protected AxisSliceDialog(Shell parentShell, NDimensions nDims, int dim) {
+	public AxisSliceDialog(Shell parentShell, NDimensions nDims, int dim) {
 		super(parentShell);
 		this.dim = dim;
 		this.nDimensions = nDims;
 	}
-	
+
 	@Override
 	protected Control createDialogArea(Composite parent) {
 		Composite container = (Composite) super.createDialogArea(parent);
@@ -75,6 +76,9 @@ public class AxisSliceDialog extends Dialog {
 		ILazyDataset sliceView = d.getLazyDataset().getSliceView(slice);
 		AxesMetadata meta = sliceView.getFirstMetadata(AxesMetadata.class);
 		ILazyDataset ax = meta.getAxes()[dim];
+		if (ax == null) {
+			ax = DatasetFactory.createRange(nDimensions.getSize(dim));
+		}
 		try {
 			IDataset dax = ax.getSlice();
 			axis = DatasetUtils.convertToDataset(dax.squeeze());

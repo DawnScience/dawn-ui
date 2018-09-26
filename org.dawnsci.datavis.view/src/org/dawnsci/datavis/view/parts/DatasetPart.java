@@ -14,6 +14,7 @@ import org.dawnsci.datavis.model.FileControllerStateEventListener;
 import org.dawnsci.datavis.model.IFileController;
 import org.dawnsci.datavis.model.IPlotController;
 import org.dawnsci.datavis.model.IRefreshable;
+import org.dawnsci.datavis.model.ISliceAssist;
 import org.dawnsci.datavis.model.ISliceChangeListener;
 import org.dawnsci.datavis.model.LoadedFile;
 import org.dawnsci.datavis.model.NDimensions;
@@ -22,12 +23,15 @@ import org.dawnsci.datavis.model.PlotModeChangeEventListener;
 import org.dawnsci.datavis.model.PlottableObject;
 import org.dawnsci.datavis.model.SliceChangeEvent;
 import org.dawnsci.datavis.view.DataVisSelectionUtils;
+import org.dawnsci.datavis.view.table.AxisSliceDialog;
 import org.dawnsci.datavis.view.table.DataConfigurationTable;
 import org.dawnsci.datavis.view.table.DataOptionTableViewer;
 import org.eclipse.e4.ui.di.Focus;
 import org.eclipse.e4.ui.model.application.ui.basic.MPart;
 import org.eclipse.e4.ui.workbench.modeling.ESelectionService;
 import org.eclipse.e4.ui.workbench.modeling.ISelectionListener;
+import org.eclipse.january.dataset.Slice;
+import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.viewers.ArrayContentProvider;
@@ -50,7 +54,6 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.ProgressBar;
 
 public class DatasetPart {
 
@@ -128,6 +131,41 @@ public class DatasetPart {
 		lower.setLayout(GridLayoutFactory.fillDefaults().create());
 		table.createControl(lower);
 		table.setLayoutData(GridDataFactory.fillDefaults().grab(true, true).create());
+		table.setSliceAssist(new ISliceAssist() {
+			
+			@Override
+			public Slice getSlice(NDimensions ndims, int dimension) {
+				AxisSliceDialog d = new AxisSliceDialog(Display.getDefault().getActiveShell(), ndims, dimension);
+				d.create();
+		
+				if (Dialog.OK == d.open()) {
+		
+					Integer start = d.getStart();
+					Integer stop = d.getStop();
+		
+					if (start == null) {
+						start = 0;
+					}
+		
+					if (stop == null) {
+						stop = ndims.getSize(dimension);
+					}
+		
+					Slice s = new Slice();
+					s.setStart(start);
+					s.setStop(stop);
+					s.setStep(1);
+					return s;
+				}
+				return null;
+			}
+
+			@Override
+			public String getLabel() {
+
+				return "Set from axis...";
+			}
+		});
 		
 		Label progress = new Label(lower,SWT.None);
 		progress.setLayoutData(GridDataFactory.fillDefaults().create());
