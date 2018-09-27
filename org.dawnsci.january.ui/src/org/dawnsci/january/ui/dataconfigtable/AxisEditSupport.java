@@ -1,6 +1,6 @@
-package org.dawnsci.datavis.view.table;
+package org.dawnsci.january.ui.dataconfigtable;
 
-import org.dawnsci.datavis.model.NDimensions;
+import org.dawnsci.january.model.NDimensions;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.ColumnViewer;

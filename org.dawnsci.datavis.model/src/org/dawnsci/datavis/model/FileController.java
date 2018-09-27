@@ -17,6 +17,7 @@ import org.dawnsci.datavis.model.fileconfig.ILoadedFileConfiguration;
 import org.dawnsci.datavis.model.fileconfig.ImageFileConfiguration;
 import org.dawnsci.datavis.model.fileconfig.NexusFileConfiguration;
 import org.dawnsci.datavis.model.fileconfig.XYEFileConfiguration;
+import org.dawnsci.january.model.NDimensions;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.dawnsci.analysis.api.io.ILoaderService;
 import org.eclipse.jface.operation.IRunnableWithProgress;

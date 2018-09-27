@@ -3,8 +3,8 @@ package org.dawnsci.datavis.view.table;
 import java.util.List;
 
 import org.dawnsci.datavis.model.DataOptions;
-import org.dawnsci.datavis.model.NDimensions;
 import org.dawnsci.datavis.view.DataVisSelectionUtils;
+import org.dawnsci.january.model.NDimensions;
 import org.eclipse.january.DatasetException;
 import org.eclipse.january.dataset.Dataset;
 import org.eclipse.january.dataset.DatasetFactory;

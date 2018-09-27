@@ -1,6 +1,7 @@
 package org.dawnsci.datavis.model;
 
 import org.dawnsci.datavis.api.IPlotMode;
+import org.dawnsci.january.model.NDimensions;
 
 public class PlottableObject {
 

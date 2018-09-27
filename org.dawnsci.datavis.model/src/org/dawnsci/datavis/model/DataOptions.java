@@ -6,6 +6,9 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.dawnsci.datavis.api.IDataPackage;
+import org.dawnsci.january.model.ISliceChangeListener;
+import org.dawnsci.january.model.NDimensions;
+import org.dawnsci.january.model.SliceChangeEvent;
 import org.eclipse.dawnsci.analysis.api.tree.Node;
 import org.eclipse.january.MetadataException;
 import org.eclipse.january.dataset.ILazyDataset;

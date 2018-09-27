@@ -7,10 +7,10 @@ import java.util.Arrays;
 
 import org.dawnsci.datavis.model.DataOptions;
 import org.dawnsci.datavis.model.LoadedFile;
-import org.dawnsci.datavis.model.NDimensions;
 import org.dawnsci.datavis.model.PlotModeXY;
 import org.dawnsci.datavis.model.PlottableObject;
 import org.dawnsci.datavis.model.fileconfig.CurrentStateFileConfiguration;
+import org.dawnsci.january.model.NDimensions;
 import org.eclipse.january.dataset.DatasetFactory;
 import org.eclipse.january.dataset.Slice;
 import org.eclipse.january.metadata.Metadata;

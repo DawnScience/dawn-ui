@@ -4,7 +4,7 @@ import static org.junit.Assert.*;
 
 import org.dawnsci.datavis.model.DataOptions;
 import org.dawnsci.datavis.model.LoadedFile;
-import org.dawnsci.datavis.model.NDimensions;
+import org.dawnsci.january.model.NDimensions;
 import org.eclipse.dawnsci.analysis.api.tree.Node;
 import org.eclipse.january.metadata.AxesMetadata;
 import org.junit.BeforeClass;

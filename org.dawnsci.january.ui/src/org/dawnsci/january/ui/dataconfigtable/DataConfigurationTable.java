@@ -1,7 +1,7 @@
-package org.dawnsci.datavis.view.table;
+package org.dawnsci.january.ui.dataconfigtable;
 
-import org.dawnsci.datavis.model.ISliceAssist;
-import org.dawnsci.datavis.model.NDimensions;
+import org.dawnsci.january.model.ISliceAssist;
+import org.dawnsci.january.model.NDimensions;
 import org.eclipse.january.dataset.Slice;
 import org.eclipse.jface.layout.TableColumnLayout;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
