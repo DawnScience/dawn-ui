@@ -8,8 +8,8 @@ import java.util.Optional;
 import org.dawnsci.datavis.api.IPlotMode;
 import org.dawnsci.datavis.model.DataOptions;
 import org.dawnsci.datavis.model.LoadedFile;
-import org.dawnsci.datavis.model.NDimensions;
 import org.dawnsci.datavis.model.PlottableObject;
+import org.dawnsci.january.model.NDimensions;
 import org.eclipse.january.dataset.Slice;
 
 public class CurrentStateFileConfiguration implements ILoadedFileConfiguration {

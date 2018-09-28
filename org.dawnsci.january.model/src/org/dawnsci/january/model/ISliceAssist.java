@@ -1,4 +1,4 @@
-package org.dawnsci.datavis.model;
+package org.dawnsci.january.model;
 
 import org.eclipse.january.dataset.Slice;
 

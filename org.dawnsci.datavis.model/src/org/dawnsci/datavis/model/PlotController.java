@@ -14,6 +14,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import org.dawnsci.datavis.api.ILazyPlotMode;
 import org.dawnsci.datavis.api.IPlotMode;
 import org.dawnsci.datavis.model.PlotEventObject.PlotEventType;
+import org.dawnsci.january.model.NDimensions;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.Platform;

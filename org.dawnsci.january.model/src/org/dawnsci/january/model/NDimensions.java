@@ -1,4 +1,4 @@
-package org.dawnsci.datavis.model;
+package org.dawnsci.january.model;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -242,6 +242,7 @@ public class NDimensions {
 	
 	public void setUpAxes(String name, Map<String,int[]> axes, String[] primary) {
 		
+		@SuppressWarnings("unchecked")
 		List<String>[] options = new List[dimensions.length];
 		for (int i = 0 ; i < options.length; i++) {
 			options[i] = new ArrayList<String>();

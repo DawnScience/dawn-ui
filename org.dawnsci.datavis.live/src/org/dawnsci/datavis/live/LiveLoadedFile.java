@@ -11,7 +11,7 @@ import java.util.Set;
 import org.dawnsci.datavis.model.DataOptions;
 import org.dawnsci.datavis.model.IRefreshable;
 import org.dawnsci.datavis.model.LoadedFile;
-import org.dawnsci.datavis.model.NDimensions;
+import org.dawnsci.january.model.NDimensions;
 import org.eclipse.dawnsci.analysis.api.io.IDataHolder;
 import org.eclipse.dawnsci.analysis.api.io.ILoaderService;
 import org.eclipse.dawnsci.analysis.api.tree.Attribute;
