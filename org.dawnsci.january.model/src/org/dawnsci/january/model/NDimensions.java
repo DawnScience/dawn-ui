@@ -2,7 +2,7 @@ package org.dawnsci.january.model;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -16,14 +16,15 @@ public class NDimensions {
 	public static final String INDICES = "indices";
 	
 	private Dimension[] dimensions;
-	private HashSet<ISliceChangeListener > listeners;
+	private LinkedHashSet<ISliceChangeListener > listeners;
 	private Object[] options = null;
 	private Object parent = null;
+	private boolean sliceFullRange = false;
 	
 	public NDimensions(int[] shape, Object parent) {
 		dimensions = new Dimension[shape.length];
 		for (int i = 0; i < dimensions.length; i++) dimensions[i] = new Dimension(i, shape[i]);
-		listeners = new HashSet<>();
+		listeners = new LinkedHashSet<>();
 		this.parent = parent;
 	}
 	
@@ -33,15 +34,16 @@ public class NDimensions {
 			dimensions[i] = new Dimension(toCopy.dimensions[i]);
 		}
 		this.options = toCopy.options != null ? toCopy.options.clone() : null;
-		listeners = new HashSet<>();
+		listeners = new LinkedHashSet<>();
 		this.parent = toCopy.parent;
+		this.sliceFullRange = toCopy.sliceFullRange;
 	}
 	
 	public void setOptions(Object[] options) {
 		this.options = options;
 		int c = 0;
 		for (int i = 0; i < dimensions.length; i++) {
-			dimensions[i].setSlice(new Slice(0, 1, 1));
+			dimensions[i].setSlice(sliceFullRange ? new Slice(dimensions[i].getSize()) : new Slice(0, 1, 1));
 			dimensions[i].setDescription(null);
 		}
 		
@@ -134,7 +136,7 @@ public class NDimensions {
 		if (dim.getSize() == 1) {
 			description = dim.getDescription();
 			dim.setDescription(null);
-			dim.setSlice(new Slice(1));
+			dim.setSlice(sliceFullRange ? new Slice(dim.getSize()) : new Slice(0, 1, 1));
 			return;
 		}
 		
@@ -143,13 +145,13 @@ public class NDimensions {
 			.findAny()
 			.ifPresent(d -> {
 				d.setDescription(null);
-				d.setSlice(new Slice(1));
+				d.setSlice(sliceFullRange ? new Slice(d.getSize()) : new Slice(0, 1, 1));
 			});
 		
 		if (desc == null || desc.isEmpty()) {
 			description = dim.getDescription();
 			dim.setDescription(null);
-			dim.setSlice(new Slice(1));
+			dim.setSlice(sliceFullRange ? new Slice(dim.getSize()) : new Slice(1));
 		} else if (dim.getDescription().isEmpty()) {
 			dim.setSlice(new Slice(dim.getSize()));
 		} else {
@@ -171,7 +173,7 @@ public class NDimensions {
 		for (Dimension d : dimensions) {
 			if (d != dim && desc != null && desc.equals(d.getDescription())) {
 				d.setDescription(null);
-				d.setSlice(new Slice(1));
+				d.setSlice(sliceFullRange ? new Slice(dim.getSize()) : new Slice(1));
 			}
 		}
 		
@@ -326,6 +328,10 @@ public class NDimensions {
 		}
 
 		return names;
+	}
+	
+	public void setSliceFullRange(boolean sliceFullRange) {
+		this.sliceFullRange = sliceFullRange;
 	}
 
 }

@@ -11,38 +11,32 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 
-import org.dawb.common.ui.util.DatasetNameUtils;
 import org.dawb.common.ui.widgets.ActionBarWrapper;
-import org.dawb.common.util.io.FileUtils;
 import org.dawnsci.conversion.schemes.ProcessConversionScheme;
+import org.dawnsci.datavis.model.DataOptions;
+import org.dawnsci.datavis.model.LoadedFile;
+import org.dawnsci.january.model.ISliceChangeListener;
+import org.dawnsci.january.model.NDimensions;
+import org.dawnsci.january.model.SliceChangeEvent;
+import org.dawnsci.january.ui.dataconfigtable.DataConfigurationTable;
 import org.dawnsci.processing.ui.ServiceHolder;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.dawnsci.analysis.api.conversion.IConversionContext;
-import org.eclipse.dawnsci.analysis.api.conversion.IConversionScheme;
 import org.eclipse.dawnsci.analysis.api.io.IDataHolder;
-import org.eclipse.dawnsci.analysis.dataset.slicer.Slicer;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.PlotType;
 import org.eclipse.dawnsci.plotting.api.PlottingFactory;
 import org.eclipse.dawnsci.plotting.api.trace.MetadataPlotUtils;
-import org.eclipse.dawnsci.slicing.api.SlicingFactory;
-import org.eclipse.dawnsci.slicing.api.system.AxisChoiceEvent;
-import org.eclipse.dawnsci.slicing.api.system.AxisChoiceListener;
-import org.eclipse.dawnsci.slicing.api.system.AxisType;
-import org.eclipse.dawnsci.slicing.api.system.DimensionalEvent;
-import org.eclipse.dawnsci.slicing.api.system.DimensionalListener;
-import org.eclipse.dawnsci.slicing.api.system.DimsData;
-import org.eclipse.dawnsci.slicing.api.system.DimsDataList;
-import org.eclipse.dawnsci.slicing.api.system.ISliceSystem;
-import org.eclipse.dawnsci.slicing.api.system.RangeMode;
-import org.eclipse.dawnsci.slicing.api.system.SliceSource;
-import org.eclipse.dawnsci.slicing.api.tool.AbstractSlicingTool;
-import org.eclipse.dawnsci.slicing.api.tool.ISlicingTool;
-import org.eclipse.january.IMonitor;
+import org.eclipse.january.DatasetException;
 import org.eclipse.january.dataset.IDataset;
-import org.eclipse.january.dataset.ILazyDataset;
-import org.eclipse.january.metadata.AxesMetadata;
+import org.eclipse.january.dataset.ShapeUtils;
+import org.eclipse.january.dataset.Slice;
+import org.eclipse.january.dataset.SliceND;
+import org.eclipse.jface.layout.GridDataFactory;
+import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.ComboViewer;
@@ -55,14 +49,13 @@ import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
+import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.slf4j.Logger;
@@ -70,17 +63,24 @@ import org.slf4j.LoggerFactory;
 
 public class SetUpProcessWizardPage extends WizardPage {
 
+	private static final Object[] LINE_OPTIONS = {"X"};
+	private static final Object[] IMAGE_OPTIONS = {"X","Y"};
+	
 	public SetUpProcessWizardPage() {
 		super("Set up input data");
 	}
 
-	private ISliceSystem sliceComponent;
 	private IPlottingSystem<Composite> system;
 	private IConversionContext context;
 	private ComboViewer cviewer;
 	private String rootName = null;
+	private DataConfigurationTable table;
+	private NDimensions nDimensions;
+	private DataOptions dataOption;
+	private LoadedFile loadedFile;
+	private Executor executor;
 	
-	private final static Logger logger = LoggerFactory.getLogger(SetUpProcessWizardPage.class);
+	private static final Logger logger = LoggerFactory.getLogger(SetUpProcessWizardPage.class);
 	
 	protected SetUpProcessWizardPage(IConversionContext context) {
 		super("Set up input data");
@@ -88,6 +88,7 @@ public class SetUpProcessWizardPage extends WizardPage {
 		setTitle("Set up data for processing");
 		this.context = context;
 		context.setConversionScheme(new ProcessConversionScheme());
+		executor = Executors.newSingleThreadExecutor();
 	}
 	
 	@Override
@@ -99,9 +100,9 @@ public class SetUpProcessWizardPage extends WizardPage {
 		setControl(sashForm);
 		
 		final Composite left = new Composite(sashForm, SWT.NONE);
-		left.setLayout(new GridLayout(2, false));
+		left.setLayout(GridLayoutFactory.fillDefaults().numColumns(2).equalWidth(false).create());
 		Composite right = new Composite(sashForm, SWT.NONE);
-		right.setLayout(new GridLayout());
+		right.setLayout(GridLayoutFactory.fillDefaults().create());
 		
 		Label l = new Label(left, SWT.NONE);
 		l.setText("Select dataset:");
@@ -109,109 +110,64 @@ public class SetUpProcessWizardPage extends WizardPage {
 		cviewer = new ComboViewer(left);
 		cviewer.setContentProvider(new BasicContentProvider());
 		cviewer.setLabelProvider(new ViewLabelProvider());
-		
-		cviewer.addSelectionChangedListener(new ISelectionChangedListener() {
-			
-			@Override
-			public void selectionChanged(SelectionChangedEvent event) {
-				Entry<String, int[]> sel =(Entry<String, int[]>)((StructuredSelection)event.getSelection()).getFirstElement();
-				updateDataset(sel.getKey());
-				
-			}
-		});
+		cviewer.getControl().setLayoutData(GridDataFactory.fillDefaults().create());
 		
 		final Button d1 = new Button(left, SWT.RADIO);
 		d1.setText("Line [1D]");
 		final Button d2 = new Button(left, SWT.RADIO);
 		d2.setText("Image [2D]");
 		
-		try {
-			this.sliceComponent = SlicingFactory.createSliceSystem("org.dawb.workbench.views.h5GalleryView");
-		} catch (Exception e) {
-			logger.error("Cannot create slice system!", e);
-			return;
-		}
+		table = new DataConfigurationTable();
+		table.createControl(left);
 
-	    sliceComponent.setRangeMode(RangeMode.MULTI_RANGE);
 
-	    final Control slicer = sliceComponent.createPartControl(left);
 		GridData data = new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1);
-		data.minimumHeight=560;
-		slicer.setLayoutData(data);
-		sliceComponent.setVisible(true);
-		sliceComponent.setSliceActionsEnabled(false);
-		sliceComponent.setToolbarVisible(false);
-
-		sliceComponent.addAxisChoiceListener(new AxisChoiceListener() {
-			
-			@Override
-			public void axisChoicePerformed(AxisChoiceEvent evt) {
-				updatePlot(context);
-				
-			}
-		});
+		table.setLayoutData(data);
 		
-		final ISlicingTool image = getImageSlicingTool();
-		image.setSlicingSystem(sliceComponent);
-		
-		final ISlicingTool line = getLineSliceTool();
-		line.setSlicingSystem(sliceComponent);
-		
-		d1.addSelectionListener(new SelectionListener() {
+		d1.addSelectionListener(new SelectionAdapter() {
 			
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				if (!d1.getSelection()) return;
-				sliceComponent.militarize(line);
-				updatePlot(context);
+				updateDataset(dataOption.getName(), LINE_OPTIONS);
+				updatePlot();
 				
 			}
 			
-			@Override
-			public void widgetDefaultSelected(SelectionEvent e) {
-				
-			}
 		});
 		
-		d2.addSelectionListener(new SelectionListener() {
+		d2.addSelectionListener(new SelectionAdapter() {
 			
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				if (!d2.getSelection()) return;
-				sliceComponent.militarize(image);
-				updatePlot(context);
+				updateDataset(dataOption.getName(), IMAGE_OPTIONS);
+				updatePlot();
 				
 			}
-			
-			@Override
-			public void widgetDefaultSelected(SelectionEvent e) {
-				
-			}
-		});
-		
-		sliceComponent.addDimensionalListener(new DimensionalListener() {
-			
-			@Override
-			public void dimensionsChanged(DimensionalEvent evt) {
-				updatePlot(context);
-			}
+
 		});
 		
 		cviewer.addSelectionChangedListener(new ISelectionChangedListener() {
 			
 			@Override
 			public void selectionChanged(SelectionChangedEvent event) {
+				@SuppressWarnings("unchecked")
 				Entry<String, int[]> sel =(Entry<String, int[]>)((StructuredSelection)event.getSelection()).getFirstElement();
-				updateDataset(sel.getKey());
+				Object[] options = null;
 				if (sel.getValue().length < 2) {
 					d1.setSelection(true);
 					d2.setSelection(false);
-					sliceComponent.militarize(line);
+					d2.setEnabled(false);
+					options = LINE_OPTIONS;
 				} else {
-					sliceComponent.militarize(image);
-					d2.setSelection(true);
 					d1.setSelection(false);
+					d2.setSelection(true);
+					d2.setEnabled(true);
+					options = IMAGE_OPTIONS;
 				}
+				
+				updateDataset(sel.getKey(), options);
 				
 			}
 		});
@@ -219,15 +175,19 @@ public class SetUpProcessWizardPage extends WizardPage {
 		
 		createPlottingSystem(right);
 		
-		//Everything that needs datasetnames after here
-		
 		try {
 			getContainer().run(true, true, new IRunnableWithProgress() {
 
 				public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
 					
 					try {
-						final Map<String,int[]> datasetNames = getDatasetInfo();
+						
+						IDataHolder dh = ServiceHolder.getLoaderService().getData(context.getFilePaths().get(0), null);
+						
+						loadedFile = new LoadedFile(dh);
+						
+						Map<String, int[]> datasetNames = sortedByRankThenLength(loadedFile.getDataOptions());
+						
 						String dsName = "";
 						if (context.getDatasetNames() != null) {
 							dsName = context.getDatasetNames().get(0);
@@ -237,14 +197,7 @@ public class SetUpProcessWizardPage extends WizardPage {
 						
 						final String dn = dsName;
 
-						// TODO Changed this to leave loading image stacks
-						// out of this because we are looking for dsName
-						// which should be there - is this right?
-						final IDataHolder dh  = ServiceHolder.getLoaderService().getData(context.getFilePaths().get(0), null);
-						ILazyDataset lzGlobal = dh.getLazyDataset(dsName);
-						//local copy since we are messing with metadata
-						final ILazyDataset lz = lzGlobal.getSliceView();
-						lz.clearMetadata(null);
+						dataOption = loadedFile.getDataOption(dn);
 						
 						Display.getDefault().asyncExec(new Runnable() {
 							
@@ -267,22 +220,49 @@ public class SetUpProcessWizardPage extends WizardPage {
 									cviewer.getCombo().select(0);
 								}
 								
-								left.layout();
 								
+								@SuppressWarnings("unchecked")
 								Entry<String, int[]> sel =(Entry<String, int[]>)((StructuredSelection)cviewer.getSelection()).getFirstElement();
+								
+								Object[] options = null;
 								
 								if (sel.getValue().length < 2) {
 									d1.setSelection(true);
 									d2.setSelection(false);
+									options = LINE_OPTIONS;
 								} else {
 									d1.setSelection(false);
 									d2.setSelection(true);
+									options = IMAGE_OPTIONS;
 								}
 								
-								final SliceSource source = new SliceSource(dh, lz, dn, context.getFilePaths().get(0), false);
-								sliceComponent.setData(source);
+								DataOptions dop = loadedFile.getDataOption(dn);
+								nDimensions = dop.buildNDimensions();
+								nDimensions.setSliceFullRange(true);
+								nDimensions.addSliceListener(new ISliceChangeListener() {
+									
+									@Override
+									public void sliceChanged(SliceChangeEvent event) {
+										// TODO Auto-generated method stub
+										
+									}
+									
+									@Override
+									public void optionsChanged(SliceChangeEvent event) {
+										updatePlot();
+										
+									}
+									
+									@Override
+									public void axisChanged(SliceChangeEvent event) {
+										updatePlot();
+									}
+								});
+								nDimensions.setOptions(options);
+								table.setMaxSliceNumber(Integer.MAX_VALUE);
+								table.setInput(nDimensions);
 
-								updatePlot(context);
+								updatePlot();
 								
 							}
 						});
@@ -298,64 +278,62 @@ public class SetUpProcessWizardPage extends WizardPage {
 		}
 	}
 	
-	private void updatePlot(IConversionContext context) {
-		Entry<String, int[]> selection = (Entry<String, int[]>)((IStructuredSelection)cviewer.getSelection()).getFirstElement();
-		String path = context.getFilePaths().get(0);
-		IDataHolder dh;
-		try {
-			dh = ServiceHolder.getLoaderService().getData(path, new IMonitor.Stub());
-			ILazyDataset lazyDataset = dh.getLazyDataset(selection.getKey());
-			//local copy so not to change data holder copies metadata
-			lazyDataset = lazyDataset.getSliceView();
-			lazyDataset.clearMetadata(null);
-			final DimsDataList dims = sliceComponent.getDimsDataList();
-			Map<Integer, String> sliceDims = new HashMap<Integer, String>();
-			
-			for (DimsData dd : dims.iterable()) {
-				if (dd.isSlice()) {
-					sliceDims.put(dd.getDimension(), String.valueOf(dd.getSlice()));
-				} else if (dd.isTextRange()) {
-					sliceDims.put(dd.getDimension(), dd.getSliceRange()!=null ? dd.getSliceRange() : "all");
+	private void updatePlot() {
+
+			NDimensions nd = new NDimensions(nDimensions);
+			for (int i = 0; i < nd.getRank(); i++) {
+				if (nd.getDescription(i).isEmpty()) {
+					nd.setSlice(i, new Slice(0,1,1));
 				}
 			}
 			
-			AxesMetadata ax = ServiceHolder.getLoaderService().getAxesMetadata(lazyDataset, path, sanitizeAxesNames(sliceComponent.getAxesNames()),true);
-			lazyDataset.setMetadata(ax);
-			IDataset firstSlice = Slicer.getFirstSlice(lazyDataset, sliceDims);
+			SliceND s = nd.buildSliceND();
 			
-			MetadataPlotUtils.plotDataWithMetadata(firstSlice, system);
-		} catch (Exception e) {
-			logger.error("Could not update plot",e);
-		}
+			executor.execute(() -> {
+				try {
+					IDataset d = dataOption.getLazyDataset().getSlice(s).squeeze();
+					Display.getDefault().asyncExec(() -> MetadataPlotUtils.plotDataWithMetadata(d, system));
+				} catch (DatasetException e) {
+					logger.error("Error slicing data for plot");
+				}
+			});
 	}
 	
-	private void updateDataset(String name) {
-		IDataHolder dh;
-		try {
-			dh = ServiceHolder.getLoaderService().getData(context.getFilePaths().get(0), null);
-			ILazyDataset lz  = dh.getLazyDataset(name);
-			//take local copy!
-			lz = lz.getSliceView();
-			final SliceSource source = new SliceSource(dh, lz, name, context.getFilePaths().get(0), false);
-			sliceComponent.setData(source);
-		} catch (Exception e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		}
+	private void updateDataset(String name, Object[] options) {
+		dataOption = loadedFile.getDataOption(name);
+		nDimensions = dataOption.buildNDimensions();
+		nDimensions.setSliceFullRange(true);
+		nDimensions.setOptions(options);
+		nDimensions.addSliceListener(new ISliceChangeListener() {
+			
+			@Override
+			public void sliceChanged(SliceChangeEvent event) {
+			}
+			
+			@Override
+			public void optionsChanged(SliceChangeEvent event) {
+				updatePlot();
+				
+			}
+			
+			@Override
+			public void axisChanged(SliceChangeEvent event) {
+				updatePlot();
+				
+			}
+		});
+			table.setInput(nDimensions);
 		
-		updatePlot(context);
+		updatePlot();
 	}
 	
-	private Map<String, int[]> getDatasetInfo() throws Exception{
+	private Map<String, int[]> sortedByRankThenLength(List<DataOptions> options) {
 		
-		final IConversionScheme scheme = context.getConversionScheme();
-		final Map<String, int[]>     names = DatasetNameUtils.getDatasetInfo(context.getFilePaths().get(0), scheme);
-
-        rootName = FileUtils.getRootName(names.keySet());
-        return names;
-	}
-	
-	private Map<String, int[]> sortedByRankThenLength(Map<String, int[]> map) {
+		Map<String, int[]> map = new HashMap<>();
+		for (DataOptions d : options) {
+			int[] shape = d.getLazyDataset().getShape();
+			map.put(d.getName(), shape);
+		}
 		
 		List<Entry<String, int[]>> ll = new LinkedList<Entry<String, int[]>>(map.entrySet());
 		
@@ -373,7 +351,12 @@ public class SetUpProcessWizardPage extends WizardPage {
 		
 		Map<String, int[]> lhm = new LinkedHashMap<String, int[]>();
 		
-		for (Entry<String, int[]> e : ll) lhm.put(e.getKey(), e.getValue());
+		for (Entry<String, int[]> e : ll) {
+			if (e.getValue().length == 1 || ShapeUtils.squeezeShape(e.getValue(), false).length < 1) {
+				continue;
+			}
+			lhm.put(e.getKey(), e.getValue());
+		}
 		
 		return lhm;
 		
@@ -381,100 +364,25 @@ public class SetUpProcessWizardPage extends WizardPage {
 	
 	
 	public void populateContext() {
+		
+		@SuppressWarnings("unchecked")
 		Entry<String, int[]> selection = (Entry<String, int[]>)((IStructuredSelection)cviewer.getSelection()).getFirstElement();
 		context.setDatasetName(selection.getKey());
-		final DimsDataList dims = sliceComponent.getDimsDataList();
-		for (DimsData dd : dims.iterable()) {
-			if (dd.isSlice()) {
-				context.addSliceDimension(dd.getDimension(), String.valueOf(dd.getSlice()));
-			} else if (dd.isTextRange()) {
-				context.addSliceDimension(dd.getDimension(), dd.getSliceRange()!=null ? dd.getSliceRange() : "all");
+		
+		Map<Integer,String> axesNames = new HashMap<>();
+		
+		for (int i = 0; i < nDimensions.getRank(); i++) {
+			if (!nDimensions.getDescription(i).isEmpty()) {
+				continue;
+			}
+			context.addSliceDimension(i, nDimensions.getSlice(i).toString());
+			if (nDimensions.getAxis(i) != null) {
+				//1 based indexing?
+				axesNames.put(i+1, nDimensions.getAxis(i));
 			}
 		}
 		
-		context.setAxesNames(sanitizeAxesNames(sliceComponent.getAxesNames()));
-	}
-	
-	private Map<Integer, String> sanitizeAxesNames(Map<Integer, String> axes) {
-		IDataHolder dh = null;
-		try {
-			dh = ServiceHolder.getLoaderService().getData(context.getFilePaths().get(0), null);
-		} catch (Exception e) {
-			logger.error("couldnt get dataholder");
-			return axes;
-		}
-		
-		Map<Integer, String> axesNames = new HashMap<Integer, String>();
-		
-		for (Integer key : axes.keySet()) {
-			String name = axes.get(key);
-			if (dh.contains(name)) {
-				axesNames.put(key, name);
-			} else {
-				int i = name.lastIndexOf(":");
-				if (i > -1) {
-					String n = name.substring(0, i);
-					if (dh.contains(n)) {
-						axesNames.put(key, n);
-					}
-				}
-			}
-			
-			
-		}
-		
-		return axesNames;
-	}
-	
-	private ISlicingTool getLineSliceTool(){
-		return new AbstractSlicingTool() {
-			
-			@Override
-			public void militarize(boolean newData) {
-				
-				
-				boolean wasImage = getSlicingSystem().getSliceType()==PlotType.IMAGE || 
-						           getSlicingSystem().getSliceType()==PlotType.SURFACE;
-				getSlicingSystem().setSliceType(getSliceType());
-				
-				final DimsDataList dimsDataList = getSlicingSystem().getDimsDataList();
-				if (dimsDataList!=null) {
-					if (wasImage&&dimsDataList.isXFirst()) {
-						dimsDataList.setSingleAxisOnly(AxisType.Y, AxisType.X);   		
-					} else {
-						dimsDataList.setSingleAxisOnly(AxisType.X, AxisType.X);
-					}
-				}
-				getSlicingSystem().update(false);
-			}
-
-			@Override
-			public Enum getSliceType() {
-				return PlotType.XY;
-			}
-		};
-	}
-	
-	private ISlicingTool getImageSlicingTool() {
-		return new AbstractSlicingTool() {
-			
-			@Override
-			public void militarize(boolean newData) {
-				
-				getSlicingSystem().setSliceType(getSliceType());
-				
-				final DimsDataList dimsDataList = getSlicingSystem().getDimsDataList();
-				if (dimsDataList!=null) dimsDataList.setTwoAxesOnly(AxisType.Y, AxisType.X);   		
-				getSlicingSystem().refresh();
-				getSlicingSystem().update(false);
-				
-			}
-
-			@Override
-			public Enum getSliceType() {
-				return PlotType.IMAGE;
-			}
-		};
+		context.setAxesNames(axesNames);
 	}
 	
 	private void createPlottingSystem(Composite right){
@@ -506,6 +414,7 @@ public class SetUpProcessWizardPage extends WizardPage {
 
 		@Override
 		public Object[] getElements(Object inputElement) {
+			@SuppressWarnings("unchecked")
 			Map<String, int[]> vals = (Map<String, int[]>)inputElement;
 			Set<Entry<String, int[]>> entrySet = vals.entrySet();
 			
@@ -525,6 +434,7 @@ public class SetUpProcessWizardPage extends WizardPage {
 	
 		@Override
 		public String getText(Object obj) {
+			@SuppressWarnings("unchecked")
 			Entry<String, int[]> ent = (Entry<String, int[]>)obj;
 			String name = ent.getKey();
 			if (rootName != null) name = name.substring(rootName.length());
