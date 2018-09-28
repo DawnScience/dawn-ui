@@ -18,10 +18,6 @@
    </license>
 
    <includes
-         id="org.dawnsci.isosurface.feature"
-         version="0.0.0"/>
-
-   <includes
          id="org.dawnsci.plotting.draw2d.feature"
          version="0.0.0"/>
 
