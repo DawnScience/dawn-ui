@@ -13,7 +13,6 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import org.dawb.common.services.ServiceManager;
 import org.dawnsci.common.widgets.gda.function.FunctionTreeViewer.COLUMN;
 import org.dawnsci.common.widgets.gda.function.descriptors.CustomFunctionDescriptorProvider;
 import org.dawnsci.common.widgets.gda.function.handlers.CopyHandler;
@@ -29,6 +28,8 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Text;
 import org.junit.Before;
 import org.junit.Test;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.FrameworkUtil;
 
 import uk.ac.diamond.scisoft.analysis.fitting.functions.Add;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.CompositeFunction;
@@ -60,7 +61,11 @@ public class FunctionTreeViewerHandlersIsHandledPluginTest extends
 		gaussian = new Gaussian();
 		actual.addFunction(gaussian);
 		subtract = new Subtract();
-		IExpressionService service = (IExpressionService)ServiceManager.getService(IExpressionService.class);
+		BundleContext bundleContext =
+				FrameworkUtil.
+				getBundle(this.getClass()).
+				getBundleContext();
+		IExpressionService service = bundleContext.getService(bundleContext.getServiceReference(IExpressionService.class));
 		jexl = new JexlExpressionFunction(service,"a+b+x");
 		subtract.addFunction(jexl);
 		actual.addFunction(subtract);

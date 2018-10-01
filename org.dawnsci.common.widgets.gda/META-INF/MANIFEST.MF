@@ -7,7 +7,6 @@ Bundle-Activator: org.dawnsci.common.widgets.gda.Activator
 Bundle-Vendor: Diamond Light Source
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Import-Package: org.apache.commons.lang.builder;version="2.6.0",
- org.dawb.common.services,
  org.eclipse.dawnsci.analysis.api.expressions,
  org.eclipse.jface.text,
  org.eclipse.jface.text.source,

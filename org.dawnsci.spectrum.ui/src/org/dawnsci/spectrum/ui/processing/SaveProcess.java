@@ -11,12 +11,13 @@ package org.dawnsci.spectrum.ui.processing;
 import java.io.File;
 import java.util.List;
 
-import org.dawb.common.services.ServiceManager;
 import org.dawnsci.spectrum.ui.file.IContain1DData;
 import org.eclipse.dawnsci.analysis.api.persistence.IPersistenceService;
 import org.eclipse.dawnsci.analysis.api.persistence.IPersistentFile;
 import org.eclipse.january.dataset.Dataset;
 import org.eclipse.january.dataset.IDataset;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.FrameworkUtil;
 
 public class SaveProcess extends AbstractSaveProcess {
 
@@ -26,7 +27,11 @@ public class SaveProcess extends AbstractSaveProcess {
 		IPersistentFile     pf=null;
 		
 		try {
-			IPersistenceService service = (IPersistenceService) ServiceManager.getService(IPersistenceService.class);
+			BundleContext bundleContext =
+					FrameworkUtil.
+					getBundle(this.getClass()).
+					getBundleContext();
+			IPersistenceService service = bundleContext.getService(bundleContext.getServiceReference(IPersistenceService.class));
 			file = new File(this.path);
 			pf = service.createPersistentFile(file.getAbsolutePath());
 			IContain1DData data = list.get(0);

@@ -25,7 +25,7 @@ public class Activator extends AbstractUIPlugin {
 
 	private static BundleContext context;
 
-	static BundleContext getContext() {
+	public static BundleContext getContext() {
 		return context;
 	}
 
