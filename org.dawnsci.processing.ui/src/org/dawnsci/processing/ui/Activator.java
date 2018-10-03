@@ -57,10 +57,10 @@ public class Activator extends AbstractUIPlugin {
 		return plugin;
 	}
 
-	public static Object getService(final Class<?> serviceClass) {
+	public static <T> T getService(final Class<T> serviceClass) {
 		BundleContext bundleContext = plugin.getBundle().getBundleContext();
 		if (bundleContext == null) return null;
-		ServiceReference<?> ref = bundleContext.getServiceReference(serviceClass);
+		ServiceReference<T> ref = bundleContext.getServiceReference(serviceClass);
 		if (ref==null) return null;
 		return bundleContext.getService(ref);
 	}

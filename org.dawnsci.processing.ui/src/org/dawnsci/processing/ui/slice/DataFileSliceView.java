@@ -24,6 +24,7 @@ import org.dawb.common.ui.monitor.ProgressMonitorWrapper;
 import org.dawb.common.ui.selection.SelectionUtils;
 import org.dawnsci.common.widgets.dialog.FileSelectionDialog;
 import org.dawnsci.conversion.schemes.ProcessConversionScheme;
+import org.dawnsci.datavis.model.IFileController;
 import org.dawnsci.processing.ui.Activator;
 import org.dawnsci.processing.ui.IProcessDisplayHelper;
 import org.dawnsci.processing.ui.ProcessingOutputView;
@@ -42,6 +43,7 @@ import org.eclipse.dawnsci.analysis.api.io.IDataHolder;
 import org.eclipse.dawnsci.analysis.api.processing.ExecutionType;
 import org.eclipse.dawnsci.analysis.api.processing.IExecutionVisitor;
 import org.eclipse.dawnsci.analysis.api.processing.IOperation;
+import org.eclipse.dawnsci.analysis.api.processing.IOperationFileMonitor;
 import org.eclipse.dawnsci.analysis.api.processing.IOperationInputData;
 import org.eclipse.dawnsci.analysis.api.processing.OperationData;
 import org.eclipse.dawnsci.analysis.api.processing.OperationException;
@@ -69,6 +71,7 @@ import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
+import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.util.LocalSelectionTransfer;
@@ -143,6 +146,8 @@ public class DataFileSliceView extends ViewPart {
 	private IProcessDisplayHelper displayHelper;
 	
 	String lastPath = null;
+	private boolean dataVisAvailable = false;
+	private boolean loadIntoDataVis = false;
 	
 	private final static Logger logger = LoggerFactory.getLogger(DataFileSliceView.class);
 
@@ -331,6 +336,8 @@ public class DataFileSliceView extends ViewPart {
 			}
 		};
 		
+		dataVisAvailable = getFileController() != null;
+		
 		Dictionary<String, String> props = new Hashtable<>();
 		props.put(EventConstants.EVENT_TOPIC, "org/dawnsci/events/processing/PROCESSUPDATE");
 		ctx.registerService(EventHandler.class, handler, props);
@@ -352,6 +359,12 @@ public class DataFileSliceView extends ViewPart {
 
 	}
 	
+	private IFileController getFileController() {
+
+		return Activator.getService(IFileController.class);
+
+	}
+	
 	private void createActions(IContributionManager rightClick) {
 		
 		final IAction run = new Action("Process all files", Activator.getImageDescriptor("icons/run_workflow.gif")) {
@@ -360,17 +373,17 @@ public class DataFileSliceView extends ViewPart {
 
 				if (ops != null) {
 					final IOperation<? extends IOperationModel, ? extends OperationData>[] fop = ops;
-					
+
 					ExecutionType type = ExecutionType.PARALLEL;
-					
+
 					try {
 						IPreferenceStore ps = Activator.getDefault().getPreferenceStore();
-						
+
 						if (ps.getBoolean(ProcessingConstants.FORCE_SERIES)) type = ExecutionType.SERIES;
 					} catch (Exception e) {
 						logger.error("Could not read preferences");
 					}
-					
+
 					final ExecutionType finalType = type;
 
 					fileManager.setProcessingConversionInfo(new IProcessingConversionInfo() {
@@ -407,7 +420,7 @@ public class DataFileSliceView extends ViewPart {
 
 					});
 				}
-				
+
 				String filePath = fileManager.getFilePaths().get(0);
 				boolean isHDF5 = false;
 				try {
@@ -417,31 +430,31 @@ public class DataFileSliceView extends ViewPart {
 					// TODO Auto-generated catch block
 					e2.printStackTrace();
 				}
-				
-				ExtendedFileSelectionDialog fsd = new ExtendedFileSelectionDialog(Display.getCurrent().getActiveShell(),isHDF5);
+
+				ExtendedFileSelectionDialog fsd = new ExtendedFileSelectionDialog(Display.getCurrent().getActiveShell(),isHDF5,dataVisAvailable);
 				if (lastPath == null) {
 					final File source = new File(fileManager.getFilePaths().get(0));
 					lastPath  = source.getParent();
 				}
-				
+
 				fsd.setPath(lastPath);
 				fsd.create();
 				if (fsd.open() == Dialog.CANCEL) return;
 				lastPath = fsd.getPath();
-				
+
 				File f = new File(lastPath);
 				if (!f.canWrite()) {
 					MessageBox dialog = 
-							  new MessageBox(getViewSite().getShell(), SWT.ICON_ERROR | SWT.OK);
+							new MessageBox(getViewSite().getShell(), SWT.ICON_ERROR | SWT.OK);
 					dialog.setText("File save error!");
 					dialog.setMessage("Could not save calibration file! (Do you have write access to this directory?)");
 
 					dialog.open();
 					return;
 				}
-				
+
 				fileManager.setOutputPath(fsd.getPath());
-			
+
 				ProgressMonitorDialog dia = new ProgressMonitorDialog(Display.getCurrent().getActiveShell());
 
 				try {
@@ -451,7 +464,8 @@ public class DataFileSliceView extends ViewPart {
 						public void run(IProgressMonitor monitor) throws InvocationTargetException,
 						InterruptedException {
 							monitor.beginTask("Processing", getAmountOfWork(fileManager.getContext()));
-							fileManager.getContext().setMonitor(new ProgressMonitorWrapper(monitor));
+							ProgressMonitorWithFiles fileMonitor = new ProgressMonitorWithFiles(monitor);
+							fileManager.getContext().setMonitor(fileMonitor);
 							try {
 								ServiceHolder.getConversionService().process(fileManager.getContext());
 							} catch (final Exception e) {
@@ -467,14 +481,20 @@ public class DataFileSliceView extends ViewPart {
 										}
 										if (memoryError) {
 											MessageDialog.openError(DataFileSliceView.this.getViewSite().getShell(), "Error processing files!", "DAWN has ran out of memory while processing, "+
-										"Either increase the xmx value in dawn.ini, or disable parallel processing");
+													"Either increase the xmx value in dawn.ini, or disable parallel processing");
 										} else {
 											MessageDialog.openError(DataFileSliceView.this.getViewSite().getShell(), "Error processing files!", e.getMessage());
 										}
 									}
 								});
-								
+
 								logger.error(e.getMessage(), e);
+							}
+
+							IFileController fc = loadIntoDataVis ? getFileController() : null;
+							
+							if (!fileMonitor.getFilePaths().isEmpty() && fc != null) {
+								fc.loadFiles(fileMonitor.getFilePaths().toArray(new String[fileMonitor.getFilePaths().size()]), null, false);
 							}
 						}
 					});
@@ -990,15 +1010,38 @@ public class DataFileSliceView extends ViewPart {
 	private class ExtendedFileSelectionDialog extends FileSelectionDialog {
 		
 		private boolean isHDF5 = false;
+		private boolean canLoad = false;
 		
-		public ExtendedFileSelectionDialog(Shell parentShell, boolean isH5) {
+		public ExtendedFileSelectionDialog(Shell parentShell, boolean isH5, boolean canLoad) {
 			super(parentShell);
 			this.isHDF5 = isH5;
+			this.canLoad = canLoad;
 		}
 		
 		@Override
 		protected Control createDialogArea(Composite parent) {
 			super.createDialogArea(parent);
+			
+			if (canLoad) {
+				final Button load = new Button(parent, SWT.CHECK);
+				load.setText("Automatically load data to DataVis perspective");
+				load.setSelection(loadIntoDataVis);
+				SelectionListener slload = new SelectionAdapter() {
+					@Override
+					public void widgetSelected(SelectionEvent e) {
+							loadIntoDataVis = load.getSelection();
+						
+					}
+				};
+				
+				load.addSelectionListener(slload);
+				
+				if (isHDF5) {
+					Label label = new Label(parent, SWT.HORIZONTAL | SWT.SEPARATOR);
+					label.setLayoutData(GridDataFactory.fillDefaults().grab(true, false).create());
+				}
+			}
+			
 			if (isHDF5) {
 				final Button button1 = new Button(parent, SWT.RADIO);
 				final Button button2 = new Button(parent, SWT.RADIO);
@@ -1068,4 +1111,25 @@ public class DataFileSliceView extends ViewPart {
 		  }
 	}
 
+	private class ProgressMonitorWithFiles extends ProgressMonitorWrapper implements IOperationFileMonitor {
+
+		private List<String> filePaths;
+
+		public ProgressMonitorWithFiles(IProgressMonitor monitor) {
+			super(monitor);
+			filePaths = new ArrayList<>();
+		}
+
+		@Override
+		public void appendFilePath(String path) {
+			filePaths.add(path);
+
+		}
+
+		@Override
+		public List<String> getFilePaths() {
+			return filePaths;
+		}
+
+	}
 }
