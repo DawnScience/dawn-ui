@@ -46,12 +46,6 @@
             separator="true"
             tooltip="Hyper 3D Slicing">
       </slicing_tool>
-      <slicing_tool
-            class="org.dawnsci.isosurface.tool.IsosurfaceTool"
-            icon="icons/IsoSurface.png"
-            id="org.dawnsci.isosurface.tool.isosurfaceTool"
-            tooltip="Slice data using an iso-surface">
-      </slicing_tool>
       
    </extension>
    <extension
