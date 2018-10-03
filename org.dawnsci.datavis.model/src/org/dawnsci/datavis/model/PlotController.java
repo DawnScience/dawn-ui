@@ -449,7 +449,7 @@ public class PlotController implements IPlotController, ILoadedFileInitialiser {
 	private Integer getDataRank(DataOptions dOptions) {
 		if (dOptions == null) return null;
 		
-		return PlotShapeUtils.getPlottableRank(dOptions.getLazyDataset());
+		return PlotShapeUtils.getPlottableRank(dOptions.getLazyDataset(), dOptions.getParent() instanceof IRefreshable);
 	}
 	
 	private IPlotDataModifier[] getPlotModifiers(int rank) {
@@ -607,7 +607,7 @@ public class PlotController implements IPlotController, ILoadedFileInitialiser {
 		
 		NDimensions nd = d.buildNDimensions();
 		
-		int rank = PlotShapeUtils.getPlottableRank(d.getLazyDataset());
+		int rank = PlotShapeUtils.getPlottableRank(d.getLazyDataset(), d.getParent() instanceof IRefreshable);
 		if (mode == null) {
 			IPlotMode defaultMode = getDefaultMode(rank);
 			nd.setOptions(defaultMode.getOptions());
@@ -677,8 +677,10 @@ public class PlotController implements IPlotController, ILoadedFileInitialiser {
 	@Override
 	public void initialise(LoadedFile file) {
 		List<DataOptions> dataOptions = new ArrayList<>();
+		
+		boolean mayGrow = file instanceof IRefreshable;
 				
-		if (file instanceof IRefreshable) {
+		if (mayGrow) {
 			dataOptions = ((IRefreshable) file).getUninitialisedDataOptions();
 		} else {
 			dataOptions = file.getDataOptions(false);
@@ -688,7 +690,7 @@ public class PlotController implements IPlotController, ILoadedFileInitialiser {
 			PlottableObject po = d.getPlottableObject();
 			if (po == null) {
 				ILazyDataset lz = d.getLazyDataset();
-				int rank = PlotShapeUtils.getPlottableRank(lz);
+				int rank = PlotShapeUtils.getPlottableRank(lz,mayGrow);
 				
 				po = getPlottableObject(d, getDefaultMode(rank));
 				d.setPlottableObject(po);
