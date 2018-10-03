@@ -372,14 +372,16 @@ public class SetUpProcessWizardPage extends WizardPage {
 		Map<Integer,String> axesNames = new HashMap<>();
 		
 		for (int i = 0; i < nDimensions.getRank(); i++) {
-			if (!nDimensions.getDescription(i).isEmpty()) {
-				continue;
-			}
-			context.addSliceDimension(i, nDimensions.getSlice(i).toString());
+			
 			if (nDimensions.getAxis(i) != null) {
 				//1 based indexing?
 				axesNames.put(i+1, nDimensions.getAxis(i));
 			}
+			
+			if (!nDimensions.getDescription(i).isEmpty()) {
+				continue;
+			}
+			context.addSliceDimension(i, nDimensions.getSlice(i).toString());
 		}
 		
 		context.setAxesNames(axesNames);
