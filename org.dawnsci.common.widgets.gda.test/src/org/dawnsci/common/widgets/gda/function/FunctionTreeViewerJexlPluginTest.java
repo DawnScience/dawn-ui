@@ -11,7 +11,7 @@ package org.dawnsci.common.widgets.gda.function;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-import org.dawb.common.services.ServiceManager;
+import org.dawnsci.common.widgets.gda.Activator;
 import org.dawnsci.common.widgets.gda.function.descriptors.CustomFunctionDescriptorProvider;
 import org.eclipse.dawnsci.analysis.api.expressions.IExpressionService;
 import org.eclipse.dawnsci.analysis.api.fitting.functions.IFunction;
@@ -32,7 +32,8 @@ public class FunctionTreeViewerJexlPluginTest extends
 			new IFunction[] { new Gaussian(), new Fermi(), new Add(),
 					new Subtract() }, true);
 	IFunctionViewer viewer;
-
+	IExpressionService service;
+	
 	@Override
 	protected void createControl(Composite parent) {
 		viewer = new FunctionTreeViewer(parent, provider);
@@ -46,7 +47,8 @@ public class FunctionTreeViewerJexlPluginTest extends
 		// If it fails here, then the Jexl service may not be running, try
 		// setting org.dawnsci.jexl autoStart to true and level to 2, as it is
 		// in uk.ac.diamond.dawn.product
-		ServiceManager.getService(IExpressionService.class, true);
+		service = Activator.getContext().getService(
+				Activator.getContext().getServiceReference(IExpressionService.class));
 	}
 
 	@Override
@@ -57,7 +59,6 @@ public class FunctionTreeViewerJexlPluginTest extends
 	@Test
 	public void testRendering_x() throws Exception {
 		CompositeFunction actual = new CompositeFunction();
-		IExpressionService service = (IExpressionService)ServiceManager.getService(IExpressionService.class);
 		actual.addFunction(new JexlExpressionFunction(service,"x"));
 		viewer.setInput(actual);
 
@@ -67,7 +68,6 @@ public class FunctionTreeViewerJexlPluginTest extends
 	@Test
 	public void testRendering_xa() throws Exception {
 		CompositeFunction actual = new CompositeFunction();
-		IExpressionService service = (IExpressionService)ServiceManager.getService(IExpressionService.class);
 		actual.addFunction(new JexlExpressionFunction(service,"x+a"));
 		viewer.setInput(actual);
 
@@ -82,7 +82,6 @@ public class FunctionTreeViewerJexlPluginTest extends
 		// maintains insertion order of the set
 
 		CompositeFunction declaredAlphabetically = new CompositeFunction();
-		IExpressionService service = (IExpressionService)ServiceManager.getService(IExpressionService.class);
 		declaredAlphabetically
 				.addFunction(new JexlExpressionFunction(service,"x+a+b+c"));
 		viewer.setInput(declaredAlphabetically);
@@ -94,7 +93,6 @@ public class FunctionTreeViewerJexlPluginTest extends
 	@Test
 	public void testSortOrderOfParams_cba() throws Exception {
 		CompositeFunction declaredReverse = new CompositeFunction();
-		IExpressionService service = (IExpressionService)ServiceManager.getService(IExpressionService.class);
 		declaredReverse.addFunction(new JexlExpressionFunction(service,"x+c+b+a"));
 		viewer.setInput(declaredReverse);
 
@@ -105,7 +103,6 @@ public class FunctionTreeViewerJexlPluginTest extends
 	@Test
 	public void testEditFunction() throws Exception {
 		CompositeFunction actual = new CompositeFunction();
-		IExpressionService service = (IExpressionService)ServiceManager.getService(IExpressionService.class);
 		JexlExpressionFunction function = new JexlExpressionFunction(service,"x+a");
 		actual.addFunction(function);
 		viewer.setInput(actual);
@@ -122,7 +119,6 @@ public class FunctionTreeViewerJexlPluginTest extends
 	@Test
 	public void testFunctionError() throws Exception {
 		CompositeFunction actual = new CompositeFunction();
-		IExpressionService service = (IExpressionService)ServiceManager.getService(IExpressionService.class);
 		JexlExpressionFunction function = new JexlExpressionFunction(service,"missing_x");
 		actual.addFunction(function);
 		viewer.setInput(actual);

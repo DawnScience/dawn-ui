@@ -13,12 +13,10 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
-import org.dawb.common.services.ServiceManager;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
-import org.eclipse.dawnsci.analysis.api.dataset.IDatasetMathsService;
 import org.eclipse.dawnsci.analysis.api.io.SliceObject;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.PlotType;
@@ -27,6 +25,7 @@ import org.eclipse.dawnsci.plotting.api.trace.ITrace;
 import org.eclipse.dawnsci.slicing.api.system.ISliceSystem;
 import org.eclipse.dawnsci.slicing.api.system.SliceSource;
 import org.eclipse.dawnsci.slicing.api.util.SliceUtils;
+import org.eclipse.january.dataset.DatasetUtils;
 import org.eclipse.january.dataset.IDataset;
 import org.eclipse.january.dataset.ILazyDataset;
 import org.eclipse.january.dataset.Slice;
@@ -123,10 +122,9 @@ class SliceJob extends Job {
 		if (lazySet instanceof IDataset && Arrays.equals(slicedShape, lazySet.getShape())) {
 			slice = (IDataset)lazySet;
 			if (currentSlice.getX() > currentSlice.getY() && slice.getShape().length==2) {
-				final IDatasetMathsService service = (IDatasetMathsService)ServiceManager.getService(IDatasetMathsService.class);
 				// transpose clobbers name
 				final String name = slice.getName();
-				slice = service.transpose(slice);
+				slice = DatasetUtils.transpose(slice);
 				if (name!=null) slice.setName(name);
 			}
 		} else {

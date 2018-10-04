@@ -13,7 +13,6 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.draw2d;bundle-version="3.7.1",
  javax.vecmath;bundle-version="1.5.2",
- org.dawb.common.services;bundle-version="1.2.0",
  org.dawb.common.util;bundle-version="1.2.0",
  org.eclipse.dawnsci.plotting.api;bundle-version="1.0.0",
  org.eclipse.january;bundle-version="1.0.0",

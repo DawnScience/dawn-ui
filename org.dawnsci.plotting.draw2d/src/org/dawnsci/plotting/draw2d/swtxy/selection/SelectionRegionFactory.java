@@ -11,15 +11,12 @@ package org.dawnsci.plotting.draw2d.swtxy.selection;
 import java.util.Collection;
 import java.util.HashSet;
 
-import org.dawb.common.services.ITransferService;
-import org.dawb.common.services.ServiceManager;
 import org.dawnsci.plotting.draw2d.Activator;
 import org.dawnsci.plotting.draw2d.swtxy.XYRegionGraph;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.axis.ICoordinateSystem;
 import org.eclipse.dawnsci.plotting.api.region.IRegion;
 import org.eclipse.dawnsci.plotting.api.region.IRegion.RegionType;
-import org.eclipse.gef.ui.actions.Clipboard;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IContributionManager;
 import org.eclipse.jface.action.Separator;
@@ -174,30 +171,6 @@ public class SelectionRegionFactory {
 			}
 		};
 		if (region instanceof AbstractSelectionRegion && region.isUserRegion()) manager.add(delete);
-		
-		final Action copy = new Action("Copy '"+region.getName()+"'", Activator.getImageDescriptor("icons/RegionCopy.png")) {
-			public void run() {
-				staticBuffer = (AbstractSelectionRegion<?>) region;
-				
-				// We also copy the region as a pastable into workflows.
-				ITransferService service=null;
-				try {
-					service = (ITransferService)ServiceManager.getService(ITransferService.class);
-				} catch (Exception e) {
-					logger.error("Cannot get ITransferService!", e);
-				}
-				if (service!=null) {
-					try {
-						final Object transferable = service.createROISource(region.getName(), region.getROI());
-						if (transferable!=null) Clipboard.getDefault().setContents(transferable);
-					} catch (Exception ne) {
-						logger.trace("Cannot set the copied region as a workflow actor!", ne);
-					}
-				}
-			}
-		};
-		if (region instanceof AbstractSelectionRegion) manager.add(copy);
-
 		
 		return manager;
 	}

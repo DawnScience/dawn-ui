@@ -8,7 +8,7 @@
  */
 package org.dawnsci.common.widgets.gda.function.jexl;
 
-import org.dawb.common.services.ServiceManager;
+import org.dawnsci.common.widgets.gda.Activator;
 import org.dawnsci.common.widgets.gda.function.descriptors.FunctionInstantiationFailedException;
 import org.dawnsci.common.widgets.gda.function.descriptors.IFunctionDescriptor;
 import org.eclipse.core.runtime.PlatformObject;
@@ -26,7 +26,8 @@ public class JexlExpressionFunctionDescriptor extends PlatformObject implements 
 		IExpressionService service = null;
 		
 		try {
-			service = (IExpressionService)ServiceManager.getService(IExpressionService.class);
+			service = Activator.getContext().getService(
+					Activator.getContext().getServiceReference(IExpressionService.class));
 		} catch (Exception e) {
 			// TODO: handle exception
 		}

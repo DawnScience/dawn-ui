@@ -15,7 +15,6 @@ import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
 
-import org.dawb.common.services.ServiceManager;
 import org.dawb.common.ui.util.GridUtils;
 import org.dawb.common.util.list.ListUtils;
 import org.dawnsci.common.widgets.dialog.FileSelectionDialog;
@@ -192,7 +191,7 @@ public class ProcessingView extends ViewPart {
 				return;
 			}
 			
-			IPersistenceService service = (IPersistenceService)ServiceManager.getService(IPersistenceService.class);
+			IPersistenceService service = Activator.getService(IPersistenceService.class);
 			IPersistentFile pf = service.createPersistentFile(filename);
 			pf.setOperations(op);
 			pf.close();

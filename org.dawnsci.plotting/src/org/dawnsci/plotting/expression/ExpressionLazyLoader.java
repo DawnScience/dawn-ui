@@ -13,7 +13,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.dawb.common.services.ServiceManager;
+import org.dawnsci.plotting.Activator;
 import org.eclipse.dawnsci.analysis.api.expressions.IExpressionEngine;
 import org.eclipse.dawnsci.analysis.api.expressions.IExpressionService;
 import org.eclipse.dawnsci.plotting.api.expressions.IVariableManager;
@@ -44,7 +44,8 @@ class ExpressionLazyLoader implements ILazyLoader {
 		this.manager          = manager;
 		
 		try {
-			IExpressionService service = (IExpressionService)ServiceManager.getService(IExpressionService.class);
+			IExpressionService service = Activator.getContext().getService(
+					Activator.getContext().getServiceReference(IExpressionService.class));
 			this.engine = service.getExpressionEngine();
 		} catch (Exception e) {
 			// TODO Auto-generated catch block, find out what happens when there is no service

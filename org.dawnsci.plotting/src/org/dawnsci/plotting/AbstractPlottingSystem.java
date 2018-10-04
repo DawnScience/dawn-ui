@@ -16,7 +16,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
-import org.dawb.common.services.ISystemService;
 import org.dawnsci.plotting.views.EmptyTool;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.ListenerList;
@@ -66,7 +65,6 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IWorkbenchPart;
-import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.part.MultiPageEditorPart;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -210,14 +208,6 @@ public abstract class AbstractPlottingSystem<T> implements IPlottingSystem<T>, I
 	public void dispose() {
 
 		PlottingFactory.removePlottingSystem(plotName);
-		if (part!=null) {
-			@SuppressWarnings("unchecked")
-			final ISystemService<IPlottingSystem<Composite>> service = (ISystemService<IPlottingSystem<Composite>>)PlatformUI.getWorkbench().getService(ISystemService.class);
-			if (service!=null) {
-				service.removeSystem(part.getTitle());
-				logger.debug("Plotting system for '"+part.getTitle()+"' removed.");
-			}
-		}
 
 		actionBarManager.dispose();
 		
@@ -470,15 +460,6 @@ public abstract class AbstractPlottingSystem<T> implements IPlottingSystem<T>, I
 		this.part = part;
 		this.bars = bars;
 		PlottingFactory.registerPlottingSystem(plotName, this);
-		
-		if (part!=null) {
-			@SuppressWarnings("unchecked")
-			final ISystemService<IPlottingSystem<?>> service = (ISystemService<IPlottingSystem<?>>) ServiceLoader.getSystemService();
-			if (service!=null) {
-				service.putSystem(part.getTitle(), this);
-				logger.debug("Plotting system for '"+part.getTitle()+"' registered.");
-			}
-		}
 	}
 
 	@Override

@@ -18,7 +18,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 
-import org.dawb.common.services.ServiceManager;
+import org.dawnsci.plotting.Activator;
 import org.eclipse.dawnsci.analysis.api.expressions.IExpressionEngine;
 import org.eclipse.dawnsci.analysis.api.expressions.IExpressionService;
 import org.eclipse.dawnsci.plotting.api.expressions.IExpressionObject;
@@ -53,7 +53,8 @@ class ExpressionObject implements IExpressionObject {
 		this.expressionString = expression;
 		
 		try {
-			IExpressionService service = (IExpressionService)ServiceManager.getService(IExpressionService.class);
+			IExpressionService service = Activator.getContext().getService(
+					Activator.getContext().getServiceReference(IExpressionService.class));
 			this.engine = service.getExpressionEngine();
 		} catch (Exception e) {
 			// TODO Auto-generated catch block, find out what happens when there is no service

@@ -13,7 +13,7 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import org.dawb.common.services.ServiceManager;
+import org.dawnsci.common.widgets.gda.Activator;
 import org.dawnsci.common.widgets.gda.function.FunctionTreeViewer.COLUMN;
 import org.dawnsci.common.widgets.gda.function.descriptors.CustomFunctionDescriptorProvider;
 import org.dawnsci.common.widgets.gda.function.handlers.CopyHandler;
@@ -63,7 +63,8 @@ public class FunctionTreeViewerHandlersExecutePluginTest extends
 		gaussian = new Gaussian();
 		actual.addFunction(gaussian);
 		subtract = new Subtract();
-		IExpressionService service = (IExpressionService)ServiceManager.getService(IExpressionService.class);
+		IExpressionService service = Activator.getContext().getService(
+				Activator.getContext().getServiceReference(IExpressionService.class));
 		jexl = new JexlExpressionFunction(service,"a+b+x");
 		subtract.addFunction(jexl);
 		actual.addFunction(subtract);

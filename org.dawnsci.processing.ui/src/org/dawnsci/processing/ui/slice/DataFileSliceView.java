@@ -19,7 +19,6 @@ import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 
-import org.dawb.common.services.ServiceManager;
 import org.dawb.common.ui.monitor.ProgressMonitorWrapper;
 import org.dawb.common.ui.selection.SelectionUtils;
 import org.dawnsci.common.widgets.dialog.FileSelectionDialog;
@@ -894,7 +893,8 @@ public class DataFileSliceView extends ViewPart {
 		private IFileIconService service;
 		ViewLabelProvider() {
 		    try {
-				this.service = (IFileIconService)ServiceManager.getService(IFileIconService.class);
+		    	this.service = Activator.getService(IFileIconService.class);
+				
 			} catch (Exception e) {
 				// Ignored, we just have no icon then
 			}
