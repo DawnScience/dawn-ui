@@ -8,10 +8,12 @@ public class PlotShapeUtils {
 
 	private PlotShapeUtils() {}
 	
-	public static int getPlottableRank(ILazyDataset lz) {
+	public static int getPlottableRank(ILazyDataset lz, boolean mayGrow) {
 		int[] shape = lz.getShape();
 		int[] max = shape;
-		if (lz instanceof IDynamicDataset) {
+		
+		//if a live scan, use maxshape as single dimensions may grow
+		if (lz instanceof IDynamicDataset && mayGrow) {
 			max = ((IDynamicDataset) lz).getMaxShape();
 		}
 		
