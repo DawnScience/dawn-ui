@@ -108,5 +108,34 @@
          </actionSet>
       </perspectiveExtension>
    </extension>
+   <extension
+         point="org.eclipse.ui.menus">
+      <menuContribution
+            allPopups="false"
+            locationURI="menu:org.eclipse.ui.main.menu">
+         <menu
+               id="org.dawnsci.datavis.file"
+               label="File">
+            <menu
+                  id="org.dawnsci.datavis.file.transfer"
+                  label="Transfer">
+               <command
+                     commandId="org.dawnsci.mapping.ui.command.transferdatavisfile"
+                     icon="icons/map.png"
+                     label="Mapping"
+                     style="push">
+               </command>
+            </menu>
+         </menu>
+      </menuContribution>
+   </extension>
+   <extension
+         point="org.eclipse.ui.commands">
+      <command
+            defaultHandler="org.dawnsci.mapping.ui.DatavisMappingTransferHandler"
+            id="org.dawnsci.mapping.ui.command.transferdatavisfile"
+            name="Datavis mapping transfer">
+      </command>
+   </extension>
 
 </plugin>

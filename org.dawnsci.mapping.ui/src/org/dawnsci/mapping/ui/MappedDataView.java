@@ -316,7 +316,15 @@ public class MappedDataView extends ViewPart {
 				manager.add(MapActionUtils.getMapPropertiesAction(maps.get(0),plotManager, fileController.getArea()));
 			}
 				
-			if (mdfs.size() > 1) manager.add(MapActionUtils.getFilesRemoveAction(fileController,mdfs));
+			if (mdfs.size() > 1) {
+				manager.add(MapActionUtils.getFilesRemoveAction(fileController,mdfs));
+			}
+			
+			if (!mdfs.isEmpty()) {
+				MenuManager transfer = new MenuManager("Transfer");
+				transfer.add(MapActionUtils.transferToDataVisAction(mdfs));
+				manager.add(transfer);
+			}
 				
 			if (!maps.isEmpty()) {
 				manager.add(new Separator());

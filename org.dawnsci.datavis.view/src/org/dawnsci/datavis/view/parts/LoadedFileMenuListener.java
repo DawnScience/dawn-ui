@@ -17,7 +17,9 @@ import org.dawnsci.datavis.model.IDataObject;
 import org.dawnsci.datavis.model.IFileController;
 import org.dawnsci.datavis.model.LoadedFile;
 import org.dawnsci.datavis.view.Activator;
+import org.dawnsci.datavis.view.DataVisSelectionUtils;
 import org.dawnsci.datavis.view.parts.LoadedFilePart.LabelEditingSupport;
+import org.eclipse.core.commands.Command;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IMenuListener;
@@ -40,19 +42,32 @@ import org.eclipse.swt.widgets.Layout;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.ui.IWorkbenchWizard;
 import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.commands.ICommandService;
 import org.eclipse.ui.dialogs.ListDialog;
+import org.eclipse.ui.handlers.IHandlerService;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.eclipse.ui.wizards.IWizardDescriptor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 public class LoadedFileMenuListener implements IMenuListener {
 
-
+	private static final Logger logger = LoggerFactory.getLogger(LoadedFileMenuListener.class);
+	
+	private static final String DATAVIS_MAPPING_TRANSFER = "org.dawnsci.mapping.ui.command.transferdatavisfile";
+	private static final String DATAVIS_PROCESSING_TRANSFER = "org.dawnsci.processing.ui.command.transferdatavisfile";
+	private static final String OPEN_TREE = "uk.ac.diamond.scisoft.analysis.rcp.opentreedialog";
+	private static final String CONVERT_WIZARD = "org.dawnsci.conversion.ui.convertExportWizard";
+	private static final String BUNDLE = "org.dawnsci.datavis.view";
+	
 	private TableViewer viewer;
 	private IFileController fileController;
 	private LabelEditingSupport editColumn;
 	private String id;
 	private ImageDescriptor convertImage = Activator.getImageDescriptor("icons/convert.png");
+	private ImageDescriptor mappingImage = Activator.getImageDescriptor("icons/map.png");
+	private ImageDescriptor processingImage = Activator.getImageDescriptor("icons/image-sharpen.png");
 
 	public LoadedFileMenuListener(IFileController fileController, TableViewer viewer,LabelEditingSupport editColumn) {
 		this.fileController = fileController;
@@ -82,11 +97,36 @@ public class LoadedFileMenuListener implements IMenuListener {
 			manager.add(new Separator());
 			manager.add(new CloseAction(fileController, viewer));
 			manager.add(new Separator());
+			
+			boolean mapping = false;
+			boolean processing = false;
+			mapping = checkCommand(DATAVIS_MAPPING_TRANSFER);
+			processing = checkCommand(DATAVIS_PROCESSING_TRANSFER);
+			
+			if (mapping || processing) {
+				MenuManager menuTransfer = new MenuManager("Transfer");
+				if (mapping) {
+					menuTransfer.add(new CommandAction("Mapping",mappingImage,DATAVIS_MAPPING_TRANSFER));
+				}
+				
+				if (processing) {
+					menuTransfer.add(new CommandAction("Processing",processingImage,DATAVIS_PROCESSING_TRANSFER));
+				}
+				manager.add(menuTransfer);
+				manager.add(new Separator());
+			}
 			if (getWiz()!=null) manager.add(new ConvertFilesAction(fileController, viewer));
 			
 			if (((IStructuredSelection)viewer.getSelection()).size()==1) {
 				manager.add(new Separator());
 				manager.add(new ApplyToAllAction(fileController, viewer));
+				
+				List<LoadedFile> s = DataVisSelectionUtils.getFromSelection(viewer.getSelection(), LoadedFile.class);
+				
+				if (!s.isEmpty() && s.get(0).getTree() != null && checkCommand(OPEN_TREE)) {
+					manager.add(new Separator());
+					manager.add(new CommandAction("View Tree...", null, OPEN_TREE));
+				}
 			}
 			
 		}
@@ -121,7 +161,7 @@ public class LoadedFileMenuListener implements IMenuListener {
 	private class CheckAction extends LoadedFileMenuAction {
 
 		public CheckAction(IFileController fileController, TableViewer viewer) {
-			super("Check",AbstractUIPlugin.imageDescriptorFromPlugin("org.dawnsci.datavis.view", "icons/ticked.png"), fileController, viewer);
+			super("Check",AbstractUIPlugin.imageDescriptorFromPlugin(BUNDLE, "icons/ticked.png"), fileController, viewer);
 		}
 
 		@Override
@@ -136,7 +176,7 @@ public class LoadedFileMenuListener implements IMenuListener {
 	private class UncheckAction extends LoadedFileMenuAction {
 
 		public UncheckAction(IFileController fileController, TableViewer viewer) {
-			super("Uncheck",AbstractUIPlugin.imageDescriptorFromPlugin("org.dawnsci.datavis.view", "icons/unticked.gif"), fileController, viewer);
+			super("Uncheck",AbstractUIPlugin.imageDescriptorFromPlugin(BUNDLE, "icons/unticked.gif"), fileController, viewer);
 		}
 
 		@Override
@@ -362,11 +402,11 @@ public class LoadedFileMenuListener implements IMenuListener {
 			try {
 				wizard = wiz.createWizard();
 			} catch (CoreException e) {
-				//TODO log
+				logger.error("Could not create wizard",e);
 			}
 			
 			if (wizard == null || !(wizard instanceof IFileOverrideWizard)) {
-				//log
+				logger.error("Wizard null or not IFileOverrideWizard");
 				return;
 			}
 			
@@ -382,8 +422,41 @@ public class LoadedFileMenuListener implements IMenuListener {
 		}
 	}
 	
+	private class CommandAction extends Action {
+		
+		private String id;
+		
+		public CommandAction(String name, ImageDescriptor imageDescriptor, String id) {
+			super(name,imageDescriptor);
+			this.id = id;
+		}
+		
+		@Override
+		public void run() {
+			
+			try {
+				IHandlerService service = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().getActivePart().getSite().getService(IHandlerService.class);
+				service.executeCommand(id, null);
+			} catch (Exception e) {
+				logger.error("Could not execute command",e);
+			} 
+		}
+		
+	}
+	
 	private static IWizardDescriptor getWiz() {
-		return PlatformUI.getWorkbench().getExportWizardRegistry().findWizard("org.dawnsci.conversion.ui.convertExportWizard");
+		return PlatformUI.getWorkbench().getExportWizardRegistry().findWizard(CONVERT_WIZARD);
+	}
+	
+	private static boolean checkCommand(String id) {
+		try {
+			ICommandService service = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().getActivePart().getSite().getService(ICommandService.class);
+			Command command = service.getCommand(id);
+			return command != null;
+		} catch (Exception e) {
+			logger.error("Could not execute command",e);
+		} 
+		return false;
 	}
 }
 

@@ -192,5 +192,30 @@
             operationid="uk.ac.diamond.scisoft.analysis.processing.operations.DigitalFilterOperation">
       </operationsetupwizardpage>
    </extension>
+   <extension
+         point="org.eclipse.ui.commands">
+      <command
+            defaultHandler="org.dawnsci.processing.ui.fileactions.DatavisProcessingTransferHandler"
+            id="org.dawnsci.processing.ui.command.transferdatavisfile"
+            name="Datavis processing transfer">
+      </command>
+   </extension>
+   <extension
+         point="org.eclipse.ui.menus">
+      <menuContribution
+            allPopups="false"
+            locationURI="menu:org.eclipse.ui.main.menu">
+         <menu
+               id="org.dawnsci.datavis.file.transfer"
+               label="Transfer">
+            <command
+                  commandId="org.dawnsci.processing.ui.command.transferdatavisfile"
+                  icon="icons/image-sharpen.png"
+                  label="Processing"
+                  style="push">
+            </command>
+         </menu>
+      </menuContribution>
+   </extension>
 
 </plugin>

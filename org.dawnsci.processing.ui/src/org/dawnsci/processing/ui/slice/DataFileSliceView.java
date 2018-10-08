@@ -23,7 +23,7 @@ import org.dawb.common.ui.monitor.ProgressMonitorWrapper;
 import org.dawb.common.ui.selection.SelectionUtils;
 import org.dawnsci.common.widgets.dialog.FileSelectionDialog;
 import org.dawnsci.conversion.schemes.ProcessConversionScheme;
-import org.dawnsci.datavis.model.IFileController;
+import org.dawnsci.datavis.api.IFileOpeningController;
 import org.dawnsci.processing.ui.Activator;
 import org.dawnsci.processing.ui.IProcessDisplayHelper;
 import org.dawnsci.processing.ui.ProcessingOutputView;
@@ -358,9 +358,9 @@ public class DataFileSliceView extends ViewPart {
 
 	}
 	
-	private IFileController getFileController() {
+	private IFileOpeningController getFileController() {
 
-		return Activator.getService(IFileController.class);
+		return Activator.getService(IFileOpeningController.class);
 
 	}
 	
@@ -490,10 +490,10 @@ public class DataFileSliceView extends ViewPart {
 								logger.error(e.getMessage(), e);
 							}
 
-							IFileController fc = loadIntoDataVis ? getFileController() : null;
+							IFileOpeningController fc = loadIntoDataVis ? getFileController() : null;
 							
 							if (!fileMonitor.getFilePaths().isEmpty() && fc != null) {
-								fc.loadFiles(fileMonitor.getFilePaths().toArray(new String[fileMonitor.getFilePaths().size()]), null, false);
+								fc.loadFiles(fileMonitor.getFilePaths().toArray(new String[fileMonitor.getFilePaths().size()]), false);
 							}
 						}
 					});

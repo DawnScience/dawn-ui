@@ -3,6 +3,7 @@ package org.dawnsci.datavis.model;
 import java.util.Comparator;
 import java.util.List;
 
+import org.dawnsci.datavis.api.IFileOpeningController;
 import org.eclipse.ui.progress.IProgressService;
 
 /**
@@ -23,7 +24,7 @@ import org.eclipse.ui.progress.IProgressService;
  * should be added to the FileControllerUtils class as static methods, to keep the API simple.
  * <p>
  */
-public interface IFileController {
+public interface IFileController extends IFileOpeningController {
 	
 	/**
 	 * Load the files in the paths array into the file controller.

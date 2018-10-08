@@ -100,6 +100,10 @@ public class FileController implements IFileController {
 		return failed;
 	}
 	
+	public List<String> loadFiles(String[] paths, boolean addPlace) {
+		return loadFiles(paths,(IProgressService)null,addPlace);
+	}
+	
 	public void attachLive() {
 		if (LiveServiceManager.getILiveFileService() != null) {
 			

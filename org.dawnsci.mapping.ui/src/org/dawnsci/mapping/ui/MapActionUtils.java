@@ -3,8 +3,10 @@ package org.dawnsci.mapping.ui;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.dawnsci.common.widgets.dialog.FileSelectionDialog;
+import org.dawnsci.datavis.api.IFileOpeningController;
 import org.dawnsci.mapping.ui.api.IMapFileController;
 import org.dawnsci.mapping.ui.datamodel.AbstractMapData;
 import org.dawnsci.mapping.ui.datamodel.AssociatedImage;
@@ -24,14 +26,22 @@ import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.WorkbenchException;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class MapActionUtils {
+	
+	private static final Logger logger = LoggerFactory.getLogger(MapActionUtils.class);
 
+	private static final ImageDescriptor datavisImage = Activator.getImageDescriptor("icons/color-swatch.png");
+	
 	public static IAction getRGBDialog(final List<AbstractMapData> maps, final MappedDataFile mdf, final TreeViewer viewer) {
 		final List<AbstractMapData> dataList = new ArrayList<AbstractMapData>(maps.size());
 		for (AbstractMapData map : maps) {
@@ -147,6 +157,28 @@ public class MapActionUtils {
 			}
 		};
 		
+		
+	}
+	
+	public static IAction transferToDataVisAction(final List<MappedDataFile> files) {
+		
+		return new Action("DataVis",datavisImage) {
+			@Override
+			public void run() {
+				List<String> collect = files.stream().map(MappedDataFile::getPath).collect(Collectors.toList());
+				if (collect.isEmpty()) return;
+				
+				IFileOpeningController fs = Activator.getService(IFileOpeningController.class);
+				
+				fs.loadFiles(collect.toArray(new String[collect.size()]), false);
+				
+				try {
+					PlatformUI.getWorkbench().showPerspective("org.dawnsci.datavis.DataVisPerspective",PlatformUI.getWorkbench().getActiveWorkbenchWindow());
+				} catch (WorkbenchException e) {
+					logger.error("Could not switch to DataVis perspective", e);
+				}
+			}
+		};
 		
 	}
 	

@@ -37,6 +37,7 @@ Require-Bundle: org.eclipse.core.runtime,
  uk.ac.diamond.scisoft.analysis;bundle-version="1.3.0",
  org.dawnsci.january.model;bundle-version="1.0.0",
  org.dawnsci.january.ui;bundle-version="1.0.0",
+ org.dawnsci.datavis.api;bundle-version="1.0.0",
  org.dawnsci.datavis.model;bundle-version="1.0.0"
 Bundle-ActivationPolicy: lazy
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
