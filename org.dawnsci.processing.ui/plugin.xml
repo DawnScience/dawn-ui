@@ -191,6 +191,12 @@
             name="Digital Filter Operation Set-up Wizard Page"
             operationid="uk.ac.diamond.scisoft.analysis.processing.operations.DigitalFilterOperation">
       </operationsetupwizardpage>
+      <operationsetupwizardpage
+            class="org.dawnsci.processing.ui.roiprofile.PolygonIntegrationModelWizardPage"
+            id="org.dawnsci.processing.ui.roiprofile.PolygonIntegrationModelWizardPage"
+            name="Polygon Integration Wizard Page"
+            operationid="uk.ac.diamond.scisoft.analysis.processing.operations.roiprofile.PolygonIntegrationOperation">
+      </operationsetupwizardpage>
    </extension>
    <extension
          point="org.eclipse.ui.commands">
