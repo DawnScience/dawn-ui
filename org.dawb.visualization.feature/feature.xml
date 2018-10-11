@@ -123,39 +123,13 @@ This Agreement is governed by the laws of the State of New York and the intellec
          version="0.0.0"/>
 
    <plugin
-         id="org.dawb.jlchart"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"/>
-
-   <plugin
-         id="org.dawb.jmol"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"/>
-
-   <plugin
          id="org.dawb.workbench.examples"
          download-size="0"
          install-size="0"
          version="0.0.0"/>
 
    <plugin
-         id="org.dom4j"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
          id="org.apache.commons.math3"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
-         id="org.jdom"
          download-size="0"
          install-size="0"
          version="0.0.0"
@@ -210,12 +184,6 @@ This Agreement is governed by the laws of the State of New York and the intellec
 
    <plugin
          id="org.eclipse.dawnsci.hdf5.editor"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"/>
-
-   <plugin
-         id="org.eclipse.dawnsci.plotting.examples"
          download-size="0"
          install-size="0"
          version="0.0.0"/>
