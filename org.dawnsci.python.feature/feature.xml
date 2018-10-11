@@ -20,10 +20,6 @@
          id="org.python.pydev.feature"
          version="0.0.0"/>
 
-   <includes
-         id="org.dawnsci.macro.feature"
-         version="0.0.0"/>
-
    <plugin
          id="uk.ac.diamond.scisoft.pydev.rcp"
          download-size="0"
@@ -46,6 +42,12 @@
 
    <plugin
          id="uk.ac.diamond.scisoft.python"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"/>
+
+   <plugin
+         id="org.eclipse.dawnsci.macro.api"
          download-size="0"
          install-size="0"
          version="0.0.0"/>
