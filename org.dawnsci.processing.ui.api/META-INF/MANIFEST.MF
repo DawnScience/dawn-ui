@@ -8,3 +8,4 @@ Require-Bundle: org.eclipse.jface;bundle-version="3.11.1",
  org.eclipse.dawnsci.analysis.api,
  org.eclipse.january
 Export-Package: org.dawnsci.processing.ui.api
+Automatic-Module-Name: org.dawnsci.processing.ui.api
