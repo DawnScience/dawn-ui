@@ -213,7 +213,7 @@ public class EscapableSliceVisitor implements SliceVisitor {
 			if (result instanceof OperationDataForDisplay) {
 				OperationDataForDisplay odd = (OperationDataForDisplay) result;
 				IDataset[] dd = odd.getDisplayData();
-				if (dd != null) {
+				if (dd != null && odd.isPlotOnOutputWindow()) {
 					if (display != null && odd.isShowSeparately()) {
 						for (IDataset d : dd) {
 							IDataset view = d.getSliceView().squeeze();
@@ -236,9 +236,9 @@ public class EscapableSliceVisitor implements SliceVisitor {
 				public void run() {
 					output.setTitle("Output");
 					if (displayHelper != null) {
-						if (result.getLog() != null && result instanceof OperationDataForDisplay && ((OperationDataForDisplay)result).isShowSeparately()) {
+						if (result.getLog() != null && result instanceof OperationDataForDisplay && ((OperationDataForDisplay)result).isPlotOnOutputWindow() && ((OperationDataForDisplay)result).isShowSeparately()) {
 							displayHelper.setDisplayMode(ProcessDisplayOptions.ALL);
-						} else if (result.getLog() == null && (result instanceof OperationDataForDisplay) && ((OperationDataForDisplay)result).isShowSeparately()) {
+						} else if (result.getLog() == null && (result instanceof OperationDataForDisplay) && ((OperationDataForDisplay)result).isPlotOnOutputWindow() && ((OperationDataForDisplay)result).isShowSeparately()) {
 							displayHelper.setDisplayMode(ProcessDisplayOptions.OUTPUT_DISPLAY);
 						} else if (result.getLog() != null && !(result instanceof OperationDataForDisplay)) {
 							displayHelper.setDisplayMode(ProcessDisplayOptions.OUTPUT_LOG);

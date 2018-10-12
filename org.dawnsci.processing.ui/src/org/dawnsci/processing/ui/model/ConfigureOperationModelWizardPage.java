@@ -414,7 +414,7 @@ public class ConfigureOperationModelWizardPage extends AbstractOperationModelWiz
 										OperationDataForDisplay odd = (OperationDataForDisplay) od;
 										IDataset[] dd = odd.getDisplayData();
 										if (dd != null) {
-											if (input != null && odd.isShowSeparately()) {
+											if (input != null && !odd.isPlotOnOutputWindow()) {
 												for (IDataset d : dd) {
 													IDataset view = d.getSliceView().squeeze();
 													MetadataPlotUtils.plotDataWithMetadata(view, input, false);
