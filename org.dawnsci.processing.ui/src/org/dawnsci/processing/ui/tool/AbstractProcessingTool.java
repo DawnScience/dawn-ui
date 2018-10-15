@@ -2,10 +2,7 @@ package org.dawnsci.processing.ui.tool;
 
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
@@ -14,9 +11,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.dawb.common.ui.monitor.ProgressMonitorWrapper;
-import org.dawnsci.common.widgets.dialog.FileSelectionDialog;
 import org.dawnsci.processing.ui.Activator;
-import org.dawnsci.processing.ui.EventServiceHolder;
 import org.dawnsci.processing.ui.ServiceHolder;
 import org.dawnsci.processing.ui.api.IOperationSetupWizardPage;
 import org.dawnsci.processing.ui.model.OperationModelViewer;
@@ -26,29 +21,28 @@ import org.dawnsci.processing.ui.processing.OperationDescriptor;
 import org.dawnsci.processing.ui.processing.OperationTableUtils;
 import org.dawnsci.processing.ui.slice.DataFileSliceView;
 import org.dawnsci.processing.ui.slice.EscapableSliceVisitor;
+import org.dawnsci.processing.ui.slice.ExtendedFileSelectionDialog;
 import org.dawnsci.processing.ui.slice.IOperationErrorInformer;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
-import org.eclipse.dawnsci.analysis.api.persistence.IPersistenceService;
+import org.eclipse.dawnsci.analysis.api.conversion.ProcessingOutputType;
 import org.eclipse.dawnsci.analysis.api.processing.Atomic;
 import org.eclipse.dawnsci.analysis.api.processing.ExecutionType;
 import org.eclipse.dawnsci.analysis.api.processing.IOperation;
-import org.eclipse.dawnsci.analysis.api.processing.IOperationBean;
 import org.eclipse.dawnsci.analysis.api.processing.IOperationContext;
 import org.eclipse.dawnsci.analysis.api.processing.IOperationInputData;
 import org.eclipse.dawnsci.analysis.api.processing.IOperationService;
+import org.eclipse.dawnsci.analysis.api.processing.ISavesToFile;
 import org.eclipse.dawnsci.analysis.api.processing.OperationData;
 import org.eclipse.dawnsci.analysis.api.processing.OperationException;
 import org.eclipse.dawnsci.analysis.api.processing.model.IOperationModel;
-import org.eclipse.dawnsci.analysis.api.tree.GroupNode;
+import org.eclipse.dawnsci.analysis.api.tree.Tree;
 import org.eclipse.dawnsci.analysis.dataset.slicer.SliceFromLiveSeriesMetadata;
 import org.eclipse.dawnsci.analysis.dataset.slicer.SliceFromSeriesMetadata;
 import org.eclipse.dawnsci.analysis.dataset.slicer.SliceInformation;
 import org.eclipse.dawnsci.analysis.dataset.slicer.SourceInformation;
-import org.eclipse.dawnsci.hdf5.nexus.NexusFileHDF5;
-import org.eclipse.dawnsci.nexus.NexusFile;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.PlotType;
 import org.eclipse.dawnsci.plotting.api.PlottingFactory;
@@ -65,19 +59,15 @@ import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.dialogs.Dialog;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
-import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.richbeans.widgets.table.ISeriesItemDescriptor;
 import org.eclipse.richbeans.widgets.table.ISeriesValidator;
 import org.eclipse.richbeans.widgets.table.SeriesTable;
-import org.eclipse.scanning.api.event.EventException;
-import org.eclipse.scanning.api.event.core.ISubmitter;
-import org.eclipse.scanning.api.event.status.StatusBean;
-import org.eclipse.scanning.api.ui.CommandConstants;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.layout.GridData;
@@ -94,6 +84,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import uk.ac.diamond.scisoft.analysis.processing.visitor.NexusFileExecutionVisitor;
+import uk.ac.diamond.scisoft.analysis.utils.FileUtils;
 
 public abstract class AbstractProcessingTool extends AbstractToolPage {
 
@@ -111,6 +102,7 @@ public abstract class AbstractProcessingTool extends AbstractToolPage {
 	private Action configure;
 	private SliceFromSeriesMetadata parentMeta;
 	private IOperationInputData inputData;
+	private ProcessingOutputType outputType = ProcessingOutputType.PROCESSING_ONLY;
 	
 	private final static String PROCESSED = "_processed";
 	private final static String EXT= ".nxs";
@@ -163,7 +155,7 @@ public abstract class AbstractProcessingTool extends AbstractToolPage {
 				
 				if (parentMeta instanceof SliceFromLiveSeriesMetadata) {
 					try {
-						setUpLiveRun();
+						Display.getDefault().asyncExec(() -> MessageDialog.openInformation(Display.getCurrent().getActiveShell(), "Live data!", "Cannot use tool to process running data!"));
 					} catch (Exception e) {
 						logger.error("Could not set-up live processing", e);
 					}
@@ -462,14 +454,20 @@ public abstract class AbstractProcessingTool extends AbstractToolPage {
 		String timeStamp = "_" +dateFormat.format(date);
 		String full = p + PROCESSED+ timeStamp + EXT;
 		
-		FileSelectionDialog fsd = new FileSelectionDialog(this.getViewPart().getSite().getShell());
-		fsd.setNewFile(true);
-		fsd.setFolderSelector(false);
-		fsd.setHasResourceButton(true);
-		fsd.setBlockOnOpen(true);
-		fsd.setPath(full);
+		boolean isHDF5 = false;
+		try {
+			Tree tree = ServiceHolder.getLoaderService().getData(parentMeta.getFilePath(), null).getTree();
+			isHDF5 = tree != null;
+		} catch (Exception e2) {
+			logger.error("Could not read tree",e2);
+		}
 		
-		if (fsd.open() == FileSelectionDialog.CANCEL) return;
+		ExtendedFileSelectionDialog fsd = new ExtendedFileSelectionDialog(Display.getCurrent().getActiveShell(),isHDF5,false, false, outputType);
+		
+		fsd.setPath(full);
+		fsd.create();
+		if (fsd.open() == Dialog.CANCEL) return;
+		outputType = fsd.getProcessingOutputType();
 		
 		final String path = fsd.getPath();
 		File fh = new File(path);
@@ -505,103 +503,6 @@ public abstract class AbstractProcessingTool extends AbstractToolPage {
 		
 	}
 	
-	private void setUpLiveRun() throws Exception {
-		
-		if (parentMeta == null) return;
-		
-		if (!(parentMeta instanceof SliceFromLiveSeriesMetadata)) return;
-		//TODO logging!
-		if (EventServiceHolder.getEventService() == null) return;
-		
-		SliceFromLiveSeriesMetadata sslm = (SliceFromLiveSeriesMetadata)parentMeta;
-	
-		String p = getPathNoExtension(sslm.getFilePath());
-		
-		FileSelectionDialog fsd = new FileSelectionDialog(this.getViewPart().getSite().getShell());
-		fsd.setNewFile(true);
-		fsd.setFolderSelector(false);
-		fsd.setHasResourceButton(true);
-		fsd.setBlockOnOpen(true);
-		fsd.setPath(p +"_processed.nxs");
-		
-		
-		if (fsd.open() == FileSelectionDialog.CANCEL) return;
-		
-		final String path = fsd.getPath();
-		int i = path.lastIndexOf(File.separator);
-		String runDirectory = path.substring(0, i+1);
-		
-		Date date = new Date() ;
-		SimpleDateFormat dateFormat = new SimpleDateFormat("yyMMdd_HHmmss") ;
-		String timeStamp = "_" +dateFormat.format(date);
-		
-		String chainPath = runDirectory +  "chain" + timeStamp +  ".nxs";
-		
-		IPersistenceService ps = ServiceHolder.getPersistenceService();
-		GroupNode gn = ps.getPersistentNodeFactory().writeOperationsToGroup(getOperations());
-		NexusFile nexusFile = null;
-		try {
-			nexusFile = NexusFileHDF5.createNexusFile(chainPath, false);
-			GroupNode group = nexusFile.getGroup("/entry", true);
-			nexusFile.addNode("/entry/process", gn);
-		} catch (Exception e){
-			throw e;
-		}finally {
-			nexusFile.close();
-		}
-		
-		List<String>[] axes = new List[sslm.getAxesNames().length];
-		for (int j = 0; j < axes.length; j++) {
-			axes[j] = Arrays.asList(new String[]{sslm.getAxesNames()[j]});
-		}
-		if (sslm.getxAxisForRemapping() != null) {
-			List<String> ax = new ArrayList<String>(axes[0]);
-			ax.add(sslm.getxAxisForRemapping());
-			axes[0] = ax;
-		}
-		
-		IOperationService service = ServiceHolder.getOperationService();
-		IOperationBean b = service.createBean();
-		b.setRunDirectory(runDirectory);
-		b.setDeleteProcessingFile(false);
-		b.setProcessingPath(chainPath);
-		b.setFilePath(sslm.getFilePath());
-		b.setDatasetPath(sslm.getDatasetName());
-		b.setXmx("1024m");
-		b.setAxesNames(axes);
-		b.setOutputFilePath(path);
-		b.setDataDimensions(sslm.getDataDimensions());
-		b.setName("GDA_OPERATION_SUBMISSION");
-
-		b.setDataKey("/entry/solstice_scan");
-		b.setReadable(true);
-
-		URI uri;
-		try {
-			IPreferenceStore pStore = Activator.getDefault().getPreferenceStore();
-			
-			uri = new URI(CommandConstants.getScanningBrokerUri());
-			
-		} catch (URISyntaxException e) {
-			logger.error("Could not create URI", e);
-			return;
-		}
-		
-		try (ISubmitter<StatusBean> submitter = EventServiceHolder.getEventService().createSubmitter(uri, "scisoft.operation.SUBMISSION_QUEUE")) {
-			if (b instanceof StatusBean) submitter.submit((StatusBean)b);
-		} catch (EventException e) {
-			logger.error("TODO put description of error here", e);
-		}
-		
-//		Map<String,String> props = new HashMap<>();
-//		props.put("path", path);
-//		props.put("host", sslm.getHost());
-//		props.put("port", Integer.toString(sslm.getPort()));
-//		EventAdmin eventAdmin = ServiceHolder.getEventAdmin();
-//		eventAdmin.postEvent(new Event("org/dawnsci/events/file/OPEN", props));
-		
-	}
-	
 	private void runProcessing(SliceFromSeriesMetadata meta, String outputFile, IProgressMonitor monitor){
 		
 		try {
@@ -612,7 +513,21 @@ public abstract class AbstractProcessingTool extends AbstractToolPage {
 			SliceFromSeriesMetadata ssm = new SliceFromSeriesMetadata(meta.getSourceInfo());
 			local.setMetadata(ssm);
 			cc.setData(local);
-			cc.setVisitor(new NexusFileExecutionVisitor(outputFile));
+			
+			NexusFileExecutionVisitor vis = new NexusFileExecutionVisitor(outputFile);
+			
+			if (outputType == ProcessingOutputType.LINK_ORIGINAL && vis instanceof ISavesToFile) {
+				((ISavesToFile)vis).includeLinkTo(meta.getFilePath());
+			} else if (outputType == ProcessingOutputType.ORIGINAL_AND_PROCESSED) {
+				File source = new File(meta.getFilePath());
+				File dest = new File(outputFile);
+				logger.debug("Copying original data ("+source.getAbsolutePath()+") to output file ("+dest.getAbsolutePath()+")");
+				long start = System.currentTimeMillis();
+				FileUtils.copyNio(source, dest);
+				logger.debug("Copy ran in: " +(System.currentTimeMillis()-start)/1000. + " s : Thread" +Thread.currentThread().toString());
+			}
+			
+			cc.setVisitor(vis);
 			cc.setDataDimensions(meta.getDataDimensions());
 			cc.setSeries(getOperations());
 			cc.setMonitor(mon);
