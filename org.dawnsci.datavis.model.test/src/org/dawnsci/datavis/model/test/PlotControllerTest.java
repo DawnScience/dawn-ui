@@ -469,70 +469,26 @@ public class PlotControllerTest extends AbstractTestModel {
 		assertEquals(0, plottingSystem.getTraces().size());
 		
 	}
-//	
-//	@Test
-//	public void testMultiFileXYAndImage() throws Exception{
-//		initialiseControllers();
-//		FileControllerUtils.loadFile(fileController,file.getAbsolutePath());
-//		FileControllerUtils.loadFile(fileController,file1.getAbsolutePath());
-//		LoadedFile lf = fileController.getLoadedFiles().stream().filter(f -> f.getFilePath().equals(file.getAbsolutePath())).findFirst().get();
-//		LoadedFile lf1 = fileController.getLoadedFiles().stream().filter(f -> f.getFilePath().equals(file1.getAbsolutePath())).findFirst().get();
-//
-//		DataOptions dop = lf.getDataOption("/entry/dataset2");
-//		plotManager.waitOnJob();
-//		assertEquals(0, plottingSystem.getTraces().size());
-//		//Select first file and some data, check plotted as line
-//		fileController.setFileSelected(lf,true);
-//		fileController.setDataSelected(dop, true);
-//		plotManager.waitOnJob();
-//		assertEquals(1, plottingSystem.getTraces().size());
-//		ITrace next = plottingSystem.getTraces().iterator().next();
-//		assertTrue(next instanceof IImageTrace);
-//		
-//		//change current file (not checked) and check data, make sure image still plotted
-//		DataOptions dop1 = lf1.getDataOption("/entry/dataset1");
-//		fileController.setFileSelected(lf1,false);
-//		plotManager.waitOnJob();
-//		assertEquals(1, plottingSystem.getTraces().size());
-//		fileController.setDataSelected(dop1, true);
-//		plotManager.waitOnJob();
-//		assertEquals(1, plottingSystem.getTraces().size());
-//		next = plottingSystem.getTraces().iterator().next();
-//		assertTrue(next instanceof IImageTrace);
-//		plotManager.waitOnJob();
-//		fileController.setDataSelected(dop1, false);
-//	
-//		//check file (with data unchecked) make sure image still plotted
-//		fileController.setFileSelected(lf1,true);
-//		plotManager.waitOnJob();
-//		assertEquals(1, plottingSystem.getTraces().size());
-//		next = plottingSystem.getTraces().iterator().next();
-//		assertTrue(next instanceof IImageTrace);
-//		
-//		//check data, make sure plot switches to a line and first file is unchecked
-//		fileController.setDataSelected(dop1, true);
-//		plotManager.waitOnJob();
-//		assertEquals(1, plottingSystem.getTraces().size());
-//		next = plottingSystem.getTraces().iterator().next();
-//		assertTrue(next instanceof ILineTrace);
-//		
-//		//Need to make UI reflect the plot manager deselection
-//		assertFalse(lf.isSelected());
-//		//
-//		fileController.setFileSelected(lf,true);
-//		assertFalse(lf1.isSelected());
-//		plotManager.waitOnJob();
-//		assertEquals(1, plottingSystem.getTraces().size());
-//		next = plottingSystem.getTraces().iterator().next();
-//		assertTrue(next instanceof IImageTrace);
-//		
-//		//clean up
-//		fileController.unloadFiles(Arrays.asList(lf1,lf));
-////		fileController.unloadFile(lf2);
-////		fileController.unloadFile(lf3);
-//		plotManager.waitOnJob();
-//		assertEquals(0, plottingSystem.getTraces().size());
-//		
-//	}
+	
+	@Test
+	public void testLabelPropagation() throws Exception{
+		initialiseControllers();
+		DataOptions dp = setUpAndSelectFirstFile1D();
+		assertEquals(1, plottingSystem.getTraces().size());
+		String label = "my_test_label";
+		dp.getParent().setLabel(label);
+		plotManager.forceReplot();
+		plotManager.waitOnJob();
+		assertEquals(1, plottingSystem.getTraces().size());
+		ITrace next = plottingSystem.getTraces().iterator().next();
+		assertTrue(next.getName().equals(label));
+		
+		fileController.setDataSelected(dp.getParent().getDataOption("/entry/dataset1a"),true);
+		plotManager.waitOnJob();
+		assertEquals(2, plottingSystem.getTraces().size());
+		next = plottingSystem.getTraces().iterator().next();
+		assertFalse(next.getName().equals(label));
+		assertTrue(next.getName().contains(label));
+	}
 
 }

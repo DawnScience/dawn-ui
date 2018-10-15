@@ -31,12 +31,9 @@ import org.eclipse.dawnsci.plotting.api.trace.ITrace;
 import org.eclipse.january.dataset.IDataset;
 import org.eclipse.january.dataset.ILazyDataset;
 import org.eclipse.january.dataset.SliceND;
-import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Color;
-import org.eclipse.swt.graphics.Cursor;
 import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.Shell;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -169,8 +166,6 @@ public class PlotController implements IPlotController, ILoadedFileInitialiser {
 	private AtomicReference<Runnable> atomicRunnable = new AtomicReference<>();
 	private AtomicReference<Future<?>> atomicFuture = new AtomicReference<>();
 	
-	private static final String ID = "org.dawnsci.prototype.nano.model.PlotManager";
-	
 	public PlotController (IPlottingSystem<?> system, IFileController controller, ExecutorService exService) {
 		this.system = system;
 		this.fileController = controller;
@@ -271,6 +266,21 @@ public class PlotController implements IPlotController, ILoadedFileInitialiser {
 			}
 		}
 		
+		final Set<String> uniqueLabelSet = new HashSet<>();
+		Set<String> duplicates = new HashSet<>();
+		
+		for (DataOptions d : state) {
+			
+			String label = d.getLabel();
+			if (label.isEmpty()) continue;
+			
+			if (uniqueLabelSet.contains(label)) {
+				uniqueLabelSet.remove(label);
+				duplicates.add(label);
+			} else if (!duplicates.contains(label)){
+				uniqueLabelSet.add(label);
+			}
+		}
 		
 		final List<Runnable> uiRunnables = new ArrayList<>();
 		
@@ -283,7 +293,6 @@ public class PlotController implements IPlotController, ILoadedFileInitialiser {
 					for (ITrace t : traces) {
 						system.removeTrace(t);
 					}
-					
 				}
 			};
 			
@@ -291,7 +300,7 @@ public class PlotController implements IPlotController, ILoadedFileInitialiser {
 		}
 		
 		for (DataOptions object : state) {
-				uiRunnables.add(updatePlottedData(object, new ArrayList<ITrace>(), localCurrentMode, localModifier));
+				uiRunnables.add(updatePlottedData(object, new ArrayList<ITrace>(), localCurrentMode, localModifier, uniqueLabelSet));
 		}
 		
 		Display.getDefault().syncExec(new Runnable() {
@@ -354,7 +363,7 @@ public class PlotController implements IPlotController, ILoadedFileInitialiser {
 		if (axes != null) for (IAxis axis : axes) if (axis != null) axis.setAxisAutoscaleTight(true);	
 	}
 	
-	private Runnable updatePlottedData(DataOptions dataOp,final List<ITrace> traces, IPlotMode mode, IPlotDataModifier modifier) {
+	private Runnable updatePlottedData(DataOptions dataOp,final List<ITrace> traces, IPlotMode mode, IPlotDataModifier modifier, Set<String> uniqueLabelSet) {
 		//remove traces if not the same as mode
 		//update the data in the plot
 		
@@ -383,6 +392,11 @@ public class PlotController implements IPlotController, ILoadedFileInitialiser {
 			view.setName(n);
 
 			data = mode.sliceForPlot(view, slice,options,system);
+			
+			if (data.length == 1 && uniqueLabelSet.contains(l)) {
+				data[0].setName(l);
+			}
+			
 		} catch (Exception e) {
 			firePlotEvent(new PlotEventObject(PlotEventType.ERROR, "Error loading data..."));
 			logger.error("Could not slice data for plotting", e);
