@@ -11,8 +11,6 @@ package org.dawnsci.plotting.draw2d.swtxy;
 import java.util.ArrayList;
 import java.util.Collection;
 
-import org.dawb.common.ui.macro.AxisMacroEvent;
-import org.dawb.common.ui.macro.ColorMacroEvent;
 import org.dawb.common.util.text.NumberUtils;
 import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.dawnsci.plotting.api.axis.AxisEvent;
@@ -62,10 +60,6 @@ public class AspectAxis extends DAxis implements IAxis {
 		final String oldName = getTitle();
         if (oldName!=null && oldName.equals(title)) return;
         
-        // To deal with API and concept of selected axis
-        if (ServiceHolder.getMacroService()!=null) {
-        	ServiceHolder.getMacroService().publish(new AxisMacroEvent("ps",this,title));
-        }
         super.setTitle(title);
 	}
 	
@@ -77,10 +71,6 @@ public class AspectAxis extends DAxis implements IAxis {
         
         if (old!=null && old.equals(color)) return;
         
-        // To deal with API and concept of selected axis
-        if (ServiceHolder.getMacroService()!=null) {
-        	ServiceHolder.getMacroService().publish(new ColorMacroEvent("ps",this,color));
-        }
 	}
 
 	

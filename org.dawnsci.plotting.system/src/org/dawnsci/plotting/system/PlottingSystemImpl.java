@@ -30,8 +30,6 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.dawnsci.analysis.api.RMIServerProvider;
-import org.eclipse.dawnsci.macro.api.IMacroService;
-import org.eclipse.dawnsci.macro.api.MacroEventObject;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystemViewer;
 import org.eclipse.dawnsci.plotting.api.IPrintablePlotting;
@@ -111,11 +109,6 @@ import org.slf4j.LoggerFactory;
 public class PlottingSystemImpl<T> extends AbstractPlottingSystem<T> {
 
 	private Logger logger = LoggerFactory.getLogger(PlottingSystemImpl.class);
-
-	private static IMacroService mservice;
-	public void setMacroService(IMacroService s) {
-		mservice = s;
-	}
 
 	private T              parent;
 	private StackLayout    stackLayout;
@@ -202,9 +195,6 @@ public class PlottingSystemImpl<T> extends AbstractPlottingSystem<T> {
 			logger.error("Unable to register plotting system " + plotName, e);
 		}
 
-		if (mservice != null) {
-			mservice.publish(new MacroEventObject(this));
-		}
 		DisplayUtils.asyncExec(new Runnable() {
 			@Override
 			public void run() {
@@ -667,11 +657,6 @@ public class PlottingSystemImpl<T> extends AbstractPlottingSystem<T> {
 				if (data.getName()!=null) viewer.setTitle(data.getName());
 			}
 
-			if (mservice!=null) {
-				mservice.publish(new MacroEventObject(data));
-				if (axes!=null && !axes.isEmpty()) mservice.publish(new MacroEventObject(axes));
-			}
-
 			return trace;
 
 		} catch (Throwable e) {
@@ -820,10 +805,6 @@ public class PlottingSystemImpl<T> extends AbstractPlottingSystem<T> {
 			((ILineTrace)iTrace).setErrorBarEnabled(errorBarEnabled);
 		}
 
-		if (mservice!=null) {
-			mservice.publish(new MacroEventObject(ysIn));
-			mservice.publish(new MacroEventObject(xIn));
-		}
 		fireTracesPlotted(new TraceEvent(traces));
         return traces;
 	}

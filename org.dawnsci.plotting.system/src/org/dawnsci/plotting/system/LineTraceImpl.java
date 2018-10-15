@@ -8,15 +8,9 @@
  */
 package org.dawnsci.plotting.system;
 
-import org.dawb.common.ui.macro.ColorMacroEvent;
-import org.dawb.common.ui.macro.TraceMacroEvent;
 import org.dawnsci.plotting.AbstractPlottingSystem;
 import org.dawnsci.plotting.draw2d.swtxy.LineTrace;
 import org.eclipse.core.runtime.preferences.InstanceScope;
-import org.eclipse.dawnsci.macro.api.IMacroService;
-import org.eclipse.dawnsci.macro.api.MacroEventObject;
-import org.eclipse.dawnsci.macro.api.MacroUtils;
-import org.eclipse.dawnsci.macro.api.MethodEventObject;
 import org.eclipse.dawnsci.plotting.api.axis.IAxis;
 import org.eclipse.dawnsci.plotting.api.preferences.PlottingConstants;
 import org.eclipse.dawnsci.plotting.api.trace.ILineTrace;
@@ -45,10 +39,6 @@ import org.eclipse.ui.preferences.ScopedPreferenceStore;
  */
 public class LineTraceImpl implements ILineTrace, ITraceListener{
 
-	private static IMacroService mservice;
-	public void setMacroService(IMacroService s) {
-		mservice = s;
-	}
 	public LineTraceImpl() { // Used for OSGi
 		
 	}
@@ -512,20 +502,12 @@ public class LineTraceImpl implements ILineTrace, ITraceListener{
 
 	@Override
 	public void traceWidthChanged(Trace trace, int old, int newWidth) {
-		if (mservice!=null) {
-			TraceMacroEvent evt = new TraceMacroEvent(this, "setLineWidth", newWidth);
-		    mservice.publish(evt);
-		}
+		//do nothing
 	}
 
 	@Override
 	public void traceNameChanged(Trace trace, final String oldName, final String newName) {
 		if (trace == this.trace && !newName.equals(oldName)) {
-			
-			String traceName = "trace_"+MacroUtils.getLegalName(newName);
-			if (mservice!=null) {
-				mservice.publish(new MacroEventObject(this, traceName+" = ps.getTrace(\""+oldName+"\")", true));
-			}
 
 			Display.getDefault().asyncExec(new Runnable() {
 				public void run() {
@@ -533,9 +515,6 @@ public class LineTraceImpl implements ILineTrace, ITraceListener{
 				}
 			});
 
-			if (mservice!=null) {
-			    mservice.publish(new MethodEventObject<String>(traceName, "setName", this, newName));
-			}
 		}
 	}
 
@@ -547,38 +526,17 @@ public class LineTraceImpl implements ILineTrace, ITraceListener{
 
 	@Override
 	public void traceTypeChanged(Trace trace, Trace.TraceType old, Trace.TraceType newTraceType) {
-		
-		if (mservice!=null) {
-			TraceMacroEvent evt = new TraceMacroEvent(this, "setTraceType", newTraceType.name());
-		    mservice.publish(evt);
-		}
-
+		//do nothing
 	}
 	
 	@Override
 	public void pointStyleChanged(Trace trace, Trace.PointStyle old, Trace.PointStyle newStyle) {
-		
-		if (mservice!=null) {
-			TraceMacroEvent evt = new TraceMacroEvent(this, "setPointStyle", newStyle.name());
-		    mservice.publish(evt);
-		}
-
+		//do nothing
 	}
 
 	@Override
 	public void traceColorChanged(Trace trace, Color old, Color newColor) {
-		if (trace == this.trace && old!=null && old.equals(newColor)) return;
-		if (mservice!=null) {
-			try {
-				String traceName = "trace_"+MacroUtils.getLegalName(getName());
-				ColorMacroEvent evt = new ColorMacroEvent(traceName, "setTraceColor", this, newColor);
-				evt.prepend(traceName+" = ps.getTrace(\""+getName()+"\")");
-				mservice.publish(evt);
-			} catch (Exception e) {
-				//ignore
-			}
-			
-		}
+		//do nothing
 	}
 
 }

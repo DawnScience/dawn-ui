@@ -11,9 +11,7 @@ package org.dawnsci.plotting.jreality;
 import java.util.Collection;
 import java.util.HashSet;
 
-import org.dawb.common.ui.macro.TraceMacroEvent;
 import org.eclipse.core.runtime.preferences.InstanceScope;
-import org.eclipse.dawnsci.macro.api.IMacroService;
 import org.eclipse.dawnsci.plotting.api.histogram.HistogramBound;
 import org.eclipse.dawnsci.plotting.api.histogram.IImageService;
 import org.eclipse.dawnsci.plotting.api.histogram.IPaletteService;
@@ -121,13 +119,6 @@ abstract public class Image3DTrace extends PlotterTrace implements IImage3DTrace
         setPaletteName(paletteName);
         setPaletteData(paletteData);
      	
-		if (!paletteName.equals(orig)) {
-	        IMacroService mservice = (IMacroService)Activator.getService(IMacroService.class);
-	        if (mservice!=null) {
-				TraceMacroEvent evt = new TraceMacroEvent(this, "setPalette", paletteName);
-				mservice.publish(evt);
-	        }
-		}
 	}
 
 	protected ColourImageData createImageData() {
