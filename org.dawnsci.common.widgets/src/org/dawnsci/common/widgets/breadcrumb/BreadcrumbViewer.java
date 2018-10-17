@@ -17,8 +17,6 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.MenuDetectEvent;
 import org.eclipse.swt.events.MenuDetectListener;
-import org.eclipse.swt.events.TraverseEvent;
-import org.eclipse.swt.events.TraverseListener;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.Image;
@@ -28,8 +26,6 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.Event;
-import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Widget;
 import org.eclipse.core.runtime.Assert;
@@ -69,7 +65,7 @@ public abstract class BreadcrumbViewer extends StructuredViewer {
 
 	private final Composite fContainer;
 	private final ArrayList<BreadcrumbItem> fBreadcrumbItems;
-	private final ListenerList fMenuListeners;
+	private final ListenerList<MenuDetectListener> fMenuListeners;
 
 	private Image fGradientBackground;
 	private BreadcrumbItem fSelectedItem;
@@ -90,31 +86,25 @@ public abstract class BreadcrumbViewer extends StructuredViewer {
 	 * @param style the style flag used for this viewer
 	 */
 	public BreadcrumbViewer(Composite parent, int style) {
-		fBreadcrumbItems= new ArrayList<BreadcrumbItem>();
-		fMenuListeners= new ListenerList();
+		fBreadcrumbItems= new ArrayList<>();
+		fMenuListeners= new ListenerList<>();
 
 		fContainer= new Composite(parent, SWT.NONE);
 		GridData layoutData= new GridData(SWT.FILL, SWT.TOP, true, false);
 		fContainer.setLayoutData(layoutData);
-		fContainer.addTraverseListener(new TraverseListener() {
-			public void keyTraversed(TraverseEvent e) {
-				e.doit= true;
-			}
-		});
+		fContainer.addTraverseListener(e -> e.doit= true);
 		fContainer.setBackgroundMode(SWT.INHERIT_DEFAULT);
 
-		fContainer.addListener(SWT.Resize, new Listener() {
-			public void handleEvent(Event event) {
-				int height= fContainer.getClientArea().height;
+		fContainer.addListener(SWT.Resize, event -> {
+			int height= fContainer.getClientArea().height;
 
-				if (fGradientBackground == null || fGradientBackground.getBounds().height != height) {
-					Image image= height == 0 ? null : createGradientImage(height, event.display);
-					fContainer.setBackgroundImage(image);
+			if (fGradientBackground == null || fGradientBackground.getBounds().height != height) {
+				Image image= height == 0 ? null : createGradientImage(height, event.display);
+				fContainer.setBackgroundImage(image);
 
-					if (fGradientBackground != null)
-						fGradientBackground.dispose();
-					fGradientBackground= image;
-				}
+				if (fGradientBackground != null)
+					fGradientBackground.dispose();
+				fGradientBackground= image;
 			}
 		});
 
@@ -132,11 +122,7 @@ public abstract class BreadcrumbViewer extends StructuredViewer {
 		gridLayout.horizontalSpacing= 0;
 		fContainer.setLayout(gridLayout);
 
-		fContainer.addListener(SWT.Resize, new Listener() {
-			public void handleEvent(Event event) {
-				refresh();
-			}
-		});
+		fContainer.addListener(SWT.Resize, event -> refresh());
 	}
 
 	/**
@@ -194,7 +180,7 @@ public abstract class BreadcrumbViewer extends StructuredViewer {
 		if (fSelectedItem != null) {
 			fSelectedItem.setFocus(true);
 		} else {
-			if (fBreadcrumbItems.size() == 0)
+			if (fBreadcrumbItems.isEmpty())
 				return;
 
 			BreadcrumbItem item= fBreadcrumbItems.get(fBreadcrumbItems.size() - 1);
@@ -293,7 +279,7 @@ public abstract class BreadcrumbViewer extends StructuredViewer {
 
 		disableRedraw();
 		try {
-			if (fBreadcrumbItems.size() > 0) {
+			if (!fBreadcrumbItems.isEmpty()) {
 				BreadcrumbItem last= fBreadcrumbItems.get(fBreadcrumbItems.size() - 1);
 				last.setIsLastItem(false);
 			}
@@ -391,15 +377,16 @@ public abstract class BreadcrumbViewer extends StructuredViewer {
 	/*
 	 * @see org.eclipse.jface.viewers.StructuredViewer#getSelectionFromWidget()
 	 */
+	@SuppressWarnings("rawtypes")
 	@Override
-	protected List getSelectionFromWidget() {
+	protected List getSelectionFromWidget() { //overides a method from jface so can't parameterize
 		if (fSelectedItem == null)
-			return Collections.EMPTY_LIST;
+			return Collections.emptyList();
 
 		if (fSelectedItem.getData() == null)
-			return Collections.EMPTY_LIST;
+			return Collections.emptyList();
 
-		ArrayList<Object> result= new ArrayList<Object>();
+		ArrayList<Object> result= new ArrayList<>();
 		if (!isEditable()) { // It is always the last item
 		    result.add(fBreadcrumbItems.get(fBreadcrumbItems.size()-1).getData());
 		} else {
@@ -436,7 +423,7 @@ public abstract class BreadcrumbViewer extends StructuredViewer {
 	 * @see org.eclipse.jface.viewers.StructuredViewer#setSelectionToWidget(java.util.List, boolean)
 	 */
 	@Override
-	protected void setSelectionToWidget(List l, boolean reveal) {
+	protected void setSelectionToWidget(@SuppressWarnings("rawtypes") List l, boolean reveal) { //overides a method from jface so can't parameterize
 		BreadcrumbItem focusItem= null;
 
 		for (int i= 0, size= fBreadcrumbItems.size(); i < size; i++) {
