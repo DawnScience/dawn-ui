@@ -841,29 +841,40 @@ public class PlottingSystemImpl<T> extends AbstractPlottingSystem<T> {
 	@Override
 	public ISurfaceTrace createSurfaceTrace(String traceName) {
 		ISurfaceTrace trace = (ISurfaceTrace)getViewer(ISurfaceTrace.class).createTrace(traceName, ISurfaceTrace.class);
-		return (ISurfaceTrace) setPaletteData(trace);
+		if (trace != null) {
+			setPaletteData(trace);
+		}
+		return trace;
 	}
 
 	@Override
 	public IIsosurfaceTrace createIsosurfaceTrace(String traceName) {
 		IIsosurfaceTrace trace = (IIsosurfaceTrace)getViewer(IIsosurfaceTrace.class).createTrace(traceName, IIsosurfaceTrace.class);
-		return (IIsosurfaceTrace) setPaletteData(trace);
+		if (trace != null) {
+			setPaletteData(trace);
+		}
+		return trace;
 	}
-	
+
 	@Override
 	public IVolumeRenderTrace createVolumeRenderTrace(String traceName) {
 		IVolumeRenderTrace trace = (IVolumeRenderTrace)getViewer(IVolumeRenderTrace.class).createTrace(traceName, IVolumeRenderTrace.class);
-		return (IVolumeRenderTrace) setPaletteData(trace);
+		if (trace != null) {
+			setPaletteData(trace);
+		}
+		return trace;
 	}
-
 
 	@Override
 	public IMulti2DTrace createMulti2DTrace(String traceName) {
 		IMulti2DTrace trace = (IMulti2DTrace)getViewer(IMulti2DTrace.class).createTrace(traceName, IMulti2DTrace.class);
-		return (IMulti2DTrace) setPaletteData(trace);
+		if (trace != null) {
+			setPaletteData(trace);
+		}
+		return trace;
 	}
 
-	private IImage3DTrace setPaletteData(IImage3DTrace trace) {
+	private void setPaletteData(IImage3DTrace trace) {
 		PaletteData palette = null;
 		if (trace.getPaletteData()==null) {
 			final String schemeName = PlottingSystemActivator.getPlottingPreferenceStore().getString(PlottingConstants.COLOUR_SCHEME);
@@ -882,7 +893,6 @@ public class PlottingSystemImpl<T> extends AbstractPlottingSystem<T> {
 			trace.setPaletteData(palette);
 			trace.setPaletteName(schemeName);
 		}
-		return trace;
 	}
 
 	@Override
