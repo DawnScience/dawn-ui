@@ -203,8 +203,17 @@ public class MappedFileManager implements IMapFileController{
 	}
 	
 	@Override
-	public void localReloadFile(String path) {
+	public void localReloadFile(String path, boolean force) {
 		if (!mappedDataArea.contains(path)) return;
+		
+		MappedDataFile df = mappedDataArea.getDataFile(path);
+		if (df.isEmpty() && !df.isFileFinished()) {
+			df.markFileFinished();
+			return;
+		}
+		
+		if (df.isFileFinished() && !force) return;
+		
 		
 		Runnable r = new Runnable() {
 			
@@ -528,8 +537,8 @@ public class MappedFileManager implements IMapFileController{
 		}
 
 		@Override
-		public void localReload(String path) {
-			localReloadFile(path);
+		public void localReload(String path, boolean force) {
+			localReloadFile(path, force);
 		}
 		
 	}

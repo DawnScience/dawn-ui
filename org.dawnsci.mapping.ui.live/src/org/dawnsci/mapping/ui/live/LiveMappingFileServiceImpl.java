@@ -231,7 +231,7 @@ public class LiveMappingFileServiceImpl implements ILiveMappingFileService {
 			if (beanNoScanReq.scanEnd() || beanNoScanReq.getStatus().isTerminated()) {
 
 				for (ILiveMapFileListener l : listeners) {
-					l.localReload(filePath);
+					l.localReload(filePath, false);
 				}
 			}
 		}
@@ -265,7 +265,7 @@ public class LiveMappingFileServiceImpl implements ILiveMappingFileService {
 			if (!evt.getBean().getStatus().isFinal()) return;
 			if (evt.getBean() instanceof IOperationBean) {
 
-				for (ILiveMapFileListener l : listeners) l.localReload(((IOperationBean)evt.getBean()).getOutputFilePath());
+				for (ILiveMapFileListener l : listeners) l.localReload(((IOperationBean)evt.getBean()).getOutputFilePath(), false);
 
 			}
 		}

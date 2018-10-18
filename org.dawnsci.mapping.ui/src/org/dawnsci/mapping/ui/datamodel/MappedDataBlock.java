@@ -54,6 +54,7 @@ public class MappedDataBlock implements LockableMapObject {
 		this.dataset = lz;
 		range = calculateRange(lz);
 		mapRepresentation = null;
+		live = false;
 	}
 	
 	@Override

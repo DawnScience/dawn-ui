@@ -243,8 +243,12 @@ public class MappedDataView extends ViewPart {
 
 			if (e instanceof MappedDataFile) {
 				MappedDataFile mdf = (MappedDataFile)e;
-				if (mdf.getLiveDataBean() !=null)
+				if (mdf.getLiveDataBean() !=null) {
 					fileController.loadLiveFile(mdf.getPath(), mdf.getLiveDataBean(),mdf.getParentPath(),false);
+				} else if (mdf.isFileFinished() && mdf.getChildren().length == 0) {
+					fileController.localReloadFile(mdf.getPath(), true);
+				}
+					
 			}
 			viewer.refresh();
 		});

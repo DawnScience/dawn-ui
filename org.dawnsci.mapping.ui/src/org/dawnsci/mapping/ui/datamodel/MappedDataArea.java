@@ -29,13 +29,35 @@ public class MappedDataArea implements MapObject {
 
 		}
 		
-		AbstractMapData map = file.getMap();
-		if (map != null) map.setPlotted(true);
-		
-		AssociatedImage aI = file.getAssociatedImage();
-		if (aI != null) aI.setPlotted(true);
+		String currentName = null;
+			
+		for (MappedDataFile f : files) {
+			currentName = getPlottedName(f);
+			if (currentName != null) {
+				break;
+			}
+		}
+
+		if (currentName != null) {
+			for (Object o : file.getChildren()) {
+				if (currentName.equals(o.toString()) && o instanceof AbstractMapData) {
+					((AbstractMapData)o).setPlotted(true);
+				}
+			}
+		}
 		 
 		files.add(file);
+	}
+	
+	private String getPlottedName(MappedDataFile f) {
+		
+		for (Object o : f.getChildren()) {
+			if (o instanceof AbstractMapData && ((AbstractMapData) o).isPlotted()) {
+				return ((AbstractMapData) o).toString();
+			}
+		}
+		
+		return null;
 	}
 
 	@Override
