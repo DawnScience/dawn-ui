@@ -43,7 +43,7 @@ public class PlotModeXY implements IPlotMode {
 
 	@Override
 	public int getMinimumRank() {
-		return 1;
+		return 0;
 	}
 
 	@Override

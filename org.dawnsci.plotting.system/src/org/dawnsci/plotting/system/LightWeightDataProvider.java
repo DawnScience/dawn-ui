@@ -207,13 +207,19 @@ class LightWeightDataProvider implements IDataProvider {
 		this.cachedYRange = null;
 
 		hasExtraXPoint = false;
-		if (y==null || y.getShape()==null || y.getShape().length<1) {
+		if (y==null || y.getShape()==null) {
 			size = 0;
 		} else {
 			size = y.getSize();
 		}
 
 		if (size > 0 && x != null) {
+			if (y.getRank() == 0) {
+				y.setShape(1);
+			}
+			if (x.getRank() == 0) {
+				x.setShape(1);
+			}
 			if (x.getSize() == size + 1) {
 				size++;
 				hasExtraXPoint = true;
