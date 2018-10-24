@@ -5,6 +5,7 @@ import org.eclipse.dawnsci.analysis.dataset.slicer.SliceFromSeriesMetadata;
 import org.eclipse.dawnsci.analysis.dataset.slicer.SliceViewIterator;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.trace.ILineTrace;
+import org.eclipse.dawnsci.plotting.api.trace.ILineTrace.PointStyle;
 import org.eclipse.dawnsci.plotting.api.trace.ITrace;
 import org.eclipse.dawnsci.plotting.api.trace.MetadataPlotUtils;
 import org.eclipse.january.DatasetException;
@@ -172,12 +173,11 @@ public class PlotModeXY implements IPlotMode {
 			if (axes.length == 1 && axes[0] != null) {
 				ax = axes[0].getSlice();
 				String name = MetadataPlotUtils.removeSquareBrackets(ax.getName());
-				ax.setName(MetadataPlotUtils.removeSquareBrackets(name));
+				ax.setName(name);
 				axName = name;
 			}
-			
 		}
-		
+
 		ILineTrace trace = null;
 		boolean canUpdate = false;
 		if (update instanceof ILineTrace) {
@@ -198,6 +198,10 @@ public class PlotModeXY implements IPlotMode {
 		trace.setData(ax, data);
 		trace.setUserObject(userObject);
 		trace.setErrorBarEnabled(errorBarEnabled);
+		if (data.getSize() == 1) {
+			trace.setPointStyle(PointStyle.POINT);
+		}
+
 		if (!canUpdate)system.addTrace(trace);
 		
 		if (axName != null) system.getSelectedXAxis().setTitle(axName);
