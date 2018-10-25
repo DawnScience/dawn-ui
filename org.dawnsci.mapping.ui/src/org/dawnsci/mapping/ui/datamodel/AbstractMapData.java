@@ -22,7 +22,7 @@ public abstract class AbstractMapData implements LockableMapObject{
 	protected ILazyDataset baseMap;
 	protected MappedDataBlock oParent;
 	protected MappedDataBlock parent;
-	private int transparency = -1;
+	private int transparency = 255;
 	private double[] range;
 	
 	protected boolean live;

@@ -5,6 +5,7 @@ import static java.util.stream.Collectors.toList;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.EventListener;
 import java.util.HashSet;
@@ -13,6 +14,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import org.dawnsci.mapping.ui.ILiveMapFileListener;
 import org.dawnsci.mapping.ui.ILiveMappingFileService;
@@ -119,26 +121,20 @@ public class LiveMappingFileServiceImpl implements ILiveMappingFileService {
 //			logger.info("Created subscriber");
 			
 			Job loadRunningScan = new Job("Load running scans") {
-				
+
 				@Override
 				protected IStatus run(IProgressMonitor monitor) {
 					List<String> allRunningFiles = getAllRunningFiles();
-					
-					for (String fname : allRunningFiles){
-						try {
-							fireListeners(fname,null);
-						} catch (Exception e) {
-							logger.error("Could not load running file {}",fname,e);
-						}
-						
+
+					try {
+						fireListeners(allRunningFiles.toArray(new String[allRunningFiles.size()]), null, true);
+					} catch (Exception e) {
+						logger.error("Could not load running files", e);
 					}
-					
+
 					if (initialFiles != null) {
-						for (String fname : initialFiles) {
-							if (!allRunningFiles.contains(fname)) {
-								for (ILiveMapFileListener l : listeners) l.fileLoadRequest(fname,null,-1, null);
-							}
-						}
+						List<String> notRunning = Arrays.stream(initialFiles).filter(f -> !allRunningFiles.contains(f)).collect(Collectors.toList());
+						fireListeners(notRunning.toArray(new String[notRunning.size()]),null, false);
 					}
 
 					return org.eclipse.core.runtime.Status.OK_STATUS;
@@ -224,7 +220,7 @@ public class LiveMappingFileServiceImpl implements ILiveMappingFileService {
 			if (beanNoScanReq.scanStart()) {
 //				LiveLoadedFile f = new LiveLoadedFile(filePath, host, port);
 				
-				fireListeners(filePath, null);
+				fireListeners(new String[] {filePath}, null,true);
 
 			}
 			
@@ -249,7 +245,7 @@ public class LiveMappingFileServiceImpl implements ILiveMappingFileService {
 			
 			if (Status.RUNNING.equals(bean.getStatus()) && !Status.RUNNING.equals(bean.getPreviousStatus())) {
 			
-				fireListeners(((IOperationBean)evt.getBean()).getOutputFilePath(),((IOperationBean)evt.getBean()).getFilePath());
+				fireListeners(new String[] {((IOperationBean)evt.getBean()).getOutputFilePath()},((IOperationBean)evt.getBean()).getFilePath(), true);
 				
 				return;
 				
@@ -276,8 +272,8 @@ public class LiveMappingFileServiceImpl implements ILiveMappingFileService {
 		}
 	}
 	
-	private void fireListeners(String f, String parent) {
-		for (ILiveMapFileListener l : listeners) l.fileLoadRequest(f,getDataServerHost(),getDataServerPort(), parent);
+	private void fireListeners(String[] fs, String parent, boolean live) {
+		for (ILiveMapFileListener l : listeners) l.fileLoadRequest(fs,live ? getDataServerHost() : null, getDataServerPort(), parent);
 	}
 	
 	public static String getDataServerHost() {

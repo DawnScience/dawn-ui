@@ -137,20 +137,10 @@ public class MappedFileManager implements IMapFileController{
 			paths = null;
 			liveService.addLiveFileListener(liveMapListener);
 		}
+		
+	}
+	
 
-		// Restore state of view
-		if (paths != null) {
-//			for (String f : filesToReload) {
-			lazyAddFiles(paths);
-//			}
-		}
-		
-	}
-	
-	private void lazyAddFiles(String[] paths) {
-		
-	}
-	
 	@Override
 	public List<String> loadFiles(String[] paths, IProgressService progressService) {
 		
@@ -170,6 +160,15 @@ public class MappedFileManager implements IMapFileController{
 		
 		List<String> failed = runnable.getFailedLoadingFiles();
 		return failed;
+	}
+	
+	private void lazyAddFiles(String[] paths) {
+		MappedDataFile f = null;
+		for (String p : paths) {
+			f = new MappedDataFile(p);
+			mappedDataArea.addMappedDataFile(f);
+		}
+		if (f != null) fireListeners(f);
 	}
 	
 	@Override
@@ -228,7 +227,6 @@ public class MappedFileManager implements IMapFileController{
 						MappedDataFileBean b = buildBeanFromTree(tree);
 						
 						if (b != null) {
-							mappedDataArea.removeFile(path);
 							innerImportFile(path, b, null, null);
 						}
 					} catch (Exception e) {
@@ -518,14 +516,17 @@ public class MappedFileManager implements IMapFileController{
 	private class LiveMapFileListener implements ILiveMapFileListener{
 
 		@Override
-		public void fileLoadRequest(String path, String host, int port, String parent) {
+		public void fileLoadRequest(String[] path, String host, int port, String parent) {
 			if (host != null) {
 				LiveDataBean b = new LiveDataBean();
 				b.setHost(host);
 				b.setPort(port);
-				loadLiveFile(path, b, parent, true);
+				for (String p : path) {
+					loadLiveFile(p, b, parent, true);
+				}
+				
 			} else {
-				loadFiles(new String[] {path}, null);
+				lazyAddFiles(path);
 			}
 			
 			
