@@ -298,21 +298,21 @@ public class LiveLoadedFile extends LoadedFile implements IRefreshable {
 			if (dataOptions.containsKey(n)) continue;
 			
 			ILazyDataset lazyDataset = dataHolder.get().getLazyDataset(n);
-			addNonStringDataset(lazyDataset, n);
+			addNonStringDataset(lazyDataset, n, false);
 			
 		}
 		
 		updateDataOptions();
 	}
 	
-	private void addNonStringDataset(ILazyDataset lazyDataset, String name){
+	private void addNonStringDataset(ILazyDataset lazyDataset, String name, boolean live){
 		
 		if(!name.startsWith("/")) {
 			//local.name dataset, messes with validation so don't add
 			return;
 		}
 		
-		if (lazyDataset instanceof IDynamicDataset) {
+		if (lazyDataset instanceof IDynamicDataset && live) {
 			try {
 				((IDynamicDataset)lazyDataset).refreshShape();
 				AxesMetadata ax = lazyDataset.getFirstMetadata(AxesMetadata.class);
@@ -390,7 +390,7 @@ public class LiveLoadedFile extends LoadedFile implements IRefreshable {
 			String[] names = dataHolder.get().getNames();
 			for (String n : names) {
 				ILazyDataset lazyDataset = dataHolder.get().getLazyDataset(n);
-				addNonStringDataset(lazyDataset, n);
+				addNonStringDataset(lazyDataset, n, true);
 			}
 			
 			if (!dataOptions.isEmpty()) {
@@ -433,7 +433,8 @@ public class LiveLoadedFile extends LoadedFile implements IRefreshable {
 				String[] names = dataHolder.get().getNames();
 				for (String n : names) {
 					ILazyDataset lazyDataset = dataHolder.get().getLazyDataset(n);
-					addNonStringDataset(lazyDataset, n);
+					//this method should not mess with metadata refreshing here
+					addNonStringDataset(lazyDataset, n, false);
 				}
 				live = false;
 				return;
