@@ -1692,7 +1692,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 	public void remask() {
 		if (imageServiceBean==null) return;
 		
-		createScaledImage(ImageScaleType.REHISTOGRAM, null);
+		createScaledImage(rescaleHistogram ? ImageScaleType.REHISTOGRAM : ImageScaleType.FORCE_REIMAGE, null);
 
 		// Max and min changed in all likely-hood
 		fireMaskListeners();
