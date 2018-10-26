@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.stream.Collectors;
 
 import org.eclipse.dawnsci.analysis.api.io.ILoaderService;
@@ -14,23 +15,9 @@ public class MappedDataArea implements MapObject {
 	private LiveStreamMapObject streamObject;
 
 	public void addMappedDataFile(MappedDataFile file) {
-		if (file.getLiveDataBean() != null) {
-			MappedDataFile f = null;
-			Iterator<MappedDataFile> iterator = files.iterator();
-			while (iterator.hasNext()) {
-				MappedDataFile next = iterator.next();
-				if (next.getPath().equals(file.getPath())){
-					f = next;
-					break;
-				}
-			}
 
-			if (f != null) removeFile(f);
-
-		}
-		
 		String currentName = null;
-			
+
 		for (MappedDataFile f : files) {
 			currentName = getPlottedName(f);
 			if (currentName != null) {
@@ -45,8 +32,24 @@ public class MappedDataArea implements MapObject {
 				}
 			}
 		}
-		 
-		files.add(file);
+
+		//in place swap if possible
+		ListIterator<MappedDataFile> li = files.listIterator();
+		boolean found = false;
+		while (li.hasNext()) {
+			MappedDataFile next = li.next();
+			if (next.getPath().equals(file.getPath())) {
+				li.set(file);
+				found = true;
+				break;
+			}
+		}
+
+		//if not, add
+		if (!found) {
+			files.add(file);
+		}
+
 	}
 	
 	private String getPlottedName(MappedDataFile f) {

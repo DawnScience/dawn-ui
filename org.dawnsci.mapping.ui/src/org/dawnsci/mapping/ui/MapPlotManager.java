@@ -7,6 +7,8 @@ import java.util.Deque;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.ConcurrentLinkedDeque;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -19,14 +21,11 @@ import org.dawnsci.mapping.ui.datamodel.MapObject;
 import org.dawnsci.mapping.ui.datamodel.MappedDataFile;
 import org.dawnsci.mapping.ui.datamodel.PlottableMapObject;
 import org.dawnsci.mapping.ui.datamodel.VectorMapData;
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.dawnsci.analysis.dataset.roi.PointROI;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.PlotType;
 import org.eclipse.dawnsci.plotting.api.axis.IAxis;
+import org.eclipse.dawnsci.plotting.api.histogram.HistogramBound;
 import org.eclipse.dawnsci.plotting.api.region.IROIListener;
 import org.eclipse.dawnsci.plotting.api.region.IRegion;
 import org.eclipse.dawnsci.plotting.api.region.IRegion.RegionType;
@@ -34,6 +33,7 @@ import org.eclipse.dawnsci.plotting.api.region.ROIEvent;
 import org.eclipse.dawnsci.plotting.api.region.RegionUtils;
 import org.eclipse.dawnsci.plotting.api.trace.IImageTrace;
 import org.eclipse.dawnsci.plotting.api.trace.ILineTrace;
+import org.eclipse.dawnsci.plotting.api.trace.IPaletteTrace;
 import org.eclipse.dawnsci.plotting.api.trace.ITrace;
 import org.eclipse.dawnsci.plotting.api.trace.IVectorTrace;
 import org.eclipse.dawnsci.plotting.api.trace.IVectorTrace.ArrowConfiguration;
@@ -62,24 +62,22 @@ public class MapPlotManager {
 	private IPlottingSystem<Composite> map;
 	private IPlottingSystem<Composite> data;
 	private ConcurrentLinkedDeque<MapTrace> layers;
-	private PlotJob job;
-	private PlotJob mapJob;
+	private ExecutorService executor;
+	private AtomicReference<Runnable> atomicRunnable = new AtomicReference<>();
 	private volatile Dataset merge;
 	private AtomicInteger atomicPosition;
-	private int layerCounter = 0;
 	private boolean firstHold = true;
-	private Runnable mapRunnable;
 	private IAxisMoveListener moveListener;
 	
 	private IMapFileController fileManager;
 	
-	private static long MIN_REFRESH_TIME = 2000;
-	
-	private final static Logger logger = LoggerFactory.getLogger(MapPlotManager.class);
+	private static final Logger logger = LoggerFactory.getLogger(MapPlotManager.class);
 	
 	public MapPlotManager(IPlottingSystem<Composite> map, IPlottingSystem<Composite> data) {
 		this.map = map;
 		this.data = data;
+		
+		executor = Executors.newSingleThreadExecutor();
 		
 		BundleContext bundleContext =
                 FrameworkUtil.
@@ -90,18 +88,6 @@ public class MapPlotManager {
 		
 		atomicPosition = new AtomicInteger(0);
 		layers = new ConcurrentLinkedDeque<MapTrace>();
-		job = new PlotJob("Plot point...",false);
-		job.setPriority(Job.INTERACTIVE);
-		mapJob = new PlotJob("Map update...",true);
-		mapJob.setPriority(Job.INTERACTIVE);
-		mapRunnable = new Runnable() {
-			
-			@Override
-			public void run(){
-				updateState();
-			}
-		};
-		
 		
 		if (data.getAxes() != null) {
 			List<IAxis> axes = data.getAxes();
@@ -144,8 +130,22 @@ public class MapPlotManager {
 	}
 	
 	public void updatePlot(){	
-		mapJob.setRunnable(mapRunnable);
-		mapJob.schedule();
+		Runnable r = atomicRunnable.getAndSet(new Runnable() {
+			
+			@Override
+			public void run() {
+				updateState();
+				
+			}
+		});
+		
+		if (r == null) {
+			executor.submit(()->{
+				Runnable run = atomicRunnable.getAndSet(null);
+				if (run == null) return;
+				run.run();
+			});
+		}
 		
 	}
 	
@@ -197,9 +197,7 @@ public class MapPlotManager {
 			}
 		};
 		
-		job.setRunnable(r);
-		
-		job.schedule();
+		executor.submit(r);
 	}
 	
 	public void plotDataWithHold(final double x, final double y) {
@@ -210,7 +208,6 @@ public class MapPlotManager {
 		Runnable r = null;
 		
 		if (ShapeUtils.squeezeShape(lz.getShape(),false).length > 1) {
-			job.cancel();
 			
 			r = new Runnable() {
 				
@@ -307,6 +304,7 @@ public class MapPlotManager {
 									re.setUserRegion(false);
 									re.setUserObject(MapPlotManager.this);
 									map.clearRegionTool();
+									data.repaint();
 								} catch (Exception e) {
 									logger.error("Error plotting line trace",e);
 								}
@@ -320,9 +318,8 @@ public class MapPlotManager {
 			};
 		}
 		
-		job.setRunnable(r);
+		executor.execute(r);
 		
-		job.schedule();
 	}
 	
 
@@ -361,7 +358,6 @@ public class MapPlotManager {
 			}
 		}
 		
-
 		for (PlottableMapObject o : plottedObjects) {
 			if (o instanceof LiveStreamMapObject){
 				MapTrace t = new MapTrace(o, null);
@@ -380,13 +376,6 @@ public class MapPlotManager {
 				layers.push(new MapTrace(o, t));
 			}
 		}
-		
-//		if (needsClear) {
-//			map.clearTraces();
-//			for (MapTrace l : layers) {
-//				if (!(l.getMap() instanceof LiveStreamMapObject)) l.rebuildTrace();
-//			}
-//		}
 		
 		for (MapTrace t : layers) {
 			if (t.getMap().isLive()) {
@@ -418,14 +407,20 @@ public class MapPlotManager {
 		updatePlottedRange();
 		
 		try {
-			
-				layerCounter = 0;
 
 			Iterator<MapTrace> it = localLayers.descendingIterator();
 			
 			while (it.hasNext()) {
 				MapTrace m = it.next();
 				if (m.getTrace() != null) {
+					 ITrace t = m.getTrace();
+					 if (t instanceof IImageTrace) {
+						 ((IImageTrace) t).setAlpha(m.getMap().getTransparency());
+					 }
+					 
+					 if (t instanceof IPaletteTrace) {
+						 ((IPaletteTrace) t).setNanBound(new HistogramBound(Double.NaN, null));
+					 }
 					map.addTrace(m.getTrace());
 				}
 				if (m.getMap() instanceof LiveStreamMapObject) {
@@ -498,21 +493,24 @@ public class MapPlotManager {
 	
 	private IImageTrace createImageTrace(MapObject ob) {
 		
-		String longName = "Layer " + layerCounter++;
+		
 		IDataset map = null;
+		
+		String longName = "";
 		
 		if (ob instanceof PlottableMapObject) {
 			PlottableMapObject amd = (PlottableMapObject)ob;
 			map = amd.getMap();
+			longName = amd.getLongName();
 		}
 		
+		
 		if (map == null) return null;
+		if (ob.getRange() == null) return null;
 		IImageTrace t = null;
 		try {
 			t = MetadataPlotUtils.buildTrace(longName, map, this.map);
-			//TODO something better here:
 			t.setGlobalRange(sanizeRange(ob.getRange(), map.getShape()));
-//			if (ob instanceof PlottableMapObject)  t.setAlpha(((PlottableMapObject)ob).getTransparency());
 		} catch (Exception e) {
 			logger.error("Error creating image trace", e);
 		}
@@ -520,15 +518,15 @@ public class MapPlotManager {
 		return t;
 	}
 	
-	
 	private IVectorTrace createVectorTrace (MapObject ob) {
 
-		String longName = "Layer " + layerCounter++;
+		String longName = "";
 		IDataset map = null;
 		
 		if (ob instanceof PlottableMapObject) {
 			PlottableMapObject amd = (PlottableMapObject)ob;
 			map = amd.getMap();
+			longName = amd.getLongName();
 		}
 		
 		if (map == null) return null;
@@ -601,7 +599,9 @@ public class MapPlotManager {
 
 		while (iterator.hasNext()) {
 			MapTrace l = iterator.next();
-			if (l.getMap() == m && l.getTrace() instanceof IImageTrace) ((IImageTrace)l.getTrace()).setAlpha(m.getTransparency());
+			if (l.getMap() == m && l.getTrace() instanceof IImageTrace) {
+				((IImageTrace)l.getTrace()).setAlpha(m.getTransparency());
+			}
 		}
 		
 		map.repaint(false);
@@ -625,39 +625,6 @@ public class MapPlotManager {
 			}
 		}
 		return m;
-	}
-	
-	private class PlotJob extends Job {
-
-		private final AtomicReference<Runnable> task =new AtomicReference<Runnable>();
-		private boolean delayed = false;
-		
-		public PlotJob(String name, boolean delayed) {
-			super(name);
-			this.delayed = delayed;
-		}
-		
-		public void setRunnable(Runnable runnable) {
-			this.task.set(runnable);
-		}
-
-		@Override
-		protected IStatus run(IProgressMonitor monitor) {
-			Runnable local = task.getAndSet(null);
-			if (local == null) return Status.OK_STATUS;
-			local.run();
-			
-			if (delayed) {
-				try {
-					Thread.sleep(MIN_REFRESH_TIME);
-				} catch (InterruptedException e) {
-					return Status.OK_STATUS;
-				}
-			}
-			
-			return Status.OK_STATUS;
-		}
-		
 	}
 	
 	private double[] sanizeRange(double[] range, int[] shape) {
@@ -704,17 +671,6 @@ public class MapPlotManager {
 			
 			return trace;
 		}
-		
-//		public void switchMap(final PlottableMapObject ob) {
-//			try {
-//				final IDataset d = ob.getMap();
-//				switchMap(ob.getLongName(),d);
-//				map = ob;
-//			} catch (Exception e) {
-//				logger.error("Error updating live!",e);
-//			}
-//
-//		}
 
 		public void rebuildTrace(){
 			Number min = null;

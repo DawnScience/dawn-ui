@@ -110,7 +110,7 @@ public class MappedDataTest {
 	@Test
 	public void testGetTransparency() {
 		int t = gridScanMap.getTransparency();
-		assertEquals(-1, t);
+		assertEquals(255, t);
 	}
 
 	@Test

@@ -4,7 +4,7 @@ import java.util.EventListener;
 
 public interface ILiveMapFileListener extends EventListener {
 	
-	public void fileLoadRequest(String path, String host, int port, String parent);
+	public void fileLoadRequest(String[] paths, String host, int port, String parent);
 	
 	public void refreshRequest();
 	
