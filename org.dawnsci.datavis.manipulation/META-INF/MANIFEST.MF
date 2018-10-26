@@ -15,7 +15,8 @@ Require-Bundle: org.eclipse.ui,
  org.dawb.common.ui,
  org.dawnsci.common.widgets,
  org.eclipse.dawnsci.nexus,
- org.dawnsci.datavis.model
+ org.dawnsci.datavis.model,
+ org.dawnsci.plotting;bundle-version="1.2.0"
 Import-Package: org.slf4j
 Service-Component: OSGI-INF/dataVisManipulationServiceManager.xml
 Bundle-ActivationPolicy: lazy
