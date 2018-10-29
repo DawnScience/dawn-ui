@@ -16,28 +16,10 @@
             tooltip="Slice as a stack of line plots">
       </slicing_tool>
       <slicing_tool
-            class="org.dawnsci.slicing.tools.plot.Stack3DSlicingTool"
-            icon="icons/TraceLines3D.png"
-            id="org.dawnsci.slicing.tools.stack3DSlicingTool"
-            tooltip="Slice as a stack of line plots in 3D">
-      </slicing_tool>
-      <slicing_tool
             class="org.dawnsci.slicing.tools.plot.ImageSlicingTool"
             icon="icons/TraceImage.png"
             id="org.dawnsci.slicing.tools.imageSlicingTool"
             tooltip="Slice as image">
-      </slicing_tool>
-      <slicing_tool
-            class="org.dawnsci.slicing.tools.plot.SurfaceSlicingTool"
-            icon="icons/TraceSurface.png"
-            id="org.dawnsci.slicing.tools.surfaceSlicingTool"
-            tooltip="Slice as surface">
-      </slicing_tool>
-      <slicing_tool
-            class="org.dawnsci.slicing.tools.plot.Scatter3DSlicingTool"
-            icon="icons/TraceScatter3D.png"
-            id="org.dawnsci.slicing.tools.scatter3DSlicingTool"
-            tooltip="Slice as 3D scatter plot">
       </slicing_tool>
       <slicing_tool
             class="org.dawnsci.slicing.tools.hyper.HyperSlicingTool"
