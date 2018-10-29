@@ -7,6 +7,7 @@ import java.util.List;
 import org.eclipse.dawnsci.analysis.api.roi.IROI;
 import org.eclipse.dawnsci.analysis.dataset.roi.RectangularROI;
 import org.eclipse.dawnsci.plotting.api.region.IRegion.RegionType;
+import org.eclipse.dawnsci.plotting.api.trace.MetadataPlotUtils;
 import org.eclipse.january.IMonitor;
 import org.eclipse.january.dataset.Dataset;
 import org.eclipse.january.dataset.DatasetUtils;
@@ -56,7 +57,7 @@ public abstract class AbstractHyper4DMapReducer implements IDatasetROIReducer {
 		IDataset y = axes.get(yOther).getSlice();
 		
 		if (x.getRank() > 1) {
-			int skip = order[yOther] == 0 ? 0 : 1;
+			int skip = order[xOther] == 0 ? 0 : 1;
 			SliceND sx = new SliceND(x.getShape());
 			for (int i = 0; i < x.getRank(); i++) {
 				if (i== skip) {
@@ -81,7 +82,10 @@ public abstract class AbstractHyper4DMapReducer implements IDatasetROIReducer {
 			
 			y = y.getSlice(sy).squeeze();
 		}
-
+		
+		x.setName(MetadataPlotUtils.removeSquareBrackets(x.getName()));
+		y.setName(MetadataPlotUtils.removeSquareBrackets(y.getName()));
+		
 		this.traceAxes = new ArrayList<IDataset>();
 		
 		if (order[yOther] < order[xOther]) {
