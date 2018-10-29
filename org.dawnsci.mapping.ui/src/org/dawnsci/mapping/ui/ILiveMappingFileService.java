@@ -9,6 +9,6 @@ public interface ILiveMappingFileService {
 	
 	public void removeLiveFileListener(ILiveMapFileListener l);
 	
-	public void runUpdate(Runnable runnable);
+	public void runUpdate(Runnable runnable, boolean queue);
 
 }

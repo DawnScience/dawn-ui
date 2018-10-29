@@ -163,6 +163,7 @@ public class MappedDataBlock implements LockableMapObject {
 		return dataset;
 	}
 	
+	@Override
 	public String getLongName() {
 		return path + " : " + name;
 	}
@@ -234,6 +235,7 @@ public class MappedDataBlock implements LockableMapObject {
 		
 	}
 
+	@Override
 	public boolean isLive() {
 		return live;
 	}
@@ -377,20 +379,36 @@ public class MappedDataBlock implements LockableMapObject {
 		
 	}
 	
+	@Override
 	public boolean isPlotted() {
 		return this.plotted;
 	}
 	
+	@Override
 	public void setPlotted(boolean plot) {
 		this.plotted = plot;
 	}
 	
+	@Override
 	public void setLock(Object lock) {
 		this.lock = lock;
 	}
 	
+	@Override
 	public Object getLock() {
 		return this.lock;
+	}
+
+	@Override
+	public void setColorRange(double[] range) {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public double[] getColorRange() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 }
 	

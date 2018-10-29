@@ -28,6 +28,7 @@ public abstract class AbstractMapData implements LockableMapObject{
 	protected boolean live;
 	private boolean plotted;
 	private Object lock;
+	private double[] colorRange;
 	
 	private static final Logger logger = LoggerFactory.getLogger(AbstractMapData.class);
 	
@@ -40,12 +41,14 @@ public abstract class AbstractMapData implements LockableMapObject{
 		if (!live) range = calculateRange(map);
 	}
 	
+	@Override
 	public abstract IDataset getSpectrum(double x, double y);
 	
 	public MappedData makeNewMapWithParent(String name, IDataset ds) {
 		return new MappedData(name, ds, parent, path, false);
 	}
 	
+	@Override
 	public IDataset getMap(){
 		try {
 
@@ -224,6 +227,7 @@ public abstract class AbstractMapData implements LockableMapObject{
 		return null;
 	}
 
+	@Override
 	public int getTransparency() {
 		return transparency;
 	}
@@ -249,6 +253,7 @@ public abstract class AbstractMapData implements LockableMapObject{
 		return range == null ? null : range.clone();
 	}
 	
+	@Override
 	public String getLongName() {
 		return path + " : " + name;
 	}
@@ -260,6 +265,7 @@ public abstract class AbstractMapData implements LockableMapObject{
 		setRange(calculateRange(baseMap));
 	}
 	
+	@Override
 	public abstract void update();
 	
 	
@@ -268,19 +274,33 @@ public abstract class AbstractMapData implements LockableMapObject{
 		return path;
 	}
 	
+	@Override
 	public boolean isPlotted() {
 		return this.plotted;
 	}
 	
+	@Override
 	public void setPlotted(boolean plot) {
 		this.plotted = plot;
 	}
 	
+	@Override
 	public void setLock(Object lock) {
 		this.lock = lock;
 	}
 	
+	@Override
 	public Object getLock() {
 		return this.lock;
+	}
+
+	@Override
+	public void setColorRange(double[] range) {
+		this.colorRange = range;
+	}
+
+	@Override
+	public double[] getColorRange() {
+		return colorRange;
 	}
 }

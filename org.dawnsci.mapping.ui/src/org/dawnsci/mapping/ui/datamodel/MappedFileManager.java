@@ -534,7 +534,9 @@ public class MappedFileManager implements IMapFileController{
 
 		@Override
 		public void refreshRequest() {
-			MappedFileManager.this.fireListeners(null);
+			if (liveService != null) {
+				liveService.runUpdate(() -> MappedFileManager.this.fireListeners(null), false);
+			}
 		}
 
 		@Override
