@@ -393,7 +393,7 @@ public class PlotController implements IPlotController, ILoadedFileInitialiser {
 
 			data = mode.sliceForPlot(view, slice,options,system);
 			
-			if (data.length == 1 && uniqueLabelSet.contains(l)) {
+			if (data != null && data.length == 1 && uniqueLabelSet.contains(l)) {
 				data[0].setName(l);
 			}
 			
