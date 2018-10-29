@@ -105,4 +105,14 @@ public class MockLiveStreamObject implements LiveStreamMapObject {
 
 	}
 
+	@Override
+	public void setColorRange(double[] range) {
+
+	}
+
+	@Override
+	public double[] getColorRange() {
+		return null;
+	}
+
 }

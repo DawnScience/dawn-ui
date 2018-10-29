@@ -12,6 +12,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -52,7 +54,8 @@ public class LiveMappingFileServiceImpl implements ILiveMappingFileService {
 	private IScanListener scanListener;
 	private IBeanListener<StatusBean> beanListener;
 	
-	private UpdateJob job;
+	private AtomicReference<Runnable> atomicRunnable = new AtomicReference<>();
+	private ExecutorService executor = Executors.newSingleThreadExecutor();
 	
 	private static final long MIN_REFRESH_TIME = 2000;
 	
@@ -77,13 +80,41 @@ public class LiveMappingFileServiceImpl implements ILiveMappingFileService {
 	}
 	
 	@Override
-	public void runUpdate(Runnable runnable) {
-		if (job == null) {
-			job = new UpdateJob("Update Live Data");
-			job.setPriority(Job.INTERACTIVE);
+	public void runUpdate(Runnable runnable, boolean queue) {
+
+		// not queued updates are allowed to be dropped
+		// Atomic runnable used as a length 1 queue
+		if (!queue) {
+			Runnable current = atomicRunnable.getAndSet(runnable);
+
+			// if current is a runnable, the internal runnable hasn't been taken,
+			// no need to submit in this case, stops the queue being flooded.
+			if (current != null) {
+				return;
+			}
+
+			executor.submit(new Runnable() {
+
+				@Override
+				public void run() {
+					Runnable run = atomicRunnable.getAndSet(null);
+					if (run == null)
+						return;
+					run.run();
+
+					try {
+						// Wait so to not swamp the UI with updates
+						Thread.sleep(MIN_REFRESH_TIME);
+					} catch (InterruptedException e) {
+						// do nothing;
+					}
+				}
+			});
+		} else {
+			// queued are added to the executor queue
+			// and not dropped (reloads etc)
+			executor.submit(runnable);
 		}
-		job.setRunnable(runnable);
-		job.schedule();
 	}
 	
 	@Override
@@ -147,37 +178,6 @@ public class LiveMappingFileServiceImpl implements ILiveMappingFileService {
 			logger.error("Could not subscribe to the event service", e);
 		}
 	}
-	
-	private class UpdateJob extends Job {
-
-		private final AtomicReference<Runnable> task =new AtomicReference<>();
-		
-		public UpdateJob(String name) {
-			super(name);
-		}
-		
-		public void setRunnable(Runnable runnable) {
-			this.task.set(runnable);
-		}
-
-		@Override
-		protected IStatus run(IProgressMonitor monitor) {
-			Runnable local = task.getAndSet(null);
-			if (local == null) return org.eclipse.core.runtime.Status.OK_STATUS;
-			local.run();
-
-
-			try {
-				Thread.sleep(MIN_REFRESH_TIME);
-			} catch (InterruptedException e) {
-				return org.eclipse.core.runtime.Status.OK_STATUS;
-			}
-
-
-			return org.eclipse.core.runtime.Status.OK_STATUS;
-		}
-		
-	}
 
 	private void detach() {
 		
@@ -218,7 +218,6 @@ public class LiveMappingFileServiceImpl implements ILiveMappingFileService {
 			final String filePath = beanNoScanReq.getFilePath();
 			// Scan started
 			if (beanNoScanReq.scanStart()) {
-//				LiveLoadedFile f = new LiveLoadedFile(filePath, host, port);
 				
 				fireListeners(new String[] {filePath}, null,true);
 

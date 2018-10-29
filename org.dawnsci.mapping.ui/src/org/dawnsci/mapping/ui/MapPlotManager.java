@@ -63,6 +63,7 @@ public class MapPlotManager {
 	private IPlottingSystem<Composite> data;
 	private ConcurrentLinkedDeque<MapTrace> layers;
 	private ExecutorService executor;
+	private ExecutorService detectorExecutor;
 	private AtomicReference<Runnable> atomicRunnable = new AtomicReference<>();
 	private volatile Dataset merge;
 	private AtomicInteger atomicPosition;
@@ -78,6 +79,7 @@ public class MapPlotManager {
 		this.data = data;
 		
 		executor = Executors.newSingleThreadExecutor();
+		detectorExecutor = Executors.newSingleThreadExecutor();
 		
 		BundleContext bundleContext =
                 FrameworkUtil.
@@ -197,7 +199,7 @@ public class MapPlotManager {
 			}
 		};
 		
-		executor.submit(r);
+		detectorExecutor.submit(r);
 	}
 	
 	public void plotDataWithHold(final double x, final double y) {
@@ -318,7 +320,7 @@ public class MapPlotManager {
 			};
 		}
 		
-		executor.execute(r);
+		detectorExecutor.execute(r);
 		
 	}
 	
@@ -337,8 +339,17 @@ public class MapPlotManager {
 		List<MapTrace> stale = new ArrayList<>();
 		
 		while (it.hasNext()) {
-			
 			MapTrace m = it.next();
+			if (m.getTrace() instanceof IPaletteTrace) {
+				IPaletteTrace t = (IPaletteTrace) m.getTrace();
+
+				if (!t.isRescaleHistogram()) {
+					m.getMap().setColorRange(new double[] { t.getMin().doubleValue(), t.getMax().doubleValue() });
+				} else {
+					m.getMap().setColorRange(null);
+				}
+			}
+
 			if (plottedObjects.contains(m.getMap())) {
 				plottedObjects.remove(m.getMap());
 			} else {
@@ -367,7 +378,7 @@ public class MapPlotManager {
 				IVectorTrace vectorTrace = createVectorTrace(o);
 				layers.push(new MapTrace(o, vectorTrace));
 			} else if (o instanceof AssociatedImage){
-				MapTrace t = new MapTrace((AssociatedImage)o, null);
+				MapTrace t = new MapTrace(o, null);
 				layers.addLast(t);
 
 			}else {
@@ -420,6 +431,13 @@ public class MapPlotManager {
 					 
 					 if (t instanceof IPaletteTrace) {
 						 ((IPaletteTrace) t).setNanBound(new HistogramBound(Double.NaN, null));
+						double[] colorRange = m.getMap().getColorRange();
+						if (colorRange != null) {
+							((IPaletteTrace) t).setMax(colorRange[1]);
+							((IPaletteTrace) t).setMin(colorRange[0]);
+							((IPaletteTrace) t).setRescaleHistogram(false);
+
+						}
 					 }
 					map.addTrace(m.getTrace());
 				}
@@ -538,8 +556,8 @@ public class MapPlotManager {
 			vectorTrace = this.map.createVectorTrace(longName);
 			// Get the axes
 			AxesMetadata axesMetadata = map.getFirstMetadata(AxesMetadata.class);
-			IDataset yAxis = (IDataset) DatasetUtils.sliceAndConvertLazyDataset(axesMetadata.getAxis(0)[0]).squeeze();
-			IDataset xAxis = (IDataset) DatasetUtils.sliceAndConvertLazyDataset(axesMetadata.getAxis(1)[0]).squeeze();
+			IDataset yAxis = DatasetUtils.sliceAndConvertLazyDataset(axesMetadata.getAxis(0)[0]).squeeze();
+			IDataset xAxis = DatasetUtils.sliceAndConvertLazyDataset(axesMetadata.getAxis(1)[0]).squeeze();
 			// Set the map datapoints and axes
 			vectorTrace.setData(map, Arrays.asList(xAxis, yAxis));
 			// And whilst setting up the plot, also define some plot specific options

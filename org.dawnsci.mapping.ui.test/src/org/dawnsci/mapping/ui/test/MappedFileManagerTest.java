@@ -2,7 +2,6 @@ package org.dawnsci.mapping.ui.test;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.io.File;
@@ -13,7 +12,6 @@ import org.dawnsci.mapping.ui.datamodel.IMapFileEventListener;
 import org.dawnsci.mapping.ui.datamodel.LiveStreamMapObject;
 import org.dawnsci.mapping.ui.datamodel.MappedDataFile;
 import org.dawnsci.mapping.ui.datamodel.MappedFileManager;
-import org.dawnsci.mapping.ui.datamodel.PlottableMapObject;
 import org.eclipse.january.dataset.IDataset;
 import org.eclipse.january.dataset.IDynamicShape;
 import org.junit.BeforeClass;
@@ -176,6 +174,18 @@ public class MappedFileManagerTest {
 			public void addAxisListener(IAxisMoveListener listener) {
 				// TODO Auto-generated method stub
 				
+			}
+
+			@Override
+			public void setColorRange(double[] range) {
+				// TODO Auto-generated method stub
+
+			}
+
+			@Override
+			public double[] getColorRange() {
+				// TODO Auto-generated method stub
+				return null;
 			}
 		});
 		

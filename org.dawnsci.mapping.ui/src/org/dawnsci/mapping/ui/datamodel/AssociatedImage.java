@@ -8,7 +8,6 @@ import org.eclipse.january.dataset.RGBDataset;
 
 public class AssociatedImage implements PlottableMapObject {
 
-	
 	private String name;
 	private String path;
 	private RGBDataset image;
@@ -22,6 +21,7 @@ public class AssociatedImage implements PlottableMapObject {
 		this.path = path;
 	}
 	
+	@Override
 	public IDataset getMap() {
 		return image;
 	}
@@ -50,6 +50,7 @@ public class AssociatedImage implements PlottableMapObject {
 		return range;
 	}
 
+	@Override
 	public String getLongName() {
 		return path + " : " + name;
 	}
@@ -79,12 +80,25 @@ public class AssociatedImage implements PlottableMapObject {
 		return path;
 	}
 	
+	@Override
 	public boolean isPlotted() {
 		return this.plotted;
 	}
 	
+	@Override
 	public void setPlotted(boolean plot) {
 		this.plotted = plot;
+	}
+
+	@Override
+	public void setColorRange(double[] range) {
+		// RGB so do nothing
+	}
+
+	@Override
+	public double[] getColorRange() {
+		// RGB return null
+		return null;
 	}
 	
 }
