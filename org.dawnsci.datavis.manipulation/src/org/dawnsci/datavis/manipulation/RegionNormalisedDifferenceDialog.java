@@ -4,7 +4,12 @@ import java.io.File;
 import java.util.Arrays;
 import java.util.List;
 
+import org.dawb.common.ui.printing.IPrintImageProvider;
+import org.dawb.common.ui.printing.PlotPrintPreviewDialog;
+import org.dawb.common.ui.printing.PrintSettings;
 import org.dawnsci.datavis.api.IXYData;
+import org.dawnsci.plotting.AbstractPlottingSystem;
+import org.eclipse.dawnsci.analysis.api.roi.IROI;
 import org.eclipse.dawnsci.analysis.dataset.roi.ROISliceUtils;
 import org.eclipse.dawnsci.analysis.dataset.roi.RectangularROI;
 import org.eclipse.dawnsci.plotting.api.IPlottingService;
@@ -32,14 +37,20 @@ import org.eclipse.january.metadata.MetadataFactory;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.graphics.ImageData;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.RGB;
+import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
@@ -55,6 +66,7 @@ public class RegionNormalisedDifferenceDialog extends Dialog {
 	
 	private double scale = 1;
 	private Color[] colors;
+	private RectangularROI linearRoi;
 	
 	private IPlottingSystem<Composite> regionSystem;
 	private IPlottingSystem<Composite> differenceSystem;
@@ -100,6 +112,9 @@ public class RegionNormalisedDifferenceDialog extends Dialog {
 		regionSystem.createPlot1D(second.getX(), Arrays.asList(second.getY()), null);
 		regionSystem.setTitle("");
 		
+		Button subtractLinear = new Button(container, SWT.CHECK);
+		subtractLinear.setText("Subtract linear fix from XMCD");
+		
 		try {
 			IRegion r = regionSystem.createRegion("Normalisation region", RegionType.XAXIS);
 			RectangularROI roi = new RectangularROI();
@@ -125,6 +140,54 @@ public class RegionNormalisedDifferenceDialog extends Dialog {
 				@Override
 				public void roiChanged(ROIEvent evt) {
 					updateScale((RectangularROI)evt.getROI());
+				}
+			});
+			
+			subtractLinear.addSelectionListener(new SelectionAdapter() {
+				
+				@Override
+				public void widgetSelected(SelectionEvent e) {
+					
+					if (subtractLinear.getSelection()) {
+						IROI roi2 = r.getROI().copy();
+						
+						try {
+							IRegion region = differenceSystem.createRegion("Linear region", RegionType.XAXIS);
+							region.setROI(roi2);
+							differenceSystem.addRegion(region);
+							region.setAlpha(64);
+							linearRoi = (RectangularROI)roi2;
+							region.addROIListener(new IROIListener() {
+								
+								@Override
+								public void roiSelected(ROIEvent evt) {
+									// Do nothing here
+									
+								}
+								
+								@Override
+								public void roiDragged(ROIEvent evt) {
+									//Do nothing here, ideally we would update,
+									//but since the data is on the same plot this causes issues
+									
+								}
+								
+								@Override
+								public void roiChanged(ROIEvent evt) {
+									linearRoi = (RectangularROI)evt.getROI().copy();
+									updateData();
+								}
+							});
+							
+						} catch (Exception e1) {
+							logger.error("Error creating region", e);
+						}
+						updateData();
+					} else {
+						differenceSystem.clearRegions();
+						linearRoi = null;
+						updateData();
+					}
 				}
 			});
 			
@@ -183,11 +246,113 @@ public class RegionNormalisedDifferenceDialog extends Dialog {
 	
 	@Override
 	protected void createButtonsForButtonBar(Composite parent) {
+		Button print = createButton(parent, IDialogConstants.NO_ID, "Print...", false);
+		
+		print.addSelectionListener(new SelectionAdapter() {
+			
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				//Seems to be no way that works to just print a composite and contents so...
+				PrintSettings settings = new PrintSettings();
+				final IPrintImageProvider prov = new IPrintImageProvider() {
+					@Override
+					public Image getImage(Rectangle size) {
+						//Lets combine images of the two systems...
+						//Make a half size rectangle for each plot
+						Rectangle s2 = new Rectangle(size.x,size.y,size.width-6,size.height/2);
+						Image im1 = ((AbstractPlottingSystem)regionSystem).getImage(s2);
+						Image im2 = ((AbstractPlottingSystem)differenceSystem).getImage(s2);
+						ImageData imd1 = im1.getImageData();
+						ImageData imd2 = im2.getImageData();
+						//Make the big picture (make it white)
+						ImageData combined = new ImageData(size.width, size.height, imd1.depth, imd1.palette);
+						int[] fullPixels = new int[size.width* size.height];
+						Arrays.fill(fullPixels, 0xFFFFFF);
+						combined.setPixels(0, 0, size.width*size.height, fullPixels, 0);
+						//fill the pixel array with the plot images.
+						int[] pixels = new int[s2.width* s2.height];
+						Arrays.fill(pixels, 0xFFFFFF);
+						imd1.getPixels(0, 0, s2.width* s2.height, pixels, 0);
+						combined.setPixels(0, 0, s2.width* s2.height, pixels,0);
+						Arrays.fill(pixels, 0xFFFFFF);
+						imd2.getPixels(0, 0, s2.width* s2.height, pixels, 0);
+						combined.setPixels(0, s2.height, s2.width* s2.height, pixels,0);
+						return new Image(null,combined);
+
+					}
+					@Override
+					public Rectangle getBounds() {
+						Control da = RegionNormalisedDifferenceDialog.this.getDialogArea();
+						Rectangle rect = da.getBounds();
+						return new Rectangle(rect.x, rect.y, rect.width, rect.height);
+					}			
+				};
+				PlotPrintPreviewDialog dialog = new PlotPrintPreviewDialog(prov, Display.getDefault(), settings);
+				settings=dialog.open();
+				
+			}
+
+		});
 		super.createButtonsForButtonBar(parent);
 		Button button = getButton(IDialogConstants.OK_ID);
 		button.setText("Save and Close");
 		setButtonLayoutData(button);
 	
+	}
+	
+	private double[] calculateLinear(RectangularROI roi, Dataset data) {
+		int tmpMin = ROISliceUtils.findPositionOfClosestValueInAxis(first.getX(), roi.getPointX());
+		int tmpMax = ROISliceUtils.findPositionOfClosestValueInAxis(first.getX(), roi.getPointX()+roi.getLength(0));
+		
+		if (tmpMin > tmpMax) {
+			int tmp = tmpMin;
+			tmpMin = tmpMax;
+			tmpMax = tmp;
+		}
+		
+		return linearFit(tmpMin, tmpMax);
+		
+	}
+	
+	private double[] linearFit(int tmpMin, int tmpMax) {
+		//Linear fit across region
+		SliceND s = new SliceND(first.getX().getShape());
+
+		s.setSlice(0, tmpMin,tmpMax,1);
+
+		Dataset dif = calculateDifference();
+
+		dif = dif.getSlice(s);
+		IDataset r = first.getX().getSlice(s);
+
+		DoubleDataset linear = DatasetFactory.ones(DoubleDataset.class,new int[] {dif.getShape()[0],2});
+		s = new SliceND(linear.getShape());
+		s.setSlice(1, 1, 2, 1);
+
+		r.setShape(linear.getShape()[0],1);
+		linear.setSlice(r, s);
+
+		Dataset result = LinearAlgebra.solveSVD(linear, dif);
+		double c = result.getDouble(0);
+		double m = result.getDouble(1);
+
+		return new double[] {m,c};
+	}
+	
+	private double[] twoPointLinear(Dataset data, int tmpMin, int tmpMax) {
+		//simple two point linear baseline
+		//may still be needed
+		double x1 = first.getX().getDouble(tmpMin);
+		double x2 = first.getX().getDouble(tmpMax);
+
+		double y1 = data.getDouble(tmpMin);
+		double y2 = data.getDouble(tmpMax);
+
+		double m = (y2-y1)/(x2-x1);
+
+		double c = y1-m*x1;
+
+		return new double[] {m,c};
 	}
 	
 	private void updateScale(RectangularROI roi) {
@@ -220,8 +385,14 @@ public class RegionNormalisedDifferenceDialog extends Dialog {
 	}
 	
 	private void updateData() {
-		IDataset dif = calculateDifference();
+		Dataset dif = calculateDifference();
 		dif.setName("XMCD");
+		
+		if (linearRoi != null) {
+			double[] mc = calculateLinear(linearRoi,dif);
+			IDataset linear = Maths.multiply(first.getX(),mc[0]).iadd(mc[1]);
+			dif.isubtract(linear);
+		}
 		
 		Dataset sum = cumTrapz(first.getX(),dif);
 		sum.setName("sum");
@@ -239,8 +410,6 @@ public class RegionNormalisedDifferenceDialog extends Dialog {
 			
 			((ILineTrace)t.get(0)).setTraceType(TraceType.DASH_LINE);
 		}
-		
-		
 		
 		differenceSystem.setTitle("");
 		differenceSystem.repaint();
