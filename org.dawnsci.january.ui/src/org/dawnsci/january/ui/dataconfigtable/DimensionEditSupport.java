@@ -1,5 +1,9 @@
 package org.dawnsci.january.ui.dataconfigtable;
 
+import java.util.HashSet;
+import java.util.LinkedHashSet;
+import java.util.Set;
+
 import org.dawnsci.january.model.NDimensions;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.CellEditor;
@@ -30,7 +34,12 @@ public class DimensionEditSupport extends EditingSupport {
 		dimEditor.setContentProvider(new ArrayContentProvider());
 		dimEditor.setActivationStyle(ComboBoxViewerCellEditor.DROP_DOWN_ON_MOUSE_ACTIVATION);
 		Object[] dataOptions =((NDimensions)getViewer().getInput()).getOptions();
-		dimEditor.setInput(dataOptions);
+		Set<String> opSet = new LinkedHashSet<>();
+		for (Object o : dataOptions) {
+			opSet.add(o.toString());
+		}
+		
+		dimEditor.setInput(opSet.toArray(new String[opSet.size()]));
 		
 		dimEditor.getViewer().getCCombo().addSelectionListener(new SelectionAdapter() {
 
