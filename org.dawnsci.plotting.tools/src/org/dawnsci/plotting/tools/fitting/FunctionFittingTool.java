@@ -29,6 +29,7 @@ import org.eclipse.dawnsci.analysis.api.fitting.functions.IDataBasedFunction;
 import org.eclipse.dawnsci.analysis.api.fitting.functions.IFunction;
 import org.eclipse.dawnsci.analysis.api.fitting.functions.IFunctionService;
 import org.eclipse.dawnsci.analysis.dataset.roi.RectangularROI;
+import org.eclipse.dawnsci.plotting.api.axis.IAxis;
 import org.eclipse.dawnsci.plotting.api.region.IROIListener;
 import org.eclipse.dawnsci.plotting.api.region.IRegion;
 import org.eclipse.dawnsci.plotting.api.region.IRegion.RegionType;
@@ -398,8 +399,9 @@ public class FunctionFittingTool extends AbstractToolPage implements IFunctionSe
 	 * 
 	 * @param roiLimits
 	 *            ROI region [x, y]
+	 * @return min and max values
 	 */
-	private void plotEstimateLine(Dataset[] roiLimits) {
+	private double[] plotEstimateLine(Dataset[] roiLimits) {
 		estimate = (ILineTrace) getPlottingSystem().getTrace("Estimate");
 		if (estimate == null) {
 			estimate = getPlottingSystem().createLineTrace("Estimate");
@@ -408,6 +410,7 @@ public class FunctionFittingTool extends AbstractToolPage implements IFunctionSe
 			getPlottingSystem().addTrace(estimate);
 		}
 
+		double[] minMax = new double[] {Double.NaN, Double.NaN};
 		if (compFunction != null) {
 			for (IFunction function : compFunction.getFunctions()) {
 				if (function instanceof IDataBasedFunction) {
@@ -417,7 +420,11 @@ public class FunctionFittingTool extends AbstractToolPage implements IFunctionSe
 			}
 			DoubleDataset functionData = compFunction.calculateValues(roiLimits[0]);
 			estimate.setData(roiLimits[0], functionData);
+			minMax[0] = functionData.min(true).doubleValue();
+			minMax[1] = functionData.max(true).doubleValue();
 		}
+
+		return minMax;
 	}
 
 	private void updateAllParameters() {
@@ -430,6 +437,8 @@ public class FunctionFittingTool extends AbstractToolPage implements IFunctionSe
 		}
 	}
 
+	private static final double SMALL_FRACTION = 1./128;
+
 	private void updateFunctionPlot(boolean force) {
 		if (!functionWidget.isValid()) {
 			return;
@@ -440,12 +449,17 @@ public class FunctionFittingTool extends AbstractToolPage implements IFunctionSe
 		if (traceROI == null) {
 			return;
 		}
-		;
 
-		plotEstimateLine(traceROI);
-
-		// System.out.println(x);
-		// System.out.println(y);
+		double[] minMax = plotEstimateLine(traceROI);
+		if (!Double.isNaN(minMax[0])) {
+			// this shows the plots in slightly larger y range when the estimate is all zero
+			IAxis yAxis = getPlottingSystem().getSelectedYAxis();
+			if (Math.min(minMax[0], yAxis.getLower()) == 0) { // all values >= 0, extend below zero
+				yAxis.setRange(-yAxis.getUpper() * SMALL_FRACTION, yAxis.getUpper());
+			} else if (Math.max(minMax[1], yAxis.getUpper()) == 0) { // all values <= 0, extend above zero
+				yAxis.setRange(yAxis.getLower(), -yAxis.getLower() * SMALL_FRACTION);
+			}
+		}
 
 		getPlottingSystem().repaint();
 
