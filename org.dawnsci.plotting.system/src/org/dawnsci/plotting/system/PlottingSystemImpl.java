@@ -13,11 +13,13 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.IdentityHashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.dawb.common.ui.util.DisplayUtils;
 import org.dawb.common.ui.util.GridUtils;
@@ -48,15 +50,16 @@ import org.eclipse.dawnsci.plotting.api.region.IRegion.RegionType;
 import org.eclipse.dawnsci.plotting.api.region.IRegionListener;
 import org.eclipse.dawnsci.plotting.api.remote.RemotePlottingSystem;
 import org.eclipse.dawnsci.plotting.api.trace.ColorOption;
-import org.eclipse.dawnsci.plotting.api.trace.IImage3DTrace;
 import org.eclipse.dawnsci.plotting.api.trace.IImageStackTrace;
 import org.eclipse.dawnsci.plotting.api.trace.IImageTrace;
 import org.eclipse.dawnsci.plotting.api.trace.IIsosurfaceTrace;
 import org.eclipse.dawnsci.plotting.api.trace.ILineStackTrace;
 import org.eclipse.dawnsci.plotting.api.trace.ILineTrace;
 import org.eclipse.dawnsci.plotting.api.trace.IMulti2DTrace;
+import org.eclipse.dawnsci.plotting.api.trace.IPaletteTrace;
 import org.eclipse.dawnsci.plotting.api.trace.IPlane3DTrace;
 import org.eclipse.dawnsci.plotting.api.trace.IScatter3DTrace;
+import org.eclipse.dawnsci.plotting.api.trace.ISurfaceMeshTrace;
 import org.eclipse.dawnsci.plotting.api.trace.ISurfaceTrace;
 import org.eclipse.dawnsci.plotting.api.trace.ITrace;
 import org.eclipse.dawnsci.plotting.api.trace.ITraceListener;
@@ -298,14 +301,6 @@ public class PlottingSystemImpl<T> extends AbstractPlottingSystem<T> {
 		viewer.createControl(parent);
 		layout();
 		return viewer;
-	}
-
-	private IPlottingSystemViewer<T> getViewer(PlotType type) {
-		for (IPlottingSystemViewer<T> v : viewers) {
-			if (v.isPlotTypeSupported(type))
-				return v;
-		}
-		return null;
 	}
 
 	private IPlottingSystemViewer<T> getViewer(Class<? extends ITrace> type) {
@@ -621,9 +616,8 @@ public class PlottingSystemImpl<T> extends AbstractPlottingSystem<T> {
 										String                      dataName,
 										final IProgressMonitor      monitor) {
 		try {
-			if (traceClazz != IImageTrace.class && traceClazz != ISurfaceTrace.class) {
-				traceClazz = IImageTrace.class;
-				switchPlottingType(traceClazz);
+			if (traceClazz != IImageTrace.class && traceClazz != ISurfaceTrace.class  && traceClazz != ISurfaceMeshTrace.class) {
+				switchPlottingType(IImageTrace.class);
 			}
 			setAutoAspectRatio(data.getShape());
 
@@ -637,28 +631,22 @@ public class PlottingSystemImpl<T> extends AbstractPlottingSystem<T> {
 			}
 			if (monitor!=null&&monitor.isCanceled()) return null;
 			
-			ITrace trace=null;
+			ITrace trace = createTrace(traceName, traceClazz);
+			trace.setDataName(dataName);
 			if (traceClazz == ISurfaceTrace.class) {
-				trace = createSurfaceTrace(traceName);
-				trace.setDataName(dataName);
 				((ISurfaceTrace)trace).setData(data, (List<IDataset>)axes);
-				addTrace(trace);
-
+			} else if (traceClazz == ISurfaceMeshTrace.class) {
+				((ISurfaceMeshTrace) trace).setData(data, axes == null ? null : axes.toArray(new IDataset[axes.size()]));
 			} else {
+				((IImageTrace) trace).setData(data, (List<IDataset>) axes, false);
+
 				final IPlottingSystemViewer<T> viewer = getViewer(IImageTrace.class);
-				IImageTrace imageTrace = createImageTrace(traceName);
-				imageTrace.setData(data, (List<IDataset>) axes, false);
-				trace = imageTrace;
-
 				viewer.clearTraces();
-				imageTrace.setDataName(dataName);
-
-				addTrace(trace);
 				if (data.getName()!=null) viewer.setTitle(data.getName());
 			}
+			addTrace(trace);
 
 			return trace;
-
 		} catch (Throwable e) {
 			logger.error("Cannot load file "+data.getName(), e);
 			return null;
@@ -694,16 +682,12 @@ public class PlottingSystemImpl<T> extends AbstractPlottingSystem<T> {
 
 	@Override
 	public IImageTrace createImageTrace(String traceName) {
-		IImageTrace trace = (IImageTrace)getViewer(IImageTrace.class).createTrace(traceName, IImageTrace.class);
-		fireTraceCreated(new TraceEvent(trace));
-		return trace;
+		return createTrace(traceName, IImageTrace.class);
 	}
 
 	@Override
 	public IImageStackTrace createImageStackTrace(String traceName) {
-		IImageStackTrace trace = (IImageStackTrace)getViewer(IImageStackTrace.class).createTrace(traceName, IImageStackTrace.class);
-		fireTraceCreated(new TraceEvent(trace));
-		return trace;
+		return createTrace(traceName, IImageStackTrace.class);
 	}
 
 	/**
@@ -806,7 +790,7 @@ public class PlottingSystemImpl<T> extends AbstractPlottingSystem<T> {
 		}
 
 		fireTracesPlotted(new TraceEvent(traces));
-        return traces;
+		return traces;
 	}
 
 	private IPreferenceStore store;
@@ -829,52 +813,34 @@ public class PlottingSystemImpl<T> extends AbstractPlottingSystem<T> {
 	}
 
 	public ILineTrace createLineTrace(String traceName) {
-		ILineTrace trace = (ILineTrace)getViewer(ILineTrace.class).createTrace(traceName, ILineTrace.class);
-		return trace;
+		return createTrace(traceName, ILineTrace.class);
 	}
 
 	public IVectorTrace createVectorTrace(String traceName) {
-		IVectorTrace trace = (IVectorTrace)getViewer(IVectorTrace.class).createTrace(traceName, IVectorTrace.class);
-		return trace;
+		return createTrace(traceName, IVectorTrace.class);
 	}
 
 	@Override
 	public ISurfaceTrace createSurfaceTrace(String traceName) {
-		ISurfaceTrace trace = (ISurfaceTrace)getViewer(ISurfaceTrace.class).createTrace(traceName, ISurfaceTrace.class);
-		if (trace != null) {
-			setPaletteData(trace);
-		}
-		return trace;
+		return createTrace(traceName, ISurfaceTrace.class);
 	}
 
 	@Override
 	public IIsosurfaceTrace createIsosurfaceTrace(String traceName) {
-		IIsosurfaceTrace trace = (IIsosurfaceTrace)getViewer(IIsosurfaceTrace.class).createTrace(traceName, IIsosurfaceTrace.class);
-		if (trace != null) {
-			setPaletteData(trace);
-		}
-		return trace;
+		return createTrace(traceName, IIsosurfaceTrace.class);
 	}
 
 	@Override
 	public IVolumeRenderTrace createVolumeRenderTrace(String traceName) {
-		IVolumeRenderTrace trace = (IVolumeRenderTrace)getViewer(IVolumeRenderTrace.class).createTrace(traceName, IVolumeRenderTrace.class);
-		if (trace != null) {
-			setPaletteData(trace);
-		}
-		return trace;
+		return createTrace(traceName, IVolumeRenderTrace.class);
 	}
 
 	@Override
 	public IMulti2DTrace createMulti2DTrace(String traceName) {
-		IMulti2DTrace trace = (IMulti2DTrace)getViewer(IMulti2DTrace.class).createTrace(traceName, IMulti2DTrace.class);
-		if (trace != null) {
-			setPaletteData(trace);
-		}
-		return trace;
+		return createTrace(traceName, IMulti2DTrace.class);
 	}
 
-	private void setPaletteData(IImage3DTrace trace) {
+	private void setPaletteData(IPaletteTrace trace) {
 		PaletteData palette = null;
 		if (trace.getPaletteData()==null) {
 			final String schemeName = PlottingSystemActivator.getPlottingPreferenceStore().getString(PlottingConstants.COLOUR_SCHEME);
@@ -897,21 +863,17 @@ public class PlottingSystemImpl<T> extends AbstractPlottingSystem<T> {
 
 	@Override
 	public ILineStackTrace createLineStackTrace(String traceName) {
-		ILineStackTrace trace = (ILineStackTrace)getViewer(ILineStackTrace.class).createTrace(traceName, ILineStackTrace.class);
-		return trace;
+		return createTrace(traceName, ILineStackTrace.class);
 	}
-
 
 	@Override
 	public IScatter3DTrace createScatter3DTrace(String traceName) {
-		IScatter3DTrace trace = (IScatter3DTrace)getViewer(IScatter3DTrace.class).createTrace(traceName, IScatter3DTrace.class);
-		return trace;
+		return createTrace(traceName, IScatter3DTrace.class);
 	}
 
 	@Override
 	public IPlane3DTrace createPlane3DTrace(String traceName) {
-		IPlane3DTrace trace = (IPlane3DTrace) getViewer(IPlane3DTrace.class).createTrace(traceName, IPlane3DTrace.class);
-		return trace;
+		return createTrace(traceName, IPlane3DTrace.class);
 	}
 
 	protected void switchPlottingType(Class<? extends ITrace> clazz) {
@@ -1513,19 +1475,26 @@ public class PlottingSystemImpl<T> extends AbstractPlottingSystem<T> {
 	
 	public List<Class<? extends ITrace>> getRegisteredTraceClasses() {
 		
-		List<Class<? extends ITrace>> traceClazz = new ArrayList<Class<? extends ITrace>>();
-		for (IPlottingSystemViewer<?> v : viewers) traceClazz.addAll(v.getSupportTraceTypes());
+		Set<Class<? extends ITrace>> clazzes = new HashSet<>();
+		for (IPlottingSystemViewer<?> v : viewers) clazzes.addAll(v.getSupportTraceTypes());
 		
-		return traceClazz;
+		List<Class<? extends ITrace>> list = new ArrayList<>();
+		list.addAll(clazzes);
+		return list;
 	}
-	
+
 	public <U extends ITrace> U createTrace(String traceName, Class<U> clazz) {
-		for (IPlottingSystemViewer<?> v : viewers) {
-			if (v.isTraceTypeSupported(clazz)) {
-				return v.createTrace(traceName, clazz);
+		IPlottingSystemViewer<?> viewer = getViewer(clazz);
+		if (viewer != null) {
+			U t = viewer.createTrace(traceName, clazz);
+			if (t instanceof IPaletteTrace) {
+				setPaletteData((IPaletteTrace) t);
 			}
+			if (t != null) {
+				fireTraceCreated(new TraceEvent(t));
+			}
+			return t;
 		}
-		
 		return null;
 	}
 

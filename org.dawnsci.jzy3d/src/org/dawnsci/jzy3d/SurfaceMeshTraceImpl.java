@@ -1,7 +1,5 @@
 package org.dawnsci.jzy3d;
 
-import org.dawnsci.jzy3d.vbo.ShaderMeshDrawableVBO;
-import org.dawnsci.jzy3d.vbo.ShaderWaterfallDrawableVBO;
 import org.eclipse.dawnsci.plotting.api.histogram.IImageService;
 import org.eclipse.dawnsci.plotting.api.histogram.IPaletteService;
 import org.eclipse.dawnsci.plotting.api.trace.ISurfaceMeshTrace;
