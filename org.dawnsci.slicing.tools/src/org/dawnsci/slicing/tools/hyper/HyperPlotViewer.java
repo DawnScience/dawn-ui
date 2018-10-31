@@ -47,7 +47,6 @@ public class HyperPlotViewer extends IPlottingSystemViewer.Stub<Composite> {
 	//Can only show one trace;
 	private HyperTrace trace;
 	private Composite control;
-	private GridData gridData;
 	private ComboViewer viewer;
 	private Hyper3Dmode currentMode = Hyper3Dmode.AREA_TO_LINE;
 	
@@ -61,7 +60,7 @@ public class HyperPlotViewer extends IPlottingSystemViewer.Stub<Composite> {
 		hyper = new HyperComponent();
 		hyper.createControl(hyperComp);
 		viewer = new ComboViewer(control);
-		gridData = new GridData(SWT.LEFT, SWT.CENTER, false, false);
+		GridData gridData = new GridData(SWT.LEFT, SWT.CENTER, false, false);
 		viewer.getControl().setLayoutData(gridData);
 		viewer.setContentProvider(new ArrayContentProvider());
 		viewer.setLabelProvider(new LabelProvider());
@@ -160,9 +159,7 @@ public class HyperPlotViewer extends IPlottingSystemViewer.Stub<Composite> {
 	}
 	
 	private void showViewer(boolean show) {
-		gridData.exclude = show;
-		viewer.getCombo().setVisible(show);
-		viewer.getCombo().pack();
+		viewer.getCombo().setEnabled(show);
 	}
 	
 	private HyperDataPackage buildDataPackage(IHyperTrace hyperTrace) {
