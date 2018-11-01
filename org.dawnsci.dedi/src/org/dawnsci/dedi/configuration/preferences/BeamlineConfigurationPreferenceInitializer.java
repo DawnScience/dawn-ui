@@ -95,7 +95,7 @@ public class BeamlineConfigurationPreferenceInitializer extends AbstractPreferen
 		bc4.setMinWavelength(0.062);
 		bc4.setMaxWavelength(0.3351);
 		bc4.setMinCameraLength(0.18);
-		bc4.setMaxCameraLength(0.58);
+		bc4.setMaxCameraLength(1.0);
 		bc4.setCameraLengthStepSize(0.01);
 		
 		
@@ -111,7 +111,7 @@ public class BeamlineConfigurationPreferenceInitializer extends AbstractPreferen
 		bc5.setMinWavelength(0.062);
 		bc5.setMaxWavelength(0.3351);
 		bc5.setMinCameraLength(0.18);
-		bc5.setMaxCameraLength(0.58);
+		bc5.setMaxCameraLength(1.0);
 		bc5.setCameraLengthStepSize(0.01);
 		
 		
