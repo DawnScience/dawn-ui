@@ -13,8 +13,12 @@ import org.eclipse.january.dataset.IDataset;
 import org.eclipse.january.dataset.Maths;
 import org.eclipse.january.dataset.SliceND;
 import org.eclipse.january.metadata.AxesMetadata;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class PlotDataModifierStack implements IPlotDataModifier {
+	
+	private static final Logger logger = LoggerFactory.getLogger(PlotDataModifierStack.class);
 
 	private double value = 0;
 	private double proportion = 0.2;
@@ -37,8 +41,7 @@ public class PlotDataModifierStack implements IPlotDataModifier {
 				try {
 					axis = md.getAxes()[0].getSlice();
 				} catch (DatasetException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+					logger.error("Could not slice axes",e);
 				}
 			}
 
@@ -63,33 +66,17 @@ public class PlotDataModifierStack implements IPlotDataModifier {
 
 		} 
 
-		
-		
-		double delta = max-min;
-		if (delta == 0) delta = 1;
 		Dataset dataset = DatasetUtils.convertToDataset(d);
-		//		dataset = Maths.subtract(dataset, min).idivide(delta);
-		//		dataset.iadd(value*proportion);
-		
+
 		if (normalise) {
 			dataset = Maths.subtract(dataset, min).idivide(max-min);
-			double test = dataset.min(true).doubleValue();
-			double test1 = dataset.max(true).doubleValue();
 			max = 1;
 			min = 0;
-			delta = 1;
 		}
 
 		dataset = Maths.add(dataset,(value-min));
-		double peakToPeak = dataset.peakToPeak(true).doubleValue();
-		peakToPeak = (max+value-min)-value;
+		double peakToPeak = (max+value-min)-value;
 		value += peakToPeak*proportion;
-
-		//		dataset = Maths.subtract(dataset, min).idivide(delta);
-		//		dataset.iadd(value*proportion);
-
-		//		value++;
-
 
 		if (md != null) {
 			dataset.addMetadata(md);
@@ -110,7 +97,7 @@ public class PlotDataModifierStack implements IPlotDataModifier {
 
 	@Override
 	public boolean supportsRank(int rank) {
-		return rank == 1;
+		return rank == 1 || rank == 0;
 	}
 
 	public double getProportion() {
