@@ -722,6 +722,12 @@ public class MockPlottingSystem implements IPlottingSystem<Object> {
 	}
 
 	@Override
+	public ITrace createTrace(String traceName) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
 	public List<Class<? extends ITrace>> getRegisteredTraceClasses() {
 		// TODO Auto-generated method stub
 		return null;

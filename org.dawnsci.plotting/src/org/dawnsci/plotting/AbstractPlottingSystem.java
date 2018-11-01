@@ -947,7 +947,7 @@ public abstract class AbstractPlottingSystem<T> implements IPlottingSystem<T>, I
 		case XY_STACKED:
 			return ILineTrace.class;
 		case XY_STACKED_3D:
-			return ILineStackTrace.class;
+			return IWaterfallTrace.class;
 		case XY_SCATTER_3D:
 			return IScatter3DTrace.class;
 		case MULTI_IMAGE:
