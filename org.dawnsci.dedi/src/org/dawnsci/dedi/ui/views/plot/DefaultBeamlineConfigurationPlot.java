@@ -31,6 +31,7 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.PreferencesUtil;
 
 import uk.ac.diamond.scisoft.analysis.crystallography.CalibrantSelectedListener;
@@ -227,7 +228,9 @@ public class DefaultBeamlineConfigurationPlot extends AbstractBeamlineConfigurat
 	
 	@Override
 	public void calibrantSelectionChanged(CalibrantSelectionEvent evt) {
-		if (evt.getSource() instanceof BeamlineConfiguration && evt.getSource() instanceof CalibrationStandards) {
+		String currentPerspectiveLabel = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().getPerspective().getLabel();
+		
+		if (currentPerspectiveLabel.equals("DEDI")) {
 			selectedCalibrant = CalibrationFactory.getCalibrationStandards().getCalibrant();
 			if(selectedCalibrant != null) selectedCalibrantLabel.setText(selectedCalibrant.getName());
 			plotConfigurationPanel.layout();

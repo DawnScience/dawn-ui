@@ -26,8 +26,6 @@ public class BeamlineConfigurationPreferenceInitializer extends AbstractPreferen
 		xmlEncoder.close();
 		
 		store.setDefault(PreferenceConstants.BEAMLINE_CONFIGURATION, baos.toString());
-		
-		BeamlineConfigurationPreferenceHelper.addDetectorPropertyChangeListener(e -> initializeDefaultPreferences());
 	}
 	
 	
@@ -79,7 +77,7 @@ public class BeamlineConfigurationPreferenceInitializer extends AbstractPreferen
 		bc3.setMinWavelength(0.062);
 		bc3.setMaxWavelength(0.3351);
 		bc3.setMinCameraLength(0.18);
-		bc3.setMaxCameraLength(0.58);
+		bc3.setMaxCameraLength(9.9);
 		bc3.setCameraLengthStepSize(0.01);
 		
 		
