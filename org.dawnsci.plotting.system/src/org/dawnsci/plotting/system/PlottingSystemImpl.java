@@ -1483,6 +1483,7 @@ public class PlottingSystemImpl<T> extends AbstractPlottingSystem<T> {
 		return list;
 	}
 
+	@Override
 	public <U extends ITrace> U createTrace(String traceName, Class<U> clazz) {
 		IPlottingSystemViewer<?> viewer = getViewer(clazz);
 		if (viewer != null) {
@@ -1496,6 +1497,11 @@ public class PlottingSystemImpl<T> extends AbstractPlottingSystem<T> {
 			return t;
 		}
 		return null;
+	}
+
+	@Override
+	public ITrace createTrace(String traceName) {
+		return createTrace(traceName, traceClazz);
 	}
 
 	public Object getAdapter(@SuppressWarnings("rawtypes") Class adapter) {
