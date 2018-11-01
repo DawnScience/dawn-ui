@@ -2,6 +2,7 @@ package org.dawnsci.dedi.ui.views.plot.plotters;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -52,6 +53,12 @@ public abstract class AbstractBeamlineConfigurationPlotter implements IBeamlineC
 	private static final String BEAMSTOP_REGION = "Beamstop";
 	private static final String CLEARANCE_REGION = "Clearance";
 	private static final String MASK_TRACE = "Mask";
+	
+	private static final String INNER_RANGE = "Inner Visible Range";
+	private static final String OUTER_RANGE = "Outer Visible Range";
+	private static final String INACCESSIBLE_RANGE = "Inaccessible Range";
+	private static final String REQUESTED_RANGE = "Requested Range";
+	private static final String VISIBLE_RANGE = "Visible Range";
 
 	private List<IRegion> calibrantRingRegions = new ArrayList<>();
 	private CalibrantSpacing selectedCalibrant;
@@ -95,11 +102,6 @@ public abstract class AbstractBeamlineConfigurationPlotter implements IBeamlineC
 			createBeamstopRegion();
 		else removeRegions(new String[]{BEAMSTOP_REGION, CLEARANCE_REGION});
 		
-		if(beamlineConfiguration.getBeamstop() != null && beamlineConfiguration.getDetector() != null && 
-		   beamlineConfiguration.getAngle() != null && context.isRayPlot()) 
-			createRay();
-		else removeRegions(new String[] {"Ray1", "Ray2", "Ray3", "Ray4"});
-		
 		if(beamlineConfiguration.getWavelength() != null && beamlineConfiguration.getCameraLength() != null && 
 		   selectedCalibrant != null && context.isCalibrantPlot())
 			createCalibrantRings();
@@ -107,6 +109,17 @@ public abstract class AbstractBeamlineConfigurationPlotter implements IBeamlineC
 		
 		if(context.isMaskPlot()) createMask();
 		else removeTrace(MASK_TRACE);
+
+		if(beamlineConfiguration.getBeamstop() != null && beamlineConfiguration.getDetector() != null && 
+				   beamlineConfiguration.getAngle() != null && context.isRayPlot()) 
+					createRay();
+		else {
+			removeTrace(INNER_RANGE);
+			removeTrace(OUTER_RANGE);
+			removeTrace(INACCESSIBLE_RANGE);
+			removeTrace(REQUESTED_RANGE);
+			removeTrace(VISIBLE_RANGE);
+		};
 		
 		createEmptyTrace();
 		rescalePlot();
@@ -177,7 +190,12 @@ public abstract class AbstractBeamlineConfigurationPlotter implements IBeamlineC
 	
 	private void createRay() {
 		int lineWidth = 6;
-		system.clearTraces();
+		removeTrace(INNER_RANGE);
+		removeTrace(OUTER_RANGE);
+		removeTrace(INACCESSIBLE_RANGE);
+		removeTrace(REQUESTED_RANGE);
+		removeTrace(VISIBLE_RANGE);
+		
 		ILineTrace visibleRange1;
 		ILineTrace visibleRange2;
 		ILineTrace inaccessibleRange;
@@ -191,10 +209,10 @@ public abstract class AbstractBeamlineConfigurationPlotter implements IBeamlineC
 		if(visibleRangeStartPoint == null || visibleRangeEndPoint == null) return;
 		
 		try {
-			visibleRange1 = system.createLineTrace("Inner Visible Range");
-			visibleRange2 = system.createLineTrace("Outer Visible Range");
-			inaccessibleRange = system.createLineTrace("Inaccessible Range");
-			requestedRange = system.createLineTrace("Requested Range");
+			visibleRange1 = system.createLineTrace(INNER_RANGE);
+			visibleRange2 = system.createLineTrace(OUTER_RANGE);
+			inaccessibleRange = system.createLineTrace(INACCESSIBLE_RANGE);
+			requestedRange = system.createLineTrace(REQUESTED_RANGE);
 		} catch (Exception e) {
 			e.printStackTrace();
 			return;
@@ -213,7 +231,7 @@ public abstract class AbstractBeamlineConfigurationPlotter implements IBeamlineC
 								  createCoordinatePair(getVisibleRangeStartPointY(), getVisibleRangeEndPointY()));
 			
 			visibleRange1.setLineWidth(lineWidth);
-			visibleRange1.setName("Visible Range");
+			visibleRange1.setName(VISIBLE_RANGE);
 			visibleRange1.setTraceColor(new Color(Display.getDefault(), 205, 133, 63));
 			system.addTrace(visibleRange1);
 			
@@ -307,6 +325,7 @@ public abstract class AbstractBeamlineConfigurationPlotter implements IBeamlineC
 													numberOfHorizontalModules, numberOfVerticalModules, missingModules));
 		
 		if(mask == null){
+			maskCache.clear();
 			mask = DatasetFactory.ones(new int[]{detectorHeight, detectorWidth}, Dataset.BOOL);
 			
 			for(int i = moduleWidth; i < detectorWidth; i += moduleWidth + gapWidth)

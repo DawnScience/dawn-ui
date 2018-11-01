@@ -227,7 +227,7 @@ public class DefaultBeamlineConfigurationPlot extends AbstractBeamlineConfigurat
 	
 	@Override
 	public void calibrantSelectionChanged(CalibrantSelectionEvent evt) {
-		if (evt.getSource() instanceof BeamlineConfiguration || evt.getSource() instanceof CalibrationStandards) {
+		if (evt.getSource() instanceof BeamlineConfiguration && evt.getSource() instanceof CalibrationStandards) {
 			selectedCalibrant = CalibrationFactory.getCalibrationStandards().getCalibrant();
 			if(selectedCalibrant != null) selectedCalibrantLabel.setText(selectedCalibrant.getName());
 			plotConfigurationPanel.layout();
