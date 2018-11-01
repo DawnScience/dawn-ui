@@ -939,7 +939,7 @@ public abstract class AbstractPlottingSystem<T> implements IPlottingSystem<T>, I
 		case ISOSURFACE:
 			return IIsosurfaceTrace.class;
 		case SURFACE:
-			return ISurfaceTrace.class;
+			return ISurfaceMeshTrace.class;
 		case VOLUME:
 			return IVolumeRenderTrace.class;
 		case PLANE3D:

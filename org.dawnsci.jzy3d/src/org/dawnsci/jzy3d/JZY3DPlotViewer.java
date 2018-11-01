@@ -141,8 +141,7 @@ public class JZY3DPlotViewer extends IPlottingSystemViewer.Stub<Composite> {
 				 chart.render();
 			 }
 		});
-		
-		
+
 		chart.addKeyboardCameraController();
 		chart.addMouseCameraController();
 		chart.pauseAnimator();
@@ -470,45 +469,44 @@ public class JZY3DPlotViewer extends IPlottingSystemViewer.Stub<Composite> {
 		
 		return false;
 	}
-	
+
 	/**
 	 * Returns array of trace classes supported by this viewer
 	 * @return clazzArray
 	 */
-	public Collection<Class<? extends ITrace>> getSupportTraceTypes(){
+	@Override
+	public Collection<Class<? extends ITrace>> getSupportTraceTypes() {
 		List<Class<? extends ITrace>> l = new ArrayList<>();
 		l.add(ISurfaceMeshTrace.class);
 		l.add(IWaterfallTrace.class);
 		l.add(IVolumeTrace.class);
 		return l;
 	}
-	
+
 	/**
-	 * 
+	 * Create trace
+	 * @param name
 	 * @param clazz
-	 * @return
+	 * @return trace of given name and class
 	 */
-	public <U extends ITrace> U createTrace(String name, Class<? extends ITrace> clazz){
+	@SuppressWarnings("unchecked")
+	public <U extends ITrace> U createTrace(String name, Class<? extends ITrace> clazz) {
+		U trace = null;
 		if (clazz == ISurfaceMeshTrace.class) {
-			SurfaceMeshTraceImpl trace = new SurfaceMeshTraceImpl(ServiceManager.getPaletteService(),ServiceManager.getImageService(),getPreferenceStore().getString(BasePlottingConstants.COLOUR_SCHEME));
-			trace.setName(name);
-			return (U)trace;
+			trace = (U) new SurfaceMeshTraceImpl(ServiceManager.getPaletteService(),ServiceManager.getImageService(),getPreferenceStore().getString(BasePlottingConstants.COLOUR_SCHEME));
+		} else if (clazz == IWaterfallTrace.class) {
+			trace = (U) new WaterfallTraceImpl(ServiceManager.getPaletteService(),ServiceManager.getImageService(),getPreferenceStore().getString(BasePlottingConstants.COLOUR_SCHEME));
+		} else if (clazz == IVolumeTrace.class) {
+			trace = (U) new VolumeTraceImpl(ServiceManager.getPaletteService(),ServiceManager.getImageService(),getPreferenceStore().getString(BasePlottingConstants.COLOUR_SCHEME));
 		}
-		
-		if (clazz == IWaterfallTrace.class) {
-			IWaterfallTrace trace = new WaterfallTraceImpl(ServiceManager.getPaletteService(),ServiceManager.getImageService(),getPreferenceStore().getString(BasePlottingConstants.COLOUR_SCHEME));
+
+		if (trace != null) {
 			trace.setName(name);
-			return (U)trace;
 		}
-		
-		if (clazz == IVolumeTrace.class) {
-			IVolumeTrace trace = new VolumeTraceImpl(ServiceManager.getPaletteService(),ServiceManager.getImageService(),getPreferenceStore().getString(BasePlottingConstants.COLOUR_SCHEME));
-			trace.setName(name);
-			return (U)trace;
-		}
-		return null;
+
+		return trace;
 	}
-	
+
 	@Override
 	public void clearTraces() {
 		Graph graph = chart.getScene().getGraph();
