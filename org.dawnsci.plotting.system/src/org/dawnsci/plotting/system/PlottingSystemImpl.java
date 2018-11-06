@@ -449,7 +449,7 @@ public class PlottingSystemImpl<T> extends AbstractPlottingSystem<T> {
 
 		if (xIn == null) {
 			final int max = getMaxSize(ysIn);
-			x = DatasetFactory.createRange(0, max, 1, Dataset.INT32);
+			x = DatasetFactory.createRange(IntegerDataset.class, max);
 			if (ysIn.size() == 1)
 				x.setName("Index of " + ysIn.get(0).getName());
 			else
@@ -514,8 +514,7 @@ public class PlottingSystemImpl<T> extends AbstractPlottingSystem<T> {
 			 				   final String                dataName,
 				               final IProgressMonitor      monitor) {
 		
-		if (traceClazz != IImageTrace.class && traceClazz != ISurfaceTrace.class) {
-			traceClazz = IImageTrace.class;
+		if (getPlotType(traceClazz).getDimensions() != 2) {
 			DisplayUtils.syncExec(new Runnable() {
 				@Override
 				public void run() {
@@ -524,9 +523,7 @@ public class PlottingSystemImpl<T> extends AbstractPlottingSystem<T> {
 			});
 		}
 		
-		final Collection<ITrace> traces = traceClazz == ISurfaceTrace.class
-				                        ? getTraces(ISurfaceTrace.class)
-				                        : getTraces(IImageTrace.class);
+		final Collection<ITrace> traces = getTraces(traceClazz);
 
 		if (monitor != null && monitor.isCanceled())
 			return null;
@@ -565,9 +562,11 @@ public class PlottingSystemImpl<T> extends AbstractPlottingSystem<T> {
 		if (monitor!=null&&monitor.isCanceled()) return null;
 		try {
 			if (image instanceof IImageTrace) {
-			    ((IImageTrace)image).setData(data, (List<IDataset>) axes, false);
+				((IImageTrace) image).setData(data, axes, false);
 			} else if (image instanceof ISurfaceTrace) {
-			    ((ISurfaceTrace)image).setData(data, (List<IDataset>)axes);
+				((ISurfaceTrace) image).setData(data, (List<IDataset>) axes);
+			} else if (image instanceof ISurfaceMeshTrace) {
+				((ISurfaceMeshTrace) image).setData(data, axes == null ? null : axes.toArray(new IDataset[axes.size()]));
 			}
 			return image;
 		} catch (Throwable ne) { // We create a new one then
@@ -616,7 +615,7 @@ public class PlottingSystemImpl<T> extends AbstractPlottingSystem<T> {
 										String                      dataName,
 										final IProgressMonitor      monitor) {
 		try {
-			if (traceClazz != IImageTrace.class && traceClazz != ISurfaceTrace.class  && traceClazz != ISurfaceMeshTrace.class) {
+			if (getPlotType(traceClazz).getDimensions() != 2) {
 				switchPlottingType(IImageTrace.class);
 			}
 			setAutoAspectRatio(data.getShape());
@@ -638,7 +637,7 @@ public class PlottingSystemImpl<T> extends AbstractPlottingSystem<T> {
 			} else if (traceClazz == ISurfaceMeshTrace.class) {
 				((ISurfaceMeshTrace) trace).setData(data, axes == null ? null : axes.toArray(new IDataset[axes.size()]));
 			} else {
-				((IImageTrace) trace).setData(data, (List<IDataset>) axes, false);
+				((IImageTrace) trace).setData(data, axes, false);
 
 				final IPlottingSystemViewer<T> viewer = getViewer(IImageTrace.class);
 				viewer.clearTraces();
@@ -716,8 +715,7 @@ public class PlottingSystemImpl<T> extends AbstractPlottingSystem<T> {
 		IPreferenceStore store = getPreferenceStore();
 		
 		if (traceClazz != ILineTrace.class) {
-			traceClazz = ILineTrace.class;
-			switchPlottingType(traceClazz);
+			switchPlottingType(ILineTrace.class);
 		}
 
 		boolean errorBarEnabled = store.getBoolean(PlottingConstants.GLOBAL_SHOW_ERROR_BARS);
@@ -736,9 +734,6 @@ public class PlottingSystemImpl<T> extends AbstractPlottingSystem<T> {
 			}
 			if (!foundErrors) errorBarEnabled = false;
 		}
-
-		if (traceClazz != null)
-			switchPlottingType(traceClazz);
 
 		if (colorMap == null && getColorOption()!=ColorOption.NONE) {
 			if (getColorOption()==ColorOption.BY_NAME) {
@@ -775,8 +770,8 @@ public class PlottingSystemImpl<T> extends AbstractPlottingSystem<T> {
 
 			ILineStackTrace trace = (ILineStackTrace)viewer.createTrace(title, ILineStackTrace.class);
 			final IDataset x = xIn;
-			final Dataset y = DatasetFactory.createRange(getMaxSize(ysIn), Dataset.INT32);
-			final Dataset z = DatasetFactory.createRange(ysIn.size(), Dataset.INT32);
+			final Dataset y = DatasetFactory.createRange(IntegerDataset.class, getMaxSize(ysIn));
+			final Dataset z = DatasetFactory.createRange(IntegerDataset.class, ysIn.size());
 			if (dataNames!=null) trace.setDataName(dataNames.get(0));
 			trace.setData(Arrays.asList(x,y,z), ysIn.toArray(new Dataset[ysIn.size()]));
 			viewer.addTrace(trace);
@@ -784,6 +779,7 @@ public class PlottingSystemImpl<T> extends AbstractPlottingSystem<T> {
 			traces = Arrays.asList((ITrace)trace);
 		}
 
+		// TODO check if valid for non-line traces
 		Collection<ITrace> lineTraces = getTraces(ILineTrace.class);
 		if (lineTraces!=null) for (ITrace iTrace : lineTraces) {
 			((ILineTrace)iTrace).setErrorBarEnabled(errorBarEnabled);
@@ -877,11 +873,16 @@ public class PlottingSystemImpl<T> extends AbstractPlottingSystem<T> {
 	}
 
 	protected void switchPlottingType(Class<? extends ITrace> clazz) {
-		
-		
+		if (clazz == null) {
+			return;
+		}
+
+		if (traceClazz != null && traceClazz.isAssignableFrom(clazz)) {
+			return;
+		}
+
 		Class<? extends ITrace>  previous = traceClazz;
 		traceClazz = clazz;
-//		actionBarManager.switchActions(getPlotType(clazz));
 
 		T top = null;
 
