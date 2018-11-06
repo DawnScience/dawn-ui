@@ -790,7 +790,8 @@ public abstract class AbstractPlottingSystem<T> implements IPlottingSystem<T>, I
 				if (iTrace instanceof IImageTrace) return true;
 			}
 		}
-		return (traceClazz!=null && getPlotType(traceClazz) != null) ? getPlotType(traceClazz).is2D() : false;
+		PlotType type = getPlotType(traceClazz);
+		return type != null ? type.is2D() : false;
 	}
 
 	@Override
