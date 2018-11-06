@@ -83,14 +83,6 @@
          unpack="false"/>
 
    <plugin
-         id="uk.ac.diamond.scisoft.pydev.rcp.dawn"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         fragment="true"
-         unpack="false"/>
-
-   <plugin
          id="uk.ac.diamond.scisoft.arpes.calibration"
          download-size="0"
          install-size="0"

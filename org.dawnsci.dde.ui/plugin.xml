@@ -99,17 +99,5 @@
             class="org.dawnsci.dde.ui.internal.LaunchBarPerspectiveHandler">
       </processor>
    </extension>
-   <extension
-         point="org.dawnsci.webintro.item">
-      <introAction
-            class="org.dawnsci.dde.ui.PerspectiveLaunch"
-            description="Plugin development environment that enables DAWN developers to build their own DAWN plugins and have them run inside of the DAWN analysis workbench"
-            icon="icons/wizban/project_wiz.gif"
-            id="org.dawnsci.dde.ui.PerspectiveLaunch"
-            name="Dawn 4 Dawn"
-            ordering="2"
-            parent_id="dawn_dev">
-      </introAction>
-   </extension>
 
 </plugin>

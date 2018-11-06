@@ -4,4 +4,3 @@ Bundle-Name: SPectrum DAWN intro contribution
 Bundle-SymbolicName: org.dawnsci.spectrum.ui.dawn;singleton:=true
 Bundle-Version: 1.0.0.qualifier
 Bundle-Vendor: Diamond Light Source
-Require-Bundle: org.dawnsci.webintro

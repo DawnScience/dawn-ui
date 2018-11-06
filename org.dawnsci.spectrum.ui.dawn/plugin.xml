@@ -1,17 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?eclipse version="3.4"?>
 <plugin>
-   <extension
-         point="org.dawnsci.webintro.item">
-      <introAction
-            class="org.dawnsci.spectrum.ui.dawn.SpectrumPerspectiveLaunch"
-            description="Designed for working with line traces from multiple files. Less suitable for images and multidimensional data"
-            icon="icons/Trace52c.png"
-            id="org.dawnsci.spectrum.ui.SpectrumPerspectiveLaunch"
-            name="Trace"
-            ordering="3"
-            parent_id="dawn_general">
-      </introAction>
-   </extension>
 
 </plugin>
