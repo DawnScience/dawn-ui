@@ -5,14 +5,6 @@
          point="org.eclipse.ui.menus">
       <menuContribution
             allPopups="false"
-            locationURI="popup:org.dawnsci.spectrum.ui.views.SpectrumView">
-         <command
-               commandId="org.dawnsci.surfacescatter.ui.dialog"
-               style="push">
-         </command>
-      </menuContribution>
-      <menuContribution
-            allPopups="false"
             locationURI="menu:org.eclipse.ui.main.menu">
          <menu
                id="org.dawnsci.menu.main.tools"
