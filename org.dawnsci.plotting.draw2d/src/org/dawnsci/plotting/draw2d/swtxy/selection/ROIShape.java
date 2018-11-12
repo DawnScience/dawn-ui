@@ -127,15 +127,15 @@ abstract public class ROIShape<T extends IROI> extends RegionFillFigure<T> imple
 	}
 
 	public void configureHandles() {
-		if(isGridSnap())
-			snapToGrid();
+		if (isGridSnap()) snapToGrid();
+		if (roiHandler.getROI() == null) return;
+
 		boolean mobile = region.isMobile();
 		boolean visible = isVisible() && mobile;
 		// handles
 		FigureTranslator mover;
 		final int imax = roiHandler.size();
 		for (int i = 0; i < imax; i++) {
-			if (roiHandler.getROI() == null) return;
 			double[] hpt = roiHandler.getAnchorPoint(i, SIDE);
 			double[] p = cs.getPositionFromValue(hpt);
 			RectangularHandle h = addHandle(p[0], p[1], mobile, visible, handleListener);
@@ -149,8 +149,9 @@ abstract public class ROIShape<T extends IROI> extends RegionFillFigure<T> imple
 		fTranslators.add(mover);
 		region.setRegionObjects(this, handles);
 		Rectangle b = getBounds();
-		if (b != null)
+		if (b != null) {
 			setBounds(b);
+		}
 	}
 
 	@Override
@@ -350,9 +351,11 @@ abstract public class ROIShape<T extends IROI> extends RegionFillFigure<T> imple
 	 * @param rroi
 	 */
 	public void updateFromROI(T rroi) {
-		croi = rroi;
-		roiHandler.setROI(rroi);
-		intUpdateFromROI(rroi);
+		if (troi == null || !rroi.equals(croi)) { // do not update if there's dragging going on 
+			croi = rroi;
+			roiHandler.setROI(rroi);
+			intUpdateFromROI(rroi);
+		}
 	}
 
 	/**
