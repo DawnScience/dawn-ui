@@ -151,7 +151,7 @@ public class VolumeViewer extends Composite {
 					double y = roi.getPointY();
 					
 					double[] point = zOnYRegion.getROI().getPoint();
-					zOnYRegion.getROI().setPoint(point[0], y);
+					zOnYRegion.getROI().setPoint(y, point[1]);
 					yPlot.repaint();
 					
 					updateZ((int)y);
@@ -201,7 +201,7 @@ public class VolumeViewer extends Composite {
 					
 					double x = roi.getPointX();
 					double[] point = zOnXRegion.getROI().getPoint();
-					zOnXRegion.getROI().setPoint(x, point[1]);
+					zOnXRegion.getROI().setPoint(point[0], x);
 					xPlot.repaint();
 					
 					updateZ((int)x);
@@ -252,7 +252,7 @@ public class VolumeViewer extends Composite {
 					
 					double[] point = yOnXRegion.getROI().getPoint();
 					yOnXRegion.getROI().setPoint(x, point[1]);
-					zPlot.repaint();
+					xPlot.repaint();
 					
 					updateY((int)x);
 					
