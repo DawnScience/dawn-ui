@@ -240,18 +240,17 @@ public class HistogramToolbarControl {
 			}
 			
 		};
-		
+
 		regListener = new IPlotRegistrationListener.Stub() {
 			public void plottingSystemCreated(PlotRegistrationEvent evt) {
 				IPlottingSystem<Object> plottingSystem = evt.getPlottingSystem();
-				if (plottingSystem.getPlotName().equals("Plot")) {
+				if ("Plot".equals(plottingSystem.getPlotName())) {
 					HistogramToolbarControl.this.system = plottingSystem;
 					system.addTraceListener(traceListener);
 				}
 			}
 		};
-		
-		
+
 		plottingService.addRegistrationListener(regListener);
 		
 		enable(false);
