@@ -465,6 +465,8 @@ public abstract class AbstractProcessingTool extends AbstractToolPage {
 		ExtendedFileSelectionDialog fsd = new ExtendedFileSelectionDialog(Display.getCurrent().getActiveShell(),isHDF5,false, false, outputType);
 		
 		fsd.setPath(full);
+		fsd.setFolderSelector(false);
+		fsd.setNewFile(true);
 		fsd.create();
 		if (fsd.open() == Dialog.CANCEL) return;
 		outputType = fsd.getProcessingOutputType();
