@@ -45,7 +45,6 @@ import uk.ac.diamond.scisoft.analysis.processing.bean.OperationBean;
 public class LiveFileServiceImpl implements ILiveFileService {
 
 	private static final String PROCESSING_SUBMIT_QUEUE_NAME = "scisoft.operation.SUBMISSION_QUEUE";
-	private static final String PROCESSING_STATUS_SET_NAME = "scisoft.operation.STATUS_QUEUE";
 	
 	private Set<ILiveFileListener> listeners = new HashSet<>();
 	private ISubscriber<EventListener> scanSubscriber;
@@ -194,12 +193,11 @@ public class LiveFileServiceImpl implements ILiveFileService {
 		IEventService eService = ServiceManager.getIEventService();
 		final String suri = CommandConstants.getScanningBrokerUri();
 		if (suri != null) { // will be null for standard DAWN
-			try {
-				final URI uri = new URI(suri);
-				IConsumer<StatusBean> queueConnection = eService.createConsumerProxy(uri, submitQueueName);
+			try (IConsumer<StatusBean> queueConnection = eService.createConsumerProxy(new URI(suri), submitQueueName)) {
 				return queueConnection.getRunningAndCompleted();
 			} catch (Exception e) {
-				logger.error("Could not get running files for submission queue {}", submitQueueName, e);
+				// there may be no processing queue present, so we just log this as a warning
+				logger.warn("Could not get running files for submission queue {}", submitQueueName);
 			}
 		}
 		return Collections.emptyList();
