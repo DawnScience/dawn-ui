@@ -358,9 +358,14 @@ public class SWTImageUtils {
 				++index;
 			}
 		}
-		imageData = new ImageData(shape[1], shape[0], 8, palette, 1, scaledImageAsByte);
 
 		boolean mixAlphas = palette.getRGB(transIndex) == null && alpha >= 0;
+		
+		//Windows does not accept a null RGB value in the palette
+		if (palette.getRGB(transIndex) == null) palette.colors[index] = new RGB(0,0,0);
+		
+		imageData = new ImageData(shape[1], shape[0], 8, palette, 1, scaledImageAsByte);
+		
 		if (mixAlphas) { // set NaN pixels transparent
 			final byte[] scaledAlphaAsByte = new byte[len];
 			int k = 0;
