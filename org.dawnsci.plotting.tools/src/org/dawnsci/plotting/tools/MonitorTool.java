@@ -91,28 +91,29 @@ public class MonitorTool extends AbstractToolPage {
 			
 			@Override
 			public void traceUpdated(TraceEvent evt) {
-				if (evt.getSource() instanceof ILineTrace) {
-					processLineTrace((ILineTrace)evt.getSource());
-				}
+				processEvent(evt);
 			}
 			
 			@Override
 			public void traceAdded(TraceEvent evt) {
-				evt.toString();
+				processEvent(evt);
 			}
 			
 			@Override
 			public void tracesUpdated(TraceEvent evt) {
-				evt.toString();
+				processEvent(evt);
 			}
 			
 			@Override
 			public void tracesAdded(TraceEvent evt) {
+				processEvent(evt);
+			}
+			
+			private void processEvent(TraceEvent evt) {
+				
 				if (evt.getSource() instanceof ILineTrace) {
 					processLineTrace((ILineTrace)evt.getSource());
-				}
-				
-				if (evt.getSource() instanceof List<?>){
+				} else if (evt.getSource() instanceof List<?>){
 					List<?> l = (List<?>)evt.getSource();
 					for (Object ob : l) {
 						if (ob instanceof ILineTrace) {
@@ -120,11 +121,6 @@ public class MonitorTool extends AbstractToolPage {
 						}
 					}
 				}
-			}
-			
-			@Override
-			protected void update(TraceEvent evt) {
-				evt.toString();
 			}
 		};
 		
@@ -233,56 +229,6 @@ public class MonitorTool extends AbstractToolPage {
 		stackLayout.topControl = scopeComp;
 		
 		stack.layout();
-		
-//		new Label(comp, SWT.NONE).setText("Max No.:");
-//		
-//		final Spinner spinner = new Spinner(comp, SWT.NONE);
-//		spinner.setMaximum(MAXIMUM_NUMBER);
-//		spinner.setSelection(scopeMonitor.getMaxLength());
-//		spinner.setMinimum(1);
-//		spinner.addSelectionListener(new SelectionAdapter() {
-//			
-//			@Override
-//			public void widgetSelected(SelectionEvent e) {
-//				if (getPlottingSystem() == null) return;
-//				getPlottingSystem().removeTraceListener(listener);
-//				scopeMonitor.setMaxLength(spinner.getSelection());
-//				system.clear();
-//				updateColor(colorViewer.getSelection());
-//				getPlottingSystem().addTraceListener(listener);
-//				
-//			}
-//		});
-//		
-//		
-//		colorViewer = new ComboViewer(comp, SWT.READ_ONLY);
-//		colorViewer.getCombo().setLayoutData(new GridData());
-//		colorViewer.setContentProvider(ArrayContentProvider.getInstance());
-//		colorViewer.setLabelProvider(new LabelProvider());
-//		colorViewer.setInput(colorSchemes.toArray());
-//		
-//		colorViewer.addSelectionChangedListener(new ISelectionChangedListener() {
-//			
-//			@Override
-//			public void selectionChanged(SelectionChangedEvent event) {
-//				if (((StructuredSelection)event.getSelection()).getFirstElement() instanceof String) {
-//					updateColor(event.getSelection());
-//				}
-//			}
-//		});
-//		
-//		colorViewer.addOpenListener(new IOpenListener() {
-//			
-//			@Override
-//			public void open(OpenEvent event) {
-//				if (getPlottingSystem() != null) getPlottingSystem().removeTraceListener(listener);
-//				
-//			}
-//		});
-//		
-//		colorViewer.getCombo().select(0);
-//		updateColor(colorViewer.getSelection());
-		
 		
 		plotComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1));
 		plotComp.setLayout(new FillLayout());
