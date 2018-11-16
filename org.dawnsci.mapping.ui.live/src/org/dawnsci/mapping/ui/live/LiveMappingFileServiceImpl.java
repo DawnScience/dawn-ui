@@ -44,7 +44,6 @@ import org.slf4j.LoggerFactory;
 public class LiveMappingFileServiceImpl implements ILiveMappingFileService {
 
 	private static final String PROCESSING_SUBMIT_QUEUE_NAME = "scisoft.operation.SUBMISSION_QUEUE";
-	private static final String PROCESSING_STATUS_SET_NAME = "scisoft.operation.STATUS_QUEUE";
 	
 	private Set<ILiveMapFileListener> listeners = new HashSet<>();
 	private ISubscriber<EventListener> scanSubscriber;
@@ -311,17 +310,14 @@ public class LiveMappingFileServiceImpl implements ILiveMappingFileService {
 		IEventService eService = LiveMappingServiceManager.getIEventService();
 		final String suri = CommandConstants.getScanningBrokerUri();
 		if (suri != null) { // will be null for standard DAWN
-			try {
-				final URI uri = new URI(suri);
-				IConsumer<StatusBean> queueConnection = eService.createConsumerProxy(uri, submitQueueName);
+			try (IConsumer<StatusBean> queueConnection = eService.createConsumerProxy(new URI(suri), submitQueueName)) {
 				return queueConnection.getRunningAndCompleted();
 			} catch (Exception e) {
-				logger.error("Could not get running files for submission queue {}", submitQueueName, e);
+				// some beamlines don't have a processing queue, so we just log this as a warning
+				logger.warn("Could not get running files for queue {}", submitQueueName);
 			}
 		}
 		return Collections.emptyList();
 	}
-
-
 
 }
