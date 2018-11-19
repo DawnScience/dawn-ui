@@ -26,6 +26,10 @@ import org.eclipse.january.dataset.StringDataset;
 
 public class MapBeanBuilder {
 
+	private static final String ENTRY_RESULT = "/entry/result/data";
+	private static final String PROCESSED_RESULT = "/processed/result/data";
+	
+	
 	public static MappedDataFileBean buildBean(Tree tree, String xName, String yName){
 		return buildBean(tree, new NXDataFinderWithAxes(xName, yName), new String[] {xName,yName});
 	}
@@ -265,7 +269,7 @@ public class MapBeanBuilder {
 		String name = bean.getBlocks().get(0).getName();
 		
 		for (MappedBlockBean b : bean.getBlocks()) {
-			if ("/entry/result/data".equals(b.getName())) {
+			if (ENTRY_RESULT.equals(b.getName()) || PROCESSED_RESULT.equals(b.getName())) {
 				name = b.getName();
 			}
 		}
