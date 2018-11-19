@@ -25,7 +25,6 @@ import org.eclipse.dawnsci.analysis.dataset.roi.PointROI;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.PlotType;
 import org.eclipse.dawnsci.plotting.api.axis.IAxis;
-import org.eclipse.dawnsci.plotting.api.histogram.HistogramBound;
 import org.eclipse.dawnsci.plotting.api.region.IROIListener;
 import org.eclipse.dawnsci.plotting.api.region.IRegion;
 import org.eclipse.dawnsci.plotting.api.region.IRegion.RegionType;
@@ -430,7 +429,6 @@ public class MapPlotManager {
 					 }
 					 
 					 if (t instanceof IPaletteTrace) {
-						 ((IPaletteTrace) t).setNanBound(new HistogramBound(Double.NaN, null));
 						double[] colorRange = m.getMap().getColorRange();
 						if (colorRange != null) {
 							((IPaletteTrace) t).setMax(colorRange[1]);
