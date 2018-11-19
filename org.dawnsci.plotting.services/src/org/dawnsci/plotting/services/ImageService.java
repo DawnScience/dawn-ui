@@ -27,7 +27,6 @@ import org.eclipse.dawnsci.plotting.api.histogram.functions.FunctionContainer;
 import org.eclipse.dawnsci.plotting.api.preferences.BasePlottingConstants;
 import org.eclipse.january.dataset.BooleanDataset;
 import org.eclipse.january.dataset.Dataset;
-import org.eclipse.january.dataset.DatasetFactory;
 import org.eclipse.january.dataset.DatasetUtils;
 import org.eclipse.january.dataset.IndexIterator;
 import org.eclipse.january.dataset.Maths;
@@ -255,17 +254,15 @@ public class ImageService extends AbstractServiceFactory implements IImageServic
 		if (bean.getHistogramType() == HistoType.OUTLIER_VALUES) {
 			double[] ret = null;
 			
-			Dataset imageIaN = setOfNumbers(image);
-			
 			Dataset mask = bean.getMask() == null ? null : DatasetUtils.convertToDataset(bean.getMask());
 			
 			try {
-			    double[] stats = Stats.outlierValues(imageIaN,mask,true, bean.getLo(), bean.getHi(), -1);
+			    double[] stats = Stats.outlierValues(image,mask,true, bean.getLo(), bean.getHi(), -1);
 			    ret = new double[]{stats[0], stats[1], -1};
 			} catch (IllegalArgumentException iae) {
 				bean.setLo(10);
 				bean.setHi(90);
-			    double[] stats = Stats.outlierValues(imageIaN,mask,true, bean.getLo(), bean.getHi(), -1);
+			    double[] stats = Stats.outlierValues(image,mask,true, bean.getLo(), bean.getHi(), -1);
 			    ret = new double[]{stats[0], stats[1], -1};
 			}
 
@@ -500,45 +497,5 @@ public class ImageService extends AbstractServiceFactory implements IImageServic
 
 		}
 		return new PaletteData(jet);
-	}
-	
-	/**
-	 * Returns a Dataset containing only real numbers.
-	 * <p>
-	 * Returns a 1D Dataset of all the numbers in the original Dataset, but
-	 * with floating point NaN values removed. Does not necessarily maintain
-	 * the shape of the Dataset.
-	 * TODO Move to a more useful utility class
-	 * @param in
-	 * 			the input Dataset that may contain NaN valued elements
-	 * @return the set of numbers (in 1D order) excluding the NaNs
-	 */
-	private Dataset setOfNumbers(Dataset in) {
-		Dataset out;
-		// reduce the dataset to only those points that have values other than floating point NaN
-		// count NaNs
-		int nanCount = 0;
-		IndexIterator iter = in.getIterator();
-		while (iter.hasNext()) {
-			if (Double.isNaN(in.getElementDoubleAbs(iter.index)))
-				nanCount++;
-		}
-
-		// 1D dataset to contain the data without NaN valued elements
-		if (nanCount > 0) {
-			out = DatasetFactory.zeros(new int[]{in.getSize()-nanCount});
-			iter = in.getIterator();
-			IndexIterator jter = out.getIterator();
-			while (iter.hasNext()) {
-				double value = in.getElementDoubleAbs(iter.index);
-				if (!Double.isNaN(value)) {
-					if (jter.hasNext())
-						out.setObjectAbs(jter.index, value);;
-				}
-			}
-		} else {
-			out = in;
-		}
-		return out;
 	}
 }
