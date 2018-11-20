@@ -902,7 +902,11 @@ public class PlottingSystemImpl<T> extends AbstractPlottingSystem<T> {
 				}
 				
 			}
-			if (!mixedTraceMode) actionBarManager.switchActions(getPlotType(clazz));
+			if (mixedTraceMode) {
+				actionBarManager.switchActions(getPlotType(IImageTrace.class));
+			} else {
+				actionBarManager.switchActions(getPlotType(clazz));
+			}
 		}
 
 		activeViewer = viewer;
