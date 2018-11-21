@@ -7,7 +7,7 @@ import org.eclipse.ui.IViewLayout;
 
 public class MappingPerspective implements IPerspectiveFactory {
 
-	public static final String ID = "org.dawnsci.mapping.ui.MappingPerspective";
+	public static final String ID = "org.dawnsci.mapping.ui.dawn.mappingperspective";
 
 	@Override
 	public void createInitialLayout(IPageLayout layout) {

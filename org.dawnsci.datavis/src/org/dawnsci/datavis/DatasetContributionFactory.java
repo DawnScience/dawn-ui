@@ -1,6 +1,11 @@
 package org.dawnsci.datavis;
 
+import org.dawnsci.datavis.api.DataVisConstants;
 import org.dawnsci.datavis.model.IFileController;
+import org.eclipse.core.expressions.EvaluationResult;
+import org.eclipse.core.expressions.Expression;
+import org.eclipse.core.expressions.IEvaluationContext;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
@@ -15,8 +20,10 @@ public class DatasetContributionFactory extends ExtensionContributionFactory {
 
 	@Override
 	public void createContributionItems(IServiceLocator serviceLocator, IContributionRoot additions) {
+		
 		MenuManager search = new MenuManager("Dataset Options",
                 "org.dawnsci.datavis.dataset");
+		
 		
 		BundleContext bundleContext =
                 FrameworkUtil.
@@ -31,7 +38,6 @@ public class DatasetContributionFactory extends ExtensionContributionFactory {
 			public void menuAboutToShow(IMenuManager manager) {
 
 				search.removeAll();
-
 
 				Action a = new Action("Filter Datasets"){
 					@Override
@@ -55,7 +61,16 @@ public class DatasetContributionFactory extends ExtensionContributionFactory {
 			}
 		});
 
-		additions.addContributionItem(search, null);
+		additions.addContributionItem(search, new Expression() {
+			
+			@Override
+			public EvaluationResult evaluate(IEvaluationContext context) throws CoreException {
+				Object variable = context.getVariable("activeWorkbenchWindow.activePerspective");
+				//probably shouldn't be needed, but doesn't work without it.
+				search.setVisible(DataVisConstants.DATAVIS_PERSPECTIVE_ID.equals(variable));
+				return EvaluationResult.valueOf(DataVisConstants.DATAVIS_PERSPECTIVE_ID.equals(variable));
+			}
+		});
 
 	}
 

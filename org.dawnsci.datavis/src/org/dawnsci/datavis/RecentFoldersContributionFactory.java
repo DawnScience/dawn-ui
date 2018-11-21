@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.dawnsci.datavis.api.DataVisConstants;
 import org.dawnsci.datavis.api.IRecentPlaces;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.jface.action.Action;
@@ -33,8 +34,8 @@ public class RecentFoldersContributionFactory extends ExtensionContributionFacto
 	@Override
 	public void createContributionItems(IServiceLocator serviceLocator, IContributionRoot additions) {
 		
-		MenuManager search = new MenuManager("Recent Places",
-                "org.dawnsci.cake");
+		MenuManager search = new MenuManager("Recent Folders",
+                "org.dawnsci.recent.folders");
 		
 		BundleContext bundleContext =
                 FrameworkUtil.
@@ -118,8 +119,7 @@ public class RecentFoldersContributionFactory extends ExtensionContributionFacto
 
     		Map<String,String[]> props = new HashMap<>();
     		props.put("paths", fileNames);
-//
-    		admin.sendEvent(new Event("org/dawnsci/events/file/OPEN", props));
+    		admin.sendEvent(new Event(DataVisConstants.FILE_OPEN_EVENT, props));
     		
 		}
 		

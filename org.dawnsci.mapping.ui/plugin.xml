@@ -103,9 +103,69 @@
          point="org.eclipse.ui.perspectiveExtensions">
       <perspectiveExtension
             targetID="org.dawnsci.mapping.ui.dawn.mappingperspective">
-         <actionSet
-               id="org.dawnsci.mapping.ui.fileOpenActionSet">
-         </actionSet>
+         <hiddenMenuItem
+               id="org.eclipse.ui.run">
+         </hiddenMenuItem>
+         <hiddenMenuItem
+               id="navigate">
+         </hiddenMenuItem>
+         <hiddenMenuItem
+               id="project">
+         </hiddenMenuItem>
+         <hiddenToolBarItem
+               id="org.eclipse.ui.workbench.navigate">
+         </hiddenToolBarItem>
+         <hiddenToolBarItem
+               id="org.eclipse.debug.ui.launchActionSet">
+         </hiddenToolBarItem>
+         <hiddenToolBarItem
+               id="org.dawb.tango.extensions.shared.memory">
+         </hiddenToolBarItem>
+         <hiddenMenuItem
+               id="org.eclipse.search.menu">
+         </hiddenMenuItem>
+         <hiddenMenuItem
+               id="file">
+         </hiddenMenuItem>
+         <hiddenMenuItem
+               id="edit">
+         </hiddenMenuItem>
+         <hiddenToolBarItem
+               id="newWizardDropDown">
+         </hiddenToolBarItem>
+         <hiddenToolBarItem
+               id="org.eclipse.ui.edit.text.gotoLastEditPosition">
+         </hiddenToolBarItem>
+         <hiddenToolBarItem
+               id="org.eclipse.ui.navigate.backwardHistory">
+         </hiddenToolBarItem>
+         <hiddenToolBarItem
+               id="org.eclipse.ui.file.save">
+         </hiddenToolBarItem>
+         <hiddenToolBarItem
+               id="org.eclipse.ui.file.saveAll">
+         </hiddenToolBarItem>
+         <hiddenToolBarItem
+               id="org.eclipse.search.OpenSearchDialogPage">
+         </hiddenToolBarItem>
+         <hiddenToolBarItem
+               id="org.eclipse.ui.navigate.next">
+         </hiddenToolBarItem>
+         <hiddenToolBarItem
+               id="org.eclipse.ui.navigate.previous">
+         </hiddenToolBarItem>
+         <hiddenToolBarItem
+               id="uk.ac.diamond.scisoft.analysis.rcp.plotting.actions.showPlotViewToolbarCommand">
+         </hiddenToolBarItem>
+         <hiddenToolBarItem
+               id="org.eclipse.ui.navigate.forwardHistory">
+         </hiddenToolBarItem>
+         <hiddenToolBarItem
+               id="org.eclipse.userstorage.accounts">
+         </hiddenToolBarItem>
+         <hiddenToolBarItem
+               id="org.eclipse.ui.externaltools.ExternalToolMenuDelegateToolbar">
+         </hiddenToolBarItem>
       </perspectiveExtension>
    </extension>
    <extension
@@ -125,6 +185,15 @@
                      label="Mapping"
                      style="push">
                </command>
+               <visibleWhen
+                  checkEnabled="false">
+               <with
+                     variable="activeWorkbenchWindow.activePerspective">
+                  <equals
+                        value="org.dawnsci.datavis.DataVisPerspective">
+                  </equals>
+               </with>
+            </visibleWhen>
             </menu>
          </menu>
       </menuContribution>

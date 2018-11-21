@@ -8,6 +8,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.dawnsci.datavis.api.DataVisConstants;
 import org.dawnsci.datavis.api.IDataFilePackage;
 import org.dawnsci.datavis.api.IRecentPlaces;
 import org.dawnsci.datavis.api.IXYData;
@@ -15,6 +16,10 @@ import org.dawnsci.datavis.api.utils.DataPackageUtils;
 import org.dawnsci.datavis.api.utils.XYDataImpl;
 import org.dawnsci.datavis.model.FileControllerUtils;
 import org.dawnsci.datavis.model.IFileController;
+import org.eclipse.core.expressions.EvaluationResult;
+import org.eclipse.core.expressions.Expression;
+import org.eclipse.core.expressions.IEvaluationContext;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.dawnsci.analysis.dataset.roi.ROISliceUtils;
 import org.eclipse.dawnsci.nexus.INexusFileFactory;
 import org.eclipse.dawnsci.plotting.api.trace.MetadataPlotUtils;
@@ -316,13 +321,21 @@ public class DataManipulationExtensionContributionFactory extends ExtensionContr
 			}
 		});
 
-		additions.addContributionItem(search, null);
-
+		additions.addContributionItem(search, new Expression() {
+			
+			@Override
+			public EvaluationResult evaluate(IEvaluationContext context) throws CoreException {
+				Object variable = context.getVariable("activeWorkbenchWindow.activePerspective");
+				//probably shouldn't be needed, but doesn't work without it.
+				search.setVisible(DataVisConstants.DATAVIS_PERSPECTIVE_ID.equals(variable));
+				return EvaluationResult.valueOf(DataVisConstants.DATAVIS_PERSPECTIVE_ID.equals(variable));
+			}
+		});
 	}
 
 
 	private List<IDataFilePackage> getData(){
-		ISelection selection = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getSelectionService().getSelection("org.dawnsci.datavis.view.parts.LoadedFilePart");
+		ISelection selection = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getSelectionService().getSelection(DataVisConstants.FILE_PART_ID);
 		return getSuitableData(selection);
 	}
 

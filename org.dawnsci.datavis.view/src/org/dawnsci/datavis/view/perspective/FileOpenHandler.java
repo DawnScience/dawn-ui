@@ -4,8 +4,8 @@ import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.dawnsci.datavis.api.DataVisConstants;
 import org.dawnsci.datavis.api.IRecentPlaces;
-import org.dawnsci.datavis.model.IFileController;
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
@@ -13,10 +13,10 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Shell;
-import org.eclipse.ui.PlatformUI;
-import org.eclipse.ui.progress.IProgressService;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
+import org.osgi.service.event.Event;
+import org.osgi.service.event.EventAdmin;
 
 public class FileOpenHandler extends AbstractHandler {
 
@@ -31,6 +31,7 @@ public class FileOpenHandler extends AbstractHandler {
                 getBundleContext();
 		
 		IRecentPlaces recentPlaces = bundleContext.getService(bundleContext.getServiceReference(IRecentPlaces.class));
+		final EventAdmin admin = bundleContext.getService(bundleContext.getServiceReference(EventAdmin.class));
 
 		if (!recentPlaces.getRecentPlaces().isEmpty()) {
 			dialog.setFilterPath(recentPlaces.getRecentPlaces().get(0));
@@ -44,10 +45,7 @@ public class FileOpenHandler extends AbstractHandler {
 		Map<String,String[]> props = new HashMap<>();
 		props.put("paths", fileNames);
 		
-		IFileController fileController = bundleContext.getService(bundleContext.getServiceReference(IFileController.class));
-		IProgressService progressService = (IProgressService) PlatformUI.getWorkbench().getService(IProgressService.class);
-		
-		fileController.loadFiles(fileNames, progressService, true);
+		admin.sendEvent(new Event(DataVisConstants.FILE_OPEN_EVENT, props));
 		
 		return null;
 	}

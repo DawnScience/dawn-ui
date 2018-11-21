@@ -26,6 +26,7 @@ import org.dawnsci.datavis.api.IFileOpeningController;
 import org.dawnsci.processing.ui.Activator;
 import org.dawnsci.processing.ui.IProcessDisplayHelper;
 import org.dawnsci.processing.ui.ProcessingOutputView;
+import org.dawnsci.processing.ui.ProcessingPerspective;
 import org.dawnsci.processing.ui.ServiceHolder;
 import org.dawnsci.processing.ui.preference.ProcessingConstants;
 import org.dawnsci.processing.ui.processing.OperationDescriptor;
@@ -106,10 +107,12 @@ import org.eclipse.ui.ISelectionListener;
 import org.eclipse.ui.IViewPart;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchPart;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.part.ResourceTransfer;
 import org.eclipse.ui.part.ViewPart;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
+import org.osgi.framework.ServiceListener;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
 import org.osgi.service.event.EventConstants;
@@ -347,6 +350,46 @@ public class DataFileSliceView extends ViewPart {
 				}
 			}
 		});
+		
+		Dictionary<String, Object> prop = new Hashtable<>();
+		prop.put(EventConstants.EVENT_TOPIC, "org/dawnsci/events/file/OPEN");
+		
+		ctx.registerService(EventHandler.class.getName(), new EventHandler() {
+			
+			@Override
+			public void handleEvent(Event event) {
+				if (Display.getCurrent() == null) {
+					PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
+						
+						@Override
+						public void run() {
+							handleEvent(event);
+							
+						}
+					});
+					return;
+				}
+				
+				try {
+					String id = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().getPerspective().getId();
+					if (!id.equals(ProcessingPerspective.ID)) {
+						return;
+					}
+					
+					String[] paths = (String[]) event.getProperty("paths");
+					if (paths == null) {
+						String path = (String) event.getProperty("path");
+						paths = new String[] { path };
+					}
+					
+					fileManager.addFiles((String[])paths);
+					
+				} catch (Exception e) {
+					return;
+				}
+				
+			}
+		}, prop);
 
 	}
 	

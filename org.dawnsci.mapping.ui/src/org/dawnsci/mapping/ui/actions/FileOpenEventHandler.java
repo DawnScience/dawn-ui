@@ -1,5 +1,6 @@
 package org.dawnsci.mapping.ui.actions;
 
+import org.dawnsci.mapping.ui.MappingPerspective;
 import org.dawnsci.mapping.ui.api.IMapFileController;
 import org.dawnsci.mapping.ui.datamodel.LiveDataBean;
 import org.dawnsci.mapping.ui.datamodel.MappedDataFileBean;
@@ -11,6 +12,8 @@ import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
 
 public class FileOpenEventHandler implements EventHandler {
+	
+	private static final String DAQ_MAPPING_ID = "uk.ac.diamond.daq.mapping.ui.experiment.MappingPerspective";
 
 	@Override
 	public void handleEvent(final Event event) {
@@ -29,7 +32,7 @@ public class FileOpenEventHandler implements EventHandler {
 		
 		try {
 			String id = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().getPerspective().getId();
-			if (!id.equals("org.dawnsci.mapping.ui.dawn.mappingperspective")) {
+			if (!id.equals(MappingPerspective.ID) && !id.equals(DAQ_MAPPING_ID)) {
 				return;
 			}
 		} catch (Exception e) {
@@ -45,6 +48,14 @@ public class FileOpenEventHandler implements EventHandler {
 		
 
 		if (fm == null) return;
+		
+		String[] paths = (String[])event.getProperty("paths");
+		
+		if (paths != null) {
+			fm.loadFiles(paths, null);
+			return;
+		}
+		
 		
 		String path = (String)event.getProperty("path");
 

@@ -3,11 +3,18 @@ package org.dawnsci.datavis;
 import java.io.File;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
+import org.dawnsci.datavis.api.DataVisConstants;
 import org.dawnsci.datavis.api.IRecentPlaces;
 import org.dawnsci.datavis.model.FileController;
 import org.dawnsci.datavis.model.FileJoining;
 import org.dawnsci.datavis.model.IFileController;
+import org.eclipse.core.expressions.EvaluationResult;
+import org.eclipse.core.expressions.Expression;
+import org.eclipse.core.expressions.IEvaluationContext;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
@@ -22,6 +29,8 @@ import org.eclipse.ui.menus.IContributionRoot;
 import org.eclipse.ui.services.IServiceLocator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
+import org.osgi.service.event.Event;
+import org.osgi.service.event.EventAdmin;
 
 public class ImportStackContributionFactory extends ExtensionContributionFactory {
 
@@ -36,7 +45,7 @@ public class ImportStackContributionFactory extends ExtensionContributionFactory
                 getBundleContext();
 		
 		final IRecentPlaces recentPlaces = bundleContext.getService(bundleContext.getServiceReference(IRecentPlaces.class));
-		final IFileController admin = bundleContext.getService(bundleContext.getServiceReference(IFileController.class));
+		final EventAdmin admin = bundleContext.getService(bundleContext.getServiceReference(EventAdmin.class));
 		
 		search.addMenuListener(new IMenuListener() {
 			
@@ -67,19 +76,30 @@ public class ImportStackContributionFactory extends ExtensionContributionFactory
         	}
 		});
 
-        additions.addContributionItem(search, null);
-
+        additions.addContributionItem(search, new Expression() {
+			
+			@Override
+			public EvaluationResult evaluate(IEvaluationContext context) throws CoreException {
+				Object variable = context.getVariable("activeWorkbenchWindow.activePerspective");
+				//probably shouldn't be needed, but doesn't work without it.
+				search.setVisible(DataVisConstants.DATAVIS_PERSPECTIVE_ID.equals(variable) 
+						|| DataVisConstants.PROCESSING_PERSPECTIVE_ID.equals(variable));
+				
+				return EvaluationResult.valueOf(DataVisConstants.DATAVIS_PERSPECTIVE_ID.equals(variable) 
+						|| DataVisConstants.PROCESSING_PERSPECTIVE_ID.equals(variable));
+			}
+		});
 	}
 	
 	private class OpenFileDialogAction extends Action {
 		
 		private String folder;
-		private IFileController controller;
+		private EventAdmin admin;
 		
-		public OpenFileDialogAction(String folder, IFileController controller) {
+		public OpenFileDialogAction(String folder, EventAdmin admin) {
 			super("From files...");
 			this.folder = folder;
-			this.controller = controller;
+			this.admin = admin;
 		}
 		
 		@Override
@@ -95,10 +115,9 @@ public class ImportStackContributionFactory extends ExtensionContributionFactory
     		
     		String joined = FileJoining.autoFileJoiner(Arrays.asList(fileNames));
     		
-    		if (controller instanceof FileController) {
-    			((FileController) controller).loadFiles(new String[] {joined}, null, false);
-    		}
-
+    		Map<String,String[]> props = new HashMap<>();
+    		props.put("paths", new String[] {joined});
+    		admin.sendEvent(new Event(DataVisConstants.FILE_OPEN_EVENT, props));
     		
 		}
 	}
@@ -106,12 +125,12 @@ public class ImportStackContributionFactory extends ExtensionContributionFactory
 		private class OpenFolderDialogAction extends Action {
 			
 			private String folder;
-			private IFileController controller;
+			private EventAdmin admin;
 			
-			public OpenFolderDialogAction(String folder, IFileController controller) {
+			public OpenFolderDialogAction(String folder, EventAdmin admin) {
 				super("From directory...");
 				this.folder = folder;
-				this.controller = controller;
+				this.admin = admin;
 			}
 			
 			@Override
@@ -126,11 +145,9 @@ public class ImportStackContributionFactory extends ExtensionContributionFactory
 	    		
 	    		String joined = FileJoining.autoFileJoiner(Arrays.asList(new String[] {open}));
 	    		
-	    		if (controller instanceof FileController) {
-	    			((FileController) controller).loadFiles(new String[] {joined}, null, false);
-	    		}
-
-	    		
+	    		Map<String,String[]> props = new HashMap<>();
+	    		props.put("paths", new String[] {joined});
+	    		admin.sendEvent(new Event(DataVisConstants.FILE_OPEN_EVENT, props));
 			}
 		
 	}

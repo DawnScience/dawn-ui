@@ -33,6 +33,31 @@
                   style="push">
             </command>
             <separator
+                  name="org.dawnsci.datavis.importseparator"
+                  visible="true">
+            </separator>
+            <separator
+                  name="org.dawnsci.datavis.recentseparator"
+                  visible="true">
+            </separator>
+            <separator
+                  name="org.dawnsci.datavis.actionsseparator"
+                  visible="true">
+            </separator>
+            <menu
+               id="org.dawnsci.datavis.file.transfer"
+               label="Transfer">
+            <visibleWhen
+                  checkEnabled="false">
+               <with
+                     variable="activeWorkbenchWindow.activePerspective">
+                  <equals
+                        value="org.dawnsci.datavis.DataVisPerspective">
+                  </equals>
+               </with>
+            </visibleWhen>
+         </menu>
+            <separator
                   name="org.dawnsci.datavis.restartseparator"
                   visible="true">
             </separator>
@@ -41,10 +66,6 @@
                   label="Restart"
                   style="push">
             </command>
-            <separator
-                  name="org.dawnsci.datavis.exitseparator"
-                  visible="true">
-            </separator>
             <command
                   commandId="org.eclipse.ui.file.exit"
                   label="Exit"
@@ -54,9 +75,23 @@
                   checkEnabled="false">
                <with
                      variable="activeWorkbenchWindow.activePerspective">
-                  <equals
-                        value="org.dawnsci.datavis.DataVisPerspective">
-                  </equals>
+                  <or>
+                     <equals
+                           value="org.dawnsci.datavis.DataVisPerspective">
+                     </equals>
+                     <equals
+                           value="org.dawnsci.mapping.ui.dawn.mappingperspective">
+                     </equals>
+                     <equals
+                           value="org.dawnsci.processing.ui.ProcessingPerspective">
+                     </equals>
+                     <equals
+                           value="uk.ac.diamond.scisoft.diffraction.powder.rcp.calibrationPerspective">
+                     </equals>
+                     <equals
+                           value="uk.ac.diamond.daq.mapping.ui.experiment.MappingPerspective">
+                     </equals>
+                  </or>
                </with>
             </visibleWhen>
          </menu>
@@ -78,7 +113,7 @@
       <menuContribution
             allPopups="false"
             class="org.dawnsci.datavis.RecentFoldersContributionFactory"
-            locationURI="menu:org.dawnsci.datavis.file">
+            locationURI="menu:org.dawnsci.datavis.file?after=org.dawnsci.datavis.recentseparator">
       </menuContribution>
       <menuContribution
             allPopups="false"
@@ -93,7 +128,7 @@
       <menuContribution
             allPopups="false"
             class="org.dawnsci.datavis.DatasetContributionFactory"
-            locationURI="menu:org.dawnsci.datavis.file">
+            locationURI="menu:org.dawnsci.datavis.file?after=org.dawnsci.datavis.actionsseparator">
       </menuContribution>
       <menuContribution
             allPopups="false"
@@ -103,7 +138,7 @@
       <menuContribution
             allPopups="false"
             class="org.dawnsci.datavis.ImportStackContributionFactory"
-            locationURI="menu:org.dawnsci.datavis.file">
+            locationURI="menu:org.dawnsci.datavis.file?afte=org.dawnsci.datavis.importseparator">
       </menuContribution>
    </extension>
    <extension
