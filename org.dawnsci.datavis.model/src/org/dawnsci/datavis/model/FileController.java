@@ -61,7 +61,7 @@ public class FileController implements IFileController {
 
 	@Override
 	public synchronized void setID(String id) {
-		if (id == currentId) {
+		if (id.equals(currentId)) {
 			return;
 		}
 		if (allLoadedFiles.isEmpty()) { // reuse default as first ID to avoid an NPE

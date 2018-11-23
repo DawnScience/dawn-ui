@@ -7,7 +7,7 @@ import org.eclipse.ui.IViewLayout;
 
 public class DataVisPerspective implements IPerspectiveFactory {
 
-	public static final String ID = "org.dawnsci.datavis.perspective";
+	public static final String ID = "org.dawnsci.datavis.DataVisPerspective";
 	public static final String LOADED_FILE_ID = "org.dawnsci.datavis.view.parts.LoadedFilePart";
 	public void createInitialLayout(IPageLayout layout) {
 		
