@@ -100,7 +100,7 @@ public class PlotModifierOffsetControl {
 		
 		
 		Scale s = new Scale(control,SWT.NONE);
-		s.setLayoutData(new GridData(48, 16));
+		s.setLayoutData(new GridData(70, 16));
 		s.setMaximum(100);
 		s.setMinimum(0);
 		
