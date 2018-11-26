@@ -15,6 +15,7 @@ import javax.annotation.PreDestroy;
 import javax.inject.Inject;
 
 import org.apache.commons.io.filefilter.WildcardFileFilter;
+import org.dawnsci.datavis.api.DataVisConstants;
 import org.dawnsci.datavis.api.IRecentPlaces;
 import org.dawnsci.datavis.model.FileControllerStateEvent;
 import org.dawnsci.datavis.model.FileControllerStateEventListener;
@@ -33,6 +34,7 @@ import org.eclipse.dawnsci.analysis.api.io.ILoaderService;
 import org.eclipse.e4.core.di.annotations.Optional;
 import org.eclipse.e4.ui.di.Focus;
 import org.eclipse.e4.ui.di.UIEventTopic;
+import org.eclipse.e4.ui.model.application.ui.MUIElement;
 import org.eclipse.e4.ui.model.application.ui.advanced.MPerspective;
 import org.eclipse.e4.ui.model.application.ui.advanced.MPerspectiveStack;
 import org.eclipse.e4.ui.model.application.ui.basic.MPart;
@@ -520,17 +522,17 @@ public class LoadedFilePart {
 
 	@Inject
 	@Optional
-	private void subscribeFileOpenE3(@UIEventTopic("org/dawnsci/events/file/OPEN") Event data, MPart part, EModelService modelService) {
-		if (part != null && part.getElementId() != partId) {
+	private void subscribeFileOpenE3(@UIEventTopic(DataVisConstants.FILE_OPEN_EVENT) Event data, MPart part, EModelService modelService) {
+		if (part == null || !part.getElementId().equals(partId)) {
 			return;
 		}
 
 		MPerspective ap = modelService.getActivePerspective(modelService.getTopLevelWindowFor(part));
-		
-		if (!ap.getElementId().equals("org.dawnsci.datavis.DataVisPerspective")) {
+		MUIElement element = modelService.find(partId, ap);
+		if (element == null) { // when active perspective does not contain this part
 			return;
 		}
-		
+
 		String[] paths = (String[]) data.getProperty("paths");
 		if (paths == null) {
 			String path = (String) data.getProperty("path");
