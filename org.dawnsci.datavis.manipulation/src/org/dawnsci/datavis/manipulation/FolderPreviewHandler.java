@@ -82,7 +82,7 @@ public class FolderPreviewHandler extends AbstractHandler {
 					return;
 				}
 				
-				FolderPreviewDialog d = new FolderPreviewDialog(HandlerUtil.getActiveShell(event), open, listFiles);
+				FolderPreviewDialog d = new FolderPreviewDialog(HandlerUtil.getActiveShell(event), listFiles);
 				
 				Display.getDefault().asyncExec(() -> {
 					if(d.open() == Dialog.OK) {

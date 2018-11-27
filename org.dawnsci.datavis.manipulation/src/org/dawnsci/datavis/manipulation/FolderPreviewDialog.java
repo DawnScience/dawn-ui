@@ -10,9 +10,11 @@
 package org.dawnsci.datavis.manipulation;
 
 import java.io.File;
+import java.io.Serializable;
 import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
@@ -27,7 +29,9 @@ import org.eclipse.dawnsci.analysis.api.io.IDataHolder;
 import org.eclipse.dawnsci.analysis.api.io.ILoaderService;
 import org.eclipse.dawnsci.analysis.api.io.ScanFileHolderException;
 import org.eclipse.dawnsci.hdf5.HDF5Utils;
+import org.eclipse.january.MetadataException;
 import org.eclipse.january.dataset.Dataset;
+import org.eclipse.january.metadata.IMetadata;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.fieldassist.ContentProposal;
 import org.eclipse.jface.fieldassist.ContentProposalAdapter;
@@ -85,6 +89,8 @@ public class FolderPreviewDialog extends Dialog {
 	private String[] labelOptions;
 	private ContentProposalAdapter adapter;
 	private String currentDatasetName = "/entry1/scan_command";
+	//since default dataset name is Nexus
+	private AtomicBoolean isNexus = new AtomicBoolean(true);
 	private TableViewer viewer;
 	private ExecutorService executor = Executors.newSingleThreadExecutor();
 	private ExecutorService executorLabel = Executors.newSingleThreadExecutor();
@@ -96,7 +102,7 @@ public class FolderPreviewDialog extends Dialog {
 
 	private ILoaderService lService;
 
-	protected FolderPreviewDialog(Shell parentShell, String folderPath, File[] filenames) {
+	protected FolderPreviewDialog(Shell parentShell, File[] filenames) {
 		super(parentShell);
 		this.filenames = filenames;
 
@@ -173,6 +179,7 @@ public class FolderPreviewDialog extends Dialog {
 		viewer.setFilters(new ViewerFilter[] {filter});
 
 		searchText.addKeyListener(new KeyAdapter() {
+			@Override
 			public void keyReleased(KeyEvent ke) {
 				filter.setSearchText(searchText.getText());
 				viewer.refresh();
@@ -381,14 +388,28 @@ public class FolderPreviewDialog extends Dialog {
 				} catch (Exception e) {
 					return;
 				}
+				
+				List<String> labels = new ArrayList<>();
+				
+				if (data.getTree() != null) {
+					isNexus.set(true);
+					String[] dataNames = data.getNames();
 
-				String[] dataNames = data.getNames();
-
-				List<String> labels = new ArrayList<String>();
-
-				for (String n: dataNames) {
-					if (data.getLazyDataset(n).getSize() == 1) {
-						labels.add(n);
+					for (String n: dataNames) {
+						if (data.getLazyDataset(n).getSize() == 1) {
+							labels.add(n);
+						}
+					}
+				}else {
+					isNexus.set(false);
+					IMetadata md = data.getMetadata();
+					try {
+						Collection<String> metaNames = md.getMetaNames();
+						
+						labels.addAll(metaNames);
+						
+					} catch (MetadataException e) {
+						logger.error("Could not get metadata",e);
 					}
 				}
 
@@ -404,7 +425,7 @@ public class FolderPreviewDialog extends Dialog {
 					public IContentProposal[] getProposals(String contents, int position) {
 
 						String lower = contents.toLowerCase();
-						ArrayList<ContentProposal> list = new ArrayList<ContentProposal>();
+						ArrayList<ContentProposal> list = new ArrayList<>();
 						for (int i = 0; i < names.length; i++) {
 							if (names[i].toLowerCase().contains(lower)) {
 								list.add(new ContentProposal(names[i]));
@@ -455,10 +476,10 @@ public class FolderPreviewDialog extends Dialog {
 	private class FileCachedValuesWithLabel {
 
 		private File file;
-		private AtomicReference<String> label = new AtomicReference<String>("");
-		private AtomicReference<String> size = new AtomicReference<String>("");
+		private AtomicReference<String> label = new AtomicReference<>("");
+		private AtomicReference<String> size = new AtomicReference<>("");
 		private AtomicLong lsize = new AtomicLong(0);
-		private AtomicReference<String> date = new AtomicReference<String>("");
+		private AtomicReference<String> date = new AtomicReference<>("");
 		private AtomicLong ldate = new AtomicLong(0);
 
 		public FileCachedValuesWithLabel(File f) {
@@ -519,7 +540,8 @@ public class FolderPreviewDialog extends Dialog {
 		public void populateLabel(String labelPath) {
 
 			String full = file.getAbsolutePath();
-			if (HDF5Utils.isHDF5(full)) {
+			boolean isH5 = HDF5Utils.isHDF5(full);
+			if (isH5 && isNexus.get()) {
 				try {
 					this.label.set("");
 					if (HDF5Utils.hasDataset(full, labelPath) && isSizeOne(HDF5Utils.getDatasetShape(full, labelPath))) {
@@ -530,6 +552,14 @@ public class FolderPreviewDialog extends Dialog {
 
 				} catch (ScanFileHolderException e) {
 					// dont always expect the label to be there
+				}
+			} else if (!isH5 && !isNexus.get()) {
+				try {
+					IMetadata dict = lService.getMetadata(full, null);
+					Serializable mv = dict.getMetaValue(labelPath);
+					this.label.set(mv == null ? "" : mv.toString());
+				} catch (Exception e) {
+					//again label may not be there
 				}
 			}
 		}
@@ -587,10 +617,10 @@ public class FolderPreviewDialog extends Dialog {
 				rc = p1.getLabel().compareTo(p2.getLabel());
 				break;
 			case 2:
-				rc = new Long(p1.getLongSize()).compareTo(p2.getLongSize());
+				rc = Long.compare(p1.getLongSize(),p2.getLongSize());
 				break;
 			case 3:
-				rc = new Long(p1.getlongDate()).compareTo(p2.getlongDate());
+				rc = Long.compare(p1.getlongDate(),p2.getlongDate());
 				break;
 			default:
 				rc = 0;
@@ -621,10 +651,7 @@ public class FolderPreviewDialog extends Dialog {
 				return true;
 			}
 			FileCachedValuesWithLabel p = (FileCachedValuesWithLabel) element;
-			if (p.getName().toLowerCase().matches(searchString)) {
-				return true;
-			}
-			if (p.getLabel().toLowerCase().matches(searchString)) {
+			if (p.getName().toLowerCase().matches(searchString) || (p.getLabel().toLowerCase().matches(searchString))) {
 				return true;
 			}
 
