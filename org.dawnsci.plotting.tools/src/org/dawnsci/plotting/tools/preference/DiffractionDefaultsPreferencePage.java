@@ -8,8 +8,6 @@
  */
 package org.dawnsci.plotting.tools.preference;
 
-import java.text.DecimalFormat;
-
 import org.dawb.common.ui.viewers.TreeNodeContentProvider;
 import org.dawnsci.common.widgets.tree.LabelNode;
 import org.dawnsci.common.widgets.tree.NodeLabelProvider;
@@ -142,7 +140,6 @@ public class DiffractionDefaultsPreferencePage extends PreferencePage implements
 				public void valueChanged(ValueEvent evt) {
 					try {
 						final String formatString = evt.getValue().toString();
-						final DecimalFormat f     = new DecimalFormat(formatString);
 						Activator.getPlottingPreferenceStore().setValue(DiffractionToolConstants.NUMBER_FORMAT, formatString);
 					} catch (Exception ne) {
 						logger.error("Cannot set "+DiffractionToolConstants.NUMBER_FORMAT+" to "+evt.getValue());
