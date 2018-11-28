@@ -48,7 +48,8 @@ public class LoadedFile implements IDataObject, IDataFilePackage {
 	private static final Logger logger = LoggerFactory.getLogger(LoadedFile.class);
 	
 	protected AtomicReference<IDataHolder> dataHolder;
-	protected Map<String,DataOptions> dataOptions;
+	protected Map<String, DataOptions> dataOptions;
+	protected Map<String, DataOptions> virtualDataOptions;
 	protected Map<String, ILazyDataset> possibleLabels;
 	protected boolean onlySignals = false;
 	protected Set<String> signals;
@@ -60,6 +61,7 @@ public class LoadedFile implements IDataObject, IDataFilePackage {
 		this.dataHolder = new AtomicReference<>(dataHolder.clone());
 		this.signals = new LinkedHashSet<>();
 		dataOptions = new LinkedHashMap<>();
+		virtualDataOptions = new LinkedHashMap<>();
 		possibleLabels = new TreeMap<>();
 		String[] names = null;
 		if (dataHolder.getTree() != null) {
@@ -109,13 +111,23 @@ public class LoadedFile implements IDataObject, IDataFilePackage {
 	}
 
 	public List<DataOptions> getDataOptions(boolean signalsOnly) {
+		
+		List<DataOptions> out = Collections.emptyList();
+		
 		if (signalsOnly) {
 			if (signals.isEmpty()) {
-				return Collections.emptyList();
+				return out;
 			}
-			return signals.stream().filter(Objects::nonNull).map(s -> dataOptions.get(s)).filter(Objects::nonNull).collect(Collectors.toList());
+			
+			out = signals.stream().filter(Objects::nonNull).map(s -> dataOptions.get(s)).filter(Objects::nonNull).collect(Collectors.toList());
+			
+		} else {
+			out = new ArrayList<>(dataOptions.values());
 		}
-		return new ArrayList<>(dataOptions.values());
+		
+		out.addAll(virtualDataOptions.values());
+		
+		return out;
 	}
 
 	public List<DataOptions> getSelectedDataOptions() {
@@ -338,5 +350,14 @@ public class LoadedFile implements IDataObject, IDataFilePackage {
 
 	public void setOnlySignals(boolean onlySignals) {
 		this.onlySignals = onlySignals;
+	}
+	
+	public void buildView(DataOptions op) {
+		DataOptionsSlice v = new DataOptionsSlice(op, op.getPlottableObject().getNDimensions().buildSliceND());
+		virtualDataOptions.put(v.getName(), v);
+	}
+	
+	public void removeView(String name) {
+		virtualDataOptions.remove(name);
 	}
 }

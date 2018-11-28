@@ -1,9 +1,17 @@
 package org.dawnsci.datavis.view.table;
 
 import java.util.Arrays;
+import java.util.List;
 
 import org.dawnsci.datavis.model.DataOptions;
+import org.dawnsci.datavis.model.DataOptionsSlice;
 import org.dawnsci.datavis.model.IFileController;
+import org.dawnsci.datavis.view.DataVisSelectionUtils;
+import org.eclipse.draw2d.ColorConstants;
+import org.eclipse.jface.action.Action;
+import org.eclipse.jface.action.IMenuListener;
+import org.eclipse.jface.action.IMenuManager;
+import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.layout.TableColumnLayout;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.CellEditor;
@@ -19,9 +27,11 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 
@@ -81,6 +91,50 @@ public class DataOptionTableViewer {
 		
 		tableViewer.setContentProvider(new ArrayContentProvider());
 		
+		MenuManager menuMgr = new MenuManager();
+		Menu menu = menuMgr.createContextMenu(tableViewer.getControl());
+		menuMgr.addMenuListener(new IMenuListener() {
+			
+			@Override
+			public void menuAboutToShow(IMenuManager manager) {
+				List<DataOptions> s = DataVisSelectionUtils.getFromSelection(tableViewer.getSelection(), DataOptions.class);
+				if (s != null && !s.isEmpty()) {
+					Action a = new Action("Take view") {
+						@Override
+						public void run() {
+							DataOptions dataOptions = s.get(0);
+							dataOptions.getParent().buildView(dataOptions);
+							tableViewer.setInput(dataOptions.getParent().getDataOptions().toArray());
+						}
+					};
+					
+					manager.add(a);
+					
+					if (s.get(0) instanceof DataOptionsSlice) {
+						Action r = new Action("Remove view") {
+							@Override
+							public void run() {
+								DataOptions dataOptions = s.get(0);
+								if (dataOptions.isSelected() && dataOptions.getParent().isSelected()) {
+									controller.setDataSelected(dataOptions, false);
+								}
+								dataOptions.getParent().removeView(dataOptions.getName());
+								tableViewer.setInput(dataOptions.getParent().getDataOptions().toArray());
+								
+							}
+						};
+						
+						manager.add(r);
+					}
+					
+					
+				}
+				
+			}
+		});
+		menuMgr.setRemoveAllWhenShown(true);
+		tableViewer.getControl().setMenu(menu);
+		
 		TableViewerColumn check   = new TableViewerColumn(tableViewer, SWT.CENTER, 0);
 		check.setEditingSupport(new CheckBoxEditSupport(tableViewer));
 		check.setLabelProvider(new ColumnLabelProvider() {
@@ -100,6 +154,15 @@ public class DataOptionTableViewer {
 		
 		TableViewerColumn name = new TableViewerColumn(tableViewer, SWT.LEFT);
 		name.setLabelProvider(new ColumnLabelProvider() {
+			
+			@Override
+			public Color getForeground(Object element) {
+				if (element instanceof DataOptionsSlice) {
+					return ColorConstants.gray;
+				}
+				return null;
+			}
+			
 			@Override
 			public String getText(Object element) {
 				return ((DataOptions)element).getName();
@@ -160,12 +223,8 @@ public class DataOptionTableViewer {
 		@Override
 		protected void setValue(Object element, Object value) {
 			if (element instanceof DataOptions && value instanceof Boolean){
-				
-				IStructuredSelection ss = getStructuredSelection();
-				
 				controller.setDataSelected((DataOptions)element, (Boolean)value);
 			}
-//			FileController.getInstance().setCurrentData((DataOptions)element, (Boolean)value);
 		}
 		
 	}

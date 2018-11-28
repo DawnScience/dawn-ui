@@ -255,7 +255,7 @@ public class FileController implements IFileController {
 				String l = f.getLabel();
 				for (DataOptions d : f.getDataOptions()) {
 					if (d.isSelected()) {
-						DataOptions dClone = new DataOptions(d);
+						DataOptions dClone = d.clone();
 						dClone.setLabel(l);
 						list.add(dClone);
 					}
