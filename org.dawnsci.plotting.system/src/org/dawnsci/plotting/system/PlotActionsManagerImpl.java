@@ -214,6 +214,11 @@ public class PlotActionsManagerImpl extends PlottingActionBarManager {
 		if (action!=null) {
 			man.add(((ActionContributionItem)action).getAction());
 		}
+
+		action = system.getActionBars().getToolBarManager().find(ZoomType.NONE.getId());
+		if (action!=null) {
+			man.add(((ActionContributionItem)action).getAction());
+		}
 	}
 
 
