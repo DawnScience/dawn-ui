@@ -1,6 +1,7 @@
 package org.dawnsci.datavis.model;
 
 import java.io.File;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -28,7 +29,9 @@ import org.eclipse.dawnsci.analysis.api.tree.NodeLink;
 import org.eclipse.dawnsci.analysis.api.tree.Tree;
 import org.eclipse.dawnsci.analysis.api.tree.TreeUtils;
 import org.eclipse.dawnsci.nexus.NexusConstants;
+import org.eclipse.january.MetadataException;
 import org.eclipse.january.dataset.Dataset;
+import org.eclipse.january.dataset.DatasetFactory;
 import org.eclipse.january.dataset.DatasetUtils;
 import org.eclipse.january.dataset.ILazyDataset;
 import org.slf4j.Logger;
@@ -278,6 +281,13 @@ public class LoadedFile implements IDataObject, IDataFilePackage {
 	}
 	
 	public Collection<String> getLabelOptions() {
+		if (possibleLabels.isEmpty()) {
+			try {
+				return dataHolder.get().getMetadata().getMetaNames();
+			} catch (MetadataException e) {
+				return Collections.emptyList();
+			}
+		}
 		return possibleLabels.keySet();
 	}
 
@@ -305,6 +315,14 @@ public class LoadedFile implements IDataObject, IDataFilePackage {
 				return slice.squeeze();
 			} catch (Exception e) {
 				logger.error("Could not read label {}", labelName,e);
+			}
+		} else {
+			try {
+				Serializable metaValue = dataHolder.get().getMetadata().getMetaValue(labelName);
+				return metaValue == null ? null : DatasetFactory.createFromObject(metaValue.toString());
+				
+			} catch (MetadataException e) {
+				return null;
 			}
 		}
 		return null;
