@@ -204,13 +204,13 @@ public class PlotActionsManagerImpl extends PlottingActionBarManager {
 
 		action = system.getActionBars().getToolBarManager().find(ZoomType.RUBBERBAND_ZOOM.getId());
 		if (action!=null) man.add(((ActionContributionItem)action).getAction());
-		
-//		for(final ZoomType zoomType : ZoomType.values()) {
-//			action = system.getActionBars().getToolBarManager().find(zoomType.getId());
-//			if (action!=null) man.add(((ActionContributionItem)action).getAction());
-//		}
 
 		action = system.getActionBars().getToolBarManager().find(BasePlottingConstants.RESCALE);
+		if (action!=null) {
+			man.add(((ActionContributionItem)action).getAction());
+		}
+		
+		action = system.getActionBars().getToolBarManager().find(ZoomType.PANNING.getId());
 		if (action!=null) {
 			man.add(((ActionContributionItem)action).getAction());
 		}
