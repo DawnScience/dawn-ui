@@ -17,8 +17,10 @@ public interface LiveStreamMapObject extends PlottableMapObject {
 	
 	public List<IDataset> getAxes();
 	
-	public IDynamicShape connect() throws Exception;
+	public void connect() throws Exception;
 	
 	public void disconnect() throws Exception;
+	
+	public IDynamicShape getDynamicDataset();
 
 }

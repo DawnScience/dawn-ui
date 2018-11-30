@@ -456,19 +456,12 @@ public class MapPlotManager {
 	
 	private IImageTrace createLiveStreamTrace(LiveStreamMapObject o) {
 		
-		IDynamicShape dataset = null;
 		
-		try {
-			 dataset = o.connect();
-		} catch (Exception e) {
-			try {
-				 
-			o.disconnect();
-			dataset = o.connect();
-			} catch (Exception e2) {
-				logger.error("Could not connect to stream",e2);
-			}
+		if (o.getDynamicDataset() == null) {
+			connectStream(o);
 		}
+		
+		IDynamicShape dataset = o.getDynamicDataset();
 			
 		if (dataset == null) return null;
 		
@@ -478,6 +471,19 @@ public class MapPlotManager {
 		trace.setAxes(o.getAxes(), false);
 		return trace;
 	
+	}
+	
+	private void connectStream(LiveStreamMapObject o) {
+		try {
+			 o.connect();
+		} catch (Exception e) {
+			try {
+				o.disconnect();
+				o.connect();
+			} catch (Exception e2) {
+				logger.error("Could not connect to stream",e2);
+			}
+		}
 	}
 
 	public PlottableMapObject getTopMap(double x, double y){
