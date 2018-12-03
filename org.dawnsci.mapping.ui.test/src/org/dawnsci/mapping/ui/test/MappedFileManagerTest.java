@@ -165,12 +165,6 @@ public class MappedFileManagerTest {
 			}
 			
 			@Override
-			public IDynamicShape connect() throws Exception {
-				// TODO Auto-generated method stub
-				return null;
-			}
-			
-			@Override
 			public void addAxisListener(IAxisMoveListener listener) {
 				// TODO Auto-generated method stub
 				
@@ -186,6 +180,18 @@ public class MappedFileManagerTest {
 			public double[] getColorRange() {
 				// TODO Auto-generated method stub
 				return null;
+			}
+
+			@Override
+			public IDynamicShape getDynamicDataset() {
+				// TODO Auto-generated method stub
+				return null;
+			}
+
+			@Override
+			public void connect() throws Exception {
+				// TODO Auto-generated method stub
+				
 			}
 		});
 		

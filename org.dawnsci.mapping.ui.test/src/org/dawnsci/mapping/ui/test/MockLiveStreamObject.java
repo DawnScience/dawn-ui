@@ -12,6 +12,7 @@ public class MockLiveStreamObject implements LiveStreamMapObject {
 
 	private boolean plotted;
 	private Set<IAxisMoveListener> listeners = new HashSet<>();
+	private IDynamicShape dynamicDataset;
 
 	@Override
 	public String getLongName() {
@@ -93,14 +94,6 @@ public class MockLiveStreamObject implements LiveStreamMapObject {
 	}
 
 	@Override
-	public IDynamicShape connect() throws Exception {
-		
-		int[] maxShape = {100,100};
-		
-		return new DynamicRandomLazyDataset(new int[][] {maxShape}, maxShape);
-	}
-
-	@Override
 	public void disconnect() throws Exception {
 
 	}
@@ -112,6 +105,20 @@ public class MockLiveStreamObject implements LiveStreamMapObject {
 
 	@Override
 	public double[] getColorRange() {
+		return null;
+	}
+
+	@Override
+	public void connect() throws Exception {
+		int[] maxShape = {100,100};
+		
+		dynamicDataset = new DynamicRandomLazyDataset(new int[][] {maxShape}, maxShape);
+		
+	}
+
+	@Override
+	public IDynamicShape getDynamicDataset() {
+		// TODO Auto-generated method stub
 		return null;
 	}
 
