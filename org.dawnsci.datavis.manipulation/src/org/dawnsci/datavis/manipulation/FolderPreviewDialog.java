@@ -72,6 +72,8 @@ import org.osgi.framework.FrameworkUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import uk.ac.diamond.scisoft.analysis.utils.VersionSort;
+
 /**
  * Dialog that shows a table of the files in a folder.
  * <p>
@@ -614,7 +616,7 @@ public class FolderPreviewDialog extends Dialog {
 				rc = p1.getName().compareTo(p2.getName());
 				break;
 			case 1:
-				rc = p1.getLabel().compareTo(p2.getLabel());
+				rc = VersionSort.versionCompare(p1.getLabel(), p2.getLabel());
 				break;
 			case 2:
 				rc = Long.compare(p1.getLongSize(),p2.getLongSize());
