@@ -47,5 +47,50 @@
             name="File Open Command">
       </command>
    </extension>
+   <extension
+         point="org.eclipse.ui.navigator.navigatorContent">
+         <actionProvider
+            class="org.dawnsci.datavis.view.DataVisActionProvider"
+            id="org.dawnsci.datavis.view.actions.DataVisActionProvider"
+            overrides="org.eclipse.ui.navigator.resources.actions.EditActions"
+            priority="highest">
+            <enablement>
+            <with
+                  variable="activeWorkbenchWindow.activePerspective">
+               <equals
+                     value="org.dawnsci.datavis.DataVisPerspective">
+               </equals>
+            </with>
+         </enablement>
+      </actionProvider>
+      <actionProvider
+            class="org.dawnsci.datavis.view.DataVisActionProvider"
+            id="org.dawnsci.datavis.view.actions.DataVisActionProvider2"
+            overrides="org.eclipse.ui.navigator.resources.OpenActions"
+            priority="highest">
+            <enablement>
+            <with
+                  variable="activeWorkbenchWindow.activePerspective">
+               <equals
+                     value="org.dawnsci.datavis.DataVisPerspective">
+               </equals>
+            </with>
+         </enablement>
+      </actionProvider>
+   </extension>
+   <extension
+         point="org.eclipse.ui.navigator.viewer">
+      <viewer
+            viewerId="org.eclipse.ui.navigator.ProjectExplorer">
+      </viewer>
+      <viewerActionBinding
+            viewerId="org.eclipse.ui.navigator.ProjectExplorer">
+         <includes>
+            <actionExtension
+                  pattern="org.dawnsci.datavis.view.actions.*">
+            </actionExtension>
+         </includes>
+      </viewerActionBinding>
+   </extension>
 
 </plugin>
