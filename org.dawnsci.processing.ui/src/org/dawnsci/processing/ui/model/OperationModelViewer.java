@@ -8,6 +8,7 @@ import org.eclipse.dawnsci.analysis.api.processing.OperationData;
 import org.eclipse.dawnsci.analysis.api.processing.model.IOperationModel;
 import org.eclipse.dawnsci.analysis.api.processing.model.ModelField;
 import org.eclipse.dawnsci.analysis.api.processing.model.ModelUtils;
+import org.eclipse.dawnsci.analysis.api.processing.model.OperationModelField;
 import org.eclipse.jface.bindings.keys.IKeyLookup;
 import org.eclipse.jface.bindings.keys.KeyLookupFactory;
 import org.eclipse.jface.viewers.CellEditor;
@@ -30,6 +31,7 @@ import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.jface.viewers.TableViewerEditor;
 import org.eclipse.jface.viewers.TableViewerFocusCellManager;
 import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.jface.viewers.ViewerFilter;
 import org.eclipse.richbeans.widgets.table.ISeriesItemDescriptor;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.dnd.DND;
@@ -72,7 +74,8 @@ public class OperationModelViewer implements ISelectionListener, ISelectionChang
 	
 	private TableViewer           viewer;
 	private IOperationModel       model;
-	
+	private boolean showAllFields = false;
+
 	public OperationModelViewer() {
 		this(true);
 	}
@@ -96,7 +99,20 @@ public class OperationModelViewer implements ISelectionListener, ISelectionChang
 		viewer.getTable().setLinesVisible(true);
 		viewer.getTable().setHeaderVisible(true);
 		viewer.getTable().setLayoutData(new GridData(GridData.FILL_BOTH));
-		
+		viewer.setFilters(new ViewerFilter() {
+			
+			@Override
+			public boolean select(Viewer viewer, Object parentElement, Object element) {
+				if (showAllFields) {
+					return true;
+				}
+
+				ModelField field = (ModelField) element;
+				OperationModelField ann = field.getAnnotation();
+				return !ann.expertOnly();
+			}
+		});
+
 		TableViewerFocusCellManager focusCellManager = new TableViewerFocusCellManager(viewer, new FocusCellOwnerDrawHighlighter(viewer));
 		ColumnViewerEditorActivationStrategy actSupport = new ColumnViewerEditorActivationStrategy(viewer) {
 			@Override
@@ -143,6 +159,14 @@ public class OperationModelViewer implements ISelectionListener, ISelectionChang
 		});
 
 		viewer.addSelectionChangedListener(this);
+	}
+
+	/**
+	 * @param showAllFields if true then show all fields
+	 */
+	public void setShowAllFields(boolean showAllFields) {
+		this.showAllFields = showAllFields;
+		viewer.refresh();
 	}
 
 	private void createDropTarget(TableViewer viewer) {
@@ -346,10 +370,7 @@ public class OperationModelViewer implements ISelectionListener, ISelectionChang
 
 	@Override
 	public void selectionChanged(SelectionChangedEvent event) {
-		if (event.getSelection() instanceof IStructuredSelection) {
-			IStructuredSelection ss = (IStructuredSelection)event.getSelection();
-			final ModelField     mf = (ModelField)ss.getFirstElement();
-		}
+		// do nothing
 	}
 
 	@Override

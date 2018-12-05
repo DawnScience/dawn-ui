@@ -15,6 +15,7 @@ import org.eclipse.dawnsci.analysis.api.processing.IOperationInputData;
 import org.eclipse.dawnsci.analysis.api.processing.model.IOperationModel;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
+import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -36,6 +37,8 @@ public class OperationModelView extends ViewPart implements ISelectionListener {
 	private OperationModelViewer modelEditor;
 	private IOperationInputData inputData;
 	private IAction configure;
+	private IAction expert;
+
 	@SuppressWarnings("unused")
 	private final static Logger logger = LoggerFactory.getLogger(OperationModelView.class);
 	
@@ -71,9 +74,18 @@ public class OperationModelView extends ViewPart implements ISelectionListener {
 			}
 		};
 		configure.setEnabled(false);
-		
-		getViewSite().getActionBars().getToolBarManager().add(configure);
-		
+
+		expert = new Action("...", IAction.AS_CHECK_BOX) {
+			public void run() {
+				modelEditor.setShowAllFields(expert.isChecked());
+			};
+		};
+		expert.setToolTipText("Show all fields");
+
+		IToolBarManager toolbar = getViewSite().getActionBars().getToolBarManager();
+		toolbar.add(expert);
+		toolbar.add(configure);
+
 		BundleContext ctx = FrameworkUtil.getBundle(OperationModelView.class).getBundleContext();
 		EventHandler handler = new EventHandler() {
 			
