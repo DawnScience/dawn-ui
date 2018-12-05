@@ -1,16 +1,15 @@
 package org.dawnsci.mapping.ui;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.Properties;
 
 import org.dawnsci.mapping.ui.api.IMapFileController;
 import org.dawnsci.mapping.ui.datamodel.AbstractMapData;
 import org.dawnsci.mapping.ui.datamodel.AssociatedImage;
 import org.dawnsci.mapping.ui.datamodel.IMapFileEventListener;
+import org.dawnsci.mapping.ui.datamodel.IMapPlotController;
 import org.dawnsci.mapping.ui.datamodel.LiveStreamMapObject;
 import org.dawnsci.mapping.ui.datamodel.MappedDataBlock;
 import org.dawnsci.mapping.ui.datamodel.MappedDataFile;
@@ -18,10 +17,6 @@ import org.dawnsci.mapping.ui.datamodel.MappedFileManager;
 import org.dawnsci.mapping.ui.datamodel.PlottableMapObject;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.dawnsci.analysis.api.persistence.IMarshallerService;
-import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
-import org.eclipse.dawnsci.plotting.api.PlotType;
-import org.eclipse.dawnsci.plotting.api.axis.ClickEvent;
-import org.eclipse.dawnsci.plotting.api.axis.IClickListener;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.util.LocalSelectionTransfer;
@@ -49,17 +44,13 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.IMemento;
-import org.eclipse.ui.IViewPart;
 import org.eclipse.ui.IViewSite;
-import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.part.ResourceTransfer;
 import org.eclipse.ui.part.ViewPart;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
-import org.osgi.service.event.Event;
-import org.osgi.service.event.EventAdmin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -83,129 +74,23 @@ public class MappedDataView extends ViewPart {
 	private static Logger logger = LoggerFactory.getLogger(MappedDataView.class);
 	public static final String ID = "org.dawnsci.mapping.ui.mappeddataview";
 	
-	private static class MapClickEvent implements IMapClickEvent {
-		
-		private final ClickEvent clickEvent;
-		private final boolean isDoubleClick;
-		private final String filePath;
-		
-		public MapClickEvent(ClickEvent clickEvent, boolean isDoubleClick,
-				String filePath) {
-			this.clickEvent = clickEvent;
-			this.isDoubleClick = isDoubleClick;
-			this.filePath = filePath;
-		}
-
-		@Override
-		public ClickEvent getClickEvent() {
-			return clickEvent;
-		}
-
-		@Override
-		public boolean isDoubleClick() {
-			return isDoubleClick;
-		}
-
-		@Override
-		public String getFilePath() {
-			return filePath;
-		}
-		
-	}
-
-	public static final String EVENT_TOPIC_MAPVIEW_CLICK = "org/dawnsci/mapping/ui/mapview/click";
+	
 	
 	private TreeViewer viewer;
-	private MapPlotManager plotManager;
+	private IMapPlotController plotManager;
 	private MappedDataViewState initialState;
 	
-//	private LiveMapFileListener liveMapListener;
 	private IMapFileEventListener mapFileListener;
 	
 	private IMapFileController fileController;
 	
-	@SuppressWarnings("unchecked")
 	@Override
 	public void createPartControl(Composite parent) {
 		
-		final IWorkbenchPage page = getSite().getPage();
-		final IPlottingSystem<Composite> map;
-		try {
-			final IViewPart view = page.showView(getSecondaryIdAttribute("mapview", "org.dawnsci.mapping.ui.mapview"));
-			map = (IPlottingSystem<Composite>)view.getAdapter(IPlottingSystem.class);
-			map.setPlotType(PlotType.IMAGE);
-		} catch (PartInitException e) {
-			throw new RuntimeException("Could not create the map view", e);
-		}
-		
-		final IPlottingSystem<Composite> spectrum;
-		try {
-			final IViewPart view = page.showView(getSecondaryIdAttribute("spectrumview", "org.dawnsci.mapping.ui.spectrumview"));
-			spectrum = (IPlottingSystem<Composite>)view.getAdapter(IPlottingSystem.class);
-		} catch (PartInitException e) {
-			throw new RuntimeException("Could not create the spectrum view", e);
-		}
-		
-		BundleContext bundleContext =
-                FrameworkUtil.
-                getBundle(this.getClass()).
-                getBundleContext();
-		
-		fileController = bundleContext.getService(bundleContext.getServiceReference(IMapFileController.class));
-		plotManager = new MapPlotManager(map, spectrum);
+		fileController = Activator.getService(IMapFileController.class);
+		plotManager = Activator.getService(IMapPlotController.class);
 		fileController.setRegistrationHelper(new RegistrationHelperImpl(plotManager));
 		
-		map.addClickListener(new IClickListener() {
-			
-			@Override
-			public void doubleClickPerformed(final ClickEvent evt) {
-				sendEvent(evt,true);
-			}
-			
-			@Override
-			public void clickPerformed(final ClickEvent evt) {
-				sendEvent(evt,false);
-			}
-			
-			private void sendEvent(final ClickEvent evt, boolean isDoubleClick) {
-				Map<String,Object> props = new HashMap<>();
-				PlottableMapObject topMap = plotManager.getTopMap();
-				String path = topMap == null ? null : topMap.getPath();
-				MappedDataFile p = fileController.getArea().getParentFile(topMap);
-				if (p != null && p.getParentPath() != null) {
-					path = p.getParentPath();
-				}
-				props.put("event", new MapClickEvent(evt, isDoubleClick, path));
-				
-				BundleContext bundleContext =
-		                FrameworkUtil.
-		                getBundle(this.getClass()).
-		                getBundleContext();
-				
-				EventAdmin a = bundleContext.getService(bundleContext.getServiceReference(EventAdmin.class));
-				
-				a.postEvent(new Event(EVENT_TOPIC_MAPVIEW_CLICK, props));
-			}
-		});
-		
-		map.addClickListener(new IClickListener() {
-			
-			@Override
-			public void doubleClickPerformed(ClickEvent evt) {
-				//No double click action
-			}
-			
-			@Override
-			public void clickPerformed(ClickEvent evt) {
-				if (evt.isShiftDown()) {
-					plotManager.plotDataWithHold(evt.getxValue(), evt.getyValue());
-				}
-				else {
-					plotManager.plotData(evt.getxValue(), evt.getyValue());
-				}
-			}
-		});
-	
 		final Composite searchComposite = new Composite(parent, SWT.NONE);
 		searchComposite.setLayout(new GridLayout(2, false));
 		final Label searchLabel = new Label(searchComposite, SWT.NONE);
@@ -217,7 +102,7 @@ public class MappedDataView extends ViewPart {
 		viewer = new TreeViewer(searchComposite);
 		viewer.getTree().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));
 		viewer.setContentProvider(new MapFileTreeContentProvider());
-		viewer.setLabelProvider(new MapFileCellLabelProvider(plotManager));
+		viewer.setLabelProvider(new MapFileCellLabelProvider());
 		viewer.setInput(fileController.getArea());
 		ColumnViewerToolTipSupport.enableFor(viewer);
 		MappedDataFilter filter = new MappedDataFilter();
@@ -392,12 +277,6 @@ public class MappedDataView extends ViewPart {
 		
 	}
 	
-//	private void openImportWizard(String path) {
-//		
-//		fileController.importFile(path);
-//		
-//	}
-	
 	@Override
 	public void setFocus() {
 		if (viewer != null && !viewer.getTree().isDisposed()) viewer.getTree().setFocus(); 
@@ -408,13 +287,6 @@ public class MappedDataView extends ViewPart {
 	public void dispose() {
 		super.dispose();
 		fileController.removeListener(mapFileListener);
-		FileManagerSingleton.clearManager();
-		
-//		ILiveMappingFileService liveService = LiveServiceManager.getLiveMappingFileService();
-		
-//		if (liveService != null && liveMapListener != null) {
-//			liveService.removeLiveFileListener(liveMapListener);
-//		}
 		
 	}
 	

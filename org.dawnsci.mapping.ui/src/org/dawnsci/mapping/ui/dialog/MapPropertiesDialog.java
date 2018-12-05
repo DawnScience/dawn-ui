@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.dawnsci.mapping.ui.MapPlotManager;
 import org.dawnsci.mapping.ui.datamodel.AbstractMapData;
+import org.dawnsci.mapping.ui.datamodel.IMapPlotController;
 import org.dawnsci.mapping.ui.datamodel.MappedDataArea;
 import org.dawnsci.mapping.ui.datamodel.MappedDataBlock;
 import org.dawnsci.mapping.ui.datamodel.ReMappedData;
@@ -33,9 +34,9 @@ public class MapPropertiesDialog extends Dialog {
 	
 	private AbstractMapData map;
 	private MappedDataArea area;
-	private MapPlotManager manager;
+	private IMapPlotController manager;
 
-	public MapPropertiesDialog(Shell parentShell, AbstractMapData map, MappedDataArea area, MapPlotManager manager) {
+	public MapPropertiesDialog(Shell parentShell, AbstractMapData map, MappedDataArea area, IMapPlotController manager) {
 		super(parentShell);
 		
 		this.map = map;

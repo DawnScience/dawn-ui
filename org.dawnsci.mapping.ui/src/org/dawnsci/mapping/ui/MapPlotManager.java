@@ -4,8 +4,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Deque;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -15,6 +17,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import org.dawnsci.mapping.ui.api.IMapFileController;
 import org.dawnsci.mapping.ui.datamodel.AssociatedImage;
 import org.dawnsci.mapping.ui.datamodel.IMapFileEventListener;
+import org.dawnsci.mapping.ui.datamodel.IMapPlotController;
 import org.dawnsci.mapping.ui.datamodel.LiveStreamMapObject;
 import org.dawnsci.mapping.ui.datamodel.LiveStreamMapObject.IAxisMoveListener;
 import org.dawnsci.mapping.ui.datamodel.MapObject;
@@ -22,9 +25,12 @@ import org.dawnsci.mapping.ui.datamodel.MappedDataFile;
 import org.dawnsci.mapping.ui.datamodel.PlottableMapObject;
 import org.dawnsci.mapping.ui.datamodel.VectorMapData;
 import org.eclipse.dawnsci.analysis.dataset.roi.PointROI;
+import org.eclipse.dawnsci.plotting.api.IPlottingService;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.PlotType;
+import org.eclipse.dawnsci.plotting.api.axis.ClickEvent;
 import org.eclipse.dawnsci.plotting.api.axis.IAxis;
+import org.eclipse.dawnsci.plotting.api.axis.IClickListener;
 import org.eclipse.dawnsci.plotting.api.region.IROIListener;
 import org.eclipse.dawnsci.plotting.api.region.IRegion;
 import org.eclipse.dawnsci.plotting.api.region.IRegion.RegionType;
@@ -51,12 +57,16 @@ import org.eclipse.january.metadata.AxesMetadata;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.PlatformUI;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.FrameworkUtil;
+import org.osgi.service.event.Event;
+import org.osgi.service.event.EventAdmin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class MapPlotManager {
+public class MapPlotManager implements IMapPlotController{
+	
+	private IMapFileController fileManager;
+	private IPlottingService plotService;
+	private EventAdmin eventAdmin;
 	
 	private IPlottingSystem<Composite> map;
 	private IPlottingSystem<Composite> data;
@@ -69,39 +79,27 @@ public class MapPlotManager {
 	private boolean firstHold = true;
 	private IAxisMoveListener moveListener;
 	
-	private IMapFileController fileManager;
-	
 	private static final Logger logger = LoggerFactory.getLogger(MapPlotManager.class);
 	
-	public MapPlotManager(IPlottingSystem<Composite> map, IPlottingSystem<Composite> data) {
-		this.map = map;
-		this.data = data;
+	public void setMapFileController(IMapFileController fileManager) {
+		this.fileManager = fileManager;
+	}
+	
+	public void setPlotService(IPlottingService service) {
+		plotService = service;
+	}
+	
+	public void setEventAdmin(EventAdmin eventAdmin) {
+		this.eventAdmin = eventAdmin;
+	}
+	
+	public MapPlotManager() {
 		
 		executor = Executors.newSingleThreadExecutor();
 		detectorExecutor = Executors.newSingleThreadExecutor();
 		
-		BundleContext bundleContext =
-                FrameworkUtil.
-                getBundle(this.getClass()).
-                getBundleContext();
-		
-		this.fileManager = bundleContext.getService(bundleContext.getServiceReference(IMapFileController.class));
-		
 		atomicPosition = new AtomicInteger(0);
 		layers = new ConcurrentLinkedDeque<MapTrace>();
-		
-		if (data.getAxes() != null) {
-			List<IAxis> axes = data.getAxes();
-			for (IAxis axis : axes) axis.setAxisAutoscaleTight(true);
-		}
-		
-		fileManager.addListener(new IMapFileEventListener() {
-			
-			@Override
-			public void mapFileStateChanged(MappedDataFile file) {
-				updatePlot();
-			}
-		});
 		
 		moveListener = new IAxisMoveListener() {
 			
@@ -130,6 +128,81 @@ public class MapPlotManager {
 		
 	}
 	
+	public void init() {
+		fileManager.addListener(new IMapFileEventListener() {
+			
+			@Override
+			public void mapFileStateChanged(MappedDataFile file) {
+				updatePlot();
+			}
+		});
+	}
+	
+	private IPlottingSystem<?> getMapPlot() {
+		if (map == null) {
+			map = plotService.getPlottingSystem("Map");
+			initMapPlot(map);
+		}
+		return map;
+	}
+	
+	private void initMapPlot(IPlottingSystem<?> system) {
+		system.addClickListener(new IClickListener() {
+			
+			@Override
+			public void doubleClickPerformed(ClickEvent evt) {
+				//No double click action
+			}
+			
+			@Override
+			public void clickPerformed(ClickEvent evt) {
+					plotData(evt.getxValue(), evt.getyValue(),evt.isShiftDown());
+			}
+			
+		});
+		
+		system.addClickListener(new IClickListener() {
+			
+			@Override
+			public void doubleClickPerformed(final ClickEvent evt) {
+				sendEvent(evt,true);
+			}
+			
+			@Override
+			public void clickPerformed(final ClickEvent evt) {
+				sendEvent(evt,false);
+			}
+			
+			private void sendEvent(final ClickEvent evt, boolean isDoubleClick) {
+				Map<String,Object> props = new HashMap<>();
+				PlottableMapObject topMap = getTopMap();
+				String path = topMap == null ? null : topMap.getPath();
+				MappedDataFile p = fileManager.getArea().getParentFile(topMap);
+				if (p != null && p.getParentPath() != null) {
+					path = p.getParentPath();
+				}
+				props.put("event", new MapClickEvent(evt, isDoubleClick, path));
+		
+				eventAdmin.postEvent(new Event(EVENT_TOPIC_MAPVIEW_CLICK, props));
+			}
+		});
+	}
+	
+	private IPlottingSystem<?> getDataPlot() {
+		if (data == null) {
+			data = plotService.getPlottingSystem("Detector Data");
+			initDataPlot(data);
+		}
+		return data;
+	}
+	
+	private void initDataPlot(IPlottingSystem<?> dataPlot) {
+		if (dataPlot.getAxes() != null) {
+			List<IAxis> axes = dataPlot.getAxes();
+			for (IAxis axis : axes) axis.setAxisAutoscaleTight(true);
+		}
+	}
+	
 	public void updatePlot(){	
 		Runnable r = atomicRunnable.getAndSet(new Runnable() {
 			
@@ -150,12 +223,25 @@ public class MapPlotManager {
 		
 	}
 	
-	public void plotData(final double x, final double y) {
+	public void plotData(final double x, final double y, boolean hold) {
+		if (!plotsReady()) return;
+		IPlottingSystem<?> dataPlot = getDataPlot();
+		IPlottingSystem<?> mapPlot = getMapPlot();
+		
 		final PlottableMapObject topMap = getTopMap(x,y);
 		if (topMap == null)  {
-			data.clear();
+			if (!hold) dataPlot.clear();
 			return;
 		}
+		
+		if (hold) {
+			plotDataWithHold(x, y, topMap, dataPlot, mapPlot);
+		} else {
+			plotData(x, y, topMap, dataPlot, mapPlot);
+		}
+	}
+	
+	private void plotData(double x, double y, final PlottableMapObject topMap, IPlottingSystem<?> dataPlot, IPlottingSystem<?> mapPlot) {
 		merge = null;
 		firstHold = true;
 		atomicPosition.set(0);
@@ -167,27 +253,27 @@ public class MapPlotManager {
 					long t = System.currentTimeMillis();
 					IDataset s = topMap.getSpectrum(x,y);
 					if (s == null) {
-						data.clear();
+						dataPlot.clear();
 						return;
 					}
 					logger.info("Slice time {} ms for shape {} of {}", (System.currentTimeMillis()-t), Arrays.toString(s.getShape()), topMap.toString());
 					if (s.getSize() == 1) return;
 
-					MetadataPlotUtils.plotDataWithMetadata(s, data);
+					MetadataPlotUtils.plotDataWithMetadata(s, dataPlot);
 
 					Display.getDefault().asyncExec(new Runnable() {
 
 						@Override
 						public void run() {
-							Collection<IRegion> regions = map.getRegions();
+							Collection<IRegion> regions = mapPlot.getRegions();
 							Iterator<IRegion> it = regions.iterator();
 							while (it.hasNext()) {
 								IRegion r = it.next();
 								if (r.getUserObject() ==  MapPlotManager.this){
-									map.removeRegion(r);
+									mapPlot.removeRegion(r);
 								}
 							}
-							map.repaint(false);
+							mapPlot.repaint(false);
 						}
 
 					});
@@ -201,8 +287,8 @@ public class MapPlotManager {
 		detectorExecutor.submit(r);
 	}
 	
-	public void plotDataWithHold(final double x, final double y) {
-		final PlottableMapObject topMap = getTopMap(x,y);
+	private void plotDataWithHold(final double x, final double y, final PlottableMapObject topMap, IPlottingSystem<?> dataPlot, IPlottingSystem<?> mapPlot)  {
+		
 		if (topMap == null) return;
 		final ILazyDataset lz = topMap.getSpectrum(x,y);
 		
@@ -214,7 +300,7 @@ public class MapPlotManager {
 				
 				@Override
 				public void run() {
-					if (firstHold) data.clear();
+					if (firstHold) dataPlot.clear();
 					firstHold = false;
 					IDataset s = null;
 					try {
@@ -252,7 +338,7 @@ public class MapPlotManager {
 						mergedDataset.setSlice(s,slice);
 
 					}
-						MetadataPlotUtils.plotDataWithMetadata(mergedDataset, data);
+						MetadataPlotUtils.plotDataWithMetadata(mergedDataset, dataPlot);
 								
 						
 					}
@@ -274,18 +360,18 @@ public class MapPlotManager {
 						return;
 					}
 					if (s != null) {
-						final ILineTrace l = MetadataPlotUtils.buildLineTrace(s, data);
+						final ILineTrace l = MetadataPlotUtils.buildLineTrace(s, dataPlot);
 						
 						Display.getDefault().syncExec(new Runnable() {
 							
 							@Override
 							public void run() {
-								if (firstHold) data.clear();
+								if (firstHold) dataPlot.clear();
 								firstHold = false;
-								data.addTrace(l);
+								dataPlot.addTrace(l);
 								try {
-									String uniqueName = RegionUtils.getUniqueName("Click", map);
-									final IRegion re = map.createRegion(uniqueName, RegionType.POINT);
+									String uniqueName = RegionUtils.getUniqueName("Click", mapPlot);
+									final IRegion re = mapPlot.createRegion(uniqueName, RegionType.POINT);
 									re.setROI(new PointROI(x, y));
 									re.setAlpha(255);
 									re.setRegionColor(l.getTraceColor());
@@ -293,19 +379,19 @@ public class MapPlotManager {
 									re.addROIListener(new IROIListener.Stub() {
 										@Override
 										public void roiSelected(ROIEvent evt) {
-											Collection<ITrace> ts = data.getTraces();
+											Collection<ITrace> ts = dataPlot.getTraces();
 											for (ITrace t : ts) if (t instanceof ILineTrace) ((ILineTrace)t).setLineWidth(1);
 											l.setLineWidth(2);
 
 										}
 									});
 //									((AbstractSelectionRegion)re).setHighlighted(true);
-									map.addRegion(re);
+									mapPlot.addRegion(re);
 									re.setMobile(false);
 									re.setUserRegion(false);
 									re.setUserObject(MapPlotManager.this);
-									map.clearRegionTool();
-									data.repaint();
+									mapPlot.clearRegionTool();
+									dataPlot.repaint();
 								} catch (Exception e) {
 									logger.error("Error plotting line trace",e);
 								}
@@ -323,14 +409,25 @@ public class MapPlotManager {
 		
 	}
 	
+	private boolean plotsReady() {
+		IPlottingSystem<?> dataPlot = getDataPlot();
+		IPlottingSystem<?> mapPlot = getMapPlot();
+		return dataPlot != null && mapPlot != null;
+	}
+	
 
 	private void updateState() {
+		if (!plotsReady()) return;
+		
+		IPlottingSystem<?> dataPlot = getDataPlot();
+		IPlottingSystem<?> mapPlot = getMapPlot();
+		
 		List<PlottableMapObject> plottedObjects = fileManager.getPlottedObjects();
 		
 		if (plottedObjects.isEmpty()) {
 			layers.clear();
-			map.clear();
-			data.clear();
+			mapPlot.clear();
+			dataPlot.clear();
 		}
 		
 		Iterator<MapTrace> it = layers.iterator();
@@ -370,20 +467,20 @@ public class MapPlotManager {
 		
 		for (PlottableMapObject o : plottedObjects) {
 			if (o instanceof LiveStreamMapObject){
-				MapTrace t = new MapTrace(o, null);
+				MapTrace t = new MapTrace(o, null, mapPlot);
 				layers.addLast(t);
 			} else if (o instanceof VectorMapData) {
 				// Initialise a vector trace
-				IVectorTrace vectorTrace = createVectorTrace(o);
-				layers.push(new MapTrace(o, vectorTrace));
+				IVectorTrace vectorTrace = createVectorTrace(o,mapPlot);
+				layers.push(new MapTrace(o, vectorTrace, mapPlot));
 			} else if (o instanceof AssociatedImage){
-				MapTrace t = new MapTrace(o, null);
+				MapTrace t = new MapTrace(o, null, mapPlot);
 				layers.addLast(t);
 
 			}else {
 
-				IImageTrace t = createImageTrace(o);
-				layers.push(new MapTrace(o, t));
+				IImageTrace t = createImageTrace(o,mapPlot);
+				layers.push(new MapTrace(o, t, mapPlot));
 			}
 		}
 		
@@ -394,25 +491,25 @@ public class MapPlotManager {
 			t.rebuildTrace();
 		}
 		
-		plotLayers(layers, stale);
+		plotLayers(layers, stale, mapPlot);
 	}
 	
-	private void plotLayers(Deque<MapTrace> localLayers, List<MapTrace> stale){
+	private void plotLayers(Deque<MapTrace> localLayers, List<MapTrace> stale, IPlottingSystem<?> mapPlot){
 		
 		if (Display.getCurrent() == null) {
 			PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
 				
 				@Override
 				public void run() {
-					plotLayers(localLayers, stale);
+					plotLayers(localLayers, stale, mapPlot);
 				}
 			});
 			return;
 		}
 		
-		if (!map.is2D()) map.setPlotType(PlotType.IMAGE);
+		if (!mapPlot.is2D()) mapPlot.setPlotType(PlotType.IMAGE);
 		
-		map.clearTraces();
+		mapPlot.clearTraces();
 		
 		updatePlottedRange();
 		
@@ -437,24 +534,24 @@ public class MapPlotManager {
 
 						}
 					 }
-					map.addTrace(m.getTrace());
+					 mapPlot.addTrace(m.getTrace());
 				}
 				if (m.getMap() instanceof LiveStreamMapObject) {
 					if (m.getTrace() == null) {
-						m.trace = createLiveStreamTrace((LiveStreamMapObject) m.getMap());
-						map.addTrace(m.getTrace());
+						m.trace = createLiveStreamTrace((LiveStreamMapObject) m.getMap(), mapPlot);
+						mapPlot.addTrace(m.getTrace());
 					}
 					LiveStreamMapObject l = (LiveStreamMapObject)m.getMap();
 					l.addAxisListener(moveListener);
 				}
 			}
-			this.map.repaint();
+			mapPlot.repaint();
 		} catch (Exception e) {
 			logger.error("Error plotting mapped data", e);
 		}
 	}
 	
-	private IImageTrace createLiveStreamTrace(LiveStreamMapObject o) {
+	private IImageTrace createLiveStreamTrace(LiveStreamMapObject o, IPlottingSystem<?> mapPlot) {
 		
 		
 		if (o.getDynamicDataset() == null) {
@@ -465,7 +562,7 @@ public class MapPlotManager {
 			
 		if (dataset == null) return null;
 		
-		IImageTrace trace = map.createImageTrace(o.getPath());
+		IImageTrace trace = mapPlot.createImageTrace(o.getPath());
 		trace.setDynamicData(dataset);
 		trace.setGlobalRange(o.getRange());
 		trace.setAxes(o.getAxes(), false);
@@ -513,7 +610,7 @@ public class MapPlotManager {
 		return null;
 	}
 	
-	private IImageTrace createImageTrace(MapObject ob) {
+	private IImageTrace createImageTrace(MapObject ob, IPlottingSystem<?> mapPlot) {
 		
 		
 		IDataset map = null;
@@ -531,7 +628,7 @@ public class MapPlotManager {
 		if (ob.getRange() == null) return null;
 		IImageTrace t = null;
 		try {
-			t = MetadataPlotUtils.buildTrace(longName, map, this.map);
+			t = MetadataPlotUtils.buildTrace(longName, map, mapPlot);
 			t.setGlobalRange(sanizeRange(ob.getRange(), map.getShape()));
 		} catch (Exception e) {
 			logger.error("Error creating image trace", e);
@@ -540,7 +637,7 @@ public class MapPlotManager {
 		return t;
 	}
 	
-	private IVectorTrace createVectorTrace (MapObject ob) {
+	private IVectorTrace createVectorTrace (MapObject ob, IPlottingSystem<?> mapPlot) {
 
 		String longName = "";
 		IDataset map = null;
@@ -557,7 +654,7 @@ public class MapPlotManager {
 		
 		try {
 			// Create the vector trace, the long way round
-			vectorTrace = this.map.createVectorTrace(longName);
+			vectorTrace = mapPlot.createVectorTrace(longName);
 			// Get the axes
 			AxesMetadata axesMetadata = map.getFirstMetadata(AxesMetadata.class);
 			IDataset yAxis = DatasetUtils.sliceAndConvertLazyDataset(axesMetadata.getAxis(0)[0]).squeeze();
@@ -615,7 +712,7 @@ public class MapPlotManager {
 	}
 	
 	public void setTransparency(PlottableMapObject m) {
-		
+		if (!plotsReady()) return;
 		
 		Iterator<MapTrace> iterator = layers.iterator();
 
@@ -671,10 +768,12 @@ public class MapPlotManager {
 		private PlottableMapObject map;
 		private ITrace trace;
 		private HistoInfo histoInfo = null;
+		private IPlottingSystem<?> mapPlot;
 
-		public MapTrace(PlottableMapObject map, ITrace trace) {
+		public MapTrace(PlottableMapObject map, ITrace trace, IPlottingSystem<?> mapPlot) {
 			this.map = map;
 			this.trace = trace;
+			this.mapPlot = mapPlot;
 		}
 
 		public PlottableMapObject getMap() {
@@ -708,7 +807,7 @@ public class MapPlotManager {
 				}
 			}
 			
-			trace = createImageTrace(map);
+			trace = createImageTrace(map, mapPlot);
 			
 			if (locked && trace != null) {
 				histoInfo = new HistoInfo(min, max);
@@ -726,4 +825,36 @@ public class MapPlotManager {
 			}
 		}
 	}
+	
+	private static class MapClickEvent implements IMapClickEvent {
+		
+		private final ClickEvent clickEvent;
+		private final boolean isDoubleClick;
+		private final String filePath;
+		
+		public MapClickEvent(ClickEvent clickEvent, boolean isDoubleClick,
+				String filePath) {
+			this.clickEvent = clickEvent;
+			this.isDoubleClick = isDoubleClick;
+			this.filePath = filePath;
+		}
+
+		@Override
+		public ClickEvent getClickEvent() {
+			return clickEvent;
+		}
+
+		@Override
+		public boolean isDoubleClick() {
+			return isDoubleClick;
+		}
+
+		@Override
+		public String getFilePath() {
+			return filePath;
+		}
+		
+	}
+
+	public static final String EVENT_TOPIC_MAPVIEW_CLICK = "org/dawnsci/mapping/ui/mapview/click";
 }
