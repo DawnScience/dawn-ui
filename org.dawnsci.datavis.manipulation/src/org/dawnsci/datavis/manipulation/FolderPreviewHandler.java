@@ -11,17 +11,15 @@ package org.dawnsci.datavis.manipulation;
 
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
-import org.dawnsci.datavis.api.DataVisConstants;
 import org.dawnsci.datavis.api.IRecentPlaces;
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.dawnsci.plotting.api.PlottingEventConstants;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.swt.SWT;
@@ -92,7 +90,7 @@ public class FolderPreviewHandler extends AbstractHandler {
 						}
 						Map<String,String[]> props = new HashMap<>();
 			    		props.put("paths", selectedFileNames);
-			    		admin.sendEvent(new Event(DataVisConstants.FILE_OPEN_EVENT, props));
+			    		admin.sendEvent(new Event(PlottingEventConstants.FILE_OPEN_EVENT, props));
 					}
 				});
 			}

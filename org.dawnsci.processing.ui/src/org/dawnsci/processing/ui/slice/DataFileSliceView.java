@@ -25,6 +25,7 @@ import org.dawnsci.conversion.schemes.ProcessConversionScheme;
 import org.dawnsci.datavis.api.IFileOpeningController;
 import org.dawnsci.processing.ui.Activator;
 import org.dawnsci.processing.ui.IProcessDisplayHelper;
+import org.dawnsci.processing.ui.ProcessingEventConstants;
 import org.dawnsci.processing.ui.ProcessingOutputView;
 import org.dawnsci.processing.ui.ProcessingPerspective;
 import org.dawnsci.processing.ui.ServiceHolder;
@@ -53,6 +54,7 @@ import org.eclipse.dawnsci.analysis.dataset.slicer.SliceInformation;
 import org.eclipse.dawnsci.analysis.dataset.slicer.Slicer;
 import org.eclipse.dawnsci.analysis.dataset.slicer.SourceInformation;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
+import org.eclipse.dawnsci.plotting.api.PlottingEventConstants;
 import org.eclipse.dawnsci.plotting.api.image.IFileIconService;
 import org.eclipse.dawnsci.plotting.api.trace.MetadataPlotUtils;
 import org.eclipse.january.IMonitor;
@@ -112,7 +114,6 @@ import org.eclipse.ui.part.ResourceTransfer;
 import org.eclipse.ui.part.ViewPart;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
-import org.osgi.framework.ServiceListener;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
 import org.osgi.service.event.EventConstants;
@@ -165,7 +166,7 @@ public class DataFileSliceView extends ViewPart {
 					EventAdmin eventAdmin = ServiceHolder.getEventAdmin();
 					Map<String,IOperationInputData> props = new HashMap<>();
 					props.put("data", inputData);
-					eventAdmin.postEvent(new Event("org/dawnsci/events/processing/DATAUPDATE", props));
+					eventAdmin.postEvent(new Event(ProcessingEventConstants.DATA_UPDATE, props));
 					selectedFile = (String)((StructuredSelection)event.getSelection()).getFirstElement();
 					update(currentOperation);
 				}
@@ -206,7 +207,7 @@ public class DataFileSliceView extends ViewPart {
 				EventAdmin eventAdmin = ServiceHolder.getEventAdmin();
 				Map<String,IOperationInputData> props = new HashMap<>();
 				props.put("data", inputData);
-				eventAdmin.postEvent(new Event("org/dawnsci/events/processing/DATAUPDATE", props));
+				eventAdmin.postEvent(new Event(ProcessingEventConstants.DATA_UPDATE, props));
 				String ss = Slice.createString(csw.getCurrentSlice());
 				currentSliceLabel.setText("Current slice of data: [" +ss + "]");
 				currentSliceLabel.getParent().layout(true);
@@ -333,7 +334,7 @@ public class DataFileSliceView extends ViewPart {
 		dataVisAvailable = getFileController() != null;
 		
 		Dictionary<String, String> props = new Hashtable<>();
-		props.put(EventConstants.EVENT_TOPIC, "org/dawnsci/events/processing/PROCESSUPDATE");
+		props.put(EventConstants.EVENT_TOPIC, ProcessingEventConstants.PROCESS_UPDATE);
 		ctx.registerService(EventHandler.class, handler, props);
 		
 		//hook up delete key to remove from list
@@ -352,7 +353,7 @@ public class DataFileSliceView extends ViewPart {
 		});
 		
 		Dictionary<String, Object> prop = new Hashtable<>();
-		prop.put(EventConstants.EVENT_TOPIC, "org/dawnsci/events/file/OPEN");
+		prop.put(EventConstants.EVENT_TOPIC, PlottingEventConstants.FILE_OPEN_EVENT);
 		
 		ctx.registerService(EventHandler.class.getName(), new EventHandler() {
 			
@@ -568,7 +569,7 @@ public class DataFileSliceView extends ViewPart {
 				EventAdmin eventAdmin = ServiceHolder.getEventAdmin();
 				Map<String,IDataset> props = new HashMap<>();
 				props.put("data", null);
-				eventAdmin.postEvent(new Event("org/dawnsci/events/processing/INITIALUPDATE", props));
+				eventAdmin.postEvent(new Event(ProcessingEventConstants.INITIAL_UPDATE, props));
 				
 				job = null;
 				currentSliceLabel.setText("Current slice of data: [ - - - - -]");
@@ -622,7 +623,7 @@ public class DataFileSliceView extends ViewPart {
 			EventAdmin eventAdmin = ServiceHolder.getEventAdmin();
 			Map<String,IDataset> props = new HashMap<>();
 			props.put("data", null);
-			eventAdmin.postEvent(new Event("org/dawnsci/events/processing/INITIALUPDATE", props));
+			eventAdmin.postEvent(new Event(ProcessingEventConstants.INITIAL_UPDATE, props));
 		} else {
 			viewer.setSelection(new StructuredSelection(fileManager.getFilePaths().get(0)),true);
 		}
@@ -817,7 +818,7 @@ public class DataFileSliceView extends ViewPart {
 				EventAdmin eventAdmin = ServiceHolder.getEventAdmin();
 				Map<String,IDataset> props = new HashMap<>();
 				props.put("data", firstSlice.getSliceView().squeeze());
-				eventAdmin.postEvent(new Event("org/dawnsci/events/processing/INITIALUPDATE", props));
+				eventAdmin.postEvent(new Event(ProcessingEventConstants.INITIAL_UPDATE, props));
 				MetadataPlotUtils.plotDataWithMetadata(firstSlice, input);
 				
 				
@@ -869,11 +870,11 @@ public class DataFileSliceView extends ViewPart {
 				inputData = sliceVisitor.getOperationInputData();
 				Map<String,IOperationInputData> propsOID = new HashMap<>();
 				propsOID.put("data", inputData);
-				eventAdmin.postEvent(new Event("org/dawnsci/events/processing/DATAUPDATE", propsOID));
+				eventAdmin.postEvent(new Event(ProcessingEventConstants.DATA_UPDATE, propsOID));
 				logger.debug("Ran in: " +(System.currentTimeMillis()-start)/1000. + " s");
 				Map<String,OperationException> propsE = new HashMap<>();
 				propsE.put("error", null);
-				eventAdmin.postEvent(new Event("org/dawnsci/events/processing/ERROR", propsE));
+				eventAdmin.postEvent(new Event(ProcessingEventConstants.ERROR, propsE));
 
 				
 				
@@ -882,7 +883,7 @@ public class DataFileSliceView extends ViewPart {
 					EventAdmin eventAdmin = ServiceHolder.getEventAdmin();
 					Map<String,OperationException> props = new HashMap<>();
 					props.put("error", e);
-					eventAdmin.postEvent(new Event("org/dawnsci/events/processing/ERROR", props));
+					eventAdmin.postEvent(new Event(ProcessingEventConstants.ERROR, props));
 					return Status.CANCEL_STATUS;
 				} catch (Exception e) {
 					logger.error(e.getMessage(), e);
@@ -891,7 +892,7 @@ public class DataFileSliceView extends ViewPart {
 					EventAdmin eventAdmin = ServiceHolder.getEventAdmin();
 					Map<String,OperationException> props = new HashMap<>();
 					props.put("error", new OperationException(null, message));
-					eventAdmin.postEvent(new Event("org/dawnsci/events/processing/ERROR", props));
+					eventAdmin.postEvent(new Event(ProcessingEventConstants.ERROR, props));
 					return Status.CANCEL_STATUS;
 				} finally {
 					if (sliceVisitor != null) {
@@ -899,7 +900,7 @@ public class DataFileSliceView extends ViewPart {
 						inputData = sliceVisitor.getOperationInputData();
 						Map<String,IOperationInputData> propsOID = new HashMap<>();
 						propsOID.put("data", inputData);
-						eventAdmin.postEvent(new Event("org/dawnsci/events/processing/DATAUPDATE", propsOID));
+						eventAdmin.postEvent(new Event(ProcessingEventConstants.DATA_UPDATE, propsOID));
 
 					}
 					output.setEnabled(true);

@@ -13,6 +13,7 @@ import org.dawb.common.ui.util.DatasetNameUtils;
 import org.dawb.common.ui.util.EclipseUtils;
 import org.dawnsci.common.widgets.celleditor.TextCellEditorWithContentProposal;
 import org.dawnsci.plotting.roi.RegionCellEditor;
+import org.dawnsci.processing.ui.ProcessingEventConstants;
 import org.dawnsci.processing.ui.ServiceHolder;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -72,7 +73,7 @@ public class ModelFieldEditors {
 		BundleContext ctx = FrameworkUtil.getBundle(ModelFieldEditors.class).getBundleContext();
 		handler = new ModelFieldEditors().new DataReadyEventHandler();
 		Dictionary<String, String> props = new Hashtable<>();
-		props.put(EventConstants.EVENT_TOPIC, "org/dawnsci/events/processing/DATAUPDATE");
+		props.put(EventConstants.EVENT_TOPIC, ProcessingEventConstants.DATA_UPDATE);
 		ctx.registerService(EventHandler.class, handler, props);
 	}
 	

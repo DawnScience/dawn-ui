@@ -15,7 +15,6 @@ import javax.annotation.PreDestroy;
 import javax.inject.Inject;
 
 import org.apache.commons.io.filefilter.WildcardFileFilter;
-import org.dawnsci.datavis.api.DataVisConstants;
 import org.dawnsci.datavis.api.IRecentPlaces;
 import org.dawnsci.datavis.model.FileControllerStateEvent;
 import org.dawnsci.datavis.model.FileControllerStateEventListener;
@@ -31,6 +30,7 @@ import org.dawnsci.datavis.view.quickfile.QuickFileWidget;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.dawnsci.analysis.api.io.ILoaderService;
+import org.eclipse.dawnsci.plotting.api.PlottingEventConstants;
 import org.eclipse.e4.core.di.annotations.Optional;
 import org.eclipse.e4.ui.di.Focus;
 import org.eclipse.e4.ui.di.UIEventTopic;
@@ -522,7 +522,7 @@ public class LoadedFilePart {
 
 	@Inject
 	@Optional
-	private void subscribeFileOpenE3(@UIEventTopic(DataVisConstants.FILE_OPEN_EVENT) Event data, MPart part, EModelService modelService) {
+	private void subscribeFileOpenE3(@UIEventTopic(PlottingEventConstants.FILE_OPEN_EVENT) Event data, MPart part, EModelService modelService) {
 		if (part == null || !part.getElementId().equals(partId)) {
 			return;
 		}

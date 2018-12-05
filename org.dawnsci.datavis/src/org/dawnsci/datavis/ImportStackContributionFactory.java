@@ -8,13 +8,12 @@ import java.util.Map;
 
 import org.dawnsci.datavis.api.DataVisConstants;
 import org.dawnsci.datavis.api.IRecentPlaces;
-import org.dawnsci.datavis.model.FileController;
 import org.dawnsci.datavis.model.FileJoining;
-import org.dawnsci.datavis.model.IFileController;
 import org.eclipse.core.expressions.EvaluationResult;
 import org.eclipse.core.expressions.Expression;
 import org.eclipse.core.expressions.IEvaluationContext;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.dawnsci.plotting.api.PlottingEventConstants;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
@@ -117,7 +116,7 @@ public class ImportStackContributionFactory extends ExtensionContributionFactory
     		
     		Map<String,String[]> props = new HashMap<>();
     		props.put("paths", new String[] {joined});
-    		admin.sendEvent(new Event(DataVisConstants.FILE_OPEN_EVENT, props));
+    		admin.sendEvent(new Event(PlottingEventConstants.FILE_OPEN_EVENT, props));
     		
 		}
 	}
@@ -147,7 +146,7 @@ public class ImportStackContributionFactory extends ExtensionContributionFactory
 	    		
 	    		Map<String,String[]> props = new HashMap<>();
 	    		props.put("paths", new String[] {joined});
-	    		admin.sendEvent(new Event(DataVisConstants.FILE_OPEN_EVENT, props));
+	    		admin.sendEvent(new Event(PlottingEventConstants.FILE_OPEN_EVENT, props));
 			}
 		
 	}

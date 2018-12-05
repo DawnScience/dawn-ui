@@ -5,9 +5,9 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.dawnsci.datavis.api.DataVisConstants;
 import org.dawnsci.datavis.api.IRecentPlaces;
 import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.dawnsci.plotting.api.PlottingEventConstants;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
@@ -119,7 +119,7 @@ public class RecentFoldersContributionFactory extends ExtensionContributionFacto
 
     		Map<String,String[]> props = new HashMap<>();
     		props.put("paths", fileNames);
-    		admin.sendEvent(new Event(DataVisConstants.FILE_OPEN_EVENT, props));
+    		admin.sendEvent(new Event(PlottingEventConstants.FILE_OPEN_EVENT, props));
     		
 		}
 		

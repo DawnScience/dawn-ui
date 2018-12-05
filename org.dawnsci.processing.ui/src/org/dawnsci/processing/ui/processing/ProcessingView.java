@@ -19,6 +19,7 @@ import org.dawb.common.ui.util.GridUtils;
 import org.dawb.common.util.list.ListUtils;
 import org.dawnsci.common.widgets.dialog.FileSelectionDialog;
 import org.dawnsci.processing.ui.Activator;
+import org.dawnsci.processing.ui.ProcessingEventConstants;
 import org.dawnsci.processing.ui.preference.ProcessingConstants;
 import org.dawnsci.processing.ui.slice.OperationInformerImpl;
 import org.eclipse.dawnsci.analysis.api.persistence.IPersistenceService;
@@ -165,7 +166,7 @@ public class ProcessingView extends ViewPart {
 		};
 		
 		Dictionary<String, String> props = new Hashtable<>();
-		props.put(EventConstants.EVENT_TOPIC, "org/dawnsci/events/processing/ERROR");
+		props.put(EventConstants.EVENT_TOPIC, ProcessingEventConstants.ERROR);
 		ctx.registerService(EventHandler.class, ErrorHandler, props);
 		
 		
@@ -179,7 +180,7 @@ public class ProcessingView extends ViewPart {
 		};
 		
 		props = new Hashtable<>();
-		props.put(EventConstants.EVENT_TOPIC, "org/dawnsci/events/processing/INITIALUPDATE");
+		props.put(EventConstants.EVENT_TOPIC, ProcessingEventConstants.INITIAL_UPDATE);
 		ctx.registerService(EventHandler.class, initialHandler, props);
 	}
 	
