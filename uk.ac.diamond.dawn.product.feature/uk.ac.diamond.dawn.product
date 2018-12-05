@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?pde version="3.5"?>
 
-<product name="DAWN Science" uid="uk.ac.diamond.dawn.product" id="org.dawnsci.product.plugin.DAWN" application="org.eclipse.ui.ide.workbench" version="2.11.0.qualifier" useFeatures="true" includeLaunchers="true">
+<product name="DAWN Science" uid="uk.ac.diamond.dawn.product" id="org.dawnsci.product.plugin.DAWN" application="org.eclipse.ui.ide.workbench" version="2.12.0.qualifier" useFeatures="true" includeLaunchers="true">
 
    <aboutInfo>
       <image path="/org.dawnsci.product.plugin/icons/Dawn-210x238-about.png"/>
@@ -9,7 +9,7 @@
          Data Analysis WorkbeNch 
 Copyright, 2010 - 2018, Diamond Light Source
 
-Version 2.11.0
+Version 2.12.0
       </text>
    </aboutInfo>
 
@@ -61,8 +61,6 @@ openFile
             winExtraLargeHigh="/org.dawnsci.product.plugin/icons/256x256_32.bmp"/>
       </win>
    </launcher>
-
-   <intro introId="org.dawnsci.webintro"/>
 
    <vm>
    </vm>
