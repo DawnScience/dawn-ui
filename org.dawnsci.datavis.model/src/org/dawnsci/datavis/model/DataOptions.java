@@ -254,4 +254,9 @@ public class DataOptions implements IDataObject, IDataPackage {
 	public String getLabel() {
 		return label;
 	}
+	
+	@Override
+	public DataOptions clone() {
+		return new DataOptions(this);
+	}
 }

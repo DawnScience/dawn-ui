@@ -209,24 +209,22 @@ public class NDimensions {
 		for (int i = 0 ; i < shape.length; i++) {
 			boolean containsEnd = false;
 			boolean isSingle = false;
+			boolean isSmaller = false;
 			
-	
-			if (dimensions[i].getSlice() != null && dimensions[i].getSize() != 1) {
+			if (dimensions[i].getSlice() != null) {
 				int size = dimensions[i].getSize();
 				Slice slice = dimensions[i].getSlice();
 
-				if (size == slice.getStop()) {
-					containsEnd = true;
-				}
-				
+				containsEnd = size == slice.getStop();
+				isSmaller = size > shape[i];
 				Integer start = slice.getStart();
 				
 				if (start == null) start = 0;
 				
-				if (size-1 == start) {
-					isSingle = true;
-				}
+				isSingle =size-1 == start;
+					
 			}
+			
 			dimensions[i].setSize(shape[i]);
 			if (containsEnd) {
 				Slice slice = dimensions[i].getSlice();
@@ -236,6 +234,12 @@ public class NDimensions {
 			if (isSingle) {
 				Slice slice = dimensions[i].getSlice();
 				slice.setStart(shape[i]-1);
+			}
+			
+			if (isSmaller && !(containsEnd && isSingle)) {
+				Slice slice = dimensions[i].getSlice();
+				slice.setStart(0);
+				slice.setStop(shape[i]);
 			}
 			
 			update(false);
