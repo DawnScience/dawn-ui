@@ -7,6 +7,7 @@ import java.util.Map;
 
 import org.dawb.common.ui.util.EclipseUtils;
 import org.dawnsci.processing.ui.Activator;
+import org.dawnsci.processing.ui.ProcessingEventConstants;
 import org.dawnsci.processing.ui.ServiceHolder;
 import org.dawnsci.processing.ui.api.IOperationSetupWizardPage;
 import org.dawnsci.processing.ui.processing.OperationDescriptor;
@@ -64,7 +65,7 @@ public class OperationModelView extends ViewPart implements ISelectionListener {
 				if (dialog.open() == Dialog.OK) {
 					EventAdmin eventAdmin = ServiceHolder.getEventAdmin();
 					Map<String,IOperationInputData> props = new HashMap<>();
-					eventAdmin.postEvent(new Event("org/dawnsci/events/processing/PROCESSUPDATE", props));
+					eventAdmin.postEvent(new Event(ProcessingEventConstants.PROCESS_UPDATE, props));
 					modelEditor.refresh();
 				}
 			}
@@ -91,7 +92,7 @@ public class OperationModelView extends ViewPart implements ISelectionListener {
 		};
 		
 		Dictionary<String, String> props = new Hashtable<>();
-		props.put(EventConstants.EVENT_TOPIC, "org/dawnsci/events/processing/DATAUPDATE");
+		props.put(EventConstants.EVENT_TOPIC, ProcessingEventConstants.DATA_UPDATE);
 		ctx.registerService(EventHandler.class, handler, props);
 	}
 

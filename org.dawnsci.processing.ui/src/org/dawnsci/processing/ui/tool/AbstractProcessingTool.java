@@ -45,6 +45,7 @@ import org.eclipse.dawnsci.analysis.dataset.slicer.SliceInformation;
 import org.eclipse.dawnsci.analysis.dataset.slicer.SourceInformation;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.PlotType;
+import org.eclipse.dawnsci.plotting.api.PlottingEventConstants;
 import org.eclipse.dawnsci.plotting.api.PlottingFactory;
 import org.eclipse.dawnsci.plotting.api.tool.AbstractToolPage;
 import org.eclipse.dawnsci.plotting.api.tool.IToolPageSystem;
@@ -489,7 +490,7 @@ public abstract class AbstractProcessingTool extends AbstractToolPage {
 						Map<String,String> props = new HashMap<>();
 						props.put("path", path);
 						EventAdmin eventAdmin = ServiceHolder.getEventAdmin();
-						eventAdmin.postEvent(new Event("org/dawnsci/events/file/OPEN", props));
+						eventAdmin.postEvent(new Event(PlottingEventConstants.FILE_OPEN_EVENT, props));
 						parentMeta.toString();
 					} catch (final Exception e) {
 						

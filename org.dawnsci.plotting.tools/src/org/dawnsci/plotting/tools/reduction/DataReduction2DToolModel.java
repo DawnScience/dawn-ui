@@ -21,6 +21,7 @@ import org.eclipse.dawnsci.hdf5.nexus.NexusFileHDF5;
 import org.eclipse.dawnsci.nexus.NexusConstants;
 import org.eclipse.dawnsci.nexus.NexusFile;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
+import org.eclipse.dawnsci.plotting.api.PlottingEventConstants;
 import org.eclipse.dawnsci.plotting.api.trace.IImageTrace;
 import org.eclipse.dawnsci.plotting.api.trace.MetadataPlotUtils;
 import org.eclipse.january.DatasetException;
@@ -203,7 +204,7 @@ class DataReduction2DToolModel extends DataReduction2DToolObservableModel {
 		Map<String,String> props = new HashMap<>();
 		props.put("path", newFilePath);
 		EventAdmin eventAdmin = ServiceLoader.getEventAdmin();
-		eventAdmin.postEvent(new Event("org/dawnsci/events/file/OPEN", props));
+		eventAdmin.postEvent(new Event(PlottingEventConstants.FILE_OPEN_EVENT, props));
 	}
 	
 	private static String showSaveDirectory(File nexusFile, Shell shell) {

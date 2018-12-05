@@ -25,6 +25,7 @@ import org.eclipse.dawnsci.analysis.api.conversion.IConversionContext;
 import org.eclipse.dawnsci.analysis.api.conversion.IConversionService;
 import org.eclipse.dawnsci.analysis.api.conversion.IConversionVisitor;
 import org.eclipse.dawnsci.hdf5.HDF5Utils;
+import org.eclipse.dawnsci.plotting.api.PlottingEventConstants;
 import org.eclipse.dawnsci.slicing.api.system.DimsData;
 import org.eclipse.dawnsci.slicing.api.system.DimsDataList;
 import org.eclipse.january.dataset.ILazyDataset;
@@ -138,7 +139,7 @@ public class DataReductionWizard extends Wizard implements IExportWizard {
 							
 							Map<String,String> props = new HashMap<>();
 							props.put("path", context.getOutputPath());
-							eventAdmin.postEvent(new Event("org/dawnsci/events/file/OPEN", props));
+							eventAdmin.postEvent(new Event(PlottingEventConstants.FILE_OPEN_EVENT, props));
 							break;
 						default:
 							break;
