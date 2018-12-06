@@ -3,15 +3,15 @@ package org.dawnsci.january.model;
 import org.eclipse.january.dataset.Slice;
 
 public class Dimension {
-	
+
 	private int dimension;
 	private String description = "";
 	private String[] axisOptions;
-	private String axis;
+	private String axis = NDimensions.INDICES;
 	private int size = -1;
 	private Slice slice;
-	
-	
+
+
 	public Dimension(int dimension, int size) {
 		this.dimension = dimension;
 		this.size = size;
@@ -30,7 +30,7 @@ public class Dimension {
 	public Slice getSlice() {
 		return slice;
 	}
-	
+
 	public void setSlice(Slice slice) {
 		this.slice = slice;
 	}
@@ -44,16 +44,16 @@ public class Dimension {
 		if (description == null) description = "";
 		this.description = description;
 	}
-	
+
 	public String getDimensionWithSize() {
 		if (size < 0) return Integer.toString(dimension);
 		return Integer.toString(dimension) + " [" + Integer.toString(size) + "]";
 	}
-	
+
 	public int getSize() {
 		return size;
 	}
-	
+
 	public void setSize(int size) {
 		this.size = size;
 	}
@@ -62,14 +62,18 @@ public class Dimension {
 	public String getAxis() {
 		return axis;
 	}
-	
+
 	public int getDimension() {
 		return dimension;
 	}
 
 
 	public void setAxis(String axis) {
-		if (axis != null && !axis.isEmpty()) this.axis = axis;
+		if (axis != null && !axis.isEmpty()) {
+			this.axis = axis;
+		} else {
+			this.axis = NDimensions.INDICES;
+		}
 	}
 
 
@@ -79,7 +83,7 @@ public class Dimension {
 
 
 	public void setAxisOptions(String[] axisOptions) {
-		
+
 		this.axisOptions = axisOptions;
 	}
 

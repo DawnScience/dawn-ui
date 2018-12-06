@@ -46,7 +46,7 @@ import uk.ac.diamond.scisoft.analysis.io.NexusTreeUtils;
 public class LoadedFile implements IDataObject, IDataFilePackage {
 
 	private static final Logger logger = LoggerFactory.getLogger(LoadedFile.class);
-	
+
 	protected AtomicReference<IDataHolder> dataHolder;
 	protected Map<String, DataOptions> dataOptions;
 	protected Map<String, DataOptions> virtualDataOptions;
@@ -77,9 +77,9 @@ public class LoadedFile implements IDataObject, IDataFilePackage {
 				logger.error("Could not get unique nodes",e);
 				this.signals = new HashSet<>();
 			}
-			
+
 		}
-		
+
 		if (names == null) names = dataHolder.getNames();
 		for (String n : names) {
 			ILazyDataset lazyDataset = dataHolder.getLazyDataset(n);
@@ -111,63 +111,63 @@ public class LoadedFile implements IDataObject, IDataFilePackage {
 	}
 
 	public List<DataOptions> getDataOptions(boolean signalsOnly) {
-		
+
 		List<DataOptions> out = Collections.emptyList();
-		
+
 		if (signalsOnly) {
 			if (signals.isEmpty()) {
 				return out;
 			}
-			
+
 			out = signals.stream().filter(Objects::nonNull).map(s -> dataOptions.get(s)).filter(Objects::nonNull).collect(Collectors.toList());
-			
+
 		} else {
 			out = new ArrayList<>(dataOptions.values());
 		}
-		
+
 		out.addAll(virtualDataOptions.values());
-		
+
 		return out;
 	}
 
 	public List<DataOptions> getSelectedDataOptions() {
 		List<DataOptions> list = dataOptions.values().stream()
-		.filter(dOp -> dOp.isSelected())
-		.collect(Collectors.toList());
+				.filter(dOp -> dOp.isSelected())
+				.collect(Collectors.toList());
 		return list;
 	}
-	
+
 	public DataOptions getDataOption(String name) {
 		return dataOptions.get(name);
 	}
-	
+
 	@Override
 	public String getName() {
 		File f = new File(dataHolder.get().getFilePath());
 		return f.getName();
 	}
-	
+
 	public String getParent() {
 		File f = new File(dataHolder.get().getFilePath());
 		return f.getParent();
 	}
-	
+
 	public String getFilePath() {
 		return dataHolder.get().getFilePath();
 	}
-	
+
 	public ILazyDataset getLazyDataset(String name){
 		return dataHolder.get().getLazyDataset(name);
 	}
-	
+
 	public Tree getTree() {
 		return dataHolder.get().getTree();
 	}
-	
+
 	public Map<String, int[]> getDataShapes(){
-		
+
 		IDataHolder dh = dataHolder.get();
-		
+
 		//use metadata if possible
 		if (dh.getMetadata() != null && dh.getMetadata().getDataShapes() != null) {
 			Map<String, int[]> ds = dataHolder.get().getMetadata().getDataShapes();
@@ -178,7 +178,7 @@ public class LoadedFile implements IDataObject, IDataFilePackage {
 					if (lazyDataset != null) ds.put(s, lazyDataset.getShape());
 				}
 			}
-			
+
 			return ds;
 		} else {
 			String[] ds = dataHolder.get().getNames();
@@ -192,9 +192,9 @@ public class LoadedFile implements IDataObject, IDataFilePackage {
 
 			return dsmap;
 		}
-		
+
 	}
-	
+
 	public boolean isSelected() {
 		return selected;
 	}
@@ -202,17 +202,17 @@ public class LoadedFile implements IDataObject, IDataFilePackage {
 	public void setSelected(boolean selected) {
 		this.selected = selected;
 	}
-	
+
 	public List<DataOptions> getChecked() {
-		
+
 		List<DataOptions> checked = new ArrayList<>();
-		
+
 		for (DataOptions op : dataOptions.values()) {
 			if (op.isSelected()) {
 				checked.add(op);
 			}
 		}
-		
+
 		return checked;
 	}
 
@@ -220,21 +220,21 @@ public class LoadedFile implements IDataObject, IDataFilePackage {
 	public IDataPackage[] getDataPackages() {
 		return dataOptions.values().stream().toArray(size ->new IDataPackage[size]);
 	}
-	
+
 	public Map<DataNode,String> getUniqueDataNodes(GroupNode node) {
 		Set<DataNode> nodes = new HashSet<>();
-		
+
 		IFindInTree tree = new IFindInTree() {
-			
+
 			@Override
 			public boolean found(NodeLink node) {
 				Node d = node.getDestination();
 				Node s = node.getSource();
-				
+
 				boolean nxData = NexusTreeUtils.isNXClass(s, NexusConstants.DATA);
-				
+
 				if (d != null && d instanceof DataNode) {
-					
+
 					if (nxData || !nodes.contains(d)) {
 						nodes.add((DataNode)d);
 						return true;
@@ -243,19 +243,19 @@ public class LoadedFile implements IDataObject, IDataFilePackage {
 				return false;
 			}
 		};
-		
+
 		Map<String, NodeLink> results = TreeUtils.treeBreadthFirstSearch(node, tree, false, true, null);
-		
+
 		Map<DataNode, String> out = new LinkedHashMap<DataNode, String>();
-		
+
 		for (Entry<String, NodeLink> e: results.entrySet()) {
 			Node d = e.getValue().getDestination();
 			if (d instanceof DataNode) {
 				out.put((DataNode)d, e.getKey());
 			}
-			
+
 			Node s = e.getValue().getSource();
-			
+
 			if (NexusTreeUtils.isNXClass(s, NexusConstants.DATA)) {
 				String name = NexusTreeUtils.getFirstString(s.getAttribute(NexusConstants.DATA_SIGNAL));
 				String key = e.getKey();
@@ -276,10 +276,10 @@ public class LoadedFile implements IDataObject, IDataFilePackage {
 				}
 			}
 		}
-		
+
 		return out;
 	}
-	
+
 	public String getLabel() {
 		return label;
 	}
@@ -287,11 +287,11 @@ public class LoadedFile implements IDataObject, IDataFilePackage {
 	public void setLabel(String label) {
 		this.label = label;
 	}
-	
+
 	public String getLabelName() {
 		return labelName;
 	}
-	
+
 	public Collection<String> getLabelOptions() {
 		if (possibleLabels.isEmpty()) {
 			try {
@@ -321,7 +321,7 @@ public class LoadedFile implements IDataObject, IDataFilePackage {
 	public Dataset getLabelValue(String labelName) {
 		if (possibleLabels.containsKey(labelName)) {
 			ILazyDataset l = possibleLabels.get(labelName);
-			
+
 			try {
 				Dataset slice = DatasetUtils.sliceAndConvertLazyDataset(l);
 				return slice.squeeze();
@@ -332,7 +332,7 @@ public class LoadedFile implements IDataObject, IDataFilePackage {
 			try {
 				Serializable metaValue = dataHolder.get().getMetadata().getMetaValue(labelName);
 				return metaValue == null ? null : DatasetFactory.createFromObject(metaValue.toString());
-				
+
 			} catch (MetadataException e) {
 				return null;
 			}
@@ -351,13 +351,12 @@ public class LoadedFile implements IDataObject, IDataFilePackage {
 	public void setOnlySignals(boolean onlySignals) {
 		this.onlySignals = onlySignals;
 	}
-	
-	public void buildView(DataOptions op) {
-		DataOptionsSlice v = new DataOptionsSlice(op, op.getPlottableObject().getNDimensions().buildSliceND());
-		virtualDataOptions.put(v.getName(), v);
-	}
-	
-	public void removeView(String name) {
+
+	public void removeVirtualOption(String name) {
 		virtualDataOptions.remove(name);
+	}
+
+	public void addVirtualOption(DataOptions option) {
+		virtualDataOptions.put(option.getName(), option);
 	}
 }

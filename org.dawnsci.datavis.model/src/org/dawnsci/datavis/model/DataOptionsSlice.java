@@ -4,9 +4,9 @@ import org.eclipse.january.dataset.ILazyDataset;
 import org.eclipse.january.dataset.SliceND;
 
 public class DataOptionsSlice extends DataOptions {
-	
+
 	private SliceND slice;
-	
+
 	public DataOptionsSlice(DataOptions option, SliceND slice) {
 		super(option);
 		this.setSelected(false);
@@ -18,12 +18,12 @@ public class DataOptionsSlice extends DataOptions {
 	public ILazyDataset getLazyDataset() {
 		return super.getLazyDataset().getSliceView(this.slice);
 	}
-	
+
 	@Override
 	public String getName() {
 		return super.getName() + "[" +slice.toString() + "]";
 	}
-	
+
 	@Override
 	public DataOptions clone() {
 		return new DataOptionsSlice(this, this.slice);
