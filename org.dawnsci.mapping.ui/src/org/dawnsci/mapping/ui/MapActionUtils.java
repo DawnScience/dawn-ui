@@ -10,6 +10,7 @@ import org.dawnsci.datavis.api.IFileOpeningController;
 import org.dawnsci.mapping.ui.api.IMapFileController;
 import org.dawnsci.mapping.ui.datamodel.AbstractMapData;
 import org.dawnsci.mapping.ui.datamodel.AssociatedImage;
+import org.dawnsci.mapping.ui.datamodel.IMapPlotController;
 import org.dawnsci.mapping.ui.datamodel.MappedDataArea;
 import org.dawnsci.mapping.ui.datamodel.MappedDataBlock;
 import org.dawnsci.mapping.ui.datamodel.MappedDataFile;
@@ -128,7 +129,7 @@ public class MapActionUtils {
 		return action;
 	}
 	
-	public static IAction getMapPropertiesAction(final AbstractMapData map, final MapPlotManager manager, final MappedDataArea area) {
+	public static IAction getMapPropertiesAction(final AbstractMapData map, final IMapPlotController manager, final MappedDataArea area) {
 		return new Action("Properties...") {
 			@Override
 			public void run() {
@@ -222,7 +223,7 @@ public class MapActionUtils {
 		
 	}
 	
-	public static IAction getUnPlotAllAction(final MapPlotManager manager, final TreeViewer viewer, IMapFileController controller) {
+	public static IAction getUnPlotAllAction(final IMapPlotController manager, final TreeViewer viewer, IMapFileController controller) {
 		return new Action("Clear plot") {
 			@Override
 			public void run() {

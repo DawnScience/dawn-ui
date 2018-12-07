@@ -2,6 +2,7 @@ package org.dawnsci.mapping.ui;
 
 import org.dawnsci.mapping.ui.api.IMapFileController;
 import org.dawnsci.mapping.ui.datamodel.AssociatedImage;
+import org.dawnsci.mapping.ui.datamodel.IMapPlotController;
 import org.dawnsci.mapping.ui.dialog.RectangleRegistrationDialog;
 import org.eclipse.january.dataset.IDataset;
 import org.eclipse.january.dataset.RGBDataset;
@@ -14,9 +15,9 @@ import org.osgi.framework.FrameworkUtil;
 public class RegistrationHelperImpl implements IRegistrationHelper {
 
 	
-	private MapPlotManager plotManager;
+	private IMapPlotController plotManager;
 
-	public RegistrationHelperImpl(MapPlotManager manager) {
+	public RegistrationHelperImpl(IMapPlotController manager) {
 		this.plotManager = manager;
 	}
 	

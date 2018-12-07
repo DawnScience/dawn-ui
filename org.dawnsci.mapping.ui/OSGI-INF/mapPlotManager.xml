@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" activate="init" name="org.dawnsci.mapping.ui">
+   <implementation class="org.dawnsci.mapping.ui.MapPlotManager"/>
+   <service>
+      <provide interface="org.dawnsci.mapping.ui.datamodel.IMapPlotController"/>
+   </service>
+   <reference bind="setMapFileController" cardinality="1..1" interface="org.dawnsci.mapping.ui.api.IMapFileController" name="IMapFileController" policy="static"/>
+   <reference bind="setPlotService" cardinality="1..1" interface="org.eclipse.dawnsci.plotting.api.IPlottingService" name="IPlottingService" policy="static"/>
+   <reference bind="setEventAdmin" cardinality="1..1" interface="org.osgi.service.event.EventAdmin" name="EventAdmin" policy="static"/>
+</scr:component>

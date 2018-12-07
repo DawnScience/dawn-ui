@@ -26,12 +26,7 @@ public class MapFileCellLabelProvider extends StyledCellLabelProvider {
 	private Font italicFont = null;
 	private Font initialFont = null;
 	
-	private MapPlotManager manager;
 	
-	public MapFileCellLabelProvider(MapPlotManager manager) {
-		this.manager = manager;
-	}
-
 	@Override
     public void update(ViewerCell cell) {
 
