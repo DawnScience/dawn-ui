@@ -291,7 +291,7 @@ public class PlotActionsManagerImpl extends PlottingActionBarManager {
 			// do not add a submenu for all
 			if (!c.equals("All")) {
 				MenuAction subMenu = new MenuAction(c);
-				Collection<String> colours = pservice.getColoursByCategory(c);
+				Collection<String> colours = pservice.getColorsByCategory(c);
 				for (final String colour : colours) {
 					final Action action = new Action(colour, IAction.AS_CHECK_BOX) {
 						public void run() {

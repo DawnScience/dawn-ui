@@ -148,7 +148,7 @@ public class PaletteService extends AbstractServiceFactory implements IPaletteSe
 	}
 
 	@Override
-	public List<String> getColoursByCategory(String sCategory) {
+	public List<String> getColorsByCategory(String sCategory) {
 		List<String> colours = new ArrayList<String>();
 		List<ColourSchemeContribution> contributions = extensionManager.getColourSchemeContributions();
 		for (ColourSchemeContribution contrib : contributions) {
@@ -164,7 +164,7 @@ public class PaletteService extends AbstractServiceFactory implements IPaletteSe
 	}
 
 	@Override
-	public String getColourCategory(String colour) {
+	public String getColorCategory(String colour) {
 		ColourSchemeContribution colourSchemeContrib = extensionManager.getColourSchemeContribution(colour);
 		ColourCategoryContribution categoryContrib = extensionManager.getColourCategoryFromID(colourSchemeContrib.getCategory());
 		return categoryContrib.getName();
@@ -180,5 +180,19 @@ public class PaletteService extends AbstractServiceFactory implements IPaletteSe
 			colourCategoryNames.add(ccc.getName());
 		}
 		return colourCategoryNames;
+	}
+
+	@Override
+	public String getDefaultColorScheme() {
+		return Activator.getPlottingPreferenceStore().getString(PlottingConstants.COLOUR_SCHEME);
+	}
+
+	@Override
+	public void setDefaultColorScheme(String color) {
+		if (getColorSchemes().contains(color)) {
+			Activator.getPlottingPreferenceStore().setValue(PlottingConstants.COLOUR_SCHEME, color);
+		} else {
+			throw new IllegalArgumentException("Default color scheme must match one of the names returned by getColorSchemes");
+		}
 	}
 }

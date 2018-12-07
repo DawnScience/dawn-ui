@@ -4,8 +4,11 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
+import org.dawb.common.ui.menu.CheckableActionGroup;
 import org.dawb.common.ui.menu.MenuAction;
 import org.dawnsci.jzy3d.hidpi.CanvasNewtScaledSWT;
 import org.dawnsci.jzy3d.hidpi.SWTScaledChartComponentFactory;
@@ -16,6 +19,7 @@ import org.eclipse.dawnsci.plotting.api.ActionType;
 import org.eclipse.dawnsci.plotting.api.IPlotActionSystem;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystemViewer;
 import org.eclipse.dawnsci.plotting.api.ManagerType;
+import org.eclipse.dawnsci.plotting.api.histogram.IPaletteService;
 import org.eclipse.dawnsci.plotting.api.preferences.BasePlottingConstants;
 import org.eclipse.dawnsci.plotting.api.tool.IToolPage.ToolPageRole;
 import org.eclipse.dawnsci.plotting.api.trace.IPaletteListener;
@@ -27,6 +31,7 @@ import org.eclipse.dawnsci.plotting.api.trace.MetadataPlotUtils;
 import org.eclipse.dawnsci.plotting.api.trace.PaletteEvent;
 import org.eclipse.january.dataset.IDataset;
 import org.eclipse.jface.action.Action;
+import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.swt.SWT;
@@ -148,6 +153,7 @@ public class JZY3DPlotViewer extends IPlottingSystemViewer.Stub<Composite> {
 		chart.render();
 		
 		createToolbar();
+		createMenu();
 	}
 	
 	private Texture3D getVolume() {
@@ -160,6 +166,47 @@ public class JZY3DPlotViewer extends IPlottingSystemViewer.Stub<Composite> {
 		}
 		
 		return null;
+	}
+	
+	private void createMenu() {
+		final IPaletteService pservice = Activator.getService(IPaletteService.class);
+		final Collection<String> names = pservice.getColorSchemes();
+
+		String schemeName = pservice.getDefaultColorScheme();
+
+		MenuAction lutCombo = new MenuAction("Color");
+		lutCombo.setImageDescriptor(Activator.getImageDescriptor("icons/color_wheel.png"));
+
+		final Map<String, IAction> paletteActions = new HashMap<String, IAction>(names.size());
+		CheckableActionGroup group      = new CheckableActionGroup();
+		
+		Collection<String> categoryNames = pservice.getColorCategories();
+		for (String c : categoryNames) {
+			if (!c.equals("All")) {
+				MenuAction subMenu = new MenuAction(c);
+				Collection<String> colours = pservice.getColorsByCategory(c);
+				for (final String colour : colours) {
+					final Action action = new Action(colour, IAction.AS_CHECK_BOX) {
+						public void run() {
+							try {
+								pservice.setDefaultColorScheme(getText());
+							} catch (Exception ne) {
+								logger.error("Cannot create palette data!", ne);
+							}
+						}
+					};
+					action.setId(colour);
+					subMenu.add(action);
+					group.add(action);
+					action.setChecked(colour.equals(schemeName));
+					paletteActions.put(colour, action);
+				}
+				lutCombo.add(subMenu);
+			}
+		}
+		IPlotActionSystem plotActionSystem = system.getPlotActionSystem();
+		plotActionSystem.registerGroup(ACTION_ID, ManagerType.MENUBAR);
+		plotActionSystem.registerAction(ACTION_ID, lutCombo, ActionType.JZY3D_COLOR, ManagerType.MENUBAR);
 	}
 	
 	private void createToolbar() {

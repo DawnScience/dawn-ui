@@ -176,7 +176,7 @@ public class HistogramToolPage2 extends AbstractToolPage implements IToolPage {
 			@Override
 			public void widgetSelected(SelectionEvent event) {
 				String category = categoryViewer.getElementAt(categoryViewer.getCombo().getSelectionIndex()).toString();
-				List<String> colours = getPaletteService().getColoursByCategory(category);
+				List<String> colours = getPaletteService().getColorsByCategory(category);
 				colourMapViewer.setInput(colours.toArray());
 				colourMapViewer.setSelection(new StructuredSelection(colours.get(0)), true);
 				for(String desc : getCategoryDescriptions()) {
@@ -485,10 +485,10 @@ public class HistogramToolPage2 extends AbstractToolPage implements IToolPage {
 			return;
 		if (schemeName == null)
 			return;
-		String category = getPaletteService().getColourCategory(schemeName);
+		String category = getPaletteService().getColorCategory(schemeName);
 		categoryViewer.setSelection(new StructuredSelection(category), true);
 
-		List<String> colours = getPaletteService().getColoursByCategory(category);
+		List<String> colours = getPaletteService().getColorsByCategory(category);
 		colourMapViewer.setInput(colours.toArray());
 		colourMapViewer.setSelection(new StructuredSelection(schemeName), true);
 	}
@@ -539,7 +539,7 @@ public class HistogramToolPage2 extends AbstractToolPage implements IToolPage {
 			categoryIdx = 0;
 		String category = categoryViewer.getCombo().getItem(categoryIdx);
 
-		List<String> colours = getPaletteService().getColoursByCategory(category);
+		List<String> colours = getPaletteService().getColorsByCategory(category);
 		colourMapViewer.setInput(colours.toArray());
 		setColourScheme(it);
 		if (lockAction != null && it != null) lockAction.setChecked(!it.isRescaleHistogram());

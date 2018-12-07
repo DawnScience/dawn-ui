@@ -5,6 +5,7 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
 
 public class Activator extends AbstractUIPlugin implements BundleActivator {
 	
@@ -13,6 +14,7 @@ public class Activator extends AbstractUIPlugin implements BundleActivator {
 
 	// The shared instance
 	private static Activator plugin;
+	private static BundleContext bundleContext;
 
 	/**
 	 * The constructor
@@ -26,6 +28,7 @@ public class Activator extends AbstractUIPlugin implements BundleActivator {
 	 */
 	public void start(BundleContext context) throws Exception {
 		super.start(context);
+		bundleContext = context;
 		plugin = this;
 	}
 
@@ -35,6 +38,7 @@ public class Activator extends AbstractUIPlugin implements BundleActivator {
 	 */
 	public void stop(BundleContext context) throws Exception {
 		plugin = null;
+		bundleContext = null;
 		super.stop(context);
 	}
 
@@ -54,5 +58,12 @@ public class Activator extends AbstractUIPlugin implements BundleActivator {
     public static Image getImage(String path) {
         return getImageDescriptor(path).createImage();
     }
+    
+    public static <T> T getService(final Class<T> serviceClass) {
+		if (bundleContext == null) return null;
+		ServiceReference<T> ref = bundleContext.getServiceReference(serviceClass);
+		if (ref==null) return null;
+		return bundleContext.getService(ref);
+	}
 
 }
