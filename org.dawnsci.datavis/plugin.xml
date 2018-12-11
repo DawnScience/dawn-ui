@@ -138,7 +138,12 @@
       <menuContribution
             allPopups="false"
             class="org.dawnsci.datavis.ImportStackContributionFactory"
-            locationURI="menu:org.dawnsci.datavis.file?afte=org.dawnsci.datavis.importseparator">
+            locationURI="menu:org.dawnsci.datavis.file?after=org.dawnsci.datavis.importseparator">
+      </menuContribution>
+      <menuContribution
+            allPopups="false"
+            class="org.dawnsci.datavis.DefaultColormapContributionFactory"
+            locationURI="menu:org.dawnsci.datavis.plot">
       </menuContribution>
    </extension>
    <extension
