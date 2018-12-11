@@ -857,4 +857,49 @@ public class MapPlotManager implements IMapPlotController{
 	}
 
 	public static final String EVENT_TOPIC_MAPVIEW_CLICK = "org/dawnsci/mapping/ui/mapview/click";
+
+	@Override
+	public void bringToFront(PlottableMapObject map) {
+		if (!map.isPlotted()) return;
+		
+		MapTrace mt = findRemoveMapTrace(map);
+		
+		if (mt == null) return;
+		
+		layers.push(mt);
+		
+		updatePlot();
+		
+	}
+
+	@Override
+	public void sendToBack(PlottableMapObject map) {
+		if (!map.isPlotted()) return;
+		
+		MapTrace mt = findRemoveMapTrace(map);
+		
+		if (mt == null) return;
+		
+		layers.add(mt);
+		
+		updatePlot();
+		
+	}
+	
+	private MapTrace findRemoveMapTrace(PlottableMapObject map) {
+		Iterator<MapTrace> iterator = layers.iterator();
+		
+		MapTrace mt = null;
+		
+		while (iterator.hasNext()) {
+			MapTrace next = iterator.next();
+			if (next.getMap() == map) {
+				mt = next;
+				iterator.remove();
+				return mt;
+			}
+		}
+		
+		return null;
+	}
 }

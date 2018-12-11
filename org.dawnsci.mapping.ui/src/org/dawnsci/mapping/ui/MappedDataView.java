@@ -163,18 +163,30 @@ public class MappedDataView extends ViewPart {
 			IStructuredSelection selection = (IStructuredSelection) viewer.getSelection();
 			Iterator<?> it = selection.iterator();
 			List<AbstractMapData> maps = new ArrayList<>();
+			
+			//single selection only actions
+			if (selection.size() == 1) {
 				
-			if (selection.size() == 1 && selection.getFirstElement() instanceof MappedDataFile) {
+				Object element = selection.getFirstElement();
 
-				manager.add(MapActionUtils.getFileRemoveAction(fileController, (MappedDataFile)selection.getFirstElement()));
-			}
-				
-			if (selection.size() == 1 && selection.getFirstElement() instanceof MappedDataBlock && ((MappedDataBlock)selection.getFirstElement()).getLazy().getRank() == 3) {
-				manager.add(MapActionUtils.getDynamicViewerAction((MappedDataBlock)selection.getFirstElement()));
-			}
-				
-			if (selection.size() == 1 && selection.getFirstElement() instanceof AssociatedImage) {
-				manager.add(MapActionUtils.getSaveImageAction((AssociatedImage)selection.getFirstElement()));
+				if (element instanceof MappedDataFile) {
+					manager.add(MapActionUtils.getFileRemoveAction(fileController, (MappedDataFile)element));
+				}
+
+				if (element instanceof MappedDataBlock &&
+						((MappedDataBlock)element).getLazy().getRank() == 3) {
+					manager.add(MapActionUtils.getDynamicViewerAction((MappedDataBlock)element));
+				}
+
+				if (element instanceof AssociatedImage) {
+					manager.add(MapActionUtils.getSaveImageAction((AssociatedImage)element));
+				}
+
+				if (element instanceof PlottableMapObject && ((PlottableMapObject)element).isPlotted()) {
+					PlottableMapObject p = (PlottableMapObject)element;
+					manager.add(MapActionUtils.getBringToFrontAction(p, plotManager));
+					manager.add(MapActionUtils.getSendToBackAction(p, plotManager));
+				}
 			}
 				
 			List<MappedDataFile> mdfs = new ArrayList<>();
@@ -191,6 +203,7 @@ public class MappedDataView extends ViewPart {
 				}
 			}
 			
+			//for rgb and vector need parent file
 			if (selection instanceof ITreeSelection) {
 				Object ob = ((ITreeSelection)selection).getPaths()[0].getParentPath().getFirstSegment();
 				if (ob instanceof MappedDataFile) {
@@ -200,7 +213,12 @@ public class MappedDataView extends ViewPart {
 				}
 			}
 				
-			if (!maps.isEmpty())manager.add(MapActionUtils.getComparisonDialog(maps));
+			if (!maps.isEmpty()) {
+				manager.add(MapActionUtils.getComparisonDialog(maps));
+				manager.add(new Separator());
+				manager.add(MapActionUtils.getUnPlotAllAction(plotManager, viewer, fileController));
+			}
+			
 			if (maps.size() == 1) {
 				manager.add(MapActionUtils.getMapPropertiesAction(maps.get(0),plotManager, fileController.getArea()));
 			}
@@ -213,14 +231,7 @@ public class MappedDataView extends ViewPart {
 				MenuManager transfer = new MenuManager("Transfer");
 				transfer.add(MapActionUtils.transferToDataVisAction(mdfs));
 				manager.add(transfer);
-			}
 				
-			if (!maps.isEmpty()) {
-				manager.add(new Separator());
-				manager.add(MapActionUtils.getUnPlotAllAction(plotManager, viewer, fileController));
-			}
-					
-			if (!mdfs.isEmpty()) {
 				manager.add(new Separator());
 				manager.add(MapActionUtils.getFilesRemoveAllAction(fileController));
 				

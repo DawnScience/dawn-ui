@@ -14,6 +14,7 @@ import org.dawnsci.mapping.ui.datamodel.IMapPlotController;
 import org.dawnsci.mapping.ui.datamodel.MappedDataArea;
 import org.dawnsci.mapping.ui.datamodel.MappedDataBlock;
 import org.dawnsci.mapping.ui.datamodel.MappedDataFile;
+import org.dawnsci.mapping.ui.datamodel.PlottableMapObject;
 import org.dawnsci.mapping.ui.datamodel.RGBMapData;
 import org.dawnsci.mapping.ui.datamodel.VectorMapData;
 import org.dawnsci.mapping.ui.dialog.DynamicDialog;
@@ -279,5 +280,23 @@ public class MapActionUtils {
 			}
 		};
 		
+	}
+	
+	public static IAction getBringToFrontAction(final PlottableMapObject map, final IMapPlotController manager) {
+		return new Action("Bring to front") {
+			@Override
+			public void run() {
+				manager.bringToFront(map);
+			}
+		};
+	}
+	
+	public static IAction getSendToBackAction(final PlottableMapObject map, final IMapPlotController manager) {
+		return new Action("Send to back") {
+			@Override
+			public void run() {
+				manager.sendToBack(map);
+			}
+		};
 	}
 }

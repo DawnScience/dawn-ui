@@ -11,5 +11,9 @@ public interface IMapPlotController {
 	void updatePlot();
 	
 	void setTransparency(PlottableMapObject map);
+	
+	void bringToFront(PlottableMapObject map);
+	
+	void sendToBack(PlottableMapObject map);
 
 }
