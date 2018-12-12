@@ -352,9 +352,9 @@ public class FileController implements IFileController {
 			}
 			
 			if (!files.isEmpty()) {
-				String name = files.get(0).getFilePath();
 				if (addToRecentPlaces) {
-					recentPlaces.addPlace(name);
+					String[] filePaths = files.stream().map(LoadedFile::getFilePath).toArray(String[]::new);
+					recentPlaces.addFiles(filePaths);
 				}
 				
 				lFiles.addFiles(files);

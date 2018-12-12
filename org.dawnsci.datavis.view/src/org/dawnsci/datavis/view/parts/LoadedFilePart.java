@@ -194,7 +194,7 @@ public class LoadedFilePart {
 		fileController.setOnlySignals(signalsOnly);
 
 
-		List<String> p = recentPlaces.getRecentPlaces();
+		List<String> p = recentPlaces.getRecentDirectories();
 		if (p.isEmpty()) {
 			qfw.setDirectoryPath(System.getProperty("user.home"));
 		} else {
@@ -360,11 +360,10 @@ public class LoadedFilePart {
 				}
 				updateOnStateChange(event);
 
-				List<String> r = recentPlaces.getRecentPlaces();
-				if (r != null && !r.isEmpty()) {
-					Display.getDefault().asyncExec(() -> qfw.setDirectoryPath(recentPlaces.getRecentPlaces().get(0)));
+				String defaultDirectory = recentPlaces.getCurrentDefaultDirectory();
+				if (defaultDirectory != null) {
+					Display.getDefault().asyncExec(() -> qfw.setDirectoryPath(recentPlaces.getCurrentDefaultDirectory()));
 				}
-				
 			}
 		};
 		

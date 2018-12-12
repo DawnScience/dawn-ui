@@ -11,6 +11,7 @@ import java.util.concurrent.Executors;
 
 import org.dawb.common.ui.monitor.ProgressMonitorWrapper;
 import org.dawb.common.ui.util.DatasetNameUtils;
+import org.dawnsci.datavis.api.IRecentPlaces;
 import org.dawnsci.mapping.ui.BeanBuilderWizard;
 import org.dawnsci.mapping.ui.IBeanBuilderHelper;
 import org.dawnsci.mapping.ui.ILiveMapFileListener;
@@ -43,6 +44,7 @@ public class MappedFileManager implements IMapFileController{
 	private IRemoteDatasetService remoteService;
 	private IStageScanConfiguration stageScanConfig;
 	private ILiveMappingFileService liveService;
+	private IRecentPlaces recentPlaces;
 	
 	
 	public void setLoaderService(ILoaderService service) {
@@ -59,6 +61,10 @@ public class MappedFileManager implements IMapFileController{
 	
 	public void setLiveMappingService(ILiveMappingFileService lServ) {
 		liveService = lServ;
+	}
+	
+	public void setRecentPlaces(IRecentPlaces recentPlaces) {
+		this.recentPlaces = recentPlaces;
 	}
 	
 	private MappedDataArea mappedDataArea;
@@ -350,6 +356,11 @@ public class MappedFileManager implements IMapFileController{
 		if (monitor != null && monitor.isCancelled()) return;
 		if (mdf != null && parentPath != null) mdf.setParentPath(parentPath);
 		mappedDataArea.addMappedDataFile(mdf);
+		
+		if (recentPlaces != null) {
+			recentPlaces.addFiles(path);
+		}
+		
 		fireListeners(mdf);
 	}
 	

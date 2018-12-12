@@ -23,8 +23,6 @@ public class FileManager {
 	}
 	
 	IConversionContext context;
-	//TODO image/1d stacks
-//	private List<ILazyDataset> dataStacks;
 	private Map<Integer, String> axesNames;
 	ISetupContext contextHelper;
 	
@@ -35,9 +33,6 @@ public class FileManager {
 	
 	public FileManager(ISetupContext contextHelper) {
 		this.contextHelper = contextHelper;
-//		filePaths = context.getFilePaths();
-//		datasetName = context.getDatasetNames().get(0);
-//		axesNames = context.getAxesNames();
 		listeners = new HashSet<IFilesAddedListener>();
 		
 	}
@@ -126,7 +121,7 @@ public class FileManager {
 							out[i] = goodFile;
 							continue;
 						}
-							
+						
 						context.getFilePaths().add(paths[i]);
 					}
 				} catch (Exception e) {
@@ -136,6 +131,13 @@ public class FileManager {
 				//TODO test axes
 				
 				out[i] = goodFile;
+			}
+			
+			for (int i = 0; i < out.length; i++) {
+				if (out[i]) {
+					ServiceHolder.getRecentPlaces().addFiles(paths[i]);
+					break;
+				}
 			}
 			
 			fireFileListeners(new FileAddedEvent(this, paths, out));

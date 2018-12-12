@@ -1,16 +1,14 @@
 package org.dawnsci.datavis.model.test;
 
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
+import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 
 import org.dawnsci.datavis.api.IRecentPlaces;
 import org.dawnsci.datavis.model.FileController;
 import org.dawnsci.datavis.model.FileControllerUtils;
-import org.dawnsci.datavis.model.IFileController;
 import org.dawnsci.datavis.model.LoadedFile;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -33,18 +31,23 @@ public class FileControllerTest extends AbstractTestModel{
 		fileController.setRecentPlaces(new IRecentPlaces() {
 			
 			@Override
-			public List<String> getRecentPlaces() {
-				return null;
+			public List<String> getRecentDirectories() {
+				return Collections.emptyList();
 			}
 			
 			@Override
-			public void addPlace(String path) {
+			public void addFiles(String... path) {
 				
 			}
 
 			@Override
-			public String getCurrentDefaultPlace() {
-				return null;
+			public String getCurrentDefaultDirectory() {
+				return "";
+			}
+
+			@Override
+			public List<String> getRecentFiles() {
+				return Collections.emptyList();
 			}
 		});
 		

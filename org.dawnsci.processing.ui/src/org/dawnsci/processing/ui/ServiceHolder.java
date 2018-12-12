@@ -1,5 +1,6 @@
 package org.dawnsci.processing.ui;
 
+import org.dawnsci.datavis.api.IRecentPlaces;
 import org.dawnsci.processing.ui.api.IOperationUIService;
 import org.eclipse.dawnsci.analysis.api.EventTracker;
 import org.eclipse.dawnsci.analysis.api.conversion.IConversionService;
@@ -21,6 +22,7 @@ public class ServiceHolder {
 	private static EventAdmin eventAdmin;
 	private static IPersistenceService persistenceService;
 	private static IOperationUIService operationUIService;
+	private static IRecentPlaces recentPlaces;
 
 	public static IExpressionService getExpressionService() {
 		return expressionService;
@@ -92,5 +94,13 @@ public class ServiceHolder {
 	
 	public void setOperationUIService(IOperationUIService operationUIService) {
 		ServiceHolder.operationUIService = operationUIService;
+	}
+	
+	public void setRecentPlaces(IRecentPlaces recentPlaces) {
+		ServiceHolder.recentPlaces = recentPlaces;
+	}
+	
+	public static IRecentPlaces getRecentPlaces() {
+		return recentPlaces;
 	}
 }

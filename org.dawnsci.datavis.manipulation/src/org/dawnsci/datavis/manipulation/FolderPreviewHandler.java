@@ -59,8 +59,8 @@ public class FolderPreviewHandler extends AbstractHandler {
 		IRecentPlaces recentPlaces = bundleContext.getService(bundleContext.getServiceReference(IRecentPlaces.class));
 		final EventAdmin admin = bundleContext.getService(bundleContext.getServiceReference(EventAdmin.class));
 		
-		if (!recentPlaces.getRecentPlaces().isEmpty()) {
-			dialog.setFilterPath(recentPlaces.getRecentPlaces().get(0));
+		if (!recentPlaces.getRecentDirectories().isEmpty()) {
+			dialog.setFilterPath(recentPlaces.getRecentDirectories().get(0));
 		}
 
 		String open = dialog.open();

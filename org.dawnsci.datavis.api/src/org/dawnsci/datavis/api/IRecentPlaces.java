@@ -4,10 +4,12 @@ import java.util.List;
 
 public interface IRecentPlaces {
 
-	public void addPlace(String path);
+	public void addFiles(String... path);
 	
-	public List<String> getRecentPlaces();
+	public List<String> getRecentDirectories();
 	
-	public String getCurrentDefaultPlace();
+	public List<String> getRecentFiles();
+	
+	public String getCurrentDefaultDirectory();
 	
 }
