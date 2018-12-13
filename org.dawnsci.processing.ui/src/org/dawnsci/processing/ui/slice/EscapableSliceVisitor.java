@@ -16,6 +16,7 @@ import org.eclipse.dawnsci.analysis.api.processing.IOperation;
 import org.eclipse.dawnsci.analysis.api.processing.IOperationInputData;
 import org.eclipse.dawnsci.analysis.api.processing.OperationData;
 import org.eclipse.dawnsci.analysis.api.processing.OperationDataForDisplay;
+import org.eclipse.dawnsci.analysis.api.processing.OperationLog;
 import org.eclipse.dawnsci.analysis.api.processing.model.IOperationModel;
 import org.eclipse.dawnsci.analysis.dataset.slicer.SliceFromSeriesMetadata;
 import org.eclipse.dawnsci.analysis.dataset.slicer.SliceVisitor;
@@ -205,9 +206,10 @@ public class EscapableSliceVisitor implements SliceVisitor {
 				}
 				MetadataPlotUtils.plotDataWithMetadata(out, output);
 			}
-			
-			if (logDisplay != null && result.getLog() != null) {
-				logDisplay.setLog(result.getLog().toString());
+
+			OperationLog l = result.getLog();
+			if (logDisplay != null && l != null) {
+				logDisplay.setLog(l.toString(), l.getSuccess(), l.getFailure());
 			}
 
 			if (result instanceof OperationDataForDisplay) {
