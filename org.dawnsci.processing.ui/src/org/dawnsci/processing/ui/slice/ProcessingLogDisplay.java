@@ -1,5 +1,7 @@
 package org.dawnsci.processing.ui.slice;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.eclipse.jface.resource.JFaceResources;
@@ -48,38 +50,44 @@ public class ProcessingLogDisplay {
 			@Override
 			public void run() {
 				logDisplay.setText(string);
-				logDisplay.setStyleRanges(createStyleRanges(good, bad));
+				StyleRange[] ranges = createStyleRanges(good, bad);
+				if (ranges != null) {
+					logDisplay.setStyleRanges(ranges);
+				}
 				logDisplay.setTopIndex(logDisplay.getLineCount() - 1);
 			}
 		});
 	}
 
 	private StyleRange[] createStyleRanges(List<Integer> listA, List<Integer> listB) {
-		int maxA = listA == null ? 0 : listA.size() / 2;
-		int maxB = listB == null ? 0 : listB.size() / 2;
-		StyleRange[] ranges = maxA + maxB > 0 ? new StyleRange[maxA + maxB] : null;
-
-		Color colorA = Display.getCurrent().getSystemColor(SWT.COLOR_GREEN);
-		for (int i = 0; i < maxA; i++) {
-			StyleRange sr = new StyleRange();
-			sr.start = listA.get(2 * i);
-			sr.length = listA.get(2 * i + 1);
-			sr.fontStyle = SWT.BOLD;
-			sr.foreground = colorA;
-			ranges[i] = sr;
+		if ((listA == null || listA.isEmpty()) && (listB == null || listB.isEmpty())) {
+			return null;
 		}
 
-		Color colorB = Display.getCurrent().getSystemColor(SWT.COLOR_RED);
-		for (int i = 0; i < maxB; i++) {
-			StyleRange sr = new StyleRange();
-			sr.start = listB.get(2 * i);
-			sr.length = listB.get(2 * i + 1);
-			sr.fontStyle = SWT.BOLD;
-			sr.foreground = colorB;
-			ranges[i + maxA] = sr;
+		List<StyleRange> ranges = new ArrayList<>();
+
+		if (listA != null) {
+			addStyleRanges(listA, ranges, Display.getCurrent().getSystemColor(SWT.COLOR_GREEN));
 		}
 
-		return ranges;
+		if (listB != null) {
+			addStyleRanges(listB, ranges, Display.getCurrent().getSystemColor(SWT.COLOR_RED));
+		}
+
+		StyleRange[] array = ranges.toArray(new StyleRange[ranges.size()]);
+		Arrays.sort(array, (s,t) -> s.start < t.start ? -1 : 1);
+		return array;
+	}
+
+	private void addStyleRanges(List<Integer> list, List<StyleRange> ranges, Color color) {
+		for (int i = 0, max = list.size() / 2; i < max; i++) {
+			StyleRange sr = new StyleRange();
+			sr.start = list.get(2 * i);
+			sr.length = list.get(2 * i + 1);
+			sr.fontStyle = SWT.BOLD;
+			sr.foreground = color;
+			ranges.add(sr);
+		}
 	}
 
 	/**
