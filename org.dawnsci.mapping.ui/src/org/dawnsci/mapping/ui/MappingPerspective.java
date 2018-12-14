@@ -8,6 +8,8 @@ import org.eclipse.ui.IViewLayout;
 public class MappingPerspective implements IPerspectiveFactory {
 
 	public static final String ID = "org.dawnsci.mapping.ui.dawn.mappingperspective";
+	public static final String MAPPING_PLOT_ID ="org.dawnsci.mapping.ui.mapview";
+	public static final String SPECTRUM_PLOT_ID ="org.dawnsci.mapping.ui.spectrumview";
 
 	@Override
 	public void createInitialLayout(IPageLayout layout) {
