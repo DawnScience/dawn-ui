@@ -147,7 +147,7 @@ public class DataManipulationExtensionContributionFactory extends ExtensionContr
 
 						IRecentPlaces recentPlaces = (IRecentPlaces)bundleContext.getService(bundleContext.getServiceReference(IRecentPlaces.class));
 
-						fd.setFilterPath(recentPlaces.getRecentPlaces().get(0));
+						fd.setFilterPath(recentPlaces.getRecentDirectories().get(0));
 
 						String open = fd.open();
 
@@ -220,7 +220,7 @@ public class DataManipulationExtensionContributionFactory extends ExtensionContr
 						IRecentPlaces recentPlaces = (IRecentPlaces)bundleContext.getService(bundleContext.getServiceReference(IRecentPlaces.class));
 
 						DirectoryDialog dirDi = new DirectoryDialog(Display.getDefault().getActiveShell());
-						dirDi.setFilterPath(recentPlaces.getRecentPlaces().get(0));
+						dirDi.setFilterPath(recentPlaces.getRecentDirectories().get(0));
 						
 						String output = dirDi.open();
 						
@@ -278,7 +278,7 @@ public class DataManipulationExtensionContributionFactory extends ExtensionContr
 										getBundleContext();
 								IRecentPlaces recentPlaces = bundleContext.getService(bundleContext.getServiceReference(IRecentPlaces.class));
 								FileDialog f = new FileDialog(Display.getDefault().getActiveShell(), SWT.SAVE);
-								f.setFilterPath(recentPlaces.getCurrentDefaultPlace());
+								f.setFilterPath(recentPlaces.getCurrentDefaultDirectory());
 								f.setFileName(d.getTemplateName() + ".dat");
 								String open = f.open();
 								

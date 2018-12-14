@@ -51,7 +51,7 @@ public class ImportStackContributionFactory extends ExtensionContributionFactory
 			@Override
 			public void menuAboutToShow(IMenuManager manager) {
 				search.removeAll();
-				Collection<String> lf = recentPlaces.getRecentPlaces();
+				Collection<String> lf = recentPlaces.getRecentDirectories();
 				
 				String path = null;
 				

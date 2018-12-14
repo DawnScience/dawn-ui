@@ -33,96 +33,151 @@ public class RecentFoldersContributionFactory extends ExtensionContributionFacto
 
 	@Override
 	public void createContributionItems(IServiceLocator serviceLocator, IContributionRoot additions) {
-		
-		MenuManager search = new MenuManager("Recent Folders",
-                "org.dawnsci.recent.folders");
-		
+
+		MenuManager directoryMenu = new MenuManager("Recent Folders",
+				"org.dawnsci.recent.folders");
+
 		BundleContext bundleContext =
-                FrameworkUtil.
-                getBundle(this.getClass()).
-                getBundleContext();
-		
+				FrameworkUtil.
+				getBundle(this.getClass()).
+				getBundleContext();
+
 		final IRecentPlaces recentPlaces = bundleContext.getService(bundleContext.getServiceReference(IRecentPlaces.class));
 		final EventAdmin admin = bundleContext.getService(bundleContext.getServiceReference(EventAdmin.class));
-		
-		search.addMenuListener(new IMenuListener() {
-			
+
+		//need since a completely empty menu won't show
+		//we are populating it in a menu listener which clears the empty action
+		final Action defaultAction = new Action("") {
+
+			@Override
+			public void run() {
+
+			}
+		};
+
+		directoryMenu.addMenuListener(new IMenuListener() {
+
 			@Override
 			public void menuAboutToShow(IMenuManager manager) {
-				search.removeAll();
-				Collection<String> lf = recentPlaces.getRecentPlaces();
+				directoryMenu.removeAll();
+				Collection<String> lf = recentPlaces.getRecentDirectories();
 				if (lf.isEmpty()) {
-					search.add(new Action("No History"){
+					directoryMenu.add(new Action("No History"){
 						@Override
 						public void run() {
 							//do nothing
 						}
 					});
 				}
-				
+
 				for (String f : lf) {
-					search.add(new OpenFileDialogAction(f,admin));
+					directoryMenu.add(new OpenFileDialogAction(f,admin));
 				}
-				
-				search.add(new Separator());
+
+				directoryMenu.add(new Separator());
 				try {
 					String property = System.getProperty("user.home");
-					search.add(new OpenFileDialogAction(property,admin));
+					directoryMenu.add(new OpenFileDialogAction(property,admin));
 				} catch (Exception e) {
 					//TODO log
 				}
-				
-			
+
+
 				try {
 					String property = ResourcesPlugin.getWorkspace().getRoot().getLocation().toString();
-					search.add(new OpenFileDialogAction(property,admin));
+					directoryMenu.add(new OpenFileDialogAction(property,admin));
 				} catch (Exception e) {
 					//TODO log
 				}
-				
+
 			}
 		});
 
-		search.add(new Action("") {
-        	
-        	@Override
-        	public void run() {
+		directoryMenu.add(defaultAction);
 
-        	}
+		additions.addContributionItem(directoryMenu, null);
+
+		MenuManager fileMenu = new MenuManager("Recent Files",
+				"org.dawnsci.recent.files");
+
+		fileMenu.addMenuListener(new IMenuListener() {
+
+			@Override
+			public void menuAboutToShow(IMenuManager manager) {
+				fileMenu.removeAll();
+				Collection<String> lf = recentPlaces.getRecentFiles();
+				if (lf.isEmpty()) {
+					fileMenu.add(new Action("No History"){
+						@Override
+						public void run() {
+							//do nothing
+						}
+					});
+				}
+
+				for (String f : lf) {
+					fileMenu.add(new OpenFileAction(f,admin));
+				}
+
+			}
 		});
 
-        additions.addContributionItem(search, null);
+		fileMenu.add(defaultAction);
+
+		additions.addContributionItem(fileMenu, null);
 
 	}
-	
+
 	private class OpenFileDialogAction extends Action {
-		
+
 		private String folder;
 		private EventAdmin admin;
-		
+
 		public OpenFileDialogAction(String folder, EventAdmin admin) {
 			super(folder +"...");
 			this.folder = folder;
 			this.admin = admin;
 		}
-		
+
 		@Override
-    	public void run() {
-    		Shell shell = Display.getDefault().getActiveShell();
-    		FileDialog dialog = new FileDialog(shell,SWT.MULTI);
-    		dialog.setFilterPath(folder);
+		public void run() {
+			Shell shell = Display.getDefault().getActiveShell();
+			FileDialog dialog = new FileDialog(shell,SWT.MULTI);
+			dialog.setFilterPath(folder);
 
-    		if (dialog.open() == null) return;
+			if (dialog.open() == null) return;
 
-    		String[] fileNames = dialog.getFileNames();
-    		for (int i = 0; i < fileNames.length; i++) fileNames[i] = dialog.getFilterPath() + File.separator + fileNames[i];
+			String[] fileNames = dialog.getFileNames();
+			for (int i = 0; i < fileNames.length; i++) fileNames[i] = dialog.getFilterPath() + File.separator + fileNames[i];
 
-    		Map<String,String[]> props = new HashMap<>();
-    		props.put("paths", fileNames);
-    		admin.sendEvent(new Event(PlottingEventConstants.FILE_OPEN_EVENT, props));
-    		
+			Map<String,String[]> props = new HashMap<>();
+			props.put("paths", fileNames);
+			admin.sendEvent(new Event(PlottingEventConstants.FILE_OPEN_EVENT, props));
+
 		}
-		
+
+	}
+
+	private class OpenFileAction extends Action {
+
+		private String file;
+		private EventAdmin admin;
+
+		public OpenFileAction(String file, EventAdmin admin) {
+			super(file);
+			this.file = file;
+			this.admin = admin;
+		}
+
+		@Override
+		public void run() {
+
+			Map<String,String[]> props = new HashMap<>();
+			props.put("paths", new String[] {file});
+			admin.sendEvent(new Event(PlottingEventConstants.FILE_OPEN_EVENT, props));
+
+		}
+
 	}
 
 }
