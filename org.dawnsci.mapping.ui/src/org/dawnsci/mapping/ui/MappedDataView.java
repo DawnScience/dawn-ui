@@ -45,6 +45,7 @@ import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.IMemento;
 import org.eclipse.ui.IViewSite;
+import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.part.ResourceTransfer;
@@ -55,42 +56,34 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * 
- * This view by default links to plotting systems on 
- * "org.dawnsci.mapping.ui.mapview" and "org.dawnsci.mapping.ui.spectrumview"
- * however a secondary id may be used when the view is opened. From a perspective
- * this id is specified colon separated from the view id. So to show a 
- * mapped data view with different linked views use:
- * <pre>
- * showView(MappedDataView.ID+":mapview=myViewForMappingID;spectrumview=myViewForSpectrumID")
- * </pre>
- * 
- * @author Jacob Filik
- * @author Matthew Gerring
- *
+ * Main view showing the table of files loaded into the mapping perspective.
+ * <p>
+ * Also forces the plot views in the mapping perspective to be created so
+ * the plotting systems in the IMapPlotController are created
  */
 public class MappedDataView extends ViewPart {
 
 	private static Logger logger = LoggerFactory.getLogger(MappedDataView.class);
 	public static final String ID = "org.dawnsci.mapping.ui.mappeddataview";
 	
-	
-	
 	private TreeViewer viewer;
-	private IMapPlotController plotManager;
 	private MappedDataViewState initialState;
-	
 	private IMapFileEventListener mapFileListener;
-	
 	private IMapFileController fileController;
 	
 	@Override
 	public void createPartControl(Composite parent) {
 		
 		fileController = Activator.getService(IMapFileController.class);
-		plotManager = Activator.getService(IMapPlotController.class);
+		IMapPlotController plotManager = Activator.getService(IMapPlotController.class);
 		fileController.setRegistrationHelper(new RegistrationHelperImpl(plotManager));
 		
+		//find plotviews which force the plotting systems to be created,
+		//even if the views are covered
+		final IWorkbenchPage page = getSite().getPage();
+		page.findView(MappingPerspective.MAPPING_PLOT_ID);
+		page.findView(MappingPerspective.SPECTRUM_PLOT_ID);
+
 		final Composite searchComposite = new Composite(parent, SWT.NONE);
 		searchComposite.setLayout(new GridLayout(2, false));
 		final Label searchLabel = new Label(searchComposite, SWT.NONE);
