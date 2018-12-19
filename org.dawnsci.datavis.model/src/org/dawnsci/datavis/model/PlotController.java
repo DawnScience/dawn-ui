@@ -203,7 +203,7 @@ public class PlotController implements IPlotController, ILoadedFileInitialiser {
 		if (system == null) return;
 		//TODO UPDATE FILE STATE
 		
-		if (d != null && d.isSelected()) {
+		if (d != null && d.isSelected() && d.getParent().isSelected()) {
 			IPlotMode localMode = currentMode;
 			currentMode = d.getPlottableObject().getPlotMode();
 			if (currentMode != localMode) {
@@ -577,7 +577,7 @@ public class PlotController implements IPlotController, ILoadedFileInitialiser {
 			@Override
 			public boolean validate(LoadedFile f) {
 				
-					if (!option.isSelected() && !option.getParent().isSelected()) {
+					if (!option.isSelected() || !option.getParent().isSelected()) {
 						//state should be valid on deselection only
 						return true;
 					}

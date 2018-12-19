@@ -95,13 +95,11 @@ public class PlotControllerTest extends AbstractTestModel {
 	
 	private DataOptions setUpAndSelectFirstFile2D(){
 		DataOptions d = setUpAndSelectFile2D(file.getAbsolutePath());
-		FileControllerUtils.loadFile(fileController,file.getAbsolutePath());
 		return d;
 	}
 	
 	private DataOptions setUpAndSelectFirstFile3D(){
 		DataOptions dop = setUpAndSelectFile3D(file.getAbsolutePath());
-		FileControllerUtils.loadFile(fileController,file.getAbsolutePath());
 		return dop;
 	}
 	
@@ -495,6 +493,26 @@ public class PlotControllerTest extends AbstractTestModel {
 		next = plottingSystem.getTraces().iterator().next();
 		assertFalse(next.getName().equals(label));
 		assertTrue(next.getName().contains(label));
+	}
+	
+	@Test
+	public void testSelectNotSelected() throws Exception {
+		initialiseControllers();
+		setUpAndSelectFirstFile2D();
+		assertEquals(1, plottingSystem.getTraces().size());
+		ITrace next = plottingSystem.getTraces().iterator().next();
+		assertTrue(next instanceof IImageTrace);
+		
+		String path = file1.getAbsolutePath();
+		FileControllerUtils.loadFile(fileController,path);
+		LoadedFile lf = fileController.getLoadedFiles().stream().filter(f -> f.getFilePath().equals(path)).findFirst().get();
+		DataOptions dop2 = lf.getDataOption("/entry/dataset2");
+		fileController.setDataSelected(dop2, true);
+		plotManager.waitOnJob();
+		assertEquals(1, plottingSystem.getTraces().size());
+		next = plottingSystem.getTraces().iterator().next();
+		assertTrue(next instanceof IImageTrace);
+		
 	}
 
 }
