@@ -94,7 +94,8 @@ public class ConfigureOperationModelWizardPage extends AbstractOperationModelWiz
 		input = createPlottingSystem(left,"DialogInput");
 		modelViewer = new OperationModelViewer();
 		modelViewer.createPartControl(left);
-		
+		modelViewer.setShowAllFields(true);
+
 		output = createPlottingSystem(right,"DialogOutput");
 		left.setWeights(new int[]{70,30});
 		errorLabel = new Label(container, SWT.WRAP);

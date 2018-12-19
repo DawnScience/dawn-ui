@@ -166,7 +166,9 @@ public class OperationModelViewer implements ISelectionListener, ISelectionChang
 	 */
 	public void setShowAllFields(boolean showAllFields) {
 		this.showAllFields = showAllFields;
-		viewer.refresh();
+		if (viewer != null) {
+			viewer.refresh();
+		}
 	}
 
 	private void createDropTarget(TableViewer viewer) {
