@@ -8,12 +8,20 @@
  */
 package org.dawnsci.plotting.tools.profile;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
 
+import org.dawnsci.plotting.tools.Activator;
+import org.dawnsci.plotting.tools.ServiceLoader;
+import org.dawnsci.plotting.tools.fitting.PeakFittingToolModel;
+import org.dawnsci.plotting.tools.fitting.PeakFittingToolOperation;
 import org.dawnsci.plotting.tools.utils.ToolUtils;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.dawnsci.analysis.api.processing.IOperation;
+import org.eclipse.dawnsci.analysis.api.processing.model.IOperationModel;
 import org.eclipse.dawnsci.analysis.api.roi.IROI;
 import org.eclipse.dawnsci.analysis.dataset.roi.RectangularROI;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
@@ -26,6 +34,9 @@ import org.eclipse.january.dataset.DatasetFactory;
 import org.eclipse.january.dataset.DatasetUtils;
 import org.eclipse.january.dataset.IDataset;
 import org.eclipse.january.dataset.IntegerDataset;
+import org.eclipse.jface.action.Action;
+import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,6 +44,51 @@ import org.slf4j.LoggerFactory;
 public class ZoomTool extends ProfileTool {
 	
 	private static Logger logger = LoggerFactory.getLogger(ZoomTool.class);
+	
+	protected Action getReductionAction() {
+		return new Action("Data reduction...", Activator.getImageDescriptor("icons/run_workflow.gif")) {
+			@Override
+			public void run() {
+				
+				try {
+					final Collection<IRegion> regions = getPlottingSystem().getRegions();
+					
+					List<IOperation<?, ?>> ops = new ArrayList<>();
+					
+					
+					for (IRegion region : regions) {
+						if (!isRegionTypeSupported(region.getRegionType())) continue;
+						
+						final RectangularROI bounds = (RectangularROI)region.getROI();
+						if (bounds==null)        continue;
+						if (!region.isVisible()) continue;
+						
+						ZoomProfileToolOperation op = (ZoomProfileToolOperation)ServiceLoader.getOperationService().create(new ZoomProfileToolOperation().getId());
+						ZoomProfileToolModel model = op.getModel();
+						model.setRegion(bounds);
+						op.setPassUnmodifiedData(true);
+						op.setStoreOutput(true);
+						ops.add(op);
+					}
+					
+					if (ops.isEmpty()) {
+						//show something
+						return;
+					}
+					
+					IOperation<?, ?> last = ops.get(ops.size()-1);
+					last.setPassUnmodifiedData(false);
+					last.setStoreOutput(false);
+					
+					ServiceLoader.getOperationUIService().runProcessingWithUI(ops.toArray(new IOperation<?, ?>[ops.size()]), sliceMetadata, null);
+				} catch (Exception e) {
+					MessageDialog.openError(getSite().getShell(), "Error Reducing Data!", "Could not reduce data! " + e.getMessage());
+					logger.error("Could not reduce data!", e);
+				}
+				
+			}
+		};
+	}
 
 	@Override
 	protected void configurePlottingSystem(IPlottingSystem<?> plotter) {

@@ -657,5 +657,39 @@
             ui="org.dawnsci.plotting.tools.filter.PseudoFlatFieldConfiguration">
       </plottingFilter>
    </extension>
+   <extension
+         point="org.eclipse.dawnsci.analysis.api.operation">
+      <operation
+            class="org.dawnsci.plotting.tools.fitting.PeakFittingToolOperation"
+            id="org.dawnsci.plotting.tools.fitting.PeakFittingToolOperation"
+            model="org.dawnsci.plotting.tools.fitting.PeakFittingToolModel"
+            name="Peak Fitting Tool"
+            visible="false">
+      </operation>
+      <operation
+            class="org.dawnsci.plotting.tools.profile.ZoomProfileToolOperation"
+            id="org.dawnsci.plotting.tools.profile.ZoomProfileToolOperation"
+            model="org.dawnsci.plotting.tools.profile.ZoomProfileToolModel"
+            name="Zoom Profile Tool">
+      </operation>
+      <operation
+            class="org.dawnsci.plotting.tools.profile.BoxProfileToolOperation"
+            id="org.dawnsci.plotting.tools.profile.BoxProfileToolOperation"
+            model="org.dawnsci.plotting.tools.profile.BoxProfileToolModel"
+            name="Box Profile Tool">
+      </operation>
+      <operation
+            class="org.dawnsci.plotting.tools.profile.RadialProfileToolOperation"
+            id="org.dawnsci.plotting.tools.profile.RadialProfileToolOperation"
+            model="org.dawnsci.plotting.tools.profile.RadialProfileToolModel"
+            name="Radial Profile Tool">
+      </operation>
+      <operation
+            class="org.dawnsci.plotting.tools.profile.AzimuthalProfileToolOperation"
+            id="org.dawnsci.plotting.tools.profile.AzimuthalProfileToolOperation"
+            model="org.dawnsci.plotting.tools.profile.AzimuthalProfileToolModel"
+            name="Azimuthal Profile Tool">
+      </operation>
+   </extension>
 
 </plugin>

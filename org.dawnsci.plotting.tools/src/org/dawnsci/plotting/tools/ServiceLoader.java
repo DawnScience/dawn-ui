@@ -1,10 +1,12 @@
 package org.dawnsci.plotting.tools;
 
+import org.dawnsci.processing.ui.api.IOperationUIService;
 import org.eclipse.dawnsci.analysis.api.conversion.IConversionService;
 import org.eclipse.dawnsci.analysis.api.image.IImageFilterService;
 import org.eclipse.dawnsci.analysis.api.image.IImageTransform;
 import org.eclipse.dawnsci.analysis.api.io.ILoaderService;
 import org.eclipse.dawnsci.analysis.api.persistence.IPersistenceService;
+import org.eclipse.dawnsci.analysis.api.processing.IOperationService;
 import org.eclipse.dawnsci.nexus.INexusFileFactory;
 import org.eclipse.dawnsci.plotting.api.expressions.IExpressionObjectService;
 import org.osgi.service.event.EventAdmin;
@@ -19,6 +21,8 @@ public class ServiceLoader {
 	private static IPersistenceService persistenceService;
 	private static INexusFileFactory nexusFileFactory;
 	private static EventAdmin eventAdmin;
+	private static IOperationService operationService;
+	private static IOperationUIService operationUIService;
 
 	public ServiceLoader() {
 		
@@ -96,6 +100,22 @@ public class ServiceLoader {
 
 	public void setEventAdmin(EventAdmin eventAdmin) {
 		ServiceLoader.eventAdmin = eventAdmin;
+	}
+	
+	public static IOperationUIService getOperationUIService() {
+		return operationUIService;
+	}
+
+	public void setOperationUIService(IOperationUIService operationUIService) {
+		ServiceLoader.operationUIService = operationUIService;
+	}
+	
+	public static IOperationService getOperationService() {
+		return operationService;
+	}
+
+	public void setOperationService(IOperationService operationService) {
+		ServiceLoader.operationService = operationService;
 	}
 
 }

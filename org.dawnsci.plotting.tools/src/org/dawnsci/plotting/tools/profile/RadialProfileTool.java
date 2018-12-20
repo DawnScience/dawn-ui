@@ -8,18 +8,22 @@
  */
 package org.dawnsci.plotting.tools.profile;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.List;
 
 import javax.vecmath.Vector3d;
 
 import org.dawb.common.ui.image.IconUtils;
 import org.dawb.common.ui.menu.MenuAction;
 import org.dawnsci.plotting.tools.Activator;
+import org.dawnsci.plotting.tools.ServiceLoader;
 import org.dawnsci.plotting.tools.utils.ToolUtils;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.dawnsci.analysis.api.diffraction.DetectorProperties;
 import org.eclipse.dawnsci.analysis.api.diffraction.DiffractionCrystalEnvironment;
+import org.eclipse.dawnsci.analysis.dataset.roi.RectangularROI;
 import org.eclipse.dawnsci.analysis.dataset.roi.SectorROI;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.region.IRegion;
@@ -32,16 +36,22 @@ import org.eclipse.january.dataset.DatasetUtils;
 import org.eclipse.january.dataset.DoubleDataset;
 import org.eclipse.january.dataset.IDataset;
 import org.eclipse.dawnsci.analysis.api.metadata.IDiffractionMetadata;
+import org.eclipse.dawnsci.analysis.api.processing.IOperation;
 import org.eclipse.january.metadata.IMetadata;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.Separator;
+import org.eclipse.jface.dialogs.MessageDialog;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import uk.ac.diamond.scisoft.analysis.diffraction.QSpace;
 import uk.ac.diamond.scisoft.analysis.roi.ROIProfile;
 import uk.ac.diamond.scisoft.analysis.roi.XAxis;
 
 public class RadialProfileTool extends SectorProfileTool {
+	
+	private static final Logger logger = LoggerFactory.getLogger(RadialProfileTool.class);
 	
 	private XAxis axis = XAxis.PIXEL;
     private MenuAction profileAxis;
@@ -388,5 +398,50 @@ public class RadialProfileTool extends SectorProfileTool {
 		double maxDistance = Math.sqrt(Math.pow(beamCenter[0]-farCorner[0],2)+Math.pow(beamCenter[1]-farCorner[1],2));
 		SectorROI sector = new SectorROI(beamCenter[0], beamCenter[1], 0, maxDistance, 0, 2*Math.PI);
 		return sector;
+	}
+	
+	protected Action getReductionAction() {
+		return new Action("Data reduction...", Activator.getImageDescriptor("icons/run_workflow.gif")) {
+			@Override
+			public void run() {
+				
+				try {
+					
+					final Collection<IRegion> regions = getPlottingSystem().getRegions();
+					
+					List<IOperation<?, ?>> ops = new ArrayList<>();
+					
+					for (IRegion region : regions) {
+						if (!isRegionTypeSupported(region.getRegionType())) continue;
+						
+						final SectorROI bounds = (SectorROI)region.getROI();
+						if (bounds==null)        continue;
+						if (!region.isVisible()) continue;
+						
+						RadialProfileToolOperation op = (RadialProfileToolOperation)ServiceLoader.getOperationService().create(new RadialProfileToolOperation().getId());
+						RadialProfileToolModel model = op.getModel();
+						model.setRoi(bounds);
+						op.setPassUnmodifiedData(true);
+						op.setStoreOutput(true);
+						ops.add(op);
+					}
+					
+					if (ops.isEmpty()) {
+						//show something
+						return;
+					}
+					
+					IOperation<?, ?> last = ops.get(ops.size()-1);
+					last.setPassUnmodifiedData(false);
+					last.setStoreOutput(false);
+					
+					ServiceLoader.getOperationUIService().runProcessingWithUI(ops.toArray(new IOperation<?, ?>[ops.size()]), sliceMetadata, null);
+				} catch (Exception e) {
+					MessageDialog.openError(getSite().getShell(), "Error Reducing Data!", "Could not reduce data! " + e.getMessage());
+					logger.error("Could not reduce data!", e);
+				}
+				
+			}
+		};
 	}
 }

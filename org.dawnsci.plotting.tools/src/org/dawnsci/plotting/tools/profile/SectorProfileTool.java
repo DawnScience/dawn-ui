@@ -328,7 +328,7 @@ public abstract class SectorProfileTool extends ProfileTool implements IDetector
 	
 	@Override
 	protected boolean isRegionTypeSupported(RegionType type) {
-		return type==RegionType.SECTOR || type==RegionType.RING;
+		return type==RegionType.SECTOR;
 	}
 
 	@Override

@@ -6,6 +6,7 @@ Bundle-Version: 1.0.0.qualifier
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Require-Bundle: org.eclipse.jface;bundle-version="3.11.1",
  org.eclipse.dawnsci.analysis.api,
- org.eclipse.january
+ org.eclipse.january,
+ org.eclipse.dawnsci.analysis.dataset;bundle-version="1.0.0"
 Export-Package: org.dawnsci.processing.ui.api
 Automatic-Module-Name: org.dawnsci.processing.ui.api

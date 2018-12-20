@@ -24,10 +24,12 @@ import org.dawb.common.ui.menu.MenuAction;
 import org.dawb.common.ui.plot.tools.IDataReductionToolPage;
 import org.dawb.common.ui.util.EclipseUtils;
 import org.dawnsci.plotting.tools.Activator;
+import org.dawnsci.plotting.tools.ServiceLoader;
 import org.dawnsci.plotting.tools.preference.FittingPreferencePage;
-import org.dawnsci.plotting.tools.reduction.DataReductionToolPageUtils;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.dawnsci.analysis.api.fitting.functions.IPeak;
+import org.eclipse.dawnsci.analysis.api.processing.IOperation;
+import org.eclipse.dawnsci.analysis.api.processing.model.IOperationModel;
 import org.eclipse.dawnsci.analysis.api.tree.GroupNode;
 import org.eclipse.dawnsci.analysis.api.tree.Node;
 import org.eclipse.dawnsci.analysis.dataset.roi.LinearROI;
@@ -57,7 +59,6 @@ import org.eclipse.jface.viewers.ColumnViewerToolTipSupport;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.jface.window.ToolTip;
-import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -527,8 +528,19 @@ public class PeakFittingTool extends AbstractFittingTool implements IRegionListe
 		dataReduction = new Action("Data reduction...", Activator.getImageDescriptor("icons/run_workflow.gif")) {
 			@Override
 			public void run() {
-				WizardDialog wd = DataReductionToolPageUtils.getToolPageReductionWizardDialog(sliceMetadata,PeakFittingTool.this);
-				wd.open();
+				try {
+					PeakFittingToolOperation op = (PeakFittingToolOperation)ServiceLoader.getOperationService().create(new PeakFittingToolOperation().getId());
+					IOperationModel model = op.getModel();
+					((PeakFittingToolModel)model).setRoi(getFitBounds());
+					
+					IOperation<?, ?> noData = ServiceLoader.getOperationService().create("uk.ac.diamond.scisoft.analysis.processing.operations.NoDataOperation");
+					
+					ServiceLoader.getOperationUIService().runProcessingWithUI(new IOperation[] {op,noData}, sliceMetadata, null);
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				
 			}
 		};
 		

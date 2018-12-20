@@ -8,14 +8,17 @@
  */
 package org.dawnsci.plotting.tools.profile;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
 import org.dawb.common.ui.menu.MenuAction;
 import org.dawnsci.plotting.tools.Activator;
+import org.dawnsci.plotting.tools.ServiceLoader;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.dawnsci.analysis.api.processing.IOperation;
 import org.eclipse.dawnsci.analysis.api.roi.IROI;
 import org.eclipse.dawnsci.analysis.api.tree.GroupNode;
 import org.eclipse.dawnsci.analysis.api.tree.Node;
@@ -39,11 +42,16 @@ import org.eclipse.january.dataset.RGBDataset;
 import org.eclipse.january.dataset.Slice;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.SWT;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import uk.ac.diamond.scisoft.analysis.roi.ROIProfile;
 
 public class BoxProfileTool extends ProfileTool {
+	
+	private static final Logger logger = LoggerFactory.getLogger(BoxProfileTool.class);
 
 	private IAxis xPixelAxis;
 	private IAxis yPixelAxis;
@@ -340,5 +348,50 @@ public class BoxProfileTool extends ProfileTool {
 			slice.appendData(lazyWritables, dataRegion, exportIndex);
 		}
 		return new DataReductionInfo(Status.OK_STATUS);
+	}
+	
+	protected Action getReductionAction() {
+		return new Action("Data reduction...", Activator.getImageDescriptor("icons/run_workflow.gif")) {
+			@Override
+			public void run() {
+				
+				try {
+					
+					final Collection<IRegion> regions = getPlottingSystem().getRegions();
+					
+					List<IOperation<?, ?>> ops = new ArrayList<>();
+					
+					for (IRegion region : regions) {
+						if (!isRegionTypeSupported(region.getRegionType())) continue;
+						
+						final RectangularROI bounds = (RectangularROI)region.getROI();
+						if (bounds==null)        continue;
+						if (!region.isVisible()) continue;
+						
+						BoxProfileToolOperation op = (BoxProfileToolOperation)ServiceLoader.getOperationService().create(new BoxProfileToolOperation().getId());
+						BoxProfileToolModel model = op.getModel();
+						model.setRoi(bounds);
+						op.setPassUnmodifiedData(true);
+						op.setStoreOutput(true);
+						ops.add(op);
+					}
+					
+					if (ops.isEmpty()) {
+						//show something
+						return;
+					}
+					
+					IOperation<?, ?> last = ops.get(ops.size()-1);
+					last.setPassUnmodifiedData(false);
+					last.setStoreOutput(false);
+					
+					ServiceLoader.getOperationUIService().runProcessingWithUI(ops.toArray(new IOperation<?, ?>[ops.size()]), sliceMetadata, null);
+				} catch (Exception e) {
+					MessageDialog.openError(getSite().getShell(), "Error Reducing Data!", "Could not reduce data! " + e.getMessage());
+					logger.error("Could not reduce data!", e);
+				}
+				
+			}
+		};
 	}
 }

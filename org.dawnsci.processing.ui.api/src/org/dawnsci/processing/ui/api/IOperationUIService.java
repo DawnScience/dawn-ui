@@ -2,9 +2,11 @@ package org.dawnsci.processing.ui.api;
 
 import java.util.List;
 
+import org.eclipse.dawnsci.analysis.api.conversion.ProcessingOutputType;
 import org.eclipse.dawnsci.analysis.api.processing.IOperation;
 import org.eclipse.dawnsci.analysis.api.processing.OperationData;
 import org.eclipse.dawnsci.analysis.api.processing.model.IOperationModel;
+import org.eclipse.dawnsci.analysis.dataset.slicer.SliceFromSeriesMetadata;
 import org.eclipse.january.dataset.IDataset;
 
 public interface IOperationUIService {
@@ -52,4 +54,6 @@ public interface IOperationUIService {
 	 * @return an IOperationModelWizard containing the requested pages
 	 */
 	public IOperationModelWizard getWizard(IDataset initialData, List<IOperationSetupWizardPage> startPages, String operationsFile, List<IOperationSetupWizardPage> endPages);
+	
+	public void runProcessingWithUI(IOperation[] operations, SliceFromSeriesMetadata metadata, ProcessingOutputType outputType);
 }

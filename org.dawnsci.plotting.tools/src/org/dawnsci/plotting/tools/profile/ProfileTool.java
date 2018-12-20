@@ -70,8 +70,8 @@ public abstract class ProfileTool extends AbstractToolPage  implements IROIListe
 	private   boolean                isUIJob = false;
 	protected boolean                alwaysDownsample = false;
 	
-	private SliceFromSeriesMetadata sliceMetadata;
-	private IAction reduceAction;
+	protected SliceFromSeriesMetadata sliceMetadata;
+	protected IAction reduceAction;
 
 	public ProfileTool() {
 		
@@ -253,20 +253,14 @@ public abstract class ProfileTool extends AbstractToolPage  implements IROIListe
 			}
 		};
 		
-		reduceAction = new Action("Data reduction...", Activator.getImageDescriptor("icons/run_workflow.gif")) {
-			@Override
-			public void run() {
-				WizardDialog wd = DataReductionToolPageUtils.getToolPageReductionWizardDialog(sliceMetadata,ProfileTool.this);
-				wd.open();
-			}
-		};
+		reduceAction = getReductionAction();
 		
-		reduceAction.setEnabled(false);
+		if (reduceAction != null) reduceAction.setEnabled(false);
 		
 		
 		if (actionbars != null){
 			actionbars.getToolBarManager().add(new Separator("org.dawb.workbench.plotting.tools.profile.newProfileGroup"));
-			actionbars.getToolBarManager().insertAfter("org.dawb.workbench.plotting.tools.profile.newProfileGroup", reduceAction);
+			if (reduceAction != null) actionbars.getToolBarManager().insertAfter("org.dawb.workbench.plotting.tools.profile.newProfileGroup", reduceAction);
 			actionbars.getToolBarManager().insertAfter("org.dawb.workbench.plotting.tools.profile.newProfileGroup", reselect);
 			actionbars.getToolBarManager().add(new Separator("org.dawb.workbench.plotting.tools.profile.newProfileGroupAfter"));
 		}
@@ -307,6 +301,10 @@ public abstract class ProfileTool extends AbstractToolPage  implements IROIListe
 		}
 
 		super.createControl(parent);
+	}
+	
+	protected IAction getReductionAction() {
+		return null;
 	}
 
 	@Override

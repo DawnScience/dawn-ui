@@ -26,7 +26,7 @@ public class ExtendedFileSelectionDialog extends FileSelectionDialog {
 			this.isHDF5 = isH5;
 			this.canLoad = canLoad;
 			this.loadIntoDataVis = loadDataVis;
-			this.processingOutputType = processingOutputType;
+			this.processingOutputType = processingOutputType != null ? processingOutputType : ProcessingOutputType.PROCESSING_ONLY;
 		}
 		
 		@Override
