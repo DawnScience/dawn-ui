@@ -120,18 +120,22 @@ public class DataOptionsUtils {
 		int[] dd = nDimensions.getDimensionsWithDescription();
 		//data axes should be set in sum/average
 		String[] ax = input.getPrimaryAxes();
-		String[] inax = new String[nDimensions.getRank()];
+		
+		if (ax != null) {
+			String[] inax = new String[nDimensions.getRank()];
 
-		for (int i = 0; i < nDimensions.getRank(); i++) {
-			ndc.setAxis(i, null);
+			for (int i = 0; i < nDimensions.getRank(); i++) {
+				ndc.setAxis(i, null);
+			}
+
+			for (int i = 0; i < dd.length; i++) {
+				inax[dd[i]] = ax[dd[i]];
+				ndc.setAxis(dd[i], ax[dd[i]]);
+			}
+			
+			dop.setAxes(inax);
 		}
-
-		for (int i = 0; i < dd.length; i++) {
-			inax[dd[i]] = ax[dd[i]];
-			ndc.setAxis(dd[i], ax[dd[i]]);
-		}
-
-		dop.setAxes(inax);
+		
 
 		return dop;
 	}

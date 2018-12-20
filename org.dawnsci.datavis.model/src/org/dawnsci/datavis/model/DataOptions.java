@@ -118,9 +118,7 @@ public class DataOptions implements IDataObject, IDataPackage {
 	public ILazyDataset getLazyDataset() {
 		if (data == null || !Arrays.equals(data.getShape(), parent.getLazyDataset(name).getShape())) {
 			ILazyDataset local = parent.getLazyDataset(name).getSliceView();
-			if (axes != null) {
-				includeAxesMetadata(local);
-			}
+			includeAxesMetadata(local);
 			data = local;
 		}
 		return data;
@@ -128,6 +126,7 @@ public class DataOptions implements IDataObject, IDataPackage {
 
 	protected void includeAxesMetadata(ILazyDataset local) {
 		AxesMetadata ax;
+		if (axes == null) return;
 		try {
 			ax = MetadataFactory.createMetadata(AxesMetadata.class, axes.length);
 			for (int i = 0; i < axes.length ; i++) {
