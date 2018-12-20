@@ -99,7 +99,7 @@ public class RecentPlacesImpl implements IRecentPlaces {
 
 	@Override
 	public List<String> getRecentFiles() {
-		if (lastDirectories.isEmpty()) {
+		if (lastFiles.isEmpty()) {
 			fillListFromPreference(lastFiles, RECENT_FILES);
 		}
 
