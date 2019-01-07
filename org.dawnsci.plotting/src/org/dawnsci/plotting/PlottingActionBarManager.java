@@ -25,10 +25,12 @@ import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.dawnsci.plotting.api.ActionType;
 import org.eclipse.dawnsci.plotting.api.EmptyPageSite;
+import org.eclipse.dawnsci.plotting.api.IAcceptLocationInfo;
 import org.eclipse.dawnsci.plotting.api.IPlotActionSystem;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.ITraceActionProvider;
 import org.eclipse.dawnsci.plotting.api.ManagerType;
+import org.eclipse.dawnsci.plotting.api.PlotLocationInfo;
 import org.eclipse.dawnsci.plotting.api.PlotType;
 import org.eclipse.dawnsci.plotting.api.preferences.BasePlottingConstants;
 import org.eclipse.dawnsci.plotting.api.tool.IToolChangeListener;
@@ -84,6 +86,7 @@ public class PlottingActionBarManager implements IPlotActionSystem {
 	protected MenuAction                imageMenu;
 	protected MenuAction                xyMenu;
 	protected ITraceActionProvider      traceActionProvider;
+	private List<IAction>               popupMenuActions;
 
 	private boolean showCustomPlotActions = true;
 	
@@ -117,6 +120,7 @@ public class PlottingActionBarManager implements IPlotActionSystem {
 		}
 		
 		this.traceActionProvider = traceActionProvider;
+		this.popupMenuActions = new ArrayList<>();
 	}       
 
 	
@@ -695,7 +699,11 @@ public class PlottingActionBarManager implements IPlotActionSystem {
 	public void registerGroup(String groupName, ManagerType type) {
 		
 		groupName = system.getPlotName()+"/"+groupName;
-
+		
+		if (type == ManagerType.POPUP) {
+			return;
+		}
+		
 		if (getActionBars()!=null) {
 			IContributionManager man=null;
 			if (type==ManagerType.TOOLBAR) {
@@ -739,6 +747,12 @@ public class PlottingActionBarManager implements IPlotActionSystem {
 		if (action.getId()==null) {
 			action.setId(groupName+action.getText());
 		}
+		
+		if (manType == ManagerType.POPUP) {
+			popupMenuActions.add(action);
+			return;
+		}
+		
 		final IContributionManager man = manType==ManagerType.MENUBAR 
 				                       ? getActionBars().getMenuManager() 
 				                       : getActionBars().getToolBarManager();
@@ -900,6 +914,26 @@ public class PlottingActionBarManager implements IPlotActionSystem {
 	}
 	public void setShowCustomPlotActions(boolean showCustomPlotActions) {
 		this.showCustomPlotActions = showCustomPlotActions;
+	}
+	@Override
+	public void addPopupAction(IAction action) {
+		popupMenuActions.add(action);
+		
+	}
+	@Override
+	public void fillPopupActions(IContributionManager manager, PlotLocationInfo bean) {
+		
+		if (!popupMenuActions.isEmpty()) {
+			manager.add(new Separator());
+		}
+		
+		for (IAction a : popupMenuActions) {
+			if (a instanceof IAcceptLocationInfo) {
+				((IAcceptLocationInfo)a).setLocationInfo(bean);
+			}
+			manager.add(a);
+		}
+		
 	}
 
 }

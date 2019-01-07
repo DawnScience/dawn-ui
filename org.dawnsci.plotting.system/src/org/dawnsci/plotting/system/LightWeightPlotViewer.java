@@ -43,6 +43,7 @@ import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystemViewer;
 import org.eclipse.dawnsci.plotting.api.IPrintablePlotting;
 import org.eclipse.dawnsci.plotting.api.ITraceActionProvider;
+import org.eclipse.dawnsci.plotting.api.PlotLocationInfo;
 import org.eclipse.dawnsci.plotting.api.PlotType;
 import org.eclipse.dawnsci.plotting.api.annotation.AnnotationUtils;
 import org.eclipse.dawnsci.plotting.api.annotation.IAnnotation;
@@ -158,13 +159,13 @@ import org.slf4j.LoggerFactory;
 public class LightWeightPlotViewer<T> extends AbstractPlottingViewer<T> implements IPlottingSystemViewer<T>, IAnnotationSystem, IRegionSystem, IAxisSystem, IPrintablePlotting, ITraceActionProvider, IAdaptable {
 
 	private static final Logger logger = LoggerFactory.getLogger(LightWeightPlotViewer.class);
-	
-    // Canvas used in SWT mode
-    private Canvas           figureCanvas;
 
-    // Controls
+	// Canvas used in SWT mode
+	private Canvas           figureCanvas;
+
+	// Controls
 	private XYRegionGraph          xyGraph;
-	
+
 	// Plotting stuff
 	private PlottingSystemImpl<T>  system;
 	private LightWeightPlotActions plotActionsCreator;
@@ -175,15 +176,15 @@ public class LightWeightPlotViewer<T> extends AbstractPlottingViewer<T> implemen
 	private Axis                  colorMapAxis;
 	public static final String XAXIS_DEFAULT_NAME = "X-Axis";
 	public static final String YAXIS_DEFAULT_NAME = "Y-Axis";
-	
+
 	private static final double COLORMAP_WHEEL_SCALE = 10;
 
 	private LayeredPane content;
 
 	private static String lastPath;
-	
+
 	private static final Collection<Class<? extends ITrace>> SUPPORTED_TRACES = Arrays.asList(ILineTrace.class, IImageTrace.class, IVectorTrace.class, IImageStackTrace.class);
-	
+
 	public void init(IPlottingSystem<T> system) {
 		this.system = (PlottingSystemImpl<T>)system;
 	}
@@ -196,122 +197,122 @@ public class LightWeightPlotViewer<T> extends AbstractPlottingViewer<T> implemen
 	public void createControl(final T parent) {
 
 		if (plotContents!=null) return;		
-		
+
 		LightweightSystem lws = null;
 		if (parent instanceof Composite) {
 			Canvas xyCanvas = new Canvas((Composite)parent, SWT.DOUBLE_BUFFERED|SWT.NO_REDRAW_RESIZE|SWT.NO_BACKGROUND);
 			lws = new LightweightSystem(xyCanvas);
-			
+
 			// Stops a mouse wheel move corrupting the plotting area, but it wobbles a bit.
 			xyCanvas.addMouseWheelListener(getMouseWheelListener());
 			xyCanvas.addKeyListener(getKeyListener());
-			
+
 			lws.setControl(xyCanvas);
 			xyCanvas.setBackground(xyCanvas.getDisplay().getSystemColor(SWT.COLOR_WHITE));
-			
-	 		final MenuManager popupMenu = new MenuManager();
+
+			final MenuManager popupMenu = new MenuManager();
 			popupMenu.setRemoveAllWhenShown(true); // Remake menu each time
-	        xyCanvas.setMenu(popupMenu.createContextMenu(xyCanvas));
-	        popupMenu.addMenuListener(getIMenuListener());
-	        
-	        this.figureCanvas = xyCanvas;
+			xyCanvas.setMenu(popupMenu.createContextMenu(xyCanvas));
+			popupMenu.addMenuListener(getIMenuListener());
+
+			this.figureCanvas = xyCanvas;
 		}
 		this.xyGraph = new XYRegionGraph();
 		xyGraph.setSelectionProvider(system.getSelectionProvider());
 		IActionBars bars = system.getActionBars();
- 		PlotActionsManagerImpl actionBarManager = (PlotActionsManagerImpl)system.getPlotActionSystem();
+		PlotActionsManagerImpl actionBarManager = (PlotActionsManagerImpl)system.getPlotActionSystem();
 		// We contain the action bars in an internal object
 		// if the API user said they were null. This allows the API
 		// user to say null for action bars and then use:
 		// getPlotActionSystem().fillXXX() to add their own actions.
- 		if (bars==null) {
- 			bars = actionBarManager.createEmptyActionBars();
- 			system.setActionBars(bars);
- 		}
+		if (bars==null) {
+			bars = actionBarManager.createEmptyActionBars();
+			system.setActionBars(bars);
+		}
 
- 		actionBarManager.init(this);
- 		this.plotActionsCreator = new LightWeightPlotActions();
- 		plotActionsCreator.init(this, xyGraph, actionBarManager);
- 		plotActionsCreator.createLightWeightActions();
-		 
- 		// Create the layers (currently everything apart from the temporary 
- 		// region draw layer is on 0)
- 		this.content      = new LayeredPane();
-        new RegionCreationLayer(content, xyGraph.getRegionArea());  
-        graphLayer = new Layer();
-        
-        graphLayer.setLayoutManager(new BorderLayout());
-        
-        plotContents = new Figure();
-        plotContents.setLayoutManager(new GridLayout(1, false));
-        plotContents.add(xyGraph, new GridData(SWT.FILL, SWT.FILL, true, true));
-        graphLayer.add(plotContents, BorderLayout.CENTER);
-        
-        
-        colorMapAxis = new DAxis();
-        colorMapAxis.setShowMaxLabel(true);
-        colorMapAxis.setShowMinLabel(true);
-        
+		actionBarManager.init(this);
+		this.plotActionsCreator = new LightWeightPlotActions();
+		plotActionsCreator.init(this, xyGraph, actionBarManager);
+		plotActionsCreator.createLightWeightActions();
+
+		// Create the layers (currently everything apart from the temporary 
+		// region draw layer is on 0)
+		this.content      = new LayeredPane();
+		new RegionCreationLayer(content, xyGraph.getRegionArea());  
+		graphLayer = new Layer();
+
+		graphLayer.setLayoutManager(new BorderLayout());
+
+		plotContents = new Figure();
+		plotContents.setLayoutManager(new GridLayout(1, false));
+		plotContents.add(xyGraph, new GridData(SWT.FILL, SWT.FILL, true, true));
+		graphLayer.add(plotContents, BorderLayout.CENTER);
+
+
+		colorMapAxis = new DAxis();
+		colorMapAxis.setShowMaxLabel(true);
+		colorMapAxis.setShowMinLabel(true);
+
 		this.intensity = new ColorMapRamp(colorMapAxis);
-		
+
 		ColorMapMouseListener l = new ColorMapMouseListener();
-		
+
 		intensity.addMouseMotionListener(l);
 		intensity.addMouseListener(l);
-		
+
 		Color bgdColor = parent instanceof Composite? ((Composite)parent).getBackground():null;
- 		intensity.setBorder(new LineBorder(bgdColor != null ? bgdColor : ColorConstants.white, 5));
-        graphLayer.add(intensity, BorderLayout.RIGHT);
-        intensity.setVisible(false);
-      
-        this.folderScale = new ScaledSliderFigure();
-        folderScale.setRange(0, 100);
-        folderScale.setStepIncrement(1.0);
-        folderScale.setValue(0);
-        folderScale.setHorizontal(true);
-        folderScale.setShowHi(false);
-        folderScale.setShowLo(false);
-        folderScale.setShowHihi(false);
-        folderScale.setShowLolo(false);
-        folderScale.setShowMarkers(false);
-        folderScale.setDrawFocus(false);
-        folderScale.addManualValueChangeListener(new IManualValueChangeListener() {			
+		intensity.setBorder(new LineBorder(bgdColor != null ? bgdColor : ColorConstants.white, 5));
+		graphLayer.add(intensity, BorderLayout.RIGHT);
+		intensity.setVisible(false);
+
+		this.folderScale = new ScaledSliderFigure();
+		folderScale.setRange(0, 100);
+		folderScale.setStepIncrement(1.0);
+		folderScale.setValue(0);
+		folderScale.setHorizontal(true);
+		folderScale.setShowHi(false);
+		folderScale.setShowLo(false);
+		folderScale.setShowHihi(false);
+		folderScale.setShowLolo(false);
+		folderScale.setShowMarkers(false);
+		folderScale.setDrawFocus(false);
+		folderScale.addManualValueChangeListener(new IManualValueChangeListener() {			
 			@Override
 			public void manualValueChanged(double newValue) {
 				setStackIndex((int)Math.round(newValue));
 			}
 		});
-		
-        content.add(graphLayer,     0);
+
+		content.add(graphLayer,     0);
 		if (lws!=null) {
 			lws.setContents(content);
 		} else {
 			((Figure)parent).add(content);
 		}
-		
+
 		// Create status contribution for position
 		IWorkbenchPart part = system.getPart();
 		if (part!=null) {
 			IStatusLineManager statusLine = null;
-		    if (part instanceof IViewPart) {
-		    	bars = ((IViewPart)part).getViewSite().getActionBars();
-		    	statusLine = bars.getStatusLineManager();
+			if (part instanceof IViewPart) {
+				bars = ((IViewPart)part).getViewSite().getActionBars();
+				statusLine = bars.getStatusLineManager();
 			} else if (part instanceof IEditorPart) {
 				bars = ((IEditorPart)part).getEditorSite().getActionBars();
-		    	statusLine = bars.getStatusLineManager();
+				statusLine = bars.getStatusLineManager();
 			}
-		    if (statusLine!=null) {
-		    	xyGraph.getRegionArea().setStatusLineManager(statusLine);
-		    }
+			if (statusLine!=null) {
+				xyGraph.getRegionArea().setStatusLineManager(statusLine);
+			}
 		}
-		
+
 		// Configure axes
 		xyGraph.getPrimaryXAxis().setShowMajorGrid(true);
 		xyGraph.getPrimaryXAxis().setShowMinorGrid(true);		
 		xyGraph.getPrimaryYAxis().setShowMajorGrid(true);
 		xyGraph.getPrimaryYAxis().setShowMinorGrid(true);
 		xyGraph.getPrimaryYAxis().setTitle("");
-		
+
 		if (system.getPlotType()!=null) {
 			// Do not change this, the test is correct, remove axes in non-1D only. 1D always has axes.
 			if (!PlottingSystemActivator.getPlottingPreferenceStore().getBoolean(PlottingConstants.SHOW_AXES) && !system.getPlotType().is1D()) {
@@ -321,18 +322,18 @@ public class LightWeightPlotViewer<T> extends AbstractPlottingViewer<T> implemen
 		}
 		if (bars!=null) bars.updateActionBars();
 		if (bars!=null) bars.getToolBarManager().update(true);
-           
-        
-        if (system.getPlotType()!=null) {
-        	actionBarManager.switchActions(system.getPlotType());
-        }
 
-        if (parent instanceof Composite) {
-        	((Composite)parent).layout();
-        } else {
-        	((Figure)parent).revalidate();
-        }
-		
+
+		if (system.getPlotType()!=null) {
+			actionBarManager.switchActions(system.getPlotType());
+		}
+
+		if (parent instanceof Composite) {
+			((Composite)parent).layout();
+		} else {
+			((Figure)parent).revalidate();
+		}
+
 	}
 	public boolean isPlotTypeSupported(PlotType type) {
 		return type.is1D() || type.is2D();
@@ -350,20 +351,20 @@ public class LightWeightPlotViewer<T> extends AbstractPlottingViewer<T> implemen
 
 	private void setFolderScaleVisible(boolean vis) {
 		if (vis) {
-	        GridData data = new GridData(SWT.FILL, SWT.FILL, true, false);
-	        data.heightHint=80;
-	        plotContents.add(folderScale, data);
+			GridData data = new GridData(SWT.FILL, SWT.FILL, true, false);
+			data.heightHint=80;
+			plotContents.add(folderScale, data);
 		} else {
 			if (folderScale.getParent()==null) return;
 			plotContents.remove(folderScale);
 		}
 	}
 
-	
+
 	public void addImageTraceListener(final ITraceListener l) {
 		if (xyGraph!=null) ((RegionArea)xyGraph.getPlotArea()).addImageTraceListener(l);
 	}
-	
+
 	public void removeImageTraceListener(final ITraceListener l) {
 		if (xyGraph!=null) ((RegionArea)xyGraph.getPlotArea()).removeImageTraceListener(l);
 	}
@@ -375,19 +376,19 @@ public class LightWeightPlotViewer<T> extends AbstractPlottingViewer<T> implemen
 		if (mouseWheelListener == null) mouseWheelListener = new MouseWheelListener() {
 			@Override
 			public void mouseScrolled(MouseEvent e) {
-				
+
 				int direction = e.count > 0 ? 1 : -1;
 
 				IFigure fig = getFigureAtCurrentMousePosition(null);
-				
+
 				if (isColorMapFigure(fig)) {
-					
+
 					ImageTrace image = getImageTrace();
 					if (image == null) return;
-					
+
 					ImageServiceBean bean = image.getImageServiceBean();
 					if (bean == null) return;
-					
+
 					double max = bean.getMax().doubleValue();
 					double min = bean.getMin().doubleValue();
 
@@ -406,7 +407,7 @@ public class LightWeightPlotViewer<T> extends AbstractPlottingViewer<T> implemen
 
 					return;
 				}
-				
+
 				if (fig!=null && fig.getParent() instanceof Axis) {
 					Axis axis = (Axis)fig.getParent();
 					final double center = axis.getPositionValue(axis.isHorizontal() ? e.x : e.y, false);
@@ -414,12 +415,12 @@ public class LightWeightPlotViewer<T> extends AbstractPlottingViewer<T> implemen
 					xyGraph.repaint();
 					return;
 				}
-			
+
 				if (xyGraph==null) return;
 				if (e.count==0)    return;
 				String level  = System.getProperty("org.dawb.workbench.plotting.system.zoomLevel");
 				double factor = level != null ? Double.parseDouble(level) : ZOOM_RATIO;
-				
+
 				boolean useWhite = PlottingSystemActivator.getPlottingPreferenceStore().getBoolean(PlottingConstants.ZOOM_INTO_WHITESPACE);
 				xyGraph.setZoomLevel(e, direction*factor, useWhite);
 				redraw();
@@ -427,7 +428,7 @@ public class LightWeightPlotViewer<T> extends AbstractPlottingViewer<T> implemen
 		};
 		return mouseWheelListener;
 	}
-	
+
 	private boolean isColorMapFigure(IFigure fig) {
 		return (fig != null &&
 				fig.getParent() != null &&
@@ -441,7 +442,7 @@ public class LightWeightPlotViewer<T> extends AbstractPlottingViewer<T> implemen
 
 	private KeyListener keyListener;
 	private KeyListener getKeyListener() {
-		
+
 		final IActionBars bars = system.getActionBars();
 		if (keyListener==null) keyListener = new KeyAdapter() {
 			private ZoomType previousTool;
@@ -450,15 +451,15 @@ public class LightWeightPlotViewer<T> extends AbstractPlottingViewer<T> implemen
 			public void keyPressed(KeyEvent e) {
 				if (e.keyCode==27) { // Esc
 					xyGraph.clearRegionTool();
-					
+
 				} else if (e.keyCode==16777230 || e.character=='h') {
 					final IContributionItem action = bars.getToolBarManager().find("org.dawb.workbench.plotting.histo");
-				    if (action!=null && action.isVisible() && action instanceof ActionContributionItem) {
-				    	ActionContributionItem iaction = (ActionContributionItem)action;
-				    	iaction.getAction().setChecked(!iaction.getAction().isChecked());
-				    	iaction.getAction().run();
-				    }
-				    
+					if (action!=null && action.isVisible() && action instanceof ActionContributionItem) {
+						ActionContributionItem iaction = (ActionContributionItem)action;
+						iaction.getAction().setChecked(!iaction.getAction().isChecked());
+						iaction.getAction().run();
+					}
+
 				} else if (e.character=='f') {
 					final ImageTrace trace = xyGraph.getRegionArea().getImageTrace();
 					// Force functional creation of image rather than 8-bit
@@ -476,98 +477,104 @@ public class LightWeightPlotViewer<T> extends AbstractPlottingViewer<T> implemen
 						logger.debug("Cannot apply custom palette function", e1);
 					}
 
-					
-					
+
+
 				} else if (e.keyCode== SWT.F11) {
 					final IContributionItem action = bars.getToolBarManager().find("org.dawb.workbench.fullscreen");
-				    if (action!=null && action.isVisible() && action instanceof ActionContributionItem) {
-				    	ActionContributionItem iaction = (ActionContributionItem)action;
-				    	iaction.getAction().setChecked(!iaction.getAction().isChecked());
-				    	iaction.getAction().run();
-				    }
+					if (action!=null && action.isVisible() && action instanceof ActionContributionItem) {
+						ActionContributionItem iaction = (ActionContributionItem)action;
+						iaction.getAction().setChecked(!iaction.getAction().isChecked());
+						iaction.getAction().run();
+					}
 				} else if (e.keyCode==16777217) {//Up
- 					Point point = Display.getDefault().getCursorLocation();
- 					point.y-=1;
- 					Display.getDefault().setCursorLocation(point);
-					
- 				} else if (e.keyCode==16777218) {//Down
- 					Point point = Display.getDefault().getCursorLocation();
- 					point.y+=1;
- 					Display.getDefault().setCursorLocation(point);
- 					
- 				} else if (e.keyCode==16777219) {//Left
- 					Point point = Display.getDefault().getCursorLocation();
- 					point.x-=1;
- 					Display.getDefault().setCursorLocation(point);
-					
- 				} else if (e.keyCode==16777220) {//Right
- 					Point point = Display.getDefault().getCursorLocation();
- 					point.x+=1;
- 					Display.getDefault().setCursorLocation(point);
- 				} else if (e.keyCode==127) {//Delete
+					Point point = Display.getDefault().getCursorLocation();
+					point.y-=1;
+					Display.getDefault().setCursorLocation(point);
+
+				} else if (e.keyCode==16777218) {//Down
+					Point point = Display.getDefault().getCursorLocation();
+					point.y+=1;
+					Display.getDefault().setCursorLocation(point);
+
+				} else if (e.keyCode==16777219) {//Left
+					Point point = Display.getDefault().getCursorLocation();
+					point.x-=1;
+					Display.getDefault().setCursorLocation(point);
+
+				} else if (e.keyCode==16777220) {//Right
+					Point point = Display.getDefault().getCursorLocation();
+					point.x+=1;
+					Display.getDefault().setCursorLocation(point);
+				} else if (e.keyCode==127) {//Delete
 					IFigure fig = getFigureAtCurrentMousePosition(IRegionContainer.class);
- 					if (fig!=null && fig instanceof IRegionContainer) {
- 						final IRegion region = (AbstractSelectionRegion<?>) ((IRegionContainer)fig).getRegion();
- 						if (region.isUserRegion())
- 							xyGraph.removeRegion(region);
- 					}
- 				}
+					if (fig!=null && fig instanceof IRegionContainer) {
+						final IRegion region = (AbstractSelectionRegion<?>) ((IRegionContainer)fig).getRegion();
+						if (region.isUserRegion())
+							xyGraph.removeRegion(region);
+					}
+				}
 				if (e.keyCode == 131072) { // SHIFT
 					xyGraph.getRegionArea().setShiftDown(true);
 				}
-		        if (e.keyCode == 262144) { // CONTROL
-		        	xyGraph.getRegionArea().setControlDown(true);
+				if (e.keyCode == 262144) { // CONTROL
+					xyGraph.getRegionArea().setControlDown(true);
 					previousTool = xyGraph.getZoomType();
 					xyGraph.setZoomType(ZoomType.NONE);
-		        }
-		        xyGraph.getRegionArea().setKeyEvent(e);
+				}
+				xyGraph.getRegionArea().setKeyEvent(e);
 			}
-			
+
 			@Override
 			public void keyReleased(KeyEvent e) {
-				
+
 				if ((e.stateMask & SWT.SHIFT)==SWT.SHIFT) {
 					xyGraph.getRegionArea().setShiftDown(false);
 				}
 				if ((e.stateMask & SWT.CONTROL)==SWT.CONTROL) {
-		        	xyGraph.getRegionArea().setControlDown(false);
+					xyGraph.getRegionArea().setControlDown(false);
 					if (previousTool!=null) {
 						xyGraph.setZoomType(previousTool);
 						previousTool = null;
 					}
-		        }
-		        if (e.character == 'x') {
-		        	if (system.getPlotType().is1D()) {
-		        		IAxis xAxis = system.getSelectedXAxis();
-		        		if (xAxis != null) {
-		        			xAxis.setLog10(!xAxis.isLog10());
-		        		}
-		        	}
-		        }
-		        if (e.character == 'y') {
-		        	if (system.getPlotType().is1D()) {
-		        		IAxis yAxis = system.getSelectedYAxis();
+				}
+				if (e.character == 'x') {
+					if (system.getPlotType().is1D()) {
+						IAxis xAxis = system.getSelectedXAxis();
+						if (xAxis != null) {
+							xAxis.setLog10(!xAxis.isLog10());
+						}
+					}
+				}
+				if (e.character == 'y') {
+					if (system.getPlotType().is1D()) {
+						IAxis yAxis = system.getSelectedYAxis();
 						if (yAxis != null) {
 							yAxis.setLog10(!yAxis.isLog10());
 						}
-		        	}
-		        }
-		        xyGraph.getRegionArea().setKeyEvent(null);
+					}
+				}
+				xyGraph.getRegionArea().setKeyEvent(null);
 			}
 		};
 		return keyListener;
 	}
 
-	
+
 	private IMenuListener popupListener;
 	private IMenuListener getIMenuListener() {
 		if (popupListener == null) {
 			popupListener = new IMenuListener() {			
 				@Override
 				public void menuAboutToShow(IMenuManager manager) {
+
+					IRegion beanRegion = null;
+					ITrace beanTrace = null;
+					IAxis beanAxis = null;
+
 					IFigure fig = getFigureAtCurrentMousePosition(IRegionContainer.class);
-					if (fig!=null) {
+					if (fig!=null && fig instanceof IRegionContainer && ((IRegionContainer)fig).getRegion().isUserRegion()) {
 						final IRegion region = ((IRegionContainer)fig).getRegion();
+						beanRegion = region;
 						SelectionRegionFactory.fillActions(manager, region, xyGraph, getSystem());
 
 						final Action configure = new Action("Configure '"+region.getName()+"'", PlottingSystemActivator.getImageDescriptor("icons/RegionProperties.png")) {
@@ -585,6 +592,7 @@ public class LightWeightPlotViewer<T> extends AbstractPlottingViewer<T> implemen
 						fig = getFigureAtCurrentMousePosition(null);
 						if (fig instanceof ITraceContainer) {
 							final ITrace trace = ((ITraceContainer) fig).getTrace();
+							beanTrace = trace;
 							fillTraceActions(manager, trace, system);
 						}
 						if (fig instanceof Label && fig.getParent() instanceof Annotation) {
@@ -593,62 +601,79 @@ public class LightWeightPlotViewer<T> extends AbstractPlottingViewer<T> implemen
 						if (fig instanceof LinearScaleTickLabels) {
 							LinearScaleTickLabels label = (LinearScaleTickLabels)fig;
 							Axis scale = (Axis)label.getScale();
+							if (scale instanceof IAxis) beanAxis = (IAxis)scale;
 							fillAxisConfigure(manager, (AspectAxis)scale);
 						}
 					}
-					
+
 					if (isColorMapFigure(fig)) {
 						fillColorMapConfigure(manager);
 					} else {
 						system.getPlotActionSystem().fillZoomActions(manager);
 					}
-					
-					
+
+					double[] xyPosition = getXYPosition();
+
+					PlotLocationInfo bean = new PlotLocationInfo(system, xyPosition[0], xyPosition[1], beanRegion, beanTrace, beanAxis);
+
+					system.getPlotActionSystem().fillPopupActions(manager, bean);
+
 					manager.update();
 				}
 			};
 		}
 		return popupListener;
 	}
-	
+
+	private double[] getXYPosition() {
+		Point   pnt       = Display.getDefault().getCursorLocation();
+		Point   par       = toDisplay(new Point(0,0));
+
+		final int xOffset = par.x+xyGraph.getLocation().x;
+		final int yOffset = par.y+xyGraph.getLocation().y;
+		final double xVal   = xyGraph.getSelectedXAxis().getPositionValue(pnt.x - xOffset);
+		final double yVal   = xyGraph.getSelectedYAxis().getPositionValue(pnt.y - yOffset);
+		return new double[] {xVal,yVal};
+	}
+
 	protected IFigure getFigureAtCurrentMousePosition(Class<?> type) {
 		Point   pnt       = Display.getDefault().getCursorLocation();
 		Point   par       = toDisplay(new Point(0,0));
 
 		final int xOffset = par.x+xyGraph.getLocation().x;
 		final int yOffset = par.y+xyGraph.getLocation().y;
-		
-		IFigure fig = xyGraph.findFigureAt(pnt.x-xOffset, pnt.y-yOffset);
-        if (fig!=null && type==null)          return fig;
-        if (fig!=null && type.isInstance(fig)) return fig;
-        
-		
-		fig = intensity.findFigureAt(pnt.x-par.x, pnt.y-par.y);
-		
-		if (fig!=null && type==null)          return fig;
-    	if (fig!=null && type.isInstance(fig)) return fig;
-		
-		// We loop +-5 around the click point to find what we want
-        for (int x = 1;x<=5; x++){
-        	fig = xyGraph.findFigureAt(pnt.x-xOffset+x, pnt.y-yOffset);
-            if (fig!=null && type==null)          return fig;
-        	if (fig!=null && type.isInstance(fig)) return fig;
-        	
-        	fig = xyGraph.findFigureAt(pnt.x-xOffset-x, pnt.y-yOffset);
-            if (fig!=null && type==null)          return fig;
-        	if (fig!=null && type.isInstance(fig)) return fig;
-        }
-        for (int y = 1;y<=5; y++){
-        	fig = xyGraph.findFigureAt(pnt.x-xOffset, pnt.y-yOffset+y);
-            if (fig!=null && type==null)          return fig;
-        	if (fig!=null && type.isInstance(fig)) return fig;
-        	
-        	fig = xyGraph.findFigureAt(pnt.x-xOffset, pnt.y-yOffset-y);
-            if (fig!=null && type==null)          return fig;
-        	if (fig!=null && type.isInstance(fig)) return fig;
-        }
 
-        return null;
+		IFigure fig = xyGraph.findFigureAt(pnt.x-xOffset, pnt.y-yOffset);
+		if (fig!=null && type==null)          return fig;
+		if (fig!=null && type.isInstance(fig)) return fig;
+
+
+		fig = intensity.findFigureAt(pnt.x-par.x, pnt.y-par.y);
+
+		if (fig!=null && type==null)          return fig;
+		if (fig!=null && type.isInstance(fig)) return fig;
+
+		// We loop +-5 around the click point to find what we want
+		for (int x = 1;x<=5; x++){
+			fig = xyGraph.findFigureAt(pnt.x-xOffset+x, pnt.y-yOffset);
+			if (fig!=null && type==null)          return fig;
+			if (fig!=null && type.isInstance(fig)) return fig;
+
+			fig = xyGraph.findFigureAt(pnt.x-xOffset-x, pnt.y-yOffset);
+			if (fig!=null && type==null)          return fig;
+			if (fig!=null && type.isInstance(fig)) return fig;
+		}
+		for (int y = 1;y<=5; y++){
+			fig = xyGraph.findFigureAt(pnt.x-xOffset, pnt.y-yOffset+y);
+			if (fig!=null && type==null)          return fig;
+			if (fig!=null && type.isInstance(fig)) return fig;
+
+			fig = xyGraph.findFigureAt(pnt.x-xOffset, pnt.y-yOffset-y);
+			if (fig!=null && type==null)          return fig;
+			if (fig!=null && type.isInstance(fig)) return fig;
+		}
+
+		return null;
 	}
 
 	private Point toDisplay(Point point) {
@@ -657,8 +682,8 @@ public class LightWeightPlotViewer<T> extends AbstractPlottingViewer<T> implemen
 	}
 
 	protected void fillAnnotationConfigure(IMenuManager manager,
-													final Annotation annotation,
-													final IPlottingSystem<T> system) {
+			final Annotation annotation,
+			final IPlottingSystem<T> system) {
 
 		final Action configure = new Action("Configure '"+annotation.getName()+"'", PlottingSystemActivator.getImageDescriptor("icons/Configure.png")) {
 			public void run() {
@@ -677,9 +702,9 @@ public class LightWeightPlotViewer<T> extends AbstractPlottingViewer<T> implemen
 				if(dialog.open() == Window.OK && dialog.getAnnotation() != null){
 					xyGraph.removeAnnotation(dialog.getAnnotation());
 					xyGraph.getOperationsManager()
-							.addCommand(new RemoveAnnotationCommand((IXYGraph) xyGraph, dialog.getAnnotation()));
+					.addCommand(new RemoveAnnotationCommand((IXYGraph) xyGraph, dialog.getAnnotation()));
 				}
-				
+
 			}
 		};
 		manager.add(delAnnotation);	
@@ -699,16 +724,16 @@ public class LightWeightPlotViewer<T> extends AbstractPlottingViewer<T> implemen
 		manager.add(configure);
 		manager.add(new Separator("org.dawb.workbench.plotting.system.configure.group"));
 	}
-	
+
 	private void fillColorMapConfigure(IMenuManager manager) {
 		final ImageTrace imageTrace = getImageTrace();
-		
+
 		if (imageTrace == null) return;
-		
+
 		ImageServiceBean bean = imageTrace.getImageServiceBean();		
-		
+
 		if (bean == null) return;
-		
+
 		if (xyGraph!=null) {
 			final Action configure = new Action("Configure Histogramming", PlottingSystemActivator.getImageDescriptor("icons/TraceProperties.png")) {
 				public void run() {
@@ -721,7 +746,7 @@ public class LightWeightPlotViewer<T> extends AbstractPlottingViewer<T> implemen
 			manager.add(configure);
 			manager.add(new Separator());
 		}
-		
+
 		boolean log = bean.isLogColorScale();
 		final Action logAction = new Action("Log colour scale", IAction.AS_CHECK_BOX) {
 			public void run() {
@@ -730,9 +755,9 @@ public class LightWeightPlotViewer<T> extends AbstractPlottingViewer<T> implemen
 				PlottingSystemActivator.getPlottingPreferenceStore().setValue(PlottingConstants.CM_LOGSCALE, this.isChecked());
 			}
 		};
-		
+
 		logAction.setChecked(log);
-		
+
 		final Action invertColorScale = new Action("Invert color scale", IAction.AS_CHECK_BOX) {
 			public void run() {
 				PlottingSystemActivator.getService(IPaletteService.class).setInverted(this.isChecked());
@@ -746,10 +771,10 @@ public class LightWeightPlotViewer<T> extends AbstractPlottingViewer<T> implemen
 				}
 			}
 		};
-		
+
 		invertColorScale.setChecked(PlottingSystemActivator.getPlottingPreferenceStore().getBoolean(PlottingConstants.CM_INVERTED));
-		
-		
+
+
 		boolean locked= !imageTrace.isRescaleHistogram();
 		final Action lockAction = new Action("Lock", IAction.AS_CHECK_BOX) {
 			public void run() {
@@ -757,24 +782,24 @@ public class LightWeightPlotViewer<T> extends AbstractPlottingViewer<T> implemen
 			}
 		};
 		lockAction.setChecked(locked);
-		
+
 		manager.add(logAction);
 		manager.add(invertColorScale);
 		manager.add(lockAction);
 	}
-	
-    /**
-     * 
-     * Problems:
-     * 1. Line trace bounds extend over other line traces so the last line trace added, will
-     * always be the figure that the right click detects.
-     * 
-     * Useful things, visible, annotation, quick set to line or points, open configure page.
-     * 
-     * @param manager
-     * @param trace
-     * @param xyGraph
-     */
+
+	/**
+	 * 
+	 * Problems:
+	 * 1. Line trace bounds extend over other line traces so the last line trace added, will
+	 * always be the figure that the right click detects.
+	 * 
+	 * Useful things, visible, annotation, quick set to line or points, open configure page.
+	 * 
+	 * @param manager
+	 * @param trace
+	 * @param xyGraph
+	 */
 	@Override
 	public <R> void fillTraceActions(final IContributionManager manager, final ITrace trace, final IPlottingSystem<R> sys) {
 
@@ -789,7 +814,7 @@ public class LightWeightPlotViewer<T> extends AbstractPlottingViewer<T> implemen
 				}
 			};
 			manager.add(visible);
-			
+
 			if (trace instanceof LineTraceImpl) {
 				final Action export = new Action("Export '"+name+"' to ascii (dat file)", PlottingSystemActivator.getImageDescriptor("icons/save_edit.png")) {
 					public void run() {
@@ -809,9 +834,9 @@ public class LightWeightPlotViewer<T> extends AbstractPlottingViewer<T> implemen
 				manager.add(export);
 			}
 		}
-		
+
 		if (xyGraph!=null) {
-			
+
 			if (SelectionRegionFactory.getStaticBuffer()!=null) {
 				final Action pasteRegion = new Action("Paste '"+SelectionRegionFactory.getStaticBuffer().getName()+"'", PlottingSystemActivator.getImageDescriptor("icons/RegionPaste.png")) {
 					public void run() {
@@ -822,7 +847,7 @@ public class LightWeightPlotViewer<T> extends AbstractPlottingViewer<T> implemen
 						} catch (Exception ne) {
 							final String name = RegionUtils.getUniqueName("Region", sys);
 							boolean ok = MessageDialog.openConfirm(Display.getDefault().getActiveShell(), "Cannot paste '"+SelectionRegionFactory.getStaticBuffer().getName()+"'",
-									                   "A region with the name '"+SelectionRegionFactory.getStaticBuffer().getName()+"' already exists.\n\nWould you like to name the region '"+name+"'?");
+									"A region with the name '"+SelectionRegionFactory.getStaticBuffer().getName()+"' already exists.\n\nWould you like to name the region '"+name+"'?");
 							if (ok) {
 								try {
 									region = (AbstractSelectionRegion<?>) sys.createRegion(name, SelectionRegionFactory.getStaticBuffer().getRegionType());
@@ -831,18 +856,18 @@ public class LightWeightPlotViewer<T> extends AbstractPlottingViewer<T> implemen
 									return;
 								}
 							} else {
-							
+
 								return;
 							}
 						}
-						
+
 						region.setROI(SelectionRegionFactory.getStaticBuffer().getROI().copy());
 						sys.addRegion(region);
 					}
 				};
 				manager.add(pasteRegion);
 			}
-			
+
 			final Action addAnnotation = new Action("Add annotation to '"+name+"'", PlottingSystemActivator.getImageDescriptor("icons/TraceAnnotation.png")) {
 				public void run() {
 					final String annotName = AnnotationUtils.getUniqueAnnotation(name+" annotation ", sys);
@@ -856,7 +881,7 @@ public class LightWeightPlotViewer<T> extends AbstractPlottingViewer<T> implemen
 			};
 			manager.add(addAnnotation);
 		}
-		
+
 		if (trace instanceof ILineTrace) {
 			final ILineTrace lt = (ILineTrace)trace;
 			if (lt.getTraceType()!=TraceType.POINT) { // Give them a quick change to points
@@ -907,10 +932,10 @@ public class LightWeightPlotViewer<T> extends AbstractPlottingViewer<T> implemen
 	}
 
 	public void setTitle(String name) {
-        if(xyGraph!=null) {
-        	xyGraph.setTitle(name);
-        	xyGraph.repaint();
-        }
+		if(xyGraph!=null) {
+			xyGraph.setTitle(name);
+			xyGraph.repaint();
+		}
 	}
 
 	@Override
@@ -919,7 +944,7 @@ public class LightWeightPlotViewer<T> extends AbstractPlottingViewer<T> implemen
 			xyGraph.setTitleColor(color);
 		}
 	}
-	
+
 	@Override
 	public void setBackgroundColor(Color color) {
 		if(xyGraph!=null) {
@@ -942,13 +967,13 @@ public class LightWeightPlotViewer<T> extends AbstractPlottingViewer<T> implemen
 		final Axis yAxis = (Axis)getSelectedYAxis();
 		xAxis.setLogScale(false);
 		yAxis.setLogScale(false);
-		
+
 		final ImageTrace trace = xyGraph.createImageTrace(traceName, xAxis, yAxis, intensity);
 		trace.setPlottingSystem(system);
 		trace.addPaletteListener(paletteListener);
 		return trace;
 	}
-	
+
 	private IPaletteListener paletteListener = new IPaletteListener.Stub() {
 		@Override
 		public void rescaleHistogramChanged(PaletteEvent evt) {
@@ -956,7 +981,7 @@ public class LightWeightPlotViewer<T> extends AbstractPlottingViewer<T> implemen
 			plotActionsCreator.getHistoLock().setChecked(locked);
 		}
 	};
-	
+
 	public boolean isTraceTypeSupported(Class<? extends ITrace> clazz) {
 		if (ILineTrace.class.isAssignableFrom(clazz)) {
 			return true;
@@ -970,7 +995,7 @@ public class LightWeightPlotViewer<T> extends AbstractPlottingViewer<T> implemen
 			return false;
 		}
 	}
-	
+
 	public <U extends ITrace> U createTrace(String name, Class<? extends ITrace> clazz) {
 		if (ILineTrace.class.isAssignableFrom(clazz)) {
 			return (U) createLineTrace(name);
@@ -1004,11 +1029,11 @@ public class LightWeightPlotViewer<T> extends AbstractPlottingViewer<T> implemen
 		final VectorTrace trace    = new VectorTrace(traceName, xAxis, yAxis);
 		return trace;
 	}
-	
+
 	protected IImageStackTrace createImageStackTrace(String traceName) {
 		final Axis xAxis = (Axis)getSelectedXAxis();
 		final Axis yAxis = (Axis)getSelectedYAxis();
-		
+
 		final ImageStackTrace trace = xyGraph.createImageStackTrace(traceName, xAxis, yAxis, intensity);
 		trace.setPlottingSystem(system);
 		return trace;
@@ -1033,15 +1058,15 @@ public class LightWeightPlotViewer<T> extends AbstractPlottingViewer<T> implemen
 	 * @return
 	 */
 	public List<ILineTrace> createLineTraces(final String                title, 
-			                                    final IDataset              x, 
-			                                    final List<? extends IDataset> ys,
-			                                    final List<String>          dataNames,
-			                                    final Map<String,ITrace>    traceMap,
-			                                    final Map<Object, Color>    colorMap,
-			                                    final IProgressMonitor      monitor) {
-		
+			final IDataset              x, 
+			final List<? extends IDataset> ys,
+			final List<String>          dataNames,
+			final Map<String,ITrace>    traceMap,
+			final Map<Object, Color>    colorMap,
+			final IProgressMonitor      monitor) {
+
 		final String rootName = system.getRootName();
-		
+
 		final AspectAxis xAxis = (AspectAxis)getSelectedXAxis();
 		xAxis.setLabelDataAndTitle(null);
 		final AspectAxis yAxis = (AspectAxis)getSelectedYAxis();
@@ -1063,7 +1088,7 @@ public class LightWeightPlotViewer<T> extends AbstractPlottingViewer<T> implemen
 
 		//create a trace data provider, which will provide the data to the trace.
 		int iplot = 0;
-		
+
 		final List<ILineTrace> traces = new ArrayList<ILineTrace>(ys.size());
 		for (int i = 0; i < ys.size(); i++) {
 
@@ -1082,27 +1107,27 @@ public class LightWeightPlotViewer<T> extends AbstractPlottingViewer<T> implemen
 			LineTraceImpl wrapper = new LineTraceImpl(system, trace);
 			wrapper.setDataName(dataName);
 			traces.add(wrapper);
-			
+
 			final TraceWillPlotEvent evt = new TraceWillPlotEvent(wrapper, x, y);
 			system.fireWillPlot(evt);
 			if (!evt.doit) continue;
 
 			LightWeightDataProvider traceDataProvider = new LightWeightDataProvider(evt.getXData(), evt.getYData());
-			
+
 			//create the trace
 			trace.init(xAxis, yAxis, traceDataProvider);
-			
+
 			if (y.getName()!=null && !"".equals(y.getName())) {
 				if (traceMap!=null) traceMap.put(y.getName(), wrapper);
 				trace.setInternalName(y.getName());
 			}
-			
+
 			//set trace property
 			trace.setPointStyle(org.eclipse.nebula.visualization.xygraph.figures.Trace.PointStyle.NONE);
 			int index = system.getTraces().size()+iplot-1;
 			if (index<0) index=0;
 			final Color plotColor = ColorUtility.getSwtColour(colorMap!=null?colorMap.values():null, index);
-//			final Color plotColor = ColorUtility.getSwtColour(null, iplot);
+			//			final Color plotColor = ColorUtility.getSwtColour(null, iplot);
 			if (colorMap!=null) {
 				if (system.getColorOption()==ColorOption.BY_NAME) {
 					colorMap.put(y.getName(),plotColor);
@@ -1114,14 +1139,14 @@ public class LightWeightPlotViewer<T> extends AbstractPlottingViewer<T> implemen
 
 			//add the trace to xyGraph
 			xyGraph.addTrace(trace, xAxis, yAxis, false);
-			
-			
+
+
 			if (monitor!=null) monitor.worked(1);
 			iplot++;
 		}
-		
+
 		redraw();
-		
+
 		if (system.isRescale()) {
 			Display.getDefault().syncExec(new Runnable() {
 				public void run() {
@@ -1133,71 +1158,71 @@ public class LightWeightPlotViewer<T> extends AbstractPlottingViewer<T> implemen
 	}
 
 	private boolean showIntensity = PlottingSystemActivator.getPlottingPreferenceStore().getBoolean(PlottingConstants.SHOW_INTENSITY);
-	
+
 	public boolean addTrace(ITrace trace) {
-		
+
 		if (trace instanceof IImageTrace) {
 			system.setPlotType(PlotType.IMAGE); // Only one image allowed at a time
 		} else if (!(trace instanceof IVectorTrace)){
 			system.setPlotType(PlotType.XY);
 		}
-			
+
 		final TraceWillPlotEvent evt = new TraceWillPlotEvent(trace, true);
 		system.fireWillPlot(evt);
 		if (!evt.doit) return false;
-    
+
 		if (trace instanceof IImageTrace) {
 
 			final IImageTrace image = (IImageTrace)trace;
-			
-			boolean autoscale = image.getGlobalRange()!= null && !system.isRescale() ? false : true;
-			
-		    if (!image.setData(evt.getImage(), evt.getAxes(), autoscale)) return false; // But not plotted
 
-			
+			boolean autoscale = image.getGlobalRange()!= null && !system.isRescale() ? false : true;
+
+			if (!image.setData(evt.getImage(), evt.getAxes(), autoscale)) return false; // But not plotted
+
+
 			xyGraph.addImageTrace((ImageTrace)image);
 			removeAdditionalAxes(); // Do not have others with images.
-			
+
 			if (DTypeUtils.getDType(trace.getData()) == Dataset.RGB) {
 				intensity.setVisible(false);
 			} else {
-			    intensity.setVisible(showIntensity);
+				intensity.setVisible(showIntensity);
 			}
-			
+
 			// If we are a stack, show the scale for iterating images.
 			if (image instanceof IImageStackTrace) {
 				IImageStackTrace stack = (IImageStackTrace)image;
-                if (stack.getStackSize()>1) {
+				if (stack.getStackSize()>1) {
 					setFolderScaleVisible(true);
 					folderScale.setRange(0, stack.getStackSize()-1);
 					folderScale.setValue(stack.getStackIndex());
-                } else {
-                	setFolderScaleVisible(false);
-                }
+				} else {
+					setFolderScaleVisible(false);
+				}
 			} else {
 				setFolderScaleVisible(false);
 			}
 
 		} else if (trace instanceof IVectorTrace) {
-			
+
 			final IVectorTrace vector = (IVectorTrace)trace;
 			xyGraph.addVectorTrace((VectorTrace)vector);
 			vector.setVisible(true);
-		
+
 		} else {
-			
+
 			final AspectAxis xAxis = (AspectAxis)getSelectedXAxis();
 			final AspectAxis yAxis = (AspectAxis)getSelectedYAxis();
 			xyGraph.addTrace(((LineTraceImpl)trace).getTrace(), xAxis, yAxis, true);
 			intensity.setVisible(false);
 		}
 		redraw();
-	
+
 		return true;
 	}
 
 	public void removeTrace(ITrace trace) {
-		
+
 		if (trace instanceof LineTraceImpl) {
 			xyGraph.removeTrace(((LineTraceImpl)trace).getTrace());
 		} else if (trace instanceof ImageTrace) {
@@ -1270,7 +1295,7 @@ public class LightWeightPlotViewer<T> extends AbstractPlottingViewer<T> implemen
 		final AnnotationWrapper wrapper = (AnnotationWrapper) annotation;
 		xyGraph.addAnnotation(wrapper.getAnnotation());
 		xyGraph.getOperationsManager()
-				.addCommand(new AddAnnotationCommand((IXYGraph) xyGraph, wrapper.getAnnotation()));
+		.addCommand(new AddAnnotationCommand((IXYGraph) xyGraph, wrapper.getAnnotation()));
 	}
 
 	@Override
@@ -1278,7 +1303,7 @@ public class LightWeightPlotViewer<T> extends AbstractPlottingViewer<T> implemen
 		final AnnotationWrapper wrapper = (AnnotationWrapper) annotation;
 		xyGraph.removeAnnotation(wrapper.getAnnotation());
 		xyGraph.getOperationsManager()
-				.addCommand(new RemoveAnnotationCommand((IXYGraph) xyGraph, wrapper.getAnnotation()));
+		.addCommand(new RemoveAnnotationCommand((IXYGraph) xyGraph, wrapper.getAnnotation()));
 	}
 
 	@Override
@@ -1294,7 +1319,7 @@ public class LightWeightPlotViewer<T> extends AbstractPlottingViewer<T> implemen
 			xyGraph.getPlotArea().removeAnnotation(annotation);
 		}
 	}
-	
+
 	@Override
 	public IAnnotation getAnnotation(final String name) {
 		final List<Annotation> anns = xyGraph.getPlotArea().getAnnotationList();
@@ -1312,16 +1337,16 @@ public class LightWeightPlotViewer<T> extends AbstractPlottingViewer<T> implemen
 		xyGraph.performAutoScale();
 		xyGraph.performAutoScale();
 	}
-	
+
 	public boolean addRegionListener(final IRegionListener l) {
 		return xyGraph.addRegionListener(l);
 	}
-	
+
 	public boolean removeRegionListener(final IRegionListener l) {
 		if (xyGraph==null) return false;
 		return xyGraph.removeRegionListener(l);
 	}
-	
+
 	/**
 	 * Throws exception if region exists already.
 	 * @throws Exception 
@@ -1340,19 +1365,19 @@ public class LightWeightPlotViewer<T> extends AbstractPlottingViewer<T> implemen
 	public void clearRegions() {
 		clearRegions(false);
 	}
-	
+
 	/**
 	 * Thread safe
 	 */
 	public void clearRegions(boolean force) {
 		if (xyGraph==null) return;
-		
+
 		xyGraph.clearRegions(force);
 	}		
-	
+
 	public void clearRegionTool() {
 		if (xyGraph==null) return;
-		
+
 		xyGraph.clearRegionTool();
 	}
 
@@ -1389,20 +1414,20 @@ public class LightWeightPlotViewer<T> extends AbstractPlottingViewer<T> implemen
 		if (xyGraph == null) return null;
 		return xyGraph.getRegion(name);
 	}
-	
+
 	@Override
 	public Collection<IRegion> getRegions(final RegionType type) {
-		
+
 		final Collection<IRegion> regions = getRegions();
 		if (regions==null) return null;
-		
+
 		final Collection<IRegion> ret= new ArrayList<IRegion>();
 		for (IRegion region : regions) {
 			if (region.getRegionType()==type) {
 				ret.add(region);
 			}
 		}
-		
+
 		return ret; // may be empty
 	}
 
@@ -1415,7 +1440,7 @@ public class LightWeightPlotViewer<T> extends AbstractPlottingViewer<T> implemen
 		if (xyGraph == null) return null;
 		return xyGraph.getRegions();
 	}
-	
+
 	/**
 	 * Use this method to create axes other than the default y and x axes.
 	 * 
@@ -1426,10 +1451,10 @@ public class LightWeightPlotViewer<T> extends AbstractPlottingViewer<T> implemen
 	 */
 	@Override
 	public IAxis createAxis(final String title, final boolean isYAxis, int side) {
-					
+
 		AspectAxis axis = new AspectAxis(title, isYAxis);
 		if (side==SWT.LEFT||side==SWT.BOTTOM) {
-		    axis.setTickLabelSide(LabelSide.Primary);
+			axis.setTickLabelSide(LabelSide.Primary);
 		} else {
 			axis.setTickLabelSide(LabelSide.Secondary);
 		}
@@ -1437,10 +1462,10 @@ public class LightWeightPlotViewer<T> extends AbstractPlottingViewer<T> implemen
 		axis.setShowMajorGrid(true);
 		axis.setShowMinorGrid(true);	
 		xyGraph.addAxis(axis);
-		
+
 		return axis;
 	}	
-	
+
 	@Override
 	public IAxis removeAxis(final IAxis axis) {
 		if (axis.isPrimaryAxis()) return null;
@@ -1448,10 +1473,10 @@ public class LightWeightPlotViewer<T> extends AbstractPlottingViewer<T> implemen
 		xyGraph.removeAxis((AspectAxis)axis);
 		return axis;
 	}	
-	
+
 	@Override
 	public List<IAxis> getAxes() {
-		
+
 		List<Axis> axes = xyGraph.getAxisList();
 		List<IAxis> ret = new ArrayList<IAxis>(axes.size());
 		for (Axis axis : axes) {
@@ -1463,7 +1488,7 @@ public class LightWeightPlotViewer<T> extends AbstractPlottingViewer<T> implemen
 
 	@Override
 	public IAxis getAxis(String title) {
-		
+
 		List<Axis> axes = xyGraph.getAxisList();
 		for (Axis axis : axes) {
 			if (!(axis instanceof IAxis)) continue;
@@ -1472,7 +1497,7 @@ public class LightWeightPlotViewer<T> extends AbstractPlottingViewer<T> implemen
 		return null;
 	}
 
-	
+
 	@Override
 	public IAxis getSelectedXAxis() {
 		if (xyGraph==null) return null;
@@ -1511,7 +1536,7 @@ public class LightWeightPlotViewer<T> extends AbstractPlottingViewer<T> implemen
 		if (xyGraph==null || xyGraph.getRegionArea()==null) return;
 		xyGraph.getRegionArea().removePositionListener(l);
 	}
-	
+
 	@Override
 	public void addClickListener(IClickListener l) {
 		if (xyGraph==null || xyGraph.getRegionArea()==null) return;
@@ -1583,15 +1608,15 @@ public class LightWeightPlotViewer<T> extends AbstractPlottingViewer<T> implemen
 	public void addPropertyChangeListener(IPropertyChangeListener listener) {
 		xyGraph.addPropertyChangeListener(listener);
 	}
-	
+
 	public void removePropertyChangeListener(IPropertyChangeListener listener) {
 		xyGraph.removePropertyChangeListener(listener);
 	}
-	
+
 
 	// Print / Export methods
 	private PrintSettings settings;
-	
+
 	@Override
 	public void printPlotting(){
 		if (settings==null) settings = new PrintSettings();
@@ -1614,13 +1639,13 @@ public class LightWeightPlotViewer<T> extends AbstractPlottingViewer<T> implemen
 	 * Print scaled plotting to printer
 	 */
 	public void printScaledPlotting(){
-		
+
 		PrintDialog dialog      = new PrintDialog(Display.getDefault().getActiveShell(), SWT.NULL);
 		PrinterData printerData = dialog.open();
 		// TODO There are options on PrintFigureOperation
 		if (printerData != null) {
-            final PrintFigureOperation op = new PrintFigureOperation(new Printer(printerData), xyGraph);
-            op.run("Print "+xyGraph.getTitle());
+			final PrintFigureOperation op = new PrintFigureOperation(new Printer(printerData), xyGraph);
+			op.run("Print "+xyGraph.getTitle());
 		}
 	}
 
@@ -1652,10 +1677,10 @@ public class LightWeightPlotViewer<T> extends AbstractPlottingViewer<T> implemen
 			final File file = new File(filename);
 			if (file.exists()) {
 				boolean yes = MessageDialog.openQuestion(Display.getDefault().getActiveShell(), "Confirm Overwrite", "The file '"+file.getName()+"' exists.\n\nWould you like to overwrite it?");
-			    if (!yes) return filename;
+				if (!yes) return filename;
 			}
-			
-				PlotExportPrintUtil.saveGraph(filename, PlotExportPrintUtil.FILE_TYPES[dialog.getFilterIndex()], plotContents.getParent());
+
+			PlotExportPrintUtil.saveGraph(filename, PlotExportPrintUtil.FILE_TYPES[dialog.getFilterIndex()], plotContents.getParent());
 			//logger.debug("Plot saved");
 		} catch (Exception e) {
 			throw e;
@@ -1703,7 +1728,7 @@ public class LightWeightPlotViewer<T> extends AbstractPlottingViewer<T> implemen
 		xyGraph.getRegionArea().setCursor(cursor);
 		ZoomType.NONE.setCursor(cursor);
 	}
-	
+
 	/**
 	 * Also clears any region or zoom tools assuming that this
 	 * special cursor is to do with a custom drawing mode.
@@ -1822,7 +1847,7 @@ public class LightWeightPlotViewer<T> extends AbstractPlottingViewer<T> implemen
 		}
 		return i;
 	}
-	
+
 	/**
 	 * 
 	 * @param x
@@ -1848,7 +1873,7 @@ public class LightWeightPlotViewer<T> extends AbstractPlottingViewer<T> implemen
 		} 
 		return null;
 	}
-	
+
 	public Cursor getSelectedCursor() {
 		return getXYRegionGraph().getRegionArea().getSelectedCursor();
 	}
@@ -1872,60 +1897,60 @@ public class LightWeightPlotViewer<T> extends AbstractPlottingViewer<T> implemen
 	public void removeMouseClickListener(MouseListener mcl) {
 		if (getXYRegionGraph()                ==null) return;
 		if (getXYRegionGraph().getRegionArea()==null) return;
-	    getXYRegionGraph().getRegionArea().removeAuxilliaryClickListener(mcl);
+		getXYRegionGraph().getRegionArea().removeAuxilliaryClickListener(mcl);
 	}
 
 	@Override
 	public Collection<Class<? extends ITrace>> getSupportTraceTypes() {
 		return new ArrayList<>(SUPPORTED_TRACES);
 	}
-	
+
 	private ImageTrace getImageTrace() {
 		PlotArea plotArea = xyGraph.getPlotArea();
 		if (plotArea instanceof RegionArea) {
 			ImageTrace image = ((RegionArea)plotArea).getImageTrace();
 			return image;
 		}
-		
+
 		return null;
 	}
-	
+
 	class ColorMapMouseListener extends MouseMotionListener.Stub implements MouseListener {
 
 		private org.eclipse.draw2d.geometry.Point start;
 		private boolean armed;
 		double startValue = 0;
-		
+
 		@Override
 		public void mousePressed(org.eclipse.draw2d.MouseEvent me) {
-			
+
 			start = me.getLocation().getCopy();
 			startValue = colorMapAxis.getPositionValue(start.y-intensity.getLocation().y, false);
 			armed = true;
-			
+
 		}
 
 		@Override
 		public void mouseReleased(org.eclipse.draw2d.MouseEvent me) {
 			armed = false;
-			
+
 		}
 
 		@Override
 		public void mouseDoubleClicked(org.eclipse.draw2d.MouseEvent me) {
 			//do nothing
 		}
-		
+
 		@Override
 		public void mouseDragged(org.eclipse.draw2d.MouseEvent me) {
 			if (!armed) return;
-			
+
 			ImageTrace image = getImageTrace();
 			if (image == null) return;
-			
+
 			ImageServiceBean bean = image.getImageServiceBean();
 			if (bean == null) return;
-			
+
 			org.eclipse.draw2d.geometry.Point location = me.getLocation();
 			double currentValue = colorMapAxis.getPositionValue(location.y-intensity.getLocation().y, false);
 			double offset = startValue-currentValue;
@@ -1940,6 +1965,6 @@ public class LightWeightPlotViewer<T> extends AbstractPlottingViewer<T> implemen
 			image.setPaletteData(image.getPaletteData());
 
 		}
-		
+
 	}
 }

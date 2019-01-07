@@ -12,7 +12,7 @@ import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.commands.IHandler;
-import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
+import org.eclipse.dawnsci.plotting.api.PlotLocationInfo;
 
 public class TestCommand extends AbstractHandler implements IHandler {
 
@@ -22,9 +22,19 @@ public class TestCommand extends AbstractHandler implements IHandler {
 	 */
 	@Override
 	public Object execute(ExecutionEvent event) throws ExecutionException {
-		
-        final IPlottingSystem<?> system = (IPlottingSystem<?>)event.getApplicationContext();
-        System.out.println(system.getPlotName());
+		PlotLocationInfo bean = (PlotLocationInfo)event.getParameters().get(PlotLocationInfo.ID);
+
+		//for not-popup actions, where location is not set, the plotting system can be accessed
+		//from the parameters using PlotLocationInfo.PLOTTINGSYSTEM as the key. 
+
+		if (bean.getRegion() != null) System.out.println("on region");
+		if (bean.getTrace() != null) System.out.println("on trace");
+		if (bean.getAxis() != null) System.out.println("on axis");
+
+		System.out.println("x: " + bean.getX());
+		System.out.println("y: " + bean.getY());
+
+		System.out.println(bean.getSystem().getPlotName());
 		return null;
 	}
 

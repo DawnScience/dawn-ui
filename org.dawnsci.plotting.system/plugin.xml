@@ -119,9 +119,12 @@
    <extension
          point="org.eclipse.dawnsci.plotting.api.plottingAction">
       <plotting_action
+            action_type="POPUP"
             command_id="org.dawnsci.plotting.system.example.TestCommand"
             icon="icons/error.png"
-            id="org.dawnsci.plotting.system.test1">
+            id="org.dawnsci.plotting.system.test1"
+            label="Hello"
+            plot_name="Plot">
       </plotting_action>
    </extension>
    <extension
