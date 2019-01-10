@@ -5,11 +5,14 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.function.BiFunction;
 
+import org.dawnsci.datavis.api.IRecentPlaces;
 import org.dawnsci.datavis.model.DataOptions;
 import org.dawnsci.datavis.model.DataOptionsDataset;
 import org.dawnsci.datavis.model.DataOptionsSlice;
 import org.dawnsci.datavis.model.DataOptionsUtils;
 import org.dawnsci.datavis.model.IFileController;
+import org.dawnsci.datavis.view.Activator;
+import org.dawnsci.datavis.view.DataOptionsUIUtils;
 import org.dawnsci.datavis.view.DataVisSelectionUtils;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.dawnsci.plotting.api.ProgressMonitorWrapper;
@@ -143,7 +146,18 @@ public class DataOptionTableViewer {
 							}
 						};
 						
+						Action save = new Action("Save to Nexus...") {
+							@Override
+							public void run() {
+								IRecentPlaces service = Activator.getService(IRecentPlaces.class);
+								
+								DataOptions dataOptions = s.get(0);
+								DataOptionsUIUtils.saveToFile(dataOptions, service == null ? null : service.getCurrentDefaultDirectory());
+							}
+						};
+						
 						manager.add(r);
+						manager.add(save);
 					}
 				}
 			}

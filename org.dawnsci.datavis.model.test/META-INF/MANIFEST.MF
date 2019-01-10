@@ -13,5 +13,6 @@ Require-Bundle: org.junit,
  org.eclipse.january,
  org.mockito.mockito-core;bundle-version="1.10.19",
  org.objenesis;bundle-version="2.6.0",
- org.dawnsci.common.live
+ org.dawnsci.common.live,
+ org.eclipse.dawnsci.analysis.api
 Bundle-Vendor: Diamond Light Source
