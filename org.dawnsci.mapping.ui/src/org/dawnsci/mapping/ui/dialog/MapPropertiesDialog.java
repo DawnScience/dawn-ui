@@ -2,7 +2,6 @@ package org.dawnsci.mapping.ui.dialog;
 
 import java.util.List;
 
-import org.dawnsci.mapping.ui.MapPlotManager;
 import org.dawnsci.mapping.ui.datamodel.AbstractMapData;
 import org.dawnsci.mapping.ui.datamodel.IMapPlotController;
 import org.dawnsci.mapping.ui.datamodel.MappedDataArea;

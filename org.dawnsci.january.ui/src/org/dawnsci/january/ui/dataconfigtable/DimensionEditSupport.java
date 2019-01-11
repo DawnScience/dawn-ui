@@ -1,6 +1,5 @@
 package org.dawnsci.january.ui.dataconfigtable;
 
-import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
