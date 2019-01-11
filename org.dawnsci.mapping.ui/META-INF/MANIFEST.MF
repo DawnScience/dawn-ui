@@ -22,7 +22,8 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.scanning.api;bundle-version="1.0.0",
  org.dawb.common.util,
  org.eclipse.nebula.widgets.opal.rangeslider;bundle-version="1.0.0",
- org.dawnsci.datavis.api;bundle-version="1.0.0"
+ org.dawnsci.datavis.api;bundle-version="1.0.0",
+ org.dawnsci.common.live
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
 Service-Component: OSGI-INF/*.xml

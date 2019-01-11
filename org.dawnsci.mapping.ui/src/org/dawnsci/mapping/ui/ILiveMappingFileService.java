@@ -1,14 +1,14 @@
 package org.dawnsci.mapping.ui;
 
+import org.dawnsci.common.live.ILiveFileService;
 
-public interface ILiveMappingFileService {
+/**
+ * Extended {@link ILiveFileService} for the Mapping perspective.
+ * <p>
+ * Includes a method for automatically loading persisted files
+ */
+public interface ILiveMappingFileService  extends ILiveFileService{
 	
 	public void setInitialFiles(String[] files);
 	
-	public void addLiveFileListener(ILiveMapFileListener l);
-	
-	public void removeLiveFileListener(ILiveMapFileListener l);
-	
-	public void runUpdate(Runnable runnable, boolean queue);
-
 }

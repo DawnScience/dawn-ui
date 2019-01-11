@@ -13,8 +13,8 @@ import static org.mockito.Mockito.withSettings;
 import java.util.List;
 
 import org.dawnsci.datavis.model.FileController;
-import org.dawnsci.datavis.model.ILiveFileListener;
-import org.dawnsci.datavis.model.ILiveFileService;
+import org.dawnsci.datavis.model.ILiveLoadedFileListener;
+import org.dawnsci.datavis.model.ILiveLoadedFileService;
 import org.dawnsci.datavis.model.IRefreshable;
 import org.dawnsci.datavis.model.LiveServiceManager;
 import org.dawnsci.datavis.model.LoadedFile;
@@ -43,14 +43,14 @@ public class LiveFileServiceTest {
 		
 		String path = "/tmp/myfile.test";
 		
-		ILiveFileService liveFileService = mock(ILiveFileService.class);
+		ILiveLoadedFileService liveFileService = mock(ILiveLoadedFileService.class);
 		new LiveServiceManager().setILiveFileService(liveFileService);
-		ArgumentCaptor<ILiveFileListener> listener = ArgumentCaptor.forClass(ILiveFileListener.class);
+		ArgumentCaptor<ILiveLoadedFileListener> listener = ArgumentCaptor.forClass(ILiveLoadedFileListener.class);
 		
 		assertTrue(fileController.getLoadedFiles().isEmpty());
 		fileController.attachLive();
 		verify(liveFileService).addLiveFileListener(listener.capture());
-		ILiveFileListener captured = listener.getValue();
+		ILiveLoadedFileListener captured = listener.getValue();
 		
 		assertNotNull(captured);
 		
@@ -67,7 +67,7 @@ public class LiveFileServiceTest {
 		captured.refreshRequest();
 		verify(liveFileService,times(1)).runUpdate(any(Runnable.class),Matchers.eq(false));
 		
-		captured.localReload(path);
+		captured.localReload(path,false);
 		verify(liveFileService,times(1)).runUpdate(any(Runnable.class),Matchers.eq(true));
 		
 	}

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" name="Live file service">
    <implementation class="org.dawnsci.datavis.model.LiveServiceManager"/>
-   <reference bind="setILiveFileService" cardinality="0..1" interface="org.dawnsci.datavis.model.ILiveFileService" name="ILiveFileService" policy="static"/>
+   <reference bind="setILiveFileService" cardinality="1..1" interface="org.dawnsci.datavis.model.ILiveLoadedFileService" name="ILiveFileService" policy="static"/>
 </scr:component>

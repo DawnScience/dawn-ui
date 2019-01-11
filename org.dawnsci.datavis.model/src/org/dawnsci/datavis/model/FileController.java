@@ -38,10 +38,11 @@ public class FileController implements IFileController {
 	public void setRecentPlaces(IRecentPlaces places) {
 		recentPlaces = places;
 	}
+
 	
 	private Map<String, LoadedFiles> allLoadedFiles;
 	private LoadedFiles loadedFiles;
-	private ILiveFileListener listener;
+	private ILiveLoadedFileListener listener;
 	private AtomicBoolean onlySignals = new AtomicBoolean(false);
 	private String labelName;
 	
@@ -105,6 +106,7 @@ public class FileController implements IFileController {
 	}
 	
 	public void attachLive() {
+		
 		if (LiveServiceManager.getILiveFileService() != null) {
 			
 			if (listener == null) {
@@ -432,7 +434,7 @@ public class FileController implements IFileController {
 		
 	}
 	
-	private class LiveFileListener implements ILiveFileListener {
+	private class LiveFileListener implements ILiveLoadedFileListener {
 		private final LoadedFiles lFiles;
 		private final Set<FileControllerStateEventListener> fListeners;
 
@@ -504,7 +506,7 @@ public class FileController implements IFileController {
 		}
 
 		@Override
-		public void localReload(String path) {
+		public void localReload(String path, boolean force) {
 			
 			Runnable r = () -> {
 

@@ -2,13 +2,13 @@ package org.dawnsci.datavis.model;
 
 public class LiveServiceManager {
 
-	private static ILiveFileService lfservice;
+	private static ILiveLoadedFileService lfservice;
 	
-	public void setILiveFileService(ILiveFileService s){
+	public void setILiveFileService(ILiveLoadedFileService s){
 		lfservice = s;
 	}
 	
-	public static ILiveFileService getILiveFileService() {
+	public static ILiveLoadedFileService getILiveFileService() {
 		return lfservice;
 	}
 	

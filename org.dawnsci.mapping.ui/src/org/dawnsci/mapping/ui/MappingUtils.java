@@ -271,14 +271,14 @@ public class MappingUtils {
 			nexus.addAttribute(dNode, new AttributeImpl("interpretation","rgba-image"));
 			
 			IDataset y = axm.getAxis(0)[0].getSlice().squeeze();
-			y.setName("y");
+			y.setName(MetadataPlotUtils.removeSquareBrackets(y.getName()));
 			nexus.createData(group, y);
 			IDataset x = axm.getAxis(1)[0].getSlice().squeeze();
-			x.setName("x");
+			x.setName(MetadataPlotUtils.removeSquareBrackets(x.getName()));
 			nexus.createData(group, x);
 			
 			nexus.addAttribute(group, new AttributeImpl("signal","data"));
-			nexus.addAttribute(group, new AttributeImpl("axes",new String[]{".","y","x"}));
+			nexus.addAttribute(group, new AttributeImpl("axes",new String[]{".",y.getName(),x.getName()}));
 		} catch (DatasetException de) {
 			de.printStackTrace();
 		} catch (NexusException e) {
