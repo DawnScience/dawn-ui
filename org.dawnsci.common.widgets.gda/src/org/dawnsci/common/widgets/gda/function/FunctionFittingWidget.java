@@ -165,7 +165,7 @@ public class FunctionFittingWidget extends Composite implements IFunctionViewer 
 	}
 
 	private FunctionTreeViewer funcTree;
-	private ListenerList modelModifiedListeners;
+	private ListenerList<IModelModifiedListener> modelModifiedListeners;
 	private IModelModifiedListener modelModifiedListener;
 	private Composite detailsPanelContainer;
 	private Label functionDescription;
@@ -325,7 +325,7 @@ public class FunctionFittingWidget extends Composite implements IFunctionViewer 
 	@Override
 	public void addModelModifiedListener(IModelModifiedListener listener) {
 		if (modelModifiedListeners == null) {
-			modelModifiedListeners = new ListenerList();
+			modelModifiedListeners = new ListenerList<>();
 			modelModifiedListener = new IModelModifiedListener() {
 
 				@Override
