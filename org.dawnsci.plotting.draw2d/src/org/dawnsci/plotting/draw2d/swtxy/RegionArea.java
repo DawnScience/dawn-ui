@@ -151,7 +151,7 @@ public class RegionArea extends PlotArea implements IPlotArea {
 		boolean shiftDown = ((state & SWT.SHIFT) != 0);
 		boolean ctrlDown = ((state & SWT.CONTROL) != 0);
 		
-		final int keyCode   = keyEvent!=null ? keyEvent.keyCode   : -1;
+//		final int keyCode   = keyEvent!=null ? keyEvent.keyCode   : -1;
 		final int stateMask = keyEvent!=null ? keyEvent.stateMask : -1;
 		final char character= keyEvent!=null ? keyEvent.character : '\0';
 		
@@ -400,7 +400,7 @@ public class RegionArea extends PlotArea implements IPlotArea {
 	}
 	
 	public boolean removeImageTrace(final ImageTrace trace){
-	    final ImageTrace gone = imageTraces.remove(trace.getName());
+		final ImageTrace gone = imageTraces.remove(trace.getName());
 		if (gone!=null){
 			trace.remove();
 			fireImageTraceRemoved(new TraceEvent(trace));
@@ -739,7 +739,7 @@ public class RegionArea extends PlotArea implements IPlotArea {
 					((LineTrace)trace).dispose();
 			}
 			traceList.clear();
-	    }
+		}
 		
 		internalClearImageTraces();
 		
@@ -901,19 +901,33 @@ public class RegionArea extends PlotArea implements IPlotArea {
 		this.keyEvent = keyEvent;
 	}
 
+	/**
+	 * <b>WARNING</b> as {@link Trace}s are not {@link ITrace}, use {@link PlotArea#getTraceList()}
+	 */
 	@Override
 	public List<ITrace> getTraces() {
-		List<Trace> list = super.getTraceList();
-		List<ITrace> traces = new ArrayList<ITrace>(list.size());
-		for (ITrace iTrace : traces) {
+		List<ITrace> traces = new ArrayList<ITrace>();
+		for (ITrace iTrace : imageTraces.values()) {
+			traces.add(iTrace);
+		}
+		for (ITrace iTrace : vectorTraces.values()) {
 			traces.add((ITrace) iTrace);
 		}
 		return traces;
 	}
 
+	/**
+	 * <b>WARNING</b> as {@link Trace}s are not {@link ITrace}, use {@link PlotArea#removeTrace(Trace)}
+	 */
 	@Override
 	public void removeTrace(ITrace trace) {
-		super.removeTrace((Trace)trace);
+		if (trace instanceof ImageTrace) {
+			removeImageTrace((ImageTrace) trace);
+		} else if (trace instanceof VectorTrace) {
+			removeVectorTrace((VectorTrace) trace);
+		} else {
+			logger.error("Unsupported trace class, ignoring removeTrace call");
+		}
 	}
 
 	@Override

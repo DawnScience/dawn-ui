@@ -17,7 +17,6 @@ import org.dawnsci.plotting.draw2d.swtxy.XYRegionGraph;
 import org.dawnsci.plotting.system.LineTraceImpl;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.region.IRegion;
-import org.eclipse.dawnsci.plotting.api.trace.ILineTrace;
 import org.eclipse.dawnsci.plotting.api.trace.ITrace;
 import org.eclipse.nebula.visualization.internal.xygraph.toolbar.ITraceConfigPage;
 import org.eclipse.nebula.visualization.internal.xygraph.toolbar.XYGraphConfigDialog;
@@ -190,26 +189,25 @@ public class XYRegionConfigDialog extends XYGraphConfigDialog {
         			break;
 				}
 			}
-         }
-        
-        if (selectedTrace!=null) {
-        	if (selectedTrace instanceof ILineTrace) {
-        		tabFolder.setSelection(2);
-        	   	int index = regionGraph.getRegionArea().getTraceList().indexOf(selectedTrace); 
-        	   	if (index>0) {
-	        		Composite traceComp = getTraceConfigPageList().get(index).getComposite();
-		        	setTraceTabSelected(index, tabFolder, getTraceCombo(), traceComp);
-        	   	}
-	        	
-        	} else {
-        		tabFolder.setSelection(imageTraceIndex);
-           	   	int index = 0; // FIXME if there is ever more than one image allowed to be plotted.
-           	   	if (index>0) {
-	         		Composite traceComp = imageTraceConfigPageList.get(index); 		
-	        		setTraceTabSelected(index, tabFolder, imageTraceCombo, traceComp);
-           	   	}
-        	}
         }
+
+		if (selectedTrace != null) {
+			if (selectedTrace instanceof Trace) {
+				tabFolder.setSelection(2);
+				int index = regionGraph.getRegionArea().getTraceList().indexOf(selectedTrace);
+				if (index > 0) {
+					Composite traceComp = getTraceConfigPageList().get(index).getComposite();
+					setTraceTabSelected(index, tabFolder, getTraceCombo(), traceComp);
+				}
+			} else {
+				tabFolder.setSelection(imageTraceIndex);
+				int index = 0; // FIXME if there is ever more than one image allowed to be plotted.
+				if (index > 0) {
+					Composite traceComp = imageTraceConfigPageList.get(index);
+					setTraceTabSelected(index, tabFolder, imageTraceCombo, traceComp);
+				}
+			}
+		}
 		if (selectedAxis != null) {
 			final int index = getXYGraph().getAxisList().indexOf(selectedAxis);
 			final TabItem[] items = tabFolder.getItems();

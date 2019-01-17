@@ -247,12 +247,10 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 	
 	@Override
 	public void setPalette(String paletteName) {
-		
-		String orig = this.paletteName;
 		IPaletteService pservice = ServiceHolder.getPaletteService();
 		final PaletteData paletteData = pservice.getDirectPaletteData(paletteName);
-        setPaletteName(paletteName);
-        setPaletteData(paletteData);
+		setPaletteName(paletteName);
+		setPaletteData(paletteData);
 
 	}
 
@@ -1194,13 +1192,11 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 	public void axisRevalidated(Axis axis) {
 		if (axis.isYAxis()) updateAxisRange(axis);
 	}
-	
-	private void updateAxisRange(Axis axis) {
-		if (!axisRedrawActive) return;				
-		updateImageDirty(ImageScaleType.REIMAGE_ALLOWED);
-//		createScaledImage(ImageScaleType.REIMAGE_ALLOWED, null);
-	}
 
+	private void updateAxisRange(Axis axis) {
+		if (!axisRedrawActive) return;
+		updateImageDirty(ImageScaleType.REIMAGE_ALLOWED);
+	}
 
 	private void updateImageDirty(ImageScaleType type) {
 		
@@ -1371,6 +1367,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 	/**
 	 * Called when the internal data of image has changed.
 	 */
+	@Override
 	public void dataChangePerformed(final DataEvent evt) {
 		if (dynamic == null) {
 			return;
@@ -1431,7 +1428,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 
 		if (getPreferenceStore().getBoolean(PlottingConstants.IGNORE_RGB) && im instanceof RGBDataset) {
 			RGBDataset rgb = (RGBDataset) im;
-			im = rgb.createGreyDataset(Dataset.FLOAT64);
+			im = rgb.createGreyDataset(DoubleDataset.class);
 			rgbDataset = rgb;
 		} else {
 			rgbDataset = null;
@@ -1540,7 +1537,6 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 	public void setMin(Number min) {
 		if (imageServiceBean==null) return;
 		
-		Number orig = imageServiceBean.getMin();
 		imageServiceBean.setMin(min);
 		try {
 			intensityScale.setMin(min.doubleValue());
@@ -1558,7 +1554,6 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 	public void setMax(Number max) {
 		
 		if (imageServiceBean==null) return;
-		Number orig = imageServiceBean.getMax();
 		imageServiceBean.setMax(max);
 		try {
 			intensityScale.setMax(max.doubleValue());
@@ -1653,11 +1648,9 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 	@Override
 	public void setDownsampleType(DownsampleType type) {
 		
-		DownsampleType orig = this.downsampleType;
 		if (this.mipMap!=null)  mipMap.clear();
 		if (this.maskMap!=null) maskMap.clear();
 		this.downsampleType = type;
-//		createScaledImage(ImageScaleType.FORCE_REIMAGE, null);
 		updateImageDirty(ImageScaleType.FORCE_REIMAGE);
 		getPreferenceStore().setValue(BasePlottingConstants.DOWNSAMPLE_PREF, type.getLabel());
 		repaint();
@@ -1765,7 +1758,6 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 		
 		storeBound(bound, BasePlottingConstants.MIN_CUT);
 		if (imageServiceBean==null) return;
-		HistogramBound orig = imageServiceBean.getMinimumCutBound();
 		imageServiceBean.setMinimumCutBound(bound);
 		fireMinCutListeners();
 		
@@ -1789,7 +1781,6 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 		
 		storeBound(bound, BasePlottingConstants.MAX_CUT);
 		if (imageServiceBean==null) return;
-		HistogramBound orig = imageServiceBean.getMaximumCutBound();
 		imageServiceBean.setMaximumCutBound(bound);
 		fireMaxCutListeners();
 	}
