@@ -225,7 +225,7 @@ public abstract class AbstractSelectionRegion<T extends IROI> extends AbstractRe
 
 	private MouseListener selectionListener;
 	private void createSelectionListener(IFigure... ro) {
-		if (selectionListener==null) selectionListener = new MouseListener.Stub() {			
+		if (selectionListener==null) selectionListener = new MouseListener.Stub() {
 			@Override
 			public void mousePressed(MouseEvent me) {
 				fireROISelected(); 
@@ -543,7 +543,8 @@ public abstract class AbstractSelectionRegion<T extends IROI> extends AbstractRe
 				//manipulate the child list directly rather than removing/adding
 				//to the parent to avoid the revalidates - we are not adding new
 				//figures just changing the order of the list.
-				List children = par.getChildren();
+				@SuppressWarnings("unchecked")
+				List<IFigure> children = par.getChildren();
 				for (Object c : children) {
 					if (ob == c) {
 						children.remove(ob);

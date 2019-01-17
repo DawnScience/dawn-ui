@@ -4,6 +4,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 
 import org.dawb.common.util.io.IOpenFileAction;
+import org.dawnsci.processing.ui.slice.DataFileSliceView;
 import org.dawnsci.processing.ui.slice.FileManager;
 import org.eclipse.ui.IViewPart;
 import org.eclipse.ui.IWorkbenchPage;
@@ -23,7 +24,7 @@ public class NavigatorOpen implements IOpenFileAction {
 		
 		if (!Files.isDirectory(file)) {
 			IWorkbenchPage page = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage();
-			IViewPart view = page.findView("org.dawnsci.processing.ui.DataFileSliceView");
+			IViewPart view = page.findView(DataFileSliceView.ID);
 			if (view==null) return;
 			
 			final FileManager manager = (FileManager)view.getAdapter(FileManager.class);

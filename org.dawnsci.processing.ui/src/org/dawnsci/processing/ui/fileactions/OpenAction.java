@@ -1,5 +1,6 @@
 package org.dawnsci.processing.ui.fileactions;
 
+import org.dawnsci.processing.ui.slice.DataFileSliceView;
 import org.dawnsci.processing.ui.slice.FileManager;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.jface.action.Action;
@@ -64,7 +65,7 @@ public class OpenAction extends Action {
 				logger.debug(loc);
 				
 				IWorkbenchPage page = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage();
-				IViewPart view = page.findView("org.dawnsci.processing.ui.DataFileSliceView");
+				IViewPart view = page.findView(DataFileSliceView.ID);
 				if (view==null) return;
 				
 				final FileManager manager = (FileManager)view.getAdapter(FileManager.class);

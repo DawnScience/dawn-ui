@@ -2,6 +2,7 @@ package org.dawnsci.processing.ui.fileactions;
 
 import java.io.File;
 
+import org.dawnsci.processing.ui.slice.DataFileSliceView;
 import org.dawnsci.processing.ui.slice.FileManager;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
@@ -36,7 +37,7 @@ public class OpenLocalFileAction extends Action implements IWorkbenchWindowActio
 			filterPath =  dialog.getFilterPath();
 
 			IWorkbenchPage page = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage();
-			IViewPart view = page.findView("org.dawnsci.processing.ui.DataFileSliceView");
+			IViewPart view = page.findView(DataFileSliceView.ID);
 			if (view==null) return;
 
 			final FileManager manager = (FileManager)view.getAdapter(FileManager.class);

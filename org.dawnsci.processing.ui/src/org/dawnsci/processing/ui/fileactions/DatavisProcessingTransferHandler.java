@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.dawnsci.datavis.api.IDataFilePackage;
+import org.dawnsci.processing.ui.slice.DataFileSliceView;
 import org.dawnsci.processing.ui.slice.FileManager;
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
@@ -28,7 +29,6 @@ public class DatavisProcessingTransferHandler extends AbstractHandler {
 	
 	private static final String LOADEDFILE_PART ="org.dawnsci.datavis.view.parts.LoadedFilePart";
 	private static final String PERSPECTIVE_ID = "org.dawnsci.processing.ui.ProcessingPerspective";
-	private static final String DATAFILESLICEVIEW = "org.dawnsci.processing.ui.DataFileSliceView";
 	
 	@Override
 	public Object execute(ExecutionEvent event) throws ExecutionException {
@@ -51,7 +51,7 @@ public class DatavisProcessingTransferHandler extends AbstractHandler {
 	
 		
 		IWorkbenchPage page = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage();
-		IViewPart view = page.findView(DATAFILESLICEVIEW);
+		IViewPart view = page.findView(DataFileSliceView.ID);
 
 		List<String> collect = list.stream().map(IDataFilePackage::getFilePath).collect(Collectors.toList());
 		String[] array = collect.toArray(new String[collect.size()]);

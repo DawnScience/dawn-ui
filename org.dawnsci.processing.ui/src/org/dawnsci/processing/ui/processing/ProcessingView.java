@@ -67,7 +67,8 @@ import org.slf4j.LoggerFactory;
  */
 public class ProcessingView extends ViewPart {
 	
-	
+	public static final String ID = "org.dawnsci.processing.ui.processingView";
+
 	private SeriesTable               seriesTable;
 	private OperationFilter           operationFiler;
 	private List<OperationDescriptor> saved;
@@ -184,7 +185,7 @@ public class ProcessingView extends ViewPart {
 		ctx.registerService(EventHandler.class, initialHandler, props);
 	}
 	
-	private void saveOperationsToFile(String filename, IOperation[] op) {
+	private void saveOperationsToFile(String filename, IOperation<?,?>[] op) {
 		try {
 			
 			if (new File(filename).exists()) {
@@ -202,6 +203,7 @@ public class ProcessingView extends ViewPart {
 		}
 	}
 	
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@Override
 	public Object getAdapter(Class clazz) {
 		
@@ -212,7 +214,8 @@ public class ProcessingView extends ViewPart {
 		return super.getAdapter(clazz);
 	}
 	
-	private IOperation[] getOperations() {
+	@SuppressWarnings("unchecked")
+	private IOperation<?,?>[] getOperations() {
 		final List<ISeriesItemDescriptor> desi = seriesTable.getSeriesItems();
 		
 		if (desi != null) {
@@ -264,7 +267,7 @@ public class ProcessingView extends ViewPart {
 		final IAction save = new Action("Save configured pipeline", IAction.AS_PUSH_BUTTON) {
 			public void run() {
 				
-				IOperation[] op = getOperations();
+				IOperation<?,?>[] op = getOperations();
 				
 				if (op == null) return;
 				FileSelectionDialog dialog = new FileSelectionDialog(ProcessingView.this.getSite().getShell());
@@ -347,6 +350,7 @@ public class ProcessingView extends ViewPart {
 		getViewSite().getActionBars().getMenuManager().add(showRanks);
 	}
 	
+	@SuppressWarnings("unused")
 	private void setDynamicMenuOptions(IMenuManager mm) {
 		
 		mm.add(add);

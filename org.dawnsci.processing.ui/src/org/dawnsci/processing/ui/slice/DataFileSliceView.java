@@ -31,6 +31,7 @@ import org.dawnsci.processing.ui.ProcessingPerspective;
 import org.dawnsci.processing.ui.ServiceHolder;
 import org.dawnsci.processing.ui.preference.ProcessingConstants;
 import org.dawnsci.processing.ui.processing.OperationDescriptor;
+import org.dawnsci.processing.ui.processing.ProcessingView;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -125,6 +126,8 @@ import uk.ac.diamond.scisoft.analysis.processing.visitor.NexusFileExecutionVisit
 
 public class DataFileSliceView extends ViewPart {
 
+	public static final String ID = "org.dawnsci.processing.ui.DataFileSliceView";
+
 	private FileManager fileManager;
 	private TableViewer viewer;
 	private UpdateJob job;
@@ -146,6 +149,7 @@ public class DataFileSliceView extends ViewPart {
 	
 	private final static Logger logger = LoggerFactory.getLogger(DataFileSliceView.class);
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public void createPartControl(Composite parent) {
 		logger.info("Perspective Created: Processing");
@@ -221,7 +225,7 @@ public class DataFileSliceView extends ViewPart {
 		createActions(rightClick);
 		viewer.getControl().setMenu(rightClick.createContextMenu(viewer.getControl()));
 		
-		getSite().getPage().addSelectionListener("org.dawnsci.processing.ui.processingView",new ISelectionListener() {
+		getSite().getPage().addSelectionListener(ProcessingView.ID, new ISelectionListener() {
 			
 			@Override
 			public void selectionChanged(IWorkbenchPart part, ISelection selection) {
@@ -677,7 +681,7 @@ public class DataFileSliceView extends ViewPart {
 	}
 	
 	private IOperation<? extends IOperationModel, ? extends OperationData>[] getOperations() {
-		IViewPart view = getSite().getPage().findView("org.dawnsci.processing.ui.processingView");
+		IViewPart view = getSite().getPage().findView(ProcessingView.ID);
 		
 		Object ob = view.getAdapter(IOperation.class);
 		IOperation<? extends IOperationModel, ? extends OperationData>[] ops = null;
@@ -685,7 +689,7 @@ public class DataFileSliceView extends ViewPart {
 		if (ob == null) return null;
 		
 		if (ob.getClass().isArray() && Array.get(ob, 0) instanceof IOperation) {
-			ops = (IOperation[])ob;
+			ops = (IOperation<?,?>[]) ob;
 		}
 		
 		return ops;
@@ -806,7 +810,7 @@ public class DataFileSliceView extends ViewPart {
 				}
 				
 				
-				int[] dataDims = Slicer.getDataDimensions(lazyDataset.getShape(), context.getSliceDimensions());
+//				int[] dataDims = Slicer.getDataDimensions(lazyDataset.getShape(), context.getSliceDimensions());
 				Slice[] s = csw.getCurrentSlice();
 				//Plot input, probably a bit wasteful to do each time
 				IDataset firstSlice = null;
@@ -848,7 +852,7 @@ public class DataFileSliceView extends ViewPart {
 						
 					} else {
 						firstSlice = inputData.getInputData();
-						ops = new IOperation[]{inputData.getCurrentOperations().get(0)};
+						ops = new IOperation<?,?>[] {inputData.getCurrentOperations().get(0)};
 					}
 					
 				}
@@ -916,6 +920,7 @@ public class DataFileSliceView extends ViewPart {
 		return new EscapableSliceVisitor(lz,dataDims,series,getOperations(),mon,fileManager.getContext(),output, display, logDisplay,displayHelper);
 	}
 	
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@Override
 	public Object getAdapter(final Class clazz) {
 		if (clazz == FileManager.class) return fileManager;

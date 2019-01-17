@@ -8,6 +8,8 @@
  */
 package org.dawnsci.processing.ui;
 
+import org.dawnsci.processing.ui.processing.ProcessingView;
+import org.dawnsci.processing.ui.slice.DataFileSliceView;
 import org.eclipse.ui.IFolderLayout;
 import org.eclipse.ui.IPageLayout;
 import org.eclipse.ui.IPerspectiveFactory;
@@ -28,8 +30,8 @@ public class ProcessingPerspective implements IPerspectiveFactory {
 		navigatorFolder.addView("org.dawnsci.fileviewer.FileViewer");
 		
 		IFolderLayout left = layout.createFolder("DataFileView", IPageLayout.LEFT, 0.3f, editorArea);
-		left.addView("org.dawnsci.processing.ui.DataFileSliceView");
-		IViewLayout vLayout = layout.getViewLayout("org.dawnsci.processing.ui.DataFileSliceView");
+		left.addView(DataFileSliceView.ID);
+		IViewLayout vLayout = layout.getViewLayout(DataFileSliceView.ID);
 		vLayout.setCloseable(false);
 		
 		IFolderLayout dataLayout = layout.createFolder("input", IPageLayout.BOTTOM, 0.5f, "DataFileView");
@@ -38,8 +40,8 @@ public class ProcessingPerspective implements IPerspectiveFactory {
 		vLayout.setCloseable(false);
 		
 		IFolderLayout top = layout.createFolder("procView", IPageLayout.LEFT, 0.5f, editorArea);
-		top.addView("org.dawnsci.processing.ui.processingView");
-		vLayout = layout.getViewLayout("org.dawnsci.processing.ui.processingView");
+		top.addView(ProcessingView.ID);
+		vLayout = layout.getViewLayout(ProcessingView.ID);
 		vLayout.setCloseable(false);
 		
 		IFolderLayout dataoutLayout = layout.createFolder("output", IPageLayout.BOTTOM, 0.35f, "procView");
