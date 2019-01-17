@@ -227,16 +227,15 @@ public class XYRegionGraph extends XYGraph {
 			//super.getLegendMap().clear();
 		}
 		
+		getRegionArea().clearTraces();
 		for(Axis axis : getXAxisList()){
 			if (axis instanceof DAxis)((DAxis)axis).clear();
 		}
 		for(Axis axis : getYAxisList()){
 			if (axis instanceof DAxis)((DAxis)axis).clear();
 		}
-		getRegionArea().clearTraces();
-		
-		revalidate();
 
+		revalidate();
 	}
 
 	public void setPaletteData(PaletteData data) {
