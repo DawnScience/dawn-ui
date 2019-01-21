@@ -261,11 +261,11 @@ public class ConfigureOperationModelWizardPage extends AbstractOperationModelWiz
 	
 	private Map<String, ROIStruct> getROIs(IOperationModel model, IDataset data) {
 		final List<Field> allFields = new ArrayList<Field>(31);
-		allFields.addAll(Arrays.asList(model.getClass().getDeclaredFields()));
-		allFields.addAll(Arrays.asList(model.getClass().getSuperclass().getDeclaredFields()));
+		for (Class<?> c = model.getClass(); c != null; c = c.getSuperclass()) {
+			allFields.addAll(Arrays.asList(c.getDeclaredFields()));
+		}
 
 		Map<String,ROIStruct> rois = new HashMap<String,ROIStruct>();
-		IDataset[] axes = MetadataPlotUtils.getAxesFromMetadata(data);
 		
 		for (Field field : allFields) {
 			Class<?> class1 = field.getType();
@@ -490,7 +490,9 @@ public class ConfigureOperationModelWizardPage extends AbstractOperationModelWiz
 
 			Object object = model.get(evt.getPropertyName());
 			
-			
+			if (region == null) {
+				return;
+			}
 			
 			if (object instanceof IROI) region.setROI((IROI)object);
 			else {
