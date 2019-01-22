@@ -1,4 +1,4 @@
-package org.dawnsci.datavis.view;
+package org.dawnsci.january.ui.utils;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -8,8 +8,8 @@ import java.util.stream.Collectors;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.StructuredSelection;
 
-public class DataVisSelectionUtils {
-
+public class SelectionUtils {
+	
 	public static <U> List<U> getFromSelection(ISelection selection, Class<U> clazz){
 
 		if (selection instanceof StructuredSelection) {
@@ -22,6 +22,5 @@ public class DataVisSelectionUtils {
 
 		return Collections.emptyList();
 	}
-	
-	
+
 }

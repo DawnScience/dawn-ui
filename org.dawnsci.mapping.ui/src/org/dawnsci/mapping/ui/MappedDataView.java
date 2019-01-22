@@ -277,6 +277,7 @@ public class MappedDataView extends ViewPart {
 			filesToReload = filesInView.toArray(new String[filesInView.size()]);
 		}
 		
+		getSite().setSelectionProvider(viewer);
 		fileController.attachLive(filesToReload);
 		
 	}

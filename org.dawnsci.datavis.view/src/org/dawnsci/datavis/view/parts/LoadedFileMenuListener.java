@@ -17,8 +17,8 @@ import org.dawnsci.datavis.model.IDataObject;
 import org.dawnsci.datavis.model.IFileController;
 import org.dawnsci.datavis.model.LoadedFile;
 import org.dawnsci.datavis.view.Activator;
-import org.dawnsci.datavis.view.DataVisSelectionUtils;
 import org.dawnsci.datavis.view.parts.LoadedFilePart.LabelEditingSupport;
+import org.dawnsci.january.ui.utils.SelectionUtils;
 import org.eclipse.core.commands.Command;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jface.action.Action;
@@ -121,7 +121,7 @@ public class LoadedFileMenuListener implements IMenuListener {
 				manager.add(new Separator());
 				manager.add(new ApplyToAllAction(fileController, viewer));
 				
-				List<LoadedFile> s = DataVisSelectionUtils.getFromSelection(viewer.getSelection(), LoadedFile.class);
+				List<LoadedFile> s = SelectionUtils.getFromSelection(viewer.getSelection(), LoadedFile.class);
 				
 				if (!s.isEmpty() && s.get(0).getTree() != null && checkCommand(OPEN_TREE)) {
 					manager.add(new Separator());
