@@ -11,24 +11,26 @@
 package org.dawnsci.datavis.model;
 
 
+import java.io.BufferedWriter;
 // Imports from java
 import java.io.File;
-import java.util.List;
-import java.util.Iterator;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.io.BufferedWriter;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.Iterator;
+import java.util.List;
 
 // Imports from org.eclipse
 import org.eclipse.dawnsci.analysis.api.io.IDataHolder;
-
 // Imports from org.slf4j
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 // Imports from uk.ac.diamond.scisoft
 import uk.ac.diamond.scisoft.analysis.io.LoaderFactory;
+import uk.ac.diamond.scisoft.analysis.utils.VersionSort;
 
 
 // Currently this class just joins files with a NeXus tree, however, class
@@ -53,6 +55,16 @@ public class FileJoining {
 			if (onlyEntry.isDirectory()) {
 				directoryPath = firstFilePath;
 				String[] directoryFileArray = onlyEntry.list();
+				//list specifies unordered so version sort as most likely correct order
+				Arrays.sort(directoryFileArray, new Comparator<String>() {
+
+					@Override
+					public int compare(String o1, String o2) {
+						return VersionSort.versionCompare(o1, o2);
+					}
+					
+				});
+				
 				firstFilePath = directoryPath + File.separator + directoryFileArray[0];
 				
 				for (int iter = 0; iter < directoryFileArray.length; iter ++) {
