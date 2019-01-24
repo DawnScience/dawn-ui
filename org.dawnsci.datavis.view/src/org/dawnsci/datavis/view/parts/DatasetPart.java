@@ -16,6 +16,7 @@ import org.dawnsci.datavis.model.IPlotController;
 import org.dawnsci.datavis.model.IRefreshable;
 import org.dawnsci.datavis.model.LoadedFile;
 import org.dawnsci.datavis.model.PlotEventObject;
+import org.dawnsci.datavis.model.PlotEventObject.PlotEventType;
 import org.dawnsci.datavis.model.PlotModeChangeEventListener;
 import org.dawnsci.datavis.model.PlottableObject;
 import org.dawnsci.datavis.view.table.AxisSliceDialog;
@@ -75,6 +76,8 @@ public class DatasetPart {
 	private ISliceChangeListener sliceListener;
 	private ISelectionListener selectionListener;
 	private PlotModeChangeEventListener plotListener;
+	
+	private PlotEventType lastPlotEvent;
 
 	@PostConstruct
 	public void createComposite(Composite parent) {
@@ -180,7 +183,12 @@ public class DatasetPart {
 					return;
 				}
 				
-				progress.setText(event.getMessage());
+				if (!PlotEventType.ERROR.equals(lastPlotEvent) || PlotEventType.LOADING.equals(event.getEventType())){
+					System.out.println(event.getMessage());
+					progress.setText(event.getMessage());
+					lastPlotEvent = event.getEventType();
+				}
+				
 			}
 			
 			@Override

@@ -398,7 +398,23 @@ public class PlotController implements IPlotController, ILoadedFileInitialiser {
 			}
 			
 		} catch (Exception e) {
-			firePlotEvent(new PlotEventObject(PlotEventType.ERROR, "Error loading data..."));
+			
+			//see if exception caused by out of memory
+			//if so add extra message
+			String mem = "";
+			Throwable t = e;
+			
+			while (t != null) {
+				
+				if (t instanceof OutOfMemoryError) {
+					mem = " Out of Memory!";
+					break;
+				}
+				
+				t = t.getCause();
+			}
+			
+			firePlotEvent(new PlotEventObject(PlotEventType.ERROR, "Error loading data..." + mem));
 			logger.error("Could not slice data for plotting", e);
 		}
 		
