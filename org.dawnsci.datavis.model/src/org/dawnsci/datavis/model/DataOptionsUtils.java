@@ -222,7 +222,7 @@ public class DataOptionsUtils {
 	 * 				The suffix to add to the end of suffix.getName().
 	 * @return The constructed object.
 	 */
-	private static DataOptionsDataset buildNewDataOptions(DataOptions input, Dataset output, String suffix) {
+	public static DataOptionsDataset buildNewDataOptions(DataOptions input, Dataset output, String suffix) {
 		return buildNewDataOptionsWithName(input, output, input.getName() + suffix);
 	}
 
@@ -236,7 +236,7 @@ public class DataOptionsUtils {
 	 * 			The full name of the new {@link DataOptionsDataset}.
 	 * @return The constructed object.
 	 */
-	private static DataOptionsDataset buildNewDataOptionsWithName(DataOptions input, Dataset output, String name) {
+	public static DataOptionsDataset buildNewDataOptionsWithName(DataOptions input, Dataset output, String name) {
 		NDimensions nDimensions = input.getPlottableObject().getNDimensions();
 		NDimensions ndc = new NDimensions(nDimensions);
 		ndc.updateShape(output.getShape());
