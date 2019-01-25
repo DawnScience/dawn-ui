@@ -197,6 +197,60 @@
             </menu>
          </menu>
       </menuContribution>
+      <menuContribution
+            allPopups="false"
+            locationURI="menu:org.eclipse.ui.main.menu">
+         <menu
+               id="org.dawnsci.mapping.menu"
+               label="Map">
+            <visibleWhen
+                  checkEnabled="false">
+               <with
+                     variable="activeWorkbenchWindow.activePerspective">
+                  <or>
+                  	 <equals
+                           value="org.dawnsci.mapping.ui.dawn.mappingperspective">
+                  	 </equals>
+                     <equals
+                           value="uk.ac.diamond.daq.mapping.ui.experiment.MappingPerspective">
+                     </equals>
+                  </or>
+               </with>
+            </visibleWhen>
+            <command
+                  commandId="org.dawnsci.mapping.ui.menu.transparency"
+                  label="Set Transparency..."
+                  style="push">
+            </command>
+         </menu>
+      </menuContribution>
+      <menuContribution
+            allPopups="false"
+            locationURI="menu:org.eclipse.ui.main.menu">
+         <menu
+               id="org.dawnsci.mapping.detector"
+               label="Detector">
+            <visibleWhen
+                  checkEnabled="false">
+               <with
+                     variable="activeWorkbenchWindow.activePerspective">
+                  <or>
+                  	 <equals
+                           value="org.dawnsci.mapping.ui.dawn.mappingperspective">
+                  	 </equals>
+                     <equals
+                           value="uk.ac.diamond.daq.mapping.ui.experiment.MappingPerspective">
+                     </equals>
+                  </or>
+               </with>
+            </visibleWhen>
+            <command
+                  commandId="org.dawnsci.mapping.ui.dynamicviewercommand"
+                  label="Dynamic Viewer..."
+                  style="push">
+            </command>
+         </menu>
+      </menuContribution>
    </extension>
    <extension
          point="org.eclipse.ui.commands">
@@ -204,6 +258,16 @@
             defaultHandler="org.dawnsci.mapping.ui.DatavisMappingTransferHandler"
             id="org.dawnsci.mapping.ui.command.transferdatavisfile"
             name="Datavis mapping transfer">
+      </command>
+      <command
+            defaultHandler="org.dawnsci.mapping.ui.actions.TransparencyHandler"
+            id="org.dawnsci.mapping.ui.menu.transparency"
+            name="Set Transparency...">
+      </command>
+      <command
+            defaultHandler="org.dawnsci.mapping.ui.actions.DynamicViewerHandler"
+            id="org.dawnsci.mapping.ui.dynamicviewercommand"
+            name="Dynamic Viewer">
       </command>
    </extension>
 

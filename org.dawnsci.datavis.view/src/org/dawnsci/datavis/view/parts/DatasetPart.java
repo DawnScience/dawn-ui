@@ -15,17 +15,17 @@ import org.dawnsci.datavis.model.IFileController;
 import org.dawnsci.datavis.model.IPlotController;
 import org.dawnsci.datavis.model.IRefreshable;
 import org.dawnsci.datavis.model.LoadedFile;
+import org.dawnsci.datavis.model.PlotEventObject;
+import org.dawnsci.datavis.model.PlotModeChangeEventListener;
+import org.dawnsci.datavis.model.PlottableObject;
+import org.dawnsci.datavis.view.table.AxisSliceDialog;
+import org.dawnsci.datavis.view.table.DataOptionTableViewer;
 import org.dawnsci.january.model.ISliceAssist;
 import org.dawnsci.january.model.ISliceChangeListener;
 import org.dawnsci.january.model.NDimensions;
 import org.dawnsci.january.model.SliceChangeEvent;
-import org.dawnsci.datavis.model.PlotEventObject;
-import org.dawnsci.datavis.model.PlotModeChangeEventListener;
-import org.dawnsci.datavis.model.PlottableObject;
-import org.dawnsci.datavis.view.DataVisSelectionUtils;
-import org.dawnsci.datavis.view.table.AxisSliceDialog;
 import org.dawnsci.january.ui.dataconfigtable.DataConfigurationTable;
-import org.dawnsci.datavis.view.table.DataOptionTableViewer;
+import org.dawnsci.january.ui.utils.SelectionUtils;
 import org.eclipse.e4.ui.di.Focus;
 import org.eclipse.e4.ui.model.application.ui.basic.MPart;
 import org.eclipse.e4.ui.workbench.modeling.ESelectionService;
@@ -216,7 +216,7 @@ public class DatasetPart {
 					Object ob = ((StructuredSelection)selection).getFirstElement();
 
 					if (ob instanceof IPlotMode && !ob.equals(plotController.getCurrentMode())) {
-						DataOptions dataOptions = DataVisSelectionUtils.getFromSelection(viewer.getStructuredSelection(), DataOptions.class).get(0);
+						DataOptions dataOptions = SelectionUtils.getFromSelection(viewer.getStructuredSelection(), DataOptions.class).get(0);
 						if (dataOptions.isSelected() && dataOptions.getParent().isSelected()) {
 							plotController.switchPlotMode((IPlotMode)ob,dataOptions);
 						} else {
@@ -254,7 +254,7 @@ public class DatasetPart {
 			@Override
 			public void selectionChanged(MPart part, Object selection) {
 				if (selection instanceof ISelection) {
-					List<LoadedFile> files = DataVisSelectionUtils.getFromSelection((ISelection)selection, LoadedFile.class);
+					List<LoadedFile> files = SelectionUtils.getFromSelection((ISelection)selection, LoadedFile.class);
 
 					updateOnSelectionChange(files.isEmpty() ? null : files.get(0));
 
@@ -296,7 +296,7 @@ public class DatasetPart {
 
 		Object selection = selectionService.getSelection(LOADED_FILE_PART_ID);
 		if (selection instanceof ISelection) {
-			List<LoadedFile> files = DataVisSelectionUtils.getFromSelection((ISelection)selection, LoadedFile.class);
+			List<LoadedFile> files = SelectionUtils.getFromSelection((ISelection)selection, LoadedFile.class);
 
 			updateOnSelectionChange(files.isEmpty() ? null : files.get(0));
 
@@ -318,7 +318,7 @@ public class DatasetPart {
 					return;
 				}
 				
-				List<DataOptions> s = DataVisSelectionUtils.getFromSelection(viewer.getStructuredSelection(), DataOptions.class);
+				List<DataOptions> s = SelectionUtils.getFromSelection(viewer.getStructuredSelection(), DataOptions.class);
 
 				if (!s.isEmpty() && s.get(0).getParent() instanceof IRefreshable) {
 					table.refresh();
@@ -352,7 +352,7 @@ public class DatasetPart {
 		}
 		
 		if (option == null && !viewer.getStructuredSelection().isEmpty()) {
-			List<DataOptions> d = DataVisSelectionUtils.getFromSelection(viewer.getStructuredSelection(), DataOptions.class);
+			List<DataOptions> d = SelectionUtils.getFromSelection(viewer.getStructuredSelection(), DataOptions.class);
 			if (!d.isEmpty() && file.getDataOptions().contains(d.get(0))) {
 				option = d.get(0);
 			}

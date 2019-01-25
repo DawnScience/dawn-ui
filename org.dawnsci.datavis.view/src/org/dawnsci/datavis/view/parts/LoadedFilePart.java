@@ -23,10 +23,10 @@ import org.dawnsci.datavis.model.IFileController;
 import org.dawnsci.datavis.model.IRefreshable;
 import org.dawnsci.datavis.model.LoadedFile;
 import org.dawnsci.datavis.view.Activator;
-import org.dawnsci.datavis.view.DataVisSelectionUtils;
 import org.dawnsci.datavis.view.preference.DataVisPreferenceConstants;
 import org.dawnsci.datavis.view.quickfile.IQuickFileWidgetListener;
 import org.dawnsci.datavis.view.quickfile.QuickFileWidget;
+import org.dawnsci.january.ui.utils.SelectionUtils;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.dawnsci.analysis.api.io.ILoaderService;
@@ -490,12 +490,12 @@ public class LoadedFilePart {
 		viewer.setInput(fileController);
 		
 		IStructuredSelection selection = viewer.getStructuredSelection();
-		List<LoadedFile> s = DataVisSelectionUtils.getFromSelection(selection, LoadedFile.class);
+		List<LoadedFile> s = SelectionUtils.getFromSelection(selection, LoadedFile.class);
 		
 		if (s.isEmpty() && event.getLoadedFile() != null) {
 			viewer.getTable().setSelection(0);
 			selection = viewer.getStructuredSelection();
-			s = DataVisSelectionUtils.getFromSelection(selection, LoadedFile.class);
+			s = SelectionUtils.getFromSelection(selection, LoadedFile.class);
 		}
 		
 		if (!s.isEmpty()) {

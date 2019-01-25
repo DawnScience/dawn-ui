@@ -13,7 +13,7 @@ import org.dawnsci.datavis.model.DataOptionsUtils;
 import org.dawnsci.datavis.model.IFileController;
 import org.dawnsci.datavis.view.Activator;
 import org.dawnsci.datavis.view.DataOptionsUIUtils;
-import org.dawnsci.datavis.view.DataVisSelectionUtils;
+import org.dawnsci.january.ui.utils.SelectionUtils;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.dawnsci.plotting.api.ProgressMonitorWrapper;
 import org.eclipse.draw2d.ColorConstants;
@@ -110,7 +110,7 @@ public class DataOptionTableViewer {
 
 			@Override
 			public void menuAboutToShow(IMenuManager manager) {
-				List<DataOptions> s = DataVisSelectionUtils.getFromSelection(tableViewer.getSelection(), DataOptions.class);
+				List<DataOptions> s = SelectionUtils.getFromSelection(tableViewer.getSelection(), DataOptions.class);
 				if (s != null && !s.isEmpty()) {
 					Action a = new Action("Take view") {
 						@Override

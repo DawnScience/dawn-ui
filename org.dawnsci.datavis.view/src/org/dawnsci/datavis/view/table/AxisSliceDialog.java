@@ -3,8 +3,8 @@ package org.dawnsci.datavis.view.table;
 import java.util.List;
 
 import org.dawnsci.datavis.model.DataOptions;
-import org.dawnsci.datavis.view.DataVisSelectionUtils;
 import org.dawnsci.january.model.NDimensions;
+import org.dawnsci.january.ui.utils.SelectionUtils;
 import org.eclipse.january.DatasetException;
 import org.eclipse.january.dataset.Dataset;
 import org.eclipse.january.dataset.DatasetFactory;
@@ -62,7 +62,7 @@ public class AxisSliceDialog extends Dialog {
 		
 		ISelection selection = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getSelectionService().getSelection("org.dawnsci.datavis.view.parts.DatasetPart");
 		
-		List<DataOptions> all = DataVisSelectionUtils.getFromSelection(selection, DataOptions.class);
+		List<DataOptions> all = SelectionUtils.getFromSelection(selection, DataOptions.class);
 		
 		if (all.isEmpty()) {
 			return container;
