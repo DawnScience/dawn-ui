@@ -212,19 +212,43 @@ public class DataOptionsUtils {
 		return new SliceViewIterator(lazyDataset, null, nDimensions.getDimensionsWithDescription());
 	}
 
-	private static DataOptionsDataset buildNewDataOptions(DataOptions input, Dataset output, String name) {
+	/**
+	 * Builds a new {@link DataOptionsDataset}, named by suffixing the original name.
+	 * @param input
+	 * 				The original {@link DataOptions} object.
+	 * @param output
+	 * 				The Dataset containing the new data.
+	 * @param suffix
+	 * 				The suffix to add to the end of suffix.getName().
+	 * @return The constructed object.
+	 */
+	private static DataOptionsDataset buildNewDataOptions(DataOptions input, Dataset output, String suffix) {
+		return buildNewDataOptionsWithName(input, output, input.getName() + suffix);
+	}
+
+	/**
+	 * Builds a new {@link DataOptionsDataset} with a given name.
+	 * @param input
+	 * 				The original {@link DataOptions} object.
+	 * @param output
+	 * 				The Dataset containing the new data.
+	 * @param name
+	 * 			The full name of the new {@link DataOptionsDataset}.
+	 * @return The constructed object.
+	 */
+	private static DataOptionsDataset buildNewDataOptionsWithName(DataOptions input, Dataset output, String name) {
 		NDimensions nDimensions = input.getPlottableObject().getNDimensions();
 		NDimensions ndc = new NDimensions(nDimensions);
 		ndc.updateShape(output.getShape());
 		IPlotMode plotMode = input.getPlottableObject().getPlotMode();
 		PlottableObject po = new PlottableObject(plotMode, ndc);
-		DataOptionsDataset dop = new DataOptionsDataset(input.getName()+name, input.getParent(), output);
+		DataOptionsDataset dop = new DataOptionsDataset(name, input.getParent(), output);
 		dop.setPlottableObject(po);
 
 		int[] dd = nDimensions.getDimensionsWithDescription();
 		//data axes should be set in sum/average
 		String[] ax = input.getPrimaryAxes();
-		
+
 		if (ax != null) {
 			String[] inax = new String[nDimensions.getRank()];
 
@@ -236,7 +260,7 @@ public class DataOptionsUtils {
 				inax[dd[i]] = ax[dd[i]];
 				ndc.setAxis(dd[i], ax[dd[i]]);
 			}
-			
+
 			dop.setAxes(inax);
 		}
 		
