@@ -370,11 +370,13 @@ public class SetUpProcessWizardPage extends WizardPage {
 		
 		Map<Integer,String> axesNames = new HashMap<>();
 		
+		String[] axesName = nDimensions.buildAxesNames();
+		
 		for (int i = 0; i < nDimensions.getRank(); i++) {
 			
-			if (nDimensions.getAxis(i) != null) {
+			if (axesName[i] != null && !axesName[i].isEmpty()) {
 				//1 based indexing?
-				axesNames.put(i+1, nDimensions.getAxis(i));
+				axesNames.put(i+1, axesName[i]);
 			}
 			
 			if (!nDimensions.getDescription(i).isEmpty()) {
