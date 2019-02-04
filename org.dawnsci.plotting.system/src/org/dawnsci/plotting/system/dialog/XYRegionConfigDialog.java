@@ -218,9 +218,10 @@ public class XYRegionConfigDialog extends XYGraphConfigDialog {
 					Composite axisConfigComposite = (Composite) axisTabComposite.getChildren()[1];
 					final StackLayout stackLayout = (StackLayout) axisConfigComposite.getLayout();
 					stackLayout.topControl = getAxisConfigPageList().get(index).getComposite();
-					Combo traceCombo = getTraceCombo();
-					if (traceCombo != null)
-						traceCombo.select(index);
+					Combo axisCombo = getAxisCombo();
+					if (axisCombo != null) {
+						axisCombo.select(index);
+					}
 					axisConfigComposite.layout(true, true);
 					break;
 				}
