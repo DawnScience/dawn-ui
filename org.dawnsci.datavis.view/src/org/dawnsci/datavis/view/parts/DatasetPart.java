@@ -1,3 +1,12 @@
+/*-
+ * Copyright (c) 2019 Diamond Light Source Ltd.
+ *
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ */
+
 package org.dawnsci.datavis.view.parts;
 
 import java.util.Arrays;
@@ -12,6 +21,7 @@ import org.dawnsci.datavis.model.DataOptions;
 import org.dawnsci.datavis.model.FileControllerStateEvent;
 import org.dawnsci.datavis.model.FileControllerStateEventListener;
 import org.dawnsci.datavis.model.IFileController;
+import org.dawnsci.datavis.model.ILoadedFileInitialiser;
 import org.dawnsci.datavis.model.IPlotController;
 import org.dawnsci.datavis.model.IRefreshable;
 import org.dawnsci.datavis.model.LoadedFile;
@@ -88,7 +98,11 @@ public class DatasetPart {
 		checkForm.left = new FormAttachment(0,0);
 		checkForm.right = new FormAttachment(100,0);
 		checkForm.bottom = new FormAttachment(75,0);
-		viewer = new DataOptionTableViewer(fileController);
+		if (plotController instanceof ILoadedFileInitialiser) {
+			viewer = new DataOptionTableViewer(fileController, (ILoadedFileInitialiser) plotController);
+		} else {
+			viewer = new DataOptionTableViewer(fileController, null);
+		}
 		viewer.createControl(parent);
 		viewer.getControl().setLayoutData(checkForm);
 

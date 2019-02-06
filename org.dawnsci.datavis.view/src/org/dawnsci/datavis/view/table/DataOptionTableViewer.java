@@ -1,3 +1,12 @@
+/*-
+ * Copyright (c) 2019 Diamond Light Source Ltd.
+ *
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ */
+
 package org.dawnsci.datavis.view.table;
 
 import java.lang.reflect.InvocationTargetException;
@@ -11,10 +20,14 @@ import org.dawnsci.datavis.model.DataOptionsDataset;
 import org.dawnsci.datavis.model.DataOptionsSlice;
 import org.dawnsci.datavis.model.DataOptionsUtils;
 import org.dawnsci.datavis.model.IFileController;
+import org.dawnsci.datavis.model.ILoadedFileInitialiser;
+import org.dawnsci.datavis.model.PlotController;
 import org.dawnsci.datavis.view.Activator;
 import org.dawnsci.datavis.view.DataOptionsUIUtils;
+import org.dawnsci.datavis.view.ExpressionDialog;
 import org.dawnsci.january.ui.utils.SelectionUtils;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.dawnsci.analysis.api.expressions.IExpressionService;
 import org.eclipse.dawnsci.plotting.api.ProgressMonitorWrapper;
 import org.eclipse.draw2d.ColorConstants;
 import org.eclipse.january.IMonitor;
@@ -37,6 +50,7 @@ import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
+import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Image;
@@ -56,9 +70,11 @@ public class DataOptionTableViewer {
 	private Composite tableComposite;
 
 	IFileController controller;
-
-	public DataOptionTableViewer(IFileController controller){
+	ILoadedFileInitialiser initialiser;
+	
+	public DataOptionTableViewer(IFileController controller, ILoadedFileInitialiser initialiser){
 		this.controller = controller;
+		this.initialiser = initialiser;
 	}
 
 	public void dispose(){
@@ -131,6 +147,26 @@ public class DataOptionTableViewer {
 
 					manager.add(sum);
 
+					Action exprAction = new Action("Apply expression...") {
+						@Override
+						public void run() {
+							DataOptions dataOptions = s.get(0);
+							IExpressionService service = Activator.getService(IExpressionService.class);
+							ExpressionDialog dialog = new ExpressionDialog(tableComposite.getShell(), service, dataOptions, controller);
+							int retVal = dialog.open();
+							if (retVal == Window.OK) {
+								DataOptions result = dialog.getResult();
+								if (result != null ) {
+									dataOptions.getParent().addVirtualOption(result);
+									if (initialiser != null)
+										initialiser.initialise(dataOptions.getParent());
+									tableViewer.setInput(dataOptions.getParent().getDataOptions().toArray());
+								}
+							}
+						}
+					};
+					
+					manager.add(exprAction);
 
 					if (s.get(0) instanceof DataOptionsSlice || s.get(0) instanceof DataOptionsDataset) {
 						Action r = new Action("Remove view") {
