@@ -82,6 +82,40 @@ public class NDimensionsTest {
 		}
 	}
 	
+	@Test
+	public void testSingleDimensionsGrow() {
+		int[] shape = new int[]{1,1};
+		NDimensions ndims = new NDimensions(shape,null);
+		String[] optionsXY = new String[]{"X","Y"};
+		ndims.setOptions(optionsXY);
+		
+		SliceND s = ndims.buildSliceND();
+		assertArrayEquals(new int[]{0, 0,}, s.getStart());
+		assertArrayEquals(new int[]{1, 1}, s.getStop());
+		
+		ndims.updateShape(new int[]{1,3});
+		s = ndims.buildSliceND();
+		assertArrayEquals(new int[]{0, 0,}, s.getStart());
+		assertArrayEquals(new int[]{1, 3}, s.getStop());
+		
+		ndims.updateShape(new int[]{1,5});
+		s = ndims.buildSliceND();
+		assertArrayEquals(new int[]{0, 0,}, s.getStart());
+		assertArrayEquals(new int[]{1, 5}, s.getStop());
+		
+		ndims.updateShape(new int[]{2,5});
+		s = ndims.buildSliceND();
+		assertArrayEquals(new int[]{0, 0,}, s.getStart());
+		assertArrayEquals(new int[]{2, 5}, s.getStop());
+		
+		ndims.updateShape(new int[]{5,5});
+		s = ndims.buildSliceND();
+		assertArrayEquals(new int[]{0, 0,}, s.getStart());
+		assertArrayEquals(new int[]{5, 5}, s.getStop());
+		
+	}
+	
+	
 	/**
 	 * Test the slice changes correctly when updateShape is called
 	 */

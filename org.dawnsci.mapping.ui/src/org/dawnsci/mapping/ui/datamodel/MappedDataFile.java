@@ -8,13 +8,16 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.eclipse.dawnsci.analysis.api.io.IDataHolder;
 import org.eclipse.dawnsci.analysis.api.io.ILoaderService;
+import org.eclipse.dawnsci.analysis.api.io.IRemoteDataHolder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 
 public class MappedDataFile implements MapObject{
 
+	private IDataHolder dataHolder;
 	private String path;
 	private Map<String,MappedDataBlock> fullDataMap;
 	private Map<String,AbstractMapData> mapDataMap;
@@ -26,20 +29,21 @@ public class MappedDataFile implements MapObject{
 	
 	private static final Logger logger = LoggerFactory.getLogger(MappedDataFile.class);
 	
-	public MappedDataFile(String path, MappedDataFileBean liveBean) {
-		this(path);
+	public MappedDataFile(String path, MappedDataFileBean liveBean, IDataHolder dataHolder) {
+		this(path, dataHolder);
 		this.descriptionBean = liveBean;
 	}
 	
-	public MappedDataFile(String path) {
+	public MappedDataFile(String path, IDataHolder dataHolder) {
+		this.dataHolder = dataHolder;
 		this.path = path;
 		fullDataMap = new HashMap<>();
 		mapDataMap = new HashMap<>();
 		microscopeDataMap = new HashMap<>();
 	}
 	
-	public MappedDataFile(String path, LiveDataBean bean) {
-		this(path);
+	public MappedDataFile(String path, LiveDataBean bean, IDataHolder dataHolder) {
+		this(path, dataHolder);
 		if (bean != null) {
 			descriptionBean = new MappedDataFileBean();
 			descriptionBean.setLiveBean(bean);
@@ -208,4 +212,9 @@ public class MappedDataFile implements MapObject{
 		this.parentPath = parentPath;
 	}
 
+	public void update() {
+		if (dataHolder instanceof IRemoteDataHolder) {
+			((IRemoteDataHolder) dataHolder).update();
+		}
+	}
 }

@@ -23,12 +23,11 @@ import org.dawnsci.mapping.ui.wizards.MapBeanBuilder;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.dawnsci.analysis.api.io.IDataHolder;
 import org.eclipse.dawnsci.analysis.api.io.ILoaderService;
+import org.eclipse.dawnsci.analysis.api.io.IRemoteDataHolder;
 import org.eclipse.dawnsci.analysis.api.io.IRemoteDatasetService;
 import org.eclipse.dawnsci.analysis.api.tree.Tree;
-import org.eclipse.dawnsci.analysis.tree.TreeToMapUtils;
 import org.eclipse.january.IMonitor;
 import org.eclipse.january.dataset.IDataset;
-import org.eclipse.january.dataset.IRemoteData;
 import org.eclipse.january.metadata.IMetadata;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.scanning.api.ui.IStageScanConfiguration;
@@ -171,7 +170,7 @@ public class MappedFileManager implements IMapFileController{
 	private void lazyAddFiles(String[] paths) {
 		MappedDataFile f = null;
 		for (String p : paths) {
-			f = new MappedDataFile(p);
+			f = new MappedDataFile(p, null);
 			mappedDataArea.addMappedDataFile(f);
 		}
 		if (f != null) fireListeners(f);
@@ -312,7 +311,7 @@ public class MappedFileManager implements IMapFileController{
 	
 	@Override
 	public void addAssociatedImage(AssociatedImage image) {
-		MappedDataFile file = new MappedDataFile(image.getPath());
+		MappedDataFile file = new MappedDataFile(image.getPath(),null);
 		file.addMapObject(image.toString(), image);
 		mappedDataArea.addMappedDataFile(file);
 		fireListeners(file);
@@ -344,7 +343,7 @@ public class MappedFileManager implements IMapFileController{
 		IDataHolder dataHolder = null;
 		
 		if (bean.getLiveBean() != null) {
-			dataHolder = remoteService.createRemoteDataHolder(path, bean.getLiveBean().getHost(), bean.getLiveBean().getPort());
+			dataHolder = remoteService.createRemoteDataHolder(path, bean.getLiveBean().getHost(), bean.getLiveBean().getPort(), false);
 		} else {
 			try {
 				dataHolder = loaderService.getData(path, null);
@@ -478,18 +477,16 @@ public class MappedFileManager implements IMapFileController{
 			}
 			
 			if (!lazy) {
-				IRemoteData rd = remoteService.createRemoteData(bean.getHost(), bean.getPort());
+				IRemoteDataHolder rdh = remoteService.createRemoteDataHolder(path, bean.getHost(), bean.getPort(), false);
 				
-				if (rd == null) {
+				if (rdh == null) {
 					logger.error("Could not acquire remote data on :" + bean.getHost() + ":" + bean.getPort());
 					return;
 				}
 				
 				try {
-					rd.setPath(path);
-					Map<String, Object> map = rd.getTree();
-					map.toString();
-					Tree tree = TreeToMapUtils.mapToTree(map, path);
+					
+					Tree tree = rdh.getTree();
 					
 					MappedDataFileBean buildBean = buildBeanFromTree(tree);
 					
@@ -508,7 +505,7 @@ public class MappedFileManager implements IMapFileController{
 				}
 			}
 			
-			MappedDataFile mdf = new MappedDataFile(path,bean);
+			MappedDataFile mdf = new MappedDataFile(path,bean, null);
 			mdf.setParentPath(parentFile);
 			mappedDataArea.addMappedDataFile(mdf);
 			fireListeners(mdf);
@@ -546,7 +543,11 @@ public class MappedFileManager implements IMapFileController{
 		@Override
 		public void refreshRequest() {
 			if (liveService != null) {
-				liveService.runUpdate(() -> MappedFileManager.this.fireListeners(null), false);
+				liveService.runUpdate(() -> {
+					MappedFileManager.this.getArea().update();
+					MappedFileManager.this.fireListeners(null);
+					
+				}, false);
 			}
 		}
 

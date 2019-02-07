@@ -5,7 +5,6 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -166,32 +165,7 @@ public class LoadedFile implements IDataObject, IDataFilePackage {
 
 	public Map<String, int[]> getDataShapes(){
 
-		IDataHolder dh = dataHolder.get();
-
-		//use metadata if possible
-		if (dh.getMetadata() != null && dh.getMetadata().getDataShapes() != null) {
-			Map<String, int[]> ds = dataHolder.get().getMetadata().getDataShapes();
-			ds = new HashMap<>(ds);
-			for (String s : ds.keySet()) {
-				if (ds.get(s) == null) {
-					ILazyDataset lazyDataset = dataHolder.get().getLazyDataset(s);
-					if (lazyDataset != null) ds.put(s, lazyDataset.getShape());
-				}
-			}
-
-			return ds;
-		} else {
-			String[] ds = dataHolder.get().getNames();
-			Map<String, int[]> dsmap = new HashMap<>();
-			for (String s : ds) {
-
-				ILazyDataset lazyDataset = dataHolder.get().getLazyDataset(s);
-				if (lazyDataset != null) dsmap.put(s, lazyDataset.getShape());
-
-			}
-
-			return dsmap;
-		}
+		return dataHolder.get().getDatasetShapes();
 
 	}
 

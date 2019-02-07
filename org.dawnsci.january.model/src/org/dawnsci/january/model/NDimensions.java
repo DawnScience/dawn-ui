@@ -43,17 +43,31 @@ public class NDimensions {
 	public void setOptions(Object[] options) {
 		this.options = options;
 		int c = 0;
+		
+		int nonSingleDims = 0;
 		for (int i = 0; i < dimensions.length; i++) {
 			dimensions[i].setSlice(sliceFullRange ? new Slice(dimensions[i].getSize()) : new Slice(0, 1, 1));
 			dimensions[i].setDescription(null);
+			if (dimensions[i].getSize() > 1) {
+				nonSingleDims++;
+			}
 		}
-
-		for (int i = dimensions.length-1 ; i >=0 ; i-- ) {
-			if (c >= options.length) break;
-			if (dimensions[i].getSize() == 1) continue;
-			dimensions[i].setDescription(options[c++].toString());
-			dimensions[i].setSlice(new Slice(0,dimensions[i].getSize()));
+		
+		if (nonSingleDims == 0) {
+			for (int i = dimensions.length-1 ; i >=0 ; i-- ) {
+				if (c >= options.length) break;
+				dimensions[i].setDescription(options[c++].toString());
+				dimensions[i].setSlice(new Slice(0,dimensions[i].getSize()));
+			}
+		} else {
+			for (int i = dimensions.length-1 ; i >=0 ; i-- ) {
+				if (c >= options.length) break;
+				if (dimensions[i].getSize() == 1) continue;
+				dimensions[i].setDescription(options[c++].toString());
+				dimensions[i].setSlice(new Slice(0,dimensions[i].getSize()));
+			}
 		}
+		
 		update(true);
 	}
 
@@ -249,9 +263,12 @@ public class NDimensions {
 				slice.setStop(shape[i]);
 			}
 
-			if (isSingle) {
+			if (isSingle && dimensions[i].getDescription().isEmpty()) {
 				Slice slice = dimensions[i].getSlice();
 				slice.setStart(shape[i]-1);
+			} else if (isSingle) {
+				Slice slice = dimensions[i].getSlice();
+				slice.setStop(shape[i]);
 			}
 
 			if (isSmaller && !(containsEnd && isSingle)) {

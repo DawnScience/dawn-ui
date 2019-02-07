@@ -245,4 +245,12 @@ public class MappedDataArea implements MapObject {
 		streamObject = stream;
 	}
 	
+	public void update() {
+		
+		for (MappedDataFile f : files) {
+			f.update();
+		}
+		
+	}
+	
 }
