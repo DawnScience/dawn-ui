@@ -279,7 +279,15 @@ public class ExpressionDialog extends Dialog {
 						IDataset data = DatasetUtils.sliceAndConvertLazyDataset(dataToLoad.getLazyDataset());
 						variableMap.put(varName, data);
 					} catch (Exception e) {
-						throw new InterruptedException("Variable \"" + varName + "\" not found.");
+						// Check for out of memory
+						Throwable f = e;
+						while (f != null) {
+							f = f.getCause();
+							if (f instanceof OutOfMemoryError)
+								throw new InterruptedException("Out of memory loading variable \"" + varName + "\".");
+						}
+						
+						throw new InterruptedException("Variable \"" + varName + "\" could not be loaded.");
 					}
 				}
 			}
