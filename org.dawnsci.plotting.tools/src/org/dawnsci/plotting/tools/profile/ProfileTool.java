@@ -104,11 +104,13 @@ public abstract class ProfileTool extends AbstractToolPage  implements IROIListe
 				}
 				@Override
 				protected void update(TraceEvent evt) {
-					IImageTrace t = ((IImageTrace)evt.getSource());
-					if (t.getData() != null) {
-						 sliceMetadata = t.getData().getFirstMetadata(SliceFromSeriesMetadata.class);
+					if (evt.getSource() instanceof IImageTrace) {
+						IImageTrace t = ((IImageTrace)evt.getSource());
+						if (t.getData() != null) {
+							 sliceMetadata = t.getData().getFirstMetadata(SliceFromSeriesMetadata.class);
+						}
+						ProfileTool.this.update(null, null, false);
 					}
-					ProfileTool.this.update(null, null, false);
 				}
 			};
 			
