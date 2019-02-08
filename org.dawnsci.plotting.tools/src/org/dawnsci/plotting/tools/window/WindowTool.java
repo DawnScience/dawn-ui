@@ -109,10 +109,9 @@ public class WindowTool extends AbstractToolPage {
 			this.traceListener = new ITraceListener.Stub() {
 				protected void update(TraceEvent evt) {
 					ITrace trace = getTrace();
-					if (trace!=null) {
-						if (trace instanceof ISurfaceTrace)
-							updateWindowPlot((ISurfaceTrace)trace);
-					} else {
+					if (trace instanceof ISurfaceTrace) {
+						updateWindowPlot((ISurfaceTrace) trace);
+					} else if (trace == null) {
 						windowSystem.clear();
 					}
 				}

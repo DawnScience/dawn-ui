@@ -132,16 +132,20 @@ public class ImageHistoryTool extends AbstractHistoryTool implements MouseListen
 			public void traceAdded(TraceEvent evt) {
 				if (!isActive())          return;
 				if (updatingPlotsAlready) return;
-				if (((IImageTrace)evt.getSource()).getUserObject()==ImageHistoryMarker.MARKER) return;
-				updatePlots(false);
+				if (evt.getSource() instanceof IImageTrace) {
+					if (((IImageTrace)evt.getSource()).getUserObject()==ImageHistoryMarker.MARKER) return;
+					updatePlots(false);
+				}
 			}
 			
 			@Override
 			public void traceRemoved(TraceEvent evt) {
 				if (!isActive())          return;
 				if (updatingPlotsAlready) return;
-				if (((IImageTrace)evt.getSource()).getUserObject()==ImageHistoryMarker.MARKER) return;
-				updatePlots(false);
+				if (evt.getSource() instanceof IImageTrace) {
+					if (((IImageTrace)evt.getSource()).getUserObject()==ImageHistoryMarker.MARKER) return;
+					updatePlots(false);
+				}
 			}
 			
 			@Override
