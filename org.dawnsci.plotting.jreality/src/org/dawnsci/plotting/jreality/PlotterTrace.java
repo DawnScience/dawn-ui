@@ -13,6 +13,7 @@ import java.util.List;
 
 import org.eclipse.dawnsci.analysis.api.roi.IROI;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
+import org.eclipse.dawnsci.plotting.api.axis.IAxis;
 import org.eclipse.dawnsci.plotting.api.trace.TraceEvent;
 import org.eclipse.january.dataset.Dataset;
 import org.eclipse.january.dataset.DatasetUtils;
@@ -31,6 +32,9 @@ class PlotterTrace {
 	protected boolean                active;
 	protected IPlottingSystem<Composite> plottingSystem;
 	protected IROI                   window;
+
+	public void initialize(IAxis... axes) {
+	}
 
 	public void dispose() {
 		if (axes!=null) axes.clear();

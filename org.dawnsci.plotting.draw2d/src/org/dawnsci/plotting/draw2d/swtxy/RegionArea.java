@@ -53,7 +53,6 @@ import org.eclipse.jface.action.IStatusLineManager;
 import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.nebula.visualization.widgets.figureparts.ColorMapRamp;
 import org.eclipse.nebula.visualization.xygraph.figures.Annotation;
-import org.eclipse.nebula.visualization.xygraph.figures.Axis;
 import org.eclipse.nebula.visualization.xygraph.figures.IXYGraph;
 import org.eclipse.nebula.visualization.xygraph.figures.PlotArea;
 import org.eclipse.nebula.visualization.xygraph.figures.Trace;
@@ -350,19 +349,19 @@ public class RegionArea extends PlotArea implements IPlotArea {
 	}
 	
 
-	public ImageTrace createImageTrace(String name, Axis xAxis, Axis yAxis, ColorMapRamp intensity) {
+	public ImageTrace createImageTrace(String name, ColorMapRamp intensity) {
         
-		final ImageTrace trace = new ImageTrace(name, xAxis, yAxis, intensity);
+		final ImageTrace trace = new ImageTrace(name, intensity);
 		fireImageTraceCreated(new TraceEvent(trace));
 		
 		return trace;
 	}
 
-	public ImageStackTrace createImageStackTrace(String name, Axis xAxis, Axis yAxis, ColorMapRamp intensity) {
+	public ImageStackTrace createImageStackTrace(String name, ColorMapRamp intensity) {
 		
         if (imageTraces.containsKey(name)) throw new RuntimeException("There is an image called '"+name+"' already plotted!");
         
-		final ImageStackTrace trace = new ImageStackTrace(name, xAxis, yAxis, intensity);
+		final ImageStackTrace trace = new ImageStackTrace(name, intensity);
 		fireImageTraceCreated(new TraceEvent(trace));
 		
 		return trace;

@@ -3,6 +3,7 @@ package org.dawnsci.jzy3d;
 import java.util.Arrays;
 import java.util.List;
 
+import org.eclipse.dawnsci.plotting.api.axis.IAxis;
 import org.eclipse.dawnsci.plotting.api.histogram.IImageService;
 import org.eclipse.dawnsci.plotting.api.histogram.IPaletteService;
 import org.eclipse.january.dataset.DatasetUtils;
@@ -27,6 +28,10 @@ public abstract class Abstract2DJZY3DTrace extends AbstractColorMapTrace {
 	private IDataset yAxis;
 	
 	protected ColorMapper colorMapper;
+
+	@Override
+	public void initialize(IAxis... axes) {
+	}
 
 	public void setData(IDataset data, IDataset[] axes) {
 		

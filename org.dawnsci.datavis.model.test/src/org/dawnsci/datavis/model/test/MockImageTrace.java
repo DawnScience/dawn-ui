@@ -1,10 +1,9 @@
 package org.dawnsci.datavis.model.test;
 
-import static org.hamcrest.CoreMatchers.instanceOf;
-
 import java.util.List;
 
 import org.eclipse.dawnsci.analysis.api.roi.IROI;
+import org.eclipse.dawnsci.plotting.api.axis.IAxis;
 import org.eclipse.dawnsci.plotting.api.histogram.HistogramBound;
 import org.eclipse.dawnsci.plotting.api.histogram.ImageServiceBean;
 import org.eclipse.dawnsci.plotting.api.histogram.ImageServiceBean.HistoType;
@@ -27,7 +26,11 @@ public class MockImageTrace implements IImageTrace {
 	public MockImageTrace(String name) {
 		this.name = name;
 	}
-	
+
+	@Override
+	public void initialize(IAxis... axes) {
+	}
+
 	@Override
 	public PaletteData getPaletteData() {
 		// TODO Auto-generated method stub

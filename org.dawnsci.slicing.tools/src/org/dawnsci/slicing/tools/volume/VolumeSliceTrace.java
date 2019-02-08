@@ -1,5 +1,6 @@
 package org.dawnsci.slicing.tools.volume;
 
+import org.eclipse.dawnsci.plotting.api.axis.IAxis;
 import org.eclipse.january.dataset.IDataset;
 import org.eclipse.january.dataset.ILazyDataset;
 
@@ -7,6 +8,10 @@ public class VolumeSliceTrace implements IVolumeSlicesTrace {
 
 	private Object userObject;
 	private ILazyDataset lazydataset;
+
+	@Override
+	public void initialize(IAxis... axes) {
+	}
 
 	@Override
 	public void setData(ILazyDataset data) {

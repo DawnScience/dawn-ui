@@ -54,15 +54,25 @@ public class LineTraceImpl implements ILineTrace, ITraceListener{
 		if (trace instanceof ITraceContainer) {
 			((ITraceContainer)trace).setTrace(this);
 		}
-		IDataProvider prov = trace.getDataProvider();
-		if (prov!=null && prov.hasErrors()) {
-			trace.setErrorBarEnabled(getPreferenceStore().getBoolean(PlottingConstants.GLOBAL_SHOW_ERROR_BARS));
-			trace.setErrorBarColor(ColorConstants.red);
-		}
 		
 		trace.addListener(this);
 	}
-	
+
+	@Override
+	public void initialize(IAxis... axes) {
+		Axis xAxis = (Axis) axes[0];
+		Axis yAxis = (Axis) axes[0];
+		IDataProvider prov = trace.getDataProvider();
+		if (prov == null) {
+			prov = new LightWeightDataProvider();
+		}
+		if (prov.hasErrors()) {
+			trace.setErrorBarEnabled(getPreferenceStore().getBoolean(PlottingConstants.GLOBAL_SHOW_ERROR_BARS));
+			trace.setErrorBarColor(ColorConstants.red);
+		}
+		trace.init(xAxis, yAxis, prov);
+	}
+
 	private IPreferenceStore getPreferenceStore() {
 		return new ScopedPreferenceStore(InstanceScope.INSTANCE, "org.dawnsci.plotting");
 	}
