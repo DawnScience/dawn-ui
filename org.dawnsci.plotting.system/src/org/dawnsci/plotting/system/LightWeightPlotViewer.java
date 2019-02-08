@@ -963,12 +963,7 @@ public class LightWeightPlotViewer<T> extends AbstractPlottingViewer<T> implemen
 
 
 	protected IImageTrace createImageTrace(String traceName) {
-		final Axis xAxis = (Axis)getSelectedXAxis();
-		final Axis yAxis = (Axis)getSelectedYAxis();
-		xAxis.setLogScale(false);
-		yAxis.setLogScale(false);
-
-		final ImageTrace trace = xyGraph.createImageTrace(traceName, xAxis, yAxis, intensity);
+		final ImageTrace trace = xyGraph.createImageTrace(traceName, intensity);
 		trace.setPlottingSystem(system);
 		trace.addPaletteListener(paletteListener);
 		return trace;
@@ -996,6 +991,7 @@ public class LightWeightPlotViewer<T> extends AbstractPlottingViewer<T> implemen
 		}
 	}
 
+	@SuppressWarnings("unchecked")
 	public <U extends ITrace> U createTrace(String name, Class<? extends ITrace> clazz) {
 		if (ILineTrace.class.isAssignableFrom(clazz)) {
 			return (U) createLineTrace(name);
@@ -1011,30 +1007,18 @@ public class LightWeightPlotViewer<T> extends AbstractPlottingViewer<T> implemen
 	}
 
 	protected ILineTrace createLineTrace(String traceName) {
-		final AspectAxis xAxis = (AspectAxis)getSelectedXAxis();
-		xAxis.setLabelDataAndTitle(null);
-		final AspectAxis yAxis = (AspectAxis)getSelectedYAxis();
-		yAxis.setLabelDataAndTitle(null);
-
-		LightWeightDataProvider traceDataProvider = new LightWeightDataProvider();
-		final LineTrace   trace    = new LineTrace(traceName, xAxis, yAxis, traceDataProvider);
+		final LineTrace   trace    = new LineTrace(traceName);
 		final LineTraceImpl wrapper = new LineTraceImpl(getSystem(), trace);
 		return wrapper;
 	}
 
 	protected IVectorTrace createVectorTrace(String traceName) {
-		final Axis xAxis = (Axis)getSelectedXAxis();
-		final Axis yAxis = (Axis)getSelectedYAxis();
-
-		final VectorTrace trace    = new VectorTrace(traceName, xAxis, yAxis);
+		final VectorTrace trace    = new VectorTrace(traceName);
 		return trace;
 	}
 
 	protected IImageStackTrace createImageStackTrace(String traceName) {
-		final Axis xAxis = (Axis)getSelectedXAxis();
-		final Axis yAxis = (Axis)getSelectedYAxis();
-
-		final ImageStackTrace trace = xyGraph.createImageStackTrace(traceName, xAxis, yAxis, intensity);
+		final ImageStackTrace trace = xyGraph.createImageStackTrace(traceName, intensity);
 		trace.setPlottingSystem(system);
 		return trace;
 	}
@@ -1057,6 +1041,7 @@ public class LightWeightPlotViewer<T> extends AbstractPlottingViewer<T> implemen
 	 * @param traceMap, may be null
 	 * @return
 	 */
+	@Override
 	public List<ILineTrace> createLineTraces(final String                title, 
 			final IDataset              x, 
 			final List<? extends IDataset> ys,
@@ -1171,14 +1156,18 @@ public class LightWeightPlotViewer<T> extends AbstractPlottingViewer<T> implemen
 		system.fireWillPlot(evt);
 		if (!evt.doit) return false;
 
+		final AspectAxis xAxis = (AspectAxis) getSelectedXAxis();
+		final AspectAxis yAxis = (AspectAxis) getSelectedYAxis();
 		if (trace instanceof IImageTrace) {
+			xAxis.setLogScale(false);
+			yAxis.setLogScale(false);
+			trace.initialize(xAxis, yAxis);
 
-			final IImageTrace image = (IImageTrace)trace;
+			final IImageTrace image = (IImageTrace) trace;
 
 			boolean autoscale = image.getGlobalRange()!= null && !system.isRescale() ? false : true;
 
 			if (!image.setData(evt.getImage(), evt.getAxes(), autoscale)) return false; // But not plotted
-
 
 			xyGraph.addImageTrace((ImageTrace)image);
 			removeAdditionalAxes(); // Do not have others with images.
@@ -1191,7 +1180,7 @@ public class LightWeightPlotViewer<T> extends AbstractPlottingViewer<T> implemen
 
 			// If we are a stack, show the scale for iterating images.
 			if (image instanceof IImageStackTrace) {
-				IImageStackTrace stack = (IImageStackTrace)image;
+				IImageStackTrace stack = (IImageStackTrace) image;
 				if (stack.getStackSize()>1) {
 					setFolderScaleVisible(true);
 					folderScale.setRange(0, stack.getStackSize()-1);
@@ -1202,18 +1191,16 @@ public class LightWeightPlotViewer<T> extends AbstractPlottingViewer<T> implemen
 			} else {
 				setFolderScaleVisible(false);
 			}
-
 		} else if (trace instanceof IVectorTrace) {
-
+			trace.initialize(xAxis, yAxis);
 			final IVectorTrace vector = (IVectorTrace)trace;
 			xyGraph.addVectorTrace((VectorTrace)vector);
 			vector.setVisible(true);
-
 		} else {
-
-			final AspectAxis xAxis = (AspectAxis)getSelectedXAxis();
-			final AspectAxis yAxis = (AspectAxis)getSelectedYAxis();
-			xyGraph.addTrace(((LineTraceImpl)trace).getTrace(), xAxis, yAxis, true);
+			xAxis.setLabelDataAndTitle(null);
+			yAxis.setLabelDataAndTitle(null);
+			trace.initialize(xAxis, yAxis);
+			xyGraph.addTrace(((LineTraceImpl) trace).getTrace(), xAxis, yAxis, true);
 			intensity.setVisible(false);
 		}
 		redraw();
@@ -1222,16 +1209,16 @@ public class LightWeightPlotViewer<T> extends AbstractPlottingViewer<T> implemen
 	}
 
 	public void removeTrace(ITrace trace) {
-
 		if (trace instanceof LineTraceImpl) {
-			xyGraph.removeTrace(((LineTraceImpl)trace).getTrace());
+			xyGraph.removeTrace(((LineTraceImpl) trace).getTrace());
 		} else if (trace instanceof ImageTrace) {
 			((ImageTrace)trace).removePaletteListener(paletteListener);
-			xyGraph.removeImageTrace((ImageTrace)trace);
+			xyGraph.removeImageTrace((ImageTrace) trace);
 		}else if (trace instanceof VectorTrace) {
-			xyGraph.removeVectorTrace((VectorTrace)trace);
+			xyGraph.removeVectorTrace((VectorTrace) trace);
 		}
-		redraw();		
+
+		redraw();
 	}
 
 	public void setShowLegend(boolean b) {

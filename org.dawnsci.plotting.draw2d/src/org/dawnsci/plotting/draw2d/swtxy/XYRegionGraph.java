@@ -122,14 +122,14 @@ public class XYRegionGraph extends XYGraph {
 	}
 
 
-	public ImageTrace createImageTrace(String name, Axis xAxis, Axis yAxis, ColorMapRamp intensity) {
+	public ImageTrace createImageTrace(String name, ColorMapRamp intensity) {
 		RegionArea ra = (RegionArea)getPlotArea();
-		return ra.createImageTrace(name, xAxis, yAxis, intensity);
+		return ra.createImageTrace(name, intensity);
 	}
 
-	public ImageStackTrace createImageStackTrace(String name, Axis xAxis, Axis yAxis, ColorMapRamp intensity) {
+	public ImageStackTrace createImageStackTrace(String name, ColorMapRamp intensity) {
 		RegionArea ra = (RegionArea)getPlotArea();
-		return ra.createImageStackTrace(name, xAxis, yAxis, intensity);
+		return ra.createImageStackTrace(name, intensity);
 	}
 	
 	public void addImageTrace(final ImageTrace trace) {

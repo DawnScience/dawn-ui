@@ -2,6 +2,7 @@ package org.dawnsci.slicing.tools.hyper;
 
 import java.util.Arrays;
 
+import org.eclipse.dawnsci.plotting.api.axis.IAxis;
 import org.eclipse.january.dataset.IDataset;
 import org.eclipse.january.dataset.ILazyDataset;
 import org.eclipse.january.dataset.SliceND;
@@ -14,7 +15,11 @@ public class HyperTrace implements IHyperTrace {
 	private Object userObject;
 	
 	private HyperPlotViewer viewer;
-	
+
+	@Override
+	public void initialize(IAxis... axes) {
+	}
+
 	@Override
 	public String getDataName() {
 		// TODO Auto-generated method stub

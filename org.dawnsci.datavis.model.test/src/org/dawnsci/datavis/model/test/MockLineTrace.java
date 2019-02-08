@@ -14,7 +14,11 @@ public class MockLineTrace implements ILineTrace {
 	public MockLineTrace(String name) {
 		this.name = name;
 	}
-	
+
+	@Override
+	public void initialize(IAxis... axes) {
+	}
+
 	@Override
 	public String getDataName() {
 		// TODO Auto-generated method stub

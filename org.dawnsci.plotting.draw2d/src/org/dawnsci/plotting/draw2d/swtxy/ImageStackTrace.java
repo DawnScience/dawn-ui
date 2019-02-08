@@ -22,7 +22,6 @@ import org.eclipse.january.DatasetException;
 import org.eclipse.january.dataset.IDataset;
 import org.eclipse.january.dataset.ILazyDataset;
 import org.eclipse.nebula.visualization.widgets.figureparts.ColorMapRamp;
-import org.eclipse.nebula.visualization.xygraph.figures.Axis;
 import org.eclipse.swt.widgets.Display;
 
 public class ImageStackTrace extends ImageTrace implements IImageStackTrace {
@@ -32,10 +31,8 @@ public class ImageStackTrace extends ImageTrace implements IImageStackTrace {
     private StackJob     stackJob;
     
 	public ImageStackTrace(String       name, 
-			               Axis         xAxis, 
-			               Axis         yAxis,
 			               ColorMapRamp intensityScale) {
-		super(name, xAxis, yAxis, intensityScale);
+		super(name, intensityScale);
 		this.stackJob = new StackJob();
 	}
 

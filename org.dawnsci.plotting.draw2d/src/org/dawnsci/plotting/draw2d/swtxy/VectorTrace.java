@@ -12,13 +12,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.dawnsci.plotting.api.axis.IAxis;
 import org.eclipse.dawnsci.plotting.api.trace.IVectorTrace;
 import org.eclipse.draw2d.Figure;
 import org.eclipse.draw2d.Graphics;
 import org.eclipse.draw2d.PolygonDecoration;
 import org.eclipse.draw2d.geometry.Point;
 import org.eclipse.draw2d.geometry.PointList;
-import org.eclipse.january.dataset.Dataset;
 import org.eclipse.january.dataset.DatasetFactory;
 import org.eclipse.january.dataset.IDataset;
 import org.eclipse.nebula.visualization.xygraph.figures.Axis;
@@ -63,10 +63,8 @@ public class VectorTrace extends Figure implements IVectorTrace {
 	private PolygonDecoration polyline;
     private Map<RGB, Color> colorMap;
 
-	public VectorTrace(String traceName, Axis xAxis, Axis yAxis) {
+	public VectorTrace(String traceName) {
 		setName(traceName);
-		this.xAxis = xAxis;
-		this.yAxis = yAxis;
 
 		this.polyline = new PolygonDecoration();
 
@@ -80,6 +78,12 @@ public class VectorTrace extends Figure implements IVectorTrace {
 		add(polyline);
 
 		colorMap = new HashMap<RGB, Color>(3);
+	}
+
+	@Override
+	public void initialize(IAxis... axes) {
+		this.xAxis = axes[0] instanceof Axis ? (Axis) axes[0] : null;
+		this.yAxis = axes[1] instanceof Axis ? (Axis) axes[1] : null;
 	}
 
 	@Override
@@ -226,8 +230,8 @@ public class VectorTrace extends Figure implements IVectorTrace {
 	private void normalize() {
 
 		int[] shape = vectors.getShape();
-        normalizedMagnitude = DatasetFactory.zeros(new int[]{shape[0], shape[1]}, Dataset.FLOAT);
-        normalizedAngle     = DatasetFactory.zeros(new int[]{shape[0], shape[1]}, Dataset.FLOAT);
+        normalizedMagnitude = DatasetFactory.zeros(shape[0], shape[1]);
+        normalizedAngle     = DatasetFactory.zeros(shape[0], shape[1]);
 
         double maxMag  = -Double.MAX_VALUE;
         double maxAng  = -Double.MAX_VALUE;

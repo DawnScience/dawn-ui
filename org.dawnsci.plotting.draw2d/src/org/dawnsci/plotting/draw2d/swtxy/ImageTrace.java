@@ -29,6 +29,7 @@ import org.eclipse.dawnsci.analysis.dataset.roi.PolygonalROI;
 import org.eclipse.dawnsci.analysis.dataset.roi.PolylineROI;
 import org.eclipse.dawnsci.analysis.dataset.roi.RectangularROI;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
+import org.eclipse.dawnsci.plotting.api.axis.IAxis;
 import org.eclipse.dawnsci.plotting.api.histogram.HistogramBound;
 import org.eclipse.dawnsci.plotting.api.histogram.IImageService;
 import org.eclipse.dawnsci.plotting.api.histogram.IPaletteService;
@@ -135,13 +136,9 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 	private double[] globalRange;
 		
 	public ImageTrace(final String name, 
-			          final Axis xAxis, 
-			          final Axis yAxis,
 			          final ColorMapRamp intensityScale) {
 		
 		this.name  = name;
-		this.xAxis = xAxis;
-		this.yAxis = yAxis;
 		this.intensityScale = intensityScale;
 
 		this.service = ServiceHolder.getImageService();
@@ -149,6 +146,13 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 		setPaletteName(getPreferenceStore().getString(BasePlottingConstants.COLOUR_SCHEME));
 		
 		downsampleType = DownsampleType.forLabel(getPreferenceStore().getString(BasePlottingConstants.DOWNSAMPLE_PREF));
+
+	}
+
+	@Override
+	public void initialize(IAxis... axes) {
+		this.xAxis = axes[0] instanceof Axis ? (Axis) axes[0] : null;
+		this.yAxis = axes[1] instanceof Axis ? (Axis) axes[1] : null;
 
 		xAxis.addListener(this);
 		yAxis.addListener(this);
