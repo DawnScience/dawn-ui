@@ -493,7 +493,7 @@ public class RegionArea extends PlotArea implements IPlotArea {
 		AbstractSelectionRegion<?> region  = SelectionRegionFactory.createSelectionRegion(name, coords, regionType);
 		if (startingWithMouseEvent) {
 			getXYGraph().setZoomType(ZoomType.NONE);
-		    
+			regionLayer.layout(); // needed to ensure the listener knows its bounds
 		    // Mouse listener for region bounds
 		    regionListener = new RegionMouseListener(regionLayer, this, region, region.getMinimumMousePresses(), region.getMaximumMousePresses());
 		    regionLayer.setMouseListenerActive(regionListener, true);

@@ -14,6 +14,7 @@ import org.eclipse.dawnsci.plotting.api.annotation.IAnnotation;
 import org.eclipse.dawnsci.plotting.api.axis.IAxis;
 import org.eclipse.dawnsci.plotting.api.axis.IClickListener;
 import org.eclipse.dawnsci.plotting.api.axis.IPositionListener;
+import org.eclipse.dawnsci.plotting.api.histogram.ImageServiceBean.ImageOrigin;
 import org.eclipse.dawnsci.plotting.api.region.IRegion;
 import org.eclipse.dawnsci.plotting.api.region.IRegion.RegionType;
 import org.eclipse.dawnsci.plotting.api.region.IRegionListener;
@@ -682,6 +683,10 @@ public class MockPlottingSystem implements IPlottingSystem<Object> {
 	public void setRescale(boolean rescale) {
 		// TODO Auto-generated method stub
 		
+	}
+
+	@Override
+	public void setOrigin(ImageOrigin origin) {
 	}
 
 	@Override
