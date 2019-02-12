@@ -10,7 +10,6 @@ package org.dawnsci.plotting.system;
 
 import org.dawnsci.plotting.AbstractPlottingSystem;
 import org.dawnsci.plotting.draw2d.swtxy.LineTrace;
-import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.dawnsci.plotting.api.axis.IAxis;
 import org.eclipse.dawnsci.plotting.api.preferences.PlottingConstants;
 import org.eclipse.dawnsci.plotting.api.trace.ILineTrace;
@@ -21,14 +20,12 @@ import org.eclipse.draw2d.ColorConstants;
 import org.eclipse.january.dataset.DatasetFactory;
 import org.eclipse.january.dataset.IDataset;
 import org.eclipse.january.dataset.IntegerDataset;
-import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.nebula.visualization.xygraph.dataprovider.IDataProvider;
 import org.eclipse.nebula.visualization.xygraph.figures.Axis;
 import org.eclipse.nebula.visualization.xygraph.figures.ITraceListener;
 import org.eclipse.nebula.visualization.xygraph.figures.Trace;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.widgets.Display;
-import org.eclipse.ui.preferences.ScopedPreferenceStore;
 
 /**
  * This class only wraps line traces, images have their own IImageTrace implementor.
@@ -61,23 +58,18 @@ public class LineTraceImpl implements ILineTrace, ITraceListener{
 	@Override
 	public void initialize(IAxis... axes) {
 		Axis xAxis = (Axis) axes[0];
-		Axis yAxis = (Axis) axes[0];
+		Axis yAxis = (Axis) axes[1];
 		IDataProvider prov = trace.getDataProvider();
 		if (prov == null) {
 			prov = new LightWeightDataProvider();
 		}
 		if (prov.hasErrors()) {
-			trace.setErrorBarEnabled(getPreferenceStore().getBoolean(PlottingConstants.GLOBAL_SHOW_ERROR_BARS));
+			trace.setErrorBarEnabled(sys.getPreferenceStore().getBoolean(PlottingConstants.GLOBAL_SHOW_ERROR_BARS));
 			trace.setErrorBarColor(ColorConstants.red);
 		}
 		trace.init(xAxis, yAxis, prov);
 	}
 
-	private IPreferenceStore getPreferenceStore() {
-		return new ScopedPreferenceStore(InstanceScope.INSTANCE, "org.dawnsci.plotting");
-	}
-
-	
 	public IDataProvider getDataProvider() {
 		return trace.getDataProvider();
 	}
@@ -416,10 +408,10 @@ public class LineTraceImpl implements ILineTrace, ITraceListener{
 			trace.setDataProvider(prov);
 			
 			if (xData.hasErrors() && !errorBarExplicitySet) {
-				trace.setErrorBarEnabled(getPreferenceStore().getBoolean(PlottingConstants.GLOBAL_SHOW_ERROR_BARS));
+				trace.setErrorBarEnabled(sys.getPreferenceStore().getBoolean(PlottingConstants.GLOBAL_SHOW_ERROR_BARS));
 			}
 			if (yData.hasErrors() && !errorBarExplicitySet) {
-				trace.setErrorBarEnabled(getPreferenceStore().getBoolean(PlottingConstants.GLOBAL_SHOW_ERROR_BARS));
+				trace.setErrorBarEnabled(sys.getPreferenceStore().getBoolean(PlottingConstants.GLOBAL_SHOW_ERROR_BARS));
 			}
 			
 			if (sys!=null) try {

@@ -790,7 +790,7 @@ public class PlottingSystemImpl<T> extends AbstractPlottingSystem<T> {
 	}
 
 	private IPreferenceStore store;
-	private IPreferenceStore getPreferenceStore() {
+	public IPreferenceStore getPreferenceStore() {
 		if (store!=null) return store;
 		store = new ScopedPreferenceStore(InstanceScope.INSTANCE, "org.dawnsci.plotting");
 		return store;

@@ -1100,6 +1100,10 @@ public class LightWeightPlotViewer<T> extends AbstractPlottingViewer<T> implemen
 			LightWeightDataProvider traceDataProvider = new LightWeightDataProvider(evt.getXData(), evt.getYData());
 
 			//create the trace
+			if (traceDataProvider.hasErrors()) {
+				trace.setErrorBarEnabled(system.getPreferenceStore().getBoolean(PlottingConstants.GLOBAL_SHOW_ERROR_BARS));
+				trace.setErrorBarColor(ColorConstants.red);
+			}
 			trace.init(xAxis, yAxis, traceDataProvider);
 
 			if (y.getName()!=null && !"".equals(y.getName())) {
