@@ -9,6 +9,7 @@
 package org.dawnsci.plotting.system;
 
 import org.eclipse.core.runtime.preferences.InstanceScope;
+import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.swt.graphics.Image;
@@ -37,7 +38,7 @@ public class PlottingSystemActivator extends AbstractUIPlugin {
 
 	public static IPreferenceStore getPlottingPreferenceStore() {
 		if (plottingPreferenceStore == null)
-			plottingPreferenceStore = new ScopedPreferenceStore(InstanceScope.INSTANCE, "org.dawnsci.plotting");
+			plottingPreferenceStore = new ScopedPreferenceStore(InstanceScope.INSTANCE, IPlottingSystem.PREFERENCE_STORE);
 		return plottingPreferenceStore;
 	}
 

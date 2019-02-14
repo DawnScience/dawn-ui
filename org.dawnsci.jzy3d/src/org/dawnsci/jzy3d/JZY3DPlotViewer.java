@@ -17,6 +17,7 @@ import org.dawnsci.jzy3d.volume.Texture3D;
 import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.dawnsci.plotting.api.ActionType;
 import org.eclipse.dawnsci.plotting.api.IPlotActionSystem;
+import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystemViewer;
 import org.eclipse.dawnsci.plotting.api.ManagerType;
 import org.eclipse.dawnsci.plotting.api.histogram.IPaletteService;
@@ -589,7 +590,7 @@ public class JZY3DPlotViewer extends IPlottingSystemViewer.Stub<Composite> {
 	private IPreferenceStore store;
 	private IPreferenceStore getPreferenceStore() {
 		if (store!=null) return store;
-		store = new ScopedPreferenceStore(InstanceScope.INSTANCE, "org.dawnsci.plotting");
+		store = new ScopedPreferenceStore(InstanceScope.INSTANCE, IPlottingSystem.PREFERENCE_STORE);
 		return store;
 	}
 	

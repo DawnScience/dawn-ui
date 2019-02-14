@@ -17,6 +17,7 @@ import java.awt.image.WritableRaster;
 import org.dawnsci.plotting.services.util.SWTImageUtils;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.preferences.InstanceScope;
+import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.histogram.HistogramBound;
 import org.eclipse.dawnsci.plotting.api.histogram.IImageService;
 import org.eclipse.dawnsci.plotting.api.histogram.IPaletteService;
@@ -416,14 +417,14 @@ public class ImageService extends AbstractServiceFactory implements IImageServic
 		ImageServiceBean imageServiceBean = new ImageServiceBean();
 		
 		if (Platform.getPreferencesService() != null) { // Normally
-			IPreferenceStore store            = new ScopedPreferenceStore(InstanceScope.INSTANCE, "org.dawnsci.plotting");
+			IPreferenceStore store = new ScopedPreferenceStore(InstanceScope.INSTANCE, IPlottingSystem.PREFERENCE_STORE);
 			imageServiceBean.setOrigin(ImageOrigin.forLabel(store.getString(BasePlottingConstants.ORIGIN_PREF)));
 			imageServiceBean.setHistogramType(HistoType.forLabel(store.getString(BasePlottingConstants.HISTO_PREF)));
 			imageServiceBean.setMinimumCutBound(HistogramBound.fromString(store.getString(BasePlottingConstants.MIN_CUT)));
 			imageServiceBean.setMaximumCutBound(HistogramBound.fromString(store.getString(BasePlottingConstants.MAX_CUT)));
 			imageServiceBean.setNanBound(HistogramBound.fromString(store.getString(BasePlottingConstants.NAN_CUT)));
 			imageServiceBean.setLo(store.getDouble(BasePlottingConstants.HISTO_LO));
-			imageServiceBean.setHi(store.getDouble(BasePlottingConstants.HISTO_HI));		
+			imageServiceBean.setHi(store.getDouble(BasePlottingConstants.HISTO_HI));
 			
 			try {
 				IPaletteService pservice = ServiceLoader.getPaletteService();

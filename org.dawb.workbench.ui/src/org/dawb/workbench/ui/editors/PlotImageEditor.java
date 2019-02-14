@@ -177,7 +177,7 @@ public class PlotImageEditor extends EditorPart implements IEditorExtension, IRe
 				
 				final String filePath = EclipseUtils.getFilePath(getEditorInput());
 				
-				final IPreferenceStore store = new ScopedPreferenceStore(InstanceScope.INSTANCE, "org.dawnsci.plotting");
+				final IPreferenceStore store = new ScopedPreferenceStore(InstanceScope.INSTANCE, IPlottingSystem.PREFERENCE_STORE);
 				final boolean isStackAllowed = store.getBoolean("org.dawb.workbench.plotting.preference.loadImageStacks");
 				
 				if (!isStackAllowed) {

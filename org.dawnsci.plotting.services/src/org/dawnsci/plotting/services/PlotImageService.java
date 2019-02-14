@@ -172,12 +172,12 @@ public class PlotImageService extends AbstractServiceFactory implements IPlotIma
 	 */
 	public Image createImageSWT(final IDataset thumbnail, ImageServiceBean bean) throws Exception {
         
-		final ScopedPreferenceStore store = new ScopedPreferenceStore(InstanceScope.INSTANCE, "org.dawnsci.plotting");
+		final ScopedPreferenceStore store = new ScopedPreferenceStore(InstanceScope.INSTANCE, IPlottingSystem.PREFERENCE_STORE);
 		
 		if (bean==null) {
 			bean = new ImageServiceBean();
 			final IPaletteService pservice = ServiceLoader.getPaletteService();
-			bean.setPalette(pservice.getDirectPaletteData(store.getString(PlottingConstants.COLOUR_SCHEME)));	
+			bean.setPalette(pservice.getDirectPaletteData(store.getString(PlottingConstants.COLOUR_SCHEME)));
 			bean.setOrigin(ImageOrigin.forLabel(store.getString(PlottingConstants.ORIGIN_PREF)));
 		}
 		bean.setImage(thumbnail);

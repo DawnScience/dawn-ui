@@ -13,6 +13,7 @@ import java.util.Collection;
 
 import org.dawb.common.util.text.NumberUtils;
 import org.eclipse.core.runtime.preferences.InstanceScope;
+import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.axis.AxisEvent;
 import org.eclipse.dawnsci.plotting.api.axis.IAxis;
 import org.eclipse.dawnsci.plotting.api.axis.IAxisListener;
@@ -77,7 +78,7 @@ public class AspectAxis extends DAxis implements IAxis {
 	private IPreferenceStore store;
 	private IPreferenceStore getPreferenceStore() {
 		if (store!=null) return store;
-		store = new ScopedPreferenceStore(InstanceScope.INSTANCE, "org.dawnsci.plotting");
+		store = new ScopedPreferenceStore(InstanceScope.INSTANCE, IPlottingSystem.PREFERENCE_STORE);
 		return store;
 	}
 

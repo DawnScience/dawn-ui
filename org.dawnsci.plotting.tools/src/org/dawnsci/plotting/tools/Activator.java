@@ -10,6 +10,7 @@ package org.dawnsci.plotting.tools;
 
 import org.eclipse.core.runtime.ILog;
 import org.eclipse.core.runtime.preferences.InstanceScope;
+import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.swt.graphics.Image;
@@ -39,7 +40,7 @@ public class Activator extends AbstractUIPlugin {
     private static IPreferenceStore plottingPreferences;
 	public static IPreferenceStore getPlottingPreferenceStore() {
 		if (plottingPreferences!=null) return plottingPreferences;
-		plottingPreferences = new ScopedPreferenceStore(InstanceScope.INSTANCE, "org.dawnsci.plotting");
+		plottingPreferences = new ScopedPreferenceStore(InstanceScope.INSTANCE, IPlottingSystem.PREFERENCE_STORE);
 		return plottingPreferences;
 	}
     		 

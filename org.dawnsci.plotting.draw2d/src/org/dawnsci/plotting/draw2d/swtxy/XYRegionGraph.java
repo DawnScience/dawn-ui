@@ -15,6 +15,7 @@ import java.util.List;
 
 import org.dawnsci.plotting.draw2d.swtxy.selection.AbstractSelectionRegion;
 import org.eclipse.core.runtime.preferences.InstanceScope;
+import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.axis.IAxis;
 import org.eclipse.dawnsci.plotting.api.histogram.ImageServiceBean.ImageOrigin;
 import org.eclipse.dawnsci.plotting.api.preferences.BasePlottingConstants;
@@ -81,7 +82,7 @@ public class XYRegionGraph extends XYGraph {
 	private IPreferenceStore store;
 	private IPreferenceStore getPreferenceStore() {
 		if (store!=null) return store;
-		store = new ScopedPreferenceStore(InstanceScope.INSTANCE, "org.dawnsci.plotting");
+		store = new ScopedPreferenceStore(InstanceScope.INSTANCE, IPlottingSystem.PREFERENCE_STORE);
 		return store;
 	}
 

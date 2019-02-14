@@ -32,7 +32,6 @@ public class PlottingPreferenceInitializer extends AbstractPreferenceInitializer
 		store.setDefault(PlottingConstants.ORIGIN_PREF,     ImageOrigin.TOP_LEFT.getLabel());
 		store.setDefault(PlottingConstants.ASPECT,          true);
 		store.setDefault(PlottingConstants.SNAP_TO_GRID,    false);
-		store.setDefault(PlottingConstants.LABEL_ZOOM_ENABLED, true);
 		store.setDefault(PlottingConstants.SHOW_AXES,       true);
 		store.setDefault(PlottingConstants.SHOW_INTENSITY,  true);
 		store.setDefault(PlottingConstants.IGNORE_RGB,      false);
@@ -59,6 +58,6 @@ public class PlottingPreferenceInitializer extends AbstractPreferenceInitializer
 		
 		store.setDefault(PlottingConstants.GLOBAL_SHOW_ERROR_BARS, true);
 		store.setDefault(PlottingConstants.AUTO_HIDE_ERROR_SIZE,   25);
-		
+		store.setDefault(PlottingConstants.SHOW_VALUE_LABELS, true);
 	}
 }

@@ -33,6 +33,7 @@ import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.dawnsci.analysis.api.io.IDataHolder;
 import org.eclipse.dawnsci.analysis.api.io.ILoaderService;
 import org.eclipse.dawnsci.analysis.api.io.SliceObject;
+import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.PlotType;
 import org.eclipse.dawnsci.plotting.api.histogram.ImageServiceBean.ImageOrigin;
 import org.eclipse.dawnsci.plotting.api.preferences.PlottingConstants;
@@ -804,7 +805,7 @@ public class SliceSystemImpl extends AbstractSliceSystem {
 			return trace.getImageOrigin().isOnLeadingDiagonal();
 		} else {
 			try {
-				final ScopedPreferenceStore store = new ScopedPreferenceStore(InstanceScope.INSTANCE, "org.dawnsci.plotting");
+				final ScopedPreferenceStore store = new ScopedPreferenceStore(InstanceScope.INSTANCE, IPlottingSystem.PREFERENCE_STORE);
 				ImageOrigin origin = ImageOrigin.forLabel(store.getString(PlottingConstants.ORIGIN_PREF));
 				return origin.isOnLeadingDiagonal();
 			} catch (Throwable e) {

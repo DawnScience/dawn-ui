@@ -64,7 +64,7 @@ public class LineTraceImpl implements ILineTrace, ITraceListener{
 			prov = new LightWeightDataProvider();
 		}
 		if (prov.hasErrors()) {
-			trace.setErrorBarEnabled(sys.getPreferenceStore().getBoolean(PlottingConstants.GLOBAL_SHOW_ERROR_BARS));
+			trace.setErrorBarEnabled(PlottingSystemActivator.getPlottingPreferenceStore().getBoolean(PlottingConstants.GLOBAL_SHOW_ERROR_BARS));
 			trace.setErrorBarColor(ColorConstants.red);
 		}
 		trace.init(xAxis, yAxis, prov);
@@ -408,10 +408,10 @@ public class LineTraceImpl implements ILineTrace, ITraceListener{
 			trace.setDataProvider(prov);
 			
 			if (xData.hasErrors() && !errorBarExplicitySet) {
-				trace.setErrorBarEnabled(sys.getPreferenceStore().getBoolean(PlottingConstants.GLOBAL_SHOW_ERROR_BARS));
+				trace.setErrorBarEnabled(PlottingSystemActivator.getPlottingPreferenceStore().getBoolean(PlottingConstants.GLOBAL_SHOW_ERROR_BARS));
 			}
 			if (yData.hasErrors() && !errorBarExplicitySet) {
-				trace.setErrorBarEnabled(sys.getPreferenceStore().getBoolean(PlottingConstants.GLOBAL_SHOW_ERROR_BARS));
+				trace.setErrorBarEnabled(PlottingSystemActivator.getPlottingPreferenceStore().getBoolean(PlottingConstants.GLOBAL_SHOW_ERROR_BARS));
 			}
 			
 			if (sys!=null) try {

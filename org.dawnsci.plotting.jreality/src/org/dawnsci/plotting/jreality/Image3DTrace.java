@@ -12,6 +12,7 @@ import java.util.Collection;
 import java.util.HashSet;
 
 import org.eclipse.core.runtime.preferences.InstanceScope;
+import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.histogram.HistogramBound;
 import org.eclipse.dawnsci.plotting.api.histogram.IImageService;
 import org.eclipse.dawnsci.plotting.api.histogram.IPaletteService;
@@ -86,7 +87,7 @@ abstract public class Image3DTrace extends PlotterTrace implements IImage3DTrace
 
 	private IPreferenceStore getPreferenceStore() {
 		if (store!=null) return store;
-		store = new ScopedPreferenceStore(InstanceScope.INSTANCE, "org.dawnsci.plotting");
+		store = new ScopedPreferenceStore(InstanceScope.INSTANCE, IPlottingSystem.PREFERENCE_STORE);
 		return store;
 	}
 

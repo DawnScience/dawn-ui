@@ -13,11 +13,11 @@ import java.util.Arrays;
 import org.dawb.common.ui.util.GridUtils;
 import org.dawnsci.plotting.system.PlottingSystemActivator;
 import org.dawnsci.plotting.util.ColorUtility;
-import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.histogram.HistogramBound;
 import org.eclipse.dawnsci.plotting.api.histogram.ImageServiceBean.HistoType;
 import org.eclipse.dawnsci.plotting.api.preferences.BasePlottingConstants;
+import org.eclipse.dawnsci.plotting.api.preferences.PlottingConstants;
 import org.eclipse.dawnsci.plotting.api.region.ColorConstants;
 import org.eclipse.dawnsci.plotting.api.tool.IToolPage.ToolPageRole;
 import org.eclipse.dawnsci.plotting.api.tool.IToolPageSystem;
@@ -28,7 +28,6 @@ import org.eclipse.january.dataset.Dataset;
 import org.eclipse.january.dataset.RGBDataset;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.preference.ColorSelector;
-import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.richbeans.widgets.decorator.BoundsDecorator;
 import org.eclipse.richbeans.widgets.decorator.FloatDecorator;
 import org.eclipse.richbeans.widgets.decorator.IValueChangeListener;
@@ -46,7 +45,6 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
-import org.eclipse.ui.preferences.ScopedPreferenceStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 /**
@@ -152,7 +150,7 @@ public class ImageTraceComposite extends Composite {
 		this.histoChoice = new CCombo(group, SWT.READ_ONLY|SWT.BORDER);
 		histoChoice.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
 		for (HistoType ht : HistoType.values()) {
-            histoChoice.add(ht.getLabel());
+			histoChoice.add(ht.getLabel());
 		}
 		histoChoice.setToolTipText("The algorithm used when histogramming the downsampled image.\nNOTE: median is much slower. If you change this, max and min will be recalculated.");
 		histoChoice.select(imageTrace.getHistoType().getIndex());
@@ -190,7 +188,7 @@ public class ImageTraceComposite extends Composite {
 		lowBox.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 1, 1));
 		this.lo = new FloatDecorator(lowBox);
 		if (imageTrace.getImageServiceBean()!=null) lo.setValue(imageTrace.getImageServiceBean().getLo());
-		lo.addValueChangeListener(new IValueChangeListener() {		
+		lo.addValueChangeListener(new IValueChangeListener() {
 			@Override
 			public void valueValidating(ValueChangeEvent evt) {
 				if (lo.isError()) return;
@@ -201,7 +199,7 @@ public class ImageTraceComposite extends Composite {
 					imageTrace.getImageServiceBean().setLo(evt.getValue().doubleValue());
 					boolean ok = imageTrace.setHistoType(type);
 					if (!ok) throw new Exception("Histo not working!");
-					getPreferenceStore().setValue(BasePlottingConstants.HISTO_LO, evt.getValue().doubleValue());
+					PlottingSystemActivator.getPlottingPreferenceStore().setValue(BasePlottingConstants.HISTO_LO, evt.getValue().doubleValue());
 					maximum.setValue(imageTrace.getMax().doubleValue());
 					minimum.setValue(imageTrace.getMin().doubleValue());
 					
@@ -209,7 +207,7 @@ public class ImageTraceComposite extends Composite {
 					imageTrace.getImageServiceBean().setLo(orig);
 				}
 			}
-		});	
+		});
 
 		label = new Label(outlierComp, SWT.NONE);
 		label.setText("Outlier high");
@@ -219,7 +217,7 @@ public class ImageTraceComposite extends Composite {
 		hiBox.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 1, 1));
 		this.hi = new FloatDecorator(hiBox);
 		if (imageTrace.getImageServiceBean()!=null) hi.setValue(imageTrace.getImageServiceBean().getHi());
-		hi.addValueChangeListener(new IValueChangeListener() {		
+		hi.addValueChangeListener(new IValueChangeListener() {
 			@Override
 			public void valueValidating(ValueChangeEvent evt) {
 				if (hi.isError()) return;
@@ -230,7 +228,7 @@ public class ImageTraceComposite extends Composite {
 					imageTrace.getImageServiceBean().setHi(evt.getValue().doubleValue());
 					boolean ok = imageTrace.setHistoType(type);
 					if (!ok) throw new Exception("Histo not working!");
-					getPreferenceStore().setValue(BasePlottingConstants.HISTO_HI, evt.getValue().doubleValue());
+					PlottingSystemActivator.getPlottingPreferenceStore().setValue(BasePlottingConstants.HISTO_HI, evt.getValue().doubleValue());
 					maximum.setValue(imageTrace.getMax().doubleValue());
 					minimum.setValue(imageTrace.getMin().doubleValue());
 
@@ -239,7 +237,7 @@ public class ImageTraceComposite extends Composite {
 				}
 			}
 		});
-      		
+
 		hi.setMaximum(99.999);
 		hi.setMinimum(lo);
 		lo.setMaximum(hi);
@@ -396,24 +394,20 @@ public class ImageTraceComposite extends Composite {
 		labelZoomEnabledButton.setToolTipText("If checked, pixel intensities will be displayed at a certain zoom level.");
 		labelZoomEnabledButton.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, true));
 		//manage label zoom
-		boolean isLabelZoomEnabled = getPreferenceStore().getBoolean(BasePlottingConstants.LABEL_ZOOM_ENABLED);
+		boolean isLabelZoomEnabled = PlottingSystemActivator.getPlottingPreferenceStore().getBoolean(PlottingConstants.SHOW_VALUE_LABELS);
 		labelZoomEnabledButton.setSelection(isLabelZoomEnabled);
 		labelZoomEnabledButton.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent evt) {
-				getPreferenceStore().setValue(BasePlottingConstants.LABEL_ZOOM_ENABLED, labelZoomEnabledButton.getSelection());
+				if (plottingSystem == null) {
+					PlottingSystemActivator.getPlottingPreferenceStore().setValue(PlottingConstants.SHOW_VALUE_LABELS, labelZoomEnabledButton.getSelection());
+				} else {
+					plottingSystem.setShowValueLabels(labelZoomEnabledButton.getSelection());
+				} 
 			}
 		});
 	}
 	
-	private IPreferenceStore store;
-	private IPreferenceStore getPreferenceStore() {
-		if (store!=null) return store;
-		store = new ScopedPreferenceStore(InstanceScope.INSTANCE, "org.dawnsci.plotting");
-		return store;
-	}
-
-
 	public void applyChanges() {
 
 		try {

@@ -129,8 +129,6 @@ public abstract class AbstractPlottingSystem<T> implements IPlottingSystem<T>, I
 		this.actionBarManager = createActionBarManager();
 	}
 
-	abstract public IPreferenceStore getPreferenceStore();
-
 	public void setPointControls(Text pointControls) {
 		this.pointControls = pointControls;
 	}

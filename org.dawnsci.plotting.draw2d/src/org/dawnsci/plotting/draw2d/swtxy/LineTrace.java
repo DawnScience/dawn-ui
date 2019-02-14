@@ -9,6 +9,7 @@
 package org.dawnsci.plotting.draw2d.swtxy;
 
 import org.eclipse.core.runtime.preferences.InstanceScope;
+import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.preferences.PlottingConstants;
 import org.eclipse.dawnsci.plotting.api.trace.ITrace;
 import org.eclipse.dawnsci.plotting.api.trace.ITraceContainer;
@@ -48,7 +49,7 @@ public class LineTrace extends Trace implements ITraceContainer {
 	}
 
 	private IPreferenceStore getPreferenceStore() {
-		return new ScopedPreferenceStore(InstanceScope.INSTANCE, "org.dawnsci.plotting");
+		return new ScopedPreferenceStore(InstanceScope.INSTANCE, IPlottingSystem.PREFERENCE_STORE);
 	}
 
 	public void dispose() {

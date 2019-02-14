@@ -30,7 +30,6 @@ import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Platform;
-import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.dawnsci.analysis.api.RMIServerProvider;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystemViewer;
@@ -96,7 +95,6 @@ import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.part.PageBook;
-import org.eclipse.ui.preferences.ScopedPreferenceStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -130,8 +128,7 @@ public class PlottingSystemImpl<T> extends AbstractPlottingSystem<T> {
 	public PlottingSystemImpl() {
 
 		super();
-		PlottingSystemActivator.getPlottingPreferenceStore().setDefault("org.dawnsci.plotting.showValueLabels", true);
-		showValueLabels = PlottingSystemActivator.getPlottingPreferenceStore().getBoolean("org.dawnsci.plotting.showValueLabels");
+		showValueLabels = PlottingSystemActivator.getPlottingPreferenceStore().getBoolean(PlottingConstants.SHOW_VALUE_LABELS);
 
 		this.actionBarManager     = (PlotActionsManagerImpl)super.actionBarManager;
 		viewers = createViewerList();
@@ -150,7 +147,7 @@ public class PlottingSystemImpl<T> extends AbstractPlottingSystem<T> {
 
 	public void setShowValueLabels(boolean showValueLabels) {
 		this.showValueLabels = showValueLabels;
-		PlottingSystemActivator.getPlottingPreferenceStore().setValue("org.dawnsci.plotting.showValueLabels", showValueLabels);
+		PlottingSystemActivator.getPlottingPreferenceStore().setValue(PlottingConstants.SHOW_VALUE_LABELS, showValueLabels);
 	}
 
 	private List<IPlottingSystemViewer<T>> createViewerList() {
@@ -664,7 +661,7 @@ public class PlottingSystemImpl<T> extends AbstractPlottingSystem<T> {
 		double ratioWidth = (double) shape[0] / (double) shape[1];
 		double ratioHeight = (double) shape[1] / (double) shape[0];
 		boolean isAuto = ratioWidth > limitRatio && ratioHeight > limitRatio;
-		boolean isAspectRatio = getPreferenceStore().getBoolean(PlottingConstants.ASPECT);
+		boolean isAspectRatio = PlottingSystemActivator.getPlottingPreferenceStore().getBoolean(PlottingConstants.ASPECT);
 		if (!isAuto) {
 			IContributionItem[] items = getActionBars().getToolBarManager().getItems();
 			for (IContributionItem item : items) {
@@ -713,7 +710,7 @@ public class PlottingSystemImpl<T> extends AbstractPlottingSystem<T> {
 										      final IProgressMonitor      monitor) {
 
 		// Switch off error bars if very many plots.
-		IPreferenceStore store = getPreferenceStore();
+		IPreferenceStore store = PlottingSystemActivator.getPlottingPreferenceStore();
 		
 		if (traceClazz != ILineTrace.class) {
 			switchPlottingType(ILineTrace.class);
@@ -788,13 +785,6 @@ public class PlottingSystemImpl<T> extends AbstractPlottingSystem<T> {
 
 		fireTracesPlotted(new TraceEvent(traces));
 		return traces;
-	}
-
-	private IPreferenceStore store;
-	public IPreferenceStore getPreferenceStore() {
-		if (store!=null) return store;
-		store = new ScopedPreferenceStore(InstanceScope.INSTANCE, "org.dawnsci.plotting");
-		return store;
 	}
 
 	@SuppressWarnings("unused")
@@ -1130,7 +1120,6 @@ public class PlottingSystemImpl<T> extends AbstractPlottingSystem<T> {
 	@Override
 	public void dispose() {
 		super.dispose();
-		store = null;
 		if (colorMap!=null) {
 			colorMap.clear();
 			colorMap = null;

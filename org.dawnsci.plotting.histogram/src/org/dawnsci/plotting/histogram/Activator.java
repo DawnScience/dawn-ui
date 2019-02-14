@@ -12,6 +12,7 @@ import java.util.Hashtable;
 
 import org.dawnsci.plotting.histogram.service.PaletteService;
 import org.eclipse.core.runtime.preferences.InstanceScope;
+import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.histogram.IPaletteService;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.resource.ImageDescriptor;
@@ -74,7 +75,7 @@ public class Activator extends AbstractUIPlugin {
 
 	public static IPreferenceStore getPlottingPreferenceStore() {
 		if (plottingPreferenceStore == null)
-			plottingPreferenceStore = new ScopedPreferenceStore(InstanceScope.INSTANCE, "org.dawnsci.plotting");
+			plottingPreferenceStore = new ScopedPreferenceStore(InstanceScope.INSTANCE, IPlottingSystem.PREFERENCE_STORE);
 		return plottingPreferenceStore;
 	}
 }

@@ -223,7 +223,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 	private IPreferenceStore store;
 	private IPreferenceStore getPreferenceStore() {
 		if (store!=null) return store;
-		store = new ScopedPreferenceStore(InstanceScope.INSTANCE, "org.dawnsci.plotting");
+		store = new ScopedPreferenceStore(InstanceScope.INSTANCE, IPlottingSystem.PREFERENCE_STORE);
 		return store;
 	}
 
@@ -1101,8 +1101,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 			graphics.drawImage(scaledData.getScaledImage(), scaledData.getXPosition(), scaledData.getYPosition());
 		}
 		
-		boolean isLabelZoomEnabled = getPreferenceStore().getBoolean(BasePlottingConstants.LABEL_ZOOM_ENABLED);
-		if (isLabelZoomEnabled && isLabelZoom && scaledData!=null) {
+		if (isLabelZoom && plottingSystem.isShowValueLabels() && scaledData!=null) {
 			if (intensityLabelPainter==null) intensityLabelPainter = new IntensityLabelPainter(plottingSystem, this);
 			intensityLabelPainter.paintIntensityLabels(graphics);
 		}
@@ -1539,12 +1538,12 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 		}
 		
 		try {
-			final ScopedPreferenceStore store = new ScopedPreferenceStore(InstanceScope.INSTANCE, "org.dawnsci.plotting.system");
+			final ScopedPreferenceStore store = new ScopedPreferenceStore(InstanceScope.INSTANCE, IPlottingSystem.PREFERENCE_STORE);
 			if (store.getBoolean(PlottingConstants.SHOW_INTENSITY)) {
 				getPlottingSystem().setShowIntensity(!(im instanceof RGBDataset));
 			}
 		} catch (Exception ne) { // Not the end of the world if this fails!
-			logger.error("Could not get scoped preference store org.dawnsci.plotting.system!", ne);
+			logger.error("Could not get scoped preference store org.dawnsci.plotting!", ne);
 		}
 
 		return true;
