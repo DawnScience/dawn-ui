@@ -173,7 +173,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 		if (xAxis instanceof DAxis) {
 			DAxis da = (DAxis) a;
 			da.setTicksAtEnds(false);
-			da.setTicksIndexBased(true);
+			da.setTicksIndexBased(globalRange == null);
 		}
 		return hasTicksAtEnd;
 	}
@@ -326,6 +326,10 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 	protected boolean createScaledImage(ImageScaleType rescaleType, final IProgressMonitor monitor) {
 			
 		if (!imageCreationAllowed) return false;
+		
+		if (getXAxis() == null || getYAxis() == null) {
+			return false;
+		}
 		boolean requireImageGeneration = scaledData.getDownsampledImageData() == null ||
 				                         rescaleType==ImageScaleType.FORCE_REIMAGE || 
 				                         rescaleType==ImageScaleType.REHISTOGRAM; // We know that it is needed
