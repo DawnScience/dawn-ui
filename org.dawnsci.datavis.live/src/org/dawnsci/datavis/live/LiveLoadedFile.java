@@ -14,29 +14,24 @@ import org.dawnsci.datavis.model.LoadedFile;
 import org.dawnsci.january.model.NDimensions;
 import org.eclipse.dawnsci.analysis.api.io.IDataHolder;
 import org.eclipse.dawnsci.analysis.api.io.ILoaderService;
+import org.eclipse.dawnsci.analysis.api.io.IRemoteDataHolder;
 import org.eclipse.dawnsci.analysis.api.tree.Attribute;
 import org.eclipse.dawnsci.analysis.api.tree.DataNode;
 import org.eclipse.dawnsci.analysis.api.tree.GroupNode;
 import org.eclipse.dawnsci.analysis.api.tree.IFindInTree;
 import org.eclipse.dawnsci.analysis.api.tree.Node;
 import org.eclipse.dawnsci.analysis.api.tree.NodeLink;
-import org.eclipse.dawnsci.analysis.api.tree.SymbolicNode;
 import org.eclipse.dawnsci.analysis.api.tree.Tree;
 import org.eclipse.dawnsci.analysis.api.tree.TreeUtils;
-import org.eclipse.dawnsci.analysis.tree.TreeToMapUtils;
 import org.eclipse.dawnsci.nexus.NexusConstants;
 import org.eclipse.january.MetadataException;
 import org.eclipse.january.dataset.Dataset;
 import org.eclipse.january.dataset.IDataset;
-import org.eclipse.january.dataset.IDatasetConnector;
 import org.eclipse.january.dataset.IDynamicDataset;
 import org.eclipse.january.dataset.ILazyDataset;
-import org.eclipse.january.dataset.IRemoteData;
 import org.eclipse.january.dataset.LazyDatasetBase;
 import org.eclipse.january.dataset.StringDataset;
 import org.eclipse.january.metadata.AxesMetadata;
-import org.eclipse.january.metadata.IMetadata;
-import org.eclipse.january.metadata.Metadata;
 import org.eclipse.january.metadata.MetadataFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -62,31 +57,25 @@ public class LiveLoadedFile extends LoadedFile implements IRefreshable {
 	}
 
 	private IDataHolder createDataHolder(String path, String host, int port) {
+		
 		DataHolder dh = new DataHolder();
 		dh.setFilePath(path);
-		Tree tree = getTree(path,host,port);
 		
-		if (tree == null) return dh;
-		
-		Map<String, NodeLink> symbolics = TreeUtils.treeBreadthFirstSearch(tree.getGroupNode(), n -> n.getDestination() instanceof SymbolicNode, true, null);
-		
-		if (!symbolics.isEmpty()) {
-			logger.info("Symbolic nodes still exist, {} in total, {} is first",symbolics.size(),symbolics.keySet().iterator().next());
+		try {
+			IDataHolder rdh = ServiceManager.getRemoteDatasetService().createRemoteDataHolder(path, host, port, true);
+			Map<String, NodeLink> result = findNodes(rdh.getTree());
+			buildDataStructures(dh, result);
+			if (result == null) {
+				return dh;
+			}
+			
+			return rdh;
+		} catch (RuntimeException e) {
 			return dh;
 		}
-		
-		Map<String, NodeLink> result = findNodes(tree);
-		
-		if (result == null) return dh;
-		dh.setMetadata(new Metadata());
-		dh.setTree(tree);
-		fillDataHolder(dh, result);
-		
-		return dh;
 	}
 	
-	private void fillDataHolder(IDataHolder dh, Map<String, NodeLink> result) {
-		IMetadata md = dh.getMetadata();
+	private void buildDataStructures(IDataHolder dh, Map<String, NodeLink> result) {
 		
 		Map<String, String[]> axesMap = new HashMap<>();
 		
@@ -96,7 +85,7 @@ public class LiveLoadedFile extends LoadedFile implements IRefreshable {
 			
 			if (dataOptions.containsKey(name)) continue;
 			
-			IDynamicDataset dataset = buildDataset(s.getKey(),dh.getFilePath(),host,port);
+			IDynamicDataset dataset = (IDynamicDataset)((DataNode)s.getValue().getDestination()).getDataset();
 			
 			long[] maxShape = ((DataNode)s.getValue().getDestination()).getMaxShape();
 			
@@ -107,8 +96,6 @@ public class LiveLoadedFile extends LoadedFile implements IRefreshable {
 				continue;
 			}
 			
-			addDataset(dataset,maxShape,dh,md);
-			
 			if (((LazyDatasetBase)dataset).getDType() != Dataset.STRING) {
 				DataOptions d = new DataOptions(name, this);
 				dataOptions.put(d.getName(),d);
@@ -118,15 +105,13 @@ public class LiveLoadedFile extends LoadedFile implements IRefreshable {
 			
 			String shortName = split[split.length-1];
 			
-			String[] axes = getAxes(dataset,s.getValue(), shortName);
+			String[] axes = getAxes(s.getValue(), shortName);
 			if (axes != null) {
 				signals.add(name);
 				axesMap.put(name, axes);
 			}
 		
 		}
-		
-		dh.setMetadata(md);
 		
 		try {
 			buildAxes(axesMap, dh);
@@ -147,7 +132,7 @@ public class LiveLoadedFile extends LoadedFile implements IRefreshable {
 				int[] shape = dh.getLazyDataset(name).getShape();
 				String[] names = entry.getValue();
 				AxesMetadata m = null;
-				int index = name.lastIndexOf("/");
+				int index = name.lastIndexOf(Node.SEPARATOR);
 				
 				for (int i = 0 ; (i < shape.length && i < names.length) ; i++) {
 					
@@ -170,7 +155,7 @@ public class LiveLoadedFile extends LoadedFile implements IRefreshable {
 		
 	}
 	
-	private static String[] getAxes(IDynamicDataset d, NodeLink l, String name){
+	private static String[] getAxes(NodeLink l, String name){
 		Node s = l.getSource();
 
 		if (s instanceof GroupNode) {
@@ -208,22 +193,6 @@ public class LiveLoadedFile extends LoadedFile implements IRefreshable {
 		return null;
 	}
 	
-	
-	private static Tree getTree(String path, String host, int port){
-		IRemoteData rd = ServiceManager.getRemoteDatasetService().createRemoteData(host, port);
-		rd.setPath(path);
-		Map<String, Object> map = null;
-		try {
-			map = rd.getTree();
-		} catch (Exception e) {
-			logger.error("Error reading tree",e);
-		}
-		
-		if (map == null) return null;
-		
-		return TreeToMapUtils.mapToTree(map, path);
-	}
-	
 	private Map<String, NodeLink> findNodes(Tree tree){
 
 		IFindInTree finder = new IFindInTree() {
@@ -237,27 +206,6 @@ public class LiveLoadedFile extends LoadedFile implements IRefreshable {
 		};
 		return TreeUtils.treeBreadthFirstSearch(tree.getGroupNode(), finder, false, null);
 
-	}
-	
-	
-	private static void addDataset(IDynamicDataset dataset, long[] maxShape, IDataHolder dh, IMetadata md){
-		String name = dataset.getName();
-		
-		dh.addDataset(name, dataset);
-		int[] max = new int[maxShape.length];
-		for (int i = 0; i < maxShape.length; i++) max[i] = (int)maxShape[i];
-		md.addDataInfo(name, max);
-	}
-	
-	private static IDynamicDataset buildDataset(String s, String path, String host, int port){
-		String name = "/"+s;
-		IDatasetConnector r = ServiceManager.getRemoteDatasetService().createRemoteDataset(host, port);
-		r.setPath(path);
-		r.setDatasetName(name);
-		IDynamicDataset dataset = (IDynamicDataset)r.getDataset();
-		dataset.refreshShape();
-		dataset.setName(name);
-		return dataset;
 	}
 	
 	private static boolean allOnes(long[] shape) {
@@ -274,20 +222,6 @@ public class LiveLoadedFile extends LoadedFile implements IRefreshable {
 		}
 		
 		return true;
-	}
-	
-	private void updateDataHolder() {
-
-		String path = getFilePath();
-		
-		Tree tree = getTree(path, host, port);
-		
-		if (tree == null) return;
-		
-		Map<String, NodeLink> result = findNodes(tree);
-		
-		fillDataHolder(dataHolder.get(), result);
-		
 	}
 	
 	private void updateOptionsNonLiveDataHolder() {
@@ -339,6 +273,11 @@ public class LiveLoadedFile extends LoadedFile implements IRefreshable {
 	
 	private void refreshAllDatasets(){
 		IDataHolder dh = dataHolder.get();
+		
+		if (dh instanceof IRemoteDataHolder) {
+			((IRemoteDataHolder)dh).update();
+		}
+		
 		String[] names = dh.getNames();
 		for (String n : names) {
 			try {
@@ -373,7 +312,7 @@ public class LiveLoadedFile extends LoadedFile implements IRefreshable {
 	@Override
 	public void refresh() {
 		if (!live) return;
-		
+		long t = System.currentTimeMillis();
 		if (finished) {
 			locallyReload();
 			return;
@@ -397,16 +336,13 @@ public class LiveLoadedFile extends LoadedFile implements IRefreshable {
 				return;
 			}
 			
-			updateDataHolder();
-			
 			return;
-		} else {
-			updateDataHolder();
 		}
 		
 		refreshAllDatasets();
 		updateDataOptions();
 		
+		logger.debug("Refresh of file {} took {} ms",getFilePath(),System.currentTimeMillis()-t);
 		return;
 	}
 

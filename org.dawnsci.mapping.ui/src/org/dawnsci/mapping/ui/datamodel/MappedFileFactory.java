@@ -26,22 +26,14 @@ public class MappedFileFactory {
 
 	private static final Logger logger = LoggerFactory.getLogger(MappedFileFactory.class);
 	
-	public static MappedDataFile getMappedDataFile(String path, AssociatedImage image) {
-		
-		MappedDataFile file = new MappedDataFile(path);
-		file.addMapObject(image.toString(), image);
-		
-		return file;
-		
-	}
-	
 	public static MappedDataFile getMappedDataFile(String path, MappedDataFileBean bean, IMonitor monitor, IDataHolder dataHolder) {
-		
-		MappedDataFile file = new MappedDataFile(path, bean);
 		
 		if (dataHolder == null) {
 			return null;
 		}
+		
+		
+		MappedDataFile file = new MappedDataFile(path, bean, dataHolder);
 		
 		for (MappedBlockBean b : bean.getBlocks()) {
 			String name = b.getName();

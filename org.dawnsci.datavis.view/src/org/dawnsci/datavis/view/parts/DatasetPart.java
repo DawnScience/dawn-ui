@@ -198,7 +198,6 @@ public class DatasetPart {
 				}
 				
 				if (!PlotEventType.ERROR.equals(lastPlotEvent) || PlotEventType.LOADING.equals(event.getEventType())){
-					System.out.println(event.getMessage());
 					progress.setText(event.getMessage());
 					lastPlotEvent = event.getEventType();
 				}
