@@ -1,4 +1,4 @@
-/*
+/*-
  * Copyright (c) 2017 Diamond Light Source Ltd.
  *
  * All rights reserved. This program and the accompanying materials
@@ -34,7 +34,7 @@ public class PowderLinesModel {
 	}
 
 	// hc in keV angstroms
-	final private static double hc_keVAA = 12.398_419_739;
+	private static final double hc_keVAA = 12.398_419_739;
 	
 	
 	private double wavelength; // in angstroms
@@ -185,9 +185,8 @@ public class PowderLinesModel {
 	 * @return the line positions in the requested coordinates
 	 */
 	public DoubleDataset getLines(PowderLineCoord requestedCoords) {
-		// if the data coords are not defined (probably a there are no actual line positions), just return the raw line positions
-		/*if (dataCoords == null)*/ return lineLocations;
-//		return convertLinePositions(lineLocations, dataCoords, requestedCoords);
+		// return the raw line positions
+		return lineLocations;
 	}
 	
 	/**

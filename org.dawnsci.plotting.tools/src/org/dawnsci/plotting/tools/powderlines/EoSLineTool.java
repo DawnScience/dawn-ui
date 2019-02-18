@@ -1,4 +1,4 @@
-/*
+/*-
  * Copyright (c) 2017 Diamond Light Source Ltd.
  *
  * All rights reserved. This program and the accompanying materials
@@ -205,7 +205,6 @@ public class EoSLineTool extends PowderLineTool {
 					}
 					tool.setPressure(pressure);
 					setLL0();
-//					tool.refresh(true);
 				}
 				
 			});

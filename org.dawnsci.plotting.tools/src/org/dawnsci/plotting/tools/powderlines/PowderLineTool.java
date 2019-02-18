@@ -1,4 +1,4 @@
-/*
+/*-
  * Copyright (c) 2017 Diamond Light Source Ltd.
  *
  * All rights reserved. This program and the accompanying materials
@@ -384,7 +384,7 @@ public class PowderLineTool extends AbstractToolPage {
 				rLine.setROI(line);
 				nyRegions.add(rLine);
 			} catch (Exception e) {
-				System.err.println("Failed creating region for new powder line.");
+				logger.error("Failed creating region for new powder line.");
 			}
 		}
 
@@ -497,7 +497,6 @@ public class PowderLineTool extends AbstractToolPage {
 			if (!haveData) {
 				// Only one Dataset, get it, it is the first
 				Dataset theDataset= DatasetUtils.convertToDataset(dataHolder.getDataset(0));
-				//			System.err.println("Dataset name is "+dataHolder.getName(0));
 				// Stop reading if there is no valid data
 				if (theDataset == null) {
 					logger.info("PowderLineTool: No valid data in file " + chosenFile + ".");
@@ -529,7 +528,7 @@ public class PowderLineTool extends AbstractToolPage {
 						nyModel = eosModel;
 					}
 				} catch (Exception mE) {
-					; // do nothing, the model has not been overwritten
+					logger.error("Metadata not read from " + dataHolder.getFilePath() + ", no new model loaded.");
 				}
 			}
 			
@@ -577,12 +576,12 @@ public class PowderLineTool extends AbstractToolPage {
 
 		@Override
 		public void dispose() {
+			// Nothing to do on dispose
 		}
 
 		@Override
 		public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
-			// TODO Auto-generated method stub
-			
+			// Nothing specific to do when the input changes
 		}
 
 		@Override
@@ -768,6 +767,7 @@ public class PowderLineTool extends AbstractToolPage {
 				
 				@Override
 				public void widgetDefaultSelected(SelectionEvent e) {
+					// nothing to do when the widget is default-selected
 				}
 			});
 			
@@ -785,6 +785,7 @@ public class PowderLineTool extends AbstractToolPage {
 				
 				@Override
 				public void widgetDefaultSelected(SelectionEvent e) {
+					// nothing to do when the widget is default-selected
 				}
 			});
 		}
@@ -844,7 +845,7 @@ public class PowderLineTool extends AbstractToolPage {
 				
 				@Override
 				public void widgetDefaultSelected(SelectionEvent e) {
-					// TODO Auto-generated method stub
+					// nothing to do when the widget is default-selected
 				}
 			});
 			
