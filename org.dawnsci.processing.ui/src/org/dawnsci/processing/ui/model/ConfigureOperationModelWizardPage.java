@@ -491,10 +491,13 @@ public class ConfigureOperationModelWizardPage extends AbstractOperationModelWiz
 			Object object = model.get(evt.getPropertyName());
 			
 			if (region == null) {
+				update();
 				return;
 			}
 			
-			if (object instanceof IROI) region.setROI((IROI)object);
+			if (object instanceof IROI) {
+				region.setROI((IROI)object);
+			}
 			else {
 				OperationModelField an = ModelUtils.getAnnotation(model, evt.getPropertyName());
 				
