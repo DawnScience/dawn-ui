@@ -191,13 +191,6 @@ public class XYRegionGraph extends XYGraph {
 		
 	}
 
-	private void internalSetShowLegend(boolean showLeg) {
-		
-		boolean orig = isShowLegend();
-		super.setShowLegend(showLeg);
-		getPreferenceStore().setValue(BasePlottingConstants.XY_SHOWLEGEND, showLeg);
-	}
-	
 	/**
 	 * @param title the title to set
 	 */
