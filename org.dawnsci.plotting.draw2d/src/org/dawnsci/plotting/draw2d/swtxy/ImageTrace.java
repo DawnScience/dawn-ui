@@ -1501,6 +1501,11 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 	@Override
 	public void setAxes(List<? extends IDataset> axes, boolean performAuto) {
 		this.axes  = (List<IDataset>) axes;
+		
+		if (getXAxis() == null || getYAxis() == null) {
+			return;
+		}
+		
 		createAxisBounds();
 		
 		if (axes==null) {
