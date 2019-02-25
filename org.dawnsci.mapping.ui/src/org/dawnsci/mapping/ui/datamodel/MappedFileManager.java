@@ -477,7 +477,15 @@ public class MappedFileManager implements IMapFileController{
 			}
 			
 			if (!lazy) {
-				IRemoteDataHolder rdh = remoteService.createRemoteDataHolder(path, bean.getHost(), bean.getPort(), false);
+				
+				IRemoteDataHolder rdh = null;
+				try {
+					rdh = remoteService.createRemoteDataHolder(path, bean.getHost(), bean.getPort(), true);
+				} catch (RuntimeException e) {
+					//do nothing, means there are symbolic links so tree not complete
+					logger.debug("Symbolic links in dataholder for {}, maps not loaded",path);
+				}
+				 
 				
 				if (rdh == null) {
 					logger.error("Could not acquire remote data on :" + bean.getHost() + ":" + bean.getPort());
