@@ -11,6 +11,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -78,6 +79,7 @@ public class MapPlotManager implements IMapPlotController{
 	private ExecutorService executor;
 	private ExecutorService detectorExecutor;
 	private AtomicReference<Runnable> atomicRunnable = new AtomicReference<>();
+	private AtomicReference<Future<?>> atomicFuture = new AtomicReference<>();
 	private volatile Dataset merge;
 	private AtomicInteger atomicPosition;
 	private boolean firstHold = true;
@@ -222,11 +224,13 @@ public class MapPlotManager implements IMapPlotController{
 		});
 		
 		if (r == null) {
-			executor.submit(()->{
+			Future<?> f = executor.submit(()->{
 				Runnable run = atomicRunnable.getAndSet(null);
 				if (run == null) return;
 				run.run();
 			});
+			
+			atomicFuture.set(f);
 		}
 		
 	}
@@ -581,7 +585,7 @@ public class MapPlotManager implements IMapPlotController{
 	private void plotLayers(Deque<MapTrace> localLayers, List<MapTrace> stale, IPlottingSystem<?> mapPlot){
 		
 		if (Display.getCurrent() == null) {
-			PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
+			Display.getDefault().syncExec(new Runnable() {
 				
 				@Override
 				public void run() {
@@ -715,6 +719,19 @@ public class MapPlotManager implements IMapPlotController{
 		}
 		
 		return null;
+	}
+	
+	public void waitOnJob() {
+
+		Future<?> future = atomicFuture.get();
+		if (future != null) {
+			try {
+				future.get();
+			} catch (Exception e) {
+				logger.info("Error from future", e);
+			} 
+		}
+
 	}
 	
 	private IImageTrace createImageTrace(MapObject ob, IPlottingSystem<?> mapPlot) {

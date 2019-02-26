@@ -14,7 +14,9 @@
 		 ==================================================================== -->
 
 	<import file="${workspace.git.loc}/scisoft-core.git/diamond.releng.tools.dawn/ant-headless/test-common.ant" />
-	<target name="junit-tests" depends="set-test-base-DAWN">
+	<target name="junit-tests" depends="Xvfb_start, _junit-tests, Xvfb_stop" />
+	
+	<target name="_junit-tests" depends="set-test-base-DAWN">
 		<junit-call description="${ant.project.name} Java JUnit tests"
 			Xvfb-display-name="${Xvfb-display-name}" Xvfb-display-number="${Xvfb-display-number}">
 			<formatter type="xml" />

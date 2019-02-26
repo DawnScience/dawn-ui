@@ -204,7 +204,15 @@ public class MappedFileManager implements IMapFileController{
 		
 		List<String> failed = runnable.getFailedLoadingFiles();
 		return failed;
-	}	
+	}
+	
+	public List<String> loadFilesBlocking(String[] paths) {
+		MapLoadingRunnable runnable = new MapLoadingRunnable(paths, null, false);
+		runnable.run();
+		List<String> failed = runnable.getFailedLoadingFiles();
+		return failed;
+	}
+	
 	
 	@Override
 	public void loadLiveFile(final String path, LiveDataBean bean, String parentFile, boolean lazy) {
