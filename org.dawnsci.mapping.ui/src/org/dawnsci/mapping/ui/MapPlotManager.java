@@ -139,7 +139,7 @@ public class MapPlotManager implements IMapPlotController{
 	}
 	
 	private IPlottingSystem<?> getMapPlot() {
-		if (map == null) {
+		if (map == null || map.isDisposed()) {
 			map = plotService.getPlottingSystem("Map");
 			initMapPlot(map);
 		}
@@ -189,7 +189,7 @@ public class MapPlotManager implements IMapPlotController{
 	}
 	
 	private IPlottingSystem<?> getDataPlot() {
-		if (data == null) {
+		if (data == null || data.isDisposed()) {
 			data = plotService.getPlottingSystem("Detector Data");
 			initDataPlot(data);
 		}
