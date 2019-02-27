@@ -17,10 +17,8 @@ import org.eclipse.dawnsci.plotting.api.axis.IAxis;
 import org.eclipse.dawnsci.plotting.api.axis.IAxisListener;
 import org.eclipse.dawnsci.plotting.api.axis.ICoordinateSystem;
 import org.eclipse.dawnsci.plotting.api.axis.ICoordinateSystemListener;
-import org.eclipse.dawnsci.plotting.api.histogram.ImageServiceBean.ImageOrigin;
 import org.eclipse.dawnsci.plotting.api.trace.IImageTrace;
 import org.eclipse.draw2d.geometry.Point;
-import org.eclipse.draw2d.geometry.PrecisionPoint;
 
 public class RegionCoordinateSystem implements ICoordinateSystem, IAxisListener {
 
@@ -41,7 +39,7 @@ public class RegionCoordinateSystem implements ICoordinateSystem, IAxisListener 
 		this.y          = y;
 		calcAspectRatio();
 	}
-	
+
 	public IAxis getX() {
 		return x;
 	}
@@ -59,24 +57,40 @@ public class RegionCoordinateSystem implements ICoordinateSystem, IAxisListener 
 		}
 	}
 
-	@Override
-	public int[] getValuePosition(double... value) {
-		if (isDisposed) throw new RuntimeException(getClass().getName()+" is disposed!");
-		if (isTransposed()) {
-			return new int[]{x.getValuePosition(value[1]), y.getValuePosition(value[0])};
-		} else {
-			return new int[]{x.getValuePosition(value[0]), y.getValuePosition(value[1])};
-		}
+	private boolean flipCoords() {
+		if (imageTrace == null) return false;
+		return imageTrace.getImageServiceBean().isTransposed() ^ imageTrace.getImageOrigin().isOnLeadingDiagonal();
 	}
 
-	public Point getValuePosition(Point value) {
-		if (isDisposed) throw new RuntimeException(getClass().getName()+" is disposed!");
-
-		double[] pos = new double[]{x.getValuePosition(value.preciseX()), y.getValuePosition(value.preciseY())};
-		if (isTransposed()) {
-			return new PrecisionPoint(pos[1], pos[0]);
+	private double[] transformValueToPosition(double ox, double oy) {
+		if (flipCoords()) {
+			return new double[] {x.getPositionFromValue(ox), y.getPositionFromValue(oy)};
 		}
-		return new PrecisionPoint(pos[0], pos[1]);
+		return new double[] {x.getPositionFromValue(oy), y.getPositionFromValue(ox)};
+	}
+
+	private double[] transformPositionToValue(double ox, double oy) {
+		if (flipCoords()) {
+			return new double[] {x.getValueFromPosition(ox), y.getValueFromPosition(oy)};
+		}
+		return new double[] {y.getValueFromPosition(oy), x.getValueFromPosition(ox)};
+	}
+
+	@Override
+	public int[] getValuePosition(double... value) {
+		double[] pos = getPositionFromValue(value[0], value[1]);
+		return new int[] {(int) pos[0], (int) pos[1]};
+	}
+
+	private void checkDisposed() {
+		if (isDisposed) throw new RuntimeException(getClass().getName() + " is disposed!");
+	}
+
+	@Override
+	public double[] getPositionFromValue(double... value) {
+		checkDisposed();
+
+		return transformValueToPosition(value[0], value[1]);
 	}
 
 	private void calcAspectRatio() {
@@ -90,50 +104,22 @@ public class RegionCoordinateSystem implements ICoordinateSystem, IAxisListener 
 
 	@Override
 	public double[] getPositionValue(int... position) {
-		if (isDisposed) throw new RuntimeException(getClass().getName()+" is disposed!");
-		
-		double[] value = new double[]{x.getPositionValue(position[0]), y.getPositionValue(position[1])};
-		if (isTransposed()) {
-			return new double[]{value[1], value[0]};
-		}
-		return value;
-	}
+		checkDisposed();
 
-	public Point getPositionValue(Point position) {
-		if (isDisposed) throw new RuntimeException(getClass().getName()+" is disposed!");
-
-		double[] value = new double[]{x.getPositionValue(position.x), y.getPositionValue(position.y)};
-		if (isTransposed()) {
-			return new PrecisionPoint(value[1], value[0]);
-		}
-		return new PrecisionPoint(value[0], value[1]);
-	}
-
-	@Override
-	public double[] getPositionFromValue(double... value) {
-		if (isDisposed) throw new RuntimeException(getClass().getName()+" is disposed!");
-
-		if (isTransposed()) {
-			return new double[] {x.getPositionFromValue(value[1]), y.getPositionFromValue(value[0])};
-		}
-		return new double[] {x.getPositionFromValue(value[0]), y.getPositionFromValue(value[1])};
+		return transformPositionToValue(position[0], position[1]);
 	}
 
 	@Override
 	public double[] getValueFromPosition(double... position) {
-		if (isDisposed) throw new RuntimeException(getClass().getName()+" is disposed!");
+		checkDisposed();
 
-		double[] value = new double[]{x.getValueFromPosition(position[0]), y.getValueFromPosition(position[1])};
-		if (isTransposed()) {
-			return new double[] {value[1], value[0]};
-		}
-		return value;
+		return transformPositionToValue(position[0], position[1]);
 	}
 
 	private Collection<ICoordinateSystemListener> coordinateListeners;
 	@Override
 	public void addCoordinateSystemListener(ICoordinateSystemListener l) {
-		if (isDisposed) throw new RuntimeException(getClass().getName()+" is disposed!");
+		checkDisposed();
 		if (coordinateListeners==null) {
 			coordinateListeners = new HashSet<ICoordinateSystemListener>();
 			x.addAxisListener(this);
@@ -143,7 +129,8 @@ public class RegionCoordinateSystem implements ICoordinateSystem, IAxisListener 
 
 	@Override
 	public void removeCoordinateSystemListener(ICoordinateSystemListener l) {
-		if (isDisposed) throw new RuntimeException(getClass().getName()+" is disposed!");
+		checkDisposed();
+
 		if (coordinateListeners==null) return;
 		coordinateListeners.remove(l);
 		if (coordinateListeners.isEmpty()) {
@@ -152,18 +139,12 @@ public class RegionCoordinateSystem implements ICoordinateSystem, IAxisListener 
 		}
 	}
 
-
 	private void fireCoordinateSystemListeners() {
 		if (coordinateListeners==null) return;
 		final CoordinateSystemEvent evt = new CoordinateSystemEvent(this);
 		for (ICoordinateSystemListener l : coordinateListeners) {
 			l.coordinatesChanged(evt);
 		}
-	}
-	
-	private boolean isTransposed() {
-		if (imageTrace==null) return false;
-		return !imageTrace.getImageOrigin().isOnLeadingDiagonal();
 	}
 
 	@Override
@@ -180,15 +161,13 @@ public class RegionCoordinateSystem implements ICoordinateSystem, IAxisListener 
 	@Override
 	public boolean isXReversed() {
 		if (imageTrace==null) return false;
-		return imageTrace.getImageOrigin() == ImageOrigin.TOP_RIGHT ||
-			   imageTrace.getImageOrigin() == ImageOrigin.BOTTOM_RIGHT;
+		return !imageTrace.getImageOrigin().isOnLeft();
 	}
 
 	@Override
 	public boolean isYReversed() {
 		if (imageTrace==null) return false;
-		return imageTrace.getImageOrigin() == ImageOrigin.BOTTOM_LEFT ||
-			   imageTrace.getImageOrigin() == ImageOrigin.BOTTOM_RIGHT;
+		return !imageTrace.getImageOrigin().isOnTop();
 	}
 
 	@Override
@@ -207,7 +186,7 @@ public class RegionCoordinateSystem implements ICoordinateSystem, IAxisListener 
 		if (imageTrace==null) return values;
 		return imageTrace.getPointInAxisCoordinates(values);
 	}
-	
+
 	@Override
 	public double[] getAxisLocationValue(double... axisLocation) throws Exception {
 		// No need to test for reversal here, the labels and the image do not get reversed.
@@ -219,5 +198,4 @@ public class RegionCoordinateSystem implements ICoordinateSystem, IAxisListener 
 	public boolean isDisposed() {
 		return isDisposed;
 	}
-
 }

@@ -994,6 +994,22 @@ class LightWeightPlotActions {
 		if (oldbg != null && !oldbg.isDisposed()) {oldbg.dispose();}
 	}
 
+	private List<IAction> originActions = new ArrayList<>();
+
+	/**
+	 * Set origin in plot action
+	 * @param origin
+	 */
+	public void setImageOrigin(ImageOrigin origin) {
+		String l = origin.getLabel();
+		for (IAction o : originActions) {
+			if (l.equals(o.getText())) {
+				o.setChecked(true);
+				break; // as all in an action group
+			}
+		}
+	}
+
 	public void createOriginActions(final XYRegionGraph xyGraph) {
 
 		final MenuAction origins = new MenuAction("Image Origin");
@@ -1004,7 +1020,7 @@ class LightWeightPlotActions {
 		ImageOrigin imageOrigin = ImageOrigin.forLabel(PlottingSystemActivator.getPlottingPreferenceStore().getString(PlottingConstants.ORIGIN_PREF));
 		IAction selectedAction  = null;
 
-		for (final ImageOrigin origin : ImageOrigin.origins) {
+		for (final ImageOrigin origin : ImageOrigin.values()) {
 
 			final IAction action = new Action(origin.getLabel(), IAction.AS_CHECK_BOX) {
 				public void run() {
@@ -1015,7 +1031,7 @@ class LightWeightPlotActions {
 			};
 			origins.add(action);
 			group.add(action);
-
+			originActions.add(action);
 			if (imageOrigin==origin) selectedAction = action;
 		}
 
@@ -1105,6 +1121,7 @@ class LightWeightPlotActions {
 	public void dispose() {
 		PlottingSystemActivator.getLocalPreferenceStore().removePropertyChangeListener(propertyListener);
 		actionBarManager.removePropertyChangeListener(switchListener);
+		originActions.clear();
 		plotIndex = null;
 		plotX     = null;
 	}

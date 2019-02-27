@@ -326,7 +326,7 @@ public class AspectAxis extends DAxis implements IAxis {
 	public void setMaximumRange(double lower, double upper) {
 		setMaximumRange(new Range(lower, upper));
 	}
-	
+
 	/**
 	 * Set with lower<upper, the class will check for if the axis is in reversed mode.
 	 * @param maximumRange
@@ -339,16 +339,19 @@ public class AspectAxis extends DAxis implements IAxis {
 		if (maximumRange.isMinBigger()) throw new RuntimeException("Maximum range must have lower less than upper. AspectAxis allows for reversed real axes in internally!");
 		this.maximumRange = maximumRange;
 	}
-	
+
 	@Override
 	public void setRange(double lower, double upper) {
 		final Range norm = normalize(new Range(lower, upper));
 		super.setRange(norm.getLower(), norm.getUpper());
+		setInverted(norm.isMinBigger());
 	}
 
 	@Override
 	public void setRange(Range range) {
-		super.setRange(normalize(range));
+		final Range norm = normalize(range); 
+		super.setRange(norm);
+		setInverted(norm.isMinBigger());
 	}
 
 	/**
@@ -502,7 +505,7 @@ public class AspectAxis extends DAxis implements IAxis {
 
 	@Override
 	public String toString() {
-		return "(" + getTitle() + ", " + getOrientation() + ")";
+		return "(" + getTitle() + ", " + getOrientation() + ", " + getRange() + ", inverted=" + getRange().isMinBigger() + ")";
 	}
 	
 	@Override

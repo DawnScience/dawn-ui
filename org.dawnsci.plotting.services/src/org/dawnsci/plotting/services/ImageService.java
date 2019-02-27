@@ -103,8 +103,12 @@ public class ImageService extends AbstractServiceFactory implements IImageServic
 		if (origin==null) origin = ImageOrigin.TOP_LEFT;
 
 		// orientate the image
-		Dataset oImage = DatasetUtils.rotate90(DatasetUtils.convertToDataset(bean.getImage()), origin.ordinal());
-		Dataset image  = oImage;
+		Dataset oImage = DatasetUtils.convertToDataset(bean.getImage());
+		if (bean.isTransposed()) {
+			oImage = oImage.getTransposedView();
+		}
+		oImage = DatasetUtils.rotate90(oImage, origin.ordinal());
+		Dataset image = oImage;
 
 		if (image instanceof RGBDataset) {
 			return SWTImageUtils.createImageData((RGBDataset) image, 0, 255, null, null, null, false, false, false);

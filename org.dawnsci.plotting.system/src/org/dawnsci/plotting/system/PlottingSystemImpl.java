@@ -42,6 +42,7 @@ import org.eclipse.dawnsci.plotting.api.axis.IAxis;
 import org.eclipse.dawnsci.plotting.api.axis.IClickListener;
 import org.eclipse.dawnsci.plotting.api.axis.IPositionListener;
 import org.eclipse.dawnsci.plotting.api.histogram.IPaletteService;
+import org.eclipse.dawnsci.plotting.api.histogram.ImageServiceBean.ImageOrigin;
 import org.eclipse.dawnsci.plotting.api.preferences.BasePlottingConstants;
 import org.eclipse.dawnsci.plotting.api.preferences.PlottingConstants;
 import org.eclipse.dawnsci.plotting.api.preferences.ToolbarConfigurationConstants;
@@ -1420,6 +1421,12 @@ public class PlottingSystemImpl<T> extends AbstractPlottingSystem<T> {
 	public void setRescale(boolean rescale) {
 		super.setRescale(rescale);
 		activeViewer.setRescale(rescale);
+	}
+
+	@Override
+	public void setOrigin(ImageOrigin origin) {
+		super.setOrigin(origin);
+		activeViewer.setOrigin(origin);
 	}
 
 	/**
