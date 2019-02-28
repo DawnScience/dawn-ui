@@ -109,7 +109,7 @@ public class OperationModelViewer implements ISelectionListener, ISelectionChang
 
 				ModelField field = (ModelField) element;
 				OperationModelField ann = field.getAnnotation();
-				return !ann.expertOnly();
+				return ann == null || !ann.expertOnly();
 			}
 		});
 
@@ -274,7 +274,12 @@ public class OperationModelViewer implements ISelectionListener, ISelectionChang
 			Object ob = ((IStructuredSelection)selection).getFirstElement();
 			if (ob instanceof ISeriesItemDescriptor) {
 				try {
-					setOperation((IOperation)((ISeriesItemDescriptor)ob).getSeriesObject());
+					ob = ((ISeriesItemDescriptor) ob).getSeriesObject();
+					if (ob instanceof IOperation<?, ?>) {
+						setOperation((IOperation<? , ?>) ob);
+					} else {
+						setOperation(null);
+					}
 				} catch (Exception e) {
 					setOperation(null);
 				}
@@ -319,10 +324,10 @@ public class OperationModelViewer implements ISelectionListener, ISelectionChang
 				
 				IOperationModel model = null;
 				if (inputElement instanceof IOperation) {
-					IOperation<IOperationModel, OperationData> op = (IOperation<IOperationModel, OperationData>)inputElement;
+					IOperation<?, ?> op = (IOperation<?, ?>) inputElement;
 					model = op.getModel();
 				} else if (inputElement instanceof IOperationModel) {
-					model = (IOperationModel)inputElement;
+					model = (IOperationModel) inputElement;
 				}
 				try {
 					final Collection<ModelField>  col = ModelUtils.getModelFields(model);
