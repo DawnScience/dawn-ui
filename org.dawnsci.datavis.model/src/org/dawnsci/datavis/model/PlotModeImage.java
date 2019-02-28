@@ -54,6 +54,7 @@ public class PlotModeImage implements IPlotModeColored {
 	public IDataset[] sliceForPlot(ILazyDataset lz, SliceND slice, Object[] options, IPlottingSystem<?> system) throws Exception {
 		long t = System.currentTimeMillis();
 		Dataset data = DatasetUtils.convertToDataset(lz.getSlice(slice));
+		PlotModeXY.sliceAxesMetadata(data);
 		logger.info("Slice time {} ms for slice {} of {}", (System.currentTimeMillis()-t), slice.toString(), lz.getName());
 		data.setErrors(null);
 		updateName(lz.getName(),data,slice);
