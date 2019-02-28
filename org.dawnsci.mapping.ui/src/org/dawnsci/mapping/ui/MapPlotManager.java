@@ -16,6 +16,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import org.dawnsci.mapping.ui.api.IMapFileController;
 import org.dawnsci.mapping.ui.datamodel.AssociatedImage;
+import org.dawnsci.mapping.ui.datamodel.HighAspectImageDisplay;
 import org.dawnsci.mapping.ui.datamodel.IMapFileEventListener;
 import org.dawnsci.mapping.ui.datamodel.IMapPlotController;
 import org.dawnsci.mapping.ui.datamodel.LiveStreamMapObject;
@@ -24,7 +25,9 @@ import org.dawnsci.mapping.ui.datamodel.MapObject;
 import org.dawnsci.mapping.ui.datamodel.MappedDataFile;
 import org.dawnsci.mapping.ui.datamodel.PlottableMapObject;
 import org.dawnsci.mapping.ui.datamodel.VectorMapData;
+import org.eclipse.dawnsci.analysis.api.metadata.MetadataUtils;
 import org.eclipse.dawnsci.analysis.dataset.roi.PointROI;
+import org.eclipse.dawnsci.analysis.dataset.slicer.SliceViewIterator;
 import org.eclipse.dawnsci.plotting.api.IPlottingService;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.PlotType;
@@ -52,6 +55,7 @@ import org.eclipse.january.dataset.IDataset;
 import org.eclipse.january.dataset.IDynamicShape;
 import org.eclipse.january.dataset.ILazyDataset;
 import org.eclipse.january.dataset.ShapeUtils;
+import org.eclipse.january.dataset.Slice;
 import org.eclipse.january.dataset.SliceND;
 import org.eclipse.january.metadata.AxesMetadata;
 import org.eclipse.swt.widgets.Composite;
@@ -77,7 +81,11 @@ public class MapPlotManager implements IMapPlotController{
 	private volatile Dataset merge;
 	private AtomicInteger atomicPosition;
 	private boolean firstHold = true;
+	private HighAspectImageDisplay highAspectImageDisplayMode = HighAspectImageDisplay.IMAGE;
 	private IAxisMoveListener moveListener;
+	
+	private static final int SMALLFIRST = 25;
+	private static final int LARGESECOND = 100;
 	
 	private static final Logger logger = LoggerFactory.getLogger(MapPlotManager.class);
 	
@@ -258,13 +266,35 @@ public class MapPlotManager implements IMapPlotController{
 					}
 					logger.info("Slice time {} ms for shape {} of {}", (System.currentTimeMillis()-t), Arrays.toString(s.getShape()), topMap.toString());
 					if (s.getSize() == 1) return;
+					
+					int[] ss = ShapeUtils.squeezeShape(s.getShape(), false);
+					MetadataUtils.sliceAxesMetadata(s);
+					
+					ITrace[] traces = null;
+					
+					if (ss.length == 2 && isHighAspectImage(ss)) {
+						traces = buildTraces(dataPlot, s, highAspectImageDisplayMode);
+					} else {
+						traces = buildTraces(dataPlot, s, null);
+					}
 
-					MetadataPlotUtils.plotDataWithMetadata(s, dataPlot);
-
-					Display.getDefault().asyncExec(new Runnable() {
+					if (traces == null || traces.length == 0) return;
+					
+					final ITrace[] finalTraces = traces;
+					
+					Display.getDefault().syncExec(new Runnable() {
 
 						@Override
 						public void run() {
+							
+							dataPlot.clear();
+							for (ITrace tr : finalTraces) {
+								if (tr == null) continue;
+								dataPlot.addTrace(tr);
+							}
+							
+							dataPlot.repaint();
+							
 							Collection<IRegion> regions = mapPlot.getRegions();
 							Iterator<IRegion> it = regions.iterator();
 							while (it.hasNext()) {
@@ -287,6 +317,36 @@ public class MapPlotManager implements IMapPlotController{
 		detectorExecutor.submit(r);
 	}
 	
+	private ITrace[] buildTraces(IPlottingSystem<?> dataPlot, IDataset d, HighAspectImageDisplay display) {
+		
+		if (display == null || display == HighAspectImageDisplay.IMAGE) return new ITrace[] {MetadataPlotUtils.buildTrace(d.squeeze(), dataPlot)};
+		
+		switch (highAspectImageDisplayMode) {
+
+		case LINES:
+			return buildLineTracesFromImage(d, dataPlot);
+		case SUM:
+			return new ITrace[] {buildLineTraceFromImageSum(d, dataPlot)};
+		default:
+			return new ITrace[0];
+		}
+		
+	}
+	
+	@Override
+	public HighAspectImageDisplay getHighAspectImageDisplayMode() {
+		return highAspectImageDisplayMode;
+	}
+
+	@Override
+	public void setHighAspectImageDisplayMode(HighAspectImageDisplay highAspectImageDisplayMode) {
+		this.highAspectImageDisplayMode = highAspectImageDisplayMode;
+	}
+
+	private boolean isHighAspectImage(int[] shape) {
+		return  shape[0] < SMALLFIRST && shape[1] > LARGESECOND;
+	}
+	
 	private void plotDataWithHold(final double x, final double y, final PlottableMapObject topMap, IPlottingSystem<?> dataPlot, IPlottingSystem<?> mapPlot)  {
 		
 		if (topMap == null) return;
@@ -294,7 +354,11 @@ public class MapPlotManager implements IMapPlotController{
 		
 		Runnable r = null;
 		
-		if (ShapeUtils.squeezeShape(lz.getShape(),false).length > 1) {
+		int[] ss = ShapeUtils.squeezeShape(lz.getShape(), false);
+		
+		boolean isHighAspect = isHighAspectImage(ss);
+		
+		if (ss.length == 2 && (!isHighAspect || (isHighAspect && highAspectImageDisplayMode.equals(HighAspectImageDisplay.IMAGE)))) {
 			
 			r = new Runnable() {
 				
@@ -304,7 +368,9 @@ public class MapPlotManager implements IMapPlotController{
 					firstHold = false;
 					IDataset s = null;
 					try {
-						s = lz.getSlice().squeeze();
+						s = lz.getSlice();
+						MetadataUtils.sliceAxesMetadata(s);
+						s.squeeze();
 					} catch (DatasetException e) {
 						logger.error("Could not get data from lazy dataset", e);
 						return;
@@ -360,7 +426,12 @@ public class MapPlotManager implements IMapPlotController{
 						return;
 					}
 					if (s != null) {
-						final ILineTrace l = MetadataPlotUtils.buildLineTrace(s, dataPlot);
+						
+						MetadataUtils.sliceAxesMetadata(s);
+						
+						final ITrace[] traces = buildTraces(dataPlot,s, isHighAspect ? highAspectImageDisplayMode : null);
+						
+						if (traces == null || traces.length == 0) return;
 						
 						Display.getDefault().syncExec(new Runnable() {
 							
@@ -368,20 +439,27 @@ public class MapPlotManager implements IMapPlotController{
 							public void run() {
 								if (firstHold) dataPlot.clear();
 								firstHold = false;
-								dataPlot.addTrace(l);
+								
+								for (ITrace t : traces) {
+									dataPlot.addTrace(t);
+								}
+								
+								
 								try {
 									String uniqueName = RegionUtils.getUniqueName("Click", mapPlot);
 									final IRegion re = mapPlot.createRegion(uniqueName, RegionType.POINT);
 									re.setROI(new PointROI(x, y));
 									re.setAlpha(255);
-									re.setRegionColor(l.getTraceColor());
+									if (traces[0] instanceof ILineTrace) {
+										re.setRegionColor(((ILineTrace)traces[0]).getTraceColor());
+									}
 									re.setUserObject(MapPlotManager.this);
 									re.addROIListener(new IROIListener.Stub() {
 										@Override
 										public void roiSelected(ROIEvent evt) {
 											Collection<ITrace> ts = dataPlot.getTraces();
 											for (ITrace t : ts) if (t instanceof ILineTrace) ((ILineTrace)t).setLineWidth(1);
-											l.setLineWidth(2);
+											for (ITrace t : traces) if (t instanceof ILineTrace) ((ILineTrace)t).setLineWidth(2);
 
 										}
 									});
@@ -762,6 +840,64 @@ public class MapPlotManager implements IMapPlotController{
 		return r;
 		
 	}
+	
+	
+	public static ILineTrace buildLineTraceFromImageSum(IDataset data, IPlottingSystem<?> system) {
+		
+		IDataset x = null;
+		data = data.getSliceView().squeeze();
+	
+		IDataset[] axes = MetadataPlotUtils.getAxesFromMetadata(data);
+		x = (axes != null && axes.length > 1 && axes[1] != null) ? axes[1].squeeze() : null;
+		
+		if (x != null && x.getRank() == 2) {
+			x = x.getSlice(new Slice(0,1), null).squeeze();
+		}
+		
+		ILineTrace it = system.createLineTrace(data.getName());
+		Dataset sum = DatasetUtils.convertToDataset(data).sum(0, true);
+		sum.setName(data.getName() + "_sum");
+		it.setData(x, sum);
+
+		return it;
+	}
+	
+	public static ILineTrace[] buildLineTracesFromImage(IDataset data, IPlottingSystem<?> system) {
+	
+		IDataset x = null;
+		data = data.getSliceView().squeeze();
+		IDataset[] axes = MetadataPlotUtils.getAxesFromMetadata(data);
+		x = (axes != null && axes.length > 1 && axes[1] != null) ? axes[1].squeeze() : null;
+		
+		if (x != null && x.getRank() == 2) {
+			x = x.getSlice(new Slice(0,1), null).squeeze();
+		}
+
+		SliceViewIterator it = new SliceViewIterator(data, null, new int[] {1});
+		int total = it.getTotal();
+		ILineTrace[] traces = new ILineTrace[total];
+		int count = 0;
+		while (it.hasNext()) {
+	
+			ILazyDataset next = it.next();
+			IDataset slice;
+			try {
+				slice = next.getSlice().squeeze();
+			} catch (DatasetException e) {
+				//shouldn't happen, not really a lazy dataset
+				logger.error("Could not slice dataset", e);
+				return null;
+			}
+	
+			ILineTrace lt = system.createLineTrace(data.getName());
+			slice.setName(data.getName() + "_" + it.getCurrent());
+			lt.setData(x, slice);
+			traces[count++] = lt;
+		}
+		return traces;
+	
+	}
+	
 	
 	private class MapTrace {
 		

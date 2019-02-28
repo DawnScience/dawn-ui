@@ -15,5 +15,9 @@ public interface IMapPlotController {
 	void bringToFront(PlottableMapObject map);
 	
 	void sendToBack(PlottableMapObject map);
+	
+	public HighAspectImageDisplay getHighAspectImageDisplayMode();
+
+	public void setHighAspectImageDisplayMode(HighAspectImageDisplay highAspectImageDisplayMode);
 
 }
