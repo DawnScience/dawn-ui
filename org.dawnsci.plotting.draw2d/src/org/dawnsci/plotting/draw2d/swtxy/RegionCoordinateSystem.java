@@ -58,7 +58,9 @@ public class RegionCoordinateSystem implements ICoordinateSystem, IAxisListener 
 	}
 
 	private boolean flipCoords() {
-		if (imageTrace == null) return false;
+		if (imageTrace == null || imageTrace.getImageServiceBean() == null) {
+			return true;
+		}
 		return imageTrace.getImageServiceBean().isTransposed() ^ imageTrace.getImageOrigin().isOnLeadingDiagonal();
 	}
 
