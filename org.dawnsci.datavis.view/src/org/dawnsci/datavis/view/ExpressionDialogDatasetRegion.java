@@ -20,6 +20,7 @@ import org.dawnsci.datavis.model.LoadedFile;
 import org.eclipse.dawnsci.analysis.api.tree.Node;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
+import org.eclipse.jface.viewers.ColumnViewerToolTipSupport;
 import org.eclipse.jface.viewers.ComboViewer;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -213,8 +214,8 @@ public class ExpressionDialogDatasetRegion {
 		// Table of variable names and Datasets
 		datasetVariableViewer = new TableViewer(fileDataCompo, SWT.FULL_SELECTION | SWT.BORDER);
 		datasetVariableViewer.setContentProvider(ArrayContentProvider.getInstance());
-		
-		
+		ColumnViewerToolTipSupport.enableFor(datasetVariableViewer);
+
 		// short variable name column
 		TableViewerColumn variableCol = new TableViewerColumn(datasetVariableViewer, SWT.NONE);
 		variableCol.getColumn().setWidth(varWidth);
@@ -228,6 +229,11 @@ public class ExpressionDialogDatasetRegion {
 		datasetCol.setLabelProvider(new ColumnLabelProvider() {
 			@Override
 			public String getText(Object element) {
+				return ((DataOptions) element).getName();
+			}
+
+			@Override
+			public String getToolTipText(Object element) {
 				return ((DataOptions) element).getName();
 			}
 		});

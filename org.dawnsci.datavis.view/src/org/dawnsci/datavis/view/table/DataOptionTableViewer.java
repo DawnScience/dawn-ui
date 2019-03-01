@@ -21,7 +21,6 @@ import org.dawnsci.datavis.model.DataOptionsSlice;
 import org.dawnsci.datavis.model.DataOptionsUtils;
 import org.dawnsci.datavis.model.IFileController;
 import org.dawnsci.datavis.model.ILoadedFileInitialiser;
-import org.dawnsci.datavis.model.PlotController;
 import org.dawnsci.datavis.view.Activator;
 import org.dawnsci.datavis.view.DataOptionsUIUtils;
 import org.dawnsci.datavis.view.ExpressionDialog;
@@ -43,6 +42,7 @@ import org.eclipse.jface.viewers.CheckboxCellEditor;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.ColumnPixelData;
 import org.eclipse.jface.viewers.ColumnViewer;
+import org.eclipse.jface.viewers.ColumnViewerToolTipSupport;
 import org.eclipse.jface.viewers.ColumnWeightData;
 import org.eclipse.jface.viewers.EditingSupport;
 import org.eclipse.jface.viewers.ISelection;
@@ -114,6 +114,7 @@ public class DataOptionTableViewer {
 		tableComposite = new Composite(parent, SWT.None);
 		tableViewer = new TableViewer(tableComposite, SWT.FULL_SELECTION | SWT.BORDER);
 		tableViewer.getTable().setHeaderVisible(true);
+		ColumnViewerToolTipSupport.enableFor(tableViewer);
 
 		ticked = AbstractUIPlugin.imageDescriptorFromPlugin("org.dawnsci.datavis.view", "icons/ticked.png").createImage();
 		unticked = AbstractUIPlugin.imageDescriptorFromPlugin("org.dawnsci.datavis.view", "icons/unticked.gif").createImage();
@@ -232,7 +233,12 @@ public class DataOptionTableViewer {
 
 			@Override
 			public String getText(Object element) {
-				return ((DataOptions)element).getName();
+				return ((DataOptions) element).getName();
+			}
+
+			@Override
+			public String getToolTipText(Object element) {
+				return ((DataOptions) element).getName();
 			}
 		});
 
