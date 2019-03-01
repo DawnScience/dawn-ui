@@ -1,6 +1,7 @@
 package org.dawnsci.datavis.model;
 
 import org.dawnsci.datavis.api.IPlotMode;
+import org.eclipse.dawnsci.analysis.api.metadata.MetadataUtils;
 import org.eclipse.dawnsci.analysis.dataset.slicer.SliceFromSeriesMetadata;
 import org.eclipse.dawnsci.analysis.dataset.slicer.SliceViewIterator;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
@@ -57,7 +58,7 @@ public class PlotModeXY implements IPlotMode {
 		
 		long t = System.currentTimeMillis();
 		IDataset allData = lz.getSlice(slice);
-		sliceAxesMetadata(allData);
+		MetadataUtils.sliceAxesMetadata(allData);
 
 		logger.info("Slice time {} ms for slice {} of {}", (System.currentTimeMillis()-t), slice.toString(), lz.getName());
 		
@@ -74,32 +75,6 @@ public class PlotModeXY implements IPlotMode {
 			
 		}
 		return all;
-	}
-
-	/**
-	 * Workaround lazy dataset bug by  taking slices of datasets in axes metadata
-	 * @param data
-	 */
-	public static void sliceAxesMetadata(IDataset data) { // FIXME
-		AxesMetadata am = data.getFirstMetadata(AxesMetadata.class);
-		if (am == null) {
-			return;
-		}
-
-		int rank = data.getRank();
-		for (int i = 0; i < rank; i++) {
-			ILazyDataset[] axes = am.getAxis(i);
-			if (axes != null) {
-				for (int j = 0, jmax = axes.length; j < jmax; j++) {
-					try {
-						axes[j] = DatasetUtils.sliceAndConvertLazyDataset(axes[j]);
-					} catch (DatasetException e) {
-						// do nothing
-					}
-				}
-				am.setAxis(i, axes);
-			}
-		}
 	}
 
 	private void updateName(String name, IDataset data, SliceND slice, int dataDim){
