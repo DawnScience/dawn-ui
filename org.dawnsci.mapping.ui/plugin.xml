@@ -249,6 +249,25 @@
                   label="Dynamic Viewer..."
                   style="push">
             </command>
+            <menu
+                  id="org.dawnsci.mapping.detector.showchannelimages"
+                  label="Show Channel Images">
+               <command
+                     commandId="org.dawnsci.mapping.ui.highaspectimageasimage"
+                     label="As Image"
+                     style="push">
+               </command>
+               <command
+                     commandId="org.dawnsci.mapping.ui.highaspectimageassum"
+                     label="As Sum"
+                     style="push">
+               </command>
+               <command
+                     commandId="org.dawnsci.mapping.ui.highaspectimageaslines"
+                     label="As Lines"
+                     style="push">
+               </command>
+            </menu>
          </menu>
       </menuContribution>
    </extension>
@@ -268,6 +287,21 @@
             defaultHandler="org.dawnsci.mapping.ui.actions.DynamicViewerHandler"
             id="org.dawnsci.mapping.ui.dynamicviewercommand"
             name="Dynamic Viewer">
+      </command>
+      <command
+            defaultHandler="org.dawnsci.mapping.ui.actions.HighAspectImageAsSumHandler"
+            id="org.dawnsci.mapping.ui.highaspectimageassum"
+            name="As Sum">
+      </command>
+      <command
+            defaultHandler="org.dawnsci.mapping.ui.actions.HighAspectImageAsImageHandler"
+            id="org.dawnsci.mapping.ui.highaspectimageasimage"
+            name="As Image">
+      </command>
+      <command
+            defaultHandler="org.dawnsci.mapping.ui.actions.HighAspectImageAsLinesHandler"
+            id="org.dawnsci.mapping.ui.highaspectimageaslines"
+            name="As Lines">
       </command>
    </extension>
 
