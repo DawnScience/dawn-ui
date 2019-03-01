@@ -1164,11 +1164,13 @@ public class LightWeightPlotViewer<T> extends AbstractPlottingViewer<T> implemen
 		final AspectAxis xAxis = (AspectAxis) getSelectedXAxis();
 		final AspectAxis yAxis = (AspectAxis) getSelectedYAxis();
 		if (trace instanceof IImageTrace) {
+			final IImageTrace image = (IImageTrace) trace;
 			xAxis.setLogScale(false);
 			yAxis.setLogScale(false);
 			trace.initialize(xAxis, yAxis);
-
-			final IImageTrace image = (IImageTrace) trace;
+			for (IRegion r : xyGraph.getRegions()) {
+				r.getCoordinateSystem().update(image, xAxis, yAxis);
+			}
 
 			boolean autoscale = image.getGlobalRange()!= null && !system.isRescale() ? false : true;
 

@@ -34,10 +34,7 @@ public class RegionCoordinateSystem implements ICoordinateSystem, IAxisListener 
 	 * @param y
 	 */
 	public RegionCoordinateSystem(IImageTrace imageTrace, IAxis x, IAxis y) {
-		this.imageTrace = imageTrace;
-		this.x          = x;
-		this.y          = y;
-		calcAspectRatio();
+		update(imageTrace, x, y);
 	}
 
 	public IAxis getX() {
@@ -46,6 +43,14 @@ public class RegionCoordinateSystem implements ICoordinateSystem, IAxisListener 
 
 	public IAxis getY() {
 		return y;
+	}
+
+	@Override
+	public void update(IImageTrace imageTrace, IAxis x, IAxis y) {
+		this.imageTrace = imageTrace;
+		this.x          = x;
+		this.y          = y;
+		calcAspectRatio();
 	}
 
 	public void dispose() {
