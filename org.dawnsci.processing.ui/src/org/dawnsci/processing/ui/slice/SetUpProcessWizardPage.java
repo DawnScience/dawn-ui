@@ -352,7 +352,7 @@ public class SetUpProcessWizardPage extends WizardPage {
 		Map<String, int[]> lhm = new LinkedHashMap<String, int[]>();
 		
 		for (Entry<String, int[]> e : ll) {
-			if (ShapeUtils.calcSize(e.getValue()) > 1) {
+			if (ShapeUtils.calcLongSize(e.getValue()) > 1) {
 				lhm.put(e.getKey(), e.getValue());
 			}	
 		}
