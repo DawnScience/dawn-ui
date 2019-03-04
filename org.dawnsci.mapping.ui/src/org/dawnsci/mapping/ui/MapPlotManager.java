@@ -34,6 +34,7 @@ import org.eclipse.dawnsci.plotting.api.PlotType;
 import org.eclipse.dawnsci.plotting.api.axis.ClickEvent;
 import org.eclipse.dawnsci.plotting.api.axis.IAxis;
 import org.eclipse.dawnsci.plotting.api.axis.IClickListener;
+import org.eclipse.dawnsci.plotting.api.histogram.ImageServiceBean.ImageOrigin;
 import org.eclipse.dawnsci.plotting.api.region.IROIListener;
 import org.eclipse.dawnsci.plotting.api.region.IRegion;
 import org.eclipse.dawnsci.plotting.api.region.IRegion.RegionType;
@@ -623,6 +624,29 @@ public class MapPlotManager implements IMapPlotController{
 					l.addAxisListener(moveListener);
 				}
 			}
+			
+			//temporary fix forcing the origin to be top left
+			
+			IAxis xAxis = mapPlot.getSelectedXAxis();
+			if (xAxis != null) xAxis.setInverted(false);
+			
+			IAxis yAxis = mapPlot.getSelectedYAxis();
+			if (yAxis != null) yAxis.setInverted(true);
+			
+			it = localLayers.descendingIterator();
+			while (it.hasNext()) {
+				MapTrace m = it.next();
+				if (m.getTrace() != null) {
+					ITrace t = m.getTrace();
+					if (t instanceof IImageTrace) {
+						((IImageTrace) t).getImageServiceBean().setTransposed(false);
+						((IImageTrace) t).getImageServiceBean().setOrigin(ImageOrigin.TOP_LEFT);
+
+					}
+				}
+			}
+			//end temporary fix
+			
 			mapPlot.repaint();
 		} catch (Exception e) {
 			logger.error("Error plotting mapped data", e);
