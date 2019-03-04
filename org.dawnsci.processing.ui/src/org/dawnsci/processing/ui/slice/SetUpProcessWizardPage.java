@@ -382,7 +382,10 @@ public class SetUpProcessWizardPage extends WizardPage {
 			if (!nDimensions.getDescription(i).isEmpty()) {
 				continue;
 			}
-			context.addSliceDimension(i, nDimensions.getSlice(i).toString());
+			
+			Slice slice = nDimensions.getSlice(i);
+						
+			context.addSliceDimension(i, slice.isSliceComplete() ? "all" : slice.toString());
 		}
 		
 		context.setAxesNames(axesNames);
