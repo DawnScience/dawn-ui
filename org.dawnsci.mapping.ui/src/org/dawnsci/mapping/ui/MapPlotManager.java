@@ -320,7 +320,19 @@ public class MapPlotManager implements IMapPlotController{
 	
 	private ITrace[] buildTraces(IPlottingSystem<?> dataPlot, IDataset d, HighAspectImageDisplay display) {
 		
-		if (display == null || display == HighAspectImageDisplay.IMAGE) return new ITrace[] {MetadataPlotUtils.buildTrace(d.squeeze(), dataPlot)};
+		if (display == null || display == HighAspectImageDisplay.IMAGE) {
+			d.squeeze();
+			
+			ITrace t = null;
+			
+			if (d.getRank() == 1) {
+				t = MetadataPlotUtils.buildLineTrace(d, dataPlot);
+			} else {
+				t = MetadataPlotUtils.buildTrace(d, dataPlot);
+			}
+			
+			return new ITrace[] {t};
+		}
 		
 		switch (highAspectImageDisplayMode) {
 
