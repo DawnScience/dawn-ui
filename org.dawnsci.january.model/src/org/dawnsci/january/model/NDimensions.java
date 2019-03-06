@@ -288,7 +288,6 @@ public class NDimensions {
 		for (int i = 0 ; i < options.length; i++) {
 			options[i] = new ArrayList<String>();
 			if (primary != null &&  primary.length > i && primary[i] != null) {
-				options[i].add(primary[i]);
 				dimensions[i].setAxis(primary[i]);
 			} else {
 				dimensions[i].setAxis(INDICES);
@@ -298,10 +297,11 @@ public class NDimensions {
 
 		for (Entry<String,int[]> e : axes.entrySet()) {
 			if (e.getValue() != null) {
-				for (Integer i : e.getValue()) {
+				for (int i : e.getValue()) {
 					for (int j = 0; j < dimensions.length ; j++) {
-						if (dimensions[j].getSize() == i && !e.getKey().equals(name))
+						if (dimensions[j].getSize() == i && !e.getKey().equals(name)) {
 							options[j].add(e.getKey());
+						}
 					}
 				}
 			}	

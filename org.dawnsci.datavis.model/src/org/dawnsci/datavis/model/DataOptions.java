@@ -1,7 +1,7 @@
 package org.dawnsci.datavis.model;
 
 import java.util.Arrays;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -80,7 +80,7 @@ public class DataOptions implements IDataObject, IDataPackage {
 	}
 
 	public Map<String, int[]> getAllPossibleAxes() {
-		Map<String, int[]> map = new HashMap<>(parent.getDataShapes());
+		Map<String, int[]> map = new LinkedHashMap<>(parent.getDataShapes());
 		map.remove(name);
 		return map;
 	}

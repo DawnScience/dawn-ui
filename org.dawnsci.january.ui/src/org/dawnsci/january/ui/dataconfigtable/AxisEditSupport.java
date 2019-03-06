@@ -29,9 +29,12 @@ public class AxisEditSupport extends EditingSupport {
 		axisEditor.setLabelProvider(new LabelProvider());
 		axisEditor.setContentProvider(new ArrayContentProvider());
 		axisEditor.setActivationStyle(ComboBoxViewerCellEditor.DROP_DOWN_ON_MOUSE_ACTIVATION);
-		String[] axisOptions = ((NDimensions)getViewer().getInput()).getAxisOptions((int)element);
+		int i = (int) element;
+		NDimensions ndims = (NDimensions) getViewer().getInput();
+		String[] axisOptions = ndims.getAxisOptions(i);
 		axisEditor.setInput(axisOptions);
-		
+		axisEditor.setValue(ndims.getAxis(i));
+
 		axisEditor.getViewer().getCCombo().addSelectionListener(new SelectionAdapter() {
 
 			@Override
