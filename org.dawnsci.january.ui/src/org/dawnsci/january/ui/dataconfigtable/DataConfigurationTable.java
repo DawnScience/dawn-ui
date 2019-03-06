@@ -5,6 +5,7 @@ import org.dawnsci.january.model.NDimensions;
 import org.eclipse.january.dataset.Slice;
 import org.eclipse.jface.layout.TableColumnLayout;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
+import org.eclipse.jface.viewers.ColumnViewerToolTipSupport;
 import org.eclipse.jface.viewers.ColumnWeightData;
 import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.TableViewer;
@@ -38,7 +39,8 @@ public class DataConfigurationTable {
 		tableComposite = new Composite(parent, SWT.NONE);
 		
 		tableViewer = new TableViewer(tableComposite, SWT.FULL_SELECTION | SWT.BORDER);
-		
+		ColumnViewerToolTipSupport.enableFor(tableViewer);
+
 		final TableViewerColumn dimension  = new TableViewerColumn(tableViewer, SWT.LEFT, 0);
 		dimension.getColumn().setText("Dimension");
 		dimension.getColumn().setWidth(80);
@@ -106,9 +108,14 @@ public class DataConfigurationTable {
 		axis.setLabelProvider(new ColumnLabelProvider() {
 			@Override
 			public String getText(Object element) {
-				String axes = nDimension.getAxis((int)element);
+				String axes = nDimension.getAxis((int) element);
 				
-			  return axes == null ? "" : axes;
+				return axes == null ? "" : axes;
+			}
+
+			@Override
+			public String getToolTipText(Object element) {
+				return getText(element);
 			}
 		});
 		axisSupport = new AxisEditSupport(tableViewer);
