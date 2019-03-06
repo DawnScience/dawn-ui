@@ -300,7 +300,10 @@ public class PlotController implements IPlotController, ILoadedFileInitialiser {
 		}
 		
 		for (DataOptions object : state) {
-				uiRunnables.add(updatePlottedData(object, new ArrayList<ITrace>(), localCurrentMode, localModifier, uniqueLabelSet));
+			Runnable r = updatePlottedData(object, new ArrayList<ITrace>(), localCurrentMode, localModifier, uniqueLabelSet);
+			if (r != null) {
+				uiRunnables.add(r);
+			}
 		}
 		
 		Display.getDefault().syncExec(new Runnable() {
