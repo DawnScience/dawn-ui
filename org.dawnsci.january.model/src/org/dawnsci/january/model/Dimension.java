@@ -16,6 +16,7 @@ public class Dimension {
 		this.dimension = dimension;
 		this.size = size;
 		slice = new Slice(0, 1, 1);
+		slice.setLength(size);
 	}
 
 	public Dimension(Dimension toCopy){
@@ -33,6 +34,7 @@ public class Dimension {
 
 	public void setSlice(Slice slice) {
 		this.slice = slice;
+		this.slice.setLength(size);
 	}
 
 	public String getDescription() {
@@ -56,6 +58,23 @@ public class Dimension {
 
 	public void setSize(int size) {
 		this.size = size;
+		
+		if (size == 0) {
+			slice.setStart(0);
+			slice.setStop(0);
+			slice.setLength(0);
+			return;
+		}
+		
+		if ( slice.getStart() != null && size < slice.getStart()) {
+			slice.setStart(size-1);
+		}
+		
+		if (size < slice.getStop()) {
+			slice.setStop(size);
+		}
+		
+		slice.setLength(size);
 	}
 
 
