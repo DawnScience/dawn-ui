@@ -11,50 +11,46 @@
 package org.dawnsci.mapping.ui.dialog;
 
 
+import java.util.ArrayList;
 // Imports from java
 import java.util.List;
-import java.util.ArrayList;
 
 //Imports from org.dawb
 import org.dawb.common.ui.widgets.ActionBarWrapper;
-
+import org.dawnsci.mapping.ui.datamodel.AbstractMapData;
 // Imports from org.dawnsci
 import org.dawnsci.mapping.ui.datamodel.VectorMapData;
-import org.dawnsci.mapping.ui.datamodel.AbstractMapData;
-
+import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 // Imports from org.eclipse.dawnsci
 import org.eclipse.dawnsci.plotting.api.PlotType;
-import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.PlottingFactory;
+import org.eclipse.dawnsci.plotting.api.axis.IAxis;
+import org.eclipse.dawnsci.plotting.api.histogram.ImageServiceBean.ImageOrigin;
 import org.eclipse.dawnsci.plotting.api.trace.IImageTrace;
 import org.eclipse.dawnsci.plotting.api.trace.IVectorTrace;
-import org.eclipse.dawnsci.plotting.api.trace.MetadataPlotUtils;
 import org.eclipse.dawnsci.plotting.api.trace.IVectorTrace.ArrowConfiguration;
-
+import org.eclipse.dawnsci.plotting.api.trace.IVectorTrace.VectorNormalization;
+import org.eclipse.dawnsci.plotting.api.trace.MetadataPlotUtils;
 // Imports from org.eclipse.january
 import org.eclipse.january.dataset.Dataset;
 import org.eclipse.january.dataset.DatasetUtils;
-
 // Imports from org.eclipse.jface
 import org.eclipse.jface.dialogs.Dialog;
-
 // Imports from org.eclipse.swt
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.graphics.Rectangle;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Combo;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
-import org.eclipse.swt.graphics.Point;
-import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.layout.GridData;
-import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.graphics.Rectangle;
-import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.events.SelectionAdapter;
-
 // Imports from org.eclipse.ui
 import org.eclipse.ui.PlatformUI;
-
 // Imports from org.slf4j
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -75,7 +71,6 @@ public class VectorMixerDialog extends Dialog  {
 	private List<AbstractMapData> maps;
 
 	// For the plotting system
-	private IVectorTrace vectorPlot;
 	private IPlottingSystem<Composite> plotSystem;
 	
 	// For the spinner boxes
@@ -265,60 +260,25 @@ public class VectorMixerDialog extends Dialog  {
 			return;
 		}
 
-		// Next, check that there's a vector plot object and if not create it
-		if (this.vectorPlot == null) {
-			this.vectorPlot = plotSystem.createVectorTrace("Vector Plot");
-			// And whilst setting up the plot, also define some plot specific options
-			this.vectorPlot.setArrowColor(new int[] {200, 0, 0});
-			this.vectorPlot.setCircleColor(new int[] {0, 200, 0});
-			this.vectorPlot.setArrowConfiguration(ArrowConfiguration.THROUGH_CENTER);
-		}
-
 		plotSystem.clear();
-
+		
+		if (plotIndex >= 0 ) {
+			AbstractMapData plotMapData = this.maps.get(this.plotIndex);
+			updatePlotTrace(plotMapData);
+		}
+		
 		// Then let's see what the user wants to plot
-		if (plotIndex >= 0 && vectorDirectionIndex >= 0 && vectorMagnitudeIndex >= 0) {
+		if (vectorDirectionIndex >= 0 && vectorMagnitudeIndex >= 0) {
 			// If the user has selected a plot and vector data
 
 			// First, get the plot data from the map
-			AbstractMapData plotMapData = this.maps.get(this.plotIndex);
 			AbstractMapData vectorDirectionData = this.maps.get(this.vectorDirectionIndex);
 			AbstractMapData vectorMagnitudeData = this.maps.get(this.vectorMagnitudeIndex);
 
 			// Update the relevant traces
-			updatePlotTrace(plotMapData);
 			updateVectorTrace(vectorDirectionData, vectorMagnitudeData);
 
 			// and return
-			return;
-		}
-		else if (plotIndex >= 0 && (vectorDirectionIndex < 0 || vectorMagnitudeIndex < 0)) {
-			// If the user has selected plot but not vector data
-
-			// First, get the plot data from the map
-			AbstractMapData plotMapData = this.maps.get(this.plotIndex);
-
-			// Update the relevant traces
-			updatePlotTrace(plotMapData);
-
-			// and return
-			return;
-		}
-		else if (plotIndex < 0 && vectorDirectionIndex >= 0 && vectorMagnitudeIndex >= 0) {
-			// If the user has selected vector but not plot data
-
-			// First, get the vector data from the map
-			AbstractMapData vectorDirectionData = this.maps.get(this.vectorDirectionIndex);
-			AbstractMapData vectorMagnitudeData = this.maps.get(this.vectorDirectionIndex);
-
-			// Update the relevant traces
-			updateVectorTrace(vectorDirectionData, vectorMagnitudeData);
-
-			// and return
-			return;
-		} 
-		else if (plotIndex < 0 && vectorDirectionIndex < 0 && vectorMagnitudeIndex < 0) {
-			// If the user has selected neither plot or vector data, just return with nothing
 			return;
 		}
 	}
@@ -332,24 +292,28 @@ public class VectorMixerDialog extends Dialog  {
 			this.vectorMap = new VectorMapData(plotMapData.toString(), plotMapData, plotMapData.getParent().getPath());
 		}
 
-		// Update the vector map data holder object with the 2D plot data
-		this.vectorMap.updatePlotData(plotMapData);
 
 		// Update plotting system with values, manually so that the global range is set for the vector trace on top
 		
 		// First set up a trace object
-		IImageTrace plotTrace = MetadataPlotUtils.buildTrace("Vector Plot", this.vectorMap.getPlotData(), plotSystem);
-
-		// Fill it with the plot data
-		plotTrace.setData(this.vectorMap.getPlotData(), this.vectorMap.getAxes(), false);
+		IImageTrace plotTrace = MetadataPlotUtils.buildTrace("Vector Plot", plotMapData.getMap(), plotSystem);
 		
 		// Set the global range and axes
-		plotTrace.setGlobalRange(this.vectorMap.getAxisRange());
-		plotTrace.setAxes(this.vectorMap.getAxes(), true);
+		plotTrace.setGlobalRange(plotMapData.getRange());
 		
 		// Add it to the plotting system and repaint
 		plotSystem.addTrace(plotTrace);
-		plotSystem.repaint();
+		
+		IAxis xAxis = plotSystem.getSelectedXAxis();
+		if (xAxis != null) xAxis.setInverted(false);
+		
+		IAxis yAxis = plotSystem.getSelectedYAxis();
+		if (yAxis != null) yAxis.setInverted(true);
+		
+		plotTrace.getImageServiceBean().setTransposed(false);
+		plotTrace.getImageServiceBean().setOrigin(ImageOrigin.TOP_LEFT);
+		
+		plotSystem.repaint(false);
 	}
 
 
@@ -363,12 +327,21 @@ public class VectorMixerDialog extends Dialog  {
 
 		// Update the vector map data holder object with the vector data
 		this.vectorMap.updateVectorData(vectorDirectionData, vectorMagnitudeData);
+		
+		IVectorTrace vectorPlot = plotSystem.createVectorTrace("Vector Plot");
+		// And whilst setting up the plot, also define some plot specific options
+		vectorPlot.setVectorNormalization(VectorNormalization.LINEAR);
+		vectorPlot.setArrowColor(new int[] {200, 0, 0});
+		vectorPlot.setCircleColor(new int[] {0, 200, 0});
+		vectorPlot.setArrowConfiguration(ArrowConfiguration.THROUGH_CENTER);
+		vectorPlot.setRadians(false);
+		vectorPlot.setPercentageThreshold(new double[] {5,95});
 
 		// Set the vector data in the plot object
-		this.vectorPlot.setData(this.vectorMap.getMap(), vectorMap.getAxes());
-
+		vectorPlot.setData(this.vectorMap.getMap(), vectorMap.getAxes());
+		
 		// Plot this trace on top of the 2D image, if present
-		plotSystem.addTrace(this.vectorPlot);
+		plotSystem.addTrace(vectorPlot);
 	}
 	
 	@Override

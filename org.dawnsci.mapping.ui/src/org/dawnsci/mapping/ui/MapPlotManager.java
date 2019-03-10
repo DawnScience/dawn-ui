@@ -46,6 +46,7 @@ import org.eclipse.dawnsci.plotting.api.trace.IPaletteTrace;
 import org.eclipse.dawnsci.plotting.api.trace.ITrace;
 import org.eclipse.dawnsci.plotting.api.trace.IVectorTrace;
 import org.eclipse.dawnsci.plotting.api.trace.IVectorTrace.ArrowConfiguration;
+import org.eclipse.dawnsci.plotting.api.trace.IVectorTrace.VectorNormalization;
 import org.eclipse.dawnsci.plotting.api.trace.MetadataPlotUtils;
 import org.eclipse.january.DatasetException;
 import org.eclipse.january.dataset.Dataset;
@@ -58,7 +59,6 @@ import org.eclipse.january.dataset.ILazyDataset;
 import org.eclipse.january.dataset.ShapeUtils;
 import org.eclipse.january.dataset.Slice;
 import org.eclipse.january.dataset.SliceND;
-import org.eclipse.january.metadata.AxesMetadata;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.PlatformUI;
@@ -562,7 +562,7 @@ public class MapPlotManager implements IMapPlotController{
 				layers.addLast(t);
 			} else if (o instanceof VectorMapData) {
 				// Initialise a vector trace
-				IVectorTrace vectorTrace = createVectorTrace(o,mapPlot);
+				IVectorTrace vectorTrace = createVectorTrace((VectorMapData)o,mapPlot);
 				layers.push(new MapTrace(o, vectorTrace, mapPlot));
 			} else if (o instanceof AssociatedImage){
 				MapTrace t = new MapTrace(o, null, mapPlot);
@@ -600,7 +600,7 @@ public class MapPlotManager implements IMapPlotController{
 		
 		if (!mapPlot.is2D()) mapPlot.setPlotType(PlotType.IMAGE);
 		
-		mapPlot.clearTraces();
+		mapPlot.clear();
 		
 		updatePlottedRange();
 		
@@ -751,7 +751,7 @@ public class MapPlotManager implements IMapPlotController{
 		return t;
 	}
 	
-	private IVectorTrace createVectorTrace (MapObject ob, IPlottingSystem<?> mapPlot) {
+	private IVectorTrace createVectorTrace (VectorMapData ob, IPlottingSystem<?> mapPlot) {
 
 		String longName = "";
 		IDataset map = null;
@@ -769,16 +769,15 @@ public class MapPlotManager implements IMapPlotController{
 		try {
 			// Create the vector trace, the long way round
 			vectorTrace = mapPlot.createVectorTrace(longName);
-			// Get the axes
-			AxesMetadata axesMetadata = map.getFirstMetadata(AxesMetadata.class);
-			IDataset yAxis = DatasetUtils.sliceAndConvertLazyDataset(axesMetadata.getAxis(0)[0]).squeeze();
-			IDataset xAxis = DatasetUtils.sliceAndConvertLazyDataset(axesMetadata.getAxis(1)[0]).squeeze();
-			// Set the map datapoints and axes
-			vectorTrace.setData(map, Arrays.asList(xAxis, yAxis));
-			// And whilst setting up the plot, also define some plot specific options
+			vectorTrace.setVectorNormalization(VectorNormalization.LINEAR);
 			vectorTrace.setArrowColor(new int[] {200, 0, 0});
 			vectorTrace.setCircleColor(new int[] {0, 200, 0});
 			vectorTrace.setArrowConfiguration(ArrowConfiguration.THROUGH_CENTER);
+			vectorTrace.setRadians(false);
+			vectorTrace.setPercentageThreshold(new double[] {5,95});
+
+			// Set the vector data in the plot object
+			vectorTrace.setData(ob.getMap(), ob.getAxes());
 		}
 		catch (Exception e) {
 		logger.error("Error creating image trace", e);
@@ -966,6 +965,11 @@ public class MapPlotManager implements IMapPlotController{
 		}
 
 		public void rebuildTrace(){
+			
+			if (trace instanceof IVectorTrace) {
+				return;
+			}
+			
 			Number min = null;
 			Number max = null;
 			boolean locked = false;

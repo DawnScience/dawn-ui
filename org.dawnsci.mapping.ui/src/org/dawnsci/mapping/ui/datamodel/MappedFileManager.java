@@ -102,8 +102,22 @@ public class MappedFileManager implements IMapFileController{
 		boolean plotted = !object.isPlotted();
 		MappedDataFile f = mappedDataArea.getParentFile(object);
 		
+		//vectors can be plotted at the same time.
+		if (object instanceof VectorMapData) {
+			object.setPlotted(plotted);
+			fireListeners(null);
+			return;
+		}
+		
+		
 		if (f != null) {
-			Arrays.stream(f.getChildren()).filter(PlottableMapObject.class::isInstance).map(PlottableMapObject.class::cast).forEach(p -> p.setPlotted(false));
+			for (Object child : f.getChildren()) {
+				
+				if (child instanceof PlottableMapObject && !(child instanceof AssociatedImage || child instanceof VectorMapData)) {
+					((PlottableMapObject)child).setPlotted(false);
+				}
+				
+			}
 		}
 		
 		object.setPlotted(plotted);
@@ -111,20 +125,15 @@ public class MappedFileManager implements IMapFileController{
 		if (object.getRange() != null) {
 			double[] range = object.getRange();
 			
-			Arrays.stream(mappedDataArea.getChildren())
-			.filter(MappedDataFile.class::isInstance)
-			.map(MappedDataFile.class::cast)
-			.flatMap(file -> Arrays.stream(file.getChildren()))
-			.filter(PlottableMapObject.class::isInstance)
-			.map(PlottableMapObject.class::cast)
-			.filter(PlottableMapObject::isPlotted)
-					.filter(p -> p != object)
-					.forEach(p -> {
-						double[] r = p.getRange();
-						if (r != null && Arrays.equals(range, r)) {
-							p.setPlotted(false);
-						}
-					});
+			for (PlottableMapObject o : mappedDataArea.getPlottedObjects()) {
+				if (object == o || o instanceof VectorMapData) continue;
+				
+				double[] r = o.getRange();
+				if (r != null && Arrays.equals(range, r)) {
+					o.setPlotted(false);
+				}
+				
+			}
 		}
 		
 		fireListeners(null);
