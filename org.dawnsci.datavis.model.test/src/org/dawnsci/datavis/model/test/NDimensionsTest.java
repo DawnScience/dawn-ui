@@ -204,6 +204,12 @@ public class NDimensionsTest {
 		assertArrayEquals(new int[]{0, 0, 0, 0}, s.getStart());
 		assertArrayEquals(new int[]{6, 6, 11, 12}, s.getStop());
 		
+		NDimensions ndimsc3 = new NDimensions(ndims);
+		ndimsc3.updateShape(new int[] {0, 6, 11, 12});
+		s = ndimsc3.buildSliceND();
+		assertArrayEquals(new int[]{0, 0, 0, 0}, s.getStart());
+		assertArrayEquals(new int[]{0, 6, 11, 12}, s.getStop());
+		
 	}
 
 }
