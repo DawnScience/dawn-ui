@@ -20,7 +20,10 @@ import org.eclipse.draw2d.PolygonDecoration;
 import org.eclipse.draw2d.geometry.Point;
 import org.eclipse.draw2d.geometry.PointList;
 import org.eclipse.january.dataset.DatasetFactory;
+import org.eclipse.january.dataset.DatasetUtils;
 import org.eclipse.january.dataset.IDataset;
+import org.eclipse.january.dataset.Slice;
+import org.eclipse.january.dataset.Stats;
 import org.eclipse.nebula.visualization.xygraph.figures.Axis;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.PaletteData;
@@ -47,6 +50,9 @@ public class VectorTrace extends Figure implements IVectorTrace {
     private int[]          arrowColor = new int[]{0,0,0};
     private int[]          circleColor= new int[]{0,0,0};
     private PaletteData    arrowPalette;
+
+	private double[] percentageThreshold = null;
+	private boolean isRadians = true;
 
 	private VectorNormalization vectorNormalizationType = VectorNormalization.LINEAR;
     private ArrowConfiguration  arrowPosition           = ArrowConfiguration.THROUGH_CENTER;
@@ -155,11 +161,10 @@ public class VectorTrace extends Figure implements IVectorTrace {
 		for (int x = 0; x < shape[0]; x++) {
 			for (int y = 0; y < shape[1]; y++) {
 				final double mag       = getMaximumArrowSize()*normalizedMagnitude.getDouble(x,y);
-				final double angle     = vectors.getDouble(x,y,1);
+				final double angle     = isRadians ? vectors.getDouble(x,y,1) : Math.toRadians(vectors.getDouble(x,y,1));
 				final double xloc      = axes!=null ? axes.get(0).getDouble(x) : x;
 				final double yloc      = axes!=null ? axes.get(1).getDouble(y) : y;
 
-				// TODO Make normalize magnitude
 				graphics.setForegroundColor(getArrowSWTColor(x,y));
 				graphics.setBackgroundColor(getArrowSWTColor(x,y));
 				paintArrow(graphics, xloc, yloc, mag, angle);
@@ -235,42 +240,61 @@ public class VectorTrace extends Figure implements IVectorTrace {
 
         double maxMag  = -Double.MAX_VALUE;
         double maxAng  = -Double.MAX_VALUE;
+        double minMag  = Double.MAX_VALUE;
+        double minAng  = Double.MAX_VALUE;
 		for (int x = 0; x < shape[0]; x++) {
 			for (int y = 0; y < shape[1]; y++) {
 				double mag = vectors.getDouble(x,y,0);
 				maxMag = Math.max(mag, maxMag);
+				minMag = Math.min(mag, minMag);
 
 				double ang = vectors.getDouble(x,y,1);
 				maxAng = Math.max(ang, maxAng);
+				minAng = Math.min(ang, minAng);
 			}
 		}
-
+		
+		if (percentageThreshold != null) {
+			double[] ov = Stats.outlierValues(DatasetUtils.convertToDataset(vectors.getSlice((Slice)null,null,new Slice(0,1))), percentageThreshold[0], percentageThreshold[1], normalizedMagnitude.getSize());
+			maxMag = ov[1];
+			minMag = ov[0];
+		}
+		
 		for (int x = 0; x < shape[0]; x++) {
 			for (int y = 0; y < shape[1]; y++) {
 
 				double mag   = vectors.getDouble(x,y,0);
-				try {
-			        double ratio = getVectorNormalization()==VectorNormalization.LOGARITHMIC
-			        		     ? Math.log(mag) / Math.log(maxMag)
-				                 : mag / maxMag;
-
-			        normalizedMagnitude.set(ratio, x, y);
-				} catch (Throwable ne) {
-					normalizedMagnitude.set(0, x, y);
+				
+				if (mag > maxMag) {
+					mag = maxMag;
+				}
+				
+				if (mag < minMag) {
+					mag = minMag;
 				}
 
+				double ratio = (mag-minMag)/(maxMag-minMag);
+
+				if (getVectorNormalization()==VectorNormalization.LOGARITHMIC) {
+					ratio = Math.log10(9*ratio+1);
+				}
+
+				normalizedMagnitude.set(ratio, x, y);
+				
+				//angle normalised for colormapping only
 				double ang   = vectors.getDouble(x,y,1);
-				try {
-			        double ratio = getVectorNormalization()==VectorNormalization.LOGARITHMIC
-			        		     ? Math.log(ang) / Math.log(maxAng)
-				                 : ang / maxAng;
 
-			        normalizedAngle.set(ratio, x, y);
-				} catch (Throwable ne) {
-					normalizedAngle.set(0, x, y);
+				ratio = (ang-minAng)/(maxAng-minAng);
+
+				if (getVectorNormalization()==VectorNormalization.LOGARITHMIC) {
+					ratio = Math.log10(9*ratio+1);
 				}
+				
+			    normalizedAngle.set(ratio, x, y);
+
 			}
 		}
+		
 	}
 
 	@Override
@@ -351,6 +375,7 @@ public class VectorTrace extends Figure implements IVectorTrace {
 
 	public void setVectorNormalization(VectorNormalization vectorNormalizationType) {
 		this.vectorNormalizationType = vectorNormalizationType;
+		if (vectors == null) return;
 		normalize();
 		repaint();
 	}
@@ -397,6 +422,22 @@ public class VectorTrace extends Figure implements IVectorTrace {
 
 	public void setArrowHistogram(ArrowHistogram arrowHistogram) {
 		this.arrowHistogram = arrowHistogram;
+	}
+	
+    public double[] getPercentageThreshold() {
+		return percentageThreshold;
+	}
+
+	public void setPercentageThreshold(double[] percentageThreshold) {
+		this.percentageThreshold = percentageThreshold;
+	}
+	
+	public boolean isRadians() {
+		return isRadians;
+	}
+
+	public void setRadians(boolean isRadians) {
+		this.isRadians = isRadians;
 	}
 
 }
