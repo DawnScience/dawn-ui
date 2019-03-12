@@ -24,6 +24,8 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IEditorSite;
+import org.eclipse.ui.IMemento;
+import org.eclipse.ui.IPersistableEditor;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.editors.text.TextEditor;
 import org.eclipse.ui.part.MultiPageEditorPart;
@@ -34,13 +36,15 @@ import org.slf4j.LoggerFactory;
 import uk.ac.diamond.scisoft.analysis.rcp.editors.TextDataEditor;
 
 
-public class AsciiEditor extends MultiPageEditorPart implements IPlottingSystemSelection, ITitledEditor {
+public class AsciiEditor extends MultiPageEditorPart implements IPersistableEditor, IPlottingSystemSelection, ITitledEditor {
 
 	public static final String ID = "org.dawb.workbench.editors.AsciiEditor"; //$NON-NLS-1$
 
 	private static final Logger logger = LoggerFactory.getLogger(AsciiEditor.class);
 
 	private PlotDataEditor dataSetEditor;
+
+	private IMemento memento;
 
 	
 	@Override
@@ -76,6 +80,7 @@ public class AsciiEditor extends MultiPageEditorPart implements IPlottingSystemS
 
 			if (!dataFirst) {
 				this.dataSetEditor = new PlotDataEditor(PlotType.XY);
+				dataSetEditor.getPlottingSystem().restorePreferences(memento);
 				dataSetEditor.getPlottingSystem().setColorOption(ColorOption.BY_NAME);
 				addPage(index, dataSetEditor, getEditorInput());
 				setPageText(index, "Plot");
@@ -135,7 +140,7 @@ public class AsciiEditor extends MultiPageEditorPart implements IPlottingSystemS
 	public boolean isSaveAsAllowed() {
 		return false;
 	}
-	
+
 	@Override
 	public void setActivePage(final int ipage) {
 		super.setActivePage(ipage);
@@ -194,5 +199,15 @@ public class AsciiEditor extends MultiPageEditorPart implements IPlottingSystemS
 	public String toString(){
 		if (getEditorInput()!=null) return getEditorInput().getName();
 		return super.toString();
+	}
+
+	@Override
+	public void restoreState(IMemento memento) {
+		this.memento = memento;
+	}
+
+	@Override
+	public void saveState(IMemento memento) {
+		dataSetEditor.getPlottingSystem().savePreferences(memento);
 	}
 }

@@ -8,6 +8,8 @@
  */ 
 package org.dawnsci.plotting;
 
+import java.io.StringReader;
+import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -56,6 +58,8 @@ import org.eclipse.dawnsci.plotting.api.trace.IWaterfallTrace;
 import org.eclipse.dawnsci.plotting.api.trace.TraceEvent;
 import org.eclipse.dawnsci.plotting.api.trace.TraceWillPlotEvent;
 import org.eclipse.draw2d.Figure;
+import org.eclipse.e4.core.contexts.IEclipseContext;
+import org.eclipse.e4.ui.model.application.ui.MUIElement;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.jface.viewers.ISelectionProvider;
@@ -65,8 +69,13 @@ import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.IActionBars;
+import org.eclipse.ui.IMemento;
 import org.eclipse.ui.IWorkbenchPart;
+import org.eclipse.ui.IWorkbenchPartSite;
+import org.eclipse.ui.WorkbenchException;
+import org.eclipse.ui.XMLMemento;
 import org.eclipse.ui.part.MultiPageEditorPart;
+import org.eclipse.ui.part.MultiPageEditorSite;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -96,7 +105,7 @@ import org.slf4j.LoggerFactory;
 public abstract class AbstractPlottingSystem<T> implements IPlottingSystem<T>, IToolPageSystem {
 	
 	private static final Logger logger = LoggerFactory.getLogger(AbstractPlottingSystem.class);
-	
+
 	/**
 	 * Boolean to say if regions should be automatically hidden
 	 * when plot mode is changed.
@@ -232,10 +241,109 @@ public abstract class AbstractPlottingSystem<T> implements IPlottingSystem<T>, I
 		currentToolIdMap = null;
 	}
 
+	private XMLMemento memento = null;
+
+	private static final String MEMENTO_KEY = "memento";
+	private static final String MEMENTO_TYPE = "trace";
+
+	private static XMLMemento loadMemento(IWorkbenchPart part) {
+		IWorkbenchPartSite site = part.getSite();
+		if (site instanceof MultiPageEditorSite) {
+			MultiPageEditorPart ed = ((MultiPageEditorSite) site).getMultiPageEditor();
+			site = ed.getSite();
+		}
+		logger.debug("PS: id = {}; reg name = ", site.getId(), site.getRegisteredName());
+
+		String state = site.getService(IEclipseContext.class).get(MUIElement.class).getPersistedState().get(MEMENTO_KEY);
+		if (state == null) {
+			return null;
+		}
+		try {
+			return XMLMemento.createReadRoot(new StringReader(state));
+		} catch (WorkbenchException e) {
+			logger.error("Could not read plot preferences", e);
+		}
+		return null;
+	}
+
+	private void initializeMemento() {
+		if (part != null) {
+			memento = loadMemento(part);
+		}
+
+		if (memento == null) {
+			memento = XMLMemento.createWriteRoot(MEMENTO_TYPE);
+		} else {
+			XMLMemento c = (XMLMemento) memento.getChild(MEMENTO_TYPE);
+			memento = c != null ? c : (XMLMemento) memento.createChild(MEMENTO_TYPE);
+		}
+	}
+
+	protected XMLMemento getMemento() {
+		if (memento == null) {
+			initializeMemento();
+		}
+		return memento;
+	}
+
+	@Override
+	public void restorePreferences(IMemento memento) {
+		if (memento instanceof XMLMemento) {
+			XMLMemento c = (XMLMemento) memento.getChild(MEMENTO_TYPE);
+			if (c != null) {
+				this.memento = c;
+			}
+		}
+	}
+
+	@Override
+	public void savePreferences(IMemento state) {
+		IMemento prefs = state.getChild(MEMENTO_TYPE);
+
+		if (prefs == null) {
+			prefs = state.createChild(MEMENTO_TYPE);
+		}
+
+		getLineTracePreferences().copyPreferences(prefs);
+	}
+
+	/**
+	 * Save some preferences to persisted state (to cover plot view closing)
+	 */
+	public void savePreferences() {
+		XMLMemento o = loadMemento(part);
+		if (o == null) {
+			o = XMLMemento.createWriteRoot("view");
+		}
+
+		IMemento c = o.getChild(MEMENTO_TYPE);
+		if (c == null) {
+			c = o.getChild("editorState");
+			if (c == null) {
+				c = o.createChild(MEMENTO_TYPE);
+			} else {
+				c = c.getChild(MEMENTO_TYPE);
+			}
+		}
+
+		getLineTracePreferences().copyPreferences(c);
+
+		try {
+			StringWriter writer = new StringWriter();
+			o.save(writer);
+
+			IWorkbenchPartSite site = part.getSite();
+			site.getService(IEclipseContext.class).get(MUIElement.class).getPersistedState().put(MEMENTO_KEY, writer.toString());
+		} catch (Exception e) {
+			logger.error("Could not save plot preferences", e);
+		}
+	}
+
 	@Override
 	public PlotType getPlotType() {
 		return getPlotType(traceClazz);
 	}
+
 	/**
 	 * Override to define what should happen if the 
 	 * system is notified that plot types are likely
@@ -443,7 +551,7 @@ public abstract class AbstractPlottingSystem<T> implements IPlottingSystem<T>, I
 	public String getPlotName() {
 		return plotName;
 	}
-	
+
 	/**
 	 * This simply assigns the part, subclasses should override this
 	 * and call super.createPlotPart(...) to assign the part. Also registers the plot
@@ -985,7 +1093,5 @@ public abstract class AbstractPlottingSystem<T> implements IPlottingSystem<T>, I
 		if (IVolumeTrace.class.isAssignableFrom(clazz)) return PlotType.JZY3D_COLOR;
 
 		return null;
-
 	}
-
 }

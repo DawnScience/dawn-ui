@@ -79,7 +79,7 @@ public class PlottingActionBarManager implements IPlotActionSystem {
 
 	private static final Logger logger = LoggerFactory.getLogger(PlottingActionBarManager.class);
 	
-	// Extrac actions for 1D and image viewing
+	// Extract actions for 1D and image viewing
 	protected Map<String, IToolPage> toolPages;
 	protected AbstractPlottingSystem<?> system;
 	protected Map<ActionType, List<ActionContainer>> actionMap;

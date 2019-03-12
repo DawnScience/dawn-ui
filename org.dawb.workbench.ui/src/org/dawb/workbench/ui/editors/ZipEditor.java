@@ -30,6 +30,8 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IEditorSite;
+import org.eclipse.ui.IMemento;
+import org.eclipse.ui.IPersistableEditor;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.editors.text.TextEditor;
 import org.eclipse.ui.ide.FileStoreEditorInput;
@@ -39,7 +41,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 
-public class ZipEditor extends MultiPageEditorPart implements  IPlottingSystemSelection {
+public class ZipEditor extends MultiPageEditorPart implements IPersistableEditor, IPlottingSystemSelection {
 
 	public static final String ID = "org.dawb.workbench.editor.ZipEditor"; //$NON-NLS-1$
 
@@ -50,6 +52,8 @@ public class ZipEditor extends MultiPageEditorPart implements  IPlottingSystemSe
 	private PlotDataEditor dataSetEditor;
 
 	private PlotImageEditor plotImageEditor;
+
+	private IMemento memento;
 	
 	@Override
 	public void init(IEditorSite site, IEditorInput input) throws PartInitException{
@@ -79,6 +83,7 @@ public class ZipEditor extends MultiPageEditorPart implements  IPlottingSystemSe
 			// image editor for each image in the zip
 			if (isOneDZipFile()) {
 				this.dataSetEditor = new PlotDataEditor(PlotType.IMAGE);
+				dataSetEditor.getPlottingSystem().restorePreferences(memento);
 				addPage(0, dataSetEditor,    getUnzippedEditorInput());
 				setPageText(0, "Plot");
 
@@ -233,7 +238,6 @@ public class ZipEditor extends MultiPageEditorPart implements  IPlottingSystemSe
 		
 		return super.getAdapter(clazz);
 	}
-    
 
 	@Override
 	public IDataset setDatasetSelected(String name, boolean clearOthers) {
@@ -249,5 +253,13 @@ public class ZipEditor extends MultiPageEditorPart implements  IPlottingSystemSe
 		((IPlottingSystemSelection)man).setAll1DSelected(overide);
 	}
 
+	@Override
+	public void restoreState(IMemento memento) {
+		this.memento = memento;
+	}
 
+	@Override
+	public void saveState(IMemento memento) {
+		dataSetEditor.getPlottingSystem().savePreferences(memento);
+	}
 }

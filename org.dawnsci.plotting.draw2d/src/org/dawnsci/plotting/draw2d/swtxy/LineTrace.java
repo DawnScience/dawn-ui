@@ -8,17 +8,13 @@
  */
 package org.dawnsci.plotting.draw2d.swtxy;
 
-import org.eclipse.core.runtime.preferences.InstanceScope;
-import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
-import org.eclipse.dawnsci.plotting.api.preferences.PlottingConstants;
 import org.eclipse.dawnsci.plotting.api.trace.ITrace;
 import org.eclipse.dawnsci.plotting.api.trace.ITraceContainer;
+import org.eclipse.dawnsci.plotting.api.trace.LineTracePreferences;
 import org.eclipse.draw2d.ColorConstants;
-import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.nebula.visualization.xygraph.dataprovider.IDataProvider;
 import org.eclipse.nebula.visualization.xygraph.figures.Axis;
 import org.eclipse.nebula.visualization.xygraph.figures.Trace;
-import org.eclipse.ui.preferences.ScopedPreferenceStore;
 
 /**
  * Trace with drawPolyline(...) for faster rendering.
@@ -38,18 +34,14 @@ public class LineTrace extends Trace implements ITraceContainer {
 		super(name);
 	}
 
-	public LineTrace(String name, Axis xAxis, Axis yAxis, IDataProvider dataProvider) {
+	public LineTrace(String name, Axis xAxis, Axis yAxis, IDataProvider dataProvider, LineTracePreferences prefs) {
 		super(name, xAxis, yAxis, dataProvider);
 		if (dataProvider != null) {
 			if (dataProvider.hasErrors()) {
-				setErrorBarEnabled(getPreferenceStore().getBoolean(PlottingConstants.GLOBAL_SHOW_ERROR_BARS));
+				setErrorBarEnabled(prefs.getBoolean(LineTracePreferences.ERROR_BAR_ON));
 				setErrorBarColor(ColorConstants.red);
 			}
 		}
-	}
-
-	private IPreferenceStore getPreferenceStore() {
-		return new ScopedPreferenceStore(InstanceScope.INSTANCE, IPlottingSystem.PREFERENCE_STORE);
 	}
 
 	public void dispose() {
@@ -61,12 +53,10 @@ public class LineTrace extends Trace implements ITraceContainer {
 		return getXYGraph()==null;
 	}
 
-
 	public String getInternalName() {
 		if (internalName!=null) return internalName;
 		return getName();
 	}
-
 
 	public void setInternalName(String internalName) {
 		this.internalName = internalName;
@@ -79,10 +69,8 @@ public class LineTrace extends Trace implements ITraceContainer {
 		return trace;
 	}
 
-
 	@Override
 	public void setTrace(ITrace trace) {
 		this.trace = trace;
 	}
-
 }

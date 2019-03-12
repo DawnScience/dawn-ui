@@ -36,6 +36,8 @@ import org.eclipse.jface.viewers.IContentProvider;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IEditorSite;
+import org.eclipse.ui.IMemento;
+import org.eclipse.ui.IPersistableEditor;
 import org.eclipse.ui.IReusableEditor;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.part.MultiPageEditorPart;
@@ -49,11 +51,12 @@ import uk.ac.diamond.scisoft.analysis.rcp.editors.HDF5TreeEditor;
 import uk.ac.diamond.scisoft.analysis.utils.FileUtils;
 
 
-public class H5MultiEditor extends MultiPageEditorPart  implements IReusableEditor, IPlottingSystemSelection, IH5Editor, ITitledEditor {
+public class H5MultiEditor extends MultiPageEditorPart implements IPersistableEditor, IReusableEditor, IPlottingSystemSelection, IH5Editor, ITitledEditor {
 
 	private static final Logger logger = LoggerFactory.getLogger(H5MultiEditor.class);
 	private PlotDataEditor dataSetEditor;
 	private IReusableEditor treePage;
+	private IMemento memento;
 
 	@Override
 	public void init(IEditorSite site, IEditorInput input) throws PartInitException{
@@ -147,7 +150,9 @@ public class H5MultiEditor extends MultiPageEditorPart  implements IReusableEdit
 
 			if (!treeOnTop) {
 				this.dataSetEditor = new PlotDataEditor(PlotType.XY);
-				dataSetEditor.getPlottingSystem().setColorOption(ColorOption.BY_NAME);	
+				dataSetEditor.getPlottingSystem().restorePreferences(memento);
+				dataSetEditor.getPlottingSystem().setColorOption(ColorOption.BY_NAME);
+
 				addPage(index, dataSetEditor, input.getInput());
 				setPageText(index, "Plot");
 				index++;
@@ -238,7 +243,6 @@ public class H5MultiEditor extends MultiPageEditorPart  implements IReusableEdit
 		
 		return super.getAdapter(clazz);
 	}
-    
 
 	@Override
 	public IDataset setDatasetSelected(String name, boolean clearOthers) {
@@ -259,4 +263,13 @@ public class H5MultiEditor extends MultiPageEditorPart  implements IReusableEdit
 		return EclipseUtils.getFilePath(getEditorInput());
 	}
 
+	@Override
+	public void restoreState(IMemento memento) {
+		this.memento = memento;
+	}
+
+	@Override
+	public void saveState(IMemento memento) {
+		dataSetEditor.getPlottingSystem().savePreferences(memento);
+	}
 }
