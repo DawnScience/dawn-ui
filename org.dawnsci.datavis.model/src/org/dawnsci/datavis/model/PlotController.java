@@ -535,6 +535,13 @@ public class PlotController implements IPlotController, ILoadedFileInitialiser {
 	}
 	
 	public void switchPlotMode(IPlotMode mode, DataOptions dOption) {
+		
+		//if not selected for plot, just update internal state and return
+		if (!dOption.isSelected() || !dOption.getParent().isSelected()) {
+			updateInnerPlotMode(dOption, mode);
+			return;
+		}
+		
 		if (mode == currentMode) return;
 		
 		try {
@@ -543,11 +550,7 @@ public class PlotController implements IPlotController, ILoadedFileInitialiser {
 			getPlottingSystem().setTitle("");
 			
 			currentMode = mode;
-			PlottableObject po = dOption.getPlottableObject();
-			NDimensions nd = po.getNDimensions();
-			nd.setOptions(currentMode.getOptions());
-			
-			dOption.setPlottableObject(new PlottableObject(currentMode, nd));
+			updateInnerPlotMode(dOption, currentMode);
 			
 			updateFileState(dOption,currentMode);
 			final List<DataOptions> state = fileController.getImmutableFileState();
@@ -558,6 +561,17 @@ public class PlotController implements IPlotController, ILoadedFileInitialiser {
 		}
 		
 		for (PlotModeChangeEventListener l : listeners) l.plotModeChanged();
+	}
+	
+	private void updateInnerPlotMode(DataOptions d, IPlotMode m) {
+		
+		PlottableObject po = d.getPlottableObject();
+		if (po.getPlotMode() != m) {
+			NDimensions nd = po.getNDimensions();
+			nd.setOptions(m.getOptions());
+			d.setPlottableObject(new PlottableObject(m, nd));
+		}
+		
 	}
 	
 	private void updatePlotStateInJob(List<DataOptions> state, IPlotMode mode){

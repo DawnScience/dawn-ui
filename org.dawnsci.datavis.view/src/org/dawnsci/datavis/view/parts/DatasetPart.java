@@ -28,7 +28,6 @@ import org.dawnsci.datavis.model.LoadedFile;
 import org.dawnsci.datavis.model.PlotEventObject;
 import org.dawnsci.datavis.model.PlotEventObject.PlotEventType;
 import org.dawnsci.datavis.model.PlotModeChangeEventListener;
-import org.dawnsci.datavis.model.PlottableObject;
 import org.dawnsci.datavis.view.table.AxisSliceDialog;
 import org.dawnsci.datavis.view.table.DataOptionTableViewer;
 import org.dawnsci.january.model.ISliceAssist;
@@ -236,28 +235,19 @@ public class DatasetPart {
 				if (selection instanceof StructuredSelection) {
 					Object ob = ((StructuredSelection)selection).getFirstElement();
 
-					if (ob instanceof IPlotMode && !ob.equals(plotController.getCurrentMode())) {
-						DataOptions dataOptions = SelectionUtils.getFromSelection(viewer.getStructuredSelection(), DataOptions.class).get(0);
-						if (dataOptions.isSelected() && dataOptions.getParent().isSelected()) {
-							plotController.switchPlotMode((IPlotMode)ob,dataOptions);
-						} else {
-							PlottableObject po = dataOptions.getPlottableObject();
-							NDimensions nd = po.getNDimensions();
-							nd.setOptions(((IPlotMode)ob).getOptions());
-							
-							dataOptions.setPlottableObject(new PlottableObject((IPlotMode)ob, nd));
-						}
-						
-						
-						
-						table.setInput(dataOptions.getPlottableObject().getNDimensions());
-						if (((IPlotMode)ob).supportsMultiple()) {
-							table.setMaxSliceNumber(50);
-						} else {
-							table.setMaxSliceNumber(1);
-						}
-						viewer.refresh();
+					if (!(ob instanceof IPlotMode)) return;
+
+					DataOptions dataOptions = SelectionUtils.getFromSelection(viewer.getStructuredSelection(), DataOptions.class).get(0);
+
+					plotController.switchPlotMode((IPlotMode)ob,dataOptions);
+
+					table.setInput(dataOptions.getPlottableObject().getNDimensions());
+					if (((IPlotMode)ob).supportsMultiple()) {
+						table.setMaxSliceNumber(50);
+					} else {
+						table.setMaxSliceNumber(1);
 					}
+					viewer.refresh();
 				}
 			}
 		});
