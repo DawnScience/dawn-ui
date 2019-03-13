@@ -17,11 +17,12 @@ import org.eclipse.dawnsci.plotting.api.trace.PaletteEvent;
 import org.eclipse.dawnsci.plotting.api.trace.TraceEvent;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.FocusAdapter;
+import org.eclipse.swt.events.FocusEvent;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.TraverseEvent;
 import org.eclipse.swt.events.TraverseListener;
-import org.eclipse.swt.events.VerifyEvent;
 import org.eclipse.swt.events.VerifyListener;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
@@ -96,37 +97,31 @@ public class HistogramToolbarControl {
 			
 		});
 		
-		VerifyListener v = new VerifyListener() {
-			
-			@Override
-			public void verifyText(VerifyEvent e) {
-				
-				 //Validation for keys like Backspace, left arrow key, right arrow key and del keys
-				if (e.character == SWT.BS || e.keyCode == SWT.ARROW_LEFT
-						|| e.keyCode == SWT.ARROW_RIGHT
-						|| e.keyCode == SWT.DEL || e.character == '.') {
-					e.doit = true;
-					return;
-				}
+		VerifyListener v = e -> {
 
-				if (e.character == '\0') {
-					e.doit = true;
-					return;
-				}
-				
-				if (e.character == '-') {
-					e.doit = true;
-					return;
-				}
-				
-				if (!('0' <= e.character && e.character <= '9')){
-					e.doit = false;
-					return;
-				}
+			//Validation for keys like Backspace, left arrow key, right arrow key and del keys
+			if (e.character == SWT.BS || e.keyCode == SWT.ARROW_LEFT
+					|| e.keyCode == SWT.ARROW_RIGHT
+					|| e.keyCode == SWT.DEL || e.character == '.') {
+				e.doit = true;
+				return;
+			}
+
+			if (e.character == '\0') {
+				e.doit = true;
+				return;
+			}
+
+			if (e.character == '-') {
+				e.doit = true;
+				return;
+			}
+
+			if (!('0' <= e.character && e.character <= '9')){
+				e.doit = false;
+				return;
 			}
 		};
-		
-		
 		
 		low = new Text(control, SWT.BORDER | SWT.RIGHT);
 		low.setText("0");
@@ -136,20 +131,16 @@ public class HistogramToolbarControl {
 			
 			@Override
 			public void keyTraversed(TraverseEvent e) {
-				if (trace != null) {
-					String text = low.getText();
-					try {
-						double min = Double.parseDouble(text);
-						trace.getImageServiceBean().setMin(min);
-						trace.setMin(min);
-						trace.setPaletteData(trace.getPaletteData());
-						system.repaint();
-					} catch ( Exception ex) {
-						low.setText(trace.getImageServiceBean().getMin().toString());
-					}
-					
-				}
+				updateMin();
 				
+			}
+		});
+		
+		low.addFocusListener(new FocusAdapter() {
+			
+			@Override
+			public void focusLost(FocusEvent e) {
+				updateMin();
 			}
 		});
 		
@@ -166,19 +157,15 @@ public class HistogramToolbarControl {
 			
 			@Override
 			public void keyTraversed(TraverseEvent e) {
-				if (trace != null) {
-					String text = high.getText();
-					try {
-						double max = Double.parseDouble(text);
-						trace.getImageServiceBean().setMax(max);
-						trace.setMax(max);
-						trace.setPaletteData(trace.getPaletteData());
-						system.repaint();
-					} catch ( Exception ex) {
-						low.setText(trace.getImageServiceBean().getMin().toString());
-					}
-					
-				}
+				updateMax();
+			}
+		});
+		
+		high.addFocusListener(new FocusAdapter() {
+			
+			@Override
+			public void focusLost(FocusEvent e) {
+				updateMax();
 				
 			}
 		});
@@ -267,6 +254,38 @@ public class HistogramToolbarControl {
 		};
 	}
 	
+	private void updateMin() {
+		if (trace != null) {
+			String text = low.getText();
+			try {
+				double min = Double.parseDouble(text);
+				trace.getImageServiceBean().setMin(min);
+				trace.setMin(min);
+				trace.setPaletteData(trace.getPaletteData());
+				system.repaint();
+			} catch ( Exception ex) {
+				low.setText(trace.getImageServiceBean().getMin().toString());
+			}
+			
+		}
+	}
+	
+	private void updateMax() {
+		if (trace != null) {
+			String text = high.getText();
+			try {
+				double max = Double.parseDouble(text);
+				trace.getImageServiceBean().setMax(max);
+				trace.setMax(max);
+				trace.setPaletteData(trace.getPaletteData());
+				system.repaint();
+			} catch ( Exception ex) {
+				high.setText(trace.getImageServiceBean().getMax().toString());
+			}
+			
+		}
+	}
+	
 	@PreDestroy
 	public void dispose() {
 		if (lockImage != null) lockImage.dispose();
@@ -294,6 +313,5 @@ public class HistogramToolbarControl {
 		}
 		
 	}
-	
 	
 }
