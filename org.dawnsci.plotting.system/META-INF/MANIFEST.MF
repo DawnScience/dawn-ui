@@ -26,5 +26,4 @@ Require-Bundle: org.eclipse.nebula.visualization.xygraph,
  org.eclipse.core.resources
 Bundle-Activator: org.dawnsci.plotting.system.PlottingSystemActivator
 Bundle-ActivationPolicy: lazy
-Service-Component: OSGI-INF/*.xml
 Automatic-Module-Name: org.dawnsci.plotting.system

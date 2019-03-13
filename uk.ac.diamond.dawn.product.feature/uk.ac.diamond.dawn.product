@@ -31,11 +31,8 @@ openFile
       <vmArgs>-Xms256m
 -Xmx1024m
 -Dosgi.requiredJavaVersion=1.8.0
--Dcom.isencia.require.file.source=true
 -Dosgi.locking=none
--Dorg.dawnsci.passerelle.do.not.break.osgi=true
 -Dpydev.funding.hide=true
--Dosgi.framework.extensions=org.eclipse.fx.osgi
 -Dorg.eclipse.epp.internal.mpc.core.service.DefaultMarketplaceService.url=http://dmarket.diamond.ac.uk:8080/mpc -Dorg.eclipse.epp.internal.mpc.core.service.DefaultCatalogService.url=http://dmarket.diamond.ac.uk:8080/mpc
       </vmArgs>
       <vmArgsMac>-XstartOnFirstThread -Dorg.eclipse.swt.internal.carbon.smallFonts
