@@ -2,6 +2,7 @@ package org.dawnsci.datavis.model.test;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
 
 import java.util.Arrays;
@@ -28,6 +29,7 @@ import org.eclipse.dawnsci.plotting.api.trace.ITrace;
 import org.eclipse.january.dataset.Comparisons;
 import org.eclipse.january.dataset.IDataset;
 import org.eclipse.january.dataset.Slice;
+import org.eclipse.january.dataset.SliceND;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -515,4 +517,42 @@ public class PlotControllerTest extends AbstractTestModel {
 		
 	}
 
+	@Test
+	public void testSwitchAndSliceBeforePlot() throws Exception {
+		initialiseControllers();
+		String path = file.getAbsolutePath();
+		FileControllerUtils.loadFile(fileController,path);
+		LoadedFile lf = fileController.getLoadedFiles().stream().filter(f -> f.getFilePath().equals(path)).findFirst().get();
+		DataOptions dop = lf.getDataOption("/entry/dataset3");
+		IPlotMode[] plotModes = plotManager.getPlotModes(dop);
+		IPlotMode newMode = plotModes[0];
+		assertNotEquals(newMode, plotManager.getCurrentMode());
+		//should only switch internal plot object in dataoption
+		plotManager.switchPlotMode(newMode, dop);
+		assertNotEquals(newMode, plotManager.getCurrentMode());
+		NDimensions nDimensions = dop.getPlottableObject().getNDimensions();
+		SliceND snd = nDimensions.buildSliceND();
+		assertNotEquals(2, snd.getStart()[0]);
+
+		nDimensions.setSlice(0, new Slice(2,3));
+		
+		fileController.setFileSelected(lf, true);
+		plotManager.waitOnJob();
+		assertNotEquals(newMode, plotManager.getCurrentMode());
+		fileController.setDataSelected(dop, true);
+		plotManager.waitOnJob();
+		
+		dop = lf.getDataOption("/entry/dataset3");
+		nDimensions = dop.getPlottableObject().getNDimensions();
+		snd = nDimensions.buildSliceND();
+		assertEquals(2, snd.getStart()[0]);
+		
+		assertEquals(newMode, plotManager.getCurrentMode());
+		
+		//clean up
+		fileController.unloadFiles(Arrays.asList(lf));
+		plotManager.waitOnJob();
+		assertEquals(0, plottingSystem.getTraces().size());
+		
+	}
 }
