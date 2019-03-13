@@ -13,6 +13,7 @@ import java.awt.image.ColorModel;
 import java.awt.image.DirectColorModel;
 import java.awt.image.IndexColorModel;
 import java.awt.image.WritableRaster;
+import java.util.NoSuchElementException;
 
 import org.dawnsci.plotting.services.util.SWTImageUtils;
 import org.eclipse.core.runtime.Platform;
@@ -269,6 +270,9 @@ public class ImageService extends AbstractServiceFactory implements IImageServic
 				bean.setHi(90);
 			    double[] stats = Stats.outlierValues(image,mask,true, bean.getLo(), bean.getHi(), -1);
 			    ret = new double[]{stats[0], stats[1], -1};
+			} catch (NoSuchElementException e) {
+				//data all NaN
+				ret = new double[] {Double.NaN, Double.NaN,-1};
 			}
 
 		    if (bean.isLogColorScale() && ret != null) {
