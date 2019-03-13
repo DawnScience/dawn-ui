@@ -58,6 +58,7 @@ public class LoadedFileMenuListener implements IMenuListener {
 	private static final String DATAVIS_MAPPING_TRANSFER = "org.dawnsci.mapping.ui.command.transferdatavisfile";
 	private static final String DATAVIS_PROCESSING_TRANSFER = "org.dawnsci.processing.ui.command.transferdatavisfile";
 	private static final String OPEN_TREE = "uk.ac.diamond.scisoft.analysis.rcp.opentreedialog";
+	private static final String OPEN_META = "uk.ac.diamond.sda.meta.metadialogcommand";
 	private static final String CONVERT_WIZARD = "org.dawnsci.conversion.ui.convertExportWizard";
 	private static final String BUNDLE = "org.dawnsci.datavis.view";
 	
@@ -123,10 +124,16 @@ public class LoadedFileMenuListener implements IMenuListener {
 				
 				List<LoadedFile> s = SelectionUtils.getFromSelection(viewer.getSelection(), LoadedFile.class);
 				
+				manager.add(new Separator());
+				
+				if (!s.isEmpty() && checkCommand(OPEN_META)) {
+					manager.add(new CommandAction("View Metadata...", null, OPEN_META));
+				}
+				
 				if (!s.isEmpty() && s.get(0).getTree() != null && checkCommand(OPEN_TREE)) {
-					manager.add(new Separator());
 					manager.add(new CommandAction("View Tree...", null, OPEN_TREE));
 				}
+				
 			}
 			
 		}
