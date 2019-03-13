@@ -94,6 +94,8 @@ import org.osgi.service.event.EventAdmin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import uk.ac.diamond.scisoft.analysis.utils.VersionSort;
+
 public class LoadedFilePart {
 
 	private static final Logger logger = LoggerFactory.getLogger(LoadedFilePart.class);
@@ -643,7 +645,7 @@ public class LoadedFilePart {
 		public CompareObject(TableViewerColumn column, Function<? super LoadedFile, ? extends String> keyExtractor) {
 			this.column = column;
 			this.comparatorFunction = keyExtractor;
-			this.comparator = Comparator.comparing(keyExtractor);
+			this.comparator = createComparator();
 			direction = SWT.DOWN;
 		}
 		
@@ -663,7 +665,7 @@ public class LoadedFilePart {
 			switch (direction) {
 			case SWT.DOWN:
 				direction = SWT.UP;
-				comparator = Comparator.comparing(comparatorFunction);
+				comparator = createComparator();
 				comparator = comparator.reversed();
 				break;
 			case SWT.UP:
@@ -672,12 +674,24 @@ public class LoadedFilePart {
 				break;
 			case SWT.NONE:
 				direction = SWT.DOWN;
-				comparator = Comparator.comparing(comparatorFunction);
+				comparator = createComparator();
 				break;
 
 			default:
 				break;
 			}
+		}
+		
+		private Comparator<LoadedFile> createComparator(){
+			return new Comparator<LoadedFile>() {
+
+				@Override
+				public int compare(LoadedFile o1, LoadedFile o2) {
+					String s1 = comparatorFunction.apply(o1);
+					String s2 = comparatorFunction.apply(o2);
+					return VersionSort.versionCompare(s1,s2);
+				}
+			};
 		}
 		
 	}
