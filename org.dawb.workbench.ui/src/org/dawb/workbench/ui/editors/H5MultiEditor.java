@@ -20,7 +20,6 @@ import org.eclipse.dawnsci.analysis.api.io.IDataHolder;
 import org.eclipse.dawnsci.analysis.api.io.IFileLoader;
 import org.eclipse.dawnsci.analysis.api.tree.Tree;
 import org.eclipse.dawnsci.hdf5.editor.H5ValuePage;
-import org.eclipse.dawnsci.hdf5.editor.IH5Editor;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystemSelection;
 import org.eclipse.dawnsci.plotting.api.PlotType;
@@ -51,7 +50,7 @@ import uk.ac.diamond.scisoft.analysis.rcp.editors.HDF5TreeEditor;
 import uk.ac.diamond.scisoft.analysis.utils.FileUtils;
 
 
-public class H5MultiEditor extends MultiPageEditorPart implements IPersistableEditor, IReusableEditor, IPlottingSystemSelection, IH5Editor, ITitledEditor {
+public class H5MultiEditor extends MultiPageEditorPart implements IPersistableEditor, IReusableEditor, IPlottingSystemSelection, ITitledEditor {
 
 	private static final Logger logger = LoggerFactory.getLogger(H5MultiEditor.class);
 	private PlotDataEditor dataSetEditor;
@@ -256,11 +255,6 @@ public class H5MultiEditor extends MultiPageEditorPart implements IPersistableEd
 		IVariableManager man = (IVariableManager)getAdapter(IVariableManager.class);
 		if (man==null) return;
 		((IPlottingSystemSelection)man).setAll1DSelected(overide);
-	}
-
-	@Override
-	public String getFilePath() {
-		return EclipseUtils.getFilePath(getEditorInput());
 	}
 
 	@Override
