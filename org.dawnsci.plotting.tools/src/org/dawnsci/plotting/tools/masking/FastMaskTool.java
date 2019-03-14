@@ -24,6 +24,8 @@ import org.eclipse.dawnsci.analysis.api.persistence.IPersistentFile;
 import org.eclipse.dawnsci.analysis.api.roi.IROI;
 import org.eclipse.dawnsci.analysis.dataset.mask.MaskCircularBuffer;
 import org.eclipse.dawnsci.analysis.dataset.roi.CircularROI;
+import org.eclipse.dawnsci.analysis.dataset.roi.LinearROI;
+import org.eclipse.dawnsci.analysis.dataset.roi.RectangularROI;
 import org.eclipse.dawnsci.analysis.dataset.roi.RingROI;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.region.IROIListener;
@@ -62,6 +64,7 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Spinner;
 import org.eclipse.swt.widgets.Text;
 
 import uk.ac.diamond.scisoft.analysis.io.NexusDiffractionCalibrationReader;
@@ -88,6 +91,7 @@ public class FastMaskTool extends AbstractToolPage {
 	public FastMaskTool() {
 		regionTypes = new ArrayList<>();
 		regionTypes.add(new NamedRegionType("Box", RegionType.BOX));
+		regionTypes.add(new NamedRegionType("Line", RegionType.LINE));
 		regionTypes.add(new NamedRegionType("Sector", RegionType.SECTOR));
 		regionTypes.add(new NamedRegionType("Polygon", RegionType.POLYGON));
 		regionTypes.add(new NamedRegionType("X-Axis", RegionType.XAXIS));
@@ -195,10 +199,20 @@ public class FastMaskTool extends AbstractToolPage {
 				if (imageTrace != null) {
 					IDataset data = imageTrace.getData();
 
-					final IROI roi = evt.getROI();
+					IROI roi = evt.getROI();
+					
+					int thickness = maskRegionComposite.getLineThickness();
+					
+					if (roi instanceof LinearROI && thickness != 1) {
+						
+						roi = FastMaskTool.this.buildThickLine((LinearROI)roi, thickness);
+					}
 
+					final IROI froi = roi;
+					
+					
 					if (buffer == null) buffer = new MaskCircularBuffer(data.getShape());
-					Runnable r = () -> buffer.maskROI(roi);
+					Runnable r = () -> buffer.maskROI(froi);
 
 					job.setRunnable(r);
 					job.schedule();
@@ -642,11 +656,24 @@ public class FastMaskTool extends AbstractToolPage {
 		
 	}
 	
+	private IROI buildThickLine(LinearROI lroi, int thickness) {
+		double angle = lroi.getAngle();
+		
+		RectangularROI rroi = new RectangularROI();
+		rroi.setAngle(lroi.getAngle());
+		rroi.setLengths(lroi.getLength(), thickness);
+		double[] point = lroi.getPoint();
+		rroi.setPoint(new double[] {point[0]+Math.sin(angle)*(thickness/2.0), point[1] - Math.cos(angle)*(thickness/2.0)});
+		
+		return rroi;
+	}
+	
 	private class MaskRegionComposite extends Composite {
 
 		private ROIEditTable roiEditTable;
 		private AtomicReference<IRegion> regionRef;
 		private IROIListener roiListener;
+		private Spinner lineThickness;
 		
 		public MaskRegionComposite(Composite parent, int style) {
 			super(parent, style);
@@ -668,11 +695,11 @@ public class FastMaskTool extends AbstractToolPage {
 			};
 			this.setLayout(new FillLayout());
 			Group group = new Group(this, SWT.NONE);
-			group.setLayout(new GridLayout(3, false));
+			group.setLayout(new GridLayout(4, false));
 			group.setText("Draw Regions");
 			
 			Combo combo = new Combo(group, SWT.READ_ONLY);
-			combo.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+			combo.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false,2,1));
 			String[] array = regionTypes.stream().map(r -> r.name).toArray(String[]::new);
 			combo.setItems(array);
 			combo.select(0);
@@ -727,9 +754,19 @@ public class FastMaskTool extends AbstractToolPage {
 						if (buffer == null) buffer = new MaskCircularBuffer(data.getShape());
 						final Collection<IRegion> regions = getPlottingSystem().getRegions();
 						
+						final int thickness = maskRegionComposite.getLineThickness();
+						
 						Runnable r = () -> {for (IRegion re: regions) {
-							buffer.maskROI(re.getROI());
-							};
+							
+							IROI roi = re.getROI();
+							
+							if (roi instanceof LinearROI && thickness != 1) {
+								
+								roi = buildThickLine((LinearROI)roi, thickness);
+							}
+							
+							buffer.maskROI(roi);
+							}
 						};
 							
 						job.setRunnable(r);
@@ -740,6 +777,16 @@ public class FastMaskTool extends AbstractToolPage {
 				
 
 			});
+			
+			Label tlabel = new Label(group, SWT.None);
+			tlabel.setText("Line Thickness");
+			tlabel.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
+			
+			lineThickness = new Spinner(group, SWT.BORDER);
+			lineThickness.setMinimum(1);
+			lineThickness.setMaximum(10000);
+			lineThickness.setSelection(1);
+			lineThickness.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, false, false));
 			
 			Button b4 = new Button(group, SWT.CHECK);
 			b4.setText("Paint on region drag");
@@ -765,7 +812,7 @@ public class FastMaskTool extends AbstractToolPage {
 
 			});
 			Composite editComposite = new Composite(group, SWT.None);
-			editComposite.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false,3,1));
+			editComposite.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false,4,1));
 			editComposite.setLayout(new GridLayout(2, false));
 			roiEditTable = new ROIEditTable();
 			roiEditTable.createPartControl(editComposite);
@@ -778,9 +825,10 @@ public class FastMaskTool extends AbstractToolPage {
 			regionRef.set(region);
 			roiEditTable.setRegion(roi, region.getRegionType(), region.getCoordinateSystem());
 			roiEditTable.getTableViewer().refresh();
-//			this.roiViewer.setRegion(region.getROI(), region.getRegionType(), region.getCoordinateSystem());
-
 		}
 		
+		public int getLineThickness() {
+			return lineThickness.getSelection();
+		}
 	}
 }
