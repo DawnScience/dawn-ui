@@ -25,8 +25,6 @@ import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import uk.ac.diamond.scisoft.analysis.peakfinding.IPeakFindingService;
 import org.dawnsci.common.widgets.spinner.FloatSpinner;
@@ -44,10 +42,8 @@ import org.dawnsci.plotting.tools.preference.PeakFindingConstants;
 public class PeakFindingPreferencePage extends PreferencePage implements IWorkbenchPreferencePage { 
 
 	public static final String ID = "org.dawb.workbench.plotting.PeakFindingPreferencePage";
-	
-	private static final Logger logger = LoggerFactory.getLogger(PeakFindingPreferencePage.class);
-	
-	private CCombo algorithmCombo; 	 	
+
+	private CCombo algorithmCombo;
 
 	private Composite contentPanel;
 	private StackLayout controlsLayout;

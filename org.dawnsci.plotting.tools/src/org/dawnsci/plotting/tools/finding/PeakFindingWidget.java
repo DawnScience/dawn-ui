@@ -20,8 +20,6 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Scale;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import uk.ac.diamond.scisoft.analysis.fitting.functions.IdentifiedPeak;
 import uk.ac.diamond.scisoft.analysis.peakfinding.IPeakFindingService;
@@ -33,8 +31,6 @@ import uk.ac.diamond.scisoft.analysis.peakfinding.PeakFindingData;
  * @author Dean P. Ottewell
  */
 public class PeakFindingWidget {
-	
-	private static final Logger logger = LoggerFactory.getLogger(PeakFindingWidget.class);
 
 	PeakFindingManager manager;
 
