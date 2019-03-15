@@ -45,4 +45,3 @@ Service-Component: OSGI-INF/*.xml
 Export-Package: org.dawnsci.processing.ui,
  org.dawnsci.processing.ui.model,
  org.dawnsci.processing.ui.slice
-Automatic-Module-Name: org.dawnsci.processing.ui
