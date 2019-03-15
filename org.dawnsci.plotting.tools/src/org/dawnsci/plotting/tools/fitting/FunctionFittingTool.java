@@ -52,6 +52,14 @@ import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.preference.IPreferenceStore;
+import org.eclipse.jface.util.IPropertyChangeListener;
+import org.eclipse.jface.util.PropertyChangeEvent;
+import org.eclipse.jface.viewers.ArrayContentProvider;
+import org.eclipse.jface.viewers.ColumnLabelProvider;
+import org.eclipse.jface.viewers.ComboViewer;
+import org.eclipse.jface.viewers.ISelectionChangedListener;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.MouseAdapter;
 import org.eclipse.swt.events.MouseEvent;
@@ -103,6 +111,7 @@ public class FunctionFittingTool extends AbstractToolPage implements IFunctionSe
 
 	private UpdateFitPlotJob updateFittedPlotJob;
 	private ITraceListener traceListener = new FunctionFittingTraceListener();
+	private IPropertyChangeListener optimizerListener;
 
 	private Text chiSquaredValueText;
 	private FunctionFittingWidget functionWidget;
@@ -252,6 +261,53 @@ public class FunctionFittingTool extends AbstractToolPage implements IFunctionSe
 			connectPlotSystemListeners();
 			compFunctionModified();
 		}
+		
+		ComboViewer optimizerCombo = new ComboViewer(composite);
+		optimizerCombo.setContentProvider(new ArrayContentProvider());
+		optimizerCombo.setLabelProvider(new ColumnLabelProvider());
+		
+		optimizerCombo.setInput(FittingConstants.FIT_ALGORITHMS.values());
+		
+		int algoId = prefs.getInt(FittingConstants.FIT_ALGORITHM);
+		FIT_ALGORITHMS algorithm = FIT_ALGORITHMS.fromId(algoId);
+		
+		optimizerCombo.setSelection(new StructuredSelection(algorithm));
+		
+		optimizerCombo.addSelectionChangedListener(new ISelectionChangedListener() {
+			
+			@Override
+			public void selectionChanged(SelectionChangedEvent event) {
+				Object el = event.getStructuredSelection().getFirstElement();
+				
+				if (el instanceof FIT_ALGORITHMS) {
+					prefs.setValue(FittingConstants.FIT_ALGORITHM, ((FIT_ALGORITHMS)el).ID);
+				}
+			}
+		});
+		
+		//need to add a property change listener to the preference, since the optimizer
+		//may also be changed from the preference page, and should be kept in sync
+		optimizerListener = new IPropertyChangeListener() {
+			
+			@Override
+			public void propertyChange(PropertyChangeEvent event) {
+				if (FittingConstants.FIT_ALGORITHM.equals(event.getProperty())) {
+					Object value = event.getNewValue();
+					if (value instanceof Integer && optimizerCombo.getStructuredSelection().getFirstElement() instanceof FIT_ALGORITHMS) {
+						FIT_ALGORITHMS current = (FIT_ALGORITHMS)optimizerCombo.getStructuredSelection().getFirstElement();
+						Integer id = (Integer)value;
+						if (!id.equals(current.ID)) {
+							FIT_ALGORITHMS fromId = FIT_ALGORITHMS.fromId(id);
+							if (fromId != null) {
+								optimizerCombo.setSelection(new StructuredSelection(fromId));
+								optimizerCombo.refresh();
+							}
+						}
+					}
+				}
+			}
+		};
+		
 		// track tool usage
 		super.createControl(parent);
 	}
@@ -287,7 +343,7 @@ public class FunctionFittingTool extends AbstractToolPage implements IFunctionSe
 	private void connectPlotSystemListeners() {
 		try {
 			getPlottingSystem().addTraceListener(traceListener);
-
+			if (optimizerListener != null) prefs.addPropertyChangeListener(optimizerListener);
 			region = getPlottingSystem().getRegion("fit_region");
 
 			if (region == null) {
@@ -330,6 +386,7 @@ public class FunctionFittingTool extends AbstractToolPage implements IFunctionSe
 			getPlottingSystem().removeTrace(fitTrace);
 
 		getPlottingSystem().removeTraceListener(traceListener);
+		if (optimizerListener != null) prefs.removePropertyChangeListener(optimizerListener);
 
 		super.deactivate();
 	}
