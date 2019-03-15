@@ -61,7 +61,7 @@ public class ProcessingOutputView extends ViewPart {
 			output.getPlotComposite().setLayoutData(outputPlotSubComp.getLayoutData());
 			
 			display = PlottingFactory.createPlottingSystem();
-			display.createPlotPart(displayPlotComp, "Display", null, PlotType.XY, null);
+			display.createPlotPart(displayPlotComp, "Display", null, PlotType.XY, this);
 		} catch (Exception e) {
 			logger.error("cannot create plotting system",e);
 		}

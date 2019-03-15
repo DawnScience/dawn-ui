@@ -22,6 +22,7 @@ import org.dawnsci.plotting.draw2d.swtxy.XYRegionGraph;
 import org.dawnsci.plotting.draw2d.swtxy.selection.AbstractSelectionRegion;
 import org.dawnsci.plotting.system.dialog.AddAxisDialog;
 import org.dawnsci.plotting.system.dialog.AddRegionDialog;
+import org.dawnsci.plotting.system.dialog.LineTracePreferenceDialog;
 import org.dawnsci.plotting.system.dialog.RemoveAxisDialog;
 import org.dawnsci.plotting.system.dialog.RemoveRegionCommand;
 import org.dawnsci.plotting.system.dialog.RemoveRegionDialog;
@@ -137,6 +138,7 @@ class LightWeightPlotActions {
 		actionBarManager.createToolDimensionalActions(ToolPageRole.ROLE_2D, "org.dawb.workbench.plotting.views.toolPageView.2D");
 		//actionBarManager.createToolDimensionalActions(ToolPageRole.ROLE_1D_AND_2D, "org.dawb.workbench.plotting.views.toolPageView.1D_and_2D");
 		createAxisActions(cmdService);
+		createPlotPreferenceActions(xyGraph);
 		createRegionActions(xyGraph);
 		createZoomActions(xyGraph, XYGraphFlags.COMBINED_ZOOM);
 		createUndoRedoActions(xyGraph);
@@ -404,6 +406,18 @@ class LightWeightPlotActions {
 		actionBarManager.addXYSeparator();
 		actionBarManager.addXYAction(logX);
 		actionBarManager.addXYAction(logY);
+		actionBarManager.addXYSeparator();
+	}
+
+	protected void createPlotPreferenceActions(final XYRegionGraph xyGraph) {
+		final Action plotPreference = new Action("Plot preferences...") {
+			public void run() {
+				LineTracePreferenceDialog changePreferences = new LineTracePreferenceDialog(Display.getDefault().getActiveShell(), viewer.getSystem());
+				changePreferences.open();
+			}
+		};
+		plotPreference.setToolTipText("Preferences for this plot only");
+		actionBarManager.addXYAction(plotPreference);
 		actionBarManager.addXYSeparator();
 	}
 

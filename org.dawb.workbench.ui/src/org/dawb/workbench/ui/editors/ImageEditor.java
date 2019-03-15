@@ -23,6 +23,8 @@ import org.eclipse.dawnsci.plotting.api.tool.IToolPageSystem;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IEditorSite;
+import org.eclipse.ui.IMemento;
+import org.eclipse.ui.IPersistableEditor;
 import org.eclipse.ui.IReusableEditor;
 import org.eclipse.ui.IShowEditorInput;
 import org.eclipse.ui.PartInitException;
@@ -32,13 +34,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 
-public class ImageEditor extends MultiPageEditorPart implements IReusableEditor, IShowEditorInput, ITitledEditor  {
+public class ImageEditor extends MultiPageEditorPart implements IPersistableEditor, IReusableEditor, IShowEditorInput, ITitledEditor  {
 
 	public static final String ID = "org.dawb.workbench.editors.ImageEditor"; //$NON-NLS-1$
 
 	private static final Logger logger = LoggerFactory.getLogger(ImageEditor.class);
 
 	private PlotDataEditor plotDataEditor;
+
+	private IMemento memento;
 
 
 	
@@ -102,6 +106,7 @@ public class ImageEditor extends MultiPageEditorPart implements IReusableEditor,
 
 			if(!dataFirst) {
 				this.plotDataEditor = new PlotDataEditor(PlotType.IMAGE, this);
+				plotDataEditor.getPlottingSystem().restorePreferences(memento);
 				addPage(index, plotDataEditor,       getEditorInput());
 				setPageText(index, "Image");
 				index++;
@@ -185,6 +190,16 @@ public class ImageEditor extends MultiPageEditorPart implements IReusableEditor,
 
 	@Override
 	public void showEditorInput(IEditorInput editorInput) {
-		setInput(editorInput);		
+		setInput(editorInput);
+	}
+
+	@Override
+	public void restoreState(IMemento memento) {
+		this.memento = memento;
+	}
+
+	@Override
+	public void saveState(IMemento memento) {
+		plotDataEditor.getPlottingSystem().savePreferences(memento);
 	}
 }

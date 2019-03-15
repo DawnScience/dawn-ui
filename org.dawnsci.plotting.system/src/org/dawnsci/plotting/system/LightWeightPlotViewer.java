@@ -1010,6 +1010,7 @@ public class LightWeightPlotViewer<T> extends AbstractPlottingViewer<T> implemen
 	protected ILineTrace createLineTrace(String traceName) {
 		final LineTrace   trace    = new LineTrace(traceName);
 		final LineTraceImpl wrapper = new LineTraceImpl(getSystem(), trace);
+		system.getLineTracePreferences().applyPreferences(wrapper);
 		return wrapper;
 	}
 
@@ -1101,10 +1102,6 @@ public class LightWeightPlotViewer<T> extends AbstractPlottingViewer<T> implemen
 			LightWeightDataProvider traceDataProvider = new LightWeightDataProvider(evt.getXData(), evt.getYData());
 
 			//create the trace
-			if (traceDataProvider.hasErrors()) {
-				trace.setErrorBarEnabled(PlottingSystemActivator.getPlottingPreferenceStore().getBoolean(PlottingConstants.GLOBAL_SHOW_ERROR_BARS));
-				trace.setErrorBarColor(ColorConstants.red);
-			}
 			trace.init(xAxis, yAxis, traceDataProvider);
 
 			if (y.getName()!=null && !"".equals(y.getName())) {
@@ -1112,8 +1109,12 @@ public class LightWeightPlotViewer<T> extends AbstractPlottingViewer<T> implemen
 				trace.setInternalName(y.getName());
 			}
 
+			system.getLineTracePreferences().applyPreferences(wrapper);
+			if (traceDataProvider.hasErrors()) {
+				trace.setErrorBarColor(ColorConstants.red);
+			}
+
 			//set trace property
-			trace.setPointStyle(org.eclipse.nebula.visualization.xygraph.figures.Trace.PointStyle.NONE);
 			int index = system.getTraces().size()+iplot-1;
 			if (index<0) index=0;
 			final Color plotColor = ColorUtility.getSwtColour(colorMap!=null?colorMap.values():null, index);

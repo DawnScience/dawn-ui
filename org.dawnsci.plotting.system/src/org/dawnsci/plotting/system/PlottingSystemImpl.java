@@ -65,6 +65,7 @@ import org.eclipse.dawnsci.plotting.api.trace.ITrace;
 import org.eclipse.dawnsci.plotting.api.trace.ITraceListener;
 import org.eclipse.dawnsci.plotting.api.trace.IVectorTrace;
 import org.eclipse.dawnsci.plotting.api.trace.IVolumeRenderTrace;
+import org.eclipse.dawnsci.plotting.api.trace.LineTracePreferences;
 import org.eclipse.dawnsci.plotting.api.trace.TraceEvent;
 import org.eclipse.draw2d.Figure;
 import org.eclipse.draw2d.IFigure;
@@ -77,7 +78,6 @@ import org.eclipse.jface.action.ActionContributionItem;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IContributionItem;
 import org.eclipse.jface.action.ToolBarManager;
-import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.nebula.visualization.xygraph.figures.Trace;
 import org.eclipse.swt.SWT;
@@ -170,6 +170,8 @@ public class PlottingSystemImpl<T> extends AbstractPlottingSystem<T> {
 
 	private boolean containerOverride = false;
 
+	private LineTracePreferences lineTracePrefs;
+
 	@Override
 	public void createPlotPart(final T              container,
 							   final String         plotName,
@@ -186,6 +188,7 @@ public class PlottingSystemImpl<T> extends AbstractPlottingSystem<T> {
 		} else {
 			throw new IllegalArgumentException("Cannot deal with plots of type "+container.getClass());
 		}
+
 		// We make the viewerless plotting system before the viewer so that
 		// any macro listener can import numpy.
 		try {
@@ -202,6 +205,15 @@ public class PlottingSystemImpl<T> extends AbstractPlottingSystem<T> {
 				PlottingFactory.notityPlottingSystemCreated(plotName, PlottingSystemImpl.this);
 			}
 		});
+	}
+
+	@Override
+	public LineTracePreferences getLineTracePreferences() {
+		if (lineTracePrefs == null) {
+			lineTracePrefs = new LineTracePreferences(PlottingSystemActivator.getPlottingPreferenceStore(), getMemento());
+		}
+
+		return lineTracePrefs;
 	}
 
 	private void createFigurePlotPart(final IFigure container,
@@ -710,16 +722,15 @@ public class PlottingSystemImpl<T> extends AbstractPlottingSystem<T> {
 										      final IProgressMonitor      monitor) {
 
 		// Switch off error bars if very many plots.
-		IPreferenceStore store = PlottingSystemActivator.getPlottingPreferenceStore();
 		
 		if (traceClazz != ILineTrace.class) {
 			switchPlottingType(ILineTrace.class);
 		}
 
-		boolean errorBarEnabled = store.getBoolean(PlottingConstants.GLOBAL_SHOW_ERROR_BARS);
+		boolean errorBarEnabled = getLineTracePreferences().getBoolean(PlottingConstants.GLOBAL_SHOW_ERROR_BARS);
 		Collection<ITrace> existing = getTraces(ILineTrace.class);
 		int traceCount = ysIn.size() + (existing!=null ? existing.size() : 0);
-		if (errorBarEnabled && traceCount >= store.getInt(PlottingConstants.AUTO_HIDE_ERROR_SIZE)) errorBarEnabled = false;
+		if (errorBarEnabled && traceCount >= PlottingSystemActivator.getPlottingPreferenceStore().getInt(PlottingConstants.AUTO_HIDE_ERROR_SIZE)) errorBarEnabled = false;
 
 		if (errorBarEnabled) {
 			// No error dataset there then false again
