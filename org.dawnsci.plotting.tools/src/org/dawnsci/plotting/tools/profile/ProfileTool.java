@@ -16,7 +16,6 @@ import java.util.Map;
 
 import org.dawb.common.ui.plot.tools.IDataReductionToolPage;
 import org.dawnsci.plotting.tools.Activator;
-import org.dawnsci.plotting.tools.reduction.DataReductionToolPageUtils;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -47,7 +46,6 @@ import org.eclipse.dawnsci.plotting.api.trace.TraceEvent;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.Separator;
-import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.ui.IActionBars;

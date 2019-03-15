@@ -18,7 +18,6 @@ import org.eclipse.dawnsci.plotting.api.axis.IAxisListener;
 import org.eclipse.dawnsci.plotting.api.axis.ICoordinateSystem;
 import org.eclipse.dawnsci.plotting.api.axis.ICoordinateSystemListener;
 import org.eclipse.dawnsci.plotting.api.trace.IImageTrace;
-import org.eclipse.draw2d.geometry.Point;
 
 public class RegionCoordinateSystem implements ICoordinateSystem, IAxisListener {
 
