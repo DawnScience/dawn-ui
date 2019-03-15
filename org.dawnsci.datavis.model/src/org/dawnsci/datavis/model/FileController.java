@@ -85,10 +85,10 @@ public class FileController implements IFileController {
 	 */
 	public List<String> loadFiles(String[] paths, IProgressService progressService, boolean addToRecentPlaces) {
 		
-		FileLoadingRunnable runnable = new FileLoadingRunnable(loadedFiles, listeners, paths, fileInitialiser);
+		FileLoadingRunnable runnable = new FileLoadingRunnable(loadedFiles, listeners, paths, fileInitialiser, addToRecentPlaces);
 		
 		if (progressService == null) {
-			runnable.run(null, addToRecentPlaces);
+			runnable.run(null);
 		} else {
 			try {
 				progressService.busyCursorWhile(runnable);
@@ -291,21 +291,20 @@ public class FileController implements IFileController {
 		private final String[] paths;
 		private final List<String> failedPaths;
 		private final ILoadedFileInitialiser initer;
+		private final boolean addToRecentPlaces;
 		
-		public FileLoadingRunnable(LoadedFiles files, Set<FileControllerStateEventListener> listeners, String[] paths, ILoadedFileInitialiser initer) {
+		public FileLoadingRunnable(LoadedFiles files, Set<FileControllerStateEventListener> listeners, String[] paths, ILoadedFileInitialiser initer, boolean addToRecentPlaces) {
 			this.lFiles = files;
 			this.fListeners = listeners;
 			this.paths = paths;
 			this.initer = initer;
+			this.addToRecentPlaces = addToRecentPlaces;
 			failedPaths = new ArrayList<String>();
+			
 		}
 		
 		@Override
 		public void run(IProgressMonitor monitor) {
-			run(monitor, true);
-		}
-		
-		public void run(IProgressMonitor monitor, boolean addToRecentPlaces) {
 			
 			List<LoadedFile> files = new ArrayList<>();
 			

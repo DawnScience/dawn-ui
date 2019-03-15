@@ -89,7 +89,7 @@ public class FolderPreviewHandler extends AbstractHandler {
 							return;
 						}
 						Map<String,String[]> props = new HashMap<>();
-			    		props.put("paths", selectedFileNames);
+			    		props.put(PlottingEventConstants.MULTIPLE_FILE_PROPERTY, selectedFileNames);
 			    		admin.sendEvent(new Event(PlottingEventConstants.FILE_OPEN_EVENT, props));
 					}
 				});

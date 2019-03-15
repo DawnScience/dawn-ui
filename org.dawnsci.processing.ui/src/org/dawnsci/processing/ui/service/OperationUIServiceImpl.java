@@ -229,7 +229,7 @@ public class OperationUIServiceImpl implements IOperationUIService {
 					try {
 						runProcessing(metadata, path, monitor, operations, foutputType);
 						Map<String,String> props = new HashMap<>();
-						props.put("path", path);
+						props.put(PlottingEventConstants.SINGLE_FILE_PROPERTY, path);
 						EventAdmin eventAdmin = ServiceHolder.getEventAdmin();
 						eventAdmin.postEvent(new Event(PlottingEventConstants.FILE_OPEN_EVENT, props));
 					} catch (final Exception e) {

@@ -138,7 +138,7 @@ public class DataReductionWizard extends Wizard implements IExportWizard {
 							final EventAdmin eventAdmin = bundleContext.getService(bundleContext.getServiceReference(EventAdmin.class));
 							
 							Map<String,String> props = new HashMap<>();
-							props.put("path", context.getOutputPath());
+							props.put(PlottingEventConstants.SINGLE_FILE_PROPERTY, context.getOutputPath());
 							eventAdmin.postEvent(new Event(PlottingEventConstants.FILE_OPEN_EVENT, props));
 							break;
 						default:

@@ -151,7 +151,7 @@ public class RecentFoldersContributionFactory extends ExtensionContributionFacto
 			for (int i = 0; i < fileNames.length; i++) fileNames[i] = dialog.getFilterPath() + File.separator + fileNames[i];
 
 			Map<String,String[]> props = new HashMap<>();
-			props.put("paths", fileNames);
+			props.put(PlottingEventConstants.MULTIPLE_FILE_PROPERTY, fileNames);
 			admin.sendEvent(new Event(PlottingEventConstants.FILE_OPEN_EVENT, props));
 
 		}

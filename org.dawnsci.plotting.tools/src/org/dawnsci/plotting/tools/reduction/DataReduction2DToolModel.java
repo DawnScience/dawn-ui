@@ -202,7 +202,7 @@ class DataReduction2DToolModel extends DataReduction2DToolObservableModel {
 		String newFilePath = DataReduction2DToolHelper.getUniqueFilenameWithSuffixInDirectory(nexusFile, "reduced", dirToStoreReducedFiles);
 		exportToGenericNexusFile(newFilePath, imageTrace, rangeDataList, deletedIndices);
 		Map<String,String> props = new HashMap<>();
-		props.put("path", newFilePath);
+		props.put(PlottingEventConstants.SINGLE_FILE_PROPERTY, newFilePath);
 		EventAdmin eventAdmin = ServiceLoader.getEventAdmin();
 		eventAdmin.postEvent(new Event(PlottingEventConstants.FILE_OPEN_EVENT, props));
 	}

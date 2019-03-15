@@ -159,7 +159,7 @@ public class LoadedFilePart {
 				.map(File::getAbsolutePath)
 				.toArray(String[]::new);
 					
-			loadData(names);
+			loadData(names, true);
 			logger.debug("Loaded files using quickwidget");
 		}
 	}
@@ -392,11 +392,11 @@ public class LoadedFilePart {
 					}
 					
 					if (!paths.isEmpty()) {
-						loadData(paths.toArray(new String[paths.size()]));
+						loadData(paths.toArray(new String[paths.size()]), true);
 					}
 					
 				} else if (dropData instanceof String[]) {
-					loadData((String[])dropData);
+					loadData((String[])dropData,true);
 				} else if (dropData instanceof StructuredSelection) {
 					StructuredSelection ss = (StructuredSelection)dropData;
 					List<LoadedFile> lf = new ArrayList<LoadedFile>();
@@ -472,8 +472,8 @@ public class LoadedFilePart {
 
 	}
 	
-	private void loadData(String[] paths) {
-		List<String> loadFiles = FileControllerUtils.loadFiles(fileController,paths,(IProgressService) PlatformUI.getWorkbench().getService(IProgressService.class));
+	private void loadData(String[] paths, boolean addToHistory) {
+		List<String> loadFiles = fileController.loadFiles(paths, (IProgressService) PlatformUI.getWorkbench().getService(IProgressService.class), addToHistory);
 		
 		if (loadFiles != null && !loadFiles.isEmpty()) {
 			MessageDialog.openError(
@@ -534,15 +534,23 @@ public class LoadedFilePart {
 			return;
 		}
 
-		String[] paths = (String[]) data.getProperty("paths");
+		String[] paths = (String[]) data.getProperty(PlottingEventConstants.MULTIPLE_FILE_PROPERTY);
 		if (paths == null) {
-			String path = (String) data.getProperty("path");
+			String path = (String) data.getProperty(PlottingEventConstants.SINGLE_FILE_PROPERTY);
 			paths = new String[] { path };
 		}
 
-		if (data.getProperty("live_bean") != null) return;
+		if (data.getProperty(PlottingEventConstants.LIVE_BEAN_PROPERTY) != null) return;
 
-		loadData(paths);
+		boolean addToHistory = true;
+		
+		Object o = data.getProperty(PlottingEventConstants.ADD_TO_HISTORY_PROPERTY);
+		
+		if (o instanceof Boolean) {
+			addToHistory = (Boolean)o;
+		}
+		
+		loadData(paths, addToHistory);
 	}
 
 	@Inject

@@ -45,7 +45,7 @@ public class LiveFileServiceImpl extends AbstractLiveFileService implements ILiv
 		} else {
 			
 			Map<String,String[]> props = new HashMap<>();
-			props.put("paths", paths);
+			props.put(PlottingEventConstants.MULTIPLE_FILE_PROPERTY, paths);
 			
 			eventAdmin.sendEvent(new Event(PlottingEventConstants.FILE_OPEN_EVENT, props));
 			

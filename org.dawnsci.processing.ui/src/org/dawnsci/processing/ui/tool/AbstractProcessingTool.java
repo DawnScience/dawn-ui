@@ -488,7 +488,7 @@ public abstract class AbstractProcessingTool extends AbstractToolPage {
 					try {
 						runProcessing(parentMeta, path, monitor);
 						Map<String,String> props = new HashMap<>();
-						props.put("path", path);
+						props.put(PlottingEventConstants.SINGLE_FILE_PROPERTY, path);
 						EventAdmin eventAdmin = ServiceHolder.getEventAdmin();
 						eventAdmin.postEvent(new Event(PlottingEventConstants.FILE_OPEN_EVENT, props));
 						parentMeta.toString();

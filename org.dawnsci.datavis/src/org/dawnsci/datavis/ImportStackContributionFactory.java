@@ -59,7 +59,6 @@ public class ImportStackContributionFactory extends ExtensionContributionFactory
 					path = lf.iterator().next();
 				}
 				
-
 				search.add(new OpenFileDialogAction(path,admin));
 				search.add(new OpenFolderDialogAction(path,admin));
 				
@@ -114,9 +113,7 @@ public class ImportStackContributionFactory extends ExtensionContributionFactory
     		
     		String joined = FileJoining.autoFileJoiner(Arrays.asList(fileNames));
     		
-    		Map<String,String[]> props = new HashMap<>();
-    		props.put("paths", new String[] {joined});
-    		admin.sendEvent(new Event(PlottingEventConstants.FILE_OPEN_EVENT, props));
+    		sendFileName(joined, admin);
     		
 		}
 	}
@@ -144,11 +141,17 @@ public class ImportStackContributionFactory extends ExtensionContributionFactory
 	    		
 	    		String joined = FileJoining.autoFileJoiner(Arrays.asList(new String[] {open}));
 	    		
-	    		Map<String,String[]> props = new HashMap<>();
-	    		props.put("paths", new String[] {joined});
-	    		admin.sendEvent(new Event(PlottingEventConstants.FILE_OPEN_EVENT, props));
+	    		sendFileName(joined, admin);
+	    		
 			}
 		
 	}
+		
+		private void sendFileName(String joined, EventAdmin admin) {
+			Map<String,Object> props = new HashMap<>();
+    		props.put(PlottingEventConstants.MULTIPLE_FILE_PROPERTY, new String[] {joined});
+    		props.put(PlottingEventConstants.ADD_TO_HISTORY_PROPERTY, Boolean.FALSE);
+    		admin.sendEvent(new Event(PlottingEventConstants.FILE_OPEN_EVENT, props));
+		}
 
 }

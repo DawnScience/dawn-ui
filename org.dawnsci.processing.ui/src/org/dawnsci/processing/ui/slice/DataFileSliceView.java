@@ -381,9 +381,9 @@ public class DataFileSliceView extends ViewPart {
 						return;
 					}
 					
-					String[] paths = (String[]) event.getProperty("paths");
+					String[] paths = (String[]) event.getProperty(PlottingEventConstants.MULTIPLE_FILE_PROPERTY);
 					if (paths == null) {
-						String path = (String) event.getProperty("path");
+						String path = (String) event.getProperty(PlottingEventConstants.SINGLE_FILE_PROPERTY);
 						paths = new String[] { path };
 					}
 					

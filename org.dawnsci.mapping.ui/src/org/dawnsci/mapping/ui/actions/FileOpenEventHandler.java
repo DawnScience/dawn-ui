@@ -4,6 +4,7 @@ import org.dawnsci.mapping.ui.MappingPerspective;
 import org.dawnsci.mapping.ui.api.IMapFileController;
 import org.dawnsci.mapping.ui.datamodel.LiveDataBean;
 import org.dawnsci.mapping.ui.datamodel.MappedDataFileBean;
+import org.eclipse.dawnsci.plotting.api.PlottingEventConstants;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.PlatformUI;
 import org.osgi.framework.BundleContext;
@@ -49,7 +50,7 @@ public class FileOpenEventHandler implements EventHandler {
 
 		if (fm == null) return;
 		
-		String[] paths = (String[])event.getProperty("paths");
+		String[] paths = (String[])event.getProperty(PlottingEventConstants.MULTIPLE_FILE_PROPERTY);
 		
 		if (paths != null) {
 			fm.loadFiles(paths, null);
@@ -57,7 +58,7 @@ public class FileOpenEventHandler implements EventHandler {
 		}
 		
 		
-		String path = (String)event.getProperty("path");
+		String path = (String)event.getProperty(PlottingEventConstants.SINGLE_FILE_PROPERTY);
 
 		if (path == null) return;
 
@@ -77,8 +78,8 @@ public class FileOpenEventHandler implements EventHandler {
 			if (p instanceof MappedDataFileBean) fm.loadFile(path, (MappedDataFileBean)p, null);
 		}
 		
-		if (event.containsProperty("live_bean")) {
-			Object p = event.getProperty("live_bean");
+		if (event.containsProperty(PlottingEventConstants.LIVE_BEAN_PROPERTY)) {
+			Object p = event.getProperty(PlottingEventConstants.LIVE_BEAN_PROPERTY);
 			if (p instanceof LiveDataBean) fm.loadLiveFile(path, (LiveDataBean)p,null, true);
 			return;
 		}

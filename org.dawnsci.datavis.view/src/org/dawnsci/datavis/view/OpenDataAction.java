@@ -65,7 +65,7 @@ public class OpenDataAction extends Action {
 				final EventAdmin admin = Activator.getService(EventAdmin.class);
 				
 				Map<String,String[]> props = new HashMap<>();
-	    		props.put("paths", new String[] {loc});
+	    		props.put(PlottingEventConstants.MULTIPLE_FILE_PROPERTY, new String[] {loc});
 	    		admin.sendEvent(new Event(PlottingEventConstants.FILE_OPEN_EVENT, props));
 			}
 		}
