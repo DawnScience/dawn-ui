@@ -54,7 +54,7 @@ public class LoadedFile implements IDataObject, IDataFilePackage {
 	protected Set<String> signals;
 	private boolean selected = false;
 	private String labelName = "";
-	private String label = "";
+	private Dataset labelValue;
 
 	public LoadedFile(IDataHolder dataHolder) {
 		this.dataHolder = new AtomicReference<>(dataHolder.clone());
@@ -255,11 +255,12 @@ public class LoadedFile implements IDataObject, IDataFilePackage {
 	}
 
 	public String getLabel() {
-		return label;
+		if (labelValue == null) return "";
+		return labelValue.getString();
 	}
 
 	public void setLabel(String label) {
-		this.label = label;
+		labelValue = DatasetFactory.createFromObject(label);
 	}
 
 	public String getLabelName() {
@@ -280,16 +281,15 @@ public class LoadedFile implements IDataObject, IDataFilePackage {
 	public void setLabelName(String labelName) {
 		if (labelName == null) {
 			this.labelName = "";
-			this.label = "";
+			this.labelValue = null;
 			return;
 		}
 		this.labelName = labelName;
-		Dataset d = getLabelValue();
-		label = d == null ? "" : d.getString();
+		labelValue = getLabelValue(labelName);
 	}
 
 	public Dataset getLabelValue() {
-		return getLabelValue(labelName);
+		return labelValue;
 	}
 
 	public Dataset getLabelValue(String labelName) {
@@ -298,15 +298,28 @@ public class LoadedFile implements IDataObject, IDataFilePackage {
 
 			try {
 				Dataset slice = DatasetUtils.sliceAndConvertLazyDataset(l);
-				return slice.squeeze();
+				slice.squeeze();
+				
+				if (slice.getRank() == 0) {
+					return slice;
+				}
+				logger.warn("Label {} does not have rank 0", labelName);
+				return null;
 			} catch (Exception e) {
 				logger.error("Could not read label {}", labelName,e);
 			}
 		} else {
 			try {
 				Serializable metaValue = dataHolder.get().getMetadata().getMetaValue(labelName);
-				return metaValue == null ? null : DatasetFactory.createFromObject(metaValue.toString());
-
+				if (metaValue == null) return null;
+				Dataset d = DatasetFactory.createFromObject(metaValue);
+				d.squeeze();
+				if (d.getRank() == 0) {
+					return d;
+				}
+				logger.warn("Label {} does not have rank 0", labelName);
+				return null;
+				
 			} catch (MetadataException e) {
 				return null;
 			}

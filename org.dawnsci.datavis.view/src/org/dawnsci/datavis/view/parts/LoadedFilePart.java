@@ -42,6 +42,8 @@ import org.eclipse.e4.ui.workbench.UIEvents;
 import org.eclipse.e4.ui.workbench.modeling.EModelService;
 import org.eclipse.e4.ui.workbench.modeling.EPartService;
 import org.eclipse.e4.ui.workbench.modeling.ESelectionService;
+import org.eclipse.january.dataset.Dataset;
+import org.eclipse.january.dataset.StringDataset;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.layout.TableColumnLayout;
@@ -311,7 +313,7 @@ public class LoadedFilePart {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				if (sorter == null || !sorter.isThisColumn(labelColumn)) {
-					sorter = new CompareObject(labelColumn, (LoadedFile file) -> file.getLabel());
+					sorter = new CompareObject(labelColumn, (LoadedFile file) -> file.getLabelValue());
 				} else {
 					sorter.increment();
 				}
@@ -637,12 +639,12 @@ public class LoadedFilePart {
 	
 	private class CompareObject {
 		
-		private Function<? super LoadedFile, ? extends String> comparatorFunction;
+		private Function<? super LoadedFile, ? extends Object> comparatorFunction;
 		private Comparator<LoadedFile> comparator;
 		private TableViewerColumn column;
 		private int direction;
 		
-		public CompareObject(TableViewerColumn column, Function<? super LoadedFile, ? extends String> keyExtractor) {
+		public CompareObject(TableViewerColumn column, Function<? super LoadedFile, ? extends Object> keyExtractor) {
 			this.column = column;
 			this.comparatorFunction = keyExtractor;
 			this.comparator = createComparator();
@@ -687,9 +689,30 @@ public class LoadedFilePart {
 
 				@Override
 				public int compare(LoadedFile o1, LoadedFile o2) {
-					String s1 = comparatorFunction.apply(o1);
-					String s2 = comparatorFunction.apply(o2);
-					return VersionSort.versionCompare(s1,s2);
+					Object oc1 = comparatorFunction.apply(o1);
+					Object oc2 = comparatorFunction.apply(o2);
+					
+					if (oc1 == null && oc2 == null) return 0;
+					
+					if (oc1 == null) return -1;
+					if (oc2 == null) return 1;
+					
+					if (oc1 instanceof StringDataset || oc2 instanceof StringDataset) {
+						oc1 = ((Dataset)oc1).getString();
+						oc2 = ((Dataset)oc2).getString();
+					}
+					
+					if (oc1 instanceof Dataset && oc2 instanceof Dataset) {
+						double d1 = ((Dataset)oc1).getDouble();
+						double d2 = ((Dataset)oc2).getDouble();
+						return Double.compare(d1, d2);
+					}
+					
+					if (oc1 instanceof String && oc2 instanceof String) {
+						return VersionSort.versionCompare((String)oc1,(String)oc2);
+					}
+					
+					return 0; 
 				}
 			};
 		}
