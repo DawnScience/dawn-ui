@@ -46,6 +46,13 @@ import org.eclipse.january.dataset.IndexIterator;
 import org.eclipse.january.dataset.SliceND;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.layout.GridLayoutFactory;
+import org.eclipse.jface.viewers.ArrayContentProvider;
+import org.eclipse.jface.viewers.ColumnLabelProvider;
+import org.eclipse.jface.viewers.ComboViewer;
+import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.ISelectionChangedListener;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.wizard.IWizard;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.SWT;
@@ -70,12 +77,27 @@ import org.eclipse.swt.widgets.Text;
 import uk.ac.diamond.scisoft.analysis.io.NexusDiffractionCalibrationReader;
 
 public class FastMaskTool extends AbstractToolPage {
+	
+	public enum MaskRegionDragMode {
+		NO_ACTION("No Drag Action"),PAINT_ON_RELEASE("Paint on Release"),PAINT_ON_DRAG("Paint on Drag");
+		
+		private String name;
+		
+		private MaskRegionDragMode(String name) {
+			this.name = name;
+		}
+		
+		@Override
+		public String toString() {
+			return name;
+		}
+	}
 
 	private Composite control;
 	private MaskCircularBuffer buffer;
 	private List<NamedRegionType> regionTypes;
 	private FastMaskJob job;
-	private boolean paintMode = false;
+	private MaskRegionDragMode maskRegionDragMode = MaskRegionDragMode.NO_ACTION;
 	private AtomicReference<Double> lowerValue;
 	private AtomicReference<Double> upperValue;
 	
@@ -160,7 +182,7 @@ public class FastMaskTool extends AbstractToolPage {
 			
 			@Override
 			public void regionAdded(RegionEvent evt) {
-				if (paintMode) evt.getRegion().addROIListener(getROIListener());
+				if (!maskRegionDragMode.equals(MaskRegionDragMode.NO_ACTION)) evt.getRegion().addROIListener(getROIListener());
 				
 				IRegion region = (IRegion)evt.getSource();
 				maskRegionComposite.setROI(evt.getRegion().getROI(), region);
@@ -195,6 +217,24 @@ public class FastMaskTool extends AbstractToolPage {
 			@Override
 			public void roiDragged(ROIEvent evt) {
 				
+				if (maskRegionDragMode.equals(MaskRegionDragMode.PAINT_ON_DRAG)) {
+					paintRegion(evt);
+				}
+			}
+
+			@Override
+			public void roiChanged(ROIEvent evt) {
+				if (maskRegionDragMode.equals(MaskRegionDragMode.PAINT_ON_RELEASE)) {
+					paintRegion(evt);
+				}
+			}
+
+			@Override
+			public void roiSelected(ROIEvent evt) {
+				//do nothing
+			}
+			
+			private void paintRegion(ROIEvent evt) {
 				IImageTrace imageTrace = getImageTrace();
 				if (imageTrace != null) {
 					IDataset data = imageTrace.getData();
@@ -217,17 +257,6 @@ public class FastMaskTool extends AbstractToolPage {
 					job.setRunnable(r);
 					job.schedule();
 				}
-
-			}
-
-			@Override
-			public void roiChanged(ROIEvent evt) {
-				//Do nothing
-			}
-
-			@Override
-			public void roiSelected(ROIEvent evt) {
-				//do nothing
 			}
 
 		};
@@ -788,29 +817,38 @@ public class FastMaskTool extends AbstractToolPage {
 			lineThickness.setSelection(1);
 			lineThickness.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, false, false));
 			
-			Button b4 = new Button(group, SWT.CHECK);
-			b4.setText("Paint on region drag");
-			b4.addSelectionListener(new SelectionAdapter() {
-
+			ComboViewer comboMode = new ComboViewer(group, SWT.READ_ONLY);
+			comboMode.getCombo().setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+			comboMode.setContentProvider(new ArrayContentProvider());
+			comboMode.setLabelProvider(new ColumnLabelProvider());
+			comboMode.setInput(MaskRegionDragMode.values());
+			comboMode.addSelectionChangedListener(new ISelectionChangedListener() {
+				
 				@Override
-				public void widgetSelected(SelectionEvent e) {
-					paintMode = b4.getSelection();
-
+				public void selectionChanged(SelectionChangedEvent event) {
+					ISelection s = event.getSelection();
+					if (s.isEmpty()) return;
+					
+					if (s instanceof StructuredSelection && ((StructuredSelection)s).getFirstElement() instanceof MaskRegionDragMode) {
+						maskRegionDragMode = (MaskRegionDragMode)((StructuredSelection)s).getFirstElement();
+						
 						Collection<IRegion> regions = getPlottingSystem().getRegions();
 						IROIListener roiListener = getROIListener();
 						for (IRegion next : regions) {
 
-							if (paintMode) {
-								next.addROIListener(roiListener);
-							} else {
+							if (maskRegionDragMode.equals(MaskRegionDragMode.NO_ACTION)) {
 								next.removeROIListener(iroiListener);
+							} else {
+								next.addROIListener(roiListener);
 							}
 						}
-					
+					}
 				}
-
-
 			});
+			
+			comboMode.setSelection(new StructuredSelection(MaskRegionDragMode.NO_ACTION));
+			combo.redraw();
+					
 			Composite editComposite = new Composite(group, SWT.None);
 			editComposite.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false,4,1));
 			editComposite.setLayout(new GridLayout(2, false));
