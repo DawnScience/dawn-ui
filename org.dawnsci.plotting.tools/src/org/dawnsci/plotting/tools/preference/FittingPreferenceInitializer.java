@@ -39,7 +39,7 @@ public class FittingPreferenceInitializer extends AbstractPreferenceInitializer 
 		store.setDefault(FittingConstants.REAL_FORMAT,  "##0.#####");
 		store.setDefault(FittingConstants.FIT_QUALITY,  0.0001);
 		store.setDefault(FittingConstants.FIT_ALGORITHM,
-				FittingConstants.FIT_ALGORITHMS.APACHENELDERMEAD.ID);
+				FittingConstants.FIT_ALGORITHMS.APACHELEVENBERGMAQUARDT.ID);
 	}
 
 }
