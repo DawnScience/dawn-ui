@@ -14,6 +14,8 @@ import org.eclipse.january.dataset.Slice;
 
 public class SliceChangeEvent extends EventObject {
 
+	private static final long serialVersionUID = 2800379950521097329L;
+
 	private Slice[] slices;
 	
 	public SliceChangeEvent(Object source, Slice[] slice) {

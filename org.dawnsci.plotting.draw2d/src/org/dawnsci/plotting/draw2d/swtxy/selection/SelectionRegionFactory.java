@@ -20,8 +20,6 @@ import org.eclipse.dawnsci.plotting.api.region.IRegion.RegionType;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IContributionManager;
 import org.eclipse.jface.action.Separator;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Class giving access to selection regions.
@@ -30,8 +28,6 @@ import org.slf4j.LoggerFactory;
  *
  */
 public class SelectionRegionFactory {
-	
-	private static Logger logger = LoggerFactory.getLogger(SelectionRegionFactory.class);
 
 	private static final Collection<RegionType> SUPPORTED_REGIONS;
 	static {

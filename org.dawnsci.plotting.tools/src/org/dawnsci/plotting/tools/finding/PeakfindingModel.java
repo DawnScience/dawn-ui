@@ -14,8 +14,6 @@ import java.util.List;
 import org.dawnsci.plotting.tools.Activator;
 import org.eclipse.dawnsci.analysis.api.processing.model.AbstractOperationModel;
 import org.eclipse.january.dataset.IDataset;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import uk.ac.diamond.scisoft.analysis.fitting.functions.IdentifiedPeak;
 import uk.ac.diamond.scisoft.analysis.optimize.IOptimizer;
@@ -30,8 +28,6 @@ import uk.ac.diamond.scisoft.analysis.peakfinding.IPeakFindingService;
  */
 public class PeakfindingModel extends AbstractOperationModel {
 
-	private static final Logger logger = LoggerFactory.getLogger(PeakFindingManager.class);
-	
 	List<IdentifiedPeak> peaksId = null;
 	
 	IDataset xdata;
