@@ -83,7 +83,13 @@ public class MappedDataView extends ViewPart {
 		final IWorkbenchPage page = getSite().getPage();
 		page.findView(MappingPerspective.MAPPING_PLOT_ID);
 		page.findView(MappingPerspective.SPECTRUM_PLOT_ID);
-
+		boolean initPlots = plotManager.initPlots();
+		
+		if (!initPlots) {
+			//should happen but may not be fatal...
+			logger.warn("Mapping plot systems could not be initialised");
+		}
+		
 		final Composite searchComposite = new Composite(parent, SWT.NONE);
 		searchComposite.setLayout(new GridLayout(2, false));
 		final Label searchLabel = new Label(searchComposite, SWT.NONE);

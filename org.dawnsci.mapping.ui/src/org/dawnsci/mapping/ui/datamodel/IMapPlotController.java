@@ -19,5 +19,7 @@ public interface IMapPlotController {
 	public HighAspectImageDisplay getHighAspectImageDisplayMode();
 
 	public void setHighAspectImageDisplayMode(HighAspectImageDisplay highAspectImageDisplayMode);
+	
+	public boolean initPlots();
 
 }

@@ -1078,4 +1078,9 @@ public class MapPlotManager implements IMapPlotController{
 		
 		return null;
 	}
+
+	@Override
+	public boolean initPlots() {
+		return plotsReady();
+	}
 }
