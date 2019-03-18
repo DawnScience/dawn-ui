@@ -1,6 +1,8 @@
 package org.dawnsci.mapping.ui.wizards;
 
 import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.dawnsci.mapping.ui.datamodel.MapBean;
 import org.dawnsci.mapping.ui.datamodel.MappedBlockBean;
@@ -33,6 +35,10 @@ public class LegacyMapBeanBuilder {
 	private static final String I05ENERGIES = "energies";
 	private static final String I05LOCATION = "location";
 	public static final String I05CHECK = "/entry1/instrument/analyser/cps";
+	public static final String I05DEMAND = "demand";
+	public static final String I05VOLTAGE = "voltage";
+	public static final String I05RESISTANCE = "resistance";
+	public static final String I05CURRENT = "current";
 	
 	public static final String I22SAXCHECK = "/entry1/detector/data";
 	public static final String I22SAX = "/entry1/detector";
@@ -205,7 +211,10 @@ public static MappedDataFileBean buildBeani08Energyin2016(Tree tree) {
 			if (!gn.containsDataNode(I05ANGLES) && !gn.containsDataNode(I05LOCATION)) return null;
 			if (!gn.containsDataNode(I05ENERGIES)) return null;
 			
-			String[] xyAxesNames = getXYAxesNames(gn);
+			Set<String> ignore = new HashSet<String>();
+			ignore.add(I05DEMAND);
+			
+			String[] xyAxesNames = getXYAxesNames(gn,ignore);
 			
 			if (xyAxesNames == null) return null;
 			
@@ -231,15 +240,24 @@ public static MappedDataFileBean buildBeani08Energyin2016(Tree tree) {
 			mb.setParent(I05ANALYSER + Node.SEPARATOR + I05DATA);
 			fb.addMap(mb);
 			fb.setScanRank(2);
-
+			
+			String[] others = new String[] {I05VOLTAGE, I05CURRENT, I05RESISTANCE};
+			
+			for (String o : others) {
+				if (gn.containsDataNode(o)) {
+					MapBean mb1 = new MapBean();
+					mb1.setName(I05ANALYSER + Node.SEPARATOR + o);
+					mb1.setParent(I05ANALYSER + Node.SEPARATOR + o);
+					fb.addMap(mb1);
+				}
+			}
 		}
-
 		
 		if (fb!= null && !fb.checkValid()) fb = null;
 		return fb;
 	}
 	
-	private static String[] getXYAxesNames(GroupNode gn) {
+	private static String[] getXYAxesNames(GroupNode gn, Set<String> ignore) {
 		
 		String yAxis = null;
 		String xAxis = null;
@@ -247,6 +265,10 @@ public static MappedDataFileBean buildBeani08Energyin2016(Tree tree) {
 		Collection<String> names = gn.getNames();
 		
 		for (String name : names) {
+			
+			if (ignore != null && ignore.contains(name)) {
+				continue;
+			}
 			
 			if (gn.containsDataNode(name)) {
 				DataNode dataNode = gn.getDataNode(name);
@@ -362,7 +384,7 @@ public static MappedDataFileBean buildBeani08Energyin2016(Tree tree) {
 			GroupNode gn = (GroupNode)n;
 			DataNode dataNode = gn.getDataNode(I22data);
 			int rank = dataNode.getDataset().getRank();
-			String[] xyAxesNames = getXYAxesNames(gn);
+			String[] xyAxesNames = getXYAxesNames(gn, null);
 			
 			if (xyAxesNames == null) return null;
 			
