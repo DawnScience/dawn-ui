@@ -264,6 +264,8 @@ public class H5MultiEditor extends MultiPageEditorPart implements IPersistableEd
 
 	@Override
 	public void saveState(IMemento memento) {
-		dataSetEditor.getPlottingSystem().savePreferences(memento);
+		if (dataSetEditor != null) {
+			dataSetEditor.getPlottingSystem().savePreferences(memento);
+		}
 	}
 }
