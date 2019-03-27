@@ -81,17 +81,17 @@ public class EscapableSliceVisitor implements SliceVisitor {
 		SliceFromSeriesMetadata ssm = slice.getMetadata(SliceFromSeriesMetadata.class).get(0);
 
 		try {
-			for (IOperation op : series)
+			for (IOperation op : series) {
 				op.init();
+			}
 
 			for (IOperation<? extends IOperationModel, ? extends OperationData> i : series) {
-				
 				if (monitor != null && monitor.isCanceled()) {
 					logger.debug("Cancelled");
 					inputData = null;
 					return;
 				}
-				
+
 				OperationMetadataImpl operationMeta = new OperationMetadataImpl(null, fullSeries, i);
 				data.getData().setMetadata(operationMeta);
 				if (i instanceof IExportOperation) {

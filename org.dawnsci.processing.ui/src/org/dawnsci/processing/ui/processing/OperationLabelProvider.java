@@ -13,11 +13,13 @@ import org.eclipse.dawnsci.analysis.api.processing.OperationData;
 import org.eclipse.dawnsci.analysis.api.processing.model.IOperationModel;
 import org.eclipse.jface.viewers.DelegatingStyledCellLabelProvider.IStyledLabelProvider;
 import org.eclipse.jface.viewers.StyledString;
+import org.eclipse.jface.viewers.StyledString.Styler;
 import org.eclipse.richbeans.widgets.table.SeriesItemLabelProvider;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.graphics.TextStyle;
 import org.eclipse.swt.widgets.Display;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,21 +27,38 @@ import org.slf4j.LoggerFactory;
 final class OperationLabelProvider extends SeriesItemLabelProvider implements IStyledLabelProvider {
 
 	private static final Logger logger = LoggerFactory.getLogger(OperationLabelProvider.class);
+	private Styler styler;
 
 	public OperationLabelProvider(int column) {
 		super(column);
+		styler = new Styler() {
+			@Override
+			public void applyStyles(TextStyle textStyle) {
+				textStyle.strikeout = true;
+				Display d = Display.getDefault();
+				textStyle.background = d.getSystemColor(SWT.COLOR_TITLE_INACTIVE_BACKGROUND);
+				textStyle.foreground = d.getSystemColor(SWT.COLOR_TITLE_INACTIVE_FOREGROUND);
+			}
+		};
 	}
 
 	@Override
 	public StyledString getStyledText(Object element) {
 
-		if(!(element instanceof OperationDescriptor)) return new StyledString();
+		if (!(element instanceof OperationDescriptor)) return new StyledString();
 
+		OperationDescriptor des = (OperationDescriptor) element;
 		final StyledString ret = new StyledString(getText(element));
 		if (column==0) {
-			OperationDescriptor des = (OperationDescriptor)element;
 			ret.append("    ");
-	        ret.append(des.getCategoryLabel(), StyledString.DECORATIONS_STYLER);
+			ret.append(des.getCategoryLabel(), StyledString.DECORATIONS_STYLER);
+		}
+		try {
+			if (!des.isEnabled()) {
+				ret.setStyle(0, ret.length(), styler);
+			}
+		} catch (StringIndexOutOfBoundsException e) {
+			logger.error("Could not get operation from its descriptor", e);
 		}
 		return ret;
 	}
