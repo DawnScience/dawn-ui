@@ -821,6 +821,16 @@ public class PlottingActionBarManager implements IPlotActionSystem {
 	@Override
 	public void remove(String id) {
         //super.remove(id);
+		
+		IAction action;
+		Iterator<IAction> iterator = popupMenuActions.iterator();
+		while (iterator.hasNext()) {
+			action = iterator.next();
+			if (id != null && id.equals(action.getId())) {
+				iterator.remove();
+				return;
+			}
+		}
 
 		for (ActionType actionType : ActionType.values()) {
 
