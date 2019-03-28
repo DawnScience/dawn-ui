@@ -8,13 +8,14 @@ import org.dawnsci.common.widgets.spinner.FloatSpinner;
 import org.dawnsci.mapping.ui.MappingUtils;
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.dawnsci.analysis.api.roi.IROI;
-import org.eclipse.dawnsci.analysis.api.tree.Node;
 import org.eclipse.dawnsci.analysis.dataset.impl.function.MapToRotatedCartesian;
 import org.eclipse.dawnsci.analysis.dataset.roi.PointROI;
 import org.eclipse.dawnsci.analysis.dataset.roi.RectangularROI;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.PlotType;
 import org.eclipse.dawnsci.plotting.api.PlottingFactory;
+import org.eclipse.dawnsci.plotting.api.axis.IAxis;
+import org.eclipse.dawnsci.plotting.api.histogram.ImageServiceBean.ImageOrigin;
 import org.eclipse.dawnsci.plotting.api.region.IROIListener;
 import org.eclipse.dawnsci.plotting.api.region.IRegion;
 import org.eclipse.dawnsci.plotting.api.region.IRegion.RegionType;
@@ -26,6 +27,7 @@ import org.eclipse.january.MetadataException;
 import org.eclipse.january.dataset.Dataset;
 import org.eclipse.january.dataset.DatasetFactory;
 import org.eclipse.january.dataset.DatasetUtils;
+import org.eclipse.january.dataset.DoubleDataset;
 import org.eclipse.january.dataset.IDataset;
 import org.eclipse.january.dataset.LinearAlgebra;
 import org.eclipse.january.dataset.RGBDataset;
@@ -354,77 +356,8 @@ public class RectangleRegistrationDialog extends Dialog {
 		Dataset v = buildDataset(map);//map
 		Dataset x = buildDataset((RectangularROI)box.getROI());//image
 		if (x == null || v == null) return;
-		Dataset trans = LinearAlgebra.solveSVD(x, v);
-
-		double tX = trans.getDouble(2,0);
-		double tY = trans.getDouble(2,1);
 		
-		double sX = Math.hypot(trans.getDouble(0,0), trans.getDouble(0,1));
-		double sY = Math.hypot(trans.getDouble(1,0), trans.getDouble(1,1));
-		
-		double r = Math.toDegrees(Math.atan(trans.getDouble(0,1)/trans.getDouble(1,1)));
-		
-		int[] shape = image.getShape();
-		
-		Dataset xR = DatasetFactory.createRange(shape[1], Dataset.FLOAT64);
-		Dataset yR = DatasetFactory.createRange(shape[0], Dataset.FLOAT64);
-		
-		xR.imultiply(sX);
-		xR.iadd(tX);
-		
-		yR.imultiply(sY);
-		yR.iadd(tY);
-		
-		MapToRotatedCartesian mrc = new MapToRotatedCartesian(0, 0, shape[1], shape[0], r*-1);
-		
-		IDataset im;
-		
-		if (image instanceof RGBDataset) {
-			
-			RGBDataset rgb = (RGBDataset)image;
-			im = DatasetUtils.createCompoundDataset(RGBDataset.class, mrc.value(rgb.getRedView()).get(0),
-								mrc.value(rgb.getGreenView()).get(0),
-								mrc.value(rgb.getBlueView()).get(0));
-			
-			
-		} else {
-			List<Dataset> value = mrc.value(image);
-			im = value.get(0);
-		}
-		
-		logger.debug("XOffset: {}, YOffset: {}, XScale {}, YScale {},",tX,tY,sX,sY);
-		
-		registered = im;
-		try {
-			AxesMetadata mmd = map.getFirstMetadata(AxesMetadata.class);
-			String n0 = mmd.getAxis(0)[0].getName();
-			String n1 = mmd.getAxis(1)[0].getName();
-
-			String[] split = n0.split(Node.SEPARATOR);
-			yR.setName(split[split.length-1]);
-			
-			split = n1.split(Node.SEPARATOR);
-			xR.setName(split[split.length-1]);
-			
-			AxesMetadata ax;
-			ax = MetadataFactory.createMetadata(AxesMetadata.class, 2);
-			ax.addAxis(0, yR);
-			ax.addAxis(1, xR);
-			im.addMetadata(ax);
-			registered.addMetadata(ax);
-		} catch (MetadataException e) {
-			logger.error("Could not create axes metadata", e);
-		}
-		systemComposite.clear();
-		double[] range = MappingUtils.getGlobalRange(im,map);
-
-		IImageTrace image = MetadataPlotUtils.buildTrace("image",im, systemComposite);
-		image.setGlobalRange(range);
-		IImageTrace mapim = MetadataPlotUtils.buildTrace("map", map, systemComposite,scale.getSelection());
-		mapim.setGlobalRange(range);
-		systemComposite.addTrace(image);
-		systemComposite.addTrace(mapim);
-		
+		plotCompositeImage(x, v);
 	}
 	
 	
@@ -432,6 +365,12 @@ public class RectangleRegistrationDialog extends Dialog {
 		Dataset v = buildDataset(mapPoints);
 		Dataset x = buildDataset(imagePoints);
 		if (x == null || v == null) return;
+		
+		plotCompositeImage(x, v);
+	}
+	
+	private void plotCompositeImage(Dataset x, Dataset v) {
+		
 		Dataset trans = LinearAlgebra.solveSVD(x, v);
 
 		double tX = trans.getDouble(2,0);
@@ -444,8 +383,8 @@ public class RectangleRegistrationDialog extends Dialog {
 		
 		int[] shape = image.getShape();
 		
-		Dataset xR = DatasetFactory.createRange(shape[1], Dataset.FLOAT64);
-		Dataset yR = DatasetFactory.createRange(shape[0], Dataset.FLOAT64);
+		Dataset xR = DatasetFactory.createRange(DoubleDataset.class, shape[1]);
+		Dataset yR = DatasetFactory.createRange(DoubleDataset.class, shape[0]);
 		
 		xR.imultiply(sX);
 		xR.iadd(tX);
@@ -483,23 +422,34 @@ public class RectangleRegistrationDialog extends Dialog {
 		}
 		im.addMetadata(ax);
 		registered.addMetadata(ax);
+		
 		systemComposite.clear();
 		double[] range = MappingUtils.getGlobalRange(im,map);
 
 		IImageTrace image = MetadataPlotUtils.buildTrace("image",im, systemComposite);
 		image.setGlobalRange(range);
-		IImageTrace mapim = MetadataPlotUtils.buildTrace("map", map, systemComposite,120);
+		IImageTrace mapim = MetadataPlotUtils.buildTrace("map", map, systemComposite,scale.getSelection());
 		mapim.setGlobalRange(range);
 		systemComposite.addTrace(image);
 		systemComposite.addTrace(mapim);
+		IAxis xAxis = systemComposite.getSelectedXAxis();
+		if (xAxis != null) xAxis.setInverted(false);
 		
+		IAxis yAxis = systemComposite.getSelectedYAxis();
+		if (yAxis != null) yAxis.setInverted(true);
+		
+		image.getImageServiceBean().setTransposed(false);
+		image.getImageServiceBean().setOrigin(ImageOrigin.TOP_LEFT);
+		
+		mapim.getImageServiceBean().setTransposed(false);
+		mapim.getImageServiceBean().setOrigin(ImageOrigin.TOP_LEFT);
 	}
 	
 	private Dataset buildDataset(IRegion[] regions) {
 
 
 		try {
-			Dataset mat = DatasetFactory.ones(new int[]{4, 3},Dataset.FLOAT64);
+			Dataset mat = DatasetFactory.ones(DoubleDataset.class, new int[]{4, 3});
 			int[] pos = new int[2];
 
 			for (int i = 0; i < 4 ; i++) {
