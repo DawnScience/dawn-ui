@@ -415,7 +415,10 @@ public class MappedFileManager implements IMapFileController{
 						logger.error("Couldn't load data from {}", path);
 					}
 					
-					if (registrationHelper != null && im != null) registrationHelper.register(path, im);
+					if (registrationHelper != null && im != null) {
+						recentPlaces.addFiles(path);
+						registrationHelper.register(path, im);
+					}
 					
 					return;
 				}

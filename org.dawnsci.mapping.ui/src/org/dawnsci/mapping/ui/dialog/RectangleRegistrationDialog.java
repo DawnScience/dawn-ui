@@ -8,6 +8,7 @@ import org.dawnsci.common.widgets.spinner.FloatSpinner;
 import org.dawnsci.mapping.ui.MappingUtils;
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.dawnsci.analysis.api.roi.IROI;
+import org.eclipse.dawnsci.analysis.api.tree.Node;
 import org.eclipse.dawnsci.analysis.dataset.impl.function.MapToRotatedCartesian;
 import org.eclipse.dawnsci.analysis.dataset.roi.PointROI;
 import org.eclipse.dawnsci.analysis.dataset.roi.RectangularROI;
@@ -412,16 +413,27 @@ public class RectangleRegistrationDialog extends Dialog {
 		logger.debug("XOffset: {}, YOffset: {}, XScale {}, YScale {},",tX,tY,sX,sY);
 		
 		registered = im;
-		AxesMetadata ax = null;
+		
 		try {
-			ax = MetadataFactory.createMetadata(AxesMetadata.class, 2);
+			AxesMetadata mmd = map.getFirstMetadata(AxesMetadata.class);
+			String n0 = mmd.getAxis(0)[0].getName();
+			String n1 = mmd.getAxis(1)[0].getName();
+
+			String[] split = n0.split(Node.SEPARATOR);
+			yR.setName(split[split.length-1]);
+			
+			split = n1.split(Node.SEPARATOR);
+			xR.setName(split[split.length-1]);
+			
+			AxesMetadata ax = MetadataFactory.createMetadata(AxesMetadata.class, 2);
 			ax.addAxis(0, yR);
 			ax.addAxis(1, xR);
+			im.addMetadata(ax);
+			registered.addMetadata(ax);
+
 		} catch (MetadataException e) {
 			logger.error("Could not create axes metadata", e);
 		}
-		im.addMetadata(ax);
-		registered.addMetadata(ax);
 		
 		systemComposite.clear();
 		double[] range = MappingUtils.getGlobalRange(im,map);
