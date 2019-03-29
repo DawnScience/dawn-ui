@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 
 import org.dawnsci.common.widgets.dialog.FileSelectionDialog;
 import org.dawnsci.datavis.api.IFileOpeningController;
+import org.dawnsci.datavis.api.IRecentPlaces;
 import org.dawnsci.mapping.ui.api.IMapFileController;
 import org.dawnsci.mapping.ui.datamodel.AbstractMapData;
 import org.dawnsci.mapping.ui.datamodel.AssociatedImage;
@@ -259,11 +260,15 @@ public class MapActionUtils {
 			@Override
 			public void run() {
 				
+				IRecentPlaces places = Activator.getService(IRecentPlaces.class);
+				
+				String path = places.getCurrentDefaultDirectory() + File.separator + "image.nxs";
+				
 				FileSelectionDialog dialog = new FileSelectionDialog(Display.getDefault().getActiveShell());
 				dialog.setNewFile(true);
 				dialog.setFolderSelector(false);
 
-				dialog.setPath(System.getProperty("user.home")+ File.separator + "image.nxs");
+				dialog.setPath(path);
 			
 				dialog.create();
 				
