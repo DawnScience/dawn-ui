@@ -187,30 +187,4 @@ public class ZoomTool extends ProfileTool {
 			return null;
 		}
 	}
-	
-	@Override
-	public DataReductionInfo export(DataReductionSlice drslice) throws Exception {
-
-		final Collection<IRegion> regions = getPlottingSystem().getRegions();
-		
-		for (IRegion region : regions) {
-			if (!isRegionTypeSupported(region.getRegionType())) continue;
-			
-			final RectangularROI bounds = (RectangularROI)region.getROI();
-			if (bounds==null)        continue;
-			if (!region.isVisible()) continue;
-
-			final int yInc = bounds.getPoint()[1]<bounds.getEndPoint()[1] ? 1 : -1;
-			final int xInc = bounds.getPoint()[0]<bounds.getEndPoint()[0] ? 1 : -1;
-			
-			final Dataset slice = DatasetUtils.convertToDataset(drslice.getData().getSlice(new int[] { (int) bounds.getPoint()[1],   (int) bounds.getPoint()[0]    },
-											                       new int[] { (int) bounds.getEndPoint()[1],(int) bounds.getEndPoint()[0] },
-											                       new int[] {yInc, xInc}));
-			slice.setName(region.getName().replace(' ','_'));
-			
-			drslice.appendData(lazyWritables, slice, exportIndex);
-		}
-        return new DataReductionInfo(Status.OK_STATUS);
-
-	}
 }

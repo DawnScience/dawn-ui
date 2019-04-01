@@ -20,22 +20,20 @@ import org.dawb.common.ui.menu.MenuAction;
 import org.dawnsci.plotting.tools.Activator;
 import org.dawnsci.plotting.tools.ServiceLoader;
 import org.dawnsci.plotting.tools.utils.ToolUtils;
-import org.eclipse.core.runtime.Status;
 import org.eclipse.dawnsci.analysis.api.diffraction.DetectorProperties;
 import org.eclipse.dawnsci.analysis.api.diffraction.DiffractionCrystalEnvironment;
+import org.eclipse.dawnsci.analysis.api.metadata.IDiffractionMetadata;
+import org.eclipse.dawnsci.analysis.api.processing.IOperation;
 import org.eclipse.dawnsci.analysis.dataset.roi.SectorROI;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.region.IRegion;
 import org.eclipse.dawnsci.plotting.api.region.IRegion.RegionType;
 import org.eclipse.dawnsci.plotting.api.region.RegionUtils;
-import org.eclipse.dawnsci.plotting.api.trace.IImageTrace;
 import org.eclipse.january.dataset.Dataset;
 import org.eclipse.january.dataset.DatasetFactory;
 import org.eclipse.january.dataset.DatasetUtils;
 import org.eclipse.january.dataset.DoubleDataset;
 import org.eclipse.january.dataset.IDataset;
-import org.eclipse.dawnsci.analysis.api.metadata.IDiffractionMetadata;
-import org.eclipse.dawnsci.analysis.api.processing.IOperation;
 import org.eclipse.january.metadata.IMetadata;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
@@ -345,33 +343,6 @@ public class RadialProfileTool extends SectorProfileTool {
 	    } else {
 	    	return new Dataset[]{integral, null, ax, null};
 	    }
-	}
-
-	@Override
-	public DataReductionInfo export(DataReductionSlice slice) throws Exception {
-		
-		final IImageTrace   image   = getImageTrace();
-		final Collection<IRegion> regions = getPlottingSystem().getRegions();
-		
-		for (IRegion region : regions) {
-			if (!isRegionTypeSupported(region.getRegionType())) continue;
-			if (!region.isVisible())    continue;
-			if (!region.isUserRegion()) continue;
-			
-			final SectorROI sroi = (SectorROI)region.getROI();
-			Dataset[] profile = ROIProfile.sector(DatasetUtils.convertToDataset(slice.getData()), DatasetUtils.convertToDataset(image.getMask()), sroi, true, false, false);
-		
-			Dataset integral = profile[0];
-			integral.setName("radial_"+region.getName().replace(' ', '_'));     
-			slice.appendData(lazyWritables, integral, exportIndex);
-			
-		    if (profile.length>=3 && profile[2]!=null && sroi.hasSeparateRegions()) {
-				final Dataset reflection = profile[2];
-				reflection.setName("radial_sym_"+region.getName().replace(' ', '_'));     
-				slice.appendData(lazyWritables, reflection, exportIndex);
-		    }
-		}
-		return new DataReductionInfo(Status.OK_STATUS);
 	}
 	
 	private SectorROI getFullSector() {

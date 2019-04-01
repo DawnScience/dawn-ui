@@ -31,11 +31,9 @@ import org.eclipse.dawnsci.plotting.api.expressions.IVariableManager;
 import org.eclipse.dawnsci.slicing.api.SlicingFactory;
 import org.eclipse.dawnsci.slicing.api.data.ITransferableDataObject;
 import org.eclipse.dawnsci.slicing.api.editor.ISlicablePlottingPart;
-import org.eclipse.dawnsci.slicing.api.system.DimensionalEvent;
 import org.eclipse.dawnsci.slicing.api.system.DimensionalListener;
 import org.eclipse.dawnsci.slicing.api.system.ISliceSystem;
 import org.eclipse.jface.action.IAction;
-import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
@@ -106,11 +104,6 @@ public class PlotDataPage extends Page implements IAdaptable {
 				if (file!=null) dataSetComponent.setFileName(file.getName());
 			}
 			dataSetComponent.createPartControl(form, getSite().getActionBars());
-			
-			if (dataSetComponent.getDataReductionAction()!=null) {
-				getSite().getActionBars().getToolBarManager().add(dataSetComponent.getDataReductionAction());
-				getSite().getActionBars().getToolBarManager().add(new Separator("data.reduction.separator"));
-			}
 
 			final List<IAction> extras = new ArrayList<IAction>(7);
 			extras.addAll(dataSetComponent.getDimensionalActions());
@@ -172,18 +165,11 @@ public class PlotDataPage extends Page implements IAdaptable {
 			
 			this.sliceComponent = SlicingFactory.createSliceSystem("org.dawb.workbench.views.h5GalleryView");
 			sliceComponent.setPlottingSystem(this.dataSetComponent.getPlottingSystem());
-			sliceComponent.addCustomAction(dataSetComponent.getDataReductionAction());
 			sliceComponent.createPartControl(form);
 			sliceComponent.setVisible(false);
 			
 			getSite().setSelectionProvider(sliceComponent.getSelectionProvider());
 			
-			dataReductionDimensionalListener = new DimensionalListener() {
-				@Override
-				public void dimensionsChanged(DimensionalEvent evt) {
-					dataSetComponent.getDataReductionAction().setEnabled(dataSetComponent.isDataReductionToolActive());
-				}
-			};
 			sliceComponent.addDimensionalListener(dataReductionDimensionalListener);
 	
 			form.setWeights(new int[] {40, 60});

@@ -121,24 +121,4 @@ public class LineProfileTool extends ProfileTool {
 	protected RegionType getCreateRegionType() {
 		return RegionType.LINE;
 	}
-
-	
-	@Override
-	public DataReductionInfo export(DataReductionSlice slice) throws Exception {
-		
-		final IImageTrace   image   = getImageTrace();
-		final Collection<IRegion> regions = getPlottingSystem().getRegions();
-		
-		for (IRegion region : regions) {
-			if (!isRegionTypeSupported(region.getRegionType())) continue;
-			if (!region.isVisible())    continue;
-			if (!region.isUserRegion()) continue;
-			
-			Dataset[] profileData = ROIProfile.line(DatasetUtils.convertToDataset(slice.getData()), DatasetUtils.convertToDataset(image.getMask()), (LinearROI)region.getROI(), 1d, false);
-			final Dataset intensity = profileData[0];
-			intensity.setName(region.getName().replace(' ', '_'));
-			slice.appendData(lazyWritables, intensity, exportIndex);
-		}
-        return new DataReductionInfo(Status.OK_STATUS);
-	}
 }

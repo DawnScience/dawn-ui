@@ -199,12 +199,6 @@ public class BoxLineProfileTool extends ProfileTool implements IProfileToolPage 
 	}
 
 	@Override
-	public DataReductionInfo export(DataReductionSlice bean) throws Exception {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
 	public void setLineOrientation(boolean vertical) {
 		this.isVertical = vertical;
 	}
