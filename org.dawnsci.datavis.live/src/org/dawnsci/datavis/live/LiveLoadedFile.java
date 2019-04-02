@@ -64,10 +64,12 @@ public class LiveLoadedFile extends LoadedFile implements IRefreshable {
 		try {
 			IDataHolder rdh = ServiceManager.getRemoteDatasetService().createRemoteDataHolder(path, host, port, true);
 			Map<String, NodeLink> result = findNodes(rdh.getTree());
-			buildDataStructures(dh, result);
+			
 			if (result == null) {
 				return dh;
 			}
+			
+			buildDataStructures(rdh, result);
 			
 			return rdh;
 		} catch (RuntimeException e) {
