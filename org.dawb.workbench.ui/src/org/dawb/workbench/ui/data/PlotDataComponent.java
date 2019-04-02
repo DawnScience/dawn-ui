@@ -25,7 +25,6 @@ import java.util.regex.Pattern;
 
 import org.dawb.common.ui.DawbUtils;
 import org.dawb.common.ui.monitor.ProgressMonitorWrapper;
-import org.dawb.common.ui.plot.tools.IDataReductionToolPage;
 import org.dawb.common.ui.util.DialogUtils;
 import org.dawb.common.ui.util.EclipseUtils;
 import org.dawb.common.util.io.FileUtils;
@@ -38,7 +37,6 @@ import org.dawb.workbench.ui.editors.preference.EditorPreferencePage;
 import org.dawb.workbench.ui.transferable.TransferableDataObject;
 import org.dawnsci.conversion.ui.ConvertWizard;
 import org.dawnsci.plotting.AbstractPlottingSystem;
-import org.dawnsci.plotting.tools.reduction.DataReductionWizard;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
@@ -54,7 +52,6 @@ import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.dawnsci.analysis.api.io.IDataHolder;
 import org.eclipse.dawnsci.analysis.api.io.ILoaderService;
-import org.eclipse.dawnsci.hdf5.HDF5Utils;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystemSelection;
 import org.eclipse.dawnsci.plotting.api.PlotType;
@@ -63,15 +60,11 @@ import org.eclipse.dawnsci.plotting.api.expressions.IExpressionObject;
 import org.eclipse.dawnsci.plotting.api.expressions.IExpressionObjectService;
 import org.eclipse.dawnsci.plotting.api.expressions.IVariableManager;
 import org.eclipse.dawnsci.plotting.api.tool.IToolChangeListener;
-import org.eclipse.dawnsci.plotting.api.tool.IToolPage;
-import org.eclipse.dawnsci.plotting.api.tool.IToolPageSystem;
-import org.eclipse.dawnsci.plotting.api.tool.ToolChangeEvent;
 import org.eclipse.dawnsci.plotting.api.trace.ITraceListener;
 import org.eclipse.dawnsci.plotting.api.trace.TraceEvent;
 import org.eclipse.dawnsci.slicing.api.data.ITransferableDataManager;
 import org.eclipse.dawnsci.slicing.api.data.ITransferableDataObject;
 import org.eclipse.dawnsci.slicing.api.data.ITransferableDataService;
-import org.eclipse.dawnsci.slicing.api.system.DimsData;
 import org.eclipse.dawnsci.slicing.api.system.DimsDataList;
 import org.eclipse.dawnsci.slicing.api.system.ISliceSystem;
 import org.eclipse.dawnsci.slicing.api.util.SliceUtils;
@@ -178,7 +171,6 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 	private Composite                container;
 	private DataTableFilter               dataFilter;
 
-	private IAction                  dataReduction;
 	private ITraceListener           traceListener;
 	private ITraceListener           dataViewRefreshListener;
 	private IToolChangeListener      toolListener;
@@ -375,19 +367,7 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 			if (getPlottingSystem()!=null)
 				getPlottingSystem().addTraceListener(traceListener);
 			
-			if (dataReduction!=null) {
-				this.toolListener = new IToolChangeListener() {
-
-					@Override
-					public void toolChanged(ToolChangeEvent evt) {
-						if (dataReduction!=null) {
-							dataReduction.setEnabled(isDataReductionToolActive());
-						}
-					}
-				};
-				if (getAbstractPlottingSystem() != null)
-					getAbstractPlottingSystem().addToolChangeListener(toolListener);
-			}
+			
 			if (getAbstractPlottingSystem() != null)
 				getAbstractPlottingSystem().addPropertyChangeListener(new IPropertyChangeListener() {
 					@Override
@@ -538,11 +518,6 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 	public void setFocus() {
 		if (dataViewer!=null && !dataViewer.getControl().isDisposed()) {
 			dataViewer.getControl().setFocus();
-			
-			if (dataReduction!=null) {
-				dataReduction.setEnabled(isDataReductionToolActive());
-			}
-
 		}
 	}
 
@@ -602,31 +577,6 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 	    
 		final List<Object> rightClickActions = new ArrayList<Object>(11);
 	    createDimensionalActions(rightClickActions, false);
-
-	    PlotDataComponent.this.dataReduction = new Action("Data reduction...", Activator.getImageDescriptor("icons/data-reduction.png")) {
-			@Override
-			public void run() {
-				DataReductionWizard wiz=null;
-				try {
-					wiz = (DataReductionWizard)EclipseUtils.openWizard(DataReductionWizard.ID, false);
-				} catch (Exception e) {
-					logger.error("Cannot open wizard "+DataReductionWizard.ID, e);
-				}
-				wiz.setData(getFile(),
-						    getSelectionNames().get(0),
-						    (IDataReductionToolPage)getAbstractPlottingSystem().getActiveTool(),
-						    getSliceSet());
-				wiz.setSlice(getSliceSet(), getSliceData());
-				
-				// TODO Should be non modal, it takes a while.
-				WizardDialog wd = new  WizardDialog(Display.getDefault().getActiveShell(), wiz);
-				wd.setTitle(wiz.getWindowTitle());
-				wd.create();
-				wd.getShell().setSize(650, 800);
-				DialogUtils.centerDialog(Display.getDefault().getActiveShell(), wd.getShell());
-				wd.open();
-			}
-		};
 		
 		final Action copy = new Action("Copy selected data (it can then be pasted to another data list.)", Activator.getImageDescriptor("icons/copy.gif")) {
 			public void run() {
@@ -685,7 +635,7 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 			public void selectionChanged(SelectionChangedEvent event) {
 				final Object sel           = ((StructuredSelection)dataViewer.getSelection()).getFirstElement();
 				final ITransferableDataObject ob  = (ITransferableDataObject)sel;
-				updateActions(copy, paste, delete, export, dataReduction, ob, bars);
+				updateActions(copy, paste, delete, export, ob, bars);
 			}
 		});
 		
@@ -730,17 +680,10 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 				menuManager.add(delete);
 				menuManager.add(new Separator(getClass().getName()+".filter"));
 				
-				updateActions(copy, paste, delete, export, dataReduction, ob, null);
+				updateActions(copy, paste, delete, export, ob, null);
 
 				menuManager.add(new Separator(getClass().getName()+".export"));
 				menuManager.add(export);
-
-				if (HDF5Utils.isHDF5(getFileName())) {
-					menuManager.add(new Separator(getClass().getName()+"sep2"));
-					
-					dataReduction.setEnabled(false);
-					menuManager.add(dataReduction);
-				}
 				
 				menuManager.add(new Separator(getClass().getName()+".error"));
 				
@@ -795,13 +738,6 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 					public void run() {
 						PreferenceDialog pref = PreferencesUtil.createPreferenceDialogOn(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(), "org.edna.workbench.editors.preferencePage", null, null);
 						if (pref != null) pref.open();
-					}
-				});
-				
-				menuManager.addMenuListener(new IMenuListener() {			
-					@Override
-					public void menuAboutToShow(IMenuManager manager) {
-						if (dataReduction!=null) dataReduction.setEnabled(isDataReductionToolActive());
 					}
 				});
 			}
@@ -909,7 +845,6 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 								IAction paste, 
 								IAction delete, 
 								IAction export,
-								IAction dataReduction,
 			                     ITransferableDataObject ob,
 			                     IActionBars bars) {
 		
@@ -939,8 +874,6 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 			delete.setText("Delete");
 			delete.setEnabled(false);
 		}
-				
-		dataReduction.setEnabled(isDataReductionToolActive());
 
 		if (bars!=null) {
 			bars.getToolBarManager().update(true);
@@ -1014,11 +947,6 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 		return false;
 	} 
 
-	public IAction getDataReductionAction() {
-		
-		return dataReduction;
-	}
-	
 	protected DimsDataList getSliceData() {
 		final ISliceSystem system = (ISliceSystem)editor.getAdapter(ISliceSystem.class);
 		if (system!=null) return system.getDimsDataList();
@@ -1111,32 +1039,6 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 			}
 		}
 		return names;
-	}
-
-	public boolean isDataReductionToolActive() {
-		
-		if (HDF5Utils.isHDF5(getFileName()) || isSelectionReducible()) {
-			
-			IToolPageSystem toolSystem = (IToolPageSystem)getPlottingSystem().getAdapter(IToolPageSystem.class);
-			IToolPage tool = toolSystem.getActiveTool();
-			boolean probablyOk = tool!=null && tool instanceof IDataReductionToolPage;
-			
-			// Check for advanced axes
-			dataReduction.setText("Data reduction...");
-			if (probablyOk) {
-				final DimsDataList ddl = getSliceData();
-				if (ddl!=null) for (DimsData dd : ddl.iterable()) {
-					
-					if (dd.getPlotAxis().isAdvanced()) {
-						dataReduction.setText("Data reduction cannot be used with advanced axes.");
-						return false;
-					}
-				}
-			}
-			
-			return probablyOk;
-		}
-		return false;
 	}
 
 	/**

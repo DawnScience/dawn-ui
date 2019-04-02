@@ -14,12 +14,10 @@ import java.util.List;
 
 import org.dawnsci.plotting.tools.Activator;
 import org.dawnsci.plotting.tools.ServiceLoader;
-import org.eclipse.core.runtime.Status;
 import org.eclipse.dawnsci.analysis.api.processing.IOperation;
 import org.eclipse.dawnsci.analysis.dataset.roi.SectorROI;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.region.IRegion;
-import org.eclipse.dawnsci.plotting.api.trace.IImageTrace;
 import org.eclipse.january.dataset.Dataset;
 import org.eclipse.january.dataset.DatasetFactory;
 import org.eclipse.january.dataset.DatasetUtils;
@@ -112,33 +110,6 @@ public class AzimuthalProfileTool extends SectorProfileTool {
 	    } else {
 	    	return new Dataset[]{integral, null};
 	    }
-	}
-
-	@Override
-	public DataReductionInfo export(DataReductionSlice slice) throws Exception {
-		
-		final IImageTrace   image   = getImageTrace();
-		final Collection<IRegion> regions = getPlottingSystem().getRegions();
-		
-		for (IRegion region : regions) {
-			if (!isRegionTypeSupported(region.getRegionType())) continue;
-			if (!region.isVisible())    continue;
-			if (!region.isUserRegion()) continue;
-			
-			final SectorROI sroi = (SectorROI)region.getROI();
-			final Dataset[] profile = ROIProfile.sector(DatasetUtils.convertToDataset(slice.getData()), DatasetUtils.convertToDataset(image.getMask()), sroi, false, true, false);
-		
-			Dataset integral = profile[1];
-			integral.setName("azimuthal_"+region.getName().replace(' ', '_'));     
-			slice.appendData(lazyWritables, integral, exportIndex);
-			
-		    if (profile.length>=4 && profile[3]!=null && sroi.hasSeparateRegions()) {
-				final Dataset reflection = profile[3];
-				reflection.setName("azimuthal_sym_"+region.getName().replace(' ', '_'));     
-				slice.appendData(lazyWritables, reflection, exportIndex);
-		    }
-		}
-		return new DataReductionInfo(Status.OK_STATUS);
 	}
 	
 	protected Action getReductionAction() {

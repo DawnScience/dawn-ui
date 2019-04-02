@@ -14,27 +14,20 @@ import java.io.FileOutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.dawb.common.ui.image.IconUtils;
 import org.dawb.common.ui.menu.CheckableActionGroup;
 import org.dawb.common.ui.menu.MenuAction;
-import org.dawb.common.ui.plot.tools.IDataReductionToolPage;
 import org.dawb.common.ui.util.EclipseUtils;
 import org.dawnsci.plotting.tools.Activator;
 import org.dawnsci.plotting.tools.ServiceLoader;
 import org.dawnsci.plotting.tools.preference.FittingPreferencePage;
-import org.eclipse.core.runtime.Status;
 import org.eclipse.dawnsci.analysis.api.fitting.functions.IPeak;
 import org.eclipse.dawnsci.analysis.api.processing.IOperation;
 import org.eclipse.dawnsci.analysis.api.processing.model.IOperationModel;
-import org.eclipse.dawnsci.analysis.api.tree.GroupNode;
-import org.eclipse.dawnsci.analysis.api.tree.Node;
 import org.eclipse.dawnsci.analysis.dataset.roi.LinearROI;
 import org.eclipse.dawnsci.analysis.dataset.roi.RectangularROI;
-import org.eclipse.dawnsci.nexus.NexusFile;
 import org.eclipse.dawnsci.plotting.api.annotation.IAnnotation;
 import org.eclipse.dawnsci.plotting.api.region.IRegion;
 import org.eclipse.dawnsci.plotting.api.region.IRegion.RegionType;
@@ -44,10 +37,6 @@ import org.eclipse.dawnsci.plotting.api.trace.ILineTrace;
 import org.eclipse.dawnsci.plotting.api.views.ISettablePlotView;
 import org.eclipse.draw2d.ColorConstants;
 import org.eclipse.january.dataset.Dataset;
-import org.eclipse.january.dataset.DatasetFactory;
-import org.eclipse.january.dataset.DatasetUtils;
-import org.eclipse.january.dataset.IDataset;
-import org.eclipse.january.dataset.IntegerDataset;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.MenuManager;
@@ -69,12 +58,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import uk.ac.diamond.scisoft.analysis.fitting.FittingConstants;
-import uk.ac.diamond.scisoft.analysis.fitting.Generic1DFitter;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.FunctionFactory;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.FunctionSquirts;
-import uk.ac.diamond.scisoft.analysis.fitting.functions.IdentifiedPeak;
 
-public class PeakFittingTool extends AbstractFittingTool implements IRegionListener, IDataReductionToolPage {
+public class PeakFittingTool extends AbstractFittingTool implements IRegionListener {
 
 	private static final Logger logger = LoggerFactory.getLogger(PeakFittingTool.class);
 	private MenuAction numberPeaks;
@@ -344,169 +331,6 @@ public class PeakFittingTool extends AbstractFittingTool implements IRegionListe
 		buf.append(FittingUtils.getSmoothing());
 		buf.append("' (<a>configure smoothing</a>)");
 		return buf.toString();
-	}
-	
-	private Map<Integer,List<Double>> fit, xpos, fwhm, area;
-	private Map<Integer,List<IDataset>> functions;
-	private DataReductionSlice lastSlice;
-	
-	public DataReductionInfo export(DataReductionSlice slice) throws Exception {
-				
-		final RectangularROI roi = getFitBounds();
-		if (roi==null) return new DataReductionInfo(Status.CANCEL_STATUS, null);
-
-		final double[] p1 = roi.getPointRef();
-		final double[] p2 = roi.getEndPoint();
-
-		Dataset x  = slice.getAxes()!=null && !slice.getAxes().isEmpty()
-				           ? DatasetUtils.convertToDataset(slice.getAxes().get(0))
-				           : DatasetFactory.createRange(IntegerDataset.class, slice.getData().getSize());
-
-		Dataset[] a= Generic1DFitter.selectInRange(x,DatasetUtils.convertToDataset(slice.getData()),p1[0],p2[0]);
-		x = a[0]; Dataset y=a[1];
-		
-		// If the IdentifiedPeaks are null, we make them.
-		@SuppressWarnings("unchecked")
-		List<IdentifiedPeak> identifiedPeaks = (List<IdentifiedPeak>)slice.getUserData();
-		if (slice.getUserData()==null) {
-			identifiedPeaks = Generic1DFitter.parseDataDerivative(x, y, FittingUtils.getSmoothing());
-		}
-
-		if (fit==null)  fit  = new LinkedHashMap<Integer,List<Double>>(7);
-		if (xpos==null) xpos = new LinkedHashMap<Integer,List<Double>>(7);
-		if (fwhm==null) fwhm = new LinkedHashMap<Integer,List<Double>>(7);
-		if (area==null) area = new LinkedHashMap<Integer,List<Double>>(7);
-		if (functions==null) functions = new LinkedHashMap<Integer,List<IDataset>>(7); 
-		lastSlice = slice;
-		
-		try {
-			final FittedPeaksInfo info = new FittedPeaksInfo(x, y, slice.getMonitor());
-			info.setIdentifiedPeaks(identifiedPeaks);
-			
-			FittedFunctions bean = FittingUtils.getFittedPeaks(info);
-			
-			int index = 1;
-			for (FittedFunction fp : bean.getFunctionList()) {
-				
-				final String peakName = "Peak"+index;
-				Dataset sdd = DatasetFactory.createFromObject(fp.getPeakValue(), 1);
-				addValue(fit, index, fp.getPeakValue());
-				sdd.setName(peakName+"_fit");
-				slice.appendData(lazyWritables, sdd, exportIndex);
-				
-				sdd = DatasetFactory.createFromObject(fp.getPosition(), 1);
-				addValue(xpos, index, fp.getPosition());
-				sdd.setName(peakName+"_xposition");
-				slice.appendData(lazyWritables, sdd, exportIndex);
-				
-				sdd = DatasetFactory.createFromObject(fp.getFWHM(), 1);
-				addValue(fwhm, index, fp.getFWHM());
-				sdd.setName(peakName+"_fwhm");
-				slice.appendData(lazyWritables, sdd, exportIndex);
-				
-				sdd = DatasetFactory.createFromObject(fp.getArea(), 1);
-				addValue(area, index, fp.getArea());
-				sdd.setName(peakName+"_area");
-				slice.appendData(lazyWritables, sdd, exportIndex);
-
-				final Dataset[] pair = fp.getPeakFunctions();
-				Dataset     function = pair[1];
-				Dataset fc = function.clone();
-				fc.setName(peakName+"_function");
-				slice.appendData(lazyWritables, fc, exportIndex);
-				addList(functions, index, fc);
-
-				++index;
-			}
-			
-		} catch (Exception ne) {
-			logger.error("Cannot fit peaks!", ne);
-			return new DataReductionInfo(Status.CANCEL_STATUS, null);
-		}
-		
-		DataReductionInfo status = new DataReductionInfo(Status.OK_STATUS, identifiedPeaks);
-		return status;
-	}
-	
-
-	private void addValue(Map<Integer, List<Double>> col, int index, double value) {
-
-        List<Double> values = col.get(index);
-        if (values == null) {
-        	values = new ArrayList<Double>(31);
-        	col.put(index, values);
-        }
-        values.add(value);
-	}
-	
-	private void addList(Map<Integer, List<IDataset>> lists, int index, IDataset item) {
-        List<IDataset> list = lists.get(index);
-        if (list == null) {
-        	list = new ArrayList<IDataset>(31);
-        	lists.put(index, list);
-        }
-        list.add(item);
-	}
-
-	/**
-	 * The user may enter a regular expression for their dataset name. In this case 
-	 * all datasets matching it will be fitted for peaks. If they do this, we attempt to 
-	 * detect that they selected more than one dataset and write a single list of the peaks
-	 * and other scalars. This is used for EDXD to process individual separate elements in the
-	 * results file which should be a single block, but isnt. Example /dls/i12/data/2014/cm4963-2/rawdata/36153.nxs
-	 */
-	public void exportFinished() throws Exception {
-		
-		if (fit==null || xpos==null || fwhm==null || area==null || functions==null || lastSlice==null) return;
-		
-		if (lastSlice.getExpandedDatasetNames()==null || lastSlice.getExpandedDatasetNames().size()<2) return;
-		
-		final String nodeName = getTitle().replace(' ', '_');
-		
-		NexusFile file = lastSlice.getFile();
-		String entry = (String)file.getRoot();
-		String container = entry + Node.SEPARATOR + nodeName;
-		GroupNode containerNode = file.getGroup(container, true);
-		for (int i = 1; i <= fit.size(); i++) {
-			
-			final String peakName = "Peak"+i;
-
-			final IDataset fits  = DatasetFactory.createFromList(fit.get(i));
-			fits.setName(peakName+"_fit_byElement");
-			lastSlice.appendData(lazyWritables, fits, container, i);
-			
-			final IDataset xposi = DatasetFactory.createFromList(xpos.get(i));
-			xposi.setName(peakName+"_xposition_byElement");
-			lastSlice.appendData(lazyWritables, xposi, container, i);
-
-			final IDataset fwhms = DatasetFactory.createFromList(fwhm.get(i));
-			fwhms.setName(peakName+"_fwhm_byElement");
-			lastSlice.appendData(lazyWritables, fwhms, container, i);
-
-			final IDataset areas = DatasetFactory.createFromList(area.get(i));
-			areas.setName(peakName+"_area_byElement");
-			lastSlice.appendData(lazyWritables, areas, container, i);
-			
-			final List<IDataset> fs = functions.get(i);
-			for (IDataset iDataset : fs) {
-				Dataset ds = DatasetUtils.convertToDataset(iDataset.squeeze());
-				ds.setName(peakName+"_functions");
-				
-				// Append directly into file.
-				file.createData(containerNode, ds);
-//				lastSlice.getFile().appendDataset(ds.getName(), ds, container);
-			}
-
-		}
-		
-		fit.clear();
-		xpos.clear();
-		fwhm.clear();
-		area.clear();
-		functions.clear();
-		lastSlice = null;
-		super.exportFinished();
-
 	}
 
 	/**
@@ -841,15 +665,5 @@ public class PeakFittingTool extends AbstractFittingTool implements IRegionListe
 			}
 			plotView.updateData(peaks, IPeak.class);
 		}
-	}
-
-	@Override
-	public int getExportIndex() {
-		return exportIndex;
-	}
-
-	@Override
-	public void setExportIndex(int exportIndex) {
-		this.exportIndex = exportIndex;
 	}
 }

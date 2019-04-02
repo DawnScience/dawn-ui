@@ -17,15 +17,9 @@ import org.dawb.common.ui.menu.MenuAction;
 import org.dawnsci.plotting.tools.Activator;
 import org.dawnsci.plotting.tools.ServiceLoader;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.Status;
 import org.eclipse.dawnsci.analysis.api.processing.IOperation;
 import org.eclipse.dawnsci.analysis.api.roi.IROI;
-import org.eclipse.dawnsci.analysis.api.tree.GroupNode;
-import org.eclipse.dawnsci.analysis.api.tree.Node;
 import org.eclipse.dawnsci.analysis.dataset.roi.RectangularROI;
-import org.eclipse.dawnsci.analysis.tree.impl.AttributeImpl;
-import org.eclipse.dawnsci.nexus.NexusConstants;
-import org.eclipse.dawnsci.nexus.NexusFile;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.axis.IAxis;
 import org.eclipse.dawnsci.plotting.api.region.IRegion;
@@ -261,93 +255,6 @@ public class BoxProfileTool extends ProfileTool {
 	@Override
 	protected RegionType getCreateRegionType() {
 		return RegionType.BOX;
-	}
-
-	/**
-	 * Same tool called recursively from the DataReductionWizard
-	 */
-	@Override
-	public DataReductionInfo export(DataReductionSlice slice) throws Exception {
-
-		final IImageTrace   image   = getImageTrace();
-		final Collection<IRegion> regions = getPlottingSystem().getRegions();
-		NexusFile file = slice.getFile();
-
-		String dataGroupPath = slice.getParent();
-		// Fix to http://jira.diamond.ac.uk/browse/SCI-1898
-		GroupNode groupNode = file.getGroup(dataGroupPath, true);
-		file.addAttribute(groupNode, new AttributeImpl(NexusConstants.NXCLASS, "NXsubentry"));
-
-		if (slice.getMonitor()!=null && slice.getMonitor().isCancelled()) return null;
-		String dataPath = "";
-		for (IRegion region : regions) {
-			if (!isRegionTypeSupported(region.getRegionType())) continue;
-			if (!region.isVisible())    continue;
-			if (!region.isUserRegion()) continue;
-
-			RectangularROI bounds = (RectangularROI)region.getROI();
-			
-			//create roi name group
-			String datasetName = region.getName();
-			if (datasetName.startsWith(dataGroupPath))
-				datasetName = datasetName.substring(dataGroupPath.length());
-			datasetName = datasetName.replace(' ', '_');
-			file.getGroup(groupNode, datasetName, "NXdata", true);
-			dataPath = dataGroupPath + Node.SEPARATOR + datasetName;
-
-			//box profiles
-			String regionGroup = dataGroupPath + Node.SEPARATOR + "profile";
-			file.getGroup(groupNode, "profile", "NXdata", true);
-			slice.setParent(regionGroup);
-
-			Dataset[] box = showX || showY ? ROIProfile.box(DatasetUtils.convertToDataset(slice.getData()), DatasetUtils.convertToDataset(image.getMask()),
-					(RectangularROI)region.getROI(), false) : null;
-
-			if (showX) {
-				final Dataset x_intensity = box[0];
-				x_intensity.setName("X_Profile");
-				
-				slice.appendData(lazyWritables, x_intensity, exportIndex);
-			}
-
-			if (showY) {
-				final Dataset y_intensity = box[1];
-				y_intensity.setName("Y_Profile");
-				slice.appendData(lazyWritables, y_intensity, exportIndex);
-			}
-
-			// Mean, Sum, Std deviation and region
-			int xInc = bounds.getPoint()[0]<bounds.getEndPoint()[0] ? 1 : -1;
-			int yInc = bounds.getPoint()[1]<bounds.getEndPoint()[1] ? 1 : -1;
-
-			Dataset dataRegion = DatasetUtils.convertToDataset(slice.getData().getSlice(
-					new int[] { (int) bounds.getPoint()[1], (int) bounds.getPoint()[0] },
-					new int[] { (int) bounds.getEndPoint()[1],(int) bounds.getEndPoint()[0] },
-					new int[] {yInc, xInc}));
-			//mean
-			Object mean = dataRegion.mean();
-			Dataset meands = DatasetFactory.createFromObject(mean, new int[]{1});
-			meands.setName("Mean");
-			slice.appendData(lazyWritables, meands,dataPath, exportIndex);
-
-			//Sum
-			Object sum = dataRegion.sum();
-			Dataset sumds = DatasetFactory.createFromObject(sum, new int[]{1});
-			sumds.setName("Sum");
-			slice.appendData(lazyWritables, sumds,dataPath, exportIndex);
-
-			//Standard deviation
-			Object std = dataRegion.stdDeviation();
-			Dataset stds = DatasetFactory.createFromObject(std, new int[]{1});
-			stds.setName("Std_Deviation");
-			slice.appendData(lazyWritables, stds,dataPath, exportIndex);
-
-			//region
-			slice.setParent(dataPath);
-			dataRegion.setName("Region_Slice");
-			slice.appendData(lazyWritables, dataRegion, exportIndex);
-		}
-		return new DataReductionInfo(Status.OK_STATUS);
 	}
 	
 	protected Action getReductionAction() {

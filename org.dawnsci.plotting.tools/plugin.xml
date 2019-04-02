@@ -577,12 +577,6 @@
             id="org.dawb.workbench.plotting.fittedPeaksExportWizard"
             name="Fitted Peaks">
       </wizard>
-      <wizard
-            class="org.dawnsci.plotting.tools.reduction.DataReductionWizard"
-            icon="icons/data-reduction.png"
-            id="org.dawb.workbench.plotting.dataReductionExportWizard"
-            name="Data Reduction">
-      </wizard>
            <wizard
             class="org.dawnsci.plotting.tools.finding.PeakFindingExportWizard"
             icon="icons/peakSearch.png"

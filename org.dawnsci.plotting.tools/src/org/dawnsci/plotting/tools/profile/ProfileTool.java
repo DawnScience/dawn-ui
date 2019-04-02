@@ -14,7 +14,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
-import org.dawb.common.ui.plot.tools.IDataReductionToolPage;
 import org.dawnsci.plotting.tools.Activator;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -54,7 +53,7 @@ import org.eclipse.ui.progress.UIJob;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public abstract class ProfileTool extends AbstractToolPage  implements IROIListener, IDataReductionToolPage {
+public abstract class ProfileTool extends AbstractToolPage  implements IROIListener {
 
 	private final static Logger logger = LoggerFactory.getLogger(ProfileTool.class);
 	
@@ -633,15 +632,5 @@ public abstract class ProfileTool extends AbstractToolPage  implements IROIListe
 	public void roiSelected(ROIEvent evt) {
 		// TODO Auto-generated method stub
 
-	}
-
-	@Override
-	public int getExportIndex() {
-		return exportIndex;
-	}
-
-	@Override
-	public void setExportIndex(int exportIndex) {
-		this.exportIndex = exportIndex;
 	}
 }
