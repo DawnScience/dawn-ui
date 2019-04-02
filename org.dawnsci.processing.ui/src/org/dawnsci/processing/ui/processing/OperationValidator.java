@@ -12,7 +12,6 @@ import java.util.List;
 
 import org.dawnsci.processing.ui.Activator;
 import org.dawnsci.processing.ui.slice.IOperationErrorInformer;
-import org.eclipse.dawnsci.analysis.api.processing.IOperation;
 import org.eclipse.dawnsci.analysis.api.processing.IOperationService;
 import org.eclipse.dawnsci.analysis.api.processing.OperationException;
 import org.eclipse.january.dataset.IDataset;
@@ -40,7 +39,7 @@ final class OperationValidator implements ISeriesValidator {
 			
 			if (informer != null) first = informer.getTestData();
 			
-		    service.validate(first, getOperations(series));
+		    service.validate(first, OperationTableUtils.getOperations(null, series));
 		} catch (Exception ne) {
 			return ne.getMessage();
 		}
@@ -55,16 +54,6 @@ final class OperationValidator implements ISeriesValidator {
 		return null;
 	}
 
-	private IOperation[] getOperations(List<ISeriesItemDescriptor> series) throws Exception {
-		final IOperation[] ret = new IOperation[series.size()];
-		int i = 0;
-		for (ISeriesItemDescriptor item : series) {
-			ret[i] = (IOperation)item.getSeriesObject();
-			i++;
-		}
-		return ret;
-	}
-	
 	public void setOperationErrorInformer(IOperationErrorInformer informer) {
 		this.informer = informer;
 	}

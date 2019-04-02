@@ -25,9 +25,7 @@ import org.dawnsci.processing.ui.slice.OperationInformerImpl;
 import org.eclipse.dawnsci.analysis.api.persistence.IPersistenceService;
 import org.eclipse.dawnsci.analysis.api.persistence.IPersistentFile;
 import org.eclipse.dawnsci.analysis.api.processing.IOperation;
-import org.eclipse.dawnsci.analysis.api.processing.OperationData;
 import org.eclipse.dawnsci.analysis.api.processing.OperationException;
-import org.eclipse.dawnsci.analysis.api.processing.model.IOperationModel;
 import org.eclipse.january.dataset.IDataset;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
@@ -70,7 +68,7 @@ public class ProcessingView extends ViewPart {
 	public static final String ID = "org.dawnsci.processing.ui.processingView";
 
 	private SeriesTable               seriesTable;
-	private OperationFilter           operationFiler;
+	private OperationFilter           operationFilter;
 	private List<OperationDescriptor> saved;
 	private TableViewerColumn inputs, outputs;
 	private IAction add;
@@ -82,6 +80,8 @@ public class ProcessingView extends ViewPart {
 	private final static String[] files = new String[]{"Nexus files"};
 	
 	private final static Logger logger = LoggerFactory.getLogger(ProcessingView.class);
+
+	private static final char DISABLE_PREFIX = '!';
 
 	public ProcessingView() {
 		this.seriesTable    = new SeriesTable();
@@ -105,21 +105,34 @@ public class ProcessingView extends ViewPart {
 				// do nothing
 			}
 		});
-		this.operationFiler = new OperationFilter();
+		this.operationFilter = new OperationFilter();
 	}
-	
+
 	@Override
-    public void init(IViewSite site, IMemento memento) throws PartInitException {
-		
+	public void init(IViewSite site, IMemento memento) throws PartInitException {
 		super.init(site, memento);
 
 		final String key = memento!=null ? memento.getString(ProcessingConstants.OPERATION_IDS) : null;
 		if (key!=null && !"".equals(key)) {
 			List<String> ids = ListUtils.getList(key);
-			this.saved = operationFiler.createDescriptors(ids);
+			int n = ids.size();
+			boolean[] disabled = new boolean[n];
+			for (int i = 0; i < n; i++) {
+				String id = ids.get(i);
+				if (id.charAt(0) == DISABLE_PREFIX) {
+					disabled[i] = true;
+					ids.set(i, id.substring(1));
+				}
+			}
+			this.saved = operationFilter.createDescriptors(ids);
+			for (int i = 0; i < n; i++) {
+				if (disabled[i]) {
+					saved.get(i).setEnabled(false);
+				}
+			}
 		}
-    }
-    
+	}
+
 	@Override
 	public void createPartControl(Composite parent) {
 		
@@ -131,7 +144,7 @@ public class ProcessingView extends ViewPart {
 		OperationValidator val = new OperationValidator();
 		final OperationInformerImpl informer = new OperationInformerImpl(seriesTable);
 		val.setOperationErrorInformer(informer);
-		operationFiler.setOperationErrorInformer(informer);
+		operationFilter.setOperationErrorInformer(informer);
 
 		seriesTable.setValidator(val);
 		final OperationLabelProvider prov = new OperationLabelProvider(0);
@@ -152,9 +165,9 @@ public class ProcessingView extends ViewPart {
 		
 		// Here's the data, lets show it!
 		seriesTable.setMenuManager(Click);
-		seriesTable.setInput(saved, operationFiler);
+		seriesTable.setInput(saved, operationFilter);
 
-		OperationTableUtils.setupPipelinePaneDropTarget(seriesTable, operationFiler, logger, getSite().getShell());
+		OperationTableUtils.setupPipelinePaneDropTarget(seriesTable, operationFilter, logger, getSite().getShell());
 		
 		BundleContext ctx = FrameworkUtil.getBundle(ProcessingView.class).getBundleContext();
 		EventHandler ErrorHandler = new EventHandler() {
@@ -208,34 +221,12 @@ public class ProcessingView extends ViewPart {
 	public Object getAdapter(Class clazz) {
 		
 		if (clazz==IOperation.class) {
-			return getOperations();
+			return OperationTableUtils.getOperations(logger, seriesTable.getSeriesItems());
 		}
 		
 		return super.getAdapter(clazz);
 	}
 	
-	@SuppressWarnings("unchecked")
-	private IOperation<?,?>[] getOperations() {
-		final List<ISeriesItemDescriptor> desi = seriesTable.getSeriesItems();
-		
-		if (desi != null) {
-			Iterator<ISeriesItemDescriptor> it = desi.iterator();
-			while (it.hasNext()) if ((!(it.next() instanceof OperationDescriptor))) it.remove();
-		}
-		
-		if (desi==null || desi.isEmpty()) return null;
-		final IOperation<? extends IOperationModel, ? extends OperationData>[] pipeline = new IOperation[desi.size()];
-		for (int i = 0; i < desi.size(); i++) {
-			try {
-				pipeline[i] = (IOperation<? extends IOperationModel, ? extends OperationData>)desi.get(i).getSeriesObject();
-			} catch (Exception e) {
-				logger.error("Could not get series object");
-				return null;
-			}
-			}
-		return pipeline;
-	}
-
 	private void createColumns() {
 		
 		this.inputs  = seriesTable.createColumn("Input Rank",  SWT.LEFT, 0, new OperationLabelProvider(1));
@@ -267,8 +258,8 @@ public class ProcessingView extends ViewPart {
 		final IAction save = new Action("Save configured pipeline", IAction.AS_PUSH_BUTTON) {
 			public void run() {
 				
-				IOperation<?,?>[] op = getOperations();
-				
+				IOperation<?,?>[] op = OperationTableUtils.getOperations(logger, seriesTable.getSeriesItems());
+
 				if (op == null) return;
 				FileSelectionDialog dialog = new FileSelectionDialog(ProcessingView.this.getSite().getShell());
 				if (lastPath != null) dialog.setPath(lastPath);
@@ -301,7 +292,7 @@ public class ProcessingView extends ViewPart {
 				dialog.create();
 				if (dialog.open() == Dialog.CANCEL) return;
 				String path = dialog.getPath();
-				OperationTableUtils.readOperationsFromFile(path, seriesTable, operationFiler, logger, getSite().getShell());
+				OperationTableUtils.readOperationsFromFile(path, seriesTable, operationFilter, logger, getSite().getShell());
 				lastPath = path;
 			}
 		};
@@ -349,68 +340,15 @@ public class ProcessingView extends ViewPart {
 		getViewSite().getActionBars().getToolBarManager().add(showRanks);
 		getViewSite().getActionBars().getMenuManager().add(showRanks);
 	}
-	
-	@SuppressWarnings("unused")
-	private void setDynamicMenuOptions(IMenuManager mm) {
-		
-		mm.add(add);
-		mm.add(delete);
-		mm.add(clear);
-		mm.add(new Separator());
-		
-		IOperation<? extends IOperationModel, ? extends OperationData> op = null;
-		
-		try {
-			ISeriesItemDescriptor selected = seriesTable.getSelected();
-			if (!(selected instanceof OperationDescriptor)) return;
-			op = ((OperationDescriptor)selected).getSeriesObject();
-		} catch (InstantiationException e1) {
-		}
-		
-		final IAction saveInter = new Action("Save output", IAction.AS_CHECK_BOX) {
-			public void run() {
-				ISeriesItemDescriptor current = seriesTable.getSelected();
-				if (current instanceof OperationDescriptor) {
-					try {
-						((OperationDescriptor)current).getSeriesObject().setStoreOutput(isChecked());
-						seriesTable.refreshTable();
-					} catch (InstantiationException e) {
-						logger.error("Could not series object",e);
-					}
-				}
-			}
-		};
-		
-		if (op != null && op.isStoreOutput()) saveInter.setChecked(true);
-		
-		mm.add(saveInter);
-		
-		final IAction passUnMod = new Action("Pass through", IAction.AS_CHECK_BOX) {
-			public void run() {
-				ISeriesItemDescriptor current = seriesTable.getSelected();
-				if (current instanceof OperationDescriptor) {
-					try {
-						((OperationDescriptor)current).getSeriesObject().setPassUnmodifiedData(isChecked());
-						seriesTable.refreshTable();
-					} catch (InstantiationException e) {
-						logger.error("Could not build series object",e);
-					}
-				}
-			}
-		};
-		
-		if (op != null && op.isPassUnmodifiedData()) passUnMod.setChecked(true);
-		mm.add(passUnMod);
-	}
 
 	@Override
 	public void setFocus() {
 		seriesTable.setFocus();
 	}
 
-    public void saveState(IMemento memento) {
-    	memento.putString(ProcessingConstants.OPERATION_IDS, createIdList(seriesTable.getSeriesItems()));
-    }
+	public void saveState(IMemento memento) {
+		memento.putString(ProcessingConstants.OPERATION_IDS, createIdList(seriesTable.getSeriesItems()));
+	}
 
 	private String createIdList(Collection<ISeriesItemDescriptor> seriesItems) {
 		if (seriesItems==null || seriesItems.isEmpty()) return null;
@@ -419,6 +357,9 @@ public class ProcessingView extends ViewPart {
 			ISeriesItemDescriptor des = iterator.next();
 			if (!(des instanceof OperationDescriptor)) continue;
 			OperationDescriptor  odes = (OperationDescriptor)des;
+			if (!odes.isEnabled()) {
+				buf.append(DISABLE_PREFIX);
+			}
 			buf.append(odes.getId());
 			if(iterator.hasNext()) buf.append(",");
 		}

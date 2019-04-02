@@ -44,7 +44,8 @@ public class OperationDescriptor implements ISeriesItemDescriptor {
 	private IOperation<? extends IOperationModel, ? extends OperationData>              operation;
 	private final String            id;
 	private final IOperationService service;
-	
+	private boolean enabled = true;
+
 	// Operations of the same id and service are required to be differentiated
 	private final String            uniqueId;
 	
@@ -111,6 +112,7 @@ public class OperationDescriptor implements ISeriesItemDescriptor {
 		return null;
 	}
 
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public IOperationModel getModel() {
 		
 		if (operation!=null && operation.getModel()!=null) return operation.getModel();
@@ -132,9 +134,9 @@ public class OperationDescriptor implements ISeriesItemDescriptor {
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
+		result = prime * result + (enabled ? 1231 : 1237);
 		result = prime * result + ((id == null) ? 0 : id.hashCode());
-		result = prime * result
-				+ ((uniqueId == null) ? 0 : uniqueId.hashCode());
+		result = prime * result + ((uniqueId == null) ? 0 : uniqueId.hashCode());
 		return result;
 	}
 
@@ -147,6 +149,8 @@ public class OperationDescriptor implements ISeriesItemDescriptor {
 		if (getClass() != obj.getClass())
 			return false;
 		OperationDescriptor other = (OperationDescriptor) obj;
+		if (enabled != other.enabled)
+			return false;
 		if (id == null) {
 			if (other.id != null)
 				return false;
@@ -160,7 +164,6 @@ public class OperationDescriptor implements ISeriesItemDescriptor {
 		return true;
 	}
 
-	
 	// Reads the declared operations from extension point, if they have not been already.
 	public synchronized Image getImage() {
 		
@@ -251,11 +254,30 @@ public class OperationDescriptor implements ISeriesItemDescriptor {
 
 	@Override
 	public boolean isFilterable() {
+		if (!enabled) {
+			return false; // ignore operation when disabled
+		}
+
 		try {
 			final IOperation<? extends IOperationModel, ? extends OperationData> o = this.getSeriesObject();
 			return !(o.getInputRank() == OperationRank.ANY && o.getOutputRank() == OperationRank.SAME);
 		} catch (InstantiationException e) {
 			return true;
 		}
+	}
+
+	/**
+	 * @return true if enabled (this is the default)
+	 */
+	public boolean isEnabled() {
+		return enabled;
+	}
+
+	/**
+	 * Set whether operation is enabled or disabled
+	 * @param enabled
+	 */
+	public void setEnabled(boolean enabled) {
+		this.enabled = enabled;
 	}
 }

@@ -2,6 +2,8 @@ package org.dawnsci.processing.ui.processing;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 import org.dawnsci.processing.ui.Activator;
 import org.dawnsci.processing.ui.ServiceHolder;
@@ -130,19 +132,23 @@ public class OperationTableUtils {
 		
 		IOperation<? extends IOperationModel, ? extends OperationData> op = null;
 		
+		OperationDescriptor selected = null;
 		try {
-			ISeriesItemDescriptor selected = seriesTable.getSelected();
-			if (!(selected instanceof OperationDescriptor)) return;
-			op = ((OperationDescriptor)selected).getSeriesObject();
+			ISeriesItemDescriptor s = seriesTable.getSelected();
+			if (!(s instanceof OperationDescriptor)) {
+				return;
+			}
+			selected = (OperationDescriptor) s;
+			op = selected.getSeriesObject();
 		} catch (InstantiationException e1) {
 		}
-		
+
 		final IAction saveInter = new Action("Save output", IAction.AS_CHECK_BOX) {
 			public void run() {
 				ISeriesItemDescriptor current = seriesTable.getSelected();
 				if (current instanceof OperationDescriptor) {
 					try {
-						((OperationDescriptor)current).getSeriesObject().setStoreOutput(isChecked());
+						((OperationDescriptor) current).getSeriesObject().setStoreOutput(isChecked());
 						seriesTable.refreshTable();
 					} catch (InstantiationException e) {
 						logger.error("Could not create series object",e);
@@ -160,7 +166,7 @@ public class OperationTableUtils {
 				ISeriesItemDescriptor current = seriesTable.getSelected();
 				if (current instanceof OperationDescriptor) {
 					try {
-						((OperationDescriptor)current).getSeriesObject().setPassUnmodifiedData(isChecked());
+						((OperationDescriptor) current).getSeriesObject().setPassUnmodifiedData(isChecked());
 						seriesTable.refreshTable();
 					} catch (InstantiationException e) {
 						logger.error("Could not set pass through");
@@ -171,7 +177,19 @@ public class OperationTableUtils {
 		
 		if (op != null && op.isPassUnmodifiedData()) passUnMod.setChecked(true);
 		mm.add(passUnMod);
-		
+
+		final IAction enable = new Action("Enabled", IAction.AS_CHECK_BOX) {
+			public void run() {
+				ISeriesItemDescriptor current = seriesTable.getSelected();
+				if (current instanceof OperationDescriptor) {
+					((OperationDescriptor) current).setEnabled(isChecked());
+					seriesTable.refreshTable();
+				}
+			}
+		};
+
+		if (op != null) enable.setChecked(selected.isEnabled());
+		mm.add(enable);
 	}
 	
 	public static Action getAddAction(final SeriesTable seriesTable) {
@@ -200,4 +218,22 @@ public class OperationTableUtils {
 		};
 	}
 
+	public static IOperation<?, ?>[] getOperations(Logger logger, List<ISeriesItemDescriptor> series) {
+		List<?> ops = series.stream()
+		.filter(s -> OperationDescriptor.class.isInstance(s))
+		.map(s -> OperationDescriptor.class.cast(s))
+		.filter(o -> o.isEnabled()).map(o -> {
+			try {
+				return o.getSeriesObject();
+			} catch (InstantiationException e) {
+				return null;
+			}
+		}).collect(Collectors.toList());
+
+		if (ops.stream().anyMatch(Objects::isNull)) {
+			logger.error("Could not get series object");
+			return null;
+		}
+		return ops.toArray(new IOperation[ops.size()]);
+	}
 }

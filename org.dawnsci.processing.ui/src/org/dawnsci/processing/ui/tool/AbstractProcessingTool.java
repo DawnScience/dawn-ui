@@ -6,7 +6,6 @@ import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -17,7 +16,6 @@ import org.dawnsci.processing.ui.api.IOperationSetupWizardPage;
 import org.dawnsci.processing.ui.model.OperationModelViewer;
 import org.dawnsci.processing.ui.model.OperationModelWizard;
 import org.dawnsci.processing.ui.model.OperationModelWizardDialog;
-import org.dawnsci.processing.ui.processing.OperationDescriptor;
 import org.dawnsci.processing.ui.processing.OperationTableUtils;
 import org.dawnsci.processing.ui.slice.DataFileSliceView;
 import org.dawnsci.processing.ui.slice.EscapableSliceVisitor;
@@ -35,7 +33,6 @@ import org.eclipse.dawnsci.analysis.api.processing.IOperationContext;
 import org.eclipse.dawnsci.analysis.api.processing.IOperationInputData;
 import org.eclipse.dawnsci.analysis.api.processing.IOperationService;
 import org.eclipse.dawnsci.analysis.api.processing.ISavesToFile;
-import org.eclipse.dawnsci.analysis.api.processing.OperationData;
 import org.eclipse.dawnsci.analysis.api.processing.OperationException;
 import org.eclipse.dawnsci.analysis.api.processing.model.IOperationModel;
 import org.eclipse.dawnsci.analysis.api.tree.Tree;
@@ -95,7 +92,7 @@ public abstract class AbstractProcessingTool extends AbstractToolPage {
 	private SeriesTable  seriesTable;
 
 	private OperationModelViewer modelEditor;
-	private IOperation selection;
+	private IOperation<?, ?> selection;
 	private ProcessingJob job;
 	private ITraceListener listener;
 	private IOperationErrorInformer informer;
@@ -249,7 +246,7 @@ public abstract class AbstractProcessingTool extends AbstractToolPage {
 					Object ob = ((IStructuredSelection)ss).getFirstElement();
 					if (ob instanceof ISeriesItemDescriptor) {
 						try {
-							selection = ((IOperation)((ISeriesItemDescriptor)ob).getSeriesObject());
+							selection = ((IOperation<?, ?> )((ISeriesItemDescriptor)ob).getSeriesObject());
 							if (selection == null) return;
 							updateData();
 						} catch (Exception e) {
@@ -321,7 +318,7 @@ public abstract class AbstractProcessingTool extends AbstractToolPage {
 		configure.setEnabled(false);
 		IDataset ds = getData();
 		if (ds == null) return;
-		IOperation[] operations = getOperations();
+		IOperation<?, ?>[] operations = OperationTableUtils.getOperations(logger, seriesTable.getSeriesItems());
 		SliceFromSeriesMetadata meta = ds.getFirstMetadata(SliceFromSeriesMetadata.class);
 		if (ds.getFirstMetadata(SliceFromSeriesMetadata.class) != null){
 			run.setEnabled(true);
@@ -334,35 +331,14 @@ public abstract class AbstractProcessingTool extends AbstractToolPage {
 		
 		ProcessingInfo info = new ProcessingInfo();
 		info.data = ds;
-		info.operations = getOperations();
+		info.operations = operations;
 		info.parentMetadata = parentMeta;
 		
 		job.update(info);
 		job.schedule();
 
 	}
-	
-	private IOperation[] getOperations() {
-		final List<ISeriesItemDescriptor> desi = seriesTable.getSeriesItems();
-		
-		if (desi != null) {
-			Iterator<ISeriesItemDescriptor> it = desi.iterator();
-			while (it.hasNext()) if ((!(it.next() instanceof OperationDescriptor))) it.remove();
-		}
-		
-		if (desi==null || desi.isEmpty()) return null;
-		final IOperation<? extends IOperationModel, ? extends OperationData>[] pipeline = new IOperation[desi.size()];
-		for (int i = 0; i < desi.size(); i++) {
-			try {
-				pipeline[i] = (IOperation<? extends IOperationModel, ? extends OperationData>)desi.get(i).getSeriesObject();
-			} catch (Exception e) {
-				logger.error("Could not get series object",e);
-				return null;
-			}
-			}
-		return pipeline;
-	}
-	
+
 	@Override
 	public Control getControl() {
 		return sashForm;
@@ -375,7 +351,7 @@ public abstract class AbstractProcessingTool extends AbstractToolPage {
 	
 	private class ProcessingInfo {
 		public IDataset data;
-		public IOperation[] operations;
+		public IOperation<?, ?>[] operations;
 		public SliceFromSeriesMetadata parentMetadata;
 		
 	}
@@ -394,9 +370,8 @@ public abstract class AbstractProcessingTool extends AbstractToolPage {
 
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
-			ProcessingInfo local = info;
 			IDataset ds = info.data.getSliceView();
-			IOperation[] operations = info.operations;
+			IOperation<?, ?>[] operations = info.operations;
 			
 			SliceFromSeriesMetadata sliceMeta;
 			
@@ -419,7 +394,7 @@ public abstract class AbstractProcessingTool extends AbstractToolPage {
 			
 			ds.setMetadata(sliceMeta);
 			
-			EscapableSliceVisitor vis = new EscapableSliceVisitor(null, sliceMeta.getDataDimensions(),operations,getOperations(),null,null,system);
+			EscapableSliceVisitor vis = new EscapableSliceVisitor(null, sliceMeta.getDataDimensions(),operations, operations,null,null,system);
 			vis.setEndOperation(selection);
 			
 			try {
@@ -532,7 +507,7 @@ public abstract class AbstractProcessingTool extends AbstractToolPage {
 			
 			cc.setVisitor(vis);
 			cc.setDataDimensions(meta.getDataDimensions());
-			cc.setSeries(getOperations());
+			cc.setSeries(OperationTableUtils.getOperations(logger, seriesTable.getSeriesItems()));
 			cc.setMonitor(mon);
 			
 			monitor.beginTask("Processing", DataFileSliceView.getWork(new SliceND(local.getShape()), meta.getDataDimensions()));
@@ -556,8 +531,8 @@ public abstract class AbstractProcessingTool extends AbstractToolPage {
 	}
 	
 	private boolean canRunParallel() {
-		IOperation[] operationSeries = getOperations();
-		for (IOperation op : operationSeries) {
+		IOperation<?, ?>[] operationSeries = OperationTableUtils.getOperations(logger, seriesTable.getSeriesItems());
+		for (IOperation<?, ?> op : operationSeries) {
 			Atomic atomic = op.getClass().getAnnotation(Atomic.class);
 			if (atomic == null) {
 				return false;
