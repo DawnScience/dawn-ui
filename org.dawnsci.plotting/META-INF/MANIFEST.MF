@@ -25,6 +25,7 @@ Require-Bundle: org.eclipse.core.runtime,
  com.thoughtworks.xstream
 Bundle-ActivationPolicy: lazy
 Export-Package: org.dawnsci.plotting,
+ org.dawnsci.plotting.actions,
  org.dawnsci.plotting.roi,
  org.dawnsci.plotting.util,
  org.dawnsci.plotting.views

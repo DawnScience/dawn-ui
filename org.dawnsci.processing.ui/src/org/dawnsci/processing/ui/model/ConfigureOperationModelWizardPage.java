@@ -11,7 +11,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import org.apache.commons.lang.ArrayUtils;
-import org.dawb.common.ui.widgets.ActionBarWrapper;
+import org.dawnsci.plotting.actions.ActionBarWrapper;
 import org.dawnsci.processing.ui.Activator;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;

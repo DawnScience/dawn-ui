@@ -3,9 +3,9 @@ package org.dawnsci.mapping.ui.dialog;
 import java.util.Arrays;
 import java.util.List;
 
-import org.dawb.common.ui.widgets.ActionBarWrapper;
 import org.dawnsci.common.widgets.spinner.FloatSpinner;
 import org.dawnsci.mapping.ui.MappingUtils;
+import org.dawnsci.plotting.actions.ActionBarWrapper;
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.dawnsci.analysis.api.roi.IROI;
 import org.eclipse.dawnsci.analysis.api.tree.Node;

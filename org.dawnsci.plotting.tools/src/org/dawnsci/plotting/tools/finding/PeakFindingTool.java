@@ -5,7 +5,7 @@ import java.util.Collection;
 import java.util.List;
 
 import org.dawb.common.ui.util.GridUtils;
-import org.dawb.common.ui.widgets.ActionBarWrapper;
+import org.dawnsci.plotting.actions.ActionBarWrapper;
 import org.dawnsci.plotting.tools.fitting.PeakFittingTool;
 import org.eclipse.dawnsci.analysis.api.roi.IRectangularROI;
 import org.eclipse.dawnsci.analysis.dataset.roi.RectangularROI;

@@ -14,7 +14,6 @@ import java.util.Set;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
-import org.dawb.common.ui.widgets.ActionBarWrapper;
 import org.dawnsci.conversion.schemes.ProcessConversionScheme;
 import org.dawnsci.datavis.model.DataOptions;
 import org.dawnsci.datavis.model.LoadedFile;
@@ -22,6 +21,7 @@ import org.dawnsci.january.model.ISliceChangeListener;
 import org.dawnsci.january.model.NDimensions;
 import org.dawnsci.january.model.SliceChangeEvent;
 import org.dawnsci.january.ui.dataconfigtable.DataConfigurationTable;
+import org.dawnsci.plotting.actions.ActionBarWrapper;
 import org.dawnsci.processing.ui.ServiceHolder;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.dawnsci.analysis.api.conversion.IConversionContext;

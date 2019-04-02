@@ -13,7 +13,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.dawb.common.ui.util.GridUtils;
-import org.dawb.common.ui.widgets.ActionBarWrapper;
+import org.dawnsci.plotting.actions.ActionBarWrapper;
 import org.dawnsci.plotting.roi.ROIWidget;
 import org.dawnsci.plotting.tools.Activator;
 import org.dawnsci.plotting.tools.RegionSumTool;

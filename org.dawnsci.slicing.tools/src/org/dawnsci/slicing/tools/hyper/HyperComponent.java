@@ -13,7 +13,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.dawb.common.ui.util.GridUtils;
-import org.dawb.common.ui.widgets.ActionBarWrapper;
+import org.dawnsci.plotting.actions.ActionBarWrapper;
 import org.eclipse.dawnsci.analysis.api.roi.IROI;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.PlotType;

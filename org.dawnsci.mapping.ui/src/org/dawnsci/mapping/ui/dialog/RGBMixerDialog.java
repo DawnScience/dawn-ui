@@ -3,9 +3,9 @@ package org.dawnsci.mapping.ui.dialog;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.dawb.common.ui.widgets.ActionBarWrapper;
 import org.dawnsci.mapping.ui.datamodel.AbstractMapData;
 import org.dawnsci.mapping.ui.datamodel.RGBMapData;
+import org.dawnsci.plotting.actions.ActionBarWrapper;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.PlotType;
 import org.eclipse.dawnsci.plotting.api.PlottingFactory;

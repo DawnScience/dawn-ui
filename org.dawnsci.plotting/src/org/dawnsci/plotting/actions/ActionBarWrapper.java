@@ -162,6 +162,10 @@ public class ActionBarWrapper extends SubActionBars2 {
 		this.rightManager = rightManager;
 	}
 	
+	public Composite getToolbarControl() {
+		return this.toolbarControl;
+	}
+	
 	public void setVisible(boolean isVisible) {
 		setVisible(toolbarControl, isVisible);
 		toolbarControl.getParent().layout(new Control[]{toolbarControl});

@@ -3,7 +3,7 @@ package org.dawb.workbench.ui.editors.test;
 import java.net.URL;
 
 import org.dawb.common.services.ServiceManager;
-import org.dawb.common.ui.widgets.ActionBarWrapper;
+import org.dawnsci.plotting.actions.ActionBarWrapper;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.dawnsci.analysis.api.io.IRemoteDatasetService;
 import org.eclipse.dawnsci.plotting.api.EmptyWorkbenchPart;

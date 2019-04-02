@@ -2,8 +2,8 @@ package org.dawnsci.datavis.manipulation;
 
 import java.io.File;
 
-import org.dawb.common.ui.widgets.ActionBarWrapper;
 import org.dawnsci.common.widgets.dialog.FileSelectionDialog;
+import org.dawnsci.plotting.actions.ActionBarWrapper;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.dawnsci.analysis.api.io.IDataHolder;
 import org.eclipse.dawnsci.analysis.api.tree.GroupNode;

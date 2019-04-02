@@ -15,11 +15,11 @@ import java.util.Map;
 
 import org.apache.commons.math3.exception.TooManyEvaluationsException;
 import org.dawb.common.ui.util.GridUtils;
-import org.dawb.common.ui.widgets.ActionBarWrapper;
 import org.dawnsci.common.widgets.gda.function.FunctionFittingWidget;
 import org.dawnsci.common.widgets.gda.function.IFittedFunctionInvalidatedEvent;
 import org.dawnsci.common.widgets.gda.function.ModelModifiedAdapter;
 import org.dawnsci.common.widgets.gda.function.descriptors.DefaultFunctionDescriptorProvider;
+import org.dawnsci.plotting.actions.ActionBarWrapper;
 import org.dawnsci.plotting.tools.Activator;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;

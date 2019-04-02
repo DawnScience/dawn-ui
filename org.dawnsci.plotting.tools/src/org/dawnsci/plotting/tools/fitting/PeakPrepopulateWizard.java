@@ -2,7 +2,7 @@ package org.dawnsci.plotting.tools.fitting;
 
 import java.util.List;
 
-import org.dawb.common.ui.widgets.ActionBarWrapper;
+import org.dawnsci.plotting.actions.ActionBarWrapper;
 import org.dawnsci.plotting.tools.finding.PeakFindingTool;
 import org.eclipse.dawnsci.analysis.api.fitting.functions.IFunction;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;

@@ -12,16 +12,12 @@ package org.dawnsci.mapping.ui.dialog;
 
 
 import java.util.ArrayList;
-// Imports from java
 import java.util.List;
 
-//Imports from org.dawb
-import org.dawb.common.ui.widgets.ActionBarWrapper;
 import org.dawnsci.mapping.ui.datamodel.AbstractMapData;
-// Imports from org.dawnsci
 import org.dawnsci.mapping.ui.datamodel.VectorMapData;
+import org.dawnsci.plotting.actions.ActionBarWrapper;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
-// Imports from org.eclipse.dawnsci
 import org.eclipse.dawnsci.plotting.api.PlotType;
 import org.eclipse.dawnsci.plotting.api.PlottingFactory;
 import org.eclipse.dawnsci.plotting.api.axis.IAxis;
@@ -31,12 +27,9 @@ import org.eclipse.dawnsci.plotting.api.trace.IVectorTrace;
 import org.eclipse.dawnsci.plotting.api.trace.IVectorTrace.ArrowConfiguration;
 import org.eclipse.dawnsci.plotting.api.trace.IVectorTrace.VectorNormalization;
 import org.eclipse.dawnsci.plotting.api.trace.MetadataPlotUtils;
-// Imports from org.eclipse.january
 import org.eclipse.january.dataset.Dataset;
 import org.eclipse.january.dataset.DatasetUtils;
-// Imports from org.eclipse.jface
 import org.eclipse.jface.dialogs.Dialog;
-// Imports from org.eclipse.swt
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -49,9 +42,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
-// Imports from org.eclipse.ui
 import org.eclipse.ui.PlatformUI;
-// Imports from org.slf4j
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
