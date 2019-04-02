@@ -19,7 +19,6 @@ import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 
-import org.dawb.common.ui.monitor.ProgressMonitorWrapper;
 import org.dawb.common.ui.selection.SelectionUtils;
 import org.dawnsci.conversion.schemes.ProcessConversionScheme;
 import org.dawnsci.datavis.api.IFileOpeningController;
@@ -56,6 +55,7 @@ import org.eclipse.dawnsci.analysis.dataset.slicer.Slicer;
 import org.eclipse.dawnsci.analysis.dataset.slicer.SourceInformation;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.PlottingEventConstants;
+import org.eclipse.dawnsci.plotting.api.ProgressMonitorWrapper;
 import org.eclipse.dawnsci.plotting.api.image.IFileIconService;
 import org.eclipse.dawnsci.plotting.api.trace.MetadataPlotUtils;
 import org.eclipse.january.IMonitor;

@@ -9,7 +9,6 @@
 package org.dawb.workbench.ui.data;
 
 
-import org.dawb.common.ui.monitor.ProgressMonitorWrapper;
 import org.dawb.workbench.ui.Activator;
 import org.dawb.workbench.ui.transferable.TransferableDataObject;
 import org.dawnsci.common.widgets.celleditor.ExpresionCellEditor;
@@ -18,6 +17,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.dawnsci.plotting.api.ProgressMonitorWrapper;
 import org.eclipse.dawnsci.plotting.api.expressions.IExpressionObject;
 import org.eclipse.dawnsci.plotting.api.expressions.IExpressionObjectService;
 import org.eclipse.dawnsci.plotting.api.expressions.IVariableManager;
