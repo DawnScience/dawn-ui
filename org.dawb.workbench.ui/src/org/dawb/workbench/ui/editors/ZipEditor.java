@@ -260,6 +260,8 @@ public class ZipEditor extends MultiPageEditorPart implements IPersistableEditor
 
 	@Override
 	public void saveState(IMemento memento) {
-		dataSetEditor.getPlottingSystem().savePreferences(memento);
+		if (dataSetEditor != null) {
+			dataSetEditor.getPlottingSystem().savePreferences(memento);
+		}
 	}
 }
