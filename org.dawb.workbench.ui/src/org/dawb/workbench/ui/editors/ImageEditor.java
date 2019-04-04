@@ -200,6 +200,8 @@ public class ImageEditor extends MultiPageEditorPart implements IPersistableEdit
 
 	@Override
 	public void saveState(IMemento memento) {
-		plotDataEditor.getPlottingSystem().savePreferences(memento);
+		if (plotDataEditor != null) {
+			plotDataEditor.getPlottingSystem().savePreferences(memento);
+		}
 	}
 }
