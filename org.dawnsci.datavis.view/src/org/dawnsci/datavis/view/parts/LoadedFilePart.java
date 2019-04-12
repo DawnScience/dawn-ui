@@ -18,7 +18,6 @@ import org.apache.commons.io.filefilter.WildcardFileFilter;
 import org.dawnsci.datavis.api.IRecentPlaces;
 import org.dawnsci.datavis.model.FileControllerStateEvent;
 import org.dawnsci.datavis.model.FileControllerStateEventListener;
-import org.dawnsci.datavis.model.FileControllerUtils;
 import org.dawnsci.datavis.model.IFileController;
 import org.dawnsci.datavis.model.IRefreshable;
 import org.dawnsci.datavis.model.LoadedFile;

@@ -17,7 +17,6 @@ import org.dawnsci.plotting.tools.Activator;
 import org.dawnsci.plotting.tools.ServiceLoader;
 import org.dawnsci.plotting.tools.utils.ToolUtils;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.Status;
 import org.eclipse.dawnsci.analysis.api.processing.IOperation;
 import org.eclipse.dawnsci.analysis.api.roi.IROI;
 import org.eclipse.dawnsci.analysis.dataset.roi.RectangularROI;
