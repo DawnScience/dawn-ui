@@ -62,7 +62,6 @@ import org.eclipse.january.dataset.IDataListener;
 import org.eclipse.january.dataset.IDataset;
 import org.eclipse.january.dataset.IDynamicShape;
 import org.eclipse.january.dataset.ILazyDataset;
-import org.eclipse.january.dataset.IndexIterator;
 import org.eclipse.january.dataset.Maths;
 import org.eclipse.january.dataset.RGBDataset;
 import org.eclipse.january.dataset.ShapeUtils;
@@ -89,9 +88,9 @@ import org.slf4j.LoggerFactory;
  *
  */
 public class ImageTrace extends Figure implements IImageTrace, IAxisListener, ITraceContainer, IDataListener {
-	
+
 	private static final Logger logger = LoggerFactory.getLogger(ImageTrace.class);
-	
+
 	private static final int MINIMUM_ZOOM_SIZE  = 2;
 	private static final int MINIMUM_LABEL_SIZE = 10;
 
@@ -119,9 +118,9 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 	 */
 	private boolean          isLabelZoom;
 
-    /**
-     * Controls of the image should be downsampled and the ImageData recreated.
-     */
+	/**
+	 * Controls of the image should be downsampled and the ImageData recreated.
+	 */
 	private boolean          imageCreationAllowed = true;
 
 	/**
@@ -137,19 +136,19 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 	private IImageService service;
 
 	private boolean xTicksAtEnd, yTicksAtEnd;
-	
+
 	private double[] globalRange;
-		
+
 	public ImageTrace(final String name, 
-			          final ColorMapRamp intensityScale) {
-		
+			final ColorMapRamp intensityScale) {
+
 		this.name  = name;
 		this.intensityScale = intensityScale;
 
 		this.service = ServiceHolder.getImageService();
 		this.imageServiceBean = service.createBeanFromPreferences();
 		setPaletteName(getPreferenceStore().getString(BasePlottingConstants.COLOUR_SCHEME));
-		
+
 		downsampleType = DownsampleType.forLabel(getPreferenceStore().getString(BasePlottingConstants.DOWNSAMPLE_PREF));
 
 	}
@@ -286,7 +285,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 	public void setPaletteName(String paletteName) {
 		this.paletteName = paletteName;
 	}
-	
+
 	@Override
 	public void setPalette(String paletteName) {
 		IPaletteService pservice = ServiceHolder.getPaletteService();
@@ -303,13 +302,13 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 		FORCE_REIMAGE, 
 		REHISTOGRAM;
 	}
-	
 
-    /**
-     * Get the current image which can be used by the composite trace.
-     * @return
-     * @throws Exception 
-     */
+
+	/**
+	 * Get the current image which can be used by the composite trace.
+	 * @return
+	 * @throws Exception 
+	 */
 	protected ScaledImageData getScaledImageData() {	
 		return scaledData;
 	}
@@ -339,7 +338,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 		}
 		return true;
 	}
-	
+
 	/**
 	 * Object to hold the current scaled image, the location it should be drawn
 	 * and the downsampled image data which it used.
@@ -362,165 +361,165 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 	 * @return true if scaledImage created.
 	 */
 	protected boolean createScaledImage(ImageScaleType rescaleType, final IProgressMonitor monitor) {
-			
+
 		if (!imageCreationAllowed) return false;
-		
+
 		if (getXAxis() == null || getYAxis() == null) {
 			return false;
 		}
 		boolean requireImageGeneration = scaledData.getDownsampledImageData() == null ||
-				                         rescaleType==ImageScaleType.FORCE_REIMAGE || 
-				                         rescaleType==ImageScaleType.REHISTOGRAM; // We know that it is needed
-		
-		// If we just changed downsample scale, we force the update.
-		// This allows user resizes of the plot area to be picked up
-		// and the larger data size used if it fits.
-		if (!requireImageGeneration && rescaleType == ImageScaleType.REIMAGE_ALLOWED && currentDownSampleBin > 0) {
-			if (getDownsampleBin() != currentDownSampleBin) {
-				requireImageGeneration = true;
-			}
-		}
+				rescaleType==ImageScaleType.FORCE_REIMAGE || 
+				rescaleType==ImageScaleType.REHISTOGRAM; // We know that it is needed
 
-		final XYRegionGraph graph  = (XYRegionGraph)getXAxis().getParent();
-		final Rectangle     bounds = graph.getRegionArea().getBounds();
-		if (bounds.width < 1 || bounds.height < 1) return false;
-
-		scaledData.setX(bounds.x);
-		scaledData.setY(bounds.y);
-		scaledData.setXoffset(0);
-		scaledData.setYoffset(0);
-
-		if (!imageCreationAllowed) return false;
-		if (monitor!=null && monitor.isCanceled()) return false;
-
-		if (requireImageGeneration) {
-			boolean ok = createDownsampledImageData(rescaleType, monitor);
-			if (!ok) return false;
-		}
-
-		if (monitor!=null && monitor.isCanceled()) return false;
-		if (scaledData.getDownsampledImageData() == null) return false;
-
-		try {
-			isMaximumZoom = false;
-			isLabelZoom   = false;
-
-			scaledData.disposeImage();
-			ImageData imageData = scaledData.getDownsampledImageData();
-			if (imageData != null && imageData.width == bounds.width && imageData.height == bounds.height) {
-				// No slice, faster
-				if (monitor!=null && monitor.isCanceled()) return false;
-				Image scaledImage  = new Image(Display.getDefault(), imageData);
-				scaledData.setScaledImage(scaledImage);
-			} else {
-
-				if (globalRange != null) {
-					return buildImageRelativeToAxes(imageData);
-				}
-
-				// slice data to get current zoom area
-				Range xRange = xAxis.getRange();
-				Range yRange = yAxis.getRange();
-
-				double xMin = xRange.getLower() / currentDownSampleBin;
-				double yMin = yRange.getLower() / currentDownSampleBin;
-				double xMax = xRange.getUpper() / currentDownSampleBin;
-				double yMax = yRange.getUpper() / currentDownSampleBin;
-				int xSize = imageData.width;
-				int ySize = imageData.height;
-				
-				// check as getLower and getUpper don't work as expected
-				if (xMax < xMin) {
-					double temp = xMax;
-					xMax = xMin;
-					xMin = temp;
-				}
-				if (yMax < yMin) {
-					double temp = yMax;
-					yMax = yMin;
-					yMin = temp;
-				}
-
-				// factors to scale image data 
-				double xScale = bounds.width / (xMax - xMin);
-				double yScale = bounds.height / (yMax - yMin);
-
-				// Deliberately get the over-sized dimensions so that the edge pixels can be smoothly panned through.
-				double xPix = Math.floor(xMin);
-				double yPix = Math.floor(yMin);
-				int fullWidth  = (int) (Math.ceil(xMax) - xPix);
-				int fullHeight = (int) (Math.ceil(yMax) - yPix);
-
-				// Force a minimum size for (zoomed-in) pixels on the system
-				if (fullWidth <= MINIMUM_ZOOM_SIZE && fullHeight <= MINIMUM_ZOOM_SIZE) {
-					isMaximumZoom = true;
-				}
-				if (fullWidth <= MINIMUM_LABEL_SIZE && fullHeight <= MINIMUM_LABEL_SIZE) {
-					isLabelZoom = true;
-				}
-
-				// These offsets are used when the scaled images is drawn to the screen.
-				double xOffset;
-				double yOffset;
-				// Deal with the origin orientations correctly.
-				ImageOrigin origin = getImageOrigin();
-				if (origin.isOnLeft()) {
-					xOffset = (xMin - xPix) * xScale;
-				} else {
-					double xPixD = xSize - xMax;
-					xPix = Math.floor(xPixD);
-					xOffset = (xPixD - xPix) * xScale;
-				}
-
-				if (origin.isOnTop()) {
-					yOffset = (yMin - yPix) * yScale;
-				} else {
-					double yPixD = ySize - yMax;
-					yPix = Math.floor(yPixD);
-					yOffset = (yPixD - yPix) * yScale;
-				}
-				if (xPix < 0 || yPix < 0 || xPix+fullWidth > xSize || yPix+fullHeight > ySize) {
-					logger.trace("Incorrect position calculated!");
-					return false; // prevent IAE in calling getPixel
-				}
-
-				// Slice the data.
-				// Pixel slice on downsampled data = fast!
-				ImageData data = sliceImageData(imageData, fullWidth, fullHeight, (int) xPix, (int) yPix, ySize);
-
-				int scaledWidth = (int) (fullWidth * xScale);
-				int scaledHeight = (int) (fullHeight * yScale);
-
-				Image scaledImage = null;
-				if (data != null) {
-					if (checkScalingAgainstScreenSize(scaledWidth, scaledHeight)) {
-						data = data.scaledTo(scaledWidth, scaledHeight);
-					} else {
-						isMaximumZoom = true;
+				// If we just changed downsample scale, we force the update.
+				// This allows user resizes of the plot area to be picked up
+				// and the larger data size used if it fits.
+				if (!requireImageGeneration && rescaleType == ImageScaleType.REIMAGE_ALLOWED && currentDownSampleBin > 0) {
+					if (getDownsampleBin() != currentDownSampleBin) {
+						requireImageGeneration = true;
 					}
-					scaledImage = new Image(Display.getDefault(), data);
 				}
-				scaledData.setXoffset(xOffset);
-				scaledData.setYoffset(yOffset);
-				scaledData.setScaledImage(scaledImage);
-			}
 
-			return true;
-		} catch (IllegalArgumentException ie) {
-			logger.error(ie.toString());
-			return false;
-		} catch (java.lang.NegativeArraySizeException allowed) {
-			return false;
-		} catch (NullPointerException ne) {
-			throw ne;
-		} catch (Throwable ne) {
-			logger.error("Image scale error!", ne);
-			return false;
-		}
+				final XYRegionGraph graph  = (XYRegionGraph)getXAxis().getParent();
+				final Rectangle     bounds = graph.getRegionArea().getBounds();
+				if (bounds.width < 1 || bounds.height < 1) return false;
+
+				scaledData.setX(bounds.x);
+				scaledData.setY(bounds.y);
+				scaledData.setXoffset(0);
+				scaledData.setYoffset(0);
+
+				if (!imageCreationAllowed) return false;
+				if (monitor!=null && monitor.isCanceled()) return false;
+
+				if (requireImageGeneration) {
+					boolean ok = createDownsampledImageData(rescaleType, monitor);
+					if (!ok) return false;
+				}
+
+				if (monitor!=null && monitor.isCanceled()) return false;
+				if (scaledData.getDownsampledImageData() == null) return false;
+
+				try {
+					isMaximumZoom = false;
+					isLabelZoom   = false;
+
+					scaledData.disposeImage();
+					ImageData imageData = scaledData.getDownsampledImageData();
+					if (imageData != null && imageData.width == bounds.width && imageData.height == bounds.height) {
+						// No slice, faster
+						if (monitor!=null && monitor.isCanceled()) return false;
+						Image scaledImage  = new Image(Display.getDefault(), imageData);
+						scaledData.setScaledImage(scaledImage);
+					} else {
+
+						if (globalRange != null) {
+							return buildImageRelativeToAxes(imageData);
+						}
+
+						// slice data to get current zoom area
+						Range xRange = xAxis.getRange();
+						Range yRange = yAxis.getRange();
+
+						double xMin = xRange.getLower() / currentDownSampleBin;
+						double yMin = yRange.getLower() / currentDownSampleBin;
+						double xMax = xRange.getUpper() / currentDownSampleBin;
+						double yMax = yRange.getUpper() / currentDownSampleBin;
+						int xSize = imageData.width;
+						int ySize = imageData.height;
+
+						// check as getLower and getUpper don't work as expected
+						if (xMax < xMin) {
+							double temp = xMax;
+							xMax = xMin;
+							xMin = temp;
+						}
+						if (yMax < yMin) {
+							double temp = yMax;
+							yMax = yMin;
+							yMin = temp;
+						}
+
+						// factors to scale image data 
+						double xScale = bounds.width / (xMax - xMin);
+						double yScale = bounds.height / (yMax - yMin);
+
+						// Deliberately get the over-sized dimensions so that the edge pixels can be smoothly panned through.
+						double xPix = Math.floor(xMin);
+						double yPix = Math.floor(yMin);
+						int fullWidth  = (int) (Math.ceil(xMax) - xPix);
+						int fullHeight = (int) (Math.ceil(yMax) - yPix);
+
+						// Force a minimum size for (zoomed-in) pixels on the system
+						if (fullWidth <= MINIMUM_ZOOM_SIZE && fullHeight <= MINIMUM_ZOOM_SIZE) {
+							isMaximumZoom = true;
+						}
+						if (fullWidth <= MINIMUM_LABEL_SIZE && fullHeight <= MINIMUM_LABEL_SIZE) {
+							isLabelZoom = true;
+						}
+
+						// These offsets are used when the scaled images is drawn to the screen.
+						double xOffset;
+						double yOffset;
+						// Deal with the origin orientations correctly.
+						ImageOrigin origin = getImageOrigin();
+						if (origin.isOnLeft()) {
+							xOffset = (xMin - xPix) * xScale;
+						} else {
+							double xPixD = xSize - xMax;
+							xPix = Math.floor(xPixD);
+							xOffset = (xPixD - xPix) * xScale;
+						}
+
+						if (origin.isOnTop()) {
+							yOffset = (yMin - yPix) * yScale;
+						} else {
+							double yPixD = ySize - yMax;
+							yPix = Math.floor(yPixD);
+							yOffset = (yPixD - yPix) * yScale;
+						}
+						if (xPix < 0 || yPix < 0 || xPix+fullWidth > xSize || yPix+fullHeight > ySize) {
+							logger.trace("Incorrect position calculated!");
+							return false; // prevent IAE in calling getPixel
+						}
+
+						// Slice the data.
+						// Pixel slice on downsampled data = fast!
+						ImageData data = sliceImageData(imageData, fullWidth, fullHeight, (int) xPix, (int) yPix, ySize);
+
+						int scaledWidth = (int) (fullWidth * xScale);
+						int scaledHeight = (int) (fullHeight * yScale);
+
+						Image scaledImage = null;
+						if (data != null) {
+							if (checkScalingAgainstScreenSize(scaledWidth, scaledHeight)) {
+								data = data.scaledTo(scaledWidth, scaledHeight);
+							} else {
+								isMaximumZoom = true;
+							}
+							scaledImage = new Image(Display.getDefault(), data);
+						}
+						scaledData.setXoffset(xOffset);
+						scaledData.setYoffset(yOffset);
+						scaledData.setScaledImage(scaledImage);
+					}
+
+					return true;
+				} catch (IllegalArgumentException ie) {
+					logger.error(ie.toString());
+					return false;
+				} catch (java.lang.NegativeArraySizeException allowed) {
+					return false;
+				} catch (NullPointerException ne) {
+					throw ne;
+				} catch (Throwable ne) {
+					logger.error("Image scale error!", ne);
+					return false;
+				}
 	}
 
 	private boolean buildImageRelativeToAxes(ImageData imageData) {
-		
+
 		// slice data to get current zoom area
 		/**     
 		 *      x1,y1--------------x2,y2
@@ -529,122 +528,57 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 		 *        |                  |
 		 *      x3,y3--------------x4,y4
 		 */
-		
+
 		ImageData data = imageData;
-		
+
 		if (getAxes() == null) return false;
-		
-		IDataset xAxis = getAxes().get(0);
-		IDataset yAxis = getAxes().get(1);
-		
+
+		Dataset xAxis = DatasetUtils.convertToDataset(getAxes().get(0));
+		Dataset yAxis = DatasetUtils.convertToDataset(getAxes().get(1));
+
 		if (xAxis == null || yAxis == null) return false;
-		
+
 		if (xAxis.getSize() == 1 && yAxis.getSize() == 1) return false;
-		
+
 		if (xAxis.getSize() == 1) {
 			double step = Math.abs(yAxis.getDouble(0)-yAxis.getDouble(1));
 			double d = xAxis.getDouble();
 			xAxis = DatasetFactory.createFromObject(new double[]{ d, d + step});
 		}
-		
+
 		if (yAxis.getSize() == 1) {
 			double step = Math.abs(xAxis.getDouble(0)-xAxis.getDouble(1));
 			double d = yAxis.getDouble();
 			yAxis = DatasetFactory.createFromObject(new double[]{ d, d + step});
 		}
 
-		boolean xDataInc = xAxis.getDouble(0) < xAxis.getDouble(-1);
-		boolean yDataInc = yAxis.getDouble(0) < yAxis.getDouble(-1);
+		int[] xvalues = generateStartLengthPositionArray(xAxis,getXAxis());
+		int xPix = xvalues[0];
+		int width = xvalues[1];
+		int xPos = xvalues[2];
+		int scaledWidth = xvalues[3];
 
-		//Get the axes coordinates visible on screen
-		double[] da = getImageCoords(1, false, xAxis, yAxis);
-		double minX = da[0];
-		double minY = da[1];
-		double maxX = da[2];
-		double maxY = da[3];
-		
-		//Get the data points per axis step
-		double xAxValPerPoint =  Math.abs(getAxisValuePerDataPoint(minX,maxX,xAxis));
-		double yAxValPerPoint =  Math.abs(getAxisValuePerDataPoint(minY,maxY,yAxis));
-		
-		if (Double.isNaN(xAxValPerPoint)|| Double.isNaN(yAxValPerPoint)) {
+		if (width <= 0) {
 			return false;
 		}
-		
-		//get x and y start position in data array (floored)
-		int xPix = getPositionInAxis(xDataInc ? minX : maxX,xAxis,true)/currentDownSampleBin;
-		int yPix = getPositionInAxis(yDataInc ? minY : maxY,yAxis,true)/currentDownSampleBin;
-		
-		//determine sub pixel offset in data frame
-		double xdiff = (xAxis.getDouble(xPix)-(xDataInc ? minX : maxX));
-		double ydiff = (yAxis.getDouble(yPix)-(yDataInc ? minY : maxY));
-		
-		//Determine the corresponding number of data points in x and y (floor min, ceil max)
-		int xDataPoints = getNumberOfDataPoints(minX,maxX,getAxes().get(0), xDataInc);
-		int yDataPoints = getNumberOfDataPoints(minY,maxY,getAxes().get(1), yDataInc);
-		
-		int xDataPointsDS = xDataPoints/currentDownSampleBin;
-		int yDataPointsDS = yDataPoints/currentDownSampleBin;
-		
-		//Get matching screen co-ordinates in pixels
-		double[] screenCoords = getImageCoords(1, true, xAxis, yAxis);
-		
-		//calculate full number of data points
-		double realx = (maxX-minX)/xAxValPerPoint;
-		double realy = (maxY-minY)/yAxValPerPoint;
-		
-		// Ratio of screen pixels to full number of data points
-		double xScale = Math.abs((screenCoords[2]-screenCoords[0]) / (realx));
-		double yScale = Math.abs((screenCoords[3]-screenCoords[1]) / (realy));
-		
-		//FIXME Handle minimum cases
-		
-		// Size of image data in index
-		final int xSize = imageData.width;
-		final int ySize = imageData.height;
-		
-		double xmin = xAxis.min(true).doubleValue();
-		double xmax = xAxis.max(true).doubleValue();
-		double ymin = yAxis.min(true).doubleValue();
-		double ymax = yAxis.max(true).doubleValue();
-		
-		double xLen = xAxis.getSize();
-		double yLen = yAxis.getSize();
-		
-		double xp = ((xmax-xmin)/(xLen-1))/2;
-		double yp = ((ymax-ymin)/(yLen-1))/2;
-		
-		double xOffset = (((-xdiff+xp)/xAxValPerPoint))*xScale;
-		double yOffset = (((-ydiff+yp)/yAxValPerPoint))*yScale;
-//		xOffset = 0;
-		
 
-		//FIXME origins
-		int width  = xPix+xDataPointsDS > xSize  ? Math.min(xSize, xDataPointsDS) : xDataPointsDS;
-		int height = yPix+yDataPointsDS > ySize  ? Math.min(ySize, yDataPointsDS) : yDataPointsDS;
-		
-		int scaledWidth  = Math.max(1, (int) (xDataPoints*xScale));
-		int scaledHeight = Math.max(1, (int) (yDataPoints*yScale));
-		
-//		 Force a minimum size on the system
-//		if (width <= MINIMUM_ZOOM_SIZE) {
-//			if (width > imageData.width) width = MINIMUM_ZOOM_SIZE;
-//			isMaximumZoom = true;
-//		}
-//		if (height <= MINIMUM_ZOOM_SIZE) {
-//			if (height > imageData.height) height = MINIMUM_ZOOM_SIZE;
-//			isMaximumZoom = true;
-//		}
-		
+		int[] yvalues = generateStartLengthPositionArray(yAxis,getYAxis());
+		int yPix = yvalues[0];
+		int height = yvalues[1];
+		int yPos = yvalues[2];
+		int scaledHeight = yvalues[3];
+
+		if (height <= 0) {
+			return false;
+		}
+
+		int ySize = imageData.height;
+
 		try {
-			// Slice the data.
-			// Pixel slice on downsampled data = fast!
+
 			data = sliceImageData(data, width, height, xPix, yPix, ySize);
 
-			boolean proceed = checkScalingAgainstScreenSize(scaledWidth, scaledHeight);
-
-			if (!xDataInc) scaledWidth*=-1;
-			if (!yDataInc) scaledHeight*=-1;
+			boolean proceed = checkScalingAgainstScreenSize(Math.abs(scaledWidth), Math.abs(scaledHeight));
 
 			Image scaledImage = null;
 			if (data != null) {
@@ -655,15 +589,16 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 				}
 				scaledImage = new Image(Display.getDefault(), data);
 			}
-			
-			scaledData.setX(screenCoords[0]);
-			scaledData.setY(screenCoords[1]);
-			scaledData.setXoffset(xOffset);
-			scaledData.setYoffset(yOffset);
+
+
+			scaledData.setX(xPos);
+			scaledData.setY(yPos);
+			scaledData.setXoffset(0);
+			scaledData.setYoffset(0);
 			scaledData.setScaledImage(scaledImage);
-			
+
 		} catch (IllegalArgumentException ne) {
-			
+
 			logger.error("Image scaling has malfunctioned");
 			logger.debug("Trace name = "+getName());
 			logger.debug("scaleWidth = "+scaledWidth);
@@ -672,15 +607,75 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 			logger.debug("height = "+height);
 			logger.debug("xPix = "+xPix);
 			logger.debug("yPix = "+yPix);
-			
+
 			throw ne;
 		}
-		
-		
+
+
 		return true;
-		
+
 	}
 	
+	/**
+	 * 
+	 * @param axis
+	 * @param plotAxis
+	 * @return values for the start index into the data, the size of the data, the screen pixel position and the scaling
+	 */
+	private int[] generateStartLengthPositionArray(Dataset axis, AspectAxis plotAxis) {
+		boolean dataInc = axis.getDouble(0) < axis.getDouble(-1);
+		int end = axis.getSize()-1;
+		
+		double minData = axis.min().doubleValue();
+		double maxData = axis.max().doubleValue();
+
+		double stepData = (maxData - minData)/(end);
+
+		//adjust axis min/max so centre of pixel is at axis value
+		minData -= stepData/2;
+		maxData += stepData/2;
+		
+
+		//get data coords visible on screen
+		double[] visibleLimits = calculatePlotDataLimits(minData, maxData, plotAxis);
+
+		double minPlot = visibleLimits[0];
+		double maxPlot = visibleLimits[1];
+
+		//get start (floored) and stop (ceiling) position in data array
+		//assume linear steps
+		double startIdxFrac = (minPlot - minData)/stepData;
+
+		int startIdx = (int)Math.floor(startIdxFrac);
+
+		double stopIdxFrac = (maxPlot -minData)/stepData;
+
+		int stopIdx = (int)Math.ceil(stopIdxFrac);
+
+		stopIdx = stopIdx <  end ? stopIdx : end;
+
+		int sizeData = stopIdx - startIdx + 1;
+
+		//get on screen pixel location to draw image
+		int[] visibleLimitsPixel = getPixelDatalimits(minData + startIdx*stepData, maxData - (end-stopIdx)* stepData, plotAxis);
+
+		//calculate scaling factor
+		double pixelScale = Math.abs((visibleLimitsPixel[0]-visibleLimitsPixel[1]) / ((double)sizeData));
+
+		int scaled = Math.max(1, (int) (sizeData*pixelScale));
+		
+		//if axis not increasing
+		//flip start index and scaling
+		if (!dataInc) {
+			startIdx = end - stopIdx;
+			scaled*=-1;
+		}
+
+		return new int[] {startIdx, sizeData, visibleLimitsPixel[0], scaled};
+	}
+		
+
+
 	private ImageData sliceImageData(ImageData imageData, int width, int height, int xPix, int yPix, int ySize) {
 		ImageData data;
 		if (imageData.depth <= 8) {
@@ -722,131 +717,64 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 		this.globalRange = globalRange;
 		if (yAxis instanceof DAxis)((DAxis)yAxis).setTicksIndexBased(false);
 		if (xAxis instanceof DAxis)((DAxis)xAxis).setTicksIndexBased(false);
-//		if (xAxis instanceof AspectAxis)((AspectAxis)xAxis).setMaximumRange(globalRange[0], globalRange[1]);
-//		if (yAxis instanceof AspectAxis)((AspectAxis)yAxis).setMaximumRange(globalRange[2], globalRange[3]);
-//		xAxis.setRange(lower, upper);
+		//		if (xAxis instanceof AspectAxis)((AspectAxis)xAxis).setMaximumRange(globalRange[0], globalRange[1]);
+		//		if (yAxis instanceof AspectAxis)((AspectAxis)yAxis).setMaximumRange(globalRange[2], globalRange[3]);
+		//		xAxis.setRange(lower, upper);
 		if (xAxis instanceof DAxis)((DAxis)xAxis).setTicksAtEnds(false);
 		if (yAxis instanceof DAxis)((DAxis)yAxis).setTicksAtEnds(false);
 		updateImageDirty(ImageScaleType.FORCE_REIMAGE);
-//		performAutoscale();
+		//		performAutoscale();
 	}
-	
+
 	public double[] getGlobalRange() {
 		return globalRange;
 	}
-	
-	private final int getNumberOfDataPoints(double min, double max, IDataset axes, boolean increasing) {
-		
-		int minp = getPositionInAxis(min,axes,true);
-		int maxp = getPositionInAxis(max,axes,false);
-		
-		return increasing ? maxp-minp+1 : minp-maxp+1;
-	}
-	
-	
-	private final double getAxisValuePerDataPoint(double min, double max, IDataset axes) {
-		int minp = getPositionInAxis(min,axes);
-		int maxp = getPositionInAxis(max,axes);
-		
-		return (axes.getDouble(maxp)-axes.getDouble(minp))/(maxp-minp);
-		
-	}
-	
+
 	private final int getPositionInAxis(double val, IDataset axis) {
 		if (axis.getSize() == 1) return 0;
 		Dataset a = DatasetUtils.convertToDataset(axis.clone());
 		return Maths.abs(a.isubtract(val)).minPos()[0];
 	}
 	
-	private final int getPositionInAxis(double val, IDataset axis, boolean floor) {
-		if (axis.getSize() == 1) return 0;
-		int pos = 0;
-		double dif = 0;
-		double test = Double.MAX_VALUE;
-		Dataset a = DatasetUtils.convertToDataset(axis.clone());
-		IndexIterator it = a.getIterator();
-		while (it.hasNext()) {
-			double d = a.getDouble(it.index);
-			double ad = Math.abs(d-val);
-			if (ad < test) {
-				test = ad;
-				pos = it.index;
-				dif = d-val;
-			}
-		}
-		
-		if (floor) {
-			if (dif > 0) pos--;
-		} else {
-			if (dif < 0) pos++;
-		}
-		
-		return pos;
-		
+	private final int[] getPixelDatalimits(double min, double max, AspectAxis axis) {
+
+		int v1 = axis.getValuePosition(min, false);
+		int v2 = axis.getValuePosition(max, false);
+
+		return new int[]{v1, v2};
+
 	}
+	
+	private final double[] calculatePlotDataLimits(double minData, double maxData, AspectAxis axis) {
 
-	/**
-	 * Get the image in data coordinates  or 
-	 * pixel coordinates.
-	 * 
-	 * 
-	 * @param bin  - if the datacoordinates are downsampled, optionally set the bin.
-	 * @return x1,y1,x2,y2  where x2>x1 and y2>y1
-	 */
-	private final double[] getImageCoords(int bin, boolean pixels, IDataset x, IDataset y) {
-		
-		Range xRange = xAxis.getRange();
-		Range yRange = yAxis.getRange();
+		Range range = axis.getRange();
 
-		double minX = xRange.getLower()/bin;
-		double minY = yRange.getLower()/bin;
-		double maxX = xRange.getUpper()/bin;
-		double maxY = yRange.getUpper()/bin;
+		double min = range.getLower();
+		double max = range.getUpper();
 
 		// Make sure we have the min and max right
-		if(maxX < minX){
-			double temp = maxX;
-			maxX = minX;
-			minX = temp;
+		if(max < min){
+			double temp = max;
+			max = min;
+			min = temp;
 		}
-		if(maxY < minY){
-			double temp = maxY;
-			maxY = minY;
-			minY = temp;
-		}
-				
-		// Bind the extent of the images to the actual data
-		
-		double minXData = x.min(true).doubleValue()/bin;
-		minX = Math.max(minXData, minX);
-		
-		double maxXData = x.max(true).doubleValue()/bin;
-		maxX = Math.min(maxXData, maxX);
-		
-		double minYData = y.min(true).doubleValue()/bin;
-		minY = Math.max(minYData, minY);
 
-		double maxYData = y.max(true).doubleValue()/bin;
-		maxY = Math.min(maxYData, maxY);
-	
-		if (pixels) {
-			int x1 = xAxis.getValuePosition(minX, false);
-			int y1 = yAxis.getValuePosition(minY, false);
-			int x2 = xAxis.getValuePosition(maxX, false);
-			int y2 = yAxis.getValuePosition(maxY, false);
-			return new double[]{x1, y1, x2, y2};
-			
-		} else {
-		    return new double[]{minX, minY, maxX, maxY};
-		}
+		// Bind the extent of the images to the actual data
+
+		min= Math.max(minData, min);
+		max = Math.min(maxData, max);
+
+
+		return new double[]{min, max};
+		
 	}
 
 	private boolean createDownsampledImageData(ImageScaleType rescaleType, IProgressMonitor monitor) {
-		
+
 		try {
 			imageCreationAllowed = false;
 			if (image==null) return false;
-			
+
 			IDataset reducedFullImage = getDownsampled(image);
 
 			imageServiceBean.setImage(reducedFullImage);
@@ -858,19 +786,19 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 			} else {
 				imageServiceBean.setMask(null); // Ensure we lose the mask!
 			}
-			
+
 			if (rescaleType==ImageScaleType.REHISTOGRAM) { // Avoids changing colouring to 
-				                                           // max and min of new selection.
-				
+				// max and min of new selection.
+
 				Range xRange = getXAxis().getRange();
 				Range yRange = getYAxis().getRange();
-				
+
 				if (globalRange != null) {
 					xRange = new Range(getPositionInAxis(xRange.getLower(), getAxes().get(0)), getPositionInAxis(xRange.getUpper(), getAxes().get(0)));
 					yRange = new Range(getPositionInAxis(yRange.getLower(), getAxes().get(1)), getPositionInAxis(yRange.getUpper(), getAxes().get(1)));
 				}
-				
-				
+
+
 				Dataset  slice     = slice(yRange, xRange, getData());
 				ImageServiceBean histoBean = imageServiceBean.clone();
 				histoBean.setImage(slice);
@@ -880,11 +808,11 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 				setMax(fa[1]);
 
 			}
-							
+
 			this.imageServiceBean.setAlpha(getAlpha());
 			ImageData imageData   = service.getImageData(imageServiceBean);
 			scaledData.setDownsampledImageData(imageData);
-			
+
 			try {
 				ImageServiceBean intensityScaleBean = imageServiceBean.clone();
 				intensityScaleBean.setOrigin(ImageOrigin.TOP_LEFT);
@@ -922,12 +850,12 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 	private Map<Integer, Reference<Dataset>> mipMap;
 	private Map<Integer, Reference<Dataset>> maskMap;
 	private Collection<IDownSampleListener> downsampleListeners;
-	
+
 	private IDataset getDownsampled(Dataset image) {
-	
+
 		return getDownsampled(image, getDownsampleTypeDiamond());
- 	}
-	
+	}
+
 	/**
 	 * Uses caches based on bin, not DownsampleMode.
 	 * @param image
@@ -935,55 +863,55 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 	 * @return
 	 */
 	private Dataset getDownsampled(Dataset image, DownsampleMode mode) {
-		
+
 		// Down sample, no point histogramming the whole thing
-        final int bin = getDownsampleBin();
-        
-        boolean newBin = false;
-        if (currentDownSampleBin!=bin) newBin = true;
-        
-        try {
-	        this.currentDownSampleBin = bin;
+		final int bin = getDownsampleBin();
+
+		boolean newBin = false;
+		if (currentDownSampleBin!=bin) newBin = true;
+
+		try {
+			this.currentDownSampleBin = bin;
 			if (bin==1) {
-		        logger.trace("No downsample bin (or bin=1)");
+				logger.trace("No downsample bin (or bin=1)");
 				return image; // nothing to downsample
 			}
-			
+
 			if (image.getDType()!=Dataset.BOOL) {
 				if (mipMap!=null && mipMap.containsKey(bin) && mipMap.get(bin).get()!=null) {
-			        logger.trace("Downsample bin used, "+bin);
+					logger.trace("Downsample bin used, "+bin);
 					return mipMap.get(bin).get();
 				}
 			} else {
 				if (maskMap!=null && maskMap.containsKey(bin) && maskMap.get(bin).get()!=null) {
-			        logger.trace("Downsample mask bin used, "+bin);
+					logger.trace("Downsample mask bin used, "+bin);
 					return maskMap.get(bin).get();
 				}
 			}
-			
+
 			final Downsample downSampler = new Downsample(mode, new int[]{bin,bin});
 			List<? extends IDataset>   sets = downSampler.value(image);
 			final Dataset set = DatasetUtils.convertToDataset(sets.get(0));
-			
+
 			if (image.getDType()!=Dataset.BOOL) {
 				if (mipMap==null) mipMap = new HashMap<Integer,Reference<Dataset>>(3);
 				mipMap.put(bin, new SoftReference<Dataset>(set));
-		        logger.trace("Downsample bin created, "+bin);
+				logger.trace("Downsample bin created, "+bin);
 			} else {
 				if (maskMap==null) maskMap = new HashMap<Integer,Reference<Dataset>>(3);
 				maskMap.put(bin, new SoftReference<Dataset>(set));
-		        logger.trace("Downsample mask bin created, "+bin);
+				logger.trace("Downsample mask bin created, "+bin);
 			}
-	      
+
 			return set;
-			
-        } finally {
-        	if (newBin) { // We fire a downsample event.
-        		fireDownsampleListeners(new DownSampleEvent(this, bin));
-        	}
-        }
+
+		} finally {
+			if (newBin) { // We fire a downsample event.
+				fireDownsampleListeners(new DownSampleEvent(this, bin));
+			}
+		}
 	}
-	
+
 	protected void fireDownsampleListeners(DownSampleEvent evt) {
 		if (downsampleListeners==null) return;
 		for (IDownSampleListener l : downsampleListeners) l.downSampleChanged(evt);
@@ -993,7 +921,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 	public int getBin() {
 		return currentDownSampleBin;
 	}
-	
+
 	/**
 	 * Add listener to be notifed if the dawnsampling changes.
 	 * @param l
@@ -1003,7 +931,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 		if (downsampleListeners==null) downsampleListeners = new HashSet<IDownSampleListener>(7);
 		downsampleListeners.add(l);
 	}
-	
+
 	/**
 	 * Remove listener so that it is not notified.
 	 * @param l
@@ -1013,12 +941,12 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 		if (downsampleListeners==null) return;
 		downsampleListeners.remove(l);
 	}
-	
+
 	@Override
 	public IDataset getDownsampled() {
 		return getDownsampled(getImage());
 	}
-	
+
 	public IDataset getDownsampledMask() {
 		if (getMask()==null) return null;
 		return getDownsampled(getMask(), DownsampleMode.MINIMUM);
@@ -1035,13 +963,17 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 	 * @return
 	 */
 	public int getDownsampleBin() {
-		
+
+		if (globalRange != null) {
+			return 1;
+		}
+
 		final XYRegionGraph graph      = (XYRegionGraph)getXAxis().getParent();
 		final Rectangle     realBounds = graph.getRegionArea().getBounds();
-		
+
 		double rwidth  = getSpan(getXAxis());
 		double rheight = getSpan(getYAxis());
- 
+
 		int iwidth  = realBounds.width;
 		int iheight = realBounds.height;
 
@@ -1058,6 +990,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 		double sixtyF = dataSide/64;
 		if (ret>sixtyF) ret = (int)sixtyF; // No need to round, int portion accurate enough
 		if (ret<1)      ret = 1;
+
 		return ret;
 	}
 
@@ -1085,7 +1018,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 			}
 			lastAspectRatio = isKeepAspectRatio();
 		}
-		
+
 		if (dirty != null) {
 			boolean imageReady = createScaledImage(dirty, null);
 			dirty = null;
@@ -1095,12 +1028,12 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 		}
 
 		graphics.pushState();
-		
+
 		// Offsets and scaled image are calculated in the createScaledImage method.
 		if (scaledData.getScaledImage()!=null) {
 			graphics.drawImage(scaledData.getScaledImage(), scaledData.getXPosition(), scaledData.getYPosition());
 		}
-		
+
 		if (isLabelZoom && plottingSystem.isShowValueLabels() && scaledData!=null) {
 			if (intensityLabelPainter==null) intensityLabelPainter = new IntensityLabelPainter(plottingSystem, this);
 			intensityLabelPainter.paintIntensityLabels(graphics);
@@ -1112,7 +1045,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 	private boolean isKeepAspectRatio() {
 		return getXAxis().isKeepAspect() && getYAxis().isKeepAspect();
 	}
-	
+
 	public void sleep() {
 		if (mipMap!=null)           mipMap.clear();
 		if (maskMap!=null)          maskMap.clear();
@@ -1122,12 +1055,12 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 		if (mipMap!=null)           mipMap.clear();
 		if (maskMap!=null)          maskMap.clear();
 		scaledData.disposeImage();
-		
+
 		if (paletteListeners!=null) paletteListeners.clear();
 		paletteListeners = null;
 		if (downsampleListeners!=null) downsampleListeners.clear();
 		downsampleListeners = null;
-		
+
 		if (getParent()!=null) getParent().remove(this);
 		xAxis.removeListener(this);
 		yAxis.removeListener(this);
@@ -1137,16 +1070,16 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 
 		axisRedrawActive = false;
 		if (imageServiceBean!=null) imageServiceBean.dispose();
-		
+
 		this.imageServiceBean = null;
 		this.service          = null;
 		this.intensityScale   = null;
-		
+
 		if (dynamic != null) {
 			dynamic.removeDataListener(this);
 			dynamic = null;
 		}
-		
+
 		this.image            = null;
 		this.rgbDataset       = null;
 		this.fullMask         = null;
@@ -1162,7 +1095,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 	public Dataset getData() {
 		return image;
 	}
-	
+
 	@Override
 	public IDataset getRGBData() {
 		return rgbDataset;
@@ -1176,7 +1109,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 	 * @return
 	 */
 	private final Dataset slice(Range xr, Range yr, final Dataset data) {
-		
+
 		// Check that a slice needed, this speeds up the initial show of the image.
 		final int[] shape = data.getShape();
 		final int[] imageRanges = getImageBounds(shape, getImageOrigin());
@@ -1184,13 +1117,13 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 		if (imageRanges!=null && Arrays.equals(imageRanges, bounds)) {
 			return data;
 		}
-		
+
 		int[] xRange = getRange(bounds, shape[0], 0, false);
 		int[] yRange = getRange(bounds, shape[1], 1, false);		
 
 		try {
 			return data.getSliceView(new int[]{xRange[0],yRange[0]}, new int[]{xRange[1],yRange[1]}, null);
-			
+
 		} catch (IllegalArgumentException iae) {
 			logger.error("Cannot slice image", iae);
 			return data;
@@ -1200,18 +1133,18 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 	private static final int[] getRange(int[] bounds, int side, int index, boolean inverted) {
 		int start = bounds[index];
 		if (inverted) start = side-start;
-		
+
 		int stop  = bounds[2+index];
 		if (inverted) stop = side-stop;
 
 		if (start>stop) {
 			start = bounds[2+index];
 			if (inverted) start = side-start;
-			
+
 			stop  = bounds[index];
 			if (inverted) stop = side-stop;
 		}
-		
+
 		return new int[]{start, stop};
 	}
 
@@ -1270,13 +1203,13 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 	}
 
 	private void updateImageDirty(ImageScaleType type) {
-		
+
 		if (dirty == null) dirty = type;
-		
+
 		if (dirty.ordinal() < type.ordinal()) {
 			dirty = type;
 		}
-		
+
 	}
 
 	private void setAxisRedrawActive(boolean b) {
@@ -1299,7 +1232,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 			yAxis.setRange(globalRange[3], globalRange[2]);
 			return;
 		}
-	
+
 		final int[] shape = getImageShape();
 		switch(getImageOrigin()) {
 		case TOP_LEFT:
@@ -1360,13 +1293,13 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 	 * Creates new axis bounds, updates the label data set
 	 */
 	private void createAxisBounds() {
-		
+
 		if (globalRange != null) {
 			((AspectAxis)getXAxis()).setTitle(axes.get(0).getName());
 			((AspectAxis)getYAxis()).setTitle(axes.get(1).getName());
 			return;
 		}
-		
+
 		final int[] shape = getImageShape();
 		if (getImageOrigin().isOnLeadingDiagonal()) {
 			setupAxis(getXAxis(), new Range(0,shape[1]), axes!=null&&axes.size()>0 ? axes.get(0) : null);
@@ -1387,10 +1320,10 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 		if (imageServiceBean==null) return ImageOrigin.TOP_LEFT;
 		return imageServiceBean.getOrigin();
 	}
-	
-	
+
+
 	private boolean rescaleHistogram = true;
-	
+
 	public boolean isRescaleHistogram() {
 		return rescaleHistogram;
 	}
@@ -1436,9 +1369,9 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 		try {
 			final IDataset slice = DatasetUtils.sliceAndConvertLazyDataset(dynamic.getDataset());
 			if (Display.getDefault().getThread()==Thread.currentThread()) {
-			    setDataInternal(slice, axes, plottingSystem.isRescale());
-			    updateImageDirty(ImageScaleType.FORCE_REIMAGE);
-			    repaint();
+				setDataInternal(slice, axes, plottingSystem.isRescale());
+				updateImageDirty(ImageScaleType.FORCE_REIMAGE);
+				repaint();
 			} else {
 				Display.getDefault().syncExec(new Runnable() {
 					public void run() {
@@ -1450,10 +1383,10 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 			}
 		} catch (DatasetException e) {
 			// TODO Auto-generated catch block
-//			e.printStackTrace();
+			//			e.printStackTrace();
 		}
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	private boolean setDataInternal(ILazyDataset lazy, List<? extends IDataset> axes, boolean performAuto) {
 
@@ -1475,14 +1408,14 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 			if (imageServiceBean==null){ 
 				imageServiceBean = new ImageServiceBean();
 			}
-			
+
 			imageServiceBean.setImage(im);
-			
+
 			imageServiceBean.setLogColorScale(getPreferenceStore().getBoolean(PlottingConstants.CM_LOGSCALE));
 			//shouldn't rehistogram here, may not be UI thread
-//			if(imageServiceBean.isLogColorScale())
-//				rehistogram();
-			
+			//			if(imageServiceBean.isLogColorScale())
+			//				rehistogram();
+
 			return false;
 		}
 
@@ -1505,7 +1438,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 			}
 		} catch (Throwable ignored) {
 			// We allow things to proceed without a warning.
-//			ignored.printStackTrace();
+			//			ignored.printStackTrace();
 		}
 
 		// The image is drawn low y to the top left but the axes are low y to the bottom right
@@ -1516,17 +1449,17 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 		this.image = im;
 		if (this.mipMap!=null)  mipMap.clear();
 		scaledData.disposeImage();
-		
+
 		if (imageServiceBean==null) imageServiceBean = new ImageServiceBean();
 		imageServiceBean.setImage(im);
-		
+
 		if (service==null) service = (IImageService)PlatformUI.getWorkbench().getService(IImageService.class);
 		if (rescaleHistogram) {
 			final double[] fa = service.getFastStatistics(imageServiceBean);
 			setMin(fa[0]);
 			setMax(fa[1]);
 		}
-		
+
 		setAxes(axes, performAuto);
 
 		if (plottingSystem!=null) try {
@@ -1536,7 +1469,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 		} catch (Throwable ignored) {
 			// We allow things to proceed without a warning.
 		}
-		
+
 		try {
 			final ScopedPreferenceStore store = new ScopedPreferenceStore(InstanceScope.INSTANCE, IPlottingSystem.PREFERENCE_STORE);
 			if (store.getBoolean(PlottingConstants.SHOW_INTENSITY)) {
@@ -1553,13 +1486,13 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 	@Override
 	public void setAxes(List<? extends IDataset> axes, boolean performAuto) {
 		this.axes  = (List<IDataset>) axes;
-		
+
 		if (getXAxis() == null || getYAxis() == null) {
 			return;
 		}
-		
+
 		createAxisBounds();
-		
+
 		if (axes==null) {
 			getXAxis().setTitle("");
 			getYAxis().setTitle("");
@@ -1568,27 +1501,27 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 		} else if (axes.get(1)==null) {
 			getYAxis().setTitle("");
 		}
-		
+
 		if (globalRange != null && xAxis instanceof AspectAxis && yAxis instanceof AspectAxis) {
-			
+
 			AspectAxis ax = (AspectAxis)xAxis;
 			AspectAxis ay = (AspectAxis)yAxis;
-			
+
 			if (ax.isKeepAspect() && ay.isKeepAspect()) {
 				ax.setKeepAspectWith(ay);
 				ay.setKeepAspectWith(ax);
 			}
 		}
-		
+
 		if (performAuto) {
-	 		try {
+			try {
 				setAxisRedrawActive(false);
 				performAutoscale();
 			} finally {
 				setAxisRedrawActive(true);
 			}
 		} else {
-//			createScaledImage(ImageScaleType.FORCE_REIMAGE, null);
+			//			createScaledImage(ImageScaleType.FORCE_REIMAGE, null);
 			updateImageDirty(ImageScaleType.FORCE_REIMAGE);
 			repaint();
 		}
@@ -1601,7 +1534,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 
 	public void setMin(Number min) {
 		if (imageServiceBean==null) return;
-		
+
 		imageServiceBean.setMin(min);
 		try {
 			intensityScale.setMin(min.doubleValue());
@@ -1615,9 +1548,9 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 	public Number getMax() {
 		return imageServiceBean.getMax();
 	}
-	
+
 	public void setMax(Number max) {
-		
+
 		if (imageServiceBean==null) return;
 		imageServiceBean.setMax(max);
 		try {
@@ -1648,8 +1581,8 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 		if (paletteListeners==null) return;
 		paletteListeners.remove(pl);
 	}
-	
-	
+
+
 	private void firePaletteDataListeners(PaletteData paletteData) {
 		if (paletteListeners==null) return;
 		final PaletteEvent evt = new PaletteEvent(this, getPaletteData()); // Important do not let Mark get at it :)
@@ -1697,22 +1630,22 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 		final PaletteEvent evt = new PaletteEvent(this, getPaletteData());
 		for (IPaletteListener pl : paletteListeners) pl.imageOriginChanged(evt);
 	}
-	
+
 	private void fireSetRescaleListeners() {
 		if (paletteListeners==null) return;
 		if (!imageCreationAllowed)  return;
 		final PaletteEvent evt = new PaletteEvent(this, getPaletteData());
 		for (IPaletteListener pl : paletteListeners) pl.rescaleHistogramChanged(evt);
 	}
-	
+
 	@Override
 	public DownsampleType getDownsampleType() {
 		return downsampleType;
 	}
-	
+
 	@Override
 	public void setDownsampleType(DownsampleType type) {
-		
+
 		if (this.mipMap!=null)  mipMap.clear();
 		if (this.maskMap!=null) maskMap.clear();
 		this.downsampleType = type;
@@ -1746,10 +1679,10 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 		fireMinDataListeners();
 		repaint();
 	}
-	
+
 	public void remask() {
 		if (imageServiceBean==null) return;
-		
+
 		createScaledImage(rescaleHistogram ? ImageScaleType.REHISTOGRAM : ImageScaleType.FORCE_REIMAGE, null);
 
 		// Max and min changed in all likely-hood
@@ -1757,7 +1690,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 		repaint();
 	}
 
-	
+
 	@Override
 	public List<IDataset> getAxes() {
 		return (List<IDataset>) axes;
@@ -1772,13 +1705,13 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 		if (imageServiceBean==null) return null;
 		return imageServiceBean.getHistogramType();
 	}
-	
+
 	/**
 	 * Sets the histo type.
 	 */
 	@Override
 	public boolean setHistoType(HistoType type) {
-		
+
 		if (imageServiceBean==null) return false;
 		HistoType orig = imageServiceBean.getHistogramType();
 		if (orig == type) { // do nothing (especially if min/max are changed)
@@ -1787,7 +1720,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 
 		imageServiceBean.setHistogramType(type);
 		getPreferenceStore().setValue(BasePlottingConstants.HISTO_PREF, type.getLabel());
-//		boolean histoOk = createScaledImage(ImageScaleType.REHISTOGRAM, null);
+		//		boolean histoOk = createScaledImage(ImageScaleType.REHISTOGRAM, null);
 		updateImageDirty(ImageScaleType.REHISTOGRAM);
 		repaint();
 
@@ -1803,7 +1736,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 	public void setTrace(ITrace trace) {
 		// Does nothing, you cannot change the trace, this is the trace.
 	}
-	
+
 	public void setImageUpdateActive(boolean active) {
 		this.imageCreationAllowed = active;
 		if (active) {
@@ -1820,12 +1753,12 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 
 	@Override
 	public void setMinCut(HistogramBound bound) {
-		
+
 		storeBound(bound, BasePlottingConstants.MIN_CUT);
 		if (imageServiceBean==null) return;
 		imageServiceBean.setMinimumCutBound(bound);
 		fireMinCutListeners();
-		
+
 	}
 
 	private void storeBound(HistogramBound bound, String prop) {
@@ -1843,7 +1776,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 
 	@Override
 	public void setMaxCut(HistogramBound bound) {
-		
+
 		storeBound(bound, BasePlottingConstants.MAX_CUT);
 		if (imageServiceBean==null) return;
 		imageServiceBean.setMaximumCutBound(bound);
@@ -1862,8 +1795,8 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 		imageServiceBean.setNanBound(bound);
 		fireNanBoundsListeners();
 	}
-	
-    private Dataset fullMask;
+
+	private Dataset fullMask;
 	/**
 	 * The masking dataset of there is one, normally null.
 	 * @return
@@ -1871,7 +1804,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 	public Dataset getMask() {
 		return fullMask;
 	}
-	
+
 	/**
 	 * 
 	 * @param bd
@@ -1926,7 +1859,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 	public boolean isMaximumZoom() {
 		return isMaximumZoom;
 	}
-	
+
 	private Object userObject;
 
 	public Object getUserObject() {
@@ -1936,7 +1869,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 	public void setUserObject(Object userObject) {
 		this.userObject = userObject;
 	}
-	
+
 	/**
 	 * If the axis data set has been set, this method will return 
 	 * a selection region in the coordinates of the axes labels rather
@@ -1949,19 +1882,19 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 	 */
 	@Override
 	public IROI getRegionInAxisCoordinates(final IROI roi) throws Exception {
-		
+
 		if (!TraceUtils.isCustomAxes(this)) return roi;
-		
+
 		final IDataset xl = axes.get(0); // May be null
 		final IDataset yl = axes.get(1); // May be null
-		
+
 		if (roi instanceof LinearROI) {
 			double[] sp = ((LinearROI)roi).getPoint();
 			double[] ep = ((LinearROI)roi).getEndPoint();
 			TraceUtils.transform(xl,0,sp,ep);
 			TraceUtils.transform(yl,1,sp,ep);
 			return new LinearROI(sp, ep);
-			
+
 		} else if (roi instanceof IPolylineROI) {
 			IPolylineROI proi = (IPolylineROI)roi;
 			final PolylineROI ret = (proi instanceof PolygonalROI) ? new PolygonalROI() : new PolylineROI();
@@ -1971,29 +1904,29 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 				TraceUtils.transform(yl,1,dp);
 				ret.insertPoint(dp);
 			}
-			
+
 		} else if (roi instanceof PointROI) {
 			double[] dp = roi.getPointRef();
 			TraceUtils.transform(xl,0,dp);
 			TraceUtils.transform(yl,1,dp);
 			return new PointROI(dp);
-			
+
 		} else if (roi instanceof RectangularROI) {
 			RectangularROI rroi = (RectangularROI)roi;
 			double[] sp=roi.getPoint();
 			double[] ep=rroi.getEndPoint();
 			TraceUtils.transform(xl,0,sp,ep);
 			TraceUtils.transform(yl,1,sp,ep);
-				
+
 			return new RectangularROI(sp[0], sp[1], ep[0]-sp[0], sp[1]-ep[1], rroi.getAngle());
-						
+
 		} else {
 			throw new Exception("Unsupported roi "+roi.getClass());
 		}
 
 		return roi;
 	}
-	
+
 	@Override
 	public double[] getPointInAxisCoordinates(final double[] point) throws Exception {
 		if (axes == null || axes.size() == 0 || image == null)
@@ -2001,7 +1934,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 
 		final double[] ret = point.clone();
 		final int[] shape = image.getShapeRef();
-		
+
 		final Dataset xl = DatasetUtils.convertToDataset(axes.get(0)); // May be null
 		if (TraceUtils.isAxisCustom(xl, shape[1])) {
 			TraceUtils.transform(xl, 0, ret);
@@ -2057,7 +1990,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 	public void setPlottingSystem(IPlottingSystem<?> plottingSystem) {
 		this.plottingSystem = plottingSystem;
 	}
-	
+
 	@Override
 	public boolean isActive() {
 		return getParent()!=null;
@@ -2065,7 +1998,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 
 	@Override
 	public List<String> getAxesNames() {
-        return Arrays.asList(xAxis.getTitle(), yAxis.getTitle());
+		return Arrays.asList(xAxis.getTitle(), yAxis.getTitle());
 	}
 
 	@Override
@@ -2094,7 +2027,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 		this.alpha = alpha;
 		rehistogram();
 	}
-	
+
 	@Override
 	public boolean hasTrueAxes(){
 		return globalRange != null;
@@ -2103,25 +2036,25 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 	@Override
 	public void axisForegroundColorChanged(Axis axis, Color oldColor, Color newColor) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void axisTitleChanged(Axis axis, String oldTitle, String newTitle) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void axisAutoScaleChanged(Axis axis, boolean oldAutoScale, boolean newAutoScale) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void axisLogScaleChanged(Axis axis, boolean old, boolean logScale) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	private void clearAspect(Axis axis) {
