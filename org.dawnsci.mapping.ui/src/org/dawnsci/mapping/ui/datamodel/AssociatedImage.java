@@ -47,7 +47,7 @@ public class AssociatedImage implements PlottableMapObject {
 
 	@Override
 	public double[] getRange() {
-		return range;
+		return range.clone();
 	}
 
 	@Override
