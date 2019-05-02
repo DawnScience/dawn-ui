@@ -1462,21 +1462,22 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 
 		setAxes(axes, performAuto);
 
-		if (plottingSystem!=null) try {
-			if (plottingSystem.getTraces().contains(this)) {
-				plottingSystem.fireTraceUpdated(new TraceEvent(this));
+		if (plottingSystem!=null) {
+			try {
+				if (plottingSystem.getTraces().contains(this)) {
+					plottingSystem.fireTraceUpdated(new TraceEvent(this));
+				}
+			} catch (Throwable ignored) {
+				// We allow things to proceed without a warning.
 			}
-		} catch (Throwable ignored) {
-			// We allow things to proceed without a warning.
-		}
 
-		try {
-			final ScopedPreferenceStore store = new ScopedPreferenceStore(InstanceScope.INSTANCE, IPlottingSystem.PREFERENCE_STORE);
-			if (store.getBoolean(PlottingConstants.SHOW_INTENSITY)) {
-				getPlottingSystem().setShowIntensity(!(im instanceof RGBDataset));
+			try {
+				if (getPreferenceStore().getBoolean(PlottingConstants.SHOW_INTENSITY)) {
+					plottingSystem.setShowIntensity(!(im instanceof RGBDataset));
+				}
+			} catch (Exception ne) { // Not the end of the world if this fails!
+				logger.warn("Could not set whether to show intensity scale", ne);
 			}
-		} catch (Exception ne) { // Not the end of the world if this fails!
-			logger.error("Could not get scoped preference store org.dawnsci.plotting!", ne);
 		}
 
 		return true;
