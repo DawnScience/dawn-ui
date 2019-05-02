@@ -1,7 +1,6 @@
 package org.dawnsci.datavis.model;
 
 import org.dawnsci.datavis.api.IPlotMode;
-import org.eclipse.dawnsci.analysis.api.metadata.MetadataUtils;
 import org.eclipse.dawnsci.analysis.dataset.slicer.SliceFromSeriesMetadata;
 import org.eclipse.dawnsci.analysis.dataset.slicer.SliceViewIterator;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
@@ -58,7 +57,6 @@ public class PlotModeXY implements IPlotMode {
 		
 		long t = System.currentTimeMillis();
 		IDataset allData = lz.getSlice(slice);
-		MetadataUtils.sliceAxesMetadata(allData);
 
 		logger.info("Slice time {} ms for slice {} of {}", (System.currentTimeMillis()-t), slice.toString(), lz.getName());
 		

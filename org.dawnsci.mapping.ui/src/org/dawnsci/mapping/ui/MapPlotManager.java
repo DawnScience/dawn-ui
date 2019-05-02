@@ -25,7 +25,6 @@ import org.dawnsci.mapping.ui.datamodel.MapObject;
 import org.dawnsci.mapping.ui.datamodel.MappedDataFile;
 import org.dawnsci.mapping.ui.datamodel.PlottableMapObject;
 import org.dawnsci.mapping.ui.datamodel.VectorMapData;
-import org.eclipse.dawnsci.analysis.api.metadata.MetadataUtils;
 import org.eclipse.dawnsci.analysis.dataset.roi.PointROI;
 import org.eclipse.dawnsci.analysis.dataset.slicer.SliceViewIterator;
 import org.eclipse.dawnsci.plotting.api.IPlottingService;
@@ -269,7 +268,6 @@ public class MapPlotManager implements IMapPlotController{
 					if (s.getSize() == 1) return;
 					
 					int[] ss = ShapeUtils.squeezeShape(s.getShape(), false);
-					MetadataUtils.sliceAxesMetadata(s);
 					
 					ITrace[] traces = null;
 					
@@ -381,9 +379,7 @@ public class MapPlotManager implements IMapPlotController{
 					firstHold = false;
 					IDataset s = null;
 					try {
-						s = lz.getSlice();
-						MetadataUtils.sliceAxesMetadata(s);
-						s.squeeze();
+						s = DatasetUtils.sliceAndConvertLazyDataset(lz).squeeze();
 					} catch (DatasetException e) {
 						logger.error("Could not get data from lazy dataset", e);
 						return;
@@ -433,15 +429,12 @@ public class MapPlotManager implements IMapPlotController{
 				public void run() {
 					IDataset s = null;
 					try {
-						s = lz.getSlice();
+						s = DatasetUtils.sliceAndConvertLazyDataset(lz);
 					} catch (DatasetException e) {
 						logger.error("Could not get data from lazy dataset", e);
 						return;
 					}
 					if (s != null) {
-						
-						MetadataUtils.sliceAxesMetadata(s);
-						
 						final ITrace[] traces = buildTraces(dataPlot,s, isHighAspect ? highAspectImageDisplayMode : null);
 						
 						if (traces == null || traces.length == 0) return;

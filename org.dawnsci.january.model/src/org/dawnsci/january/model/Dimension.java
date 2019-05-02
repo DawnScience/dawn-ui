@@ -60,8 +60,8 @@ public class Dimension {
 		this.size = size;
 		
 		if (size == 0) {
-			slice.setStart(0);
-			slice.setStop(0);
+			slice.setStart(null);
+			slice.setStop(null);
 			slice.setLength(0);
 			return;
 		}
