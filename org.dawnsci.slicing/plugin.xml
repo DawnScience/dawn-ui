@@ -3,11 +3,11 @@
 <plugin>
    <extension
          point="org.eclipse.dawnsci.slicing.api.slicingSystem">
-      <slice_component
+      <slicing_system
             class="org.dawnsci.slicing.component.SliceSystemImpl"
             id="org.dawnsci.slicing.sliceSystemBasic"
             name="Simple Slicing">
-      </slice_component>
+      </slicing_system>
    </extension>
    <extension
          point="org.eclipse.core.runtime.preferences">

@@ -343,9 +343,9 @@ class SectorSelection extends ROISelectionRegion<SectorROI> implements ILockable
 		public void snapToGrid() {
 			SectorROI cSnappedROI = croi;
 			if (cSnappedROI != null) {
-				cSnappedROI.setPoint(new Float(Math.round(cSnappedROI.getPoint()[0])), new Float(Math.round(cSnappedROI.getPoint()[1])));
-				cSnappedROI.setRadii(new double[] {new Float(Math.round(cSnappedROI.getRadii()[0])), new Float(Math.round(cSnappedROI.getRadii()[1]))});
-				cSnappedROI.setDpp(new Float(Math.round(cSnappedROI.getDpp())));
+				cSnappedROI.setPoint(Math.round(cSnappedROI.getPoint()[0]), Math.round(cSnappedROI.getPoint()[1]));
+				cSnappedROI.setRadii(new double[] {Math.round(cSnappedROI.getRadii()[0]), Math.round(cSnappedROI.getRadii()[1])});
+				cSnappedROI.setDpp(Math.round(cSnappedROI.getDpp()));
 				croi = cSnappedROI;
 			}
 		}

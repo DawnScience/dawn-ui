@@ -451,7 +451,7 @@ public class ToolPageView extends ViewPart implements IPartListener, IToolChange
 	 */
 	private void preparePage(PageRec rec) {
 		IPageSite site = null;
-		Integer count;
+		int count;
 
 		if (!mapToolToNumRecs.containsKey(rec.tool)) {
 			if (rec.tool instanceof IPageBookViewPage) {
@@ -468,14 +468,14 @@ public class ToolPageView extends ViewPart implements IPartListener, IToolChange
 			// for backward compability with IPage
 			rec.tool.setActionBars(rec.subActionBars);
 
-			count = new Integer(0);
+			count = 0;
 		} else {
 			site = (IPageSite) mapToolToSite.get(rec.tool);
 			rec.subActionBars = (SubActionBars) site.getActionBars();
-			count = ((Integer) mapToolToNumRecs.get(rec.tool));
+			count = (Integer) mapToolToNumRecs.get(rec.tool);
 		}
 
-		mapToolToNumRecs.put(rec.tool, new Integer(count.intValue() + 1));
+		mapToolToNumRecs.put(rec.tool, count + 1);
 	}
 
 	/**
@@ -873,7 +873,7 @@ public class ToolPageView extends ViewPart implements IPartListener, IToolChange
 					((ToolPageSite) site).dispose(); 
 				}
 			} else {
-				mapToolToNumRecs.put(rec.tool, new Integer(newCount));
+				mapToolToNumRecs.put(rec.tool, newCount);
 			}
 		}
 		pageRecs.clear();

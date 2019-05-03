@@ -152,14 +152,14 @@ public class FittedFunctions {
 					boolean last=true;
 					for (int i=0; i<pos.size();i++) {
 						if ( ((Double)(pos.elementAt(i))).doubleValue() > fp.getPosition() ) {
-							pos.insertElementAt(new Double(fp.getPosition()), i);
+							pos.insertElementAt(fp.getPosition(), i);
 							qVec.insertElementAt(fp.getQ(), i);
 							last=false;
 							break;
 						}
 					}
 					if (last) {
-						pos.addElement(new Double(fp.getPosition()));
+						pos.addElement(fp.getPosition());
 						qVec.addElement(fp.getQ());
 					}
 							

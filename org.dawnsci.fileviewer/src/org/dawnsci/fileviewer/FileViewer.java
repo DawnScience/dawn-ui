@@ -439,12 +439,12 @@ public class FileViewer {
 		 */
 		if ((files != null) && (files.length != 0)) {
 			numObjectsLabel.setText(Utils.getResourceString("details.NumberOfSelectedFiles.text",
-					new Object[] { new Integer(files.length) }));
+					new Object[] { Integer.valueOf(files.length) }));
 			long fileSize = 0L;
 			for (int i = 0; i < files.length; ++i) {
 				fileSize += files[i].getFile().length();
 			}
-			diskSpaceLabel.setText(Utils.getResourceString("details.FileSize.text", new Object[] { new Long(fileSize) }));
+			diskSpaceLabel.setText(Utils.getResourceString("details.FileSize.text", new Object[] { Long.valueOf(fileSize) }));
 		} else {
 			// No files selected
 			diskSpaceLabel.setText("");
@@ -461,7 +461,7 @@ public class FileViewer {
 						int numObjects = retrieveDirJob.getDirListCount();
 						Display.getDefault().syncExec(new Runnable() {
 							public void run() {
-								numObjectsLabel.setText(Utils.getResourceString("details.DirNumberOfObjects.text", new Object[] { new Integer(numObjects) }));
+								numObjectsLabel.setText(Utils.getResourceString("details.DirNumberOfObjects.text", new Object[] { Integer.valueOf(numObjects) }));
 							}
 						});
 					}
