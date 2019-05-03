@@ -1766,13 +1766,6 @@
       </serviceFactory>
    </extension>
    <extension
-         point="org.eclipse.ui.intro.configExtension">
-      <configExtension
-            configId="org.dawnsci.intro.universalConfig"
-            content="intro/tutorials.xml">
-      </configExtension>
-   </extension>
-   <extension
          point="org.eclipse.ui.preferencePages">
       <page
             category="org.dawb.workbench.ui.visualizationPreferences"
