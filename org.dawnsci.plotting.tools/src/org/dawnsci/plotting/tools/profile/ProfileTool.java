@@ -622,7 +622,8 @@ public abstract class ProfileTool extends AbstractToolPage  implements IROIListe
 	public boolean isProfileTool() {
 		return true;
 	}
-	
+
+	@SuppressWarnings("unchecked")
 	@Override
 	public IPlottingSystem<Composite> getToolPlottingSystem() {
 		return profilePlottingSystem;
