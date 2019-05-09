@@ -27,7 +27,7 @@ public class GaussianBlurConfiguration extends RadiusFilterConfiguration {
 		sigma.setLayoutData(gridData);
 		sigma.setText("0");
 		sigma.setToolTipText("Sigma Gaussian distribution's sigma. If <= 0 then will be selected based on radius.");
-		filter.putConfiguration("sigma", new Double(0));
+		filter.putConfiguration("sigma", 0.);
 		sigma.addVerifyListener(new VerifyListener() {
 			@Override
 			public void verifyText(VerifyEvent e) {

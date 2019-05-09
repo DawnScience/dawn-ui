@@ -583,10 +583,10 @@ public class AxisPixelROIEditTable {
 		final private String description3 = "X values as pixels (Editable)";
 
 		{
-			xAxisRow = new AxisPixelRowDataModel(new String(RowName.XAXIS_ROW), new Double(0), new Double(0), new Double(0), description0);
-			yAxisRow = new AxisPixelRowDataModel(new String(RowName.YAXIS_ROW), new Double(0), new Double(0), new Double(0), description1);
-			xPixelRow = new AxisPixelRowDataModel(new String(RowName.XPIXEL_ROW), new Double(0), new Double(0), new Double(0), description2);
-			yPixelRow = new AxisPixelRowDataModel(new String(RowName.YPIXEL_ROW), new Double(0), new Double(0), new Double(0), description3);
+			xAxisRow = new AxisPixelRowDataModel(new String(RowName.XAXIS_ROW), 0, 0, 0, description0);
+			yAxisRow = new AxisPixelRowDataModel(new String(RowName.YAXIS_ROW), 0, 0, 0, description1);
+			xPixelRow = new AxisPixelRowDataModel(new String(RowName.XPIXEL_ROW), 0, 0, 0, description2);
+			yPixelRow = new AxisPixelRowDataModel(new String(RowName.YPIXEL_ROW), 0, 0, 0, description3);
 
 			rows.add(xAxisRow);
 			rows.add(yAxisRow);
@@ -611,7 +611,7 @@ public class AxisPixelROIEditTable {
 		private AxisPixelRowDataModel xAxisRow;
 
 		{
-			xAxisRow = new AxisPixelRowDataModel(new String(RowName.XAXIS_ROW), new Double(0), new Double(0), new Double(0), description);
+			xAxisRow = new AxisPixelRowDataModel(new String(RowName.XAXIS_ROW), 0, 0, 0, description);
 			rows.add(xAxisRow);
 		}
 

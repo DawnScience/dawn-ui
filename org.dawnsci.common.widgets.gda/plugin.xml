@@ -5,7 +5,7 @@
    <extension
          point="org.eclipse.core.runtime.adapters">
       <factory
-            adaptableType="uk.ac.diamond.scisoft.analysis.fitting.functions.IFunction"
+            adaptableType="org.eclipse.dawnsci.analysis.api.fitting.functions.IFunction"
             class="org.dawnsci.common.widgets.gda.function.detail.DetailsPaneFactory">
          <adapter
                type="org.dawnsci.common.widgets.gda.function.detail.IFunctionDetailPane">
@@ -19,7 +19,7 @@
          </adapter>
       </factory>
       <factory
-            adaptableType="uk.ac.diamond.scisoft.analysis.fitting.functions.IParameter"
+            adaptableType="org.eclipse.dawnsci.analysis.api.fitting.functions.IParameter"
             class="org.dawnsci.common.widgets.gda.function.detail.DetailsPaneFactory">
          <adapter
                type="org.dawnsci.common.widgets.gda.function.detail.IFunctionDetailPane">
@@ -33,7 +33,7 @@
          </adapter>
       </factory>
       <factory
-            adaptableType="org.dawnsci.common.widgets.gda.function.jexl.JexlExpressionFunction"
+            adaptableType="uk.ac.diamond.scisoft.analysis.fitting.functions.JexlExpressionFunction"
             class="org.dawnsci.common.widgets.gda.function.detail.DetailsPaneFactory">
          <adapter
                type="org.dawnsci.common.widgets.gda.function.detail.IFunctionDetailPane">
