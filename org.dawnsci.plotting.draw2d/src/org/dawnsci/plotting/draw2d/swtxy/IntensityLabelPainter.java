@@ -48,7 +48,6 @@ class IntensityLabelPainter {
 	public void paintIntensityLabels(Graphics graphics) {
 		
 		if (system==null)          return;
-		//if (image.getAxes()!=null) return;
 		if (!system.isShowValueLabels()) return;
 		
 		try {
@@ -57,21 +56,38 @@ class IntensityLabelPainter {
 			final IAxis xAxis = system.getSelectedXAxis();
 			final IAxis yAxis = system.getSelectedYAxis();
 			IDataset data = image.getData();
-			int[] shape = data.getShape();
 
 			// Paint labels at centre pixels
-			final int xLower = Math.max(0, (int)Math.floor(Math.min(xAxis.getLower(), xAxis.getUpper())));
-			final int xUpper = Math.min(shape[1], (int) Math.ceil(Math.max(xAxis.getLower(), xAxis.getUpper())));
-			
-			final int yLower = Math.max(0, (int)Math.floor(Math.min(yAxis.getLower(), yAxis.getUpper())));
-			final int yUpper = Math.min(shape[0], (int) Math.ceil(Math.max(yAxis.getLower(), yAxis.getUpper())));
+			double[] lower = new double[] {xAxis.getLower(), yAxis.getLower()};
+			lower = image.getPointInImageCoordinates(lower);
 
-			for (int x = xLower; x < xUpper; x++) {
-				for (int y = yLower; y < yUpper; y++) {
-					// TODO FIXME check rotations.
-					String lText = data.getString(y, x);
-					int lx = xAxis.getValuePosition(x+0.5);
-					int ly = yAxis.getValuePosition(y+0.5);
+			double[] upper = new double[] {xAxis.getUpper(), yAxis.getUpper()};
+			upper = image.getPointInImageCoordinates(upper);
+
+			int xLower, xUpper;
+			if (xAxis.isInverted()) {
+				xLower = (int) upper[0];
+				xUpper = (int) Math.ceil(lower[0]);
+			} else {
+				xLower = (int) lower[0];
+				xUpper = (int) Math.ceil(upper[0]);
+			}
+			int yLower, yUpper;
+			if (yAxis.isInverted()) {
+				yLower = (int) upper[1];
+				yUpper = (int) Math.ceil(lower[1]);
+			} else {
+				yLower = (int) lower[1];
+				yUpper = (int) Math.ceil(upper[1]);
+			}
+
+			final boolean transpose = !(image.getImageServiceBean().isTransposed() ^ image.getImageOrigin().isOnLeadingDiagonal());
+
+			for (int y = yLower; y < yUpper; y++) {
+				for (int x = xLower; x < xUpper; x++) {
+					String lText = transpose ? data.getString(x, y) : data.getString(y, x);
+					int lx = (int) xAxis.getPositionFromValue(x+0.5);
+					int ly = (int) yAxis.getPositionFromValue(y+0.5);
 					graphics.setAlpha(75);
 					graphics.fillString(lText, lx, ly);
 					graphics.setAlpha(255);
