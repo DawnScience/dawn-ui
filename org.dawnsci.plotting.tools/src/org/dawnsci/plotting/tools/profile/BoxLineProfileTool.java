@@ -48,6 +48,7 @@ import uk.ac.diamond.scisoft.analysis.roi.ROIProfile;
 /**
  * BoxLine profile tool
  */
+@SuppressWarnings("unchecked")
 public class BoxLineProfileTool extends ProfileTool implements IProfileToolPage {
 
 	private static final Logger logger = LoggerFactory.getLogger(BoxLineProfileTool.class);
@@ -357,12 +358,12 @@ public class BoxLineProfileTool extends ProfileTool implements IProfileToolPage 
 		Dataset xi = null;
 
 		double ang = bounds.getAngle();
+		int a = isVertical ? 1 : 0;
 		if (axes != null && ang == 0) {
 
 			int[] spt = bounds.getIntPoint();
 			int[] len = bounds.getIntLengths();
 
-			int a = isVertical ? 1 : 0;
 			IDataset xFull = axes.get(a);
 
 			if (xFull != null) {
@@ -377,10 +378,10 @@ public class BoxLineProfileTool extends ProfileTool implements IProfileToolPage 
 		Dataset intensity1 = boxLine[0];
 		intensity1.setName(EDGE1);
 		if (xi == null || !Arrays.equals(xi.getShapeRef(), intensity1.getShapeRef())) {
-			double xStart = bounds.getPointX();
-			double xEnd = bounds.getPointX() + bounds.getLength(0);
-			xi = DatasetFactory.createRange(IntegerDataset.class, xStart, xEnd, 1);
-			xi.setName("X Pixel");
+			double xStart = bounds.getPoint()[a];
+			double xEnd = xStart + bounds.getLength(a);
+			xi = DatasetFactory.createLinearSpace(IntegerDataset.class, xStart, xEnd, intensity1.getSize());
+			xi.setName(isVertical ? "Y Pixel" : "X Pixel");
 		}
 
 		Dataset intensity2 = boxLine[1];
