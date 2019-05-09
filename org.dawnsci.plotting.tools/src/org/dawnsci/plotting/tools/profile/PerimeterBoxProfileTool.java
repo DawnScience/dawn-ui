@@ -628,6 +628,7 @@ public class PerimeterBoxProfileTool extends AbstractToolPage  implements IROILi
 		return "Profile";
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public IPlottingSystem<Composite> getToolPlottingSystem() {
 		return zoomProfilePlottingSystem;

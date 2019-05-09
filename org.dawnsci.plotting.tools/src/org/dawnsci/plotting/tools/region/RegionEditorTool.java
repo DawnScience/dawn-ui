@@ -44,7 +44,6 @@ import org.eclipse.dawnsci.analysis.api.unit.UnitUtils;
 import org.eclipse.dawnsci.analysis.dataset.roi.LinearROI;
 import org.eclipse.dawnsci.analysis.dataset.roi.PointROI;
 import org.eclipse.dawnsci.analysis.dataset.roi.RectangularROI;
-import org.eclipse.dawnsci.plotting.api.axis.ICoordinateSystem;
 import org.eclipse.dawnsci.plotting.api.preferences.BasePlottingConstants;
 import org.eclipse.dawnsci.plotting.api.region.IROIListener;
 import org.eclipse.dawnsci.plotting.api.region.IRegion;
@@ -1055,34 +1054,6 @@ public class RegionEditorTool extends AbstractToolPage implements IResettableExp
 			return intensityAndSum;
 		} catch (java.lang.UnsupportedOperationException use) {
 			return new double[]{0,0}; // Happens with RGBDatasets coming from MJPGStream see org.dawnsci.slice.server.test.ClientPluginTest
-		}
-	}
-
-	/**
-	 * get point in axis coords
-	 * @param coords
-	 * @return
-	 */
-	public double[] getAxisPoint(ICoordinateSystem coords, double... vals) {
-		if (coords==null) return vals;
-		try {
-			return coords.getValueAxisLocation(vals);
-		} catch (Exception e) {
-			return vals;
-		}
-	}
-
-	/**
-	 * get point in image coords
-	 * @param coords
-	 * @return
-	 */
-	public double[] getImagePoint(ICoordinateSystem coords, double... vals) {
-		if (coords==null) return vals;
-		try {
-			return coords.getAxisLocationValue(vals);
-		} catch (Exception e) {
-			return vals;
 		}
 	}
 

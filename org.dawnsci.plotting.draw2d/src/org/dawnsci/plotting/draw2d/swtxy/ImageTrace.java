@@ -162,8 +162,8 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 		// override axes with image origin given untransposed image
 		listenToAxisChanges = false;
 		try {
-			boolean xLeft = xAxis.getRange().isMinBigger();
-			boolean yDown = yAxis.getRange().isMinBigger();
+			boolean xLeft = xAxis.isInverted();
+			boolean yDown = yAxis.isInverted();
 			switch (getImageOrigin()) {
 			case TOP_LEFT:
 			default:
@@ -371,151 +371,151 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 				rescaleType==ImageScaleType.FORCE_REIMAGE || 
 				rescaleType==ImageScaleType.REHISTOGRAM; // We know that it is needed
 
-				// If we just changed downsample scale, we force the update.
-				// This allows user resizes of the plot area to be picked up
-				// and the larger data size used if it fits.
-				if (!requireImageGeneration && rescaleType == ImageScaleType.REIMAGE_ALLOWED && currentDownSampleBin > 0) {
-					if (getDownsampleBin() != currentDownSampleBin) {
-						requireImageGeneration = true;
-					}
+		// If we just changed downsample scale, we force the update.
+		// This allows user resizes of the plot area to be picked up
+		// and the larger data size used if it fits.
+		if (!requireImageGeneration && rescaleType == ImageScaleType.REIMAGE_ALLOWED && currentDownSampleBin > 0) {
+			if (getDownsampleBin() != currentDownSampleBin) {
+				requireImageGeneration = true;
+			}
+		}
+
+		final XYRegionGraph graph  = (XYRegionGraph)getXAxis().getParent();
+		final Rectangle     bounds = graph.getRegionArea().getBounds();
+		if (bounds.width < 1 || bounds.height < 1) return false;
+
+		scaledData.setX(bounds.x);
+		scaledData.setY(bounds.y);
+		scaledData.setXoffset(0);
+		scaledData.setYoffset(0);
+
+		if (!imageCreationAllowed) return false;
+		if (monitor!=null && monitor.isCanceled()) return false;
+
+		if (requireImageGeneration) {
+			boolean ok = createDownsampledImageData(rescaleType, monitor);
+			if (!ok) return false;
+		}
+
+		if (monitor!=null && monitor.isCanceled()) return false;
+		if (scaledData.getDownsampledImageData() == null) return false;
+
+		try {
+			isMaximumZoom = false;
+			isLabelZoom   = false;
+
+			scaledData.disposeImage();
+			ImageData imageData = scaledData.getDownsampledImageData();
+			if (imageData != null && imageData.width == bounds.width && imageData.height == bounds.height) {
+				// No slice, faster
+				if (monitor!=null && monitor.isCanceled()) return false;
+				Image scaledImage  = new Image(Display.getDefault(), imageData);
+				scaledData.setScaledImage(scaledImage);
+			} else {
+
+				if (globalRange != null) {
+					return buildImageRelativeToAxes(imageData);
 				}
 
-				final XYRegionGraph graph  = (XYRegionGraph)getXAxis().getParent();
-				final Rectangle     bounds = graph.getRegionArea().getBounds();
-				if (bounds.width < 1 || bounds.height < 1) return false;
+				// slice data to get current zoom area
+				Range xRange = xAxis.getRange();
+				Range yRange = yAxis.getRange();
 
-				scaledData.setX(bounds.x);
-				scaledData.setY(bounds.y);
-				scaledData.setXoffset(0);
-				scaledData.setYoffset(0);
+				double xMin = xRange.getLower() / currentDownSampleBin;
+				double yMin = yRange.getLower() / currentDownSampleBin;
+				double xMax = xRange.getUpper() / currentDownSampleBin;
+				double yMax = yRange.getUpper() / currentDownSampleBin;
+				int xSize = imageData.width;
+				int ySize = imageData.height;
 
-				if (!imageCreationAllowed) return false;
-				if (monitor!=null && monitor.isCanceled()) return false;
-
-				if (requireImageGeneration) {
-					boolean ok = createDownsampledImageData(rescaleType, monitor);
-					if (!ok) return false;
+				// check as getLower and getUpper don't work as expected
+				if (xMax < xMin) {
+					double temp = xMax;
+					xMax = xMin;
+					xMin = temp;
+				}
+				if (yMax < yMin) {
+					double temp = yMax;
+					yMax = yMin;
+					yMin = temp;
 				}
 
-				if (monitor!=null && monitor.isCanceled()) return false;
-				if (scaledData.getDownsampledImageData() == null) return false;
+				// factors to scale image data 
+				double xScale = bounds.width / (xMax - xMin);
+				double yScale = bounds.height / (yMax - yMin);
 
-				try {
-					isMaximumZoom = false;
-					isLabelZoom   = false;
+				// Deliberately get the over-sized dimensions so that the edge pixels can be smoothly panned through.
+				double xPix = Math.floor(xMin);
+				double yPix = Math.floor(yMin);
+				int fullWidth  = (int) (Math.ceil(xMax) - xPix);
+				int fullHeight = (int) (Math.ceil(yMax) - yPix);
 
-					scaledData.disposeImage();
-					ImageData imageData = scaledData.getDownsampledImageData();
-					if (imageData != null && imageData.width == bounds.width && imageData.height == bounds.height) {
-						// No slice, faster
-						if (monitor!=null && monitor.isCanceled()) return false;
-						Image scaledImage  = new Image(Display.getDefault(), imageData);
-						scaledData.setScaledImage(scaledImage);
+				// Force a minimum size for (zoomed-in) pixels on the system
+				if (fullWidth <= MINIMUM_ZOOM_SIZE && fullHeight <= MINIMUM_ZOOM_SIZE) {
+					isMaximumZoom = true;
+				}
+				if (fullWidth <= MINIMUM_LABEL_SIZE && fullHeight <= MINIMUM_LABEL_SIZE) {
+					isLabelZoom = true;
+				}
+
+				// These offsets are used when the scaled images is drawn to the screen.
+				double xOffset;
+				double yOffset;
+				// Deal with the origin orientations correctly.
+				ImageOrigin origin = getImageOrigin();
+				if (origin.isOnLeft()) {
+					xOffset = (xMin - xPix) * xScale;
+				} else {
+					double xPixD = xSize - xMax;
+					xPix = Math.floor(xPixD);
+					xOffset = (xPixD - xPix) * xScale;
+				}
+
+				if (origin.isOnTop()) {
+					yOffset = (yMin - yPix) * yScale;
+				} else {
+					double yPixD = ySize - yMax;
+					yPix = Math.floor(yPixD);
+					yOffset = (yPixD - yPix) * yScale;
+				}
+				if (xPix < 0 || yPix < 0 || xPix+fullWidth > xSize || yPix+fullHeight > ySize) {
+					logger.trace("Incorrect position calculated!");
+					return false; // prevent IAE in calling getPixel
+				}
+
+				// Slice the data.
+				// Pixel slice on downsampled data = fast!
+				ImageData data = sliceImageData(imageData, fullWidth, fullHeight, (int) xPix, (int) yPix, ySize);
+
+				int scaledWidth = (int) (fullWidth * xScale);
+				int scaledHeight = (int) (fullHeight * yScale);
+
+				Image scaledImage = null;
+				if (data != null) {
+					if (checkScalingAgainstScreenSize(scaledWidth, scaledHeight)) {
+						data = data.scaledTo(scaledWidth, scaledHeight);
 					} else {
-
-						if (globalRange != null) {
-							return buildImageRelativeToAxes(imageData);
-						}
-
-						// slice data to get current zoom area
-						Range xRange = xAxis.getRange();
-						Range yRange = yAxis.getRange();
-
-						double xMin = xRange.getLower() / currentDownSampleBin;
-						double yMin = yRange.getLower() / currentDownSampleBin;
-						double xMax = xRange.getUpper() / currentDownSampleBin;
-						double yMax = yRange.getUpper() / currentDownSampleBin;
-						int xSize = imageData.width;
-						int ySize = imageData.height;
-
-						// check as getLower and getUpper don't work as expected
-						if (xMax < xMin) {
-							double temp = xMax;
-							xMax = xMin;
-							xMin = temp;
-						}
-						if (yMax < yMin) {
-							double temp = yMax;
-							yMax = yMin;
-							yMin = temp;
-						}
-
-						// factors to scale image data 
-						double xScale = bounds.width / (xMax - xMin);
-						double yScale = bounds.height / (yMax - yMin);
-
-						// Deliberately get the over-sized dimensions so that the edge pixels can be smoothly panned through.
-						double xPix = Math.floor(xMin);
-						double yPix = Math.floor(yMin);
-						int fullWidth  = (int) (Math.ceil(xMax) - xPix);
-						int fullHeight = (int) (Math.ceil(yMax) - yPix);
-
-						// Force a minimum size for (zoomed-in) pixels on the system
-						if (fullWidth <= MINIMUM_ZOOM_SIZE && fullHeight <= MINIMUM_ZOOM_SIZE) {
-							isMaximumZoom = true;
-						}
-						if (fullWidth <= MINIMUM_LABEL_SIZE && fullHeight <= MINIMUM_LABEL_SIZE) {
-							isLabelZoom = true;
-						}
-
-						// These offsets are used when the scaled images is drawn to the screen.
-						double xOffset;
-						double yOffset;
-						// Deal with the origin orientations correctly.
-						ImageOrigin origin = getImageOrigin();
-						if (origin.isOnLeft()) {
-							xOffset = (xMin - xPix) * xScale;
-						} else {
-							double xPixD = xSize - xMax;
-							xPix = Math.floor(xPixD);
-							xOffset = (xPixD - xPix) * xScale;
-						}
-
-						if (origin.isOnTop()) {
-							yOffset = (yMin - yPix) * yScale;
-						} else {
-							double yPixD = ySize - yMax;
-							yPix = Math.floor(yPixD);
-							yOffset = (yPixD - yPix) * yScale;
-						}
-						if (xPix < 0 || yPix < 0 || xPix+fullWidth > xSize || yPix+fullHeight > ySize) {
-							logger.trace("Incorrect position calculated!");
-							return false; // prevent IAE in calling getPixel
-						}
-
-						// Slice the data.
-						// Pixel slice on downsampled data = fast!
-						ImageData data = sliceImageData(imageData, fullWidth, fullHeight, (int) xPix, (int) yPix, ySize);
-
-						int scaledWidth = (int) (fullWidth * xScale);
-						int scaledHeight = (int) (fullHeight * yScale);
-
-						Image scaledImage = null;
-						if (data != null) {
-							if (checkScalingAgainstScreenSize(scaledWidth, scaledHeight)) {
-								data = data.scaledTo(scaledWidth, scaledHeight);
-							} else {
-								isMaximumZoom = true;
-							}
-							scaledImage = new Image(Display.getDefault(), data);
-						}
-						scaledData.setXoffset(xOffset);
-						scaledData.setYoffset(yOffset);
-						scaledData.setScaledImage(scaledImage);
+						isMaximumZoom = true;
 					}
-
-					return true;
-				} catch (IllegalArgumentException ie) {
-					logger.error(ie.toString());
-					return false;
-				} catch (java.lang.NegativeArraySizeException allowed) {
-					return false;
-				} catch (NullPointerException ne) {
-					throw ne;
-				} catch (Throwable ne) {
-					logger.error("Image scale error!", ne);
-					return false;
+					scaledImage = new Image(Display.getDefault(), data);
 				}
+				scaledData.setXoffset(xOffset);
+				scaledData.setYoffset(yOffset);
+				scaledData.setScaledImage(scaledImage);
+			}
+
+			return true;
+		} catch (IllegalArgumentException ie) {
+			logger.error(ie.toString());
+			return false;
+		} catch (java.lang.NegativeArraySizeException allowed) {
+			return false;
+		} catch (NullPointerException ne) {
+			throw ne;
+		} catch (Throwable ne) {
+			logger.error("Image scale error!", ne);
+			return false;
+		}
 	}
 
 	private boolean buildImageRelativeToAxes(ImageData imageData) {
@@ -1954,12 +1954,6 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 
 	@Override
 	public double[] getPointInImageCoordinates(final double[] axisLocation) throws Exception {
-		if (!getImageOrigin().isOnLeadingDiagonal()) {
-			double t = axisLocation[0];
-			axisLocation[0] = axisLocation[1];
-			axisLocation[1] = t;
-		}
-
 		if (axes == null || axes.size() == 0 || image == null)
 			return axisLocation;
 
@@ -1969,7 +1963,12 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 		final Dataset xl = DatasetUtils.convertToDataset(axes.get(0)); // May be null
 		if (TraceUtils.isAxisCustom(xl, shape[1])) {
 			double x = axisLocation[0];
-			ret[0] = Double.isNaN(x) ? Double.NaN : DatasetUtils.crossings(xl, x).get(0);
+			if (Double.isNaN(x)) {
+				ret[0] = Double.NaN;
+			} else {
+				List<Double> c = DatasetUtils.crossings(xl, x);
+				ret[0] = c.size() > 0 ? c.get(0) : Double.NaN;
+			}
 		}
 
 		if (axes.size() < 2)
@@ -1978,7 +1977,12 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 		final Dataset yl = DatasetUtils.convertToDataset(axes.get(1)); // May be null
 		if (TraceUtils.isAxisCustom(yl, shape[0])) {
 			double y = axisLocation[1];
-			ret[1] = Double.isNaN(y) ? Double.NaN : DatasetUtils.crossings(yl, y).get(0);
+			if (Double.isNaN(y)) {
+				ret[1] = Double.NaN;
+			} else {
+				List<Double> c = DatasetUtils.crossings(yl, y);
+				ret[1] = c.size() > 0 ? c.get(0) : Double.NaN;
+			}
 		}
 
 		return ret;

@@ -26,7 +26,6 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.dawnsci.analysis.api.roi.IROI;
-import org.eclipse.dawnsci.plotting.api.axis.ICoordinateSystem;
 import org.eclipse.dawnsci.plotting.api.region.IROIListener;
 import org.eclipse.dawnsci.plotting.api.region.IRegion;
 import org.eclipse.dawnsci.plotting.api.region.IRegionListener;
@@ -388,7 +387,7 @@ public class MeasurementTool extends AbstractToolPage implements IRegionListener
 	}
 
 	private IDataset getCalibratedAxis(double factor, int size) {
-		Dataset axis = DatasetFactory.createRange(size, Dataset.FLOAT64);
+		Dataset axis = DatasetFactory.createRange(size);
 		axis.imultiply(factor);
 		axis.setName(unitName);
 		return axis;
@@ -667,34 +666,6 @@ public class MeasurementTool extends AbstractToolPage implements IRegionListener
 		if (dragBounds!=null&&dragBounds.containsKey(region.getName()))
 			return dragBounds.get(region.getName());
 		return region.getROI();
-	}
-
-	/**
-	 * get point in axis coords
-	 * @param coords
-	 * @return
-	 */
-	public double[] getAxisPoint(ICoordinateSystem coords, double... vals) {
-		if (coords==null) return vals;
-		try {
-			return coords.getValueAxisLocation(vals);
-		} catch (Exception e) {
-			return vals;
-		}
-	}
-
-	/**
-	 * get point in image coords
-	 * @param coords
-	 * @return
-	 */
-	public double[] getImagePoint(ICoordinateSystem coords, double... vals) {
-		if (coords==null) return vals;
-		try {
-			return coords.getAxisLocationValue(vals);
-		} catch (Exception e) {
-			return vals;
-		}
 	}
 
 	public IROI getRoi() {

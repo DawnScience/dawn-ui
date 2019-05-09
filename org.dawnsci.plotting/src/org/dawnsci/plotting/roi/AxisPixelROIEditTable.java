@@ -19,7 +19,6 @@ import org.eclipse.dawnsci.analysis.api.processing.model.AbstractOperationModel;
 import org.eclipse.dawnsci.analysis.api.roi.IROI;
 import org.eclipse.dawnsci.analysis.dataset.roi.RectangularROI;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
-import org.eclipse.dawnsci.plotting.api.axis.ICoordinateSystem;
 import org.eclipse.dawnsci.plotting.api.region.IRegion;
 import org.eclipse.dawnsci.plotting.api.trace.IImageTrace;
 import org.eclipse.dawnsci.plotting.api.trace.ITrace;
@@ -237,8 +236,7 @@ public class AxisPixelROIEditTable {
 							try {
 								setValue(element, rb.getValue(), false);
 							} catch (Exception e1) {
-								// TODO Auto-generated catch block
-								e1.printStackTrace();
+								// do nothing (some intermediate values will cause IAEs)
 							}
 						}
 					});
@@ -412,34 +410,6 @@ public class AxisPixelROIEditTable {
 			ret = rr;
 		}
 		return ret;
-	}
-
-	/**
-	 * get point in axis coords
-	 * @param coords
-	 * @return
-	 */
-	public double[] getAxisPoint(ICoordinateSystem coords, double... vals) {
-		if (coords==null) return vals;
-		try {
-			return coords.getValueAxisLocation(vals);
-		} catch (Exception e) {
-			return vals;
-		}
-	}
-
-	/**
-	 * get point in image coords
-	 * @param coords
-	 * @return
-	 */
-	public double[] getImagePoint(ICoordinateSystem coords, double... vals) {
-		if (coords==null) return vals;
-		try {
-			return coords.getAxisLocationValue(vals);
-		} catch (Exception e) {
-			return vals;
-		}
 	}
 
 	public IStructuredSelection getSelection() {
