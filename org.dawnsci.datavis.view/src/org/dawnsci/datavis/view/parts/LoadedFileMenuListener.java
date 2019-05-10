@@ -36,6 +36,9 @@ import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.wizard.WizardDialog;
+import org.eclipse.swt.dnd.Clipboard;
+import org.eclipse.swt.dnd.TextTransfer;
+import org.eclipse.swt.dnd.Transfer;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Layout;
@@ -134,6 +137,10 @@ public class LoadedFileMenuListener implements IMenuListener {
 					manager.add(new CommandAction("View Tree...", null, OPEN_TREE));
 				}
 				
+				if (!s.isEmpty() && s.get(0).getFilePath() != null) {
+					manager.add(new CopyToClipboardAction(s.get(0).getFilePath()));
+				}
+				
 			}
 			
 		}
@@ -163,6 +170,25 @@ public class LoadedFileMenuListener implements IMenuListener {
 			
 			return Collections.emptyList();
 		}
+	}
+	
+	private class CopyToClipboardAction extends Action {
+		
+		private String string;
+		
+		public CopyToClipboardAction(String s) {
+			super("Copy path to clipboard");
+			string = s;
+		}
+		
+		@Override
+		public void run() {
+			Clipboard cb = new Clipboard(Display.getDefault());
+			TextTransfer textTransfer = TextTransfer.getInstance();
+			cb.setContents(new Object[] { string },
+					new Transfer[] { textTransfer });
+		}
+		
 	}
 	
 	private class CheckAction extends LoadedFileMenuAction {
