@@ -28,6 +28,8 @@ import org.eclipse.dawnsci.analysis.dataset.roi.LinearROI;
 import org.eclipse.dawnsci.analysis.dataset.roi.RectangularROI;
 import org.eclipse.dawnsci.analysis.dataset.roi.RingROI;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
+import org.eclipse.dawnsci.plotting.api.axis.ClickEvent;
+import org.eclipse.dawnsci.plotting.api.axis.IClickListener;
 import org.eclipse.dawnsci.plotting.api.region.IROIListener;
 import org.eclipse.dawnsci.plotting.api.region.IRegion;
 import org.eclipse.dawnsci.plotting.api.region.IRegion.RegionType;
@@ -72,6 +74,8 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Spinner;
+import org.eclipse.swt.widgets.TabFolder;
+import org.eclipse.swt.widgets.TabItem;
 import org.eclipse.swt.widgets.Text;
 
 import uk.ac.diamond.scisoft.analysis.io.NexusDiffractionCalibrationReader;
@@ -104,6 +108,7 @@ public class FastMaskTool extends AbstractToolPage {
 	private IDiffractionMetadata metadata;
 	private String lastPath = null;
 	
+	private MaskOnClickListener pixelMaskListener;
 	
 	private MaskRegionComposite maskRegionComposite;
 	
@@ -122,6 +127,7 @@ public class FastMaskTool extends AbstractToolPage {
 		regionTypes.add(new NamedRegionType("Circle", RegionType.CIRCLE));
 		lowerValue = new AtomicReference<Double>(null);
 		upperValue = new AtomicReference<Double>(null);
+		
 	}
 
 	@Override
@@ -138,14 +144,29 @@ public class FastMaskTool extends AbstractToolPage {
 		maskRegionComposite = new MaskRegionComposite(control, SWT.None);
 		maskRegionComposite.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 		
-		ThresholdMaskComposite thresholdMaskComposite = new ThresholdMaskComposite(control, SWT.None);
-		thresholdMaskComposite.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+		final TabFolder tabFolder = new TabFolder(control, SWT.BORDER);
+		tabFolder.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 		
-		DiffractionComposite difComposite = new DiffractionComposite(control, SWT.None);
+		TabItem tabItem = new TabItem(tabFolder, SWT.NULL);
+		
+		ThresholdMaskComposite thresholdMaskComposite = new ThresholdMaskComposite(tabFolder, SWT.None);
+		thresholdMaskComposite.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+		tabItem.setControl(thresholdMaskComposite);
+		tabItem.setText("Threshold");
+		
+		DiffractionComposite difComposite = new DiffractionComposite(tabFolder, SWT.None);
 		difComposite.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 		
-		ImageComposite imageProcessingComposite = new ImageComposite(control, SWT.None);
+		tabItem = new TabItem(tabFolder, SWT.NULL);
+		tabItem.setControl(difComposite);
+		tabItem.setText("Detector Geometry");
+		
+		ImageComposite imageProcessingComposite = new ImageComposite(tabFolder, SWT.None);
 		imageProcessingComposite.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+		
+		tabItem = new TabItem(tabFolder, SWT.NULL);
+		tabItem.setControl(imageProcessingComposite);
+		tabItem.setText("Mask Processing");
 		
 		UtilitiesComposite utilitiesComposite = new UtilitiesComposite(control, SWT.NONE);
 		utilitiesComposite.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
@@ -235,28 +256,26 @@ public class FastMaskTool extends AbstractToolPage {
 			}
 			
 			private void paintRegion(ROIEvent evt) {
-				IImageTrace imageTrace = getImageTrace();
-				if (imageTrace != null) {
-					IDataset data = imageTrace.getData();
 
-					IROI roi = evt.getROI();
-					
-					int thickness = maskRegionComposite.getLineThickness();
-					
-					if (roi instanceof LinearROI && thickness != 1) {
-						
-						roi = FastMaskTool.this.buildThickLine((LinearROI)roi, thickness);
-					}
-
-					final IROI froi = roi;
-					
-					
-					if (buffer == null) buffer = new MaskCircularBuffer(data.getShape());
-					Runnable r = () -> buffer.maskROI(froi);
-
-					job.setRunnable(r);
-					job.schedule();
+				if (buffer == null && !buildBuffer()) {
+					return;
 				}
+
+				IROI roi = evt.getROI();
+
+				int thickness = maskRegionComposite.getLineThickness();
+
+				if (roi instanceof LinearROI && thickness != 1) {
+
+					roi = FastMaskTool.this.buildThickLine((LinearROI)roi, thickness);
+				}
+
+				final IROI froi = roi;
+
+				Runnable r = () -> buffer.maskROI(froi);
+
+				job.setRunnable(r);
+				job.schedule();
 			}
 
 		};
@@ -272,6 +291,30 @@ public class FastMaskTool extends AbstractToolPage {
 	@Override
 	public void setFocus() {
 		control.setFocus();
+	}
+	
+	@Override
+	public void deactivate() {
+		if (pixelMaskListener != null) {
+			IPlottingSystem<Object> plottingSystem = getPlottingSystem();
+			if (plottingSystem != null) {
+				plottingSystem.removeClickListener(pixelMaskListener);
+				pixelMaskListener = null;
+			}
+		}
+		
+		if (maskRegionComposite != null) maskRegionComposite.removeListeners();
+		
+		IROIListener roiListener = getROIListener();
+		IPlottingSystem<?> ps = getPlottingSystem();
+		if (ps == null) return;
+		Collection<IRegion> regions = ps.getRegions();
+		if (regions == null) return;
+		
+		for (IRegion r : regions) {
+			r.removeROIListener(roiListener);
+		}
+		
 	}
 	
 	private String getFileName(){
@@ -428,14 +471,9 @@ public class FastMaskTool extends AbstractToolPage {
 					if (path == null) return;
 					lastPath = path;
 					
-					IImageTrace imageTrace = getImageTrace();
-					if (imageTrace != null) {
-						IDataset data = imageTrace.getData();
-						
-						if (buffer == null) buffer = new MaskCircularBuffer(data.getShape());
+					if (buffer == null && !buildBuffer()) {
+						return;
 					}
-					
-					if (buffer == null) return;
 					
 					final String fileName = path;
 					
@@ -455,14 +493,9 @@ public class FastMaskTool extends AbstractToolPage {
 					job.setRunnable(r);
 					job.schedule();
 				}
-
-
 			});
 			
 		}
-		
-		
-		
 	}
 	
 	private class DiffractionComposite extends Composite {
@@ -470,15 +503,12 @@ public class FastMaskTool extends AbstractToolPage {
 		public DiffractionComposite(Composite parent, int style) {
 			super(parent, style);
 			
-			this.setLayout(new FillLayout());
-			Group group = new Group(this, SWT.NONE);
-			group.setLayout(new GridLayout(2, false));
-			group.setText("Detector Geometry");
+			this.setLayout(new GridLayout(2, false));
 			
-			Button load = new Button(group, SWT.PUSH);
+			Button load = new Button(this, SWT.PUSH);
 			load.setText("Load Calibration");
 			
-			final CLabel currentPath = new CLabel(group, SWT.None);
+			final CLabel currentPath = new CLabel(this, SWT.None);
 			
 			
 			load.addSelectionListener(new SelectionAdapter() {
@@ -510,7 +540,7 @@ public class FastMaskTool extends AbstractToolPage {
 				
 			});
 			
-			Button center = new Button(group, SWT.PUSH);
+			Button center = new Button(this, SWT.PUSH);
 			center.setText("Centre Sectors, Rings and Circles");
 			center.addSelectionListener(new SelectionAdapter() {
 				
@@ -544,12 +574,9 @@ public class FastMaskTool extends AbstractToolPage {
 		public ImageComposite(Composite parent, int style) {
 			super(parent, style);
 
-			this.setLayout(new FillLayout());
-			Group group = new Group(this, SWT.NONE);
-			group.setLayout(new GridLayout(3, false));
-			group.setText("Mask Processing");
+			this.setLayout(new GridLayout(3, false));
 			
-			Button b1 = new Button(group, SWT.PUSH);
+			Button b1 = new Button(this, SWT.PUSH);
 			b1.setText("Invert");
 			b1.addSelectionListener(new SelectionAdapter() {
 
@@ -566,7 +593,7 @@ public class FastMaskTool extends AbstractToolPage {
 
 			});
 			
-			Button b2 = new Button(group, SWT.PUSH);
+			Button b2 = new Button(this, SWT.PUSH);
 			b2.setText("Flip H");
 			b2.addSelectionListener(new SelectionAdapter() {
 
@@ -589,7 +616,7 @@ public class FastMaskTool extends AbstractToolPage {
 
 			});
 			
-			Button b3 = new Button(group, SWT.PUSH);
+			Button b3 = new Button(this, SWT.PUSH);
 			b3.setText("Flip V");
 			b3.addSelectionListener(new SelectionAdapter() {
 
@@ -620,15 +647,11 @@ public class FastMaskTool extends AbstractToolPage {
 		public ThresholdMaskComposite(Composite parent, int style) {
 			super(parent, style);
 			
-			this.setLayout(new FillLayout());
-			Group group = new Group(this, SWT.NONE);
-			group.setLayout(new GridLayout(2, false));
-			group.setText("Threshold");
+			this.setLayout(new GridLayout(2, false));
 			
-			
-			Label ll = new Label(group, SWT.NONE);
+			Label ll = new Label(this, SWT.NONE);
 			ll.setText("Lower");
-			Text lower = new Text(group,SWT.BORDER);
+			Text lower = new Text(this,SWT.BORDER);
 			lower.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 			lower.addTraverseListener(new TraverseListener() {
 				
@@ -640,9 +663,9 @@ public class FastMaskTool extends AbstractToolPage {
 				}
 			});
 			
-			Label lu = new Label(group, SWT.NONE);
+			Label lu = new Label(this, SWT.NONE);
 			lu.setText("Upper");
-			Text upper = new Text(group,SWT.BORDER);
+			Text upper = new Text(this,SWT.BORDER);
 			upper.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 			upper.addTraverseListener(new TraverseListener() {
 				
@@ -658,13 +681,8 @@ public class FastMaskTool extends AbstractToolPage {
 		private void update(AtomicReference<Double> value, TraverseEvent e, String text) {
 			if (e.detail != SWT.TRAVERSE_RETURN && e.detail != SWT.TRAVERSE_TAB_NEXT) return;
 			
-			if (buffer == null) {
-				IImageTrace imageTrace = getImageTrace();
-				if (imageTrace == null) return;
-				
-				IDataset data = imageTrace.getData();
-				buffer = new MaskCircularBuffer(data.getShape());
-				
+			if (buffer == null && !buildBuffer()) {
+				return;
 			}
 			
 			Double val = null;
@@ -774,37 +792,34 @@ public class FastMaskTool extends AbstractToolPage {
 			Button b = new Button(group, SWT.PUSH);
 			b.setText("Apply");
 			b.addSelectionListener(new SelectionAdapter() {
-				
+
 				@Override
 				public void widgetSelected(SelectionEvent e) {
-					IImageTrace imageTrace = getImageTrace();
-					if (imageTrace != null) {
-						IDataset data = imageTrace.getData();
-						if (buffer == null) buffer = new MaskCircularBuffer(data.getShape());
-						final Collection<IRegion> regions = getPlottingSystem().getRegions();
-						
-						final int thickness = maskRegionComposite.getLineThickness();
-						
-						Runnable r = () -> {for (IRegion re: regions) {
-							
-							IROI roi = re.getROI();
-							
-							if (roi instanceof LinearROI && thickness != 1) {
-								
-								roi = buildThickLine((LinearROI)roi, thickness);
-							}
-							
-							buffer.maskROI(roi);
-							}
-						};
-							
-						job.setRunnable(r);
-						job.schedule();
+
+					if (buffer == null && !buildBuffer()) {
+						return;
 					}
 					
-				}
-				
+					final Collection<IRegion> regions = getPlottingSystem().getRegions();
 
+					final int thickness = maskRegionComposite.getLineThickness();
+
+					Runnable r = () -> {for (IRegion re: regions) {
+
+						IROI roi = re.getROI();
+
+						if (roi instanceof LinearROI && thickness != 1) {
+
+							roi = buildThickLine((LinearROI)roi, thickness);
+						}
+
+						buffer.maskROI(roi);
+					}
+					};
+
+					job.setRunnable(r);
+					job.schedule();
+				}
 			});
 			
 			Label tlabel = new Label(group, SWT.None);
@@ -857,6 +872,38 @@ public class FastMaskTool extends AbstractToolPage {
 			
 			roiEditTable.addROIListener(roiListener);
 			
+			final Button bmaskclick = new Button(group, SWT.TOGGLE);
+			bmaskclick.setText("Mask Pixel on Click");
+			bmaskclick.addSelectionListener(new SelectionAdapter() {
+				
+				@Override
+				public void widgetSelected(SelectionEvent e) {
+					
+					IPlottingSystem<?> ps = getPlottingSystem();
+					
+					if (ps == null || ps.isDisposed()) return;
+					
+					if (bmaskclick.getSelection()) {
+						
+						if (pixelMaskListener == null) {
+							pixelMaskListener = new MaskOnClickListener();
+						}
+						
+						ps.addClickListener(pixelMaskListener);
+						
+					} else {
+						if (pixelMaskListener != null) {
+							ps.removeClickListener(pixelMaskListener);
+							pixelMaskListener = null;
+						}
+					}
+				}
+			});
+			
+		}
+		
+		public void removeListeners() {
+			roiEditTable.removeROIListener(roiListener);
 		}
 		
 		public void setROI(IROI roi, final IRegion region){
@@ -868,5 +915,45 @@ public class FastMaskTool extends AbstractToolPage {
 		public int getLineThickness() {
 			return lineThickness.getSelection();
 		}
+	}
+	
+	private class MaskOnClickListener implements IClickListener {
+
+		
+		@Override
+		public void clickPerformed(ClickEvent evt) {
+			
+			if (buffer == null && !buildBuffer()) {
+					return;
+			}
+			
+			Runnable r = ()-> {
+				double x = evt.getxValue();
+				double y = evt.getyValue();
+				buffer.maskPixel((int)x, (int)y);
+			};
+			
+			job.setRunnable(r);
+			job.schedule();
+			
+		}
+
+		@Override
+		public void doubleClickPerformed(ClickEvent evt) {
+			// do nothing
+			
+		}
+		
+	}
+	
+	private boolean buildBuffer() {
+		IImageTrace imageTrace = getImageTrace();
+		if (imageTrace != null) {
+			IDataset data = imageTrace.getData();
+			
+			buffer = new MaskCircularBuffer(data.getShape());
+			return true;
+		}
+		return false;
 	}
 }
