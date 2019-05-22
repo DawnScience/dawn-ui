@@ -4,12 +4,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.dawnsci.mapping.ui.datamodel.MappedDataBlock;
+import org.dawnsci.slicing.tools.hyper.Hyper4DImageReducer;
+import org.dawnsci.slicing.tools.hyper.Hyper4DMapReducer;
 import org.dawnsci.slicing.tools.hyper.HyperComponent;
 import org.eclipse.january.DatasetException;
-import org.eclipse.january.dataset.Dataset;
 import org.eclipse.january.dataset.DatasetFactory;
 import org.eclipse.january.dataset.IDataset;
 import org.eclipse.january.dataset.ILazyDataset;
+import org.eclipse.january.dataset.IntegerDataset;
 import org.eclipse.january.dataset.Slice;
 import org.eclipse.january.metadata.AxesMetadata;
 import org.eclipse.jface.dialogs.Dialog;
@@ -44,21 +46,39 @@ public class DynamicDialog extends Dialog {
 		Slice[] slices = new Slice[shape.length];
 		for (int i = 0; i< shape.length; i++) slices[i] = new Slice(0, shape[i]);
 		
-		int[] order = new int[3];
-		order[2] = block.getDataDimensions()[0];
-		order[1] = block.getyDim();
-		order[0] = block.getxDim();
+		int[] order = new int[shape.length];
+		if (shape.length == 4) {
+			//default Y1,X1,Y2,X2
+			order[3] = block.getDataDimensions()[1];
+			order[2] = block.getDataDimensions()[0];
+			order[0] = block.getyDim();
+			order[1] = block.getxDim();
+		} else {
+			//default Y,X,Z
+			order[2] = block.getDataDimensions()[0];
+			order[1] = block.getyDim();
+			order[0] = block.getxDim();
+		}
+		
+		
 
 		List<IDataset> dsl = new ArrayList<>();
 		try {
-			dsl.add(axes[order[0]] == null ? DatasetFactory.createRange(shape[order[0]], Dataset.INT32) : axes[order[0]].getSlice().squeeze());
-			dsl.add(axes[order[1]] == null ? DatasetFactory.createRange(shape[order[1]], Dataset.INT32) : axes[order[1]].getSlice().squeeze());
-			dsl.add(axes[order[2]] == null ? DatasetFactory.createRange(shape[order[2]], Dataset.INT32) : axes[order[2]].getSlice().squeeze());
+			dsl.add(axes[order[0]] == null ? DatasetFactory.createRange(IntegerDataset.class, shape[order[0]]) : axes[order[0]].getSlice().squeeze());
+			dsl.add(axes[order[1]] == null ? DatasetFactory.createRange(IntegerDataset.class, shape[order[1]]) : axes[order[1]].getSlice().squeeze());
+			dsl.add(axes[order[2]] == null ? DatasetFactory.createRange(IntegerDataset.class, shape[order[2]]) : axes[order[2]].getSlice().squeeze());
+			if (shape.length ==  4) {
+				dsl.add(axes[order[3]] == null ? DatasetFactory.createRange(IntegerDataset.class, shape[order[3]]) : axes[order[3]].getSlice().squeeze());
+			}
 		} catch (DatasetException e) {
 			e.printStackTrace();
 		}
 
-		component.setData(lazy, dsl, slices, order);
+		if (shape.length == 3) {
+			component.setData(lazy, dsl, slices, order);
+		} else {
+			component.setData(lazy, dsl, slices, order,new Hyper4DMapReducer(), new Hyper4DImageReducer());
+		}
 		
 		return container;
 	}
