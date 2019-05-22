@@ -495,7 +495,9 @@ public class LoadedFilePart {
 		IStructuredSelection selection = viewer.getStructuredSelection();
 		List<LoadedFile> s = SelectionUtils.getFromSelection(selection, LoadedFile.class);
 		
-		if (s.isEmpty() && event.getLoadedFile() != null) {
+		boolean pushSelection = event.getLoadedFile() != null || viewer.getTable().getItemCount() != 0;
+		
+		if (s.isEmpty() && pushSelection) {
 			viewer.getTable().setSelection(0);
 			selection = viewer.getStructuredSelection();
 			s = SelectionUtils.getFromSelection(selection, LoadedFile.class);
