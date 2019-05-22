@@ -197,9 +197,10 @@ public class LightWeightPlotViewer<T> extends AbstractPlottingViewer<T> implemen
 	 */
 	public void createControl(final T parent) {
 
-		if (plotContents!=null) return;		
-
+		if (plotContents!=null) return;
+		
 		LightweightSystem lws = null;
+
 		if (parent instanceof Composite) {
 			Canvas xyCanvas = new Canvas((Composite)parent, SWT.DOUBLE_BUFFERED|SWT.NO_REDRAW_RESIZE|SWT.NO_BACKGROUND);
 			lws = new LightweightSystem(xyCanvas);
@@ -209,7 +210,6 @@ public class LightWeightPlotViewer<T> extends AbstractPlottingViewer<T> implemen
 			xyCanvas.addKeyListener(getKeyListener());
 
 			lws.setControl(xyCanvas);
-			xyCanvas.setBackground(xyCanvas.getDisplay().getSystemColor(SWT.COLOR_WHITE));
 
 			final MenuManager popupMenu = new MenuManager();
 			popupMenu.setRemoveAllWhenShown(true); // Remake menu each time
@@ -260,9 +260,8 @@ public class LightWeightPlotViewer<T> extends AbstractPlottingViewer<T> implemen
 
 		intensity.addMouseMotionListener(l);
 		intensity.addMouseListener(l);
-
-		Color bgdColor = parent instanceof Composite? ((Composite)parent).getBackground():null;
-		intensity.setBorder(new LineBorder(bgdColor != null ? bgdColor : ColorConstants.white, 5));
+		
+		intensity.setBorder(new LineBorder(ColorConstants.white, 5));
 		graphLayer.add(intensity, BorderLayout.RIGHT);
 		intensity.setVisible(false);
 
@@ -324,7 +323,6 @@ public class LightWeightPlotViewer<T> extends AbstractPlottingViewer<T> implemen
 		if (bars!=null) bars.updateActionBars();
 		if (bars!=null) bars.getToolBarManager().update(true);
 
-
 		if (system.getPlotType()!=null) {
 			actionBarManager.switchActions(system.getPlotType());
 		}
@@ -333,6 +331,12 @@ public class LightWeightPlotViewer<T> extends AbstractPlottingViewer<T> implemen
 			((Composite)parent).layout();
 		} else {
 			((Figure)parent).revalidate();
+		}
+
+		//CSS colors applied late so need to do this at the end to avoid
+		//the wrong border color
+		if (figureCanvas != null) {
+			((LineBorder)intensity.getBorder()).setColor(figureCanvas.getBackground());
 		}
 
 	}
