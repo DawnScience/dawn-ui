@@ -83,7 +83,7 @@ public class ImageTrapeziumBaselineReducer implements IDatasetROIReducer, IProvi
 		double min = axes.get(2).getSlice().min().doubleValue();
 		double max = axes.get(2).getSlice().max().doubleValue();
 		
-		return new XAxisBoxROI(min,0,(max-min)/10, 0, 0);
+		return new XAxisBoxROI((max-min)/100 +min,0,(max-min)/100, 0, 0);
 	}
 	
 	@Override

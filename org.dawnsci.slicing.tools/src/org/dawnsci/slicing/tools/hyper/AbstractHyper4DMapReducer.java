@@ -126,7 +126,13 @@ public abstract class AbstractHyper4DMapReducer implements IDatasetROIReducer {
 			yval = y[1];
 		}
 		
-		return new RectangularROI(yval/10, xval/10, yval/10, xval/10, 0);
+		int ystart = yval > 10 ? yval/10 : 0;
+		int xstart = xval > 10 ? xval/10 : 0;
+		
+		yval = yval > 2 ? 2 : 1;
+		xval = xval > 2 ? 2 : 1;
+		
+		return new RectangularROI(xstart, ystart, yval, xval, 0);
 	}
 
 	@Override
