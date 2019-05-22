@@ -21,10 +21,9 @@ public class DynamicViewerHandler extends AbstractHandler {
 		Object evaluationContext = event.getApplicationContext();
 		
 		List<MappedDataBlock> s = getListFromContext(evaluationContext);
-		if (s.size() == 1 && s.get(0).getLazy().getRank() == 3) {
-		
-		DynamicDialog dialog = new DynamicDialog(PlatformUI.getWorkbench().getDisplay().getActiveShell(), s.get(0));
-		dialog.open();
+		if (isValidBlockList(s)) { 
+			DynamicDialog dialog = new DynamicDialog(PlatformUI.getWorkbench().getDisplay().getActiveShell(), s.get(0));
+			dialog.open();
 		}
 		
 		return null;
@@ -34,12 +33,8 @@ public class DynamicViewerHandler extends AbstractHandler {
 	public void setEnabled(Object evaluationContext) {
 		
 		List<MappedDataBlock> s = getListFromContext(evaluationContext);
-
-		if (s.size() == 1 && s.get(0).getLazy().getRank() == 3 && !s.get(0).isRemappingRequired()) {
-			setBaseEnabled(true);
-		} else {
-			setBaseEnabled(false);
-		}
+		setBaseEnabled(isValidBlockList(s));
+	
 	}
 	
 	private List<MappedDataBlock> getListFromContext(Object context) {
@@ -52,6 +47,26 @@ public class DynamicViewerHandler extends AbstractHandler {
 		
 		return Collections.emptyList();
 		
+	}
+	
+	private boolean isValidBlockList(List<MappedDataBlock> s) {
+		
+		if (s.size() != 1) return false;
+		
+		MappedDataBlock b = s.get(0);
+		
+		if (b.isRemappingRequired() || b.isLive()) return false;
+		
+		
+		if (b.getLazy().getRank() == 3 && b.getDataDimensions().length == 1) {
+			return true;
+		}
+		
+		if (b.getLazy().getRank() == 4 && b.getDataDimensions().length == 2) {
+			return true;
+		}
+		
+		return false;
 	}
 
 }
