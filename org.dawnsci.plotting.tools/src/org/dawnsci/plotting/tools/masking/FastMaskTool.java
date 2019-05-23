@@ -848,6 +848,9 @@ public class FastMaskTool extends AbstractToolPage {
 						maskRegionDragMode = (MaskRegionDragMode)((StructuredSelection)s).getFirstElement();
 						
 						Collection<IRegion> regions = getPlottingSystem().getRegions();
+						
+						if (regions == null) return;
+						
 						IROIListener roiListener = getROIListener();
 						for (IRegion next : regions) {
 
