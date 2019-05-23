@@ -222,6 +222,11 @@
                   label="Set Transparency..."
                   style="push">
             </command>
+            <command
+                  commandId="org.dawnsci.mapping.ui.lockcolourmapstotop"
+                  label="Lock All Colour Maps"
+                  style="push">
+            </command>
          </menu>
       </menuContribution>
       <menuContribution
@@ -302,6 +307,11 @@
             defaultHandler="org.dawnsci.mapping.ui.actions.HighAspectImageAsLinesHandler"
             id="org.dawnsci.mapping.ui.highaspectimageaslines"
             name="As Lines">
+      </command>
+      <command
+            defaultHandler="org.dawnsci.mapping.ui.actions.LockColourMapsHandler"
+            id="org.dawnsci.mapping.ui.lockcolourmapstotop"
+            name="Lock Colourmap Ranges to Top Map">
       </command>
    </extension>
 
