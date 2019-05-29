@@ -688,7 +688,7 @@ public class DataFileSliceView extends ViewPart {
 		
 		if (ob == null) return null;
 		
-		if (ob.getClass().isArray() && Array.get(ob, 0) instanceof IOperation) {
+		if (ob.getClass().isArray() && Array.getLength(ob) > 0 && Array.get(ob, 0) instanceof IOperation) {
 			ops = (IOperation<?,?>[]) ob;
 		}
 		
