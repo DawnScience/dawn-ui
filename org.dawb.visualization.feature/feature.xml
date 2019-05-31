@@ -103,10 +103,6 @@ This Agreement is governed by the laws of the State of New York and the intellec
    </license>
 
    <includes
-         id="org.dawb.apache.feature"
-         version="0.0.0"/>
-
-   <includes
          id="org.dawnsci.plotting.feature"
          version="0.0.0"/>
 

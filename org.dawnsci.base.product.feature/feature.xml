@@ -30,10 +30,6 @@
          version="0.0.0"/>
 
    <includes
-         id="org.dawb.apache.feature"
-         version="0.0.0"/>
-
-   <includes
          id="org.dawb.visualization.feature"
          version="0.0.0"/>
 
