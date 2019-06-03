@@ -15,6 +15,7 @@ import org.dawnsci.datavis.api.ILazyPlotMode;
 import org.dawnsci.datavis.api.IPlotMode;
 import org.dawnsci.datavis.model.PlotEventObject.PlotEventType;
 import org.dawnsci.january.model.NDimensions;
+import org.dawnsci.january.ui.utils.DisplayWrapper;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.Platform;
@@ -306,7 +307,7 @@ public class PlotController implements IPlotController, ILoadedFileInitialiser {
 			}
 		}
 		
-		Display.getDefault().syncExec(new Runnable() {
+		DisplayWrapper.syncExec(new Runnable() {
 			
 			@Override
 			public void run() {

@@ -22,6 +22,7 @@ import org.dawnsci.datavis.model.PlotController;
 import org.dawnsci.january.model.ISliceChangeListener;
 import org.dawnsci.january.model.NDimensions;
 import org.dawnsci.january.model.SliceChangeEvent;
+import org.dawnsci.january.ui.utils.DisplayWrapper;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.trace.IImageTrace;
 import org.eclipse.dawnsci.plotting.api.trace.ILineTrace;
@@ -44,6 +45,7 @@ public class PlotControllerTest extends AbstractTestModel {
 	
 	@BeforeClass
 	public static void buildData() throws Exception {
+		DisplayWrapper.setTestMode();
 		AbstractTestModel.buildData();
 		exService = Executors.newSingleThreadExecutor();
 		

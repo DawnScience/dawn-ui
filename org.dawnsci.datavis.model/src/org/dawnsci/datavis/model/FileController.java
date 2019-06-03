@@ -484,13 +484,8 @@ public class FileController implements IFileController {
 						if (!fileList.isEmpty()) {
 							IRefreshable r = fileList.get(0);
 							List<DataOptions> c = ((LoadedFile)r).getChecked();
-							//FIXME should not need display code in the file controller!
-							if (Display.getCurrent() == null) {
-								//This should be else where but it breaks the unit tests due to locking in Display (only for true,true)
-								Display.getDefault().asyncExec(() -> fireStateChangeListeners(true, true, (LoadedFile)fileList.get(0), !c.isEmpty() ? (DataOptions)c.get(0) : null));
-							} else {
-								fireStateChangeListeners(true, true, (LoadedFile)fileList.get(0), !c.isEmpty() ? (DataOptions)c.get(0) : null);
-							}
+
+							fireStateChangeListeners(true, true, (LoadedFile)fileList.get(0), !c.isEmpty() ? (DataOptions)c.get(0) : null);
 						}
 						
 					}
