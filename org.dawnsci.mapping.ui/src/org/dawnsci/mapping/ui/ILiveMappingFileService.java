@@ -1,6 +1,6 @@
 package org.dawnsci.mapping.ui;
 
-import org.dawnsci.common.live.ILiveFileService;
+import org.dawnsci.datavis.api.ILiveFileService;
 
 /**
  * Extended {@link ILiveFileService} for the Mapping perspective.

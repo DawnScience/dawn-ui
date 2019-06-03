@@ -1,6 +1,6 @@
 package org.dawnsci.datavis.model;
 
-import org.dawnsci.common.live.ILiveFileListener;
+import org.dawnsci.datavis.api.ILiveFileListener;
 
 /**
  * Extended {@link ILiveFileListener} for the DataVis perspective.
