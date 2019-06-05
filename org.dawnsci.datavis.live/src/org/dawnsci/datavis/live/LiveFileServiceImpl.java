@@ -4,7 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.dawnsci.common.live.AbstractLiveFileService;
-import org.dawnsci.common.live.ILiveFileListener;
+import org.dawnsci.datavis.api.ILiveFileListener;
 import org.dawnsci.datavis.model.ILiveLoadedFileListener;
 import org.dawnsci.datavis.model.ILiveLoadedFileService;
 import org.dawnsci.datavis.model.LoadedFile;
