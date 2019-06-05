@@ -1,7 +1,7 @@
 package org.dawnsci.mapping.ui.live;
 
 import org.dawnsci.common.live.AbstractLiveFileService;
-import org.dawnsci.common.live.ILiveFileListener;
+import org.dawnsci.datavis.api.ILiveFileListener;
 import org.dawnsci.mapping.ui.ILiveMapFileListener;
 import org.dawnsci.mapping.ui.ILiveMappingFileService;
 
