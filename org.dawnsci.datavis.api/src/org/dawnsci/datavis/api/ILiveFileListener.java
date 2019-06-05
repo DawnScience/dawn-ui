@@ -1,4 +1,4 @@
-package org.dawnsci.common.live;
+package org.dawnsci.datavis.api;
 
 import java.util.EventListener;
 

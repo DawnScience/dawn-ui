@@ -1,4 +1,4 @@
-package org.dawnsci.common.live;
+package org.dawnsci.datavis.api;
 
 /**
  * Interface describing a service to deal with live files,
