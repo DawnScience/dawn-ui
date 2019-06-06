@@ -28,7 +28,6 @@ import org.dawb.common.ui.util.DialogUtils;
 import org.dawb.common.ui.util.EclipseUtils;
 import org.dawb.common.util.io.FileUtils;
 import org.dawb.common.util.io.PropUtils;
-import org.dawb.common.util.text.NumberUtils;
 import org.dawb.workbench.ui.Activator;
 import org.dawb.workbench.ui.data.wizard.PythonFilterWizard;
 import org.dawb.workbench.ui.editors.preference.EditorConstants;
@@ -1854,7 +1853,7 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 			final Matcher   matcher = service.getStackMatcher(name);
 			if (matcher.matches()) {
 				String index       = matcher.group(2);
-				if (index!=null) index = NumberUtils.removeLeadingZeros(index);
+				if (index!=null) index = removeLeadingZeros(index);
 				if (Integer.parseInt(index) == 1) {
 					String lazySetName = matcher.group(1);
                     if (dataHolder.contains(lazySetName)) {
@@ -1911,6 +1910,15 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 			dataViewer.refresh();
 		}
 		
+	}
+
+	private static String removeLeadingZeros(String index) {
+		int i = 0;
+		int imax = index.length();
+		while (i < imax && index.charAt(i++) == '0') {
+		}
+
+		return i == 0 ? index : index.substring(i);
 	}
 
 	public void refresh() {

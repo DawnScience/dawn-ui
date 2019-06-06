@@ -11,7 +11,6 @@ package org.dawnsci.plotting.draw2d.swtxy;
 import java.util.ArrayList;
 import java.util.Collection;
 
-import org.dawb.common.util.text.NumberUtils;
 import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.axis.AxisEvent;
@@ -98,7 +97,7 @@ public class AspectAxis extends DAxis implements IAxis {
 		// We keep aspect if the other axis has a larger range than this axis.
 		final double  thisRange     = getInterval(getRange());
 		final double  relRange      = getInterval(relativeTo.getRange());
-		final boolean equal         = NumberUtils.equalsPercent(thisRange, relRange, 0.001);
+		final boolean equal         = Math.abs(thisRange - relRange) <= Math.abs(thisRange)* 0.001;
 		final boolean isOtherReallyLonger = isLonger(calcBounds, getGraph().getPlotArea().getBounds());
 		final boolean isRelative    = equal && !isOtherReallyLonger; // The parent layouts ys second so x is the right size.
 		final boolean isOtherLarger = relRange>thisRange;
