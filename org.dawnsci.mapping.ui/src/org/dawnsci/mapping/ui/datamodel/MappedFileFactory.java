@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.eclipse.dawnsci.analysis.api.io.IDataHolder;
 import org.eclipse.january.IMonitor;
+import org.eclipse.january.dataset.CompoundDataset;
 import org.eclipse.january.dataset.Dataset;
 import org.eclipse.january.dataset.DatasetFactory;
 import org.eclipse.january.dataset.DatasetUtils;
@@ -151,11 +152,11 @@ public class MappedFileFactory {
 			
 			if (d.getRank() == 3) {
 				
-				RGBDataset ds = (RGBDataset) DatasetUtils.createCompoundDataset(Dataset.RGB, d.getSlice(new Slice(0,1,1),null,null).squeeze(), d.getSlice(new Slice(1,2,1),null,null).squeeze(), d.getSlice(new Slice(2,3,1),null,null).squeeze());
+				RGBDataset ds = createRGBDataset(d, d.getShape()[2] == 3);
 				ds.addMetadata(ax);
 				return new AssociatedImage(b.getName(), ds, path);
 			} else if (d.getRank() == 2) {
-				RGBDataset ds = (RGBDataset) DatasetUtils.createCompoundDataset(Dataset.RGB, d);
+				RGBDataset ds = DatasetUtils.createCompoundDataset(RGBDataset.class, d);
 				ds.addMetadata(ax);
 				return new AssociatedImage(b.getName(), ds, path);
 				
@@ -166,6 +167,21 @@ public class MappedFileFactory {
 		}
 		return null;
 		
+	}
+	
+	private static RGBDataset createRGBDataset(Dataset d, boolean interleaved) {
+		
+		if (interleaved) {
+			
+			CompoundDataset cd = DatasetUtils.createCompoundDatasetFromLastAxis(d, true);
+			
+			return RGBDataset.createFromCompoundDataset(cd);
+		}
+
+		return DatasetUtils.createCompoundDataset(RGBDataset.class, new Dataset[] {
+				d.getSliceView(new Slice(0,1,1),null,null).squeeze(),
+				d.getSliceView(new Slice(1,2,1),null,null).squeeze(),
+				d.getSliceView(new Slice(2,3,1),null,null).squeeze()});	
 	}
 	
 	private static AxesMetadata checkAndBuildAxesMetadata(List<String> axes, MappedBlockBean bean, IDataHolder dataHolder) {
