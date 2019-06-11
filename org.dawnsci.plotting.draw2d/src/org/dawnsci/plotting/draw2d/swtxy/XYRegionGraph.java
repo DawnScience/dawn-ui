@@ -9,9 +9,11 @@
 package org.dawnsci.plotting.draw2d.swtxy;
 
 import java.text.NumberFormat;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 
 import org.dawnsci.plotting.draw2d.swtxy.selection.AbstractSelectionRegion;
 import org.eclipse.core.runtime.preferences.InstanceScope;
@@ -39,6 +41,7 @@ import org.eclipse.nebula.visualization.xygraph.figures.PlotArea;
 import org.eclipse.nebula.visualization.xygraph.figures.Trace;
 import org.eclipse.nebula.visualization.xygraph.figures.XYGraph;
 import org.eclipse.nebula.visualization.xygraph.linearscale.AbstractScale.LabelSide;
+import org.eclipse.nebula.visualization.xygraph.linearscale.Range;
 import org.eclipse.nebula.visualization.xygraph.util.XYGraphMediaFactory;
 import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.graphics.Color;
@@ -80,6 +83,9 @@ public class XYRegionGraph extends XYGraph {
 	}
 	
 	private IPreferenceStore store;
+	private boolean zoomed = false;
+	private boolean autoscaled;
+
 	private IPreferenceStore getPreferenceStore() {
 		if (store!=null) return store;
 		store = new ScopedPreferenceStore(InstanceScope.INSTANCE, IPlottingSystem.PREFERENCE_STORE);
@@ -177,11 +183,13 @@ public class XYRegionGraph extends XYGraph {
 		return (RegionArea)getPlotArea();
 	}
 
-	public void performAutoScale(){
-
-		if (getRegionArea().getImageTraces()!=null && getRegionArea().getImageTraces().size()>0) {
+	public void performAutoScale() {
+		zoomed = true;
+		autoscaled = true;
+		Map<String, ImageTrace> traces = getRegionArea().getImageTraces();
+		if (traces != null && !traces.isEmpty()) {
 			
-			for (ImageTrace trace : getRegionArea().getImageTraces().values()) {
+			for (ImageTrace trace : traces.values()) {
 				trace.performAutoscale();
 			}
 			
@@ -189,7 +197,6 @@ public class XYRegionGraph extends XYGraph {
 			
 			super.performAutoScale();
 		}
-		
 	}
 
 	/**
@@ -239,92 +246,97 @@ public class XYRegionGraph extends XYGraph {
 	public void setImageOrigin(ImageOrigin origin) {
 		getRegionArea().setImageOrigin(origin);
 	}
-	
+
+	@Override
 	public void layout() {
-		
 		super.layout();
-		
+
 		for (Axis axis : getXAxisList()) {
 			if (axis instanceof AspectAxis) {
-				((AspectAxis)axis).checkBounds();
+				((AspectAxis) axis).checkBounds(zoomed);
 			}
 		}
+	
 		for (Axis axis : getYAxisList()) {
 			if (axis instanceof AspectAxis) {
-				((AspectAxis)axis).checkBounds();
+				((AspectAxis) axis).checkBounds(zoomed);
 			}
 		}
-		
-		if(getPlotArea() != null && getPlotArea().isVisible()){
+		zoomed = false;
 
-			Rectangle plotAreaBound = new Rectangle(
-					getPrimaryXAxis().getBounds().x + getPrimaryXAxis().getMargin(),
-					getPrimaryYAxis().getBounds().y + getPrimaryYAxis().getMargin(),
-					getPrimaryXAxis().getTickLength(),
-					getPrimaryYAxis().getTickLength()
-					);
-			getPlotArea().setBounds(plotAreaBound);
-
+		PlotArea pa = getPlotArea();
+		if (pa != null && pa.isVisible()) {
+			Axis x = getPrimaryXAxis();
+			Axis y = getPrimaryYAxis();
+			Rectangle plotAreaBound = new Rectangle(x.getBounds().x + x.getMargin(), y.getBounds().y + y.getMargin(),
+					x.getTickLength(), y.getTickLength());
+			pa.setBounds(plotAreaBound);
 		}
-		
 	}
 
 	public void setKeepAspect(boolean checked) {
 		for (Axis axis : getXAxisList()) {
-			if (axis instanceof AspectAxis) ((AspectAxis)axis).setKeepAspect(checked);
+			if (axis instanceof AspectAxis) ((AspectAxis) axis).setKeepAspect(checked);
 		}
 		for (Axis axis : getYAxisList()) {
-			if (axis instanceof AspectAxis) ((AspectAxis)axis).setKeepAspect(checked);
+			if (axis instanceof AspectAxis) ((AspectAxis) axis).setKeepAspect(checked);
 		}
 	}
-	
+
 	/**
 	 * Zooms about the central point a factor (-ve for out) usually +-0.1
 	 */
 	public void setZoomLevel(MouseEvent evt, double delta, boolean tryToUseWhitespace) {
-		
-		int primX = getPrimaryXAxis().getTickLength();
-		int primY = getPrimaryYAxis().getTickLength();
-		double xScale = delta;
-		double yScale = delta;	
-
-		// Allow for axis size
-		if (primX>(primY*1.333)) {
-			double ratio = (Double.valueOf(primX)/Double.valueOf(primY));
-			yScale = delta / ratio;
-		} else if (primY>(primX*1.333)) {
-			xScale = delta / (Double.valueOf(primY)/Double.valueOf(primX));
-		}
-		
-		// Allow for available size
-		if (getRegionArea().getImageTrace()!=null && tryToUseWhitespace) {
-			
-			// Fudged scaling algorithm
-			// TODO make a less jerky one
-			Rectangle fullSize  = getBounds();
-			int w  = fullSize.width; 
-			int h  = fullSize.height;
-			int xg = w-primX; 
-			int yg = h-primY; 
-			if ((xg-yg)>100) {
-				double scale = 2d;
-				yScale = delta>0 ? yScale*scale : yScale/scale;
-			} else if ((yg-xg)>10) {
-				double scale = 6d;
-				yScale = delta>0 ? yScale/scale : yScale*scale;
-			}
-		}
-		
+		zoomed = true;
 		for (Axis axis : getXAxisList()) {
 			final double cenX = axis.getPositionValue(evt.x, false);
-			axis.zoomInOut(cenX, xScale);
+			axis.zoomInOut(cenX, delta);
 		}
 		for (Axis axis : getYAxisList()) {
 			final double cenY = axis.getPositionValue(evt.y, false);
-			axis.zoomInOut(cenY, yScale);
+			axis.zoomInOut(cenY, delta);
+		}
+
+		RegionArea area = getRegionArea();
+		ImageTrace image = area.getImageTrace();
+		if (tryToUseWhitespace && image != null) {
+			double[] gr = delta < 0 ? null : image.getGlobalRange();
+			expandAxis((AspectAxis) getPrimaryXAxis(), gr == null ? null : Arrays.copyOfRange(gr, 0, 2));
+			expandAxis((AspectAxis) getPrimaryYAxis(), gr == null ? null : Arrays.copyOfRange(gr, 2, 4));
+		}
+		if (delta < 0) { // don't use global range to expand after zooming in again
+			autoscaled = false;
+		}
+
+		area.createPositionCursor(evt.x, evt.y);
+	}
+
+	private void expandAxis(AspectAxis axis, double[] limit) {
+		int p = axis.getTickLength();
+		int q = axis.getPrecheckTickLength();
+		if (q > p) { // when there is room to expand
+			Range r = axis.getRange();
+			double l = r.getLower();
+			double u = r.getUpper();
+			double d = u - l;
+			if (d > 0) { // shift end to maximize portion of image shown
+				u = l + (d * q) / p;
+			} else {
+				l = u - (d * q) / p;
+			}
+			if (limit != null && autoscaled) {
+				if (d > 0) {
+					l = Math.max(l, limit[0]);
+					u = Math.min(u, limit[1]);
+				} else {
+					l = Math.min(l, limit[1]);
+					u = Math.max(u, limit[0]);
+				}
+			}
+			axis.setRange(l, u);
 		}
 	}
-	
+
 	public void dispose() {
 		removeAll();
 		getRegionArea().dispose();
@@ -336,7 +348,7 @@ public class XYRegionGraph extends XYGraph {
 	
 	public void addAnnotation(final Annotation annotation){
 		
-		annotation.setLabelProvider(new IAnnotationLabelProvider() {		
+		annotation.setLabelProvider(new IAnnotationLabelProvider() {
 			@Override
 			public String getInfoText(double xValue, double yValue, boolean showName, boolean showSample, boolean showPosition) {
 				if (getRegionArea().getImageTrace()==null) return null;
@@ -457,7 +469,7 @@ public class XYRegionGraph extends XYGraph {
 
 	public IAxis getSelectedXAxis() {
 		if (selectedXAxis==null) {
-			return (AspectAxis)getPrimaryXAxis();
+			return (IAxis) getPrimaryXAxis();
 		}
 		return selectedXAxis;
 	}
@@ -468,7 +480,7 @@ public class XYRegionGraph extends XYGraph {
 
 	public IAxis getSelectedYAxis() {
 		if (selectedYAxis==null) {
-			return (AspectAxis)getPrimaryYAxis();
+			return (IAxis) getPrimaryYAxis();
 		}
 		return selectedYAxis;
 	}

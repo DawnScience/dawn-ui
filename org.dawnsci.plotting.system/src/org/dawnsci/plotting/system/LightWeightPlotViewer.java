@@ -607,7 +607,7 @@ public class LightWeightPlotViewer<T> extends AbstractPlottingViewer<T> implemen
 							LinearScaleTickLabels label = (LinearScaleTickLabels)fig;
 							Axis scale = (Axis)label.getScale();
 							if (scale instanceof IAxis) beanAxis = (IAxis)scale;
-							fillAxisConfigure(manager, (AspectAxis)scale);
+							fillAxisConfigure(manager, scale);
 						}
 					}
 
@@ -1058,9 +1058,9 @@ public class LightWeightPlotViewer<T> extends AbstractPlottingViewer<T> implemen
 
 		final String rootName = system.getRootName();
 
-		final AspectAxis xAxis = (AspectAxis)getSelectedXAxis();
+		final IAxis xAxis = getSelectedXAxis();
 		xAxis.setLabelDataAndTitle(null);
-		final AspectAxis yAxis = (AspectAxis)getSelectedYAxis();
+		final IAxis yAxis = getSelectedYAxis();
 		yAxis.setLabelDataAndTitle(null);
 
 		xAxis.setVisible(true);
@@ -1106,7 +1106,7 @@ public class LightWeightPlotViewer<T> extends AbstractPlottingViewer<T> implemen
 			LightWeightDataProvider traceDataProvider = new LightWeightDataProvider(evt.getXData(), evt.getYData());
 
 			//create the trace
-			trace.init(xAxis, yAxis, traceDataProvider);
+			trace.init((Axis) xAxis, (Axis) yAxis, traceDataProvider);
 
 			if (y.getName()!=null && !"".equals(y.getName())) {
 				if (traceMap!=null) traceMap.put(y.getName(), wrapper);
@@ -1133,7 +1133,7 @@ public class LightWeightPlotViewer<T> extends AbstractPlottingViewer<T> implemen
 			trace.setTraceColor(plotColor);
 
 			//add the trace to xyGraph
-			xyGraph.addTrace(trace, xAxis, yAxis, false);
+			xyGraph.addTrace(trace, (Axis) xAxis, (Axis) yAxis, false);
 
 
 			if (monitor!=null) monitor.worked(1);
@@ -1166,12 +1166,12 @@ public class LightWeightPlotViewer<T> extends AbstractPlottingViewer<T> implemen
 		system.fireWillPlot(evt);
 		if (!evt.doit) return false;
 
-		final AspectAxis xAxis = (AspectAxis) getSelectedXAxis();
-		final AspectAxis yAxis = (AspectAxis) getSelectedYAxis();
+		final IAxis xAxis = getSelectedXAxis();
+		final IAxis yAxis = getSelectedYAxis();
 		if (trace instanceof IImageTrace) {
 			final IImageTrace image = (IImageTrace) trace;
-			xAxis.setLogScale(false);
-			yAxis.setLogScale(false);
+			xAxis.setLog10(false);
+			yAxis.setLog10(false);
 			trace.initialize(xAxis, yAxis);
 			for (IRegion r : xyGraph.getRegions()) {
 				r.getCoordinateSystem().update(image, xAxis, yAxis);
@@ -1212,7 +1212,7 @@ public class LightWeightPlotViewer<T> extends AbstractPlottingViewer<T> implemen
 			xAxis.setLabelDataAndTitle(null);
 			yAxis.setLabelDataAndTitle(null);
 			trace.initialize(xAxis, yAxis);
-			xyGraph.addTrace(((LineTraceImpl) trace).getTrace(), xAxis, yAxis, true);
+			xyGraph.addTrace(((LineTraceImpl) trace).getTrace(), (Axis) xAxis, (Axis) yAxis, true);
 			intensity.setVisible(false);
 		}
 		redraw();
@@ -1468,8 +1468,8 @@ public class LightWeightPlotViewer<T> extends AbstractPlottingViewer<T> implemen
 	@Override
 	public IAxis removeAxis(final IAxis axis) {
 		if (axis.isPrimaryAxis()) return null;
-		if (!(axis instanceof AspectAxis)) return null;
-		xyGraph.removeAxis((AspectAxis)axis);
+		if (!(axis instanceof Axis)) return null;
+		xyGraph.removeAxis((Axis) axis);
 		return axis;
 	}	
 

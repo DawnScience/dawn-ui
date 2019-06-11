@@ -14,13 +14,13 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.dawnsci.plotting.draw2d.swtxy.AspectAxis;
 import org.dawnsci.plotting.draw2d.swtxy.RegionArea;
 import org.dawnsci.plotting.draw2d.swtxy.RegionCoordinateSystem;
 import org.dawnsci.plotting.draw2d.swtxy.XYRegionGraph;
 import org.dawnsci.plotting.draw2d.swtxy.selection.AbstractSelectionRegion;
 import org.dawnsci.plotting.roi.ROIEditTable;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
+import org.eclipse.dawnsci.plotting.api.axis.IAxis;
 import org.eclipse.dawnsci.plotting.api.region.IROIListener;
 import org.eclipse.dawnsci.plotting.api.region.IRegion;
 import org.eclipse.dawnsci.plotting.api.region.IRegion.RegionType;
@@ -307,8 +307,8 @@ public class RegionEditComposite extends Composite {
 
 	public AbstractSelectionRegion<?> createRegion() throws Exception {
 		
-		final AspectAxis xAxis = getAxis(xyGraph.getXAxisList(), xCombo.getSelectionIndex());
-		final AspectAxis yAxis = getAxis(xyGraph.getYAxisList(), yCombo.getSelectionIndex());
+		final IAxis xAxis = getAxis(xyGraph.getXAxisList(), xCombo.getSelectionIndex());
+		final IAxis yAxis = getAxis(xyGraph.getYAxisList(), yCombo.getSelectionIndex());
 		
 		AbstractSelectionRegion<?> region=null;
 		
@@ -334,7 +334,7 @@ public class RegionEditComposite extends Composite {
 		
         this.editingRegion = region;
         this.roiViewer.setRegion(region.getROI(), region.getRegionType(), region.getCoordinateSystem());
-        this.roiListener = new IROIListener.Stub() {			
+        this.roiListener = new IROIListener.Stub() {
 			@Override
 			public void roiChanged(ROIEvent evt) {
 				region.setROI(evt.getROI());
@@ -355,10 +355,10 @@ public class RegionEditComposite extends Composite {
 		regionType.setEnabled(false);
 		regionType.setEditable(false);
 		
-		int index = xyGraph.getXAxisList().indexOf(region.getCoordinateSystem().getX());
+		int index = getAxisIndex(xyGraph.getXAxisList(), region.getCoordinateSystem().getX());
 		xCombo.select(index);
 		
-		index = xyGraph.getYAxisList().indexOf(region.getCoordinateSystem().getY());
+		index = getAxisIndex(xyGraph.getYAxisList(), region.getCoordinateSystem().getY());
 		yCombo.select(index);
 		
 		colorSelector.setColorValue(region.getRegionColor().getRGB());
@@ -390,10 +390,10 @@ public class RegionEditComposite extends Composite {
 		} catch (Exception e) {
 			MessageDialog.openError(Display.getDefault().getActiveShell(), "Region Exists", 
 					"The region '"+txt+"' already exists.\n\n"+
-			        "Please choose a unique name for regions.");
+					"Please choose a unique name for regions.");
 		}
-		final AspectAxis x = getAxis(xyGraph.getXAxisList(), xCombo.getSelectionIndex());
-		final AspectAxis y = getAxis(xyGraph.getYAxisList(), yCombo.getSelectionIndex());
+		final IAxis x = getAxis(xyGraph.getXAxisList(), xCombo.getSelectionIndex());
+		final IAxis y = getAxis(xyGraph.getYAxisList(), yCombo.getSelectionIndex());
 		RegionCoordinateSystem sys = new RegionCoordinateSystem(getImageTrace(), x, y);
 		editingRegion.setCoordinateSystem(sys);
 		editingRegion.setShowPosition(showPoints.getSelection());
@@ -404,18 +404,26 @@ public class RegionEditComposite extends Composite {
 		editingRegion.setShowLabel(showLabel.getSelection());
 		editingRegion.setFill(fillRegion.getSelection());
 		
-        return editingRegion;
+		return editingRegion;
 	}
 
 
-	private AspectAxis getAxis(List<Axis> xAxisList, int selectionIndex) {
+	private IAxis getAxis(List<Axis> xAxisList, int selectionIndex) {
 		if (selectionIndex<0) selectionIndex=0;
-		return (AspectAxis)xAxisList.get(selectionIndex);
+		Axis a = xAxisList.get(selectionIndex);
+		return a instanceof IAxis ? (IAxis) a : null;
 	}
 
-    public IImageTrace getImageTrace() {
-    	return ((RegionArea)xyGraph.getPlotArea()).getImageTrace();
-    }
+	private int getAxisIndex(List<Axis> xAxisList, IAxis a) {
+		if (a instanceof Axis) {
+			return xAxisList.indexOf((Axis) a);
+		}
+		return -1;
+	}
+
+	public IImageTrace getImageTrace() {
+		return ((RegionArea)xyGraph.getPlotArea()).getImageTrace();
+	}
 
 	public void applyChanges() {
 //		this.roiViewer.cancelEditing();
