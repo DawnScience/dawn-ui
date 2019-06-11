@@ -63,7 +63,6 @@ import uk.ac.diamond.scisoft.analysis.crystallography.CalibrationFactory;
 import uk.ac.diamond.scisoft.analysis.crystallography.CalibrationStandards;
 import uk.ac.diamond.scisoft.analysis.roi.XAxis;
 
-@SuppressWarnings("unused")
 public class PowderCheckTool extends AbstractToolPage {
 	
 	
