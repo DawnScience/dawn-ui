@@ -329,7 +329,6 @@ public class Stepper extends Canvas {
 
 	private Image sliderImage;
 
-	@SuppressWarnings("unused")
 	protected IFigure getContents() {
 		rootFigure = new Panel();
 		rootFigure.setLayoutManager(new StepperLayout());
