@@ -153,7 +153,7 @@ public class HistogramToolPage2 extends AbstractToolPage implements IToolPage {
 	 * Create the image settings, i.e. colour scheme section
 	 */
 	private void createImageSettings(Composite comp) {
-		Section section = toolkit.createSection(comp, Section.DESCRIPTION | Section.TITLE_BAR);
+		Section section = toolkit.createSection(comp, Section.DESCRIPTION | Section.TITLE_BAR | Section.TWISTIE);
 		section.setLayout(GridLayoutFactory.fillDefaults().create());
 		section.setLayoutData(GridDataFactory.fillDefaults().grab(true, false).create());
 		section.setText("Image Settings");
