@@ -151,7 +151,7 @@ public class MappedFileFactory {
 			ax.addAxis(1,dataHolder.getLazyDataset(b.getAxes()[1]));
 			
 			if (d.getRank() == 3) {
-				
+				d.clearMetadata(AxesMetadata.class);
 				RGBDataset ds = createRGBDataset(d, d.getShape()[2] == 3);
 				ds.addMetadata(ax);
 				return new AssociatedImage(b.getName(), ds, path);
@@ -179,9 +179,9 @@ public class MappedFileFactory {
 		}
 
 		return DatasetUtils.createCompoundDataset(RGBDataset.class, new Dataset[] {
-				d.getSliceView(new Slice(0,1,1),null,null).squeeze(),
-				d.getSliceView(new Slice(1,2,1),null,null).squeeze(),
-				d.getSliceView(new Slice(2,3,1),null,null).squeeze()});	
+				d.getSlice(new Slice(0,1,1),null,null).squeeze(),
+				d.getSlice(new Slice(1,2,1),null,null).squeeze(),
+				d.getSlice(new Slice(2,3,1),null,null).squeeze()});	
 	}
 	
 	private static AxesMetadata checkAndBuildAxesMetadata(List<String> axes, MappedBlockBean bean, IDataHolder dataHolder) {
