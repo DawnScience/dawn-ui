@@ -84,32 +84,70 @@ public class AspectAxis extends DAxis implements IAxis {
 	public void setKeepAspectWith(final AspectAxis axis) {
 		this.relativeTo = axis;
 	}
-	
-	public void checkBounds() {
-	   checkBounds(false);	
+
+	private int precheckTickLength;
+
+	/**
+	 * @return tick length before axis has been resized after checkBounds
+	 */
+	public int getPrecheckTickLength() {
+		return precheckTickLength;
 	}
-	protected void checkBounds(final boolean force) {
-		
-		Rectangle calcBounds = getBounds().getCopy();
+
+	public String getDirection() {
+		return isHorizontal() ? "x" : "y";
+	}
+
+	private boolean skipCheckBounds = false;
+
+	public void checkBounds(final boolean ignore) {
+		checkBounds(ignore, false);
+	}
+
+	private double centre = Double.NaN;
+
+	protected void checkBounds(final boolean ignore, final boolean force) {
+		if (skipCheckBounds) {
+			skipCheckBounds = false;
+			return;
+		}
+
 		if (relativeTo == null) return;
 		if (!keepAspect)        return;
 		
 		// We keep aspect if the other axis has a larger range than this axis.
 		final double  thisRange     = getInterval(getRange());
 		final double  relRange      = getInterval(relativeTo.getRange());
-		final boolean equal         = Math.abs(thisRange - relRange) <= Math.abs(thisRange)* 0.001;
-		final boolean isOtherReallyLonger = isLonger(calcBounds, getGraph().getPlotArea().getBounds());
-		final boolean isRelative    = equal && !isOtherReallyLonger; // The parent layouts ys second so x is the right size.
-		final boolean isOtherLarger = relRange>thisRange;
-		
-		if (isRelative || isOtherLarger || force) {
+		final Rectangle calcBounds  = getBounds().getCopy();
+
+		boolean check = false;
+		if (!force) { // check if this axis's resolution (/pixel) is less than the other's
+			check = relRange * getTickLength() > thisRange * relativeTo.getTickLength();
+		}
+
+		precheckTickLength = isHorizontal() ? calcBounds.width : calcBounds.height;
+		precheckTickLength -= 4*getMargin();
+		if (check || force) {
 			boolean otherAxisInvalid = setRelativeAxisBounds(calcBounds, thisRange, relRange);
-			setBounds(calcBounds);
-			if (otherAxisInvalid&&!force) { // force is not recursive
-				relativeTo.checkBounds(true);
+			if (force) { // change range instead
+				double fLength = precheckTickLength + 2 * getMargin();
+				double d = 1 - (isHorizontal() ? calcBounds.width : calcBounds.height) / fLength;
+				if (d > 0) { // what if need to shrink???
+					Range r = getRange();
+					if (!Double.isFinite(centre)) {
+						centre = (r.getLower() + r.getUpper()) * 0.5;
+					}
+					relativeTo.skipCheckBounds = true;
+					zoomInOut(centre, d);
+				}
+			} else {
+				setBounds(calcBounds);
 			}
-		}		
-		
+			if (!ignore && otherAxisInvalid && !force) { // force is not recursive
+				relativeTo.checkBounds(false, true);
+			}
+		}
+
 		// y correction for companion axis
 		if (!isHorizontal() && getTickLabelSide() == LabelSide.Primary) { 
 			
@@ -122,9 +160,47 @@ public class AspectAxis extends DAxis implements IAxis {
 			IFigure yTicks = (IFigure)getChildren().get(1);
 			Dimension yAxisSize = yTicks.getSize();
 			final Rectangle relBounds = relativeTo.getBounds().getCopy();
-			relBounds.y = getBounds().y + yAxisSize.height - 10;
+			relBounds.y = getBounds().y + yAxisSize.height - getMargin();
 			relativeTo.setBounds(relBounds);
 		}
+	}
+
+	private boolean setRelativeAxisBounds(final Rectangle origBounds, final double thisRange, final double relRange) {
+		int relPixels = relativeTo.getTickLength();
+	
+		int thisPixels = (int) Math.round(thisRange * relPixels / relRange);
+		thisPixels += 2 * getMargin(); // adjust for whole axis length
+	
+		Rectangle bnds = getGraph().getPlotArea().getBounds();
+		boolean otherAxisInvalid;
+		if (isHorizontal()) {
+			otherAxisInvalid = thisPixels > bnds.width;
+			origBounds.width = otherAxisInvalid ? bnds.width : thisPixels;
+		} else {
+			otherAxisInvalid = thisPixels > bnds.height;
+			origBounds.height = otherAxisInvalid ? bnds.height : thisPixels;
+		}
+		return otherAxisInvalid;
+	}
+
+	@Override
+	public void zoomInOut(final double center, final double factor) {
+		this.centre = center;
+		// If we are image and it is fully zoomed, do not allow zoom in.
+		final XYRegionGraph xyGraph = getGraph();
+		final ImageTrace trace = xyGraph.getRegionArea().getImageTrace();
+		if (trace!=null && trace.isMaximumZoom() && factor>0) return; // We cannot zoom in more.
+	
+		super.zoomInOut(center, factor);
+	}
+
+	/**
+	 * Should be a method on Range really but 
+	 * @param range
+	 * @return
+	 */
+	private static double getInterval(Range range) {
+		return Math.abs(range.getUpper() - range.getLower());
 	}
 
 	private static boolean isTopOrRightOn(Range r, int[] limits) {
@@ -218,11 +294,11 @@ public class AspectAxis extends DAxis implements IAxis {
 	}
 
 	protected boolean panChecked(Range temp, double t1, double t2) {
-		final ImageTrace trace = ((XYRegionGraph)getGraph()).getRegionArea().getImageTrace();
+		final ImageTrace trace = getGraph().getRegionArea().getImageTrace();
 
 		// Code to stop pan outside image bounds.
-		if (trace!=null && !trace.hasTrueAxes()) {
-
+		if (trace != null && !trace.hasTrueAxes()) {
+			skipCheckBounds = false;
 			final double d1 = t1 - t2;
 			final double d2 = t2 - t1;
 
@@ -260,51 +336,8 @@ public class AspectAxis extends DAxis implements IAxis {
 
 		}
 
+		skipCheckBounds = true;
 		return super.panChecked(temp, t1, t2);
-	}
-
-	/**
-	 * true if with is longer in its direction in pixels than this axis. 
-	 * @param aspectAxis
-	 * @param relativeTo2
-	 * @return
-	 */
-	private boolean isLonger(Rectangle compare, Rectangle otherBounds) {
-		final int len1 = isYAxis() ? compare.height : compare.width;
-		final int len2 = relativeTo.isYAxis() ? otherBounds.height : otherBounds.width;
-		if (len1==len2) return true;
-		return len2>=len1;
-	}
-
-	private boolean setRelativeAxisBounds (final Rectangle origBounds, 
-										   final double    thisRange, 
-										   final double    relRange) {
-		
-		final Rectangle relBounds = relativeTo.getBounds();
-		int      realPixels = relativeTo.isYAxis() ? relBounds.height : relBounds.width;
-		realPixels-= 2*relativeTo.getMargin();
-		
-		final double    pixRatio  = realPixels/relRange;   // pix / unit
-		int       range     = (int)Math.round(thisRange*pixRatio);    // span for thisRange of them
-		range+=2*getMargin();
-		
-		boolean otherAxisInvalid = false;
-		if (isYAxis()  && range>getGraph().getPlotArea().getBounds().height) otherAxisInvalid = true;
-		if (!isYAxis() && range>getGraph().getPlotArea().getBounds().width)  otherAxisInvalid = true;
-
-		if (isYAxis()) origBounds.height = Math.min(range, getGraph().getPlotArea().getBounds().height); 
-		else           origBounds.width  = Math.min(range, getGraph().getPlotArea().getBounds().width);
-		
-		return otherAxisInvalid;
-	}
-
-	/**
-	 * Should be a method on Range really but 
-	 * @param range
-	 * @return
-	 */
-	private double getInterval(Range range) {
-		return Math.max(range.getLower(), range.getUpper()) - Math.min(range.getLower(), range.getUpper());
 	}
 
 	public boolean isKeepAspect() {
@@ -343,30 +376,56 @@ public class AspectAxis extends DAxis implements IAxis {
 	@Override
 	public void setRange(double lower, double upper) {
 		final Range norm = normalize(new Range(lower, upper));
-		super.setRange(norm.getLower(), norm.getUpper());
-		setInverted(norm.isMinBigger());
-	}
-
-	@Override
-	public void setRange(Range range) {
-		final Range norm = normalize(range); 
-		super.setRange(norm);
+		double l = norm.getLower();
+		double u = norm.getUpper();
+		centre = (l + u)*0.5;
+		super.setRange(l, u);
 		setInverted(norm.isMinBigger());
 	}
 
 	/**
-	 * 
 	 * @param range
-	 * @return true if range not outside maximum.
+	 * @return clipped range if it exceeds maximum range
 	 */
-	private Range normalize(Range range) {
-		if (maximumRange==null) return range;
-		if (relativeTo==null)   return range;
-		//if (true) return new Range(range.getLower(), range.getUpper());
-		double lower=range.getLower(), upper=range.getUpper();
-		if (!maximumRange.inRange(lower, true)) lower = range.isMinBigger() ? maximumRange.getUpper() : maximumRange.getLower();
-		if (!maximumRange.inRange(upper, true)) upper = range.isMinBigger() ? maximumRange.getLower() : maximumRange.getUpper();
-		return new Range(lower, upper);
+	private Range normalize(Range r) {
+		if (maximumRange == null) return r;
+
+		double mu = maximumRange.getUpper();
+		double ml = maximumRange.getLower();
+		double u = r.getUpper();
+		double l = r.getLower();
+		boolean changed = false;
+		boolean swap = u < l;
+		if (swap) {
+			double t = l;
+			l = u;
+			u = t;
+		}
+		double d = u - mu;
+		if (d > 0) { // shift lower limit if upper exceeds max
+			changed = true;
+			l -= d;
+			l = Math.max(ml, l); // ensure lower limit is okay
+			u = mu;
+		}
+		d = ml - l;
+		if (d > 0) { // do the same if lower subceeds min
+			changed = true;
+			u += d;
+			u = Math.min(mu,  u);
+			l = ml;
+		}
+
+		if (changed) {
+			if (swap) {
+				double t = l;
+				l = u;
+				u = t;
+			}
+
+			return new Range(l, u);
+		}
+		return r;
 	}
 
 	private static String getTitleFromLabelData(IDataset label) {
@@ -390,7 +449,7 @@ public class AspectAxis extends DAxis implements IAxis {
 			setTitle(text);
 		}
 	}
-	
+
 	/**
 	 * Override to provide custom axis labels.
 	 */
@@ -481,18 +540,6 @@ public class AspectAxis extends DAxis implements IAxis {
 		axisListeners.remove(listener);
 	}
 
-	
-	@Override
-	public void zoomInOut(final double center, final double factor) {
-		
-		// If we are image and it is fully zoomed, do not allow zoom in.
-		final XYRegionGraph xyGraph = (XYRegionGraph)getGraph();
-		final ImageTrace trace = xyGraph.getRegionArea().getImageTrace();
-		if (trace!=null && trace.isMaximumZoom() && factor>0) return; // We cannot zoom in more.
-		
-		super.zoomInOut(center, factor);
-	}
-
 	@Override
 	public void setDateFormatEnabled(boolean dateEnabled) {
 		super.setDateEnabled(dateEnabled);
@@ -505,7 +552,7 @@ public class AspectAxis extends DAxis implements IAxis {
 
 	@Override
 	public String toString() {
-		return "(" + getTitle() + ", " + getOrientation() + ", " + getRange() + ", inverted=" + getRange().isMinBigger() + ")";
+		return "(" + getTitle() + ", " + getOrientation() + ", " + getRange() + ", inverted=" + isInverted() + ")";
 	}
 	
 	@Override

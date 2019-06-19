@@ -89,11 +89,10 @@ public class RegionArea extends PlotArea implements IPlotArea {
 			@Override
 			public void mouseMoved(MouseEvent me) {
 				
-				firePositionListeners(new PositionEvent(RegionArea.this, 
-						                               (AspectAxis)getRegionGraph().getPrimaryXAxis(),
-						                               (AspectAxis)getRegionGraph().getPrimaryYAxis(),
-													    me.x, 
-													    me.y));
+				firePositionListeners(new PositionEvent(RegionArea.this,
+						(IAxis) getRegionGraph().getPrimaryXAxis(),
+						(IAxis) getRegionGraph().getPrimaryYAxis(),
+						me.x, me.y));
 				createPositionCursor(me);
 			}
 			/**
@@ -242,7 +241,7 @@ public class RegionArea extends PlotArea implements IPlotArea {
 						statusLine.setMessage(format.format(da[0])+", "+format.format(da[1]));
 						return;
 					} catch (Throwable ignored) {
-                        // Normal position
+						// Normal position
 					}
 				}
 
@@ -252,12 +251,21 @@ public class RegionArea extends PlotArea implements IPlotArea {
 	}
 	
 	private boolean requirePositionWithCursor=true;
-    private Cursor positionCursor;
+	private Cursor positionCursor;
+
 	/**
 	 * Whenever cursor is NONE we show intensity info.
 	 * @param me
 	 */
 	protected void createPositionCursor(MouseEvent me) {
+		createPositionCursor(me.x, me.y);
+	}
+
+	/**
+	 * Whenever cursor is NONE we show intensity info.
+	 * @param me
+	 */
+	protected void createPositionCursor(int mx, int my) {
 		
 		if (!requirePositionWithCursor) return;
 		if (!containsMouse)  {
@@ -271,10 +279,9 @@ public class RegionArea extends PlotArea implements IPlotArea {
 		if (positionCursor!=null) positionCursor.dispose();
 		final IAxis  x = getRegionGraph().getSelectedXAxis();
 		final IAxis  y = getRegionGraph().getSelectedYAxis();
-		positionCursor = CursorUtils.getPositionCursor(me, x, y, getImageTrace());
+		positionCursor = CursorUtils.getPositionCursor(mx, my, x, y, getImageTrace());
 		setCursor(positionCursor);
 	}
-
 
 	public void addRegion(final IRegion region) {
 		addRegion(region, true);
