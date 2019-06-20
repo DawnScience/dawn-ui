@@ -9,6 +9,7 @@ import java.util.Collections;
 import java.util.EventListener;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
@@ -26,16 +27,11 @@ import org.eclipse.scanning.api.event.bean.IBeanListener;
 import org.eclipse.scanning.api.event.core.IConsumer;
 import org.eclipse.scanning.api.event.core.IPropertyFilter.FilterAction;
 import org.eclipse.scanning.api.event.core.ISubscriber;
-import org.eclipse.scanning.api.event.scan.IScanListener;
 import org.eclipse.scanning.api.event.scan.ScanBean;
-import org.eclipse.scanning.api.event.scan.ScanEvent;
-import org.eclipse.scanning.api.event.status.Status;
 import org.eclipse.scanning.api.event.status.StatusBean;
 import org.eclipse.scanning.api.ui.CommandConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import uk.ac.diamond.scisoft.analysis.processing.bean.OperationBean;
 
 public abstract class AbstractLiveFileService {
 	
@@ -44,6 +40,19 @@ public abstract class AbstractLiveFileService {
 	private static final String PROCESSING_SUBMIT_QUEUE_NAME = "scisoft.operation.SUBMISSION_QUEUE";
 	private static final String EXTERNAL_FILE_TOPIC = "org.dawnsci.file.topic";
 	private static final String PROCESSING_TOPIC = "scisoft.operation.STATUS_TOPIC";
+	private static final String SCAN_STATUS_STARTED = "STARTED";
+	private static final String SCAN_STATUS_UPDATED = "UPDATED";
+	private static final String SCAN_STATUS_FINISHED = "FINISHED";
+	private static final String JOB_STATUS_RUNNING = "RUNNING";
+	private static final String JOB_STATUS_COMPLETE = "COMPLETE";
+	private static final String JOB_STATUS_TERMINATED = "TERMINATED";
+	private static final String JOB_STATUS_FAILED = "FAILED";
+	private static final String JOB_STATUS_UNFINISHED = "UNFINISHED";
+	private static final String JOB_STATUS_NONE = "NONE";
+	private static final String MESSAGE_STATUS_FIELD = "status";
+	private static final String MESSAGE_PREVIOUS_STATUS_FIELD = "previousStatus";
+	private static final String MESSAGE_FILEPATH_FIELD = "filePath";
+	private static final String MESSAGE_OUTPUT_FILEPATH_FIELD = "outputFilePath";
 	
 	protected Set<ILiveFileListener> listeners = new HashSet<>();
 
@@ -51,10 +60,10 @@ public abstract class AbstractLiveFileService {
 	private ISubscriber<EventListener> procSubscriber;
 	private ISubscriber<EventListener> fileSubscriber;
 	
-	private IScanListener scanListener;
-	private IBeanListener<OperationBean> operationListener;
-	private IBeanListener<FileBean> fileListener;
-	
+	private IBeanListener<Map<String, Object>> scanListener;
+	private IBeanListener<Map<String, Object>> operationListener;
+	private IBeanListener<Map<String, Object>> fileListener;
+
 	private AtomicReference<Runnable> atomicRunnable = new AtomicReference<>();
 	private ExecutorService executor = Executors.newSingleThreadExecutor();
 
@@ -77,7 +86,8 @@ public abstract class AbstractLiveFileService {
 
 		final URI uri = new URI(suri);
 
-		scanSubscriber = eventService.createSubscriber(uri, EventConstants.STATUS_TOPIC);
+		scanSubscriber = eventService.createSubscriber(uri, "gda.messages.scan");
+
 
 		// We don't care about the scan request, removing it means that
 		// all the points models and detector models to not have to resolve in
@@ -257,94 +267,109 @@ public abstract class AbstractLiveFileService {
 	
 	protected abstract void handleFileLoad(String[] file, String parent, boolean live);
 	
-	
-	private class BeanListener implements IBeanListener<OperationBean> {
+	private class BeanListener implements IBeanListener<Map<String, Object>> {
 		
 		@Override
-		public void beanChangePerformed(BeanEvent<OperationBean> evt) {
+		public void beanChangePerformed(BeanEvent<Map<String, Object>> evt) {
 			
-			if (!(evt.getBean() instanceof IOperationBean)) return;
+			Map<String, Object> msg = evt.getBean();
 			
-			StatusBean bean = evt.getBean();
+			boolean doFieldsExist = msg.containsKey(MESSAGE_STATUS_FIELD) &&
+					msg.containsKey(MESSAGE_FILEPATH_FIELD) &&
+					msg.containsKey(MESSAGE_OUTPUT_FILEPATH_FIELD);
+
+			if (!doFieldsExist) {
+				logger.error("At least one of the {}, {}, {} fields are missing in the message",
+						MESSAGE_STATUS_FIELD, MESSAGE_FILEPATH_FIELD, MESSAGE_OUTPUT_FILEPATH_FIELD);
+				return;
+			}
+
+			if (msg.get(MESSAGE_STATUS_FIELD).equals(JOB_STATUS_RUNNING)) {
+				for (ILiveFileListener l : listeners) {
+					l.refreshRequest();
+				}
+			}
 			
-			if (Status.RUNNING.equals(bean.getStatus()) && !Status.RUNNING.equals(bean.getPreviousStatus())) {
+			if (msg.get(MESSAGE_STATUS_FIELD).equals(JOB_STATUS_RUNNING) &&
+					!msg.get(MESSAGE_PREVIOUS_STATUS_FIELD).equals(JOB_STATUS_RUNNING)) {
 				
-				handleFileLoad(new String[] {evt.getBean().getOutputFilePath()}, evt.getBean().getFilePath(), true);
+				String filePath = (String) msg.get(MESSAGE_FILEPATH_FIELD);
+				handleFileLoad(new String[] {filePath}, null, true);
 				
 				return;
 				
 			}
 			
-			if (Status.RUNNING.equals(bean.getStatus())) {
+			if (msg.get(MESSAGE_STATUS_FIELD).equals(JOB_STATUS_TERMINATED) ||
+					msg.get(MESSAGE_STATUS_FIELD).equals(JOB_STATUS_FAILED) ||
+					msg.get(MESSAGE_STATUS_FIELD).equals(JOB_STATUS_UNFINISHED) ||
+					msg.get(MESSAGE_STATUS_FIELD).equals(JOB_STATUS_NONE)) return;
+
+			if (msg.get(MESSAGE_STATUS_FIELD).equals(JOB_STATUS_COMPLETE)) {
 				for (ILiveFileListener l : listeners) {
-					l.refreshRequest();
+					l.localReload((String)msg.get(MESSAGE_OUTPUT_FILEPATH_FIELD), false);
 				}
 			}
-			
-			
-			if (!evt.getBean().getStatus().isFinal()) return;
-			if (evt.getBean() instanceof IOperationBean) {
 
-				for (ILiveFileListener l : listeners) l.localReload(((IOperationBean)evt.getBean()).getOutputFilePath(), false);
+		}
 
-			}
-		}
-		
-		@Override
-		public Class<OperationBean> getBeanClass() {
-			return OperationBean.class;
-		}
 	}
 	
-	private class ScanListener implements IScanListener {
+	private class ScanListener implements IBeanListener<Map<String, Object>> {
 		
 		@Override
-		public void scanEventPerformed(ScanEvent evt) {
-			for (ILiveFileListener l : listeners) {
-				l.refreshRequest();
+		public void beanChangePerformed(BeanEvent<Map<String, Object>> evt) {
+			
+			Map<String, Object> msg = evt.getBean();
+			
+			boolean doesStatusFieldExist = msg.containsKey(MESSAGE_STATUS_FIELD);
+
+			if (!doesStatusFieldExist) {
+				logger.error("Missing {} field in message", MESSAGE_STATUS_FIELD);
+				return;
 			}
-		}
-		
-		@Override
-		public void scanStateChanged(ScanEvent event) {
-			
-			ScanBean beanNoScanReq = event.getBean();
-			
-			if (beanNoScanReq.getStatus().equals(Status.RUNNING)) {
+
+			if(msg.get(MESSAGE_STATUS_FIELD).equals(SCAN_STATUS_UPDATED)) {
 				for (ILiveFileListener l : listeners) {
 					l.refreshRequest();
 				}
 			}
 			
-			final String filePath = beanNoScanReq.getFilePath();
+			final String filePath = (String) msg.get(MESSAGE_FILEPATH_FIELD);
 			// Scan started
-			if (beanNoScanReq.scanStart()) {
-
+			if (msg.get(MESSAGE_STATUS_FIELD).equals(SCAN_STATUS_STARTED)) {
 				handleFileLoad(new String[] {filePath}, null, true);
-
 			}
 			
-			if (beanNoScanReq.scanEnd()) {
+			if (msg.get(MESSAGE_STATUS_FIELD).equals(SCAN_STATUS_FINISHED)) {
+				for (ILiveFileListener l : listeners) {
+					l.localReload(filePath, false);
+				}
 
-				for (ILiveFileListener l : listeners) l.localReload(filePath, false);
 			}
+
 		}
-		
+
 	}
 	
-	private class FileBeanListener implements IBeanListener<FileBean> {
+	private class FileBeanListener implements IBeanListener<Map<String, Object>> {
 		
 		@Override
-		public void beanChangePerformed(BeanEvent<FileBean> evt) {
+		public void beanChangePerformed(BeanEvent<Map<String, Object>> evt) {
 			
-			String fileName = evt.getBean().getFilePath();
-			handleFileLoad(new String[] {fileName}, null, false);
+			Map<String, Object> msg = evt.getBean();
+			boolean doesFilepathFieldExist = msg.containsKey(MESSAGE_FILEPATH_FIELD);
+
+			if (!doesFilepathFieldExist) {
+				logger.error("Missing {} field in message", MESSAGE_FILEPATH_FIELD);
+				return;
+			}
+
+			String filePath = (String) msg.get(MESSAGE_FILEPATH_FIELD);
+			handleFileLoad(new String[] {filePath}, null, false);
+
 		}
-		
-		@Override
-		public Class<FileBean> getBeanClass() {
-			return FileBean.class;
-		}
+
 	}
 	
 }
