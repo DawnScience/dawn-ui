@@ -3,6 +3,7 @@ package org.dawnsci.january.ui.dataconfigtable;
 import org.dawnsci.january.model.ISliceAssist;
 import org.dawnsci.january.model.NDimensions;
 import org.eclipse.january.dataset.Slice;
+import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.TableColumnLayout;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.ColumnViewerToolTipSupport;
@@ -12,6 +13,8 @@ import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 
@@ -26,7 +29,7 @@ public class DataConfigurationTable {
 	private DimensionEditSupport dimensionSupport;
 	private AxisEditSupport axisSupport;
 	
-	private Composite tableComposite;
+	private Composite outerComposite;
 	
 //	private HashSet<ISliceChangeListener > listeners;
 	
@@ -36,7 +39,11 @@ public class DataConfigurationTable {
 	
 	public void createControl(Composite parent) {
 		
-		tableComposite = new Composite(parent, SWT.NONE);
+		outerComposite = new Composite(parent, SWT.NONE);
+		outerComposite.setLayout(new GridLayout());
+		
+		Composite tableComposite = new Composite(outerComposite, SWT.NONE);
+		tableComposite.setLayoutData(GridDataFactory.fillDefaults().grab(true, true).create());
 		
 		tableViewer = new TableViewer(tableComposite, SWT.FULL_SELECTION | SWT.BORDER);
 		ColumnViewerToolTipSupport.enableFor(tableViewer);
@@ -132,7 +139,7 @@ public class DataConfigurationTable {
 	}
 	
 	public void setLayoutData(Object layoutData) {
-		tableComposite.setLayoutData(layoutData);
+		outerComposite.setLayoutData(layoutData);
 	}
 	
 	public void setInput(NDimensions ndims) {
@@ -144,7 +151,19 @@ public class DataConfigurationTable {
 		}
 		nDimension = ndims;
 		tableViewer.setInput(ndims);
-		tableViewer.getTable().getParent().layout();
+
+		if (outerComposite.getLayoutData() instanceof GridData) {
+			int itemCount = tableViewer.getTable().getItemCount();
+			int itemHeight = tableViewer.getTable().getItemHeight ();
+			int headerHeight = tableViewer.getTable().getHeaderHeight ();
+			
+			GridData gd = (GridData)outerComposite.getLayoutData();
+			int h = (1+itemCount)*itemHeight + headerHeight;
+			gd.minimumHeight = h;
+			gd.heightHint = h;
+		}
+	
+		outerComposite.getParent().layout(true, true);
 	}
 	
 	public void clearAll() {

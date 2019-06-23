@@ -43,7 +43,6 @@ import org.eclipse.e4.ui.workbench.modeling.ISelectionListener;
 import org.eclipse.january.dataset.Slice;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.layout.GridDataFactory;
-import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ComboViewer;
 import org.eclipse.jface.viewers.ISelection;
@@ -56,9 +55,6 @@ import org.eclipse.jface.viewers.StyledCellLabelProvider;
 import org.eclipse.jface.viewers.StyledString;
 import org.eclipse.jface.viewers.ViewerCell;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.layout.FormAttachment;
-import org.eclipse.swt.layout.FormData;
-import org.eclipse.swt.layout.FormLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
@@ -91,19 +87,15 @@ public class DatasetPart {
 	@PostConstruct
 	public void createComposite(Composite parent) {
 
-		parent.setLayout(new FormLayout());
-		FormData checkForm = new FormData();
-		checkForm.top = new FormAttachment(0,0);
-		checkForm.left = new FormAttachment(0,0);
-		checkForm.right = new FormAttachment(100,0);
-		checkForm.bottom = new FormAttachment(75,0);
+		parent.setLayout(new GridLayout());
+
 		if (plotController instanceof ILoadedFileInitialiser) {
 			viewer = new DataOptionTableViewer(fileController, (ILoadedFileInitialiser) plotController);
 		} else {
 			viewer = new DataOptionTableViewer(fileController, null);
 		}
 		viewer.createControl(parent);
-		viewer.getControl().setLayoutData(checkForm);
+		viewer.getControl().setLayoutData(GridDataFactory.fillDefaults().grab(true, true).create());
 
 		viewer.addSelectionChangedListener(new ISelectionChangedListener() {
 
@@ -127,13 +119,8 @@ public class DatasetPart {
 			}
 		});
 
-		FormData comboForm = new FormData();
-		comboForm.top = new FormAttachment(viewer.getControl());
-		comboForm.left = new FormAttachment(0,0);
-		comboForm.right = new FormAttachment(100,0);
-
 		Composite plotTypeComposite = new Composite(parent, SWT.NONE);
-		plotTypeComposite.setLayoutData(comboForm);
+		plotTypeComposite.setLayoutData(GridDataFactory.fillDefaults().create());
 		plotTypeComposite.setLayout(new GridLayout(2, false));
 
 		Label plotTypeLabel = new Label(plotTypeComposite, SWT.NONE);
@@ -141,12 +128,11 @@ public class DatasetPart {
 		plotTypeLabel.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, false, false));
 
 		plotModeOptionsViewer = new ComboViewer(plotTypeComposite);
+		plotModeOptionsViewer.getControl().setLayoutData(GridDataFactory.fillDefaults().create());
 		table = new DataConfigurationTable();
-		
-		Composite lower = new Composite(parent, SWT.None);
-		lower.setLayout(GridLayoutFactory.fillDefaults().create());
-		table.createControl(lower);
-		table.setLayoutData(GridDataFactory.fillDefaults().grab(true, true).create());
+
+		table.createControl(parent);
+		table.setLayoutData(GridDataFactory.fillDefaults().grab(true, false).create());
 		table.setSliceAssist(new ISliceAssist() {
 			
 			@Override
@@ -183,7 +169,7 @@ public class DatasetPart {
 			}
 		});
 		
-		Label progress = new Label(lower,SWT.None);
+		Label progress = new Label(parent,SWT.None);
 		progress.setLayoutData(GridDataFactory.fillDefaults().create());
 		progress.setText("Ready");
 		
@@ -251,14 +237,6 @@ public class DatasetPart {
 				}
 			}
 		});
-
-		FormData tableForm = new FormData();
-		tableForm.top = new FormAttachment(plotTypeComposite);
-		tableForm.left = new FormAttachment(0,0);
-		tableForm.right = new FormAttachment(100,0);
-		tableForm.bottom = new FormAttachment(100,0);
-
-		lower.setLayoutData(tableForm);
 
 		selectionListener = new ISelectionListener() {
 
