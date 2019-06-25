@@ -19,12 +19,11 @@ import org.eclipse.jface.resource.ImageDescriptor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public abstract class AbstractOperationModelWizardPage extends AbstractOperationSetupWizardPage implements PropertyChangeListener {
-
-	protected IOperationModel model;
-	protected IOperationModel omodel;
-	@SuppressWarnings("rawtypes")
-	final protected IOperation operation;
+public abstract class AbstractOperationModelWizardPage<M extends IOperationModel> extends AbstractOperationSetupWizardPage implements PropertyChangeListener {
+	
+	protected M model;
+	protected M omodel;
+	final protected IOperation<M, ? extends OperationData> operation;
 	private Job update;
 
 	private static final Logger logger = LoggerFactory.getLogger(AbstractOperationModelWizardPage.class);
@@ -34,20 +33,21 @@ public abstract class AbstractOperationModelWizardPage extends AbstractOperation
 		operation = null;
 	}
 	
-	protected AbstractOperationModelWizardPage(IOperation<? extends IOperationModel, ? extends OperationData> operation) {
+	protected AbstractOperationModelWizardPage(IOperation<M, ? extends OperationData> operation) {
 		this(operation, null);
 	}
 	
-	protected AbstractOperationModelWizardPage(IOperation<? extends IOperationModel, ? extends OperationData> operation, ImageDescriptor image) {
+	protected AbstractOperationModelWizardPage(IOperation<M, ? extends OperationData> operation, ImageDescriptor image) {
 		super(operation.getName(), operation.getDescription(), image);
 		this.operation = operation;
 		initAbstractOperationModelWizardPage();
 	}
 	
+	@SuppressWarnings("unchecked")
 	private void initAbstractOperationModelWizardPage() {
 		try {
-			this.model = operation.getModel().getClass().newInstance(); // instantiate a new model
-			this.omodel = operation.getModel(); // get the old model
+			this.model = (M) operation.getModel().getClass().newInstance(); // instantiate a new model
+			this.omodel = (M) operation.getModel(); // get the old model
 			BeanUtils.copyProperties(this.model, this.omodel); // copy the properties from the old model back to the new one
 			operation.setModel(model);
 		} catch (Exception e) {
@@ -101,11 +101,11 @@ public abstract class AbstractOperationModelWizardPage extends AbstractOperation
 		update();
 	}
 	
-	public IOperationModel getModel() {
+	public M getModel() {
 		return model;
 	}
-	
-	protected IOperation getOperation() {
+
+	protected IOperation<M, ? extends OperationData> getOperation() {
 		return operation;
 	}
 }

@@ -32,7 +32,6 @@ import org.dawnsci.processing.ui.model.OperationModelViewer;
 import org.eclipse.dawnsci.analysis.api.processing.IOperation;
 import org.eclipse.dawnsci.analysis.api.processing.OperationData;
 import org.eclipse.dawnsci.analysis.api.processing.model.AbstractOperationModel;
-import org.eclipse.dawnsci.analysis.api.processing.model.IOperationModel;
 import org.eclipse.dawnsci.analysis.api.roi.IROI;
 import org.eclipse.dawnsci.analysis.api.roi.IRectangularROI;
 import org.eclipse.dawnsci.analysis.dataset.roi.XAxisBoxROI;
@@ -56,6 +55,7 @@ import org.eclipse.swt.widgets.Label;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import uk.ac.diamond.scisoft.analysis.processing.operations.saxs.TParameterModel;
 
 //@author Tim Snow, adapted from original plug-in set by Tim Spain.
 
@@ -64,7 +64,7 @@ import org.slf4j.LoggerFactory;
 //
 // P. Fratzl, S. Schreiber and K. Klaushofer, Connective Tissue Research, 1996, 14, 247-254, DOI: 10.3109/03008209609005268
 //
-public class TParameterWizardPage extends AbstractOperationModelWizardPage implements IOperationSetupWizardPage {
+public class TParameterWizardPage extends AbstractOperationModelWizardPage<TParameterModel> implements IOperationSetupWizardPage {
 
 	// Let's set up a logger first
 	private static final Logger logger = LoggerFactory.getLogger(TParameterWizardPage.class);
@@ -98,7 +98,7 @@ public class TParameterWizardPage extends AbstractOperationModelWizardPage imple
 	
 	
 	// And another for when there's more variables available
-	public TParameterWizardPage(IOperation<? extends IOperationModel, ? extends OperationData> operation) {
+	public TParameterWizardPage(IOperation<TParameterModel, ? extends OperationData> operation) {
 		super(operation);
 	}
 

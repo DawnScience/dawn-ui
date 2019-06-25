@@ -31,7 +31,6 @@ import org.dawnsci.processing.ui.model.OperationModelViewer;
 import org.eclipse.dawnsci.analysis.api.processing.IOperation;
 import org.eclipse.dawnsci.analysis.api.processing.OperationData;
 import org.eclipse.dawnsci.analysis.api.processing.model.AbstractOperationModel;
-import org.eclipse.dawnsci.analysis.api.processing.model.IOperationModel;
 import org.eclipse.dawnsci.analysis.api.roi.IROI;
 import org.eclipse.dawnsci.analysis.api.roi.IRectangularROI;
 import org.eclipse.dawnsci.analysis.dataset.roi.XAxisBoxROI;
@@ -53,13 +52,14 @@ import org.eclipse.swt.widgets.Composite;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import uk.ac.diamond.scisoft.analysis.processing.operations.oned.DigitalFilterModel;
 import uk.ac.diamond.scisoft.analysis.processing.operations.oned.DigitalFilterOperation;
 
 
 //@author Tim Snow
 
 
-public class DigitalFilterWizardPage extends AbstractOperationModelWizardPage implements IOperationSetupWizardPage {
+public class DigitalFilterWizardPage extends AbstractOperationModelWizardPage<DigitalFilterModel> implements IOperationSetupWizardPage {
 
 	// Let's set up a logger first
 	private static final Logger logger = LoggerFactory.getLogger(DigitalFilterWizardPage.class);
@@ -89,7 +89,7 @@ public class DigitalFilterWizardPage extends AbstractOperationModelWizardPage im
 	
 	
 	// And another for when there's more variables available
-	public DigitalFilterWizardPage(IOperation<? extends IOperationModel, ? extends OperationData> operation) {
+	public DigitalFilterWizardPage(IOperation<DigitalFilterModel, ? extends OperationData> operation) {
 		super(operation);
 	}
 
@@ -293,10 +293,7 @@ public class DigitalFilterWizardPage extends AbstractOperationModelWizardPage im
 		this.update();
 	}
 	
-	
 	public void regionChange() {
 		this.update();
 	}
-	
-	
 }

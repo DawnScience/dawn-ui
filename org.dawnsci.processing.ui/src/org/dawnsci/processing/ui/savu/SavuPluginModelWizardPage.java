@@ -27,7 +27,7 @@ import org.eclipse.swt.widgets.Label;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class SavuPluginModelWizardPage extends AbstractOperationModelWizardPage {
+public class SavuPluginModelWizardPage extends AbstractOperationModelWizardPage<IOperationModel> {
 	
 
 	private static final Logger logger = LoggerFactory.getLogger(SavuPluginModelWizardPage.class);
@@ -51,7 +51,7 @@ public class SavuPluginModelWizardPage extends AbstractOperationModelWizardPage 
 	
 	
 	@SuppressWarnings("unchecked")
-	public SavuPluginModelWizardPage(IOperation<? extends IOperationModel, ? extends OperationData> operation) {
+	public SavuPluginModelWizardPage(IOperation<IOperationModel, ? extends OperationData> operation) {
 		super(operation);
 
 		final String wspacePath = ResourcesPlugin.getWorkspace().getRoot().getLocation().toString();
