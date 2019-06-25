@@ -47,7 +47,7 @@ public class QuickFileWidget extends Composite {
 		pathform.right = new FormAttachment(65,0);
 		pathform.bottom = new FormAttachment(100,0);
 		directoryPath.setLayoutData(pathform);
-		directoryPath.setText("/dls/i22/data/2017/cm4325-1/processed/cake/");
+		directoryPath.setText("");
 		fileNameText = new Text(this, SWT.BORDER);
 		FormData nameForm = new FormData();
 		nameForm.top = new FormAttachment(0,0);
@@ -100,6 +100,10 @@ public class QuickFileWidget extends Composite {
 				}
 			}
 		});
+	}
+	
+	public void setTextToolTipText(String tip) {
+		fileNameText.setToolTipText(tip);
 	}
 	
 	private void updateContext() {
@@ -163,17 +167,4 @@ public class QuickFileWidget extends Composite {
 	public void removeListener(IQuickFileWidgetListener l) {
 		listeners.remove(l);
 	}
-	
-	
-//	@Override
-//    public Point computeSize(int wHint, int hHint, boolean changed) {
-//
-//        // try to consider the given hints. Here we decided to use the smallest
-//        // value so that the line would not be bigger than 30x2.
-//        // In case the SWT.DEFAULT flag for the hints is used, we simply stick to
-//        // the LINE_WIDTH and LINE_HEIGHT.
-//        
-//
-//        return directoryPath.computeSize(wHint, hHint, changed);
-//    }
 }
