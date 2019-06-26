@@ -329,8 +329,13 @@ public class FittedFunction  {
 		
 		DecimalFormat format = new DecimalFormat("##0.#####E0");
 		final StringBuilder buf = new StringBuilder();
-		//buf.append(getPeakName().replace(' ', '_'));
-		//buf.append("\t");
+		String name = getDataTrace().getName();
+		
+		if (name == null || name.isEmpty()) {
+			name = "trace";
+		}
+		buf.append(name.replace(' ', '_'));
+		buf.append("\t");
 		buf.append(format.format(getPosition()));
 		buf.append("\t");
 		buf.append(format.format(getPeakValue()));
@@ -346,7 +351,8 @@ public class FittedFunction  {
 	public static String getCVSTitle() {
 		final StringBuilder buf = new StringBuilder();
 		//buf.append("Peak_Name\t");
-		buf.append("# Position\t");
+		buf.append("# Name\t");
+		buf.append("Position\t");
 		buf.append("Fit\t");
 		buf.append("FWHM\t");
 		buf.append("Area\t");
