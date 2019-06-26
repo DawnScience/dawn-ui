@@ -190,6 +190,8 @@ public class LoadedFilePart {
 		comboForm.bottom = new FormAttachment(100,0);
 		comboForm.height = 32;
 		qfw.setLayoutData(comboForm);
+		qfw.setTextToolTipText("Accepts filename, directory name, .. to move back a directory,"
+				+ " * as a wildcard and <x-y> for a numerical range"); 
 		
 		IPreferenceStore ps = Activator.getDefault().getPreferenceStore();
 		
