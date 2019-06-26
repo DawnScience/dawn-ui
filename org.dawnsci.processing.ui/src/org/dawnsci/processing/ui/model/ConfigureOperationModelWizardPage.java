@@ -57,7 +57,7 @@ import org.eclipse.swt.widgets.Label;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class ConfigureOperationModelWizardPage extends AbstractOperationModelWizardPage {
+public class ConfigureOperationModelWizardPage extends AbstractOperationModelWizardPage<IOperationModel> {
 	
 	protected IPlottingSystem<Composite> input;
 	protected IPlottingSystem<Composite> output;
@@ -72,9 +72,10 @@ public class ConfigureOperationModelWizardPage extends AbstractOperationModelWiz
 	public ConfigureOperationModelWizardPage() {
 		super();
 	}
-	
+
+	@SuppressWarnings("unchecked")
 	public ConfigureOperationModelWizardPage(IOperation<? extends IOperationModel, ? extends OperationData> operation) {
-		super(operation);
+		super((IOperation<IOperationModel, ? extends OperationData>) operation);
 	}
 
 	public void createDialogArea(Composite parent) {
@@ -192,28 +193,30 @@ public class ConfigureOperationModelWizardPage extends AbstractOperationModelWiz
 		
 		
 		for (final Entry<String,ROIStruct> entry : rois.entrySet()) {
-			if (entry.getValue().roi == null) {
+			IROI roi = entry.getValue().roi;
+			if (roi == null) {
 				continue;
 			}
 			try {
 				IRegionService rservice = Activator.getService(IRegionService.class);
 				
-				if (entry.getValue().roi instanceof RingROI && d != null && sector) {
-					entry.getValue().roi.setPoint(d.getDetector2DProperties().getBeamCentreCoords());
+				if (roi instanceof RingROI && d != null && sector) {
+					roi.setPoint(d.getDetector2DProperties().getBeamCentreCoords());
 				}
 
 				IRegion reg = null;
-				if (entry.getValue().type != RangeType.NONE) {
-					reg = input.createRegion(entry.getKey(), getRegionType(entry.getValue().type));
-					reg.setROI(entry.getValue().roi);
+				final String name = entry.getKey();
+				ROIStruct rs = entry.getValue();
+				if (rs.type != RangeType.NONE) {
+					reg = input.createRegion(name, getRegionType(rs.type));
+					reg.setROI(rs.roi);
 					input.addRegion(reg);
 				} else {
-					reg = rservice.createRegion(input,entry.getValue().roi,entry.getKey());
+					reg = rservice.createRegion(input, rs.roi, name);
 				}
-				
+
 				if (reg instanceof ILockableRegion && sector) ((ILockableRegion)reg).setCentreMovable(false);
 				
-				final String name = entry.getKey();
 				reg.addROIListener(new IROIListener.Stub() {
 					
 					@Override
@@ -278,7 +281,7 @@ public class ConfigureOperationModelWizardPage extends AbstractOperationModelWiz
 				} else if (an != null && an.rangevalue() != RangeType.NONE) {
 					
 					IROI roi = getRoiFromAnnotation(an, field.getName());
-					if (roi != null) rois.put(field.getName(),new ROIStruct(roi,an.rangevalue()));
+					if (roi != null) rois.put(field.getName(), new ROIStruct(roi,an.rangevalue()));
 				}
 			} catch (Exception e) {
 				logger.warn("Couldnt create roi " + e.getMessage());
@@ -435,7 +438,6 @@ public class ConfigureOperationModelWizardPage extends AbstractOperationModelWiz
 								} catch (Exception e) {
 									logger.warn("Could not plot data: " + e.getMessage());
 								}
-
 							}
 						});
 						
@@ -487,6 +489,7 @@ public class ConfigureOperationModelWizardPage extends AbstractOperationModelWiz
 	public void propertyChange(PropertyChangeEvent evt) {
 		try {
 			IRegion region = input.getRegion(evt.getPropertyName());
+
 
 			Object object = model.get(evt.getPropertyName());
 			
@@ -572,21 +575,22 @@ public class ConfigureOperationModelWizardPage extends AbstractOperationModelWiz
 	}
 	
 	private RectangularROI getRoiFromAnnotation(OperationModelField an, String name) {
-		
-		if (an != null && an.rangevalue() != RangeType.NONE) {
-			try {
-				return getROIFromRange(getRangeFromAnnotation(an, name), an.rangevalue(), axes);
-			} catch (Exception e) {
-				logger.warn("Could not build roi");
-				return null;
-			}
+		if (an != null) {
+			RangeType range = an.rangevalue();
 
-			
+			if (range != RangeType.NONE) {
+				try {
+					return getROIFromRange(getRangeFromAnnotation(an, name), an.rangevalue(), axes);
+				} catch (Exception e) {
+					logger.warn("Could not build roi");
+					return null;
+				}
+			}
 		}
-		
+
 		return null;
 	}
-	
+
 	private double[] getRangeFromAnnotation(OperationModelField an, String name){
 		double[] range = minMax.clone();
 		

@@ -24,7 +24,6 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.dawnsci.analysis.api.processing.IOperation;
 import org.eclipse.dawnsci.analysis.api.processing.OperationData;
 import org.eclipse.dawnsci.analysis.api.processing.OperationDataForDisplay;
-import org.eclipse.dawnsci.analysis.api.processing.model.IOperationModel;
 import org.eclipse.dawnsci.analysis.api.roi.IROI;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.PlotType;
@@ -55,7 +54,7 @@ import org.slf4j.LoggerFactory;
 
 import uk.ac.diamond.scisoft.analysis.processing.operations.roiprofile.PolygonIntegrationModel;
 
-public class PolygonIntegrationModelWizardPage extends AbstractOperationModelWizardPage implements IROIListener {
+public class PolygonIntegrationModelWizardPage extends AbstractOperationModelWizardPage<PolygonIntegrationModel> implements IROIListener {
 
 	private static final Logger logger = LoggerFactory.getLogger(PolygonIntegrationModelWizardPage.class);
 	private static final String POLYGON = "Polygon";
@@ -100,7 +99,7 @@ public class PolygonIntegrationModelWizardPage extends AbstractOperationModelWiz
 		
 	}
 
-	public PolygonIntegrationModelWizardPage(IOperation<? extends IOperationModel, ? extends OperationData> operation) {
+	public PolygonIntegrationModelWizardPage(IOperation<PolygonIntegrationModel, ? extends OperationData> operation) {
 		super(operation);
 	}
 	
@@ -140,7 +139,7 @@ public class PolygonIntegrationModelWizardPage extends AbstractOperationModelWiz
 			IRegion region = plottingSystem.createRegion(POLYGON, RegionType.POLYGON);
 			region.addROIListener(this);
 			region.setUserRegion(false);
-			PolygonIntegrationModel polygonIntegrationModel = (PolygonIntegrationModel) getModel();
+			PolygonIntegrationModel polygonIntegrationModel = getModel();
 			IROI regionOfInterest = polygonIntegrationModel.getRegionOfInterest();
 			if (regionOfInterest != null) {
 				region.setROI(regionOfInterest);
@@ -151,7 +150,7 @@ public class PolygonIntegrationModelWizardPage extends AbstractOperationModelWiz
 				
 				@Override
 				public void widgetSelected(SelectionEvent e) {
-					final PolygonIntegrationModel polygonIntegrationModel = (PolygonIntegrationModel) getModel();
+					final PolygonIntegrationModel polygonIntegrationModel = getModel();
 					IRegion tempRegion = plottingSystem.getRegion(POLYGON);
 					if (tempRegion != null) {
 						tempRegion.removeROIListener(PolygonIntegrationModelWizardPage.this);
@@ -183,7 +182,7 @@ public class PolygonIntegrationModelWizardPage extends AbstractOperationModelWiz
 
 	private void updateModel(ROIEvent evt) {
 		IROI roi = evt.getROI();
-		PolygonIntegrationModel polygonIntegrationModel = (PolygonIntegrationModel) getModel();
+		PolygonIntegrationModel polygonIntegrationModel = getModel();
 		polygonIntegrationModel.setRegionOfInterest(roi);
 	}
 	
