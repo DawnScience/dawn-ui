@@ -23,6 +23,7 @@ import org.eclipse.january.dataset.Dataset;
 import org.eclipse.january.dataset.DatasetFactory;
 import org.eclipse.january.dataset.DatasetUtils;
 import org.eclipse.january.dataset.IDataset;
+import org.eclipse.january.dataset.IntegerDataset;
 import org.eclipse.january.dataset.Slice;
 
 import uk.ac.diamond.scisoft.analysis.axis.AxisValues;
@@ -113,7 +114,7 @@ public class StackTrace extends PlotterTrace implements ILineStackTrace {
 			final int x1 = window.getIntPoint()[0];
 			final int x2 = (int) Math.ceil(((LinearROI) window).getEndPoint()[0]);
 			final int len = x2 - x1;
-			zAxis = new AxisValues(getLabel(a), DatasetFactory.createRange(len, Dataset.INT32));
+			zAxis = new AxisValues(getLabel(a), DatasetFactory.createRange(IntegerDataset.class, len));
 		} else {
 			zAxis = new AxisValues(getLabel(a), null);
 		}

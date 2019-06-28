@@ -12,6 +12,7 @@ import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.PlotType;
 import org.eclipse.dawnsci.plotting.api.PlottingFactory;
 import org.eclipse.dawnsci.plotting.api.trace.IImageTrace;
+import org.eclipse.january.dataset.ComplexDoubleDataset;
 import org.eclipse.january.dataset.Dataset;
 import org.eclipse.january.dataset.DatasetFactory;
 import org.eclipse.january.dataset.IDataset;
@@ -47,25 +48,25 @@ public class ProviderLogDataPluginTest extends PluginTestBase {
 		Dataset input, expected;
 
 		// normal data
-		input = DatasetFactory.createRange(100, Dataset.FLOAT64);
+		input = DatasetFactory.createRange(100);
 		input.setShape(10, 10);
 		expected = null;
 		params.add(new Object[] {input, expected});
 
 		// normal data with some negative values
-		input = DatasetFactory.createRange(-100, 100, 2, Dataset.FLOAT64);
+		input = DatasetFactory.createRange(-100, 100, 2.);
 		input.setShape(10, 10);
 		expected = null;
 		params.add(new Object[] {input, expected});
 
 		// complex data
-		input = DatasetFactory.createRange(100, Dataset.COMPLEX128);
+		input = DatasetFactory.createRange(ComplexDoubleDataset.class, 100);
 		input.setShape(10, 10);
 		expected = Maths.abs(input);
 		params.add(new Object[] {input, expected});
 
 		// complex data with some negative values
-		input = DatasetFactory.createRange(-100, 100, 2, Dataset.COMPLEX128);
+		input = DatasetFactory.createRange(ComplexDoubleDataset.class, -100, 100, 2);
 		input.setShape(10, 10);
 		expected = Maths.abs(input);
 		params.add(new Object[] {input, expected});

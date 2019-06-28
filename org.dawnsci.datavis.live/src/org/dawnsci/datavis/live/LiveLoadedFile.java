@@ -25,11 +25,9 @@ import org.eclipse.dawnsci.analysis.api.tree.Tree;
 import org.eclipse.dawnsci.analysis.api.tree.TreeUtils;
 import org.eclipse.dawnsci.nexus.NexusConstants;
 import org.eclipse.january.MetadataException;
-import org.eclipse.january.dataset.Dataset;
 import org.eclipse.january.dataset.IDataset;
 import org.eclipse.january.dataset.IDynamicDataset;
 import org.eclipse.january.dataset.ILazyDataset;
-import org.eclipse.january.dataset.LazyDatasetBase;
 import org.eclipse.january.dataset.StringDataset;
 import org.eclipse.january.metadata.AxesMetadata;
 import org.eclipse.january.metadata.MetadataFactory;
@@ -98,7 +96,7 @@ public class LiveLoadedFile extends LoadedFile implements IRefreshable {
 				continue;
 			}
 			
-			if (((LazyDatasetBase)dataset).getDType() != Dataset.STRING) {
+			if (!dataset.getElementClass().equals(String.class)) {
 				DataOptions d = new DataOptions(name, this);
 				dataOptions.put(d.getName(),d);
 			}
@@ -267,7 +265,7 @@ public class LiveLoadedFile extends LoadedFile implements IRefreshable {
 		
 		if (shape.length == 0 || allOnes(shape)) return;
 		
-		if (((LazyDatasetBase)lazyDataset).getDType() != Dataset.STRING) {
+		if (!lazyDataset.getElementClass().equals(String.class)) {
 			DataOptions d = new DataOptions(name, this);
 			dataOptions.put(d.getName(),d);
 		}

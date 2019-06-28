@@ -22,6 +22,7 @@ import org.eclipse.january.dataset.Dataset;
 import org.eclipse.january.dataset.DatasetFactory;
 import org.eclipse.january.dataset.DatasetUtils;
 import org.eclipse.january.dataset.IDataset;
+import org.eclipse.january.dataset.IntegerDataset;
 
 import uk.ac.diamond.scisoft.analysis.axis.AxisValues;
 
@@ -67,7 +68,7 @@ public class Scatter3DTrace extends PlotterTrace implements IScatter3DTrace {
 			final int x1 = window.getIntPoint()[0];
 			final int x2 = (int)Math.round(((LinearROI) window).getEndPoint()[0]);
 			final int len = x2-x1;
-			zAxis = new AxisValues(getLabel(2), DatasetFactory.createRange(len, Dataset.INT32));
+			zAxis = new AxisValues(getLabel(2), DatasetFactory.createRange(IntegerDataset.class, len));
 		} else {
 			zAxis = new AxisValues(getLabel(2), axes!=null?axes.get(2):null);
 		}

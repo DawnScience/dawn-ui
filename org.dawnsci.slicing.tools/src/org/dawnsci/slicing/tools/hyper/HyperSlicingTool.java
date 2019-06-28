@@ -24,10 +24,10 @@ import org.eclipse.dawnsci.slicing.api.system.DimensionalListener;
 import org.eclipse.dawnsci.slicing.api.system.DimsDataList;
 import org.eclipse.dawnsci.slicing.api.system.SliceSource;
 import org.eclipse.dawnsci.slicing.api.tool.AbstractSlicingTool;
-import org.eclipse.january.dataset.Dataset;
 import org.eclipse.january.dataset.DatasetFactory;
 import org.eclipse.january.dataset.IDataset;
 import org.eclipse.january.dataset.ILazyDataset;
+import org.eclipse.january.dataset.IntegerDataset;
 import org.eclipse.january.dataset.Slice;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
@@ -197,7 +197,7 @@ public class HyperSlicingTool extends AbstractSlicingTool {
 			if (axis > -1 && axis < 3) {
 				IDataset id = ia.get(i);
 				if (id == null) {
-					id = DatasetFactory.createRange(dataShape[i], Dataset.INT);
+					id = DatasetFactory.createRange(IntegerDataset.class, dataShape[i]);
 					id.setName("indices");
 				}
 				ret[axis] = id;

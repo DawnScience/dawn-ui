@@ -393,7 +393,7 @@ public class JexlExpressionFunctionTest {
 		JexlExpressionFunction f = new JexlExpressionFunction(new ExpressionServiceImpl(),"a+x");
 		double a = 12.3;
 		f.getParameter(0).setValue(a);
-		Dataset x = DatasetFactory.createRange(10, Dataset.FLOAT64);
+		Dataset x = DatasetFactory.createRange(10);
 		DoubleDataset values = f.calculateValues(x);
 		Dataset y = Maths.add(x, a);
 		TestUtils.assertDatasetEquals(y, values, 1e-15, 1e-15);

@@ -29,10 +29,11 @@ import org.eclipse.dawnsci.plotting.api.trace.ColorOption;
 import org.eclipse.dawnsci.plotting.api.trace.ILineTrace;
 import org.eclipse.dawnsci.plotting.api.trace.ITrace;
 import org.eclipse.draw2d.ColorConstants;
-import org.eclipse.january.dataset.Dataset;
 import org.eclipse.january.dataset.DatasetFactory;
 import org.eclipse.january.dataset.IDataset;
 import org.eclipse.january.dataset.ILazyDataset;
+import org.eclipse.january.dataset.IntegerDataset;
+import org.eclipse.january.dataset.ShortDataset;
 import org.eclipse.january.dataset.Slice;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IContributionItem;
@@ -186,7 +187,7 @@ public class HyperComponent {
 			List<IDataset> ax2d = new ArrayList<IDataset>();
 			ax2d.add(daxes.get(axisCount++));
 			ax2d.add(daxes.get(axisCount++));
-			mainSystem.createPlot2D(DatasetFactory.zeros(new int[] {ax2d.get(0).getSize(), ax2d.get(1).getSize()}, Dataset.INT16), ax2d, null);
+			mainSystem.createPlot2D(DatasetFactory.zeros(ShortDataset.class, ax2d.get(0).getSize(), ax2d.get(1).getSize()), ax2d, null);
 		}
 		
 		for (IRegion region : mainSystem.getRegions()) {
@@ -199,14 +200,14 @@ public class HyperComponent {
 		if (mainReducer.isOutput1D()) {
 			List<IDataset> xd = new ArrayList<IDataset>();
 			IDataset axis = daxes.get(axisCount++);
-			xd.add(DatasetFactory.zeros(new int[] {(int)axis.getSize()},Dataset.INT16));
+			xd.add(DatasetFactory.zeros(ShortDataset.class, axis.getSize()));
 			
 			sideSystem.createPlot1D(axis,xd, null);
 		} else {
 			List<IDataset> xd = new ArrayList<IDataset>();
-			xd.add(DatasetFactory.createRange(10, Dataset.INT32));
+			xd.add(DatasetFactory.createRange(IntegerDataset.class, 10));
 			xd.add(daxes.get(axisCount++));
-			sideSystem.createPlot2D(DatasetFactory.ones(new int[] {10,(int)xd.get(1).getSize()}, Dataset.INT32), xd, null);
+			sideSystem.createPlot2D(DatasetFactory.ones(IntegerDataset.class, 10, xd.get(1).getSize()), xd, null);
 		}
 		
 		for (IRegion region : sideSystem.getRegions()) {

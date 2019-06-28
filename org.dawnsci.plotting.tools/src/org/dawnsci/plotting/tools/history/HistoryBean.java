@@ -23,6 +23,7 @@ import org.eclipse.january.dataset.Dataset;
 import org.eclipse.january.dataset.DatasetFactory;
 import org.eclipse.january.dataset.DatasetUtils;
 import org.eclipse.january.dataset.IDataset;
+import org.eclipse.january.dataset.IntegerDataset;
 import org.eclipse.swt.graphics.RGB;
 
 class HistoryBean {
@@ -114,7 +115,7 @@ class HistoryBean {
 		if (xdata==null) {
 			Dataset data = getData();
 			if (data!=null && data.getRank()==1) {
-				xdata = DatasetFactory.createRange(data.getSize(), Dataset.INT32);
+				xdata = DatasetFactory.createRange(IntegerDataset.class, data.getSize());
 			}
 		}
 		return xdata;

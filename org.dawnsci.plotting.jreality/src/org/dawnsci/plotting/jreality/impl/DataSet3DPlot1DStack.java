@@ -19,14 +19,12 @@ import org.dawnsci.plotting.jreality.tick.TickFormatting;
 import org.eclipse.dawnsci.plotting.api.jreality.core.AxisMode;
 import org.eclipse.dawnsci.plotting.api.jreality.impl.Plot1DGraphTable;
 import org.eclipse.dawnsci.plotting.api.jreality.util.ArrayPoolUtility;
-import org.eclipse.january.dataset.Dataset;
 import org.eclipse.january.dataset.DatasetFactory;
 import org.eclipse.january.dataset.DoubleDataset;
 import org.eclipse.january.dataset.IDataset;
 import org.eclipse.swt.graphics.Cursor;
 import org.eclipse.swt.widgets.Composite;
 
-import uk.ac.diamond.scisoft.analysis.axis.AxisValues;
 import de.jreality.geometry.IndexedLineSetFactory;
 import de.jreality.geometry.PointSetFactory;
 import de.jreality.math.MatrixBuilder;
@@ -44,6 +42,7 @@ import de.jreality.shader.ShaderUtility;
 import de.jreality.ui.viewerapp.AbstractViewerApp;
 import de.jreality.util.CameraUtility;
 import de.jreality.util.SceneGraphUtility;
+import uk.ac.diamond.scisoft.analysis.axis.AxisValues;
 
 /**
  *
@@ -136,7 +135,7 @@ public class DataSet3DPlot1DStack extends DataSet3DPlot1D {
 		graph.removeTool(tool);
 		
 		if (zAxisValues == null) {
-			zAxisValues = new AxisValues(DatasetFactory.createRange(1+plots+zOffset, Dataset.FLOAT64));
+			zAxisValues = new AxisValues(DatasetFactory.createRange(1+plots+zOffset));
 		}
 		
 		if (zTicks != null)
@@ -288,7 +287,7 @@ public class DataSet3DPlot1DStack extends DataSet3DPlot1D {
 				zAxisValues.addValues(values.getData());
 			}
 		} else {
-			zAxisValues = new AxisValues(DatasetFactory.createRange(1+plots+zOffset, Dataset.FLOAT64));
+			zAxisValues = new AxisValues(DatasetFactory.createRange(1+plots+zOffset));
 		}
 		updateGraphsZPosition();
 		

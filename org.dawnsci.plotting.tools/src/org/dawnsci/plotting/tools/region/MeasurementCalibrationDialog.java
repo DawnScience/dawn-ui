@@ -226,12 +226,12 @@ public class MeasurementCalibrationDialog extends Dialog {
 			// TODO FIXME only for standard orientation
 			// TODO FIXME only for square
 			final int[] shape = set.getShape();
-			Dataset y = DatasetFactory.createRange(shape[0], Dataset.FLOAT64);
+			Dataset y = DatasetFactory.createRange(shape[0]);
 			y.imultiply(ratio);
 			String unit = measurementUnit.getText();
 			y.setName(unit);
 			
-			Dataset x = DatasetFactory.createRange(shape[1], Dataset.FLOAT64);
+			Dataset x = DatasetFactory.createRange(shape[1]);
 			x.imultiply(ratio);
 			x.setName(measurementUnit.getText());
 

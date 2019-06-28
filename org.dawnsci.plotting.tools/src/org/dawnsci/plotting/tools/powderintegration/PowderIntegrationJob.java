@@ -18,6 +18,7 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.january.dataset.Dataset;
 import org.eclipse.january.dataset.DatasetFactory;
+import org.eclipse.january.dataset.FloatDataset;
 import org.eclipse.january.dataset.IDataset;
 import org.eclipse.january.dataset.Maths;
 import org.eclipse.dawnsci.analysis.api.metadata.IDiffractionMetadata;
@@ -204,7 +205,7 @@ public class PowderIntegrationJob extends Job {
 				!mod.isApplyPolarisationCorrection() &&
 				!mod.isAppyDetectorTransmissionCorrection()) return null;
 
-		Dataset correction = DatasetFactory.ones(data, Dataset.FLOAT32);
+		Dataset correction = DatasetFactory.ones(data, FloatDataset.class);
 
 		if (!mod.isApplyPolarisationCorrection() &&
 				!mod.isApplySolidAngleCorrection() &&

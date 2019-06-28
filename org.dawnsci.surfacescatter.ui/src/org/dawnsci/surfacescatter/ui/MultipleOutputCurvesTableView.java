@@ -13,7 +13,6 @@ import org.eclipse.dawnsci.plotting.api.PlottingFactory;
 import org.eclipse.dawnsci.plotting.api.region.IRegion;
 import org.eclipse.dawnsci.plotting.api.region.IRegion.RegionType;
 import org.eclipse.dawnsci.plotting.api.trace.ILineTrace;
-import org.eclipse.january.dataset.Dataset;
 import org.eclipse.january.dataset.DatasetFactory;
 import org.eclipse.january.dataset.IDataset;
 import org.eclipse.swt.SWT;
@@ -26,7 +25,6 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Shell;
 
 public class MultipleOutputCurvesTableView extends Composite {
@@ -128,7 +126,7 @@ public class MultipleOutputCurvesTableView extends Composite {
 		plotSystem4.createPlotPart(sashForm, "Progress Plot", actionBarComposite, PlotType.IMAGE, null);
 
 		lt = plotSystem4.createLineTrace("Blank Curve");
-		IDataset backup = DatasetFactory.createRange(0, 200, 1, Dataset.FLOAT64);
+		IDataset backup = DatasetFactory.createRange(0, 200, 1.);
 		lt.setData(backup, backup);
 
 		plotSystem4.addTrace(lt);
@@ -193,7 +191,7 @@ public class MultipleOutputCurvesTableView extends Composite {
 			public void run() {
 				plotSystem4.clear();
 				lt = plotSystem4.createLineTrace("Output Curve");
-				IDataset backup = DatasetFactory.createRange(0, 200, 1, Dataset.FLOAT64);
+				IDataset backup = DatasetFactory.createRange(0, 200, 1.);
 				lt.setData(backup, backup);
 				plotSystem4.addTrace(lt);
 				plotSystem4.repaint();

@@ -7,6 +7,7 @@ import org.eclipse.january.dataset.IDataset;
 import org.eclipse.january.dataset.IndexIterator;
 import org.eclipse.january.dataset.Maths;
 import org.eclipse.january.dataset.RGBDataset;
+import org.eclipse.january.dataset.ShortDataset;
 import org.eclipse.january.metadata.AxesMetadata;
 
 public class RGBMapData extends MappedData {
@@ -70,7 +71,7 @@ public class RGBMapData extends MappedData {
 	}
 	
 	private void clearChannel(int channel){
-		data.setElements(DatasetFactory.zeros(data.getShape(), Dataset.INT16), channel);
+		data.setElements(DatasetFactory.zeros(ShortDataset.class, data.getShapeRef()), channel);
 		
 	}
 	
@@ -91,7 +92,7 @@ public class RGBMapData extends MappedData {
 	
 	private Dataset updateDataset(Dataset ds, double min, double max, boolean log) {
 		Dataset out = ds.getSlice();
-		Dataset shortData = DatasetFactory.zeros(out, Dataset.INT16);
+		Dataset shortData = DatasetFactory.zeros(out, ShortDataset.class);
 		
 		if (log) {
 			out = Maths.log10(out);

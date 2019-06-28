@@ -2,7 +2,6 @@ package org.dawnsci.dedi.ui.views.plot.plotters;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -29,6 +28,7 @@ import org.eclipse.dawnsci.plotting.api.trace.IImageTrace;
 import org.eclipse.dawnsci.plotting.api.trace.IImageTrace.DownsampleType;
 import org.eclipse.dawnsci.plotting.api.trace.ILineTrace;
 import org.eclipse.dawnsci.plotting.api.trace.ITrace;
+import org.eclipse.january.dataset.BooleanDataset;
 import org.eclipse.january.dataset.Dataset;
 import org.eclipse.january.dataset.DatasetFactory;
 import org.eclipse.january.dataset.Slice;
@@ -296,7 +296,6 @@ public abstract class AbstractBeamlineConfigurationPlotter implements IBeamlineC
 	}
 	
 	
-	@SuppressWarnings("deprecation")
 	private void createMask(){
 		removeTrace(MASK_TRACE);
 		
@@ -326,7 +325,7 @@ public abstract class AbstractBeamlineConfigurationPlotter implements IBeamlineC
 		
 		if(mask == null){
 			maskCache.clear();
-			mask = DatasetFactory.ones(new int[]{detectorHeight, detectorWidth}, Dataset.BOOL);
+			mask = DatasetFactory.ones(BooleanDataset.class, detectorHeight, detectorWidth);
 			
 			for(int i = moduleWidth; i < detectorWidth; i += moduleWidth + gapWidth)
 				mask.setSlice(false, null, new Slice(i , i+gapWidth));
@@ -349,8 +348,8 @@ public abstract class AbstractBeamlineConfigurationPlotter implements IBeamlineC
 										numberOfHorizontalModules, numberOfVerticalModules, missingModules), mask);
 		}
 		
-		Dataset xAxis = DatasetFactory.createRange(getDetectorTopLeftX(), getDetectorTopLeftX() + getHorizontalLengthFromPixels(detectorWidth), getHorizontalLengthFromPixels(1), Dataset.FLOAT64);
-		Dataset yAxis = DatasetFactory.createRange(getDetectorTopLeftY(),getDetectorTopLeftY() + getVerticalLengthFromPixels(detectorHeight), getVerticalLengthFromPixels(1), Dataset.FLOAT64);
+		Dataset xAxis = DatasetFactory.createRange(getDetectorTopLeftX(), getDetectorTopLeftX() + getHorizontalLengthFromPixels(detectorWidth), getHorizontalLengthFromPixels(1));
+		Dataset yAxis = DatasetFactory.createRange(getDetectorTopLeftY(),getDetectorTopLeftY() + getVerticalLengthFromPixels(detectorHeight), getVerticalLengthFromPixels(1));
 				
 		final IImageTrace image = system.createImageTrace(MASK_TRACE);
 		image.setDownsampleType(DownsampleType.POINT);

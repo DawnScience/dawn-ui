@@ -23,8 +23,8 @@ import org.eclipse.dawnsci.analysis.dataset.roi.XAxisBoxROI;
 import org.eclipse.dawnsci.analysis.dataset.roi.YAxisBoxROI;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.region.IROIListener;
-import org.eclipse.dawnsci.plotting.api.region.IRegion.RegionType;
 import org.eclipse.dawnsci.plotting.api.region.IRegion;
+import org.eclipse.dawnsci.plotting.api.region.IRegion.RegionType;
 import org.eclipse.dawnsci.plotting.api.region.IRegionListener;
 import org.eclipse.dawnsci.plotting.api.region.IRegionSystem;
 import org.eclipse.dawnsci.plotting.api.region.ROIEvent;
@@ -36,10 +36,10 @@ import org.eclipse.dawnsci.plotting.api.trace.ITraceListener;
 import org.eclipse.dawnsci.plotting.api.trace.TraceEvent;
 import org.eclipse.draw2d.ColorConstants;
 import org.eclipse.january.IMonitor;
-import org.eclipse.january.dataset.Dataset;
 import org.eclipse.january.dataset.DatasetFactory;
 import org.eclipse.january.dataset.IDataset;
 import org.eclipse.january.dataset.ILazyDataset;
+import org.eclipse.january.dataset.IntegerDataset;
 import org.eclipse.january.dataset.Slice;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.ActionContributionItem;
@@ -91,18 +91,19 @@ public class Hyper2DTool extends AbstractToolPage {
 		if (im == null) return;
 		removeAllRegions();
 		IDataset ds = im.getData();
+		int[] shape = ds.getShape();
 		List<IDataset> ax = im.getAxes();
 		if (ax == null) {
 			ax = new ArrayList<IDataset>();
-			ax.add(DatasetFactory.createRange(ds.getShape()[1], Dataset.INT32));
-			ax.add(DatasetFactory.createRange(ds.getShape()[0], Dataset.INT32));
+			ax.add(DatasetFactory.createRange(IntegerDataset.class, shape[1]));
+			ax.add(DatasetFactory.createRange(IntegerDataset.class, shape[0]));
 		} else {
 			if (ax.get(0) == null) {
-				ax.set(0, DatasetFactory.createRange(ds.getShape()[1], Dataset.INT32));
+				ax.set(0, DatasetFactory.createRange(IntegerDataset.class, shape[1]));
 			}
 			
 			if (ax.get(1)== null) {
-				ax.set(1, DatasetFactory.createRange(ds.getShape()[0], Dataset.INT32));
+				ax.set(1, DatasetFactory.createRange(IntegerDataset.class, shape[0]));
 			}
 		}
 		
