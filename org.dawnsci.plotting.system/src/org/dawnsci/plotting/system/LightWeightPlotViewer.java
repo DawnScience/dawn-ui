@@ -414,11 +414,22 @@ public class LightWeightPlotViewer<T> extends AbstractPlottingViewer<T> implemen
 				}
 
 				if (fig!=null && fig.getParent() instanceof Axis) {
-					Axis axis = (Axis)fig.getParent();
-					final double center = axis.getPositionValue(axis.isHorizontal() ? e.x : e.y, false);
-					axis.zoomInOut(center, direction * ZOOM_RATIO);
-					xyGraph.repaint();
-					return;
+					ImageTrace image = xyGraph.getRegionArea().getImageTrace();
+					Axis axis = (Axis) fig.getParent();
+					if (image == null) {
+						final double center = axis.getPositionValue(axis.isHorizontal() ? e.x : e.y, false);
+						axis.zoomInOut(center, direction * ZOOM_RATIO);
+						xyGraph.repaint();
+						return;
+					}
+
+					// change mouse coordinates to be on image boundary and fall through
+					org.eclipse.draw2d.geometry.Rectangle aBndS = axis.getBounds();
+					if (axis.isHorizontal()) {
+						e.y = axis.isPrimary() ? aBndS.y : aBndS.y + aBndS.height;
+					} else {
+						e.x = axis.isPrimary() ? aBndS.x + aBndS.width : aBndS.x;
+					}
 				}
 
 				if (xyGraph==null) return;
@@ -429,7 +440,7 @@ public class LightWeightPlotViewer<T> extends AbstractPlottingViewer<T> implemen
 				boolean useWhite = PlottingSystemActivator.getPlottingPreferenceStore().getBoolean(PlottingConstants.ZOOM_INTO_WHITESPACE);
 				xyGraph.setZoomLevel(e, direction*factor, useWhite);
 				redraw();
-			}	
+			}
 		};
 		return mouseWheelListener;
 	}
