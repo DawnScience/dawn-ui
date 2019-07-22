@@ -149,7 +149,7 @@ public class AspectAxis extends DAxis implements IAxis {
 		}
 
 		// y correction for companion axis
-		if (!isHorizontal() && getTickLabelSide() == LabelSide.Primary) { 
+		if (!isHorizontal() && isPrimary()) { 
 			
 			// We have to ensure that our own ticks have been laid out
 			// because we use their size to set the location of the
@@ -443,11 +443,17 @@ public class AspectAxis extends DAxis implements IAxis {
 		if (labels!=null && labels.getRank()!=1) {
 			return;
 		}
-		labelData = DatasetUtils.convertToDataset(labels);
+
 		String text = getTitleFromLabelData(labels);
 		if (text != null) {
 			setTitle(text);
 		}
+
+		if (labels.equals(labelData)) {
+			return;
+		}
+		setDirty(true);
+		labelData = DatasetUtils.convertToDataset(labels);
 	}
 
 	/**
