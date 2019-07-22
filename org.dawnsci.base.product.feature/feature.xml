@@ -101,6 +101,10 @@
          id="org.dawnsci.dde.feature"
          version="0.0.0"/>
 
+   <includes
+         id="org.eclipse.dawnsci.nexus.template.feature"
+         version="0.0.0"/>
+
    <plugin
          id="uk.ac.diamond.scisoft.analysis.rcp.contributions"
          download-size="0"
