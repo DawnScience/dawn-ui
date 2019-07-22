@@ -440,7 +440,11 @@ public class AspectAxis extends DAxis implements IAxis {
 
 	@Override
 	public void setLabelDataAndTitle(IDataset labels) {
-		if (labels!=null && labels.getRank()!=1) {
+		if (labels == null) {
+			if (labelData == null) {
+				return;
+			}
+		} else if (labels.getRank() != 1) {
 			return;
 		}
 
@@ -449,7 +453,7 @@ public class AspectAxis extends DAxis implements IAxis {
 			setTitle(text);
 		}
 
-		if (labels.equals(labelData)) {
+		if (labels != null && labels.equals(labelData)) {
 			return;
 		}
 		setDirty(true);
