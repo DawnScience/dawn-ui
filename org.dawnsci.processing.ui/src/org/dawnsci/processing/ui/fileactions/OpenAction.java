@@ -15,7 +15,7 @@ import org.slf4j.LoggerFactory;
 
 public class OpenAction extends Action {
 	
-	private static final Logger logger = LoggerFactory.getLogger(OpenLocalFileAction.class);
+	private static final Logger logger = LoggerFactory.getLogger(OpenAction.class);
 	
 	private ISelectionProvider provider;
 

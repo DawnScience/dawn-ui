@@ -53,7 +53,7 @@ import uk.ac.diamond.scisoft.analysis.fitting.functions.IdentifiedPeak;
  */
 public class PeakFindingTool extends AbstractToolPage implements IRegionListener {
 
-	private static final Logger logger = LoggerFactory.getLogger(PeakFittingTool.class);
+	private static final Logger logger = LoggerFactory.getLogger(PeakFindingTool.class);
 
 	public PeakFindingManager manager;
 

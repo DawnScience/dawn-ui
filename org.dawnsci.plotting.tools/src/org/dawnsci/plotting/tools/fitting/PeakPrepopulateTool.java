@@ -38,7 +38,7 @@ import uk.ac.diamond.scisoft.analysis.fitting.functions.FunctionFactory;
 
 public class PeakPrepopulateTool extends Dialog {
 	
-	private static final Logger logger = LoggerFactory.getLogger(FunctionFittingTool.class);
+	private static final Logger logger = LoggerFactory.getLogger(PeakPrepopulateTool.class);
 	
 	//Tool common UI elements
 	private Composite dialogContainer;

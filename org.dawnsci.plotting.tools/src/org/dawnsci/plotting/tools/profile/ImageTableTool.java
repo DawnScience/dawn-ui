@@ -64,7 +64,7 @@ import uk.ac.diamond.scisoft.analysis.io.LoaderFactory;
 
 public class ImageTableTool extends AbstractToolPage  implements IROIListener {
 
-	private final static Logger logger = LoggerFactory.getLogger(ProfileTool.class);
+	private static final Logger logger = LoggerFactory.getLogger(ImageTableTool.class);
 	
 	private   Table                  table;
 	private   Composite              main;

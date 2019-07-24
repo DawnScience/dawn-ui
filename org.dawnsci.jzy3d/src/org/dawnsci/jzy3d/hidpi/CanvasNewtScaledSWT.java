@@ -39,7 +39,6 @@ import com.jogamp.opengl.util.texture.TextureIO;
  * {@link IScreenCanvas} documentation.
  */
 public class CanvasNewtScaledSWT extends Composite implements IScreenCanvas {
-//    static Logger LOGGER = Logger.getLogger(CanvasNewtSWT.class);
     
     public CanvasNewtScaledSWT(IChartComponentFactory factory, Scene scene, Quality quality, GLCapabilitiesImmutable glci) {
         this(factory, scene, quality, glci, false, false);

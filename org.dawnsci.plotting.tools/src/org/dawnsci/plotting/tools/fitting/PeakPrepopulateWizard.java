@@ -34,7 +34,7 @@ public class PeakPrepopulateWizard extends WizardPage {
 		super("Intial peak searching tool");
 	}
 
-	private static final Logger logger = LoggerFactory.getLogger(FunctionFittingTool.class);
+	private static final Logger logger = LoggerFactory.getLogger(PeakPrepopulateWizard.class);
 	
 	//Tool common UI elements
 	private Composite dialogContainer;

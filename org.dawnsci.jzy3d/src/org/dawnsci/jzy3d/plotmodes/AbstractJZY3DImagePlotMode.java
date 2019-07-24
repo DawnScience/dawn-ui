@@ -21,7 +21,7 @@ import org.slf4j.LoggerFactory;
 
 public abstract class AbstractJZY3DImagePlotMode extends PlotModeImage {
 
-	private static final Logger logger = LoggerFactory.getLogger(PlotModeSurfaceMesh.class);
+	private static final Logger logger = LoggerFactory.getLogger(AbstractJZY3DImagePlotMode.class);
 	
 	protected AtomicReference<ITrace> atomicTrace = new AtomicReference<>();
 	
