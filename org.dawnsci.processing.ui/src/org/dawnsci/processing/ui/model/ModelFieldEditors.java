@@ -83,8 +83,8 @@ public class ModelFieldEditors {
 	 * @param field
 	 * @return
 	 */
+	@SuppressWarnings("unchecked")
 	public static CellEditor createEditor(ModelField field, Composite parent) {
-        
 		Object value;
 		try {
 			value = field.get();
@@ -102,7 +102,7 @@ public class ModelFieldEditors {
 				logger.error("Could not get field type");
 			}
 		}
-        
+
 		CellEditor ed = null;
     	final OperationModelField anot = field.getAnnotation();
     	if (!isEnabled(field.getModel(), anot)) return null;
@@ -110,12 +110,11 @@ public class ModelFieldEditors {
         if (clazz == Boolean.class) {
         	ed = new CheckboxCellEditor(parent, SWT.NONE);
         	
-        } else if (Number.class.isAssignableFrom(clazz) || isNumberArray(clazz)) {        	
+        } else if (Number.class.isAssignableFrom(clazz) || isNumberArray(clazz)) {
         	ed = getNumberEditor(field, clazz, parent);
         	
-        } else if (IROI.class.isAssignableFrom(clazz)) {        	
-        	ed = new RegionCellEditor(parent);
-        	
+        } else if (IROI.class.isAssignableFrom(clazz)) {
+        	ed = new RegionCellEditor(parent, (Class<? extends IROI>) clazz);
         } else if (Enum.class.isAssignableFrom(clazz)) {
         	ed = getChoiceEditor((Class<? extends Enum<?>>)clazz, parent);
         	
