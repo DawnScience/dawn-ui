@@ -6,10 +6,12 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.stream.Collectors;
 
 import org.dawnsci.datavis.api.DataVisConstants;
 import org.dawnsci.datavis.api.IDataFilePackage;
+import org.dawnsci.datavis.api.IDataPackage;
 import org.dawnsci.datavis.api.IRecentPlaces;
 import org.dawnsci.datavis.api.IXYData;
 import org.dawnsci.datavis.api.utils.DataPackageUtils;
@@ -35,6 +37,7 @@ import org.eclipse.january.dataset.SliceND;
 import org.eclipse.january.dataset.StringDataset;
 import org.eclipse.january.metadata.AxesMetadata;
 import org.eclipse.january.metadata.MetadataFactory;
+import org.eclipse.january.metadata.MetadataType;
 //import org.dawnsci.datavis.api.IDataPackage;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IMenuListener;
@@ -59,6 +62,7 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
 
 import uk.ac.diamond.scisoft.analysis.dataset.function.Interpolation1D;
+import uk.ac.diamond.scisoft.analysis.utils.ReflMergeUtils;
 
 public class DataManipulationExtensionContributionFactory extends ExtensionContributionFactory {
 
@@ -294,12 +298,122 @@ public class DataManipulationExtensionContributionFactory extends ExtensionContr
 					}
 				};
 				
+				Action stitch = new Action("Stitch") {
+					@Override
+					public void run() {
+						
+						// Takes the list of IDataFilePackages, extracts the data and stores 
+						// it as a nested array
+						List<IDataFilePackage> dataFiles = getData();
+						
+						Dataset[] dataArray = new Dataset[dataFiles.size()];
+						
+						int counter = 0;
+						String firstFile = "";
+						String finalFile = "";
+						// Loop through the files that are checked/highlighted
+						ListIterator<IDataFilePackage> it = dataFiles.listIterator();
+						while (it.hasNext()) {
+							IDataPackage[] dataPacks = it.next().getDataPackages();
+							
+							if (counter == 0) {
+								firstFile = new File(dataFiles.get(counter).getFilePath()).getName();
+							}
+							finalFile = new File(dataFiles.get(counter).getFilePath()).getName();
+							// Extract the y-axis from the selected IDataPackage
+							Dataset yTemp = null;
+							for (IDataPackage i : dataPacks) {
+								if (i.isSelected()) {
+									try {
+										yTemp = DatasetUtils.sliceAndConvertLazyDataset(i.getLazyDataset());
+										break;
+									} catch (DatasetException e) {
+										MessageDialog.openError(Display.getDefault().getActiveShell(), "Error", "There has been an error opening the selected dataset.");
+									}
+								}
+							}
+							if (yTemp == null) {
+								continue;
+							}
+							dataArray[counter] = yTemp;
+							counter += 1;
+						}
+						
+						Dataset[] attenuationCorrected;
+						Dataset joinedData; 
+						Dataset normalisedToOne;
+						Dataset pointsMerged = null;
+						try {
+							attenuationCorrected = ReflMergeUtils.correctAttenuation(dataArray);
+							joinedData = ReflMergeUtils.concatenate(attenuationCorrected);
+							normalisedToOne = ReflMergeUtils.normaliseTER(joinedData);
+							pointsMerged = ReflMergeUtils.rebinDatapoints(normalisedToOne);
+						} catch (DatasetException e) {
+							MessageDialog.openError(Display.getDefault().getActiveShell(), "Error", "There has been an error in the dataset concatenation.");
+						}
+																												
+						writeToFile(pointsMerged, firstFile, finalFile);
+					}
+					
+					private void writeToFile(Dataset dataToWrite, String firstFile, String finalFile) {
+						String name = "stitched";
+						
+						StringBuilder builder = new StringBuilder(name);
+						if (firstFile.contains(".") && finalFile.contains(".")) {
+							builder.append("_");
+							builder.append(firstFile.substring(0, firstFile.lastIndexOf(".")));
+							builder.append("_");
+							builder.append(finalFile.substring(0, finalFile.lastIndexOf(".")));	
+						}
+						name = builder.toString();
+						
+						FileDialog fd = new FileDialog(Display.getDefault().getActiveShell(), SWT.SAVE);
+						String[] exts = new String[] {".dat"};
+						fd.setFilterExtensions(exts);
+						fd.setFileName(name);
+
+						BundleContext bundleContext =
+								FrameworkUtil.
+								getBundle(this.getClass()).
+								getBundleContext();
+						
+						IRecentPlaces recentPlaces = (IRecentPlaces)bundleContext.getService(bundleContext.getServiceReference(IRecentPlaces.class));
+
+						fd.setFilterPath(recentPlaces.getRecentDirectories().get(0));
+
+						String open = fd.open();
+						int filterIndex = fd.getFilterIndex();
+
+						if (filterIndex == -1) {
+							filterIndex = 0;
+						}
+
+						String ext = exts[filterIndex];
+
+						if (!open.endsWith(ext)) {
+							open = open + ext;
+						}
+
+						boolean success = FileWritingUtils.writeDat(open, dataToWrite);
+						
+						if (success) {
+							IFileController fc = (IFileController)bundleContext.getService(bundleContext.getServiceReference(IFileController.class));
+							FileControllerUtils.loadFile(fc,open);
+						} else {
+							MessageDialog.openError(Display.getDefault().getActiveShell(), "Error", "It has not been possible to write the data file.");
+						}
+					}
+				};
+				
+				stitch.setToolTipText("Stitch together selected dataset, and normalise the total external reflection to 1.");
+				
 				
 				if (data == null || data.isEmpty()) {
 					a.setEnabled(false);
 					average.setEnabled(false);
 					sub.setEnabled(false);
 					xmcd.setEnabled(false);
+					stitch.setEnabled(false);
 				}
 				
 
@@ -307,6 +421,7 @@ public class DataManipulationExtensionContributionFactory extends ExtensionContr
 				search.add(average);
 				search.add(sub);
 				search.add(xmcd);
+				search.add(stitch);
 
 			}
 
