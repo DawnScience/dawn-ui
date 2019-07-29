@@ -212,7 +212,7 @@ public class PlotModeXY implements IPlotMode {
 	public int[] getDataDimensions(Object[] currentOptions) {
 		int[] dataDims = new int[1];
 		for (int i = 0; i < currentOptions.length; i++) {
-			if (PlotModeXY.options[0].equals(currentOptions[i])){
+			if (getOptions()[0].equals(currentOptions[i])){
 				dataDims[0] = i;
 				break;
 			}

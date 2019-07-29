@@ -243,8 +243,9 @@ public class PlotModeImage implements IPlotModeColored {
 	public int[] getDataDimensions(Object[] currentOptions) {
 		int[] dataDims = new int[2];
 		int count = 0;
+		String[] ops = getOptions();
 		for (int i = 0; i < currentOptions.length && count < 2; i++) {
-			if (currentOptions[i] != null && !currentOptions[i].toString().isEmpty() && (options[0].equals(currentOptions[i].toString()) || options[1].equals(currentOptions[i].toString()))) {
+			if (currentOptions[i] != null && !currentOptions[i].toString().isEmpty() && (ops[0].equals(currentOptions[i].toString()) || ops[1].equals(currentOptions[i].toString()))) {
 				dataDims[count++] = i;
 			}
 		}
