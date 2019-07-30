@@ -44,12 +44,36 @@ public class DiffractionDetectorHelper {
 	}
 	
 	/**
-	 * Static method to determine the detector pixel size using the image dimensions.
+	 * Static method to determine the diffraction detector from the image size.
+	 * <p>
 	 * Known detectors are stored in the preferences store.
-	 * Pilatus detector are hardcoded and guessed from the pilatus module size
+	 * Pilatus detectors are hardcoded and guessed from the pilatus module size
 	 */
 	public static DiffractionDetector getMatchingDetector(int[] imageSize) {
 		DiffractionDetectors detectors = getDetectorsFromPreferences();
+		
+		return getMatchingDetector(imageSize, detectors);
+	}
+	
+	/**
+	 * Static method to determine the diffraction detector from the image size, uses only defaults in
+	 * preference initialiser
+	 * <p>
+	 * This method works when there is no workspace (and therefore no preferences)
+	 * 
+	 */
+	public static DiffractionDetector getMatchingDefaultDetector(int[] imageSize) {
+		DiffractionDetectors detectors = DiffractionDetectorPreferenceInitializer.getDefaultDetectors();
+		
+		return getMatchingDetector(imageSize, detectors);
+	}
+	
+	/**
+	 * Static method to determine the most likely detector from the input list,
+	 * using the image size.
+	 *
+	 */
+	public static DiffractionDetector getMatchingDetector(int[] imageSize, DiffractionDetectors detectors) {
 		
 		if (detectors == null || detectors.getDiffractionDetectors().isEmpty()) return null;
 		
