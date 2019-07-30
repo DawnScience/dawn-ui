@@ -68,7 +68,6 @@ public class LoadedFileMenuListener implements IMenuListener {
 	private TableViewer viewer;
 	private IFileController fileController;
 	private LabelEditingSupport editColumn;
-	private String id;
 	private ImageDescriptor convertImage = Activator.getImageDescriptor("icons/convert.png");
 	private ImageDescriptor mappingImage = Activator.getImageDescriptor("icons/map.png");
 	private ImageDescriptor processingImage = Activator.getImageDescriptor("icons/image-sharpen.png");
@@ -77,7 +76,6 @@ public class LoadedFileMenuListener implements IMenuListener {
 		this.fileController = fileController;
 		this.viewer = viewer;
 		this.editColumn = editColumn;
-		id = fileController.getID();
 	}
 
 	@Override
@@ -159,7 +157,7 @@ public class LoadedFileMenuListener implements IMenuListener {
 		}
 		
 		protected List<LoadedFile> getFileSelection() {
-			if (LoadedFileMenuListener.this.id.equals(fileController.getID()) && view.getSelection() instanceof IStructuredSelection) {
+			if (view.getSelection() instanceof IStructuredSelection) {
 				final IStructuredSelection selection = (IStructuredSelection) view.getSelection();
 				return Arrays.stream(selection.toArray())
 						.filter(LoadedFile.class::isInstance)

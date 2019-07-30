@@ -39,8 +39,6 @@ public class FileController implements IFileController {
 		recentPlaces = places;
 	}
 
-	
-	private Map<String, LoadedFiles> allLoadedFiles;
 	private LoadedFiles loadedFiles;
 	private ILiveLoadedFileListener listener;
 	private AtomicBoolean onlySignals = new AtomicBoolean(false);
@@ -49,37 +47,15 @@ public class FileController implements IFileController {
 	private ILoadedFileConfiguration[] fileConfigs = new ILoadedFileConfiguration[]{new CurrentStateFileConfiguration(), new NexusFileConfiguration(), new ImageFileConfiguration(), new XYEFileConfiguration()};
 	private Set<FileControllerStateEventListener> listeners;
 
-	private String currentId;
 	private ILoadedFileInitialiser fileInitialiser;
 	
 	private static final Logger logger = LoggerFactory.getLogger(FileController.class);
 
 	public FileController(){
-		allLoadedFiles = new HashMap<>();
 		loadedFiles = new LoadedFiles();
 		listeners = new HashSet<>();
 	};
 
-	@Override
-	public synchronized void setID(String id) {
-		if (id.equals(currentId)) {
-			return;
-		}
-		if (allLoadedFiles.isEmpty()) { // reuse default as first ID to avoid an NPE
-			allLoadedFiles.put(id, loadedFiles);
-		} else if (!allLoadedFiles.containsKey(id)) {
-			allLoadedFiles.put(id, new LoadedFiles());
-		}
-		loadedFiles = allLoadedFiles.get(id);
-
-		currentId = id;
-	}
-
-	@Override
-	public String getID() {
-		return currentId;
-	}
-	
 	/* (non-Javadoc)
 	 * @see org.dawnsci.datavis.model.IFileController#loadFiles(java.lang.String[], org.eclipse.ui.progress.IProgressService, boolean)
 	 */
@@ -215,22 +191,7 @@ public class FileController implements IFileController {
 	}
 		fireStateChangeListeners(true, true, files.get(0),null);
 	}
-	
-	
-	/* (non-Javadoc)
-	 * @see org.dawnsci.datavis.model.IFileController#getSelectedFiles()
-	 */
-	@Override
-	public List<LoadedFile> getSelectedFiles(){
-		
-		List<LoadedFile> checked = new ArrayList<>();
-		
-		for (LoadedFile f : loadedFiles) {
-			if (f.isSelected()) checked.add(f);
-		}
-		return checked;
-	}
-	
+
 	private void fireUpdateRequest() {
 		for (FileControllerStateEventListener l : listeners) l.refreshRequest();
 	}
