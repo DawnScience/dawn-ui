@@ -22,6 +22,7 @@ import org.dawnsci.datavis.model.IFileController;
 import org.dawnsci.datavis.model.IRefreshable;
 import org.dawnsci.datavis.model.LoadedFile;
 import org.dawnsci.datavis.view.Activator;
+import org.dawnsci.datavis.view.perspective.DataVisPerspective;
 import org.dawnsci.datavis.view.preference.DataVisPreferenceConstants;
 import org.dawnsci.datavis.view.quickfile.IQuickFileWidgetListener;
 import org.dawnsci.datavis.view.quickfile.QuickFileWidget;
@@ -168,7 +169,6 @@ public class LoadedFilePart {
 	@PostConstruct
 	public void createComposite(Composite parent, MPart part) {
 		partId = part.getElementId();
-		fileController.setID(partId);
 		logger.info("LoadedFile view: {} created", partId);
 		parent.setLayout(new FormLayout());
 		FormData checkForm = new FormData();
@@ -360,9 +360,6 @@ public class LoadedFilePart {
 			
 			@Override
 			public void stateChanged(FileControllerStateEvent event) {
-				if (!fileController.getID().equals(partId)) {
-					return; // ignore other sources of state changes
-				}
 				updateOnStateChange(event);
 
 				String defaultDirectory = recentPlaces.getCurrentDefaultDirectory();
@@ -526,6 +523,14 @@ public class LoadedFilePart {
 		if (viewer != null) viewer.getControl().setFocus();
 	}
 
+	/**
+	 * Override this in subclasses
+	 * @return perspective that this part belongs to
+	 */
+	protected String getPerspectiveID() {
+		return DataVisPerspective.ID;
+	}
+
 	@Inject
 	@Optional
 	private void subscribeFileOpenE3(@UIEventTopic(PlottingEventConstants.FILE_OPEN_EVENT) Event data, MPart part, EModelService modelService) {
@@ -534,6 +539,9 @@ public class LoadedFilePart {
 		}
 
 		MPerspective ap = modelService.getActivePerspective(modelService.getTopLevelWindowFor(part));
+		if (!ap.getElementId().equals(getPerspectiveID())) {
+			return;
+		}
 		MUIElement element = modelService.find(partId, ap);
 		if (element == null) { // when active perspective does not contain this part
 			return;
@@ -558,19 +566,6 @@ public class LoadedFilePart {
 		loadData(paths, addToHistory);
 	}
 
-	@Inject
-	@Optional
-	private void perspectiveChanged(@UIEventTopic("org/eclipse/e4/ui/model/ui/ElementContainer/selectedElement/SET") Event data, EPartService service) {
-		Object property = data.getProperty(UIEvents.EventTags.ELEMENT);
-		if (property instanceof MPerspectiveStack) {
-			MPerspective p = ((MPerspectiveStack) property).getSelectedElement();
-			if (p != null && partId != null && service.isPartOrPlaceholderInPerspective(partId, p)) {
-				logger.debug("Switching filecontroller to {} for {}", partId, p.getElementId());
-				fileController.setID(partId);
-			}
-		}
-	}
-	
 	private class CheckBoxEditSupport extends EditingSupport {
 
 		public CheckBoxEditSupport(ColumnViewer viewer) {

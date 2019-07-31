@@ -132,29 +132,6 @@ public interface IFileController extends IFileOpeningController {
 	
 	public void selectFiles(List<LoadedFile> files, boolean selected);
 
-	/**
-	 * @deprecated only uses API calls so moved to FileControllerUtils
-	 * 
-	 * @param files
-	 * @param selected
-	 */
-	@Deprecated 
-	public List<LoadedFile> getSelectedFiles();
-
-	/**
-	 * @deprecated prefer extending class rather than different id per perspective
-	 * @param id
-	 */
-	@Deprecated
-	public void setID(String id);
-
-	/**
-	 * @deprecated prefer extending class rather than different id per perspective
-	 * @return
-	 */
-	@Deprecated
-	public String getID();
-
 	public boolean isOnlySignals();
 
 	public void setOnlySignals(boolean onlySignals);
