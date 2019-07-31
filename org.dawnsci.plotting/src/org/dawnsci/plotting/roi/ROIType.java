@@ -9,6 +9,9 @@
 package org.dawnsci.plotting.roi;
 
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.eclipse.dawnsci.analysis.api.roi.IROI;
 import org.eclipse.dawnsci.analysis.dataset.roi.EllipticalROI;
 import org.eclipse.dawnsci.analysis.dataset.roi.LinearROI;
@@ -56,6 +59,19 @@ public enum ROIType {
 		return names;
 	}
 
+	public static String[] getTypes(Class<? extends IROI> rClazz) {
+		if (rClazz == null) {
+			return getTypes();
+		}
+		final List<String> names = new ArrayList<>();
+		for (ROIType t : ROIType.values()) {
+			if (rClazz.isAssignableFrom(t.clazz)) {
+				names.add(t.getName());
+			}
+		}
+		return names.toArray(new String[names.size()]);
+	}
+
 	public String getName() {
 		return clazz.getSimpleName();
 	}
@@ -63,6 +79,15 @@ public enum ROIType {
 	public static ROIType getType(int index) {
 		final ROIType[] ops = ROIType.values();
 		return ops[index];
+	}
+
+	public static ROIType getType(String name) {
+		for (ROIType t : ROIType.values()) {
+			if (t.getName().equals(name)) {
+				return t;
+			}
+		}
+		return null;
 	}
 
 	public IROI getRoi() throws InstantiationException, IllegalAccessException {
@@ -77,8 +102,8 @@ public enum ROIType {
 		return -1;
 	}
 
-	public static IROI createNew(int selectionIndex) throws InstantiationException, IllegalAccessException {
-		final ROIType roi = getType(selectionIndex);
-		return roi.clazz.newInstance();
+	public static IROI createNew(String name) throws InstantiationException, IllegalAccessException {
+		final ROIType roi = getType(name);
+		return roi == null ? null : roi.getRoi();
 	}
 }

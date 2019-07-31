@@ -35,8 +35,11 @@ public class ROIDialog extends Dialog {
 	private ROIEditTable roiEditor;
 	private CCombo roiType;
 
-	public ROIDialog(Shell parentShell) {
+	private Class<? extends IROI> clazz;
+
+	public ROIDialog(Shell parentShell, Class<? extends IROI> clazz) {
 		super(parentShell);
+		this.clazz = clazz;
 	}
 
 	@Override
@@ -59,13 +62,13 @@ public class ROIDialog extends Dialog {
 		label.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 
 		roiType = new CCombo(top, SWT.READ_ONLY|SWT.BORDER);
-		roiType.setItems(ROIType.getTypes());
+		roiType.setItems(ROIType.getTypes(clazz));
 		roiType.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		roiType.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				try {
-					roiEditor.setRegion(ROIType.createNew(roiType.getSelectionIndex()), null, null);
+					roiEditor.setRegion(ROIType.createNew(roiType.getItem(roiType.getSelectionIndex())), null, null);
 				} catch (Exception e1) {
 					logger.error("Cannot create roi "+ROIType.getType(roiType.getSelectionIndex()).getName(), e1);
 				}

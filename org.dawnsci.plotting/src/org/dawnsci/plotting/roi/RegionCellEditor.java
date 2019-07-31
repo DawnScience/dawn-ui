@@ -20,20 +20,21 @@ public class RegionCellEditor extends DialogCellEditor {
 
 	private static final Logger logger = LoggerFactory.getLogger(RegionCellEditor.class);
 	private IRegionTransformer transformer;
+	private Class<? extends IROI> clazz;
 	
-	public RegionCellEditor(Composite parent) {
-		this(parent, null);
+	public RegionCellEditor(Composite parent, Class<? extends IROI> clazz) {
+		this(parent, clazz, null);
 	}
 
-	public RegionCellEditor(Composite parent, IRegionTransformer transformer) {
+	public RegionCellEditor(Composite parent, Class<? extends IROI> clazz, IRegionTransformer transformer) {
 		super(parent);
+		this.clazz = clazz;
 		this.transformer = transformer;
 	}
 	
 	@Override
 	protected Object openDialogBox(Control cellEditorWindow) {
-						
-		final ROIDialog dialog = new ROIDialog(cellEditorWindow.getShell()); // extends BeanDialog
+		final ROIDialog dialog = new ROIDialog(cellEditorWindow.getShell(), clazz);
 		dialog.create();
 		dialog.getShell().setSize(550,450); // As needed
 		dialog.getShell().setText("Edit Region of Interest");
