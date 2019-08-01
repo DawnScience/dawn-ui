@@ -25,7 +25,7 @@ import org.eclipse.scanning.api.event.EventException;
 import org.eclipse.scanning.api.event.IEventService;
 import org.eclipse.scanning.api.event.bean.BeanEvent;
 import org.eclipse.scanning.api.event.bean.IBeanListener;
-import org.eclipse.scanning.api.event.core.IConsumer;
+import org.eclipse.scanning.api.event.core.IJobQueue;
 import org.eclipse.scanning.api.event.core.IPropertyFilter.FilterAction;
 import org.eclipse.scanning.api.event.core.ISubscriber;
 import org.eclipse.scanning.api.event.scan.ScanBean;
@@ -239,7 +239,7 @@ public abstract class AbstractLiveFileService {
 	private List<StatusBean> getRunningBeans(String submitQueueName) {
 		final String suri = CommandConstants.getScanningBrokerUri();
 		if (suri != null) { // will be null for standard DAWN
-			try (IConsumer<StatusBean> queueConnection = eventService.createConsumerProxy(new URI(suri), submitQueueName)) {
+			try (IJobQueue<StatusBean> queueConnection = eventService.createJobQueueProxy(new URI(suri), submitQueueName)) {
 				return queueConnection.getRunningAndCompleted();
 			} catch (Exception e) {
 				// there may be no processing queue present, so we just log this as a warning
