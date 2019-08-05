@@ -9,6 +9,7 @@ import org.eclipse.dawnsci.nexus.NexusFile;
 import org.eclipse.dawnsci.plotting.api.trace.MetadataPlotUtils;
 import org.eclipse.january.DatasetException;
 import org.eclipse.january.dataset.Dataset;
+import org.eclipse.january.dataset.DatasetFactory;
 import org.eclipse.january.dataset.DatasetUtils;
 import org.eclipse.january.dataset.IDataset;
 import org.eclipse.january.dataset.ILazyDataset;
@@ -102,6 +103,55 @@ public class FileWritingUtils {
 			return false;
 		}
 		
+		return true;
+	}
+	
+	public static boolean writeDat(String path, Dataset data) {
+		String name = "data";
+		if (data.getName() != null) {
+			name = data.getName();
+		}
+		
+		RawTextSaver saver = new RawTextSaver(path);
+		DataHolder dh = new DataHolder();
+		AxesMetadata md = data.getFirstMetadata(AxesMetadata.class);
+		ILazyDataset[] axes = md.getAxes();
+		IDataset[] dArray = new IDataset[4];
+		int shape = data.getShapeRef()[0];
+		data.setShape(shape, 1);
+		dArray[1] = data;
+		if (axes[0] != null) {
+			try {
+				dArray[0] = getAxisPadded(axes[0]);
+			} catch (DatasetException e) {
+				return false;
+			}
+		} else {
+			return false;
+		}
+		if (data.hasErrors()) {
+			dArray[2] = data.getErrors();
+		} else {
+			dArray[2] = DatasetFactory.zeros(shape, 1);
+		}
+		if (axes[0].hasErrors()) {
+			try {
+				dArray[3] = getAxisPadded(axes[0].getErrors());
+			} catch (DatasetException e) {
+				return false;
+			}
+		} else {
+			dArray[3] = DatasetFactory.zeros(shape, 1);
+		}
+		
+		data = DatasetUtils.concatenate(dArray, 1);
+		dh.addDataset(name, data);
+		
+		try {
+			saver.saveFile(dh);
+		} catch (ScanFileHolderException e) {
+			return false;
+		}
 		return true;
 	}
 	
