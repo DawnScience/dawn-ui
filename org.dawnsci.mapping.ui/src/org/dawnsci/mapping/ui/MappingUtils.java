@@ -2,7 +2,7 @@ package org.dawnsci.mapping.ui;
 
 import java.util.List;
 
-import org.dawnsci.mapping.ui.datamodel.AssociatedImage;
+import org.dawnsci.mapping.ui.datamodel.PlottableMapObject;
 import org.eclipse.dawnsci.analysis.api.tree.DataNode;
 import org.eclipse.dawnsci.analysis.api.tree.GroupNode;
 import org.eclipse.dawnsci.analysis.tree.impl.AttributeImpl;
@@ -247,9 +247,7 @@ public class MappingUtils {
 		return new int[]{yOut,xOut};
 	}
 	
-	public static void saveRegisteredImage(AssociatedImage image, String path, INexusFileFactory fileFactory) {
-		
-		
+	public static void saveRegisteredImage(PlottableMapObject image, String path, INexusFileFactory fileFactory) {
 		
 		NexusFile nexus = fileFactory.newNexusFile(path);
 		try {

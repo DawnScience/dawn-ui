@@ -736,6 +736,10 @@ public class MapPlotManager implements IMapPlotController{
 	
 	private IImageTrace createImageTrace(MapObject ob, IPlottingSystem<?> mapPlot) {
 		
+		//this is not where live streams are created
+		if (ob instanceof LiveStreamMapObject) {
+			return null;
+		}
 		
 		IDataset map = null;
 		

@@ -12,6 +12,7 @@ import org.dawnsci.mapping.ui.api.IMapFileController;
 import org.dawnsci.mapping.ui.datamodel.AbstractMapData;
 import org.dawnsci.mapping.ui.datamodel.AssociatedImage;
 import org.dawnsci.mapping.ui.datamodel.IMapPlotController;
+import org.dawnsci.mapping.ui.datamodel.LiveStreamMapObject;
 import org.dawnsci.mapping.ui.datamodel.MappedDataArea;
 import org.dawnsci.mapping.ui.datamodel.MappedDataBlock;
 import org.dawnsci.mapping.ui.datamodel.MappedDataFile;
@@ -31,6 +32,7 @@ import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.TreeViewer;
+import org.eclipse.scanning.api.scan.IFilePathService;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.WorkbenchException;
@@ -284,7 +286,36 @@ public class MapActionUtils {
 				}
 			}
 		};
-		
+	}
+	
+	public static IAction getSaveStreamAction(final LiveStreamMapObject stream, final IMapFileController manager) {
+		return new Action("Save snapshot...") {
+			@Override
+			public void run() {
+				
+				String outPath;
+				
+				try {
+					outPath = getFilePath();
+				} catch (Exception e) {
+					logger.error("Could not save snapshot",e);
+					return;
+				}
+				
+				INexusFileFactory f = Activator.getService(INexusFileFactory.class);
+
+			    MappingUtils.saveRegisteredImage(stream, outPath, f);
+				
+			    manager.loadFiles(new String[]{outPath}, null);
+			}
+		};
+	}
+	
+	private static String getFilePath() throws Exception {
+		final IFilePathService filePathService = Activator.getService(IFilePathService.class);
+		final String processedFilesDir = filePathService.getProcessingDir();
+
+		return filePathService.getNextPath(processedFilesDir, "snapshot");
 	}
 	
 	public static IAction getBringToFrontAction(final PlottableMapObject map, final IMapPlotController manager) {

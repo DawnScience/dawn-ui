@@ -17,6 +17,7 @@ import org.dawnsci.mapping.ui.datamodel.MappedFileManager;
 import org.dawnsci.mapping.ui.datamodel.PlottableMapObject;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.dawnsci.analysis.api.persistence.IMarshallerService;
+import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.util.LocalSelectionTransfer;
@@ -26,6 +27,7 @@ import org.eclipse.jface.viewers.ITreeSelection;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TreeSelection;
 import org.eclipse.jface.viewers.TreeViewer;
+import org.eclipse.scanning.api.scan.IFilePathService;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.dnd.DND;
 import org.eclipse.swt.dnd.DropTarget;
@@ -167,6 +169,18 @@ public class MappedDataView extends ViewPart {
 			if (selection.size() == 1) {
 				
 				Object element = selection.getFirstElement();
+				
+				if (element instanceof LiveStreamMapObject) {
+					IFilePathService s = Activator.getService(IFilePathService.class);
+					//should only be in gda
+					if (s.getProcessingDir() != null) {
+						IAction a = MapActionUtils.getSaveStreamAction((LiveStreamMapObject)element,fileController);
+						if (((LiveStreamMapObject)element).getMap() == null) {
+							a.setEnabled(false);
+						}
+						manager.add(a);
+					}
+				}
 
 				if (element instanceof MappedDataFile) {
 					manager.add(MapActionUtils.getFileRemoveAction(fileController, (MappedDataFile)element));
