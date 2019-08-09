@@ -792,10 +792,19 @@ public class RegionArea extends PlotArea implements IPlotArea {
 		}
 	}
 
-
 	public void setImageOrigin(ImageOrigin origin) {
-		if (imageTraces!=null) for (ImageTrace trace : imageTraces.values()) {
-			trace.setImageOrigin(origin);
+		if (imageTraces!=null) {
+			for (ImageTrace trace : imageTraces.values()) {
+				trace.setImageOrigin(origin);
+			}
+		}
+	}
+
+	public void setImageTranspose(boolean transpose) {
+		if (imageTraces!=null) {
+			for (ImageTrace trace : imageTraces.values()) {
+				trace.setImageTransposed(transpose);
+			}
 		}
 	}
 

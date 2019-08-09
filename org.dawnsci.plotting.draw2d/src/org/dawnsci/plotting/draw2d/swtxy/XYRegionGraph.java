@@ -247,6 +247,10 @@ public class XYRegionGraph extends XYGraph {
 		getRegionArea().setImageOrigin(origin);
 	}
 
+	public void setImageTranspose(boolean transpose) {
+		getRegionArea().setImageTranspose(transpose);
+	}
+
 	@Override
 	public void layout() {
 		super.layout();

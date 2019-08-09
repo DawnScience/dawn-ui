@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -61,6 +62,8 @@ import org.eclipse.january.dataset.IDataset;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IContributionManager;
+import org.eclipse.jface.action.IMenuListener;
+import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -145,7 +148,7 @@ class LightWeightPlotActions {
 		actionBarManager.createExportActions();
 		createAspectHistoAction(xyGraph);
 		actionBarManager.createPaletteActions();
-		createOriginActions(xyGraph);
+		createImageTransformActions(xyGraph);
 		createSpecialImageActions(xyGraph, cmdService);
 		createAdditionalActions(xyGraph, null);
 		createFullScreenActions(xyGraph);
@@ -1008,54 +1011,69 @@ class LightWeightPlotActions {
 		if (oldbg != null && !oldbg.isDisposed()) {oldbg.dispose();}
 	}
 
-	private List<IAction> originActions = new ArrayList<>();
+	private IMenuListener transformMenuListener;
 
-	/**
-	 * Set origin in plot action
-	 * @param origin
-	 */
-	public void setImageOrigin(ImageOrigin origin) {
-		String l = origin.getLabel();
-		for (IAction o : originActions) {
-			if (l.equals(o.getText())) {
-				o.setChecked(true);
-				break; // as all in an action group
-			}
-		}
-	}
-
-	public void createOriginActions(final XYRegionGraph xyGraph) {
+	public void createImageTransformActions(final XYRegionGraph xyGraph) {
 
 		final MenuAction origins = new MenuAction("Image Origin");
-		origins.setId(BasePlottingConstants.IMAGE_ORIGIN_MENU_ID);
+		origins.setId(PlottingConstants.IMAGE_ORIGIN_MENU_ID);
 		origins.setImageDescriptor(PlottingSystemActivator.getImageDescriptor("icons/origins.png"));
 
 		CheckableActionGroup group      = new CheckableActionGroup();
-		ImageOrigin imageOrigin = ImageOrigin.forLabel(PlottingSystemActivator.getPlottingPreferenceStore().getString(PlottingConstants.ORIGIN_PREF));
-		IAction selectedAction  = null;
+		Map<String, IAction> originActions = new HashMap<>();
 
 		for (final ImageOrigin origin : ImageOrigin.values()) {
-
-			final IAction action = new Action(origin.getLabel(), IAction.AS_CHECK_BOX) {
+			String l = origin.getLabel();
+			final IAction action = new Action(l, IAction.AS_CHECK_BOX) {
 				public void run() {
-					PlottingSystemActivator.getPlottingPreferenceStore().setValue(PlottingConstants.ORIGIN_PREF, origin.getLabel());
+					PlottingSystemActivator.getPlottingPreferenceStore().setValue(PlottingConstants.ORIGIN_PREF, l);
 					xyGraph.setImageOrigin(origin);
 					setChecked(true);
 				}
 			};
 			origins.add(action);
 			group.add(action);
-			originActions.add(action);
-			if (imageOrigin==origin) selectedAction = action;
+			originActions.put(l, action);
 		}
 
-		if (selectedAction!=null) selectedAction.setChecked(true);
+		String l = PlottingSystemActivator.getPlottingPreferenceStore().getString(PlottingConstants.ORIGIN_PREF);
+		if (l == null || l.isEmpty()) {
+			l = ImageOrigin.TOP_LEFT.getLabel();
+		}
+		originActions.get(l).setChecked(true);
 
-		actionBarManager.registerMenuBarGroup(origins.getId()+".group");
-		actionBarManager.registerAction(origins.getId()+".group", origins, ActionType.IMAGE, ManagerType.MENUBAR);
+		Action transposeImage = new Action("Transpose image", IAction.AS_CHECK_BOX) {
+			public void run() {
+				PlottingSystemActivator.getPlottingPreferenceStore().setValue(PlottingConstants.TRANSPOSE_PREF, isChecked());
+				xyGraph.setImageTranspose(isChecked());
+			}
+		};
+		transposeImage.setId(PlottingConstants.IMAGE_TRANSPOSE_ID);
+		transposeImage.setToolTipText("Swap axes about image origin");
+		transposeImage.setChecked(PlottingSystemActivator.getPlottingPreferenceStore().getBoolean(PlottingConstants.TRANSPOSE_PREF));
 
+		actionBarManager.registerMenuBarGroup(PlottingConstants.IMAGE_TRANSFORMS_ID);
+		actionBarManager.registerAction(PlottingConstants.IMAGE_TRANSFORMS_ID, origins, ActionType.IMAGE, ManagerType.MENUBAR);
+		actionBarManager.registerAction(PlottingConstants.IMAGE_TRANSFORMS_ID, transposeImage, ActionType.IMAGE, ManagerType.MENUBAR);
+
+		transformMenuListener = new IMenuListener() {
+			@Override
+			public void menuAboutToShow(IMenuManager manager) {
+				Collection<ITrace> traces = viewer.getSystem().getTraces();
+				for (Iterator<ITrace> iterator = traces.iterator(); iterator.hasNext();) {
+					ITrace trace = (ITrace) iterator.next();
+					if (trace instanceof IImageTrace) {
+						IImageTrace iTrace = (IImageTrace) trace;
+						originActions.get(iTrace.getImageOrigin().getLabel()).setChecked(true);
+						transposeImage.setChecked(iTrace.getImageServiceBean().isTransposed());
+						break; // expect only one image
+					}
+				}
+			}
+		};
+
+		actionBarManager.getActionBars().getMenuManager().addMenuListener(transformMenuListener);
 	}
-
 
 	/**
 	 * Also uses 'bars' field to add the actions
@@ -1129,13 +1147,12 @@ class LightWeightPlotActions {
 		actionBarManager.addXYSeparator();
 		actionBarManager.addXYAction(filters);
 		actionBarManager.addXYSeparator();
-
 	}
 
 	public void dispose() {
 		PlottingSystemActivator.getLocalPreferenceStore().removePropertyChangeListener(propertyListener);
+		actionBarManager.getActionBars().getMenuManager().removeMenuListener(transformMenuListener);
 		actionBarManager.removePropertyChangeListener(switchListener);
-		originActions.clear();
 		plotIndex = null;
 		plotX     = null;
 	}
