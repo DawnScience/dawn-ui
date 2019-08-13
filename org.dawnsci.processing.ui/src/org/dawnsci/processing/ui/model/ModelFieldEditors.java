@@ -93,14 +93,10 @@ public class ModelFieldEditors {
 			return null;
 		}
 		
-		Class<? extends Object> clazz = null;
-		if (value!=null) {
+		Class<? extends Object> clazz = field.getType();
+		
+		if (clazz == null && value!=null) {
 			clazz = value.getClass();
-		} else {
-			clazz = field.getType();
-			if (clazz == null) {
-				logger.error("Could not get field type");
-			}
 		}
 
 		CellEditor ed = null;
