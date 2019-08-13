@@ -17,6 +17,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+
 import org.dawnsci.datavis.api.ILiveFileListener;
 import org.eclipse.dawnsci.analysis.api.processing.IOperationBean;
 import org.eclipse.scanning.api.event.EventConstants;
@@ -28,10 +29,13 @@ import org.eclipse.scanning.api.event.core.IConsumer;
 import org.eclipse.scanning.api.event.core.IPropertyFilter.FilterAction;
 import org.eclipse.scanning.api.event.core.ISubscriber;
 import org.eclipse.scanning.api.event.scan.ScanBean;
+import org.eclipse.scanning.api.event.status.Status;
 import org.eclipse.scanning.api.event.status.StatusBean;
 import org.eclipse.scanning.api.ui.CommandConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import uk.ac.diamond.scisoft.analysis.processing.bean.OperationBean;
 
 public abstract class AbstractLiveFileService {
 	
@@ -43,16 +47,8 @@ public abstract class AbstractLiveFileService {
 	private static final String SCAN_STATUS_STARTED = "STARTED";
 	private static final String SCAN_STATUS_UPDATED = "UPDATED";
 	private static final String SCAN_STATUS_FINISHED = "FINISHED";
-	private static final String JOB_STATUS_RUNNING = "RUNNING";
-	private static final String JOB_STATUS_COMPLETE = "COMPLETE";
-	private static final String JOB_STATUS_TERMINATED = "TERMINATED";
-	private static final String JOB_STATUS_FAILED = "FAILED";
-	private static final String JOB_STATUS_UNFINISHED = "UNFINISHED";
-	private static final String JOB_STATUS_NONE = "NONE";
 	private static final String MESSAGE_STATUS_FIELD = "status";
-	private static final String MESSAGE_PREVIOUS_STATUS_FIELD = "previousStatus";
 	private static final String MESSAGE_FILEPATH_FIELD = "filePath";
-	private static final String MESSAGE_OUTPUT_FILEPATH_FIELD = "outputFilePath";
 	
 	protected Set<ILiveFileListener> listeners = new HashSet<>();
 
@@ -61,7 +57,7 @@ public abstract class AbstractLiveFileService {
 	private ISubscriber<EventListener> fileSubscriber;
 	
 	private IBeanListener<Map<String, Object>> scanListener;
-	private IBeanListener<Map<String, Object>> operationListener;
+	private IBeanListener<OperationBean> operationListener;
 	private IBeanListener<Map<String, Object>> fileListener;
 
 	private AtomicReference<Runnable> atomicRunnable = new AtomicReference<>();
@@ -267,50 +263,38 @@ public abstract class AbstractLiveFileService {
 	
 	protected abstract void handleFileLoad(String[] file, String parent, boolean live);
 	
-	private class BeanListener implements IBeanListener<Map<String, Object>> {
+	private class BeanListener implements IBeanListener<OperationBean> {
 		
 		@Override
-		public void beanChangePerformed(BeanEvent<Map<String, Object>> evt) {
+		public void beanChangePerformed(BeanEvent<OperationBean> evt) {
 			
-			Map<String, Object> msg = evt.getBean();
+			OperationBean bean = evt.getBean();
 			
-			boolean doFieldsExist = msg.containsKey(MESSAGE_STATUS_FIELD) &&
-					msg.containsKey(MESSAGE_FILEPATH_FIELD) &&
-					msg.containsKey(MESSAGE_OUTPUT_FILEPATH_FIELD);
-
-			if (!doFieldsExist) {
-				logger.error("At least one of the {}, {}, {} fields are missing in the message",
-						MESSAGE_STATUS_FIELD, MESSAGE_FILEPATH_FIELD, MESSAGE_OUTPUT_FILEPATH_FIELD);
+			if (Status.RUNNING.equals(bean.getStatus()) && !Status.RUNNING.equals(bean.getPreviousStatus())) {
+				
+				handleFileLoad(new String[] {evt.getBean().getOutputFilePath()}, evt.getBean().getFilePath(), true);
+				
 				return;
+				
 			}
-
-			if (msg.get(MESSAGE_STATUS_FIELD).equals(JOB_STATUS_RUNNING)) {
+			
+			if (Status.RUNNING.equals(bean.getStatus())) {
 				for (ILiveFileListener l : listeners) {
 					l.refreshRequest();
 				}
 			}
 			
-			if (msg.get(MESSAGE_STATUS_FIELD).equals(JOB_STATUS_RUNNING) &&
-					!msg.get(MESSAGE_PREVIOUS_STATUS_FIELD).equals(JOB_STATUS_RUNNING)) {
-				
-				String filePath = (String) msg.get(MESSAGE_FILEPATH_FIELD);
-				handleFileLoad(new String[] {filePath}, null, true);
-				
-				return;
-				
-			}
 			
-			if (msg.get(MESSAGE_STATUS_FIELD).equals(JOB_STATUS_TERMINATED) ||
-					msg.get(MESSAGE_STATUS_FIELD).equals(JOB_STATUS_FAILED) ||
-					msg.get(MESSAGE_STATUS_FIELD).equals(JOB_STATUS_UNFINISHED) ||
-					msg.get(MESSAGE_STATUS_FIELD).equals(JOB_STATUS_NONE)) return;
+			if (!evt.getBean().getStatus().isFinal()) return;
 
-			if (msg.get(MESSAGE_STATUS_FIELD).equals(JOB_STATUS_COMPLETE)) {
-				for (ILiveFileListener l : listeners) {
-					l.localReload((String)msg.get(MESSAGE_OUTPUT_FILEPATH_FIELD), false);
-				}
-			}
 
+			for (ILiveFileListener l : listeners) l.localReload(evt.getBean().getOutputFilePath(), false);
+
+		}
+		
+		@Override
+		public Class<OperationBean> getBeanClass() {
+			return OperationBean.class;
 		}
 
 	}
