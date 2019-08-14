@@ -314,8 +314,8 @@ public class MappedFileManager implements IMapFileController{
 		if (stageScanConfig == null){
 			b = MapBeanBuilder.buildBean(tree);
 		} else {
-			String x = stageScanConfig.getActiveFastScanAxis();
-			String y = stageScanConfig.getActiveSlowScanAxis();
+			String x = stageScanConfig.getPlotXAxisName();
+			String y = stageScanConfig.getPlotYAxisName();
 			b = MapBeanBuilder.buildBean(tree,x,y);
 		}
 		return b;
