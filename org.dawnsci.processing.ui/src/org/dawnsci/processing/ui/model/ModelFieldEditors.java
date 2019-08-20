@@ -68,16 +68,26 @@ public class ModelFieldEditors {
 	private static ToolTip            currentHint;
 	private static DataReadyEventHandler handler;
 	private static IOperationInputData recentData;
-	
+	private static Map<Class<?>, Class<?>> BOXED_CLASSES; // maps from primitives to their boxed equivalents
+
 	static {
 		BundleContext ctx = FrameworkUtil.getBundle(ModelFieldEditors.class).getBundleContext();
 		handler = new ModelFieldEditors().new DataReadyEventHandler();
 		Dictionary<String, String> props = new Hashtable<>();
 		props.put(EventConstants.EVENT_TOPIC, ProcessingEventConstants.DATA_UPDATE);
 		ctx.registerService(EventHandler.class, handler, props);
+
+		BOXED_CLASSES = new HashMap<>();
+		BOXED_CLASSES.put(boolean.class, Boolean.class);
+		BOXED_CLASSES.put(byte.class, Byte.class);
+		BOXED_CLASSES.put(short.class, Short.class);
+		BOXED_CLASSES.put(int.class, Integer.class);
+		BOXED_CLASSES.put(long.class, Long.class);
+		BOXED_CLASSES.put(float.class, Float.class);
+		BOXED_CLASSES.put(double.class, Double.class);
+		BOXED_CLASSES.put(char.class, Character.class);
 	}
-	
-	
+
 	/**
 	 * Create a new editor for a field.
 	 * @param field
@@ -92,8 +102,11 @@ public class ModelFieldEditors {
 			logger.error("Could not get field value", e);
 			return null;
 		}
-		
+
 		Class<? extends Object> clazz = field.getType();
+		if (clazz.isPrimitive()) {
+			clazz = BOXED_CLASSES.get(clazz);
+		}
 		
 		if (clazz == null && value!=null) {
 			clazz = value.getClass();
