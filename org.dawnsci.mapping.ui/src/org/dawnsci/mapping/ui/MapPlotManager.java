@@ -61,7 +61,6 @@ import org.eclipse.january.dataset.Slice;
 import org.eclipse.january.dataset.SliceND;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
-import org.eclipse.ui.PlatformUI;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
 import org.slf4j.Logger;

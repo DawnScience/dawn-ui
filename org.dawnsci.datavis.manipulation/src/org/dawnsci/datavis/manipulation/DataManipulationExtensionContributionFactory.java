@@ -37,8 +37,6 @@ import org.eclipse.january.dataset.SliceND;
 import org.eclipse.january.dataset.StringDataset;
 import org.eclipse.january.metadata.AxesMetadata;
 import org.eclipse.january.metadata.MetadataFactory;
-import org.eclipse.january.metadata.MetadataType;
-//import org.dawnsci.datavis.api.IDataPackage;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
