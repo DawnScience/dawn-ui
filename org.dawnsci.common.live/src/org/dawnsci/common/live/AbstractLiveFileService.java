@@ -49,6 +49,8 @@ public abstract class AbstractLiveFileService {
 	private static final String SCAN_STATUS_FINISHED = "FINISHED";
 	private static final String MESSAGE_STATUS_FIELD = "status";
 	private static final String MESSAGE_FILEPATH_FIELD = "filePath";
+	private static final String SWMR_STATUS = "swmrStatus";
+	private static final String SWMR_ACTIVE = "ACTIVE";
 	
 	protected Set<ILiveFileListener> listeners = new HashSet<>();
 
@@ -312,8 +314,18 @@ public abstract class AbstractLiveFileService {
 				logger.error("Missing {} field in message", MESSAGE_STATUS_FIELD);
 				return;
 			}
+			
+			if (msg.containsKey(SWMR_STATUS) && !SWMR_ACTIVE.equals(msg.get(SWMR_STATUS))) {
+				//do nothing if swmr not active
+				return;
+			}
+			
+			if (msg.get(MESSAGE_FILEPATH_FIELD) == null || msg.get(MESSAGE_FILEPATH_FIELD).toString().isEmpty()) {
+				//do nothing if filename null or empty
+				return;
+			}
 
-			if(msg.get(MESSAGE_STATUS_FIELD).equals(SCAN_STATUS_UPDATED)) {
+			if (msg.get(MESSAGE_STATUS_FIELD).equals(SCAN_STATUS_UPDATED)) {
 				for (ILiveFileListener l : listeners) {
 					l.refreshRequest();
 				}
