@@ -61,12 +61,12 @@ public class DataOptions implements IDataObject, IDataPackage {
 	}
 
 	public DataOptions(DataOptions toCopy) {
-		this(toCopy.name,toCopy.parent);
+		this(toCopy.name, toCopy.parent);
 		this.data = toCopy.data != null ? toCopy.data.getSliceView() : null;
-		this.axes = axes != null ? axes.clone() : null;
+		this.axes = toCopy.axes != null ? toCopy.axes.clone() : null;
 		this.selected = new AtomicBoolean(toCopy.selected.get());
-		this.plottableObject = new PlottableObject(toCopy.plottableObject.getPlotMode(),
-				new NDimensions(toCopy.plottableObject.getNDimensions()));
+		this.plottableObject = toCopy.plottableObject != null ? new PlottableObject(toCopy.plottableObject.getPlotMode(),
+				new NDimensions(toCopy.plottableObject.getNDimensions())) : null;
 		this.label = toCopy.label;
 	}
 
