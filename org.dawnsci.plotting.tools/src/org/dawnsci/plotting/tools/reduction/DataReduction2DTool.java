@@ -273,8 +273,8 @@ public class DataReduction2DTool extends AbstractToolPage implements IRegionList
 	
 	private void addTracesForRegion(DataReduction2DToolSpectraRegionDataNode region) {
 		Dataset data = region.getDataset(DatasetUtils.convertToDataset(imageTrace.getData()));
-		int noOfSpectra = data.getShape()[0];
-		int noOfChannels = data.getShape()[1];
+		int noOfSpectra = data.getShapeRef()[0];
+		int noOfChannels = data.getShapeRef()[1];
 		String name = region.toString();
 		for (int i = 0; i < noOfSpectra; i++) {
 			Dataset dataItem = data.getSliceView(new int[]{i, 0}, new int[]{i + 1, noOfChannels}, null);
@@ -282,7 +282,7 @@ public class DataReduction2DTool extends AbstractToolPage implements IRegionList
 			dataItem.squeeze();
 			ILineTrace trace = plottingSystem.createLineTrace(name + " " + i);
 			region.addTrace(trace);
-			trace.setData(axes1.length == 0 ? null : axes1[0].getSlice(null, new int[]{1, axes1[0].getShape()[1]}, null).squeeze(), dataItem); // FIXME
+			trace.setData(axes1.length == 0 ? null : axes1[0].getSlice(null, new int[]{1, axes1[0].getShapeRef()[1]}, null).squeeze(), dataItem); // FIXME
 			addToPlottingSystem(trace);
 		}
 	}

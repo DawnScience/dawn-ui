@@ -41,7 +41,7 @@ import org.eclipse.dawnsci.plotting.api.trace.IImageStackTrace;
 import org.eclipse.dawnsci.plotting.api.trace.IStackPositionListener;
 import org.eclipse.dawnsci.plotting.api.trace.StackPositionEvent;
 import org.eclipse.january.dataset.IDataset;
-import org.eclipse.january.dataset.LazyDataset;
+import org.eclipse.january.dataset.ILazyDataset;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.Separator;
@@ -221,7 +221,7 @@ public class PlotImageEditor extends EditorPart implements IEditorExtension, IRe
 						if (imageFilenames.size() > 1) {
 				 		    Collections.sort(imageFilenames, new SortNatural<String>(true));
 							ImageStackLoader loader = new ImageStackLoader(imageFilenames , new ProgressMonitorWrapper(monitor));
-							LazyDataset lazyDataset = new LazyDataset("Folder Stack", loader.getDType(), loader.getShape(), loader);
+							ILazyDataset lazyDataset = loader.createLazyDataset("Folder Stack");
 							
 							stack.setStack(lazyDataset);
 							

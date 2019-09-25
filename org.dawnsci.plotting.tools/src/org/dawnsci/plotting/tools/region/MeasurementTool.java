@@ -380,8 +380,9 @@ public class MeasurementTool extends AbstractToolPage implements IRegionListener
 		if (trace!=null && !Double.isNaN(xCalibratedAxisFactor) && !Double.isNaN(yCalibratedAxisFactor)
 				        && xCalibratedAxisFactor>0              && yCalibratedAxisFactor>0) {
 			final IDataset data = trace.getData();
-			trace.setAxes(Arrays.asList(getCalibratedAxis(xCalibratedAxisFactor, data.getShape()[1]), 
-					                    getCalibratedAxis(yCalibratedAxisFactor, data.getShape()[0])), 
+			int[] shape = data.getShape();
+			trace.setAxes(Arrays.asList(getCalibratedAxis(xCalibratedAxisFactor, shape[1]), 
+					                    getCalibratedAxis(yCalibratedAxisFactor, shape[0])), 
 					                    true);
 		}
 	}

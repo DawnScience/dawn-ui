@@ -109,7 +109,7 @@ public class MapBeanBuilder {
 					String name = next.getName();
 					if ((name.startsWith(names[0]) && name.endsWith(NexusConstants.DATA_AXESSET_SUFFIX+NexusConstants.DATA_INDICES_SUFFIX)) || (name.startsWith(names[0]) && name.endsWith(NexusConstants.DATA_INDICES_SUFFIX))) {
 						IDataset v = next.getValue();
-						int index = v.getShape().length == 0 ? Integer.parseInt(v.getString()) : Integer.parseInt(v.getString(0));
+						int index = v.getRank() == 0 ? Integer.parseInt(v.getString()) : Integer.parseInt(v.getString(0));
 						axNames[index] = names[1] + name.substring(names[0].length(), name.length()-8);
 						remap = names[0] + name.substring(names[0].length(), name.length()-8);
 						break;

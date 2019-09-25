@@ -246,12 +246,15 @@ public class LiveLoadedFile extends LoadedFile implements IRefreshable {
 			return;
 		}
 		
+		
+		int[] shape = lazyDataset.getShape();
+
 		if (lazyDataset instanceof IDynamicDataset && live) {
 			try {
 				((IDynamicDataset)lazyDataset).refreshShape();
 				AxesMetadata ax = lazyDataset.getFirstMetadata(AxesMetadata.class);
 				if (ax != null) {
-					int[] refresh = ax.refresh(lazyDataset.getShape());
+					int[] refresh = ax.refresh(shape);
 					((IDynamicDataset) lazyDataset).resize(refresh);
 				}
 
@@ -260,8 +263,6 @@ public class LiveLoadedFile extends LoadedFile implements IRefreshable {
 				logger.error("Could not refresh dataset:" + lazyDataset.getName(),e);
 			}
 		}
-		
-		int[] shape = lazyDataset.getShape();
 		
 		if (shape.length == 0 || allOnes(shape)) return;
 		

@@ -16,6 +16,7 @@ import org.eclipse.january.DatasetException;
 import org.eclipse.january.dataset.Dataset;
 import org.eclipse.january.dataset.DatasetFactory;
 import org.eclipse.january.dataset.DatasetUtils;
+import org.eclipse.january.dataset.DoubleDataset;
 import org.eclipse.january.dataset.IDataset;
 import org.eclipse.january.dataset.ILazyDataset;
 import org.eclipse.january.dataset.IndexIterator;
@@ -253,11 +254,11 @@ class LightWeightDataProvider implements IDataProvider {
 	 */
 	public void append(Number xValue, Number yValue) {
 
-		final double[] xArray = x!=null && x.getShape()!=null && x.getShape().length>0
-				              ? (double[])DatasetUtils.cast(x, Dataset.FLOAT64).getBuffer()
+		final double[] xArray = x!=null && x.getShapeRef()!=null && x.getRank()>0
+				              ? (double[])x.cast(DoubleDataset.class).getBuffer()
 		                      : new double[0];
-		final double[] yArray = y!=null && y.getShape()!=null && y.getShape().length>0
-	                          ? (double[])DatasetUtils.cast(y, Dataset.FLOAT64).getBuffer()
+		final double[] yArray = y!=null && y.getShapeRef()!=null && y.getRank()>0
+	                          ? (double[]) y.cast(DoubleDataset.class).getBuffer()
                               : new double[0];
 	                          
 	    final double[] xa = new double[xArray.length+1];

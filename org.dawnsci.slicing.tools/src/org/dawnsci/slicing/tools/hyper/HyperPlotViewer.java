@@ -170,11 +170,11 @@ public class HyperPlotViewer extends IPlottingSystemViewer.Stub<Composite> {
 		IDataset[] daxes = new IDataset[rank];
 		
 		AxesMetadata md = lazyDataset.getFirstMetadata(AxesMetadata.class);
-		
+		int[] shape = lazyDataset.getShape();
 		if (md == null) {
 			
 			for (int i = 0; i < 3;i++) {
-				IDataset d = DatasetFactory.createRange(lazyDataset.getShape()[order[i]]);
+				IDataset d = DatasetFactory.createRange(shape[order[i]]);
 				daxes[i] = d;
 			}
 			
@@ -184,7 +184,7 @@ public class HyperPlotViewer extends IPlottingSystemViewer.Stub<Composite> {
 				ILazyDataset[] axis = md.getAxis(order[i]);
 				IDataset d = null;
 				if (axis == null || axis[0] == null) {
-					d = DatasetFactory.createRange(lazyDataset.getShape()[order[i]]);
+					d = DatasetFactory.createRange(shape[order[i]]);
 				} else {
 					try {
 						//TODO ndAxes
@@ -194,7 +194,7 @@ public class HyperPlotViewer extends IPlottingSystemViewer.Stub<Composite> {
 						d.setName(name);
 					} catch (DatasetException e) {
 						//TODO log
-						d = DatasetFactory.createRange(lazyDataset.getShape()[order[i]]);
+						d = DatasetFactory.createRange(shape[order[i]]);
 					}
 				}
 				

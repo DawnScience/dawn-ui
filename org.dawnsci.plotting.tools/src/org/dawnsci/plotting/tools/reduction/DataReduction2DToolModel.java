@@ -377,7 +377,8 @@ class DataReduction2DToolModel extends DataReduction2DToolObservableModel {
 	private static Dataset applyRangesAndDeletionsToDataset(TableColumnAveragedRegionExportMode mode, Dataset rawData, List<RangeData> rangeDataList, List<Integer> deletedIndices) throws Exception {
 		Dataset rv = null;
 	
-		if (rawData.getShape()[0] == 1) {
+		int noOfSpectrum = rawData.getShapeRef()[0];
+		if (noOfSpectrum == 1) {
 			rv = rawData;
 			String newName = MetadataPlotUtils.removeSquareBrackets(rawData.getName());
 			newName = newName.substring(newName.lastIndexOf('/') + 1);
@@ -385,8 +386,7 @@ class DataReduction2DToolModel extends DataReduction2DToolObservableModel {
 			return rv;
 		}
 			
-		int noOfSpectrum = rawData.getShape()[0];
-		int noOfChannels = rawData.getShape()[1];
+		int noOfChannels = rawData.getShapeRef()[1];
 		
 		if (rangeDataList.isEmpty() && deletedIndices.isEmpty()) {
 			rv = rawData;
