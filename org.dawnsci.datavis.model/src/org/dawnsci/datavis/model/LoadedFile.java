@@ -33,6 +33,7 @@ import org.eclipse.january.dataset.Dataset;
 import org.eclipse.january.dataset.DatasetFactory;
 import org.eclipse.january.dataset.DatasetUtils;
 import org.eclipse.january.dataset.ILazyDataset;
+import org.eclipse.january.dataset.LazyDynamicDataset;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -72,6 +73,25 @@ public class LoadedFile implements IDataObject, IDataFilePackage {
 				for (String v : values) {
 					names[count++] = Tree.ROOT + v;
 				}
+				
+				for (Entry<DataNode,String> e : uniqueDataNodes.entrySet()) {
+					if (e.getKey().containsAttribute("interpretation") && 
+							e.getKey().getAttribute("interpretation").getFirstElement().equals("rgba-image")) {
+						e.toString();
+						
+						ILazyDataset d = e.getKey().getDataset();
+						
+						int[] shape = d.getShape();
+						
+						if (shape.length >=3 && d instanceof LazyDynamicDataset && (shape[shape.length-1] == 3 || shape[shape.length-3] == 3)) {
+							RGBLazyDynamicDataset rgbl = RGBLazyDynamicDataset.buildFromLazyDataset((LazyDynamicDataset)d);
+							virtualDataOptions.put(e.getValue() + "RGB", new DataOptionsDataset(e.getValue() + "RGB", this, rgbl));
+						}
+						
+						
+					}
+				}
+				
 			} catch ( Exception e) {
 				logger.error("Could not get unique nodes",e);
 				this.signals = new HashSet<>();

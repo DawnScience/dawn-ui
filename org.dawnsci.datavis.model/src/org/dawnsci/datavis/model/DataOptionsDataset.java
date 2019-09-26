@@ -6,10 +6,10 @@ import org.eclipse.january.dataset.ILazyDataset;
 
 public class DataOptionsDataset extends DataOptions {
 
-	private IDataset dataset;
-	private IDataset localView;
+	private ILazyDataset dataset;
+	private ILazyDataset localView;
 
-	public DataOptionsDataset(String name, LoadedFile parent, IDataset dataset) {
+	public DataOptionsDataset(String name, LoadedFile parent, ILazyDataset dataset) {
 		super(name, parent);
 
 		this.dataset = dataset;
@@ -19,7 +19,7 @@ public class DataOptionsDataset extends DataOptions {
 	public ILazyDataset getLazyDataset() {
 
 		if (localView == null) {
-			IDataset local = dataset.getSliceView();
+			ILazyDataset local = dataset.getSliceView();
 			includeAxesMetadata(local);
 			localView = local;
 		}
