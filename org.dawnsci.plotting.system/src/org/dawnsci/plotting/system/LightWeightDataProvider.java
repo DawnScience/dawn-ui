@@ -41,11 +41,12 @@ class LightWeightDataProvider implements IDataProvider {
 	private boolean hasExtraXPoint;
 
 	private Range cachedXRange, cachedYRange;
-	private double[] positiveMins = new double[2]; // zeros indicate need to update
+	private double[] positiveMins = new double[2]; // +inf indicate need to update
 
 	public LightWeightDataProvider() {
-		
+		Arrays.fill(positiveMins, Double.POSITIVE_INFINITY);
 	}
+
 	public LightWeightDataProvider(final IDataset x, final IDataset y) {
 		setDataInternal(x, y);
 	}
@@ -108,7 +109,7 @@ class LightWeightDataProvider implements IDataProvider {
 				if (positiveOnly) {
 					if (min <= 0) {
 						min = positiveMins[idx];
-						if (positiveMins[idx] == 0) {
+						if (Double.isInfinite(positiveMins[idx])) {
 							min = positiveMin(d);
 							positiveMins[idx] = min;
 						}
@@ -186,7 +187,7 @@ class LightWeightDataProvider implements IDataProvider {
 	}
 
 	private void setDataInternal(IDataset xData, IDataset yData) {
-		Arrays.fill(positiveMins, 0); // reset
+		Arrays.fill(positiveMins, Double.POSITIVE_INFINITY); // reset
 		this.x = DatasetUtils.convertToDataset(xData);
 		this.y = DatasetUtils.convertToDataset(yData);
 		ILazyDataset xel = x.getErrors();
@@ -267,7 +268,7 @@ class LightWeightDataProvider implements IDataProvider {
 	    }
 	    xa[xa.length-1] = value;
 	    this.x = DatasetFactory.createFromObject(xa);
-	    
+
 	    final double[] ya = new double[yArray.length+1];
 	    System.arraycopy(yArray, 0, ya, 0, yArray.length);
 	    value = yValue.doubleValue();
@@ -276,7 +277,7 @@ class LightWeightDataProvider implements IDataProvider {
 	    }
 	    ya[ya.length-1] = value;
 	    this.y = DatasetFactory.createFromObject(ya);
-	    
+		size++;
 		this.cachedXRange = null;
 		this.cachedYRange = null;
 	    fireDataProviderListeners();
