@@ -16,7 +16,7 @@ public class Dimension {
 		this.dimension = dimension;
 		this.size = size;
 		slice = new Slice(0, 1, 1);
-		slice.setLength(size);
+		if (size != 0) slice.setLength(size);
 	}
 
 	public Dimension(Dimension toCopy){

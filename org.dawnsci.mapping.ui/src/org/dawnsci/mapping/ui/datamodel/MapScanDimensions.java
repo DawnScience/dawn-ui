@@ -6,9 +6,12 @@ import org.eclipse.january.dataset.ILazyDataset;
 import org.eclipse.january.dataset.ShapeUtils;
 import org.eclipse.january.dataset.SliceND;
 import org.eclipse.january.metadata.AxesMetadata;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class MapScanDimensions {
 
+	private static final Logger logger = LoggerFactory.getLogger(MapScanDimensions.class);
 	
 	private int xDim;
 	private int yDim;
@@ -226,8 +229,7 @@ public class MapScanDimensions {
 			map.setMetadata(svAx);
 			
 		} catch (Exception e) {
-			//FIXME log
-			e.printStackTrace();
+			logger.error("Could not set map axes",e);
 		}
 		
 	}

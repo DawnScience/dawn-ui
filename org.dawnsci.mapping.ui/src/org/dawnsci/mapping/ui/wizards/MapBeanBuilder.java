@@ -211,8 +211,6 @@ public class MapBeanBuilder {
 			}
 		}
 		
-		if (minRank < 1) return;
-		
 		if (max == null || min == null) return;
 		
 		bean.setScanRank(minRank);
@@ -250,7 +248,7 @@ public class MapBeanBuilder {
 			}
 			
 			if (d.xAxisForRemapping != null) {
-				xDim = yDim = bean.getScanRank()-1;
+				xDim = yDim = bean.getScanRank() == 0 ? 0 : bean.getScanRank()-1;
 			}
 			
 			MappedBlockBean b = new MappedBlockBean();

@@ -25,6 +25,7 @@ import org.dawnsci.mapping.ui.datamodel.LiveStreamMapObject.IAxisMoveListener;
 import org.dawnsci.mapping.ui.datamodel.MapObject;
 import org.dawnsci.mapping.ui.datamodel.MappedDataFile;
 import org.dawnsci.mapping.ui.datamodel.PlottableMapObject;
+import org.dawnsci.mapping.ui.datamodel.ReMappedData;
 import org.dawnsci.mapping.ui.datamodel.VectorMapData;
 import org.eclipse.dawnsci.analysis.dataset.roi.PointROI;
 import org.eclipse.dawnsci.analysis.dataset.slicer.SliceViewIterator;
@@ -42,6 +43,7 @@ import org.eclipse.dawnsci.plotting.api.region.ROIEvent;
 import org.eclipse.dawnsci.plotting.api.region.RegionUtils;
 import org.eclipse.dawnsci.plotting.api.trace.IImageTrace;
 import org.eclipse.dawnsci.plotting.api.trace.ILineTrace;
+import org.eclipse.dawnsci.plotting.api.trace.ILineTrace.PointStyle;
 import org.eclipse.dawnsci.plotting.api.trace.IPaletteTrace;
 import org.eclipse.dawnsci.plotting.api.trace.ITrace;
 import org.eclipse.dawnsci.plotting.api.trace.IVectorTrace;
@@ -87,6 +89,7 @@ public class MapPlotManager implements IMapPlotController{
 	
 	private static final int SMALLFIRST = 25;
 	private static final int LARGESECOND = 100;
+	private static final int POINTSIZE = 10;
 	
 	private static final Logger logger = LoggerFactory.getLogger(MapPlotManager.class);
 	
@@ -564,6 +567,12 @@ public class MapPlotManager implements IMapPlotController{
 				MapTrace t = new MapTrace(o, null, mapPlot);
 				layers.addLast(t);
 
+			
+			} else if (o instanceof ReMappedData && ((ReMappedData) o).getData().getSize() == 1 && !o.isLive()) {
+				
+				ILineTrace t = createPointTrace((ReMappedData)o, mapPlot);
+				layers.push(new MapTrace(o, t, mapPlot));
+				
 			}else {
 
 				IImageTrace t = createImageTrace(o,mapPlot);
@@ -701,7 +710,25 @@ public class MapPlotManager implements IMapPlotController{
 			MapObject l = iterator.next().getMap();
 			double[] range = l.getRange();
 			
-			if (l instanceof PlottableMapObject && x >= range[0] && x <= range[1] && y >= range[2] && y <= range[3]) return (PlottableMapObject)l;
+			double x0 = range[0];
+			double x1 = range[1];
+			double y0 = range[2];
+			double y1 = range[3];
+			
+			if (x0 == x1) {
+				double scaling = getMapPlot().getSelectedXAxis().getScaling()*(POINTSIZE/2);
+				x0 -= scaling;
+				x1 += scaling;
+			}
+			
+			if (y0 == y1) {
+				double scaling = getMapPlot().getSelectedYAxis().getScaling()*(POINTSIZE/2);
+				y1 -= scaling;
+				y0 += scaling;
+			}
+			
+			
+			if (l instanceof PlottableMapObject && x >= x0 && x <= x1 && y >= y0 && y <= y1) return (PlottableMapObject)l;
 			
 		}
 		
@@ -800,6 +827,18 @@ public class MapPlotManager implements IMapPlotController{
 		return vectorTrace;
 	}
 	
+	private ILineTrace createPointTrace(ReMappedData ob, IPlottingSystem<?> mapPlot) {
+		
+		IDataset m = ob.getMap();
+		IDataset[] ax = MetadataPlotUtils.getAxesForDimension(m, 0);
+		
+		ILineTrace lt = mapPlot.createLineTrace(ob.getLongName());
+		lt.setData(ax[1], ax[0]);
+		lt.setPointStyle(PointStyle.FILLED_SQUARE);
+		lt.setPointSize(POINTSIZE);
+		
+		return lt;
+	}
 	
 	private void updatePlottedRange(){
 		
@@ -980,6 +1019,16 @@ public class MapPlotManager implements IMapPlotController{
 		public void rebuildTrace(){
 			
 			if (trace instanceof IVectorTrace) {
+				return;
+			}
+			
+			if (trace == null && map instanceof ReMappedData && ((ReMappedData)map).getData().getSize() == 1) {
+				trace = createPointTrace((ReMappedData)map, mapPlot);
+				return;
+			}
+			
+			if (trace instanceof ILineTrace && map instanceof ReMappedData) {
+				trace = createPointTrace((ReMappedData)map, mapPlot);
 				return;
 			}
 			

@@ -1,10 +1,13 @@
 package org.dawnsci.mapping.ui.datamodel;
 
+import java.util.Arrays;
+
 import org.dawnsci.mapping.ui.LivePlottingUtils;
 import org.dawnsci.mapping.ui.MappingUtils;
 import org.eclipse.dawnsci.plotting.api.trace.MetadataPlotUtils;
 import org.eclipse.january.DatasetException;
 import org.eclipse.january.dataset.Dataset;
+import org.eclipse.january.dataset.DatasetFactory;
 import org.eclipse.january.dataset.DatasetUtils;
 import org.eclipse.january.dataset.IDataset;
 import org.eclipse.january.dataset.IDynamicDataset;
@@ -54,13 +57,19 @@ public class ReMappedData extends AbstractMapData {
 		IDataset fm = flatMap;
 		if (fm == null) {
 			
-			if (baseMap.getSize() == 1) return;
-			
+			if (baseMap.getSize() == 1 & live) return;
+		
 			try {
+				if (baseMap.getSize() == 1) {
+					map = baseMap.getSlice();
+					lookup = DatasetFactory.zeros(1);
+					return;
+				}
+				
+				
 				if (baseMap.getRank() == 1) {
 
 					fm = DatasetUtils.sliceAndConvertLazyDataset(baseMap);
-					fm.toString();
 
 				} else {
 					fm = baseMap.getSlice(parent.getMapDims().getMapSlice(baseMap));
@@ -108,13 +117,21 @@ public class ReMappedData extends AbstractMapData {
 	
 	@Override
 	public IDataset getSpectrum(double x, double y) {
-		int[] indices = MappingUtils.getIndicesFromCoOrds(getMap(), x, y);
+		
 		int index = -1;
-		try {
-			index = lookup.getInt(new int[]{indices[1],indices[0]});
-		} catch (Exception e) {
-			logger.debug("click outside bounds");
+		
+		if (baseMap.getSize() == 1) {
+			index = 0;
+		} else {
+			int[] indices = MappingUtils.getIndicesFromCoOrds(getMap(), x, y);
+			
+			try {
+				index = lookup.getInt(new int[]{indices[1],indices[0]});
+			} catch (Exception e) {
+				logger.debug("click outside bounds");
+			}
 		}
+		
 		if (index == -1) return null;
 		if (parent.getLazy() instanceof IDynamicDataset) {
 			((IDynamicDataset)parent.getLazy()).refreshShape();
@@ -131,6 +148,9 @@ public class ReMappedData extends AbstractMapData {
 	public void update() {
 		synchronized (getLock()) {
 			flatMap = updateMap();
+			if (flatMap == null) {
+				return;
+			}
 			updateRemappedData(null);
 		}
 	}

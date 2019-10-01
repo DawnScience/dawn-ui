@@ -61,16 +61,59 @@ public abstract class AbstractMapData implements LockableMapObject{
 			IDataset slice;
 
 			slice = baseMap.getSlice(s);
-
-			slice.squeeze();
-			map = slice;
+			
+			map = make2D(slice,mapDims.getxDim(), mapDims.getyDim());
 
 			return map;
+			
 		} catch (DatasetException e) {
 			logger.error("Could not slice map");
 		}
 
 		return null;
+	}
+	
+	private IDataset make2D(IDataset d, int xd, int yd) {
+		
+		if (d.getRank() == 2) {
+			return d;
+		}
+		
+		AxesMetadata ax = d.getFirstMetadata(AxesMetadata.class);
+		
+		if (ax == null) return null;
+		
+		ILazyDataset[] axx = ax.getAxis(xd);
+		ILazyDataset[] axy = ax.getAxis(yd);
+		
+		int[] oShape = d.getShape();
+		
+		int[] shape = new int[] {oShape[yd], oShape[xd]};
+		
+		IDataset view = d.getSliceView();
+		view.clearMetadata(null);
+		view.setShape(shape);
+		
+		try {
+			AxesMetadata md = MetadataFactory.createMetadata(AxesMetadata.class, 2);
+			
+			for (ILazyDataset l : axx) {
+				md.setAxis(1, l.getSliceView().squeezeEnds());
+			}
+			
+			for (ILazyDataset l : axy) {
+				md.setAxis(0, l.getSliceView().squeezeEnds());
+			}
+			
+			view.setMetadata(md);
+			
+			return view;
+			
+		} catch (Exception e) {
+			logger.error("Could not create axes metadata",e);
+			return null;
+		}
+		
 	}
 	
 	public IDataset getMapForDims(int x, int y) {
@@ -126,8 +169,7 @@ public abstract class AbstractMapData implements LockableMapObject{
 			((IDynamicDataset)baseMap).resize(refresh);
 			baseMap.setMetadata(ax);
 		} catch (MetadataException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.error("Could not create metadata",e);
 		}
 
 	}
@@ -161,6 +203,11 @@ public abstract class AbstractMapData implements LockableMapObject{
 		}
 
 		((IDynamicDataset)baseMap).refreshShape();
+		
+		if (baseMap.getSize() == 0) {
+			return null;
+		}
+		
 		AxesMetadata ax = baseMap.getFirstMetadata(AxesMetadata.class);
 		if (ax == null) return null;
 		int[] refresh = ax.refresh(baseMap.getShape());

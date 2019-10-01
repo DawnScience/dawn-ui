@@ -219,7 +219,6 @@ public class RGBMixerDialog extends Dialog  {
 			public void widgetSelected(SelectionEvent evt) {
 				bDirty = true;
 				updatePlot();
-				System.out.println("moving");
 			}
 		});
 		blueRangeSlider.addMouseWheelListener(new MouseWheelListener() {

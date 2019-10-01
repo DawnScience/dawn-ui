@@ -233,8 +233,7 @@ public class RectangleRegistrationDialog extends Dialog {
 
 			update();
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.error("Could not create scan region box",e);
 		}
 		
 		

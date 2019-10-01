@@ -2,15 +2,12 @@ package org.dawnsci.mapping.ui.test;
 
 import java.util.Arrays;
 
-import org.eclipse.dawnsci.analysis.api.tree.GroupNode;
 import org.eclipse.dawnsci.analysis.api.tree.Node;
 import org.eclipse.dawnsci.hdf5.nexus.NexusFileFactoryHDF5;
-import org.eclipse.dawnsci.hdf5.nexus.NexusFileHDF5;
 import org.eclipse.dawnsci.nexus.NXdata;
 import org.eclipse.dawnsci.nexus.NXentry;
 import org.eclipse.dawnsci.nexus.NXroot;
 import org.eclipse.dawnsci.nexus.NexusException;
-import org.eclipse.dawnsci.nexus.NexusFile;
 import org.eclipse.dawnsci.nexus.NexusNodeFactory;
 import org.eclipse.dawnsci.nexus.ServiceHolder;
 import org.eclipse.dawnsci.nexus.builder.NexusFileBuilder;
@@ -36,8 +33,9 @@ public class MapNexusFileBuilderUtils {
 	
 	public static final String[] FASTEST_AXES = new String[] {STAGE_X,STAGE_Y,STAGE_Z,TEMPERATURE};
 	
+	static { new ServiceHolder().setNexusFileFactory(new NexusFileFactoryHDF5()); }
+	
 	public static void makeGridScanWithSum(String path) throws NexusException {
-		new ServiceHolder().setNexusFileFactory(new NexusFileFactoryHDF5());
 		NexusFileBuilder fileBuilder = new DefaultNexusFileBuilder(path);
 		NXroot nXroot = fileBuilder.getNXroot();
 		NXentry entry = NexusNodeFactory.createNXentry();
@@ -54,7 +52,6 @@ public class MapNexusFileBuilderUtils {
 	}
 	
 	public static void makeGridScanWithZandSum(String path) throws NexusException {
-		new ServiceHolder().setNexusFileFactory(new NexusFileFactoryHDF5());
 		NexusFileBuilder fileBuilder = new DefaultNexusFileBuilder(path);
 		NXroot nXroot = fileBuilder.getNXroot();
 		NXentry entry = NexusNodeFactory.createNXentry();
@@ -71,7 +68,6 @@ public class MapNexusFileBuilderUtils {
 	}
 	
 	public static void makeGridScanWithEnergyZ(String path) throws NexusException {
-		new ServiceHolder().setNexusFileFactory(new NexusFileFactoryHDF5());
 		NexusFileBuilder fileBuilder = new DefaultNexusFileBuilder(path);
 		NXroot nXroot = fileBuilder.getNXroot();
 		NXentry entry = NexusNodeFactory.createNXentry();
@@ -87,7 +83,6 @@ public class MapNexusFileBuilderUtils {
 	}
 	
 	public static void makeDiagLineScanWithSum(String path) throws NexusException {
-		new ServiceHolder().setNexusFileFactory(new NexusFileFactoryHDF5());
 		NexusFileBuilder fileBuilder = new DefaultNexusFileBuilder(path);
 		NXroot nXroot = fileBuilder.getNXroot();
 		NXentry entry = NexusNodeFactory.createNXentry();
@@ -103,8 +98,23 @@ public class MapNexusFileBuilderUtils {
 		}
 	}
 	
+	public static void makePointScanWithSum(String path) throws NexusException {
+		NexusFileBuilder fileBuilder = new DefaultNexusFileBuilder(path);
+		NXroot nXroot = fileBuilder.getNXroot();
+		NXentry entry = NexusNodeFactory.createNXentry();
+		nXroot.addGroupNode(ENTRY1, entry);
+
+		NXdata makeNXData = makeNonGridNXData(3, 2, false, 1);
+		entry.addGroupNode(DETECTOR, makeNXData);
+		NXdata sum = makeNonGridNXData(1, 0, false, 1);
+		entry.addGroupNode(SUM, sum);
+		
+		
+		try (NexusScanFile file = fileBuilder.createFile(false)) {
+		}
+	}
+	
 	public static void makeDiagLineScanWithSumZ(String path) throws NexusException {
-		new ServiceHolder().setNexusFileFactory(new NexusFileFactoryHDF5());
 		NexusFileBuilder fileBuilder = new DefaultNexusFileBuilder(path);
 		NXroot nXroot = fileBuilder.getNXroot();
 		NXentry entry = NexusNodeFactory.createNXentry();
@@ -121,7 +131,6 @@ public class MapNexusFileBuilderUtils {
 	}
 	
 	public static void makeDiodeGridScan(String path) throws NexusException {
-		new ServiceHolder().setNexusFileFactory(new NexusFileFactoryHDF5());
 		NexusFileBuilder fileBuilder = new DefaultNexusFileBuilder(path);
 		NXroot nXroot = fileBuilder.getNXroot();
 		NXentry entry = NexusNodeFactory.createNXentry();
@@ -135,7 +144,6 @@ public class MapNexusFileBuilderUtils {
 	}
 	
 	public static void makeDiodeGridScanEnergy(String path) throws NexusException {
-		new ServiceHolder().setNexusFileFactory(new NexusFileFactoryHDF5());
 		NexusFileBuilder fileBuilder = new DefaultNexusFileBuilder(path);
 		NXroot nXroot = fileBuilder.getNXroot();
 		NXentry entry = NexusNodeFactory.createNXentry();
@@ -149,7 +157,6 @@ public class MapNexusFileBuilderUtils {
 	}
 	
 	public static void makeDiodeLineScan(String path) throws NexusException {
-		new ServiceHolder().setNexusFileFactory(new NexusFileFactoryHDF5());
 		NexusFileBuilder fileBuilder = new DefaultNexusFileBuilder(path);
 		NXroot nXroot = fileBuilder.getNXroot();
 		NXentry entry = NexusNodeFactory.createNXentry();
@@ -162,7 +169,6 @@ public class MapNexusFileBuilderUtils {
 	}
 	
 	public static void makeDiodeLineScanEnergy(String path) throws NexusException {
-		new ServiceHolder().setNexusFileFactory(new NexusFileFactoryHDF5());
 		NexusFileBuilder fileBuilder = new DefaultNexusFileBuilder(path);
 		NXroot nXroot = fileBuilder.getNXroot();
 		NXentry entry = NexusNodeFactory.createNXentry();
@@ -175,6 +181,14 @@ public class MapNexusFileBuilderUtils {
 	}
 	
 	private static NXdata makeNXData(int rank, int detectorRank, boolean isEnergy) {
+		return makeNXData(rank, detectorRank, isEnergy, SMALLEST);
+	}
+	
+	private static NXdata makeNonGridNXData(int rank, int detectorRank, boolean isEnergy) {
+		return makeNonGridNXData(rank, detectorRank, isEnergy, SMALLEST);
+	}
+	
+	private static NXdata makeNXData(int rank, int detectorRank, boolean isEnergy, int smallest) {
 		
 		int scanRank = rank - detectorRank;
 		
@@ -186,7 +200,7 @@ public class MapNexusFileBuilderUtils {
 		Arrays.fill(shape, 100);
 		
 		for (int i = 0 ; i < rank - detectorRank; i++) {
-			shape[i] = SMALLEST+i;
+			shape[i] = smallest+i;
 		}
 		int size = 1;
 		for (int i = 0 ; i < shape.length; i++) {
@@ -224,7 +238,7 @@ public class MapNexusFileBuilderUtils {
 		
 	}
 	
-	private static NXdata makeNonGridNXData(int rank, int detectorRank, boolean isEnergy) {
+	private static NXdata makeNonGridNXData(int rank, int detectorRank, boolean isEnergy, int smallest) {
 		
 		int scanRank = rank - detectorRank;
 		
@@ -236,7 +250,7 @@ public class MapNexusFileBuilderUtils {
 		Arrays.fill(shape, 100);
 		
 		for (int i = 0 ; i < rank - detectorRank; i++) {
-			shape[i] = SMALLEST+i;
+			shape[i] = smallest+i;
 		}
 		int size = 1;
 		for (int i = 0 ; i < shape.length; i++) {

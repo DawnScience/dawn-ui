@@ -21,8 +21,12 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.PlatformUI;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class DynamicDialog extends Dialog {
+	
+	private static final Logger logger = LoggerFactory.getLogger(DynamicDialog.class);
 
 	HyperComponent component;
 	MappedDataBlock block;
@@ -71,7 +75,7 @@ public class DynamicDialog extends Dialog {
 				dsl.add(axes[order[3]] == null ? DatasetFactory.createRange(IntegerDataset.class, shape[order[3]]) : axes[order[3]].getSlice().squeeze());
 			}
 		} catch (DatasetException e) {
-			e.printStackTrace();
+			logger.error("Could not slice dataset",e);
 		}
 
 		if (shape.length == 3) {

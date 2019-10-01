@@ -23,13 +23,16 @@ public class MapBeanBuilderTest {
 	
 	private static File file = null;
 	private static File file1 = null;
+	private static File file2 = null;
 	
 	@BeforeClass
 	public static void buildData() throws Exception {
 		file = folder.newFile("file1.nxs");
 		file1 = folder.newFile("file2.nxs");
+		file2 = folder.newFile("file3.nxs");
 		MapNexusFileBuilderUtils.makeGridScanWithSum(file.getAbsolutePath());
 		MapNexusFileBuilderUtils.makeGridScanWithZandSum(file1.getAbsolutePath());
+		MapNexusFileBuilderUtils.makePointScanWithSum(file2.getAbsolutePath());
 	}
 	
 	
@@ -39,6 +42,15 @@ public class MapBeanBuilderTest {
 		IDataHolder data = LoaderFactory.getData(file.getAbsolutePath());
 		MappedDataFileBean buildBean = MapBeanBuilder.buildBean(data.getTree());
 		assertNull(buildBean.getBlocks().get(0).getxAxisForRemapping());
+		assertTrue(buildBean.checkValid());
+	}
+	
+	@Test
+	public void testBuildBeanSinglePoint() throws Exception {
+
+		IDataHolder data = LoaderFactory.getData(file2.getAbsolutePath());
+		MappedDataFileBean buildBean = MapBeanBuilder.buildBean(data.getTree());
+		assertNotNull(buildBean.getBlocks().get(0).getxAxisForRemapping());
 		assertTrue(buildBean.checkValid());
 	}
 	

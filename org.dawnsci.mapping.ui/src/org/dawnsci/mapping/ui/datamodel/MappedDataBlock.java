@@ -103,7 +103,7 @@ public class MappedDataBlock implements LockableMapObject {
 			
 			return dataset.getSlice(slice);
 		} catch (DatasetException e) {
-			e.printStackTrace();
+			logger.error("Could not slice dataset",e);
 		}
 		return null;
 	}
@@ -355,8 +355,7 @@ public class MappedDataBlock implements LockableMapObject {
 		try {
 			return getSpectrum(idx[0], idx[1]).getSlice();
 		} catch (DatasetException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.error("Could not slice dataset",e);
 		}
 		return null;
 	}

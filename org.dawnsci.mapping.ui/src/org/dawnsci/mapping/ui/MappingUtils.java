@@ -1,5 +1,6 @@
 package org.dawnsci.mapping.ui;
 
+import java.util.Arrays;
 import java.util.List;
 
 import org.dawnsci.mapping.ui.datamodel.PlottableMapObject;
@@ -21,11 +22,15 @@ import org.eclipse.january.dataset.Maths;
 import org.eclipse.january.dataset.RGBDataset;
 import org.eclipse.january.metadata.AxesMetadata;
 import org.eclipse.january.metadata.MetadataFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import uk.ac.diamond.scisoft.analysis.diffraction.powder.PixelIntegration;
 import uk.ac.diamond.scisoft.analysis.diffraction.powder.XYImagePixelCache;
 
 public class MappingUtils {
+	
+	private static final Logger logger = LoggerFactory.getLogger(MappingUtils.class);
 
 	public static double[] getGlobalRange(ILazyDataset... datasets) {
 		
@@ -68,8 +73,7 @@ public class MappingUtils {
 			try {
 				out[i] = DatasetUtils.sliceAndConvertLazyDataset(lazys[i]);
 			} catch (DatasetException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				logger.error("Could not slice dataset",e);
 			}
 		}
 		
@@ -80,6 +84,14 @@ public class MappingUtils {
 		double[] range = new double[4];
 		int xs = axes[1].getSize();
 		int ys = axes[0].getSize();
+		
+		if (xs == 1) {
+			xs = 2;
+		}
+		
+		if (ys == 1) {
+			ys = 2;
+		}
 		
 		double fMin = axes[1].min(true).doubleValue();
 		double fMax = axes[1].max(true).doubleValue();
@@ -93,22 +105,20 @@ public class MappingUtils {
 		double sMin = axes[0].min(true).doubleValue();
 		double sMax = axes[0].max(true).doubleValue();
 		
-		//first line
-		if (sMin == sMax) {
-			double d = (fMax-fMin)/2;
-			sMax = sMin + d;
-			sMin = sMin - d;
-		} else {
-			double dy = ((sMax-sMin)/(ys-1))/2;
-			sMin-=dy;
-			sMax+=dy;
-		}
-		
 		range[2] = sMin;
 		range[3] = sMax;
-//		double dy = ((range[3]-range[2])/(ys-1))/2;
-//		range[2] -= dy;
-//		range[3] += dy;
+		
+		//pad range for extra 0.5 pixel
+		
+		if (sMin == sMax) {
+			range[2] -= dx;
+			range[3] += dx;
+		} else {
+			double dy = ((sMax-sMin)/(ys-1))/2;
+			range[2] -= dy;
+			range[3] += dy;
+		}
+		
 		return range;
 	}
 	
@@ -170,6 +180,7 @@ public class MappingUtils {
 	
 	public static IDataset[] remapData(IDataset flatMap, int[] shape, int scanDim){
 		if (flatMap == null) return null;
+		
 		IDataset[] axes = MetadataPlotUtils.getAxesForDimension(flatMap, scanDim);
 		
 		Dataset y = DatasetUtils.convertToDataset(axes[0]);
@@ -197,7 +208,7 @@ public class MappingUtils {
 			axm.addAxis(0, data.get(2));
 			axm.addAxis(1, data.get(0));
 		} catch (MetadataException e) {
-			e.printStackTrace();
+			logger.error("Could not create axis metadata",e);
 		}
 		IDataset map = data.get(1);
 		map.addMetadata(axm);
@@ -278,17 +289,15 @@ public class MappingUtils {
 			nexus.addAttribute(group, new AttributeImpl("signal","data"));
 			nexus.addAttribute(group, new AttributeImpl("axes",new String[]{".",y.getName(),x.getName()}));
 		} catch (DatasetException de) {
-			de.printStackTrace();
+			logger.error("Could not slice dataset", de);
 		} catch (NexusException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.error("Error writing nexus file", e);
 		} finally {
 			if (nexus != null)
 				try {
 					nexus.close();
 				} catch (NexusException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+					logger.error("Error closing file", e);
 				}
 		}
 	}

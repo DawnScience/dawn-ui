@@ -539,20 +539,27 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 		if (xAxis == null || yAxis == null) return false;
 
 		if (xAxis.getSize() == 1 && yAxis.getSize() == 1) return false;
-
-		if (xAxis.getSize() == 1) {
-			double step = Math.abs(yAxis.getDouble(0)-yAxis.getDouble(1));
-			double d = xAxis.getDouble();
-			xAxis = DatasetFactory.createFromObject(new double[]{ d, d + step});
+		
+		double dx = 0;
+		double dy = 0;
+		
+		if (xAxis.getSize() > 1) {
+			dx = (xAxis.getDouble(-1) - xAxis.getDouble(0))/(xAxis.getSize()-1);
 		}
-
-		if (yAxis.getSize() == 1) {
-			double step = Math.abs(xAxis.getDouble(0)-xAxis.getDouble(1));
-			double d = yAxis.getDouble();
-			yAxis = DatasetFactory.createFromObject(new double[]{ d, d + step});
+		
+		if (yAxis.getSize() > 1) {
+			dy = (yAxis.getDouble(-1) - yAxis.getDouble(0))/(yAxis.getSize()-1);
 		}
+		
+		if (dx == 0 && dy == 0) {
+			logger.error("Axis steps both zero!");
+			return false;
+		}
+		
+		dx = dx != 0 ? dx : dy;
+		dy = dy != 0 ? dy : dx;
 
-		int[] xvalues = generateStartLengthPositionArray(xAxis,getXAxis());
+		int[] xvalues = generateStartLengthPositionArray(xAxis,getXAxis(), dx);
 		if (xvalues == null) {
 			return false;
 		}
@@ -565,7 +572,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 			return false;
 		}
 
-		int[] yvalues = generateStartLengthPositionArray(yAxis,getYAxis());
+		int[] yvalues = generateStartLengthPositionArray(yAxis,getYAxis(), dy);
 		if (yvalues == null) {
 			return false;
 		}
@@ -617,7 +624,6 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 			throw ne;
 		}
 
-
 		return true;
 
 	}
@@ -626,22 +632,21 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 	 * 
 	 * @param axis
 	 * @param plotAxis
+	 * @param step - axis step size
 	 * @return values for the start index into the data, the size of the data, the screen pixel position and the scaling
 	 */
-	private int[] generateStartLengthPositionArray(Dataset axis, AspectAxis plotAxis) {
-		boolean dataInc = axis.getDouble(0) < axis.getDouble(-1);
+	private int[] generateStartLengthPositionArray(Dataset axis, AspectAxis plotAxis, double step) {
 		int end = axis.getSize()-1;
 		
 		double minData = axis.min().doubleValue();
 		double maxData = axis.max().doubleValue();
-
-		double stepData = (maxData - minData)/(end);
-
-		//adjust axis min/max so centre of pixel is at axis value
-		minData -= stepData/2;
-		maxData += stepData/2;
 		
-
+		double astep = Math.abs(step);
+		
+		//adjust axis min/max so centre of pixel is at axis value
+		minData -= astep/2;
+		maxData += astep/2;
+		
 		//get data coords visible on screen
 		double[] visibleLimits = calculatePlotDataLimits(minData, maxData, plotAxis);
 		if (visibleLimits == null) {
@@ -653,11 +658,11 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 
 		//get start (floored) and stop (ceiling) position in data array
 		//assume linear steps
-		double startIdxFrac = (minPlot - minData)/stepData;
+		double startIdxFrac = (minPlot - minData)/astep;
 
 		int startIdx = (int)Math.floor(startIdxFrac);
 
-		double stopIdxFrac = (maxPlot -minData)/stepData;
+		double stopIdxFrac = (maxPlot -minData)/astep;
 
 		int stopIdx = (int)Math.ceil(stopIdxFrac);
 
@@ -666,7 +671,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 		int sizeData = stopIdx - startIdx + 1;
 
 		//get on screen pixel location to draw image
-		int[] visibleLimitsPixel = getPixelDataLimits(minData + startIdx*stepData, maxData - (end-stopIdx)* stepData, plotAxis);
+		int[] visibleLimitsPixel = getPixelDataLimits(minData + startIdx*astep, maxData - (end-stopIdx)* step, plotAxis);
 
 		//calculate scaling factor
 		double pixelScale = Math.abs((visibleLimitsPixel[0]-visibleLimitsPixel[1]) / ((double)sizeData));
@@ -675,7 +680,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 		
 		//if axis not increasing
 		//flip start index and scaling
-		if (!dataInc) {
+		if (step < 0) {
 			startIdx = end - stopIdx;
 			scaled*=-1;
 		}

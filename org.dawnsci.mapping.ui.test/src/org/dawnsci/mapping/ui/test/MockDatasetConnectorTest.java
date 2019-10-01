@@ -1,11 +1,9 @@
 package org.dawnsci.mapping.ui.test;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertArrayEquals;
 
-import org.eclipse.january.DatasetException;
 import org.eclipse.january.dataset.IDataset;
 import org.eclipse.january.dataset.IDynamicDataset;
-import org.eclipse.january.dataset.ILazyDataset;
 import org.junit.Test;
 
 public class MockDatasetConnectorTest {

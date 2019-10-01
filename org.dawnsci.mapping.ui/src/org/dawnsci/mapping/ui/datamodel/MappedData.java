@@ -5,10 +5,13 @@ import org.eclipse.dawnsci.plotting.api.trace.MetadataPlotUtils;
 import org.eclipse.january.DatasetException;
 import org.eclipse.january.dataset.IDataset;
 import org.eclipse.january.dataset.ILazyDataset;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 public class MappedData extends AbstractMapData{
 
+	private static final Logger logger = LoggerFactory.getLogger(MappedData.class);
 	
 	public MappedData(String name, ILazyDataset map, MappedDataBlock parent, String path, boolean live) {
 		super(name, map, parent, path, live);
@@ -37,7 +40,7 @@ public class MappedData extends AbstractMapData{
 		try {
 			s = spectrum.getSlice();
 		} catch (DatasetException e) {
-			e.printStackTrace();
+			logger.error("Could not slice dataset", e);
 		}
 		return s;
 	}

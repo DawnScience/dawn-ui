@@ -1,10 +1,11 @@
 package org.dawnsci.mapping.ui.test;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 import org.dawnsci.mapping.ui.datamodel.LiveRemoteAxes;
 import org.dawnsci.mapping.ui.datamodel.MapScanDimensions;
-import org.dawnsci.mapping.ui.datamodel.MappedData;
 import org.dawnsci.mapping.ui.datamodel.MappedDataBlock;
 import org.dawnsci.mapping.ui.datamodel.ReMappedData;
 import org.eclipse.january.dataset.Comparisons;

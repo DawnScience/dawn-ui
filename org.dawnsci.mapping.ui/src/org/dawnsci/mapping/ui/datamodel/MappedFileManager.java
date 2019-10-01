@@ -410,7 +410,7 @@ public class MappedFileManager implements IMapFileController{
 				meta = loaderService.getMetadata(path, null);
 				dh =loaderService.getData(path, null);
 				} catch (Exception e) {
-					e.printStackTrace();
+					logger.error("Could not load data",e);
 					return;
 				}
 				
