@@ -28,7 +28,6 @@ import org.eclipse.dawnsci.plotting.api.PlottingFactory;
 import org.eclipse.dawnsci.plotting.api.PlottingSelectionProvider;
 import org.eclipse.dawnsci.plotting.api.annotation.IAnnotation;
 import org.eclipse.dawnsci.plotting.api.axis.IAxis;
-import org.eclipse.dawnsci.plotting.api.histogram.ImageServiceBean.ImageOrigin;
 import org.eclipse.dawnsci.plotting.api.region.IRegion;
 import org.eclipse.dawnsci.plotting.api.region.IRegion.RegionType;
 import org.eclipse.dawnsci.plotting.api.region.IRegionListener;
@@ -180,10 +179,6 @@ public abstract class AbstractPlottingSystem<T> implements IPlottingSystem<T>, I
 		final boolean oldRescale = rescale;
 		this.rescale = rescale;
 		firePropertyChangeListener(RESCALE_ID, oldRescale, rescale);
-	}
-
-	@Override
-	public void setOrigin(ImageOrigin origin) {
 	}
 
 	private Collection<IPropertyChangeListener> propertyListeners;

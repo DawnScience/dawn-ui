@@ -423,6 +423,7 @@ public class ImageService extends AbstractServiceFactory implements IImageServic
 		if (Platform.getPreferencesService() != null) { // Normally
 			IPreferenceStore store = new ScopedPreferenceStore(InstanceScope.INSTANCE, IPlottingSystem.PREFERENCE_STORE);
 			imageServiceBean.setOrigin(ImageOrigin.forLabel(store.getString(BasePlottingConstants.ORIGIN_PREF)));
+			imageServiceBean.setTransposed(store.getBoolean(BasePlottingConstants.TRANSPOSE_PREF));
 			imageServiceBean.setHistogramType(HistoType.forLabel(store.getString(BasePlottingConstants.HISTO_PREF)));
 			imageServiceBean.setMinimumCutBound(HistogramBound.fromString(store.getString(BasePlottingConstants.MIN_CUT)));
 			imageServiceBean.setMaximumCutBound(HistogramBound.fromString(store.getString(BasePlottingConstants.MAX_CUT)));
@@ -468,7 +469,7 @@ public class ImageService extends AbstractServiceFactory implements IImageServic
 			imageServiceBean.setMaximumCutBound(HistogramBound.DEFAULT_MAXIMUM);
 			imageServiceBean.setNanBound(HistogramBound.DEFAULT_NAN);
 			imageServiceBean.setLo(00.01);
-			imageServiceBean.setHi(99.99);		
+			imageServiceBean.setHi(99.99);
 			imageServiceBean.setPalette(makeJetPalette());
 		}
 	

@@ -10,6 +10,7 @@ package org.dawnsci.plotting.draw2d.swtxy;
 
 import java.lang.ref.Reference;
 import java.lang.ref.SoftReference;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
@@ -105,7 +106,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 	private DownsampleType   downsampleType=DownsampleType.MAXIMUM;
 	private int              currentDownSampleBin=-1;
 	private int              alpha = -1;
-	private List<IDataset>   axes;
+	private List<Dataset>    axes;
 	private ImageServiceBean imageServiceBean;
 	private ImageScaleType dirty = null;
 	/**
@@ -147,10 +148,10 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 
 		this.service = ServiceHolder.getImageService();
 		this.imageServiceBean = service.createBeanFromPreferences();
+		imageTransposed = imageServiceBean.isTransposed();
 		setPaletteName(getPreferenceStore().getString(BasePlottingConstants.COLOUR_SCHEME));
 
 		downsampleType = DownsampleType.forLabel(getPreferenceStore().getString(BasePlottingConstants.DOWNSAMPLE_PREF));
-
 	}
 
 	@Override
@@ -162,25 +163,23 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 		// override axes with image origin given untransposed image
 		listenToAxisChanges = false;
 		try {
-			boolean xLeft = xAxis.isInverted();
-			boolean yDown = yAxis.isInverted();
 			switch (getImageOrigin()) {
 			case TOP_LEFT:
 			default:
-				xAxis.setInverted(xLeft);
-				yAxis.setInverted(!yDown);
+				xAxis.setInverted(false);
+				yAxis.setInverted(true);
 				break;
 			case BOTTOM_LEFT:
-				xAxis.setInverted(xLeft);
-				yAxis.setInverted(yDown);
+				xAxis.setInverted(false);
+				yAxis.setInverted(false);
 				break;
 			case BOTTOM_RIGHT:
-				xAxis.setInverted(!xLeft);
-				yAxis.setInverted(yDown);
+				xAxis.setInverted(true);
+				yAxis.setInverted(false);
 				break;
 			case TOP_RIGHT:
-				xAxis.setInverted(!xLeft);
-				yAxis.setInverted(!yDown);
+				xAxis.setInverted(true);
+				yAxis.setInverted(true);
 				break;
 			}
 		} finally {
@@ -1070,9 +1069,8 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 		if (getParent()!=null) getParent().remove(this);
 		xAxis.removeListener(this);
 		yAxis.removeListener(this);
-		if (yAxis.isInverted()) {
-			yAxis.setInverted(false); // by default, origin is at top left so reset for XY plots
-		}
+		xAxis.setInverted(false); // by default, origin is at top left so reset for XY plots
+		yAxis.setInverted(false);
 
 		axisRedrawActive = false;
 		if (imageServiceBean!=null) imageServiceBean.dispose();
@@ -1117,7 +1115,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 	private final Dataset slice(Range xr, Range yr, final Dataset data) {
 
 		// Check that a slice needed, this speeds up the initial show of the image.
-		final int[] shape = data.getShape();
+		final int[] shape = getImageShape(data);
 		final int[] imageRanges = getImageBounds(shape, getImageOrigin());
 		final int[] bounds = getBounds(xr, yr);
 		if (imageRanges!=null && Arrays.equals(imageRanges, bounds)) {
@@ -1190,7 +1188,6 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 			break;
 		}
 
-		plottingSystem.setOrigin(imageOrigin);
 		imageServiceBean.setOrigin(imageOrigin);
 	}
 
@@ -1222,15 +1219,25 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 		this.axisRedrawActive = b;
 	}
 
-	private int[] getImageShape() {
-		int[] shape = image.getShape();
+	// does the transpose if necessary
+	private int[] getImageShape(Dataset image) {
+		int[] shape = image.getShapeRef();
 		if (imageTransposed) {
-			int t = shape[0];
-			shape[0] = shape[1];
-			shape[1] = t;
+			return new int[] { shape[1], shape[0] };
 		}
 		return shape;
 	}
+	/*
+	 * T=false                                 T=true                            
+	 *                                                                           
+	 * TL                TR                    TL                TR              
+	 *  x = 0, shape[1]   x = shape[0], 0       x = 0, shape[1]   x = shape[1], 0
+	 *  y = shape[0], 0   y = shape[1], 0       y = shape[0], 0   y = shape[0], 0
+	 *                                                                           
+	 * BL                BR                    BL                BR              
+	 *  x = 0, shape[0]   x = shape[1], 0       x = 0, shape[1]   x = shape[0], 0
+	 *  y = 0, shape[1]   y = 0, shape[0]       y = 0, shape[0]   y = 0, shape[1]
+	 */
 
 	public void performAutoscale() {
 		if (globalRange != null) {
@@ -1239,9 +1246,10 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 			return;
 		}
 
-		final int[] shape = getImageShape();
-		switch(getImageOrigin()) {
+		int[] shape = getImageShape(image);
+		switch (getImageOrigin()) {
 		case TOP_LEFT:
+		default:
 			xAxis.setRange(0, shape[1]);
 			yAxis.setRange(shape[0], 0);
 			break;
@@ -1261,7 +1269,6 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 	}
 
 	private static final int[] getImageBounds(int[] shape, ImageOrigin origin) {
-		if (origin==null) origin = ImageOrigin.TOP_LEFT; 
 		switch (origin) {
 		case TOP_LEFT:
 			return new int[] {0, shape[0], shape[1], 0};
@@ -1279,9 +1286,20 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 	 * Rotates the image so that its origin is in given corner
 	 */
 	public void setImageOrigin(ImageOrigin imageOrigin) {
+		if (getImageOrigin() == imageOrigin) {
+			return;
+		}
 		logger.trace("Image origin changed to: " + imageOrigin.getLabel());
-		if (this.mipMap!=null) mipMap.clear();
-		imageServiceBean.setOrigin(imageOrigin);
+		if (imageServiceBean != null) {
+			imageServiceBean.setOrigin(imageOrigin);
+		}
+		updateAxesAndImage();
+	}
+
+	private void updateAxesAndImage() {
+		if (this.mipMap != null) {
+			mipMap.clear();
+		}
 		createAxisBounds();
 		listenToAxisChanges = false;
 		try {
@@ -1294,7 +1312,6 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 		fireImageOriginListeners();
 	}
 
-
 	/**
 	 * Creates new axis bounds, updates the label data set
 	 */
@@ -1306,25 +1323,42 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 			return;
 		}
 
-		final int[] shape = getImageShape();
-		if (getImageOrigin().isOnLeadingDiagonal()) {
-			setupAxis(getXAxis(), new Range(0,shape[1]), axes!=null&&axes.size()>0 ? axes.get(0) : null);
-			setupAxis(getYAxis(), new Range(0,shape[0]), axes!=null&&axes.size()>1 ? axes.get(1) : null);
-		} else {
+		final int[] shape = image.getShapeRef();
+		boolean leading = getImageOrigin().isOnLeadingDiagonal();
+		boolean flip = !(imageTransposed ^ leading);
+
+		if (flip) {
 			setupAxis(getXAxis(), new Range(0,shape[0]), axes!=null&&axes.size()>1 ? axes.get(1) : null);
 			setupAxis(getYAxis(), new Range(0,shape[1]), axes!=null&&axes.size()>0 ? axes.get(0) : null);
+		} else {
+			setupAxis(getXAxis(), new Range(0,shape[1]), axes!=null&&axes.size()>0 ? axes.get(0) : null);
+			setupAxis(getYAxis(), new Range(0,shape[0]), axes!=null&&axes.size()>1 ? axes.get(1) : null);
 		}
 	}
 
-	private void setupAxis(Axis axis, Range bounds, IDataset labels) {
-		((AspectAxis)axis).setMaximumRange(bounds);
-		((AspectAxis)axis).setLabelDataAndTitle(labels);
+	private void setupAxis(Axis axis, Range bounds, Dataset labels) {
+		((AspectAxis) axis).setMaximumRange(bounds);
+		((AspectAxis) axis).setLabelDataAndTitle(labels);
 	}
 
 	@Override
 	public ImageOrigin getImageOrigin() {
 		if (imageServiceBean==null) return ImageOrigin.TOP_LEFT;
 		return imageServiceBean.getOrigin();
+	}
+
+	public void setImageTransposed(boolean imageTransposed) {
+		if (this.imageTransposed == imageTransposed) {
+			return;
+		}
+
+		logger.trace("Image transpose changed to: " + imageTransposed);
+		this.imageTransposed = imageTransposed;
+		if (imageServiceBean != null) {
+			imageServiceBean.setTransposed(imageTransposed);
+		}
+
+		updateAxesAndImage();
 	}
 
 	private boolean rescaleHistogram = true;
@@ -1392,7 +1426,6 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 		}
 	}
 
-	@SuppressWarnings("unchecked")
 	private boolean setDataInternal(ILazyDataset lazy, List<? extends IDataset> axes, boolean performAuto) {
 
 		Dataset im = null;
@@ -1408,7 +1441,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 		// We are just assigning the data before the image is live.
 		if (getParent()==null && !performAuto && globalRange == null) {
 			this.image = im;
-			this.axes  = (List<IDataset>)axes;
+			internalSetAxes(axes);
 			// is this enough?
 			if (imageServiceBean==null){ 
 				imageServiceBean = new ImageServiceBean();
@@ -1488,10 +1521,22 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 		return true;
 	}
 
-	@SuppressWarnings("unchecked")
+	private void internalSetAxes(List<? extends IDataset> axes) {
+		if (this.axes != axes) {
+			if (axes == null) {
+				this.axes = null;
+			} else {
+				this.axes = new ArrayList<Dataset>(axes.size());
+				for (IDataset i : axes) {
+					this.axes.add(DatasetUtils.convertToDataset(i));
+				}
+			}
+		}
+	}
+
 	@Override
 	public void setAxes(List<? extends IDataset> axes, boolean performAuto) {
-		this.axes  = (List<IDataset>) axes;
+		internalSetAxes(axes);
 
 		if (getXAxis() == null || getYAxis() == null) {
 			return;
@@ -1502,9 +1547,9 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 		if (axes==null) {
 			getXAxis().setTitle("");
 			getYAxis().setTitle("");
-		} else if (axes.get(0)==null) {
+		} else if (axes.size() == 0 || axes.get(0) == null) {
 			getXAxis().setTitle("");
-		} else if (axes.get(1)==null) {
+		} else if (axes.size() < 2 || axes.get(1) == null) {
 			getYAxis().setTitle("");
 		}
 
@@ -1696,10 +1741,11 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 		repaint();
 	}
 
-
+	@SuppressWarnings("unchecked")
 	@Override
 	public List<IDataset> getAxes() {
-		return (List<IDataset>) axes;
+		List<? extends IDataset> t = axes;
+		return (List<IDataset>) t;
 	}
 
 	/**
@@ -1891,8 +1937,8 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 
 		if (!TraceUtils.isCustomAxes(this)) return roi;
 
-		final IDataset xl = axes.get(0); // May be null
-		final IDataset yl = axes.get(1); // May be null
+		final Dataset xl = axes.get(0); // May be null
+		final Dataset yl = axes.get(1); // May be null
 
 		if (roi instanceof LinearROI) {
 			double[] sp = ((LinearROI)roi).getPoint();
@@ -1941,15 +1987,16 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 		final double[] ret = point.clone();
 		final int[] shape = image.getShapeRef();
 
-		final Dataset xl = DatasetUtils.convertToDataset(axes.get(0)); // May be null
+		final Dataset xl = axes.get(0); // May be null
 		if (TraceUtils.isAxisCustom(xl, shape[1])) {
 			TraceUtils.transform(xl, 0, ret);
 		}
 
-		if (axes.size() < 2)
+		if (axes.size() < 2) {
 			return ret;
+		}
 
-		final Dataset yl = DatasetUtils.convertToDataset(axes.get(1)); // May be null
+		final Dataset yl = axes.get(1); // May be null
 		if (TraceUtils.isAxisCustom(yl, shape[0])) {
 			TraceUtils.transform(yl, 1, ret);
 		}

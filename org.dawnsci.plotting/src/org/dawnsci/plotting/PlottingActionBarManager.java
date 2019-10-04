@@ -767,7 +767,7 @@ public class PlottingActionBarManager implements IPlotActionSystem {
 		ac.insert(true);
 	}
 
-	protected IActionBars getActionBars() {
+	public IActionBars getActionBars() {
 		return system.getActionBars();
 	}
 

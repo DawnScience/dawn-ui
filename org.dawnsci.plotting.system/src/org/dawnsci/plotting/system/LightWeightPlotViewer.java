@@ -54,7 +54,6 @@ import org.eclipse.dawnsci.plotting.api.axis.IClickListener;
 import org.eclipse.dawnsci.plotting.api.axis.IPositionListener;
 import org.eclipse.dawnsci.plotting.api.histogram.IPaletteService;
 import org.eclipse.dawnsci.plotting.api.histogram.ImageServiceBean;
-import org.eclipse.dawnsci.plotting.api.histogram.ImageServiceBean.ImageOrigin;
 import org.eclipse.dawnsci.plotting.api.histogram.functions.FunctionContainer;
 import org.eclipse.dawnsci.plotting.api.preferences.PlottingConstants;
 import org.eclipse.dawnsci.plotting.api.region.IRegion;
@@ -1383,7 +1382,7 @@ public class LightWeightPlotViewer<T> extends AbstractPlottingViewer<T> implemen
 		if (xyGraph==null) return;
 
 		xyGraph.clearRegions(force);
-	}		
+	}
 
 	public void clearRegionTool() {
 		if (xyGraph==null) return;
@@ -1470,7 +1469,7 @@ public class LightWeightPlotViewer<T> extends AbstractPlottingViewer<T> implemen
 		}
 		axis.setAutoScaleThreshold(0.1);
 		axis.setShowMajorGrid(true);
-		axis.setShowMinorGrid(true);	
+		axis.setShowMinorGrid(true);
 		xyGraph.addAxis(axis);
 
 		return axis;
@@ -1724,10 +1723,6 @@ public class LightWeightPlotViewer<T> extends AbstractPlottingViewer<T> implemen
 
 	public void setRescale(boolean rescale) {
 		this.plotActionsCreator.setRescaleButton(rescale);
-	}
-
-	public void setOrigin(ImageOrigin origin) {
-		this.plotActionsCreator.setImageOrigin(origin);
 	}
 
 	public String getTitle() {
