@@ -19,7 +19,6 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import org.dawnsci.datavis.api.ILiveFileListener;
-import org.eclipse.dawnsci.analysis.api.processing.IOperationBean;
 import org.eclipse.scanning.api.event.EventConstants;
 import org.eclipse.scanning.api.event.EventException;
 import org.eclipse.scanning.api.event.IEventService;
@@ -29,26 +28,24 @@ import org.eclipse.scanning.api.event.core.IJobQueue;
 import org.eclipse.scanning.api.event.core.IPropertyFilter.FilterAction;
 import org.eclipse.scanning.api.event.core.ISubscriber;
 import org.eclipse.scanning.api.event.scan.ScanBean;
-import org.eclipse.scanning.api.event.status.Status;
 import org.eclipse.scanning.api.event.status.StatusBean;
 import org.eclipse.scanning.api.ui.CommandConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import uk.ac.diamond.scisoft.analysis.processing.bean.OperationBean;
-
 public abstract class AbstractLiveFileService {
 	
 	private static final Logger logger = LoggerFactory.getLogger(AbstractLiveFileService.class);
 	
-	private static final String PROCESSING_SUBMIT_QUEUE_NAME = "scisoft.operation.SUBMISSION_QUEUE";
 	private static final String EXTERNAL_FILE_TOPIC = "org.dawnsci.file.topic";
-	private static final String PROCESSING_TOPIC = "scisoft.operation.STATUS_TOPIC";
+	private static final String GDA_SCAN_TOPIC = "gda.messages.scan";
+	private static final String PROCESSING_TOPIC = "gda.messages.processing";
 	private static final String SCAN_STATUS_STARTED = "STARTED";
 	private static final String SCAN_STATUS_UPDATED = "UPDATED";
 	private static final String SCAN_STATUS_FINISHED = "FINISHED";
 	private static final String MESSAGE_STATUS_FIELD = "status";
 	private static final String MESSAGE_FILEPATH_FIELD = "filePath";
+	private static final String MESSAGE_INITIAL_FILEPATH_FIELD = "initialFilePath";
 	private static final String SWMR_STATUS = "swmrStatus";
 	private static final String SWMR_ACTIVE = "ACTIVE";
 	
@@ -59,7 +56,7 @@ public abstract class AbstractLiveFileService {
 	private ISubscriber<EventListener> fileSubscriber;
 	
 	private IBeanListener<Map<String, Object>> scanListener;
-	private IBeanListener<OperationBean> operationListener;
+	private IBeanListener<Map<String, Object>> operationListener;
 	private IBeanListener<Map<String, Object>> fileListener;
 
 	private AtomicReference<Runnable> atomicRunnable = new AtomicReference<>();
@@ -84,7 +81,7 @@ public abstract class AbstractLiveFileService {
 
 		final URI uri = new URI(suri);
 
-		scanSubscriber = eventService.createSubscriber(uri, "gda.messages.scan");
+		scanSubscriber = eventService.createSubscriber(uri, GDA_SCAN_TOPIC);
 
 
 		// We don't care about the scan request, removing it means that
@@ -99,7 +96,7 @@ public abstract class AbstractLiveFileService {
 		
 		procSubscriber = eventService.createSubscriber(uri, PROCESSING_TOPIC);
 
-		if (operationListener == null) operationListener = new BeanListener();
+		if (operationListener == null) operationListener = new ScanListener();
 		
 		procSubscriber.addListener(operationListener);
 
@@ -222,8 +219,6 @@ public abstract class AbstractLiveFileService {
 		List<String> fileNames = new ArrayList<>();
 		fileNames.addAll(getRunningFiles(EventConstants.SUBMISSION_QUEUE,
 				bean -> ((ScanBean) bean).getFilePath()));
-		fileNames.addAll(getRunningFiles(PROCESSING_SUBMIT_QUEUE_NAME, 
-				bean -> bean instanceof IOperationBean ? ((IOperationBean) bean).getOutputFilePath() : null));  
 		return fileNames;
 	}
 	
@@ -265,42 +260,6 @@ public abstract class AbstractLiveFileService {
 	
 	protected abstract void handleFileLoad(String[] file, String parent, boolean live);
 	
-	private class BeanListener implements IBeanListener<OperationBean> {
-		
-		@Override
-		public void beanChangePerformed(BeanEvent<OperationBean> evt) {
-			
-			OperationBean bean = evt.getBean();
-			
-			if (Status.RUNNING.equals(bean.getStatus()) && !Status.RUNNING.equals(bean.getPreviousStatus())) {
-				
-				handleFileLoad(new String[] {evt.getBean().getOutputFilePath()}, evt.getBean().getFilePath(), true);
-				
-				return;
-				
-			}
-			
-			if (Status.RUNNING.equals(bean.getStatus())) {
-				for (ILiveFileListener l : listeners) {
-					l.refreshRequest();
-				}
-			}
-			
-			
-			if (!evt.getBean().getStatus().isFinal()) return;
-
-
-			for (ILiveFileListener l : listeners) l.localReload(evt.getBean().getOutputFilePath(), false);
-
-		}
-		
-		@Override
-		public Class<OperationBean> getBeanClass() {
-			return OperationBean.class;
-		}
-
-	}
-	
 	private class ScanListener implements IBeanListener<Map<String, Object>> {
 		
 		@Override
@@ -334,7 +293,12 @@ public abstract class AbstractLiveFileService {
 			final String filePath = (String) msg.get(MESSAGE_FILEPATH_FIELD);
 			// Scan started
 			if (msg.get(MESSAGE_STATUS_FIELD).equals(SCAN_STATUS_STARTED)) {
-				handleFileLoad(new String[] {filePath}, null, true);
+				
+				String parent = msg.containsKey(MESSAGE_INITIAL_FILEPATH_FIELD) ? msg.get(MESSAGE_INITIAL_FILEPATH_FIELD).toString() : null;
+				
+					handleFileLoad(new String[] {filePath}, parent, true);
+				
+				
 			}
 			
 			if (msg.get(MESSAGE_STATUS_FIELD).equals(SCAN_STATUS_FINISHED)) {

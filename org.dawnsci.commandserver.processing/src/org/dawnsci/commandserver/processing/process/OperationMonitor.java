@@ -3,11 +3,12 @@ package org.dawnsci.commandserver.processing.process;
 import java.net.URI;
 
 import org.dawnsci.commandserver.processing.Activator;
+import org.dawnsci.commandserver.processing.process.ProcessingMessage.ProcessingStatus;
+import org.dawnsci.commandserver.processing.process.ProcessingMessage.SwmrStatus;
 import org.eclipse.january.IMonitor;
 import org.eclipse.scanning.api.event.EventException;
 import org.eclipse.scanning.api.event.IEventService;
 import org.eclipse.scanning.api.event.core.IPublisher;
-import org.eclipse.scanning.api.event.status.Status;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -22,30 +23,36 @@ import uk.ac.diamond.scisoft.analysis.processing.bean.OperationBean;
  */
 public class OperationMonitor implements IMonitor, IFlushMonitor {
 	
+	private static final String PROCESSING_TOPIC = "gda.messages.processing";
+	
 	private static final Logger logger = LoggerFactory.getLogger(OperationMonitor.class);
 
 	private OperationBean obean;
+	//Total and count currently not used but likely to be in future
 	private int           total;
 	private int           count;
 	private boolean       cancelled;
-	private IPublisher<OperationBean> publisher; 
+	private IPublisher<ProcessingMessage> publisher; 
 	
 	public OperationMonitor(OperationBean obean, int total) {
 		this.obean       = obean;
 		this.total       = total;
-		try {
-			IEventService eventService = Activator.getService(IEventService.class);
-			 publisher = eventService.createPublisher(new URI(obean.getPublisherURI()), "scisoft.operation.STATUS_TOPIC");
-		} catch (Exception e) {
-			logger.error("Could not create publisher:",e);
+		
+		if (obean.getPublisherURI() == null || obean.getPublisherURI().isEmpty()) {
+			logger.debug("No publisher URI set");
+		} else {
+			try {
+				IEventService eventService = Activator.getService(IEventService.class);
+				 publisher = eventService.createPublisher(new URI(obean.getPublisherURI()), PROCESSING_TOPIC);
+			} catch (Exception e) {
+				logger.error("Could not create publisher:",e);
+			}
 		}
 	}
 	
 	@Override
 	public void worked(int amount) {
 		count+=amount;
-		double done = (double)count / (double)total;
-		obean.setPercentComplete(done);
 	}
 
 	@Override
@@ -64,42 +71,33 @@ public class OperationMonitor implements IMonitor, IFlushMonitor {
 	}
 	
 	public void setComplete() {
-		if (publisher != null) {
-			obean.setStatus(Status.COMPLETE);
-			try {
-				publisher.broadcast(obean);
-			} catch (EventException e) {
-				logger.error("Could not broadcast bean:",e);
-				logger.error(obean.toString());
-			}
-		}
+		
+		buildMessageAndBroadcast(ProcessingStatus.FINISHED);
+
 	}
 
 	public void setRunning() {
-		if (publisher != null) {
-			obean.setStatus(Status.RUNNING);
-			try {
-				publisher.broadcast(obean);
-			} catch (EventException e) {
-				logger.error("Could not broadcast bean:",e);
-				logger.error(obean.toString());
-			}
-		}
+		buildMessageAndBroadcast(ProcessingStatus.STARTED);
 	}
 
 	@Override
 	public void fileFlushed() {
-		if (publisher != null) {
-			obean.setPreviousStatus(Status.RUNNING);
-			obean.setStatus(Status.RUNNING);
-			obean.setMessage("Flushed " + count + " frames");
-			try {
-				publisher.broadcast(obean);
-			} catch (EventException e) {
-				logger.error("Could not broadcast bean:",e);
-				logger.error(obean.toString());
-			}
+		buildMessageAndBroadcast(ProcessingStatus.UPDATED);
+	}
+	
+	private void buildMessageAndBroadcast(ProcessingStatus status) {
+		if (publisher == null) {
+			return;
 		}
 		
+		ProcessingMessage m = new ProcessingMessage(obean.getOutputFilePath(),
+				obean.getFilePath(), status, obean.isReadable() ? SwmrStatus.ACTIVE : SwmrStatus.DISABLED);
+
+		try {
+			publisher.broadcast(m);
+		} catch (EventException e) {
+			logger.error("Could not broadcast message:",e);
+		}
+
 	}
 }
