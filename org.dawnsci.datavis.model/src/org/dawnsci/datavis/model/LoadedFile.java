@@ -25,6 +25,7 @@ import org.eclipse.dawnsci.analysis.api.tree.GroupNode;
 import org.eclipse.dawnsci.analysis.api.tree.IFindInTree;
 import org.eclipse.dawnsci.analysis.api.tree.Node;
 import org.eclipse.dawnsci.analysis.api.tree.NodeLink;
+import org.eclipse.dawnsci.analysis.api.tree.SymbolicNode;
 import org.eclipse.dawnsci.analysis.api.tree.Tree;
 import org.eclipse.dawnsci.analysis.api.tree.TreeUtils;
 import org.eclipse.dawnsci.nexus.NexusConstants;
@@ -44,6 +45,8 @@ import uk.ac.diamond.scisoft.analysis.io.NexusTreeUtils;
  *
  */
 public class LoadedFile implements IDataObject, IDataFilePackage {
+
+	private static final String INTERPRETATION = "interpretation";
 
 	private static final Logger logger = LoggerFactory.getLogger(LoadedFile.class);
 
@@ -75,8 +78,8 @@ public class LoadedFile implements IDataObject, IDataFilePackage {
 				}
 				
 				for (Entry<DataNode,String> e : uniqueDataNodes.entrySet()) {
-					if (e.getKey().containsAttribute("interpretation") && 
-							e.getKey().getAttribute("interpretation").getFirstElement().equals("rgba-image")) {
+					if (e.getKey().containsAttribute(INTERPRETATION) && 
+							e.getKey().getAttribute(INTERPRETATION).getFirstElement().equals("rgba-image")) {
 						e.toString();
 						
 						ILazyDataset d = e.getKey().getDataset();
@@ -87,8 +90,6 @@ public class LoadedFile implements IDataObject, IDataFilePackage {
 							RGBLazyDynamicDataset rgbl = RGBLazyDynamicDataset.buildFromLazyDataset((LazyDynamicDataset)d);
 							virtualDataOptions.put(e.getValue() + "RGB", new DataOptionsDataset(e.getValue() + "RGB", this, rgbl));
 						}
-						
-						
 					}
 				}
 				
@@ -223,11 +224,12 @@ public class LoadedFile implements IDataObject, IDataFilePackage {
 			@Override
 			public boolean found(NodeLink node) {
 				Node d = node.getDestination();
-				Node s = node.getSource();
 
-				boolean nxData = NexusTreeUtils.isNXClass(s, NexusConstants.DATA);
-
-				if (d != null && d instanceof DataNode) {
+				while (d instanceof SymbolicNode) {
+					d = ((SymbolicNode) d).getNode();
+				}
+				if (d instanceof DataNode) {
+					boolean nxData = NexusTreeUtils.isNXClass(node.getSource(), NexusConstants.DATA);
 
 					if (nxData || !nodes.contains(d)) {
 						nodes.add((DataNode)d);
@@ -244,28 +246,25 @@ public class LoadedFile implements IDataObject, IDataFilePackage {
 
 		for (Entry<String, NodeLink> e: results.entrySet()) {
 			Node d = e.getValue().getDestination();
+			while (d instanceof SymbolicNode) {
+				d = ((SymbolicNode) d).getNode();
+			}
 			if (d instanceof DataNode) {
 				out.put((DataNode)d, e.getKey());
 			}
 
-			Node s = e.getValue().getSource();
+			GroupNode s = (GroupNode) e.getValue().getSource();
 
 			if (NexusTreeUtils.isNXClass(s, NexusConstants.DATA)) {
 				String name = NexusTreeUtils.getFirstString(s.getAttribute(NexusConstants.DATA_SIGNAL));
 				String key = e.getKey();
-				if (name != null) {
-					if (key.equals(name) || key.endsWith(Node.SEPARATOR + name)) {
-						signals.add(Tree.ROOT + key);
-						ILazyDataset lz = NexusTreeUtils.getAugmentedSignalDataset((GroupNode)s);
-						if (lz != null) {
-							dataHolder.get().addDataset(Tree.ROOT + name, lz);
-						}
-					}
-				} else if (d.containsAttribute(NexusConstants.DATA_SIGNAL)) {
-					signals.add(Tree.ROOT + key);
-					ILazyDataset lz = NexusTreeUtils.getAugmentedSignalDataset((GroupNode)s);
+				if ((name != null && (key.equals(name) || key.endsWith(Node.SEPARATOR + name))) ||
+						d.containsAttribute(NexusConstants.DATA_SIGNAL)) {
+					String path = Tree.ROOT + key;
+					signals.add(path);
+					ILazyDataset lz = NexusTreeUtils.getAugmentedSignalDataset(s);
 					if (lz != null) {
-						dataHolder.get().addDataset(Tree.ROOT + key, lz);
+						dataHolder.get().addDataset(path, lz);
 					}
 				}
 			}

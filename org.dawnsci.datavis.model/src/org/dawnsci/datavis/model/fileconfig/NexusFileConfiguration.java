@@ -12,11 +12,14 @@ import org.eclipse.dawnsci.analysis.api.tree.GroupNode;
 import org.eclipse.dawnsci.analysis.api.tree.IFindInTree;
 import org.eclipse.dawnsci.analysis.api.tree.Node;
 import org.eclipse.dawnsci.analysis.api.tree.NodeLink;
+import org.eclipse.dawnsci.analysis.api.tree.SymbolicNode;
 import org.eclipse.dawnsci.analysis.api.tree.Tree;
 import org.eclipse.dawnsci.analysis.api.tree.TreeUtils;
 import org.eclipse.dawnsci.nexus.NexusConstants;
 
 public class NexusFileConfiguration implements ILoadedFileConfiguration {
+
+	private static final String DEFAULT = "default";
 
 	@Override
 	public boolean configure(LoadedFile f) {
@@ -31,15 +34,16 @@ public class NexusFileConfiguration implements ILoadedFileConfiguration {
 		// identify the default NXentry group. This entry group should contain a default attribute itself containing
 		// the name of the default NXdata group within.
 		GroupNode rootNode = tree.getGroupNode();
-		Attribute defaultRootAttribute = rootNode.getAttribute("default");
+		Attribute defaultRootAttribute = rootNode.getAttribute(DEFAULT);
 		if (defaultRootAttribute != null) {
 			// get default entry node
-			GroupNode defaultEntryNode = rootNode.getGroupNode(defaultRootAttribute.getFirstElement());
+			String rAName = defaultRootAttribute.getFirstElement();
+			GroupNode defaultEntryNode = rootNode.getGroupNode(rAName);
 			if (defaultEntryNode != null) {
-				Attribute defaultEntryAttribute = defaultEntryNode.getAttribute("default");
+				Attribute defaultEntryAttribute = defaultEntryNode.getAttribute(DEFAULT);
 				if (defaultEntryAttribute != null) {
 					// get default NXdata group in this entry
-					String prefix = defaultRootAttribute.getFirstElement() + Node.SEPARATOR + defaultEntryAttribute.getFirstElement();
+					String prefix = rAName + Node.SEPARATOR + defaultEntryAttribute.getFirstElement();
 					found = new HashMap<>();
 					found.put(prefix, null);
 				}
@@ -55,7 +59,6 @@ public class NexusFileConfiguration implements ILoadedFileConfiguration {
 				}
 
 				n = node.getSource();
-
 				if (n.containsAttribute(NexusConstants.NXCLASS) &&
 					n.getAttribute(NexusConstants.NXCLASS).getFirstElement().equals(NexusConstants.DATA)) {
 						return true;
@@ -74,36 +77,31 @@ public class NexusFileConfiguration implements ILoadedFileConfiguration {
 		for (String key : found.keySet()) {
 			String path = Node.SEPARATOR + key;
 			NodeLink nl = tree.findNodeLink(path);
-			if (nl == null)
+			if (nl == null) {
 				continue;
+			}
+
 			Node dest = nl.getDestination();
 			String signal = dest.getAttribute(NexusConstants.DATA_SIGNAL).getFirstElement();
-			
-			if (signal != null && dest instanceof DataNode) {
+			if (signal == null) {
+				continue;
+			}
+
+			if (dest instanceof GroupNode) {
+				dest = ((GroupNode) dest).getNode(signal);
+				path = path + Node.SEPARATOR + signal;
+				while (dest instanceof SymbolicNode) {
+					dest = ((SymbolicNode) dest).getNode();
+				}
+			}
+
+			if (dest instanceof DataNode) {
 				int r = ((DataNode)dest).getRank();
 				if (r > max) {
 					max = r;
 					maxRank = path;
-					continue;
 				}
 			}
-			
-			if (signal != null && dest instanceof GroupNode) {
-				Node node = ((GroupNode)dest).getNode(signal);
-				if (node == null || !node.isDataNode()) {
-					return false;
-				}
-				DataNode d = ((GroupNode)dest).getDataNode(signal);
-				if (d != null) {
-					int r = d.getRank();
-					if (r > max) {
-						max = r;
-						maxRank = path+Node.SEPARATOR+signal;
-						continue;
-					}
-				}
-			}
-			
 		}
 		
 		if (maxRank != null) {
