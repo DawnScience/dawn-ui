@@ -62,5 +62,7 @@ public interface IMapFileController {
 	void removeFile(MappedDataFile file);
 	
 	void addLiveStream(LiveStreamMapObject stream);
+	
+	void registerUpdates(MappedDataFile file);
 }
 

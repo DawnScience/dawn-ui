@@ -210,6 +210,10 @@ public class MappedDataView extends ViewPart {
 					MappedDataFile f = (MappedDataFile)obj;
 					mdfs.add(f);
 				}
+				
+				if (obj instanceof MappedDataBlock && ((MappedDataBlock)obj).getMapObject() != null) {
+					maps.add(((MappedDataBlock)obj).getMapObject());
+				}
 					
 				if (obj instanceof AbstractMapData) {
 					maps.add((AbstractMapData)obj);
@@ -233,7 +237,7 @@ public class MappedDataView extends ViewPart {
 			}
 			
 			if (maps.size() == 1) {
-				manager.add(MapActionUtils.getMapPropertiesAction(maps.get(0),plotManager, fileController.getArea()));
+				manager.add(MapActionUtils.getMapPropertiesAction(maps.get(0),plotManager, fileController));
 			}
 				
 			if (mdfs.size() > 1) {

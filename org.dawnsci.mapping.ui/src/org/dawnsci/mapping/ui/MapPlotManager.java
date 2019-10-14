@@ -215,7 +215,7 @@ public class MapPlotManager implements IMapPlotController{
 		}
 	}
 	
-	public void updatePlot(){	
+	private void updatePlot(){	
 		Runnable r = atomicRunnable.getAndSet(new Runnable() {
 			
 			@Override

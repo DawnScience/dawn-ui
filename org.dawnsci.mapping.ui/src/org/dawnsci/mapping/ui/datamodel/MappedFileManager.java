@@ -351,6 +351,11 @@ public class MappedFileManager implements IMapFileController{
 	}
 	
 	@Override
+	public void registerUpdates(MappedDataFile file) {
+		fireListeners(file);
+	}
+	
+	@Override
 	public void removeAllFromDisplay() {
 		getPlottedObjects().stream().forEach(p -> p.setPlotted(false));
 		fireListeners(null);

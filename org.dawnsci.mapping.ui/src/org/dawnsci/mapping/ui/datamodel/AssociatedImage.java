@@ -9,6 +9,7 @@ import org.eclipse.january.dataset.RGBDataset;
 public class AssociatedImage implements PlottableMapObject {
 
 	private String name;
+	private String shortName;
 	private String path;
 	private RGBDataset image;
 	private double[] range;
@@ -19,6 +20,7 @@ public class AssociatedImage implements PlottableMapObject {
 		this.image = image;
 		this.range = calculateRange(image);
 		this.path = path;
+		this.shortName = MappingUtils.getShortName(name);
 	}
 	
 	@Override
@@ -28,7 +30,7 @@ public class AssociatedImage implements PlottableMapObject {
 	
 	@Override
 	public String toString() {
-		return name;
+		return shortName;
 	}
 
 	@Override

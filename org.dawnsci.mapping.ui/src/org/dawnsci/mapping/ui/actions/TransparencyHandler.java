@@ -27,7 +27,7 @@ public class TransparencyHandler extends AbstractHandler {
 
 		List<AbstractMapData> s = getListFromContext(evaluationContext);
 			if (s.size() == 1) {
-				MapPropertiesDialog d = new MapPropertiesDialog(Display.getDefault().getActiveShell(), s.get(0), fc.getArea(), pc);
+				MapPropertiesDialog d = new MapPropertiesDialog(Display.getDefault().getActiveShell(), s.get(0), pc,fc);
 				d.open();
 			}
 			

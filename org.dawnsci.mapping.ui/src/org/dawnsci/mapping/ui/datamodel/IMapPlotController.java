@@ -8,8 +8,6 @@ public interface IMapPlotController {
 	
 	void plotData(final double x, final double y, boolean hold);
 	
-	void updatePlot();
-	
 	void setTransparency(PlottableMapObject map);
 	
 	void bringToFront(PlottableMapObject map);

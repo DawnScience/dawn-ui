@@ -5,6 +5,7 @@ import java.util.List;
 import org.dawnsci.mapping.ui.datamodel.PlottableMapObject;
 import org.eclipse.dawnsci.analysis.api.tree.DataNode;
 import org.eclipse.dawnsci.analysis.api.tree.GroupNode;
+import org.eclipse.dawnsci.analysis.api.tree.Node;
 import org.eclipse.dawnsci.analysis.tree.impl.AttributeImpl;
 import org.eclipse.dawnsci.nexus.INexusFileFactory;
 import org.eclipse.dawnsci.nexus.NexusException;
@@ -310,5 +311,18 @@ public class MappingUtils {
 		if (r == 0) return 1;
 		
 		return r;
+	}
+
+	public static String getShortName(String name) {
+
+		long count = name.chars().filter(ch -> ch == Node.SEPARATOR.charAt(0)).count();
+
+		if (count < 2) {
+			return name;
+		} else {
+			int lastIndexOf = name.lastIndexOf(Node.SEPARATOR);
+			int last2 = name.lastIndexOf(Node.SEPARATOR,  lastIndexOf-1);
+			return name.substring(last2+1, lastIndexOf);
+		}
 	}
 }

@@ -64,11 +64,6 @@ public class MapPlotManagerTest {
 		plotManager.setPlotService(mockPlotService);
 		plotManager.init();
 		
-		plotManager.updatePlot();
-		
-		verify(mockPlotService,times(1)).getPlottingSystem("Map");
-		verify(mockPlotService,times(1)).getPlottingSystem("Detector Data");
-		
 		assertNull(plotManager.getTopMap());
 		
 		fileManager.loadFilesBlocking(new String[] {file.getAbsolutePath()});

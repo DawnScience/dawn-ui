@@ -18,6 +18,7 @@ import org.slf4j.LoggerFactory;
 public class MappedDataBlock implements LockableMapObject {
 
 	private String name;
+	private String shortName;
 	private String path;
 	ILazyDataset dataset;
 	private MapScanDimensions mapDims;
@@ -39,6 +40,7 @@ public class MappedDataBlock implements LockableMapObject {
 		this.range = calculateRange(dataset);
 		this.path = path;
 		this.live = live;
+		this.shortName = MappingUtils.getShortName(name);
 		
 	}
 	
@@ -59,7 +61,13 @@ public class MappedDataBlock implements LockableMapObject {
 	
 	@Override
 	public String toString() {
-		return name;
+		
+		if (canPlot()) {
+			return getMapObject().toString();
+			
+		}
+		
+		return shortName;
 	}
 
 	@Override
@@ -288,10 +296,13 @@ public class MappedDataBlock implements LockableMapObject {
 	}
 	
 	public AbstractMapData getMapObject() {
+		
+		if (!canPlot()) return null;
+		
 		if (mapRepresentation == null) {
 			if (mapDims.isRemappingRequired()) {
 
-				mapRepresentation = new ReMappedData(this.toString(), dataset.getSliceView() ,this, path, isLive());
+				mapRepresentation = new ReMappedData(this.name, dataset.getSliceView() ,this, path, isLive());
 				mapRepresentation.setLock(getLock());
 				if (isLive()) mapRepresentation.update();
 				range = mapRepresentation.getRange();
@@ -300,7 +311,7 @@ public class MappedDataBlock implements LockableMapObject {
 
 			} else {
 
-				mapRepresentation = new MappedData(this.toString(),dataset.getSliceView(),this, path, isLive());
+				mapRepresentation = new MappedData(this.name,dataset.getSliceView(),this, path, isLive());
 				mapRepresentation.setLock(getLock());
 				if (isLive()) mapRepresentation.update();
 				range = mapRepresentation.getRange();

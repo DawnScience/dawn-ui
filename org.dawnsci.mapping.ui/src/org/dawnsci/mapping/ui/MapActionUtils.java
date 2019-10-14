@@ -13,7 +13,6 @@ import org.dawnsci.mapping.ui.datamodel.AbstractMapData;
 import org.dawnsci.mapping.ui.datamodel.AssociatedImage;
 import org.dawnsci.mapping.ui.datamodel.IMapPlotController;
 import org.dawnsci.mapping.ui.datamodel.LiveStreamMapObject;
-import org.dawnsci.mapping.ui.datamodel.MappedDataArea;
 import org.dawnsci.mapping.ui.datamodel.MappedDataBlock;
 import org.dawnsci.mapping.ui.datamodel.MappedDataFile;
 import org.dawnsci.mapping.ui.datamodel.PlottableMapObject;
@@ -133,14 +132,14 @@ public class MapActionUtils {
 		return action;
 	}
 	
-	public static IAction getMapPropertiesAction(final AbstractMapData map, final IMapPlotController manager, final MappedDataArea area) {
+	public static IAction getMapPropertiesAction(final AbstractMapData map, final IMapPlotController manager, final IMapFileController fileManager) {
 		return new Action("Properties...") {
 			@Override
 			public void run() {
 				
 				MapPropertiesDialog dialog;
 				try {
-					dialog = new MapPropertiesDialog(Display.getDefault().getActiveShell(), map, area,manager);
+					dialog = new MapPropertiesDialog(Display.getDefault().getActiveShell(), map,manager,fileManager);
 					dialog.open();
 				} catch (Exception e) {
 					MessageDialog.openError(Display.getDefault()

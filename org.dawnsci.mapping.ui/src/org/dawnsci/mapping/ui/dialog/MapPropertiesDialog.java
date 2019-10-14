@@ -2,9 +2,10 @@ package org.dawnsci.mapping.ui.dialog;
 
 import java.util.List;
 
+import org.dawnsci.mapping.ui.api.IMapFileController;
 import org.dawnsci.mapping.ui.datamodel.AbstractMapData;
 import org.dawnsci.mapping.ui.datamodel.IMapPlotController;
-import org.dawnsci.mapping.ui.datamodel.MappedDataArea;
+import org.dawnsci.mapping.ui.datamodel.MapScanDimensions;
 import org.dawnsci.mapping.ui.datamodel.MappedDataBlock;
 import org.dawnsci.mapping.ui.datamodel.ReMappedData;
 import org.eclipse.jface.dialogs.Dialog;
@@ -32,14 +33,13 @@ import org.eclipse.swt.widgets.Spinner;
 public class MapPropertiesDialog extends Dialog {
 	
 	private AbstractMapData map;
-	private MappedDataArea area;
 	private IMapPlotController manager;
+	private IMapFileController fileManager;
 
-	public MapPropertiesDialog(Shell parentShell, AbstractMapData map, MappedDataArea area, IMapPlotController manager) {
+	public MapPropertiesDialog(Shell parentShell, AbstractMapData map, IMapPlotController manager, IMapFileController fileController) {
 		super(parentShell);
-		
+		this.fileManager = fileController;
 		this.map = map;
-		this.area = area;
 		this.manager = manager;
 	}
 	
@@ -90,7 +90,7 @@ public class MapPropertiesDialog extends Dialog {
 		});
 		
 		
-		 List<MappedDataBlock> suitableParents = area.findSuitableParentBlocks(map);
+		 List<MappedDataBlock> suitableParents = fileManager.getArea().findSuitableParentBlocks(map);
 		String[] dataBlockNames = new String[suitableParents.size()];
 		for (int i = 0; i < dataBlockNames.length; i++) dataBlockNames[i] = suitableParents.get(i).toString();
 		comboViewer.setInput(suitableParents);
@@ -133,7 +133,7 @@ public class MapPropertiesDialog extends Dialog {
 				public void widgetSelected(SelectionEvent e) {
 					shape[0] = xspin.getSelection();
 					rm.setShape(shape);
-					manager.updatePlot();
+					fileManager.registerUpdates(null);
 				}
 			});
 
@@ -148,10 +148,44 @@ public class MapPropertiesDialog extends Dialog {
 				public void widgetSelected(SelectionEvent e) {
 					shape[1] = yspin.getSelection();
 					rm.setShape(shape);
-					manager.updatePlot();
+					fileManager.registerUpdates(null);
 				}
 			});
 			
+		}
+		
+		//For now only consider scans with 1 extra dimension
+		//i.e. xanes or tomography maps
+		//Higher dimensions currently not nicely supported by the core code
+		
+		final MapScanDimensions mapDims = map.getParent().getMapDims();
+		
+		int[] nonXYScanDimensions = mapDims.getNonXYScanDimensions();
+		
+		if (nonXYScanDimensions != null) {
+			Label sliceLabel = new Label(container, SWT.NONE);
+			sliceLabel.setText("Slice");
+			
+			int i = map.getData().getShape()[nonXYScanDimensions[0]];
+			
+			int current = mapDims.getNonXYScanSlice(nonXYScanDimensions[0]);
+			
+			current = current == -1 ? 0 : current;
+			
+			final Scale slice = new Scale(container, SWT.NONE);
+			slice.setMaximum(i-1);
+			slice.setMinimum(0);
+			slice.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+			slice.setSelection(current);
+			slice.addSelectionListener(new SelectionAdapter() {
+				
+				@Override
+				public void widgetSelected(SelectionEvent e) {
+					mapDims.updateNonXYScanSlice(nonXYScanDimensions[0], slice.getSelection());
+					map.clearCachedMap();
+					fileManager.registerUpdates(null);
+				}
+			});
 		}
 		
 		return container;

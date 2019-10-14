@@ -83,6 +83,24 @@ public class MapScanDimensions {
 		}
 	}
 	
+	/**
+	 * Returns value of scan non-x/y dimension slice
+	 * 
+	 * or -1 if dim is not a non-x/y scan dimension
+	 * @param dim
+	 * @return
+	 */
+    public int getNonXYScanSlice(int dim) {
+    	
+		for (int i = 0; i < nonXYScanDimensions.length; i++) {
+			if (dim == nonXYScanDimensions[i]) {
+				return nonXYDimensionValues[i];
+			}
+		}
+		
+		return -1;
+	}
+	
 	public void updateNonXYScanSlice(int[] shape) {
 		
 		if (nonXYScanDimensions == null) return;

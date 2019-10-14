@@ -8,6 +8,7 @@ import org.eclipse.january.dataset.IDataset;
 import org.eclipse.january.dataset.IDynamicDataset;
 import org.eclipse.january.dataset.ILazyDataset;
 import org.eclipse.january.dataset.ShapeUtils;
+import org.eclipse.january.dataset.Slice;
 import org.eclipse.january.dataset.SliceND;
 import org.eclipse.january.metadata.AxesMetadata;
 import org.eclipse.january.metadata.MetadataFactory;
@@ -17,6 +18,8 @@ import org.slf4j.LoggerFactory;
 public abstract class AbstractMapData implements LockableMapObject{
 
 	private String name;
+	private String shortName;
+	private String nameSuffix = "";
 	protected String path;
 	protected IDataset map;
 	protected ILazyDataset baseMap;
@@ -38,6 +41,7 @@ public abstract class AbstractMapData implements LockableMapObject{
 		this.path = path;
 		this.oParent = this.parent = parent;
 		this.live = live;
+		this.shortName = MappingUtils.getShortName(name);
 		if (!live) range = calculateRange(map);
 	}
 	
@@ -94,6 +98,8 @@ public abstract class AbstractMapData implements LockableMapObject{
 		view.clearMetadata(null);
 		view.setShape(shape);
 		
+		buildSuffix(new SliceND(d.getShape()), ax);
+		
 		try {
 			AxesMetadata md = MetadataFactory.createMetadata(AxesMetadata.class, 2);
 			
@@ -115,6 +121,47 @@ public abstract class AbstractMapData implements LockableMapObject{
 		}
 		
 	}
+	
+	private void buildSuffix(SliceND slice, AxesMetadata m) {
+		
+		try {
+			ILazyDataset[] md = m.getAxes();
+			if (md == null) return;
+
+			StringBuilder builder = new StringBuilder(" ");
+
+			builder.append("[");
+			Slice[] s = slice.convertToSlice();
+			int[] shape = slice.getShape();
+			for (int i = 0 ; i < md.length; i++){
+				
+				if (md[i] == null || shape[i] != 1) {
+					builder.append(s[i].toString());
+					builder.append(",");
+					continue;
+				}
+				
+				
+				IDataset d = md[i].getSlice();
+				if (d == null || d.getSize() != 1){
+					builder.append(s[i].toString());
+				} else {
+					d.squeeze();
+					double val = d.getDouble();
+					builder.append(Double.toString(val));
+				}
+				builder.append(",");
+			}
+			
+			builder.setCharAt(builder.length()-1,']');
+			
+			nameSuffix = builder.toString();
+		} catch (Exception e) {
+			logger.warn("Could not build name suffix", e);
+		}
+		
+	}
+	
 	
 	public IDataset getMapForDims(int x, int y) {
 		try {
@@ -261,7 +308,7 @@ public abstract class AbstractMapData implements LockableMapObject{
 	
 	@Override
 	public String toString() {
-		return name;
+		return shortName + nameSuffix;
 	}
 
 	@Override
@@ -310,6 +357,10 @@ public abstract class AbstractMapData implements LockableMapObject{
 		this.map = null;
 		this.baseMap = map;
 		setRange(calculateRange(baseMap));
+	}
+	
+	public void clearCachedMap() {
+		map = null;
 	}
 	
 	@Override
