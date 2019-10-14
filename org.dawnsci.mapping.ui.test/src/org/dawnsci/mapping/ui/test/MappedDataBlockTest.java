@@ -45,8 +45,10 @@ public class MappedDataBlockTest {
 		IDataHolder data = LoaderFactory.getData(file.getAbsolutePath());
 		ILazyDataset lazyDataset = data.getLazyDataset(MapNexusFileBuilderUtils.DETECTOR_PATH);
 		MapScanDimensions msd = new MapScanDimensions(1, 0, 2);
+		
+		
 		gridScanBlock = new MappedDataBlock(MapNexusFileBuilderUtils.DETECTOR_PATH,
-				lazyDataset, file.getAbsolutePath(),msd,false);
+				lazyDataset, file.getAbsolutePath(),msd,null,false);
 		
 		MapNexusFileBuilderUtils.makeGridScanWithZandSum(file1.getAbsolutePath());
 		
@@ -54,7 +56,7 @@ public class MappedDataBlockTest {
 		lazyDataset = data.getLazyDataset(MapNexusFileBuilderUtils.DETECTOR_PATH);
 		msd = new MapScanDimensions(2, 1, 3);
 		gridScanBlock3D = new MappedDataBlock(MapNexusFileBuilderUtils.DETECTOR_PATH,
-				lazyDataset, file1.getAbsolutePath(), msd,false);
+				lazyDataset, file1.getAbsolutePath(), msd,null,false);
 		
 		MapNexusFileBuilderUtils.makeGridScanWithEnergyZ(file2.getAbsolutePath());
 		
@@ -62,7 +64,7 @@ public class MappedDataBlockTest {
 		lazyDataset = data.getLazyDataset(MapNexusFileBuilderUtils.DETECTOR_PATH);
 		msd = new MapScanDimensions(2, 1, 3);
 		gridScanBlockEnergy = new MappedDataBlock(MapNexusFileBuilderUtils.DETECTOR_PATH,
-				lazyDataset,file2.getAbsolutePath(),msd,false);
+				lazyDataset,file2.getAbsolutePath(),msd,null,false);
 		
 	}
 
@@ -138,7 +140,7 @@ public class MappedDataBlockTest {
 		
 		Object lock = new Object();
 		
-		MappedDataBlock liveBlock = new MappedDataBlock("live", dataset,"livePath", msd, true);
+		MappedDataBlock liveBlock = new MappedDataBlock("live", dataset,"livePath", msd,null, true);
 		liveBlock.setLock(lock);
 		ILazyDataset spectrum = liveBlock.getSpectrum(1, 1);
 		
@@ -163,7 +165,7 @@ public class MappedDataBlockTest {
 		axm.setAxis(1, axes.getAxes()[0]);
 		dataset.addMetadata(axm);
 		
-		MappedDataBlock liveBlock =  new MappedDataBlock("live", dataset,"livePath", msd, true);
+		MappedDataBlock liveBlock =  new MappedDataBlock("live", dataset,"livePath", msd,null, true);
 		Object lock = new Object();
 		liveBlock.setLock(lock);
 		liveBlock.update();

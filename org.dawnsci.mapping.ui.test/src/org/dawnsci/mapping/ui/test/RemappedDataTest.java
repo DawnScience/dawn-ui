@@ -30,7 +30,7 @@ public class RemappedDataTest {
 		axm.addAxis(0, axes.getxAxisForRemapping());
 		dataset.addMetadata(axm);
 		Object lock = new Object();
-		MappedDataBlock liveBlock = new MappedDataBlock("live", dataset,"livePath", msd, true);
+		MappedDataBlock liveBlock = new MappedDataBlock("live", dataset,"livePath", msd,null, true);
 		liveBlock.setLock(lock);
 		ReMappedData md = new ReMappedData("map", MappedDataBlockTest.getLiveLinearMap(), liveBlock, "livePath", true);
 		md.setLock(lock);

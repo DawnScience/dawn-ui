@@ -240,20 +240,12 @@ public class MapActionUtils {
 		return new Action("Dynamic Viewer...") {
 			@Override
 			public void run() {
-				
-				DynamicDialog dialog;
-				try {
-					dialog = new DynamicDialog(PlatformUI.getWorkbench().getDisplay().getActiveShell(), block);
-					dialog.open();
-				} catch (Exception e) {
-					MessageDialog.openError(Display.getDefault()
-							.getActiveShell(), "Error Properties Viewer",
-							"The following error occured while opening the Properties Viewer dialog: " + e);
-				}
-				
+
+				DynamicDialog.runDialog(PlatformUI.getWorkbench().getDisplay().getActiveShell(),
+						block, Activator.getService(IMapFileController.class));
 			}
 		};
-		
+
 	}
 	
 	public static IAction getSaveImageAction(final AssociatedImage image) {

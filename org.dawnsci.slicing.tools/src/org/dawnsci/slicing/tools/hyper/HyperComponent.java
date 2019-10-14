@@ -28,6 +28,7 @@ import org.eclipse.dawnsci.plotting.api.tool.IToolPageSystem;
 import org.eclipse.dawnsci.plotting.api.trace.ColorOption;
 import org.eclipse.dawnsci.plotting.api.trace.ILineTrace;
 import org.eclipse.dawnsci.plotting.api.trace.ITrace;
+import org.eclipse.dawnsci.plotting.api.trace.MetadataPlotUtils;
 import org.eclipse.draw2d.ColorConstants;
 import org.eclipse.january.dataset.DatasetFactory;
 import org.eclipse.january.dataset.IDataset;
@@ -497,7 +498,7 @@ public class HyperComponent {
 		};
 	}
 
-	/**
+	/**	
 	 * Method to override if something needs to be updated on a right region change
 	 */
 	public void updateOnRightRegionChange(IROI roi) {
@@ -511,6 +512,10 @@ public class HyperComponent {
 	protected void updateLeft(IRegion r, IROI rb) {
 
 		rightJob.profile(r,rb);
+	}
+	
+	public IDataset getLeftData() {
+		return MetadataPlotUtils.getDataFromImageTrace(mainSystem);
 	}
 	
 }
