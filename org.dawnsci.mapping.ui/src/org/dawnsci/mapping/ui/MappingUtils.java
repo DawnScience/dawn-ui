@@ -1,6 +1,5 @@
 package org.dawnsci.mapping.ui;
 
-import java.util.Arrays;
 import java.util.List;
 
 import org.dawnsci.mapping.ui.datamodel.PlottableMapObject;
@@ -300,5 +299,16 @@ public class MappingUtils {
 					logger.error("Error closing file", e);
 				}
 		}
+	}
+	
+	public  static int getSqueezedRank(long[] maxShape) {
+		int r = 0;
+		
+		for (long i : maxShape) if (i != 1) r++;
+		
+		//no zero ranked map scans.
+		if (r == 0) return 1;
+		
+		return r;
 	}
 }

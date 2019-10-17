@@ -3,6 +3,7 @@ package org.dawnsci.mapping.ui.datamodel;
 import java.util.Arrays;
 import java.util.List;
 
+import org.dawnsci.mapping.ui.MappingUtils;
 import org.eclipse.dawnsci.analysis.api.io.IDataHolder;
 import org.eclipse.january.IMonitor;
 import org.eclipse.january.dataset.CompoundDataset;
@@ -11,6 +12,7 @@ import org.eclipse.january.dataset.DatasetFactory;
 import org.eclipse.january.dataset.DatasetUtils;
 import org.eclipse.january.dataset.DoubleDataset;
 import org.eclipse.january.dataset.IDataset;
+import org.eclipse.january.dataset.IDynamicDataset;
 import org.eclipse.january.dataset.ILazyDataset;
 import org.eclipse.january.dataset.RGBDataset;
 import org.eclipse.january.dataset.Slice;
@@ -194,9 +196,15 @@ public class MappedFileFactory {
 				if (axes.get(i) == null) continue;
 				ILazyDataset lz = dataHolder.getLazyDataset(axes.get(i));
 				lz.setName(axes.get(i));
-				int[] ss = lz.getShape();
 				
-				if (ss.length == 1) {
+				int rank = lz.getRank();
+				
+				if (lz instanceof IDynamicDataset) {
+					long[] maxShape = Arrays.stream(((IDynamicDataset)lz).getMaxShape()).asLongStream().toArray();
+					rank = MappingUtils.getSqueezedRank(maxShape);
+				}
+				
+				if (rank == 1) {
 					axm.addAxis(i, lz);
 					
 					String second = null;
@@ -212,7 +220,7 @@ public class MappedFileFactory {
 					IDataset ds = lz.getSlice();
 					double min = ds.min(true).doubleValue();
 					double max = ds.max(true).doubleValue();
-					ILazyDataset s = DatasetFactory.createLinearSpace(DoubleDataset.class,min, max, ss[i]);
+					ILazyDataset s = DatasetFactory.createLinearSpace(DoubleDataset.class,min, max, lz.getShape()[i]);
 					s.setName(axes.get(i));
 					axm.addAxis(i, s);
 				}

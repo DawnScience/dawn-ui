@@ -833,7 +833,7 @@ public class MapPlotManager implements IMapPlotController{
 		IDataset[] ax = MetadataPlotUtils.getAxesForDimension(m, 0);
 		
 		ILineTrace lt = mapPlot.createLineTrace(ob.getLongName());
-		lt.setData(ax[1], ax[0]);
+		lt.setData(ax[1].squeeze(), ax[0].squeeze());
 		lt.setPointStyle(PointStyle.FILLED_SQUARE);
 		lt.setPointSize(POINTSIZE);
 		

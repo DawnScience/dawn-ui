@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.dawnsci.mapping.ui.MappingUtils;
 import org.dawnsci.mapping.ui.datamodel.AssociatedImageBean;
 import org.dawnsci.mapping.ui.datamodel.MapBean;
 import org.dawnsci.mapping.ui.datamodel.MappedBlockBean;
@@ -68,7 +69,7 @@ public class MapBeanBuilder {
 			int squeezedRank = rank;
 			
 			if (dataNode.getMaxShape() != null) {
-				squeezedRank = getSqueezedRank(dataNode.getMaxShape());
+				squeezedRank = MappingUtils.getSqueezedRank(dataNode.getMaxShape());
 			}
 			
 			String[] axNames = new String[rank];
@@ -181,15 +182,6 @@ public class MapBeanBuilder {
 		
 		return null;
 	}
-	
-	private static int getSqueezedRank(long[] maxShape) {
-		int r = 0;
-		
-		for (long i : maxShape) if (i != 1) r++;
-		
-		return r;
-	}
-
 
 	private static void populateData(MappedDataFileBean bean, List<DataInfo> infoList, String[] xyNames) {
 		
