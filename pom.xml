@@ -20,6 +20,7 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/ma
 <module>org.dawnsci.base.product.feature</module>
 <module>org.dawnsci.base.site</module>
 <module>org.dawnsci.breadcrumb.navigation</module>
+<module>org.dawnsci.commandserver.processing</module>
 <module>org.dawnsci.commandserver.processing.feature</module>
 <module>org.dawnsci.common.live</module>
 <module>org.dawnsci.common.widgets</module>
