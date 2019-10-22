@@ -22,7 +22,7 @@
          version="0.0.0"/>
 
    <includes
-         id="org.dawnsci.marketplace"
+         id="org.dawnsci.marketplaceclient.feature"
          version="0.0.0"/>
 
    <plugin
