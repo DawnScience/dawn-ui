@@ -4,6 +4,8 @@ import java.util.Collections;
 import java.util.List;
 
 import org.dawnsci.january.ui.utils.SelectionUtils;
+import org.dawnsci.mapping.ui.Activator;
+import org.dawnsci.mapping.ui.api.IMapFileController;
 import org.dawnsci.mapping.ui.datamodel.MappedDataBlock;
 import org.dawnsci.mapping.ui.dialog.DynamicDialog;
 import org.eclipse.core.commands.AbstractHandler;
@@ -22,9 +24,11 @@ public class DynamicViewerHandler extends AbstractHandler {
 		
 		List<MappedDataBlock> s = getListFromContext(evaluationContext);
 		if (isValidBlockList(s)) { 
-			DynamicDialog dialog = new DynamicDialog(PlatformUI.getWorkbench().getDisplay().getActiveShell(), s.get(0));
-			dialog.open();
-		}
+			MappedDataBlock mdb = s.get(0);
+			DynamicDialog.runDialog(PlatformUI.getWorkbench().getDisplay().getActiveShell(),
+					mdb, Activator.getService(IMapFileController.class));
+
+			}
 		
 		return null;
 	}

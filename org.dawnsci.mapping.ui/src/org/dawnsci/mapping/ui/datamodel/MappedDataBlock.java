@@ -23,17 +23,20 @@ public class MappedDataBlock implements LockableMapObject {
 	ILazyDataset dataset;
 	private MapScanDimensions mapDims;
 	private boolean live = false;
+	
+	private  MappedDataFile parentFile;
 
 	private AbstractMapData mapRepresentation;
 	
 	private double[] range;
 
 	private boolean plotted;
+
 	private Object lock;
 	
 	private static final Logger logger = LoggerFactory.getLogger(MappedDataBlock.class);
 	
-	public MappedDataBlock(String name, ILazyDataset dataset, String path, MapScanDimensions dims, boolean live) {
+	public MappedDataBlock(String name, ILazyDataset dataset, String path, MapScanDimensions dims, MappedDataFile file, boolean live) {
 		this.name = name;
 		this.dataset = dataset;
 		this.mapDims = dims;
@@ -41,7 +44,7 @@ public class MappedDataBlock implements LockableMapObject {
 		this.path = path;
 		this.live = live;
 		this.shortName = MappingUtils.getShortName(name);
-		
+		this.parentFile = file;
 	}
 	
 	public int getScanRank() {
@@ -66,7 +69,7 @@ public class MappedDataBlock implements LockableMapObject {
 			return getMapObject().toString();
 			
 		}
-		
+
 		return shortName;
 	}
 
@@ -420,6 +423,11 @@ public class MappedDataBlock implements LockableMapObject {
 		// TODO Auto-generated method stub
 		return null;
 	}
+	
+	public MappedDataFile getParentFile() {
+		return parentFile;
+	}
+
 }
 	
 

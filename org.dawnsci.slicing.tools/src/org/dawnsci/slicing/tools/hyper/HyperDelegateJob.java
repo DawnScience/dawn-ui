@@ -87,7 +87,9 @@ public class HyperDelegateJob extends Job {
 			List<IDataset> outputAxes = this.reducer.getAxes();
 
 			if (!this.reducer.isOutput1D()) {
-				output.setName("Image");
+				if (output.getName() == null || output.getName().isEmpty()) {
+					output.setName("Image");
+				}
 				updateImage(plot,output,outputAxes);
 			} else {
 

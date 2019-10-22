@@ -46,7 +46,7 @@ public class MappedFileFactory {
 			}
 			
 			try {
-				MappedDataBlock block = setUpBlock(path, name, b, bean.getLiveBean(),bean.getScanRank(), dataHolder);
+				MappedDataBlock block = setUpBlock(path, name, b, bean.getLiveBean(),bean.getScanRank(), dataHolder,file);
 				file.addMapObject(name, block);
 			} catch (Exception e) {
 				logger.error("Could not build block named " + name, e);
@@ -84,7 +84,7 @@ public class MappedFileFactory {
 	}
 	
 	
-	private static MappedDataBlock setUpBlock(String path, String blockName, MappedBlockBean bean, LiveDataBean live, int scanRank, IDataHolder dataHolder) {
+	private static MappedDataBlock setUpBlock(String path, String blockName, MappedBlockBean bean, LiveDataBean live, int scanRank, IDataHolder dataHolder, MappedDataFile file) {
 		MappedDataBlock block = null;
 		
 		MapScanDimensions msd = new MapScanDimensions(bean.getxDim(), bean.getyDim(), scanRank);
@@ -95,7 +95,7 @@ public class MappedFileFactory {
 		lz.clearMetadata(AxesMetadata.class);
 		AxesMetadata axm = checkAndBuildAxesMetadata(axesNames, bean, dataHolder);
 		lz.setMetadata(axm);
-		block = new MappedDataBlock(blockName, lz,path,msd,live != null);
+		block = new MappedDataBlock(blockName, lz,path,msd,file,live != null);
 
 		return block;
 	}

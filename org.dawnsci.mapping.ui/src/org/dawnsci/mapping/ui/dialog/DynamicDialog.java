@@ -3,7 +3,10 @@ package org.dawnsci.mapping.ui.dialog;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.dawnsci.mapping.ui.api.IMapFileController;
+import org.dawnsci.mapping.ui.datamodel.MappedData;
 import org.dawnsci.mapping.ui.datamodel.MappedDataBlock;
+import org.dawnsci.mapping.ui.datamodel.MappedDataFile;
 import org.dawnsci.slicing.tools.hyper.Hyper4DImageReducer;
 import org.dawnsci.slicing.tools.hyper.Hyper4DMapReducer;
 import org.dawnsci.slicing.tools.hyper.HyperComponent;
@@ -15,8 +18,12 @@ import org.eclipse.january.dataset.IntegerDataset;
 import org.eclipse.january.dataset.Slice;
 import org.eclipse.january.metadata.AxesMetadata;
 import org.eclipse.jface.dialogs.Dialog;
+import org.eclipse.jface.dialogs.IDialogConstants;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
@@ -30,6 +37,8 @@ public class DynamicDialog extends Dialog {
 
 	HyperComponent component;
 	MappedDataBlock block;
+	
+	List<MappedData> stashed = new ArrayList<>();
 	
 	public DynamicDialog(Shell parentShell, MappedDataBlock block) {
 		super(parentShell);
@@ -112,4 +121,41 @@ public class DynamicDialog extends Dialog {
 		return super.close();
 	}
 	
+	protected void createButtonsForButtonBar(Composite parent) {
+		Button axisButton = createButton(parent, IDialogConstants.NO_ID, "Keep Map", false);
+		
+		axisButton.addSelectionListener(new SelectionAdapter() {
+			
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				IDataset d = component.getLeftData();
+				MappedData m = new MappedData(d.getName(), d, block, block.getPath(), false);
+				stashed.add(m);
+				
+			}
+
+		});
+		
+		createButton(parent, IDialogConstants.OK_ID,"Close", false);
+	}
+	
+	public List<MappedData> getStashedMaps() {
+		return stashed;
+	}
+	
+	public static void runDialog(Shell shell, MappedDataBlock block, IMapFileController controller) {
+		DynamicDialog dialog = new DynamicDialog(shell, block);
+		dialog.open();
+
+		List<MappedData> stashedMaps = dialog.getStashedMaps();
+
+		if (!dialog.getStashedMaps().isEmpty()) {
+			MappedDataFile pf = block.getParentFile();
+			for (MappedData m : stashedMaps) {
+				pf.addMapObject(m.toString(), m);
+			}
+
+			controller.registerUpdates(pf);
+		}
+	}
 }
