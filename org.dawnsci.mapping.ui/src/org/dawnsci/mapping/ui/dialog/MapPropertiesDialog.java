@@ -171,9 +171,10 @@ public class MapPropertiesDialog extends Dialog {
 			int current = mapDims.getNonXYScanSlice(nonXYScanDimensions[0]);
 			
 			current = current == -1 ? 0 : current;
+			int max = i -1;
 			
 			final Scale slice = new Scale(container, SWT.NONE);
-			slice.setMaximum(i-1);
+			slice.setMaximum(max);
 			slice.setMinimum(0);
 			slice.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 			slice.setSelection(current);
@@ -181,6 +182,12 @@ public class MapPropertiesDialog extends Dialog {
 				
 				@Override
 				public void widgetSelected(SelectionEvent e) {
+					
+					int s = slice.getSelection();
+					
+					//grow with scan when slider at end
+					mapDims.setNonScanLocked(!(s == max));
+
 					mapDims.updateNonXYScanSlice(nonXYScanDimensions[0], slice.getSelection());
 					map.clearCachedMap();
 					fileManager.registerUpdates(null);

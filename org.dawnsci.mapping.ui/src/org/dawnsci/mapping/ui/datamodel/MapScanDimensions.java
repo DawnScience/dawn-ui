@@ -19,6 +19,8 @@ public class MapScanDimensions {
 	private int[] nonXYDimensionValues;
 	private int scanRank;
 	
+	private boolean nonScanLocked = false;
+	
 	public MapScanDimensions(int xDim, int yDim, int scanRank) {
 		this.xDim = xDim;
 		this.yDim = yDim;
@@ -104,6 +106,8 @@ public class MapScanDimensions {
 	public void updateNonXYScanSlice(int[] shape) {
 		
 		if (nonXYScanDimensions == null) return;
+		
+		if (nonScanLocked) return;
 		
 		for (int i = 0 ; i < shape.length; i++) {
 			if (i == xDim || i == yDim) continue;
@@ -263,4 +267,9 @@ public class MapScanDimensions {
 		
 		return dataDims;
 	}
+	
+	public void setNonScanLocked(boolean nonScanLocked) {
+		this.nonScanLocked = nonScanLocked;
+	}
+
 }

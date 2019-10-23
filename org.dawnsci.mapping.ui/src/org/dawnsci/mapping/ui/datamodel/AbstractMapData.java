@@ -7,7 +7,6 @@ import org.eclipse.january.MetadataException;
 import org.eclipse.january.dataset.IDataset;
 import org.eclipse.january.dataset.IDynamicDataset;
 import org.eclipse.january.dataset.ILazyDataset;
-import org.eclipse.january.dataset.ShapeUtils;
 import org.eclipse.january.dataset.Slice;
 import org.eclipse.january.dataset.SliceND;
 import org.eclipse.january.metadata.AxesMetadata;
@@ -122,7 +121,7 @@ public abstract class AbstractMapData implements LockableMapObject{
 		
 	}
 	
-	private void buildSuffix(SliceND slice, AxesMetadata m) {
+	protected void buildSuffix(SliceND slice, AxesMetadata m) {
 		
 		try {
 			ILazyDataset[] md = m.getAxes();
@@ -268,15 +267,9 @@ public abstract class AbstractMapData implements LockableMapObject{
 			long preSlice = System.currentTimeMillis();
 			IDataset slice = baseMap.getSlice(mapSlice);
 			logger.info("Slice of data from {} took {} ms", name, (System.currentTimeMillis()-preSlice));
-			if (!mapDims.isRemappingRequired() && slice.getRank() != 2) {
-				int[] ss = ShapeUtils.squeezeShape(slice.getShape(), false);
-				if (ss.length == 1) {
-					int[] s2d = new int[]{1, ss[0]};
-					slice.setShape(s2d);
-				} else {
-					slice.squeeze();
-				}
-			}
+			
+			
+			slice = sanitizeRank(slice, mapDims);
 
 			slice = LivePlottingUtils.cropNanValuesFromAxes(slice,!mapDims.isRemappingRequired());
 			if (slice == null) return null;
@@ -284,9 +277,7 @@ public abstract class AbstractMapData implements LockableMapObject{
 			
 			logger.info("Update of data from {} took {} ms", name, (System.currentTimeMillis()-startTime));
 			return slice;
-			
-//			updateRemappedData(null);
-			
+
 		} catch (DatasetException e) {
 			logger.warn("Could not slice data",e);
 		} catch (Exception e) {
@@ -296,6 +287,8 @@ public abstract class AbstractMapData implements LockableMapObject{
 		return null;
 
 	}
+	
+	protected abstract IDataset sanitizeRank(IDataset data, MapScanDimensions dims);
 	
 	public abstract ILazyDataset getData();
 	

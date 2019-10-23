@@ -1,7 +1,5 @@
 package org.dawnsci.mapping.ui.datamodel;
 
-import java.util.Arrays;
-
 import org.dawnsci.mapping.ui.LivePlottingUtils;
 import org.dawnsci.mapping.ui.MappingUtils;
 import org.eclipse.dawnsci.plotting.api.trace.MetadataPlotUtils;
@@ -12,7 +10,9 @@ import org.eclipse.january.dataset.DatasetUtils;
 import org.eclipse.january.dataset.IDataset;
 import org.eclipse.january.dataset.IDynamicDataset;
 import org.eclipse.january.dataset.ILazyDataset;
+import org.eclipse.january.dataset.SliceND;
 import org.eclipse.january.metadata.AxesMetadata;
+import org.eclipse.january.metadata.MetadataFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -158,5 +158,47 @@ public class ReMappedData extends AbstractMapData {
 	@Override
 	public ILazyDataset getData() {
 		return baseMap;
+	}
+
+	@Override
+	protected IDataset sanitizeRank(IDataset data, MapScanDimensions dims) {
+		if (data.getRank() == 1) {
+			return data;
+		}
+		
+		//should be same for x and y
+		int dim = dims.getxDim();
+		
+		AxesMetadata ax = data.getFirstMetadata(AxesMetadata.class);
+		
+		if (ax == null) return null;
+		
+		ILazyDataset[] axes = ax.getAxis(dim);
+		
+		int[] oShape = data.getShape();
+		
+		int[] shape = new int[] {oShape[dim]};
+		
+		IDataset view = data.getSliceView();
+		view.clearMetadata(null);
+		view.setShape(shape);
+		
+		buildSuffix(new SliceND(data.getShape()), ax);
+		
+		try {
+			AxesMetadata md = MetadataFactory.createMetadata(AxesMetadata.class, 1);
+			
+			for (ILazyDataset l : axes) {
+				md.addAxis(0, l.getSliceView().squeezeEnds());
+			}
+			
+			view.setMetadata(md);
+			
+			return view;
+			
+		} catch (Exception e) {
+			logger.error("Could not create axes metadata",e);
+			return null;
+		}
 	}
 }
