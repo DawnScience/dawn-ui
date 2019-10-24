@@ -18,6 +18,7 @@ import org.dawnsci.datavis.model.DataOptions;
 import org.dawnsci.datavis.model.IFileController;
 import org.dawnsci.datavis.model.LoadedFile;
 import org.eclipse.dawnsci.analysis.api.tree.Node;
+import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.ColumnViewerToolTipSupport;
@@ -30,9 +31,7 @@ import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.layout.FillLayout;
-import org.eclipse.swt.layout.RowData;
-import org.eclipse.swt.layout.RowLayout;
+import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 
 /**
@@ -41,7 +40,7 @@ import org.eclipse.swt.widgets.Composite;
  * @author Timothy Spain, timothy.spain@diamond.ac.uk
  *
  */
-public class ExpressionDialogDatasetRegion {
+public class ExpressionDialogDatasetRegion extends Composite {
 
 	private Map<Did, String> varFromDataID;
 	private Map<String, DataOptions> dataFromVar;
@@ -53,10 +52,7 @@ public class ExpressionDialogDatasetRegion {
 	private Map<String, LoadedFile> fileNamespaceMap;
 
 	private TableViewer datasetVariableViewer;
-	
-	private int datasetWidth;
-	private int varWidth;
-	private int tableHeight;
+
 	
 	/**
 	 * Creates the new part, and performs the initial set-up
@@ -65,7 +61,8 @@ public class ExpressionDialogDatasetRegion {
 	 * @param selected
 	 * 				Interface to the initially selected data
 	 */
-	public ExpressionDialogDatasetRegion(IFileController controller, DataOptions selected) {
+	public ExpressionDialogDatasetRegion(Composite parent, IFileController controller, DataOptions selected) {
+		super(parent, SWT.None);
 		varFromDataID = new HashMap<>();
 		dataFromVar = new HashMap<>();
 		
@@ -79,6 +76,8 @@ public class ExpressionDialogDatasetRegion {
 		this.controller = controller;
 
 		mapLoadedFiles(this.controller.getLoadedFiles());
+		
+		createFileDataCompo();
 	}
 	
 	/**
@@ -112,49 +111,6 @@ public class ExpressionDialogDatasetRegion {
 		return dataFromVar.keySet();
 	}
 	
-	/**
-	 * Sets the width in pixels of the 'Dataset' column in the table.
-	 * @param dWidth
-	 * 				Width desired.
-	 */
-	public void setDatasetWidth(int dWidth) {
-		datasetWidth = dWidth;
-	}
-	
-	/**
-	 * Sets the width in pixels of the 'var' column in the table.
-	 * @param vWidth
-	 * 				Width desired.
-	 */
-	public void setVarWidth(int vWidth) {
-		varWidth = vWidth;
-	}
-
-	/**
-	 * Sets the height in pixels of the table.
-	 * @param tHeight
-	 * 				Height desired.
-	 */
-	public void setTableHeight(int tHeight) {
-		tableHeight = tHeight;
-	}
-	
-	/**
-	 * Performs the action of generating the UI elements.
-	 * @param parent
-	 * 				parent Composite to use.
-	 * @return
-	 * 		the new Composite.
-	 */
-	public Composite createComposite(Composite parent) {
-		Composite datasetsCompo = new Composite(parent, SWT.NONE);
-		datasetsCompo.setLayout(new RowLayout(SWT.VERTICAL));
-
-		createFileDataCompo(datasetsCompo, principalFile);
-		
-		return datasetsCompo;
-	}
-	
 	private class Did {
 		String f;
 		String d;
@@ -182,12 +138,11 @@ public class ExpressionDialogDatasetRegion {
 		}
 	}
 
-	private Composite createFileDataCompo(Composite parent, LoadedFile fileLoaded) {
-		Composite fileDataCompo = new Composite(parent, SWT.NONE);
-		fileDataCompo.setLayout(new FillLayout(SWT.HORIZONTAL));
+	private void createFileDataCompo() {
+		this.setLayout(new GridLayout());
 		
-		final ComboViewer availableFilesViewer = new ComboViewer(fileDataCompo, SWT.READ_ONLY);
-		availableFilesViewer.getCombo().setLayoutData(new RowData(varWidth + datasetWidth, tableHeight));
+		final ComboViewer availableFilesViewer = new ComboViewer(this, SWT.READ_ONLY);
+		availableFilesViewer.getCombo().setLayoutData(GridDataFactory.fillDefaults().create());
 		
 		availableFilesViewer.setContentProvider(ArrayContentProvider.getInstance());
 		availableFilesViewer.setLabelProvider(new LabelProvider() {
@@ -206,25 +161,22 @@ public class ExpressionDialogDatasetRegion {
 		
 		availableFilesViewer.addSelectionChangedListener(new FileSelectionListener());
 
-		availableFilesViewer.setSelection(new StructuredSelection(fileLoaded));
-		
-		
-		fileDataCompo.setLayout(new RowLayout(SWT.VERTICAL));
+		availableFilesViewer.setSelection(new StructuredSelection(principalFile));
 
 		// Table of variable names and Datasets
-		datasetVariableViewer = new TableViewer(fileDataCompo, SWT.FULL_SELECTION | SWT.BORDER);
+		datasetVariableViewer = new TableViewer(this, SWT.FULL_SELECTION | SWT.BORDER);
 		datasetVariableViewer.setContentProvider(ArrayContentProvider.getInstance());
 		ColumnViewerToolTipSupport.enableFor(datasetVariableViewer);
-
+		datasetVariableViewer.getTable().setLayoutData(GridDataFactory.fillDefaults().grab(true, true).create());
 		// short variable name column
 		TableViewerColumn variableCol = new TableViewerColumn(datasetVariableViewer, SWT.NONE);
-		variableCol.getColumn().setWidth(varWidth);
+		variableCol.getColumn().setWidth(200);
 		variableCol.getColumn().setText("var");
 		variableCol.setLabelProvider(new VarLabelProvider());
 		
 		// Dataset name column
 		TableViewerColumn datasetCol = new TableViewerColumn(datasetVariableViewer, SWT.NONE);
-		datasetCol.getColumn().setWidth(datasetWidth);
+		datasetCol.getColumn().setWidth(200);
 		datasetCol.getColumn().setText("Dataset");
 		datasetCol.setLabelProvider(new ColumnLabelProvider() {
 			@Override
@@ -240,9 +192,8 @@ public class ExpressionDialogDatasetRegion {
 		
 		datasetVariableViewer.getTable().setHeaderVisible(true);
 		datasetVariableViewer.getTable().setLinesVisible(true);
-		datasetVariableViewer.setInput(fileLoaded.getDataOptions());
+		datasetVariableViewer.setInput(principalFile.getDataOptions());
 		
-		return fileDataCompo;
 	}
 	
 	private class FileSelectionListener implements ISelectionChangedListener {
