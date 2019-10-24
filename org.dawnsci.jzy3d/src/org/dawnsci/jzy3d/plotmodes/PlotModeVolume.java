@@ -22,9 +22,11 @@ public class PlotModeVolume extends AbstractJZY3DImagePlotMode {
 
 	private static final Logger logger = LoggerFactory.getLogger(PlotModeVolume.class);
 	
+	private static final String[] options = {"X","Y","Z"};
+	
 	@Override
 	public String[] getOptions() {
-		return new String[] {"X","Y","Z"};
+		return options;
 	}
 
 	@Override
@@ -51,7 +53,12 @@ public class PlotModeVolume extends AbstractJZY3DImagePlotMode {
 	@Override
 	public IDataset[] sliceForPlot(ILazyDataset lz, SliceND slice, Object[] options, IPlottingSystem<?> system) throws Exception {
 		IDataset[] data = sliceForPlotInner(lz, slice, options, system);
-		IDataset d = data[0];
+		Dataset d = DatasetUtils.convertToDataset(data[0]);
+		int[] pA = getPermutationArray(options);
+		d = d.transpose(pA);
+		
+		d.squeeze();
+		
 		AxesMetadata metadata = d.getFirstMetadata(AxesMetadata.class);
 		List<IDataset> ax = null;
 		
@@ -81,6 +88,67 @@ public class PlotModeVolume extends AbstractJZY3DImagePlotMode {
 		return data;
 	}
 	
+	/**
+	 *Take options, return array with
+     *Z index at lowest position
+	 *Y index at mid
+     *X index at highest
+     *Empty string indices remain unchanged
+     *<p>
+     *i.e. {"Y","X","","Z"};<p>
+     *Z = 3 -> 0,<p>
+     *Y = 0 -> 1,<p>
+     *X = 1 -> 3,<p>
+     *"" = 2 -> 2,<p>
+     * returns {3,0,2,1};
+     * <p>
+	 * Mapping the input to {"Z","Y","X"} while maintaining gaps
+	 * @param options
+	 * @return
+	 */
+	protected int[] getPermutationArray(Object[] options) {
+		
+		int len = options.length;
+		
+		assert len >= 3;
+		
+		int[] perm = new int[len];
+		
+		String[] volop = getOptions();
+		
+		int[] opPos = new int[volop.length];
+		
+		int count = 0;
+		
+		//fill the sliced dims with the index
+		//keep track of other dims
+		for (int i = 0 ; i < len; i++) {
+			if (options[i].toString().isEmpty()) {
+				perm[i] = i;
+			} else {
+				opPos[count++] = i;
+			}
+		}
+		
+		//some debug checks
+		assert count == 3;//X,Y,Z
+		assert count == opPos.length;
+		
+		//go through other dims and assign X,Y,Z
+		for (int p : opPos) {
+			String o = options[p].toString();
+			if (o.equals(volop[0])) {
+				perm[opPos[2]] = p;
+			} else if (o.equals(volop[1])){
+				perm[opPos[1]] = p;
+			} else {
+				perm[opPos[0]] = p;
+			}
+		}
+		
+		return perm;
+	}
+	
 	private void setData(ITrace trace, IDataset d, IDataset[] axes) {
 		if (trace instanceof VolumeTraceImpl) {
 			((VolumeTraceImpl)trace).setData(d, axes,d.min(true),d.max(true));
@@ -92,8 +160,6 @@ public class PlotModeVolume extends AbstractJZY3DImagePlotMode {
 		Dataset data = DatasetUtils.convertToDataset(lz.getSlice(slice));
 		logger.info("Slice time {} ms for slice {} of {}", (System.currentTimeMillis()-t), slice.toString(), lz.getName());
 		data.setErrors(null);
-		data.squeeze();
-		if (data.getRank() != 3) return null;
 		return new IDataset[]{data};
 	}
 
