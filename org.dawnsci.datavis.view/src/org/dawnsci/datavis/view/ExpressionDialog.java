@@ -27,16 +27,15 @@ import org.eclipse.january.dataset.IDataset;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
-import org.eclipse.swt.graphics.GC;
-import org.eclipse.swt.layout.FormAttachment;
-import org.eclipse.swt.layout.FormData;
-import org.eclipse.swt.layout.FormLayout;
+import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
@@ -59,11 +58,12 @@ public class ExpressionDialog extends Dialog {
 	private DataOptions selected;
 	
 	private IExpressionService service;
+	private IFileController controller;
 
 	private ExpressionApplier applier;
 	private String expression;
 	
-	private String expressionName = "expr";
+	private String expressionName = "Result";
 	private DataOptions result = null;
 
 	private Collection<String> varsNamesToLoad;
@@ -72,10 +72,6 @@ public class ExpressionDialog extends Dialog {
 	
 	private Label shapeLabel;
 	private Label resultLabel;
-	
-	// Hardcoded layout
-	private int varWidth = 50;
-	private int datasetWidth = 400;
 	
 	
 	protected ExpressionDialog(Shell parentShell) {
@@ -98,8 +94,9 @@ public class ExpressionDialog extends Dialog {
 		
 		this.service = service;
 		this.selected = input;
+		this.controller = controller;
 		
-		datasetPart = new ExpressionDialogDatasetRegion(controller, input);
+		
 	}
 	
 	@Override
@@ -108,11 +105,9 @@ public class ExpressionDialog extends Dialog {
 		
 		container.setLayout(new GridLayout(2, true));
 		
-		datasetPart.setDatasetWidth(datasetWidth);
-		datasetPart.setVarWidth(varWidth);
-		datasetPart.setTableHeight(DIALOG_DEFAULT_BOUNDS);
+		datasetPart = new ExpressionDialogDatasetRegion(container, controller, selected);
+		datasetPart.setLayoutData(GridDataFactory.fillDefaults().grab(true, true).create());
 		
-		datasetPart.createComposite(container);
 		createRightColumn(container);
 		
 		return container;
@@ -134,9 +129,28 @@ public class ExpressionDialog extends Dialog {
 	
 	
 	private Composite createRightColumn(Composite parent) {
+		
 		Composite expressionComposite = new Composite(parent, SWT.NONE);
+		expressionComposite.setLayout(new GridLayout(2,false));
+        expressionComposite.setLayoutData(GridDataFactory.fillDefaults().grab(true, true).create());
+		
 
-		Text expressionText = new Text(expressionComposite, SWT.MULTI | SWT.BORDER | SWT.WRAP | SWT.V_SCROLL);
+		Text expressionNameText = new Text(expressionComposite, SWT.BORDER);
+		expressionNameText.setText(this.expressionName);
+		expressionNameText.setEditable(true);
+		expressionNameText.setLayoutData(GridDataFactory.fillDefaults().create());
+		expressionNameText.addModifyListener(new ModifyListener() {
+			@Override
+			public void modifyText(ModifyEvent e) {
+				expressionName = alphaNumerize(((Text) e.getSource()).getText());
+			}
+		});
+		
+		Label eqLabel = new Label(expressionComposite, SWT.CENTER);
+		eqLabel.setText("=");
+        
+		Text expressionText = new Text(expressionComposite, SWT.MULTI | SWT.BORDER | SWT.WRAP);
+		expressionText.setLayoutData(GridDataFactory.fillDefaults().grab(true, true).span(2, 1).create());
 		expressionText.setEditable(true);
 		expressionText.addModifyListener(new ModifyListener() {
 			@Override
@@ -155,74 +169,18 @@ public class ExpressionDialog extends Dialog {
 			}
 		});
 		
-		Text expressionNameText = new Text(expressionComposite, SWT.BORDER);
-		expressionNameText.setText(this.expressionName);
-		expressionNameText.setEditable(true);
-		expressionNameText.addModifyListener(new ModifyListener() {
-			@Override
-			public void modifyText(ModifyEvent e) {
-				expressionName = alphaNumerize(((Text) e.getSource()).getText());
-			}
-		});
-		
-		Label eqLabel = new Label(expressionComposite, SWT.CENTER);
-		eqLabel.setText("=");
-		
 		resultLabel = new Label(expressionComposite, SWT.TRAIL);
+		resultLabel.setLayoutData(GridDataFactory.fillDefaults().create());
 		
 		shapeLabel = new Label(expressionComposite, SWT.LEAD);
-		
-		// Set up the layout in another method
-		createExpressionLayout(expressionComposite, expressionNameText, eqLabel, expressionText, resultLabel, shapeLabel);
+		shapeLabel.setLayoutData(GridDataFactory.fillDefaults().create());
 		
 		applier = new ExpressionApplier(service);
 		
 		return expressionComposite;
 	}
 
-	private void createExpressionLayout(Composite parent, Text expressionNameText, Label eqLabel, Text expressionText, Label resultLabel, Label shapeLabel) {
-		FormLayout expressionLayout = new FormLayout();
-		expressionLayout.marginHeight = 5;
-		expressionLayout.marginWidth = 5;
-		parent.setLayout(expressionLayout);
-		
-		final int topOffset = 5;
-		final int leftOffset = 5;
-		GC gc = new GC(expressionNameText);
-		// Lower case þ has both a descender and an ascender
-		final int lineHeight = gc.textExtent("þ").y;
-		// An em is the size of an M (ish)
-		final int emWidth = gc.textExtent("M").x;
-		
-		// Expression name dialog box
-		FormData nameData = new FormData(4*emWidth, lineHeight);
-		nameData.top = new FormAttachment(0, topOffset);
-		nameData.left = new FormAttachment(0, leftOffset);
-		expressionNameText.setLayoutData(nameData);
-		
-		FormData eqData = new FormData(emWidth, lineHeight);
-		eqData.top = new FormAttachment(0, 2*topOffset);
-		eqData.left = new FormAttachment(expressionNameText);
-		eqLabel.setLayoutData(eqData);
-		
-		FormData expData= new FormData(datasetWidth, 13*lineHeight);
-		expData.top = new FormAttachment(expressionNameText, topOffset);
-		expData.left = new FormAttachment(0, leftOffset);
-		expData.right = new FormAttachment(100, leftOffset);
-		expressionText.setLayoutData(expData);
-		
-		FormData resultData = new FormData(10*emWidth, lineHeight);
-		resultData.top = new FormAttachment(expressionText);
-		resultData.left = new FormAttachment(0, leftOffset);
-		resultLabel.setLayoutData(resultData);
-		
-		FormData shapeData = new FormData(10*emWidth, lineHeight);
-		shapeData.top = new FormAttachment(expressionText);
-		shapeData.left = new FormAttachment(resultLabel, leftOffset);
-		shapeLabel.setLayoutData(shapeData);
-		
-	}
-
+	
 	@Override
 	protected void okPressed() {
 		// No result, not calculated since expression was last edited.
@@ -349,4 +307,16 @@ public class ExpressionDialog extends Dialog {
 		resultLabel.setText("");
 		shapeLabel.setText("");
 	}
+	
+	@Override
+	  protected boolean isResizable() {
+	    return true;
+	  }
+	
+	@Override
+	protected Point getInitialSize() {
+		Rectangle bounds = PlatformUI.getWorkbench().getWorkbenchWindows()[0].getShell().getBounds();
+		return new Point((int)(bounds.width*0.7),(int)(bounds.height*0.7));
+	}
+	
 }
