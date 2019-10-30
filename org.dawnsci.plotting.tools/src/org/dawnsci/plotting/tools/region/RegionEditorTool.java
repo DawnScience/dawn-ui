@@ -13,6 +13,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
 
 import javax.measure.Unit;
 import javax.swing.tree.TreeNode;
@@ -989,11 +990,12 @@ public class RegionEditorTool extends AbstractToolPage implements IResettableExp
 
 	private final class RegionBoundsJob extends Job {
 
-		private IROI roi;
+		private AtomicReference<IROI> roi;
 		private double[] intensitySum = new double[] {0,0};
 
 		RegionBoundsJob() {
 			super("Region update");
+			roi = new AtomicReference<IROI>();
 		}
 
 		@Override
@@ -1004,15 +1006,22 @@ public class RegionEditorTool extends AbstractToolPage implements IResettableExp
 
 				if (model == null)
 					return Status.CANCEL_STATUS;
-				intensitySum = getIntensityAndSum(roi);
+				
+				IROI r = roi.get();
+				
+				if (r == null) {
+					return Status.CANCEL_STATUS;
+				}
+				
+				intensitySum = getIntensityAndSum(r);
 
 				if (model == null)
 					return Status.CANCEL_STATUS;
 				Display.getDefault().syncExec(new Runnable() {
 					@Override
 					public void run() {
-						model.updateRegion(roi, intensitySum[0], intensitySum[1]);
-						dragBounds.put(roi.getName(), roi);
+						model.updateRegion(r, intensitySum[0], intensitySum[1]);
+						dragBounds.put(r.getName(), r);
 						viewer.refresh(true);
 					}
 				});
@@ -1021,7 +1030,7 @@ public class RegionEditorTool extends AbstractToolPage implements IResettableExp
 		}
 
 		public void setROI(IROI roi) {
-			this.roi = roi;
+			this.roi.set(roi);
 		}
 	};
 
