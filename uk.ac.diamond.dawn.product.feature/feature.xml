@@ -23,15 +23,11 @@
 
    <includes
          id="org.dawnsci.miniconda.feature"
-         version="0.0.0"
-         os="linux,macosx,win32"
-         arch="x86_64"/>
+         version="0.0.0"/>
 
    <includes
          id="uk.ac.diamond.cpython.feature"
-         version="0.0.0"
-         os="linux,macosx,win32"
-         arch="x86_64"/>
+         version="0.0.0"/>
 
    <includes
          id="uk.ac.diamond.scisoft.spectroscopy.cpython.feature"
