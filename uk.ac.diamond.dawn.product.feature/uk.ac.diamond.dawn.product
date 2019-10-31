@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?pde version="3.5"?>
 
-<product name="DAWN Science" uid="uk.ac.diamond.dawn.product" id="org.dawnsci.product.plugin.DAWN" application="org.eclipse.ui.ide.workbench" version="2.16.0.qualifier" useFeatures="true" includeLaunchers="true">
+<product name="DAWN Science" uid="uk.ac.diamond.dawn.product" id="org.dawnsci.product.plugin.DAWN" application="org.eclipse.ui.ide.workbench" version="2.17.0.qualifier" useFeatures="true" includeLaunchers="true">
 
    <aboutInfo>
       <image path="/org.dawnsci.product.plugin/icons/Dawn-210x238-about.png"/>
       <text>
          Data Analysis WorkbeNch 
-Copyright, 2010 - 2019, Diamond Light Source
+Copyright, 2010 - 2020, Diamond Light Source
 
-Version 2.16.0
+Version 2.17.0
       </text>
    </aboutInfo>
 
@@ -34,6 +34,7 @@ openFile
 -Dosgi.locking=none
 -Dpydev.funding.hide=true
 -Dorg.eclipse.epp.internal.mpc.core.service.DefaultMarketplaceService.url=http://dmarket.diamond.ac.uk:8080/mpc -Dorg.eclipse.epp.internal.mpc.core.service.DefaultCatalogService.url=http://dmarket.diamond.ac.uk:8080/mpc
+-Drun.in.eclipse=true
       </vmArgs>
       <vmArgsMac>-XstartOnFirstThread -Dorg.eclipse.swt.internal.carbon.smallFonts
       </vmArgsMac>
@@ -58,7 +59,6 @@ openFile
             winExtraLargeHigh="/org.dawnsci.product.plugin/icons/256x256_32.bmp"/>
       </win>
    </launcher>
-
 
    <vm>
    </vm>
