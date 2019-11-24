@@ -258,8 +258,10 @@ public class LoadedFile implements IDataObject, IDataFilePackage {
 			if (NexusTreeUtils.isNXClass(s, NexusConstants.DATA)) {
 				String name = NexusTreeUtils.getFirstString(s.getAttribute(NexusConstants.DATA_SIGNAL));
 				String key = e.getKey();
-				if ((name != null && (key.equals(name) || key.endsWith(Node.SEPARATOR + name))) ||
-						d.containsAttribute(NexusConstants.DATA_SIGNAL)) {
+				//Only post 2014  NXData Nexus tagging runs through here,
+				//NXdata may have many pre-2014 signal tags from GDA
+				//and this code does not work for more than one signal in a node
+				if ((name != null && (key.equals(name) || key.endsWith(Node.SEPARATOR + name)))) {
 					String path = Tree.ROOT + key;
 					signals.add(path);
 					ILazyDataset lz = NexusTreeUtils.getAugmentedSignalDataset(s);
