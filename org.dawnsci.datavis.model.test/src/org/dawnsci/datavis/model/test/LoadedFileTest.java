@@ -1,24 +1,31 @@
 package org.dawnsci.datavis.model.test;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
-import java.io.File;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.TreeMap;
 
 import org.dawnsci.datavis.model.DataOptions;
 import org.dawnsci.datavis.model.LoadedFile;
+import org.eclipse.dawnsci.analysis.api.tree.DataNode;
 import org.eclipse.dawnsci.analysis.api.tree.Node;
+import org.eclipse.dawnsci.analysis.api.tree.Tree;
+import org.eclipse.dawnsci.analysis.tree.TreeFactory;
+import org.eclipse.dawnsci.nexus.NXdata;
+import org.eclipse.dawnsci.nexus.NXentry;
+import org.eclipse.dawnsci.nexus.NexusConstants;
+import org.eclipse.dawnsci.nexus.NexusNodeFactory;
+import org.eclipse.january.dataset.DatasetFactory;
+import org.eclipse.january.dataset.DoubleDataset;
 import org.eclipse.january.dataset.ILazyDataset;
-import org.junit.BeforeClass;
-import org.junit.ClassRule;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
 
-import uk.ac.diamond.scisoft.analysis.io.LoaderFactory;
+import uk.ac.diamond.scisoft.analysis.io.DataHolder;
+import uk.ac.diamond.scisoft.analysis.io.HDF5Loader;
 
 
 public class LoadedFileTest  extends AbstractTestModel {
@@ -27,16 +34,6 @@ public class LoadedFileTest  extends AbstractTestModel {
 	public void testLoadedFile() throws Exception {
 		assertEquals(file.getAbsolutePath(), loadedFile.getFilePath());
 	}
-
-//	@Test
-//	public void testHasChildren() {
-//		assertTrue(loadedFile.hasChildren());
-//	}
-//
-//	@Test
-//	public void testGetChildren() {
-//		assertNotNull(loadedFile.getChildren());
-//	}
 
 	@Test
 	public void testGetDataOptions() {
@@ -92,6 +89,55 @@ public class LoadedFileTest  extends AbstractTestModel {
 		List<DataOptions> checked = loadedFile.getChecked();
 		assertEquals(1, checked.size());
 		assertEquals(dataOptions, checked.get(0));
+	}
+	
+	@Test
+	public void mixedSignalTags() {
+		
+		String signal = "thesignal";
+		String notthesignal = "notthesignal";
+		String data = "data";
+		
+		DataNode sn = TreeFactory.createDataNode(0);
+		DoubleDataset dss = DatasetFactory.zeros(new int[] {3});
+		dss.setName(signal);
+		sn.setDataset(dss);
+		
+		DataNode nsn = TreeFactory.createDataNode(0);
+		DoubleDataset dns = DatasetFactory.zeros(new int[] {5});
+		dns.setName(notthesignal);
+		nsn.setDataset(dns);
+		nsn.addAttribute(TreeFactory.createAttribute(NexusConstants.DATA_SIGNAL, 1));
+		
+		NXdata nx = NexusNodeFactory.createNXdata();
+		nx.setAttributeSignal(signal);
+		nx.addDataNode(signal, sn);
+		nx.addDataNode(notthesignal, nsn);
+		nx.setAttributeAxes(".");
+		
+		NXentry en = NexusNodeFactory.createNXentry();
+		en.addGroupNode(data, nx);
+		
+		Tree t = TreeFactory.createTreeFile(0, "/tmp/nofile.nxs");
+		t.setGroupNode(en);
+		
+		DataHolder dh = new DataHolder();
+		dh.setTree(t);
+		
+		HDF5Loader.updateDataHolder(dh, true);
+		
+		LoadedFile f = new LoadedFile(dh);
+		
+		DataOptions signalDO = f.getDataOption(Tree.ROOT + data + Node.SEPARATOR + signal);
+		
+		ILazyDataset lzs = signalDO.getLazyDataset();
+		assertEquals(3, lzs.getSize());
+		
+		DataOptions nsignalDO = f.getDataOption(Tree.ROOT + data + Node.SEPARATOR + notthesignal);
+		
+		ILazyDataset lzns = nsignalDO.getLazyDataset();
+		assertEquals(5, lzns.getSize());
+		
 	}
 
 }
