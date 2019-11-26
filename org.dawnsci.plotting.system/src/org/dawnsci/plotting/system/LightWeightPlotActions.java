@@ -279,7 +279,7 @@ class LightWeightPlotActions {
 			try {
 				manType = Enum.valueOf(ManagerType.class, type);
 			} catch (Exception e) {
-				logger.error("action_type in extension point not correctly configured, defaulting to {}", manType.toString());
+				logger.debug("action_type in extension point not present or incorrectly configured, defaulting to {}", manType);
 			}
 
 			ActionType actionType = ActionType.ALL;
@@ -288,7 +288,7 @@ class LightWeightPlotActions {
 			try {
 				actionType = Enum.valueOf(ActionType.class, type);
 			} catch (Exception e) {
-				logger.error("plot_type in extension point not correctly configured, defaulting to {}", manType.toString());
+				logger.debug("plot_type in extension point not present or incorrectly configured, defaulting to {}", actionType);
 			}
 
 			actionBarManager.registerAction(action, actionType, manType);
