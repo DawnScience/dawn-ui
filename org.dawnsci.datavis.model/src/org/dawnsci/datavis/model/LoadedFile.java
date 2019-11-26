@@ -3,6 +3,7 @@ package org.dawnsci.datavis.model;
 import java.io.File;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
@@ -34,11 +35,13 @@ import org.eclipse.january.dataset.Dataset;
 import org.eclipse.january.dataset.DatasetFactory;
 import org.eclipse.january.dataset.DatasetUtils;
 import org.eclipse.january.dataset.ILazyDataset;
+import org.eclipse.january.dataset.InterfaceUtils;
 import org.eclipse.january.dataset.LazyDynamicDataset;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import uk.ac.diamond.scisoft.analysis.io.NexusTreeUtils;
+import uk.ac.diamond.scisoft.analysis.io.Utils;
 
 /**
  * Class to represent a data file loaded in the IFileController
@@ -313,6 +316,16 @@ public class LoadedFile implements IDataObject, IDataFilePackage {
 		return labelValue;
 	}
 
+	private static final String[] LABELS_TO_CONVERT = new String[] { "entry_identifier", };
+	private static Dataset convertFromString(String name, Dataset values) {
+		if (Arrays.stream(LABELS_TO_CONVERT).anyMatch(n -> name.endsWith(n))) {
+			if (!InterfaceUtils.isNumerical(values.getClass())) {
+				return DatasetFactory.createFromObject(Utils.parseValue(values.getString()));
+			}
+		}
+		return values;
+	}
+
 	public Dataset getLabelValue(String labelName) {
 		if (possibleLabels.containsKey(labelName)) {
 			ILazyDataset l = possibleLabels.get(labelName);
@@ -322,7 +335,7 @@ public class LoadedFile implements IDataObject, IDataFilePackage {
 				slice.squeeze();
 				
 				if (slice.getRank() == 0) {
-					return slice;
+					return convertFromString(labelName, slice);
 				}
 				logger.warn("Label {} does not have rank 0", labelName);
 				return null;
@@ -336,7 +349,7 @@ public class LoadedFile implements IDataObject, IDataFilePackage {
 				Dataset d = DatasetFactory.createFromObject(metaValue);
 				d.squeeze();
 				if (d.getRank() == 0) {
-					return d;
+					return convertFromString(labelName, d);
 				}
 				logger.warn("Label {} does not have rank 0", labelName);
 				return null;
