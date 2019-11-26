@@ -257,7 +257,19 @@ class LightWeightPlotActions {
 				}
 			}
 
-			final PlotAction action = new PlotAction(label, actionBarManager.getSystem(), command);
+			int style = IAction.AS_PUSH_BUTTON;
+			final String styleAttr = ie.getAttribute("style");
+			if (styleAttr != null && !styleAttr.isEmpty()) {
+				if (styleAttr.equals("push_button")) {
+					// default
+				} else if (styleAttr.equals("toggle_button")) {
+					style = IAction.AS_CHECK_BOX;
+				} else {
+					logger.debug("Unknown style {}: defaulting to push_button", styleAttr);
+				}
+			}
+
+			final PlotAction action = new PlotAction(label, style, actionBarManager.getSystem(), command);
 
 			if (icon!=null) action.setImageDescriptor(icon);
 
@@ -1203,8 +1215,8 @@ class LightWeightPlotActions {
 		private Command command;
 		private IPlottingSystem<?> system;
 
-		public PlotAction(String label, IPlottingSystem<?> system, Command command) {
-			super(label);
+		public PlotAction(String label, int style, IPlottingSystem<?> system, Command command) {
+			super(label, style);
 			this.system = system;
 			this.command = command;
 		}
