@@ -7,7 +7,7 @@
  * http://www.eclipse.org/legal/epl-v10.html
  */
 
-package org.dawb.workbench.ui.views;
+package org.dawnsci.common.widgets;
 
 /**
  * Adaptor class to be overridden. This allows tasks to be defined to run in repetition and
