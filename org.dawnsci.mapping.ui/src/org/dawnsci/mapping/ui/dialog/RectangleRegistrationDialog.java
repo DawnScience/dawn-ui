@@ -399,7 +399,7 @@ public class RectangleRegistrationDialog extends Dialog {
 		if (image instanceof RGBDataset) {
 			
 			RGBDataset rgb = (RGBDataset)image;
-			im = DatasetUtils.createCompoundDataset(Dataset.RGB, mrc.value(rgb.getRedView()).get(0),
+			im = DatasetUtils.createCompoundDataset(RGBDataset.class, mrc.value(rgb.getRedView()).get(0),
 								mrc.value(rgb.getGreenView()).get(0),
 								mrc.value(rgb.getBlueView()).get(0));
 			

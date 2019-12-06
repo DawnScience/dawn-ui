@@ -18,6 +18,7 @@ import org.eclipse.dawnsci.plotting.api.trace.ILineTrace;
 import org.eclipse.january.dataset.Dataset;
 import org.eclipse.january.dataset.DatasetFactory;
 import org.eclipse.january.dataset.DatasetUtils;
+import org.eclipse.january.dataset.DoubleDataset;
 import org.eclipse.january.dataset.IDataset;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
@@ -333,7 +334,7 @@ public class SuperSashPlotSystem3Composite extends Composite {
 
 		Dataset subImage = ssp.subImage(selection, greenRectangle);
 
-		double rawIntensity = ((Number) DatasetUtils.cast(subImage, Dataset.FLOAT64).sum()).doubleValue();
+		double rawIntensity = ((Number) DatasetUtils.cast(DoubleDataset.class, subImage).sum()).doubleValue();
 		ssp.setCurrentRawIntensity(rawIntensity);
 
 		plotSystem2.updatePlot2D(subImage, null, null);

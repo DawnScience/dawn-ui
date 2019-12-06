@@ -366,7 +366,7 @@ public class DataSet3DPlot2DMulti extends DataSet3DPlot2D {
 			imageDatas.put(tex, imageData);
 		}
 		float[] imageData = (float[])imageDatas.get(tex);
-		FloatDataset fdata = (FloatDataset)DatasetUtils.cast(DatasetUtils.convertToDataset(data), Dataset.FLOAT32);
+		FloatDataset fdata = DatasetUtils.cast(FloatDataset.class, data);
 		if (width == fdata.getShape()[1] &&	height == fdata.getShape()[0]) 
 		{
 			imageData = fdata.getData();
