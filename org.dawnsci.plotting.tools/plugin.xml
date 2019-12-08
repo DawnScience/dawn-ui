@@ -33,25 +33,25 @@
    <extension
          point="org.eclipse.ui.preferencePages">
       <page
-            category="org.dawnsci.preferences.root"
+            category="uk.ac.diamond.scisoft.analysis.rcp.preferences.root"
             class="org.dawnsci.plotting.tools.preference.FittingPreferencePage"
             id="org.dawb.workbench.plotting.fittingPreferencePage"
             name="Fitting Preferences">
       </page>
       <page
-            category="org.dawnsci.preferences.root"
+            category="uk.ac.diamond.scisoft.analysis.rcp.preferences.root"
             class="org.dawnsci.plotting.tools.preference.InfoPixelPreferencePage"
             id="org.dawb.workbench.plotting.infoPixelPreferencePage"
             name="Pixel Information Preferences">
       </page>
       <page
-            category="org.dawnsci.preferences.root"
+            category="uk.ac.diamond.scisoft.analysis.rcp.preferences.root"
             class="org.dawnsci.plotting.tools.preference.RegionEditorPreferencePage"
             id="org.dawb.workbench.plotting.regionEditorPreferencePage"
             name="Region Editor Preferences">
       </page>
       <page
-            category="org.dawnsci.preferences.root"
+            category="uk.ac.diamond.scisoft.analysis.rcp.preferences.root"
             class="org.eclipse.ui.internal.dialogs.EmptyPreferencePage"
             id="org.dawnsci.preferences.diffraction"
             name="Diffraction">
@@ -75,14 +75,14 @@
             name="Diffraction Detectors">
       </page>
       <page
-            category="org.dawnsci.preferences.root"
+            category="uk.ac.diamond.scisoft.analysis.rcp.preferences.root"
             class="org.dawnsci.plotting.tools.preference.CrossProfilePreferencePage"
             id="org.dawnsci.plotting.tools.crossProfilePreference"
             name="Cross Profile Preferences">
       </page>
       
       <page
-            category="org.dawnsci.preferences.root"
+            category="uk.ac.diamond.scisoft.analysis.rcp.preferences.root"
             class="org.dawnsci.plotting.tools.preference.PeakFindingPreferencePage"
             id="org.dawb.workbench.plotting.PeakFindingPreferencePage"
             name="Peak Finding Preferences">

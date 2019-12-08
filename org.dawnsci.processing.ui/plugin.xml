@@ -225,7 +225,7 @@
    <extension
          point="org.eclipse.ui.preferencePages">
       <page
-            category="org.dawnsci.preferences.root"
+            category="uk.ac.diamond.scisoft.analysis.rcp.preferences.root"
             class="org.dawnsci.processing.ui.preference.ProcessingPreferencePage"
             id="org.dawnsci.processing.ui.preference.ProcessingPreferencePage"
             name="Processing Preferences">

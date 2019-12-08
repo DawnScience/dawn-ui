@@ -84,7 +84,7 @@
    <extension
          point="org.eclipse.ui.preferencePages">
       <page
-            category="org.dawnsci.preferences.root"
+            category="uk.ac.diamond.scisoft.analysis.rcp.preferences.root"
             class="org.dawnsci.dedi.configuration.preferences.BeamlineConfigurationPreferencePage"
             id="dedi.configuration.preferences.beamlineconfiguration"
             name="Beamline Configuration ">
