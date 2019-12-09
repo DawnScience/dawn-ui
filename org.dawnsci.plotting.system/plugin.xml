@@ -19,13 +19,13 @@
    <extension
          point="org.eclipse.ui.preferencePages">
       <page
-            category="org.dawb.workbench.ui.visualizationPreferences"
+            category="uk.ac.diamond.scisoft.analysis.rcp.preferences.root"
             class="org.dawnsci.plotting.system.preference.ToolbarConfigurationPreferencePage"
             id="org.dawnsci.plotting.system.toolbarPreferencePage"
             name="Plot Toolbar">
       </page>
       <page
-            category="org.dawb.workbench.ui.visualizationPreferences"
+            category="uk.ac.diamond.scisoft.analysis.rcp.preferences.root"
             class="org.dawnsci.plotting.system.preference.ErrorBarPreferencePage"
             id="org.dawnsci.plotting.system.errorBarPreferencePage"
             name="Error Bars">
