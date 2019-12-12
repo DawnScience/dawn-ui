@@ -31,8 +31,10 @@ import org.dawnsci.plotting.system.dialog.XYRegionConfigDialog;
 import org.eclipse.core.commands.Command;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
+import org.eclipse.core.commands.IExecutionListener;
 import org.eclipse.core.commands.NotEnabledException;
 import org.eclipse.core.commands.NotHandledException;
+import org.eclipse.core.commands.State;
 import org.eclipse.core.commands.common.NotDefinedException;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.Platform;
@@ -96,6 +98,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.commands.ICommandService;
 import org.eclipse.ui.dialogs.PreferencesUtil;
+import org.eclipse.ui.handlers.RegistryToggleState;
 import org.osgi.framework.Bundle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -1219,6 +1222,9 @@ class LightWeightPlotActions {
 			super(label, style);
 			this.system = system;
 			this.command = command;
+
+			setButtonCheckedState();
+			this.command.addExecutionListener(new PlotActionExecutionListener());
 		}
 
 		public void run() {
@@ -1236,6 +1242,49 @@ class LightWeightPlotActions {
 		@Override
 		public void setLocationInfo(PlotLocationInfo bean) {
 			map.put(PlotLocationInfo.ID, bean);
+		}
+
+		/**
+		 * If this object is a check box, set its state from the associated command
+		 */
+		private void setButtonCheckedState() {
+			if (getStyle() == AS_CHECK_BOX) {
+				final State toggleState = command.getState(RegistryToggleState.STATE_ID);
+				if (toggleState != null) {
+					final Object toggleValue = toggleState.getValue();
+					if (toggleValue instanceof Boolean) {
+						setChecked((Boolean) toggleValue);
+					}
+				}
+			}
+		}
+
+		/**
+		 * Class to synchronise the state of the toggle button with the state of the
+		 * associated command
+		 * <p>
+		 * This is necessary because the command can be executed via a menu.
+		 */
+		private class PlotActionExecutionListener implements IExecutionListener {
+			@Override
+			public void preExecute(String commandId, ExecutionEvent event) {
+				// no action required
+			}
+
+			@Override
+			public void postExecuteSuccess(String commandId, Object returnValue) {
+				setButtonCheckedState();
+			}
+
+			@Override
+			public void postExecuteFailure(String commandId, ExecutionException exception) {
+				setButtonCheckedState();
+			}
+
+			@Override
+			public void notHandled(String commandId, NotHandledException exception) {
+				// no action required
+			}
 		}
 	}
 }
