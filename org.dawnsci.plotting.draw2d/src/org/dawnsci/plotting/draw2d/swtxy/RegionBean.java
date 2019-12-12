@@ -28,8 +28,23 @@ public class RegionBean implements Serializable {
 	protected Color   regionColor;
 	protected boolean showPosition=false;
 	protected int     alpha=80;
+
+	/**
+	 * Controls whether the mapping region is shown in the plot<br>
+	 * Default value must match default value of <code>RegistryToggleState</code>
+	 * for command id <code>uk.ac.diamond.daq.mapping.ui.command.showHideMappingRegion</code>
+	 * in <code>plugin.xml</code>
+	 */
 	protected boolean visible=true;
+
+	/**
+	 * Controls whether the mapping region fill is shown in the plot<br>
+	 * Default value must match default value of <code>RegistryToggleState</code>
+	 * for command id <code>uk.ac.diamond.daq.mapping.ui.command.toggleFillMappingRegion</code>
+	 * in <code>plugin.xml</code>
+	 */
 	protected boolean fill=true;
+
 	protected boolean mobile=true;
 	protected boolean showLabel=false;	
 	public void sync(RegionBean bean) {
