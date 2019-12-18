@@ -6,13 +6,14 @@ import org.eclipse.january.dataset.Slice;
 import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.ColumnViewer;
 import org.eclipse.jface.viewers.EditingSupport;
+import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TextCellEditor;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.FocusEvent;
 import org.eclipse.swt.events.FocusListener;
+import org.eclipse.swt.events.MouseAdapter;
 import org.eclipse.swt.events.MouseEvent;
-import org.eclipse.swt.events.MouseListener;
-import org.eclipse.swt.events.MouseTrackListener;
+import org.eclipse.swt.events.MouseTrackAdapter;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.VerifyEvent;
@@ -29,15 +30,19 @@ import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Slider;
+import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.Text;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class SliceEditingSupport extends EditingSupport {
+	
+	private static final Logger logger = LoggerFactory.getLogger(SliceEditingSupport.class);
 
 	private TextCellEditor editor;
 	private Shell sliderShell;
 	private Slider slider;
 	private int currentDimension = -1;
-	private int[] minMax;
 	private boolean sliding = false;
 	private int maxSliceSize = 50;
 	
@@ -92,8 +97,6 @@ public class SliceEditingSupport extends EditingSupport {
 	@Override
 	protected CellEditor getCellEditor(Object element) {
 		currentDimension = (int) element;
-		int dimSize = getSize((int)element);
-		minMax = new int[]{0,dimSize};
 		((Text)editor.getControl()).setText("25");
 		((Text)editor.getControl()).setSelection(26);
 		if (sliderShell!=null&&sliderShell.isVisible()) return editor;
@@ -113,33 +116,17 @@ public class SliceEditingSupport extends EditingSupport {
 	protected Object getValue(Object element) {
 		
 		currentDimension = (int)element;
-		int size = getSize((int)element);
-		minMax = new int[]{0,size};
-		
-		if (slider != null) {
-			Slice slice = getSlice((int)element);
-			slider.setMinimum(0);
-//			int start = slice.getStart() == null ? 0 : slice.getStart();
-//			int stop = slice.getStop() == null ? size : slice.getStop();
-//			int max = 1+size - (stop -start);
-//			System.out.println("start " + start + " stop " + stop + " max " + max);
-			int[] sss = getSliderStartStop(slice, size);
-			slider.setMaximum(sss[1]);
-			slider.setSelection(sss[0]);
-			slider.setThumb(1);
-			slider.setIncrement(1);
-		}
+	
 		return getSlice(currentDimension).toString();
 	}
 	
-	private int[] getSliderStartStop(Slice slice, int size) {
+	private int[] getSliderSelectionThumb(Slice slice, int size) {
 		int start = slice.getStart() == null ? 0 : slice.getStart();
 		int stop = slice.getStop() == null ? size : slice.getStop();
-		int step = slice.getStep();
 		
-		int sliderStop = size - (stop-start) + step;
+		int thumb = (stop - start);
 		
-		return new int[]{start, sliderStop};
+		return new int[]{start, thumb};
 	}
 	
 	private Slice getSlice(int i) {
@@ -183,20 +170,27 @@ public class SliceEditingSupport extends EditingSupport {
 			}else {
 				setSlice(currentDimension,s[0]);
 			}
-			int size = getSize((int)element);
-			int[] sss = getSliderStartStop(s[0], size);
-			slider.setMaximum(sss[1]);
-			slider.setSelection(sss[0]);
-			slider.setThumb(1);
-			slider.setIncrement(1);
-//			slider.setSelection(s[0].getStart());
-			
-//			setSlice(currentDimension,s[0]);
+			if (slider != null && slider.getVisible()) {
+				int size = getSize(currentDimension);
+				Slice slice = getSlice((int)element);
+				updateSlider(slice,size);
+			}
+
 			getViewer().refresh();
 		} catch (Exception e) {
-			//TODO warn
+			logger.error("Could not set slice",e);
 		}
 
+	}
+	
+	private void updateSlider(Slice slice, int size) {
+		slider.setMinimum(0);
+		int[] sss = getSliderSelectionThumb(slice, size);
+		slider.setMaximum(size);
+		slider.setSelection(sss[0]);
+		slider.setThumb(sss[1]);
+		slider.setIncrement(1);
+		slider.setPageIncrement(10);
 	}
 	
 	private void createSliderShell() {
@@ -210,7 +204,6 @@ public class SliceEditingSupport extends EditingSupport {
 			public void handleEvent(final Event e) {
 				if (e.type == SWT.Traverse) setShowingSlider(false);
 				if (sliding) return;
-//				if (e.type == 16) return;
 				if (slider.isFocusControl()) return;
 				setShowingSlider(false);
 			}
@@ -225,6 +218,8 @@ public class SliceEditingSupport extends EditingSupport {
 		editor.getControl().addListener(SWT.MouseDoubleClick, closeListener);
 		editor.getControl().addListener(SWT.MouseDown, closeListener);
 		editor.getControl().addListener(SWT.Dispose, closeListener);
+		//focus out so when editor loses focus the slider vanishes
+		//sliding boolean stops it vanishing when sliding
 		editor.getControl().addListener(SWT.FocusOut, closeListener);
 		editor.getControl().addListener(SWT.Traverse, closeListener);
 		// Listeners on the target control's shell
@@ -233,10 +228,11 @@ public class SliceEditingSupport extends EditingSupport {
 		controlShell.addListener(SWT.Resize, closeListener);
 
 
-        slider = new Slider(sliderShell, SWT.None);		
+        slider = new Slider(sliderShell, SWT.None);
+        //we want the slider to have the stepper buttons
+        slider.setData("org.eclipse.swt.internal.gtk.css", "scrollbar {-GtkScrollbar-has-backward-stepper: true; -GtkScrollbar-has-forward-stepper: true;}");
         slider.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-        slider.setValues(0, minMax[0], minMax[1], 1, 1, 10);
-        slider.addMouseListener(new MouseListener() {
+        slider.addMouseListener(new MouseAdapter() {
 			
 			@Override
 			public void mouseUp(MouseEvent e) {
@@ -250,21 +246,9 @@ public class SliceEditingSupport extends EditingSupport {
 				slider.getShell().setVisible(true);
 				
 			}
-			
-			@Override
-			public void mouseDoubleClick(MouseEvent e) {
-				// TODO Auto-generated method stub
-				
-			}
 		});
         
-        slider.addMouseTrackListener(new MouseTrackListener() {
-			
-			@Override
-			public void mouseHover(MouseEvent e) {
-				// TODO Auto-generated method stub
-				
-			}
+        slider.addMouseTrackListener(new MouseTrackAdapter() {
 			
 			@Override
 			public void mouseExit(MouseEvent e) {
@@ -283,22 +267,7 @@ public class SliceEditingSupport extends EditingSupport {
         	
         	public void widgetSelected(SelectionEvent e) {
         		slider.setFocus();
-        		Slice slice = getSlice(currentDimension);
-        		int size = getSize(currentDimension);
-        		
-        		int start = slice.getStart() == null ? 0 : slice.getStart();
-    			int stop = slice.getStop() == null ? size-1 : slice.getStop();
-    			int step = slice.getStep();
-        		int dif = stop-start;
-        		String val = Integer.toString((slider.getSelection()));
-        		if (dif > 1) {
-        			val = Integer.toString(slider.getSelection()) + ":" + Integer.toString((slider.getSelection()+dif));
-        			slider.setMaximum(size-dif+step);
-        			if (step != 1) val = val + ":" + step;
-        		}
-        		editor.setValue(val);
-        		setValue(currentDimension, val);
-        		
+        		updateSlice(slider.getSelection());
         	}
 		});
         
@@ -314,16 +283,45 @@ public class SliceEditingSupport extends EditingSupport {
         slider.setIncrement(1);
         
         sliderShell.pack();
-//        shellCreated = true;
 	}
 	
+	private void updateSlice(int i) {
+		
+		Slice slice = getSlice(currentDimension);
+		int size = getSize(currentDimension);
+		
+		int[] sst = getSliderSelectionThumb(slice,size);
+		
+		int step = slice.getStep();
+		
+		Slice s = new Slice(i, i+sst[1], step);
+		setSlice(currentDimension,s);
+		editor.setValue(s.toString());
+		getViewer().refresh();
+	}
 	
 	protected void setShowingSlider(final boolean isShow) {
 		if (isShow) {
-			createSliderShell();	
-			Rectangle sizeT= editor.getControl().getBounds();
-			Point     pntT = editor.getControl().toDisplay(-2, sizeT.height-4);
-			Rectangle rect = new Rectangle(pntT.x, pntT.y, sizeT.width-2, sliderShell.getBounds().height);
+			createSliderShell();
+			updateSlider(getSlice(currentDimension), getSize(currentDimension));
+			Rectangle eb= editor.getControl().getBounds();
+			Point     ep = editor.getControl().toDisplay(0, eb.height);
+			
+			ColumnViewer v = getViewer();
+			
+			int x = ep.x;
+			int y = ep.y;
+			int width = eb.width;
+			
+			if (v instanceof TableViewer) {
+				Table table = ((TableViewer) v).getTable();
+				Rectangle tb = table.getBounds();
+				width = tb.width;
+				Point     tp = table.toDisplay(0, eb.height);
+				x = tp.x;
+			}
+			
+			Rectangle rect = new Rectangle(x,y, width, sliderShell.getBounds().height);
 			sliderShell.setBounds(rect);
 			sliderShell.setVisible(true);
 		} else {
