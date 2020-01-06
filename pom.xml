@@ -196,5 +196,14 @@
 				<module>uk.ac.diamond.dawn.site</module>
 			</modules>
 		</profile>
+		<profile>
+			<id>dawn-lite</id>
+			<modules>
+				<module>org.dawnsci.simple.plugin</module>
+				<module>org.dawnsci.simple.feature</module>
+				<module>org.dawnsci.simple.product</module>
+				<module>org.dawnsci.workbench.feature</module>
+			</modules>
+		</profile>
 	</profiles>
 </project>
