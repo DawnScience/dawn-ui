@@ -292,4 +292,14 @@
          </menu>
       </menuContribution>
    </extension>
+   <extension
+         point="org.eclipse.dawnsci.analysis.api.operation">
+      <operation
+            class="org.dawnsci.processing.ui.operations.ExportAVIOperation"
+            description="Exports a sequence of images to an avi file"
+            id="org.dawnsci.conversion.operations.ExportAVIOperation"
+            model="org.dawnsci.processing.ui.operations.ExportAVIModel"
+            name="Export image stack to AVI">
+      </operation>
+   </extension>
 </plugin>

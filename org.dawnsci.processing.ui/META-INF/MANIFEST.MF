@@ -42,5 +42,6 @@ Bundle-ActivationPolicy: lazy
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Service-Component: OSGI-INF/*.xml
 Export-Package: org.dawnsci.processing.ui,
+ org.dawnsci.processing.ui.converters.avi;x-internal:=true,
  org.dawnsci.processing.ui.model,
  org.dawnsci.processing.ui.slice
