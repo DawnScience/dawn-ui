@@ -887,7 +887,8 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 				return image; // nothing to downsample
 			}
 
-			if (image.getDType()!=Dataset.BOOL) {
+			boolean notBoolean = !BooleanDataset.class.isAssignableFrom(image.getClass());
+			if (notBoolean) {
 				if (mipMap!=null && mipMap.containsKey(bin) && mipMap.get(bin).get()!=null) {
 					logger.trace("Downsample bin used, "+bin);
 					return mipMap.get(bin).get();
@@ -903,7 +904,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 			List<? extends IDataset>   sets = downSampler.value(image);
 			final Dataset set = DatasetUtils.convertToDataset(sets.get(0));
 
-			if (image.getDType()!=Dataset.BOOL) {
+			if (notBoolean) {
 				if (mipMap==null) mipMap = new HashMap<Integer,Reference<Dataset>>(3);
 				mipMap.put(bin, new SoftReference<Dataset>(set));
 				logger.trace("Downsample bin created, "+bin);

@@ -4,7 +4,6 @@ import java.util.List;
 
 import org.eclipse.dawnsci.analysis.dataset.impl.Image;
 import org.eclipse.dawnsci.plotting.api.filter.AbstractDelayedFilter;
-import org.eclipse.january.dataset.DTypeUtils;
 import org.eclipse.january.dataset.Dataset;
 import org.eclipse.january.dataset.DatasetUtils;
 import org.eclipse.january.dataset.IDataset;
@@ -24,8 +23,7 @@ public class PseudoFlatFieldFilter extends AbstractDelayedFilter {
 	protected Object[] filter(IDataset data, List<IDataset> axes)
 			throws Exception {
 		int radius = (int) getConfiguration().get("radius");
-		int dtype = DTypeUtils.getDType(data);
-		Dataset d = DatasetUtils.cast(data, dtype);
+		Dataset d = DatasetUtils.convertToDataset(data);
 		final IDataset pseudoFlatFieldCorrected = Image.pseudoFlatFieldFilter(d, radius);
 		return new Object[] { pseudoFlatFieldCorrected, axes };
 	}

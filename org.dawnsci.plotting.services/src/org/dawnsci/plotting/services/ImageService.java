@@ -33,6 +33,7 @@ import org.eclipse.january.dataset.DatasetUtils;
 import org.eclipse.january.dataset.IndexIterator;
 import org.eclipse.january.dataset.Maths;
 import org.eclipse.january.dataset.RGBDataset;
+import org.eclipse.january.dataset.ShortDataset;
 import org.eclipse.january.dataset.Stats;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.swt.graphics.Image;
@@ -287,9 +288,7 @@ public class ImageService extends AbstractServiceFactory implements IImageServic
 		double sum = 0.0;
 		int size = 0;
 		
-		BooleanDataset mask = bean.getMask()!=null
-	                        ? (BooleanDataset) DatasetUtils.cast(bean.getMask(), Dataset.BOOL)
-	                        : null;
+		BooleanDataset mask = bean.getMask() == null ? null : DatasetUtils.cast(BooleanDataset.class, bean.getMask());
 
 	    // Big loop warning:
 	    final IndexIterator it = image.getIterator();
@@ -321,7 +320,7 @@ public class ImageService extends AbstractServiceFactory implements IImageServic
 			try {
 				median = ((Number)Stats.median(image)).doubleValue(); // SLOW
 			} catch (Exception ne) {
-				median = ((Number)Stats.median(image.cast(Dataset.INT16))).doubleValue();// SLOWER
+				median = ((Number)Stats.median(image.cast(ShortDataset.class))).doubleValue();// SLOWER
 			}
 			retMax = 2 * median;
 			retExtra=median;

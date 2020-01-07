@@ -707,7 +707,7 @@ public class DataSet3DPlot2D implements IDataSet3DCorePlot,
 		}
 		float[] imageData = imageDatas.get(ap);
 		Texture2D currentTexture = textures.get(ap);
-		FloatDataset fdata = (FloatDataset)DatasetUtils.cast(DatasetUtils.convertToDataset(data), Dataset.FLOAT32);
+		FloatDataset fdata = DatasetUtils.cast(FloatDataset.class, data);
 		if (width == fdata.getShape()[1] &&	height == fdata.getShape()[0]) 
 		{
 			imageData = fdata.getData();

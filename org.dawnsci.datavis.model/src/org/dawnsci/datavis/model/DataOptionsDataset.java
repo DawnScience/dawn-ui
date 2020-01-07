@@ -1,7 +1,6 @@
 package org.dawnsci.datavis.model;
 
 import org.dawnsci.january.model.NDimensions;
-import org.eclipse.january.dataset.IDataset;
 import org.eclipse.january.dataset.ILazyDataset;
 
 public class DataOptionsDataset extends DataOptions {
