@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+   <extension
+         point="org.eclipse.dawnsci.plotting.api.plottingViewer">
+      <plottingViewer
+            class="org.dawnsci.multidimensional.ui.hyper.HyperPlotViewer"
+            id="org.dawnsci.slicing.tools.hyper.HyperPlotViewer">
+      </plottingViewer>
+      <plottingViewer
+            class="org.dawnsci.multidimensional.ui.volume.VolumeSlicesPlotViewer"
+            id="org.dawnsci.slicing.tools.volume.VolumeSlicesPlotViewer">
+      </plottingViewer>
+   </extension>
+   <extension
+         point="org.dawnsci.datavis.api.plotmode">
+      <plotmode
+            class="org.dawnsci.multidimensional.ui.hyper.PlotModeHyper"
+            name="Hyper3d"
+            priority="0">
+      </plotmode>
+      <plotmode
+            class="org.dawnsci.multidimensional.ui.hyper.PlotModeHyper4D"
+            name="Hyper4d"
+            priority="-2">
+      </plotmode>
+      <plotmode
+            class="org.dawnsci.multidimensional.ui.volume.PlotModeVolumeSlices"
+            name="&quot;Volume - Orthogonal Slices&quot;"
+            priority="-1">
+      </plotmode>
+   </extension>
+      <extension
+         point="org.eclipse.ui.views">
+      <view
+            category="uk.ac.diamond.scisoft.analysis.rcp"
+            class="org.dawnsci.multidimensional.ui.hyper.HyperView"
+            icon="icons/chart_curve.png"
+            id="org.dawnsci.slicing.tools.hyper.hyperView"
+            name="Hyper3D"
+            restorable="true">
+      </view>
+   </extension>
+
+</plugin>

@@ -14,10 +14,10 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.dawnsci.analysis.dataset;bundle-version="1.0.0",
  org.dawb.common.ui;bundle-version="1.3.0",
  org.dawnsci.datavis.api,
- org.dawnsci.plotting
+ org.dawnsci.plotting,
+ org.dawnsci.multidimensional.ui
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
-Export-Package: org.dawnsci.slicing.tools.hyper
 Import-Package: org.eclipse.draw2d,
  org.slf4j;version="[1.7.2,2.0.0)"
 Automatic-Module-Name: org.dawnsci.slicing.tools
