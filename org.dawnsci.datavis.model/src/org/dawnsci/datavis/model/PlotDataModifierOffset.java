@@ -15,7 +15,9 @@ private double value = 0;
 	public IDataset modifyForDisplay(IDataset d) {
 		double min = d.min(true).doubleValue();
 		Dataset dataset = DatasetUtils.convertToDataset(d);
+		String name = dataset.getName();
 		dataset = Maths.add(dataset,(value-min));
+		dataset.setName(name);
 		value = dataset.max(true).doubleValue();
 		AxesMetadata md = d.getFirstMetadata(AxesMetadata.class);
 		if (md != null) {
