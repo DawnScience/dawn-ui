@@ -67,6 +67,7 @@ public class PlotDataModifierStack implements IPlotDataModifier {
 		} 
 
 		Dataset dataset = DatasetUtils.convertToDataset(d);
+		String name = dataset.getName();
 
 		if (normalise) {
 			dataset = Maths.subtract(dataset, min).idivide(max-min);
@@ -75,6 +76,7 @@ public class PlotDataModifierStack implements IPlotDataModifier {
 		}
 
 		dataset = Maths.add(dataset,(value-min));
+		dataset.setName(name);
 		double peakToPeak = (max+value-min)-value;
 		value += peakToPeak*proportion;
 
