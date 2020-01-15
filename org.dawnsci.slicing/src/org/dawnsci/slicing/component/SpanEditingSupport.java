@@ -9,8 +9,8 @@
 package org.dawnsci.slicing.component;
 
 import org.eclipse.dawnsci.slicing.api.system.DimsData;
-import org.eclipse.january.dataset.DTypeUtils;
 import org.eclipse.january.dataset.ILazyDataset;
+import org.eclipse.january.dataset.InterfaceUtils;
 import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.ColumnViewer;
 import org.eclipse.jface.viewers.EditingSupport;
@@ -78,7 +78,7 @@ public class SpanEditingSupport extends EditingSupport {
 	 */
 	public static int getMaxSliceLength(ILazyDataset lazySet, int dimension) {
 		// size in bytes of each item
-		final double size = DTypeUtils.getItemBytes(DTypeUtils.getDTypeFromClass(lazySet.getElementClass()), lazySet.getElementsPerItem());
+		final double size = InterfaceUtils.getItemBytes(lazySet.getElementsPerItem(), InterfaceUtils.getInterface(lazySet));
 		
 		// Max in bytes takes into account our minimum requirement
 		final double max  = Math.max(Runtime.getRuntime().totalMemory(), Runtime.getRuntime().maxMemory());

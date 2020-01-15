@@ -488,7 +488,7 @@ public class PowderLineTool extends AbstractToolPage {
 			// Try to read a named Dataset
 			for (String dName : dSpacingNames) {
 				Dataset theDataset= DatasetUtils.convertToDataset(dataHolder.getDataset(dName));
-				if (theDataset != null && theDataset.getDType() == Dataset.FLOAT) {
+				if (theDataset != null && theDataset instanceof DoubleDataset) {
 					lines = (DoubleDataset) DatasetUtils.convertToDataset(theDataset);
 					haveData = true;
 				}
@@ -502,7 +502,7 @@ public class PowderLineTool extends AbstractToolPage {
 					logger.info("PowderLineTool: No valid data in file " + chosenFile + ".");
 					return;
 				}
-				if (theDataset.getDType() != Dataset.FLOAT) {
+				if (!(theDataset instanceof DoubleDataset)) {
 					logger.info("PowderLineTool: No valid double data found in file " + chosenFile + ".");
 					return;
 				}
