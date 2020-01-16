@@ -14,6 +14,12 @@ import java.util.List;
 
 import org.dawb.common.ui.menu.CheckableActionGroup;
 import org.dawb.common.ui.menu.MenuAction;
+import org.dawnsci.multidimensional.ui.hyper.ArpesMainImageReducer;
+import org.dawnsci.multidimensional.ui.hyper.ArpesSideImageReducer;
+import org.dawnsci.multidimensional.ui.hyper.HyperComponent;
+import org.dawnsci.multidimensional.ui.hyper.HyperType;
+import org.dawnsci.multidimensional.ui.hyper.ImageTrapeziumBaselineReducer;
+import org.dawnsci.multidimensional.ui.hyper.TraceLineReducer;
 import org.dawnsci.slicing.tools.Activator;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.slicing.api.system.AxisChoiceEvent;

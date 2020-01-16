@@ -13,10 +13,10 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
+import org.dawnsci.multidimensional.ui.hyper.HyperComponent;
+import org.dawnsci.multidimensional.ui.hyper.IDatasetROIReducer;
+import org.dawnsci.multidimensional.ui.hyper.IProvideReducerActions;
 import org.dawnsci.plotting.tools.Activator;
-import org.dawnsci.slicing.tools.hyper.HyperComponent;
-import org.dawnsci.slicing.tools.hyper.IDatasetROIReducer;
-import org.dawnsci.slicing.tools.hyper.IProvideReducerActions;
 import org.eclipse.dawnsci.analysis.api.roi.IROI;
 import org.eclipse.dawnsci.analysis.dataset.roi.ROISliceUtils;
 import org.eclipse.dawnsci.analysis.dataset.roi.XAxisBoxROI;

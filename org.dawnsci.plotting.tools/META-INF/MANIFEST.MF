@@ -40,7 +40,8 @@ Require-Bundle: org.eclipse.ui,
  javax.measure.unit-api;bundle-version="[1.0.0,2.0.0)",
  org.eclipse.nebula.widgets.opal.checkboxgroup;bundle-version="1.0.0",
  org.eclipse.nebula.widgets.opal.rangeslider;bundle-version="1.0.0",
- org.dawnsci.processing.ui.api
+ org.dawnsci.processing.ui.api,
+ org.dawnsci.multidimensional.ui
 Import-Package: javax.vecmath,
  org.apache.commons.collections4;version="4.0.0",
  org.apache.commons.collections4.bidimap;version="4.0.0",
