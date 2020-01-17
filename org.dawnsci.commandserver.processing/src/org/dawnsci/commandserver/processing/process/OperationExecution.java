@@ -13,7 +13,6 @@ import org.eclipse.dawnsci.analysis.api.processing.ExecutionType;
 import org.eclipse.dawnsci.analysis.api.processing.IExecutionVisitor;
 import org.eclipse.dawnsci.analysis.api.processing.ILiveOperationInfo;
 import org.eclipse.dawnsci.analysis.api.processing.IOperation;
-import org.eclipse.dawnsci.analysis.api.processing.IOperationBean;
 import org.eclipse.dawnsci.analysis.api.processing.IOperationContext;
 import org.eclipse.dawnsci.analysis.api.processing.IOperationService;
 import org.eclipse.dawnsci.analysis.api.tree.DataNode;
@@ -179,7 +178,7 @@ public class OperationExecution {
 		    
 		    //Create visitor to save data
 		    
-		    final IExecutionVisitor visitor = new NexusFileExecutionVisitor(obean.getOutputFilePath(),obean.isReadable(),obean.getLinkParentEntry() ? obean.getFilePath() : null);
+		    final IExecutionVisitor visitor = new NexusFileExecutionVisitor(obean.getOutputFilePath(),obean.isReadable(),obean.getLinkParentEntry() ? obean.getFilePath() : null, obean.getTemplatePath());
 		    context.setVisitor(visitor);
 		    File fh = new File(obean.getOutputFilePath());
 			File parent = fh.getParentFile();
