@@ -33,7 +33,6 @@ import org.dawb.workbench.ui.data.wizard.PythonFilterWizard;
 import org.dawb.workbench.ui.editors.preference.EditorConstants;
 import org.dawb.workbench.ui.editors.preference.EditorPreferencePage;
 import org.dawb.workbench.ui.transferable.TransferableDataObject;
-import org.dawnsci.conversion.ui.ConvertWizard;
 import org.dawnsci.plotting.AbstractPlottingSystem;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.resources.IFile;
@@ -66,7 +65,6 @@ import org.eclipse.dawnsci.slicing.api.data.ITransferableDataObject;
 import org.eclipse.dawnsci.slicing.api.data.ITransferableDataService;
 import org.eclipse.dawnsci.slicing.api.system.DimsDataList;
 import org.eclipse.dawnsci.slicing.api.system.ISliceSystem;
-import org.eclipse.dawnsci.slicing.api.util.SliceUtils;
 import org.eclipse.january.IMonitor;
 import org.eclipse.january.dataset.DataEvent;
 import org.eclipse.january.dataset.IDataListener;
@@ -141,6 +139,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import uk.ac.diamond.scisoft.analysis.io.LoaderFactory;
+import uk.ac.diamond.scisoft.analysis.utils.DataHolderUtils;
 import uk.ac.diamond.scisoft.analysis.utils.OSUtils;
 
 /**
@@ -610,31 +609,13 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 		};
 		bars.getToolBarManager().add(delete);
 		delete.setEnabled(false);		
-		
-		final Action export = new Action("Export...", Activator.getImageDescriptor("icons/export_wiz.gif")) {
-			public void run() {
-				
-				final ConvertWizard cwizard = new ConvertWizard();
-				final IStructuredSelection sel = (IStructuredSelection) dataViewer.getSelection();
-				cwizard.setSelectionOverride(sel.toList());
-				WizardDialog dialog = new WizardDialog(container.getShell(), cwizard);
-		        dialog.setPageSize(new Point(400, 450));
-		        dialog.create();
-		        dialog.open();
-
-			}
-		};
-		export.setEnabled(false);
-		bars.getToolBarManager().add(new Separator());
-		bars.getToolBarManager().add(export);
-		bars.getToolBarManager().add(new Separator());
 
 		dataViewer.addSelectionChangedListener(new ISelectionChangedListener() {
 			@Override
 			public void selectionChanged(SelectionChangedEvent event) {
 				final Object sel           = ((StructuredSelection)dataViewer.getSelection()).getFirstElement();
 				final ITransferableDataObject ob  = (ITransferableDataObject)sel;
-				updateActions(copy, paste, delete, export, ob, bars);
+				updateActions(copy, paste, delete, ob, bars);
 			}
 		});
 		
@@ -679,10 +660,9 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 				menuManager.add(delete);
 				menuManager.add(new Separator(getClass().getName()+".filter"));
 				
-				updateActions(copy, paste, delete, export, ob, null);
+				updateActions(copy, paste, delete, ob, null);
 
 				menuManager.add(new Separator(getClass().getName()+".export"));
-				menuManager.add(export);
 				
 				menuManager.add(new Separator(getClass().getName()+".error"));
 				
@@ -843,19 +823,14 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 	protected void updateActions(IAction copy, 
 								IAction paste, 
 								IAction delete, 
-								IAction export,
 			                     ITransferableDataObject ob,
 			                     IActionBars bars) {
 		
 		if (ob!=null) {
 		    copy.setText("Copy '"+ob.getName()+"' (can be pasted into other data).");
 			copy.setEnabled(true);
-			export.setText("Export '"+ob.getName()+"'");
-			export.setEnabled(true);
 		} else {
 			copy.setEnabled(false);
-			export.setText("Export");
-			export.setEnabled(false);
 		}
 		
 		ITransferableDataObject currentCopiedData = transferableService.getBuffer();
@@ -1808,7 +1783,7 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 		
 		if (metaData==null) metaData = dataHolder.getMetadata();
 		
-		final Collection<String> names = SliceUtils.getSlicableNames(dataHolder);
+		final Collection<String> names = DataHolderUtils.getSlicableNames(dataHolder);
 		for (String name : names) this.add(transferableService.createData(dataHolder, metaData, name));
 		
 		// Search names to see if they all have a common root, we do not show this.
