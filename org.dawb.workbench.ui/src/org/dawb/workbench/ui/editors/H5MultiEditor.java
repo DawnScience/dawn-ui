@@ -28,7 +28,6 @@ import org.eclipse.dawnsci.plotting.api.tool.IToolPageSystem;
 import org.eclipse.dawnsci.plotting.api.trace.ColorOption;
 import org.eclipse.dawnsci.slicing.api.data.ITransferableDataManager;
 import org.eclipse.dawnsci.slicing.api.system.ISliceSystem;
-import org.eclipse.dawnsci.slicing.api.util.SliceUtils;
 import org.eclipse.january.dataset.IDataset;
 import org.eclipse.january.metadata.IMetadata;
 import org.eclipse.jface.viewers.IContentProvider;
@@ -47,6 +46,7 @@ import org.slf4j.LoggerFactory;
 import uk.ac.diamond.scisoft.analysis.io.LoaderFactory;
 import uk.ac.diamond.scisoft.analysis.rcp.editors.HDF5Input;
 import uk.ac.diamond.scisoft.analysis.rcp.editors.HDF5TreeEditor;
+import uk.ac.diamond.scisoft.analysis.utils.DataHolderUtils;
 import uk.ac.diamond.scisoft.analysis.utils.FileUtils;
 
 
@@ -113,7 +113,7 @@ public class H5MultiEditor extends MultiPageEditorPart implements IPersistableEd
 		try {
 			
 			if (metadata!=null) {
-				final Collection<String> names = SliceUtils.getSlicableNames(holder);
+				final Collection<String> names = DataHolderUtils.getSlicableNames(holder);
 				if (names == null || names.size() < 1 || getSite().getPage().findViewReference("uk.ac.diamond.scisoft.analysis.rcp.views.DatasetInspectorView") != null) {
 					treeOnTop = true;
 				}
