@@ -23,8 +23,7 @@ import org.eclipse.dawnsci.plotting.api.tool.IToolPage.ToolPageRole;
 import org.eclipse.dawnsci.plotting.api.tool.IToolPageSystem;
 import org.eclipse.dawnsci.plotting.api.trace.IImageTrace;
 import org.eclipse.dawnsci.plotting.api.trace.IImageTrace.DownsampleType;
-import org.eclipse.january.dataset.DTypeUtils;
-import org.eclipse.january.dataset.Dataset;
+import org.eclipse.january.dataset.InterfaceUtils;
 import org.eclipse.january.dataset.RGBDataset;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.preference.ColorSelector;
@@ -99,10 +98,7 @@ public class ImageTraceComposite extends Composite {
 		group.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, true));
 		group.setLayout(new GridLayout(2, false));
 		
-		final int dType = DTypeUtils.getDType(imageTrace.getData());
-		boolean isInt = dType==Dataset.INT16 ||
-				        dType==Dataset.INT32 ||
-				        dType==Dataset.INT64;
+		boolean isInt = InterfaceUtils.isInteger(imageTrace.getData());
 
 		label = new Label(group, SWT.NONE);
 		label.setText("Minimum Intensity");

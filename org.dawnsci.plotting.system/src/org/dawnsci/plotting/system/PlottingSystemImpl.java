@@ -797,18 +797,6 @@ public class PlottingSystemImpl<T> extends AbstractPlottingSystem<T> {
 		return traces;
 	}
 
-	@SuppressWarnings("unused")
-	private boolean isAllInts(List<Dataset> ysIn) {
-		for (Dataset a : ysIn) {
-			if (a.getDType()!=Dataset.INT16 &&
-				a.getDType()!=Dataset.INT32 &&
-				a.getDType()!=Dataset.INT64) {
-				return false;
-			}
-		}
-		return true;
-	}
-
 	public ILineTrace createLineTrace(String traceName) {
 		return createTrace(traceName, ILineTrace.class);
 	}

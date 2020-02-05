@@ -91,11 +91,10 @@ import org.eclipse.draw2d.LineBorder;
 import org.eclipse.draw2d.MouseListener;
 import org.eclipse.draw2d.MouseMotionListener;
 import org.eclipse.draw2d.PrintFigureOperation;
-import org.eclipse.january.dataset.DTypeUtils;
-import org.eclipse.january.dataset.Dataset;
 import org.eclipse.january.dataset.DatasetFactory;
 import org.eclipse.january.dataset.DoubleDataset;
 import org.eclipse.january.dataset.IDataset;
+import org.eclipse.january.dataset.RGBDataset;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.ActionContributionItem;
 import org.eclipse.jface.action.IAction;
@@ -1194,7 +1193,7 @@ public class LightWeightPlotViewer<T> extends AbstractPlottingViewer<T> implemen
 			xyGraph.addImageTrace((ImageTrace)image);
 			removeAdditionalAxes(); // Do not have others with images.
 
-			if (DTypeUtils.getDType(trace.getData()) == Dataset.RGB) {
+			if (trace.getData() instanceof RGBDataset) {
 				intensity.setVisible(false);
 			} else {
 				intensity.setVisible(showIntensity);

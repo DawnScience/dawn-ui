@@ -17,6 +17,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.concurrent.locks.ReadWriteLock;
+
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.math3.util.MathArrays;
 import org.dawnsci.surfacescatter.AnalaysisMethodologies;
@@ -75,7 +76,6 @@ import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.region.IRegion;
 import org.eclipse.dawnsci.plotting.api.trace.ILineTrace;
 import org.eclipse.january.dataset.AggregateDataset;
-import org.eclipse.january.dataset.DTypeUtils;
 import org.eclipse.january.dataset.Dataset;
 import org.eclipse.january.dataset.DatasetFactory;
 import org.eclipse.january.dataset.DatasetUtils;
@@ -83,7 +83,6 @@ import org.eclipse.january.dataset.DoubleDataset;
 import org.eclipse.january.dataset.IDataset;
 import org.eclipse.january.dataset.ILazyDataset;
 import org.eclipse.january.dataset.Maths;
-import org.eclipse.january.dataset.ShapeUtils;
 import org.eclipse.january.dataset.SliceND;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -1333,57 +1332,6 @@ public class SurfaceScatterPresenter {
 
 	public void setInterpolatedLenPts(ArrayList<double[][]> intepolatedLenPts) {
 		drm.setInterpolatedLenPts(intepolatedLenPts);
-	}
-
-	public static ILazyDataset concatenate(final ILazyDataset[] as, final int axis) {
-		if (as == null || as.length == 0) {
-			throw new IllegalArgumentException("No datasets given");
-		}
-		ILazyDataset a = as[0];
-		if (as.length == 1) {
-			return a.clone();
-		}
-		int[] ashape = a.getShape();
-		int at = DTypeUtils.getDType(a);
-		int anum = as.length;
-		int isize = a.getElementsPerItem();
-
-		int i = 1;
-		for (; i < anum; i++) {
-			if (at != DTypeUtils.getDType(as[i])) {
-
-				break;
-			}
-			if (!ShapeUtils.areShapesCompatible(ashape, as[i].getShape(), axis)) {
-
-				break;
-			}
-			final int is = as[i].getElementsPerItem();
-			if (isize < is)
-				isize = is;
-		}
-		if (i < anum) {
-			throw new IllegalArgumentException("Datasets are not compatible");
-		}
-
-		for (i = 1; i < anum; i++) {
-			ashape[axis] += as[i].getShape()[axis];
-		}
-
-		ILazyDataset result = DatasetFactory.zeros(isize, ashape, at);
-
-		int[] start = new int[ashape.length];
-		int[] stop = ashape;
-		stop[axis] = 0;
-		for (i = 0; i < anum; i++) {
-			ILazyDataset b = as[i];
-			int[] bshape = b.getShape();
-			stop[axis] += bshape[axis];
-			((Dataset) result).setSlice(b, start, stop, null);
-			start[axis] += bshape[axis];
-		}
-
-		return result;
 	}
 
 	public RectangularROI[] regionOfInterestSetter(int[][] lenPt) {
@@ -2661,13 +2609,7 @@ public class SurfaceScatterPresenter {
 	}
 
 	public static Dataset sortStrings(DoubleDataset a, Dataset b) {
-		if (!DTypeUtils.isDTypeNumerical(a.getDType())) {
-			throw new UnsupportedOperationException("Sorting non-numerical datasets not supported yet");
-		}
-
-		// gather all datasets as double dataset copies
-
-		DoubleDataset s = (DoubleDataset) DatasetFactory.createFromObject(a);
+		DoubleDataset s = a;
 
 		int l = b == null ? 0 : b.getSize();
 		Dataset[] t = new Dataset[l];
