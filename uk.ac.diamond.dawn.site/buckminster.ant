@@ -291,6 +291,15 @@ Additional Ant tasks for Buckminster build. Based on http://www.ralfebert.de/blo
             <arg value="-C" />
             <arg value="${destination}/jre" />
         </exec>
+        <!--
+             Remove unnecessary files from JRE, see https://www.oracle.com/technetwork/java/javase/jre-8-readme-2095710.html
+        -->
+        <dirname property="antfile.dir" file="${ant.file}" />
+        <echo message="JRE include: Deleting files listed in ${antfile.dir}/jre-exclude.${product.os}.${product.arch}" />
+        <symlink failonerror="true" action="delete" link="${destination}/jre/man/ja" />
+        <delete includeemptydirs="true" removeNotFollowedSymlinks="true">
+            <fileset dir="${destination}/jre" includesfile="${antfile.dir}/jre-exclude.${product.os}.${product.arch}" />
+        </delete>
         <property name="jreUntarDone" value="true" />
     </target>
 
