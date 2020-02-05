@@ -1589,7 +1589,7 @@ public class LightWeightPlotViewer<T> extends AbstractPlottingViewer<T> implemen
 		}
 	}
 	private void repaintInternal(final boolean autoScale) {
-		if (figureCanvas!=null) {
+		if (figureCanvas != null && !figureCanvas.isDisposed()) {
 			if (autoScale){
 				xyGraph.performAutoScale();
 				xyGraph.performAutoScale();
