@@ -193,7 +193,7 @@ public class MappingUtils {
 		double xMin = x.min(true).doubleValue();
 		
 		if (shape == null) {
-			shape = guessBestShapeShape(x,y);
+			shape = guessBestShape(x,y);
 		}
 		
 		XYImagePixelCache cache = new XYImagePixelCache(x,y,new double[]{xMin,xMax},new double[]{yMin,yMax},shape[1],shape[0]);
@@ -217,34 +217,75 @@ public class MappingUtils {
 		return new IDataset[] {map,lookup};
 	}
 	
-	private static int[] guessBestShapeShape(Dataset xCoord, Dataset yCoord) {
+	/**
+	 * Use fast and slow axes position to guess
+	 * a sensible grid shape for remapping
+	 * @param fast
+	 * @param slow
+	 * @return
+	 */
+	public static int[] guessBestShape(Dataset fast, Dataset slow) {
 		
-		IndexIterator it = xCoord.getIterator();
+		int nPoints = fast.getSize();
 		
-		double maxX = -Double.MAX_VALUE;
-		double maxY = -Double.MAX_VALUE;
-		double minX = Double.MAX_VALUE;
-		double minY = Double.MAX_VALUE;
-		
-		int nPoints = 0;
-		
-		while (it.hasNext()) {
-			double x = xCoord.getElementDoubleAbs(it.index);
-			double y = yCoord.getElementDoubleAbs(it.index);
-
-			maxX = Math.max(x,maxX);
-			maxY = Math.max(y,maxY);
-
-			minX = Math.min(x,minX);
-			minY = Math.min(y,minY);
-
-			nPoints++;
+		if (nPoints == 1) {
+			return new int[] {1,1};
 		}
 		
-		double xrange = Math.abs(maxX - minX);
-		double yrange = Math.abs(maxY -minY);
+		IndexIterator it = fast.getIterator();
+		
+		//First check for flattened grid scan by looking for constant
+		//values in x or y
+		int nXConst = 0;
+		int nYConst = 0;
+
+		it.hasNext();
+		double last_x = fast.getElementDoubleAbs(it.index);
+		double last_y = slow.getElementDoubleAbs(it.index);
+		
+		while (it.hasNext()) {
+			double x = fast.getElementDoubleAbs(it.index);
+			double y = slow.getElementDoubleAbs(it.index);
+			
+			if (x == last_x) {
+				nXConst++;
+			}
+			
+			if (y == last_y) {
+				nYConst++;
+			}
+			
+			if (x != last_x && y != last_y) {
+				break;
+			}
+			
+			last_x = x;
+			last_y = y;
+		}
+		
+		if (nXConst != 0) {
+			double nY = nXConst + 1;
+			return new int[] {(int)nY, (int)Math.ceil(nPoints/nY)};
+		}
+		
+		if (nYConst != 0) {
+			double nX = nYConst + 1;
+			return new int[] {(int)Math.ceil(nPoints/nX), (int)nX};
+		}
+		
+		//Not a grid, so do our best to guess
+		//based on most likely some kind of square-ish scan
+		
+		double xrange = fast.peakToPeak(true).doubleValue();
+		double yrange = slow.peakToPeak(true).doubleValue();
 		
 		double ratio = xrange/yrange;
+		
+		//square
+		if (ratio == 1) {
+			int side = (int)Math.ceil(Math.sqrt(nPoints));
+			return new int[] {side,side};
+		}
 		
 		int yOut = (int)Math.ceil(Math.sqrt(nPoints/ratio));
 		if (yOut < 1) yOut = 1;
@@ -252,6 +293,7 @@ public class MappingUtils {
 		
 		if (xOut < 1) xOut = 1;
 
+		//limit to 1000x1000 grid for speed
 		if (xOut > 1000) xOut = 1000;
 		if (yOut > 1000) yOut = 1000;
  		
