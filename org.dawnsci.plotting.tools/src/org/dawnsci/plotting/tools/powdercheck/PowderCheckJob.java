@@ -40,6 +40,7 @@ import org.slf4j.LoggerFactory;
 import uk.ac.diamond.scisoft.analysis.baseline.BaselineGeneration;
 import uk.ac.diamond.scisoft.analysis.crystallography.CalibrationFactory;
 import uk.ac.diamond.scisoft.analysis.crystallography.HKL;
+import uk.ac.diamond.scisoft.analysis.diffraction.DSpacing;
 import uk.ac.diamond.scisoft.analysis.diffraction.powder.NonPixelSplittingIntegration;
 import uk.ac.diamond.scisoft.analysis.diffraction.powder.NonPixelSplittingIntegration2D;
 import uk.ac.diamond.scisoft.analysis.diffraction.powder.PixelSplittingIntegration2D;
@@ -229,8 +230,11 @@ public class PowderCheckJob extends Job {
 		final double[] qVals = new double[spacings.size()];
 
 		for (int i = 0 ; i < spacings.size(); i++) {
-			if (xAxis == XAxis.ANGLE) qVals[i] = 2*Math.toDegrees(Math.asin((metadata.getDiffractionCrystalEnvironment().getWavelength() / (2*spacings.get(i).getDNano()*10))));
-			else qVals[i] = (Math.PI*2)/(spacings.get(i).getDNano()*10);
+			if (xAxis == XAxis.ANGLE) {
+				qVals[i] = Math.toDegrees(DSpacing.coneAngleFromDSpacing(metadata.getDiffractionCrystalEnvironment(), spacings.get(i).getDNano()*10));
+			} else {
+				qVals[i] = (Math.PI*2)/(spacings.get(i).getDNano()*10);
+			}
 		}
 
 		double qMax = xIn.max().doubleValue();
