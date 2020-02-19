@@ -1,11 +1,7 @@
 package org.dawnsci.jzy3d.vbo;
 
-import java.lang.reflect.Method;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
-import java.util.ArrayList;
-import java.util.List;
-
 import org.jzy3d.colors.ColorMapper;
 import org.jzy3d.maths.BoundingBox3d;
 import org.jzy3d.maths.Coord3d;
