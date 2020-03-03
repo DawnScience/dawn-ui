@@ -70,7 +70,7 @@ public class ROIDialog extends Dialog {
 				try {
 					roiEditor.setRegion(ROIType.createNew(roiType.getItem(roiType.getSelectionIndex())), null, null);
 				} catch (Exception e1) {
-					logger.error("Cannot create roi "+ROIType.getType(roiType.getSelectionIndex()).getName(), e1);
+					logger.error("Cannot create roi {}", roiType.getItem(roiType.getSelectionIndex()), e1);
 				}
 			}
 		});
@@ -83,9 +83,23 @@ public class ROIDialog extends Dialog {
 	}
 
 	public void setROI(IROI roi) {
-		if (roi==null) return;
-		final int index = ROIType.getIndex(roi.getClass());
-		roiType.select(index);
+		if (roi==null) {
+			return;
+		}
+
+		String n = ROIType.getName(roi.getClass());
+		if (n == null) {
+			return;
+		}
+
+		String[] rois = roiType.getItems();
+		for (int i = 0; i < rois.length; i++) {
+			if (n.equals(rois[i])) {
+				roiType.select(i);
+				break;
+			}
+		}
+		// could fail if roi not in combo
 		roiEditor.setRegion(roi, null, null);
 	}
 

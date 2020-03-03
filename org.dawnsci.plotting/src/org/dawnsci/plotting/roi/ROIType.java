@@ -43,12 +43,6 @@ public enum ROIType {
 	ROIType(Class<? extends IROI> clazz) {
 		this.clazz = clazz;
 	}
-	
-	public int getIndex() {
-		final ROIType[] ops = ROIType.values();
-		for (int i = 0; i < ops.length; i++) if (ops[i]==this) return i;
-		return -1;
-	}
 
 	public static String[] getTypes() {
 		final ROIType[] ops = ROIType.values();
@@ -76,11 +70,6 @@ public enum ROIType {
 		return clazz.getSimpleName();
 	}
 
-	public static ROIType getType(int index) {
-		final ROIType[] ops = ROIType.values();
-		return ops[index];
-	}
-
 	public static ROIType getType(String name) {
 		for (ROIType t : ROIType.values()) {
 			if (t.getName().equals(name)) {
@@ -94,12 +83,17 @@ public enum ROIType {
 		return clazz.newInstance();
 	}
 
-	public static int getIndex(Class<? extends IROI> class1) {
+	/**
+	 * Get name of ROI type
+	 * @param rClass RIO class
+	 * @return name or null if class is not in enumeration
+	 */
+	public static String getName(Class<? extends IROI> rClass) { // just simple name though
 		final ROIType[] ops = ROIType.values();
 		for (ROIType roiType : ops) {
-			if (roiType.clazz == class1) return roiType.getIndex();
+			if (roiType.clazz == rClass) return roiType.getName();
 		}
-		return -1;
+		return null;
 	}
 
 	public static IROI createNew(String name) throws InstantiationException, IllegalAccessException {
