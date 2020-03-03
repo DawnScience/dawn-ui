@@ -184,6 +184,7 @@ public class MappedDataView extends ViewPart {
 
 				if (element instanceof MappedDataFile) {
 					manager.add(MapActionUtils.getFileRemoveAction(fileController, (MappedDataFile)element));
+					manager.add(MapActionUtils.getCopyPathToClipboardAction(((MappedDataFile)element).getPath()));
 				}
 
 				if (element instanceof MappedDataBlock &&

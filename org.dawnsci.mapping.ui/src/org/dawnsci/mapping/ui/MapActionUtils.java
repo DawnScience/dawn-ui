@@ -32,6 +32,9 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.scanning.api.scan.IFilePathService;
+import org.eclipse.swt.dnd.Clipboard;
+import org.eclipse.swt.dnd.TextTransfer;
+import org.eclipse.swt.dnd.Transfer;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.WorkbenchException;
@@ -234,6 +237,19 @@ public class MapActionUtils {
 			}
 		};
 
+	}
+	
+	public static IAction getCopyPathToClipboardAction(String path) {
+		return new Action("Copy path to clipboard") {
+			
+			@Override
+			public void run() {
+				Clipboard cb = new Clipboard(Display.getDefault());
+				TextTransfer textTransfer = TextTransfer.getInstance();
+				cb.setContents(new Object[] { path },
+						new Transfer[] { textTransfer });
+			}
+		};
 	}
 	
 	public static IAction getDynamicViewerAction(final MappedDataBlock block) {
