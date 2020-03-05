@@ -187,7 +187,7 @@ public class MapPlotManager implements IMapPlotController{
 			
 			private void sendEvent(final ClickEvent evt, boolean isDoubleClick) {
 				Map<String,Object> props = new HashMap<>();
-				PlottableMapObject topMap = getTopMap();
+				PlottableMapObject topMap = getTopMap(evt.getxValue(), evt.getyValue());
 				String path = topMap == null ? null : topMap.getPath();
 				MappedDataFile p = fileManager.getArea().getParentFile(topMap);
 				if (p != null && p.getParentPath() != null) {
