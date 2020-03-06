@@ -10,12 +10,14 @@ package org.dawnsci.plotting.roi;
 
 import org.eclipse.dawnsci.analysis.api.roi.IROI;
 import org.eclipse.jface.dialogs.Dialog;
+import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CCombo;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
@@ -80,6 +82,27 @@ public class ROIDialog extends Dialog {
 		roiEditor.createPartControl(main);
 
 		return main;
+	}
+
+	@Override
+	protected void createButtonsForButtonBar(Composite parent) {
+		super.createButtonsForButtonBar(parent);
+		Button b = createButton(parent, IDialogConstants.NO_ID, "Remove", false);
+		b.setToolTipText("Remove region");
+	}
+
+	/**
+	 * Return code from ROIDialog to indicate that the region is to be removed
+	 */
+	public static final int REMOVE_ROI = -1237;
+
+	@Override
+	protected void buttonPressed(int buttonId) {
+		super.buttonPressed(buttonId);
+		if (buttonId == IDialogConstants.NO_ID) {
+			setReturnCode(REMOVE_ROI);
+			close();
+		}
 	}
 
 	public void setROI(IROI roi) {

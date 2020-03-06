@@ -21,7 +21,7 @@ public class RegionCellEditor extends DialogCellEditor {
 	private static final Logger logger = LoggerFactory.getLogger(RegionCellEditor.class);
 	private IRegionTransformer transformer;
 	private Class<? extends IROI> clazz;
-	
+
 	public RegionCellEditor(Composite parent, Class<? extends IROI> clazz) {
 		this(parent, clazz, null);
 	}
@@ -31,33 +31,48 @@ public class RegionCellEditor extends DialogCellEditor {
 		this.clazz = clazz;
 		this.transformer = transformer;
 	}
-	
+
+	private static final Integer REMOVE_ENTRY = ROIDialog.REMOVE_ROI; // special singleton to indicate removal of ROI
+
 	@Override
 	protected Object openDialogBox(Control cellEditorWindow) {
 		final ROIDialog dialog = new ROIDialog(cellEditorWindow.getShell(), clazz);
 		dialog.create();
 		dialog.getShell().setSize(550,450); // As needed
 		dialog.getShell().setText("Edit Region of Interest");
-	
+
 		try {
-			dialog.setROI(transformer!=null ? transformer.getROI() : (IROI)getValue());
-	        final int ok = dialog.open();
-	        if (ok == Dialog.OK) {
-	            return transformer!=null ? transformer.getValue(dialog.getROI()) : dialog.getROI();
-	        }
+			dialog.setROI(transformer != null ? transformer.getROI() : (IROI) getValue());
+			final int ok = dialog.open();
+			if (ok == Dialog.OK) {
+				return transformer != null ? transformer.getValue(dialog.getROI()) : dialog.getROI();
+			} else if (ok == ROIDialog.REMOVE_ROI) {
+				return REMOVE_ENTRY;
+			}
 		} catch (Exception ne) {
 			logger.error("Problem decoding and/or encoding bean!", ne);
 		}
-        
-        return null;
+
+		return null;
 	}
-    protected void updateContents(Object value) {
-        if ( getDefaultLabel() == null) {
+
+	protected void updateContents(Object value) {
+		if (getDefaultLabel() == null) {
 			return;
 		}
-        if (value == null && transformer==null) return;
-        getDefaultLabel().setText(transformer!=null ? transformer.getRendererText() : value.toString());
-    }
+		if (value == null && transformer == null) {
+			return;
+		}
+		if (value == REMOVE_ENTRY) {
+			value = "";
+		}
+		getDefaultLabel().setText(transformer != null ? transformer.getRendererText() : value.toString());
+	}
 
+	@Override
+	protected Object doGetValue() {
+		Object o = super.doGetValue();
+		return o == REMOVE_ENTRY ? null : o;
+	}
 };
 
