@@ -1,4 +1,5 @@
 Manifest-Version: 1.0
+Eclipse-BundleShape: dir
 Bundle-ManifestVersion: 2
 Bundle-Name: Plotting services
 Bundle-SymbolicName: org.dawnsci.plotting.services;singleton:=true

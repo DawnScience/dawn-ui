@@ -2,6 +2,7 @@ Dependency-Note: Do not add dependencies to this plugin without discussing. For 
  uk.ac.diamond.scisoft.analysis.rcp is right out. Do not add dependency on org.dawb.common.ui, this
  is bad for plotting using RAP. E4FIXME Added bundles to solve internal call issues
 Manifest-Version: 1.0
+Eclipse-BundleShape: dir
 Bundle-ManifestVersion: 2
 Bundle-Name: Plotting
 Bundle-SymbolicName: org.dawnsci.plotting;singleton:=true
