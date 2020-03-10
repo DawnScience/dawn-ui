@@ -58,7 +58,7 @@ public class PlotModeXY implements IPlotMode {
 		long t = System.currentTimeMillis();
 		IDataset allData = lz.getSlice(slice);
 
-		logger.info("Slice time {} ms for slice {} of {}", (System.currentTimeMillis()-t), slice.toString(), lz.getName());
+		logger.debug("Slice time {} ms for slice {} of {}", (System.currentTimeMillis()-t), slice.toString(), lz.getName());
 		
 		SliceViewIterator it = new SliceViewIterator(allData, null, getDataDimensions(options));
 		

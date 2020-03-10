@@ -54,7 +54,7 @@ public class PlotModeImage implements IPlotModeColored {
 	public IDataset[] sliceForPlot(ILazyDataset lz, SliceND slice, Object[] options, IPlottingSystem<?> system) throws Exception {
 		long t = System.currentTimeMillis();
 		Dataset data = DatasetUtils.convertToDataset(lz.getSlice(slice));
-		logger.info("Slice time {} ms for slice {} of {}", (System.currentTimeMillis()-t), slice.toString(), lz.getName());
+		logger.debug("Slice time {} ms for slice {} of {}", (System.currentTimeMillis()-t), slice.toString(), lz.getName());
 		data.setErrors(null);
 		updateName(lz.getName(),data,slice);
 		data.squeeze();
@@ -215,7 +215,7 @@ public class PlotModeImage implements IPlotModeColored {
 			system.getSelectedXAxis().setRange(range[0], range[1]);
 			system.getSelectedYAxis().setRange(range[2], range[3]);
 		}
-		logger.info("Display time " + (System.currentTimeMillis()-t) + " ms");
+		logger.debug("Display time " + (System.currentTimeMillis()-t) + " ms");
 		
 	}
 

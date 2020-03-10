@@ -158,7 +158,7 @@ public class PlotModeVolume extends AbstractJZY3DImagePlotMode {
 	public IDataset[] sliceForPlotInner(ILazyDataset lz, SliceND slice, Object[] options, IPlottingSystem<?> system) throws Exception {
 		long t = System.currentTimeMillis();
 		Dataset data = DatasetUtils.convertToDataset(lz.getSlice(slice));
-		logger.info("Slice time {} ms for slice {} of {}", (System.currentTimeMillis()-t), slice.toString(), lz.getName());
+		logger.debug("Slice time {} ms for slice {} of {}", (System.currentTimeMillis()-t), slice.toString(), lz.getName());
 		data.setErrors(null);
 		return new IDataset[]{data};
 	}

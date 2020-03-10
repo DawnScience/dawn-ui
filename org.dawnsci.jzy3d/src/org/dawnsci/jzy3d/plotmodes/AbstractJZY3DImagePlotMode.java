@@ -53,7 +53,7 @@ public abstract class AbstractJZY3DImagePlotMode extends PlotModeImage {
 
 		long t = System.currentTimeMillis();
 		setData(trace,d, ax == null ? null : ax.toArray(new IDataset[ax.size()]));
-		logger.info("Tesselation time {} ms for slice {} of {}", (System.currentTimeMillis()-t), slice.toString(), lz.getName());
+		logger.debug("Tesselation time {} ms for slice {} of {}", (System.currentTimeMillis()-t), slice.toString(), lz.getName());
 		atomicTrace.set(trace);
 		
 		return data;
