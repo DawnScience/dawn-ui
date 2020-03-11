@@ -119,9 +119,12 @@ public class MapPropertiesDialog extends Dialog {
 		});
 		
 		
-		if (map instanceof ReMappedData) {
+		//Remapped data of size 1 is not remapped, just shown as a point
+		// so changing the shape makes no sense
+		if (map instanceof ReMappedData && map.getData().getSize() != 1) {
 			final ReMappedData rm = (ReMappedData)map;
 			final int[] shape = rm.getShape();
+
 			Label xLabel = new Label(container, SWT.NONE);
 			xLabel.setText("X shape");
 			final Spinner xspin = new Spinner(container, SWT.NONE);
