@@ -2,7 +2,7 @@
 <feature
       id="org.dawnsci.base.product.feature"
       label="DAWN Science"
-      version="2.17.0.qualifier"
+      version="2.18.0.qualifier"
       provider-name="DAWN Collaboration">
 
    <description url="http://www.example.com/description">
@@ -43,10 +43,6 @@
 
    <includes
          id="uk.ac.diamond.scisoft.feedback.feature"
-         version="0.0.0"/>
-
-   <includes
-         id="org.dawnsci.documentation.feature"
          version="0.0.0"/>
 
    <includes
