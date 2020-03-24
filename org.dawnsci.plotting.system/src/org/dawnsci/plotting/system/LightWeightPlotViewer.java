@@ -467,7 +467,7 @@ public class LightWeightPlotViewer<T> extends AbstractPlottingViewer<T> implemen
 					xyGraph.clearRegionTool();
 
 				} else if (e.keyCode==16777230 || e.character=='h') {
-					final IContributionItem action = bars.getToolBarManager().find("org.dawb.workbench.plotting.histo");
+					final IContributionItem action = bars == null ? null : bars.getToolBarManager().find("org.dawb.workbench.plotting.histo");
 					if (action!=null && action.isVisible() && action instanceof ActionContributionItem) {
 						ActionContributionItem iaction = (ActionContributionItem)action;
 						iaction.getAction().setChecked(!iaction.getAction().isChecked());
@@ -494,7 +494,7 @@ public class LightWeightPlotViewer<T> extends AbstractPlottingViewer<T> implemen
 
 
 				} else if (e.keyCode== SWT.F11) {
-					final IContributionItem action = bars.getToolBarManager().find("org.dawb.workbench.fullscreen");
+					final IContributionItem action = bars == null ? null : bars.getToolBarManager().find("org.dawb.workbench.fullscreen");
 					if (action!=null && action.isVisible() && action instanceof ActionContributionItem) {
 						ActionContributionItem iaction = (ActionContributionItem)action;
 						iaction.getAction().setChecked(!iaction.getAction().isChecked());
