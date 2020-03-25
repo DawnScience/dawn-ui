@@ -9,6 +9,7 @@ import java.util.Map;
 import org.eclipse.dawnsci.plotting.api.histogram.ImageServiceBean;
 import org.eclipse.january.dataset.Dataset;
 import org.eclipse.january.dataset.DatasetFactory;
+import org.eclipse.january.dataset.Maths;
 import org.junit.Test;
 
 public class ImageServiceTest {
@@ -29,6 +30,11 @@ public class ImageServiceTest {
 
 		// Offset should be dataset min -(dataset range * 1e-6)
 		assertEquals(-9e-6, imageServiceBean.getLogOffset(), 0.0);
+
+		image = Maths.subtract(image, -20);
+		imageServiceBean.setImage(image);
+		// Offset should be dataset min -(dataset range * 1e-6)
+		assertEquals(20, imageServiceBean.getLogOffset(), 1);
 	}
 
 	/**
