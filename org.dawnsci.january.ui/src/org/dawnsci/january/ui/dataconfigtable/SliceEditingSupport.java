@@ -228,7 +228,7 @@ public class SliceEditingSupport extends EditingSupport {
 		controlShell.addListener(SWT.Resize, closeListener);
 
 
-        slider = new Slider(sliderShell, SWT.None);
+        slider = new Slider(sliderShell, SWT.HORIZONTAL);
         //we want the slider to have the stepper buttons
         slider.setData("org.eclipse.swt.internal.gtk.css", "scrollbar {-GtkScrollbar-has-backward-stepper: true; -GtkScrollbar-has-forward-stepper: true;}");
         slider.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
@@ -262,16 +262,21 @@ public class SliceEditingSupport extends EditingSupport {
 				
 			}
 		});
-        
-        slider.addSelectionListener(new SelectionAdapter() {
-        	
-        	public void widgetSelected(SelectionEvent e) {
-        		slider.setFocus();
-        		updateSlice(slider.getSelection());
-        	}
+
+		slider.addSelectionListener(new SelectionAdapter() {
+			private int last = slider.getSelection();
+
+			public void widgetSelected(SelectionEvent e) {
+				slider.setFocus();
+				int current = slider.getSelection();
+				if (current != last) {
+					updateSlice(current);
+					last = current;
+				}
+			}
 		});
-        
-        slider.addFocusListener(new FocusListener() {
+
+		slider.addFocusListener(new FocusListener() {
 			@Override
 			public void focusGained(FocusEvent e) { }
 			@Override
