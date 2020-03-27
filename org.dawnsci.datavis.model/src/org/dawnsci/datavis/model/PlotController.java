@@ -126,12 +126,19 @@ public class PlotController implements IPlotController, ILoadedFileInitialiser {
 			modeDataList.add(new PlotModeData(plotMode, name, priority));
 		}
 		modeDataList.sort(null);
+		// image mode index must match MODE_2D
 		modeDataList.add(0, new PlotModeData(new PlotModeImage(), "PlotModeImage"));
+		modeDataList.add(0, new PlotModeData(new PlotModeXY(true), "PlotModeScatter"));
 		modeDataList.add(0, new PlotModeData(new PlotModeXY(), "PlotModeXY"));
-		
+
 		modes = modeDataList.stream().map(data -> data.mode).toArray(IPlotMode[]::new);
 	}
-	
+
+	/**
+	 * This constant should used in testing only
+	 */
+	public static final int MODE_2D = 2;
+
 	private  IPlottingService plotService;
 	private  IFileController fileController;
 	
@@ -511,7 +518,7 @@ public class PlotController implements IPlotController, ILoadedFileInitialiser {
 	}
 	
 	private IPlotMode getDefaultMode(int rank) {
-		if (rank > 1) return modes[1];
+		if (rank > 1) return modes[MODE_2D];
 		return modes[0];
 	}
 	
@@ -616,8 +623,8 @@ public class PlotController implements IPlotController, ILoadedFileInitialiser {
 						return true;
 					}
 				
-					if (!f.isSelected()) return true;			
-					boolean thisFile = f == option.getParent();			
+					if (!f.isSelected()) return true;
+					boolean thisFile = f == option.getParent();
 					for (DataOptions o : f.getDataOptions()) {
 						if (!o.isSelected()) continue;
 						if (option.getName().equals(o.getName()) && option.getFilePath().equals(o.getFilePath())) continue;

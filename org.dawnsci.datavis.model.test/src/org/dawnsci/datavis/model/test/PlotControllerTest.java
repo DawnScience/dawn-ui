@@ -42,7 +42,9 @@ public class PlotControllerTest extends AbstractTestModel {
 	private static FileController fileController;
 	private static IPlottingSystem<?> plottingSystem;
 	private static ExecutorService exService;
-	
+
+	private static final int MODE_2D = PlotController.MODE_2D;
+
 	@BeforeClass
 	public static void buildData() throws Exception {
 		DisplayWrapper.setTestMode();
@@ -323,8 +325,8 @@ public class PlotControllerTest extends AbstractTestModel {
 
 		LoadedFile lf = dop.getParent();
 		NDimensions nD = dop.getPlottableObject().getNDimensions();
-		assertEquals(modes[1].getOptions()[0], nD.getDescription(1));
-		assertEquals(modes[1].getOptions()[1], nD.getDescription(0));
+		assertEquals(modes[MODE_2D].getOptions()[0], nD.getDescription(1));
+		assertEquals(modes[MODE_2D].getOptions()[1], nD.getDescription(0));
 		
 		plotManager.switchPlotMode(modes[0],dop);
 		plotManager.waitOnJob();
@@ -335,15 +337,15 @@ public class PlotControllerTest extends AbstractTestModel {
 		nD = dop.getPlottableObject().getNDimensions();
 		assertEquals(modes[0].getOptions()[0], nD.getDescription(1));
 		
-		plotManager.switchPlotMode(modes[1],dop);
+		plotManager.switchPlotMode(modes[MODE_2D],dop);
 		plotManager.waitOnJob();
 
 		next = plottingSystem.getTraces().iterator().next();
 		assertTrue(next instanceof IImageTrace);
 		
 		nD = dop.getPlottableObject().getNDimensions();
-		assertEquals(modes[1].getOptions()[0], nD.getDescription(1));
-		assertEquals(modes[1].getOptions()[1], nD.getDescription(0));
+		assertEquals(modes[MODE_2D].getOptions()[0], nD.getDescription(1));
+		assertEquals(modes[MODE_2D].getOptions()[1], nD.getDescription(0));
 		
 		fileController.unloadFiles(Arrays.asList(lf));
 		plotManager.waitOnJob();
@@ -378,7 +380,7 @@ public class PlotControllerTest extends AbstractTestModel {
 		next = plottingSystem.getTraces().iterator().next();
 		assertTrue(next instanceof ILineTrace);
 
-		plotManager.switchPlotMode(modes[1],dop2);
+		plotManager.switchPlotMode(modes[MODE_2D],dop2);
 		plotManager.waitOnJob();
 		assertEquals(1, plottingSystem.getTraces().size());
 		next = plottingSystem.getTraces().iterator().next();

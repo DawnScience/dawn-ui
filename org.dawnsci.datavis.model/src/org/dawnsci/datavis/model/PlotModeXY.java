@@ -6,6 +6,7 @@ import org.eclipse.dawnsci.analysis.dataset.slicer.SliceViewIterator;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.trace.ILineTrace;
 import org.eclipse.dawnsci.plotting.api.trace.ILineTrace.PointStyle;
+import org.eclipse.dawnsci.plotting.api.trace.ILineTrace.TraceType;
 import org.eclipse.dawnsci.plotting.api.trace.ITrace;
 import org.eclipse.dawnsci.plotting.api.trace.MetadataPlotUtils;
 import org.eclipse.january.DatasetException;
@@ -25,8 +26,23 @@ public class PlotModeXY implements IPlotMode {
 	private static final String[] options =  new String[]{"X"};
 	private long count = 0;
 	private boolean errorBarEnabled = false;
+	private boolean usePoints = false;
 	
 	private final static Logger logger = LoggerFactory.getLogger(PlotModeXY.class);
+
+	/**
+	 * Construct XY mode with line plotting
+	 */
+	public PlotModeXY() {
+	}
+
+	/**
+	 * Construct XY mode with given plotting
+	 * @param usePoints if true plot with points instead of a line
+	 */
+	public PlotModeXY(boolean usePoints) {
+		this.usePoints = usePoints;
+	}
 
 	public String[] getOptions() {
 		return options;
@@ -34,7 +50,7 @@ public class PlotModeXY implements IPlotMode {
 
 	@Override
 	public String getName() {
-		return "Line";
+		return usePoints ? "Points" : "Line";
 	}
 	
 	@Override
@@ -199,7 +215,11 @@ public class PlotModeXY implements IPlotMode {
 		trace.setData(ax, data);
 		trace.setUserObject(userObject);
 		trace.setErrorBarEnabled(errorBarEnabled);
-		if (data.getSize() == 1) {
+		if (usePoints) {
+			trace.setTraceType(TraceType.POINT);
+			trace.setPointStyle(PointStyle.FILLED_CIRCLE);
+			trace.setPointSize(2);
+		} else if (data.getSize() == 1) {
 			trace.setPointStyle(PointStyle.POINT);
 		}
 
