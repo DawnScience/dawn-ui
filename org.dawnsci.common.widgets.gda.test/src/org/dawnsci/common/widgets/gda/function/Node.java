@@ -8,8 +8,8 @@
  */
 package org.dawnsci.common.widgets.gda.function;
 
-import org.apache.commons.lang.builder.EqualsBuilder;
-import org.apache.commons.lang.builder.HashCodeBuilder;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 public class Node {
 	public static final Node ADD_NEW_FUNCTION = new Node("Add new function");

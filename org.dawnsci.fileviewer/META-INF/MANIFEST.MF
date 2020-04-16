@@ -20,7 +20,6 @@ Require-Bundle: org.eclipse.ui,
  org.apache.commons.io;bundle-version="2.4.0",
  org.eclipse.dawnsci.analysis.api,
  org.eclipse.january,
- org.apache.commons.lang,
  org.eclipse.dawnsci.nexus,
  org.dawb.common.util
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
@@ -29,3 +28,4 @@ Import-Package: javax.inject;version="1.0.0",
  uk.ac.diamond.sda.navigator.views
 Bundle-ActivationPolicy: lazy
 Service-Component: OSGI-INF/*.xml
+Automatic-Module-Name: org.dawnsci.fileviewer

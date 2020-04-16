@@ -12,7 +12,7 @@ package org.dawnsci.common.widgets.gda.function.internal.model;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.commons.lang.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.dawnsci.common.widgets.gda.function.IFittedFunctionInvalidatedEvent;
 import org.dawnsci.common.widgets.gda.function.IFunctionModifiedEvent;
 import org.dawnsci.common.widgets.gda.function.IModelModifiedListener;
