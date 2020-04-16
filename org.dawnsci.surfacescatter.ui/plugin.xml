@@ -2,6 +2,14 @@
 <?eclipse version="3.4"?>
 <plugin>
    <extension
+         point="org.eclipse.ui.commands">
+      <command
+            defaultHandler="org.dawnsci.surfacescatter.ui.OpenDialogHandler"
+            id="org.dawnsci.surfacescatter.ui.dialog"
+            name="RodAn">
+      </command>
+   </extension>
+   <extension
          point="org.eclipse.ui.menus">
       <menuContribution
             allPopups="false"
@@ -16,14 +24,6 @@
             </command>
          </menu>
       </menuContribution>
-   </extension>
-   <extension
-         point="org.eclipse.ui.commands">
-      <command
-            defaultHandler="org.dawnsci.surfacescatter.ui.OpenDialogHandler"
-            id="org.dawnsci.surfacescatter.ui.dialog"
-            name="RodAn">
-      </command>
    </extension>
 
 </plugin>
