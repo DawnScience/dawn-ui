@@ -22,6 +22,7 @@ package org.dawnsci.plotting.views;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.Platform;
@@ -54,12 +55,13 @@ import org.osgi.framework.ServiceReference;
  * within a <code>PageBookView</code>. Most methods are forwarded to the
  * view's site.
  */
+@SuppressWarnings("restriction")
 public class ToolPageSite implements IPageSite, INestable {
 
 	/**
 	 * The list of menu extender for each registered menu.
 	 */
-	private ArrayList<?> menuExtenders;
+	private List<PopupMenuExtender> menuExtenders;
 
 	/**
 	 * The "parent" view site
@@ -128,7 +130,7 @@ public class ToolPageSite implements IPageSite, INestable {
 		if (menuExtenders != null) {
 			HashSet<MenuManager> managers = new HashSet<MenuManager>(menuExtenders.size());
 			for (int i = 0; i < menuExtenders.size(); i++) {
-				PopupMenuExtender ext = (PopupMenuExtender) menuExtenders.get(i);
+				PopupMenuExtender ext = menuExtenders.get(i);
 				managers.add(ext.getManager());
 				ext.dispose();
 			}
@@ -216,7 +218,7 @@ public class ToolPageSite implements IPageSite, INestable {
 		// E4FIXME This might work
 		EPartService partService = getService(EPartService.class, EPartService.class);
 		PartSite.registerContextMenu(menuID, menuMgr, selProvider, false,
-				parentSite.getPart(), partService.getActivePart().getContext() ,menuExtenders);
+				parentSite.getPart(), partService.getActivePart().getContext() , menuExtenders);
 	}
 	
 	
