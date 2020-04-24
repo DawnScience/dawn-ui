@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <feature
       id="org.dawnsci.base.product.feature"
-      label="DAWN Science"
+      label="Dawn Base Product Feature"
       version="2.18.0.qualifier"
       provider-name="DAWN Collaboration">
 
@@ -61,9 +61,9 @@
          id="org.dawnsci.fileviewer.feature"
          version="0.0.0"/>
 
-   <includes
+   <!-- includes
          id="org.dawnsci.marketplaceclient.feature"
-         version="0.0.0"/>
+         version="0.0.0"/ -->
 
    <includes
          id="org.dawnsci.conversion.feature"
@@ -93,9 +93,9 @@
          id="org.dawnsci.jzy3d.feature"
          version="0.0.0"/>
 
-   <includes
+   <!-- includes
          id="org.dawnsci.dde.feature"
-         version="0.0.0"/>
+         version="0.0.0"/ -->
 
    <includes
          id="org.eclipse.dawnsci.nexus.template.feature"

@@ -3,7 +3,7 @@ Dependency-Notes:
  This plugin should be totally vanilla and not have dependencies on anything
  other than unit and eclipse/swt/jface things.
 Bundle-ManifestVersion: 2
-Bundle-Name: DawnScience Widgets
+Bundle-Name: Dawn Common Widgets
 Bundle-SymbolicName: org.dawnsci.common.widgets;singleton:=true
 Bundle-Version: 1.2.0.qualifier
 Bundle-Activator: org.dawnsci.common.widgets.Activator

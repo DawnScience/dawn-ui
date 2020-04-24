@@ -1,6 +1,6 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: Navigation
+Bundle-Name: Breadcrumb Navigation
 Bundle-SymbolicName: org.dawnsci.breadcrumb.navigation;singleton:=true
 Bundle-Version: 1.0.0.qualifier
 Bundle-Activator: org.dawnsci.breadcrumb.navigation.Activator
@@ -12,7 +12,7 @@ Require-Bundle: org.eclipse.ui,
  org.dawnsci.common.widgets;bundle-version="1.2.0",
  org.eclipse.january;bundle-version="1.0.0",
  org.eclipse.dawnsci.analysis.api;bundle-version="1.0.0"
-Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
 Export-Package: org.dawnsci.breadcrumb.navigation,
  org.dawnsci.breadcrumb.navigation.preference,
@@ -21,3 +21,4 @@ Export-Package: org.dawnsci.breadcrumb.navigation,
 Import-Package: org.dawnsci.breadcrumb.navigation.views,
  org.slf4j;version="[1.7.2,2.0.0)"
 Service-Component: OSGI-INF/*.xml
+Automatic-Module-Name: org.dawnsci.breadcrumb.navigation

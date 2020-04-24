@@ -1,6 +1,6 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: Dedi
+Bundle-Name: DEDI
 Bundle-SymbolicName: org.dawnsci.dedi;singleton:=true
 Bundle-Version: 1.0.0.qualifier
 Bundle-Activator: org.dawnsci.dedi.Activator
@@ -23,3 +23,4 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.richbeans.widgets;bundle-version="1.0.0"
 Bundle-ActivationPolicy: lazy
 Bundle-Vendor: Diamond Light Source
+Automatic-Module-Name: org.dawnsci.dedi

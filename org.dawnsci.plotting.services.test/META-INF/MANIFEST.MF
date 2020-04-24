@@ -1,6 +1,6 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: Tests
+Bundle-Name: Plotting Sevices Tests
 Bundle-SymbolicName: org.dawnsci.plotting.services.test
 Bundle-Version: 1.0.0.qualifier
 Fragment-Host: org.dawnsci.plotting.services;bundle-version="1.0.0"

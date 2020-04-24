@@ -1,6 +1,6 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: Nano Model Test Fragment
+Bundle-Name: DataVis Model Tests
 Bundle-SymbolicName: org.dawnsci.datavis.model.test
 Bundle-Version: 1.0.0.qualifier
 Fragment-Host: org.dawnsci.datavis.model;bundle-version="1.0.0"
@@ -17,3 +17,4 @@ Require-Bundle: org.junit,
  org.objenesis;bundle-version="2.6.0",
  org.eclipse.dawnsci.analysis.api
 Bundle-Vendor: Diamond Light Source
+Automatic-Module-Name: org.dawnsci.datavis.model.test

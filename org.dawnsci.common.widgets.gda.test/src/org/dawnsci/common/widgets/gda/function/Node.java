@@ -17,7 +17,7 @@ public class Node {
 	public static final Node GAUSSIAN = new Node("Gaussian", "posn", "fwhm",
 			"area");
 	public static final Node FERMI = new Node("Fermi", "mu", "kT", "scale",
-			"Constant");
+			"C");
 
 	public static Node ADD(Node... children) {
 		return new Node("Add", children);

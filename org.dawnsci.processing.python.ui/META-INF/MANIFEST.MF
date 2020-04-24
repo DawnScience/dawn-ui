@@ -1,6 +1,6 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: Processing Python Savu bundle
+Bundle-Name: Processing Python UI
 Bundle-SymbolicName: org.dawnsci.processing.python.ui;singleton:=true
 Bundle-Version: 1.0.0.qualifier
 Bundle-Activator: org.dawnsci.processing.python.ui.Activator

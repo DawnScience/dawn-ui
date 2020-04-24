@@ -1,6 +1,6 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: DAWN Developer Environment UI
+Bundle-Name: Dawn Developer Environment UI
 Bundle-SymbolicName: org.dawnsci.dde.ui;singleton:=true
 Bundle-Version: 1.0.0.qualifier
 Bundle-Activator: org.dawnsci.dde.ui.DAWNDDEPlugin

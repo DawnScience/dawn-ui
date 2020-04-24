@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <feature
       id="org.dawnsci.plotting.feature"
-      label="Feature"
+      label="Dawn Plotting Feature"
       version="1.7.1.qualifier"
       provider-name="Diamond Light Source">
 

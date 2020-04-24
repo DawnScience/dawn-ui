@@ -1,10 +1,10 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: Test UI
+Bundle-Name: Workbench UI Tests
 Bundle-SymbolicName: org.dawb.workbench.ui.test
 Bundle-Version: 1.1.0.qualifier
 Bundle-Vendor: ESRF
-Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Import-Package: org.dawb.common.ui.image,
  org.dawb.common.ui.util,
  org.dawb.common.util.eclipse,

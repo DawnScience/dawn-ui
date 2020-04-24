@@ -1,6 +1,6 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: JZY3D Test
+Bundle-Name: Dawn Jzy3d Test
 Bundle-SymbolicName: org.dawnsci.jzy3d.test
 Bundle-Version: 1.0.0.qualifier
 Fragment-Host: org.dawnsci.jzy3d
