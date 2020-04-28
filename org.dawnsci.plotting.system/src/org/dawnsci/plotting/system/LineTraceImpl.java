@@ -106,6 +106,9 @@ public class LineTraceImpl implements ILineTrace, ITraceListener{
 		case DASH_LINE:
 			trace.setTraceType(Trace.TraceType.DASH_LINE);
 			return;
+		case DOT_LINE:
+			trace.setTraceType(Trace.TraceType.DOT_LINE);
+			return;
 		case POINT:
 			trace.setTraceType(Trace.TraceType.POINT);
 			return;
