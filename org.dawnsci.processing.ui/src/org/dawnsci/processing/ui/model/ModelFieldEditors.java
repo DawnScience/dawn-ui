@@ -22,6 +22,7 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.dawnsci.analysis.api.expressions.IExpressionEngine;
 import org.eclipse.dawnsci.analysis.api.expressions.IExpressionService;
 import org.eclipse.dawnsci.analysis.api.processing.IOperationInputData;
+import org.eclipse.dawnsci.analysis.api.processing.model.ChoiceData;
 import org.eclipse.dawnsci.analysis.api.processing.model.FileType;
 import org.eclipse.dawnsci.analysis.api.processing.model.IOperationModel;
 import org.eclipse.dawnsci.analysis.api.processing.model.ModelField;
@@ -41,7 +42,6 @@ import org.eclipse.jface.window.DefaultToolTip;
 import org.eclipse.jface.window.ToolTip;
 import org.eclipse.richbeans.widgets.cell.CComboCellEditor;
 import org.eclipse.richbeans.widgets.cell.CComboWithEntryCellEditor;
-import org.eclipse.richbeans.widgets.cell.CComboWithEntryCellEditorData;
 import org.eclipse.richbeans.widgets.cell.NumberCellEditor;
 import org.eclipse.richbeans.widgets.file.FileDialogCellEditor;
 import org.eclipse.swt.SWT;
@@ -127,9 +127,8 @@ public class ModelFieldEditors {
         } else if (Enum.class.isAssignableFrom(clazz)) {
         	ed = getChoiceEditor((Class<? extends Enum<?>>)clazz, parent);
         	
-        } else if (CComboWithEntryCellEditorData.class.isAssignableFrom(clazz)) {
-        	ed = getChoiceWithEntryEditor((CComboWithEntryCellEditorData) value, parent);
-        	
+        } else if (ChoiceData.class.isAssignableFrom(clazz)) {
+        	ed = getChoiceWithEntryEditor((ChoiceData) value, parent);
         } else if (FileDialogCellEditor.isEditorFor(clazz) || (anot!=null && anot.file()!=FileType.NONE)) {
         	FileDialogCellEditor fe = new FileDialogCellEditor(parent);
         	fe.setValueClass(clazz);
@@ -255,22 +254,24 @@ public class ModelFieldEditors {
 		return cellEd;
 	}
 
-	private static CellEditor getChoiceWithEntryEditor(final CComboWithEntryCellEditorData data, Composite parent) {
-		
-	    final String[] items  = data.getItems();
+	private static CellEditor getChoiceWithEntryEditor(final ChoiceData data, Composite parent) {
+		final String[] items  = data.getChoices();
 		
 		CComboWithEntryCellEditor cellEd = new CComboWithEntryCellEditor(parent, items) {
-    	    protected void doSetValue(Object value) {
-                super.doSetValue(((CComboWithEntryCellEditorData)value).getActiveItem());
-    	    }
-    		protected Object doGetValue() {
-    			return new CComboWithEntryCellEditorData(data, (String)super.doGetValue());
-    		}
+			protected void doSetValue(Object value) {
+				if (value instanceof ChoiceData) {
+					super.doSetValue(((ChoiceData) value).getChosen());
+				}
+			}
+
+			protected Object doGetValue() {
+				return new ChoiceData(items, (String) super.doGetValue());
+			}
 		};
-		
+
 		return cellEd;
 	}
-	
+
 	private static CellEditor getNumberEditor(ModelField field, final Class<? extends Object> clazz, Composite parent) {
     	
 		OperationModelField anot = field.getAnnotation();
