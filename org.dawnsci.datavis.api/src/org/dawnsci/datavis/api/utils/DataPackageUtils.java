@@ -36,6 +36,16 @@ public class DataPackageUtils {
 				.collect(Collectors.toList());
 	}
 	
+	
+	public static List<IXYData> getXYData(List<IDataPackage> list) {
+		
+		Stream<IDataPackage> stream = list.stream();
+		
+		return stream.map(DataPackageUtils::getData)
+					 .filter(Objects::nonNull)
+                     .collect(Collectors.toList());
+	}
+	
 	private static IXYData getData(IDataPackage pack) {
 		
 		ILazyDataset l = pack.getLazyDataset();
