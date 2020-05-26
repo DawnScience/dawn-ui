@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <feature
       id="org.dawnsci.processing.feature"
-      label="Feature"
+      label="Dawn Processing Feature"
       version="1.0.0.qualifier"
       provider-name="Diamond Light Source">
 

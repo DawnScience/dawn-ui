@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <feature
       id="uk.ac.diamond.dawn.base.product.feature"
-      label="DAWN Science"
+      label="Dawn Diamond Base Product Feature"
       version="2.18.0.qualifier"
       provider-name="Diamond Light Source">
 

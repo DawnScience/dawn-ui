@@ -1,6 +1,6 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: Jzy3d
+Bundle-Name: Dawn Jzy3d
 Bundle-SymbolicName: org.dawnsci.jzy3d;singleton:=true
 Bundle-Version: 1.0.0.qualifier
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
@@ -22,3 +22,4 @@ Import-Package: org.dawb.common.ui.menu,
 Service-Component: OSGI-INF/serviceManager.xml
 Bundle-Activator: org.dawnsci.jzy3d.Activator
 Bundle-ActivationPolicy: lazy
+Automatic-Module-Name: org.dawnsci.jzy3d

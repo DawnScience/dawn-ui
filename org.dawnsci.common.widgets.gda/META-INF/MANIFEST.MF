@@ -1,6 +1,6 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: Common ui extensions including GDA dependencies.
+Bundle-Name: Dawn Common UI GDA Extensions
 Bundle-SymbolicName: org.dawnsci.common.widgets.gda;singleton:=true
 Bundle-Version: 1.2.0.qualifier
 Bundle-Activator: org.dawnsci.common.widgets.gda.Activator

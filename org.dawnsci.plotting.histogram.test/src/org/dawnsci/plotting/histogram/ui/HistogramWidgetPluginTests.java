@@ -1,10 +1,12 @@
 package org.dawnsci.plotting.histogram.ui;
 
-import static org.mockito.Mockito.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import org.dawnsci.plotting.histogram.ImageHistogramProvider;
 import org.eclipse.dawnsci.plotting.api.histogram.ImageServiceBean;
-import org.eclipse.dawnsci.plotting.api.trace.IPaletteListener;
 import org.eclipse.dawnsci.plotting.api.trace.IPaletteTrace;
 import org.eclipse.january.dataset.Random;
 import org.eclipse.swt.graphics.PaletteData;
@@ -13,7 +15,6 @@ import org.eclipse.swt.widgets.Composite;
 import org.junit.Test;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
-import org.mockito.stubbing.OngoingStubbing;
 
 public class HistogramWidgetPluginTests extends PluginTestBase {
 

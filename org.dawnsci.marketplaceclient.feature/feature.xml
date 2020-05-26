@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <feature
       id="org.dawnsci.marketplaceclient.feature"
-      label="Feature"
+      label="Dawn Market Place Client Feature"
       version="1.0.0.qualifier"
       provider-name="Diamond Light Source">
 
@@ -76,7 +76,6 @@
 
    <plugin
          id="com.sun.jna"
-         os="win32"
          download-size="0"
          install-size="0"
          version="0.0.0"
@@ -84,7 +83,6 @@
 
    <plugin
          id="com.sun.jna.platform"
-         os="win32"
          download-size="0"
          install-size="0"
          version="0.0.0"

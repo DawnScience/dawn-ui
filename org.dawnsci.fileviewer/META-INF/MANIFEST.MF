@@ -1,6 +1,6 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: FileViewer
+Bundle-Name: Dawn FileViewer
 Bundle-SymbolicName: org.dawnsci.fileviewer;singleton:=true
 Bundle-Version: 1.0.0.qualifier
 Bundle-Activator: org.dawnsci.fileviewer.Activator

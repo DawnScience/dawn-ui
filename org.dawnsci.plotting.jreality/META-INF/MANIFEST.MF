@@ -1,6 +1,6 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: Jreality
+Bundle-Name: Plotting jReality
 Bundle-SymbolicName: org.dawnsci.plotting.jreality;singleton:=true
 Bundle-Version: 1.2.0.qualifier
 Bundle-Activator: org.dawnsci.plotting.jreality.Activator

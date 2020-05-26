@@ -1,15 +1,16 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: Mapping UI Test
+Bundle-Name: Mapping UI Tests
 Bundle-SymbolicName: org.dawnsci.mapping.ui.test
 Bundle-Version: 1.0.0.qualifier
-Fragment-Host: org.dawnsci.mapping.ui;bundle-version="1.0.0.qualifier"
+Fragment-Host: org.dawnsci.mapping.ui
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Require-Bundle: org.junit;bundle-version="[4.12.0,5.0.0)",
  org.eclipse.dawnsci.hdf5,
  org.eclipse.dawnsci.json,
- org.mockito.mockito-core;bundle-version="1.10.19",
+ org.mockito.mockito-core,
  net.bytebuddy.byte-buddy,
  net.bytebuddy.byte-buddy-agent,
  org.objenesis;bundle-version="2.6.0"
 Bundle-Vendor: Diamond Light Source
+Automatic-Module-Name: org.dawnsci.mapping.ui.test
