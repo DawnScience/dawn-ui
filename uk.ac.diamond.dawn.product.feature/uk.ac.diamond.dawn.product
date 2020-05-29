@@ -34,7 +34,6 @@ openFile
 -Dosgi.locking=none
 -Dpydev.funding.hide=true
 -Dorg.eclipse.epp.internal.mpc.core.service.DefaultMarketplaceService.url=http://dmarket.diamond.ac.uk:8080/mpc -Dorg.eclipse.epp.internal.mpc.core.service.DefaultCatalogService.url=http://dmarket.diamond.ac.uk:8080/mpc
--Drun.in.eclipse=true
       </vmArgs>
       <vmArgsMac>-XstartOnFirstThread -Dorg.eclipse.swt.internal.carbon.smallFonts
       </vmArgsMac>
