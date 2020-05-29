@@ -2,7 +2,7 @@
 <feature
       id="org.dawnsci.base.product.feature"
       label="Dawn Base Product Feature"
-      version="2.18.0.qualifier"
+      version="2.19.0.qualifier"
       provider-name="DAWN Collaboration">
 
    <description url="http://www.example.com/description">
@@ -10,7 +10,7 @@
    </description>
 
    <copyright url="http://www.example.com/copyright">
-      Copyright (c) 2019 Diamond Light Source Ltd.
+      Copyright (c) 2010 - 2020, Diamond Light Source Ltd.
    </copyright>
 
    <license url="http://www.eclipse.org/legal/epl-v10.html">
