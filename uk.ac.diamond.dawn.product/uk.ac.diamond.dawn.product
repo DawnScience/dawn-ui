@@ -1,1 +1,84 @@
-../uk.ac.diamond.dawn.product.feature/uk.ac.diamond.dawn.product
+<?xml version="1.0" encoding="UTF-8"?>
+<?pde version="3.5"?>
+
+<product name="DAWN Science" uid="uk.ac.diamond.dawn.product" id="org.dawnsci.product.plugin.DAWN" application="org.eclipse.ui.ide.workbench" version="2.18.0.qualifier" useFeatures="true" includeLaunchers="true">
+
+   <aboutInfo>
+      <image path="/org.dawnsci.product.plugin/icons/Dawn-210x238-about.png"/>
+      <text>
+         Data Analysis WorkbeNch 
+Copyright, 2010 - 2020, Diamond Light Source
+
+Version 2.18.0
+      </text>
+   </aboutInfo>
+
+   <configIni use="default">
+   </configIni>
+
+   <launcherArgs>
+      <programArgs>-showLocation
+--launcher.defaultAction
+openFile
+--launcher.appendVmargs
+      </programArgs>
+      <programArgsLin>--launcher.GTK_version
+2
+      </programArgsLin>
+      <programArgsMac>-vm
+../jre/Contents/Home/bin/java
+      </programArgsMac>
+      <vmArgs>-Xms256m
+-Xmx1024m
+-Dosgi.requiredJavaVersion=1.8.0
+-Dosgi.locking=none
+-Dpydev.funding.hide=true
+-Dorg.eclipse.epp.internal.mpc.core.service.DefaultMarketplaceService.url=http://dmarket.diamond.ac.uk:8080/mpc -Dorg.eclipse.epp.internal.mpc.core.service.DefaultCatalogService.url=http://dmarket.diamond.ac.uk:8080/mpc
+-Drun.in.eclipse=true
+      </vmArgs>
+      <vmArgsMac>-XstartOnFirstThread -Dorg.eclipse.swt.internal.carbon.smallFonts
+      </vmArgsMac>
+   </launcherArgs>
+
+   <windowImages i16="/org.dawnsci.product.plugin/icons/Temp-16x16-icon.png" i32="/org.dawnsci.product.plugin/icons/Temp-32x32-icon.png" i48="/org.dawnsci.product.plugin/icons/Temp-48x48-icon.png"/>
+
+   <splash
+      location="org.dawnsci.product.plugin"
+      startupProgressRect="5,240,590,15" />
+   <launcher name="dawn">
+      <linux icon="/org.dawnsci.product.plugin/icons/dawn-icon.xpm"/>
+      <win useIco="false">
+         <ico path="/org.dawnsci.product.plugin/icons/dawn-icon.ico"/>
+         <bmp
+            winSmallHigh="/org.dawnsci.product.plugin/icons/16x16_32.bmp"
+            winSmallLow="/org.dawnsci.product.plugin/icons/16x16_8.bmp"
+            winMediumHigh="/org.dawnsci.product.plugin/icons/32x32_32.bmp"
+            winMediumLow="/org.dawnsci.product.plugin/icons/32x32_8.bmp"
+            winLargeHigh="/org.dawnsci.product.plugin/icons/48x48_32.bmp"
+            winLargeLow="/org.dawnsci.product.plugin/icons/48x48_8.bmp"
+            winExtraLargeHigh="/org.dawnsci.product.plugin/icons/256x256_32.bmp"/>
+      </win>
+   </launcher>
+
+   <vm>
+   </vm>
+
+   <plugins>
+   </plugins>
+
+   <features>
+      <feature id="uk.ac.diamond.dawn.product.feature"/>
+   </features>
+
+   <configurations>
+      <property name="preferenceCustomization" value="plugin_customization.ini" />
+   </configurations>
+
+   <preferencesInfo>
+      <targetfile overwrite="false"/>
+   </preferencesInfo>
+
+   <cssInfo>
+   </cssInfo>
+
+</product>
