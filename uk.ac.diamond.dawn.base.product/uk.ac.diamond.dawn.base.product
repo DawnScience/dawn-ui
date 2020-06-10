@@ -43,9 +43,9 @@ openFile
 
    <splash
       location="org.dawnsci.product.plugin"
-      startupProgressRect="0,0,200,15"
-      startupMessageRect="0,20,200,20"
-      startupForegroundColor="0000FF" />
+      startupProgressRect="5,235,590,20"
+      startupMessageRect="5,5,300,20"
+      startupForegroundColor="FFFFFF" />
    <launcher name="dawn">
       <linux icon="/org.dawnsci.product.plugin/icons/dawn-icon.xpm"/>
       <win useIco="false">
@@ -60,8 +60,10 @@ openFile
       </win>
    </launcher>
 
+
    <vm>
    </vm>
+
 
    <plugins>
    </plugins>
@@ -75,7 +77,7 @@ openFile
    </configurations>
 
    <preferencesInfo>
-      <targetfile overwrite="false"/>
+      <targetfile overwrite="false" path="plugin_customization.ini" />
    </preferencesInfo>
 
    <cssInfo>
