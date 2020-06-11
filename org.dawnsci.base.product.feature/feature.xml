@@ -22,6 +22,10 @@
          version="0.0.0"/>
 
    <includes
+         id="org.eclipse.jdt"
+         version="0.0.0"/>
+
+   <includes
          id="org.eclipse.e4.rcp"
          version="0.0.0"/>
 
