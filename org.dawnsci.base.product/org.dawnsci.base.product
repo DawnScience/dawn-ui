@@ -48,13 +48,12 @@ openFile
       <macosx icon="/org.dawnsci.product.plugin/icons/dawn.icns"/>
       <win useIco="true">
          <ico path="/org.dawnsci.product.plugin/icons/dawn.ico"/>
+         <bmp/>
       </win>
    </launcher>
 
-
    <vm>
    </vm>
-
 
    <plugins>
    </plugins>
@@ -64,10 +63,11 @@ openFile
    </features>
 
    <configurations>
-      <plugin id="org.dawnsci.persistence" autoStart="true" startLevel="2" />
-      <plugin id="uk.ac.diamond.scisoft" autoStart="true" startLevel="1" />
-      <plugin id="uk.ac.diamond.scisoft.analysis" autoStart="true" startLevel="2" />
-      <plugin id="uk.ac.diamond.scisoft.analysis.osgi" autoStart="true" startLevel="2" />
+      <plugin id="org.apache.felix.scr" autoStart="true" startLevel="2" />
+      <plugin id="org.eclipse.core.runtime" autoStart="true" startLevel="0" />
+      <plugin id="org.eclipse.equinox.common" autoStart="true" startLevel="2" />
+      <plugin id="org.eclipse.equinox.event" autoStart="true" startLevel="2" />
+      <plugin id="org.eclipse.equinox.simpleconfigurator" autoStart="true" startLevel="1" />
       <property name="preferenceCustomization" value="plugin_customization.ini" />
    </configurations>
 
