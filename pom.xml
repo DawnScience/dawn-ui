@@ -71,13 +71,6 @@
 			<modules>
 				<module>org.dawb.visualization.feature</module>
 				<module>org.dawnsci.breadcrumb.navigation</module>
-				<!-- <module>org.dawnsci.dde.core</module>
-				<module>org.dawnsci.dde.feature</module> 
-				<module>org.dawnsci.dde.templates</module>
-				<module>org.dawnsci.dde.ui</module> 
-				<module>org.dawnsci.dde.ui.tests</module>
-				<module>org.dawnsci.marketplaceclient.feature</module>
-				 -->
 				<module>org.dawnsci.dedi</module>
 				<module>org.dawnsci.fileviewer</module>
 				<module>org.dawnsci.fileviewer.feature</module>

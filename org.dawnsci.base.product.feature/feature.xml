@@ -65,10 +65,6 @@
          id="org.dawnsci.fileviewer.feature"
          version="0.0.0"/>
 
-   <!-- includes
-         id="org.dawnsci.marketplaceclient.feature"
-         version="0.0.0"/ -->
-
    <includes
          id="org.dawnsci.conversion.feature"
          version="0.0.0"/>
@@ -96,10 +92,6 @@
    <includes
          id="org.dawnsci.jzy3d.feature"
          version="0.0.0"/>
-
-   <!-- includes
-         id="org.dawnsci.dde.feature"
-         version="0.0.0"/ -->
 
    <includes
          id="org.eclipse.dawnsci.nexus.template.feature"

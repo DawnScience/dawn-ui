@@ -30,7 +30,6 @@ openFile
 -Dosgi.requiredJavaVersion=1.8.0
 -Dosgi.locking=none
 -Dpydev.funding.hide=true
--Dorg.eclipse.epp.internal.mpc.core.service.DefaultMarketplaceService.url=http://dmarket.diamond.ac.uk:8080/mpc -Dorg.eclipse.epp.internal.mpc.core.service.DefaultCatalogService.url=http://dmarket.diamond.ac.uk:8080/mpc
       </vmArgs>
       <vmArgsLin>-Xmx2048m
       </vmArgsLin>
