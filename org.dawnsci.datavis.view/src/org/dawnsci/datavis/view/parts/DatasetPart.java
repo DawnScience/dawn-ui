@@ -28,6 +28,8 @@ import org.dawnsci.datavis.model.LoadedFile;
 import org.dawnsci.datavis.model.PlotEventObject;
 import org.dawnsci.datavis.model.PlotEventObject.PlotEventType;
 import org.dawnsci.datavis.model.PlotModeChangeEventListener;
+import org.dawnsci.datavis.view.Activator;
+import org.dawnsci.datavis.view.preference.DataVisPreferenceConstants;
 import org.dawnsci.datavis.view.table.AxisSliceDialog;
 import org.dawnsci.datavis.view.table.DataOptionTableViewer;
 import org.dawnsci.january.model.ISliceAssist;
@@ -43,6 +45,7 @@ import org.eclipse.e4.ui.workbench.modeling.ISelectionListener;
 import org.eclipse.january.dataset.Slice;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.layout.GridDataFactory;
+import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ComboViewer;
 import org.eclipse.jface.viewers.ISelection;
@@ -87,6 +90,12 @@ public class DatasetPart {
 	@PostConstruct
 	public void createComposite(Composite parent) {
 
+		
+		IPreferenceStore ps = Activator.getDefault().getPreferenceStore();
+		
+		boolean coSlice = ps.getBoolean(DataVisPreferenceConstants.CO_SLICE);
+		plotController.setCoSlicingEnabled(coSlice);
+		
 		parent.setLayout(new GridLayout());
 
 		if (plotController instanceof ILoadedFileInitialiser) {
@@ -277,6 +286,8 @@ public class DatasetPart {
 					if (!dOptions.isSelected() && !dOptions.getParent().isSelected()) {
 						return;
 					}
+					
+					plotController.replotOnSlice(dOptions);
 				}
 				
 				plotController.forceReplot();
@@ -327,6 +338,7 @@ public class DatasetPart {
 			return;
 		}
 
+		removeSliceListener();
 
 		List<DataOptions> dataOptions = file.getDataOptions();
 		viewer.setInput(dataOptions.toArray());
@@ -371,9 +383,13 @@ public class DatasetPart {
 		selectionService.removeSelectionListener(LOADED_FILE_PART_ID, selectionListener);
 		plotController.removePlotModeListener(plotListener);
 		plotController.dispose();
+		
+		IPreferenceStore ps = Activator.getDefault().getPreferenceStore();
+		ps.setValue(DataVisPreferenceConstants.CO_SLICE,plotController.isCoSlicingEnabled());
 	}
 
 	private void updateOnSelectionChange(DataOptions op){
+		removeSliceListener(op.getParent());
 		op.getPlottableObject().getNDimensions().addSliceListener(sliceListener);
 		IPlotMode[] suitableModes = plotController.getPlotModes(op);
 		plotModeOptionsViewer.setInput(suitableModes);
@@ -389,6 +405,18 @@ public class DatasetPart {
 		table.setInput(op.getPlottableObject().getNDimensions());
 
 		viewer.refresh();
+	}
+	
+	private void removeSliceListener(LoadedFile f) {
+		for (DataOptions d : f.getDataOptions()) {
+			d.getPlottableObject().getNDimensions().removeSliceListener(sliceListener);
+		}
+	}
+	
+	private void removeSliceListener() {
+		for (LoadedFile f : fileController.getLoadedFiles()) {
+			removeSliceListener(f);
+		}
 	}
 
 	@Focus

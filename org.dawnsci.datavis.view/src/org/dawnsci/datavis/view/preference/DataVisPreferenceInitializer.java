@@ -10,6 +10,7 @@ public class DataVisPreferenceInitializer extends AbstractPreferenceInitializer 
 	public void initializeDefaultPreferences() {
 		IPreferenceStore ps = Activator.getDefault().getPreferenceStore();
 		ps.setDefault(DataVisPreferenceConstants.SIGNALS_ONLY, false);
+		ps.setDefault(DataVisPreferenceConstants.CO_SLICE, false);
 		
 	}
 

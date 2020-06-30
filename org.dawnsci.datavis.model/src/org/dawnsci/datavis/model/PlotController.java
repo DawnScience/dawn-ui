@@ -2,6 +2,7 @@ package org.dawnsci.datavis.model;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
@@ -10,6 +11,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.Collectors;
 
 import org.dawnsci.datavis.api.ILazyPlotMode;
 import org.dawnsci.datavis.api.IPlotMode;
@@ -31,6 +33,7 @@ import org.eclipse.dawnsci.plotting.api.trace.IPaletteTrace;
 import org.eclipse.dawnsci.plotting.api.trace.ITrace;
 import org.eclipse.january.dataset.IDataset;
 import org.eclipse.january.dataset.ILazyDataset;
+import org.eclipse.january.dataset.Slice;
 import org.eclipse.january.dataset.SliceND;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.RGB;
@@ -160,6 +163,8 @@ public class PlotController implements IPlotController, ILoadedFileInitialiser {
 	
 	private boolean modeSwitching = false;
 	
+	private boolean coSlicingEnabled = false;
+
 	private IPlotDataModifier[] modifiers = new IPlotDataModifier[]{ new PlotDataModifierStack()};
 	private IPlotDataModifier currentModifier;
 	
@@ -538,6 +543,89 @@ public class PlotController implements IPlotController, ILoadedFileInitialiser {
 		updatePlotStateInJob(state, currentMode);
 	}
 	
+	@Override
+	public void replotOnSlice(DataOptions option) {
+		if (modeSwitching) return;
+
+		if (!coSlicingEnabled || option == null || !currentMode.supportsMultiple()) {
+			forceReplot();
+			return;
+		}
+		
+		//dont co-slice if not plotted
+		if (!option.isSelected() || !option.getParent().isSelected()) {
+			forceReplot();
+			return;
+		}
+		
+		IPlotMode mode = currentMode;
+		
+		SliceND s = option.getPlottableObject().getNDimensions().buildSliceND();
+		Slice[] sarray = s.convertToSlice();
+		int[] dd = mode.getDataDimensions(option.getPlottableObject().getNDimensions().getOptions());
+		int[] shape = s.getSourceShape();
+		
+		//validator in this case should always return true
+		//we are just using it to do the iteration in the file controller
+		IFileStateValidator v = new IFileStateValidator() {
+
+			@Override
+			public boolean validate(LoadedFile f) {
+
+				if (!f.isSelected()) return true;
+
+				for (DataOptions o : f.getDataOptions()) {
+					if (!o.isSelected()) continue;
+					if (option.getName().equals(o.getName()) && option.getFilePath().equals(o.getFilePath())) continue;
+
+					int rank = shape.length;
+					int[] shapeInner = o.getLazyDataset().getShape();
+
+					if (rank != shapeInner.length) {
+						continue;
+					}
+
+					int[] dDinner = mode.getDataDimensions(o.getPlottableObject().getNDimensions().getOptions());
+
+					if (Arrays.equals(dd, dDinner)) {
+
+						NDimensions nDinner = o.getPlottableObject().getNDimensions();
+
+						HashSet<Integer> dimSet = Arrays.stream(dDinner)
+								.boxed()
+								.collect(Collectors.toCollection(HashSet::new));
+
+						boolean canCoSlice = true;
+
+						for (int i = 0 ; i < rank; i++) {
+							if (dimSet.contains(i)) continue;
+							if (shape[i] != shapeInner[i]) {
+								canCoSlice = false;
+								break;
+							}
+						}
+
+						if (canCoSlice) {
+							for (int i = 0 ; i < rank; i++) {
+								if (dimSet.contains(i)) continue;
+								nDinner.setSlice(i, sarray[i].clone());
+							}
+						}
+					}
+				}	
+
+				return true;
+			}
+		};
+
+		fileController.validateState(v);
+		
+		
+		final List<DataOptions> state = fileController.getImmutableFileState();
+		//update plot
+		updatePlotStateInJob(state, currentMode);
+	}
+	
 	public IPlotDataModifier getEnabledPlotModifier() {
 		return currentModifier;
 	}
@@ -625,9 +713,11 @@ public class PlotController implements IPlotController, ILoadedFileInitialiser {
 				
 					if (!f.isSelected()) return true;
 					boolean thisFile = f == option.getParent();
+					
 					for (DataOptions o : f.getDataOptions()) {
 						if (!o.isSelected()) continue;
 						if (option.getName().equals(o.getName()) && option.getFilePath().equals(o.getFilePath())) continue;
+						
 						if (!mode.supportsMultiple() || o.getPlottableObject().getPlotMode() != mode) {
 							if (thisFile) {
 								o.setSelected(false);
@@ -767,5 +857,13 @@ public class PlotController implements IPlotController, ILoadedFileInitialiser {
 	@Override
 	public void removePlotModeListener(PlotModeChangeEventListener l) {
 		listeners.remove(l);
+	}
+	
+	public boolean isCoSlicingEnabled() {
+		return coSlicingEnabled;
+	}
+
+	public void setCoSlicingEnabled(boolean coSlicingEnabled) {
+		this.coSlicingEnabled = coSlicingEnabled;
 	}
 }

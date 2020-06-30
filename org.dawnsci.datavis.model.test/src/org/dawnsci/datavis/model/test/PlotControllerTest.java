@@ -1,9 +1,11 @@
 package org.dawnsci.datavis.model.test;
 
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertThat;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -31,6 +33,8 @@ import org.eclipse.january.dataset.Comparisons;
 import org.eclipse.january.dataset.IDataset;
 import org.eclipse.january.dataset.Slice;
 import org.eclipse.january.dataset.SliceND;
+import org.hamcrest.core.IsEqual;
+import org.hamcrest.core.IsNot;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -557,6 +561,131 @@ public class PlotControllerTest extends AbstractTestModel {
 		fileController.unloadFiles(Arrays.asList(lf));
 		plotManager.waitOnJob();
 		assertEquals(0, plottingSystem.getTraces().size());
+	}
+	
+	@Test
+	public void testCoSliceXY() throws Exception{
+		initialiseControllers();
+		
+		//Load data and set up with three line plots
+		
+		FileControllerUtils.loadFile(fileController,file1.getAbsolutePath());
+		
+		LoadedFile lf1 = fileController.getLoadedFiles().stream().filter(f -> f.getFilePath().equals(file1.getAbsolutePath())).findFirst().get();
+		DataOptions dop1 = lf1.getDataOption("/entry/dataset2");
+		
+		IPlotMode[] plotModes = plotManager.getPlotModes(dop1);
+		IPlotMode newMode = plotModes[0];
+		assertTrue(newMode.supportsMultiple());
+		
+		plotManager.switchPlotMode(newMode, dop1);
+		
+		fileController.setFileSelected(lf1, true);
+		fileController.setDataSelected(dop1, true);
+		plotManager.waitOnJob();
+		assertEquals(1, plottingSystem.getTraces().size());
+		
+		FileControllerUtils.loadFile(fileController,file2.getAbsolutePath());
+		FileControllerUtils.loadFile(fileController,file3.getAbsolutePath());
+		
+		LoadedFile lf2 = fileController.getLoadedFiles().stream().filter(f -> f.getFilePath().equals(file2.getAbsolutePath())).findFirst().get();
+		LoadedFile lf3 = fileController.getLoadedFiles().stream().filter(f -> f.getFilePath().equals(file3.getAbsolutePath())).findFirst().get();
+		
+		DataOptions dop2 = lf2.getDataOption("/entry/dataset2");
+		DataOptions dop2a = lf3.getDataOption("/entry/dataset2a");
+		DataOptions dop2aRemove = lf3.getDataOption("/entry/dataset2");
+		plotManager.switchPlotMode(newMode, dop2a);
+		
+		fileController.setDataSelected(dop2aRemove,false);
+		
+		fileController.setFileSelected(lf2, true);
+		fileController.setDataSelected(dop2, true);
+		fileController.setFileSelected(lf3, true);
+		fileController.setDataSelected(dop2a, true);
+		
+		plotManager.waitOnJob();
+		
+		assertEquals(3, plottingSystem.getTraces().size());
+		
+		
+		IPlotMode m = dop1.getPlottableObject().getPlotMode();
+		NDimensions nd1 = dop1.getPlottableObject().getNDimensions();
+		NDimensions nd2 = dop2.getPlottableObject().getNDimensions();
+		NDimensions nd2a = dop2a.getPlottableObject().getNDimensions();
+
+		SliceND s1 = nd1.buildSliceND();
+		SliceND s2 = nd2.buildSliceND();
+		SliceND s2a = nd2a.buildSliceND();
+		
+		assertEquals(m, dop2.getPlottableObject().getPlotMode());
+		assertEquals(m, dop2a.getPlottableObject().getPlotMode());
+		
+		assertArrayEquals(s1.getStart(), s2.getStart());
+		assertArrayEquals(s1.getStop(), s2.getStop());
+		
+		assertArrayEquals(s1.getStart(), s2a.getStart());
+		assertThat(s1.getStop(), IsNot.not(IsEqual.equalTo(s2a.getStop())));
+		
+		//change slice, make sure noting is co-slice
+		nd1.setSlice(0, new Slice(1,2,1));
+		
+		plotManager.replotOnSlice(dop1);
+		plotManager.waitOnJob();
+		assertEquals(3, plottingSystem.getTraces().size());
+		
+		s1 = nd1.buildSliceND();
+		s2 = nd2.buildSliceND();
+		s2a = nd2a.buildSliceND();
+		
+		assertThat(s1.getStart(), IsNot.not(IsEqual.equalTo(s2.getStart())));
+		assertThat(s1.getStop(), IsNot.not(IsEqual.equalTo(s2.getStop())));
+		
+		assertThat(s1.getStart(), IsNot.not(IsEqual.equalTo(s2a.getStart())));
+		assertThat(s1.getStop(), IsNot.not(IsEqual.equalTo(s2a.getStop())));
+		
+		//enable co-slicing and slice
+		plotManager.setCoSlicingEnabled(true);
+		
+		nd1.setSlice(0, new Slice(2,3,1));
+		
+		plotManager.replotOnSlice(dop1);
+		plotManager.waitOnJob();
+		assertEquals(3, plottingSystem.getTraces().size());
+		
+		s1 = nd1.buildSliceND();
+		s2 = nd2.buildSliceND();
+		s2a = nd2a.buildSliceND();
+		
+		assertArrayEquals(s1.getStart(), s2.getStart());
+		assertArrayEquals(s1.getStop(), s2.getStop());
+		
+		assertThat(s1.getStart(), IsNot.not(IsEqual.equalTo(s2a.getStart())));
+		assertThat(s1.getStop(), IsNot.not(IsEqual.equalTo(s2a.getStop())));
+		
+		//disable co-slicing and slice
+		plotManager.setCoSlicingEnabled(false);
+		
+		nd1.setSlice(0, new Slice(3,4,1));
+		
+		plotManager.replotOnSlice(dop1);
+		plotManager.waitOnJob();
+		assertEquals(3, plottingSystem.getTraces().size());
+
+		s1 = nd1.buildSliceND();
+		s2 = nd2.buildSliceND();
+		s2a = nd2a.buildSliceND();
+		
+		assertThat(s1.getStart(), IsNot.not(IsEqual.equalTo(s2.getStart())));
+		assertThat(s1.getStop(), IsNot.not(IsEqual.equalTo(s2.getStop())));
+		
+		assertThat(s1.getStart(), IsNot.not(IsEqual.equalTo(s2a.getStart())));
+		assertThat(s1.getStop(), IsNot.not(IsEqual.equalTo(s2a.getStop())));
+		
+		//clean up
+		fileController.unloadFiles(Arrays.asList(lf1,lf2,lf3));
+		plotManager.waitOnJob();
+		assertEquals(0, plottingSystem.getTraces().size());
 		
 	}
 }
+	

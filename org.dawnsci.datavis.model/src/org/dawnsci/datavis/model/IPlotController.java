@@ -105,5 +105,28 @@ public interface IPlotController {
 	 * @param l
 	 */
 	void removePlotModeListener(PlotModeChangeEventListener l);
+	
+	/**
+	 * Determine if co-slicing is enabled
+	 * <p>
+	 * If the plot mode support multiple traces, and co-slicing is enabled,
+	 * datasets of the same size will all have slices changed when one changes
+	 * 
+	 * @return
+	 */
+	boolean isCoSlicingEnabled();
 
+	/**
+	 * Enable or Disable co-slicing
+	 * 
+	 * @param coSlicingEnabled
+	 */
+	void setCoSlicingEnabled(boolean coSlicingEnabled);
+
+	/**
+	 * Force a replot when only the slicing of data has changed
+	 * 
+	 * @param dop
+	 */
+	void replotOnSlice(DataOptions dop);
 }

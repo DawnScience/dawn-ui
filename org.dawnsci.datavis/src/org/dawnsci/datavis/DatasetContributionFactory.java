@@ -2,6 +2,7 @@ package org.dawnsci.datavis;
 
 import org.dawnsci.datavis.api.DataVisConstants;
 import org.dawnsci.datavis.model.IFileController;
+import org.dawnsci.datavis.model.IPlotController;
 import org.eclipse.core.expressions.EvaluationResult;
 import org.eclipse.core.expressions.Expression;
 import org.eclipse.core.expressions.IEvaluationContext;
@@ -31,6 +32,7 @@ public class DatasetContributionFactory extends ExtensionContributionFactory {
                 getBundleContext();
 		
 		final IFileController fileController = bundleContext.getService(bundleContext.getServiceReference(IFileController.class));
+		final IPlotController plotController = bundleContext.getService(bundleContext.getServiceReference(IPlotController.class));
 		
 		search.addMenuListener(new IMenuListener() {
 
@@ -48,8 +50,20 @@ public class DatasetContributionFactory extends ExtensionContributionFactory {
 				};
 
 				a.setChecked(fileController.isOnlySignals());
+				
+				
+				Action coa = new Action("Co-slice Datasets"){
+					@Override
+					public void run() {
+						boolean coSlice = plotController.isCoSlicingEnabled();
+						plotController.setCoSlicingEnabled(!coSlice);
+					}
+				};
+
+				coa.setChecked(plotController.isCoSlicingEnabled());
 
 				search.add(a);
+				search.add(coa);
 			}
 		});
 
