@@ -618,8 +618,9 @@ public class PlotController implements IPlotController, ILoadedFileInitialiser {
 			}
 		};
 
-		fileController.validateState(v);
-		
+		//Don't get the file controller to validate directly as that triggers a state change
+		//event which is not useful here (file/dataset state has not changed)
+		fileController.getLoadedFiles().stream().forEach(v::validate);
 		
 		final List<DataOptions> state = fileController.getImmutableFileState();
 		//update plot
