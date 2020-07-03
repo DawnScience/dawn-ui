@@ -34,6 +34,11 @@ public class DataOptionsUtils {
 	private static final String DATA_NAME = "data";
 
 	public static DataOptions buildView(DataOptions op) {
+		
+		if (op instanceof DataOptionsDataset) {
+			return new DataOptionsDatasetSlice((DataOptionsDataset)op, op.getPlottableObject().getNDimensions().buildSliceND());
+		}
+		
 		return new DataOptionsSlice(op, op.getPlottableObject().getNDimensions().buildSliceND());
 	}
 
