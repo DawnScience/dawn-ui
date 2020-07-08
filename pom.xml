@@ -80,12 +80,9 @@
 				<module>org.dawnsci.mapping.ui</module>
 				<module>org.dawnsci.mapping.ui.dawn</module>
 				<module>org.dawnsci.processing.feature</module>
-				<module>org.dawnsci.processing.ui.dawn</module>
 				<module>org.dawnsci.product.logging</module>
 				<module>org.dawnsci.product.plugin</module>
 				<module>org.dawnsci.base.product.feature</module>
-				<!-- Out of date: needs passerelle, tango, etc 
-				<module>org.dawb.workbench.ui.test</module -->
 				<module>org.dawnsci.common.widgets.gda.test</module>
 				<module>org.dawnsci.datavis.model.test</module>
 				<module>org.dawnsci.mapping.ui.test</module>
