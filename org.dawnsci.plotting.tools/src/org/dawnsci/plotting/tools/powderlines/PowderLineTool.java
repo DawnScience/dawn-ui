@@ -65,6 +65,8 @@ import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * A tool to allow the importation of powder line data from either a 
@@ -78,6 +80,7 @@ import org.eclipse.swt.widgets.Text;
  */
 public class PowderLineTool extends AbstractToolPage {
 
+	private static final Logger logger = LoggerFactory.getLogger(PowderLineTool.class);
 	private Composite composite; // root Composite of the tool
 	private ITraceListener tracerListener; // The trace on which the tool listens
 	private PowderLinesModel.PowderLineCoord plotCoordinate = PowderLinesModel.PowderLineCoord.Q; // The coordinate of the input data

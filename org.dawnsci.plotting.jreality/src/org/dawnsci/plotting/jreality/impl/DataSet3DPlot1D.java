@@ -89,7 +89,7 @@ public class DataSet3DPlot1D implements IDataSet3DCorePlot, AreaSelectListener, 
 	 */
 	public static String GRAPHNAMEPREFIX = "graph.subGraph";
 
-	protected static final Logger logger = LoggerFactory.getLogger(DataSet3DPlot1D.class);
+	private static final Logger logger = LoggerFactory.getLogger(DataSet3DPlot1D.class);
 
 	protected List<IDataset> sets;
 	protected SelectedWindow currentSelectWindow = null;

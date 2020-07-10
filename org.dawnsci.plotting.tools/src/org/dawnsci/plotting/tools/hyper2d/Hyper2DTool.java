@@ -48,8 +48,12 @@ import org.eclipse.jface.action.IContributionItem;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class Hyper2DTool extends AbstractToolPage {
+
+	private static final Logger logger = LoggerFactory.getLogger(Hyper2DTool.class);
 
 	HyperComponent component;
 	ITraceListener traceListener;

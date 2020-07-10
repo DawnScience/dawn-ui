@@ -87,7 +87,7 @@ public class MeasurementTool extends AbstractToolPage implements IRegionListener
 	private double yCalibratedAxisFactor=Double.NaN;
 	private String unitName;
 
-	protected static final Logger logger = LoggerFactory.getLogger(MeasurementTool.class);
+	private static final Logger logger = LoggerFactory.getLogger(MeasurementTool.class);
 	
 	private   Composite     composite;
 	protected TableViewer   viewer;

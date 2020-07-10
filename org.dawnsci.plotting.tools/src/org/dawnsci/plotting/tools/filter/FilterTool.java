@@ -32,6 +32,8 @@ import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * A tool which reads the plot filter extension point 
@@ -44,6 +46,8 @@ import org.eclipse.swt.widgets.Label;
  *
  */
 public class FilterTool extends AbstractToolPage {
+
+	private static final Logger logger = LoggerFactory.getLogger(FilterTool.class);
 
 	/* Map id to filter */
 	private Map<String, IPlottingFilter> filters;
