@@ -6,6 +6,7 @@ import java.util.List;
 
 import org.dawnsci.datavis.manipulation.DataManipulationUtils;
 import org.eclipse.january.MetadataException;
+import org.eclipse.january.dataset.Dataset;
 import org.eclipse.january.dataset.DatasetUtils;
 import org.eclipse.january.dataset.IDataset;
 import org.eclipse.january.dataset.ILazyDataset;
@@ -25,7 +26,7 @@ public class ComponentFitStackResult {
 	private IDataset components;
 	private IDataset concentrations;
 	private IDataset residual;
-	private IDataset resRMS;
+	private IDataset rSquared;
 	
 	private int sampleDims = 0;
 	private int signalDims = 1;
@@ -34,12 +35,10 @@ public class ComponentFitStackResult {
 		this.stack = stack;
 		this.components = components;
 		this.concentrations = concentrations;
-		residual = LinearAlgebra.dotProduct(DatasetUtils.convertToDataset(concentrations.getTransposedView()), DatasetUtils.convertToDataset(components));
+		Dataset model = LinearAlgebra.dotProduct(DatasetUtils.convertToDataset(concentrations.getTransposedView()), DatasetUtils.convertToDataset(components));
+		this.residual = Maths.subtract(stack, model);
 		
-		residual = Maths.subtract(stack, residual);
-		
-		this.resRMS = Maths.power(residual, 2).sum(signalDims, true).ipower(0.5);
-		resRMS.setName("RMS");
+		this.rSquared = calculateRSq();
 		
 		AxesMetadata xm = stack.getFirstMetadata(AxesMetadata.class);
 		
@@ -51,7 +50,7 @@ public class ComponentFitStackResult {
 					rmsax.setAxis(0, axes[0].getSliceView().squeezeEnds());
 				}
 			}
-			resRMS.setMetadata(rmsax);
+			rSquared.setMetadata(rmsax);
 			
 		} catch (MetadataException e) {
 			logger.debug("Problem making axes metdata", e);
@@ -66,13 +65,39 @@ public class ComponentFitStackResult {
 		return concentrations.getSliceView();
 	}
 	
-	public IDataset getSeriesResidualRMS() {
-		return resRMS;
+	public IDataset getSeriesRSquared() {
+		return rSquared;
+	}
+	
+	private IDataset calculateRSq() {
+		
+		Dataset mean = DatasetUtils.convertToDataset(stack).mean(signalDims,true);
+		mean.setShape(new int[] {mean.getSize(),1});
+		Dataset ssr = Maths.square(residual).sum(signalDims, true);
+		Dataset sst = Maths.square(Maths.subtract(stack, mean)).sum(signalDims, true);
+		
+		Dataset rsq = Maths.subtract(1,Maths.divide(ssr,sst));
+		rsq.setName("R-Sq");
+		return rsq;
 	}
 	
 	public ComponentFitResult getData(int number) {
 		
-		IDataset data = stack.getSlice(new Slice(number, number+1), null).squeeze();
+		double axisPosition = number;
+		
+		IDataset data = stack.getSlice(new Slice(number, number+1));
+		
+		AxesMetadata axmd = data.getFirstMetadata(AxesMetadata.class);
+		
+		if (axmd != null && axmd.getAxes() != null && axmd.getAxes()[0] != null) {
+			try {
+				axisPosition = axmd.getAxes()[0].getSlice().getDouble(0,0);
+			} catch (Exception e) {
+				//ignore, just use index value
+			}
+		}
+				
+		data = data.squeeze();
 		data.setName("data");
 		
 		IDataset concs = concentrations.getSlice((Slice)null, new Slice(number, number+1));
@@ -82,7 +107,7 @@ public class ComponentFitStackResult {
 		IDataset sum = DatasetUtils.convertToDataset(fitted).sum(sampleDims, true);
 		sum.setName("Sum");
 		
-		IDataset residual = this.residual.getSlice(new Slice(number, number+1), null).squeeze();
+		IDataset residual = this.residual.getSlice(new Slice(number, number+1)).squeeze();
 		residual.setName("Residual");
 		
 		AxesMetadata axm = data.getFirstMetadata(AxesMetadata.class);
@@ -115,7 +140,7 @@ public class ComponentFitStackResult {
 			logger.debug("Problem making axes metdata", e);
 		}
 		
-		return new ComponentFitResult(data, fitted, sum, residual, componentResults);
+		return new ComponentFitResult(data, fitted, sum, residual, componentResults, axisPosition);
 		
 	}
 	
