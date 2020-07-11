@@ -26,7 +26,7 @@ openFile
 2
       </programArgsLin>
       <programArgsMac>-vm
-../jre/Contents/Home/bin/java
+../Eclipse/jre/Contents/Home/bin/
       </programArgsMac>
       <vmArgs>-Xms256m
 -Xmx1024m
@@ -34,7 +34,8 @@ openFile
 -Dosgi.locking=none
 -Dpydev.funding.hide=true
       </vmArgs>
-      <vmArgsMac>-XstartOnFirstThread -Dorg.eclipse.swt.internal.carbon.smallFonts
+      <vmArgsMac>-XstartOnFirstThread
+-Dorg.eclipse.swt.internal.carbon.smallFonts
       </vmArgsMac>
    </launcherArgs>
 
@@ -50,13 +51,12 @@ openFile
       <macosx icon="/org.dawnsci.product.plugin/icons/dawn.icns"/>
       <win useIco="true">
          <ico path="/org.dawnsci.product.plugin/icons/dawn.ico"/>
+         <bmp/>
       </win>
    </launcher>
 
-
    <vm>
    </vm>
-
 
    <plugins>
    </plugins>
@@ -75,7 +75,7 @@ openFile
    </configurations>
 
    <preferencesInfo>
-      <targetfile overwrite="false" path="plugin_customization.ini" />
+      <targetfile overwrite="false" path="plugin_customization.ini"/>
    </preferencesInfo>
 
    <cssInfo>

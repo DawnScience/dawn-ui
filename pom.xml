@@ -14,6 +14,59 @@
 		<relativePath>../daq-aggregator.git</relativePath>
 	</parent>
 
+	<build>
+		<pluginManagement>
+			<plugins>
+				<!--  remove copy of JRE, etc in p2 cache from products -->
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-antrun-plugin</artifactId>
+					<version>${maven.ant.plugin.version}</version>
+					<executions>
+						<execution>
+							<phase>pre-integration-test</phase>
+							<id>delete-p2-cache</id>
+							<configuration>
+								<target name="delete-p2-cache">
+									<echo message="Deleting P2 cache in ${project.build.directory}"/>
+									<delete includeemptydirs="true">
+										<fileset dir="${project.build.directory}">
+											<include name="**/p2/org.eclipse.equinox.p2.core/cache/**"/>
+										</fileset>
+									</delete>
+								</target>
+							</configuration>
+							<goals>
+								<goal>run</goal>
+							</goals>
+						</execution>
+					</executions>
+				</plugin>
+				<!--  split creation of product archive so deletion can occur -->
+				<plugin>
+					<groupId>org.eclipse.tycho</groupId>
+					<artifactId>tycho-p2-director-plugin</artifactId>
+					<executions>
+						<execution>
+							<phase>package</phase>
+							<id>materialize-products</id>
+							<goals>
+								<goal>materialize-products</goal>
+							</goals>
+						</execution>
+						<execution>
+							<phase>pre-integration-test</phase>
+							<id>archive-products</id>
+							<goals>
+								<goal>archive-products</goal>
+							</goals>
+						</execution>
+					</executions>
+				</plugin>
+			</plugins>
+		</pluginManagement>
+	</build>
+
 	<modules>
 		<module>org.dawb.workbench.ui</module>
 		<module>org.dawnsci.common.live</module>
