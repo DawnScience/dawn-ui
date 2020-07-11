@@ -2,4 +2,5 @@
 *.class
 org.dawnsci.isosurface.test/Results/random_noise_bench_mark_results.txt
 target/
-.polyglot.build.properties
+.polyglot.*
+.META-INF_MANIFEST.MF
