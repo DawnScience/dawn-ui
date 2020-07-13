@@ -86,6 +86,8 @@ import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.preferences.ScopedPreferenceStore;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 /**
@@ -96,6 +98,8 @@ import org.eclipse.ui.preferences.ScopedPreferenceStore;
  *
  */
 public class SliceSystemImpl extends AbstractSliceSystem {
+
+	private static final Logger logger = LoggerFactory.getLogger(SliceSystemImpl.class);
 
 	private static final List<String> COLUMN_PROPERTIES = Arrays.asList(new String[]{"Dimension","Axis","Slice","Axis Data","Span"});
 	

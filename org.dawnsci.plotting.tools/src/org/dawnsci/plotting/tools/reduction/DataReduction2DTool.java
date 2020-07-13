@@ -55,6 +55,8 @@ import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IURIEditorInput;
 import org.eclipse.ui.part.EditorPart;
 import org.eclipse.ui.part.FileEditorInput;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 /** Very much like TimeResolvedToolPage, but without the stuff that makes me want to cut myself ;-).
@@ -63,6 +65,8 @@ import org.eclipse.ui.part.FileEditorInput;
  *
  */
 public class DataReduction2DTool extends AbstractToolPage implements IRegionListener, ITraceListener {
+
+	private static final Logger logger = LoggerFactory.getLogger(DataReduction2DTool.class);
 
 	private static final int MAX_DISPLAYED_TRACES = 20;
 	private static final int ADDED_ALPHA_FOR_SELECTED_VALUE = 20;

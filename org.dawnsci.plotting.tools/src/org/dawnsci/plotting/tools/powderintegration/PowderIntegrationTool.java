@@ -53,6 +53,8 @@ import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IViewPart;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.part.IPageSite;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import uk.ac.diamond.scisoft.analysis.diffraction.powder.AbstractPixelIntegration;
 import uk.ac.diamond.scisoft.analysis.diffraction.powder.PixelIntegrationUtils.IntegrationMode;
@@ -60,6 +62,7 @@ import uk.ac.diamond.scisoft.analysis.io.NexusDiffractionCalibrationReader;
 import uk.ac.diamond.scisoft.analysis.roi.XAxis;
 
 public class PowderIntegrationTool extends AbstractToolPage {
+	private static final Logger logger = LoggerFactory.getLogger(PowderIntegrationTool.class);
 	private IPlottingSystem<Composite> system;
 	private ITraceListener traceListener;
 	private IDiffractionMetadata metadata;

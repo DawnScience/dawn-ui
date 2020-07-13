@@ -191,7 +191,7 @@ class DataReduction2DToolSpectraTableComposite extends DataReduction2DToolObserv
 		}
 	}
 
-	protected static final Logger logger = LoggerFactory.getLogger(DataReduction2DToolSpectraTableComposite.class);
+	private static final Logger logger = LoggerFactory.getLogger(DataReduction2DToolSpectraTableComposite.class);
 
 	public static final String NEW_REGION_PROP_NAME = "newRegion";
 	private static final String SPECTRUM_NODE = "spectrumNode";

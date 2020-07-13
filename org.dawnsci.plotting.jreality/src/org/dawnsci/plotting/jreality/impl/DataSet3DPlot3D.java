@@ -73,7 +73,7 @@ public class DataSet3DPlot3D implements IDataSet3DCorePlot {
 	 */
 	public static final double HANDNESS = 1.0; // -1.0 right hand system 1.0 left hand system
 	
-	protected static final Logger logger = LoggerFactory.getLogger(DataSet3DPlot3D.class);	
+	private static final Logger logger = LoggerFactory.getLogger(DataSet3DPlot3D.class);	
 	
 	protected static final int MAXJOGLDIM = 1000;
 	protected static final int MAXSOFTDIM = 256;
