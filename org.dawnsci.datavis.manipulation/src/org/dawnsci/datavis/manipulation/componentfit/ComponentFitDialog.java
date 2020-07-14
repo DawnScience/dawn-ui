@@ -38,6 +38,8 @@ public class ComponentFitDialog extends Dialog {
 	private IPlottingSystem<Composite> concPlot;
 	private IPlottingSystem<Composite> resPlot;
 	
+	private Label traceAxisValueLabel;
+	private static final String AXIS_VALUE_PREFIX = "Axis value: ";
 	private ComponentFitStackResult result;
 	
 
@@ -94,10 +96,14 @@ public class ComponentFitDialog extends Dialog {
 		
 		Group traceSelectGroup = new Group(config,SWT.None);
 		traceSelectGroup.setText("Select Trace");
-		traceSelectGroup.setLayoutData(GridDataFactory.fillDefaults().create());
-		traceSelectGroup.setLayout(new GridLayout());
+		traceSelectGroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		traceSelectGroup.setLayout(new GridLayout(2,false));
 		
 		Spinner spin = new  Spinner(traceSelectGroup, SWT.None);
+		
+		traceAxisValueLabel = new Label(traceSelectGroup, SWT.NONE);
+		traceAxisValueLabel.setText(AXIS_VALUE_PREFIX);
+		traceAxisValueLabel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
 		resPlot.createPlotPart(topPane, "Residual Plot", abwres, PlotType.XY, null);
 		resPlot.getPlotComposite().setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, true));
@@ -117,8 +123,8 @@ public class ComponentFitDialog extends Dialog {
 		}
 		
 		
-		IDataset rms = result.getSeriesResidualRMS();
-		ILineTrace t = MetadataPlotUtils.buildLineTrace(rms, resPlot);
+		IDataset rsq = result.getSeriesRSquared();
+		ILineTrace t = MetadataPlotUtils.buildLineTrace(rsq, resPlot);
 		resPlot.addTrace(t);
 		
 		
@@ -156,6 +162,8 @@ public class ComponentFitDialog extends Dialog {
 		Color gray = display.getSystemColor(SWT.COLOR_GRAY);
 
 		ComponentFitResult data = result.getData(i);
+		
+		traceAxisValueLabel.setText(AXIS_VALUE_PREFIX + data.getAxisPosition());
 
 		IDataset d = data.getData();
 		d.setName("data");

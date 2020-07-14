@@ -13,14 +13,16 @@ public class ComponentFitResult {
 	private IDataset sum;
 	private IDataset residual;
 	private List<IDataset> componentValue;
+	private double axisPosition;
 
-	public ComponentFitResult(IDataset data, IDataset fitted, IDataset sum, IDataset residual, List<IDataset> componentValues) {
+	public ComponentFitResult(IDataset data, IDataset fitted, IDataset sum, IDataset residual, List<IDataset> componentValues, double axisPosition) {
 		
 		this.data = data;
 		this.fitted = fitted;
 		this.sum = sum;
 		this.residual = residual;
 		this.componentValue = componentValues;
+		this.axisPosition = axisPosition;
 	}
 
 	public IDataset getData() {
@@ -47,5 +49,9 @@ public class ComponentFitResult {
 		
 		return DataManipulationUtils.getXYIterator(fitted);
 		
+	}
+	
+	public double getAxisPosition() {
+		return axisPosition;
 	}
 }
