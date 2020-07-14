@@ -471,6 +471,13 @@
              label="Image Filter"
              tooltip="Use to filter images with different algorithms, for instance Fano factor">
        </plotting_tool_page>
+       <plotting_tool_page
+             category="org.dawnsci.plotting.tools.category.Profile"
+             class="org.dawnsci.plotting.tools.imagecuts.PerpendicularImageCutsTool"
+             icon="icons/cutter_box.png"
+             id="org.dawnsci.plotting.tools.imagecuts.PerpendicularImageCutsTool"
+             label="Perpendicular Cuts Tool">
+       </plotting_tool_page>
    </extension>
 
   <extension
