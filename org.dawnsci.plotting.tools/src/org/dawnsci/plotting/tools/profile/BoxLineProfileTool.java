@@ -15,9 +15,6 @@ import java.util.List;
 
 import org.dawnsci.plotting.tools.Activator;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.dawnsci.analysis.api.roi.IROI;
 import org.eclipse.dawnsci.analysis.dataset.roi.RectangularROI;
 import org.eclipse.dawnsci.analysis.dataset.roi.XAxisBoxROI;
@@ -60,7 +57,6 @@ public class BoxLineProfileTool extends ProfileTool implements IProfileToolPage 
 	private boolean isEdgePlotted;
 	private boolean isXAxisROIVisible = false;
 
-	private ProfileJob profileJob;
 	private IRegion xAxisROI;
 	private IRegion region;
 
@@ -70,7 +66,6 @@ public class BoxLineProfileTool extends ProfileTool implements IProfileToolPage 
 
 	public BoxLineProfileTool() {
 		this(false, true, false);
-		this.profileJob = new ProfileJob();
 	}
 
 	/**
@@ -463,46 +458,4 @@ public class BoxLineProfileTool extends ProfileTool implements IProfileToolPage 
 		if (region.getROI() instanceof RectangularROI)
 			update(region, (RectangularROI) region.getROI(), false);
 	}
-
-	protected synchronized void update(IRegion r, RectangularROI rb, boolean isDrag) {
-		if (!isActive())
-			return;
-		if (r != null) {
-			if (!isRegionTypeSupported(r.getRegionType()))
-				return; // Nothing to do.
-			if (!r.isUserRegion())
-				return; // Likewise
-		}
-		if (rb == null)
-			return;
-		profileJob.profile(r, rb, isDrag);
-	}
-
-	private final class ProfileJob extends Job {
-
-		private IRegion currentRegion;
-		private RectangularROI currentROI;
-		private boolean isDrag;
-
-		ProfileJob() {
-			super(getRegionName() + " update");
-			setSystem(true);
-			setUser(false);
-			setPriority(Job.INTERACTIVE);
-		}
-
-		public void profile(IRegion r, RectangularROI rb, boolean isDrag) {
-			this.currentRegion = r;
-			this.currentROI = rb;
-			this.isDrag = isDrag;
-			schedule();
-		}
-
-		@Override
-		protected IStatus run(IProgressMonitor monitor) {
-			createProfile(getImageTrace(), currentRegion, currentROI, true, isDrag, monitor);
-			return Status.OK_STATUS;
-		}
-	}
-
 }
