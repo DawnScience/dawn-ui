@@ -69,7 +69,6 @@
 
 	<modules>
 		<module>org.dawb.workbench.ui</module>
-		<module>org.dawnsci.common.live</module>
 		<module>org.dawnsci.common.widgets</module>
 		<module>org.dawnsci.common.widgets.gda</module>
 		<module>org.dawnsci.conversion.ui.api</module>
@@ -77,7 +76,6 @@
 		<module>org.dawnsci.datavis.api</module>
 		<module>org.dawnsci.datavis.e4.addons</module>
 		<module>org.dawnsci.datavis.feature</module>
-		<module>org.dawnsci.datavis.live</module>
 		<module>org.dawnsci.datavis.manipulation</module>
 		<module>org.dawnsci.datavis.model</module>
 		<module>org.dawnsci.datavis.view</module>
@@ -86,7 +84,6 @@
 		<module>org.dawnsci.jzy3d</module>
 		<module>org.dawnsci.jzy3d.feature</module>
 		<module>org.dawnsci.mapping.ui</module>
-		<module>org.dawnsci.mapping.ui.live</module>
 		<module>org.dawnsci.multidimensional.ui</module>
 		<module>org.dawnsci.plotting</module>
 		<module>org.dawnsci.plotting.draw2d</module>
@@ -116,6 +113,9 @@
 				<activeByDefault>true</activeByDefault>
 			</activation>
 			<modules>
+				<module>org.dawnsci.common.live</module>
+				<module>org.dawnsci.datavis.live</module>
+				<module>org.dawnsci.mapping.ui.live</module>
 				<module>org.dawnsci.processing.python.ui</module>
 			</modules>
 		</profile>
