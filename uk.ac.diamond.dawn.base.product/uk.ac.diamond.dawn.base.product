@@ -45,7 +45,7 @@ openFile
       location="org.dawnsci.product.plugin"
       startupProgressRect="5,235,590,20"
       startupMessageRect="5,5,300,20"
-      startupForegroundColor="FFFFFF" />
+      startupForegroundColor="00AA00" />
    <launcher name="dawn">
       <linux icon="/org.dawnsci.product.plugin/icons/dawn-icon.xpm"/>
       <macosx icon="/org.dawnsci.product.plugin/icons/dawn.icns"/>
@@ -71,7 +71,7 @@ openFile
       <plugin id="org.eclipse.equinox.common" autoStart="true" startLevel="2" />
       <plugin id="org.eclipse.equinox.event" autoStart="true" startLevel="2" />
       <plugin id="org.eclipse.equinox.simpleconfigurator" autoStart="true" startLevel="1" />
-      <property name="preferenceCustomization" value="plugin_customization.ini" />
+      <property name="osgi.instance.area.default" value="@user.home/dawn-workspace" />
    </configurations>
 
    <preferencesInfo>
