@@ -826,6 +826,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 			try {
 				ImageServiceBean intensityScaleBean = imageServiceBean.clone();
 				intensityScaleBean.setOrigin(ImageOrigin.TOP_LEFT);
+				intensityScaleBean.setTransposed(false);
 				// We send the image drawn with the same palette to the 
 				// intensityScale
 				// TODO FIXME This will not work in log mode
