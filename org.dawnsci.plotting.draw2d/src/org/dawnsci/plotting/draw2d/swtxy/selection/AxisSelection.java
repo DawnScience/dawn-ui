@@ -24,6 +24,7 @@ import org.eclipse.dawnsci.analysis.dataset.roi.XAxisLineBoxROI;
 import org.eclipse.dawnsci.analysis.dataset.roi.YAxisBoxROI;
 import org.eclipse.dawnsci.analysis.dataset.roi.YAxisLineBoxROI;
 import org.eclipse.dawnsci.plotting.api.axis.ICoordinateSystem;
+import org.eclipse.dawnsci.plotting.api.region.ILockTranslatable;
 import org.eclipse.dawnsci.plotting.api.region.IRegionContainer;
 import org.eclipse.dawnsci.plotting.api.region.MouseListener;
 import org.eclipse.dawnsci.plotting.api.region.MouseMotionListener;
@@ -55,7 +56,7 @@ import org.slf4j.LoggerFactory;
  *     
  * @author Matthew Gerring
  */
-class AxisSelection extends AbstractSelectionRegion<RectangularROI> {
+class AxisSelection extends AbstractSelectionRegion<RectangularROI> implements ILockTranslatable {
 	
 	private static final Logger logger = LoggerFactory.getLogger(AxisSelection.class);
 		
@@ -88,6 +89,7 @@ class AxisSelection extends AbstractSelectionRegion<RectangularROI> {
 		
 		this.regionArea  = (RegionArea)parent;
      	this.line1       = new LineFigure(true,  parent.getBounds());
+     	
      	
      	if (regionType==RegionType.XAXIS || regionType==RegionType.YAXIS) {
     	    this.line2  = new LineFigure(false, parent.getBounds());
@@ -211,6 +213,7 @@ class AxisSelection extends AbstractSelectionRegion<RectangularROI> {
     		}
 
         };
+        
         
         setTrackMouse(isTrackMouse());
 	}
@@ -436,7 +439,7 @@ class AxisSelection extends AbstractSelectionRegion<RectangularROI> {
 	private boolean isDrawnOnX() {
 		boolean isX = (regionType==RegionType.XAXIS || regionType==RegionType.XAXIS_LINE);
 		
-		if (!coords.isCoordsFlipped()) {
+		if (coords != null && !coords.isCoordsFlipped()) {
 			isX = !isX;
 		}
 		
@@ -635,5 +638,19 @@ class AxisSelection extends AbstractSelectionRegion<RectangularROI> {
 	public void snapToGrid() {
 		// TODO implement the snap to grid for this selection
 		
+	}
+	
+	@Override
+	public void translateOnly(boolean fix) {
+		
+		if (line1 != null) {
+			line1.setMobile(!fix);
+			line1.setVisible(!fix);
+		}
+
+		if (line2 != null) {
+			line2.setMobile(!fix);
+			line2.setVisible(!fix);
+		}
 	}
 }

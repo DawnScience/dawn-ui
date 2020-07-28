@@ -1,4 +1,4 @@
-package org.dawnsci.plotting.tools.imagecuts;
+package org.dawnsci.multidimensional.ui.imagecuts;
 
 import java.util.LinkedHashSet;
 import java.util.Set;
@@ -7,7 +7,7 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
-import org.dawnsci.plotting.tools.imagecuts.CutData.CutType;
+import org.dawnsci.multidimensional.ui.imagecuts.CutData.CutType;
 import org.eclipse.dawnsci.analysis.dataset.roi.RectangularROI;
 import org.eclipse.january.dataset.DatasetUtils;
 import org.eclipse.january.dataset.IDataset;
@@ -108,9 +108,14 @@ public class PerpendicularCutsRunner {
 
 		double step = 1;
 		String name = isX ? "X-Axis" : "Y-Axis";
-
+		
 		if (axis != null) {
-			step = Math.abs(axis.getDouble(axis.getSize() - 1) - axis.getDouble(0)) / (axis.getSize() - 1);
+			int lastPoint = axis.getSize() - 1;
+			step = Math.abs(axis.getDouble(lastPoint) - axis.getDouble(0)) / (lastPoint);
+			if (pos > lastPoint) {
+				pos = lastPoint;
+			}
+			
 			val = axis.getDouble(pos);
 			if (axis.getName() != null && !axis.getName().isEmpty()) {
 				name = axis.getName();
