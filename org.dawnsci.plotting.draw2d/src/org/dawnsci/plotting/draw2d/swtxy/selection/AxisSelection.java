@@ -40,6 +40,8 @@ import org.eclipse.draw2d.geometry.Point;
 import org.eclipse.draw2d.geometry.PointList;
 import org.eclipse.draw2d.geometry.PrecisionPoint;
 import org.eclipse.draw2d.geometry.Rectangle;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 /**
@@ -54,6 +56,8 @@ import org.eclipse.draw2d.geometry.Rectangle;
  * @author Matthew Gerring
  */
 class AxisSelection extends AbstractSelectionRegion<RectangularROI> {
+	
+	private static final Logger logger = LoggerFactory.getLogger(AxisSelection.class);
 		
 	private static final int WIDTH = 8;
 	
@@ -123,7 +127,7 @@ class AxisSelection extends AbstractSelectionRegion<RectangularROI> {
      	if (regionType==RegionType.XAXIS || regionType==RegionType.YAXIS) {
     		this.mover = new FigureTranslator(getXyGraph(), parent, connection, Arrays.asList(new IFigure[]{line1, line2}));
     		
-    		if (regionType==RegionType.XAXIS || regionType==RegionType.XAXIS_LINE) {
+    		if (isDrawnOnX()) {
     			mover.setLockedDirection(FigureTranslator.LockType.X);
     		} else {
     			mover.setLockedDirection(FigureTranslator.LockType.Y);
@@ -226,14 +230,17 @@ class AxisSelection extends AbstractSelectionRegion<RectangularROI> {
 		
 		
 		gc.setLineStyle(Graphics.LINE_DOT);
-     	if (regionType==RegionType.XAXIS || regionType==RegionType.XAXIS_LINE) {
-     		if (regionType==RegionType.XAXIS) r.width+=2;
+		
+		boolean isNotBox = regionType==RegionType.XAXIS || regionType==RegionType.YAXIS;
+		
+     	if (isDrawnOnX()) {
+     		if (isNotBox) r.width+=2;
 			gc.drawLine(r.getBottomRight(), r.getTopRight());
-			if (regionType==RegionType.XAXIS) gc.drawLine(r.getBottomLeft(),  r.getTopLeft());
+			if (isNotBox) gc.drawLine(r.getBottomLeft(),  r.getTopLeft());
 		} else {
-			if (regionType==RegionType.YAXIS) r.height+=2;
+			if (isNotBox) r.height+=2;
 			gc.drawLine(r.getTopLeft(),     r.getTopRight());
-			if (regionType==RegionType.YAXIS) gc.drawLine(r.getBottomLeft(),  r.getBottomRight());
+			if (isNotBox) gc.drawLine(r.getBottomLeft(),  r.getBottomRight());
 		}
 		gc.setBackgroundColor(getRegionColor());
 		gc.setAlpha(getAlpha());
@@ -245,7 +252,8 @@ class AxisSelection extends AbstractSelectionRegion<RectangularROI> {
 			                             Rectangle parentBounds) {
 		
 		Rectangle r;
-		if (regionType==RegionType.XAXIS || regionType==RegionType.XAXIS_LINE) { // Draw vertical lines
+		
+		if (isDrawnOnX()) { // Draw vertical lines
 			r = new Rectangle(new Point(bounds.getLocation().x,    parentBounds.getLocation().y), 
 					          new Point(bounds.getBottomRight().x, parentBounds.getBottomRight().y));
 		
@@ -276,7 +284,8 @@ class AxisSelection extends AbstractSelectionRegion<RectangularROI> {
 			setOpaque(false);
             updateBounds(parent);			
 			this.mover = new FigureTranslator(getXyGraph(), this);
-			if (regionType==RegionType.XAXIS || regionType==RegionType.XAXIS_LINE) {
+			
+			if (isDrawnOnX()) {
 				mover.setLockedDirection(FigureTranslator.LockType.X);
 			} else {
 				mover.setLockedDirection(FigureTranslator.LockType.Y);
@@ -285,8 +294,10 @@ class AxisSelection extends AbstractSelectionRegion<RectangularROI> {
 			addFigureListener(createFigureListener());
 			mover.setActive(isMobile());
 		}
+		
 		protected void updateBounds(Rectangle parentBounds) {
-			if (regionType==RegionType.XAXIS|| regionType==RegionType.XAXIS_LINE) {
+			
+			if (isDrawnOnX()) {
 				if (!isTrackMouse()) setCursor(Cursors.SIZEWE);
 				setBounds(new Rectangle(parentBounds.x, parentBounds.y, getLineAreaWidth(), parentBounds.height));
 			} else {
@@ -294,6 +305,17 @@ class AxisSelection extends AbstractSelectionRegion<RectangularROI> {
 				setBounds(new Rectangle(parentBounds.x, parentBounds.y, parentBounds.width, getLineAreaWidth()));
 			}
 		}
+		
+		public void updateLockedDirection() {
+			
+			if (isDrawnOnX()) {
+				mover.setLockedDirection(FigureTranslator.LockType.X);
+			} else {
+				mover.setLockedDirection(FigureTranslator.LockType.Y);
+			}
+		}
+		
+		
 		protected void paintFigure(Graphics gc) {
 			
 			super.paintFigure(gc);
@@ -306,7 +328,8 @@ class AxisSelection extends AbstractSelectionRegion<RectangularROI> {
 			
 			gc.setLineWidth(getLineWidth());
 			final Rectangle b = getBounds();
-			if (regionType==RegionType.XAXIS || regionType==RegionType.XAXIS_LINE) {
+
+			if (isDrawnOnX()) {
 				if (first) {
 				    gc.drawLine(b.getTopLeft(), b.getBottomLeft());
 				} else {
@@ -325,7 +348,7 @@ class AxisSelection extends AbstractSelectionRegion<RectangularROI> {
 			if (!mobile) {
 				setCursor(null);
 			} else {
-				if (regionType==RegionType.XAXIS|| regionType==RegionType.XAXIS_LINE) {
+				if (isDrawnOnX()) {
 					if (!isTrackMouse()) setCursor(Cursors.SIZEWE);
 				} else {
 					if (!isTrackMouse()) setCursor(Cursors.SIZENS);
@@ -366,7 +389,7 @@ class AxisSelection extends AbstractSelectionRegion<RectangularROI> {
 	}
 
 	protected Rectangle getRectangleFromVertices() {
-		final Point loc1   = line1.getLocation();
+ 		final Point loc1   = line1.getLocation();
 		final Point loc4   = line2 != null 
 				           ? line2.getBounds().getBottomRight()
 				           : line1.getBounds().getBottomRight();
@@ -409,6 +432,16 @@ class AxisSelection extends AbstractSelectionRegion<RectangularROI> {
 		}
 		return rroi;
 	}
+	
+	private boolean isDrawnOnX() {
+		boolean isX = (regionType==RegionType.XAXIS || regionType==RegionType.XAXIS_LINE);
+		
+		if (!coords.isCoordsFlipped()) {
+			isX = !isX;
+		}
+		
+		return isX;
+	}
 
 	protected void updateRegion() {
 		
@@ -433,6 +466,24 @@ class AxisSelection extends AbstractSelectionRegion<RectangularROI> {
 
 		final Rectangle local = new Rectangle(new PrecisionPoint(p1[0], p1[1]), new PrecisionPoint(p2[0], p2[1]));
 		setLocalBounds(local, line1.getParent().getBounds());
+		
+		if (mover != null) {
+			if (isDrawnOnX()) {
+				mover.setLockedDirection(FigureTranslator.LockType.X);
+			} else {
+				mover.setLockedDirection(FigureTranslator.LockType.Y);
+			}
+		}
+		
+		if (line1 != null) {
+			line1.updateLockedDirection();
+		}
+		
+		if (line2 != null) {
+			line2.updateLockedDirection();
+		}
+		
+		
 	}
 
 	@Override
@@ -461,7 +512,7 @@ class AxisSelection extends AbstractSelectionRegion<RectangularROI> {
 		if (line1!=null) {
 			final Rectangle bounds = getSelectionBounds(box, parentBounds);
 
-			if (regionType==RegionType.XAXIS || regionType==RegionType.XAXIS_LINE) {
+			if (isDrawnOnX()) {
 				line1.setLocation(bounds.getTopLeft());
 				if (line2!=null) line2.setLocation(new Point(bounds.getTopRight().x-getLineAreaWidth(), bounds.getTopRight().y));
 			} else {
@@ -507,7 +558,8 @@ class AxisSelection extends AbstractSelectionRegion<RectangularROI> {
 	        	    connection.setEnabled(true);
 	        		connection.setCursor(Draw2DUtils.getRoiMoveCursor());
 	        	}
-				if (regionType==RegionType.XAXIS|| regionType==RegionType.XAXIS_LINE) {
+	        	
+				if (isDrawnOnX()) {
 					line1.setCursor(Cursors.SIZEWE);
 				} else {
 					line1.setCursor(Cursors.SIZENS);
@@ -530,8 +582,7 @@ class AxisSelection extends AbstractSelectionRegion<RectangularROI> {
 			try {
 				line1.getParent().addMouseListener(registerMouseListener(l));
 			} catch(final IllegalStateException e) {
-				System.out.println("DEBUG " + e.getLocalizedMessage());
-				e.printStackTrace();
+				logger.debug("Illegal state on adding mouse listener",e);
 			}
 		}
 	}
@@ -542,8 +593,7 @@ class AxisSelection extends AbstractSelectionRegion<RectangularROI> {
 			try {
 				line1.getParent().removeMouseListener(unregisterMouseListener(l));
 			} catch(final IllegalStateException e) {
-				System.out.println("DEBUG " + e.getLocalizedMessage());
-				e.printStackTrace();
+				logger.debug("Illegal state on removing mouse listener",e);
 			}
 		}
 	}
@@ -554,8 +604,7 @@ class AxisSelection extends AbstractSelectionRegion<RectangularROI> {
 			try {
 				line1.getParent().addMouseMotionListener(registerMouseMotionListener(l));
 			} catch(final IllegalStateException e) {
-				System.out.println("DEBUG " + e.getLocalizedMessage());
-				e.printStackTrace();
+				logger.debug("Illegal state on adding mouse motion listener",e);
 			}
 		}
 	}
@@ -566,8 +615,7 @@ class AxisSelection extends AbstractSelectionRegion<RectangularROI> {
 			try {
 				line1.getParent().removeMouseMotionListener(unregisterMouseMotionListener(l));
 			} catch(final IllegalStateException e) {
-				System.out.println("DEBUG " + e.getLocalizedMessage());
-				e.printStackTrace();
+				logger.debug("Illegal state on removing mouse motion listener",e);
 			}
 		}
 	}

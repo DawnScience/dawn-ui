@@ -61,7 +61,8 @@ public class RegionCoordinateSystem implements ICoordinateSystem, IAxisListener 
 		}
 	}
 
-	private boolean flipCoords() {
+	@Override
+	public boolean isCoordsFlipped() {
 		if (imageTrace == null || imageTrace.getImageServiceBean() == null) {
 			return true;
 		}
@@ -69,14 +70,14 @@ public class RegionCoordinateSystem implements ICoordinateSystem, IAxisListener 
 	}
 
 	private double[] transformValueToPosition(double ox, double oy) {
-		if (flipCoords()) {
+		if (isCoordsFlipped()) {
 			return new double[] {x.getPositionFromValue(ox), y.getPositionFromValue(oy)};
 		}
 		return new double[] {x.getPositionFromValue(oy), y.getPositionFromValue(ox)};
 	}
 
 	private double[] transformPositionToValue(double ox, double oy) {
-		if (flipCoords()) {
+		if (isCoordsFlipped()) {
 			return new double[] {x.getValueFromPosition(ox), y.getValueFromPosition(oy)};
 		}
 		return new double[] {y.getValueFromPosition(oy), x.getValueFromPosition(ox)};
