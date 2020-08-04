@@ -1,4 +1,4 @@
-package org.dawnsci.plotting.tools.imagecuts;
+package org.dawnsci.multidimensional.ui.imagecuts;
 
 public class CutData {
 

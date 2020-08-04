@@ -1,4 +1,4 @@
-package org.dawnsci.plotting.tools.imagecuts;
+package org.dawnsci.multidimensional.ui.imagecuts;
 
 import java.math.BigDecimal;
 import java.math.MathContext;
@@ -7,7 +7,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.dawnsci.plotting.tools.imagecuts.CutData.CutType;
+import org.dawnsci.multidimensional.ui.imagecuts.CutData.CutType;
 import org.eclipse.dawnsci.analysis.dataset.roi.RectangularROI;
 import org.eclipse.dawnsci.plotting.api.IPlottingService;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
@@ -175,7 +175,7 @@ public class PerpendicularImageCutsComposite extends Composite {
 				Display.getDefault().syncExec(() -> {
 					viewer.setInput(data);
 
-					sumLabel.setText(Double.toString(intersectionSum));
+					sumLabel.setText(doubleToStringWithPrecision(intersectionSum));
 					xProfile.clear();
 					yProfile.clear();
 					xProfile.addTrace(xt);
