@@ -28,65 +28,22 @@ public class Activator extends AbstractUIPlugin {
 	// the context
 	private static BundleContext context;
 	
-	/**
-	 * The constructor
-	 */
-	public Activator() {
-	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.eclipse.ui.plugin.AbstractUIPlugin#start(org.osgi.framework.BundleContext)
-	 */
 	public void start(BundleContext c) throws Exception {
 		super.start(c);
 		plugin = this;
 		context = c;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.eclipse.ui.plugin.AbstractUIPlugin#stop(org.osgi.framework.BundleContext)
-	 */
 	public void stop(BundleContext c) throws Exception {
 		plugin = null;
 		super.stop(context);
 		context = null;
 	}
 
-	/**
-	 * Returns the shared instance
-	 *
-	 * @return the shared instance
-	 */
-	public static Activator getDefault() {
-		return plugin;
-	}
-
-	/**
-	 * Creates the image, this should be disposed later.
-	 * @param path
-	 * @return Image
-	 */
-	public static Image getImage(String path) {
-		ImageDescriptor des = imageDescriptorFromPlugin(PLUGIN_ID, path);
-		return des.createImage();
-	}
 
 	public static ImageDescriptor getImageDescriptor(String path) {
 		return imageDescriptorFromPlugin(PLUGIN_ID, path);
 	}
 
-	/**
-	 * Looks for OSGI service, used by ServiceManager
-	 * 
-	 * @param clazz
-	 * @return
-	 */
-	public static <T> T getService(Class<T> clazz) {
-		if (context==null) return null;
-		ServiceReference<T> ref = context.getServiceReference(clazz);
-		if (ref==null) return null;
-		return context.getService(ref);
-	}
 }
