@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.Collectors;
 
 import org.dawb.common.ui.util.EclipseUtils;
 import org.dawb.common.ui.wizard.persistence.PersistenceExportWizard;
@@ -725,6 +726,7 @@ public class FastMaskTool extends AbstractToolPage {
 		private AtomicReference<IRegion> regionRef;
 		private IROIListener roiListener;
 		private Spinner lineThickness;
+		private final List<String> IGNOREIFCONTAINS = new ArrayList<>(Arrays.asList("beam centre", "calibrant")); //sub-strings associated with known DiffractionAugmenter ROIs 
 		
 		public MaskRegionComposite(Composite parent, int style) {
 			super(parent, style);
@@ -787,7 +789,8 @@ public class FastMaskTool extends AbstractToolPage {
 				public void widgetSelected(SelectionEvent e) {
 					IPlottingSystem<?> plottingSystem = getPlottingSystem();
 					Collection<IRegion> regions = plottingSystem.getRegions();
-					regions.stream().forEach(plottingSystem::removeRegion);
+					regions.stream().filter(r -> predicateKnownROINames(r)).collect(Collectors.toList())
+							.forEach(plottingSystem::removeRegion);
 				}
 
 			});
@@ -804,7 +807,7 @@ public class FastMaskTool extends AbstractToolPage {
 						return;
 					}
 					
-					final Collection<IRegion> regions = getPlottingSystem().getRegions();
+					final Collection<IRegion> regions = getPlottingSystem().getRegions().stream().filter(r -> predicateKnownROINames(r)).collect(Collectors.toList());
 
 					final int thickness = maskRegionComposite.getLineThickness();
 
@@ -909,6 +912,14 @@ public class FastMaskTool extends AbstractToolPage {
 			
 		}
 		
+		private boolean predicateKnownROINames(IRegion region)  {
+			String rname = region.getName().toLowerCase();
+			for (String scomp : IGNOREIFCONTAINS)
+				if (rname.contains(scomp))
+					return false;
+			return true;
+		}
+
 		public void removeListeners() {
 			roiEditTable.removeROIListener(roiListener);
 		}
