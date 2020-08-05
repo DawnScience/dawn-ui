@@ -33,16 +33,6 @@ public class Activator extends AbstractUIPlugin {
 
 	private static IPreferenceStore plottingPreferenceStore;
 
-	/**
-	 * The constructor
-	 */
-	public Activator() {
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * @see org.eclipse.ui.plugin.AbstractUIPlugin#start(org.osgi.framework.BundleContext)
-	 */
 	public void start(BundleContext context) throws Exception {
 		super.start(context);
 		Hashtable<String, String> props = new Hashtable<String, String>(1);
@@ -51,24 +41,11 @@ public class Activator extends AbstractUIPlugin {
 		plugin = this;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.eclipse.ui.plugin.AbstractUIPlugin#stop(org.osgi.framework.BundleContext)
-	 */
 	public void stop(BundleContext context) throws Exception {
 		plugin = null;
 		super.stop(context);
 	}
 
-	/**
-	 * Returns the shared instance
-	 *
-	 * @return the shared instance
-	 */
-	public static Activator getDefault() {
-		return plugin;
-	}
-	
 	public static ImageDescriptor getImageDescriptor(String path) {
 		return imageDescriptorFromPlugin(PLUGIN_ID, path);
 	}
