@@ -338,12 +338,19 @@ public class SetUpProcessWizardPage extends WizardPage {
 		List<Entry<String, int[]>> ll = new LinkedList<Entry<String, int[]>>(map.entrySet());
 		
 		Collections.sort(ll, new Comparator<Entry<String, int[]>>() {
-
+			// sort by greatest rank, largest size then name
 			@Override
 			public int compare(Entry<String, int[]> o1, Entry<String, int[]> o2) {
-				int val = Integer.compare(o2.getValue().length, o1.getValue().length);
+				int[] shape1 = o1.getValue();
+				int[] shape2 = o2.getValue();
+				int val = Integer.compare(shape2.length, shape1.length);
 				
-				if (val == 0) val = Integer.compare(o1.getKey().length(), o2.getKey().length());
+				if (val == 0) {
+					val = Long.compare(ShapeUtils.calcLongSize(shape2), ShapeUtils.calcLongSize(shape1));
+					if (val == 0) {
+						val = Integer.compare(o1.getKey().length(), o2.getKey().length());
+					}
+				}
 				
 				return val;
 			}
