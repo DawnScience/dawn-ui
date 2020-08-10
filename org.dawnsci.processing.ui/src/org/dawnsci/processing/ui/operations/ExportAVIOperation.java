@@ -13,7 +13,7 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 
-import org.dawnsci.conversion.Activator;
+import org.dawnsci.processing.ui.Activator;
 import org.dawnsci.processing.ui.converters.avi.AVIOutputStream;
 import org.eclipse.dawnsci.analysis.api.processing.IExportOperation;
 import org.eclipse.dawnsci.analysis.api.processing.OperationData;
