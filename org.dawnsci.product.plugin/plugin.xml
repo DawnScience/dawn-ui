@@ -26,7 +26,7 @@
          </property>
          <property
                name="startupForegroundColor"
-               value="FFFFFF">
+               value="00AA00">
          </property>
          <property
                name="startupMessageRect"
@@ -35,10 +35,6 @@
          <property
                name="startupProgressRect"
                value="5,235,590,20">
-         </property>
-         <property
-               name="preferenceCustomization"
-               value="plugin_customization.ini">
          </property>
       </product>
    </extension>
