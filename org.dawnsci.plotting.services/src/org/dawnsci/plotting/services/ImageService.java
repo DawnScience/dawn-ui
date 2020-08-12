@@ -117,7 +117,6 @@ public class ImageService extends AbstractServiceFactory implements IImageServic
 			return SWTImageUtils.createImageData((RGBDataset) image, 0, 255, null, null, null, false, false, false);
 		}
 
-
 		createMaxMin(bean);
 		double max = getMax(bean);
 		double min = getMin(bean);
@@ -125,20 +124,13 @@ public class ImageService extends AbstractServiceFactory implements IImageServic
 		double maxCut = getMaxCut(bean);
 		double minCut = getMinCut(bean);
 
-		// now deal with the log if needed
-		if (bean.isLogColorScale()) {
-			image = DatasetUtils.rotate90(getImageLoggedData(bean), origin.ordinal());
-			max = Math.log10(max);
-			// note createMaxMin() -> getFastStatistics() -> getImageLogged() which ensures min >= 0 
-			min = Math.log10(min);
-			maxCut = Math.log10(maxCut);
-			// no guarantees for minCut though
-			minCut = minCut <= 0 ? Double.NEGATIVE_INFINITY : Math.log10(minCut);
-		}
-
 		if (oImage.isComplex()) { // handle complex datasets by creating RGB dataset
 			Dataset hue = Maths.angle(oImage, true);
-			Dataset value = DatasetUtils.rotate90(getImageLoggedData(bean), origin.ordinal());
+			Dataset lImage = DatasetUtils.convertToDataset(getImageLoggedData(bean));
+			if (bean.isTransposed()) {
+				lImage = lImage.getTransposedView();
+			}
+			Dataset value = DatasetUtils.rotate90(lImage, origin.ordinal());
 			double maxmax = Math.max(Math.abs(max), Math.abs(min));
 			if (max - min > Math.ulp(maxmax)) {
 				value.isubtract(min);
@@ -148,6 +140,22 @@ public class ImageService extends AbstractServiceFactory implements IImageServic
 			}
 			image = RGBDataset.createFromHSV(hue, null, value);
 			return SWTImageUtils.createImageData(image, 0, 255, null, null, null, false, false, false);
+		}
+
+		// now deal with the log if needed
+		if (bean.isLogColorScale()) {
+			Dataset lImage = DatasetUtils.convertToDataset(getImageLoggedData(bean));
+			if (bean.isTransposed()) {
+				lImage = lImage.getTransposedView();
+			}
+
+			image = DatasetUtils.rotate90(lImage, origin.ordinal());
+			max = Math.log10(max);
+			// note createMaxMin() -> getFastStatistics() -> getImageLogged() which ensures min >= 0 
+			min = Math.log10(min);
+			maxCut = Math.log10(maxCut);
+			// no guarantees for minCut though
+			minCut = minCut <= 0 ? Double.NEGATIVE_INFINITY : Math.log10(minCut);
 		}
 
 		if (bean.getFunctionObject()!=null && bean.getFunctionObject() instanceof FunctionContainer) {
