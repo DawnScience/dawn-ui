@@ -281,4 +281,16 @@ public class MockLineTrace implements ILineTrace {
 		return null;
 	}
 
+	@Override
+	public void setDrawYErrorInArea(boolean drawYErrorInArea) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public boolean isDrawYErrorInArea() {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
 }

@@ -54,8 +54,19 @@ public class LinePlotContributionFactory extends ExtensionContributionFactory {
 				};
 
 				a.setChecked(xy.isErrorBarEnabled());
+				
+				Action aArea = new Action("Draw Y Error in Area"){
+					@Override
+					public void run() {
+						finalXY.setDrawYErrorInArea(!finalXY.isDrawYErrorInArea());
+						plotController.forceReplot();
+					}
+				};
+
+				aArea.setChecked(xy.isDrawYErrorInArea());
 
 				menu.add(a);
+				menu.add(aArea);
 			}
 		});
 

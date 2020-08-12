@@ -544,4 +544,14 @@ public class LineTraceImpl implements ILineTrace, ITraceListener{
 		//do nothing
 	}
 
+	@Override
+	public void setDrawYErrorInArea(boolean drawYErrorInArea) {
+		trace.setDrawYErrorInArea(drawYErrorInArea);
+	}
+
+	@Override
+	public boolean isDrawYErrorInArea() {
+		return trace.isDrawYErrorInArea();
+	}
+
 }
