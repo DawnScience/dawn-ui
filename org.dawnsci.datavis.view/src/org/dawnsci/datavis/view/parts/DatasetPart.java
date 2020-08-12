@@ -288,6 +288,8 @@ public class DatasetPart {
 					}
 					
 					plotController.replotOnSlice(dOptions);
+					
+					return;
 				}
 				
 				plotController.forceReplot();
