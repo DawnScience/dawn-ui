@@ -82,7 +82,7 @@ public class NexusFileConfiguration implements ILoadedFileConfiguration {
 			}
 
 			Node dest = nl.getDestination();
-			String signal = dest.getAttribute(NexusConstants.DATA_SIGNAL).getFirstElement();
+			String signal = dest.containsAttribute(NexusConstants.DATA_SIGNAL) ? dest.getAttribute(NexusConstants.DATA_SIGNAL).getFirstElement() : null;
 			if (signal == null) {
 				continue;
 			}

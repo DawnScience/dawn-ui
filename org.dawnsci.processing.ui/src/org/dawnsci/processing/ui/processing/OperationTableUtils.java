@@ -119,7 +119,7 @@ public class OperationTableUtils {
 		} catch (Exception e) {
 			logger.error("Could not read operations from file", e);
 			if (shell != null)
-				MessageDialog.openInformation(shell, "Exception while writing operations to file", "An exception occurred while writing the operations to a file.\n" + e.getMessage());
+				MessageDialog.openInformation(shell, "Exception while reading operations from file", "An exception occurred while reading the operations from a file.\n" + e.getMessage());
 		}
 	}
 	
