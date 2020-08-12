@@ -5,6 +5,7 @@ import org.eclipse.dawnsci.analysis.dataset.slicer.SliceFromSeriesMetadata;
 import org.eclipse.dawnsci.analysis.dataset.slicer.SliceViewIterator;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.trace.ILineTrace;
+import org.eclipse.dawnsci.plotting.api.trace.ILineTrace.ErrorBarType;
 import org.eclipse.dawnsci.plotting.api.trace.ILineTrace.PointStyle;
 import org.eclipse.dawnsci.plotting.api.trace.ILineTrace.TraceType;
 import org.eclipse.dawnsci.plotting.api.trace.ITrace;
@@ -27,7 +28,8 @@ public class PlotModeXY implements IPlotMode {
 	private long count = 0;
 	private boolean errorBarEnabled = false;
 	private boolean usePoints = false;
-	
+	private boolean drawYErrorInArea = false;
+
 	private final static Logger logger = LoggerFactory.getLogger(PlotModeXY.class);
 
 	/**
@@ -214,7 +216,14 @@ public class PlotModeXY implements IPlotMode {
 		trace.setDataName(data.getName());
 		trace.setData(ax, data);
 		trace.setUserObject(userObject);
-		trace.setErrorBarEnabled(errorBarEnabled);
+		
+		if (errorBarEnabled) {
+			trace.setErrorBarEnabled(errorBarEnabled);
+			trace.setXErrorBarType(ErrorBarType.BOTH);
+			trace.setYErrorBarType(ErrorBarType.BOTH);
+		}
+		
+		trace.setDrawYErrorInArea(drawYErrorInArea);
 		if (usePoints) {
 			trace.setTraceType(TraceType.POINT);
 			trace.setPointStyle(PointStyle.FILLED_CIRCLE);
@@ -247,5 +256,13 @@ public class PlotModeXY implements IPlotMode {
 
 	public void setErrorBarEnabled(boolean errorBarEnabled) {
 		this.errorBarEnabled = errorBarEnabled;
+	}
+	
+	public boolean isDrawYErrorInArea() {
+		return drawYErrorInArea;
+	}
+
+	public void setDrawYErrorInArea(boolean drawYErrorInArea) {
+		this.drawYErrorInArea = drawYErrorInArea;
 	}
 }
