@@ -26,7 +26,7 @@ openFile
 2
       </programArgsLin>
       <programArgsMac>-vm
-../Eclipse/jre/Contents/Home/bin/
+../Eclipse/jre/Contents/Home/bin
       </programArgsMac>
       <vmArgs>-Xms256m
 -Xmx1024m

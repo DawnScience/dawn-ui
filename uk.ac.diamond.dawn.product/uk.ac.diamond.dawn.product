@@ -26,13 +26,14 @@ openFile
 2
       </programArgsLin>
       <programArgsMac>-vm
-../Eclipse/jre/Contents/Home/bin/
+../Eclipse/jre/Contents/Home/bin
       </programArgsMac>
       <vmArgs>-Xms256m
 -Xmx1024m
 -Dosgi.requiredJavaVersion=1.8.0
 -Dosgi.locking=none
 -Dpydev.funding.hide=true
+-Drun.in.eclipse=true
       </vmArgs>
       <vmArgsMac>-XstartOnFirstThread
 -Dorg.eclipse.swt.internal.carbon.smallFonts
