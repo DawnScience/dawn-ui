@@ -276,7 +276,7 @@ public class FileController implements IFileController {
 				if (monitor != null) monitor.subTask("Loading " + path + "...");
 				LoadedFile f = null;
 				try {
-					f = new LoadedFile(loaderService.getData(path, null));
+					f = new LoadedFile(loaderService.getData(path,true, null));
 				} catch (Exception e) {
 					failedPaths.add(path);
 					logger.error("Exception loading file",e);
