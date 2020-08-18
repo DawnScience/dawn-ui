@@ -138,6 +138,7 @@
 				<module>org.dawnsci.base.product.feature</module>
 				<module>org.dawnsci.common.widgets.gda.test</module>
 				<module>org.dawnsci.datavis.model.test</module>
+				<module>org.dawnsci.jzy3d.test</module>
 				<module>org.dawnsci.mapping.ui.test</module>
 				<!--  No tests work!!!
 				<module>org.dawnsci.plotting.histogram.test</module>  -->
