@@ -35,20 +35,12 @@ public class Activator extends AbstractUIPlugin {
 		return context;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.eclipse.ui.plugin.AbstractUIPlugin#start(org.osgi.framework.BundleContext)
-	 */
 	public void start(BundleContext context) throws Exception {
 		super.start(context);
 		Activator.context = context;
 		plugin = this;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.eclipse.ui.plugin.AbstractUIPlugin#stop(org.osgi.framework.BundleContext)
-	 */
 	public void stop(BundleContext context) throws Exception {
 		plugin = null;
 		Activator.context = null;
@@ -62,15 +54,6 @@ public class Activator extends AbstractUIPlugin {
 	 */
 	public static Activator getDefault() {
 		return plugin;
-	}
-	/**
-	 * Creates the image, this should be disposed later.
-	 * @param path
-	 * @return Image
-	 */
-	public static Image getImage(String path) {
-		ImageDescriptor des = imageDescriptorFromPlugin(PLUGIN_ID, path);
-		return des.createImage();
 	}
 
 	public static ImageDescriptor getImageDescriptor(String path) {
