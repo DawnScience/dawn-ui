@@ -24,7 +24,13 @@ import org.eclipse.swt.graphics.PaletteData;
 import org.eclipse.swt.graphics.RGB;
 import org.eclipse.ui.services.AbstractServiceFactory;
 import org.eclipse.ui.services.IServiceLocator;
+import org.osgi.service.component.annotations.Component;
 
+@Component(
+    property = {
+        "description=A service used to get colour schemes registered with Dawn.",
+    }
+)
 public class PaletteService extends AbstractServiceFactory implements IPaletteService {
 
 	private static IPaletteService pservice;

@@ -8,17 +8,12 @@
  */
 package org.dawnsci.plotting.histogram;
 
-import java.util.Hashtable;
-
-import org.dawnsci.plotting.histogram.service.PaletteService;
 import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
-import org.eclipse.dawnsci.plotting.api.histogram.IPaletteService;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.eclipse.ui.preferences.ScopedPreferenceStore;
-import org.osgi.framework.BundleContext;
 
 /**
  * The activator class controls the plug-in life cycle
@@ -29,22 +24,8 @@ public class Activator extends AbstractUIPlugin {
 	public static final String PLUGIN_ID = "org.dawnsci.plotting.histogram"; //$NON-NLS-1$
 
 	// The shared instance
-	private static Activator plugin;
 
 	private static IPreferenceStore plottingPreferenceStore;
-
-	public void start(BundleContext context) throws Exception {
-		super.start(context);
-		Hashtable<String, String> props = new Hashtable<String, String>(1);
-		props.put("description", "A service used to get colour schemes registered with Dawn.");
-		context.registerService(IPaletteService.class, new PaletteService(), props);
-		plugin = this;
-	}
-
-	public void stop(BundleContext context) throws Exception {
-		plugin = null;
-		super.stop(context);
-	}
 
 	public static ImageDescriptor getImageDescriptor(String path) {
 		return imageDescriptorFromPlugin(PLUGIN_ID, path);
