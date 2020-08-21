@@ -33,7 +33,6 @@ openFile
 -Dosgi.requiredJavaVersion=1.8.0
 -Dosgi.locking=none
 -Dpydev.funding.hide=true
--Drun.in.eclipse=true
       </vmArgs>
       <vmArgsMac>-XstartOnFirstThread
 -Dorg.eclipse.swt.internal.carbon.smallFonts
