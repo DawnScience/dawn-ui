@@ -10,8 +10,8 @@ import org.eclipse.dawnsci.nexus.NXroot;
 import org.eclipse.dawnsci.nexus.NexusException;
 import org.eclipse.dawnsci.nexus.NexusNodeFactory;
 import org.eclipse.dawnsci.nexus.ServiceHolder;
+import org.eclipse.dawnsci.nexus.builder.NexusBuilderFile;
 import org.eclipse.dawnsci.nexus.builder.NexusFileBuilder;
-import org.eclipse.dawnsci.nexus.builder.NexusScanFile;
 import org.eclipse.dawnsci.nexus.builder.impl.DefaultNexusFileBuilder;
 import org.eclipse.january.dataset.DatasetFactory;
 import org.eclipse.january.dataset.DoubleDataset;
@@ -47,7 +47,7 @@ public class MapNexusFileBuilderUtils {
 		entry.addGroupNode(SUM, sum);
 		
 		
-		try (NexusScanFile file = fileBuilder.createFile(false)) {
+		try (NexusBuilderFile file = fileBuilder.createFile(false)) {
 		}
 	}
 	
@@ -63,7 +63,7 @@ public class MapNexusFileBuilderUtils {
 		entry.addGroupNode(SUM, sum);
 		
 		
-		try (NexusScanFile file = fileBuilder.createFile(false)) {
+		try (NexusBuilderFile file = fileBuilder.createFile(false)) {
 		}
 	}
 	
@@ -77,7 +77,7 @@ public class MapNexusFileBuilderUtils {
 		entry.addGroupNode(DETECTOR, makeNXData);
 		
 		
-		try (NexusScanFile file = fileBuilder.createFile(false)) {
+		try (NexusBuilderFile file = fileBuilder.createFile(false)) {
 		}
 
 	}
@@ -94,7 +94,7 @@ public class MapNexusFileBuilderUtils {
 		entry.addGroupNode(SUM, sum);
 		
 		
-		try (NexusScanFile file = fileBuilder.createFile(false)) {
+		try (NexusBuilderFile file = fileBuilder.createFile(false)) {
 		}
 	}
 	
@@ -110,7 +110,7 @@ public class MapNexusFileBuilderUtils {
 		entry.addGroupNode(SUM, sum);
 		
 		
-		try (NexusScanFile file = fileBuilder.createFile(false)) {
+		try (NexusBuilderFile file = fileBuilder.createFile(false)) {
 		}
 	}
 	
@@ -126,7 +126,7 @@ public class MapNexusFileBuilderUtils {
 		entry.addGroupNode(SUM, sum);
 		
 		
-		try (NexusScanFile file = fileBuilder.createFile(false)) {
+		try (NexusBuilderFile file = fileBuilder.createFile(false)) {
 		}
 	}
 	
@@ -139,7 +139,7 @@ public class MapNexusFileBuilderUtils {
 		entry.addGroupNode(DETECTOR, sum);
 		
 		
-		try (NexusScanFile file = fileBuilder.createFile(false)) {
+		try (NexusBuilderFile file = fileBuilder.createFile(false)) {
 		}
 	}
 	
@@ -152,7 +152,7 @@ public class MapNexusFileBuilderUtils {
 		entry.addGroupNode(DETECTOR, sum);
 		
 		
-		try (NexusScanFile file = fileBuilder.createFile(false)) {
+		try (NexusBuilderFile file = fileBuilder.createFile(false)) {
 		}
 	}
 	
@@ -164,7 +164,7 @@ public class MapNexusFileBuilderUtils {
 		NXdata sum = makeNonGridNXData(1, 0, false);
 		entry.addGroupNode(DETECTOR, sum);
 		
-		try (NexusScanFile file = fileBuilder.createFile(false)) {
+		try (NexusBuilderFile file = fileBuilder.createFile(false)) {
 		}
 	}
 	
@@ -176,7 +176,7 @@ public class MapNexusFileBuilderUtils {
 		NXdata sum = makeNonGridNXData(2, 0, true);
 		entry.addGroupNode(DETECTOR, sum);
 		
-		try (NexusScanFile file = fileBuilder.createFile(false)) {
+		try (NexusBuilderFile file = fileBuilder.createFile(false)) {
 		}
 	}
 	
