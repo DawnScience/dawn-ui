@@ -61,6 +61,10 @@
          id="org.dawnsci.commandserver.processing.feature"
          version="0.0.0"/>
 
+   <includes
+         id="org.eclipse.jdt"
+         version="0.0.0"/>
+
    <plugin
          id="uk.ac.diamond.scisoft.xpdf"
          download-size="0"
