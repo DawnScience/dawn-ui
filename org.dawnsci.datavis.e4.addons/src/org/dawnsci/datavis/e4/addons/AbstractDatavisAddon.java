@@ -38,7 +38,9 @@ public abstract class AbstractDatavisAddon {
 			control.setElementId(getElementID());
 			control.setContributionURI(getURI());
 			control.getTags().add("Draggable");
-			topTrimBar.getChildren().add(0, control);
+			if (topTrimBar != null) {
+				topTrimBar.getChildren().add(0, control);
+			}
         }
     }
     
