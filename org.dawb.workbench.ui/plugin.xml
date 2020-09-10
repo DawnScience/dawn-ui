@@ -16,11 +16,6 @@
             name="Editor Preferences">
       </page>
       <page
-            class="org.dawb.workbench.ui.preference.DataAnalysisPreferencePage"
-            id="org.dawnsci.preferences.root"
-            name="Data Analysis">
-      </page>
-      <page
             class="org.dawb.workbench.ui.preference.VisualizationPreferencePage"
             id="org.dawb.workbench.ui.visualizationPreferences"
             name="Visualization Preferences">
