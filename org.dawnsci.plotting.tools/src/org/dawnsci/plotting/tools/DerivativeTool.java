@@ -143,7 +143,7 @@ public class DerivativeTool extends AbstractToolPage  {
 						// is plotted
 						List<ITrace> processableTraces = new ArrayList<ITrace>();
 						for (ITrace trace: eventSource) {
-							if (trace.isUserTrace() && 
+							if (trace.isVisible() && trace.isUserTrace() && 
 									trace.getUserObject() != HistoryType.HISTORY_PLOT &&
 									trace.getUserObject() != DerivativeTool.class) {
 								
@@ -243,7 +243,7 @@ public class DerivativeTool extends AbstractToolPage  {
 		// and remove them from the plot
 		if (eventTraceList.isEmpty()) {
 			for (ITrace trace : getPlottingSystem().getTraces(ILineTrace.class)) {
-				if (trace.isUserTrace() && trace.getUserObject() != HistoryType.HISTORY_PLOT
+				if (trace.isVisible() && trace.isUserTrace() && trace.getUserObject() != HistoryType.HISTORY_PLOT
 						&& trace.getUserObject() != DerivativeTool.class) {
 					eventTraceList.add(trace);
 					getPlottingSystem().removeTrace(trace);
