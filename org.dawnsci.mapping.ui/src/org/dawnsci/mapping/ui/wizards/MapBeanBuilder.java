@@ -432,6 +432,10 @@ public class MapBeanBuilder {
 				}
 			}
 			
+			if (!foundx && !foundy) {
+				return false;
+			}
+			
 			needsRemapping = foundx && foundy && index != null;
 			
 			return foundx && foundy && index != null;
