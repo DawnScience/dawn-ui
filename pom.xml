@@ -140,6 +140,7 @@
 			<modules>
 				<module>org.dawb.visualization.feature</module>
 				<module>org.dawnsci.breadcrumb.navigation</module>
+				<module>org.dawnsci.osgi.test.application</module>
 				<module>org.dawnsci.dedi</module>
 				<module>org.dawnsci.fileviewer</module>
 				<module>org.dawnsci.fileviewer.feature</module>
