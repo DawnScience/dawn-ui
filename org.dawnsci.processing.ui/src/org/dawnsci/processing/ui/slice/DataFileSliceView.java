@@ -35,7 +35,6 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
-import org.eclipse.dawnsci.analysis.api.EventTracker;
 import org.eclipse.dawnsci.analysis.api.conversion.IConversionContext;
 import org.eclipse.dawnsci.analysis.api.conversion.IProcessingConversionInfo;
 import org.eclipse.dawnsci.analysis.api.conversion.ProcessingOutputType;
@@ -543,14 +542,6 @@ public class DataFileSliceView extends ViewPart {
 					logger.error(e1.getMessage(), e1);
 				} catch (InterruptedException e1) {
 					logger.error(e1.getMessage(), e1);
-				}
-				try {
-					// track the run button in processing
-					EventTracker tracker = ServiceHolder.getEventTrackerService();
-					if (tracker != null)
-						tracker.trackActionEvent("Processing_Run");
-				} catch (Exception e) {
-					logger.debug("Could not track event",e);
 				}
 			}
 		};

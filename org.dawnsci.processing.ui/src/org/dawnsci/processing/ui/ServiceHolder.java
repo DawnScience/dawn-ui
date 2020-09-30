@@ -2,7 +2,6 @@ package org.dawnsci.processing.ui;
 
 import org.dawnsci.datavis.api.IRecentPlaces;
 import org.dawnsci.processing.ui.api.IOperationUIService;
-import org.eclipse.dawnsci.analysis.api.EventTracker;
 import org.eclipse.dawnsci.analysis.api.conversion.IConversionService;
 import org.eclipse.dawnsci.analysis.api.expressions.IExpressionService;
 import org.eclipse.dawnsci.analysis.api.io.ILoaderService;
@@ -14,7 +13,7 @@ import org.osgi.service.event.EventAdmin;
 public class ServiceHolder {
 
 	private static IExpressionService expressionService;
-	private static EventTracker eventTrackerService;
+
 	private static IConversionService conversionService;
 	private static IOperationService operationService;
 	private static ILoaderService loaderService;
@@ -30,14 +29,6 @@ public class ServiceHolder {
 
 	public void setExpressionService(IExpressionService expressionService) {
 		ServiceHolder.expressionService = expressionService;
-	}
-
-	public static EventTracker getEventTrackerService() {
-		return eventTrackerService;
-	}
-
-	public void setEventTrackerService(EventTracker eventTrackerService) {
-		ServiceHolder.eventTrackerService = eventTrackerService;
 	}
 
 	public void setConversionService(IConversionService s) {
