@@ -1,5 +1,6 @@
 package org.dawnsci.processing.ui.processing;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -7,6 +8,8 @@ import java.util.stream.Collectors;
 
 import org.dawnsci.processing.ui.Activator;
 import org.dawnsci.processing.ui.ServiceHolder;
+import org.dawnsci.processing.ui.slice.DataFileSliceView;
+import org.dawnsci.processing.ui.slice.FileManager;
 import org.dawnsci.processing.ui.slice.IOperationErrorInformer;
 import org.dawnsci.processing.ui.slice.OperationInformerImpl;
 import org.eclipse.core.resources.IFile;
@@ -16,6 +19,7 @@ import org.eclipse.dawnsci.analysis.api.processing.IOperation;
 import org.eclipse.dawnsci.analysis.api.processing.IOperationService;
 import org.eclipse.dawnsci.analysis.api.processing.OperationData;
 import org.eclipse.dawnsci.analysis.api.processing.model.IOperationModel;
+import org.eclipse.january.metadata.OriginMetadata;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IMenuManager;
@@ -33,6 +37,9 @@ import org.eclipse.swt.dnd.TextTransfer;
 import org.eclipse.swt.dnd.Transfer;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.ui.IViewPart;
+import org.eclipse.ui.IWorkbenchPage;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.part.ResourceTransfer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -63,20 +70,22 @@ public class OperationTableUtils {
 		return info;
 	}
 	
-	private static void readOperationsToSeriesTableFromFile(String filename, SeriesTable table, OperationFilter opFilter) throws Exception {
+	private static String readOperationsToSeriesTableFromFile(String filename, SeriesTable table, OperationFilter opFilter) throws Exception {
 		IPersistenceService service = ServiceHolder.getPersistenceService();
 		IOperationService os = ServiceHolder.getOperationService();
-		IPersistentFile pf = service.getPersistentFile(filename);
-		IOperation<? extends IOperationModel, ? extends OperationData>[] operations = pf.getOperations();
-		pf.close();
-		if (operations == null) return;
-		List<OperationDescriptor> list = new ArrayList<OperationDescriptor>(operations.length);
-		for (IOperation<? extends IOperationModel, ? extends OperationData> op : operations) list.add(new OperationDescriptor(op, os));
-		
-		if (opFilter == null) opFilter = new OperationFilter();
-		
-		if (operations != null) table.setInput(list, opFilter);
+		try (IPersistentFile pf = service.getPersistentFile(filename)) {
+			IOperation<? extends IOperationModel, ? extends OperationData>[] operations = pf.getOperations();
+			if (operations == null) return null;
+			OriginMetadata dataOrigin = pf.getOperationDataOrigin();
+			List<OperationDescriptor> list = new ArrayList<OperationDescriptor>(operations.length);
+			for (IOperation<? extends IOperationModel, ? extends OperationData> op : operations) list.add(new OperationDescriptor(op, os));
 
+			if (opFilter == null) opFilter = new OperationFilter();
+
+			if (operations != null) table.setInput(list, opFilter);
+
+			return dataOrigin == null ? null : dataOrigin.getFilePath();
+		}
 	}
 
 	
@@ -91,38 +100,64 @@ public class OperationTableUtils {
 			@Override
 			public void drop(DropTargetEvent event) {
 				Object dropData = event.data;
+				String dataFile = null;
 				if (dropData instanceof TreeSelection) {
 					TreeSelection selectedNode = (TreeSelection) dropData;
 					Object obj[] = selectedNode.toArray();
 					for (int i = 0; i < obj.length; i++) {
 						if (obj[i] instanceof IFile) {
 							IFile file = (IFile) obj[i];
-							readOperationsFromFile(file.getLocation().toOSString(), table, opFilter, logger, shell);
-							return;
+							dataFile = readOperationsFromFile(file.getLocation().toOSString(), table, opFilter, logger, shell);
+							break;
 						}
 					}
 				} else if (dropData instanceof String[]) {
 					for (String path : (String[])dropData){
-						readOperationsFromFile(path, table, opFilter, logger, shell);
-						return;
+						dataFile = readOperationsFromFile(path, table, opFilter, logger, shell);
+						break;
 					}
+				}
+				if (dataFile != null) {
+					confirmAddFileForProcessing(shell, dataFile);
 				}
 			}
 		});
-		
-		
 	}
-	
-	public static void readOperationsFromFile(String fileName, SeriesTable table, OperationFilter opFilter, Logger logger, Shell shell) {
+
+	/**
+	 * Pops up dialog for user to confirm given file is added for processing
+	 * @param shell
+	 * @param dataFile
+	 */
+	public static void confirmAddFileForProcessing(Shell shell, String dataFile) {
+		if (dataFile == null || !(new File(dataFile).canRead())) {
+			return;
+		}
+
+		boolean ok = MessageDialog.openQuestion(shell, "Add file for processing", "Add " + dataFile + "?");
+		if (ok) {
+			IWorkbenchPage page = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage();
+			IViewPart view = page.findView(DataFileSliceView.ID);
+			if (view==null) return;
+
+			final FileManager manager = (FileManager)view.getAdapter(FileManager.class);
+			if (manager != null) {
+				manager.addFiles(new String[]{dataFile});
+			}
+		}
+	}
+
+	public static String readOperationsFromFile(String fileName, SeriesTable table, OperationFilter opFilter, Logger logger, Shell shell) {
 		try {
-			OperationTableUtils.readOperationsToSeriesTableFromFile(fileName, table, opFilter);
+			return OperationTableUtils.readOperationsToSeriesTableFromFile(fileName, table, opFilter);
 		} catch (Exception e) {
 			logger.error("Could not read operations from file", e);
 			if (shell != null)
 				MessageDialog.openInformation(shell, "Exception while reading operations from file", "An exception occurred while reading the operations from a file.\n" + e.getMessage());
 		}
+		return null;
 	}
-	
+
 	public static void addMenuItems(IMenuManager mm, final SeriesTable seriesTable, Shell shell) {
 		
 		mm.add(getAddAction(seriesTable));
