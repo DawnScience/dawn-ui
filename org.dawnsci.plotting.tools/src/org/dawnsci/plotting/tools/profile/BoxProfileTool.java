@@ -226,9 +226,9 @@ public class BoxProfileTool extends ProfileTool {
 				
 		final Dataset x_intensity = box[0];
 		x_intensity.setName("X "+region.getName());
-		if (xi == null || !Arrays.equals(xi.getShape(), x_intensity.getShape())){
-			double xStart = bounds.getPointX();
-			double xEnd = bounds.getPointX() + bounds.getLength(0);
+		if (xi == null || !Arrays.equals(xi.getShapeRef(), x_intensity.getShapeRef())){
+			double xStart = Math.floor(bounds.getPointX());
+			double xEnd = xStart + x_intensity.getSize();
 			xi = DatasetFactory.createRange(IntegerDataset.class, xStart, xEnd, 1);
 			xi.setName("X Pixel");
 		}
@@ -236,9 +236,9 @@ public class BoxProfileTool extends ProfileTool {
 		
 		final Dataset y_intensity = box[1];
 		y_intensity.setName("Y "+region.getName());
-		if (yi == null || !Arrays.equals(yi.getShape(), y_intensity.getShape())) {
-			double yStart = bounds.getPointY();
-			double yEnd = bounds.getPointY() + bounds.getLength(1);
+		if (yi == null || !Arrays.equals(yi.getShapeRef(), y_intensity.getShapeRef())) {
+			double yStart = Math.floor(bounds.getPointY());
+			double yEnd = yStart + y_intensity.getSize();
 			yi = DatasetFactory.createRange(IntegerDataset.class, yStart, yEnd, 1);
 			yi.setName("Y Pixel");
 		}

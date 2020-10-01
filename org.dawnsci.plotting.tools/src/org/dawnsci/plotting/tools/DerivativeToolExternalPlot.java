@@ -107,24 +107,24 @@ public class DerivativeToolExternalPlot extends AbstractToolPage {
 		job2 = new DerivativeJob2(system);
 	}
 	
+	@SuppressWarnings("unchecked")
 	protected boolean checkEvent(TraceEvent evt) {
-		
-		//First, if the event source is not a list or ITrace ignore event
-		if (!(evt.getSource() instanceof List<?>) && !(evt.getSource() instanceof ITrace)) {
+		List<ITrace> eventSource;
+		Object obj = evt.getSource();
+		if (obj instanceof List<?>) {
+			eventSource = (List<ITrace>) obj;
+		} else if (evt.getSource() instanceof ITrace) {
+			eventSource = new ArrayList<ITrace>();
+			eventSource.add((ITrace) obj);
+		} else {
 			return false;
 		}
-		List<ITrace> eventSource = new ArrayList<ITrace>();
-		if (evt.getSource() instanceof List<?>)
-			eventSource = (List<ITrace>)evt.getSource();
-		if (evt.getSource() instanceof ITrace) {
-			eventSource.clear();
-			eventSource.add((ITrace)evt.getSource());
+
+		for (ITrace t : eventSource) {
+			if (t.getUserObject() instanceof ITrace) return false;
 		}
-		
-		for (ITrace t : eventSource) if (t.getUserObject() instanceof ITrace) return false;
-		
+
 		return true;
-		
 	}
 
 	@Override
@@ -293,6 +293,9 @@ public class DerivativeToolExternalPlot extends AbstractToolPage {
 				if (trace instanceof ILineTrace) {
 					if (monitor.isCanceled()) return Status.CANCEL_STATUS;
 					final ILineTrace t = (ILineTrace)trace;
+					if (!t.isVisible()) {
+						continue;
+					}
 					Dataset x = DatasetUtils.convertToDataset(t.getXData());
 					Dataset y = DatasetUtils.convertToDataset(t.getYData());
 					
@@ -315,7 +318,7 @@ public class DerivativeToolExternalPlot extends AbstractToolPage {
 						system.addTrace(t);
 					}
 					
-					system.repaint();						
+					system.repaint();
 				}
 			});
 			
