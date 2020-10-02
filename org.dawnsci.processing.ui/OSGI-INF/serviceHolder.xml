@@ -5,7 +5,6 @@
    <reference bind="setConversionService" cardinality="1..1" interface="org.eclipse.dawnsci.analysis.api.conversion.IConversionService" name="IConversionService" policy="static"/>
    <reference bind="setOperationService" cardinality="1..1" interface="org.eclipse.dawnsci.analysis.api.processing.IOperationService" name="IOperationService" policy="static"/>
    <reference bind="setLoaderService" cardinality="1..1" interface="org.eclipse.dawnsci.analysis.api.io.ILoaderService" name="ILoaderService" policy="static"/>
-   <reference bind="setEventTrackerService" cardinality="0..1" interface="org.eclipse.dawnsci.analysis.api.EventTracker" name="EventTracker" policy="dynamic"/>
    <reference bind="setOperationExporter" cardinality="1..1" interface="org.eclipse.dawnsci.analysis.api.processing.IOperationExporterService" name="IOperationExporterService" policy="static"/>
    <reference bind="setEventAdmin" cardinality="1..1" interface="org.osgi.service.event.EventAdmin" name="EventAdmin" policy="static"/>
    <reference bind="setPersistenceService" cardinality="1..1" interface="org.eclipse.dawnsci.analysis.api.persistence.IPersistenceService" name="IPersistenceService" policy="static"/>
