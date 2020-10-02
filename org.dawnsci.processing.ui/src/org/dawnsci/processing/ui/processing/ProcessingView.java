@@ -43,6 +43,7 @@ import org.eclipse.richbeans.widgets.table.event.SeriesItemListener;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IMemento;
 import org.eclipse.ui.IViewSite;
 import org.eclipse.ui.PartInitException;
@@ -150,7 +151,7 @@ public class ProcessingView extends ViewPart {
 		final OperationLabelProvider prov = new OperationLabelProvider(0);
 		seriesTable.createControl(content, prov);
 		getViewSite().setSelectionProvider(seriesTable.getSelectionProvider());
-		createToobarActions();
+		createToolbarActions();
 		final MenuManager Click = new MenuManager("#PopupMenu");
 		Click.setRemoveAllWhenShown(true);
 		//createActions(Click);
@@ -239,7 +240,7 @@ public class ProcessingView extends ViewPart {
 		
 	}
 
-	private void createToobarActions() {
+	private void createToolbarActions() {
 		add = OperationTableUtils.getAddAction(seriesTable);
 
 		delete = OperationTableUtils.getDeleteAction(seriesTable);
@@ -281,8 +282,8 @@ public class ProcessingView extends ViewPart {
 		
 		final IAction load = new Action("Load configured pipeline", IAction.AS_PUSH_BUTTON) {
 			public void run() {
-				
-				FileSelectionDialog dialog = new FileSelectionDialog(ProcessingView.this.getSite().getShell());
+				Shell shell = getSite().getShell();
+				FileSelectionDialog dialog = new FileSelectionDialog(shell);
 				dialog.setExtensions(extensions);
 				dialog.setFiles(files);
 				dialog.setNewFile(false);
@@ -292,8 +293,11 @@ public class ProcessingView extends ViewPart {
 				dialog.create();
 				if (dialog.open() == Dialog.CANCEL) return;
 				String path = dialog.getPath();
-				OperationTableUtils.readOperationsFromFile(path, seriesTable, operationFilter, logger, getSite().getShell());
+				String dataFile = OperationTableUtils.readOperationsFromFile(path, seriesTable, operationFilter, logger, shell);
 				lastPath = path;
+				if (dataFile != null) {
+					OperationTableUtils.confirmAddFileForProcessing(shell, dataFile);
+				}
 			}
 		};
 		save.setImageDescriptor(Activator.getImageDescriptor("icons/save_edit.png"));
