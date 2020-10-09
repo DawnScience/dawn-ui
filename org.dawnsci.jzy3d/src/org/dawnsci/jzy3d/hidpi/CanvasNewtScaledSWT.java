@@ -106,6 +106,7 @@ public class CanvasNewtScaledSWT extends Composite implements IScreenCanvas {
 
     @Override
     public void dispose() {
+       super.dispose();
         new Thread(new Runnable() {
             @Override
             public void run() {
@@ -125,7 +126,9 @@ public class CanvasNewtScaledSWT extends Composite implements IScreenCanvas {
 
     @Override
     public void display() {
-        window.display();
+        if (window != null) {
+            window.display();
+        }
     }
 
     @Override
