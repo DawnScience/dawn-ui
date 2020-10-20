@@ -109,6 +109,7 @@ import org.eclipse.ui.ISelectionListener;
 import org.eclipse.ui.IViewPart;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchPart;
+import org.eclipse.ui.IWorkbenchPartSite;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.part.ResourceTransfer;
 import org.eclipse.ui.part.ViewPart;
@@ -672,7 +673,9 @@ public class DataFileSliceView extends ViewPart {
 	}
 	
 	private IOperation<? extends IOperationModel, ? extends OperationData>[] getOperations() {
-		IViewPart view = getSite().getPage().findView(ProcessingView.ID);
+		IWorkbenchPartSite site = getSite();
+		if (site == null) return null;
+		IViewPart view = site.getPage().findView(ProcessingView.ID);
 		
 		Object ob = view.getAdapter(IOperation.class);
 		IOperation<? extends IOperationModel, ? extends OperationData>[] ops = null;

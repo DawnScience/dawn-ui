@@ -11,12 +11,14 @@ import org.eclipse.dawnsci.analysis.api.processing.model.ModelUtils;
 import org.eclipse.dawnsci.analysis.api.processing.model.OperationModelField;
 import org.eclipse.jface.bindings.keys.IKeyLookup;
 import org.eclipse.jface.bindings.keys.KeyLookupFactory;
+import org.eclipse.jface.layout.TableColumnLayout;
 import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.ColumnViewer;
 import org.eclipse.jface.viewers.ColumnViewerEditor;
 import org.eclipse.jface.viewers.ColumnViewerEditorActivationEvent;
 import org.eclipse.jface.viewers.ColumnViewerEditorActivationStrategy;
 import org.eclipse.jface.viewers.ColumnViewerToolTipSupport;
+import org.eclipse.jface.viewers.ColumnWeightData;
 import org.eclipse.jface.viewers.EditingSupport;
 import org.eclipse.jface.viewers.FocusCellOwnerDrawHighlighter;
 import org.eclipse.jface.viewers.IContentProvider;
@@ -45,7 +47,6 @@ import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.events.KeyListener;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
-import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Item;
 import org.eclipse.swt.widgets.Table;
@@ -91,14 +92,14 @@ public class OperationModelViewer implements ISelectionListener, ISelectionChang
 	
 
 	public void createPartControl(Composite parent) {
+		Composite tableComposite = new Composite(parent, SWT.NONE);
 		
-		this.viewer = new TableViewer(parent, SWT.SINGLE | SWT.BORDER | SWT.FULL_SELECTION);
+ 		this.viewer = new TableViewer(tableComposite, SWT.SINGLE | SWT.BORDER | SWT.FULL_SELECTION);
 		viewer.setContentProvider(createContentProvider());
 		ColumnViewerToolTipSupport.enableFor(viewer);
 		
 		viewer.getTable().setLinesVisible(true);
 		viewer.getTable().setHeaderVisible(true);
-		viewer.getTable().setLayoutData(new GridData(GridData.FILL_BOTH));
 		viewer.setFilters(new ViewerFilter() {
 			
 			@Override
@@ -133,8 +134,10 @@ public class OperationModelViewer implements ISelectionListener, ISelectionChang
 						| ColumnViewerEditor.KEYBOARD_ACTIVATION);
 
 
+		TableColumnLayout columnLayout = new TableColumnLayout();
+		createColumns(viewer,columnLayout);
 		
-		createColumns(viewer);
+		
 		createDropTarget(viewer);
 
 		viewer.getTable().addKeyListener(new KeyListener() {
@@ -159,6 +162,7 @@ public class OperationModelViewer implements ISelectionListener, ISelectionChang
 		});
 
 		viewer.addSelectionChangedListener(this);
+		tableComposite.setLayout(columnLayout);
 	}
 
 	/**
@@ -232,7 +236,7 @@ public class OperationModelViewer implements ISelectionListener, ISelectionChang
 		});
 	}
 
-	private void createColumns(TableViewer viewer) {
+	private void createColumns(TableViewer viewer, TableColumnLayout columnLayout) {
 		
         TableViewerColumn var   = new TableViewerColumn(viewer, SWT.LEFT, 0);
 		var.getColumn().setText("Name");
@@ -248,11 +252,15 @@ public class OperationModelViewer implements ISelectionListener, ISelectionChang
 			}
 		});
 		
+		columnLayout.setColumnData(var.getColumn(), new ColumnWeightData(25,20));
+		
 		var   = new TableViewerColumn(viewer, SWT.LEFT, 1);
 		var.getColumn().setText("Value");
 		var.getColumn().setWidth(200);
 		var.setLabelProvider(new ModelFieldLabelProvider());
 		var.setEditingSupport(new ModelFieldEditingSupport(viewer));
+		
+		columnLayout.setColumnData(var.getColumn(), new ColumnWeightData(75,20));
 	}
 
 	public void setFocus() {

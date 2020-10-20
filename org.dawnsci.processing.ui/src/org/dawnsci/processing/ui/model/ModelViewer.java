@@ -3,6 +3,8 @@ package org.dawnsci.processing.ui.model;
 import org.eclipse.dawnsci.analysis.api.processing.model.ModelField;
 import org.eclipse.jface.bindings.keys.IKeyLookup;
 import org.eclipse.jface.bindings.keys.KeyLookupFactory;
+import org.eclipse.jface.layout.GridDataFactory;
+import org.eclipse.jface.layout.TableColumnLayout;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.ColumnViewer;
@@ -10,16 +12,14 @@ import org.eclipse.jface.viewers.ColumnViewerEditor;
 import org.eclipse.jface.viewers.ColumnViewerEditorActivationEvent;
 import org.eclipse.jface.viewers.ColumnViewerEditorActivationStrategy;
 import org.eclipse.jface.viewers.ColumnViewerToolTipSupport;
+import org.eclipse.jface.viewers.ColumnWeightData;
 import org.eclipse.jface.viewers.EditingSupport;
 import org.eclipse.jface.viewers.FocusCellOwnerDrawHighlighter;
-import org.eclipse.jface.viewers.IContentProvider;
-import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.jface.viewers.TableViewerEditor;
 import org.eclipse.jface.viewers.TableViewerFocusCellManager;
-import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.events.KeyListener;
@@ -40,8 +40,11 @@ public class ModelViewer {
 	private TableViewer viewer;
 
 	public void createPartControl(Composite parent) {
+		
+		Composite tableComposite = new Composite(parent, SWT.NONE);
+		tableComposite.setLayoutData(GridDataFactory.fillDefaults().grab(true, true).create());
 
-		this.viewer = new TableViewer(parent, SWT.SINGLE | SWT.BORDER);
+		this.viewer = new TableViewer(tableComposite, SWT.SINGLE | SWT.BORDER);
 		viewer.setContentProvider(ArrayContentProvider.getInstance());
 		ColumnViewerToolTipSupport.enableFor(viewer);
 
@@ -68,7 +71,8 @@ public class ModelViewer {
 						| ColumnViewerEditor.TABBING_VERTICAL
 						| ColumnViewerEditor.KEYBOARD_ACTIVATION);
 
-		createColumns(viewer);
+		TableColumnLayout columnLayout = new TableColumnLayout();
+		createColumns(viewer, columnLayout);
 
 		viewer.getTable().addKeyListener(new KeyListener() {
 			public void keyReleased(KeyEvent e) {
@@ -89,9 +93,11 @@ public class ModelViewer {
 				}
 			}
 		});
+	    
+	    tableComposite.setLayout(columnLayout);
 	}
 
-	private void createColumns(TableViewer viewer) {
+	private void createColumns(TableViewer viewer, TableColumnLayout columnLayout) {
 		
 		TableViewerColumn var = new TableViewerColumn(viewer, SWT.LEFT, 0);
 		var.getColumn().setText("Name");
@@ -106,12 +112,16 @@ public class ModelViewer {
 				return ((ModelField)element).getDescription();
 			}
 		});
+		
+		columnLayout.setColumnData(var.getColumn(), new ColumnWeightData(25,20));
 
 		var = new TableViewerColumn(viewer, SWT.LEFT, 1);
 		var.getColumn().setText("Value");
 		var.getColumn().setWidth(200);
 		var.setLabelProvider(new ModelFieldLabelProvider());
 		var.setEditingSupport(new ModelFieldEditingSupport(viewer));
+		
+		columnLayout.setColumnData(var.getColumn(), new ColumnWeightData(75,20));
 	}
 
 	public void setFocus() {
@@ -133,26 +143,6 @@ public class ModelViewer {
 		if (!viewer.getTable().isDisposed()) {
 			viewer.setInput(fields);
 		}
-	}
-
-	private IContentProvider createContentProvider() {
-		return new IStructuredContentProvider() {
-			@Override
-			public void dispose() {
-			}
-
-			@Override
-			public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
-			}
-
-			@Override
-			public Object[] getElements(Object inputElement) {
-				if (inputElement instanceof ModelField[]) {
-					return (ModelField[]) inputElement;
-				}
-				return new ModelField[0];
-			}
-		};
 	}
 
 	class ModelFieldEditingSupport extends EditingSupport {

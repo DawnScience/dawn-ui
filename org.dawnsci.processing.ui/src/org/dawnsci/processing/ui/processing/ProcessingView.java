@@ -35,7 +35,6 @@ import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.richbeans.widgets.table.ISeriesItemDescriptor;
 import org.eclipse.richbeans.widgets.table.SeriesTable;
 import org.eclipse.richbeans.widgets.table.event.SeriesItemEvent;
@@ -71,7 +70,6 @@ public class ProcessingView extends ViewPart {
 	private SeriesTable               seriesTable;
 	private OperationFilter           operationFilter;
 	private List<OperationDescriptor> saved;
-	private TableViewerColumn inputs, outputs;
 	private IAction add;
 	private IAction delete;
 	private IAction clear;
@@ -162,7 +160,6 @@ public class ProcessingView extends ViewPart {
 				OperationTableUtils.addMenuItems(manager, seriesTable, getViewSite().getShell());
 			}
 		});
-		createColumns();
 		
 		// Here's the data, lets show it!
 		seriesTable.setMenuManager(Click);
@@ -226,18 +223,6 @@ public class ProcessingView extends ViewPart {
 		}
 		
 		return super.getAdapter(clazz);
-	}
-	
-	private void createColumns() {
-		
-		this.inputs  = seriesTable.createColumn("Input Rank",  SWT.LEFT, 0, new OperationLabelProvider(1));
-		inputs.getColumn().setWidth(0);
-		inputs.getColumn().setResizable(false);
-
-		this.outputs = seriesTable.createColumn("Output Rank", SWT.LEFT, 0, new OperationLabelProvider(2));
-		outputs.getColumn().setWidth(0);
-		outputs.getColumn().setResizable(false);
-		
 	}
 
 	private void createToolbarActions() {
@@ -330,19 +315,6 @@ public class ProcessingView extends ViewPart {
 		
 		getViewSite().getActionBars().getToolBarManager().add(lock);
 		getViewSite().getActionBars().getMenuManager().add(lock);
-
-		final IAction showRanks = new Action("Show input and output ranks", IAction.AS_CHECK_BOX) {
-			public void run() {
-				inputs.getColumn().setWidth(isChecked() ? 100 : 0);
-				inputs.getColumn().setResizable(isChecked() ? true : false);
-				outputs.getColumn().setWidth(isChecked() ? 100 : 0);
-				outputs.getColumn().setResizable(isChecked() ? true : false);
-			}
-		};
-		showRanks.setImageDescriptor(Activator.getImageDescriptor("icons/application-tile-horizontal.png"));
-
-		getViewSite().getActionBars().getToolBarManager().add(showRanks);
-		getViewSite().getActionBars().getMenuManager().add(showRanks);
 	}
 
 	@Override
