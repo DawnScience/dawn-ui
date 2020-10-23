@@ -59,6 +59,7 @@ import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
+import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -68,6 +69,7 @@ import org.eclipse.richbeans.widgets.table.ISeriesValidator;
 import org.eclipse.richbeans.widgets.table.SeriesTable;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
+import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
@@ -233,8 +235,11 @@ public abstract class AbstractProcessingTool extends AbstractToolPage {
 		lower.setLayout(new GridLayout(2, false));
 		informer = OperationTableUtils.initialiseOperationTable(seriesTable, lower);
 		
+		Composite c = new Composite(lower, SWT.None);
+		c.setLayout(new FillLayout());
+		c.setLayoutData(GridDataFactory.fillDefaults().grab(true, true).create());
 		modelEditor = new OperationModelViewer(false);
-		modelEditor.createPartControl(lower);
+		modelEditor.createPartControl(c);
 		seriesTable.addSelectionListener(new ISelectionChangedListener() {
 			
 			@Override
