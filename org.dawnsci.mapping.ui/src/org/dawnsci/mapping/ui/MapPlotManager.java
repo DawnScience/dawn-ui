@@ -302,13 +302,17 @@ public class MapPlotManager implements IMapPlotController{
 							
 							Collection<IRegion> regions = mapPlot.getRegions();
 							Iterator<IRegion> it = regions.iterator();
+							boolean found = false;
 							while (it.hasNext()) {
 								IRegion r = it.next();
 								if (r.getUserObject() ==  MapPlotManager.this){
 									mapPlot.removeRegion(r);
+									found = true;
 								}
 							}
-							mapPlot.repaint(false);
+							if (found) {
+								mapPlot.repaint(false);
+							}
 						}
 
 					});
