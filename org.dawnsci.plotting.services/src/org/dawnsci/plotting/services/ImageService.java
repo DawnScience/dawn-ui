@@ -138,6 +138,7 @@ public class ImageService extends AbstractServiceFactory implements IImageServic
 			} else {
 				value.imultiply(1./maxmax);
 			}
+			Maths.clip(value, value, 0, 1);
 			image = RGBDataset.createFromHSV(hue, null, value);
 			return SWTImageUtils.createImageData(image, 0, 255, null, null, null, false, false, false);
 		}
