@@ -565,8 +565,13 @@ public class MapPlotManager implements IMapPlotController{
 				layers.addLast(t);
 			} else if (o instanceof VectorMapData) {
 				// Initialise a vector trace
-				IVectorTrace vectorTrace = createVectorTrace((VectorMapData)o,mapPlot);
-				layers.push(new MapTrace(o, vectorTrace, mapPlot));
+				ITrace t;
+				if (((VectorMapData)o).isShowAsComplex()) {
+					t = createImageTrace(o, mapPlot);
+				} else {
+					 t = createVectorTrace((VectorMapData)o,mapPlot);
+				}
+				layers.push(new MapTrace(o, t, mapPlot));
 			} else if (o instanceof AssociatedImage){
 				MapTrace t = new MapTrace(o, null, mapPlot);
 				layers.addLast(t);
