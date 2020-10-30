@@ -263,7 +263,7 @@ public class RGBMixerDialog extends Dialog  {
 				rDirty = false;
 			};
 		} else {
-			rgbMap.clearRed();
+			if (rgbMap != null) rgbMap.clearRed();
 		}
 		
 		if (idxG >= 0) {
@@ -274,7 +274,7 @@ public class RGBMixerDialog extends Dialog  {
 				gDirty = false;
 			};
 		} else {
-			rgbMap.clearGreen();
+			if (rgbMap != null) rgbMap.clearGreen();
 		}
 		if (idxB >= 0) {
 			if (bDirty) {
@@ -284,7 +284,7 @@ public class RGBMixerDialog extends Dialog  {
 				bDirty = false;
 			};
 		} else {
-			rgbMap.clearBlue();
+			if (rgbMap != null) rgbMap.clearBlue();
 		}
 		
 
