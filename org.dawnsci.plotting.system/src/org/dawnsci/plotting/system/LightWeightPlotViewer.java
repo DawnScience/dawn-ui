@@ -24,7 +24,6 @@ import org.dawb.common.ui.printing.PrintSettings;
 import org.dawb.common.ui.util.EclipseUtils;
 import org.dawb.common.ui.wizard.PlotDataConversionWizard;
 import org.dawnsci.plotting.AbstractPlottingSystem;
-import org.dawnsci.plotting.AbstractPlottingViewer;
 import org.dawnsci.plotting.draw2d.swtxy.AspectAxis;
 import org.dawnsci.plotting.draw2d.swtxy.ImageStackTrace;
 import org.dawnsci.plotting.draw2d.swtxy.ImageTrace;
@@ -155,7 +154,7 @@ import org.slf4j.LoggerFactory;
  * @author Matthew Gerring
  *
  */
-public class LightWeightPlotViewer<T> extends AbstractPlottingViewer<T> implements IPlottingSystemViewer<T>, IAnnotationSystem, IRegionSystem, IAxisSystem, IPrintablePlotting, ITraceActionProvider, IAdaptable {
+public class LightWeightPlotViewer<T> implements IPlottingSystemViewer<T>, IAnnotationSystem, IRegionSystem, IAxisSystem, IPrintablePlotting, ITraceActionProvider, IAdaptable {
 
 	private static final Logger logger = LoggerFactory.getLogger(LightWeightPlotViewer.class);
 

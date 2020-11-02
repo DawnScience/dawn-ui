@@ -294,14 +294,6 @@
             tooltip="A tool to zoom areas in a separate view.">
       </plotting_tool_page>
       <plotting_tool_page
-            cheat_sheet_id="org.dawb.workbench.plotting.cheatsheet.masking"
-            class="org.dawnsci.plotting.tools.masking.MaskingTool"
-            icon="icons/plot-tool-masking.png"
-            id="org.dawb.workbench.plotting.tools.maskingTool"
-            label="Masking"
-            tooltip="Masking the image and leaving data modified.">
-      </plotting_tool_page>
-      <plotting_tool_page
             category="org.dawnsci.plotting.tools.plotting_tool_category.fitting"
             cheat_sheet_id="org.dawb.workbench.plotting.cheatsheet.ellipsefitting"
             class="org.dawnsci.plotting.tools.EllipseFittingTool"
@@ -437,7 +429,8 @@
              class="org.dawnsci.plotting.tools.masking.FastMaskTool"
              icon="icons/mask.png"
              id="org.dawnsci.plotting.tools.masking.FastMaskTool"
-             label="Fast Mask"
+             label="Masking (Fast)"
+             tooltip="Create masks for images"
              visible="true">
       </plotting_tool_page>
        <plotting_tool_page
@@ -553,13 +546,6 @@
             contentFile="cheat/crosshair_profile.xml"
             id="org.dawb.workbench.plotting.cheatsheet.crosshairprofile"
             name="Cross Hair Profile">
-      </cheatsheet>
-      <cheatsheet
-            category="org.dawb.workbench.plotting.tools.category"
-            composite="false"
-            contentFile="cheat/masking.xml"
-            id="org.dawb.workbench.plotting.cheatsheet.masking"
-            name="Masking">
       </cheatsheet>
       <cheatsheet
             category="org.dawb.workbench.plotting.tools.category"
