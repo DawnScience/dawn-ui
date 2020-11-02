@@ -231,6 +231,8 @@ public class FastMaskTool extends AbstractToolPage {
 				
 			}
 		});
+		
+		super.createControl(parent);
 	}
 	
 	private IROIListener getROIListener() {
