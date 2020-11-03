@@ -184,6 +184,9 @@
          <hiddenToolBarItem
                id="org.eclipse.ui.externaltools.ExternalToolMenuDelegateToolbar">
          </hiddenToolBarItem>
+         <hiddenToolBarItem
+               id="org.eclipse.ui.window.pinEditor">
+         </hiddenToolBarItem>
       </perspectiveExtension>
    </extension>
    <extension
