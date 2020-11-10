@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+
+   <extension
+         id="application"
+         point="org.eclipse.core.runtime.applications">
+      <application>
+         <run
+               class="org.dawnsci.simple.plugin.Application">
+         </run>
+      </application>
+   </extension>
+   <extension
+         id="product"
+         point="org.eclipse.core.runtime.products">
+      <product
+            application="org.dawnsci.simple.plugin.application"
+            description="icons/16x16pxls.png,icons/32x32pxls.png,icons/48x48pxl.png,icons/64x64pxl.png"
+            name="DAWN">
+         <property
+               name="appName"
+               value="DAWN">
+         </property>
+         <property
+               name="windowImages"
+               value="icons/16x16pxls.png,icons/32x32pxl.png,icons/48x48pxl.png">
+         </property>
+      </product>
+   </extension>
+
+</plugin>
