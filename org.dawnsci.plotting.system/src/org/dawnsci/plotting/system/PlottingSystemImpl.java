@@ -1369,19 +1369,20 @@ public class PlottingSystemImpl<T> extends AbstractPlottingSystem<T> {
 
 	@Override
 	public String savePlotting(final String filename) throws Exception{
+		final String[] path = new String[1];
 		if (activeViewer instanceof IPrintablePlotting) {
-			DisplayUtils.asyncExec(new Runnable() {
+			DisplayUtils.syncExec(new Runnable() {
 				@Override
 				public void run() {
 					try {
-						((IPrintablePlotting) activeViewer).savePlotting(filename);
+						path[0] = ((IPrintablePlotting) activeViewer).savePlotting(filename);
 					} catch (Throwable t) {
 						throw new RuntimeException(t);
 					}
 				}
 			});
 		}
-		return null;
+		return path[0];
 	}
 
 	@Override

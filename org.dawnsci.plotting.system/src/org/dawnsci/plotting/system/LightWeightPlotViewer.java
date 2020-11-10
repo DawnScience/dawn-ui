@@ -1667,7 +1667,7 @@ public class LightWeightPlotViewer<T> implements IPlottingSystemViewer<T>, IAnno
 
 	@Override
 	public String savePlotting(String filename) throws Exception {
-		FileDialog dialog = new FileDialog (Display.getDefault().getActiveShell(), SWT.SAVE);
+		FileDialog dialog = new FileDialog(Display.getDefault().getActiveShell(), SWT.SAVE);
 		String [] filterExtensions = new String [] {"*.png;*.PNG;*.jpg;*.JPG;*.jpeg;*.JPEG", "*.ps;*.eps", "*.svg;*.SVG"};
 		if (filename!=null) {
 			dialog.setFilterPath((new File(filename)).getParent());
@@ -1677,10 +1677,10 @@ public class LightWeightPlotViewer<T> implements IPlottingSystemViewer<T>, IAnno
 			if (platform.equals("win32") || platform.equals("wpf")) {
 				filterPath = "c:\\";
 			}
-			dialog.setFilterPath (filterPath);
+			dialog.setFilterPath(filterPath);
 		}
-		dialog.setFilterNames (PlotExportPrintUtil.FILE_TYPES);
-		dialog.setFilterExtensions (filterExtensions);
+		dialog.setFilterNames(PlotExportPrintUtil.FILE_TYPES);
+		dialog.setFilterExtensions(filterExtensions);
 		filename = dialog.open();
 		if (filename == null)
 			return null;
@@ -1691,7 +1691,8 @@ public class LightWeightPlotViewer<T> implements IPlottingSystemViewer<T>, IAnno
 				if (!yes) return filename;
 			}
 
-			PlotExportPrintUtil.saveGraph(filename, PlotExportPrintUtil.FILE_TYPES[dialog.getFilterIndex()], plotContents.getParent());
+			int index = Math.max(0, dialog.getFilterIndex()); // does not matter if wrong as next method overrides the given type(!)
+			PlotExportPrintUtil.saveGraph(filename, PlotExportPrintUtil.FILE_TYPES[index], plotContents.getParent());
 			//logger.debug("Plot saved");
 		} catch (Exception e) {
 			throw e;
