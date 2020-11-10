@@ -17,6 +17,7 @@ import java.util.List;
 import org.dawnsci.mapping.ui.datamodel.AbstractMapData;
 import org.dawnsci.mapping.ui.datamodel.VectorMapData;
 import org.dawnsci.plotting.actions.ActionBarWrapper;
+import org.eclipse.dawnsci.analysis.api.diffraction.NumberOfSymmetryFolds;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.PlotType;
 import org.eclipse.dawnsci.plotting.api.PlottingFactory;
@@ -29,6 +30,7 @@ import org.eclipse.dawnsci.plotting.api.trace.IVectorTrace.VectorNormalization;
 import org.eclipse.dawnsci.plotting.api.trace.MetadataPlotUtils;
 import org.eclipse.january.dataset.Dataset;
 import org.eclipse.january.dataset.DatasetUtils;
+import org.eclipse.january.dataset.IDataset;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -37,6 +39,7 @@ import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
@@ -68,6 +71,16 @@ public class VectorMixerDialog extends Dialog  {
 	private int plotIndex = -1;
 	private int vectorDirectionIndex = -1;
 	private int vectorMagnitudeIndex = -1;
+	private NumberOfSymmetryFolds folds = NumberOfSymmetryFolds.TWO_FOLD;
+	
+	private boolean showAsComplex = true;
+	private final static String NOSYM = "None";
+	private String[] symmetryOptions = new String[] {NOSYM,
+			NumberOfSymmetryFolds.TWO_FOLD.toString(),
+			NumberOfSymmetryFolds.FOUR_FOLD.toString(),
+			NumberOfSymmetryFolds.SIX_FOLD.toString(),
+			NumberOfSymmetryFolds.EIGHT_FOLD.toString()
+	};
 
 
 	// Class initiation
@@ -220,6 +233,37 @@ public class VectorMixerDialog extends Dialog  {
 				updatePlot();
 			}
 		});
+		
+		Button complexButton = new Button(bottomPane, SWT.CHECK);
+		final Combo symCombo = new Combo(bottomPane, SWT.CENTER);
+		complexButton.setText("Show as Complex HSV image");
+		complexButton.addSelectionListener(new SelectionAdapter() {
+			
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				boolean selection = complexButton.getSelection();
+				showAsComplex = selection;
+				vectorMap = null;
+				updatePlot();
+				symCombo.setEnabled(selection);
+			}
+		
+		});
+		
+		
+		symCombo.setEnabled(showAsComplex);
+		symCombo.setItems(symmetryOptions);
+		symCombo.select(1);
+		symCombo.addSelectionListener(new SelectionAdapter() {
+			
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				folds = NumberOfSymmetryFolds.getFromName(symmetryOptions[symCombo.getSelectionIndex()]);
+				vectorMap = null;
+				updatePlot();
+			}
+			
+		});
 
 		// Return the GUI
 		return container;
@@ -253,7 +297,7 @@ public class VectorMixerDialog extends Dialog  {
 
 		plotSystem.clear();
 		
-		if (plotIndex >= 0 ) {
+		if (plotIndex >= 0 && !showAsComplex) {
 			AbstractMapData plotMapData = this.maps.get(this.plotIndex);
 			updatePlotTrace(plotMapData);
 		}
@@ -266,23 +310,22 @@ public class VectorMixerDialog extends Dialog  {
 			AbstractMapData vectorDirectionData = this.maps.get(this.vectorDirectionIndex);
 			AbstractMapData vectorMagnitudeData = this.maps.get(this.vectorMagnitudeIndex);
 
-			// Update the relevant traces
-			updateVectorTrace(vectorDirectionData, vectorMagnitudeData);
+			if (showAsComplex) {
+				plotComplexData(vectorDirectionData, vectorMagnitudeData);
+				
+			} else {
+				// Update the relevant traces
+				updateVectorTrace(vectorDirectionData, vectorMagnitudeData);
 
-			// and return
-			return;
+				// and return
+				return;
+			}
 		}
 	}
 		
 
 	private void updatePlotTrace (AbstractMapData plotMapData) {
 		// For updating the plot's 'trace' on screen
-
-		// First, check that there's a vector map data holder object and if not create it
-		if (this.vectorMap == null) {
-			this.vectorMap = new VectorMapData(plotMapData.toString(), plotMapData, plotMapData.getParent().getPath());
-		}
-
 
 		// Update plotting system with values, manually so that the global range is set for the vector trace on top
 		
@@ -307,17 +350,35 @@ public class VectorMixerDialog extends Dialog  {
 		plotSystem.repaint(false);
 	}
 
+	private void plotComplexData(AbstractMapData vectorDirectionData, AbstractMapData vectorMagnitudeData) {
 
+		buildVectorMap(vectorDirectionData, vectorMagnitudeData);
+
+		IImageTrace t = null;
+		try {
+			IDataset map = vectorMap.getMap();
+			t = MetadataPlotUtils.buildTrace("Complex plot", map, plotSystem);
+			t.setGlobalRange(vectorMap.getRange());
+			plotSystem.addTrace(t);
+		} catch (Exception e) {
+			logger.error("Error creating image trace", e);
+		}
+	}
+	
+
+	private void buildVectorMap(AbstractMapData vectorDirectionData, AbstractMapData vectorMagnitudeData) {
+		if (this.vectorMap == null) {
+			this.vectorMap = new VectorMapData(vectorDirectionData.toString(), vectorDirectionData, vectorDirectionData.getParent().getPath(),showAsComplex, folds);
+		}
+		
+		this.vectorMap.updateVectorData(vectorDirectionData, vectorMagnitudeData);
+	}
+	
 	private void updateVectorTrace (AbstractMapData vectorDirectionData, AbstractMapData vectorMagnitudeData) {
 		// For updating the vector trace on screen
 		
 		// First, check that there's a vector map data holder object and if not create it
-		if (this.vectorMap == null) {
-			this.vectorMap = new VectorMapData(vectorDirectionData.toString(), vectorDirectionData, vectorDirectionData.getParent().getPath());
-		}
-
-		// Update the vector map data holder object with the vector data
-		this.vectorMap.updateVectorData(vectorDirectionData, vectorMagnitudeData);
+		buildVectorMap(vectorDirectionData, vectorMagnitudeData);
 		
 		IVectorTrace vectorPlot = plotSystem.createVectorTrace("Vector Plot");
 		// And whilst setting up the plot, also define some plot specific options
