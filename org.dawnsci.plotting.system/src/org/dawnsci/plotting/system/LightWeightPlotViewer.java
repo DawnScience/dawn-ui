@@ -1166,9 +1166,13 @@ public class LightWeightPlotViewer<T> extends AbstractPlottingViewer<T> implemen
 	public boolean addTrace(ITrace trace) {
 
 		if (trace instanceof IImageTrace) {
-			system.setPlotType(PlotType.IMAGE); // Only one image allowed at a time
-		} else if (!(trace instanceof IVectorTrace)){
-			system.setPlotType(PlotType.XY);
+			if (system.getPlotType() != PlotType.IMAGE) {
+				system.setPlotType(PlotType.IMAGE); // Only one image allowed at a time
+			}
+		} else if (!(trace instanceof IVectorTrace)) {
+			if (system.getPlotType() != PlotType.XY) {
+				system.setPlotType(PlotType.XY);
+			}
 		}
 
 		final TraceWillPlotEvent evt = new TraceWillPlotEvent(trace, true);
