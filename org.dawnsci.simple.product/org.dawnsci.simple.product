@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?pde version="3.5"?>
 
-<product name="DAWN" uid="org.dawnsci.simple" id="org.dawnsci.simple.plugin.product" application="org.dawnsci.simple.plugin.application" useFeatures="true" includeLaunchers="true">
-
+<product name="DAWN" uid="org.dawnsci.simple.product" id="org.dawnsci.simple.plugin.product" application="org.dawnsci.simple.plugin.application" version="1.0" useFeatures="true" includeLaunchers="true">
 
    <configIni use="default">
    </configIni>
@@ -14,13 +13,16 @@
 
    <windowImages i16="/org.dawnsci.simple.plugin/icons/16x16pxls.png" i32="/org.dawnsci.simple.plugin/icons/32x32pxl.png" i48="/org.dawnsci.simple.plugin/icons/48x48pxl.png"/>
 
-
-   <launcher>
+   <splash
+      location="org.dawnsci.simple.plugin"
+      startupProgressRect="5,220,490,10"
+      startupMessageRect="5,200,100,20"
+      startupForegroundColor="179ACE" />
+   <launcher name="dawn-lite">
       <win useIco="false">
          <bmp/>
       </win>
    </launcher>
-
 
    <vm>
    </vm>

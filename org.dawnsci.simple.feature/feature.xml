@@ -48,6 +48,30 @@
          id="org.dawnsci.conversion.feature"
          version="0.0.0"/>
 
+   <includes
+         id="org.dawnsci.jre.linux.x86_64.feature"
+         version="0.0.0"
+         optional="true"
+         os="linux"
+         ws="gtk"
+         arch="x86_64"/>
+
+   <includes
+         id="org.dawnsci.jre.macos.x86_64.feature"
+         version="0.0.0"
+         optional="true"
+         os="macosx"
+         ws="cocoa"
+         arch="x86_64"/>
+
+   <includes
+         id="org.dawnsci.jre.win32.x86_64.feature"
+         version="0.0.0"
+         optional="true"
+         os="win32"
+         ws="win32"
+         arch="x86_64"/>
+
    <plugin
          id="org.eclipse.scanning.api"
          download-size="0"
@@ -349,12 +373,6 @@
          unpack="false"/>
 
    <plugin
-         id="org.monte.media"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"/>
-
-   <plugin
          id="org.apache.commons.jexl"
          download-size="0"
          install-size="0"
@@ -405,13 +423,6 @@
 
    <plugin
          id="org.eclipse.core.filesystem"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
-         id="com.fasterxml.jackson.core.jackson-annotations.source"
          download-size="0"
          install-size="0"
          version="0.0.0"
