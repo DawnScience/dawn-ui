@@ -1,5 +1,6 @@
 package org.dawnsci.plotting.histogram.ui;
 
+import org.dawb.common.ui.util.DisplayUtils;
 import org.dawnsci.plotting.histogram.IHistogramProvider;
 import org.dawnsci.plotting.histogram.IHistogramProvider.IHistogramDatasets;
 import org.eclipse.core.runtime.Assert;
@@ -33,7 +34,6 @@ import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.IActionBars;
@@ -500,24 +500,16 @@ public class HistogramViewer extends ContentViewer {
 
 	@Override
 	public void refresh() {
-		
-		updateTraces();
-		updateUIComponents();
-		
+		DisplayUtils.asyncExec(composite, new Runnable() {
+			@Override
+			public void run() {
+				updateTraces();
+				updateUIComponents();
+			}
+		});
 	}
-	
+
 	private void updateUIComponents() {
-		if (Display.getCurrent() == null) {
-			Display.getDefault().asyncExec(new Runnable() {
-				
-				@Override
-				public void run() {
-					updateUIComponents();
-					
-				}
-			});
-			return;
-		}
 		
 		histogramPlottingSystem.repaint();
 		

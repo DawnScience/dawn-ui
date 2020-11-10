@@ -611,9 +611,4 @@ public class HistogramToolPage2 extends AbstractToolPage implements IToolPage {
 			return pservice = (IPaletteService) PaletteService.getPaletteService();
 		return pservice;
 	}
-
-	@Override
-	public String getToolId() {
-		return ID;
-	}
 }
