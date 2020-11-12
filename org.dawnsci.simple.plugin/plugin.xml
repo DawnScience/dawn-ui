@@ -26,6 +26,22 @@
                name="windowImages"
                value="icons/16x16pxls.png,icons/32x32pxl.png,icons/48x48pxl.png">
          </property>
+         <property
+               name="startupProgressRect"
+               value="5,220,490,10">
+         </property>
+         <property
+               name="startupForegroundColor"
+               value="179ACE">
+         </property>
+         <property
+               name="startupMessageRect"
+               value="5,200,100,20">
+         </property>
+         <property
+               name="preferenceCustomization"
+               value="plugin_customization.ini">
+         </property>
       </product>
    </extension>
 
