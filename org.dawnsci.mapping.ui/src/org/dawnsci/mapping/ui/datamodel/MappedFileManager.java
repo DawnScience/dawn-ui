@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -77,7 +78,7 @@ public class MappedFileManager implements IMapFileController{
 	private ExecutorService liveLoadExector;
 	
 	public MappedFileManager() {
-		listeners = new HashSet<>();
+		listeners = new CopyOnWriteArraySet<>();
 		mappedDataArea = new MappedDataArea();
 		beanHelper = new BeanBuilderWizard();
 		liveLoadExector = Executors.newSingleThreadExecutor();
