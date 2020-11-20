@@ -278,7 +278,7 @@ public class ProcessingView extends ViewPart {
 				dialog.create();
 				if (dialog.open() == Dialog.CANCEL) return;
 				String path = dialog.getPath();
-				String dataFile = OperationTableUtils.readOperationsFromFile(path, seriesTable, operationFilter, logger, shell);
+				String dataFile = OperationTableUtils.readOperationsFromFile(shell, path, seriesTable, operationFilter, logger);
 				lastPath = path;
 				if (dataFile != null) {
 					OperationTableUtils.confirmAddFileForProcessing(shell, dataFile);

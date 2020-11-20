@@ -182,7 +182,9 @@ public class ModelFieldEditors {
 		   		final Collection<ModelField> fields = ModelUtils.getModelFields(model);
 		   		for (ModelField field : fields) {
 		   			Object value = field.get();
-		   			if (value instanceof Enum) value = ((Enum<?>)value).name();
+		   			if (value instanceof Enum) {
+		   				value = ((Enum<?>)value).toString();
+		   			}
 		   			values.put(field.getName(), value);
 				}
 		   		engine.setLoadedVariables(values);
