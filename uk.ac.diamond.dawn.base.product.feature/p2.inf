@@ -13,11 +13,4 @@ instructions.configure= \
   org.eclipse.equinox.p2.touchpoint.eclipse.addRepository(location:http${#58}//opengda.org/DawnDiamond/master/updates/snapshot/,type:0,name:Dawn (snapshot version),enabled:false); \
   org.eclipse.equinox.p2.touchpoint.eclipse.addRepository(location:http${#58}//opengda.org/DawnDiamond/master/updates/snapshot/,type:1,name:Dawn (snapshot version),enabled:false); \
   org.eclipse.equinox.p2.touchpoint.eclipse.addRepository(location:http${#58}//download.eclipse.org/egit/updates-3.0.3/,type:0,name:EGit/JGit 3.0.3,enabled:false); \
-  org.eclipse.equinox.p2.touchpoint.eclipse.addRepository(location:http${#58}//download.eclipse.org/egit/updates-3.0.3/,type:1,name:EGit/JGit 3.0.3,enabled:false); \
-  org.eclipse.equinox.p2.touchpoint.eclipse.addRepository(location:http${#58}//subclipse.tigris.org/update_1.6.x/,type:0,name:Subclipse  1.6.x Release (uses Subversion 1.6.x working copy format),enabled:false); \
-  org.eclipse.equinox.p2.touchpoint.eclipse.addRepository(location:http${#58}//subclipse.tigris.org/update_1.6.x/,type:1,name:Subclipse  1.6.x Release (uses Subversion 1.6.x working copy format),enabled:false); \
-  org.eclipse.equinox.p2.touchpoint.eclipse.addRepository(location:http${#58}//subclipse.tigris.org/update_1.8.x/,type:0,name:Subclipse  1.8.x Release (uses Subversion 1.7.x working copy format),enabled:false); \
-  org.eclipse.equinox.p2.touchpoint.eclipse.addRepository(location:http${#58}//subclipse.tigris.org/update_1.8.x/,type:1,name:Subclipse  1.8.x Release (uses Subversion 1.7.x working copy format),enabled:false); \
-  org.eclipse.equinox.p2.touchpoint.eclipse.addRepository(location:http${#58}//subclipse.tigris.org/update_1.10.x/,type:0,name:Subclipse 1.10.x Release (uses Subversion 1.8.x working copy format),enabled:false); \
-  org.eclipse.equinox.p2.touchpoint.eclipse.addRepository(location:http${#58}//subclipse.tigris.org/update_1.10.x/,type:1,name:Subclipse 1.10.x Release (uses Subversion 1.8.x working copy format),enabled:false);
-
+  org.eclipse.equinox.p2.touchpoint.eclipse.addRepository(location:http${#58}//download.eclipse.org/egit/updates-3.0.3/,type:1,name:EGit/JGit 3.0.3,enabled:false);
