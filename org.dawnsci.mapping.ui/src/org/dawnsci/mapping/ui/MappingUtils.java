@@ -6,7 +6,7 @@ import org.dawnsci.mapping.ui.datamodel.PlottableMapObject;
 import org.eclipse.dawnsci.analysis.api.tree.DataNode;
 import org.eclipse.dawnsci.analysis.api.tree.GroupNode;
 import org.eclipse.dawnsci.analysis.api.tree.Node;
-import org.eclipse.dawnsci.analysis.tree.impl.AttributeImpl;
+import org.eclipse.dawnsci.analysis.tree.TreeFactory;
 import org.eclipse.dawnsci.nexus.INexusFileFactory;
 import org.eclipse.dawnsci.nexus.NexusException;
 import org.eclipse.dawnsci.nexus.NexusFile;
@@ -306,9 +306,9 @@ public class MappingUtils {
 		try {
 			nexus.openToWrite(true);
 			GroupNode group = nexus.getGroup("/entry", true);
-			nexus.addAttribute(group, new AttributeImpl("NX_class","NXentry"));
+			nexus.addAttribute(group, TreeFactory.createAttribute("NX_class","NXentry"));
 			group = nexus.getGroup("/entry/registered_image", true);
-			nexus.addAttribute(group, new AttributeImpl("NX_class","NXdata"));
+			nexus.addAttribute(group, TreeFactory.createAttribute("NX_class","NXdata"));
 			IDataset data = image.getMap().getSliceView();
 			AxesMetadata axm = data.getFirstMetadata(AxesMetadata.class);
 			if (data instanceof RGBDataset) {
@@ -319,7 +319,7 @@ public class MappingUtils {
 			}
 			data.setName("data");
 			DataNode dNode = nexus.createData(group, data);
-			nexus.addAttribute(dNode, new AttributeImpl("interpretation","rgba-image"));
+			nexus.addAttribute(dNode, TreeFactory.createAttribute("interpretation","rgba-image"));
 			
 			IDataset y = axm.getAxis(0)[0].getSlice().squeeze();
 			y.setName(MetadataPlotUtils.removeSquareBrackets(y.getName()));
@@ -328,8 +328,8 @@ public class MappingUtils {
 			x.setName(MetadataPlotUtils.removeSquareBrackets(x.getName()));
 			nexus.createData(group, x);
 			
-			nexus.addAttribute(group, new AttributeImpl("signal","data"));
-			nexus.addAttribute(group, new AttributeImpl("axes",new String[]{".",y.getName(),x.getName()}));
+			nexus.addAttribute(group, TreeFactory.createAttribute("signal","data"));
+			nexus.addAttribute(group, TreeFactory.createAttribute("axes",new String[]{".",y.getName(),x.getName()}));
 		} catch (DatasetException de) {
 			logger.error("Could not slice dataset", de);
 		} catch (NexusException e) {
