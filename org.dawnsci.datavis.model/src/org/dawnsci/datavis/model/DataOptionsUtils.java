@@ -130,7 +130,7 @@ public class DataOptionsUtils {
 		
 		NXdata nxData = NexusNodeFactory.createNXdata();
 		nxData.setAttributeSignal(data.getName());
-		nxData.setData(data);
+		nxData.setData("data", data);
 		
 		Dataset[] axesArray = getAxesArray(data, nxData);
 		
