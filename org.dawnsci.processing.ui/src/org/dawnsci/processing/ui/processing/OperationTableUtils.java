@@ -70,12 +70,20 @@ public class OperationTableUtils {
 		return info;
 	}
 	
-	private static String readOperationsToSeriesTableFromFile(String filename, SeriesTable table, OperationFilter opFilter) throws Exception {
+	private static String readOperationsToSeriesTableFromFile(Shell shell, String filename, SeriesTable table, OperationFilter opFilter) throws Exception {
 		IPersistenceService service = ServiceHolder.getPersistenceService();
 		IOperationService os = ServiceHolder.getOperationService();
 		try (IPersistentFile pf = service.getPersistentFile(filename)) {
 			IOperation<? extends IOperationModel, ? extends OperationData>[] operations = pf.getOperations();
 			if (operations == null) return null;
+
+			if (pf.hasConfiguredFields()) {
+				boolean ok = MessageDialog.openQuestion(shell, "Apply auto-configured fields", "Override some fields that are automatically set?");
+				if (ok) {
+					pf.applyConfiguredFields(operations);
+				}
+			}
+
 			OriginMetadata dataOrigin = pf.getOperationDataOrigin();
 			List<OperationDescriptor> list = new ArrayList<OperationDescriptor>(operations.length);
 			for (IOperation<? extends IOperationModel, ? extends OperationData> op : operations) list.add(new OperationDescriptor(op, os));
@@ -88,7 +96,6 @@ public class OperationTableUtils {
 		}
 	}
 
-	
 	public static void setupPipelinePaneDropTarget(final SeriesTable table, final OperationFilter opFilter, final Logger logger, final Shell shell) {
 		DropTarget dt = table.getDropTarget();
 		
@@ -107,13 +114,13 @@ public class OperationTableUtils {
 					for (int i = 0; i < obj.length; i++) {
 						if (obj[i] instanceof IFile) {
 							IFile file = (IFile) obj[i];
-							dataFile = readOperationsFromFile(file.getLocation().toOSString(), table, opFilter, logger, shell);
+							dataFile = readOperationsFromFile(shell, file.getLocation().toOSString(), table, opFilter, logger);
 							break;
 						}
 					}
 				} else if (dropData instanceof String[]) {
 					for (String path : (String[])dropData){
-						dataFile = readOperationsFromFile(path, table, opFilter, logger, shell);
+						dataFile = readOperationsFromFile(shell, path, table, opFilter, logger);
 						break;
 					}
 				}
@@ -147,9 +154,9 @@ public class OperationTableUtils {
 		}
 	}
 
-	public static String readOperationsFromFile(String fileName, SeriesTable table, OperationFilter opFilter, Logger logger, Shell shell) {
+	public static String readOperationsFromFile(Shell shell, String fileName, SeriesTable table, OperationFilter opFilter, Logger logger) {
 		try {
-			return OperationTableUtils.readOperationsToSeriesTableFromFile(fileName, table, opFilter);
+			return readOperationsToSeriesTableFromFile(shell, fileName, table, opFilter);
 		} catch (Exception e) {
 			logger.error("Could not read operations from file", e);
 			if (shell != null)
