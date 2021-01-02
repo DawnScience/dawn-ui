@@ -38,10 +38,6 @@ public class LoadedFiles implements IDataObject, Iterable<LoadedFile> {
 		return findAny.isPresent();
 	}
 
-	public Object[] getChildren() {
-		return fileList.toArray();
-	}
-
 	@Override
 	public String getName() {
 		return "";

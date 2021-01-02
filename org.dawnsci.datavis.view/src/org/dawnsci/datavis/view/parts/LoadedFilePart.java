@@ -6,7 +6,6 @@ import java.io.FilenameFilter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
-import java.util.Iterator;
 import java.util.List;
 import java.util.function.Function;
 
@@ -96,6 +95,7 @@ import org.slf4j.LoggerFactory;
 import uk.ac.diamond.scisoft.analysis.utils.VersionSort;
 
 public class LoadedFilePart {
+	public static final String ID = "org.dawnsci.datavis.view.parts.LoadedFilePart";
 
 	private static final Logger logger = LoggerFactory.getLogger(LoadedFilePart.class);
 	
@@ -400,17 +400,7 @@ public class LoadedFilePart {
 					loadData((String[])dropData,true);
 				} else if (dropData instanceof StructuredSelection) {
 					StructuredSelection ss = (StructuredSelection)dropData;
-					List<LoadedFile> lf = new ArrayList<LoadedFile>();
-					
-					Iterator<?> it = ss.iterator();
-					
-					while (it.hasNext()) {
-						Object next = it.next();
-						if (next instanceof LoadedFile) {
-							lf.add((LoadedFile)next);
-						}
-					}
-					
+					List<LoadedFile> lf = SelectionUtils.getFromSelection(ss, LoadedFile.class);
 					if (!lf.isEmpty()) {
 						Point p2 = new Point(event.x, event.y);
 						Point p1 = viewer.getControl().toControl(p2);
@@ -493,17 +483,17 @@ public class LoadedFilePart {
 		viewer.setInput(fileController);
 		
 		IStructuredSelection selection = viewer.getStructuredSelection();
-		List<LoadedFile> s = SelectionUtils.getFromSelection(selection, LoadedFile.class);
+		LoadedFile s = SelectionUtils.getFirstFromSelection(selection, LoadedFile.class);
 		
 		boolean pushSelection = event.getLoadedFile() != null || viewer.getTable().getItemCount() != 0;
 		
-		if (s.isEmpty() && pushSelection) {
+		if (s == null && pushSelection) {
 			viewer.getTable().setSelection(0);
 			selection = viewer.getStructuredSelection();
-			s = SelectionUtils.getFromSelection(selection, LoadedFile.class);
+			s = SelectionUtils.getFirstFromSelection(selection, LoadedFile.class);
 		}
 		
-		if (!s.isEmpty()) {
+		if (s != null) {
 			selectionService.setSelection(new StructuredSelection(selection.toArray()));
 		}
 	}

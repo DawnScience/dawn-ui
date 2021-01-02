@@ -11,6 +11,7 @@ import java.util.stream.Collectors;
 
 import org.dawnsci.conversion.ui.api.IFileOverrideWizard;
 import org.dawnsci.datavis.model.DataOptions;
+import org.dawnsci.datavis.model.DataOptionsUtils;
 import org.dawnsci.datavis.model.FileController;
 import org.dawnsci.datavis.model.FileJoining;
 import org.dawnsci.datavis.model.IDataObject;
@@ -42,6 +43,7 @@ import org.eclipse.swt.dnd.Transfer;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Layout;
+import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.ui.IWorkbenchWizard;
 import org.eclipse.ui.PlatformUI;
@@ -123,22 +125,23 @@ public class LoadedFileMenuListener implements IMenuListener {
 				manager.add(new Separator());
 				manager.add(new ApplyToAllAction(fileController, viewer));
 				
-				List<LoadedFile> s = SelectionUtils.getFromSelection(viewer.getSelection(), LoadedFile.class);
+				LoadedFile s = SelectionUtils.getFirstFromSelection(viewer.getSelection(), LoadedFile.class);
 				
 				manager.add(new Separator());
 				
-				if (!s.isEmpty() && checkCommand(OPEN_META)) {
-					manager.add(new CommandAction("View Metadata...", null, OPEN_META));
+				if (s != null) {
+					if (checkCommand(OPEN_META)) {
+						manager.add(new CommandAction("View Metadata...", null, OPEN_META));
+					}
+
+					if (s.getTree() != null && checkCommand(OPEN_TREE)) {
+						manager.add(new CommandAction("View Tree...", null, OPEN_TREE));
+					}
+
+					if (s.getFilePath() != null) {
+						manager.add(new CopyToClipboardAction(s.getFilePath()));
+					}
 				}
-				
-				if (!s.isEmpty() && s.get(0).getTree() != null && checkCommand(OPEN_TREE)) {
-					manager.add(new CommandAction("View Tree...", null, OPEN_TREE));
-				}
-				
-				if (!s.isEmpty() && s.get(0).getFilePath() != null) {
-					manager.add(new CopyToClipboardAction(s.get(0).getFilePath()));
-				}
-				
 			}
 			
 		}
@@ -322,18 +325,22 @@ public class LoadedFileMenuListener implements IMenuListener {
 			
 			fileController.setLabelName(labelName);
 			
-			Layout layout = view.getTable().getParent().getLayout();
+			Table table = view.getTable();
+			Layout layout = table.getParent().getLayout();
 			
 			if (layout instanceof TableColumnLayout) {
-				TableColumn column = view.getTable().getColumn(2);
-				column.setText(labelName);
+				TableColumn column = table.getColumn(2);
+				column.setText(DataOptionsUtils.shortenDatasetPath(labelName, false));
+				column.setToolTipText(labelName);
 				((TableColumnLayout)layout).setColumnData(column, new ColumnWeightData(50,20));
 			}
 			
 			editColumn.setCanEdit(false);
 			
 			view.refresh();
-			view.getTable().getParent().layout();
+			for (TableColumn c : table.getColumns()) {
+				c.pack();
+			}
 		}
 	}
 	

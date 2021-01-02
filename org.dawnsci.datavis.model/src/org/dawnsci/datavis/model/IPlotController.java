@@ -1,6 +1,7 @@
 package org.dawnsci.datavis.model;
 
 import org.dawnsci.datavis.api.IPlotMode;
+import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 
 /**
  * Main interface for interacting with the plot in the DataVis perspective
@@ -91,7 +92,12 @@ public interface IPlotController {
 	 * @return
 	 */
 	ITraceColourProvider getColorProvider();
-	
+
+	/**
+	 * @return plotting system
+	 */
+	IPlottingSystem<?> getPlottingSystem();
+
 	/**
 	 * Add a listener to be notified when the plot mode changes
 	 * 

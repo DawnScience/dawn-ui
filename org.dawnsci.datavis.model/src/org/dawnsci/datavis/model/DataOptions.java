@@ -27,6 +27,7 @@ public class DataOptions implements IDataObject, IDataPackage {
 	private static final Logger logger = LoggerFactory.getLogger(DataOptions.class);
 
 	private String name;
+	private String shortName;
 	private LoadedFile parent;
 	protected String[] axes;
 	private ILazyDataset data;
@@ -73,6 +74,14 @@ public class DataOptions implements IDataObject, IDataPackage {
 	@Override
 	public String getName() {
 		return name;
+	}
+
+	public void setShortName(String shortName) {
+		this.shortName = shortName;
+	}
+
+	public String getShortName() {
+		return shortName;
 	}
 
 	public String getFilePath(){
@@ -264,5 +273,10 @@ public class DataOptions implements IDataObject, IDataPackage {
 	@Override
 	public DataOptions clone() {
 		return new DataOptions(this);
+	}
+
+	@Override
+	public String toString() {
+		return (shortName == null ? name : shortName) + (selected.get() ? "*" : "");
 	}
 }

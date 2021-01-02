@@ -273,4 +273,33 @@ public class DataOptionsUtils {
 		return dop;
 	}
 
+	private static final String SEP = Node.SEPARATOR;
+
+	/**
+	 * Shortens dataset path
+	 * @param name
+	 * @param justLast if true use last segment
+	 * @return last segment or last two if they are distinct
+	 */
+	public static String shortenDatasetPath(String name, boolean justLast) {
+		int i = name.lastIndexOf("/data");
+		if (i > 0) {
+			name = name.substring(0, i);
+		}
+		i = name.lastIndexOf(SEP);
+		if (i > 0) {
+			String last = name.substring(i + 1);
+			if (!justLast) {
+				int j = name.substring(0, i).lastIndexOf(SEP);
+				if (j > 0) {
+					String next = name.substring(j + 1, i);
+					if (!next.equals(last)) {
+						last = name.substring(j + 1);
+					}
+				}
+			}
+			name = last;
+		}
+		return name;
+	}
 }

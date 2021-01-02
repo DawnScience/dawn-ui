@@ -11,7 +11,6 @@ package org.dawnsci.datavis.view.table;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
-import java.util.List;
 import java.util.function.BiFunction;
 
 import org.dawnsci.datavis.api.IRecentPlaces;
@@ -64,10 +63,19 @@ import org.eclipse.ui.plugin.AbstractUIPlugin;
 
 public class DataOptionTableViewer {
 
-	private TableViewer       tableViewer;
+	private TableViewer tableViewer;
 	private Image ticked;
 	private Image unticked;
 	private Composite tableComposite;
+	private boolean useShortName;
+
+	/**
+	 * Set to true to display short names
+	 * @param useShortName
+	 */
+	public void setUseShortName(boolean useShortName) {
+		this.useShortName = useShortName;
+	}
 
 	IFileController controller;
 	ILoadedFileInitialiser initialiser;
@@ -98,16 +106,30 @@ public class DataOptionTableViewer {
 		return tableViewer.getStructuredSelection();
 	}
 
-	public void setInput(Object input){
+	public void setInput(Object input) {
 		tableViewer.setInput(input);
 	}
 
-	public void refresh(){
+	public void refresh() {
 		tableViewer.refresh();
 	}
 
-	public void setSelection(ISelection selection, boolean reveal){
+	public void setSelection(ISelection selection, boolean reveal) {
 		tableViewer.setSelection(selection, reveal);
+	}
+
+	/**
+	 * @return if viewer has no input
+	 */
+	public boolean isEmpty() {
+		return tableViewer.getInput() == null;
+	}
+
+	/**
+	 * Reselect current selection
+	 */
+	public void reselect() {
+		setSelection(getStructuredSelection(), true);
 	}
 
 	public void createControl(Composite parent) {
@@ -127,12 +149,11 @@ public class DataOptionTableViewer {
 
 			@Override
 			public void menuAboutToShow(IMenuManager manager) {
-				List<DataOptions> s = SelectionUtils.getFromSelection(tableViewer.getSelection(), DataOptions.class);
-				if (s != null && !s.isEmpty()) {
+				DataOptions dataOptions = SelectionUtils.getFirstFromSelection(tableViewer.getSelection(), DataOptions.class);
+				if (dataOptions != null) {
 					Action a = new Action("Take view") {
 						@Override
 						public void run() {
-							DataOptions dataOptions = s.get(0);
 							dataOptions.getParent().addVirtualOption(DataOptionsUtils.buildView(dataOptions));
 							tableViewer.setInput(dataOptions.getParent().getDataOptions().toArray());
 						}
@@ -140,18 +161,17 @@ public class DataOptionTableViewer {
 
 					manager.add(a);
 
-					DataOptionsAction avr = new DataOptionsAction("Average", "Calculating average...", s.get(0), DataOptionsUtils::average);
+					DataOptionsAction avr = new DataOptionsAction("Average", "Calculating average...", dataOptions, DataOptionsUtils::average);
 
 					manager.add(avr);
 
-					DataOptionsAction sum = new DataOptionsAction("Sum", "Calculating sum...", s.get(0), DataOptionsUtils::sum);
+					DataOptionsAction sum = new DataOptionsAction("Sum", "Calculating sum...", dataOptions, DataOptionsUtils::sum);
 
 					manager.add(sum);
 
 					Action exprAction = new Action("Apply expression...") {
 						@Override
 						public void run() {
-							DataOptions dataOptions = s.get(0);
 							IExpressionService service = Activator.getService(IExpressionService.class);
 							ExpressionDialog dialog = new ExpressionDialog(tableComposite.getShell(), service, dataOptions, controller);
 							int retVal = dialog.open();
@@ -169,11 +189,10 @@ public class DataOptionTableViewer {
 					
 					manager.add(exprAction);
 
-					if (s.get(0) instanceof DataOptionsSlice || s.get(0) instanceof DataOptionsDataset) {
+					if (dataOptions instanceof DataOptionsSlice || dataOptions instanceof DataOptionsDataset) {
 						Action r = new Action("Remove view") {
 							@Override
 							public void run() {
-								DataOptions dataOptions = s.get(0);
 								if (dataOptions.isSelected() && dataOptions.getParent().isSelected()) {
 									controller.setDataSelected(dataOptions, false);
 								}
@@ -188,7 +207,6 @@ public class DataOptionTableViewer {
 							public void run() {
 								IRecentPlaces service = Activator.getService(IRecentPlaces.class);
 								
-								DataOptions dataOptions = s.get(0);
 								DataOptionsUIUtils.saveToFile(dataOptions, service == null ? null : service.getCurrentDefaultDirectory());
 							}
 						};
@@ -233,7 +251,8 @@ public class DataOptionTableViewer {
 
 			@Override
 			public String getText(Object element) {
-				return ((DataOptions) element).getName();
+				DataOptions d = (DataOptions) element;
+				return useShortName ? d.getShortName() : d.getName();
 			}
 
 			@Override
@@ -299,7 +318,6 @@ public class DataOptionTableViewer {
 				controller.setDataSelected((DataOptions)element, (Boolean)value);
 			}
 		}
-
 	}
 
 	private class DataOptionsAction extends Action {
@@ -345,5 +363,4 @@ public class DataOptionTableViewer {
 		}
 
 	}
-
 }

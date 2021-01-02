@@ -1,7 +1,5 @@
 package org.dawnsci.datavis.view.table;
 
-import java.util.List;
-
 import org.dawnsci.datavis.model.DataOptions;
 import org.dawnsci.january.model.NDimensions;
 import org.dawnsci.january.ui.utils.SelectionUtils;
@@ -62,13 +60,11 @@ public class AxisSliceDialog extends Dialog {
 		
 		ISelection selection = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getSelectionService().getSelection("org.dawnsci.datavis.view.parts.DatasetPart");
 		
-		List<DataOptions> all = SelectionUtils.getFromSelection(selection, DataOptions.class);
+		DataOptions d = SelectionUtils.getFirstFromSelection(selection, DataOptions.class);
 		
-		if (all.isEmpty()) {
+		if (d == null) {
 			return container;
 		}
-		
-		DataOptions d = all.get(0);
 		
 		SliceND slice = nDimensions.buildSliceND();
 		slice.setSlice(dim, 0, null, 1);

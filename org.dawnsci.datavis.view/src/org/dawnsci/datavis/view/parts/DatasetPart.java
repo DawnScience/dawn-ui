@@ -9,7 +9,6 @@
 
 package org.dawnsci.datavis.view.parts;
 
-import java.util.Arrays;
 import java.util.List;
 
 import javax.annotation.PostConstruct;
@@ -45,6 +44,8 @@ import org.eclipse.e4.ui.workbench.modeling.ISelectionListener;
 import org.eclipse.january.dataset.Slice;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.layout.GridDataFactory;
+import org.eclipse.jface.layout.GridLayoutFactory;
+import org.eclipse.jface.layout.RowLayoutFactory;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ComboViewer;
@@ -54,22 +55,23 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
-import org.eclipse.jface.viewers.StyledCellLabelProvider;
-import org.eclipse.jface.viewers.StyledString;
-import org.eclipse.jface.viewers.ViewerCell;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.layout.GridData;
-import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.custom.StackLayout;
+import org.eclipse.swt.events.SelectionListener;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class DatasetPart {
+	protected static final Logger logger = LoggerFactory.getLogger(DatasetPart.class);
 
-	private static final String LOADED_FILE_PART_ID = "org.dawnsci.datavis.view.parts.LoadedFilePart";
+	public static final String ID = "org.dawnsci.datavis.view.parts.DatasetPart";
 
-	@Inject
-	ESelectionService selectionService;
+	@Inject ESelectionService selectionService;
 
 	@Inject IFileController fileController;
 	@Inject IPlotController plotController;
@@ -87,6 +89,13 @@ public class DatasetPart {
 	
 	private PlotEventType lastPlotEvent;
 
+
+	private StackLayout layout;
+
+	private Composite page0, page1;
+
+	private ProcessResultsUI processResultsUI;
+
 	@PostConstruct
 	public void createComposite(Composite parent) {
 
@@ -95,15 +104,94 @@ public class DatasetPart {
 		
 		boolean coSlice = ps.getBoolean(DataVisPreferenceConstants.CO_SLICE);
 		plotController.setCoSlicingEnabled(coSlice);
-		
-		parent.setLayout(new GridLayout());
+
+		parent.setLayout(GridLayoutFactory.fillDefaults().create());
+
+		Group radio = new Group(parent, SWT.NONE);
+		radio.setText("Filter");
+		radio.setLayoutData(GridDataFactory.swtDefaults().grab(true, false).create());
+		radio.setLayout(RowLayoutFactory.swtDefaults().create());
+		Button all = new Button(radio, SWT.RADIO);
+		all.setText("None");
+		all.setToolTipText("Show all; do not filter any datasets out");
+		all.setSelection(true);
+		Button proc = new Button(radio, SWT.RADIO);
+		proc.setText("Processed only");
+		proc.setToolTipText("Show processed datasets only; plot selected in 1D");
+
+		Composite stack = new Composite(parent, SWT.NONE);
+		stack.setLayoutData(GridDataFactory.fillDefaults().grab(true, true).create());
+		layout = new StackLayout();
+		stack.setLayout(layout);
+
+		processResultsUI = new ProcessResultsUI(fileController, plotController);
+		page0 = createPage0(stack);
+		page1 = processResultsUI.createPage(stack);
+
+		layout.topControl = page0;
+
+		Label progress = new Label(parent, SWT.NONE);
+		progress.setLayoutData(GridDataFactory.fillDefaults().grab(true, false).create());
+		progress.setText("Ready");
+
+		createListeners(progress);
+		SelectionListener adapter = SelectionListener.widgetSelectedAdapter(e -> {
+			if ((layout.topControl == page0) == (e.widget == all)) {
+				return; // no change
+			}
+			boolean isAll = e.widget == all;
+			layout.topControl = isAll ? page0 : page1;
+			stack.layout();
+			// re-trigger selections
+			if (isAll) {
+				viewer.reselect();
+			} else if (processResultsUI.isEmpty()) { // first time...
+				deselectAll();
+
+				Object selection = selectionService.getSelection(LoadedFilePart.ID);
+				if (selection instanceof ISelection) {
+					List<LoadedFile> files = SelectionUtils.getFromSelection((ISelection) selection, LoadedFile.class);
+
+					processResultsUI.initialize(files);
+				}
+			} else {
+				processResultsUI.reselect();
+			}
+		});
+
+		all.addSelectionListener(adapter);
+		proc.addSelectionListener(adapter);
+
+		// initialize
+		Object selection = selectionService.getSelection(LoadedFilePart.ID);
+		if (selection instanceof ISelection) {
+			LoadedFile file = SelectionUtils.getFirstFromSelection((ISelection) selection, LoadedFile.class);
+
+			updateOnSelectionChange(file);
+
+			plotController.forceReplot();
+		}
+	}
+
+	private void deselectAll() {
+		for (LoadedFile f : fileController.getLoadedFiles()) {
+			for (DataOptions d : f.getSelectedDataOptions()) {
+				d.setSelected(false);
+			}
+		}
+	}
+
+	private Composite createPage0(Composite parent) {
+		Composite stack = new Composite(parent, SWT.NONE);
+		stack.setLayoutData(GridDataFactory.fillDefaults().create());
+		stack.setLayout(GridLayoutFactory.swtDefaults().create());
 
 		if (plotController instanceof ILoadedFileInitialiser) {
 			viewer = new DataOptionTableViewer(fileController, (ILoadedFileInitialiser) plotController);
 		} else {
 			viewer = new DataOptionTableViewer(fileController, null);
 		}
-		viewer.createControl(parent);
+		viewer.createControl(stack);
 		viewer.getControl().setLayoutData(GridDataFactory.fillDefaults().grab(true, true).create());
 
 		viewer.addSelectionChangedListener(new ISelectionChangedListener() {
@@ -112,8 +200,8 @@ public class DatasetPart {
 			public void selectionChanged(SelectionChangedEvent event) {
 				IStructuredSelection selection = viewer.getStructuredSelection();
 				selectionService.setSelection(selection.getFirstElement());
-				if (selection.getFirstElement() instanceof DataOptions) {
-					DataOptions op = (DataOptions)selection.getFirstElement();
+				DataOptions op = SelectionUtils.getFirstFromSelection(selection, DataOptions.class);
+				if (op != null) {
 					updateOnSelectionChange(op);
 
 					if (op.getParent() instanceof IRefreshable) {
@@ -121,26 +209,24 @@ public class DatasetPart {
 						if (r.isLive()) {
 							plotController.forceReplot();
 						}
-
 					}
 				}
-
 			}
 		});
 
-		Composite plotTypeComposite = new Composite(parent, SWT.NONE);
+		Composite plotTypeComposite = new Composite(stack, SWT.NONE);
 		plotTypeComposite.setLayoutData(GridDataFactory.fillDefaults().create());
-		plotTypeComposite.setLayout(new GridLayout(2, false));
+		plotTypeComposite.setLayout(GridLayoutFactory.fillDefaults().numColumns(2).create());
 
 		Label plotTypeLabel = new Label(plotTypeComposite, SWT.NONE);
 		plotTypeLabel.setText("Plot Type:");
-		plotTypeLabel.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, false, false));
+		plotTypeLabel.setLayoutData(GridDataFactory.swtDefaults().create());
 
 		plotModeOptionsViewer = new ComboViewer(plotTypeComposite);
 		plotModeOptionsViewer.getControl().setLayoutData(GridDataFactory.fillDefaults().create());
 		table = new DataConfigurationTable();
 
-		table.createControl(parent);
+		table.createControl(stack);
 		table.setLayoutData(GridDataFactory.fillDefaults().grab(true, false).create());
 		table.setSliceAssist(new ISliceAssist() {
 			
@@ -173,41 +259,11 @@ public class DatasetPart {
 
 			@Override
 			public String getLabel() {
-
 				return "Set from axis...";
 			}
 		});
 		
-		Label progress = new Label(parent,SWT.None);
-		progress.setLayoutData(GridDataFactory.fillDefaults().create());
-		progress.setText("Ready");
-		
-		plotListener = new PlotModeChangeEventListener() {
-			
-			@Override
-			public void plotStateEvent(PlotEventObject event) {
-				if (Display.getCurrent() == null) {
-					Display.getDefault().asyncExec(() -> plotStateEvent(event));
-					return;
-				}
-				
-				if (!PlotEventType.ERROR.equals(lastPlotEvent) || PlotEventType.LOADING.equals(event.getEventType())){
-					progress.setText(event.getMessage());
-					lastPlotEvent = event.getEventType();
-				}
-				
-			}
-			
-			@Override
-			public void plotModeChanged() {
-				//do nothing
-				
-			}
-		};
-		
-		plotController.addPlotModeListener(plotListener);
-
-		plotModeOptionsViewer.getCombo().setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+		plotModeOptionsViewer.getCombo().setLayoutData(GridDataFactory.fillDefaults().grab(true, false).create());
 		plotModeOptionsViewer.setContentProvider(new ArrayContentProvider());
 		plotModeOptionsViewer.setLabelProvider(new LabelProvider() {
 			@Override
@@ -215,12 +271,38 @@ public class DatasetPart {
 				String name = "";
 
 				if (element instanceof IPlotMode) {
-					name = ((IPlotMode)element).getName();
+					name = ((IPlotMode) element).getName();
 				}
 
 				return name;
 			}
 		});
+
+		return stack;
+	}
+
+	private void createListeners(Label progress) {
+		plotListener = new PlotModeChangeEventListener() {
+			@Override
+			public void plotStateEvent(PlotEventObject event) {
+				if (Display.getCurrent() == null) {
+					Display.getDefault().asyncExec(() -> plotStateEvent(event));
+					return;
+				}
+
+				if (!PlotEventType.ERROR.equals(lastPlotEvent) || PlotEventType.LOADING.equals(event.getEventType())){
+					progress.setText(event.getMessage());
+					lastPlotEvent = event.getEventType();
+				}
+			}
+			
+			@Override
+			public void plotModeChanged() {
+				//do nothing
+			}
+		};
+
+		plotController.addPlotModeListener(plotListener);
 
 		plotModeOptionsViewer.addSelectionChangedListener(new ISelectionChangedListener() {
 
@@ -231,16 +313,17 @@ public class DatasetPart {
 					Object ob = ((StructuredSelection)selection).getFirstElement();
 
 					if (!(ob instanceof IPlotMode)) return;
+					IPlotMode mode = (IPlotMode) ob;
+					DataOptions dataOptions = SelectionUtils.getFirstFromSelection(viewer.getStructuredSelection(), DataOptions.class);
 
-					DataOptions dataOptions = SelectionUtils.getFromSelection(viewer.getStructuredSelection(), DataOptions.class).get(0);
-
-					plotController.switchPlotMode((IPlotMode)ob,dataOptions);
-
-					table.setInput(dataOptions.getPlottableObject().getNDimensions());
-					if (((IPlotMode)ob).supportsMultiple()) {
-						table.setMaxSliceNumber(50);
-					} else {
-						table.setMaxSliceNumber(1);
+					plotController.switchPlotMode(mode, dataOptions);
+					if (dataOptions != null) {
+						table.setInput(dataOptions.getPlottableObject().getNDimensions());
+						if (mode.supportsMultiple()) {
+							table.setMaxSliceNumber(50);
+						} else {
+							table.setMaxSliceNumber(1);
+						}
 					}
 					viewer.refresh();
 				}
@@ -251,16 +334,14 @@ public class DatasetPart {
 
 			@Override
 			public void selectionChanged(MPart part, Object selection) {
-				if (selection instanceof ISelection) {
-					List<LoadedFile> files = SelectionUtils.getFromSelection((ISelection)selection, LoadedFile.class);
-
-					updateOnSelectionChange(files.isEmpty() ? null : files.get(0));
-
+				if (layout.topControl == page0 && selection instanceof ISelection) {
+					LoadedFile file = SelectionUtils.getFirstFromSelection((ISelection) selection, LoadedFile.class);
+					updateOnSelectionChange(file);
 				}
 			}
 		};
 
-		selectionService.addSelectionListener(LOADED_FILE_PART_ID, selectionListener);
+		selectionService.addSelectionListener(LoadedFilePart.ID, selectionListener);
 
 		sliceListener = new ISliceChangeListener() {
 
@@ -296,43 +377,42 @@ public class DatasetPart {
 			}
 		};
 
-		Object selection = selectionService.getSelection(LOADED_FILE_PART_ID);
-		if (selection instanceof ISelection) {
-			List<LoadedFile> files = SelectionUtils.getFromSelection((ISelection)selection, LoadedFile.class);
-
-			updateOnSelectionChange(files.isEmpty() ? null : files.get(0));
-
-			plotController.forceReplot();
-		}
-		
 		fileStateListener = new FileControllerStateEventListener() {
 
 			@Override
 			public void stateChanged(FileControllerStateEvent event) {
-				//do nothing
+				if (layout.topControl == page1) {
+					if (!event.isSelectedDataChanged() && !event.isSelectedFileChanged()) return;
+
+					if (event.isSelectedFileChanged()) {
+						processResultsUI.updateTable(event.getLoadedFile());
+					}
+					if (event.isSelectedDataChanged()) {
+						Display.getDefault().asyncExec(() -> processResultsUI.updateSelected(event.getOption()));
+					}
+				}
 			}
 
 			@Override
 			public void refreshRequest() {
-
 				if (Display.getCurrent() == null) {
-					Display.getDefault().asyncExec(()->refreshRequest());
+					Display.getDefault().asyncExec(() -> refreshRequest());
 					return;
 				}
-				
-				List<DataOptions> s = SelectionUtils.getFromSelection(viewer.getStructuredSelection(), DataOptions.class);
 
-				if (!s.isEmpty() && s.get(0).getParent() instanceof IRefreshable) {
+				DataOptions s = SelectionUtils.getFirstFromSelection(viewer.getStructuredSelection(), DataOptions.class);
+
+				if (s != null && s.getParent() instanceof IRefreshable) {
 					table.refresh();
 					viewer.refresh();
 				}
 			}
 		};
-		
+
 		fileController.addStateListener(fileStateListener);
 	}
 
-	private void updateOnSelectionChange(LoadedFile file){
+	private void updateOnSelectionChange(LoadedFile file) {
 		if (file == null) {
 			viewer.setInput(null);
 			table.setInput(null);
@@ -343,7 +423,7 @@ public class DatasetPart {
 		removeSliceListener();
 
 		List<DataOptions> dataOptions = file.getDataOptions();
-		viewer.setInput(dataOptions.toArray());
+		viewer.setInput(dataOptions);
 
 		DataOptions option = null;
 
@@ -355,13 +435,11 @@ public class DatasetPart {
 		}
 		
 		if (option == null && !viewer.getStructuredSelection().isEmpty()) {
-			List<DataOptions> d = SelectionUtils.getFromSelection(viewer.getStructuredSelection(), DataOptions.class);
-			if (!d.isEmpty() && file.getDataOptions().contains(d.get(0))) {
-				option = d.get(0);
+			DataOptions d = SelectionUtils.getFirstFromSelection(viewer.getStructuredSelection(), DataOptions.class);
+			if (d != null && file.getDataOptions().contains(d)) {
+				option = d;
 			}
-			
 		}
-		
 
 		if (option == null && file.getDataOptions().size() != 0) {
 			option = file.getDataOptions().get(0);
@@ -373,16 +451,14 @@ public class DatasetPart {
 		}
 
 		viewer.refresh();
-
 	}
 
-
-
 	@PreDestroy
-	public void dispose(){
+	public void dispose() {
+		processResultsUI.dispose();
 		viewer.dispose();
 		fileController.removeStateListener(fileStateListener);
-		selectionService.removeSelectionListener(LOADED_FILE_PART_ID, selectionListener);
+		selectionService.removeSelectionListener(LoadedFilePart.ID, selectionListener);
 		plotController.removePlotModeListener(plotListener);
 		plotController.dispose();
 		
@@ -390,7 +466,7 @@ public class DatasetPart {
 		ps.setValue(DataVisPreferenceConstants.CO_SLICE,plotController.isCoSlicingEnabled());
 	}
 
-	private void updateOnSelectionChange(DataOptions op){
+	private void updateOnSelectionChange(DataOptions op) {
 		removeSliceListener(op.getParent());
 		op.getPlottableObject().getNDimensions().addSliceListener(sliceListener);
 		IPlotMode[] suitableModes = plotController.getPlotModes(op);
@@ -403,7 +479,6 @@ public class DatasetPart {
 			table.setMaxSliceNumber(1);
 		}
 
-
 		table.setInput(op.getPlottableObject().getNDimensions());
 
 		viewer.refresh();
@@ -414,7 +489,7 @@ public class DatasetPart {
 			d.getPlottableObject().getNDimensions().removeSliceListener(sliceListener);
 		}
 	}
-	
+
 	private void removeSliceListener() {
 		for (LoadedFile f : fileController.getLoadedFiles()) {
 			removeSliceListener(f);
@@ -425,18 +500,4 @@ public class DatasetPart {
 	public void setFocus() {
 		if (viewer != null) viewer.getTable().setFocus();
 	}
-
-	class ViewLabelLabelProvider extends StyledCellLabelProvider {
-
-		@Override
-		public void update(ViewerCell cell) {
-			Object element = cell.getElement();
-			StyledString text = new StyledString();
-			text.append(((DataOptions)element).getName() + " " + Arrays.toString(((DataOptions)element).getLazyDataset().getShape()));
-			cell.setText(text.toString());
-			super.update(cell);
-		}
-	}
-
-
 }

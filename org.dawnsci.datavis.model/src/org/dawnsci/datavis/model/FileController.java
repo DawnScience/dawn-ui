@@ -183,10 +183,9 @@ public class FileController implements IFileController {
 		
 		if (files.isEmpty()) return;
 		
-		for (LoadedFile file : files){
-
+		for (LoadedFile file : files) {
 			loadedFiles.unloadFile(file);
-	}
+		}
 		fireStateChangeListeners(true, true, files.get(0),null);
 	}
 

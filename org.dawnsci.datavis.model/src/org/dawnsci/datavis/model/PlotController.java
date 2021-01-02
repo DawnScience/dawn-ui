@@ -1,11 +1,16 @@
 package org.dawnsci.datavis.model;
 
 import java.io.File;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Formatter;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -13,6 +18,7 @@ import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
+import org.dawnsci.datavis.api.IDataPackage;
 import org.dawnsci.datavis.api.ILazyPlotMode;
 import org.dawnsci.datavis.api.IPlotMode;
 import org.dawnsci.datavis.model.PlotEventObject.PlotEventType;
@@ -31,10 +37,20 @@ import org.eclipse.dawnsci.plotting.api.histogram.ImageServiceBean;
 import org.eclipse.dawnsci.plotting.api.trace.ILineTrace;
 import org.eclipse.dawnsci.plotting.api.trace.IPaletteTrace;
 import org.eclipse.dawnsci.plotting.api.trace.ITrace;
+import org.eclipse.dawnsci.plotting.api.trace.PlotExportConstants;
+import org.eclipse.january.MetadataException;
+import org.eclipse.january.dataset.Dataset;
+import org.eclipse.january.dataset.DatasetFactory;
+import org.eclipse.january.dataset.DatasetUtils;
+import org.eclipse.january.dataset.DoubleDataset;
 import org.eclipse.january.dataset.IDataset;
 import org.eclipse.january.dataset.ILazyDataset;
+import org.eclipse.january.dataset.ShapeUtils;
 import org.eclipse.january.dataset.Slice;
 import org.eclipse.january.dataset.SliceND;
+import org.eclipse.january.metadata.AxesMetadata;
+import org.eclipse.january.metadata.IMetadata;
+import org.eclipse.january.metadata.MetadataFactory;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.widgets.Display;
@@ -178,6 +194,8 @@ public class PlotController implements IPlotController, ILoadedFileInitialiser {
 	private ExecutorService executor;
 	private AtomicReference<Runnable> atomicRunnable = new AtomicReference<>();
 	private AtomicReference<Future<?>> atomicFuture = new AtomicReference<>();
+
+	private Map<String, List<DataOptions>> singlePlots = new LinkedHashMap<>();
 	
 	public PlotController (IPlottingSystem<?> system, IFileController controller, ExecutorService exService) {
 		this.system = system;
@@ -229,22 +247,11 @@ public class PlotController implements IPlotController, ILoadedFileInitialiser {
 		}
 		
 		if (d != null) updateFileState(d, currentMode);
-		
-		//make immutable state object
-		final List<DataOptions> state = fileController.getImmutableFileState();
-		//update plot
-		
-		if (state.isEmpty()) {
-			system.reset();
-			if (system.getSelectedXAxis() != null) system.getSelectedXAxis().setTitle("");
-			if (system.getSelectedYAxis() != null) system.getSelectedYAxis().setTitle("");
-			system.setTitle("");
-		}
-		updatePlotStateInJob(state, currentMode);
-		
+
+		updatePlotStateInJob(currentMode, true);
 	}
 	
-	private void updatePlotState(List<DataOptions> state, IPlotMode mode) {
+	private void updatePlotState(List<? extends IDataPackage> state, IPlotMode mode) {
 
 		//start update
 		firePlotEvent(new PlotEventObject(PlotEventType.LOADING, "Loading data..."));
@@ -282,16 +289,19 @@ public class PlotController implements IPlotController, ILoadedFileInitialiser {
 		final Set<String> uniqueLabelSet = new HashSet<>();
 		Set<String> duplicates = new HashSet<>();
 		
-		for (DataOptions d : state) {
-			
-			String label = d.getLabel();
-			if (label.isEmpty()) continue;
-			
-			if (uniqueLabelSet.contains(label)) {
-				uniqueLabelSet.remove(label);
-				duplicates.add(label);
-			} else if (!duplicates.contains(label)){
-				uniqueLabelSet.add(label);
+		for (IDataPackage dp : state) {
+			if (dp instanceof DataOptions) {
+				DataOptions d = (DataOptions) dp;
+
+				String label = d.getLabel();
+				if (label.isEmpty()) continue;
+				
+				if (uniqueLabelSet.contains(label)) {
+					uniqueLabelSet.remove(label);
+					duplicates.add(label);
+				} else if (!duplicates.contains(label)){
+					uniqueLabelSet.add(label);
+				}
 			}
 		}
 		
@@ -311,14 +321,24 @@ public class PlotController implements IPlotController, ILoadedFileInitialiser {
 			
 			uiRunnables.add(r);
 		}
-		
-		for (DataOptions object : state) {
-			Runnable r = updatePlottedData(object, new ArrayList<ITrace>(), localCurrentMode, localModifier, uniqueLabelSet);
-			if (r != null) {
-				uiRunnables.add(r);
+
+		boolean isXY = PlotModeXY.class.isAssignableFrom(localCurrentMode.getClass());
+		for (IDataPackage dp : state) {
+			if (dp instanceof DataOptions) {
+				DataOptions d = (DataOptions) dp;
+
+				if (!isXY || checkForMultiplePoints(d)) {
+					Runnable r = updatePlottedData(d, localCurrentMode, localModifier, uniqueLabelSet);
+					if (r != null) {
+						uiRunnables.add(r);
+					}
+				}
 			}
 		}
-		
+		if (!singlePlots.isEmpty()) {
+			generateSinglePointPlots(uiRunnables, localCurrentMode, localModifier, uniqueLabelSet);
+		}
+
 		DisplayWrapper.syncExec(new Runnable() {
 			
 			@Override
@@ -376,11 +396,65 @@ public class PlotController implements IPlotController, ILoadedFileInitialiser {
 		});
 		
 		List<IAxis> axes = system.getAxes();
-		if (axes != null) for (IAxis axis : axes) if (axis != null) axis.setAxisAutoscaleTight(true);	
+		if (axes != null) for (IAxis axis : axes) if (axis != null) axis.setAxisAutoscaleTight(true);
 	}
+
+	// adds single point options to singlePlots too
+	private boolean checkForMultiplePoints(DataOptions d) {
+		PlottableObject po = d.getPlottableObject();
+		NDimensions nd = po.getNDimensions();
+		SliceND s = nd.buildSliceND();
+		if (ShapeUtils.calcSize(s.getShape()) != 1) {
+			return true;
+		}
+
+		String n = d.getShortName(); // prefer to use short name if name is not already used
+		if (n == null || (!singlePlots.containsKey(n) && singlePlots.containsKey(d.getName()))) {
+			n = d.getName();
+		}
+
+		List<DataOptions> l = singlePlots.get(n);
+		if (l == null) {
+			l = new ArrayList<>();
+			singlePlots.put(n, l);
+		}
+		l.add(d);
+		return false;
+	}
+
 	
-	private Runnable updatePlottedData(DataOptions dataOp,final List<ITrace> traces, IPlotMode mode, IPlotDataModifier modifier, Set<String> uniqueLabelSet) {
-		//remove traces if not the same as mode
+	private IMetadata createExportMetadata(DataOptions dataOp) {
+		Map<String, Serializable> kv = new LinkedHashMap<>();
+		LoadedFile lf = dataOp.getParent();
+		String l = lf.getLabelName();
+	
+		if (!l.isEmpty()) {
+			kv.put(PlotExportConstants.LABEL_NAME, DataOptionsUtils.shortenDatasetPath(l, false));
+			kv.put(PlotExportConstants.LABEL_VALUE, (Serializable) lf.getLabelValue().getObject());
+		}
+
+		Dataset scanNumber = lf.getLabelValue("/entry1/entry_identifier");
+		if (scanNumber == null) {
+			kv.put(PlotExportConstants.SCAN, new File(lf.getFilePath()).getName());
+		} else {
+			kv.put(PlotExportConstants.SCAN, scanNumber.getString());
+		}
+
+		String name = dataOp.getShortName();
+		if (name == null) {
+			name = DataOptionsUtils.shortenDatasetPath(dataOp.getName(), true);
+		}
+		kv.put(PlotExportConstants.PLOT_NAME, name);
+
+		try {
+			return MetadataFactory.createMetadata(IMetadata.class, kv);
+		} catch (MetadataException e) {
+			logger.error("Could not create export metadata", e);
+		}
+		return null;
+	}
+
+	private Runnable updatePlottedData(DataOptions dataOp, IPlotMode mode, IPlotDataModifier modifier, Set<String> uniqueLabelSet) {
 		//update the data in the plot
 		
 		IPlottingSystem<?> system = getPlottingSystem();
@@ -396,23 +470,32 @@ public class PlotController implements IPlotController, ILoadedFileInitialiser {
 		
 		dataOp.setAxes(axes);
 		
+
 		IDataset[] data = null;
+		IMetadata md = createExportMetadata(dataOp);
 		try {
 			ILazyDataset view = dataOp.getLazyDataset().getSliceView();
-			File f = new File(dataOp.getFilePath());
-			String n = f.getName() + ":" + dataOp.getName();
-			String l = dataOp.getLabel();
-			if (!l.isEmpty()) {
-				n = String.format("%s (%s)", n, l);
-			}
-			view.setName(n);
 
-			data = mode.sliceForPlot(view, slice,options,system);
-			
+			if (md != null) { // name format as 'scan:data opt (label:value)'
+				try (Formatter f = new Formatter()) {
+	
+					Serializable s = md.getMetaValue(PlotExportConstants.LABEL_NAME);
+					if (s != null) {
+						f.format("%s=%s (%s:%s)", s, md.getMetaValue(PlotExportConstants.LABEL_VALUE), md.getMetaValue(PlotExportConstants.PLOT_NAME), md.getMetaValue(PlotExportConstants.SCAN));
+					} else {
+						f.format("%s:%s", md.getMetaValue(PlotExportConstants.PLOT_NAME), md.getMetaValue(PlotExportConstants.SCAN));
+					}
+					view.setName(f.toString());
+				}
+			}
+
+			LoadedFile lf = dataOp.getParent();
+			String l = lf.getLabelName();
+			data = mode.sliceForPlot(view, slice, options, system);
+
 			if (data != null && data.length == 1 && uniqueLabelSet.contains(l)) {
 				data[0].setName(l);
 			}
-			
 		} catch (Exception e) {
 			
 			//see if exception caused by out of memory
@@ -439,29 +522,29 @@ public class PlotController implements IPlotController, ILoadedFileInitialiser {
 			return ()->  {
 
 				try {
-					((ILazyPlotMode)mode).displayData(traces.isEmpty() ? null : traces.toArray(new ITrace[traces.size()]), system, dataOp);
+					((ILazyPlotMode)mode).displayData(null, system, dataOp);
 					getPlottingSystem().repaint();
 				} catch (Exception e) {
 					logger.error("Error plotting", e);
 				}
 			};
 		}
-	
-		
+
 		if (data == null) {
 			return null;
 		}
 		
 		SourceInformation si = new SourceInformation(dataOp.getFilePath(), dataOp.getName(), dataOp.getLazyDataset());
 		SliceInformation s = new SliceInformation(slice, slice, new SliceND(dataOp.getLazyDataset().getShape()), mode.getDataDimensions(options), 1, 0);
-		SliceFromSeriesMetadata md = new SliceFromSeriesMetadata(si, s);
+		SliceFromSeriesMetadata smd = new SliceFromSeriesMetadata(si, s);
 		
 		for (int i = 0; i < data.length ; i++) {
 			IDataset d = data[i];
 			if (modifier != null && modifier.supportsRank(mode.getMinimumRank())){
 				d = modifier.modifyForDisplay(d);
 			}
-			d.setMetadata(md);
+			d.setMetadata(smd);
+			d.addMetadata(md);
 			data[i] = d;
 		}
 		
@@ -471,15 +554,79 @@ public class PlotController implements IPlotController, ILoadedFileInitialiser {
 		return () -> {
 
 			try {
-				mode.displayData(finalData, traces.isEmpty() ? null : traces.toArray(new ITrace[traces.size()]), system, dataOp);
+				mode.displayData(finalData, null, system, dataOp);
 			} catch (Exception e) {
 				logger.error("Error displaying data", e);
 			}
 		};
 		
 	}
-	
-	
+
+	private void generateSinglePointPlots(List<Runnable> uiRunnables, IPlotMode mode, IPlotDataModifier localModifier, Set<String> uniqueLabelSet) {
+		for (Entry<String, List<DataOptions>> e : singlePlots.entrySet()) {
+			Runnable r = createPlottedData(e.getKey(), e.getValue(), mode, localModifier, uniqueLabelSet);
+			if (r != null) {
+				uiRunnables.add(r);
+			}
+		}
+		singlePlots.clear();
+	}
+
+	// gather single-point data from given options to create single plot
+	private Runnable createPlottedData(String n, List<DataOptions> list, IPlotMode mode, IPlotDataModifier localModifier, Set<String> uniqueLabelSet) {
+		int l = list.size();
+		if (l == 0) {
+			return null;
+		}
+		DoubleDataset x = DatasetFactory.zeros(l);
+		DoubleDataset y = DatasetFactory.zeros(l);
+		String label = null;
+		for (int i = 0; i < l; i++) {
+			DataOptions d = list.get(i);
+			LoadedFile f = d.getParent();
+			if (label == null) {
+				label = f.getLabelName();
+			}
+			PlottableObject po = d.getPlottableObject();
+			NDimensions nd = po.getNDimensions();
+			SliceND slice = nd.buildSliceND();
+			Object[] options = nd.getOptions();
+			IDataset[] data = null;
+			try {
+				data = mode.sliceForPlot(d.getLazyDataset().getSliceView(), slice, options, system);
+			} catch (Exception e) {
+				logger.error("Could not slice data for {} from {}", n, f.getFilePath(), e);
+			}
+
+			Dataset lv = f.getLabelValue();
+			x.set(lv == null ? i : lv.getDouble(), i);
+			Dataset pd = DatasetUtils.convertToDataset(data[0]);
+			y.set(pd.getDouble(), i);
+		}
+		if (label == null || label.isEmpty()) {
+			label = list.get(0).getFilePath();
+		}
+		x.setName(label);
+		y.setName(n);
+		try {
+			AxesMetadata am = MetadataFactory.createMetadata(AxesMetadata.class, 1);
+			am.setAxis(0, x);
+			y.addMetadata(am);
+		} catch (MetadataException e) {
+			logger.error("Could not create axes metadata for plotting", e);
+		}
+
+		final IDataset[] plotData = new IDataset[] {y};
+		return () -> {
+			try {
+				mode.displayData(plotData, null, system, list.get(0));
+			} catch (Exception e) {
+				logger.error("Error displaying data", e);
+			}
+		};
+	}
+
+
 	public IPlotMode[] getPlotModes(DataOptions dOptions) {
 		Integer rank = getDataRank(dOptions);
 		if (rank == null) return null;
@@ -538,9 +685,7 @@ public class PlotController implements IPlotController, ILoadedFileInitialiser {
 	public void forceReplot() {
 		//should not force a replot while mode is switching
 		if (modeSwitching) return;
-		final List<DataOptions> state = fileController.getImmutableFileState();
-		//update plot
-		updatePlotStateInJob(state, currentMode);
+		updatePlotStateInJob(currentMode, false);
 	}
 	
 	@Override
@@ -621,10 +766,8 @@ public class PlotController implements IPlotController, ILoadedFileInitialiser {
 		//Don't get the file controller to validate directly as that triggers a state change
 		//event which is not useful here (file/dataset state has not changed)
 		fileController.getLoadedFiles().stream().forEach(v::validate);
-		
-		final List<DataOptions> state = fileController.getImmutableFileState();
-		//update plot
-		updatePlotStateInJob(state, currentMode);
+
+		updatePlotStateInJob(currentMode, false);
 	}
 	
 	public IPlotDataModifier getEnabledPlotModifier() {
@@ -650,9 +793,7 @@ public class PlotController implements IPlotController, ILoadedFileInitialiser {
 			updateInnerPlotMode(dOption, currentMode);
 			
 			updateFileState(dOption,currentMode);
-			final List<DataOptions> state = fileController.getImmutableFileState();
-			//update plot
-			updatePlotStateInJob(state, currentMode);
+			updatePlotStateInJob(currentMode, false);
 		} finally {
 			modeSwitching = false;
 		}
@@ -670,9 +811,17 @@ public class PlotController implements IPlotController, ILoadedFileInitialiser {
 		}
 		
 	}
-	
-	private void updatePlotStateInJob(List<DataOptions> state, IPlotMode mode){
-		
+
+	private void updatePlotStateInJob(IPlotMode mode, boolean resetIfNoData){
+		final List<? extends IDataPackage> state = fileController.getImmutableFileState();
+
+		if (resetIfNoData && state.isEmpty()) {
+			system.reset();
+			if (system.getSelectedXAxis() != null) system.getSelectedXAxis().setTitle("");
+			if (system.getSelectedYAxis() != null) system.getSelectedYAxis().setTitle("");
+			system.setTitle("");
+		}
+
 		Runnable r = new Runnable() {
 			
 			@Override
@@ -736,14 +885,14 @@ public class PlotController implements IPlotController, ILoadedFileInitialiser {
 		
 
 	}
-	
-	private IPlottingSystem<?> getPlottingSystem() {
+
+	@Override
+	public IPlottingSystem<?> getPlottingSystem() {
 		if (system == null) {
 			system = plotService.getPlottingSystem("Plot");
 		}
 		return system;
 	}
-	
 
 	public IPlotMode getCurrentMode() {
 		return currentMode;
@@ -814,10 +963,8 @@ public class PlotController implements IPlotController, ILoadedFileInitialiser {
 		if (colorProvider == null) {
 			getPlottingSystem().clearTraces();
 		}
-		
-		final List<DataOptions> state = fileController.getImmutableFileState();
-		//update plot
-		updatePlotStateInJob(state, currentMode);
+
+		updatePlotStateInJob(currentMode, false);
 	}
 
 	@Override

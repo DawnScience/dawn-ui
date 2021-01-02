@@ -29,12 +29,11 @@ public class PlotDataModifierStack implements IPlotDataModifier {
 	public IDataset modifyForDisplay(IDataset d) {
 		
 		double min = d.min(true).doubleValue();
-		double max = d.max().doubleValue();
+		double max = d.max(true).doubleValue();
 		
 		AxesMetadata md = d.getFirstMetadata(AxesMetadata.class);
 		
 		if (xRange  != null) {
-
 			IDataset axis = null;
 
 			if (md != null && md.getAxes()!= null && md.getAxes()[0] != null) {
@@ -62,8 +61,7 @@ public class PlotDataModifierStack implements IPlotDataModifier {
 			IDataset crop = d.getSlice(s);
 
 			min = crop.min(true).doubleValue();
-			max = crop.max().doubleValue();
-
+			max = crop.max(true).doubleValue();
 		} 
 
 		Dataset dataset = DatasetUtils.convertToDataset(d);
@@ -75,10 +73,9 @@ public class PlotDataModifierStack implements IPlotDataModifier {
 			min = 0;
 		}
 
-		dataset = Maths.add(dataset,(value-min));
+		dataset = Maths.add(dataset, value - min);
 		dataset.setName(name);
-		double peakToPeak = (max+value-min)-value;
-		value += peakToPeak*proportion;
+		value += (max - min) * proportion;
 
 		if (md != null) {
 			dataset.addMetadata(md);
@@ -115,13 +112,13 @@ public class PlotDataModifierStack implements IPlotDataModifier {
 		IAxis x = system.getSelectedXAxis();
 		if (x == null) {
 			xRange = null;
+			return;
 		}
-		
+
 		xRange = new double[2];
 		xRange[0] = x.getLower();
 		xRange[1] = x.getUpper();
 		Arrays.sort(xRange);
-		
 	}
 
 	public boolean isNormalise() {
@@ -131,5 +128,4 @@ public class PlotDataModifierStack implements IPlotDataModifier {
 	public void setNormalise(boolean normalise) {
 		this.normalise = normalise;
 	}
-
 }

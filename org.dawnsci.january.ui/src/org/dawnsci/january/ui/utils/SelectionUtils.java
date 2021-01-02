@@ -23,4 +23,14 @@ public class SelectionUtils {
 		return Collections.emptyList();
 	}
 
+	@SuppressWarnings("unchecked")
+	public static <U> U getFirstFromSelection(ISelection selection, Class<U> clazz) {
+		if (selection instanceof StructuredSelection) {
+			Object obj = ((StructuredSelection) selection).getFirstElement();
+			if (clazz.isInstance(obj)) {
+				return (U) obj;
+			}
+		}
+		return null;
+	}
 }

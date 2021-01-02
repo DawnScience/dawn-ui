@@ -1,7 +1,7 @@
 package org.dawnsci.datavis.model;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.eclipse.ui.progress.IProgressService;
 
@@ -16,12 +16,10 @@ public class FileControllerUtils {
 	}
 
 	public static List<LoadedFile> getSelectedFiles(IFileController controller){
-		
-		List<LoadedFile> checked = new ArrayList<>();
-		
-		for (LoadedFile f : controller.getLoadedFiles()) {
-			if (f.isSelected()) checked.add(f);
-		}
-		return checked;
+		return getSelectedFiles(controller.getLoadedFiles());
+	}
+
+	public static List<LoadedFile> getSelectedFiles(List<LoadedFile> files) {
+		return files.stream().filter(LoadedFile::isSelected).collect(Collectors.toList());
 	}
 }

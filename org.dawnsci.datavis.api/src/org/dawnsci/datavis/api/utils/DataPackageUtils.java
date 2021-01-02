@@ -37,9 +37,9 @@ public class DataPackageUtils {
 	}
 	
 	
-	public static List<IXYData> getXYData(List<IDataPackage> list) {
+	public static List<IXYData> getXYData(List<? extends IDataPackage> list) {
 		
-		Stream<IDataPackage> stream = list.stream();
+		Stream<? extends IDataPackage> stream = list.stream();
 		
 		return stream.map(DataPackageUtils::getData)
 					 .filter(Objects::nonNull)
@@ -51,7 +51,7 @@ public class DataPackageUtils {
 		ILazyDataset l = pack.getLazyDataset();
 		SliceND s = pack.getSlice();
 		
-		if (s == null && l.getShape().length != 1) return null;
+		if (s == null && l.getRank() != 1) return null;
 		
 		if (s == null) {
 			s = new SliceND(l.getShape());
