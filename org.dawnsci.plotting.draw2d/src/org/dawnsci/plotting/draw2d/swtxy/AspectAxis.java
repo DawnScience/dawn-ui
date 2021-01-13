@@ -126,7 +126,7 @@ public class AspectAxis extends DAxis implements IAxis {
 		}
 
 		precheckTickLength = isHorizontal() ? calcBounds.width : calcBounds.height;
-		precheckTickLength -= 4*getMargin();
+		precheckTickLength -= 2 * getMargin();
 		if (check || force) {
 			boolean otherAxisInvalid = setRelativeAxisBounds(calcBounds, thisRange, relRange);
 			if (force) { // change range instead
