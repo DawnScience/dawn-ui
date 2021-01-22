@@ -105,11 +105,9 @@ public class PlotActionsManagerImpl extends PlottingActionBarManager {
 				try {
 					lastscreeshot_filename = system.savePlotting(lastscreeshot_filename);
 				} catch (Exception e) {
-					
-					final File file     = new File(lastscreeshot_filename);
 					final Status status = new Status(IStatus.ERROR, "org.dawnsci.plotting.system", e.getMessage());
-					ErrorDialog.openError(Display.getDefault().getActiveShell(), "Cannot save to "+file.getName(), 
-							                "Cannot save to the file '"+file.getName()+"'\n\n"+
+					ErrorDialog.openError(Display.getDefault().getActiveShell(), "Cannot save screenshot", 
+							                "Cannot save file\n\n"+
 									        "The location might be in a read only directory or invalid.", status);
 					return;
 				}
