@@ -453,7 +453,7 @@ public class FileViewer {
 				if (retrieveDirJob != null && retrieveDirJob.getState() == Job.RUNNING) {
 					retrieveDirJob.cancel();
 				}
-				retrieveDirJob = new RetrieveFileListJob(currentDirectory, tableExplo.getSortType(), tableExplo.getSortDirection(), tableExplo.getFilter(), tableExplo.getUseRegex(), true);
+				retrieveDirJob = new RetrieveFileListJob(currentDirectory, tableExplo.getSortType(), tableExplo.getSortDirection(), tableExplo.getFilter(), tableExplo.getFilterType(), true);
 //				retrieveDirJob.setThread(workerThread);
 				retrieveDirJob.addJobChangeListener(new JobChangeAdapter() {
 					@Override

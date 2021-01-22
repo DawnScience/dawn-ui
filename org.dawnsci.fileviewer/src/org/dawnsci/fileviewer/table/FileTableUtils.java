@@ -5,16 +5,42 @@ import java.io.FileFilter;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.regex.Pattern;
-import java.util.regex.PatternSyntaxException;
 
 import org.apache.commons.io.filefilter.RegexFileFilter;
 import org.apache.commons.io.filefilter.WildcardFileFilter;
 import org.dawnsci.fileviewer.Utils;
-import org.dawnsci.fileviewer.Utils.SortType;
 import org.dawnsci.fileviewer.Utils.SortDirection;
+import org.dawnsci.fileviewer.Utils.SortType;
 
 public class FileTableUtils {
-	
+	public static enum FilterType {
+		WILDCARD("Wildcard", "Can use * and ? characters.\nE.g., 'i12-*nxs' for all NeXus files starting with 'i12-' and ending with 'nxs'"),
+		SCAN_NUMBER("Scan range", "Optional prefix and Python slice.\nE.g., 'i12- 1234::2' for all files starting with 'i12-' and containing even scan numbers from 1234"),
+		REG_EXP("Regular expression", "Java regular expression"),
+		;
+
+		private String label;
+		private String tooltip;
+
+		private FilterType(String label, String tooltip) {
+			this.label = label;
+			this.tooltip = tooltip;
+		}
+
+		public String getTooltip() {
+			return tooltip;
+		}
+
+		static String[] getLabels() {
+			FilterType[] values = values();
+			String[] labels = new String[values.length];
+			for (int i = 0; i < values.length; i++) {
+				labels[i] = values[i].label;
+			}
+			return labels;
+		}
+	}
+
 	private FileTableUtils() {
 		
 	}
@@ -60,6 +86,28 @@ public class FileTableUtils {
 		return compare;
 	}
 
+	private static FileFilter getFileFilter(String filter, FilterType type) {
+		try {
+			switch (type) {
+			case REG_EXP:
+				return new RegexFileFilter(filter);
+			case SCAN_NUMBER:
+				String[] parts = filter.split("\\s+");
+				if (parts.length == 1) {
+					return new ScanNumberFileFilter(null, filter);
+				}
+				return new ScanNumberFileFilter(parts[0], parts[1]);
+			case WILDCARD:
+				return new WildcardFileFilter(filter);
+			default:
+				break;
+			}
+		} catch (Exception e) {
+			// do nothing
+		}
+		return null;
+	}
+
 	/**
 	 * Gets a directory listing
 	 * 
@@ -70,20 +118,15 @@ public class FileTableUtils {
 	 * @return an array of files this directory contains, may be empty but not
 	 *         null
 	 */
-	public static FileTableContent[] getDirectoryList(File file, SortType sortType, SortDirection sortDirection, String filter, boolean useRegex ) {
+	public static FileTableContent[] getDirectoryList(File file, SortType sortType, SortDirection sortDirection, String filter, FilterType filterType) {
 		File[] list = null;
 		if (filter == null || "*".equals(filter) || Pattern.matches("^\\s*$", filter)) {
 			list = file.listFiles();
-		}
-		else if (useRegex) {
-			try {
-				list = file.listFiles((FileFilter) new RegexFileFilter(filter));
-			} catch (PatternSyntaxException e) {
-				list = null;
+		} else {
+			FileFilter fileFilter = getFileFilter(filter, filterType);
+			if (fileFilter != null) {
+				list = file.listFiles(fileFilter);
 			}
-		}
-		else {
-			list = file.listFiles((FileFilter) new WildcardFileFilter(filter));
 		}
 		if (list == null || list.length == 0)
 			return new FileTableContent[0];
@@ -92,20 +135,15 @@ public class FileTableUtils {
 		return contentList;
 	}
 
-	public static int getDirectoryListCount(File file, String filter, boolean useRegex) {
+	public static int getDirectoryListCount(File file, String filter, FilterType filterType) {
 		File[] list = null;
 		if (filter == null || "*".equals(filter) || Pattern.matches("^\\s*$", filter)) {
 			list = file.listFiles();
-		}
-		else if (useRegex) {
-			try {
-				list = file.listFiles((FileFilter) new RegexFileFilter(filter));
-			} catch (PatternSyntaxException e) {
-				list = null;
+		} else {
+			FileFilter fileFilter = getFileFilter(filter, filterType);
+			if (fileFilter != null) {
+				list = file.listFiles(fileFilter);
 			}
-		}
-		else {
-			list = file.listFiles((FileFilter) new WildcardFileFilter(filter));
 		}
 		if (list == null)
 			return 0; 

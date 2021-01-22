@@ -11,6 +11,7 @@ package org.dawnsci.fileviewer.table;
 import java.io.File;
 
 import org.dawnsci.fileviewer.Utils.SortType;
+import org.dawnsci.fileviewer.table.FileTableUtils.FilterType;
 import org.dawnsci.fileviewer.Utils.SortDirection;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -24,25 +25,25 @@ public class RetrieveFileListJob extends Job {
 	private final SortType sortType;
 	private final SortDirection direction;
 	private final String filter;
-	private final boolean useRegex;
+	private final FilterType filterType;
 	private final boolean quick;
 	
-	public RetrieveFileListJob(File workerStateDir, SortType sortType, SortDirection direction, String filter, boolean useRegex, boolean quick) {
+	public RetrieveFileListJob(File workerStateDir, SortType sortType, SortDirection direction, String filter, FilterType filterType, boolean quick) {
 		super("Retrieving file list..");
 		this.workerStateDir = workerStateDir;
 		this.sortType = sortType;
 		this.direction = direction;
 		this.filter = filter;
-		this.useRegex = useRegex;
+		this.filterType = filterType;
 		this.quick = quick;
 	}
 
 	@Override
 	protected IStatus run(IProgressMonitor monitor) {
 		if (quick) {
-			dirListCount = FileTableUtils.getDirectoryListCount(workerStateDir, filter, useRegex);
+			dirListCount = FileTableUtils.getDirectoryListCount(workerStateDir, filter, filterType);
 		} else {
-			dirList = FileTableUtils.getDirectoryList(workerStateDir, sortType, direction, filter, useRegex);
+			dirList = FileTableUtils.getDirectoryList(workerStateDir, sortType, direction, filter, filterType);
 			dirListCount = dirList.length;
 		}
 		if (dirList == null)
