@@ -73,7 +73,7 @@ public class ConfigurationView extends ViewPart implements Observer {
 		// A group for the camera length.
 		Group cameraGroup = GuiHelper.createGroup(mainPanel, "", 3);
 		GuiHelper.createLabel(cameraGroup, "Camera Length:");
-		cameraLengthValueSpinner = new Spinner(cameraGroup, SWT.BORDER | SWT.READ_ONLY);
+		cameraLengthValueSpinner = new Spinner(cameraGroup, SWT.BORDER);
 		cameraLengthValueSpinner.addModifyListener(e -> ResultsService.getInstance().getBeamlineConfiguration().
 				setCameraLength(cameraLengthValueSpinner.getSelection()/100.0));
 		cameraLengthValueSpinner.setValues(145, 120, 970, 2, 25, 1); // Default values used in case no beamline template is selected.
