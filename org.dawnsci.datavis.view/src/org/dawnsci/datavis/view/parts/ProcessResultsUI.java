@@ -21,7 +21,9 @@ import java.util.regex.Pattern;
 
 import org.dawnsci.datavis.api.IPlotMode;
 import org.dawnsci.datavis.model.DataOptions;
+import org.dawnsci.datavis.model.FileControllerStateEvent;
 import org.dawnsci.datavis.model.FileControllerUtils;
+import org.dawnsci.datavis.model.IDatasetStateChanger;
 import org.dawnsci.datavis.model.IFileController;
 import org.dawnsci.datavis.model.ILoadedFileInitialiser;
 import org.dawnsci.datavis.model.IPlotController;
@@ -51,7 +53,7 @@ import org.eclipse.swt.widgets.Label;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class ProcessResultsUI {
+public class ProcessResultsUI extends Composite implements IDatasetStateChanger {
 	protected static final Logger logger = LoggerFactory.getLogger(ProcessResultsUI.class);
 
 	// all data options short name per process
@@ -69,16 +71,17 @@ public class ProcessResultsUI {
 	private IFileController fileController;
 	private IPlotController plotController;
 
-	public ProcessResultsUI(IFileController fc, IPlotController pc) {
+	public ProcessResultsUI(Composite parent, IFileController fc, IPlotController pc) {
+		super(parent, SWT.None);
 		this.fileController = fc;
 		this.plotController = pc;
+		createPage();
 	}
 
-	public Composite createPage(Composite parent) {
-		Composite stack = new Composite(parent, SWT.NONE);
-		stack.setLayout(new FillLayout());
+	private Composite createPage() {
+		this.setLayout(new FillLayout());
 
-		Composite plotComp = new Composite(stack, SWT.NONE);
+		Composite plotComp = new Composite(this, SWT.NONE);
 		plotComp.setLayout(GridLayoutFactory.fillDefaults().create());
 
 		Composite comboComp = new Composite(plotComp, SWT.NONE);
@@ -125,16 +128,21 @@ public class ProcessResultsUI {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				if (dialog == null) {
-					dialog = new AlignDialog(stack.getShell(), fileController, plotController);
+					dialog = new AlignDialog(ProcessResultsUI.this.getShell(), fileController, plotController);
 				}
 				dialog.open();
 			}
 		});
 
-		return stack;
+		return this;
 	}
 
 	public void initialize(List<LoadedFile> files) {
+		
+		//TODO not clear plotted state, but
+		//figure out if state is compatible
+		deselectAll();
+		
 		// populate data option short names per process
 		processDataOptions.clear();
 		for (LoadedFile f : files) {
@@ -392,16 +400,44 @@ public class ProcessResultsUI {
 
 		fileController.applyToAll(op.getParent());
 	}
-
-	public boolean isEmpty() {
-		return processViewer.isEmpty();
-	}
-
-	public void reselect() {
-		processViewer.reselect();
+	
+	private void deselectAll() {
+		for (LoadedFile f : fileController.getLoadedFiles()) {
+			for (DataOptions d : f.getSelectedDataOptions()) {
+				d.setSelected(false);
+			}
+		}
 	}
 
 	public void dispose() {
 		processViewer.dispose();
+	}
+
+	@Override
+	public void updateOnSelectionChange(LoadedFile file) {
+		//Do nothing - react here for selections changes in the LoadedFilePart that dont change state
+		
+	}
+
+	@Override
+	public void stateChanged(FileControllerStateEvent event) {
+		if (!event.isSelectedDataChanged() && !event.isSelectedFileChanged()) return;
+		if (event.isSelectedFileChanged()) {
+			updateTable(event.getLoadedFile());
+		}
+		if (event.isSelectedDataChanged()) {
+			Display.getDefault().asyncExec(() -> updateSelected(event.getOption()));
+		}
+	}
+
+	@Override
+	public void refreshRequest() {
+		//Do nothing - this is for SWMR updates
+	}
+
+
+	@Override
+	public String getChangerName() {
+		return "Post RIXS";
 	}
 }
