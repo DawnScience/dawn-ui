@@ -146,8 +146,8 @@ class AxisSelection extends AbstractSelectionRegion<RectangularROI> implements I
         parent.addFigureListener(new FigureListener() {
 			@Override
 			public void figureMoved(IFigure source) {
-				if (line1!=null) line1.updateBounds(source.getBounds());
-				if (line2!=null) line2.updateBounds(source.getBounds());
+				if (line1!=null) line1.updateBounds(source.getBounds(),false);
+				if (line2!=null) line2.updateBounds(source.getBounds(),false);
 				updateBounds();
 			}
 		});
@@ -285,7 +285,7 @@ class AxisSelection extends AbstractSelectionRegion<RectangularROI> implements I
 		LineFigure(final boolean first, Rectangle parent) {
 			this.first = first;
 			setOpaque(false);
-            updateBounds(parent);			
+			updateBounds(parent,true);			
 			this.mover = new FigureTranslator(getXyGraph(), this);
 			
 			if (isDrawnOnX()) {
@@ -298,14 +298,36 @@ class AxisSelection extends AbstractSelectionRegion<RectangularROI> implements I
 			mover.setActive(isMobile());
 		}
 		
-		protected void updateBounds(Rectangle parentBounds) {
-			
+		private void updateBounds(Rectangle parentBounds, boolean init) {
+
 			if (isDrawnOnX()) {
 				if (!isTrackMouse()) setCursor(Cursors.SIZEWE);
-				setBounds(new Rectangle(parentBounds.x, parentBounds.y, getLineAreaWidth(), parentBounds.height));
+
+				int x = parentBounds.x;
+				int w = getLineAreaWidth();
+
+				Rectangle b = this.getBounds();
+
+				if (b != null && !init) {
+					x = b.x;
+					w = b.width;
+				}
+
+				setBounds(new Rectangle(x, parentBounds.y, w, parentBounds.height));
 			} else {
 				if (!isTrackMouse()) setCursor(Cursors.SIZENS);
-				setBounds(new Rectangle(parentBounds.x, parentBounds.y, parentBounds.width, getLineAreaWidth()));
+
+				int y = parentBounds.y;
+				int h = getLineAreaWidth();
+
+				Rectangle b = this.getBounds();
+
+				if (b != null && !init) {
+					y = b.y;
+					h = b.height;
+				}
+
+				setBounds(new Rectangle(parentBounds.x, y, parentBounds.width, h));
 			}
 		}
 		
