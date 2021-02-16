@@ -38,6 +38,8 @@ public class DataOptions implements IDataObject, IDataPackage {
 
 	private ISliceChangeListener listener;
 
+	private String process;
+
 	public DataOptions(String name, LoadedFile parent) {
 		this.name = name;
 		this.parent = parent;
@@ -82,6 +84,14 @@ public class DataOptions implements IDataObject, IDataPackage {
 
 	public String getShortName() {
 		return shortName;
+	}
+
+	public void setProcess(String process) {
+		this.process = process;
+	}
+
+	public String getProcess() {
+		return process;
 	}
 
 	public String getFilePath(){

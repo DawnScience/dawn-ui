@@ -10,14 +10,8 @@
 package org.dawnsci.datavis.view.parts;
 
 import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
+import java.util.Collections;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import org.dawnsci.datavis.api.IPlotMode;
 import org.dawnsci.datavis.model.DataOptions;
@@ -25,6 +19,7 @@ import org.dawnsci.datavis.model.FileControllerStateEvent;
 import org.dawnsci.datavis.model.FileControllerUtils;
 import org.dawnsci.datavis.model.IDatasetStateChanger;
 import org.dawnsci.datavis.model.IFileController;
+import org.dawnsci.datavis.model.IFileStateValidator;
 import org.dawnsci.datavis.model.ILoadedFileInitialiser;
 import org.dawnsci.datavis.model.IPlotController;
 import org.dawnsci.datavis.model.LoadedFile;
@@ -33,6 +28,7 @@ import org.dawnsci.datavis.view.table.DataOptionTableViewer;
 import org.dawnsci.january.model.NDimensions;
 import org.dawnsci.january.ui.utils.SelectionUtils;
 import org.eclipse.january.dataset.Slice;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.viewers.ArrayContentProvider;
@@ -56,16 +52,14 @@ import org.slf4j.LoggerFactory;
 public class ProcessResultsUI extends Composite implements IDatasetStateChanger {
 	protected static final Logger logger = LoggerFactory.getLogger(ProcessResultsUI.class);
 
-	// all data options short name per process
-	private Map<String, Set<String>> processDataOptions = new LinkedHashMap<>();
-	// only chosen data options short name per process
-	private Map<String, Set<String>> processDataChosen = new LinkedHashMap<>();
+	private List<String> allProcesses = new ArrayList<>();
 
 	private ComboViewer processCombo;
 	private DataOptionTableViewer processViewer;
 
 	private List<DataOptions> currentSelection = new ArrayList<>();
 	private String currentProcess;
+	private String currentFile;
 
 	private AlignDialog dialog;
 	private IFileController fileController;
@@ -98,9 +92,8 @@ public class ProcessResultsUI extends Composite implements IDatasetStateChanger 
 				ISelection s = event.getSelection();
 				String p = SelectionUtils.getFirstFromSelection(s, String.class);
 				if (p != null && !p.equals(currentProcess)) {
-					updateProcessedDataTable(p, FileControllerUtils.getSelectedFiles(fileController));
-
-					processCombo.getControl().getParent().layout(true, true);
+					currentProcess = p;
+					updateTable(FileControllerUtils.getLoadedFile(fileController, currentFile));
 				}
 			}
 		});
@@ -137,201 +130,127 @@ public class ProcessResultsUI extends Composite implements IDatasetStateChanger 
 		return this;
 	}
 
-	public void initialize(List<LoadedFile> files) {
-		
-		//TODO not clear plotted state, but
-		//figure out if state is compatible
-		deselectAll();
-		
-		// populate data option short names per process
-		processDataOptions.clear();
-		for (LoadedFile f : files) {
-			logger.debug("Update P GUI: {}", f.getFilePath());
-			List<DataOptions> opts = f.getDataOptions(true);
-			for (DataOptions o : opts) {
-				if (!updateProcessedData(o.getName()) && o.isSelected()) {
-					o.setSelected(false);
+	private boolean isInvalid() {
+		IFileStateValidator v = (LoadedFile f) -> {
+			for (DataOptions op : f.getDataOptions()) {
+				if (op.isSelected()) {
+					if (!op.getPlottableObject().getPlotMode().getClass().equals(PlotModeXY.class)) {
+						return false;
+					}
 				}
 			}
-			for (String n : f.getLabelOptions()) {
-				if (f.isSignal(n)) {
-					updateProcessedData(n);
+			return true;
+		};
+
+		for (LoadedFile f : fileController.getLoadedFiles()) {
+			if (f.isSelected()) {
+				if (!v.validate(f)) {
+					return true;
 				}
-			}
-		}
-
-		// parse for processes
-		List<String> ps = new ArrayList<>(processDataOptions.keySet());
-		int previous = ps.indexOf(currentProcess);
-		if (previous < 0 && !ps.isEmpty()) {
-			previous = ps.size() - 1;
-			if (RESULT.equals(ps.get(previous)) && previous > 0) { // do not choose RESULT
-				previous--;
-			}
-		}
-
-		final int choice = previous;
-		Display.getDefault().asyncExec(() -> {
-			processCombo.setInput(ps);
-			processCombo.getCombo().select(choice);
-			processCombo.getControl().getParent().layout(true, true);
-		});
-
-		updateProcessedDataTable(choice >= 0 ? ps.get(choice) : null, files);
-	}
-
-	// capture /processed/(auxiliary|summary)/%d-PROCESS_NAME/DATA_NAME
-	static final Pattern PROCESS_REGEX = Pattern.compile("/[^/]+/[^/]+/\\d+-([^/]+)/(.+)");
-	static final String DATA = "/data";
-	static final String RESULT = "result";
-	static final String RESULT_SUFFIX = RESULT + DATA;
-
-	/**
-	 * @param n name to add
-	 * @return true if process is current
-	 */
-	private boolean updateProcessedData(String n) {
-		Matcher m = PROCESS_REGEX.matcher(n);
-		boolean isCurrent = false;
-		if (m.matches()) {
-			String p = m.group(1);
-			String d = m.group(2);
-			if (d.endsWith(DATA)) {
-				d = d.substring(0, d.length() - DATA.length());
-			}
-//			logger.debug("\t{} : {}", p, d);
-			Set<String> s = processDataOptions.get(p);
-			if (s == null) {
-				s = new LinkedHashSet<>();
-				processDataOptions.put(p, s);
-			}
-			s.add(d);
-			isCurrent = p.equals(currentProcess);
-		} else if (n.endsWith(RESULT_SUFFIX)) {
-//			logger.debug("\t{}", n);
-			processDataOptions.put(RESULT, null);
-			isCurrent = RESULT.equals(currentProcess);
-		} else {
-//			logger.debug("\tIgnoring {}", n);
-		}
-		return isCurrent;
-	}
-
-	/*
-	 * TODO FC.getImmutableFileState() only hands out selected files' selected data
-	 * options to PC FC.getLoadedFiles() gets all files
-	 * FileControllerUtils.getSelectedFiles hands out selected files PR == processed
-	 * results Too many events??? Process Combo save/restore data option and apply
-	 * to all files (in case list of files have changed) File selection changes file
-	 * added in PR mode then select current data option (if one exists) None/PR
-	 * switch entering PR, recall
-	 * 
-	 * update process table when changing from process combo clean up chosen
-	 * options(?)
-	 * 
-	 * When changing back to None, remember chosen options
-	 * 
-	 * 
-	 * Need to make offset plot modifier work
-	 */
-	private void updateProcessedDataTable(String process, List<LoadedFile> files) {
-		currentSelection.clear();
-
-		currentProcess = process;
-
-		Set<String> names = process == null ? null : processDataOptions.get(process);
-		DataOptions opt = null;
-		if (names != null) {
-			final Set<String> chosen = processDataChosen.get(currentProcess);
-			for (String n : names) {
-				boolean select = chosen == null ? false : chosen.contains(n);
-				DataOptions d = updateCurrentSelection(files, n, n + DATA, select);
-				if (d != null) {
-					opt = d;
-				}
-			}
-		} else if (RESULT.equals(process)) {
-			opt = updateCurrentSelection(files, RESULT, RESULT_SUFFIX, false);
-		}
-
-		final DataOptions foundOpt = opt;
-		Display.getDefault().asyncExec(() -> {
-			processViewer.setInput(currentSelection);
-			processViewer.refresh();
-
-			if (foundOpt != null) {
-				updateSelected(foundOpt);
-			}
-		});
-	}
-
-	public void updateTable(LoadedFile file) {
-		if (file == null) {
-			return;
-		}
-
-		final Set<String> names = processDataOptions.get(currentProcess);
-		if (names == null) {
-			return;
-		}
-
-		final Set<String> chosen = processDataChosen.get(currentProcess);
-		currentSelection.clear();
-		DataOptions opt = null;
-		for (String n : names) {
-			boolean select = chosen == null ? false : chosen.contains(n);
-			DataOptions t = updateCurrentSelection(file, n, n + DATA, select, false);
-			if (t != null) {
-				if (opt == null) {
-					opt = t;
-				}
-				currentSelection.add(t);
-			}
-		}
-
-		final DataOptions foundOpt = opt;
-		Display.getDefault().asyncExec(() -> {
-			processViewer.setInput(currentSelection);
-			processViewer.refresh();
-			switchToPlotXY(foundOpt);
-		});
-	}
-
-	private DataOptions updateCurrentSelection(List<LoadedFile> files, String name, String suffix, boolean select) {
-		DataOptions found = null; // found and selected
-
-		for (LoadedFile f : files) {
-			DataOptions t = updateCurrentSelection(f, name, suffix, select, true);
-			if (found == null && t != null) {
-				found = t;
-				currentSelection.add(t);
-			}
-		}
-
-		return found;
-	}
-
-	private DataOptions updateCurrentSelection(LoadedFile f, String name, String suffix, boolean select,
-			boolean resetOthers) {
-		for (DataOptions d : f.getDataOptions()) {
-			if (d.getName().endsWith(suffix)) {
-				if (d.isSelected() != select) {
-					d.setSelected(select);
-				}
-				d.setShortName(name);
-				if (select) {
-					NDimensions nd = d.getPlottableObject().getNDimensions();
-					setSlicingFull(nd);
-				}
-				return d;
-			} else if (resetOthers) {
-				if (d.isSelected()) {
+			} else { // deselect all options in unselected files
+				for (DataOptions d : f.getSelectedDataOptions()) {
 					d.setSelected(false);
 				}
 			}
 		}
 
-		return null;
+		return false;
+	}
+
+	@Override
+	public void initialize(List<LoadedFile> files) {
+		if (isInvalid()) {
+			boolean ok = MessageDialog.openQuestion(getShell(), "Deselect all", "Only datasets plotted as points or lines allowed. Do you wish to deselect chosen datasets?");
+			if (ok) {
+				deselectAll();
+			}
+		}
+
+		internalInitialize(files);
+		if (!files.isEmpty()) {
+			LoadedFile file = files.get(0);
+			currentFile = file.getFilePath();
+			updateCombo(file);
+			updateTable(file);
+		}
+	}
+
+	private void deselectAll() {
+		for (LoadedFile f : fileController.getLoadedFiles()) {
+			for (DataOptions d : f.getSelectedDataOptions()) {
+				d.setSelected(false);
+			}
+		}
+	}
+
+	private void internalInitialize(List<LoadedFile> files) {
+		allProcesses.clear();
+		allProcesses.add(LoadedFile.RESULT);
+		int n = files.size();
+		if (n > 0) {
+			for (LoadedFile f : files) {
+				for (String p : f.getProcesses()) {
+					if (!allProcesses.contains(p)) {
+						allProcesses.add(p);
+					}
+				}
+			}
+		} else {
+			updateCombo(null);
+		}
+	}
+
+	private void updateCombo(LoadedFile file) {
+		List<String> ps;
+		int previous = -1;
+		
+		if (file == null) {
+			ps = Collections.emptyList();
+		} else {
+			ps = new ArrayList<>(file.getProcesses());
+			previous = ps.indexOf(currentProcess);
+			if (previous < 0 && ps.size() > 0) {
+				currentProcess = ps.get(ps.size() - 1);
+				previous = allProcesses.indexOf(currentProcess);
+			}
+		}
+
+		final int choice = previous;
+		Display.getDefault().asyncExec(() -> {
+			processCombo.setInput(allProcesses);
+			if (choice >= 0) {
+				processCombo.getCombo().select(choice);
+			}
+			processCombo.getControl().getParent().layout(true, true);
+		});
+	}
+
+	private void updateTable(LoadedFile file) {
+		if (file == null) {
+			return;
+		}
+
+		if (currentProcess == null) {
+			return;
+		}
+
+		currentSelection.clear();
+		DataOptions opt = null;
+		for (DataOptions o: getProcessData(file, currentProcess)) {
+			currentSelection.add(o);
+			if (opt == null) {
+				opt = o;
+			}
+		}
+
+		final DataOptions foundOpt = opt;
+		Display.getDefault().asyncExec(() -> {
+			processViewer.setInput(currentSelection);
+			processViewer.refresh();
+			if (foundOpt != null) {
+				switchToPlotXY(foundOpt);
+			}
+		});
 	}
 
 	private void setSlicingFull(NDimensions nd) {
@@ -342,39 +261,18 @@ public class ProcessResultsUI extends Composite implements IDatasetStateChanger 
 		}
 	}
 
-	private Set<String> getProcessDataChoice() {
-		Set<String> chosen = processDataChosen.get(currentProcess);
-		if (chosen == null) {
-			chosen = new HashSet<>();
-			processDataChosen.put(currentProcess, chosen);
-		}
-		return chosen;
-	}
-
 	private void updateProcessDataChoice(DataOptions opt) { // change for all files
-		if (opt != null) {
-			boolean isSelected = opt.isSelected();
-			String name = opt.getShortName();
-			if (name != null) {
-				Set<String> chosen = getProcessDataChoice();
-				if (isSelected) {
-					chosen.add(name);
-				} else {
-					chosen.remove(name);
+		boolean isSelected = opt.isSelected();
+		String name = opt.getName();
+		for (LoadedFile f : fileController.getLoadedFiles()) {
+			DataOptions d = f.getDataOption(name);
+			if (d != null) {
+				if (isSelected != d.isSelected()) {
+					d.setSelected(isSelected);
 				}
-			}
-
-			name = opt.getName();
-			for (LoadedFile f : fileController.getLoadedFiles()) {
-				DataOptions d = f.getDataOption(name);
-				if (d != null) {
-					if (isSelected != d.isSelected()) {
-						d.setSelected(isSelected);
-					}
-					if (isSelected) {
-						NDimensions nd = d.getPlottableObject().getNDimensions();
-						setSlicingFull(nd);
-					}
+				if (isSelected) {
+					NDimensions nd = d.getPlottableObject().getNDimensions();
+					setSlicingFull(nd);
 				}
 			}
 		}
@@ -382,11 +280,9 @@ public class ProcessResultsUI extends Composite implements IDatasetStateChanger 
 		processViewer.refresh();
 	}
 
-	public  void updateSelected(DataOptions op) {
+	private void updateSelected(DataOptions op) {
 		updateProcessDataChoice(op);
-		if (op != null) {
-			switchToPlotXY(op);
-		}
+		switchToPlotXY(op);
 	}
 
 	private void switchToPlotXY(DataOptions op) {
@@ -401,32 +297,68 @@ public class ProcessResultsUI extends Composite implements IDatasetStateChanger 
 		fileController.applyToAll(op.getParent());
 	}
 	
-	private void deselectAll() {
-		for (LoadedFile f : fileController.getLoadedFiles()) {
-			for (DataOptions d : f.getSelectedDataOptions()) {
-				d.setSelected(false);
-			}
-		}
-	}
-
 	public void dispose() {
 		processViewer.dispose();
 	}
 
+	List<DataOptions> getProcessData(LoadedFile file, String process) {
+		List<DataOptions> opts = new ArrayList<>();
+		for (DataOptions o : file.getDataOptions(true)) {
+			if (process.equals(o.getProcess())) {
+				opts.add(o);
+			}
+		}
+		return opts;
+	}
+
 	@Override
 	public void updateOnSelectionChange(LoadedFile file) {
-		//Do nothing - react here for selections changes in the LoadedFilePart that dont change state
-		
+		if (file == null) {
+			currentFile = null;
+			return;
+		}
+		String newFile = file.getFilePath();
+		if (allProcesses.isEmpty() && !newFile.equals(currentFile)) { // ignore when un-initialized
+			currentFile = newFile;
+			updateCombo(file);
+			updateTable(file);
+		}
 	}
 
 	@Override
 	public void stateChanged(FileControllerStateEvent event) {
-		if (!event.isSelectedDataChanged() && !event.isSelectedFileChanged()) return;
 		if (event.isSelectedFileChanged()) {
-			updateTable(event.getLoadedFile());
-		}
-		if (event.isSelectedDataChanged()) {
-			Display.getDefault().asyncExec(() -> updateSelected(event.getOption()));
+			if (event.isSelectedDataChanged()) {
+				// moveBefore; selectFiles (pass 1st file); setFileSelected; unloadFiles; setComparator;
+				// LFL.refreshRequest; LFL.localReload;
+				// replot
+				// also need to reconcile file in FC with state
+				List<LoadedFile> files = fileController.getLoadedFiles();
+				if (files.isEmpty()) {
+					internalInitialize(files);
+				} else {
+					LoadedFile f = event.getLoadedFile();
+					if (f != null) {
+						String path = f.getFilePath();
+						if (!path.equals(currentFile)) {
+							currentFile = path;
+						}
+					}
+				}
+			}
+		} else {
+			if (event.isSelectedDataChanged()) {
+				// setDataSelected; setLabelName; applyToAll
+				// replot only if dataOpt then update selected data (across all file states)
+				DataOptions opt = event.getOption();
+				if (opt != null) {
+					updateSelected(opt);
+				}
+			} else {
+				// deselect; loadFiles; setOnlySignals; validateState; LFL.fileLoaded
+				// reset process state with all files
+				internalInitialize(fileController.getLoadedFiles());
+			}
 		}
 	}
 
@@ -435,9 +367,8 @@ public class ProcessResultsUI extends Composite implements IDatasetStateChanger 
 		//Do nothing - this is for SWMR updates
 	}
 
-
 	@Override
 	public String getChangerName() {
-		return "Post RIXS";
+		return "Processed results";
 	}
 }

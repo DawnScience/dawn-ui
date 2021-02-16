@@ -16,6 +16,8 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import org.dawnsci.datavis.api.IDataFilePackage;
@@ -63,9 +65,11 @@ public class LoadedFile implements IDataObject, IDataFilePackage {
 	private String labelName = "";
 	private Dataset labelValue;
 
+	private final Collection<String> allProcesses;
+
 	public LoadedFile(IDataHolder dataHolder) {
 		this.dataHolder = new AtomicReference<>(dataHolder.clone());
-		this.signals = new LinkedHashSet<>();
+		signals = new LinkedHashSet<>();
 		dataOptions = new LinkedHashMap<>();
 		virtualDataOptions = new LinkedHashMap<>();
 		possibleLabels = new TreeMap<>();
@@ -103,6 +107,7 @@ public class LoadedFile implements IDataObject, IDataFilePackage {
 
 		}
 
+		Map<Integer, String> processes = new TreeMap<>();
 		if (names == null) names = dataHolder.getNames();
 		for (String n : names) {
 			ILazyDataset lazyDataset = dataHolder.getLazyDataset(n);
@@ -113,9 +118,35 @@ public class LoadedFile implements IDataObject, IDataFilePackage {
 				continue;
 			}
 
+			// parse for processing results
+			Matcher m = PROCESS_REGEX.matcher(n);
+			String shortName = null;
+			String process = null;
+			if (m.matches()) {
+				int ordinal = Integer.parseInt(m.group(1));
+				process = m.group(2);
+				shortName = m.group(3);
+				if (shortName.endsWith(DATA)) {
+					shortName = shortName.substring(0, shortName.length() - DATA.length());
+				}
+				String p = processes.get(ordinal);
+				if (p == null) {
+					processes.put(ordinal, process);
+				} else if (p.equals(process)) {
+					p = process; // use same string
+				} else {
+					logger.error("Process ({}) for data '{}' has wrong name: {} ({} expected)", ordinal, shortName, process, p);
+				}
+			} else if (n.endsWith(RESULT_SUFFIX)) {
+				process = RESULT;
+				processes.put(-1, RESULT);
+			}
+
 			boolean notString = !lazyDataset.getElementClass().equals(String.class);
 			if (notString && (lazyDataset.getSize() != 1 || signals.contains(n))) {
 				DataOptions d = new DataOptions(n, this);
+				d.setShortName(shortName);
+				d.setProcess(process);
 				dataOptions.put(d.getName(),d);
 			} else {
 				if (!notString && signals.contains(n)) {
@@ -127,6 +158,22 @@ public class LoadedFile implements IDataObject, IDataFilePackage {
 				possibleLabels.put(n, lazyDataset);
 			}
 		}
+
+		allProcesses = Collections.unmodifiableCollection(processes.values());
+	}
+
+	// capture /processed/(auxiliary|summary)/%d-PROCESS_NAME/DATA_NAME
+	static final Pattern PROCESS_REGEX = Pattern.compile("/[^/]+/[^/]+/(\\d+)-([^/]+)/(.+)");
+	static final String DATA = "/data";
+
+	/**
+	 * name of NXdata group holding processed data
+	 */
+	public static final String RESULT = "result";
+	static final String RESULT_SUFFIX = RESULT + DATA;
+
+	public Collection<String> getProcesses() {
+		return allProcesses;
 	}
 
 	public List<DataOptions> getDataOptions() {
