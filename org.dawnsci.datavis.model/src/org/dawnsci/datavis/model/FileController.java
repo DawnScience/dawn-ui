@@ -59,7 +59,7 @@ public class FileController implements IFileController {
 	 */
 	public List<String> loadFiles(String[] paths, IProgressService progressService, boolean addToRecentPlaces) {
 		
-		FileLoadingRunnable runnable = new FileLoadingRunnable(loadedFiles, listeners, paths, fileInitialiser, addToRecentPlaces);
+		FileLoadingRunnable runnable = new FileLoadingRunnable(paths, addToRecentPlaces);
 		
 		if (progressService == null) {
 			runnable.run(null);
@@ -84,7 +84,7 @@ public class FileController implements IFileController {
 		if (LiveServiceManager.getILiveFileService() != null) {
 			
 			if (listener == null) {
-				listener = new LiveFileListener(loadedFiles, listeners);
+				listener = new LiveFileListener();
 			}
 			
 			LiveServiceManager.getILiveFileService().addLiveFileListener(listener);
@@ -121,11 +121,10 @@ public class FileController implements IFileController {
 				((LoadedFile)o).setSelected(false);
 			}
 		}
-		
-		fireStateChangeListeners(false,false,null,null);
+
+		fireStateChangeListeners(false, false, null, null);
 	}
-	
-	
+
 	/* (non-Javadoc)
 	 * @see org.dawnsci.datavis.model.IFileController#selectFiles(java.util.List, boolean)
 	 */
@@ -133,19 +132,19 @@ public class FileController implements IFileController {
 	public void selectFiles(List<LoadedFile> files, boolean selected) {
 		if (files.isEmpty())return;
 		for (LoadedFile file : files) file.setSelected(selected);
-		fireStateChangeListeners(true,true, files.get(0),null);
-		
+
+		fireStateChangeListeners(true, true, files.get(0), null);
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.dawnsci.datavis.model.IFileController#setCurrentFile(org.dawnsci.datavis.model.LoadedFile, boolean)
 	 */
 	@Override
 	public void setFileSelected(LoadedFile file, boolean selected) {
 		file.setSelected(selected);
-		fireStateChangeListeners(true,true,file,getFirstSelectedOption(file));
+		fireStateChangeListeners(true, true, file, getFirstSelectedOption(file));
 	}
-	
+
 	private DataOptions getFirstSelectedOption(LoadedFile f) {
 		DataOptions out = null;
 		List<DataOptions> dd = f.getDataOptions();
@@ -164,17 +163,15 @@ public class FileController implements IFileController {
 	@Override
 	public void setDataSelected(DataOptions data, boolean selected) {
 		data.setSelected(selected);
-		fireStateChangeListeners(false,true, data.getParent(),data);
+		fireStateChangeListeners(false, true, data.getParent(), data);
 	}
-	
 
 	@Override
 	public void moveBefore(List<LoadedFile> files, LoadedFile marker) {
 		loadedFiles.moveBefore(files, marker);
 		fireStateChangeListeners(true, true,null,null);
 	}
-	
-	
+
 	/* (non-Javadoc)
 	 * @see org.dawnsci.datavis.model.IFileController#unloadFiles(java.util.List)
 	 */
@@ -186,7 +183,8 @@ public class FileController implements IFileController {
 		for (LoadedFile file : files) {
 			loadedFiles.unloadFile(file);
 		}
-		fireStateChangeListeners(true, true, files.get(0),null);
+
+		fireStateChangeListeners(true, true, files.get(0), null);
 	}
 
 	private void fireUpdateRequest() {
@@ -194,10 +192,6 @@ public class FileController implements IFileController {
 	}
 	
 	private void fireStateChangeListeners(boolean file, boolean dataset, LoadedFile f, DataOptions o) {
-		fireStateChangeListeners(listeners, file, dataset,f,o);
-	}
-	
-	private void fireStateChangeListeners(Set<FileControllerStateEventListener> listeners, boolean file, boolean dataset, LoadedFile f, DataOptions o) {
 		FileControllerStateEvent e = new FileControllerStateEvent(this, file, dataset, f , o);
 		for (FileControllerStateEventListener l : listeners) l.stateChanged(e);
 	}
@@ -244,18 +238,12 @@ public class FileController implements IFileController {
 	
 	private class FileLoadingRunnable implements IRunnableWithProgress {
 
-		private final LoadedFiles lFiles;
-		private final Set<FileControllerStateEventListener> fListeners;
 		private final String[] paths;
 		private final List<String> failedPaths;
-		private final ILoadedFileInitialiser initer;
 		private final boolean addToRecentPlaces;
 		
-		public FileLoadingRunnable(LoadedFiles files, Set<FileControllerStateEventListener> listeners, String[] paths, ILoadedFileInitialiser initer, boolean addToRecentPlaces) {
-			this.lFiles = files;
-			this.fListeners = listeners;
+		public FileLoadingRunnable(String[] paths, boolean addToRecentPlaces) {
 			this.paths = paths;
-			this.initer = initer;
 			this.addToRecentPlaces = addToRecentPlaces;
 			failedPaths = new ArrayList<String>();
 			
@@ -271,7 +259,7 @@ public class FileController implements IFileController {
 			}
 			
 			for (String path : paths) {
-				if (lFiles.contains(path)) continue;
+				if (loadedFiles.contains(path)) continue;
 				if (monitor != null) monitor.subTask("Loading " + path + "...");
 				LoadedFile f = null;
 				try {
@@ -292,14 +280,14 @@ public class FileController implements IFileController {
 								break;
 							}
 						} catch (Exception e) {
-							logger.error("Error thrown in " + c.toString(), e);
+							logger.error("Error thrown in {}", c, e);
 						}
 						
 					}
 					
 					f.setLabelName(labelName);
 					f.setOnlySignals(onlySignals.get());
-					if (initer != null) initer.initialise(f);
+					if (fileInitialiser != null) fileInitialiser.initialise(f);
 					files.add(f);
 				}
 				
@@ -316,12 +304,10 @@ public class FileController implements IFileController {
 					recentPlaces.addFiles(filePaths);
 				}
 				
-				lFiles.addFiles(files);
-				
+				loadedFiles.addFiles(files);
 			}
-			
-			fireStateChangeListeners(fListeners, false,false,null,null);
-			
+
+			fireStateChangeListeners(false, false, null, null);
 		}
 		
 		public List<String> getFailedLoadingFiles(){
@@ -332,7 +318,7 @@ public class FileController implements IFileController {
 	@Override
 	public void setComparator(Comparator<LoadedFile> comparator) {
 		loadedFiles.setComparator(comparator);
-		fireStateChangeListeners(true, true, null,null);
+		fireStateChangeListeners(true, true, null, null);
 	}
 
 	@Override
@@ -341,7 +327,8 @@ public class FileController implements IFileController {
 		for (LoadedFile file : loadedFiles) {
 			file.setLabelName(label);
 		}
-		fireStateChangeListeners(false, true,null,null);
+
+		fireStateChangeListeners(false, true, null, null);
 	}
 
 	@Override
@@ -353,10 +340,10 @@ public class FileController implements IFileController {
 	public void setOnlySignals(boolean onlySignals) {
 		this.onlySignals.set(onlySignals);
 		loadedFiles.getLoadedFiles().stream().forEach(f-> f.setOnlySignals(onlySignals));
-		
-		fireStateChangeListeners(false, false,null, null);
+
+		fireStateChangeListeners(false, false, null, null);
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.dawnsci.datavis.model.IFileController#applyToAll(org.dawnsci.datavis.model.LoadedFile)
 	 */
@@ -386,18 +373,13 @@ public class FileController implements IFileController {
 				}
 			}
 		}
-		
-		fireStateChangeListeners(false, true,null,null);
-		
-	}
-	
-	private class LiveFileListener implements ILiveLoadedFileListener {
-		private final LoadedFiles lFiles;
-		private final Set<FileControllerStateEventListener> fListeners;
 
-		public LiveFileListener(LoadedFiles files, Set<FileControllerStateEventListener> listeners) {
-			this.lFiles = files;
-			this.fListeners = listeners;
+		fireStateChangeListeners(false, true, null, null);
+	}
+
+	private class LiveFileListener implements ILiveLoadedFileListener {
+
+		public LiveFileListener() {
 		}
 
 		@Override
@@ -409,7 +391,7 @@ public class FileController implements IFileController {
 				public void run() {
 					
 					
-					List<IRefreshable> fileList = lFiles.getLoadedFiles().stream()
+					List<IRefreshable> fileList = loadedFiles.getLoadedFiles().stream()
 							.filter(IRefreshable.class::isInstance)
 							.map(IRefreshable.class::cast)
 							.filter(IRefreshable::isLive)
@@ -463,7 +445,7 @@ public class FileController implements IFileController {
 			Runnable r = () -> {
 
 				DataOptions dop = null;
-				LoadedFile loadedFile = lFiles.getLoadedFile(path);
+				LoadedFile loadedFile = loadedFiles.getLoadedFile(path);
 				if (loadedFile instanceof IRefreshable) {
 					logger.info("Locally reloading {}",path);
 					((IRefreshable)loadedFile).locallyReload();
@@ -530,8 +512,8 @@ public class FileController implements IFileController {
 
 			}
 			
-			lFiles.addFile(loadedFile);
-			fireStateChangeListeners(fListeners, false, false, loadedFile, null);
+			loadedFiles.addFile(loadedFile);
+			fireStateChangeListeners(false, false, loadedFile, null);
 		}
 		
 		private void initialiseLiveFile(LoadedFile file, ILoadedFileConfiguration primary, ILoadedFileConfiguration secondary) {
