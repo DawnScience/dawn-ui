@@ -323,12 +323,21 @@ public class PlotController implements IPlotController, ILoadedFileInitialiser {
 		}
 
 		boolean isXY = PlotModeXY.class.isAssignableFrom(localCurrentMode.getClass());
+		Set<String> names = new HashSet<>();
+		int n = 0;
+		for (IDataPackage dp : state) {
+			if (dp instanceof DataOptions) {
+				n++;
+				names.add(((DataOptions) dp).getName());
+			}
+		}
+		boolean useName = n <= 1 || names.size() > 1;
 		for (IDataPackage dp : state) {
 			if (dp instanceof DataOptions) {
 				DataOptions d = (DataOptions) dp;
 
 				if (!isXY || checkForMultiplePoints(d)) {
-					Runnable r = updatePlottedData(d, localCurrentMode, localModifier, uniqueLabelSet);
+					Runnable r = updatePlottedData(useName, d, localCurrentMode, localModifier, uniqueLabelSet);
 					if (r != null) {
 						uiRunnables.add(r);
 					}
@@ -454,7 +463,7 @@ public class PlotController implements IPlotController, ILoadedFileInitialiser {
 		return null;
 	}
 
-	private Runnable updatePlottedData(DataOptions dataOp, IPlotMode mode, IPlotDataModifier modifier, Set<String> uniqueLabelSet) {
+	private Runnable updatePlottedData(boolean useName, DataOptions dataOp, IPlotMode mode, IPlotDataModifier modifier, Set<String> uniqueLabelSet) {
 		//update the data in the plot
 		
 		IPlottingSystem<?> system = getPlottingSystem();
@@ -480,19 +489,43 @@ public class PlotController implements IPlotController, ILoadedFileInitialiser {
 				try (Formatter f = new Formatter()) {
 	
 					Serializable s = md.getMetaValue(PlotExportConstants.LABEL_NAME);
-					if (s != null) {
-						f.format("%s=%s (%s:%s)", s, md.getMetaValue(PlotExportConstants.LABEL_VALUE), md.getMetaValue(PlotExportConstants.PLOT_NAME), md.getMetaValue(PlotExportConstants.SCAN));
+					if (useName) {
+						if (s != null) {
+							f.format("%s=%s (%s:%s)", s, md.getMetaValue(PlotExportConstants.LABEL_VALUE), md.getMetaValue(PlotExportConstants.PLOT_NAME), md.getMetaValue(PlotExportConstants.SCAN));
+						} else {
+							f.format("%s:%s", md.getMetaValue(PlotExportConstants.PLOT_NAME), md.getMetaValue(PlotExportConstants.SCAN));
+						}
 					} else {
-						f.format("%s:%s", md.getMetaValue(PlotExportConstants.PLOT_NAME), md.getMetaValue(PlotExportConstants.SCAN));
+						if (s != null) {
+							f.format("%s=%s (%s)", s, md.getMetaValue(PlotExportConstants.LABEL_VALUE), md.getMetaValue(PlotExportConstants.SCAN));
+						} else {
+							f.format("%s", md.getMetaValue(PlotExportConstants.SCAN));
+						}
 					}
 					view.setName(f.toString());
 				}
 			}
 
-			LoadedFile lf = dataOp.getParent();
-			String l = lf.getLabelName();
+			if (!useName) {
+				if (view.getRank() == 1) {
+					IAxis axis = system.getAxes().get(1);
+					String title = axis.getTitle();
+					String name = md.getMetaValue(PlotExportConstants.PLOT_NAME).toString();
+					if (title == null || !title.equals(name)) {
+						axis.setTitle(name);
+					}
+				} else if (view.getRank() >= 2) {
+					String title = system.getTitle();
+					String name = md.getMetaValue(PlotExportConstants.PLOT_NAME).toString();
+					if (title == null || !title.equals(name)) {
+						system.setTitle(name);
+					}
+				}
+			}
 			data = mode.sliceForPlot(view, slice, options, system);
 
+			LoadedFile lf = dataOp.getParent();
+			String l = lf.getLabelName();
 			if (data != null && data.length == 1 && uniqueLabelSet.contains(l)) {
 				data[0].setName(l);
 			}
