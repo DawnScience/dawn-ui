@@ -14,6 +14,7 @@ import javax.annotation.PreDestroy;
 import javax.inject.Inject;
 
 import org.apache.commons.io.filefilter.WildcardFileFilter;
+import org.dawnsci.datavis.api.DataVisConstants;
 import org.dawnsci.datavis.api.IRecentPlaces;
 import org.dawnsci.datavis.model.FileControllerStateEvent;
 import org.dawnsci.datavis.model.FileControllerStateEventListener;
@@ -95,7 +96,7 @@ import org.slf4j.LoggerFactory;
 import uk.ac.diamond.scisoft.analysis.utils.VersionSort;
 
 public class LoadedFilePart {
-	public static final String ID = "org.dawnsci.datavis.view.parts.LoadedFilePart";
+	public static final String ID = DataVisConstants.FILE_PART_ID;
 
 	private static final Logger logger = LoggerFactory.getLogger(LoadedFilePart.class);
 	

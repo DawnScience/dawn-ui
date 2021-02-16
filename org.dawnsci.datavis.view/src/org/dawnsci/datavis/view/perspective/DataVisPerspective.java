@@ -1,5 +1,6 @@
 package org.dawnsci.datavis.view.perspective;
 
+import org.dawnsci.datavis.api.DataVisConstants;
 import org.dawnsci.datavis.view.parts.DatasetPart;
 import org.dawnsci.datavis.view.parts.LoadedFilePart;
 import org.eclipse.ui.IFolderLayout;
@@ -9,7 +10,7 @@ import org.eclipse.ui.IViewLayout;
 
 public class DataVisPerspective implements IPerspectiveFactory {
 
-	public static final String ID = "org.dawnsci.datavis.DataVisPerspective";
+	public static final String ID = DataVisConstants.DATAVIS_PERSPECTIVE_ID;
 
 	private static final String PLOT_ID = "org.dawnsci.datavis.view.parts.Plot";
 
