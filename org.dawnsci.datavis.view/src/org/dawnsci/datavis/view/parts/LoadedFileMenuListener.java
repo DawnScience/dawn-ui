@@ -492,7 +492,7 @@ public class LoadedFileMenuListener implements IMenuListener {
 			Command command = service.getCommand(id);
 			return command != null;
 		} catch (Exception e) {
-			logger.error("Could not execute command",e);
+			logger.error("Could not execute command", e);
 		} 
 		return false;
 	}

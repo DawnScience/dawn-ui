@@ -382,7 +382,9 @@ public class LoadedFile implements IDataObject, IDataFilePackage {
 				slice.squeeze();
 				
 				if (slice.getRank() == 0) {
-					return convertFromString(labelName, slice);
+					Dataset v = convertFromString(labelName, slice);
+					v.setName(labelName);
+					return v;
 				}
 				logger.warn("Label {} does not have rank 0", labelName);
 				return null;

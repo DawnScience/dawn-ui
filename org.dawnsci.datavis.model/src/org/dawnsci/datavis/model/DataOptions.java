@@ -11,6 +11,7 @@ import org.dawnsci.january.model.NDimensions;
 import org.dawnsci.january.model.SliceChangeEvent;
 import org.eclipse.dawnsci.analysis.api.tree.Node;
 import org.eclipse.january.MetadataException;
+import org.eclipse.january.dataset.IDataset;
 import org.eclipse.january.dataset.ILazyDataset;
 import org.eclipse.january.dataset.SliceND;
 import org.eclipse.january.metadata.AxesMetadata;
@@ -278,6 +279,11 @@ public class DataOptions implements IDataObject, IDataPackage {
 
 	public String getLabel() {
 		return label;
+	}
+
+	@Override
+	public IDataset getLabelValue() {
+		return parent.getLabelValue();
 	}
 
 	@Override

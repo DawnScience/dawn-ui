@@ -10,7 +10,9 @@ import org.dawnsci.datavis.api.IDataFilePackage;
 import org.dawnsci.datavis.api.IDataPackage;
 import org.dawnsci.datavis.api.IXYData;
 import org.eclipse.january.DatasetException;
+import org.eclipse.january.dataset.Dataset;
 import org.eclipse.january.dataset.DatasetFactory;
+import org.eclipse.january.dataset.DatasetUtils;
 import org.eclipse.january.dataset.IDataset;
 import org.eclipse.january.dataset.ILazyDataset;
 import org.eclipse.january.dataset.SliceND;
@@ -63,15 +65,16 @@ public class DataPackageUtils {
 			
 			IDataset[] unpackXY = unpackXY(y);
 			
-			return  new XYDataImpl(unpackXY[0], unpackXY[1], pack.getFilePath(), pack.getName(), pack.getSlice());
-			
+			Dataset labelValue = DatasetUtils.convertToDataset(pack.getLabelValue());
+			return labelValue == null ? new XYDataImpl(unpackXY[0], unpackXY[1], Double.NaN, pack.getFilePath(), pack.getName(), null, pack.getSlice()) :
+				new XYDataImpl(unpackXY[0], unpackXY[1], labelValue.getDouble(), pack.getFilePath(), pack.getName(), labelValue.getName(), pack.getSlice());
 		} catch (DatasetException e) {
 			e.printStackTrace();
 		}
 		
 		return null;
 	}
-	
+
 	private static IDataset[] unpackXY(IDataset y) {
 		y = y.squeeze();
 		IDataset x = null;

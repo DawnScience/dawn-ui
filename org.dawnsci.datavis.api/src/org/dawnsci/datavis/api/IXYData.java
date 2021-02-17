@@ -9,10 +9,13 @@ public interface IXYData {
 
 	String getDatasetName();
 
+	String getLabelName();
+
 	String getFileName();
 
 	IDataset getY();
 
 	IDataset getX();
 
+	double getLabel();
 }
