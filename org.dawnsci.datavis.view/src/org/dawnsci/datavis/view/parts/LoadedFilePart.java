@@ -637,9 +637,9 @@ public class LoadedFilePart {
 	
 	private class CompareObject {
 		
-		private Function<? super LoadedFile, ? extends Object> comparatorFunction;
-		private Comparator<LoadedFile> comparator;
-		private TableViewerColumn column;
+		private final Function<? super LoadedFile, ? extends Object> comparatorFunction;
+		private final Comparator<LoadedFile> comparator;
+		private final TableViewerColumn column;
 		private int direction;
 		
 		public CompareObject(TableViewerColumn column, Function<? super LoadedFile, ? extends Object> keyExtractor) {
@@ -658,31 +658,34 @@ public class LoadedFilePart {
 		}
 		
 		public Comparator<LoadedFile> getComparator(){
-			return comparator;
+			switch (direction) {
+			case SWT.UP:
+				return comparator.reversed();
+			case SWT.NONE:
+				return null;
+			case SWT.DOWN:
+			default:
+				return comparator;
+			}
 		}
 		
 		public void increment() {
 			switch (direction) {
 			case SWT.DOWN:
 				direction = SWT.UP;
-				comparator = createComparator();
-				comparator = comparator.reversed();
 				break;
 			case SWT.UP:
 				direction = SWT.NONE;
-				comparator = null;
 				break;
 			case SWT.NONE:
 				direction = SWT.DOWN;
-				comparator = createComparator();
 				break;
-
 			default:
 				break;
 			}
 		}
 		
-		private Comparator<LoadedFile> createComparator(){
+		private Comparator<LoadedFile> createComparator() {
 			return new Comparator<LoadedFile>() {
 
 				@Override
@@ -695,7 +698,7 @@ public class LoadedFilePart {
 					if (oc1 == null) return -1;
 					if (oc2 == null) return 1;
 					
-					if (oc1 instanceof StringDataset || oc2 instanceof StringDataset) {
+					if (oc1 instanceof StringDataset && oc2 instanceof StringDataset) {
 						oc1 = ((Dataset)oc1).getString();
 						oc2 = ((Dataset)oc2).getString();
 					}
