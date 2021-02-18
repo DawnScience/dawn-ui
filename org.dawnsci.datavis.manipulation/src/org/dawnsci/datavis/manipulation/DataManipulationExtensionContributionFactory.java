@@ -50,6 +50,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.DirectoryDialog;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.FileDialog;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.ListDialog;
 import org.eclipse.ui.menus.ExtensionContributionFactory;
@@ -68,44 +69,52 @@ public class DataManipulationExtensionContributionFactory extends ExtensionContr
 	@Override
 	public void createContributionItems(IServiceLocator serviceLocator, IContributionRoot additions) {
 
-		MenuManager search = new MenuManager("XY Data",
-				"org.dawnsci.datavis.tools.data");
+		MenuManager xyTools = new MenuManager("XY Data", "org.dawnsci.datavis.tools.data");
 
-		search.addMenuListener(new IMenuListener() {
+		xyTools.addMenuListener(new IMenuListener() {
+
+			private BundleContext bundleContext;
+
+			private <T> T getService(Class<T> clazz) {
+				return (T) bundleContext.getService(bundleContext.getServiceReference(clazz));
+			}
+
+			private String getLastRecentDirectory() {
+				IRecentPlaces places = getService(IRecentPlaces.class);
+				return places.getRecentDirectories().get(0);
+			}
 
 			@Override
 			public void menuAboutToShow(IMenuManager manager) {
-				search.removeAll();
+				xyTools.removeAll();
 
 				List<IDataFilePackage> data = getData();
+				bundleContext = FrameworkUtil.getBundle(this.getClass()).getBundleContext();
+				Shell shell = Display.getDefault().getActiveShell();
 
 				Action a = new Action("Concatenate"){
 					@Override
 					public void run() {
 
-						IDataset comb = buildCombined();
+						IDataset comb = buildCombined(data);
 
 						if (comb != null ) {
-							CombineDialog c = new CombineDialog(Display.getDefault().getActiveShell(), comb);
+							CombineDialog c = new CombineDialog(shell, comb);
 							c.open();
 						} else {
-							MessageDialog.openError(Display.getDefault().getActiveShell(), "No valid data.", "No valid data was found to concatenate.\n(1D slices are currently not supported).");
+							MessageDialog.openError(shell, "No valid data.", "No valid data was found to concatenate.\n(1D slices are currently not supported).");
 						}
 					}
 				};
-
-				if (data == null || data.isEmpty()) {
-					a.setEnabled(false);
-				}
 
 				Action average = new Action("Average"){
 					@Override
 					public void run() {
 
-						IDataset comb = buildCombined();
+						IDataset comb = buildCombined(data);
 
 						if (comb == null) {
-							MessageDialog.openError(Display.getDefault().getActiveShell(), "No valid data.", "No valid data was found to average.\n(1D slices are currently not supported).");
+							MessageDialog.openError(shell, "No valid data.", "No valid data was found to average.\n(1D slices are currently not supported).");
 							return;
 						}
 						
@@ -135,19 +144,11 @@ public class DataManipulationExtensionContributionFactory extends ExtensionContr
 						
 						transferAxisOne(d,mean);
 
-						FileDialog fd = new FileDialog(Display.getDefault().getActiveShell(), SWT.SAVE);
+						FileDialog fd = new FileDialog(shell, SWT.SAVE);
 						String[] exts = new String[] {".dat",".xye",".nxs",".h5"};
 						fd.setFilterExtensions(exts);
 						fd.setFileName(name);
-
-						BundleContext bundleContext =
-								FrameworkUtil.
-								getBundle(this.getClass()).
-								getBundleContext();
-
-						IRecentPlaces recentPlaces = (IRecentPlaces)bundleContext.getService(bundleContext.getServiceReference(IRecentPlaces.class));
-
-						fd.setFilterPath(recentPlaces.getRecentDirectories().get(0));
+						fd.setFilterPath(getLastRecentDirectory());
 
 						String open = fd.open();
 
@@ -169,7 +170,7 @@ public class DataManipulationExtensionContributionFactory extends ExtensionContr
 
 						if (ext.equals(exts[2]) || ext.equals(exts[3])) {
 
-							INexusFileFactory fileFactory = (INexusFileFactory)bundleContext.getService(bundleContext.getServiceReference(INexusFileFactory.class));
+							INexusFileFactory fileFactory = getService(INexusFileFactory.class);
 
 							success = FileWritingUtils.writeNexus(open, fileFactory, mean);
 							
@@ -179,28 +180,26 @@ public class DataManipulationExtensionContributionFactory extends ExtensionContr
 						}
 						
 						if (success) {
-							IFileController fc = (IFileController)bundleContext.getService(bundleContext.getServiceReference(IFileController.class));
+							IFileController fc = getService(IFileController.class);
 							FileControllerUtils.loadFile(fc,open);
 						}
 						
 					}
 				};
-				
-				
-				
+
 				Action sub = new Action("Subtract"){
 					@Override
 					public void run() {
 
-						List<IXYData> xy = getCompatibleXY();
+						List<IXYData> xy = getCompatibleXY(data);
 						
-						ListDialog d = new ListDialog(Display.getDefault().getActiveShell());
+						ListDialog d = new ListDialog(shell);
 						d.setTitle("Select file to subtract");
 						d.setContentProvider(new ArrayContentProvider());
 						d.setLabelProvider(new LabelProvider());
 
 						if (xy == null) {
-							MessageDialog.openError(Display.getDefault().getActiveShell(), "No valid data.", "No valid data was found to subtract.\n(1D slices are currently not supported).");
+							MessageDialog.openError(shell, "No valid data.", "No valid data was found to subtract.\n(1D slices are currently not supported).");
 							return;
 						}
 						
@@ -212,15 +211,9 @@ public class DataManipulationExtensionContributionFactory extends ExtensionContr
 						
 						if (d.getResult().length == 0) return;
 						
-						BundleContext bundleContext =
-								FrameworkUtil.
-								getBundle(this.getClass()).
-								getBundleContext();
 
-						IRecentPlaces recentPlaces = (IRecentPlaces)bundleContext.getService(bundleContext.getServiceReference(IRecentPlaces.class));
-
-						DirectoryDialog dirDi = new DirectoryDialog(Display.getDefault().getActiveShell());
-						dirDi.setFilterPath(recentPlaces.getRecentDirectories().get(0));
+						DirectoryDialog dirDi = new DirectoryDialog(shell);
+						dirDi.setFilterPath(getLastRecentDirectory());
 						
 						String output = dirDi.open();
 						
@@ -255,7 +248,7 @@ public class DataManipulationExtensionContributionFactory extends ExtensionContr
 						}
 						
 						if (!paths.isEmpty()) {
-							IFileController fc = (IFileController)bundleContext.getService(bundleContext.getServiceReference(IFileController.class));
+							IFileController fc = getService(IFileController.class);
 							FileControllerUtils.loadFiles(fc,paths.toArray(new String[paths.size()]), null);
 						}
 						
@@ -267,28 +260,23 @@ public class DataManipulationExtensionContributionFactory extends ExtensionContr
 					@Override
 					public void run() {
 
-						List<IXYData> data = getCompatibleXY();
+						List<IXYData> xy = getCompatibleXY(data);
 						
-						if (data != null && data.size() == 2) {
-							RegionNormalisedDifferenceDialog d = new RegionNormalisedDifferenceDialog(Display.getDefault().getActiveShell(), data.get(0), data.get(1));
+						if (xy != null && xy.size() == 2) {
+							RegionNormalisedDifferenceDialog d = new RegionNormalisedDifferenceDialog(shell, xy.get(0), xy.get(1));
 							if (d.open() == Dialog.OK) {
-								BundleContext bundleContext =
-										FrameworkUtil.
-										getBundle(this.getClass()).
-										getBundleContext();
-								IRecentPlaces recentPlaces = bundleContext.getService(bundleContext.getServiceReference(IRecentPlaces.class));
-								FileDialog f = new FileDialog(Display.getDefault().getActiveShell(), SWT.SAVE);
-								f.setFilterPath(recentPlaces.getCurrentDefaultDirectory());
+								FileDialog f = new FileDialog(shell, SWT.SAVE);
+								f.setFilterPath(getLastRecentDirectory());
 								f.setFileName(d.getTemplateName() + ".dat");
 								String open = f.open();
 								
 								if (open != null && FileWritingUtils.writeText(open, d.getData())) {
-									IFileController fc = bundleContext.getService(bundleContext.getServiceReference(IFileController.class));
+									IFileController fc = getService(IFileController.class);
 									FileControllerUtils.loadFile(fc,open);
 								}
 							}
 						} else {
-							MessageDialog.openError(Display.getDefault().getActiveShell(), "Error", "XMCD requires two files to be selected in the table");
+							MessageDialog.openError(shell, "Error", "XMCD requires two files to be selected in the table");
 						}
 						
 					}
@@ -300,22 +288,21 @@ public class DataManipulationExtensionContributionFactory extends ExtensionContr
 						
 						// Takes the list of IDataFilePackages, extracts the data and stores 
 						// it as a nested array
-						List<IDataFilePackage> dataFiles = getData();
 						
-						Dataset[] dataArray = new Dataset[dataFiles.size()];
+						Dataset[] dataArray = new Dataset[data.size()];
 						
 						int counter = 0;
 						String firstFile = "";
 						String finalFile = "";
 						// Loop through the files that are checked/highlighted
-						ListIterator<IDataFilePackage> it = dataFiles.listIterator();
+						ListIterator<IDataFilePackage> it = data.listIterator();
 						while (it.hasNext()) {
 							IDataPackage[] dataPacks = it.next().getDataPackages();
 							
 							if (counter == 0) {
-								firstFile = new File(dataFiles.get(counter).getFilePath()).getName();
+								firstFile = new File(data.get(counter).getFilePath()).getName();
 							}
-							finalFile = new File(dataFiles.get(counter).getFilePath()).getName();
+							finalFile = new File(data.get(counter).getFilePath()).getName();
 							// Extract the y-axis from the selected IDataPackage
 							Dataset yTemp = null;
 							for (IDataPackage i : dataPacks) {
@@ -324,7 +311,7 @@ public class DataManipulationExtensionContributionFactory extends ExtensionContr
 										yTemp = DatasetUtils.sliceAndConvertLazyDataset(i.getLazyDataset());
 										break;
 									} catch (DatasetException e) {
-										MessageDialog.openError(Display.getDefault().getActiveShell(), "Error", "There has been an error opening the selected dataset.");
+										MessageDialog.openError(shell, "Error", "There has been an error opening the selected dataset.");
 									}
 								}
 							}
@@ -345,9 +332,9 @@ public class DataManipulationExtensionContributionFactory extends ExtensionContr
 							normalisedToOne = ReflMergeUtils.normaliseTER(joinedData);
 							pointsMerged = ReflMergeUtils.rebinDatapoints(normalisedToOne);
 						} catch (DatasetException e) {
-							MessageDialog.openError(Display.getDefault().getActiveShell(), "Error", "There has been an error in the dataset concatenation.");
+							MessageDialog.openError(shell, "Error", "There has been an error in the dataset concatenation.");
 						}
-																												
+						
 						writeToFile(pointsMerged, firstFile, finalFile);
 					}
 					
@@ -363,19 +350,11 @@ public class DataManipulationExtensionContributionFactory extends ExtensionContr
 						}
 						name = builder.toString();
 						
-						FileDialog fd = new FileDialog(Display.getDefault().getActiveShell(), SWT.SAVE);
+						FileDialog fd = new FileDialog(shell, SWT.SAVE);
 						String[] exts = new String[] {".dat"};
 						fd.setFilterExtensions(exts);
 						fd.setFileName(name);
-
-						BundleContext bundleContext =
-								FrameworkUtil.
-								getBundle(this.getClass()).
-								getBundleContext();
-						
-						IRecentPlaces recentPlaces = (IRecentPlaces)bundleContext.getService(bundleContext.getServiceReference(IRecentPlaces.class));
-
-						fd.setFilterPath(recentPlaces.getRecentDirectories().get(0));
+						fd.setFilterPath(getLastRecentDirectory());
 
 						String open = fd.open();
 						int filterIndex = fd.getFilterIndex();
@@ -393,17 +372,16 @@ public class DataManipulationExtensionContributionFactory extends ExtensionContr
 						boolean success = FileWritingUtils.writeDat(open, dataToWrite);
 						
 						if (success) {
-							IFileController fc = (IFileController)bundleContext.getService(bundleContext.getServiceReference(IFileController.class));
+							IFileController fc = getService(IFileController.class);
 							FileControllerUtils.loadFile(fc,open);
 						} else {
-							MessageDialog.openError(Display.getDefault().getActiveShell(), "Error", "It has not been possible to write the data file.");
+							MessageDialog.openError(shell, "Error", "It has not been possible to write the data file.");
 						}
 					}
 				};
 				
 				stitch.setToolTipText("Stitch together selected dataset, and normalise the total external reflection to 1.");
-				
-				
+
 				if (data == null || data.isEmpty()) {
 					a.setEnabled(false);
 					average.setEnabled(false);
@@ -411,80 +389,61 @@ public class DataManipulationExtensionContributionFactory extends ExtensionContr
 					xmcd.setEnabled(false);
 					stitch.setEnabled(false);
 				}
-				
 
-				search.add(a);
-				search.add(average);
-				search.add(sub);
-				search.add(xmcd);
-				search.add(stitch);
-				
 				Action componentFit = new Action("Component Fit"){
 					@Override
 					public void run() {
 
 						try {
-							ComponentFitModel model = getComponentFit();
-							ComponentFitDialog d = new ComponentFitDialog(Display.getDefault().getActiveShell(), model);
+							IFileController fc = getService(IFileController.class);
+							ComponentFitModel model = getComponentFit(fc);
+							ComponentFitDialog d = new ComponentFitDialog(shell, model);
 							d.open();
 							
 						} catch (IllegalArgumentException | DatasetException e) {
-							MessageDialog.openError(Display.getDefault().getActiveShell(), "Error", "Could not initialise data for component fit: " + e.getMessage());
+							MessageDialog.openError(shell, "Error", "Could not initialise data for component fit: " + e.getMessage());
 						}
 						
 					}
 				};
-				
-				search.add(componentFit);
 
+				xyTools.add(a);
+				xyTools.add(average);
+				xyTools.add(sub);
+				xyTools.add(xmcd);
+				xyTools.add(stitch);
+				xyTools.add(componentFit);
 			}
-
-
 		});
-		
-		
 
-		search.add(new Action("") {
-
+		xyTools.add(new Action("") {
 			@Override
 			public void run() {
-
 			}
 		});
 
-		additions.addContributionItem(search, new Expression() {
+		additions.addContributionItem(xyTools, new Expression() {
 			
 			@Override
 			public EvaluationResult evaluate(IEvaluationContext context) throws CoreException {
 				Object variable = context.getVariable("activeWorkbenchWindow.activePerspective");
 				//probably shouldn't be needed, but doesn't work without it.
-				search.setVisible(DataVisConstants.DATAVIS_PERSPECTIVE_ID.equals(variable));
+				xyTools.setVisible(DataVisConstants.DATAVIS_PERSPECTIVE_ID.equals(variable));
 				return EvaluationResult.valueOf(DataVisConstants.DATAVIS_PERSPECTIVE_ID.equals(variable));
 			}
 		});
 	}
 
-
-	private List<IDataFilePackage> getData(){
+	private List<IDataFilePackage> getData() {
 		ISelection selection = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getSelectionService().getSelection(DataVisConstants.FILE_PART_ID);
 		return getSuitableData(selection);
 	}
 	
-	private ComponentFitModel getComponentFit() throws IllegalArgumentException, DatasetException{
-		
-		BundleContext bundleContext =
-				FrameworkUtil.
-				getBundle(this.getClass()).
-				getBundleContext();
-		IFileController fc = (IFileController)bundleContext.getService(bundleContext.getServiceReference(IFileController.class));
-		
+	private ComponentFitModel getComponentFit(IFileController fc) throws IllegalArgumentException, DatasetException{
 		List<DataOptions> dataOptions = fc.getImmutableFileState();
 		
 		return ComponentFitModel.buildModel(dataOptions);
 	}
-
-
-	
 
 	private List<IDataFilePackage> getSuitableData(ISelection selection){
 
@@ -493,15 +452,13 @@ public class DataManipulationExtensionContributionFactory extends ExtensionContr
 			return Arrays.stream(((StructuredSelection)selection).toArray())
 					.filter(IDataFilePackage.class::isInstance)
 					.map(IDataFilePackage.class::cast).collect(Collectors.toList());
-
 		}
 
 		return Collections.emptyList();
 	}
 
 
-	private List<IXYData> getCompatibleXY(){
-		List<IDataFilePackage> suitableData = getData();
+	private List<IXYData> getCompatibleXY(List<IDataFilePackage> suitableData){
 		List<IXYData> xyData = DataPackageUtils.getXYData(suitableData, false);
 		if (xyData.isEmpty()) {
 			return null;
@@ -510,9 +467,9 @@ public class DataManipulationExtensionContributionFactory extends ExtensionContr
 		return DataManipulationUtils.getCompatibleDatasets(xyData, null, null);
 	}
 	
-	private IDataset buildCombined() {
+	private IDataset buildCombined(List<IDataFilePackage> suitableData) {
 
-		List<IXYData> compatibleXY = getCompatibleXY();
+		List<IXYData> compatibleXY = getCompatibleXY(suitableData);
 		
 		if (compatibleXY == null) return null;
 

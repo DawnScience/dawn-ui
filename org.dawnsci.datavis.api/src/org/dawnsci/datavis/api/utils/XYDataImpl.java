@@ -10,13 +10,17 @@ public class XYDataImpl implements IXYData {
 	private IDataset y;
 	private String fileName;
 	private String datasetName;
+	private String labelName;
 	private SliceND slice;
+	private double label;
 	
-	public XYDataImpl(IDataset x, IDataset y, String filename, String datasetName, SliceND slice) {
+	public XYDataImpl(IDataset x, IDataset y, double label, String filename, String datasetName, String labelName, SliceND slice) {
 		this.x = x;
 		this.y = y;
+		this.label = label;
 		this.fileName = filename;
 		this.datasetName = datasetName;
+		this.labelName = labelName;
 		this.slice = slice;
 	}
 
@@ -41,10 +45,20 @@ public class XYDataImpl implements IXYData {
 	}
 
 	@Override
+	public String getLabelName() {
+		return labelName;
+	}
+
+	@Override
 	public SliceND getSlice() {
 		return slice;
 	}
-	
+
+	@Override
+	public double getLabel() {
+		return label;
+	}
+
 	@Override
 	public String toString() {
 		return fileName;

@@ -11,6 +11,7 @@ import org.dawnsci.january.model.NDimensions;
 import org.dawnsci.january.model.SliceChangeEvent;
 import org.eclipse.dawnsci.analysis.api.tree.Node;
 import org.eclipse.january.MetadataException;
+import org.eclipse.january.dataset.IDataset;
 import org.eclipse.january.dataset.ILazyDataset;
 import org.eclipse.january.dataset.SliceND;
 import org.eclipse.january.metadata.AxesMetadata;
@@ -37,6 +38,8 @@ public class DataOptions implements IDataObject, IDataPackage {
 	private String label;
 
 	private ISliceChangeListener listener;
+
+	private String process;
 
 	public DataOptions(String name, LoadedFile parent) {
 		this.name = name;
@@ -82,6 +85,14 @@ public class DataOptions implements IDataObject, IDataPackage {
 
 	public String getShortName() {
 		return shortName;
+	}
+
+	public void setProcess(String process) {
+		this.process = process;
+	}
+
+	public String getProcess() {
+		return process;
 	}
 
 	public String getFilePath(){
@@ -268,6 +279,11 @@ public class DataOptions implements IDataObject, IDataPackage {
 
 	public String getLabel() {
 		return label;
+	}
+
+	@Override
+	public IDataset getLabelValue() {
+		return parent.getLabelValue();
 	}
 
 	@Override

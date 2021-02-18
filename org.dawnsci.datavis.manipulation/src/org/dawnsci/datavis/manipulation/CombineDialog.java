@@ -15,8 +15,11 @@ import org.eclipse.dawnsci.plotting.api.PlotType;
 import org.eclipse.dawnsci.plotting.api.PlottingFactory;
 import org.eclipse.dawnsci.plotting.api.trace.IImageTrace;
 import org.eclipse.dawnsci.plotting.api.trace.MetadataPlotUtils;
+import org.eclipse.january.dataset.Comparisons;
+import org.eclipse.january.dataset.Comparisons.Monotonicity;
 import org.eclipse.january.dataset.Dataset;
 import org.eclipse.january.dataset.DatasetFactory;
+import org.eclipse.january.dataset.DatasetUtils;
 import org.eclipse.january.dataset.IDataset;
 import org.eclipse.january.dataset.ILazyDataset;
 import org.eclipse.january.dataset.IntegerDataset;
@@ -47,7 +50,7 @@ public class CombineDialog extends Dialog implements IAdaptable{
 	private static Logger logger = LoggerFactory.getLogger(CombineDialog.class);
 
 
-	private IDataset data;
+	private Dataset data;
 	private IPlottingSystem<Composite> system;
 	private Image image;
 	private double[] globalRange;
@@ -56,27 +59,35 @@ public class CombineDialog extends Dialog implements IAdaptable{
 
 	public CombineDialog(Shell shell, IDataset data){
 		super(shell);
-		this.data = data;
+		this.data = DatasetUtils.convertToDataset(data);
 		try {
 			AxesMetadata ax = data.getFirstMetadata(AxesMetadata.class);
-//			AxesMetadata ax = MetadataFactory.createMetadata(AxesMetadata.class, 2);
-//			ax.setAxis(1, x);
-			
-			if (ax.getAxes() != null && ax.getAxes()[0] != null) {
-				names = ax.getAxes()[0].getSlice();
-				names = names.squeeze();
+
+			ILazyDataset[] xs = ax.getAxis(0);
+			Dataset range = null;
+			if (xs != null && xs[0] != null) {
+				names = DatasetUtils.sliceAndConvertLazyDataset(xs[0]).squeeze();
 				names.setName("Names");
+				if (xs.length > 1 && xs[1] != null) {
+					range = DatasetUtils.sliceAndConvertLazyDataset(xs[1]).squeeze();
+					Monotonicity m = Comparisons.findMonotonicity(range);
+					if (m == Monotonicity.NOT_ORDERED) {
+						range = null;
+					}
+				}
 			}
-			
-			Dataset range = DatasetFactory.createRange(IntegerDataset.class,data.getShape()[0]);
-			range.setName("Range");
-			
+
+			if (range == null) {
+				range = DatasetFactory.createRange(IntegerDataset.class, this.data.getShapeRef()[0]);
+				range.setName("Range");
+			}
+
 			ILazyDataset[] axis = ax.getAxis(1);
 			
 			IDataset x = axis[0].getSlice();
 			
-			globalRange = new double[]{x.min().doubleValue(),x.max().doubleValue(),range.min().doubleValue(),range.max().doubleValue(), 
-					};
+			globalRange = new double[] { x.min().doubleValue(), x.max().doubleValue(),
+					range.min().doubleValue(), range.max().doubleValue() };
 			
 			ax.setAxis(0, range);
 			
@@ -93,12 +104,11 @@ public class CombineDialog extends Dialog implements IAdaptable{
 	}
 
 	@Override
-	  protected void configureShell(Shell newShell) {
-	    super.configureShell(newShell);
-	    newShell.setText("Combine");
-//	    newShell.setImage(image = Activator.getImageDescriptor("icons/spectrum.png").createImage());
-	  }
-	
+	protected void configureShell(Shell newShell) {
+		super.configureShell(newShell);
+		newShell.setText("Combine");
+	}
+
 	/**
 	 * Create the content of the Shell dialog
 	 * 
@@ -126,66 +136,62 @@ public class CombineDialog extends Dialog implements IAdaptable{
 		}
 		
 		system.setKeepAspect(false);
-		
-//		Button loadButton = createButton(container, IDialogConstants.CLIENT_ID+1, "Load Y Axis...", false);
-		
+
 		return container;
 	}
-	
-	
-	protected void createButtonsForButtonBar(Composite parent) {
-	  // Change parent layout data to fill the whole bar
-	  parent.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 
-	  Button axisButton = createButton(parent, IDialogConstants.NO_ID, "Load Y-Axis...", false);
-	  axisButton.addSelectionListener(new SelectionAdapter() {
-		
-		@Override
-		public void widgetSelected(SelectionEvent e) {
-			FileSelectionDialog dialog = new FileSelectionDialog(Display.getDefault().getActiveShell());
-			dialog.setNewFile(false);
-			dialog.setFolderSelector(false);
-			if (lastPath != null) {
-				File f = new File(lastPath);
-				if (!f.isDirectory()) {
-					lastPath = f.getParent();
+	protected void createButtonsForButtonBar(Composite parent) {
+		// Change parent layout data to fill the whole bar
+		parent.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+
+		Button axisButton = createButton(parent, IDialogConstants.NO_ID, "Load Y-Axis...", false);
+		axisButton.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				FileSelectionDialog dialog = new FileSelectionDialog(Display.getDefault().getActiveShell());
+				dialog.setNewFile(false);
+				dialog.setFolderSelector(false);
+				if (lastPath != null) {
+					File f = new File(lastPath);
+					if (!f.isDirectory()) {
+						lastPath = f.getParent();
+					}
+					dialog.setPath(lastPath);
+				} else {
+					dialog.setPath(System.getProperty("user.home"));
 				}
-				dialog.setPath(lastPath);
-			} else {
-				dialog.setPath(System.getProperty("user.home"));
-			}
-			
-			dialog.create();
-			if (dialog.open() == Dialog.CANCEL ) return;
-			lastPath = dialog.getPath();
-			
-			try {
-				IDataHolder dh = LoaderFactory.getData(lastPath);
-				IDataset dataset = dh.getDataset(0);
-				dataset = dataset.getSliceView().squeeze();
-				if (dataset.getSize() != data.getShape()[0]) {
-					throw new IllegalArgumentException("Dataset sizes not compatible :" + data.getShape()[0] + " and "  + dataset.getSize());
+
+				dialog.create();
+				if (dialog.open() == Dialog.CANCEL)
+					return;
+				lastPath = dialog.getPath();
+
+				try {
+					IDataHolder dh = LoaderFactory.getData(lastPath);
+					IDataset dataset = dh.getDataset(0);
+					dataset = dataset.getSliceView().squeeze();
+					if (dataset.getSize() != data.getShapeRef()[0]) {
+						throw new IllegalArgumentException(
+								"Dataset sizes not compatible :" + data.getShapeRef()[0] + " and " + dataset.getSize());
+					}
+					AxesMetadata ax = data.getFirstMetadata(AxesMetadata.class);
+					ax.setAxis(0, dataset);
+					globalRange[2] = dataset.min(true).doubleValue();
+					globalRange[3] = dataset.max(true).doubleValue();
+					system.clear();
+					IImageTrace t = MetadataPlotUtils.buildTrace(data, system);
+					t.setGlobalRange(globalRange);
+					system.addTrace(t);
+
+				} catch (Exception e1) {
+					MessageDialog.openError(getShell(), "Error", "Error importing y-axis :" + e1.getMessage());
 				}
-				AxesMetadata ax = data.getFirstMetadata(AxesMetadata.class);
-				ax.setAxis(0, dataset);
-				globalRange[2] = dataset.min(true).doubleValue();
-				globalRange[3] = dataset.max(true).doubleValue();
-				system.clear();
-				IImageTrace t = MetadataPlotUtils.buildTrace(data, system);
-				t.setGlobalRange(globalRange);
-				system.addTrace(t);
-				
-				
-			} catch (Exception e1) {
-				MessageDialog.openError(getShell(), "Error", "Error importing y-axis :" + e1.getMessage());
+
 			}
-			
-		}
-		
-	});
-	  
-	  Button saveButton = createButton(parent, IDialogConstants.NO_ID, "Save...", false);
-	  saveButton.addSelectionListener(new SelectionAdapter() {
+		});
+
+		Button saveButton = createButton(parent, IDialogConstants.NO_ID, "Save...", false);
+		saveButton.addSelectionListener(new SelectionAdapter() {
 			
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -267,38 +273,37 @@ public class CombineDialog extends Dialog implements IAdaptable{
 			
 		});
 
-	  // Create a spacer label
-	  Label spacer = new Label(parent, SWT.NONE);
-	  spacer.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+		// Create a spacer label
+		Label spacer = new Label(parent, SWT.NONE);
+		spacer.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 
-	  // Update layout of the parent composite to count the spacer
-	  GridLayout layout = (GridLayout)parent.getLayout();
-	  layout.numColumns++;
-	  layout.makeColumnsEqualWidth = false;
+		// Update layout of the parent composite to count the spacer
+		GridLayout layout = (GridLayout) parent.getLayout();
+		layout.numColumns++;
+		layout.makeColumnsEqualWidth = false;
 
-	  createButton(parent, IDialogConstants.OK_ID,"OK", false);
+		createButton(parent, IDialogConstants.OK_ID, "OK", false);
 	}
-	
+
 	@Override
-	  protected Point getInitialSize() {
-	    return new Point(1000, 800);
-	  }
-	
+	protected Point getInitialSize() {
+		return new Point(1000, 800);
+	}
+
 	@Override
 	public boolean close() {
 		if (image != null) image.dispose();
 		return super.close();
-		
 	}
-	
+
 	@Override
-	  protected boolean isResizable() {
-	    return true;
-	  }
+	protected boolean isResizable() {
+		return true;
+	}
 
 	@Override
 	public Object getAdapter(Class adapter) {
-			if (IPlottingSystem.class == adapter) return system;
+		if (IPlottingSystem.class == adapter) return system;
 		return null;
 	}
 }

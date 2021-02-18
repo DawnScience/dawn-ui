@@ -7,13 +7,15 @@ import java.util.List;
 
 import org.dawnsci.datavis.api.IXYData;
 import org.dawnsci.datavis.api.utils.XYDataImpl;
-import org.eclipse.dawnsci.analysis.dataset.roi.ROISliceUtils;
 import org.eclipse.dawnsci.analysis.dataset.slicer.SliceViewIterator;
 import org.eclipse.january.DatasetException;
 import org.eclipse.january.MetadataException;
+import org.eclipse.january.dataset.Comparisons;
+import org.eclipse.january.dataset.Comparisons.Monotonicity;
 import org.eclipse.january.dataset.Dataset;
 import org.eclipse.january.dataset.DatasetFactory;
 import org.eclipse.january.dataset.DatasetUtils;
+import org.eclipse.january.dataset.DoubleDataset;
 import org.eclipse.january.dataset.IDataset;
 import org.eclipse.january.dataset.ILazyDataset;
 import org.eclipse.january.dataset.SliceND;
@@ -40,24 +42,28 @@ public class DataManipulationUtils {
 	 */
 	public static List<IXYData> getCompatibleDatasets(List<IXYData> data, IDataset testX, int[] outIndices){
 
-		IDataset[] xall = new IDataset[data.size()];
+		if (data.isEmpty()) {
+			return data;
+		}
 
-		for (int i = 0; i < data.size(); i++) {
-			xall[i] = data.get(i).getX();
+		IDataset[] xall;
+		int k;
+		if (testX == null) {
+			xall = new IDataset[data.size()];
+			k = 0;
+		} else {
+			xall = new IDataset[data.size() + 1];
+			xall[0] = testX;
+			k = 1;
+		}
+		for (IXYData d : data) {
+			xall[k++] = d.getX();
 		}
 
 		boolean dataAndNull = false;
 		boolean needsChecks = false;
 
-		IDataset test = testX != null ? testX : xall[0];
-		
-		if (testX != null) {
-			IDataset[] xallextra = new IDataset[data.size()+1];
-			xallextra[0] = test;
-			System.arraycopy(xall, 0, xallextra, 1, xall.length);
-			xall = xallextra;
-		}
-		
+		Dataset test = DatasetUtils.convertToDataset(xall[0]);
 
 		for (int i = 1; i < xall.length; i++) {
 			if ((test == null) != (xall[i] == null)) dataAndNull = true;
@@ -67,9 +73,10 @@ public class DataManipulationUtils {
 		//xdata and no xdata not supported
 		if (dataAndNull) return null;
 
+		IXYData first = data.get(0);
 		if (test == null) {
 			//TODO make sure yDatasets != null
-			int size = data.get(0).getY().getSize();
+			int size = first.getY().getSize();
 
 			for (IXYData d : data) {
 				if (d.getY().getSize() != size) return null;
@@ -92,9 +99,21 @@ public class DataManipulationUtils {
 
 		List<IXYData> output = new ArrayList<IXYData>();
 
-		int maxpos = ROISliceUtils.findPositionOfClosestValueInAxis(test, commonValues[1])-1;
-		int minpos = ROISliceUtils.findPositionOfClosestValueInAxis(test, commonValues[0])+1;
-		
+		Monotonicity m = Comparisons.findMonotonicity(test);
+		boolean up = m == Monotonicity.NONDECREASING || m == Monotonicity.STRICTLY_INCREASING;
+
+		int maxpos;
+		int minpos;
+		if (up) {
+			minpos = DatasetUtils.findIndexGreaterThan(test, commonValues[0]);
+			maxpos = DatasetUtils.findIndexGreaterThan(test, commonValues[1]);
+		} else {
+			minpos = DatasetUtils.findIndexLessThan(test, commonValues[1]);
+			maxpos = DatasetUtils.findIndexLessThan(test, commonValues[0]);
+		}
+		minpos = Math.max(minpos - 1, 0);
+		maxpos = Math.min(maxpos, test.getSize());
+
 		if (outIndices != null && outIndices.length == 2) {
 			outIndices[0] = minpos;
 			outIndices[1] = maxpos;
@@ -106,9 +125,9 @@ public class DataManipulationUtils {
 		int start = 0;
 		
 		if (testX == null) {
-			IDataset y = data.get(0).getY().getSlice(new int[] {minpos},new int[]{maxpos},null);
+			IDataset y = first.getY().getSlice(new int[] {minpos},new int[]{maxpos},null);
 
-			XYDataImpl d = new XYDataImpl(xnew, y, data.get(0).getFileName(), data.get(0).getDatasetName(), new SliceND(y.getShape()));
+			XYDataImpl d = new XYDataImpl(xnew, y, first.getLabel(), first.getFileName(), first.getDatasetName(), first.getLabelName(), new SliceND(y.getShape()));
 
 			output.add(d);
 			
@@ -116,28 +135,29 @@ public class DataManipulationUtils {
 		}
 
 		for (int i = start; i < data.size(); i++) {
+			IXYData d = data.get(i);
+			IDataset x = d.getX();
+			IDataset y1 = d.getY();
 
-			IDataset x = data.get(i).getX();
-			IDataset y1 = data.get(i).getY();
-
-			output.add(new XYDataImpl(xnew, Interpolation1D.splineInterpolation(x, y1, xnew),data.get(i).getFileName(),data.get(i).getDatasetName(), new SliceND(xnew.getShape())));
+			output.add(new XYDataImpl(xnew, Interpolation1D.splineInterpolation(x, y1, xnew), d.getLabel(),
+					d.getFileName(), d.getDatasetName(), d.getLabelName(), new SliceND(xnew.getShape())));
 		}
 
 		return output;
 	}
 	
 	private static double[] checkXaxisHasCommonRangeForInterpolation(IDataset[] xaxis) {
-		double min = Double.NEGATIVE_INFINITY;
-		double max = Double.POSITIVE_INFINITY;
+		double infimum = Double.NEGATIVE_INFINITY; // greatest lower bound
+		double supremum = Double.POSITIVE_INFINITY; // least upper bound
 
 		for (IDataset x : xaxis) {
-			min = Math.max(min, x.min().doubleValue());
-			max = Math.min(max, x.max().doubleValue());
+			infimum = Math.max(infimum, x.min().doubleValue());
+			supremum = Math.min(supremum, x.max().doubleValue());
 		}
 
-		if (min > max) return null;
+		if (infimum > supremum) return null;
 
-		return new double[] {min, max};
+		return new double[] {infimum, supremum};
 	}
 	
 	/**
@@ -154,16 +174,25 @@ public class DataManipulationUtils {
 		IDataset x0 = list.get(0).getX();
 
 		IDataset[] all = new IDataset[list.size()];
-		IDataset names = DatasetFactory.zeros(StringDataset.class, new int[] {list.size()});
+		Dataset names = DatasetFactory.zeros(StringDataset.class, all.length);
+		Dataset labels = DatasetFactory.zeros(DoubleDataset.class, all.length);
 
 		int count = 0;
+		boolean anyNaNs = false;
+		String lName = null;
 		for (IXYData file : list) {
 
 			names.set(new File(file.getFileName()).getName() + ":" + file.getDatasetName(), count);
+			double l = file.getLabel();
+			if (Double.isNaN(l)) {
+				anyNaNs = true;
+			} else if (lName == null) {
+				lName = file.getLabelName();
+			}
+			labels.set(l, count);
 			IDataset ds1 = file.getY().getSliceView().squeeze();
 			ds1.setShape(new int[]{1,ds1.getShape()[0]});
 			all[count++] = ds1;
-
 		}
 
 		Dataset conc = DatasetUtils.concatenate(all, 0);
@@ -174,6 +203,10 @@ public class DataManipulationUtils {
 			AxesMetadata md = MetadataFactory.createMetadata(AxesMetadata.class, 2);
 			md.setAxis(1, x0);
 			md.addAxis(0, names);
+			if (!anyNaNs) {
+				labels.setName(lName);
+				md.addAxis(0, labels);
+			}
 			conc.setMetadata(md);
 		} catch (MetadataException e) {
 			// TODO Auto-generated catch block

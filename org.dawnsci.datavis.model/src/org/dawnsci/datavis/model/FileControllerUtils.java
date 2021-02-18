@@ -22,4 +22,8 @@ public class FileControllerUtils {
 	public static List<LoadedFile> getSelectedFiles(List<LoadedFile> files) {
 		return files.stream().filter(LoadedFile::isSelected).collect(Collectors.toList());
 	}
+
+	public static LoadedFile getLoadedFile(IFileController controller, String path) {
+		return controller.getLoadedFiles().stream().filter(f -> f.getFilePath().equals(path)).findFirst().orElse(null);
+	}
 }
