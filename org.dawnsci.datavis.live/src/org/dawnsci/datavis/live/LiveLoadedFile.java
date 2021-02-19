@@ -15,6 +15,7 @@ import org.dawnsci.january.model.NDimensions;
 import org.eclipse.dawnsci.analysis.api.io.IDataHolder;
 import org.eclipse.dawnsci.analysis.api.io.ILoaderService;
 import org.eclipse.dawnsci.analysis.api.io.IRemoteDataHolder;
+import org.eclipse.dawnsci.analysis.api.io.IRemoteDatasetService;
 import org.eclipse.dawnsci.analysis.api.tree.Attribute;
 import org.eclipse.dawnsci.analysis.api.tree.DataNode;
 import org.eclipse.dawnsci.analysis.api.tree.GroupNode;
@@ -27,6 +28,7 @@ import org.eclipse.dawnsci.nexus.NexusConstants;
 import org.eclipse.january.MetadataException;
 import org.eclipse.january.dataset.IDataset;
 import org.eclipse.january.dataset.IDynamicDataset;
+import org.eclipse.january.dataset.IDynamicShape;
 import org.eclipse.january.dataset.ILazyDataset;
 import org.eclipse.january.dataset.StringDataset;
 import org.eclipse.january.metadata.AxesMetadata;
@@ -38,6 +40,10 @@ import uk.ac.diamond.scisoft.analysis.io.DataHolder;
 
 public class LiveLoadedFile extends LoadedFile implements IRefreshable {
 
+	private IRemoteDatasetService remoteService;
+	private ILoaderService localService;
+	
+	
 	private boolean live = true;
 	private boolean finished = false;
 	private String host;
@@ -46,13 +52,36 @@ public class LiveLoadedFile extends LoadedFile implements IRefreshable {
 	
 	private static final Logger logger = LoggerFactory.getLogger(LiveLoadedFile.class);
 	
-	public LiveLoadedFile(String path, String host, int port) {
+	public LiveLoadedFile(String path, String host, int port, IRemoteDatasetService remote, ILoaderService local) {
 		super(new DataHolder());
 		this.host = host;
 		this.port = port;
+		this.remoteService = remote;
+		this.localService = local;
 		
 		dataHolder.set(createDataHolder(path, host, port));
 	}
+	
+	@Override
+	public Map<String, int[]> getDataMaxShapes(){
+		
+		Map<String, int[]> m = new HashMap<>();
+		
+		Map<String, ILazyDataset> lazyMap = dataHolder.get().toLazyMap();
+		
+		for (Entry<String, ILazyDataset> entry : lazyMap.entrySet()) {
+			
+			ILazyDataset v = entry.getValue();
+			
+			if (v instanceof IDynamicShape) {
+				m.put(entry.getKey(), ((IDynamicShape) v).getMaxShape());
+			}
+		}
+		
+		return m;
+
+	}
+	
 
 	private IDataHolder createDataHolder(String path, String host, int port) {
 		
@@ -60,7 +89,7 @@ public class LiveLoadedFile extends LoadedFile implements IRefreshable {
 		dh.setFilePath(path);
 		
 		try {
-			IDataHolder rdh = ServiceManager.getRemoteDatasetService().createRemoteDataHolder(path, host, port, true);
+			IDataHolder rdh = remoteService.createRemoteDataHolder(path, host, port, true);
 			Map<String, NodeLink> result = findNodes(rdh.getTree());
 			
 			if (result == null) {
@@ -353,10 +382,9 @@ public class LiveLoadedFile extends LoadedFile implements IRefreshable {
 		
 		finished = true;
 		
-		ILoaderService service = ServiceManager.getILoaderService();
 		try {
 			String path = getFilePath();
-			IDataHolder tmp = service.getData(path, null);
+			IDataHolder tmp = localService.getData(path, null);
 			
 			if (tmp == null || tmp.getTree() == null || tmp.getNames() == null) {
 				logger.error("Scan finished but local reload not ready for {}!", path);

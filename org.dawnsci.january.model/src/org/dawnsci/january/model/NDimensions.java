@@ -282,6 +282,10 @@ public class NDimensions {
 	}
 
 	public void setUpAxes(String name, Map<String,int[]> axes, String[] primary) {
+		setUpAxes(name, axes, primary, null);
+	}
+
+	public void setUpAxes(String name, Map<String,int[]> axes, String[] primary, Map<String,int[]> maxShapes) {
 
 		@SuppressWarnings("unchecked")
 		List<String>[] options = new List[dimensions.length];
@@ -289,6 +293,7 @@ public class NDimensions {
 			options[i] = new ArrayList<String>();
 			if (primary != null &&  primary.length > i && primary[i] != null) {
 				dimensions[i].setAxis(primary[i]);
+				options[i].add(primary[i]);
 			} else {
 				dimensions[i].setAxis(INDICES);
 			}
@@ -306,14 +311,47 @@ public class NDimensions {
 				}
 			}	
 		}
+		
+		if (maxShapes != null) {
+			addAxesFromMax(options, maxShapes, name);
+		}
 
 		for (int i = 0 ; i < dimensions.length ; i++) {
 			String[] uniqueOptions = options[i].stream().distinct().toArray(String[]::new);
 			dimensions[i].setAxisOptions(uniqueOptions);
 		}
-
 	}
-
+	
+	private void addAxesFromMax(List<String>[] options, Map<String,int[]> maxShapes, String dsName) {
+		
+		//If the dataset associated with this object is not dynamic, return;
+		if (!maxShapes.containsKey(dsName)) {
+			return;
+		}
+		
+		int[] ks = maxShapes.get(dsName);
+		
+		if (ks == null || ks.length != options.length) {
+			return;
+		}
+		
+		for (Entry<String,int[]> e : maxShapes.entrySet()) {
+			if (e.getKey().equals(dsName)){
+				continue;
+			}
+			if (e.getValue() != null) {
+				for (int i : e.getValue()) {
+					for (int j = 0; j < ks.length ; j++) {
+						if (ks[j] == i) {
+							options[j].add(e.getKey());
+						}
+					}
+				}
+			}	
+		}
+	}
+	
+	
 	public SliceND buildSliceND() {
 		int[] shape = new int[dimensions.length];
 		for (int i = 0; i < dimensions.length;i++) shape[i] = dimensions[i].getSize();

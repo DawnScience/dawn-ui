@@ -1,6 +1,7 @@
 package org.dawnsci.datavis.model;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * Interface to describe something loaded into the datavis
@@ -57,5 +58,11 @@ public interface IRefreshable {
 	 * Gets the data options before initialisation is complete
 	 */
 	public List<DataOptions>  getUninitialisedDataOptions();
+	
+	/**
+	 * Get the max shapes of the datasets
+	 * @return
+	 */
+	public Map<String, int[]> getDataMaxShapes();
 	
 }

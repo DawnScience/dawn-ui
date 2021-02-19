@@ -6,4 +6,6 @@
    <service>
       <provide interface="org.dawnsci.datavis.model.ILiveLoadedFileService"/>
    </service>
+   <reference bind="setRemoteDataService" cardinality="1..1" interface="org.eclipse.dawnsci.analysis.api.io.IRemoteDatasetService" name="IRemoteDatasetService" policy="static"/>
+   <reference bind="setLocalDataService" cardinality="1..1" interface="org.eclipse.dawnsci.analysis.api.io.ILoaderService" name="ILoaderService" policy="static"/>
 </scr:component>

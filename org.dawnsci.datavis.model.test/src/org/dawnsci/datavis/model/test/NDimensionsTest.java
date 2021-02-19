@@ -2,6 +2,10 @@ package org.dawnsci.datavis.model.test;
 
 import static org.junit.Assert.*;
 
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
+
 import org.dawnsci.january.model.NDimensions;
 import org.eclipse.january.dataset.Slice;
 import org.eclipse.january.dataset.SliceND;
@@ -210,6 +214,35 @@ public class NDimensionsTest {
 		assertArrayEquals(new int[]{0, 0, 0, 0}, s.getStart());
 		assertArrayEquals(new int[]{0, 6, 11, 12}, s.getStop());
 		
+	}
+	
+	/**
+	 * Test correct axes added
+	 */
+	@Test
+	public void testAxes() {
+		int[] shape = new int[]{1,10,1,12};
+		int[] maxshape = new int[]{-1,10,1,12};
+		String name = "/entry/test/data";	
+		String nameg = "/entry/test/grow";
+		int[] maxg = new int[]{-1};
+		String[] primary = {"zero","one","two","three"};
+		Map<String, int[]> p = new HashMap<>();
+		p.put(name, shape);
+		for (int i = 0; i < shape.length; i++) {
+			p.put(primary[i], new int[]{shape[i]});
+		}
+		Map<String, int[]> m = new HashMap<>();
+		m.put(name, maxshape);
+		m.put(nameg, maxg);
+		
+		NDimensions ndims = new NDimensions(shape,null);
+
+		ndims.setUpAxes(name, p, primary, m);
+		
+		String[] axisOptions = ndims.getAxisOptions(0);
+		
+		assertTrue(Arrays.stream(axisOptions).anyMatch(s -> s.equals(nameg)));
 	}
 
 }
