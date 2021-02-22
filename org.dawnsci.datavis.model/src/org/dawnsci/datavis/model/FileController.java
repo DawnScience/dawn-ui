@@ -26,6 +26,28 @@ import org.slf4j.LoggerFactory;
 
 public class FileController implements IFileController {
 	
+	/**
+	 *Encode what happens when a new file is loaded
+	 *
+	 */
+	private enum OpenMode {
+		/**
+		 * File is added to the list but not selected
+		 */
+		DO_NOTHING,
+		
+		/**
+		 * File is added to the list and selected
+		 */
+		SELECT,
+		
+		/**
+		 * File is added to the list, selected
+		 * and all other files deselected
+		 */
+		DESELECT_OTHERS;
+	}
+	
 	private ILoaderService loaderService;
 	private IRecentPlaces recentPlaces;
 	
@@ -47,12 +69,22 @@ public class FileController implements IFileController {
 
 	private ILoadedFileInitialiser fileInitialiser;
 	
+	private OpenMode openMode = OpenMode.DO_NOTHING;
+	
 	private static final Logger logger = LoggerFactory.getLogger(FileController.class);
 
-	public FileController(){
+	public FileController() {
 		loadedFiles = new LoadedFiles();
 		listeners = new HashSet<>();
-	};
+		try {
+			String m = System.getProperty("datavis.open.mode");
+			if (m != null) {
+				openMode = OpenMode.valueOf(m.toUpperCase());
+			}
+		} catch (IllegalArgumentException e) {
+			logger.debug("Could not interpret open mode");
+		}
+	}
 
 	/* (non-Javadoc)
 	 * @see org.dawnsci.datavis.model.IFileController#loadFiles(java.lang.String[], org.eclipse.ui.progress.IProgressService, boolean)
@@ -305,6 +337,12 @@ public class FileController implements IFileController {
 				}
 				
 				loadedFiles.addFiles(files);
+				
+				if (!openMode.equals(OpenMode.DO_NOTHING)) {
+					LoadedFile loadedFile = files.get(files.size()-1);
+					selectLoad(loadedFile, openMode.equals(OpenMode.DESELECT_OTHERS));
+					return;
+				}
 			}
 
 			fireStateChangeListeners(false, false, null, null);
@@ -315,6 +353,16 @@ public class FileController implements IFileController {
 		}
 	}
 
+	private void selectLoad(LoadedFile f, boolean deselect) {
+		f.setSelected(true);
+		
+		if (deselect) {
+			loadedFiles.deselectOthers(f.getFilePath());
+		}
+		
+		fireStateChangeListeners(true, false, f, null);
+	}
+	
 	@Override
 	public void setComparator(Comparator<LoadedFile> comparator) {
 		loadedFiles.setComparator(comparator);
@@ -513,6 +561,12 @@ public class FileController implements IFileController {
 			}
 			
 			loadedFiles.addFile(loadedFile);
+
+			if (!openMode.equals(OpenMode.DO_NOTHING)) {
+				selectLoad(loadedFile, openMode.equals(OpenMode.DESELECT_OTHERS));
+				return;
+			}
+			
 			fireStateChangeListeners(false, false, loadedFile, null);
 		}
 		
