@@ -29,11 +29,9 @@ public class DataOptionsUIUtils {
 
 		String[] fileNames = dialog.getFileNames();
 
-		INexusFileFactory service = Activator.getService(INexusFileFactory.class);
-
 		try {
-
-			DataOptionsUtils.saveToFile(dataOptions, dialog.getFilterPath() + File.separator + fileNames[0], service);
+			INexusFileFactory nexusFileFactory = ActionServiceManager.getNexusFileFactory();
+			DataOptionsUtils.saveToFile(dataOptions, dialog.getFilterPath() + File.separator + fileNames[0], nexusFileFactory);
 
 		} catch (DatasetException e) {
 			MessageDialog.openError(shell, "Error slicing data!", e.getMessage());

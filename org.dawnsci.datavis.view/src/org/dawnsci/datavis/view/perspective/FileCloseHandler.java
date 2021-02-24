@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 
 import org.dawnsci.datavis.model.IFileController;
 import org.dawnsci.datavis.model.LoadedFile;
+import org.dawnsci.datavis.view.ActionServiceManager;
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
@@ -16,16 +17,11 @@ import org.eclipse.ui.handlers.HandlerUtil;
 
 public class FileCloseHandler extends AbstractHandler {
 
-	private static IFileController controller;
-	
-	public void setFileController(IFileController c) {
-		controller = c;
-	}
-	
 	@Override
 	public Object execute(ExecutionEvent event) throws ExecutionException {
 		List<LoadedFile> list = getSelectedFiles(event);
 
+		IFileController controller = ActionServiceManager.getFileController();
 		controller.unloadFiles(list);
 
 		return null;

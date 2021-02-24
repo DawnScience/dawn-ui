@@ -13,7 +13,6 @@ import org.eclipse.dawnsci.nexus.NexusFile;
 import org.eclipse.dawnsci.nexus.NexusUtils;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.PlotType;
-import org.eclipse.dawnsci.plotting.api.PlottingFactory;
 import org.eclipse.dawnsci.plotting.api.trace.IImageTrace;
 import org.eclipse.dawnsci.plotting.api.trace.MetadataPlotUtils;
 import org.eclipse.january.dataset.Comparisons;
@@ -58,7 +57,7 @@ public class CombineDialog extends Dialog implements IAdaptable{
 	private String lastPath;
 	private IDataset names;
 
-	public CombineDialog(Shell shell, IDataset data){
+	public CombineDialog(Shell shell, IDataset data) {
 		super(shell);
 		this.data = DatasetUtils.convertToDataset(data);
 		try {
@@ -98,7 +97,7 @@ public class CombineDialog extends Dialog implements IAdaptable{
 		}
 
 		try {
-			system = PlottingFactory.createPlottingSystem();
+			system = DataVisManipulationServiceManager.getPlottingService().createPlottingSystem();
 		} catch (Exception e) {
 			logger.error("Error creating Combine plotting system:", e);
 		}
@@ -213,7 +212,7 @@ public class CombineDialog extends Dialog implements IAdaptable{
 				if (dialog.open() == Dialog.CANCEL ) return;
 				lastPath = dialog.getPath();
 				
-				try (NexusFile nexus = DataVisManipulationServiceManager.getNexusFactory().newNexusFile(lastPath)) {
+				try (NexusFile nexus = DataVisManipulationServiceManager.getNexusFileFactory().newNexusFile(lastPath)) {
 					nexus.openToWrite(true);
 					GroupNode nxentry = NexusUtils.writeNXclass(nexus, null, "entry", NexusConstants.ENTRY);
 					GroupNode nxdata = NexusUtils.writeNXclass(nexus, nxentry, "data", NexusConstants.DATA);

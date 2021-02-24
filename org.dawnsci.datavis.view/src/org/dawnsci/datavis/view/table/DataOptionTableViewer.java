@@ -20,7 +20,7 @@ import org.dawnsci.datavis.model.DataOptionsSlice;
 import org.dawnsci.datavis.model.DataOptionsUtils;
 import org.dawnsci.datavis.model.IFileController;
 import org.dawnsci.datavis.model.ILoadedFileInitialiser;
-import org.dawnsci.datavis.view.Activator;
+import org.dawnsci.datavis.view.ActionServiceManager;
 import org.dawnsci.datavis.view.DataOptionsUIUtils;
 import org.dawnsci.datavis.view.ExpressionDialog;
 import org.dawnsci.january.ui.utils.SelectionUtils;
@@ -172,7 +172,7 @@ public class DataOptionTableViewer {
 					Action exprAction = new Action("Apply expression...") {
 						@Override
 						public void run() {
-							IExpressionService service = Activator.getService(IExpressionService.class);
+							IExpressionService service = ActionServiceManager.getExpressionService();
 							ExpressionDialog dialog = new ExpressionDialog(tableComposite.getShell(), service, dataOptions, controller);
 							int retVal = dialog.open();
 							if (retVal == Window.OK) {
@@ -205,7 +205,7 @@ public class DataOptionTableViewer {
 						Action save = new Action("Save to Nexus...") {
 							@Override
 							public void run() {
-								IRecentPlaces service = Activator.getService(IRecentPlaces.class);
+								IRecentPlaces service = ActionServiceManager.getRecentPlaces();
 								
 								DataOptionsUIUtils.saveToFile(dataOptions, service == null ? null : service.getCurrentDefaultDirectory());
 							}
