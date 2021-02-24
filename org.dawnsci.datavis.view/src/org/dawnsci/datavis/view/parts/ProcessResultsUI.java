@@ -197,6 +197,7 @@ public class ProcessResultsUI extends Composite implements IDatasetStateChanger 
 			}
 		} else {
 			updateCombo(null);
+			updateTable(null);
 		}
 	}
 
@@ -227,6 +228,12 @@ public class ProcessResultsUI extends Composite implements IDatasetStateChanger 
 
 	private void updateTable(LoadedFile file) {
 		if (file == null) {
+			currentSelection.clear();
+			currentProcess = null;
+			Display.getDefault().asyncExec(() -> {
+				processViewer.setInput(currentSelection);
+				processViewer.refresh();
+			});
 			return;
 		}
 
