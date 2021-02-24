@@ -52,8 +52,6 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.FrameworkUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -83,14 +81,7 @@ public class RegionNormalisedDifferenceDialog extends Dialog {
 		container.setLayout(new GridLayout(1, false));
 		container.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
-		BundleContext bundleContext =
-                FrameworkUtil.
-                getBundle(this.getClass()).
-                getBundleContext();
-		
-		IPlottingService plottingService = bundleContext.getService(
-				 						   bundleContext.getServiceReference(IPlottingService.class));
-		
+		IPlottingService plottingService = DataVisManipulationServiceManager.getPlottingService();
 		try {
 			regionSystem = plottingService.createPlottingSystem();
 			differenceSystem = plottingService.createPlottingSystem();

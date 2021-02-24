@@ -28,8 +28,6 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.handlers.HandlerUtil;
 import org.eclipse.ui.progress.IProgressService;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.FrameworkUtil;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
 import org.slf4j.Logger;
@@ -51,13 +49,8 @@ public class FolderPreviewHandler extends AbstractHandler {
 		
 		DirectoryDialog dialog = new DirectoryDialog(HandlerUtil.getActiveShell(event),SWT.NONE);
 		
-		BundleContext bundleContext =
-                FrameworkUtil.
-                getBundle(this.getClass()).
-                getBundleContext();
-		
-		IRecentPlaces recentPlaces = bundleContext.getService(bundleContext.getServiceReference(IRecentPlaces.class));
-		final EventAdmin admin = bundleContext.getService(bundleContext.getServiceReference(EventAdmin.class));
+		IRecentPlaces recentPlaces = DataVisManipulationServiceManager.getRecentPlaces();
+		final EventAdmin admin = DataVisManipulationServiceManager.getEventAdmin();
 		
 		if (!recentPlaces.getRecentDirectories().isEmpty()) {
 			dialog.setFilterPath(recentPlaces.getRecentDirectories().get(0));
@@ -89,8 +82,8 @@ public class FolderPreviewHandler extends AbstractHandler {
 							return;
 						}
 						Map<String,String[]> props = new HashMap<>();
-			    		props.put(PlottingEventConstants.MULTIPLE_FILE_PROPERTY, selectedFileNames);
-			    		admin.sendEvent(new Event(PlottingEventConstants.FILE_OPEN_EVENT, props));
+						props.put(PlottingEventConstants.MULTIPLE_FILE_PROPERTY, selectedFileNames);
+						admin.sendEvent(new Event(PlottingEventConstants.FILE_OPEN_EVENT, props));
 					}
 				});
 			}
