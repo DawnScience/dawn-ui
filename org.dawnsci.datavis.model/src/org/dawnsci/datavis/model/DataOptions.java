@@ -104,6 +104,15 @@ public class DataOptions implements IDataObject, IDataPackage {
 		map.remove(name);
 		return map;
 	}
+	
+	private Map<String, int[]> getAxesMaxShapes() {
+		
+		if (parent instanceof IRefreshable) {
+			return ((IRefreshable) parent).getDataMaxShapes();
+		}
+		
+		return null;
+	}
 
 	public String[] getPrimaryAxes(){
 		ILazyDataset local = getLazyDataset();
@@ -259,7 +268,7 @@ public class DataOptions implements IDataObject, IDataPackage {
 
 	public NDimensions buildNDimensions() {
 		NDimensions ndims = new NDimensions(getLazyDataset().getShape(), this);
-		ndims.setUpAxes((String)null, getAllPossibleAxes(), getPrimaryAxes());
+		ndims.setUpAxes(name, getAllPossibleAxes(), getPrimaryAxes(), getAxesMaxShapes());
 		if (axes != null) {
 			for (int i = 0 ; i < axes.length; i++){
 				ndims.setAxis(i, axes[i]);

@@ -8,6 +8,8 @@ import org.dawnsci.datavis.api.ILiveFileListener;
 import org.dawnsci.datavis.model.ILiveLoadedFileListener;
 import org.dawnsci.datavis.model.ILiveLoadedFileService;
 import org.dawnsci.datavis.model.LoadedFile;
+import org.eclipse.dawnsci.analysis.api.io.ILoaderService;
+import org.eclipse.dawnsci.analysis.api.io.IRemoteDatasetService;
 import org.eclipse.dawnsci.plotting.api.PlottingEventConstants;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
@@ -15,9 +17,19 @@ import org.osgi.service.event.EventAdmin;
 public class LiveFileServiceImpl extends AbstractLiveFileService implements ILiveLoadedFileService {
 
 	private EventAdmin eventAdmin;
+	private IRemoteDatasetService remoteService;
+	private ILoaderService localService;
 
 	public void setEventAdmin(EventAdmin eventAdmin) {
 		this.eventAdmin = eventAdmin;
+	}
+	
+	public void setRemoteDataService(IRemoteDatasetService remote) {
+		this.remoteService = remote;
+	}
+	
+	public void setLocalDataService(ILoaderService local) {
+		this.localService = local;
 	}
 	
 	private void fireListeners(LoadedFile f) {
@@ -37,7 +49,7 @@ public class LiveFileServiceImpl extends AbstractLiveFileService implements ILiv
 			int port    = getDataServerPort();
 
 			for (String p : paths) {
-				LiveLoadedFile f = new LiveLoadedFile(p, host, port);
+				LiveLoadedFile f = new LiveLoadedFile(p, host, port, remoteService, localService);
 
 				fireListeners(f);
 			}
