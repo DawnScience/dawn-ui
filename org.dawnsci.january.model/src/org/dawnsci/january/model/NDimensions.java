@@ -41,9 +41,15 @@ public class NDimensions {
 	}
 
 	public void setOptions(Object[] options) {
+		setOptions(options, null);
+	}
+	
+	public void setOptions(Object[] options, int[] maxShape) {
 		this.options = options;
 		int c = 0;
 		
+		//initialise dims with full range, or first value slice
+		//and count dims that are not 1
 		int nonSingleDims = 0;
 		for (int i = 0; i < dimensions.length; i++) {
 			dimensions[i].setSlice(sliceFullRange ? new Slice(dimensions[i].getSize()) : new Slice(0, 1, 1));
@@ -53,22 +59,28 @@ public class NDimensions {
 			}
 		}
 		
+	    //if all dims 1 but max shape is defined
+		//use it to set described dimensions
 		if (nonSingleDims == 0) {
 			for (int i = dimensions.length-1 ; i >=0 ; i-- ) {
 				if (c >= options.length) break;
-				dimensions[i].setDescription(options[c++].toString());
-				dimensions[i].setSlice(new Slice(0,dimensions[i].getSize()));
+				if  (maxShape != null && maxShape[i] == 1) continue;
+				updateDimension(i, c++);
 			}
 		} else {
 			for (int i = dimensions.length-1 ; i >=0 ; i-- ) {
 				if (c >= options.length) break;
 				if (dimensions[i].getSize() == 1) continue;
-				dimensions[i].setDescription(options[c++].toString());
-				dimensions[i].setSlice(new Slice(0,dimensions[i].getSize()));
+				updateDimension(i, c++);
 			}
 		}
 		
 		update(true);
+	}
+	
+	private void updateDimension(int i, int c) {
+		dimensions[i].setDescription(options[c].toString());
+		dimensions[i].setSlice(new Slice(0,dimensions[i].getSize()));
 	}
 
 	public String[] getDimensionOptions(){
@@ -147,13 +159,6 @@ public class NDimensions {
 	private void updateDescription(Dimension dim, String desc) {
 		String description = null;
 		String oldDescription = dim.getDescription();
-
-		if (dim.getSize() == 1) {
-			description = dim.getDescription();
-			dim.setDescription(null);
-			dim.setSlice(sliceFullRange ? new Slice(dim.getSize()) : new Slice(0, 1, 1));
-			return;
-		}
 
 		Arrays.stream(dimensions)
 		.filter(d -> d.getDescription() != null && d.getDescription().equals(desc))
@@ -238,10 +243,16 @@ public class NDimensions {
 
 	public void updateShape(int[] shape) {
 		if (shape.length != dimensions.length) throw new IllegalArgumentException("shape length must match dimension length");
+		
+		boolean changed = false;
 		for (int i = 0 ; i < shape.length; i++) {
+			if (shape[i] == dimensions[i].getSize()) continue;
+			
 			boolean containsEnd = false;
 			boolean isSingle = false;
 			boolean isSmaller = false;
+			
+			changed = true;
 
 			if (dimensions[i].getSlice() != null) {
 				int size = dimensions[i].getSize();
@@ -277,7 +288,9 @@ public class NDimensions {
 				slice.setStop(shape[i]);
 			}
 
-			update(false);
+			if (changed) {
+				update(false);
+			}
 		}
 	}
 
