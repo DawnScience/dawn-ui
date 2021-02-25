@@ -438,8 +438,11 @@ public class PlotController implements IPlotController, ILoadedFileInitialiser {
 		String l = lf.getLabelName();
 	
 		if (!l.isEmpty()) {
-			kv.put(PlotExportConstants.LABEL_NAME, DataOptionsUtils.shortenDatasetPath(l, false));
-			kv.put(PlotExportConstants.LABEL_VALUE, (Serializable) lf.getLabelValue().getObject());
+			Dataset lv = lf.getLabelValue();
+			if (lv != null) {
+				kv.put(PlotExportConstants.LABEL_NAME, DataOptionsUtils.shortenDatasetPath(l, false));
+				kv.put(PlotExportConstants.LABEL_VALUE, (Serializable) lv.getObject());
+			}
 		}
 
 		Dataset scanNumber = lf.getLabelValue("/entry1/entry_identifier");
@@ -512,13 +515,13 @@ public class PlotController implements IPlotController, ILoadedFileInitialiser {
 					String title = axis.getTitle();
 					String name = md.getMetaValue(PlotExportConstants.PLOT_NAME).toString();
 					if (title == null || !title.equals(name)) {
-						axis.setTitle(name);
+						Display.getDefault().asyncExec(() -> axis.setTitle(name));
 					}
 				} else if (view.getRank() >= 2) {
 					String title = system.getTitle();
 					String name = md.getMetaValue(PlotExportConstants.PLOT_NAME).toString();
 					if (title == null || !title.equals(name)) {
-						system.setTitle(name);
+						Display.getDefault().asyncExec(() -> system.setTitle(name));
 					}
 				}
 			}

@@ -30,7 +30,6 @@ import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.layout.TableColumnLayout;
 import org.eclipse.jface.resource.ImageDescriptor;
-import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ColumnWeightData;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.LabelProvider;
@@ -48,7 +47,7 @@ import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.ui.IWorkbenchWizard;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.commands.ICommandService;
-import org.eclipse.ui.dialogs.ListDialog;
+import org.eclipse.ui.dialogs.ElementListSelectionDialog;
 import org.eclipse.ui.handlers.IHandlerService;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.eclipse.ui.wizards.IWizardDescriptor;
@@ -306,16 +305,12 @@ public class LoadedFileMenuListener implements IMenuListener {
 			if (options.isEmpty()) {
 				return;
 			}
-			
-			List<String> copyOptions = new ArrayList<>(options);
-			Collections.sort(copyOptions);
-			
-			ListDialog d = new ListDialog(Display.getDefault().getActiveShell());
-			d.setTitle("Select item for label");
-			d.setContentProvider(new ArrayContentProvider());
-			d.setLabelProvider(new LabelProvider());
 
-			d.setInput(copyOptions);
+			String[] copyOptions = options.toArray(new String[options.size()]);
+			Arrays.sort(copyOptions);
+			ElementListSelectionDialog d = new ElementListSelectionDialog(Display.getDefault().getActiveShell(), new LabelProvider());
+			d.setElements(copyOptions);
+			d.setTitle("Select item for label");
 			
 			if (Dialog.OK != d.open()) {
 				return;

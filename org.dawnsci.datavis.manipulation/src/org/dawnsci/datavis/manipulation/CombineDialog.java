@@ -10,6 +10,7 @@ import org.eclipse.dawnsci.analysis.api.tree.GroupNode;
 import org.eclipse.dawnsci.analysis.tree.TreeFactory;
 import org.eclipse.dawnsci.nexus.NexusConstants;
 import org.eclipse.dawnsci.nexus.NexusFile;
+import org.eclipse.dawnsci.nexus.NexusUtils;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.PlotType;
 import org.eclipse.dawnsci.plotting.api.PlottingFactory;
@@ -214,13 +215,11 @@ public class CombineDialog extends Dialog implements IAdaptable{
 				
 				try (NexusFile nexus = DataVisManipulationServiceManager.getNexusFactory().newNexusFile(lastPath)) {
 					nexus.openToWrite(true);
-					data.setName("data");
-					GroupNode nxdata = nexus.getGroup("/entry/data", true);
-					nexus.addAttribute(nxdata, TreeFactory.createAttribute(NexusConstants.NXCLASS, NexusConstants.DATA));
-					GroupNode nxentry = nexus.getGroup("/entry", true);
-					nexus.addAttribute(nxentry,TreeFactory.createAttribute(NexusConstants.NXCLASS, NexusConstants.ENTRY));
+					GroupNode nxentry = NexusUtils.writeNXclass(nexus, null, "entry", NexusConstants.ENTRY);
+					GroupNode nxdata = NexusUtils.writeNXclass(nexus, nxentry, "data", NexusConstants.DATA);
+					data.setName(NexusConstants.DATA_DATA);
 					nexus.createData(nxdata, data);
-					nexus.addAttribute(nxdata, TreeFactory.createAttribute(NexusConstants.DATA_SIGNAL, NexusConstants.DATA_DATA));
+					NexusUtils.writeAttribute(nexus, nxdata, NexusConstants.DATA_SIGNAL, NexusConstants.DATA_DATA);
 					
 					AxesMetadata md = data.getFirstMetadata(AxesMetadata.class);
 					
