@@ -24,11 +24,13 @@ import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.Separator;
+import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.util.LocalSelectionTransfer;
 import org.eclipse.jface.viewers.TreeSelection;
 import org.eclipse.richbeans.widgets.table.ISeriesItemDescriptor;
 import org.eclipse.richbeans.widgets.table.SeriesTable;
+import org.eclipse.swt.SWT;
 import org.eclipse.swt.dnd.DropTarget;
 import org.eclipse.swt.dnd.DropTargetAdapter;
 import org.eclipse.swt.dnd.DropTargetEvent;
@@ -78,8 +80,9 @@ public class OperationTableUtils {
 			if (operations == null) return null;
 
 			if (pf.hasConfiguredFields()) {
-				boolean ok = MessageDialog.openQuestion(shell, "Apply auto-configured fields", "Override some fields that are automatically set?");
-				if (ok) {
+				int code = MessageDialog.open(MessageDialog.QUESTION, shell, "Apply auto-configured fields", "Override some fields that are automatically set?",
+						SWT.NONE, IDialogConstants.NO_LABEL, IDialogConstants.YES_LABEL);
+				if (code == 1) {
 					pf.applyConfiguredFields(operations);
 				}
 			}
