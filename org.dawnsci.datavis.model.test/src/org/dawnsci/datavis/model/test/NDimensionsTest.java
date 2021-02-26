@@ -244,5 +244,50 @@ public class NDimensionsTest {
 		
 		assertTrue(Arrays.stream(axisOptions).anyMatch(s -> s.equals(nameg)));
 	}
-
+	
+	@Test
+	public void testGrowingVectorOptions() {
+		
+		int[] shape = {1};
+		int[] max = {10};
+		
+		NDimensions ndims = new NDimensions(shape,null);
+		
+		Object[] op = {"X"};
+		
+		ndims.setOptions(op, max);
+		
+		assertEquals(op[0],ndims.getDescription(0));
+		
+		max = new int[]{-1};
+		
+		ndims = new NDimensions(shape,null);
+		
+		ndims.setOptions(op, max);
+		
+		assertEquals(op[0],ndims.getDescription(0));
+		
+		ndims.updateShape(new int[] {10});
+		
+		SliceND s = ndims.buildSliceND();
+		
+		assertTrue(s.isAll());
+		
+		shape = new int[]{1, 1, 1};
+		max = new int[]{-1, 1, 1};
+		
+		ndims = new NDimensions(shape,null);
+		
+		ndims.setOptions(op, max);
+		
+		assertEquals(op[0],ndims.getDescription(0));
+		
+		ndims.updateShape(new int[] {10, 1, 1});
+		
+		s = ndims.buildSliceND();
+		
+		assertTrue(s.isAll());
+		
+	}
+	
 }

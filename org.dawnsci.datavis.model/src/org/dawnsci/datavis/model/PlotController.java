@@ -44,6 +44,7 @@ import org.eclipse.january.dataset.DatasetFactory;
 import org.eclipse.january.dataset.DatasetUtils;
 import org.eclipse.january.dataset.DoubleDataset;
 import org.eclipse.january.dataset.IDataset;
+import org.eclipse.january.dataset.IDynamicDataset;
 import org.eclipse.january.dataset.ILazyDataset;
 import org.eclipse.january.dataset.ShapeUtils;
 import org.eclipse.january.dataset.Slice;
@@ -938,24 +939,28 @@ public class PlotController implements IPlotController, ILoadedFileInitialiser {
 		
 		NDimensions nd = d.buildNDimensions();
 		
-		int rank = PlotShapeUtils.getPlottableRank(d.getLazyDataset(), d.getParent() instanceof IRefreshable);
-		if (mode == null) {
-			IPlotMode defaultMode = getDefaultMode(rank);
-			nd.setOptions(defaultMode.getOptions());
-			PlottableObject po = new PlottableObject(defaultMode, nd);
-			return po;
-		} else {
+		ILazyDataset lz = d.getLazyDataset();
+		int[] max = null;
+		if (lz instanceof IDynamicDataset) {
+			max = ((IDynamicDataset) lz).getMaxShape();
+		}
+		
+		int rank = PlotShapeUtils.getPlottableRank(lz, d.getParent() instanceof IRefreshable);
+		
+		if (mode != null) {
 			IPlotMode[] plotModes = getPlotModes(rank);
 			for (IPlotMode m : plotModes) {
 				if (mode.equals(m)) {
-					nd.setOptions(m.getOptions());
-					PlottableObject po = new PlottableObject(m, nd);
-					return po;
+					nd.setOptions(m.getOptions(), max);
+					return  new PlottableObject(m, nd);
 				}
 			}
 		}
 		
-		return null;
+		IPlotMode defaultMode = getDefaultMode(rank);
+		nd.setOptions(defaultMode.getOptions(), max);
+		
+		return new PlottableObject(defaultMode, nd);
 	}
 	
 	public void waitOnJob(){

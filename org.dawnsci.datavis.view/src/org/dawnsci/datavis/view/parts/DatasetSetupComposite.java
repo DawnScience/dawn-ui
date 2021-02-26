@@ -303,7 +303,7 @@ public class DatasetSetupComposite extends Composite implements IDatasetStateCha
 	@Override
 	public void refreshRequest() {
 		if (Display.getCurrent() == null) {
-			Display.getDefault().asyncExec(()->refreshRequest());
+			Display.getDefault().asyncExec(this::refreshRequest);
 			return;
 		}
 		
@@ -312,6 +312,9 @@ public class DatasetSetupComposite extends Composite implements IDatasetStateCha
 			table.refresh();
 			viewer.refresh();
 		}
+		
+		plotController.forceReplot();
+		
 	}
 
 	@Override
