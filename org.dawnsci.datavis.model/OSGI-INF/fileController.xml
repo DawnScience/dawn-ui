@@ -7,4 +7,5 @@
    </service>
    <reference bind="setLoaderService" cardinality="1..1" interface="org.eclipse.dawnsci.analysis.api.io.ILoaderService" name="ILoaderService" policy="static"/>
    <reference bind="setRecentPlaces" cardinality="1..1" interface="org.dawnsci.datavis.api.IRecentPlaces" name="IRecentPlaces" policy="static"/>
+   <reference bind="setScriptOpener" cardinality="0..1" interface="org.dawnsci.datavis.api.IScriptFileOpener" name="IScriptFileOpener" policy="static"/>
 </scr:component>

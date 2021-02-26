@@ -10,6 +10,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
 import org.dawnsci.datavis.api.IRecentPlaces;
+import org.dawnsci.datavis.api.IScriptFileOpener;
 import org.dawnsci.datavis.model.fileconfig.CurrentStateFileConfiguration;
 import org.dawnsci.datavis.model.fileconfig.ILoadedFileConfiguration;
 import org.dawnsci.datavis.model.fileconfig.ImageFileConfiguration;
@@ -50,6 +51,7 @@ public class FileController implements IFileController {
 	
 	private ILoaderService loaderService;
 	private IRecentPlaces recentPlaces;
+	private IScriptFileOpener scriptOpener;
 	
 	public void setLoaderService(ILoaderService service) {
 		this.loaderService = service;
@@ -57,6 +59,10 @@ public class FileController implements IFileController {
 	
 	public void setRecentPlaces(IRecentPlaces places) {
 		recentPlaces = places;
+	}
+	
+	public void setScriptOpener(IScriptFileOpener scriptOpener) {
+		this.scriptOpener = scriptOpener;
 	}
 
 	private LoadedFiles loadedFiles;
@@ -283,6 +289,7 @@ public class FileController implements IFileController {
 		
 		@Override
 		public void run(IProgressMonitor monitor) {
+
 			
 			List<LoadedFile> files = new ArrayList<>();
 			
@@ -291,6 +298,12 @@ public class FileController implements IFileController {
 			}
 			
 			for (String path : paths) {
+				
+				if (scriptOpener != null && scriptOpener.canOpen(path)) {
+					scriptOpener.open(path);
+					continue;
+				}
+				
 				if (loadedFiles.contains(path)) continue;
 				if (monitor != null) monitor.subTask("Loading " + path + "...");
 				LoadedFile f = null;
