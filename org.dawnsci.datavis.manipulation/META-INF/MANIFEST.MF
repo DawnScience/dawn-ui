@@ -4,7 +4,7 @@ Bundle-ManifestVersion: 2
 Bundle-Name: DataVis Manipulation
 Bundle-SymbolicName: org.dawnsci.datavis.manipulation;singleton:=true
 Bundle-Version: 1.0.0.qualifier
-Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Bundle-RequiredExecutionEnvironment: JavaSE-11
 Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime,
  org.eclipse.core.expressions,
@@ -19,7 +19,9 @@ Require-Bundle: org.eclipse.ui,
  org.dawnsci.datavis.model,
  org.eclipse.dawnsci.hdf5,
  org.dawnsci.plotting;bundle-version="1.2.0",
- org.eclipse.osgi.services
+ org.eclipse.osgi.services,
+ org.jzy3d.jdt.core.ebr,
+ org.dawb.common.util
 Import-Package: org.dawnsci.january.model,
  org.slf4j
 Service-Component: OSGI-INF/dataVisManipulationServiceManager.xml
