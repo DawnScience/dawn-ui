@@ -85,7 +85,7 @@ public class DatasetPart {
 		String[] labels = new String[2];
 		
 		DatasetSetupComposite genericSetupComposite = new DatasetSetupComposite(stack, fileController, plotController,
-				selectionService, LoadedFilePart.ID);
+				selectionService, getLoadedFileSelectionPartID());
 		
 		ProcessResultsUI processResultsUI = new ProcessResultsUI(stack,fileController, plotController);
 		
@@ -166,7 +166,7 @@ public class DatasetPart {
 			}
 		};
 		
-		selectionService.addSelectionListener(LoadedFilePart.ID, selectionListener);
+		selectionService.addSelectionListener(getLoadedFileSelectionPartID(), selectionListener);
 		
 		plotController.addPlotModeListener(plotListener);
 		
@@ -194,6 +194,10 @@ public class DatasetPart {
 		fileController.addStateListener(fileStateListener);
 		
 		
+	}
+	
+	protected String getLoadedFileSelectionPartID() {
+		return LoadedFilePart.ID;
 	}
 
 	@PreDestroy
