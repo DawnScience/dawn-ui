@@ -18,6 +18,7 @@ import org.eclipse.january.dataset.DatasetUtils;
 import org.eclipse.january.dataset.DoubleDataset;
 import org.eclipse.january.dataset.IDataset;
 import org.eclipse.january.dataset.ILazyDataset;
+import org.eclipse.january.dataset.Maths;
 import org.eclipse.january.dataset.SliceND;
 import org.eclipse.january.dataset.StringDataset;
 import org.eclipse.january.metadata.AxesMetadata;
@@ -41,6 +42,10 @@ public class DataManipulationUtils {
 	 * @return commonData
 	 */
 	public static List<IXYData> getCompatibleDatasets(List<IXYData> data, IDataset testX, int[] outIndices){
+		return getCompatibleDatasets(data, testX, outIndices, false);
+	}
+
+	public static List<IXYData> getCompatibleDatasets(List<IXYData> data, IDataset testX, int[] outIndices, boolean linear){
 
 		if (data.isEmpty()) {
 			return data;
@@ -136,10 +141,11 @@ public class DataManipulationUtils {
 
 		for (int i = start; i < data.size(); i++) {
 			IXYData d = data.get(i);
-			IDataset x = d.getX();
-			IDataset y1 = d.getY();
+			Dataset x = DatasetUtils.convertToDataset(d.getX());
+			Dataset y = DatasetUtils.convertToDataset(d.getY());
 
-			output.add(new XYDataImpl(xnew, Interpolation1D.splineInterpolation(x, y1, xnew), d.getLabel(),
+			Dataset id = linear ? Maths.interpolate(x, y, xnew, null, null) : Interpolation1D.splineInterpolation(x, y, xnew);
+			output.add(new XYDataImpl(xnew, id, d.getLabel(),
 					d.getFileName(), d.getDatasetName(), d.getLabelName(), new SliceND(xnew.getShape())));
 		}
 
@@ -168,7 +174,7 @@ public class DataManipulationUtils {
 	 * @param list
 	 * @return combinedData
 	 */
-	public static IDataset combine(List<IXYData> list) {
+	public static Dataset combine(List<IXYData> list) {
 		if (list == null || list.isEmpty()) return null;
 
 		IDataset x0 = list.get(0).getX();
@@ -190,8 +196,8 @@ public class DataManipulationUtils {
 				lName = file.getLabelName();
 			}
 			labels.set(l, count);
-			IDataset ds1 = file.getY().getSliceView().squeeze();
-			ds1.setShape(new int[]{1,ds1.getShape()[0]});
+			Dataset ds1 = DatasetUtils.convertToDataset(file.getY()).getSliceView().squeeze();
+			ds1.setShape(1, ds1.getShapeRef()[0]);
 			all[count++] = ds1;
 		}
 

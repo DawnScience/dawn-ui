@@ -264,7 +264,7 @@ public class CombineDialog extends Dialog implements IAdaptable{
 					
 					
 				} catch (Exception e1) {
-					MessageDialog.openError(getShell(), "Error", "Error importing y-axis :" + e1.getMessage());
+					MessageDialog.openError(getShell(), "Error", "Error saving combined data:" + e1.getMessage());
 				}
 				
 			}

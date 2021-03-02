@@ -15,6 +15,7 @@ import org.dawnsci.datavis.api.IDataPackage;
 import org.dawnsci.datavis.api.IRecentPlaces;
 import org.dawnsci.datavis.api.IXYData;
 import org.dawnsci.datavis.api.utils.DataPackageUtils;
+import org.dawnsci.datavis.manipulation.aggregate.AggregateDialog;
 import org.dawnsci.datavis.manipulation.componentfit.ComponentFitDialog;
 import org.dawnsci.datavis.manipulation.componentfit.ComponentFitModel;
 import org.dawnsci.datavis.model.DataOptions;
@@ -98,7 +99,7 @@ public class DataManipulationExtensionContributionFactory extends ExtensionContr
 					}
 				};
 
-				Action average = new Action("Average"){
+				Action average = new Action("Average") {
 					@Override
 					public void run() {
 
@@ -247,6 +248,25 @@ public class DataManipulationExtensionContributionFactory extends ExtensionContr
 				};
 				
 				
+				Action aggregate = new Action("Aggregate by labels") {
+					@Override
+					public void run() {
+
+						IFileController fc = DataVisManipulationServiceManager.getFileController();
+						List<IDataFilePackage> selected = fc == null ? null :
+							fc.getLoadedFiles().stream()
+								.filter(IDataFilePackage::isSelected)
+								.collect(Collectors.toList());
+
+						if (selected != null && selected.size() > 0) {
+							Dialog a = new AggregateDialog(shell, selected);
+							a.open();
+						} else {
+							MessageDialog.openError(shell, "No valid data.", "No valid data was found to aggregate");
+						}
+					}
+				};
+
 				Action xmcd = new Action("XMCD"){
 					@Override
 					public void run() {
@@ -377,6 +397,7 @@ public class DataManipulationExtensionContributionFactory extends ExtensionContr
 					concat.setEnabled(false);
 					average.setEnabled(false);
 					sub.setEnabled(false);
+					aggregate.setEnabled(false);
 					xmcd.setEnabled(false);
 					stitch.setEnabled(false);
 				}
@@ -401,6 +422,7 @@ public class DataManipulationExtensionContributionFactory extends ExtensionContr
 				xyTools.add(concat);
 				xyTools.add(average);
 				xyTools.add(sub);
+				xyTools.add(aggregate);
 				xyTools.add(xmcd);
 				xyTools.add(stitch);
 				xyTools.add(componentFit);
@@ -450,7 +472,7 @@ public class DataManipulationExtensionContributionFactory extends ExtensionContr
 
 
 	private List<IXYData> getCompatibleXY(List<IDataFilePackage> suitableData){
-		List<IXYData> xyData = DataPackageUtils.getXYData(suitableData, false);
+		List<IXYData> xyData = DataPackageUtils.getXYData(suitableData, false, false);
 		if (xyData.isEmpty()) {
 			return null;
 		}

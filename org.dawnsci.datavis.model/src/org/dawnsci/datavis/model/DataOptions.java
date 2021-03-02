@@ -1,7 +1,11 @@
 package org.dawnsci.datavis.model;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -41,6 +45,8 @@ public class DataOptions implements IDataObject, IDataPackage {
 
 	private String process;
 
+	private Map<Class<?>, List<?>> derivedData;
+
 	public DataOptions(String name, LoadedFile parent) {
 		this.name = name;
 		this.parent = parent;
@@ -62,6 +68,8 @@ public class DataOptions implements IDataObject, IDataPackage {
 				setAxes(event.getAxesNames());
 			}
 		};
+
+		derivedData = new HashMap<>();
 	}
 
 	public DataOptions(DataOptions toCopy) {
@@ -72,6 +80,7 @@ public class DataOptions implements IDataObject, IDataPackage {
 		this.plottableObject = toCopy.plottableObject != null ? new PlottableObject(toCopy.plottableObject.getPlotMode(),
 				new NDimensions(toCopy.plottableObject.getNDimensions())) : null;
 		this.label = toCopy.label;
+		this.derivedData = new HashMap<>(toCopy.derivedData);
 	}
 
 	@Override
@@ -282,6 +291,16 @@ public class DataOptions implements IDataObject, IDataPackage {
 		return plottableObject == null ? null : plottableObject.getNDimensions().buildSliceND();
 	}
 
+	/**
+	 * @return null or array of dimensions which omit from iteration when slicing
+	 */
+	public int[] getOmitDimensions() {
+		if (plottableObject == null) {
+			return null;
+		}
+		return plottableObject.getPlotMode().getDataDimensions(plottableObject.getNDimensions().getOptions());
+	}
+
 	public void setLabel(String label) {
 		this.label = label;
 	}
@@ -303,5 +322,62 @@ public class DataOptions implements IDataObject, IDataPackage {
 	@Override
 	public String toString() {
 		return (shortName == null ? name : shortName) + (selected.get() ? "*" : "");
+	}
+
+	@Override
+	public void addDerivedData(List<?> derived) {
+		if (derived != null) {
+			if (derived.isEmpty()) {
+				logger.warn("List is empty");
+			} else {
+				Iterator<?> it = derived.iterator();
+				Object obj = null;
+				while (obj == null && it.hasNext()) {
+					obj = it.next();
+				}
+
+				if (obj == null) {
+					logger.warn("List contains only nulls");
+					return;
+				}
+
+				List<?> copy = new ArrayList<>(derived);
+				Class<? extends Object> cls = obj.getClass();
+				Class<?> sc = cls.getSuperclass();
+				// place in superclass or interface
+				if (Object.class.equals(sc)) {
+					Class<?>[] ifs = cls.getInterfaces();
+					if (ifs.length > 0) {
+						derivedData.put(ifs[0], copy);
+					} else {
+						derivedData.put(sc, copy);
+					}
+				} else if (sc != null) {
+					derivedData.put(sc, copy);
+				} else {
+					derivedData.put(cls, copy);
+				}
+			}
+		}
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public <T> List<T> getDerivedData(Class<T> clazz) {
+		if (derivedData.isEmpty()) {
+			return null;
+		}
+		if (derivedData.containsKey(clazz)) {
+			return (List<T>) derivedData.get(clazz);
+		}
+
+		// find first class that extends or implements parameter 
+		for (Class<?> c : derivedData.keySet()) {
+			if (clazz.isAssignableFrom(c)) {
+				return (List<T>) derivedData.get(c);
+			}
+		}
+
+		return null;
 	}
 }

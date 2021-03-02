@@ -222,6 +222,7 @@ public class LoadedFile implements IDataObject, IDataFilePackage {
 		return f.getParent();
 	}
 
+	@Override
 	public String getFilePath() {
 		return dataHolder.get().getFilePath();
 	}
@@ -230,6 +231,7 @@ public class LoadedFile implements IDataObject, IDataFilePackage {
 		return dataHolder.get().getLazyDataset(name);
 	}
 
+	@Override
 	public Tree getTree() {
 		return dataHolder.get().getTree();
 	}
@@ -240,6 +242,7 @@ public class LoadedFile implements IDataObject, IDataFilePackage {
 
 	}
 
+	@Override
 	public boolean isSelected() {
 		return selected;
 	}
@@ -334,10 +337,12 @@ public class LoadedFile implements IDataObject, IDataFilePackage {
 		labelValue = DatasetFactory.createFromObject(label);
 	}
 
+	@Override
 	public String getLabelName() {
 		return labelName;
 	}
 
+	@Override
 	public Collection<String> getLabelOptions() {
 		if (possibleLabels.isEmpty()) {
 			try {
@@ -373,6 +378,7 @@ public class LoadedFile implements IDataObject, IDataFilePackage {
 		return values;
 	}
 
+	@Override
 	public Dataset getLabelValue(String labelName) {
 		if (possibleLabels.containsKey(labelName)) {
 			ILazyDataset l = possibleLabels.get(labelName);
