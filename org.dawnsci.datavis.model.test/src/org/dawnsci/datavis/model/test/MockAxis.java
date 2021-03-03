@@ -273,6 +273,11 @@ public class MockAxis implements IAxis {
 	}
 
 	@Override
+	public void setAutoscale(boolean autoscale) {
+		// TODO Auto-generated method stub
+	}
+
+	@Override
 	public boolean isAxisAutoscaleTight() {
 		// TODO Auto-generated method stub
 		return false;

@@ -344,6 +344,11 @@ public class AspectAxis extends DAxis implements IAxis {
 		return keepAspect;
 	}
 
+	@Override
+	public void setAutoscale(boolean autoscale) {
+		setAutoScale(autoscale);
+	}
+
 	public void setKeepAspect(boolean keepAspect) {
 		this.keepAspect = keepAspect;
 	}
