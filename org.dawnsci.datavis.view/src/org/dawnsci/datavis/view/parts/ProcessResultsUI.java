@@ -24,6 +24,7 @@ import org.dawnsci.datavis.model.ILoadedFileInitialiser;
 import org.dawnsci.datavis.model.IPlotController;
 import org.dawnsci.datavis.model.LoadedFile;
 import org.dawnsci.datavis.model.PlotModeXY;
+import org.dawnsci.datavis.model.PlottableObject;
 import org.dawnsci.datavis.view.table.DataOptionTableViewer;
 import org.dawnsci.january.model.NDimensions;
 import org.dawnsci.january.ui.utils.SelectionUtils;
@@ -278,7 +279,14 @@ public class ProcessResultsUI extends Composite implements IDatasetStateChanger 
 					d.setSelected(isSelected);
 				}
 				if (isSelected) {
-					NDimensions nd = d.getPlottableObject().getNDimensions();
+					PlottableObject po = d.getPlottableObject();
+					NDimensions nd = po.getNDimensions();
+					if (!po.getPlotMode().getClass().equals(PlotModeXY.class)) {
+						nd = new NDimensions(nd);
+						po = new PlottableObject(new PlotModeXY(), nd);
+						nd.setOptions(po.getPlotMode().getOptions());
+						d.setPlottableObject(po);
+					}
 					setSlicingFull(nd);
 				}
 			}
