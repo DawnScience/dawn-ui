@@ -28,7 +28,7 @@ public class ScanNumberFileFilter implements FileFilter {
 	private int step = 1;
 	private Pattern embeddedNumber;
 
-	private final static String EMBEDDED_NUMBER_FORMAT = "^.*([0-9]{%d,}).*";
+	private final static String EMBEDDED_NUMBER_FORMAT = "^[^0-9]*([0-9]{%d,}).*";
 
 	/**
 	 * @param prefix prefix of name (can be null)
@@ -98,7 +98,30 @@ public class ScanNumberFileFilter implements FileFilter {
 		Matcher m = p.matcher("i21-1234");
 		System.out.println(m + " matches " + m.matches());
 
-		ScanNumberFileFilter filter = new ScanNumberFileFilter(null, "1234::3");
+		ScanNumberFileFilter filter;
+
+		filter = new ScanNumberFileFilter(null, "123");
+		System.out.println("1234 should be true: " + filter.accept(new File("asd1234")));
+		System.out.println("1235 should be true: " + filter.accept(new File("asd1235")));
+		System.out.println("1237 should be true: " + filter.accept(new File("asd1237")));
+
+		filter = new ScanNumberFileFilter(null, "1235");
+		System.out.println("1234 should be false: " + filter.accept(new File("asd1234")));
+		System.out.println("1235 should be true: " + filter.accept(new File("asd1235")));
+		System.out.println("1237 should be true: " + filter.accept(new File("asd1237")));
+
+		filter = new ScanNumberFileFilter(null, "1300");
+		System.out.println("1234 should be false: " + filter.accept(new File("asd1234")));
+		System.out.println("1235 should be false: " + filter.accept(new File("asd1235")));
+		System.out.println("1237 should be false: " + filter.accept(new File("asd1237")));
+
+		filter = new ScanNumberFileFilter(null, "1235::1");
+		System.out.println("1234 should be false: " + filter.accept(new File("asd1234")));
+		System.out.println("1235 should be true: " + filter.accept(new File("asd1235")));
+		System.out.println("1237 should be true: " + filter.accept(new File("asd1237")));
+
+
+		filter = new ScanNumberFileFilter(null, "1234::3");
 		System.out.println("1234 should be true: " + filter.accept(new File("asd1234")));
 		System.out.println("1235 should be false: " + filter.accept(new File("asd1235")));
 		System.out.println("1237 should be true: " + filter.accept(new File("asd1237")));
