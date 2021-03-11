@@ -102,6 +102,7 @@ import org.eclipse.jface.action.IContributionManager;
 import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.IStatusLineManager;
+import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -622,6 +623,14 @@ public class LightWeightPlotViewer<T> implements IPlottingSystemViewer<T>, IAnno
 					if (isColorMapFigure(fig)) {
 						fillColorMapConfigure(manager);
 					} else {
+						if (system.getTracesByClass(IImageTrace.class) != null) {
+							IToolBarManager tbm = system.getActionBars().getToolBarManager();
+							IContributionItem action = tbm.find(PlottingConstants.ASPECT);
+							if (action!=null) {
+								manager.add(((ActionContributionItem) action).getAction());
+							}
+						}
+
 						system.getPlotActionSystem().fillZoomActions(manager);
 					}
 

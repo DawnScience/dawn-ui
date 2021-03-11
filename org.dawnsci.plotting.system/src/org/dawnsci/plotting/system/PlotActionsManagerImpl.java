@@ -9,7 +9,6 @@
 
 package org.dawnsci.plotting.system;
 
-import java.io.File;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -41,6 +40,7 @@ import org.eclipse.jface.action.IContributionItem;
 import org.eclipse.jface.action.IContributionManager;
 import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
+import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
@@ -196,24 +196,26 @@ public class PlotActionsManagerImpl extends PlottingActionBarManager {
 
 	@Override
 	public void fillZoomActions(IContributionManager man) {
+		IToolBarManager tbm = system.getActionBars().getToolBarManager();
+		IContributionItem action;
 
-		IContributionItem action = system.getActionBars().getToolBarManager().find(BasePlottingConstants.AUTO_SCALE);
+		action = tbm.find(BasePlottingConstants.AUTO_SCALE);
 		if (action!=null) man.add(((ActionContributionItem)action).getAction());
 
-		action = system.getActionBars().getToolBarManager().find(ZoomType.RUBBERBAND_ZOOM.getId());
+		action = tbm.find(ZoomType.RUBBERBAND_ZOOM.getId());
 		if (action!=null) man.add(((ActionContributionItem)action).getAction());
 
-		action = system.getActionBars().getToolBarManager().find(BasePlottingConstants.RESCALE);
+		action = tbm.find(BasePlottingConstants.RESCALE);
 		if (action!=null) {
 			man.add(((ActionContributionItem)action).getAction());
 		}
 		
-		action = system.getActionBars().getToolBarManager().find(ZoomType.PANNING.getId());
+		action = tbm.find(ZoomType.PANNING.getId());
 		if (action!=null) {
 			man.add(((ActionContributionItem)action).getAction());
 		}
 
-		action = system.getActionBars().getToolBarManager().find(ZoomType.NONE.getId());
+		action = tbm.find(ZoomType.NONE.getId());
 		if (action!=null) {
 			man.add(((ActionContributionItem)action).getAction());
 		}
