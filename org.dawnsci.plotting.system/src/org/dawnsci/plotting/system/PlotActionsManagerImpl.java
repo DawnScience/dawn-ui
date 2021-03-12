@@ -142,6 +142,11 @@ public class PlotActionsManagerImpl extends PlottingActionBarManager {
 				try {
 					system.setFocus();
 					IWizard wiz = EclipseUtils.openWizard(PersistenceExportWizard.ID, false);
+					
+					if (wiz instanceof PersistenceExportWizard) {
+						((PersistenceExportWizard) wiz).setPlottingSystem(system);
+					}
+					
 					WizardDialog wd = new  WizardDialog(Display.getCurrent().getActiveShell(), wiz);
 					wd.setTitle(wiz.getWindowTitle());
 					wd.open();
