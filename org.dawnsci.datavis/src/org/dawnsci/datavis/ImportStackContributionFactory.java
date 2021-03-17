@@ -109,6 +109,7 @@ public class ImportStackContributionFactory extends ExtensionContributionFactory
     		if (dialog.open() == null) return;
 
     		String[] fileNames = dialog.getFileNames();
+    		Arrays.sort(fileNames);
     		for (int i = 0; i < fileNames.length; i++) fileNames[i] = dialog.getFilterPath() + File.separator + fileNames[i];
     		
     		String joined = FileJoining.autoFileJoiner(Arrays.asList(fileNames));
