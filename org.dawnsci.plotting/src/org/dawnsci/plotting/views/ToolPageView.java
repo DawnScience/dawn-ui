@@ -1134,66 +1134,66 @@ public class ToolPageView extends ViewPart implements IPartListener, IToolChange
 	}
 	
 	protected synchronized PageRec doCreatePage(IWorkbenchPart part, IToolPage tool) {
-				
-		// If static tool is not null we can only show that tool on this page.		
+		if (part == null) {
+			return null;
+		}
+
+		// If static tool is not null we can only show that tool on this page
 		final IToolPageSystem sys = (IToolPageSystem)part.getAdapter(IToolPageSystem.class);
-        if (systems==null||recs==null) return null;
-        
-		if (sys!=null) {
-			
-			if (getViewSite().getSecondaryId()==null) {
-				systems.add(new SoftReference<IToolPageSystem>(sys));
-				sys.addToolChangeListener(this);
-			} 
-			
-			if (isFixedTool()) {
-				try {
-					tool = sys.getToolPage(getViewSite().getSecondaryId());
-					if (tool == null || tool.getViewPart()!=null) { // Make a new one
-						// See http://jira.diamond.ac.uk/browse/DAWNSCI-862 
-						// for what we are trying to avoid here.
-						tool = sys.createToolPage(getViewSite().getSecondaryId());
-					}
-				} catch (Exception e) {
-					logger.error("Cannot clone tool "+getViewSite().getSecondaryId(), e);
-					return null;
+		if (sys == null || systems == null || recs == null) {
+			return null;
+		}
+
+		if (getViewSite().getSecondaryId()==null) {
+			systems.add(new SoftReference<IToolPageSystem>(sys));
+			sys.addToolChangeListener(this);
+		} 
+		
+		if (isFixedTool()) {
+			try {
+				tool = sys.getToolPage(getViewSite().getSecondaryId());
+				if (tool == null || tool.getViewPart()!=null) { // Make a new one
+					// See http://jira.diamond.ac.uk/browse/DAWNSCI-862 
+					// for what we are trying to avoid here.
+					tool = sys.createToolPage(getViewSite().getSecondaryId());
 				}
+			} catch (Exception e) {
+				logger.error("Cannot clone tool "+getViewSite().getSecondaryId(), e);
+				return null;
 			}
+		}
 
-			if (tool==null || tool.isDisposed()) { // We find the tool and check it is not a repeat.
-				tool = sys.getCurrentToolPage(getViewRole());	
-				if (!isToolAllowed(tool)) return null;
-			
-		        final PageRec existing = getPageRec(part);
-		        
-		        if (tool!=null && existing!=null&&existing.tool!=null && existing.tool.equals(tool)) {
-		        	if (!tool.isActive() && tool.getControl()!=null) tool.activate();
-		        	return existing;
-		        }
-
-		    }
-			
-			if (tool == null)         return null;
+		if (tool==null || tool.isDisposed()) { // We find the tool and check it is not a repeat.
+			tool = sys.getCurrentToolPage(getViewRole());
 			if (!isToolAllowed(tool)) return null;
+		
+			final PageRec existing = getPageRec(part);
 			
-			updatePartInfo(tool);
-			initPage(tool);
-			tool.createControl(getPageBook());
-			createCommonActions(tool);
-			if (!tool.isActive()) tool.activate();
-			
-			if (tool.isStaticTool() && getViewSite().getSecondaryId()!=null) {
-				staticTool = tool;
+			if (tool!=null && existing!=null&&existing.tool!=null && existing.tool.equals(tool)) {
+				if (!tool.isActive() && tool.getControl()!=null) tool.activate();
+				return existing;
 			}
-						
-			PageRec rec = new PageRec(part, tool);
-			recordPage(part, tool, rec);
-            return rec;
+
 		}
 		
-		return null;
+		if (tool == null)         return null;
+		if (!isToolAllowed(tool)) return null;
+		
+		updatePartInfo(tool);
+		initPage(tool);
+		tool.createControl(getPageBook());
+		createCommonActions(tool);
+		if (!tool.isActive()) tool.activate();
+		
+		if (tool.isStaticTool() && getViewSite().getSecondaryId()!=null) {
+			staticTool = tool;
+		}
+
+		PageRec rec = new PageRec(part, tool);
+		recordPage(part, tool, rec);
+		return rec;
 	}
-	
+
 	private void createCommonActions(final IToolPage tool) {
 		
 		if (tool.getSite()==null)                 return;
