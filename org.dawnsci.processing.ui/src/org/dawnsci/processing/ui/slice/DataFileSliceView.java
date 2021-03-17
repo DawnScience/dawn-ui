@@ -387,7 +387,7 @@ public class DataFileSliceView extends ViewPart {
 						paths = new String[] { path };
 					}
 					
-					fileManager.addFiles((String[])paths);
+					fileManager.addFiles(paths);
 					
 				} catch (Exception e) {
 					return;
