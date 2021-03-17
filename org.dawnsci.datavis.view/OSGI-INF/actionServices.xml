@@ -1,10 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" name="org.dawnsci.datavis.manipulation">
-   <implementation class="org.dawnsci.datavis.manipulation.DataVisManipulationServiceManager"/>
+<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" name="org.dawnsci.datavis.view.perspective.fileclosehandler">
+   <implementation class="org.dawnsci.datavis.view.ActionServiceManager"/>
+   <reference bind="setEventAdmin" cardinality="1..1" interface="org.osgi.service.event.EventAdmin" name="EventAdmin" policy="static"/>
    <reference bind="setExpressionService" cardinality="1..1" interface="org.eclipse.dawnsci.analysis.api.expressions.IExpressionService" name="IExpressionService" policy="static"/>
    <reference bind="setFileController" cardinality="1..1" interface="org.dawnsci.datavis.model.IFileController" name="IFileController" policy="static"/>
-   <reference bind="setLoaderService" cardinality="1..1" interface="org.eclipse.dawnsci.analysis.api.io.ILoaderService" name="ILoaderService" policy="static"/>
    <reference bind="setNexusFileFactory" cardinality="1..1" interface="org.eclipse.dawnsci.nexus.INexusFileFactory" name="INexusFileFactory" policy="static"/>
-   <reference bind="setPlottingService" cardinality="1..1" interface="org.eclipse.dawnsci.plotting.api.IPlottingService" name="IPlottingService" policy="static"/>
    <reference bind="setRecentPlaces" cardinality="1..1" interface="org.dawnsci.datavis.api.IRecentPlaces" name="IRecentPlaces" policy="static"/>
 </scr:component>

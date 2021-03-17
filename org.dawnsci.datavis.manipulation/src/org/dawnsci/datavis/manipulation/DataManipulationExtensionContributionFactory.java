@@ -15,6 +15,7 @@ import org.dawnsci.datavis.api.IDataPackage;
 import org.dawnsci.datavis.api.IRecentPlaces;
 import org.dawnsci.datavis.api.IXYData;
 import org.dawnsci.datavis.api.utils.DataPackageUtils;
+import org.dawnsci.datavis.manipulation.aggregate.AggregateDialog;
 import org.dawnsci.datavis.manipulation.componentfit.ComponentFitDialog;
 import org.dawnsci.datavis.manipulation.componentfit.ComponentFitModel;
 import org.dawnsci.datavis.model.DataOptions;
@@ -56,8 +57,6 @@ import org.eclipse.ui.dialogs.ListDialog;
 import org.eclipse.ui.menus.ExtensionContributionFactory;
 import org.eclipse.ui.menus.IContributionRoot;
 import org.eclipse.ui.services.IServiceLocator;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.FrameworkUtil;
 
 import uk.ac.diamond.scisoft.analysis.utils.ReflMergeUtils;
 
@@ -73,14 +72,8 @@ public class DataManipulationExtensionContributionFactory extends ExtensionContr
 
 		xyTools.addMenuListener(new IMenuListener() {
 
-			private BundleContext bundleContext;
-
-			private <T> T getService(Class<T> clazz) {
-				return (T) bundleContext.getService(bundleContext.getServiceReference(clazz));
-			}
-
 			private String getLastRecentDirectory() {
-				IRecentPlaces places = getService(IRecentPlaces.class);
+				IRecentPlaces places = DataVisManipulationServiceManager.getRecentPlaces();
 				return places.getRecentDirectories().get(0);
 			}
 
@@ -89,10 +82,9 @@ public class DataManipulationExtensionContributionFactory extends ExtensionContr
 				xyTools.removeAll();
 
 				List<IDataFilePackage> data = getData();
-				bundleContext = FrameworkUtil.getBundle(this.getClass()).getBundleContext();
 				Shell shell = Display.getDefault().getActiveShell();
 
-				Action a = new Action("Concatenate"){
+				Action concat = new Action("Concatenate"){
 					@Override
 					public void run() {
 
@@ -107,7 +99,7 @@ public class DataManipulationExtensionContributionFactory extends ExtensionContr
 					}
 				};
 
-				Action average = new Action("Average"){
+				Action average = new Action("Average") {
 					@Override
 					public void run() {
 
@@ -170,7 +162,7 @@ public class DataManipulationExtensionContributionFactory extends ExtensionContr
 
 						if (ext.equals(exts[2]) || ext.equals(exts[3])) {
 
-							INexusFileFactory fileFactory = getService(INexusFileFactory.class);
+							INexusFileFactory fileFactory = DataVisManipulationServiceManager.getNexusFileFactory();
 
 							success = FileWritingUtils.writeNexus(open, fileFactory, mean);
 							
@@ -180,7 +172,7 @@ public class DataManipulationExtensionContributionFactory extends ExtensionContr
 						}
 						
 						if (success) {
-							IFileController fc = getService(IFileController.class);
+							IFileController fc = DataVisManipulationServiceManager.getFileController();
 							FileControllerUtils.loadFile(fc,open);
 						}
 						
@@ -248,7 +240,7 @@ public class DataManipulationExtensionContributionFactory extends ExtensionContr
 						}
 						
 						if (!paths.isEmpty()) {
-							IFileController fc = getService(IFileController.class);
+							IFileController fc = DataVisManipulationServiceManager.getFileController();
 							FileControllerUtils.loadFiles(fc,paths.toArray(new String[paths.size()]), null);
 						}
 						
@@ -256,6 +248,25 @@ public class DataManipulationExtensionContributionFactory extends ExtensionContr
 				};
 				
 				
+				Action aggregate = new Action("Aggregate by labels") {
+					@Override
+					public void run() {
+
+						IFileController fc = DataVisManipulationServiceManager.getFileController();
+						List<IDataFilePackage> selected = fc == null ? null :
+							fc.getLoadedFiles().stream()
+								.filter(IDataFilePackage::isSelected)
+								.collect(Collectors.toList());
+
+						if (selected != null && selected.size() > 0) {
+							Dialog a = new AggregateDialog(shell, selected);
+							a.open();
+						} else {
+							MessageDialog.openError(shell, "No valid data.", "No valid data was found to aggregate");
+						}
+					}
+				};
+
 				Action xmcd = new Action("XMCD"){
 					@Override
 					public void run() {
@@ -271,7 +282,7 @@ public class DataManipulationExtensionContributionFactory extends ExtensionContr
 								String open = f.open();
 								
 								if (open != null && FileWritingUtils.writeText(open, d.getData())) {
-									IFileController fc = getService(IFileController.class);
+									IFileController fc = DataVisManipulationServiceManager.getFileController();
 									FileControllerUtils.loadFile(fc,open);
 								}
 							}
@@ -372,7 +383,7 @@ public class DataManipulationExtensionContributionFactory extends ExtensionContr
 						boolean success = FileWritingUtils.writeDat(open, dataToWrite);
 						
 						if (success) {
-							IFileController fc = getService(IFileController.class);
+							IFileController fc = DataVisManipulationServiceManager.getFileController();
 							FileControllerUtils.loadFile(fc,open);
 						} else {
 							MessageDialog.openError(shell, "Error", "It has not been possible to write the data file.");
@@ -383,9 +394,10 @@ public class DataManipulationExtensionContributionFactory extends ExtensionContr
 				stitch.setToolTipText("Stitch together selected dataset, and normalise the total external reflection to 1.");
 
 				if (data == null || data.isEmpty()) {
-					a.setEnabled(false);
+					concat.setEnabled(false);
 					average.setEnabled(false);
 					sub.setEnabled(false);
+					aggregate.setEnabled(false);
 					xmcd.setEnabled(false);
 					stitch.setEnabled(false);
 				}
@@ -395,7 +407,7 @@ public class DataManipulationExtensionContributionFactory extends ExtensionContr
 					public void run() {
 
 						try {
-							IFileController fc = getService(IFileController.class);
+							IFileController fc = DataVisManipulationServiceManager.getFileController();
 							ComponentFitModel model = getComponentFit(fc);
 							ComponentFitDialog d = new ComponentFitDialog(shell, model);
 							d.open();
@@ -407,9 +419,10 @@ public class DataManipulationExtensionContributionFactory extends ExtensionContr
 					}
 				};
 
-				xyTools.add(a);
+				xyTools.add(concat);
 				xyTools.add(average);
 				xyTools.add(sub);
+				xyTools.add(aggregate);
 				xyTools.add(xmcd);
 				xyTools.add(stitch);
 				xyTools.add(componentFit);
@@ -459,7 +472,7 @@ public class DataManipulationExtensionContributionFactory extends ExtensionContr
 
 
 	private List<IXYData> getCompatibleXY(List<IDataFilePackage> suitableData){
-		List<IXYData> xyData = DataPackageUtils.getXYData(suitableData, false);
+		List<IXYData> xyData = DataPackageUtils.getXYData(suitableData, false, false);
 		if (xyData.isEmpty()) {
 			return null;
 		}

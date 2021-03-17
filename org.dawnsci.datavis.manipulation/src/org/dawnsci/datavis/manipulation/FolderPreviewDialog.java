@@ -67,8 +67,6 @@ import org.eclipse.swt.widgets.ProgressBar;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.Text;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.FrameworkUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -108,12 +106,7 @@ public class FolderPreviewDialog extends Dialog {
 		super(parentShell);
 		this.filenames = filenames;
 
-		BundleContext bundleContext =
-				FrameworkUtil.
-				getBundle(this.getClass()).
-				getBundleContext();
-
-		lService = bundleContext.getService(bundleContext.getServiceReference(ILoaderService.class));
+		lService = DataVisManipulationServiceManager.getLoaderService();
 	}
 
 	@Override

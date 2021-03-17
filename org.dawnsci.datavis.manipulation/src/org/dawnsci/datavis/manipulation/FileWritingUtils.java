@@ -1,11 +1,15 @@
 package org.dawnsci.datavis.manipulation;
 
+import java.time.Instant;
+
+import org.dawb.common.util.eclipse.BundleUtils;
 import org.eclipse.dawnsci.analysis.api.io.ScanFileHolderException;
 import org.eclipse.dawnsci.analysis.api.tree.GroupNode;
 import org.eclipse.dawnsci.analysis.tree.TreeFactory;
 import org.eclipse.dawnsci.nexus.INexusFileFactory;
 import org.eclipse.dawnsci.nexus.NexusConstants;
 import org.eclipse.dawnsci.nexus.NexusFile;
+import org.eclipse.dawnsci.nexus.NexusUtils;
 import org.eclipse.dawnsci.plotting.api.trace.MetadataPlotUtils;
 import org.eclipse.january.DatasetException;
 import org.eclipse.january.dataset.Dataset;
@@ -14,6 +18,8 @@ import org.eclipse.january.dataset.DatasetUtils;
 import org.eclipse.january.dataset.IDataset;
 import org.eclipse.january.dataset.ILazyDataset;
 import org.eclipse.january.metadata.AxesMetadata;
+import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.swt.widgets.Shell;
 
 import uk.ac.diamond.scisoft.analysis.io.DataHolder;
 import uk.ac.diamond.scisoft.analysis.io.RawTextSaver;
@@ -161,7 +167,40 @@ public class FileWritingUtils {
 		y.setShape(y.getShape()[0],1);
 		return y;
 	}
-		
-		
+
+	/**
+	 * Write processed data in Nexus format
+	 * @param fileFactory
+	 * @param shell (can be null if no error dialog wanted)
+	 * @param dawnClass
+	 * @param filePath
+	 * @param entryName
+	 * @param dataset
+	 * @return true if 
+	 */
+	public static boolean writeProcessedData(INexusFileFactory fileFactory, Shell shell, String dawnClass, String filePath, String entryName, Dataset dataset) {
+		try (NexusFile nexus = fileFactory.newNexusFile(filePath)) {
+			nexus.createAndOpenToWrite();
+			GroupNode entry = NexusUtils.writeNXclass(nexus, null, entryName, NexusConstants.ENTRY);
+
+			GroupNode data = NexusUtils.writeNXdata(nexus, entry, NexusConstants.DATA_DATA, dataset);
+			NexusUtils.writeStringAttribute(nexus, null, NexusConstants.DEFAULT, entryName);
+			NexusUtils.writeStringAttribute(nexus, entry, NexusConstants.DEFAULT, NexusConstants.DATA_DATA);
 	
+			// add NXprocess info
+			GroupNode process = NexusUtils.writeNXclass(nexus, entry, "process", NexusConstants.PROCESS);
+			NexusUtils.writeString(nexus, process, "program", "DAWN." + dawnClass);
+			NexusUtils.writeString(nexus, process, "version", BundleUtils.getDawnVersion());
+			NexusUtils.writeString(nexus, process, "date", Instant.now().toString());
+			NexusUtils.writeStringAttribute(nexus, process, NexusConstants.DEFAULT, NexusConstants.DATA_DATA);
+			nexus.link(nexus.getPath(data), nexus.getPath(process));
+			// NXnote or NXparameters
+			return true;
+		} catch (Exception e) {
+			if (shell != null) {
+				MessageDialog.openError(shell, "Error", "Writing processed data:" + e.getMessage());
+			}
+		}
+		return false;
+	}
 }

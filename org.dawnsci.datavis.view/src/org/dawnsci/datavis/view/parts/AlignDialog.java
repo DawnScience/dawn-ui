@@ -17,6 +17,7 @@ import java.util.Map;
 import org.dawnsci.datavis.api.IDataPackage;
 import org.dawnsci.datavis.api.IXYData;
 import org.dawnsci.datavis.api.utils.DataPackageUtils;
+import org.dawnsci.datavis.model.DataOptions;
 import org.dawnsci.datavis.model.IFileController;
 import org.dawnsci.datavis.model.IPlotController;
 import org.dawnsci.datavis.model.IPlotDataModifier;
@@ -464,16 +465,7 @@ public class AlignDialog extends Dialog implements IRegionListener {
 
 	/*
 	 * FIXME
-	 * 
-	 * refactor to use PlotController somehow
-	 * 
-	 * PC.updatePlotState iterates over state held by FileController
-	 * and uses PC.updatePlottedData to grab data from each file to plot
-	 * 
-	 * 
 	 * issues:
-	 *  how to make alignment persist over dialog
-	 *  store aligned data as DataOptionsDataset like expression
 	 *  in LoadedFile (from DO's parent) as virtual option (for each file too) and update table of current file.
 	 *  See DataOptionTableViewer#163 (action to apply expression)
 	 */
@@ -482,10 +474,32 @@ public class AlignDialog extends Dialog implements IRegionListener {
 		removeAveragePlot();
 		List<? extends IDataPackage> plotData = fileController.getImmutableFileState();
 
+		List<IXYData> xyData = DataPackageUtils.getXYData(plotData, false);
+		int lmax = xyData.size();
+		if (lmax < 2) {
+			return;
+		}
+		IDataset[] input = new IDataset[2 * lmax];
+
+		IDataPackage pd = plotData.get(0);
+		String fn = pd.getFilePath();
+		String dn = pd.getName();
+		int ip = 0;
+		int ipmax = plotData.size();
 		int i = 0;
-		List<IXYData> xyData = DataPackageUtils.getXYData(plotData);
-		IDataset[] input = new IDataset[2 * xyData.size()];
+		int[] pdIndex = new int[lmax];
 		for (IXYData d : xyData) { // gather inputs to shifter
+			while (!fn.equals(d.getFileName()) || !dn.equals(d.getDatasetName())) {
+				if (++ip < ipmax) {
+					pd = plotData.get(ip);
+					fn = pd.getFilePath();
+					dn = pd.getName();
+				} else {
+					pd = null;
+					break;
+				}
+			}
+			pdIndex[i/2] = ip;
 			input[i++] = d.getX();
 			input[i++] = d.getY();
 		}
@@ -519,7 +533,23 @@ public class AlignDialog extends Dialog implements IRegionListener {
 		}
 		List<Dataset> data = AlignToHalfGaussianPeak.shiftData(shifts, input);
 
-		// TODO synthesize new DataOptions for each file???
+		// gather and store in corresponding plot data
+		List<Dataset> store = new ArrayList<>();
+		int cip = pdIndex[0];
+		pd = plotData.get(cip);
+		for (int j = 0; j < input.length; j += 2) {
+			int nip = pdIndex[j/2]; 
+			if (nip != cip) {
+				storeXYData(pd, store);
+				store.clear();
+				cip = nip;
+				pd = plotData.get(cip);
+			}
+			store.add(data.get(j));
+			store.add(data.get(j + 1));
+		}
+		storeXYData(pd, store);
+
 		i = 0;
 		int minSize = Integer.MAX_VALUE;
 		IPlotDataModifier modifier = plotController.getEnabledPlotModifier();
@@ -539,10 +569,12 @@ public class AlignDialog extends Dialog implements IRegionListener {
 				x.setName(ox.getName());
 				minSize = Math.min(minSize, x.getSize());
 			}
+
 			if (modifier != null) {
 				d = DatasetUtils.convertToDataset(modifier.modifyForDisplay(d));
 			}
 			t.setData(x, d);
+
 			i += 2;
 		}
 
@@ -553,6 +585,30 @@ public class AlignDialog extends Dialog implements IRegionListener {
 		setRegionDone(true);
 		plottingSystem.repaint(false);
 		resultTable.refresh();
+	}
+
+	// store aligned data in original data option
+	// rather than synthesize new DataOptions for each file
+	private void storeXYData(IDataPackage dp, List<Dataset> xy) {
+		int n = xy == null ? 0 : xy.size();
+		if (n < 2) {
+			logger.error("Need two or more datasets");
+			return;
+		}
+		if (n % 2 == 1) {
+			logger.warn("List has odd number of datasets; last item will be ignored");
+		}
+		if (dp instanceof DataOptions) {
+			DataOptions o = (DataOptions) dp;
+			o = o.getParent().getDataOption(dp.getName());
+
+			List<IXYData> list = new ArrayList<>();
+			for (int i = 0; i < n; i+=2) {
+				list.add(DataPackageUtils.createXYData(xy.get(i), xy.get(i + 1), o));
+			}
+
+			o.addDerivedData(list);
+		}
 	}
 
 	private void plotAverage(List<? extends IDataset> data, int minSize) {
@@ -622,6 +678,9 @@ public class AlignDialog extends Dialog implements IRegionListener {
 			}
 			pi.setAuto(0);
 			pi.setManual(0);
+		}
+		for (DataOptions o : fileController.getImmutableFileState()) {
+			storeXYData(o, null);
 		}
 		setRegionDone(false);
 		resultTable.refresh();
