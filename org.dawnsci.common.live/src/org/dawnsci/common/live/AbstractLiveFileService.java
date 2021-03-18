@@ -48,6 +48,7 @@ public abstract class AbstractLiveFileService {
 	private static final String MESSAGE_INITIAL_FILEPATH_FIELD = "initialFilePath";
 	private static final String SWMR_STATUS = "swmrStatus";
 	private static final String SWMR_ACTIVE = "ACTIVE";
+	private static final String SWMR_ENABLED = "ENABLED";
 	
 	protected Set<ILiveFileListener> listeners = new HashSet<>();
 
@@ -274,8 +275,11 @@ public abstract class AbstractLiveFileService {
 				return;
 			}
 			
-			if (msg.containsKey(SWMR_STATUS) && !SWMR_ACTIVE.equals(msg.get(SWMR_STATUS))) {
-				//do nothing if swmr not active
+			boolean swmrActive = msg.containsKey(SWMR_STATUS) && SWMR_ACTIVE.equals(msg.get(SWMR_STATUS));
+			boolean swmrEnabled = msg.containsKey(SWMR_STATUS) && SWMR_ENABLED.equals(msg.get(SWMR_STATUS));
+			
+			if (!(swmrActive || swmrEnabled)) {
+				//do nothing if swmr not active or enabled
 				return;
 			}
 			
