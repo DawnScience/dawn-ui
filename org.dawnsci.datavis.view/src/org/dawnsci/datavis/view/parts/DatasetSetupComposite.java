@@ -223,7 +223,7 @@ public class DatasetSetupComposite extends Composite implements IDatasetStateCha
 		}
 		removeSliceListener();
 		List<DataOptions> dataOptions = file.getDataOptions();
-		viewer.setInput(dataOptions.toArray());
+		viewer.setInput(dataOptions);
 		DataOptions option = null;
 		for (DataOptions op : file.getDataOptions()) {
 			if (op.isSelected()) {

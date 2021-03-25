@@ -11,6 +11,7 @@ package org.dawnsci.datavis.view.table;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
+import java.util.List;
 import java.util.function.BiFunction;
 
 import org.dawnsci.datavis.api.IRecentPlaces;
@@ -51,6 +52,8 @@ import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Composite;
@@ -68,6 +71,8 @@ public class DataOptionTableViewer {
 	private Image unticked;
 	private Composite tableComposite;
 	private boolean useShortName;
+	
+	private boolean reverse = false;
 
 	/**
 	 * Set to true to display short names
@@ -106,7 +111,8 @@ public class DataOptionTableViewer {
 		return tableViewer.getStructuredSelection();
 	}
 
-	public void setInput(Object input) {
+	public void setInput(List<DataOptions> input) {
+		sort(input);
 		tableViewer.setInput(input);
 	}
 
@@ -131,6 +137,9 @@ public class DataOptionTableViewer {
 	public void reselect() {
 		setSelection(getStructuredSelection(), true);
 	}
+	
+	
+	
 
 	public void createControl(Composite parent) {
 		tableComposite = new Composite(parent, SWT.None);
@@ -155,7 +164,7 @@ public class DataOptionTableViewer {
 						@Override
 						public void run() {
 							dataOptions.getParent().addVirtualOption(DataOptionsUtils.buildView(dataOptions));
-							tableViewer.setInput(dataOptions.getParent().getDataOptions().toArray());
+							setInput(dataOptions.getParent().getDataOptions());
 						}
 					};
 
@@ -181,7 +190,8 @@ public class DataOptionTableViewer {
 									dataOptions.getParent().addVirtualOption(result);
 									if (initialiser != null)
 										initialiser.initialise(dataOptions.getParent());
-									tableViewer.setInput(dataOptions.getParent().getDataOptions().toArray());
+									
+									setInput(dataOptions.getParent().getDataOptions());
 								}
 							}
 						}
@@ -197,7 +207,7 @@ public class DataOptionTableViewer {
 									controller.setDataSelected(dataOptions, false);
 								}
 								dataOptions.getParent().removeVirtualOption(dataOptions.getName());
-								tableViewer.setInput(dataOptions.getParent().getDataOptions().toArray());
+								setInput(dataOptions.getParent().getDataOptions());
 
 							}
 						};
@@ -263,6 +273,24 @@ public class DataOptionTableViewer {
 
 		name.getColumn().setText("Dataset Name");
 		name.getColumn().setWidth(200);
+		name.getColumn().addSelectionListener(new SelectionAdapter() {
+			
+			@SuppressWarnings("unchecked")
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				reverse = !reverse;
+				Object input = tableViewer.getInput();
+				
+				if (input instanceof List<?>) {
+					sort((List<DataOptions>) input);
+				}
+				
+				tableViewer.getTable().setSortDirection(reverse ? SWT.UP : SWT.DOWN);
+				tableViewer.getTable().setSortColumn(name.getColumn());
+				tableViewer.refresh();
+				
+			}
+		});
 
 		TableViewerColumn shape = new TableViewerColumn(tableViewer, SWT.CENTER);
 		shape.setLabelProvider(new ColumnLabelProvider() {
@@ -286,6 +314,27 @@ public class DataOptionTableViewer {
 		columnLayout.setColumnData(shape.getColumn(), new ColumnWeightData(30,20));
 
 		tableComposite.setLayout(columnLayout);
+	}
+	
+	private void sort(List<DataOptions> list) {
+
+		if (list == null) {
+			return;
+		}
+
+		list.sort((DataOptions o1, DataOptions o2) -> {
+
+			//put "not from file" datasets at bottom
+			if (!o1.isFromFile() ^ !o2.isFromFile()) {
+				return o1.isFromFile() ? -1 : 1; 
+			}
+
+			int c = o1.getName().compareTo(o2.getName());
+
+			if (reverse) c *= -1;
+
+			return c;
+		});
 	}
 
 	private class CheckBoxEditSupport extends EditingSupport {
@@ -348,7 +397,7 @@ public class DataOptionTableViewer {
 							return;
 						}
 						dataOptions.getParent().addVirtualOption(out);
-						Display.getDefault().asyncExec(() -> tableViewer.setInput(dataOptions.getParent().getDataOptions().toArray()));
+						Display.getDefault().asyncExec(() -> tableViewer.setInput(dataOptions.getParent().getDataOptions()));
 					}
 				});
 			} catch (InvocationTargetException e) {

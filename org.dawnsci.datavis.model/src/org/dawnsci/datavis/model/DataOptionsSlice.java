@@ -10,6 +10,7 @@ public class DataOptionsSlice extends DataOptions {
 	public DataOptionsSlice(DataOptions option, SliceND slice) {
 		super(option);
 		this.setSelected(false);
+		this.fromFile = false;
 		this.slice = slice.clone();
 		getPlottableObject().getNDimensions().updateShape(slice.getShape());
 	}

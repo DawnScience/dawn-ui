@@ -46,6 +46,8 @@ public class DataOptions implements IDataObject, IDataPackage {
 	private String process;
 
 	private Map<Class<?>, List<?>> derivedData;
+	
+	protected boolean fromFile = true;
 
 	public DataOptions(String name, LoadedFile parent) {
 		this.name = name;
@@ -273,6 +275,10 @@ public class DataOptions implements IDataObject, IDataPackage {
 
 	public void setSelected(boolean selected) {
 		this.selected.set(selected);
+	}
+	
+	public boolean isFromFile() {
+		return fromFile;
 	}
 
 	public NDimensions buildNDimensions() {

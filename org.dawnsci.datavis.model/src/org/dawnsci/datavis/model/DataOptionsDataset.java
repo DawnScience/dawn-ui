@@ -10,7 +10,7 @@ public class DataOptionsDataset extends DataOptions {
 
 	public DataOptionsDataset(String name, LoadedFile parent, ILazyDataset dataset) {
 		super(name, parent);
-
+		this.fromFile = false;
 		this.dataset = dataset;
 	}
 
