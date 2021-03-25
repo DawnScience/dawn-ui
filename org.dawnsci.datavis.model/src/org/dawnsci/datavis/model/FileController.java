@@ -233,6 +233,16 @@ public class FileController implements IFileController {
 		FileControllerStateEvent e = new FileControllerStateEvent(this, file, dataset, f , o);
 		for (FileControllerStateEventListener l : listeners) l.stateChanged(e);
 	}
+	
+	private void fireStateChangeListenersLoad(boolean file, boolean dataset, LoadedFile f, DataOptions o) {
+		FileControllerStateEvent e = new FileControllerStateEvent(this, file, dataset, f , o);
+		
+		if (openMode != OpenMode.DO_NOTHING) {
+			e.setPushSelectionUpdate(true);
+		}
+		
+		for (FileControllerStateEventListener l : listeners) l.stateChanged(e);
+	}
 
 	/* (non-Javadoc)
 	 * @see org.dawnsci.datavis.model.IFileController#getImmutableFileState()
@@ -358,7 +368,7 @@ public class FileController implements IFileController {
 				}
 			}
 
-			fireStateChangeListeners(false, false, null, null);
+			fireStateChangeListenersLoad(false, false, null, null);
 		}
 		
 		public List<String> getFailedLoadingFiles(){
@@ -580,7 +590,7 @@ public class FileController implements IFileController {
 				return;
 			}
 			
-			fireStateChangeListeners(false, false, loadedFile, null);
+			fireStateChangeListenersLoad(false, false, loadedFile, null);
 		}
 		
 		private void initialiseLiveFile(LoadedFile file, ILoadedFileConfiguration primary, ILoadedFileConfiguration secondary) {

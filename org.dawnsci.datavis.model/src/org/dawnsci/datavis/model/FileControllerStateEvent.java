@@ -10,6 +10,8 @@ public class FileControllerStateEvent extends EventObject {
 	private boolean selectedDataChanged;
 	private LoadedFile loadedFile;
 	private DataOptions option;
+	
+	private boolean pushSelectionUpdate = false;
 
 	public FileControllerStateEvent(Object source, boolean selectedFileChanged,
 			boolean selectedDataChanged, LoadedFile f, DataOptions o) {
@@ -38,6 +40,14 @@ public class FileControllerStateEvent extends EventObject {
 
 	public boolean isSelectedDataChanged() {
 		return selectedDataChanged;
+	}
+	
+	public boolean isPushSelectionUpdate() {
+		return pushSelectionUpdate;
+	}
+
+	public void setPushSelectionUpdate(boolean pushSelectionUpdate) {
+		this.pushSelectionUpdate = pushSelectionUpdate;
 	}
 
 }
