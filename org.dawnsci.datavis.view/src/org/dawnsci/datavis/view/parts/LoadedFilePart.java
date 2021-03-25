@@ -494,6 +494,12 @@ public class LoadedFilePart {
 			s = SelectionUtils.getFirstFromSelection(selection, LoadedFile.class);
 		}
 		
+		if (event.isPushSelectionUpdate()&& event.getLoadedFile() != null) {
+			StructuredSelection s1 = new StructuredSelection(event.getLoadedFile());
+			viewer.setSelection(s1);
+			return;
+		}
+		
 		if (s != null) {
 			selectionService.setSelection(new StructuredSelection(selection.toArray()));
 		}
