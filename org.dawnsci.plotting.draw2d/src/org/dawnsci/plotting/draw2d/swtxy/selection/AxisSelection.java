@@ -265,6 +265,10 @@ class AxisSelection extends AbstractSelectionRegion<RectangularROI> implements I
                               new Point(parentBounds.getBottomRight().x, bounds.getBottomRight().y));
 			
 		}
+		
+		r.height = r.height-1;
+		r.width = r.width-1;
+		
 		return r;
 	}
 
@@ -419,6 +423,9 @@ class AxisSelection extends AbstractSelectionRegion<RectangularROI> implements I
 				           ? line2.getBounds().getBottomRight()
 				           : line1.getBounds().getBottomRight();
 		Rectangle size = new Rectangle(loc1, loc4);
+		size.height = size.height-1;
+		size.width = size.width-1;
+		
 		return size;
 	}
 
@@ -490,6 +497,9 @@ class AxisSelection extends AbstractSelectionRegion<RectangularROI> implements I
 		final double[] p2 = coords.getPositionFromValue(ept);
 
 		final Rectangle local = new Rectangle(new PrecisionPoint(p1[0], p1[1]), new PrecisionPoint(p2[0], p2[1]));
+		local.width = local.width-1;
+		local.height = local.height-1;
+		
 		setLocalBounds(local, line1.getParent().getBounds());
 		
 		if (mover != null) {
