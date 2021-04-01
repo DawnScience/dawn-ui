@@ -383,7 +383,7 @@ public class FileController implements IFileController {
 			loadedFiles.deselectOthers(f.getFilePath());
 		}
 		
-		fireStateChangeListeners(true, false, f, null);
+		fireStateChangeListenersLoad(true, false, f, null);
 	}
 	
 	@Override
