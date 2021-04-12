@@ -31,17 +31,6 @@
 					</dependency-resolution>
 				</configuration>
 			</plugin>
-			<plugin>
-				<groupId>org.eclipse.tycho</groupId>
-				<artifactId>tycho-surefire-plugin</artifactId>
-				<version>${tycho.version}</version>
-				<configuration>
-					<excludes>
-						<!-- org/eclipse/swt/graphics/Device needed -->
-						<exclude>PlotControllerTest</exclude>
-					</excludes>
-				</configuration>
-			</plugin>
 		</plugins>
 	</build>
 </project>

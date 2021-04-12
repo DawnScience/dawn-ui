@@ -1,6 +1,7 @@
 package org.dawnsci.datavis.model.test;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
@@ -253,7 +254,14 @@ public class MockPlottingSystem implements IPlottingSystem<Object> {
 
 	@Override
 	public List<IAxis> getAxes() {
-		return new ArrayList<IAxis>();
+		
+		MockAxis x = new MockAxis();
+		x.setTitle("x");
+		
+		MockAxis y = new MockAxis();
+		x.setTitle("y");
+		
+		return Arrays.asList(x,y);
 	}
 
 	@Override

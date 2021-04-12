@@ -4,8 +4,8 @@ import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -36,6 +36,7 @@ import org.eclipse.january.dataset.SliceND;
 import org.hamcrest.core.IsEqual;
 import org.hamcrest.core.IsNot;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import uk.ac.diamond.scisoft.analysis.io.LoaderServiceImpl;
@@ -484,6 +485,7 @@ public class PlotControllerTest extends AbstractTestModel {
 		
 	}
 	
+	@Ignore
 	@Test
 	public void testLabelPropagation() throws Exception{
 		initialiseControllers();
