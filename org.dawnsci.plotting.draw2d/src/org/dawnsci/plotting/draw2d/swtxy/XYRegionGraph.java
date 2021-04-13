@@ -305,8 +305,7 @@ public class XYRegionGraph extends XYGraph {
 		ImageTrace image = area.getImageTrace();
 		if (tryToUseWhitespace && image != null) {
 			double[] gr = delta < 0 ? null : image.getGlobalRange();
-			expandAxis((AspectAxis) getPrimaryXAxis(), gr == null ? null : Arrays.copyOfRange(gr, 0, 2));
-			expandAxis((AspectAxis) getPrimaryYAxis(), gr == null ? null : Arrays.copyOfRange(gr, 2, 4));
+			expandAxes(evt.x, evt.x, gr);
 		}
 		if (delta < 0) { // don't use global range to expand after zooming in again
 			autoscaled = false;
@@ -315,30 +314,40 @@ public class XYRegionGraph extends XYGraph {
 		area.createPositionCursor(evt.x, evt.y);
 	}
 
-	private void expandAxis(AspectAxis axis, double[] limit) {
-		int p = axis.getTickLength();
-		int q = axis.getPrecheckTickLength();
-		if (q > p) { // when there is room to expand
-			Range r = axis.getRange();
-			double l = r.getLower();
-			double u = r.getUpper();
-			double d = u - l;
-			if (d > 0) { // shift end to maximize portion of image shown
-				u = l + (d * q) / p;
+	private void expandAxes(int cx, int cy, double[] limit) {
+		AspectAxis ax = (AspectAxis) getPrimaryXAxis();
+		AspectAxis ay = (AspectAxis) getPrimaryYAxis();
+		double rx = ax.getPrecheckTickLength()/ (double) ax.getTickLength();
+		double ry = ay.getPrecheckTickLength()/ (double) ay.getTickLength();
+		if (rx > 1 || ry > 1) {
+			if (rx > ry) {
+				expandAxis(ax, ax.getValueFromPosition(cx), rx, limit == null ? null : Arrays.copyOfRange(limit, 0, 2));
 			} else {
-				l = u - (d * q) / p;
+				expandAxis(ay, ay.getValueFromPosition(cy), ry, limit == null ? null : Arrays.copyOfRange(limit, 2, 4));
 			}
-			if (limit != null && autoscaled) {
-				if (d > 0) {
-					l = Math.max(l, limit[0]);
-					u = Math.min(u, limit[1]);
-				} else {
-					l = Math.min(l, limit[1]);
-					u = Math.max(u, limit[0]);
-				}
-			}
-			axis.setRange(l, u);
 		}
+	}
+
+	private void expandAxis(AspectAxis a, double c, double ratio, double[] limit) {
+		Range r = a.getRange();
+		double l = r.getLower();
+		double u = r.getUpper();
+		double d = u - l;
+		if (d > 0) { // shift end to maximize portion of image shown
+			u = l + d * ratio;
+		} else {
+			l = u - d * ratio;
+		}
+		if (limit != null && autoscaled) {
+			if (!r.isMinBigger()) {
+				l = Math.max(l, limit[0]);
+				u = Math.min(u, limit[1]);
+			} else {
+				l = Math.min(l, limit[1]);
+				u = Math.max(u, limit[0]);
+			}
+		}
+		a.setRange(l, u);
 	}
 
 	public void dispose() {

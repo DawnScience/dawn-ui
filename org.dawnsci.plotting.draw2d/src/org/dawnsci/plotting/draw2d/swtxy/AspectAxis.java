@@ -98,20 +98,7 @@ public class AspectAxis extends DAxis implements IAxis {
 		return isHorizontal() ? "x" : "y";
 	}
 
-	private boolean skipCheckBounds = false;
-
-	public void checkBounds(final boolean ignore) {
-		checkBounds(ignore, false);
-	}
-
-	private double centre = Double.NaN;
-
-	protected void checkBounds(final boolean ignore, final boolean force) {
-		if (skipCheckBounds) {
-			skipCheckBounds = false;
-			return;
-		}
-
+	public void checkBounds(final boolean zooming) {
 		if (relativeTo == null) return;
 		if (!keepAspect)        return;
 		
@@ -120,32 +107,12 @@ public class AspectAxis extends DAxis implements IAxis {
 		final double  relRange      = getInterval(relativeTo.getRange());
 		final Rectangle calcBounds  = getBounds().getCopy();
 
-		boolean check = false;
-		if (!force) { // check if this axis's resolution (/pixel) is less than the other's
-			check = relRange * getTickLength() > thisRange * relativeTo.getTickLength();
-		}
-
 		precheckTickLength = isHorizontal() ? calcBounds.width : calcBounds.height;
-		precheckTickLength -= 4 * getMargin();
-		if (check || force) {
-			boolean otherAxisInvalid = setRelativeAxisBounds(calcBounds, thisRange, relRange);
-			if (force) { // change range instead
-				double fLength = precheckTickLength + 2 * getMargin();
-				double d = 1 - (isHorizontal() ? calcBounds.width : calcBounds.height) / fLength;
-				if (d > 0) { // what if need to shrink???
-					Range r = getRange();
-					if (!Double.isFinite(centre)) {
-						centre = (r.getLower() + r.getUpper()) * 0.5;
-					}
-					relativeTo.skipCheckBounds = true;
-					zoomInOut(centre, d);
-				}
-			} else {
-				setBounds(calcBounds);
-			}
-			if (!ignore && otherAxisInvalid && !force) { // force is not recursive
-				relativeTo.checkBounds(false, true);
-			}
+		precheckTickLength -= 2 * getMargin();
+		boolean check = relRange * getTickLength() > thisRange * relativeTo.getTickLength();
+		if (check) {
+			setRelativeAxisBounds(calcBounds, thisRange, relRange);
+			setBounds(calcBounds);
 		}
 
 		// y correction for companion axis
@@ -185,7 +152,6 @@ public class AspectAxis extends DAxis implements IAxis {
 
 	@Override
 	public void zoomInOut(final double center, final double factor) {
-		this.centre = center;
 		// If we are image and it is fully zoomed, do not allow zoom in.
 		final XYRegionGraph xyGraph = getGraph();
 		final ImageTrace trace = xyGraph.getRegionArea().getImageTrace();
@@ -298,16 +264,9 @@ public class AspectAxis extends DAxis implements IAxis {
 
 		// Code to stop pan outside image bounds.
 		if (trace != null && !trace.hasTrueAxes()) {
-			skipCheckBounds = false;
-			final double d1 = t1 - t2;
-			final double d2 = t2 - t1;
+			final double delta = t2 - t1;
 
-			final Range cur = getRange();
-			final double ran = Math.max(cur.getUpper(), cur.getLower()) - Math.min(cur.getUpper(), cur.getLower());
-
-			boolean isAxisFlipped = isYAxis() ? trace.getImageOrigin().isOnTop() : !trace.getImageOrigin().isOnLeft();
-			int yIndex = trace.getImageOrigin().isOnLeadingDiagonal() ? 0 : 1;
-			int index = isYAxis() ? yIndex : 1 - yIndex;
+			boolean isAxisFlipped = temp.isMinBigger();
 			double lower, upper;
 			if (isAxisFlipped) {
 				lower = temp.getUpper();
@@ -317,26 +276,18 @@ public class AspectAxis extends DAxis implements IAxis {
 				upper = temp.getUpper();
 			}
 
-			if ((lower-d2)<=0) {
+			Range r = new Range(lower - delta, upper - delta);
+			Range n = normalize(r);
+			if (n != r) { // so has been stopped
 				if (isAxisFlipped) {
-					setRange(ran, 0);
+					setRange(n.getUpper(), n.getLower());
 				} else {
-					setRange(0, ran);
-				}
-				return false;
-
-			} else if ((upper+d1)>trace.getData().getShape()[index]) {
-				if (isAxisFlipped) {
-					setRange(trace.getData().getShape()[index], trace.getData().getShape()[index]-ran);
-				} else {
-					setRange(trace.getData().getShape()[index]-ran, trace.getData().getShape()[index]);
+					setRange(n.getLower(), n.getUpper());
 				}
 				return false;
 			}
-
 		}
 
-		skipCheckBounds = true;
 		return super.panChecked(temp, t1, t2);
 	}
 
@@ -383,7 +334,6 @@ public class AspectAxis extends DAxis implements IAxis {
 		final Range norm = normalize(new Range(lower, upper));
 		double l = norm.getLower();
 		double u = norm.getUpper();
-		centre = (l + u)*0.5;
 		super.setRange(l, u);
 		setInverted(norm.isMinBigger());
 	}
