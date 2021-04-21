@@ -30,7 +30,7 @@
 					<products>
 						<product>
 							<id>${project.artifactId}</id>
-							<archiveFileName>DawnDiamond-${unqualifiedVersion}.v${maven.build.timestamp}</archiveFileName>
+							<archiveFileName>DawnDiamond-${qualifiedVersion}</archiveFileName>
 							<rootFolders>
 								<macosx>Dawn.app</macosx>
 							</rootFolders>
