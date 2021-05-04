@@ -382,6 +382,7 @@ class DataReduction2DToolModel extends DataReduction2DToolObservableModel {
 			rv = rawData;
 			String newName = MetadataPlotUtils.removeSquareBrackets(rawData.getName());
 			newName = newName.substring(newName.lastIndexOf('/') + 1);
+			newName = newName.replace(":", "-");
 			rv.setName(newName);
 			return rv;
 		}
@@ -459,6 +460,7 @@ class DataReduction2DToolModel extends DataReduction2DToolObservableModel {
 	
 		String newName = MetadataPlotUtils.removeSquareBrackets(rawData.getName());
 		newName = newName.substring(newName.lastIndexOf('/') + 1);
+		newName = newName.replace(":", "-");
 		rv.setName(newName);
 		
 		return rv;
