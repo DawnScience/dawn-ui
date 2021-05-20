@@ -386,4 +386,12 @@ public class DataOptions implements IDataObject, IDataPackage {
 
 		return null;
 	}
+
+	/**
+	 * Remove derived data
+	 * @param clazz
+	 */
+	public void removeDerivedData(Class<?> clazz) {
+		derivedData.remove(clazz);
+	}
 }

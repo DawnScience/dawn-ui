@@ -109,14 +109,14 @@ public class AlignDialog extends Dialog implements IRegionListener {
 
 	@Override
 	public void regionsRemoved(RegionEvent evt) {
-		resetPlotItems(false);
+		resetPlotItems();
 	}
 
 	@Override
 	public void regionRemoved(RegionEvent evt) {
 		IRegion r = evt.getRegion();
 		if (r != null && ALIGN_REGION.equals(r.getName())) {
-			resetPlotItems(false);
+			resetPlotItems();
 		}
 	}
 
@@ -307,6 +307,7 @@ public class AlignDialog extends Dialog implements IRegionListener {
 		if (!plotItems.isEmpty()) {
 			return;
 		}
+
 		for (ILineTrace t : plottingSystem.getTracesByClass(ILineTrace.class)) {
 			String n = t.getName();
 			if (RESAMPLE_AVERAGE.equals(n)) {
@@ -317,27 +318,43 @@ public class AlignDialog extends Dialog implements IRegionListener {
 			pi.setX(DatasetUtils.convertToDataset(t.getXData()));
 			pi.setY(DatasetUtils.convertToDataset(t.getYData()));
 		}
-	}
 
-	/**
-	 * Reset plot to unaligned and clear old state if needed
-	 */
-	public void resetPlotItems(boolean clear) {
-		if (clear) {
-			setRegionVisible(false);
-			removeRegion();
-			currentROI = null;
-			plotItems.clear();
-		} else {
-			for (PlotItem pi : plotItems.values()) {
-				pi.setAuto(0);
-				pi.setManual(0);
-			}
+		// update index
+		List<? extends IDataPackage> plotData = fileController.getImmutableFileState();
+		List<IXYData> xyData = DataPackageUtils.getXYData(plotData, false);
+		int lmax = xyData.size();
+		if (lmax < 2) {
+			return;
 		}
-		if (!resultTable.getControl().isDisposed()) {
-			resultTable.refresh();
-			updateResetButton();
-			setRegionDone(false);
+		IDataPackage pd = plotData.get(0);
+		String fn = pd.getFilePath();
+		String dn = pd.getName();
+		int ip = 0;
+		int ipmax = plotData.size();
+		int i = 0;
+		int[] pdIndex = new int[lmax]; // index values for plotData list
+		int[] xyIndex = new int[lmax]; // index values for xyData list
+		int si = 0;
+		for (IXYData d : xyData) { // gather inputs to shifter
+			while (!fn.equals(d.getFileName()) || !dn.equals(d.getDatasetName())) {
+				si = 0;
+				if (++ip < ipmax) {
+					pd = plotData.get(ip);
+					fn = pd.getFilePath();
+					dn = pd.getName();
+				} else {
+					pd = null;
+					break;
+				}
+			}
+			pdIndex[i] = ip;
+			xyIndex[i] = si++;
+			i++;
+		}
+		i = 0;
+		for (PlotItem pi : plotItems.values()) {
+			pi.setIndex(pdIndex[i], xyIndex[i]);
+			i++;
 		}
 	}
 
@@ -487,9 +504,12 @@ public class AlignDialog extends Dialog implements IRegionListener {
 		int ip = 0;
 		int ipmax = plotData.size();
 		int i = 0;
-		int[] pdIndex = new int[lmax];
+		int[] pdIndex = new int[lmax]; // index values for plotData list
+		int[] xyIndex = new int[lmax]; // index values for xyData list
+		int si = 0;
 		for (IXYData d : xyData) { // gather inputs to shifter
 			while (!fn.equals(d.getFileName()) || !dn.equals(d.getDatasetName())) {
+				si = 0;
 				if (++ip < ipmax) {
 					pd = plotData.get(ip);
 					fn = pd.getFilePath();
@@ -500,6 +520,7 @@ public class AlignDialog extends Dialog implements IRegionListener {
 				}
 			}
 			pdIndex[i/2] = ip;
+			xyIndex[i/2] = si++;
 			input[i++] = d.getX();
 			input[i++] = d.getY();
 		}
@@ -510,6 +531,7 @@ public class AlignDialog extends Dialog implements IRegionListener {
 
 		i = 0;
 		for (PlotItem pi : plotItems.values()) {
+			pi.setIndex(pdIndex[i/2], xyIndex[i/2]);
 			double delta = pi.getManual();
 			Dataset x = pi.getX();
 			Double s = shifts.get(i);
@@ -591,10 +613,6 @@ public class AlignDialog extends Dialog implements IRegionListener {
 	// rather than synthesize new DataOptions for each file
 	private void storeXYData(IDataPackage dp, List<Dataset> xy) {
 		int n = xy == null ? 0 : xy.size();
-		if (n < 2) {
-			logger.error("Need two or more datasets");
-			return;
-		}
 		if (n % 2 == 1) {
 			logger.warn("List has odd number of datasets; last item will be ignored");
 		}
@@ -602,12 +620,16 @@ public class AlignDialog extends Dialog implements IRegionListener {
 			DataOptions o = (DataOptions) dp;
 			o = o.getParent().getDataOption(dp.getName());
 
-			List<IXYData> list = new ArrayList<>();
-			for (int i = 0; i < n; i+=2) {
-				list.add(DataPackageUtils.createXYData(xy.get(i), xy.get(i + 1), o));
+			if (n == 0) {
+				o.removeDerivedData(IXYData.class);
+			} else {
+				List<IXYData> list = new ArrayList<>();
+				for (int i = 0; i < n; i+=2) {
+					list.add(DataPackageUtils.createXYData(xy.get(i), xy.get(i + 1), o));
+				}
+	
+				o.addDerivedData(list);
 			}
-
-			o.addDerivedData(list);
 		}
 	}
 
@@ -628,14 +650,13 @@ public class AlignDialog extends Dialog implements IRegionListener {
 		plottingSystem.addTrace(t);
 	}
 
-	private void updateTrace(double delta, PlotItem pi) {
+	private void updateDerivedDataAndTrace(double delta, PlotItem pi) {
 		ITrace t = plottingSystem.getTrace(pi.getName());
 		if (t instanceof ILineTrace) {
 			ILineTrace lt = (ILineTrace) t;
 			Dataset nx;
 			IDataset ny;
 			if (resampleX) {
-				
 				nx = Maths.add(pi.getX(), delta);
 				ny = Maths.interpolate(nx, pi.getY(), pi.getX(), null, null);
 				nx = pi.getX();
@@ -644,6 +665,12 @@ public class AlignDialog extends Dialog implements IRegionListener {
 				nx = Maths.add(pi.getX(), delta);
 				ny = lt.getYData();
 			}
+
+			int[] index = pi.getIndex();
+			if (index[0] >= 0) {
+				updateDerivedData(index, nx, ny);
+			}
+
 			lt.setData(nx, ny);
 			lt.repaint();
 
@@ -667,6 +694,44 @@ public class AlignDialog extends Dialog implements IRegionListener {
 		}
 	}
 
+	private void updateDerivedData(int[] index, Dataset nx, IDataset ny) {
+		List<? extends IDataPackage> plotData = fileController.getImmutableFileState();
+		IDataPackage dp = plotData.get(index[0]);
+
+		if (dp instanceof DataOptions) {
+			DataOptions o = (DataOptions) dp;
+			o = o.getParent().getDataOption(dp.getName());
+			List<IXYData> list = o.getDerivedData(IXYData.class);
+			if (list == null) {
+				list = addDerivedData(o, index[0]);
+			}
+			int i = index[1];
+			list.remove(i);
+			list.add(i, DataPackageUtils.createXYData(nx, ny, o));
+		}
+	}
+
+	private List<IXYData> addDerivedData(DataOptions o, int pdIndex) {
+		List<Dataset> store = new ArrayList<>();
+
+		for (PlotItem pi : plotItems.values()) {
+			if (pi.getIndex()[0] == pdIndex) {
+				store.add(pi.getX());
+				store.add(pi.getY());
+			}
+		}
+		storeXYData(o, store);
+		return o.getDerivedData(IXYData.class);
+	}
+
+	/**
+	 * Reset plot to unaligned and clear old state if needed
+	 */
+	public void resetPlotItems() {
+		plotOriginal();
+		updateResetButton();
+	}
+
 	private void plotOriginal() {
 		removeAveragePlot();
 		for (ILineTrace t : plottingSystem.getTracesByClass(ILineTrace.class)) {
@@ -680,10 +745,12 @@ public class AlignDialog extends Dialog implements IRegionListener {
 			pi.setManual(0);
 		}
 		for (DataOptions o : fileController.getImmutableFileState()) {
-			storeXYData(o, null);
+			storeXYData(o, null); // remove data 
 		}
 		setRegionDone(false);
-		resultTable.refresh();
+		if (!resultTable.getControl().isDisposed()) {
+			resultTable.refresh();
+		}
 		plottingSystem.repaint(false);
 	}
 
@@ -706,11 +773,11 @@ public class AlignDialog extends Dialog implements IRegionListener {
 		if (getReturnCode() == Window.CANCEL) {
 			plotOriginal();
 			removeRegion();
+			plotItems.clear();
 		} else {
 			setRegionVisible(false);
 		}
 		currentROI = null;
-		plotItems.clear();
 		return super.close();
 	}
 
@@ -749,10 +816,12 @@ public class AlignDialog extends Dialog implements IRegionListener {
 		private String name;
 		private double auto;
 		private double manual;
+		private int[] index;
 		private Dataset x, y;
 
 		public PlotItem(String name) {
 			this.name = name;
+			index = new int[] {-1, -1};
 		}
 
 		public String getName() {
@@ -790,6 +859,20 @@ public class AlignDialog extends Dialog implements IRegionListener {
 		public void setManual(double manual) {
 			this.manual = manual;
 		}
+
+		public int[] getIndex() {
+			return index;
+		}
+
+		/**
+		 * Set plot data index
+		 * @param index
+		 * @param subIndex 
+		 */
+		public void setIndex(int index, int subIndex) {
+			this.index[0] = index;
+			this.index[1] = subIndex;
+		}
 	}
 
 	private class ManualAdjustEditingSupport extends EditingSupport {
@@ -826,7 +909,7 @@ public class AlignDialog extends Dialog implements IRegionListener {
 				pi.setManual(delta);
 				getViewer().update(element, null);
 
-				updateTrace(delta, pi);
+				updateDerivedDataAndTrace(delta, pi);
 			} catch (Exception e) {
 				// do nothing
 			}
