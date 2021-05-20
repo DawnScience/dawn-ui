@@ -13,6 +13,7 @@ import java.util.Arrays;
 import org.dawb.common.ui.util.GridUtils;
 import org.dawnsci.plotting.system.PlottingSystemActivator;
 import org.dawnsci.plotting.util.ColorUtility;
+import org.dawnsci.plotting.views.ToolPageView;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.histogram.HistogramBound;
 import org.eclipse.dawnsci.plotting.api.histogram.ImageServiceBean.HistoType;
@@ -248,7 +249,7 @@ public class ImageTraceComposite extends Composite {
 
 		GridUtils.setVisible(outlierComp, imageTrace.getHistoType()==HistoType.OUTLIER_VALUES);
 		
-		if (plottingSystem!=null) {
+		if (plottingSystem!=null && plottingSystem.getPart() != null) {
 			label = new Label(group, SWT.NONE);
 			label.setText("Open histogram tool");
 			label.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false, 1, 1));
@@ -264,9 +265,9 @@ public class ImageTraceComposite extends Composite {
 						final IToolPageSystem system = (IToolPageSystem)plottingSystem.getAdapter(IToolPageSystem.class);
 						system.setToolVisible(BasePlottingConstants.HISTO_TOOL_ID, 
 								              ToolPageRole.ROLE_2D, 
-								              "org.dawb.workbench.plotting.views.toolPageView.2D");
+								              ToolPageView.TOOLPAGE_2D_VIEW_ID);
 					} catch (Exception e1) {
-						logger.error("Cannot show histogram tool programatically!", e1);
+						logger.error("Cannot show histogram tool programmatically!", e1);
 					}
 					
 				}

@@ -114,8 +114,6 @@ public class PlottingSystemImpl<T> extends AbstractPlottingSystem<T> {
 	private T              parent;
 	private StackLayout    stackLayout;
 
-	private PlotActionsManagerImpl       actionBarManager;
-
 	private List<IPlottingSystemViewer<T>>  viewers;
 	private IPlottingSystemViewer<T>        activeViewer;
 
@@ -129,7 +127,6 @@ public class PlottingSystemImpl<T> extends AbstractPlottingSystem<T> {
 		super();
 		showValueLabels = PlottingSystemActivator.getPlottingPreferenceStore().getBoolean(PlottingConstants.SHOW_VALUE_LABELS);
 
-		this.actionBarManager     = (PlotActionsManagerImpl)super.actionBarManager;
 		viewers = createViewerList();
 
 		for (IPlottingSystemViewer<T> v : viewers) {
