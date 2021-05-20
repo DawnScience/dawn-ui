@@ -39,6 +39,11 @@ public class KichwaFunction extends AFunction {
 	}
 
 	@Override
+	public int getNoOfParameters() {
+		return 0;
+	}
+
+	@Override
 	protected void setNames() {
 		setNames("Kichwa Test Function", "Does not do anything but returns zeros");
 	}
@@ -47,7 +52,6 @@ public class KichwaFunction extends AFunction {
 	public double val(double... values) {
 		return 0;
 	}
-	
 
 	@Override
 	public void fillWithValues(DoubleDataset data, CoordinatesIterator it) {
