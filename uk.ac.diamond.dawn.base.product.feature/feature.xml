@@ -2,7 +2,7 @@
 <feature
       id="uk.ac.diamond.dawn.base.product.feature"
       label="Dawn Diamond Base Product Feature"
-      version="2.22.0.qualifier"
+      version="2.23.0.qualifier"
       provider-name="Diamond Light Source">
 
    <description url="http://www.example.com/description">
