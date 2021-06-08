@@ -90,10 +90,6 @@
          version="0.0.0"/>
 
    <includes
-         id="org.eclipse.dawnsci.nexus.template.feature"
-         version="0.0.0"/>
-
-   <includes
          id="org.dawnsci.jre.linux.x86_64.feature"
          version="0.0.0"
          optional="true"
@@ -116,6 +112,10 @@
          os="win32"
          ws="win32"
          arch="x86_64"/>
+
+   <includes
+         id="org.eclipse.dawnsci.nexus.feature"
+         version="0.0.0"/>
 
    <plugin
          id="uk.ac.diamond.scisoft.analysis.rcp.contributions"
