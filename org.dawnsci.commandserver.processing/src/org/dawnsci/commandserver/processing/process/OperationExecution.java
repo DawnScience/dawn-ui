@@ -69,6 +69,7 @@ public class OperationExecution {
 		String filePath = obean.getFilePath();
 		String datasetPath = obean.getDatasetPath();
 		OperationMonitor monitor = null;
+		boolean isLive = checkLive(obean);
 		
 		logger.debug("Loading processing chain");
 		IPersistentFile file = pservice.getPersistentFile(obean.getProcessingPath());
@@ -111,11 +112,11 @@ public class OperationExecution {
 		    datasetPath = augmentedDataset.name;
 		    
 		    logger.debug("Building Slice Metadata");
-		    SourceInformation si = new SourceInformation(obean.getFilePath(), datasetPath, lz, obean.getDataKey() != null);
+		    SourceInformation si = new SourceInformation(obean.getFilePath(), datasetPath, lz, isLive);
 		    lz.setMetadata(new SliceFromSeriesMetadata(si));
 		    context.setData(lz);
 		    
-		    if (obean.getDataKey() != null) {
+		    if (isLive) {
 		    	logger.debug("Live Processing key found!");
 		    	final IDynamicDataset complete = (IDynamicDataset)holder.getLazyDataset(obean.getDataKey() + Node.SEPARATOR + "scan_finished");
 		    	
@@ -192,7 +193,7 @@ public class OperationExecution {
 		    if (s == null) s = new SliceND(lz.getShape());
 		    int work = 1;
 		    
-		    if (obean.getDataKey() == null) work = getTotalWork(s.convertToSlice(), shape,context.getDataDimensions());
+		    if (isLive) work = getTotalWork(s.convertToSlice(), shape,context.getDataDimensions());
 		    monitor = new OperationMonitor(obean, work);
 		    context.setMonitor(monitor);
 		    
@@ -215,7 +216,10 @@ public class OperationExecution {
 	}
 	
 	private boolean isFinished(OperationBean b) {
-		if (b.getDataKey() != null) {
+		
+		boolean isLive = checkLive(b);
+		
+		if (isLive) {
 			try {
 				logger.debug("Trying dataholder");
 				IDataHolder holder = lservice.getData(b.getFilePath(), new IMonitor.Stub());
@@ -229,6 +233,10 @@ public class OperationExecution {
 		}
 		
 		return false;
+	}
+	
+	private static boolean checkLive(OperationBean o) {
+		return o.getDataKey() != null && !o.getDataKey().isEmpty();
 	}
 
 	private AugmentedPackage getAugmentedDataset(String filePath, String datasetPath, OperationBean obean) {
@@ -277,7 +285,10 @@ public class OperationExecution {
 					return null;
 				}
 				logger.debug("Building AxesMetadata");
-				AxesMetadata axm = lservice.getAxesMetadata(lz, obean.getFilePath(), obean.getAxesNames(), obean.getDataKey()!=null);
+				
+				boolean isLive = checkLive(obean);
+				
+				AxesMetadata axm = lservice.getAxesMetadata(lz, obean.getFilePath(), obean.getAxesNames(), isLive);
 				lz.setMetadata(axm);
 
 			}
