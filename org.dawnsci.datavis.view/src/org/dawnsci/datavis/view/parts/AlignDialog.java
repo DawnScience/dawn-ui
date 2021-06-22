@@ -915,4 +915,11 @@ public class AlignDialog extends Dialog implements IRegionListener {
 			}
 		}
 	}
+
+	/**
+	 * Reset internal state
+	 */
+	public void reset() {
+		plotItems.clear();
+	}
 }
