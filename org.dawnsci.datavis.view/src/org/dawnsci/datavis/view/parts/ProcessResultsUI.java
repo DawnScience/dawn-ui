@@ -66,6 +66,8 @@ public class ProcessResultsUI extends Composite implements IDatasetStateChanger 
 	private IFileController fileController;
 	private IPlotController plotController;
 
+	private boolean plotUpdated = false;
+
 	public ProcessResultsUI(Composite parent, IFileController fc, IPlotController pc) {
 		super(parent, SWT.None);
 		this.fileController = fc;
@@ -123,6 +125,9 @@ public class ProcessResultsUI extends Composite implements IDatasetStateChanger 
 			public void widgetSelected(SelectionEvent e) {
 				if (dialog == null) {
 					dialog = new AlignDialog(ProcessResultsUI.this.getShell(), fileController, plotController);
+				} else if (plotUpdated) {
+					dialog.reset();
+					plotUpdated = false;
 				}
 				dialog.open();
 			}
@@ -185,6 +190,7 @@ public class ProcessResultsUI extends Composite implements IDatasetStateChanger 
 	}
 
 	private void internalInitialize(List<LoadedFile> files) {
+		plotUpdated = true;
 		allProcesses.clear();
 		allProcesses.add(LoadedFile.RESULT);
 		int n = files.size();
@@ -296,6 +302,7 @@ public class ProcessResultsUI extends Composite implements IDatasetStateChanger 
 	}
 
 	private void updateSelected(DataOptions op) {
+		plotUpdated = true;
 		updateProcessDataChoice(op);
 		switchToPlotXY(op);
 	}
