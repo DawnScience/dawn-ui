@@ -117,6 +117,10 @@
          id="org.eclipse.dawnsci.nexus.feature"
          version="0.0.0"/>
 
+   <includes
+         id="uk.ac.diamond.daq.thirdparty.activemq.feature"
+         version="0.0.0"/>
+
    <plugin
          id="uk.ac.diamond.scisoft.analysis.rcp.contributions"
          download-size="0"
@@ -231,6 +235,13 @@
 
    <plugin
          id="uk.ac.gda.common.activemq"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="com.github.tschoonj.xraylib"
          download-size="0"
          install-size="0"
          version="0.0.0"
