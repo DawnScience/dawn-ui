@@ -56,7 +56,7 @@ public class OperationApplication implements IApplication {
 			runner.run(createOperationBean(conf));
 		} catch (Exception e) {
 			logger.error("Error occured in processing:", e);
-			return new Integer(1);
+			return 1;
 		}
 		
 		return IApplication.EXIT_OK;
