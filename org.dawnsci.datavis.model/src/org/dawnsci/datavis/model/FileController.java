@@ -7,6 +7,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 import org.dawnsci.datavis.api.IRecentPlaces;
@@ -450,9 +451,30 @@ public class FileController implements IFileController {
 
 	private class LiveFileListener implements ILiveLoadedFileListener {
 
+		private AtomicReference<List<DataOptions>> cache = new AtomicReference<>();
+		
 		public LiveFileListener() {
 		}
 
+		/**
+		 * Get the state of the file controller
+		 * 
+		 * If the file cannot be read on load a
+		 * cache of the state is taken, in case
+		 * it is changed (by automatic deselection).
+		 * 
+		 * @return
+		 */
+		private List<DataOptions> getFileState() {
+			List<DataOptions> list = cache.getAndSet(null);
+			
+			if (list == null) {
+				return getImmutableFileState();
+			} else {
+				return list;
+			}
+		}
+		
 		@Override
 		public void refreshRequest() {
 
@@ -479,7 +501,9 @@ public class FileController implements IFileController {
 					}
 					
 					if (toInit) {
-						List<DataOptions> fs = getImmutableFileState();
+						
+						List<DataOptions> fs = getFileState();
+						
 						ILoadedFileConfiguration loadedConfig = null;
 						if (!fs.isEmpty()) {
 							loadedConfig = new CurrentStateFileConfiguration();
@@ -521,7 +545,8 @@ public class FileController implements IFileController {
 					logger.info("Locally reloading {}",path);
 					((IRefreshable)loadedFile).locallyReload();
 					if (!((IRefreshable) loadedFile).isInitialised()) {
-						List<DataOptions> fs = getImmutableFileState();
+						List<DataOptions> fs = getFileState();
+						
 						try {
 
 							ILoadedFileConfiguration loadedConfig = null;
@@ -581,6 +606,8 @@ public class FileController implements IFileController {
 						logger.warn("Could not configure file",e);
 				}
 
+			} else if (loadedFile instanceof IRefreshable && ((IRefreshable)loadedFile).isEmpty()) {
+				cache.set(getImmutableFileState());
 			}
 			
 			loadedFiles.addFile(loadedFile);
