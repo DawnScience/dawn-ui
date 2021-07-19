@@ -10,6 +10,8 @@ public class Dimension {
 	private String axis = NDimensions.INDICES;
 	private int size = -1;
 	private Slice slice;
+	private int axisFilterIndex = -1;
+	private boolean filterAxes = false;
 
 
 	public Dimension(int dimension, int size) {
@@ -97,13 +99,27 @@ public class Dimension {
 
 
 	public String[] getAxisOptions() {
+		
+		if (filterAxes && axisFilterIndex > 0 && axisFilterIndex < axisOptions.length) {
+			String[] out = new String[axisFilterIndex];
+			System.arraycopy(axisOptions, 0, out, 0, out.length);
+			return out;
+		}
+		
 		return axisOptions;
+	}
+	
+	public void setAxisFilterIndex(int index) {
+		axisFilterIndex = index;
 	}
 
 
 	public void setAxisOptions(String[] axisOptions) {
-
 		this.axisOptions = axisOptions;
+	}
+	
+	public void setFilterAxes(boolean filter) {
+		filterAxes = filter;
 	}
 
 }

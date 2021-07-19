@@ -8,7 +8,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -60,7 +59,7 @@ public class LoadedFile implements IDataObject, IDataFilePackage {
 	protected Map<String, DataOptions> virtualDataOptions;
 	protected Map<String, ILazyDataset> possibleLabels;
 	protected boolean onlySignals = false;
-	protected Set<String> signals;
+	protected Map<String, NexusSignal> signals;
 	private boolean selected = false;
 	private String labelName = "";
 	private Dataset labelValue;
@@ -69,7 +68,7 @@ public class LoadedFile implements IDataObject, IDataFilePackage {
 
 	public LoadedFile(IDataHolder dataHolder) {
 		this.dataHolder = new AtomicReference<>(dataHolder.clone());
-		signals = new LinkedHashSet<>();
+		signals = new LinkedHashMap<>();
 		dataOptions = new LinkedHashMap<>();
 		virtualDataOptions = new LinkedHashMap<>();
 		possibleLabels = new TreeMap<>();
@@ -102,7 +101,7 @@ public class LoadedFile implements IDataObject, IDataFilePackage {
 				
 			} catch ( Exception e) {
 				logger.error("Could not get unique nodes",e);
-				this.signals = new HashSet<>();
+				this.signals = new LinkedHashMap<>();
 			}
 
 		}
@@ -112,7 +111,7 @@ public class LoadedFile implements IDataObject, IDataFilePackage {
 		for (String n : names) {
 			ILazyDataset lazyDataset = dataHolder.getLazyDataset(n);
 			if (lazyDataset == null) {
-				if (signals.contains(n)) {
+				if (signals.containsKey(n)) {
 					signals.remove(n);
 				}
 				continue;
@@ -143,13 +142,14 @@ public class LoadedFile implements IDataObject, IDataFilePackage {
 			}
 
 			boolean notString = !lazyDataset.getElementClass().equals(String.class);
-			if (notString && (lazyDataset.getSize() != 1 || signals.contains(n))) {
-				DataOptions d = new DataOptions(n, this);
+			if (notString && (lazyDataset.getSize() != 1 || signals.containsKey(n))) {
+				NexusSignal s = signals.getOrDefault(n, null);
+				DataOptions d = new DataOptions(n, this, s);
 				d.setShortName(shortName);
 				d.setProcess(process);
 				dataOptions.put(d.getName(),d);
 			} else {
-				if (!notString && signals.contains(n)) {
+				if (!notString && signals.containsKey(n)) {
 					signals.remove(n);
 				}
 			}
@@ -189,13 +189,15 @@ public class LoadedFile implements IDataObject, IDataFilePackage {
 				return out;
 			}
 
-			out = signals.stream().filter(Objects::nonNull).map(s -> dataOptions.get(s)).filter(Objects::nonNull).collect(Collectors.toList());
+			out = signals.keySet().stream().filter(Objects::nonNull).map(s -> dataOptions.get(s)).filter(Objects::nonNull).collect(Collectors.toList());
 
 		} else {
 			out = new ArrayList<>(dataOptions.values());
 		}
 
 		out.addAll(virtualDataOptions.values());
+		
+		out.stream().forEach(d -> d.setFilterAxes(onlySignals));
 
 		return out;
 	}
@@ -308,7 +310,8 @@ public class LoadedFile implements IDataObject, IDataFilePackage {
 
 			GroupNode s = (GroupNode) e.getValue().getSource();
 
-			if (NexusTreeUtils.isNXClass(s, NexusConstants.DATA)) {
+			if (NexusTreeUtils.isNXClass(s, NexusConstants.DATA) && d instanceof DataNode) {
+				DataNode dn = (DataNode)d;
 				String name = NexusTreeUtils.getFirstString(s.getAttribute(NexusConstants.DATA_SIGNAL));
 				String key = e.getKey();
 				//Only post 2014  NXData Nexus tagging runs through here,
@@ -316,16 +319,54 @@ public class LoadedFile implements IDataObject, IDataFilePackage {
 				//and this code does not work for more than one signal in a node
 				if ((name != null && (key.equals(name) || key.endsWith(Node.SEPARATOR + name)))) {
 					String path = Tree.ROOT + key;
-					signals.add(path);
-					ILazyDataset lz = NexusTreeUtils.getAugmentedSignalDataset(s);
-					if (lz != null) {
-						dataHolder.get().addDataset(path, lz);
-					}
+					
+					String nxdatapath = path.substring(0,path.lastIndexOf(Node.SEPARATOR)) + Node.SEPARATOR;
+					NexusSignal ns = new NexusSignal(path, dn.getRank());
+					buildNexusSignalFromGroup(s, ns, nxdatapath, name);
+					signals.put(path,ns);
 				}
 			}
 		}
 
 		return out;
+	}
+	
+	private void buildNexusSignalFromGroup(GroupNode gn, NexusSignal signal, String location, String name) {
+		
+		String[] tmp = NexusTreeUtils.getStringArray(gn.getAttribute(NexusConstants.DATA_AXES));
+		if (tmp != null && tmp.length == signal.getRank()) {
+			for (int i = 0; i < tmp.length; i++) {
+				if (NexusConstants.DATA_AXESEMPTY.equals(tmp[i])) {
+					continue;
+				}
+				if (tmp[i] != null && gn.containsDataNode(tmp[i])) {
+					signal.addAxis(i, location + tmp[i]);
+				}
+			}
+		} else {
+			logger.debug("Problem with axes attribute");
+		}
+
+		Set<String> annotations = gn.getAttributeNames();
+		
+		for (String s : annotations) {
+			if (s.endsWith(NexusConstants.DATA_INDICES_SUFFIX)) {
+				String dsName = s.substring(0, s.length()- NexusConstants.DATA_INDICES_SUFFIX.length());
+				if (gn.containsDataNode(dsName)) {
+
+					int[] indices = NexusTreeUtils.parseIntArray(gn.getAttribute(s));
+					if (indices != null) {
+						for (int i = 0; i < indices.length; i++) {
+							signal.addAxis(indices[i], location + dsName);
+						}
+					}
+				}
+			}
+		}
+		
+		if (gn.containsDataNode(NexusConstants.DATA_ERRORS)) {
+			signal.setUncertainties(location + NexusConstants.DATA_ERRORS);
+		}
 	}
 
 	public String getLabel() {
@@ -417,7 +458,7 @@ public class LoadedFile implements IDataObject, IDataFilePackage {
 	}
 
 	public boolean isSignal(String name) {
-		return signals.contains(name);
+		return signals.containsKey(name);
 	}
 
 	public boolean isOnlySignals() {

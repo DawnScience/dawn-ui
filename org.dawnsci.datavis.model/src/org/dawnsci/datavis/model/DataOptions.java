@@ -13,12 +13,12 @@ import org.dawnsci.datavis.api.IDataPackage;
 import org.dawnsci.january.model.ISliceChangeListener;
 import org.dawnsci.january.model.NDimensions;
 import org.dawnsci.january.model.SliceChangeEvent;
-import org.eclipse.dawnsci.analysis.api.tree.Node;
 import org.eclipse.january.MetadataException;
 import org.eclipse.january.dataset.IDataset;
 import org.eclipse.january.dataset.ILazyDataset;
 import org.eclipse.january.dataset.SliceND;
 import org.eclipse.january.metadata.AxesMetadata;
+import org.eclipse.january.metadata.ErrorMetadata;
 import org.eclipse.january.metadata.MetadataFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,6 +37,8 @@ public class DataOptions implements IDataObject, IDataPackage {
 	protected String[] axes;
 	private ILazyDataset data;
 	private AtomicBoolean selected = new AtomicBoolean(false);
+	
+	private NexusSignal nexusSignal = null;
 
 	private PlottableObject plottableObject;
 	private String label;
@@ -48,10 +50,19 @@ public class DataOptions implements IDataObject, IDataPackage {
 	private Map<Class<?>, List<?>> derivedData;
 	
 	protected boolean fromFile = true;
-
+	
 	public DataOptions(String name, LoadedFile parent) {
+		this(name, parent, null);
+	}
+
+	public DataOptions(String name, LoadedFile parent, NexusSignal signal) {
 		this.name = name;
 		this.parent = parent;
+		this.nexusSignal = signal;
+		
+		if (nexusSignal != null) {
+			setAxes(getPrimaryAxes());
+		}
 
 		this.listener = new ISliceChangeListener() {
 
@@ -83,6 +94,7 @@ public class DataOptions implements IDataObject, IDataPackage {
 				new NDimensions(toCopy.plottableObject.getNDimensions())) : null;
 		this.label = toCopy.label;
 		this.derivedData = new HashMap<>(toCopy.derivedData);
+		this.nexusSignal = toCopy.nexusSignal != null ? new NexusSignal(toCopy.nexusSignal) : null;
 	}
 
 	@Override
@@ -126,29 +138,12 @@ public class DataOptions implements IDataObject, IDataPackage {
 	}
 
 	public String[] getPrimaryAxes(){
-		ILazyDataset local = getLazyDataset();
-		AxesMetadata am = local.getFirstMetadata(AxesMetadata.class);
-		if (am == null) return null;
-		if (am.getAxes() == null) return null;
-		String[] ax = new String[am.getAxes().length];
-		ILazyDataset[] axes = am.getAxes();
-		// check for Nexus style name
-		int index = name.lastIndexOf(Node.SEPARATOR);
-		String sub = index < 0 ? "" : name.substring(0, index + 1);
-		for (int i = 0; i < axes.length; i++) {
-			if (axes[i] != null) {
-				String full = null;
-				if (axes[i].getName().startsWith(Node.SEPARATOR)) {
-					full = axes[i].getName();
-				} else {
-					full =  sub + axes[i].getName();
-				}
-				ax[i] = parent.getDataShapes().containsKey(full) ? full : null;
-			} else {
-				ax[i] = null;
-			}
+		
+		if (nexusSignal == null) {
+			return null;
 		}
-		return ax;
+		
+		return nexusSignal.getPrimaryAxes();
 	}
 
 	public LoadedFile getParent() {
@@ -159,6 +154,20 @@ public class DataOptions implements IDataObject, IDataPackage {
 		if (data == null || !Arrays.equals(data.getShape(), parent.getLazyDataset(name).getShape())) {
 			ILazyDataset local = parent.getLazyDataset(name).getSliceView();
 			includeAxesMetadata(local);
+			
+			if (nexusSignal != null && nexusSignal.getUncertainties() != null) {
+				ILazyDataset lze = parent.getLazyDataset(nexusSignal.getUncertainties());
+				if (lze != null) {
+					try {
+						ErrorMetadata emd = MetadataFactory.createMetadata(ErrorMetadata.class);
+						emd.setError(lze);
+						local.setMetadata(emd);
+					} catch (MetadataException e) {
+						logger.error("Could not create errors");
+					}
+				}
+			}
+			
 			data = local;
 		}
 		return data;
@@ -260,6 +269,10 @@ public class DataOptions implements IDataObject, IDataPackage {
 		data = null;
 		this.axes = axesNames;
 	}
+	
+	public String[] getCurrentAxes() {
+		return this.axes == null ? null : this.axes.clone();
+	}
 
 	public PlottableObject getPlottableObject() {
 		return plottableObject;
@@ -283,7 +296,14 @@ public class DataOptions implements IDataObject, IDataPackage {
 
 	public NDimensions buildNDimensions() {
 		NDimensions ndims = new NDimensions(getLazyDataset().getShape(), this);
-		ndims.setUpAxes(name, getAllPossibleAxes(), getPrimaryAxes(), getAxesMaxShapes());
+		
+		String[][] tagged = null;
+		
+		if (nexusSignal != null) {
+			tagged = nexusSignal.getTaggedAxes();
+		}
+		
+		ndims.setUpAxes(name, getAllPossibleAxes(), tagged, getAxesMaxShapes());
 		if (axes != null) {
 			for (int i = 0 ; i < axes.length; i++){
 				ndims.setAxis(i, axes[i]);
@@ -393,5 +413,11 @@ public class DataOptions implements IDataObject, IDataPackage {
 	 */
 	public void removeDerivedData(Class<?> clazz) {
 		derivedData.remove(clazz);
+	}
+	
+	public void setFilterAxes(boolean filter) {
+		if (plottableObject != null && plottableObject.getNDimensions() != null) {
+			plottableObject.getNDimensions().setFilterAxes(filter);
+		}
 	}
 }

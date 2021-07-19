@@ -2,6 +2,7 @@ package org.dawnsci.january.model;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -293,32 +294,54 @@ public class NDimensions {
 			}
 		}
 	}
-
-	public void setUpAxes(String name, Map<String,int[]> axes, String[] primary) {
-		setUpAxes(name, axes, primary, null);
+	
+	
+	public void setUpAxes(String name, Map<String,int[]> axes, String[] primary, Map<String,int[]> maxShapes) {
+		
+		if (primary == null) {
+			setUpAxes(name, axes, (String[][]) null, maxShapes);
+			return;
+		}
+		
+		String[][] allAxes = new String[primary.length][];
+		
+		for (int i = 0; i < primary.length; i++) {
+			allAxes[i] = new String[] {primary[i]};
+		}
+		
+		setUpAxes(name, axes, allAxes, maxShapes);
 	}
 
-	public void setUpAxes(String name, Map<String,int[]> axes, String[] primary, Map<String,int[]> maxShapes) {
+	public void setUpAxes(String name, Map<String,int[]> axes, String[][] primary, Map<String,int[]> maxShapes) {
 
+		//Parse the primary arrays taken from the nexus tagging (or equivalent)
 		@SuppressWarnings("unchecked")
 		List<String>[] options = new List[dimensions.length];
 		for (int i = 0 ; i < options.length; i++) {
 			options[i] = new ArrayList<String>();
-			if (primary != null &&  primary.length > i && primary[i] != null) {
-				dimensions[i].setAxis(primary[i]);
-				options[i].add(primary[i]);
+			if (primary != null &&  primary.length > i && primary[i] != null && primary[i].length != 0) {
+				
+				dimensions[i].setAxis(primary[i][0]);
+				options[i].addAll(Arrays.asList(primary[i]));
 			} else {
 				dimensions[i].setAxis(INDICES);
 			}
 			options[i].add(INDICES);
 		}
+		
+		@SuppressWarnings("unchecked")
+		List<String>[] secondaryOptions = new List[dimensions.length];
+		for (int i = 0; i < dimensions.length; i++) {
+			secondaryOptions[i] = new ArrayList<String>();
+		}
+		
 
 		for (Entry<String,int[]> e : axes.entrySet()) {
-			if (e.getValue() != null) {
+			if (e.getValue() != null && e.getValue().length <= getRank()) {
 				for (int i : e.getValue()) {
 					for (int j = 0; j < dimensions.length ; j++) {
 						if (dimensions[j].getSize() == i && !e.getKey().equals(name)) {
-							options[j].add(e.getKey());
+							secondaryOptions[j].add(e.getKey());
 						}
 					}
 				}
@@ -326,7 +349,14 @@ public class NDimensions {
 		}
 		
 		if (maxShapes != null) {
-			addAxesFromMax(options, maxShapes, name);
+			addAxesFromMax(secondaryOptions, maxShapes, name);
+		}
+		
+		//merge here
+		for (int i = 0; i < dimensions.length; i++) {
+			dimensions[i].setAxisFilterIndex(options[i].size());
+			Collections.sort(secondaryOptions[i]);
+			options[i].addAll(secondaryOptions[i]);
 		}
 
 		for (int i = 0 ; i < dimensions.length ; i++) {
@@ -411,7 +441,7 @@ public class NDimensions {
 
 	public String[] buildAxesNames() {
 		String[] names = new String[dimensions.length];
-		for (int i = 0; i < dimensions.length;i++) {
+		for (int i = 0; i < dimensions.length; i++) {
 			String name = dimensions[i].getAxis();
 			if (INDICES.equals(name)) name = "";
 			names[i] = name;
@@ -422,6 +452,12 @@ public class NDimensions {
 
 	public void setSliceFullRange(boolean sliceFullRange) {
 		this.sliceFullRange = sliceFullRange;
+	}
+	
+	public void setFilterAxes(boolean filter) {
+		for (Dimension d : dimensions) {
+			d.setFilterAxes(filter);
+		}
 	}
 
 }

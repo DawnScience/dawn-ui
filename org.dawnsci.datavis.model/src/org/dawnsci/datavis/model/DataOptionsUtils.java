@@ -252,7 +252,7 @@ public class DataOptionsUtils {
 
 		int[] dd = nDimensions.getDimensionsWithDescription();
 		//data axes should be set in sum/average
-		String[] ax = input.getPrimaryAxes();
+		String[] ax = input.getCurrentAxes();
 
 		if (ax != null) {
 			String[] inax = new String[nDimensions.getRank()];
