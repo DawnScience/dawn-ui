@@ -41,6 +41,7 @@ public class PerpendicularCutsHelper {
 	private CutRegionUpdateListener cutUpdateListener;
 	
 	private IRegion[] regions;
+	private boolean inUpdate = false;
 	
 	public PerpendicularCutsHelper(IPlottingSystem<Composite> system) {
 		this.plottingSystem = system;
@@ -118,39 +119,49 @@ public class PerpendicularCutsHelper {
 	}
 	
 	public void runUpdate(IImageTrace t, IROI roi, IRegion region, PerpendicularImageCutsComposite composite) {
-		if (t == null) {
+		if (inUpdate || t == null || regions == null) {
 			return;
 		}
-		Collection<IRegion> regionsx = plottingSystem.getRegions(RegionType.XAXIS);
-		Collection<IRegion> regionsy = plottingSystem.getRegions(RegionType.YAXIS);
 
-		if (regionsx.isEmpty() || regionsy.isEmpty())
-			return;
+		try {
+			inUpdate = true;
 
-		List<IDataset> axes = t.getAxes();
-		
-		IDataset x =null;
-		IDataset y = null;
-		
-		if (axes != null) {
-			 x = axes.get(0);
-			 y =  axes.get(1);
+			int[] shape = t.getData().getShape();
+
+			List<IDataset> axes = t.getAxes();
+
+			IDataset x =null;
+			IDataset y = null;
+
+			if (axes != null) {
+				x = axes.get(0);
+				y = axes.get(1);
+			}
+
+			RectangularROI roix = (RectangularROI)regions[0].getROI();
+			RectangularROI roiy = (RectangularROI)regions[1].getROI();
+
+			if (region != null) {
+				if (region == regions[0]) {
+					roix = (RectangularROI)roi;
+				} else {
+					roiy = (RectangularROI)roi;
+				}
+			}
+
+			if (!validateROI(shape, roix, 0)) {
+				regions[0].setROI(roix);	
+			}
+
+			if (!validateROI(shape, roiy, 1)) {
+				regions[1].setROI(roiy);	
+			}
+
+			composite.update(t.getData(), x, y, roix,
+					roiy);
+		} finally {
+			inUpdate = false;
 		}
-		
-		
-		composite.update(t.getData(), x, y, getROI(regionsx, region, roi),
-				getROI(regionsy, region, roi));
-	}
-	
-	private RectangularROI getROI(Collection<IRegion> regions, IRegion r, IROI roi) {
-
-		IRegion region = regions.iterator().next();
-
-		if (region == r) {
-			return (RectangularROI) roi;
-		}
-
-		return (RectangularROI) region.getROI();
 	}
 	
 	public void doUpdate(IImageTrace imageTrace, IRegion[] regions, double value, double delta, boolean isX) {
@@ -245,6 +256,33 @@ public class PerpendicularCutsHelper {
 			regions = generateInitialRegions(imageTrace);
 			runUpdate(imageTrace, null, null, composite);
 		}
+	}
+	
+	private boolean validateROI(int[] shape, IROI roi, int dim) {
+		
+		boolean valid = true;
+		
+		if (roi instanceof RectangularROI) {
+			int other = dim == 0 ? 1 : 0;
+			double point = roi.getPoint()[dim];
+			double length = ((RectangularROI) roi).getLength(dim);
+			if (point > shape[other] || point < 0) {
+				point = shape[other]/2.0;
+				double[] p = new double[2];
+				p[dim] = point;
+				roi.setPoint(p);
+				valid = false;
+			}
+			
+			if ((point + length) > shape[other]) {
+				double[] p = new double[2];
+				p[dim] = shape[other] - point;
+				((RectangularROI) roi).setLengths(p);
+				valid = false;
+			}
+		}
+		
+		return valid;
 	}
 	
 	public void deactivate(PerpendicularImageCutsComposite composite) {

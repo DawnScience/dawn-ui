@@ -173,8 +173,9 @@ public class PerpendicularImageCutsComposite extends Composite {
 				ILineTrace yt = MetadataPlotUtils.buildLineTrace(yCut, yProfile);
 
 				Display.getDefault().syncExec(() -> {
-					viewer.setInput(data);
-
+					if (!viewer.isCellEditorActive()) {
+						viewer.setInput(data);
+					}
 					sumLabel.setText(doubleToStringWithPrecision(intersectionSum));
 					xProfile.clear();
 					yProfile.clear();
@@ -217,7 +218,7 @@ public class PerpendicularImageCutsComposite extends Composite {
 		listeners.remove(l);
 	}
 
-	private void fileListeners(double value, double delta, CutType type) {
+	private void fireListeners(double value, double delta, CutType type) {
 		listeners.stream().forEach(l -> l.updateRequested(value, delta, type));
 	}
 
@@ -265,9 +266,9 @@ public class PerpendicularImageCutsComposite extends Composite {
 				CutData d = (CutData) element;
 
 				if (this.value) {
-					fileListeners(Double.parseDouble(value.toString()), d.getDelta(), d.getType());
+					fireListeners(Double.parseDouble(value.toString()), d.getDelta(), d.getType());
 				} else {
-					fileListeners(d.getValue(), Double.parseDouble(value.toString()), d.getType());
+					fireListeners(d.getValue(), Double.parseDouble(value.toString()), d.getType());
 				}
 			}
 		}
