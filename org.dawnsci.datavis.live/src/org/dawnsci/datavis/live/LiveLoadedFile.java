@@ -11,6 +11,7 @@ import java.util.Set;
 import org.dawnsci.datavis.model.DataOptions;
 import org.dawnsci.datavis.model.IRefreshable;
 import org.dawnsci.datavis.model.LoadedFile;
+import org.dawnsci.datavis.model.NexusSignal;
 import org.dawnsci.january.model.NDimensions;
 import org.eclipse.dawnsci.analysis.api.io.IDataHolder;
 import org.eclipse.dawnsci.analysis.api.io.ILoaderService;
@@ -136,7 +137,13 @@ public class LiveLoadedFile extends LoadedFile implements IRefreshable {
 			
 			String[] axes = getAxes(s.getValue(), shortName);
 			if (axes != null) {
-				signals.add(name);
+				NexusSignal ns = new NexusSignal(name, axes.length);
+				for (int i = 0; i < axes.length; i++) {
+					if (axes[0] != null) {
+						ns.addAxis(i, axes[i]);
+					}
+				}
+				signals.put(name, ns);
 				axesMap.put(name, axes);
 			}
 		
