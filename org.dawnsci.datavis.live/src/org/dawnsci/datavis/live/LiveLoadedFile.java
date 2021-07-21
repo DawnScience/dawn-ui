@@ -11,13 +11,11 @@ import java.util.Set;
 import org.dawnsci.datavis.model.DataOptions;
 import org.dawnsci.datavis.model.IRefreshable;
 import org.dawnsci.datavis.model.LoadedFile;
-import org.dawnsci.datavis.model.NexusSignal;
 import org.dawnsci.january.model.NDimensions;
 import org.eclipse.dawnsci.analysis.api.io.IDataHolder;
 import org.eclipse.dawnsci.analysis.api.io.ILoaderService;
 import org.eclipse.dawnsci.analysis.api.io.IRemoteDataHolder;
 import org.eclipse.dawnsci.analysis.api.io.IRemoteDatasetService;
-import org.eclipse.dawnsci.analysis.api.tree.Attribute;
 import org.eclipse.dawnsci.analysis.api.tree.DataNode;
 import org.eclipse.dawnsci.analysis.api.tree.GroupNode;
 import org.eclipse.dawnsci.analysis.api.tree.IFindInTree;
@@ -25,15 +23,10 @@ import org.eclipse.dawnsci.analysis.api.tree.Node;
 import org.eclipse.dawnsci.analysis.api.tree.NodeLink;
 import org.eclipse.dawnsci.analysis.api.tree.Tree;
 import org.eclipse.dawnsci.analysis.api.tree.TreeUtils;
-import org.eclipse.dawnsci.nexus.NexusConstants;
-import org.eclipse.january.MetadataException;
-import org.eclipse.january.dataset.IDataset;
 import org.eclipse.january.dataset.IDynamicDataset;
 import org.eclipse.january.dataset.IDynamicShape;
 import org.eclipse.january.dataset.ILazyDataset;
-import org.eclipse.january.dataset.StringDataset;
 import org.eclipse.january.metadata.AxesMetadata;
-import org.eclipse.january.metadata.MetadataFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -107,8 +100,6 @@ public class LiveLoadedFile extends LoadedFile implements IRefreshable {
 	
 	private void buildDataStructures(IDataHolder dh, Map<String, NodeLink> result) {
 		
-		Map<String, String[]> axesMap = new HashMap<>();
-		
 		for (Entry<String, NodeLink> s : result.entrySet()) {
 			
 			String name = "/"+s.getKey();
@@ -116,6 +107,8 @@ public class LiveLoadedFile extends LoadedFile implements IRefreshable {
 			if (dataOptions.containsKey(name)) continue;
 			
 			IDynamicDataset dataset = (IDynamicDataset)((DataNode)s.getValue().getDestination()).getDataset();
+			
+			DataNode dn = (DataNode)s.getValue().getDestination();
 			
 			long[] maxShape = ((DataNode)s.getValue().getDestination()).getMaxShape();
 			
@@ -126,107 +119,21 @@ public class LiveLoadedFile extends LoadedFile implements IRefreshable {
 				continue;
 			}
 			
+			Node source = s.getValue().getSource();
+			
+			if (source instanceof GroupNode) {
+				storeNXData((GroupNode)source, dn, s.getKey());
+			}
+			
 			if (!dataset.getElementClass().equals(String.class)) {
-				DataOptions d = new DataOptions(name, this);
+				DataOptions d = new DataOptions(name, this, signals.getOrDefault(name, null));
 				dataOptions.put(d.getName(),d);
 			}
-			
-			String[] split = name.split("/");
-			
-			String shortName = split[split.length-1];
-			
-			String[] axes = getAxes(s.getValue(), shortName);
-			if (axes != null) {
-				NexusSignal ns = new NexusSignal(name, axes.length);
-				for (int i = 0; i < axes.length; i++) {
-					if (axes[0] != null) {
-						ns.addAxis(i, axes[i]);
-					}
-				}
-				signals.put(name, ns);
-				axesMap.put(name, axes);
-			}
-		
-		}
-		
-		try {
-			buildAxes(axesMap, dh);
-		} catch (MetadataException e) {
-			logger.error("Could not build AxesMetadata!", e);
 		}
 		
 		if (getLabel().isEmpty() && !getLabelName().isEmpty()){
 			setLabelName(getLabelName());
 		}
-	}
-	
-	private static void buildAxes(Map<String, String[]> map, IDataHolder dh) throws MetadataException {
-		
-		for (Entry<String, String[]> entry : map.entrySet()) {
-			String name = entry.getKey();
-			if (dh.contains(name)){
-				int[] shape = dh.getLazyDataset(name).getShape();
-				String[] names = entry.getValue();
-				AxesMetadata m = null;
-				int index = name.lastIndexOf(Node.SEPARATOR);
-				
-				for (int i = 0 ; (i < shape.length && i < names.length) ; i++) {
-					
-					String fullName = name.substring(0, index+1) + names[i];
-					if (dh.contains(fullName)){
-						if (m == null) m = MetadataFactory.createMetadata(AxesMetadata.class, shape.length);
-						ILazyDataset ax = dh.getLazyDataset(fullName);
-						ax.setName(names[i]);
-						m.addAxis(i, dh.getLazyDataset(fullName));
-					}
-					
-				}
-			
-				if (m != null) {
-					ILazyDataset lazyDataset = dh.getLazyDataset(name);
-					lazyDataset.addMetadata(m);
-				}
-			}
-		}
-		
-	}
-	
-	private static String[] getAxes(NodeLink l, String name){
-		Node s = l.getSource();
-
-		if (s instanceof GroupNode) {
-			GroupNode g = (GroupNode)s;
-			if (getNXClass(g).equals(NexusConstants.DATA)) {
-				String signal = getNXSignal(g);
-				if (signal != null && signal.equals(name)) {
-					return getNXaxes(g);
-				}
-			}
-		}
-		
-		return null;
-	}
-	
-	private static String getNXClass(GroupNode g){
-		Attribute attribute = g.getAttribute(NexusConstants.NXCLASS);
-		if (attribute != null) return attribute.getFirstElement();
-		return "";
-	}
-	
-	private static String getNXSignal(GroupNode g){
-		Attribute attribute = g.getAttribute(NexusConstants.DATA_SIGNAL);
-		if (attribute != null) return attribute.getFirstElement();
-		return null;
-	}
-	
-	private static String[] getNXaxes(GroupNode g){
-		Attribute attribute = g.getAttribute(NexusConstants.DATA_AXES);
-		if (attribute == null) return null;
-		IDataset value = attribute.getValue();
-		if (value instanceof StringDataset) {
-			return ((StringDataset)value).getData();
-		}
-		return null;
 	}
 	
 	private Map<String, NodeLink> findNodes(Tree tree){

@@ -331,6 +331,24 @@ public class LoadedFile implements IDataObject, IDataFilePackage {
 		return out;
 	}
 	
+	protected void storeNXData(GroupNode source, DataNode signal, String key) { 
+
+		if (NexusTreeUtils.isNXClass(source, NexusConstants.DATA)) {
+			String name = NexusTreeUtils.getFirstString(source.getAttribute(NexusConstants.DATA_SIGNAL));
+			//Only post 2014  NXData Nexus tagging runs through here,
+			//NXdata may have many pre-2014 signal tags from GDA
+			//and this code does not work for more than one signal in a node
+			if ((name != null && (key.equals(name) || key.endsWith(Node.SEPARATOR + name)))) {
+				String path = Tree.ROOT + key;
+				
+				String nxdatapath = path.substring(0,path.lastIndexOf(Node.SEPARATOR)) + Node.SEPARATOR;
+				NexusSignal ns = new NexusSignal(path, signal.getRank());
+				buildNexusSignalFromGroup(source, ns, nxdatapath, name);
+				signals.put(path,ns);
+			}
+		}
+	}
+	
 	private void buildNexusSignalFromGroup(GroupNode gn, NexusSignal signal, String location, String name) {
 		
 		String[] tmp = NexusTreeUtils.getStringArray(gn.getAttribute(NexusConstants.DATA_AXES));

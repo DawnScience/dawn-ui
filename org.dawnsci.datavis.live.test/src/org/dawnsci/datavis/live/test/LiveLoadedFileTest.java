@@ -1,19 +1,19 @@
 package org.dawnsci.datavis.live.test;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
 import org.dawnsci.datavis.live.LiveLoadedFile;
+import org.dawnsci.datavis.model.DataOptions;
 import org.dawnsci.datavis.model.PlotController;
 import org.eclipse.dawnsci.analysis.api.io.ILoaderService;
 import org.eclipse.dawnsci.analysis.api.io.IRemoteDataHolder;
@@ -27,10 +27,12 @@ import org.eclipse.dawnsci.analysis.dataset.MockDynamicLazyDataset;
 import org.eclipse.dawnsci.analysis.tree.TreeFactory;
 import org.eclipse.dawnsci.nexus.NXdata;
 import org.eclipse.dawnsci.nexus.NXentry;
+import org.eclipse.dawnsci.nexus.NexusConstants;
 import org.eclipse.dawnsci.nexus.NexusNodeFactory;
 import org.eclipse.january.dataset.DatasetFactory;
 import org.eclipse.january.dataset.IDynamicDataset;
 import org.eclipse.january.dataset.ILazyDataset;
+import org.eclipse.january.metadata.AxesMetadata;
 import org.junit.Test;
 
 import uk.ac.diamond.scisoft.analysis.io.DataHolder;
@@ -63,13 +65,25 @@ public class LiveLoadedFileTest {
 		
 		LiveLoadedFile f = new LiveLoadedFile(name, "nohost", 0, remote, local);
 		
-		assertEquals(1,f.getUninitialisedDataOptions().size());
+		assertEquals(2,f.getUninitialisedDataOptions().size());
 		assertEquals(0,f.getDataOptions().size());
 		
 		new PlotController().initialise(f);
 		f.setInitialised();
 		
-		assertEquals(1,f.getDataOptions().size());
+		assertEquals(2,f.getDataOptions().size());
+		
+		DataOptions dataOption = f.getDataOption("/entry/data/data");
+		
+		ILazyDataset lz = dataOption.getLazyDataset();
+		
+		AxesMetadata amd = lz.getFirstMetadata(AxesMetadata.class);
+		
+		assertNotNull(amd);
+		ILazyDataset axis = amd.getAxis(0)[0];
+		
+		assertEquals("/entry/data/axis", axis.getName());
+		
 		
 		f.refresh();
 		
@@ -84,9 +98,20 @@ public class LiveLoadedFileTest {
 		NXdata d = NexusNodeFactory.createNXdata();
 		
 		DataNode data = TreeFactory.createDataNode(0);
+		DataNode dataax = TreeFactory.createDataNode(0);
 		MockDynamicLazyDataset md = new MockDynamicLazyDataset(new int[][] {{10},{30},{60},{100}}, DatasetFactory.createRange(100));
+		MockDynamicLazyDataset mdax = new MockDynamicLazyDataset(new int[][] {{10},{30},{60},{100}}, DatasetFactory.createRange(100));
+		md.setName("/entry/data/data");
+		mdax.setName("/entry/data/axis");
+		
 		data.setDataset(md);
+		dataax.setDataset(mdax);
 		d.addDataNode("data", data);
+		d.addDataNode("axis", dataax);
+		
+		d.addAttribute(TreeFactory.createAttribute(NexusConstants.DATA_SIGNAL, "data"));
+		d.addAttribute(TreeFactory.createAttribute(NexusConstants.DATA_AXES, new String[] {"axis"}));
+		d.addAttribute(TreeFactory.createAttribute("axis" + NexusConstants.DATA_INDICES_SUFFIX, 0));
 		
 		e.addGroupNode("data", d);
 		r.addGroupNode("entry", e);
@@ -94,6 +119,11 @@ public class LiveLoadedFileTest {
 	}
 	
 	private class MockRemoteHolder extends DataHolder implements IRemoteDataHolder {
+
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = 1L;
 
 		@Override
 		public void update() {
