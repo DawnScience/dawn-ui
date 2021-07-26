@@ -493,6 +493,18 @@ public class MappedFileManager implements IMapFileController{
 		
 		@Override
 		public void run() {
+			
+			
+			if (mappedDataArea.contains(path) && lazy) {
+				logger.error("Attempting to load already loaded live file - multiple start events?");
+				return;
+			}
+			
+			if (mappedDataArea.contains(path) && !mappedDataArea.getDataFile(path).isEmpty()) {
+				logger.error("Attempting to load already populated file");
+				return;
+			}
+			
 			if (parentFile != null && !mappedDataArea.contains(parentFile)) {
 				logger.error("Attempting to load already loaded live file - multiple start events?");
 				return;
