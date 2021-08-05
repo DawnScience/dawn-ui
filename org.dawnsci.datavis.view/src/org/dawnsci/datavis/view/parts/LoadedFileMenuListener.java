@@ -16,6 +16,7 @@ import org.dawnsci.datavis.model.FileController;
 import org.dawnsci.datavis.model.FileJoining;
 import org.dawnsci.datavis.model.IDataObject;
 import org.dawnsci.datavis.model.IFileController;
+import org.dawnsci.datavis.model.IFileController.OpenMode;
 import org.dawnsci.datavis.model.LoadedFile;
 import org.dawnsci.datavis.view.Activator;
 import org.dawnsci.datavis.view.parts.LoadedFilePart.LabelEditingSupport;
@@ -23,6 +24,7 @@ import org.dawnsci.january.ui.utils.SelectionUtils;
 import org.eclipse.core.commands.Command;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jface.action.Action;
+import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.MenuManager;
@@ -93,6 +95,13 @@ public class LoadedFileMenuListener implements IMenuListener {
 			menuDisplay.add(new ClearLabelAction(fileController, viewer, editColumn));
 			menuDisplay.add(new EditLabelAction(fileController,viewer, editColumn));
 			manager.add(menuDisplay);
+			
+			MenuManager menuLiveOpen = new MenuManager("Live file selection setting");
+			menuLiveOpen.add(new LiveOpenModeAction("Deselect old files", fileController, OpenMode.DESELECT_OTHERS));
+			menuLiveOpen.add(new LiveOpenModeAction("Keep current selection", fileController, OpenMode.DO_NOTHING));
+			menuLiveOpen.add(new LiveOpenModeAction("Add new files to selection", fileController, OpenMode.SELECT));
+			manager.add(menuLiveOpen);
+			
 			manager.add(new Separator());
 			manager.add(new JoinFilesAction(fileController,viewer));
 			manager.add(new Separator());
@@ -218,6 +227,24 @@ public class LoadedFileMenuListener implements IMenuListener {
 			if (loadedFiles.isEmpty()) return;
 			file.selectFiles(loadedFiles, false);
 			view.refresh();
+		}
+	}
+	
+	private class LiveOpenModeAction extends Action {
+
+		private final IFileController file;
+		private final IFileController.OpenMode openMode;
+
+		public LiveOpenModeAction(String text, IFileController fileController, IFileController.OpenMode openMode) {
+			super(text, IAction.AS_RADIO_BUTTON);
+			this.file = fileController;
+			this.openMode = openMode;
+			setChecked(file.getOpenMode().equals(openMode));
+		}
+
+		@Override
+		public void run() {
+			file.setOpenMode(openMode);
 		}
 	}
 	

@@ -27,29 +27,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class FileController implements IFileController {
-	
-	/**
-	 *Encode what happens when a new file is loaded
-	 *
-	 */
-	private enum OpenMode {
-		/**
-		 * File is added to the list but not selected
-		 */
-		DO_NOTHING,
-		
-		/**
-		 * File is added to the list and selected
-		 */
-		SELECT,
-		
-		/**
-		 * File is added to the list, selected
-		 * and all other files deselected
-		 */
-		DESELECT_OTHERS;
-	}
-	
+
 	private ILoaderService loaderService;
 	private IRecentPlaces recentPlaces;
 	private IScriptFileOpener scriptOpener;
@@ -653,5 +631,16 @@ public class FileController implements IFileController {
 	
 	public void setFileInitialiser(ILoadedFileInitialiser initialiser) {
 		fileInitialiser = initialiser;
+	}
+
+	@Override
+	public OpenMode getOpenMode() {
+		return openMode;
+	}
+
+	@Override
+	public void setOpenMode(OpenMode openMode) {
+		this.openMode = openMode;
+		
 	}
 }

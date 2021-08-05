@@ -156,5 +156,41 @@ public interface IFileController extends IFileOpeningController {
 	 * @param initialiser
 	 */
 	public void setFileInitialiser(ILoadedFileInitialiser initialiser);
+	
+	/**
+	 * Get the current behaviour for opening/selection of new live files
+	 * 
+	 * @see OpenMode
+	 */
+	public OpenMode getOpenMode();
+
+	/**
+	 * Set the behaviour for new live files
+	 * 
+	 * @see OpenMode
+	 * @param openMode
+	 */
+	public void setOpenMode(OpenMode openMode);
+
+	/**
+	 * Encode what happens when a new file is loaded
+	 *
+	 */
+	public enum OpenMode {
+		/**
+		 * File is added to the list but not selected
+		 */
+		DO_NOTHING,
+
+		/**
+		 * File is added to the list and selected
+		 */
+		SELECT,
+
+		/**
+		 * File is added to the list, selected and all other files deselected
+		 */
+		DESELECT_OTHERS;
+	}
 
 }
