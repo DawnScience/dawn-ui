@@ -233,19 +233,15 @@ public class MappedDataView extends ViewPart {
 				
 			if (!maps.isEmpty()) {
 				manager.add(MapActionUtils.getComparisonDialog(maps));
-				manager.add(new Separator());
-				manager.add(MapActionUtils.getUnPlotAllAction(plotManager, viewer, fileController));
 			}
 			
-			if (maps.size() == 1) {
-				manager.add(MapActionUtils.getMapPropertiesAction(maps.get(0),plotManager, fileController));
-			}
+			manager.add(new Separator());
+			manager.add(MapActionUtils.getUnPlotAllAction(plotManager, viewer, fileController));
 				
-			if (mdfs.size() > 1) {
-				manager.add(MapActionUtils.getFilesRemoveAction(fileController,mdfs));
-			}
-			
 			if (!mdfs.isEmpty()) {
+				manager.add(MapActionUtils.getUnPlotFromFilesAction(fileController,mdfs));
+				
+				manager.add(new Separator());
 				MenuManager transfer = new MenuManager("Transfer");
 				transfer.add(MapActionUtils.transferToDataVisAction(mdfs));
 				manager.add(transfer);
@@ -258,6 +254,17 @@ public class MappedDataView extends ViewPart {
 					manager.add(MapActionUtils.getNonLiveFilesRemoveAction(fileController));
 				}
 			}
+			
+			if (mdfs.size() > 1) {
+				manager.add(new Separator());
+				manager.add(MapActionUtils.getFilesRemoveAction(fileController,mdfs));
+			}
+			
+			if (maps.size() == 1) {
+				manager.add(new Separator());
+				manager.add(MapActionUtils.getMapPropertiesAction(maps.get(0),plotManager, fileController));
+			}
+			
 		});
 		menuMgr.setRemoveAllWhenShown(true);
 		viewer.getControl().setMenu(menu);

@@ -1,7 +1,6 @@
 package org.dawnsci.mapping.ui.datamodel;
 
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -355,6 +354,18 @@ public class MappedFileManager implements IMapFileController{
 	public void registerUpdates(MappedDataFile file) {
 		fireListeners(file);
 	}
+	
+	public void removeFromDisplay(List<MappedDataFile> files) {
+		
+		files.stream()
+		     .flatMap(f -> Arrays.stream(f.getChildren()))
+		     .filter(PlottableMapObject.class::isInstance)
+		     .map(PlottableMapObject.class::cast)
+		     .forEach(p -> p.setPlotted(false));
+		
+		fireListeners(null);
+	}
+		
 	
 	@Override
 	public void removeAllFromDisplay() {

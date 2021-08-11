@@ -217,4 +217,30 @@ public class MappedDataFile implements MapObject{
 			((IRemoteDataHolder) dataHolder).update();
 		}
 	}
+	
+	public boolean hasDataPlotted() {
+		
+		if (mapDataMap.isEmpty() && microscopeDataMap.isEmpty() && fullDataMap.isEmpty()) {
+			return false;
+		}
+		
+		for (AbstractMapData d : mapDataMap.values()) {
+			if (d.isPlotted()) {
+				return true;
+			}
+		}
+		
+		for (AssociatedImage d : microscopeDataMap.values()) {
+			if (d.isPlotted()) {
+				return true;
+			}
+		}
+		
+		for (MappedDataBlock d : fullDataMap.values()) {
+			if(d.isPlotted()) {
+				return true;
+			}
+		}
+		return false;
+	}
 }

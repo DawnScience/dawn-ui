@@ -157,7 +157,7 @@ public class MapActionUtils {
 	}
 	
 	public static IAction getFileRemoveAction(final IMapFileController manager, final MappedDataFile file) {
-		return new Action("Clear") {
+		return new Action("Close") {
 			@Override
 			public void run() {
 				manager.removeFile(file);
@@ -190,7 +190,7 @@ public class MapActionUtils {
 	}
 	
 	public static IAction getFilesRemoveAction(final IMapFileController manager, final List<MappedDataFile> files) {
-		return new Action("Clear files") {
+		return new Action("Close files") {
 			@Override
 			public void run() {
 				for (MappedDataFile file :files) manager.removeFile(file);
@@ -200,7 +200,7 @@ public class MapActionUtils {
 	}
 	
 	public static IAction getNonLiveFilesRemoveAction(final IMapFileController manager) {
-		return new Action("Clear all finished scans") {
+		return new Action("Close all finished scans") {
 			@Override
 			public void run() {
 				manager.clearNonLiveFiles();
@@ -210,7 +210,7 @@ public class MapActionUtils {
 	}
 	
 	public static IAction getFilesRemoveAllAction(final IMapFileController manager) {
-		return new Action("Clear all files") {
+		return new Action("Close all files") {
 			@Override
 			public void run() {
 				manager.clearAll();
@@ -220,7 +220,7 @@ public class MapActionUtils {
 	}
 	
 	public static IAction getFilesRemoveAction(final IMapFileController manager) {
-		return new Action("Clear all") {
+		return new Action("Close all") {
 			@Override
 			public void run() {
 				manager.clearAll();
@@ -236,7 +236,15 @@ public class MapActionUtils {
 				controller.removeAllFromDisplay();
 			}
 		};
-
+	}
+	
+	public static IAction getUnPlotFromFilesAction(final IMapFileController controller, final List<MappedDataFile> files) {
+		return new Action("Remove from plot") {
+			@Override
+			public void run() {
+				controller.removeFromDisplay(files);
+			}
+		};
 	}
 	
 	public static IAction getCopyPathToClipboardAction(String path) {

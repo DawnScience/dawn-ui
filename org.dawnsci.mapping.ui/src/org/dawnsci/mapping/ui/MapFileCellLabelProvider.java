@@ -23,6 +23,8 @@ public class MapFileCellLabelProvider extends StyledCellLabelProvider {
 	private final Image file = Activator.getImage("icons/map-file.png");
 	private final Image remote= Activator.getImage("icons/remote-file.png");
 	private final Image camera= Activator.getImage("icons/camera-black.png");
+	private final Image plotted= Activator.getImage("icons/file-plotted.png");
+	private final Image remoteplotted= Activator.getImage("icons/live-plotted.png");
 	private Font italicFont = null;
 	private Font initialFont = null;
 	
@@ -44,12 +46,18 @@ public class MapFileCellLabelProvider extends StyledCellLabelProvider {
         	  cell.setImage(camera);
       } else if (element instanceof MappedDataFile){
     	  
-    	  if (((MappedDataFile)element).getLiveDataBean() != null) {
+    	  boolean isLive = ((MappedDataFile)element).getLiveDataBean() != null;
+    	  boolean hasPlotted = ((MappedDataFile) element).hasDataPlotted();
+    	  
+    	  if (isLive && hasPlotted) {
+    		  cell.setImage(remoteplotted);
+    	  } else if (isLive) {
     		  cell.setImage(remote);
+    	  } else if (hasPlotted) {
+    		  cell.setImage(plotted);
     	  } else {
     		  cell.setImage(file);
     	  }
-    	  
       }
 
       cell.setText(text.toString());
@@ -64,7 +72,6 @@ public class MapFileCellLabelProvider extends StyledCellLabelProvider {
     	  }
     	
       }
-      
       
       if ( element instanceof PlottableMapObject && ((PlottableMapObject)element).isPlotted()) cell.setFont(italicFont);
       else cell.setFont(initialFont);
@@ -93,6 +100,8 @@ public class MapFileCellLabelProvider extends StyledCellLabelProvider {
 		file.dispose();
 		remote.dispose();
 		camera.dispose();
+		plotted.dispose();
+		remoteplotted.dispose();
 		if (italicFont != null) italicFont.dispose();
 		super.dispose();
 	}
