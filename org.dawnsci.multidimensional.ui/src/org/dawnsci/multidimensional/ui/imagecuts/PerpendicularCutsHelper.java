@@ -262,22 +262,48 @@ public class PerpendicularCutsHelper {
 		
 		boolean valid = true;
 		
+		//maintain the width if possible
 		if (roi instanceof RectangularROI) {
 			int other = dim == 0 ? 1 : 0;
 			double point = roi.getPoint()[dim];
 			double length = ((RectangularROI) roi).getLength(dim);
-			if (point > shape[other] || point < 0) {
-				point = shape[other]/2.0;
+			
+			
+			//5 options:
+			//(a) all is fine do nothing
+			//(b) point below zero, length smaller than image
+			//(c) point below zero, length greater than image
+			//(d) point + length > size of image, length smaller than image
+			//(e) point + length > size of image, length greater than image
+			
+			
+			if (point < 0) {
+				point = 0;
+				valid = false;
+				double[] p = new double[2];
+				p[dim] = point;
+				
+				
+				roi.setPoint(p);
+				if (length > shape[other]) {
+					double[] l = new double[2];
+					l[dim] = length;
+					((RectangularROI) roi).setLengths(l);
+				}
+				
+			} else if (point + length > shape[other]) {
+				
+				if (length > shape[other]) {
+					double[] l = new double[2];
+					length = shape[other];
+					l[dim] = length;
+					((RectangularROI) roi).setLengths(l);
+				}
+				
+				point = shape[other] - length;
 				double[] p = new double[2];
 				p[dim] = point;
 				roi.setPoint(p);
-				valid = false;
-			}
-			
-			if ((point + length) > shape[other]) {
-				double[] p = new double[2];
-				p[dim] = shape[other] - point;
-				((RectangularROI) roi).setLengths(p);
 				valid = false;
 			}
 		}
