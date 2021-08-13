@@ -99,6 +99,21 @@ public class OperationTableUtils {
 		}
 	}
 
+	private static String readDataOriginFromFile(Shell shell, String filename) {
+		try {
+			IPersistenceService service = ServiceHolder.getPersistenceService();
+			try (IPersistentFile pf = service.getPersistentFile(filename)) {
+				OriginMetadata dataOrigin = pf.getOperationDataOrigin();
+				return dataOrigin == null ? null : dataOrigin.getFilePath();
+			}
+		} catch (Exception e) {
+			logger.error("Could not read data origin from file", e);
+			if (shell != null)
+				MessageDialog.openInformation(shell, "Exception while reading data origin from file", "An exception occurred while reading the operations from a file.\n" + e.getMessage());
+		}
+		return null;
+	}
+
 	public static void setupPipelinePaneDropTarget(final SeriesTable table, final OperationFilter opFilter, final Logger logger, final Shell shell) {
 		DropTarget dt = table.getDropTarget();
 		
@@ -110,26 +125,33 @@ public class OperationTableUtils {
 			@Override
 			public void drop(DropTargetEvent event) {
 				Object dropData = event.data;
-				String dataFile = null;
+				List<String> dataFile = new ArrayList<>();
 				if (dropData instanceof TreeSelection) {
 					TreeSelection selectedNode = (TreeSelection) dropData;
 					Object obj[] = selectedNode.toArray();
-					for (int i = 0; i < obj.length; i++) {
+					int i = 0;
+					for (; i < obj.length; i++) {
 						if (obj[i] instanceof IFile) {
-							IFile file = (IFile) obj[i];
-							dataFile = readOperationsFromFile(shell, file.getLocation().toOSString(), table, opFilter, logger);
+							IFile file = (IFile) obj[i]; 
+							dataFile.add(readOperationsFromFile(shell, file.getLocation().toOSString(), table, opFilter, logger));
+							i++;
 							break;
 						}
 					}
+					for (; i < obj.length; i++) {
+						if (obj[i] instanceof IFile) {
+							IFile file = (IFile) obj[i];
+							dataFile.add(readDataOriginFromFile(shell, file.getLocation().toOSString()));
+						}
+					}
 				} else if (dropData instanceof String[]) {
-					for (String path : (String[])dropData){
-						dataFile = readOperationsFromFile(shell, path, table, opFilter, logger);
-						break;
+					String[] paths = (String[]) dropData;
+					dataFile.add(readOperationsFromFile(shell, paths[0], table, opFilter, logger));
+					for (int i = 1; i < paths.length; i++) {
+						dataFile.add(readDataOriginFromFile(shell, paths[i]));
 					}
 				}
-				if (dataFile != null) {
-					confirmAddFileForProcessing(shell, dataFile);
-				}
+				confirmAddFileForProcessing(shell, dataFile.toArray(new String[dataFile.size()]));
 			}
 		});
 	}
@@ -139,12 +161,28 @@ public class OperationTableUtils {
 	 * @param shell
 	 * @param dataFile
 	 */
-	public static void confirmAddFileForProcessing(Shell shell, String dataFile) {
-		if (dataFile == null || !(new File(dataFile).canRead())) {
+	public static void confirmAddFileForProcessing(Shell shell, String... dataFile) {
+		if (dataFile == null || dataFile.length == 0) {
+			return;
+		}
+		List<String> validFiles = new ArrayList<>();
+		for (String d : dataFile) {
+			if (new File(d).canRead()) {
+				validFiles.add(d);
+			}
+		}
+		if (validFiles.isEmpty()) {
 			return;
 		}
 
-		boolean ok = MessageDialog.openQuestion(shell, "Add file for processing", "Add " + dataFile + "?");
+		dataFile = validFiles.toArray(new String[validFiles.size()]);
+		StringBuilder text = new StringBuilder("Add following files:\n");
+		for (String v : validFiles) {
+			text.append('\t');
+			text.append(v);
+			text.append('\n');
+		}
+		boolean ok = MessageDialog.openQuestion(shell, "Add file for processing", text.toString());
 		if (ok) {
 			IWorkbenchPage page = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage();
 			IViewPart view = page.findView(DataFileSliceView.ID);
@@ -152,7 +190,7 @@ public class OperationTableUtils {
 
 			final FileManager manager = (FileManager)view.getAdapter(FileManager.class);
 			if (manager != null) {
-				manager.addFiles(new String[]{dataFile});
+				manager.addFiles(dataFile);
 			}
 		}
 	}
