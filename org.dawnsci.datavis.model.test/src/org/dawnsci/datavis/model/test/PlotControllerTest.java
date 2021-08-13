@@ -18,6 +18,7 @@ import org.dawnsci.datavis.api.IRecentPlaces;
 import org.dawnsci.datavis.model.DataOptions;
 import org.dawnsci.datavis.model.FileController;
 import org.dawnsci.datavis.model.FileControllerUtils;
+import org.dawnsci.datavis.model.IFileController.OpenMode;
 import org.dawnsci.datavis.model.LiveServiceManager;
 import org.dawnsci.datavis.model.LoadedFile;
 import org.dawnsci.datavis.model.PlotController;
@@ -689,5 +690,62 @@ public class PlotControllerTest extends AbstractTestModel {
 		assertEquals(0, plottingSystem.getTraces().size());
 		
 	}
+	
+	@Test
+	public void testMultiFileImageSelectOnLoad() throws Exception{
+		initialiseControllers();
+		fileController.setOpenMode(OpenMode.SELECT);
+		FileControllerUtils.loadFile(fileController,file1.getAbsolutePath());
+		
+		LoadedFile lf1 = fileController.getLoadedFiles().stream().filter(f -> f.getFilePath().equals(file1.getAbsolutePath())).findFirst().get();
+		
+		assertTrue(lf1.isSelected());
+		DataOptions dop1 = lf1.getDataOption("/entry/dataset2");
+		fileController.setDataSelected(dop1, true);
+				
+		plotManager.waitOnJob();
+		assertEquals(1, plottingSystem.getTraces().size());
+		ITrace next = plottingSystem.getTraces().iterator().next();
+		assertTrue(next instanceof IImageTrace);
+		
+		FileControllerUtils.loadFile(fileController,file2.getAbsolutePath());
+		
+		plotManager.waitOnJob();
+		assertEquals(1, plottingSystem.getTraces().size());
+		next = plottingSystem.getTraces().iterator().next();
+		assertTrue(next instanceof IImageTrace);
+		
+		LoadedFile lf2 = fileController.getLoadedFiles().stream().filter(f -> f.getFilePath().equals(file2.getAbsolutePath())).findFirst().get();
+		assertTrue(lf2.isSelected());
+		//even though is SELECT open mode, 2 images cannot be plotted so 1st file must deselect
+		assertTrue(!lf1.isSelected());
+	}
+	
+	
+	@Test
+	public void testPlotModeXYMultiSelectOnLoad() {
+		initialiseControllers();
+		fileController.setOpenMode(OpenMode.SELECT);
+		setUpAndSelectFirstFile1D();
+		
+		plotManager.waitOnJob();
+		assertEquals(1, plottingSystem.getTraces().size());
+		ITrace next = plottingSystem.getTraces().iterator().next();
+		assertTrue(next instanceof ILineTrace);
+		
+		FileControllerUtils.loadFile(fileController,file2.getAbsolutePath());
+		
+		plotManager.waitOnJob();
+		assertEquals(2, plottingSystem.getTraces().size());
+		
+		LoadedFile lf1 = fileController.getLoadedFiles().stream().filter(f -> f.getFilePath().equals(file.getAbsolutePath())).findFirst().get();
+		LoadedFile lf2 = fileController.getLoadedFiles().stream().filter(f -> f.getFilePath().equals(file2.getAbsolutePath())).findFirst().get();
+		
+		assertTrue(lf1.isSelected());
+		assertTrue(lf2.isSelected());
+		
+	}
+	
+	
 }
 	

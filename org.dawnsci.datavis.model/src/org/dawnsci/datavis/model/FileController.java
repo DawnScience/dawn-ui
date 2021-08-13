@@ -362,7 +362,9 @@ public class FileController implements IFileController {
 			loadedFiles.deselectOthers(f.getFilePath());
 		}
 		
-		fireStateChangeListenersLoad(true, false, f, null);
+		List<DataOptions> sd = f.getSelectedDataOptions();
+		
+		fireStateChangeListenersLoad(true, false, f, sd.isEmpty() ? null : sd.get(0));
 	}
 	
 	@Override
