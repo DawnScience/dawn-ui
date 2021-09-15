@@ -11,6 +11,10 @@
             class="org.dawnsci.multidimensional.ui.volume.VolumeSlicesPlotViewer"
             id="org.dawnsci.slicing.tools.volume.VolumeSlicesPlotViewer">
       </plottingViewer>
+      <plottingViewer
+            class="org.dawnsci.multidimensional.ui.arpes.ArpesSlicePlotViewer"
+            id="org.dawnsci.multidimensional.ui.arpes.ArpesSlicePlotViewer">
+      </plottingViewer>
    </extension>
    <extension
          point="org.dawnsci.datavis.api.plotmode">
@@ -28,6 +32,11 @@
             class="org.dawnsci.multidimensional.ui.volume.PlotModeVolumeSlices"
             name="&quot;Volume - Orthogonal Slices&quot;"
             priority="-1">
+      </plotmode>
+      <plotmode
+            class="org.dawnsci.multidimensional.ui.arpes.PlotModeArpesSlice"
+            name="ARPES Slicing"
+            priority="0">
       </plotmode>
    </extension>
       <extension

@@ -32,7 +32,6 @@ import org.eclipse.draw2d.ColorConstants;
 import org.eclipse.january.dataset.DatasetFactory;
 import org.eclipse.january.dataset.IDataset;
 import org.eclipse.january.dataset.ILazyDataset;
-import org.eclipse.january.dataset.IntegerDataset;
 import org.eclipse.january.dataset.ShortDataset;
 import org.eclipse.january.dataset.Slice;
 import org.eclipse.jface.action.IAction;
@@ -172,9 +171,6 @@ public class HyperComponent {
 		if (leftJob.getReducer() instanceof IProvideReducerActions) {
 			createActions((IProvideReducerActions)leftJob.getReducer(), mainSystem, leftActions,roiListenerLeft,HYPERIMAGE);
 		}
-
-		IROI rroi = myRoi != null ? myRoi : mainReducer.getInitialROI(daxes,order);
-		IROI broi = sideReducer.getInitialROI(daxes,order);
 		
 		mainSystem.clear();
 		mainSystem.getAxes().clear();
@@ -197,22 +193,15 @@ public class HyperComponent {
 		sideSystem.clear();
 		sideSystem.getAxes().clear();
 		
-		if (mainReducer.isOutput1D()) {
-			List<IDataset> xd = new ArrayList<IDataset>();
-			IDataset axis = daxes.get(axisCount++);
-			xd.add(DatasetFactory.zeros(ShortDataset.class, axis.getSize()));
-			
-			sideSystem.createPlot1D(axis,xd, null);
-		} else {
-			List<IDataset> xd = new ArrayList<IDataset>();
-			xd.add(DatasetFactory.createRange(IntegerDataset.class, 10));
-			xd.add(daxes.get(axisCount++));
-			sideSystem.createPlot2D(DatasetFactory.ones(IntegerDataset.class, 10, xd.get(1).getSize()), xd, null);
+		boolean createSideROI = sideReducer.createROI();
+		
+		if (createSideROI) {
+			for (IRegion region : sideSystem.getRegions()) {
+				sideSystem.removeRegion(region);
+			}
 		}
 		
-		for (IRegion region : sideSystem.getRegions()) {
-			sideSystem.removeRegion(region);
-		}
+		IROI rroi = myRoi != null ? myRoi : mainReducer.getInitialROI(daxes,order);
 		
 		try {
 			IRegion region = mainSystem.createRegion(LEFT_REGION_NAME, mainReducer.getSupportedRegionType().get(0));
@@ -225,15 +214,16 @@ public class HyperComponent {
 			sideSystem.clear();
 			updateRight(region, rroi);
 			
-			IRegion windowRegion = sideSystem.createRegion(RIGHT_REGION_NAME, sideReducer.getSupportedRegionType().get(0));
-			windowRegion.setRegionColor(ColorConstants.blue);
-			windowRegion.setROI(broi);
-			
-			windowRegion.addROIListener(this.roiListenerRight);
-			sideSystem.addRegion(windowRegion);
-			windowRegion.setUserRegion(false);
-			updateLeft(windowRegion,broi);
-			
+			IRegion windowRegion = null;
+			if (createSideROI) {
+				windowRegion = sideSystem.createRegion(RIGHT_REGION_NAME, sideReducer.getSupportedRegionType().get(0));
+				windowRegion.setRegionColor(ColorConstants.blue);
+				IROI broi = sideReducer.getInitialROI(daxes,order);
+				windowRegion.setROI(broi);
+				sideSystem.addRegion(windowRegion);
+				windowRegion.setUserRegion(false);
+				updateLeft(windowRegion,windowRegion.getROI());
+			} 
 		} catch (Exception e) {
 			logger.error("Error adding regions to hyperview: " + e.getMessage());
 		}
@@ -503,12 +493,18 @@ public class HyperComponent {
 	}
 
 	protected void updateRight(IRegion r, IROI rb) {
-		
+		if (leftJob == null) return;
+		if (!leftJob.getReducer().getSupportedRegionType().contains(r.getRegionType())) {
+			return;
+		}
 		leftJob.profile(r, rb);
 	}
 	
 	protected void updateLeft(IRegion r, IROI rb) {
-
+        if (rightJob == null) return;
+        if (!rightJob.getReducer().getSupportedRegionType().contains(r.getRegionType())) {
+			return;
+		}
 		rightJob.profile(r,rb);
 	}
 	

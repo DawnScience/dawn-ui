@@ -10,9 +10,9 @@ import org.eclipse.january.dataset.SliceND;
 public class PlotModeHyper implements ILazyPlotMode {
 
 	private static final String[] options =  new String[]{"Z", "X", "Y"};
-	private ILazyDataset view3d;
-	private int[] order = new int[]{0,1,2};
-	private SliceND slice;
+	protected ILazyDataset view3d;
+	protected int[] order = new int[]{0,1,2};
+	protected SliceND slice;
 	
 	@Override
 	public String[] getOptions() {
