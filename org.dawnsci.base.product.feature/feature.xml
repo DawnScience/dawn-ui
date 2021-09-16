@@ -133,7 +133,8 @@
          id="org.dawnsci.product.plugin"
          download-size="0"
          install-size="0"
-         version="0.0.0"/>
+         version="0.0.0"
+         unpack="false"/>
 
    <plugin
          id="org.apache.commons.math3"

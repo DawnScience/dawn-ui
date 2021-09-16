@@ -1,5 +1,4 @@
 Manifest-Version: 1.0
-Eclipse-BundleShape: dir
 Bundle-ManifestVersion: 2
 Bundle-Name: Dawn Product Plugin
 Bundle-SymbolicName: org.dawnsci.product.plugin;singleton:=true
