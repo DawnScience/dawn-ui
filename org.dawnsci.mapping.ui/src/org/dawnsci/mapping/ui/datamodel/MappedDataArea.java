@@ -1,5 +1,7 @@
 package org.dawnsci.mapping.ui.datamodel;
 
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
@@ -90,7 +92,14 @@ public class MappedDataArea implements MapObject {
 	}
 	
 	public boolean contains(String path) {
-		for (MappedDataFile file : files) if (path.equals(file.getPath())) return true;
+		Path p1 = Paths.get(path);
+		
+		for (MappedDataFile file : files) {
+			Path p2 = Paths.get(file.getPath());
+				if (p1.equals(p2)) {
+					return true;
+				}
+		}
 		return false;
 	}
 	
