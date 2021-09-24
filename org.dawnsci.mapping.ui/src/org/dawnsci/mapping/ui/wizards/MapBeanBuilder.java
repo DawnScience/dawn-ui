@@ -232,7 +232,7 @@ public class MapBeanBuilder {
 				yDim = slow ? 0 : d.axes.length -1;
 			}
 			
-			if (d.rank == minRank && startCount != 1) continue;
+			if (d.rank == minRank && startCount != 1 && minRank != maxRank) continue;
 			
 			if (d.rank == 1 && startCount == 1) {
 				xDim = 0;
