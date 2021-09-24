@@ -103,7 +103,7 @@ public class DataReduction2DTool extends AbstractToolPage implements IRegionList
 
 	private String getDataFilePath(IImageTrace image) {
 		IMetadata metaData = image.getData().getFirstMetadata(IMetadata.class);
-		if (metaData != null) {
+		if (metaData != null && metaData.getFilePath() != null) {
 			return metaData.getFilePath();
 		}
 		SliceFromSeriesMetadata ssm = image.getData().getFirstMetadata(SliceFromSeriesMetadata.class);
