@@ -33,19 +33,19 @@ public class PerpendicularCutsRunner {
 				new ThreadPoolExecutor.DiscardOldestPolicy());
 	}
 
-	public void runAsync(IDataset data, IDataset xaxis, IDataset yaxis, RectangularROI xROI, RectangularROI yROI) {
+	public void runAsync(IDataset data, IDataset xaxis, IDataset yaxis, RectangularROI xROI, RectangularROI yROI, AdditionalCutDimension d) {
 		Runnable r = new Runnable() {
 
 			@Override
 			public void run() {
-				runBlocking(data, xaxis, yaxis, xROI, yROI);
+				runBlocking(data, xaxis, yaxis, xROI, yROI, d);
 			}
 		};
 
 		executor.execute(r);
 	}
 
-	public void runBlocking(IDataset data, IDataset xAxis, IDataset yAxis, RectangularROI xROI, RectangularROI yROI) {
+	public void runBlocking(IDataset data, IDataset xAxis, IDataset yAxis, RectangularROI xROI, RectangularROI yROI, AdditionalCutDimension d) {
 		double pointX = xROI.getPointX() > 0 ? xROI.getPointX() : 0;
 		double lenX = xROI.getLengths()[0];
 
@@ -65,7 +65,7 @@ public class PerpendicularCutsRunner {
 
 		double sum = ((Number) DatasetUtils.convertToDataset(data.getSliceView(ySlice, xSlice)).sum()).doubleValue();
 
-		listeners.stream().forEach(l -> l.cutProcessed(slicex, slicey, sum, buildCuts(xROI, yROI, yAxis, xAxis)));
+		listeners.stream().forEach(l -> l.cutProcessed(slicex, slicey, sum, buildCuts(xROI, yROI, yAxis, xAxis, d)));
 
 	}
 
@@ -84,18 +84,24 @@ public class PerpendicularCutsRunner {
 
 	}
 
-	private CutData[] buildCuts(RectangularROI roix, RectangularROI roiy, IDataset yAxis, IDataset xAxis) {
+	private CutData[] buildCuts(RectangularROI roix, RectangularROI roiy, IDataset yAxis, IDataset xAxis, AdditionalCutDimension d) {
 
 		CutData x = buildCut(roix, xAxis, CutType.X);
 		CutData y = buildCut(roiy, yAxis, CutType.Y);
 
-		return new CutData[] { x, y };
-
+		
+		
+		if (d != null) {
+			CutData addition = buildCut(d.getRoi(), d.getAxis(), CutType.ADDITIONAL);
+			return new CutData[] { x, y, addition };
+		} else {
+			return new CutData[] { x, y };
+		}
 	}
 
 	private CutData buildCut(RectangularROI roi, IDataset axis, CutType type) {
 
-		boolean isX = type == CutType.X;
+		boolean isX = (type == CutType.X || type == CutType.ADDITIONAL);
 
 		int i = isX ? 0 : 1;
 
@@ -110,6 +116,15 @@ public class PerpendicularCutsRunner {
 		String name = isX ? "X-Axis" : "Y-Axis";
 		
 		if (axis != null) {
+			
+			if (axis.getRank() == 2) {
+				if (CutType.Y == type) {
+					axis = axis.getSlice(new Slice(0,1), null).squeeze();
+				} else {
+					axis = axis.getSlice((Slice)null, new Slice(0,1)).squeeze();
+				}
+			}
+			
 			int lastPoint = axis.getSize() - 1;
 			step = Math.abs(axis.getDouble(lastPoint) - axis.getDouble(0)) / (lastPoint);
 			if (pos > lastPoint) {

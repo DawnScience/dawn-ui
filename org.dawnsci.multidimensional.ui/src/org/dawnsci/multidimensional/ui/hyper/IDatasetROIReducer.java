@@ -61,8 +61,31 @@ public interface IDatasetROIReducer {
 	 */
 	IROI getInitialROI(List<IDataset> axes, int[] order);
 	
+	/**
+	 * That the reducer supports multiple regions
+	 * 
+	 * Usually means that the output is a line, not an image
+	 * 
+	 * @return
+	 */
 	boolean supportsMultipleRegions();
 	
+	
+	/**
+	 * Get the axes of the reduced data
+	 * 
+	 * @return
+	 */
 	List<IDataset> getAxes();
+	
+	
+	/**
+	 * Whether the Region/ROI for this reducer needs to be created
+	 * or will be created by an external listener
+	 * @return
+	 */
+	default boolean createROI() {
+		return true;
+	}
 	
 }

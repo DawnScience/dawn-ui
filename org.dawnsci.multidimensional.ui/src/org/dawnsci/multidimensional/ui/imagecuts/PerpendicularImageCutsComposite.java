@@ -222,11 +222,16 @@ public class PerpendicularImageCutsComposite extends Composite {
 		listeners.stream().forEach(l -> l.updateRequested(value, delta, type));
 	}
 
-	public void update(IDataset data, IDataset xaxis, IDataset yaxis, RectangularROI xROI, RectangularROI yROI) {
-		runner.runAsync(data, xaxis, yaxis, xROI, yROI);
+	public void update(IDataset data, IDataset xaxis, IDataset yaxis, RectangularROI xROI, RectangularROI yROI, AdditionalCutDimension d) {
+		runner.runAsync(data, xaxis, yaxis, xROI, yROI, d);
 	}
 
 	private String doubleToStringWithPrecision(double d) {
+		
+		if (Double.isNaN(d)) {
+			return Double.toString(Double.NaN);
+		}
+		
 		BigDecimal bd = BigDecimal.valueOf(d).round(PRECISION).stripTrailingZeros();
 		// stop 100 going to 1.0E2
 		if (bd.precision() >= 1 && bd.precision() < PRECISION.getPrecision() && bd.scale() < 0
@@ -265,10 +270,18 @@ public class PerpendicularImageCutsComposite extends Composite {
 			if (element instanceof CutData) {
 				CutData d = (CutData) element;
 
+				double valueString;
+				try {
+					valueString = Double.parseDouble(value.toString());
+				} catch (Exception e) {
+					return;
+				}
+				
+				
 				if (this.value) {
-					fireListeners(Double.parseDouble(value.toString()), d.getDelta(), d.getType());
+					fireListeners(valueString, d.getDelta(), d.getType());
 				} else {
-					fireListeners(d.getValue(), Double.parseDouble(value.toString()), d.getType());
+					fireListeners(d.getValue(), valueString, d.getType());
 				}
 			}
 		}

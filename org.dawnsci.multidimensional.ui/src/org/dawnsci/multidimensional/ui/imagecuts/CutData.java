@@ -33,7 +33,7 @@ public class CutData {
 	}
 
 	public enum CutType {
-		X, Y;
+		X, Y, ADDITIONAL;
 	}
 
 }

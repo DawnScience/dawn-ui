@@ -10,6 +10,7 @@ import org.eclipse.dawnsci.analysis.dataset.roi.RectangularROI;
 import org.eclipse.dawnsci.analysis.dataset.roi.XAxisBoxROI;
 import org.eclipse.dawnsci.analysis.dataset.roi.YAxisBoxROI;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
+import org.eclipse.dawnsci.plotting.api.PlotType;
 import org.eclipse.dawnsci.plotting.api.region.ILockTranslatable;
 import org.eclipse.dawnsci.plotting.api.region.IROIListener;
 import org.eclipse.dawnsci.plotting.api.region.IRegion;
@@ -34,16 +35,18 @@ public class PerpendicularCutsHelper {
 	private static final String Y_REGION_NAME = "yPerpendicularCut";
 	
 	
-	private IPlottingSystem<Composite> plottingSystem;
+	private IPlottingSystem<?> plottingSystem;
 	private ITraceListener traceListener;
 	private IRegionListener regionListener;
 	private IROIListener roiListener;
 	private CutRegionUpdateListener cutUpdateListener;
 	
+	private AdditionalCutDimension additionalCut;
+	
 	private IRegion[] regions;
 	private boolean inUpdate = false;
 	
-	public PerpendicularCutsHelper(IPlottingSystem<Composite> system) {
+	public PerpendicularCutsHelper(IPlottingSystem<?> system) {
 		this.plottingSystem = system;
 		
 		cutUpdateListener = new CutRegionUpdateListener() {
@@ -51,11 +54,20 @@ public class PerpendicularCutsHelper {
 			@Override
 			public void updateRequested(double value, double delta, CutType type) {
 
+				if (CutType.ADDITIONAL == type && additionalCut != null) {
+					updateROI(value, delta,additionalCut.getAxis(),additionalCut.getRoi(),additionalCut.getRegion(),0);
+					return;
+				}
+				
 				IImageTrace imageTrace = getImageTrace();
 
 				doUpdate(imageTrace, regions, value, delta, type == CutType.X);
 			}
 		};
+	}
+	
+	public void setAdditionalCutDimension(AdditionalCutDimension additionalCut) {
+		this.additionalCut = additionalCut;
 	}
 	
 	private IImageTrace getImageTrace() {
@@ -69,32 +81,23 @@ public class PerpendicularCutsHelper {
 		return (IImageTrace)traces.iterator().next();
 	}
 	
-	
-	public IRegion[] generateInitialRegions(IImageTrace imageTrace) {
-
-		if (imageTrace == null) return null;
-		
-		int[] shape = imageTrace.getData().getShape();
-		
-		if (imageTrace.getImageServiceBean().isTransposed()) {
-			
-		}
-
+	public IRegion[] generateInitialRegions(int[] shape) {
 		try {
+			plottingSystem.setPlotType(PlotType.IMAGE);
 			IRegion xr = plottingSystem.createRegion(X_REGION_NAME, RegionType.XAXIS);
 
 			int xDelta = shape[1] / 10;
 
 			XAxisBoxROI xroi = new XAxisBoxROI(shape[1] / 2 - (xDelta / 2), 0, xDelta, 1, 0);
 			xr.setROI(xroi);
-			xr.setUserRegion(false);
+			xr.setUserRegion(true);
 
 			int yDelta = shape[0] / 10;
 
 			IRegion yr = plottingSystem.createRegion(Y_REGION_NAME, RegionType.YAXIS);
 			YAxisBoxROI yroi = new YAxisBoxROI(0, shape[0] / 2 - (yDelta / 2), 1, yDelta, 0);
 			yr.setROI(yroi);
-			yr.setUserRegion(false);
+			yr.setUserRegion(true);
 
 			IRegion[] regions = new IRegion[] { xr, yr };
 
@@ -109,6 +112,7 @@ public class PerpendicularCutsHelper {
 				((ILockTranslatable) yr).translateOnly(true);
 			}
 
+			this.regions = regions;
 			return regions;
 		} catch (Exception e) {
  			logger.error("Error generating initial regions", e);
@@ -116,6 +120,16 @@ public class PerpendicularCutsHelper {
 		}
 
 		return null;
+	}
+	
+	
+	public IRegion[] generateInitialRegions(IImageTrace imageTrace) {
+
+		if (imageTrace == null) return null;
+		
+		int[] shape = imageTrace.getData().getShape();
+		
+		return generateInitialRegions(shape);
 	}
 	
 	public void runUpdate(IImageTrace t, IROI roi, IRegion region, PerpendicularImageCutsComposite composite) {
@@ -158,7 +172,7 @@ public class PerpendicularCutsHelper {
 			}
 
 			composite.update(t.getData(), x, y, roix,
-					roiy);
+					roiy, additionalCut);
 		} finally {
 			inUpdate = false;
 		}
@@ -171,24 +185,33 @@ public class PerpendicularCutsHelper {
 		IDataset axis = imageTrace.getAxes().get(i);
 		IRegion r = regions[i];
 		IROI roi = r.getROI();
+		
+		updateROI(value,delta,axis,(RectangularROI)roi,r,i);
+	}
 
+	
+	private void updateROI(double value, double delta, IDataset axis, RectangularROI rr, IRegion r, int dim) {
 		double width = delta;
 		double start = value - delta / 2;
 
 		if (axis != null) {
-			double step = Math.abs(axis.getDouble(axis.getSize() - 1) - axis.getDouble(0)) / (axis.getSize() - 1);
+			double step = (axis.getDouble(axis.getSize() - 1) - axis.getDouble(0)) / (axis.getSize() - 1);
+			double startval = value - delta / 2;
+			
+			if (step < 0) {
+				step = Math.abs(step);
+				startval = value + delta / 2;
+			}
 
-			start = ROISliceUtils.findPositionOfClosestValueInAxis(axis, value - delta / 2);
+			start = ROISliceUtils.findPositionOfClosestValueInAxis(axis, startval);
 			width = delta / step;
 		}
-
-		RectangularROI rr = (RectangularROI) roi;
 
 		double[] p = new double[] { 0, 0 };
 		double[] w = new double[] { 0, 0 };
 
-		p[i] = start;
-		w[i] = width;
+		p[dim] = start;
+		w[dim] = width;
 		rr.setPoint(p);
 		rr.setLengths(w);
 		r.setROI(rr);
@@ -205,7 +228,7 @@ public class PerpendicularCutsHelper {
 					IImageTrace t = evt.getImageTrace();
 
 					if (regions == null) {
-						regions = generateInitialRegions(t);
+						generateInitialRegions(t);
 					}
 
 					runUpdate(t, null, null, composite);
@@ -253,7 +276,7 @@ public class PerpendicularCutsHelper {
 
 		if (regions == null) {
 			IImageTrace imageTrace = getImageTrace();
-			regions = generateInitialRegions(imageTrace);
+			generateInitialRegions(imageTrace);
 			runUpdate(imageTrace, null, null, composite);
 		}
 	}
