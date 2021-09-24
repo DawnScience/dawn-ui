@@ -143,6 +143,22 @@ public class MapNexusFileBuilderUtils {
 		}
 	}
 	
+	public static void makeMultipleDiodeGridScan(String path) throws NexusException {
+		NexusFileBuilder fileBuilder = new DefaultNexusFileBuilder(path);
+		NXroot nXroot = fileBuilder.getNXroot();
+		NXentry entry = NexusNodeFactory.createNXentry();
+		nXroot.addGroupNode(ENTRY1, entry);
+		NXdata sum = makeNXData(2, 0, false);
+		entry.addGroupNode(DETECTOR, sum);
+		NXdata sum2 = makeNXData(2, 0, false);
+		entry.addGroupNode(DETECTOR+"_1", sum);
+		entry.addGroupNode(DETECTOR+"_2", sum2);
+		
+		
+		try (NexusBuilderFile file = fileBuilder.createFile(false)) {
+		}
+	}
+	
 	public static void makeDiodeGridScanEnergy(String path) throws NexusException {
 		NexusFileBuilder fileBuilder = new DefaultNexusFileBuilder(path);
 		NXroot nXroot = fileBuilder.getNXroot();

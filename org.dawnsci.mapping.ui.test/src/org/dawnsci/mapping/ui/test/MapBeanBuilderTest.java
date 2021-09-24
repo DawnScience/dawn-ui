@@ -24,15 +24,18 @@ public class MapBeanBuilderTest {
 	private static File file = null;
 	private static File file1 = null;
 	private static File file2 = null;
+	private static File file3 = null;
 	
 	@BeforeClass
 	public static void buildData() throws Exception {
 		file = folder.newFile("file1.nxs");
 		file1 = folder.newFile("file2.nxs");
 		file2 = folder.newFile("file3.nxs");
+		file3 = folder.newFile("file4.nxs");
 		MapNexusFileBuilderUtils.makeGridScanWithSum(file.getAbsolutePath());
 		MapNexusFileBuilderUtils.makeGridScanWithZandSum(file1.getAbsolutePath());
 		MapNexusFileBuilderUtils.makePointScanWithSum(file2.getAbsolutePath());
+		MapNexusFileBuilderUtils.makeMultipleDiodeGridScan(file3.getAbsolutePath());
 	}
 	
 	
@@ -69,6 +72,15 @@ public class MapBeanBuilderTest {
 		IDataHolder data = LoaderFactory.getData(file1.getAbsolutePath());
 		MappedDataFileBean buildBean = MapBeanBuilder.buildBean(data.getTree(), MapNexusFileBuilderUtils.STAGE_X,
 				MapNexusFileBuilderUtils.STAGE_Y);
+		assertNotNull(buildBean);
+		assertTrue(buildBean.checkValid());
+	}
+	
+	@Test
+	public void testBuildBeanAxesNamesGridScanMulitpleScalar() throws Exception {
+
+		IDataHolder data = LoaderFactory.getData(file3.getAbsolutePath());
+		MappedDataFileBean buildBean = MapBeanBuilder.buildBean(data.getTree());
 		assertNotNull(buildBean);
 		assertTrue(buildBean.checkValid());
 	}
