@@ -47,8 +47,9 @@ public class VolumeSlicesPlotViewer extends IPlottingSystemViewer.Stub<Composite
 		return false;
 	}
 	
+	@SuppressWarnings("unchecked")
 	@Override
-	public  <U extends ITrace> U createTrace(String name, Class<? extends ITrace> clazz) {
+	public  <U extends ITrace> U createTrace(String name, Class<U> clazz) {
 		
 		if (clazz == IVolumeSlicesTrace.class) {
 			VolumeSliceTrace volume = new VolumeSliceTrace();

@@ -943,6 +943,7 @@ public class LightWeightPlotViewer<T> implements IPlottingSystemViewer<T>, IAnno
 	}
 
 
+	@SuppressWarnings("unchecked")
 	public T getControl() {
 		if (figureCanvas!=null) return (T)figureCanvas;
 		return (T)content;
@@ -1014,7 +1015,7 @@ public class LightWeightPlotViewer<T> implements IPlottingSystemViewer<T>, IAnno
 	}
 
 	@SuppressWarnings("unchecked")
-	public <U extends ITrace> U createTrace(String name, Class<? extends ITrace> clazz) {
+	public <U extends ITrace> U createTrace(String name, Class<U> clazz) {
 		if (ILineTrace.class.isAssignableFrom(clazz)) {
 			return (U) createLineTrace(name);
 		} else if (IVectorTrace.class.isAssignableFrom(clazz)) {
@@ -1887,6 +1888,7 @@ public class LightWeightPlotViewer<T> implements IPlottingSystemViewer<T>, IAnno
 		return name;
 	}
 
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	@Override
 	public Object getAdapter(Class adapter) {
 		if (adapter == XYRegionGraph.class) {

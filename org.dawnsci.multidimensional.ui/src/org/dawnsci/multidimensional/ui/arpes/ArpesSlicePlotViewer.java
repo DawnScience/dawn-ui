@@ -108,7 +108,7 @@ public class ArpesSlicePlotViewer extends AbstractHyperPlotViewer {
 	
 	@SuppressWarnings("unchecked")
 	@Override
-	public  <U extends ITrace> U createTrace(String name, Class<? extends ITrace> clazz) {
+	public  <U extends ITrace> U createTrace(String name, Class<U> clazz) {
 		
 		if (clazz == IArpesSliceTrace.class) {
 			ArpesSliceTrace hyperTrace = new ArpesSliceTrace();

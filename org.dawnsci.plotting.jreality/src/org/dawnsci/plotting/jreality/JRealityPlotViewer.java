@@ -238,7 +238,7 @@ public class JRealityPlotViewer extends IPlottingSystemViewer.Stub<Composite> im
 		}
 	}
 	
-	public <U extends ITrace> U createTrace(String name, Class<? extends ITrace> trace) {
+	public <U extends ITrace> U createTrace(String name, Class<U> trace) {
 		
 		if (ISurfaceTrace.class.isAssignableFrom(trace)) {
 			return (U)createSurfaceTrace(name);

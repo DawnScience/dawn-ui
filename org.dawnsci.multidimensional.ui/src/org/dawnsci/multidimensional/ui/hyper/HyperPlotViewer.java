@@ -124,7 +124,7 @@ public class HyperPlotViewer extends AbstractHyperPlotViewer {
 	
 	@SuppressWarnings("unchecked")
 	@Override
-	public  <U extends ITrace> U createTrace(String name, Class<? extends ITrace> clazz) {
+	public  <U extends ITrace> U createTrace(String name, Class<U> clazz) {
 		
 		if (clazz == IHyper4DTrace.class) {
 			HyperTrace hyperTrace = new Hyper4DTrace();

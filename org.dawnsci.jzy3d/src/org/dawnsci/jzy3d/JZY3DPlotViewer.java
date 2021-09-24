@@ -538,7 +538,7 @@ public class JZY3DPlotViewer extends IPlottingSystemViewer.Stub<Composite> {
 	 * @return trace of given name and class
 	 */
 	@SuppressWarnings("unchecked")
-	public <U extends ITrace> U createTrace(String name, Class<? extends ITrace> clazz) {
+	public <U extends ITrace> U createTrace(String name, Class<U> clazz) {
 		U trace = null;
 		if (clazz == ISurfaceMeshTrace.class) {
 			trace = (U) new SurfaceMeshTraceImpl(ServiceManager.getPaletteService(),ServiceManager.getImageService(),getPreferenceStore().getString(BasePlottingConstants.COLOUR_SCHEME));
