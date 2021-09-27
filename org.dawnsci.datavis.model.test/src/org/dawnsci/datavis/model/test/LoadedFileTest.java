@@ -247,7 +247,7 @@ public class LoadedFileTest  extends AbstractTestModel {
 			ILazyDataset[] axis = m.getAxis(0);
 			assertTrue(axis[0].getName().endsWith(set));
 			axis = m.getAxis(1);
-			assertNotNull(axis);
+			assertNull(axis);
 
 			NDimensions ndims = signalDO.buildNDimensions();
 			//axes tagged, _indices, indices then all other in alphabetical order
@@ -256,7 +256,7 @@ public class LoadedFileTest  extends AbstractTestModel {
 			assertArrayEquals(axop0, expected0);
 
 			String[] axop1 = ndims.getAxisOptions(1);
-			String[] expected1 = {nxread, NDimensions.INDICES, nxuncert, nxother};
+			String[] expected1 = {NDimensions.INDICES, nxread, nxuncert, nxother};
 			assertArrayEquals(axop1, expected1);
 			
 			ILazyDataset errors = lz.getErrors();
