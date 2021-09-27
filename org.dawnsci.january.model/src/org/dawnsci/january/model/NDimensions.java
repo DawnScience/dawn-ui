@@ -319,14 +319,20 @@ public class NDimensions {
 		List<String>[] options = new List[dimensions.length];
 		for (int i = 0 ; i < options.length; i++) {
 			options[i] = new ArrayList<String>();
+			boolean indicesAdded = false;
 			if (primary != null &&  primary.length > i && primary[i] != null && primary[i].length != 0) {
 				
 				dimensions[i].setAxis(primary[i][0]);
-				options[i].addAll(Arrays.asList(primary[i]));
+				List<String> plist = Arrays.asList(primary[i]);
+				options[i].addAll(plist);
+				indicesAdded = plist.contains(INDICES);
+				
 			} else {
 				dimensions[i].setAxis(INDICES);
 			}
-			options[i].add(INDICES);
+			if (!indicesAdded) {
+				options[i].add(INDICES);
+			}
 		}
 		
 		@SuppressWarnings("unchecked")

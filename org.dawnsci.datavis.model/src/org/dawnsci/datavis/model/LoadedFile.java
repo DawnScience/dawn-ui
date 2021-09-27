@@ -21,6 +21,7 @@ import java.util.stream.Collectors;
 
 import org.dawnsci.datavis.api.IDataFilePackage;
 import org.dawnsci.datavis.api.IDataPackage;
+import org.dawnsci.january.model.NDimensions;
 import org.eclipse.dawnsci.analysis.api.io.IDataHolder;
 import org.eclipse.dawnsci.analysis.api.tree.DataNode;
 import org.eclipse.dawnsci.analysis.api.tree.GroupNode;
@@ -355,7 +356,7 @@ public class LoadedFile implements IDataObject, IDataFilePackage {
 		if (tmp != null && tmp.length == signal.getRank()) {
 			for (int i = 0; i < tmp.length; i++) {
 				if (NexusConstants.DATA_AXESEMPTY.equals(tmp[i])) {
-					continue;
+					signal.addAxis(i, NDimensions.INDICES);
 				}
 				if (tmp[i] != null && gn.containsDataNode(tmp[i])) {
 					signal.addAxis(i, location + tmp[i]);
