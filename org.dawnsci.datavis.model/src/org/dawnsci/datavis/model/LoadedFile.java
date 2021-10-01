@@ -22,6 +22,7 @@ import java.util.stream.Collectors;
 import org.dawnsci.datavis.api.IDataFilePackage;
 import org.dawnsci.datavis.api.IDataPackage;
 import org.eclipse.dawnsci.analysis.api.io.IDataHolder;
+import org.eclipse.dawnsci.analysis.api.tree.Attribute;
 import org.eclipse.dawnsci.analysis.api.tree.DataNode;
 import org.eclipse.dawnsci.analysis.api.tree.GroupNode;
 import org.eclipse.dawnsci.analysis.api.tree.IFindInTree;
@@ -314,15 +315,32 @@ public class LoadedFile implements IDataObject, IDataFilePackage {
 				DataNode dn = (DataNode)d;
 				String name = NexusTreeUtils.getFirstString(s.getAttribute(NexusConstants.DATA_SIGNAL));
 				String key = e.getKey();
+				
 				//Only post 2014  NXData Nexus tagging runs through here,
 				//NXdata may have many pre-2014 signal tags from GDA
 				//and this code does not work for more than one signal in a node
 				if ((name != null && (key.equals(name) || key.endsWith(Node.SEPARATOR + name)))) {
 					String path = Tree.ROOT + key;
-					
 					String nxdatapath = path.substring(0,path.lastIndexOf(Node.SEPARATOR)) + Node.SEPARATOR;
 					NexusSignal ns = new NexusSignal(path, dn.getRank());
 					buildNexusSignalFromGroup(s, ns, nxdatapath, name);
+					signals.put(path,ns);
+				}
+				//do "something" with pre-2014 tagged
+				if (name == null) {
+					Attribute attribute = dn.getAttribute(NexusConstants.DATA_SIGNAL);
+					if (attribute == null) {
+						continue;
+					}
+
+					int signal_value = NexusTreeUtils.parseFirstInt(attribute);
+					if (signal_value != 1) {
+						continue;
+					}
+					String path = Tree.ROOT + key;
+					String nxdatapath = path.substring(0,path.lastIndexOf(Node.SEPARATOR)) + Node.SEPARATOR;
+					NexusSignal ns = new NexusSignal(path, dn.getRank());
+					buildNexusSignalFromPre2014Group(s, ns, nxdatapath);
 					signals.put(path,ns);
 				}
 			}
@@ -386,7 +404,25 @@ public class LoadedFile implements IDataObject, IDataFilePackage {
 			signal.setUncertainties(location + NexusConstants.DATA_ERRORS);
 		}
 	}
-
+	
+	private void buildNexusSignalFromPre2014Group(GroupNode gn, NexusSignal signal, String location) {
+		
+		Set<String> dnn = gn.getDataNodeNames();
+		
+		for (String n : dnn) {
+			DataNode dataNode = gn.getDataNode(n);
+			if (dataNode.containsAttribute(NexusConstants.DATA_AXIS)) {
+				Attribute attribute = dataNode.getAttribute(NexusConstants.DATA_AXIS);
+				if (attribute != null) {
+					int[] intArray = NexusTreeUtils.parseIntArray(attribute);
+					if (intArray != null && intArray.length == 1) {
+						signal.addAxis(intArray[0]-1, location + n);
+					}
+				}
+			}
+		}
+	}
+	
 	public String getLabel() {
 		if (labelValue == null) return "";
 		return labelValue.getString();
