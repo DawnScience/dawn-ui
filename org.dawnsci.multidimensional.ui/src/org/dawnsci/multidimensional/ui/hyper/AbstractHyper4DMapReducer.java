@@ -30,6 +30,8 @@ public abstract class AbstractHyper4DMapReducer implements IDatasetROIReducer {
 	public IDataset reduce(ILazyDataset data, List<IDataset> axes, IROI roi, Slice[] slices, int[] order,
 			IMonitor monitor) throws Exception {
 		
+		if (monitor.isCancelled()) return null;
+		
 		SliceND s = new SliceND(data.getShape(),slices);
 		
 		int xStart = (int)Math.floor(roi.getPointX());

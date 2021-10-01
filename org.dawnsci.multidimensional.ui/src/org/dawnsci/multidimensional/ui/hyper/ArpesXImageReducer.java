@@ -27,7 +27,6 @@ public class ArpesXImageReducer implements IDatasetROIReducer {
 		if (monitor.isCancelled()) return null;
 		if (roi instanceof RectangularROI) {
 			IDataset image = ROISliceUtils.getXAxisDataset2DAverage(data, (RectangularROI)roi, slices, order[0], monitor);
-			if (monitor.isCancelled()) return null;
 			
 			if (order[0] < order[1]) image = DatasetUtils.transpose(image);
 			

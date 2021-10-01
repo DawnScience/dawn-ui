@@ -35,7 +35,6 @@ public class ArpesSideImageReducer implements IDatasetROIReducer {
 		if (monitor.isCancelled()) return null;
 		if (roi instanceof RectangularROI) {
 			IDataset image = ROISliceUtils.getYAxisDataset2DAverage(data, (RectangularROI)roi, slices, order[2], monitor);
-			if (monitor.isCancelled()) return null;
 			
 			if (order[0] < order[1]) image = DatasetUtils.transpose(image);
 			

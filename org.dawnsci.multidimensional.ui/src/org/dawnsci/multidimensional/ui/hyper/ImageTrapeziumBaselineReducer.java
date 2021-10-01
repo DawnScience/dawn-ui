@@ -42,7 +42,6 @@ public class ImageTrapeziumBaselineReducer implements IDatasetROIReducer, IProvi
 		if (monitor.isCancelled()) return null;
 		if (roi instanceof RectangularROI) {
 			IDataset image = ROISliceUtils.getAxisDatasetTrapzSumBaselined(data,axes.get(2).getSlice(),(RectangularROI)roi, slices, order[2],1, subtractBaseline, monitor);
-			if (monitor.isCancelled()) return null;
 
 			if (order[0] < order[1]) image = DatasetUtils.transpose(image);
 			

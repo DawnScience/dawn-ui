@@ -39,7 +39,6 @@ public class ArpesMainImageReducer implements IDatasetROIReducer {
 			
 			final IDataset roiSlice = ROISliceUtils.getDataset(data, (LinearROI)roi, slices,new int[]{order[0],order[1]},1,monitor);
 			final IDataset image    = DatasetUtils.transpose(roiSlice); 
-			if (monitor.isCancelled()) return null;
 		
 			IDataset length = DatasetFactory.createRange(IntegerDataset.class, image.getShape()[1]);
 			length.setName("Line Length");

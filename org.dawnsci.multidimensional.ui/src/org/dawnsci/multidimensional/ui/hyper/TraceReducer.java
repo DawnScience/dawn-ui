@@ -46,7 +46,6 @@ public class TraceReducer implements IDatasetROIReducer, IProvideReducerActions 
 		if (roi instanceof RectangularROI) {
 			
 			Dataset output = ROISliceUtils.getDataset(data, (RectangularROI)roi, slices, new int[]{order[0],order[1]}, 1, monitor);
-			if (monitor.isCancelled()) return null;
 			
 			if (order[0] > order[1]) output = output.mean(order[0]).mean(order[1]);
 			else output = output.mean(order[1]).mean(order[0]);

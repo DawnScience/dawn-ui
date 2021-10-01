@@ -36,7 +36,6 @@ public class TraceLineReducer implements IDatasetROIReducer {
 		if (monitor.isCancelled()) return null;
 		if (roi instanceof LinearROI) {
 			final IDataset image = ROISliceUtils.getDataset(data, (LinearROI)roi, slices,new int[]{order[0],order[1]},1, monitor);
-			if (monitor.isCancelled()) return null;
 			
 			IDataset length = DatasetFactory.createRange(IntegerDataset.class, image.getShape()[1]);
 			length.setName("Line Length");

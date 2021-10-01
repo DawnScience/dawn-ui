@@ -438,7 +438,6 @@ public class Hyper2DTool extends AbstractToolPage {
 			if (monitor.isCancelled()) return null;
 			double point = roi.getPoint()[0];
 			int pos = ROISliceUtils.findPositionOfClosestValueInAxis(axes.get(1), point);
-			if (monitor.isCancelled()) return null;
 			
 			Slice slice = new Slice(pos, pos+1, 1);
 		
@@ -497,7 +496,6 @@ public class Hyper2DTool extends AbstractToolPage {
 			
 			if (monitor.isCancelled()) return null;
 			int pos = ROISliceUtils.findPositionOfClosestValueInAxis(axes.get(0), point);
-			if (monitor.isCancelled()) return null;
 			
 			Slice slice = new Slice(pos, pos+1, 1);
 			if (monitor.isCancelled()) return null;
