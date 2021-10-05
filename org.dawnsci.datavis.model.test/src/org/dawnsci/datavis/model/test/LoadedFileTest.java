@@ -147,6 +147,69 @@ public class LoadedFileTest  extends AbstractTestModel {
 	}
 	
 	@Test
+	public void pre2014SignalTags() throws MetadataException {
+		
+		String signal = "thesignal";
+		String notthesignal = "notthesignal";
+		String axis = "axis";
+		String data = "data";
+		
+		DataNode sn = TreeFactory.createDataNode(0);
+		DoubleDataset dss = DatasetFactory.zeros(new int[] {3});
+		dss.setName(signal);
+		sn.setDataset(dss);
+		sn.addAttribute(TreeFactory.createAttribute(NexusConstants.DATA_SIGNAL, 1));
+		
+		DataNode an = TreeFactory.createDataNode(0);
+		DoubleDataset dsa = DatasetFactory.zeros(new int[] {3});
+		dsa.setName(axis);
+		an.setDataset(dsa);
+		an.addAttribute(TreeFactory.createAttribute(NexusConstants.DATA_AXIS, "1"));
+		
+		DataNode nsn = TreeFactory.createDataNode(0);
+		DoubleDataset dns = DatasetFactory.zeros(new int[] {5});
+		dns.setName(notthesignal);
+		nsn.setDataset(dns);
+
+		
+		NXdata nx = NexusNodeFactory.createNXdata();
+		nx.addDataNode(signal, sn);
+		nx.addDataNode(notthesignal, nsn);
+		nx.addDataNode(axis, an);
+
+		NXentry en = NexusNodeFactory.createNXentry();
+		en.addGroupNode(data, nx);
+		
+		GroupNode root = TreeFactory.createGroupNode(0);
+		root.addGroupNode("entry", en);
+		
+		Tree t = TreeFactory.createTreeFile(0, "/tmp/nofile.nxs");
+		t.setGroupNode(root);
+		
+		DataHolder dh = new DataHolder();
+		dh.setTree(t);
+		
+		HDF5Loader.updateDataHolder(dh, true);
+		
+		LoadedFile f = new LoadedFile(dh);
+		
+		DataOptions signalDO = f.getDataOption(Tree.ROOT +"entry"+ Node.SEPARATOR + data + Node.SEPARATOR + signal);
+		
+		ILazyDataset lzs = signalDO.getLazyDataset();
+		assertEquals(3, lzs.getSize());
+		
+		List<AxesMetadata> metadata = lzs.getMetadata(AxesMetadata.class);
+		assertNotNull(metadata);
+		assertFalse(metadata.isEmpty());
+
+		AxesMetadata m = metadata.get(0);
+		ILazyDataset[] lax = m.getAxis(0);
+		assertTrue(lax[0].getName().endsWith(axis));
+		
+	}
+	
+	
+	@Test
 	public void testNexusTags() throws MetadataException {
 		testTagging(true);
 
