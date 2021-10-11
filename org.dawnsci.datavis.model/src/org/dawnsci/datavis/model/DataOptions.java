@@ -416,7 +416,8 @@ public class DataOptions implements IDataObject, IDataPackage {
 	}
 	
 	public void setFilterAxes(boolean filter) {
-		if (plottableObject != null && plottableObject.getNDimensions() != null) {
+		//only filter axes if there is a signal
+		if (plottableObject != null && plottableObject.getNDimensions() != null && nexusSignal != null) {
 			plottableObject.getNDimensions().setFilterAxes(filter);
 		}
 	}

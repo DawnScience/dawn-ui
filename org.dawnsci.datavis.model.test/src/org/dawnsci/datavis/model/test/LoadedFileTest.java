@@ -13,6 +13,7 @@ import java.util.Map.Entry;
 
 import org.dawnsci.datavis.model.DataOptions;
 import org.dawnsci.datavis.model.LoadedFile;
+import org.dawnsci.datavis.model.PlottableObject;
 import org.dawnsci.january.model.NDimensions;
 import org.eclipse.dawnsci.analysis.api.tree.DataNode;
 import org.eclipse.dawnsci.analysis.api.tree.GroupNode;
@@ -339,7 +340,45 @@ public class LoadedFileTest  extends AbstractTestModel {
 			ILazyDataset errors = lz.getErrors();
 			assertNull(errors);
 		}
+	}
+	
+	@Test
+	public void testAxesNotNexus() throws MetadataException {
 		
+		DataHolder dh = new DataHolder();
+		
+		for (int i = 0; i < 4 ; i++) {
+			String name = "Column_" + i;
+			DoubleDataset d = DatasetFactory.ones(new int[] {100});
+			d.setName(name);
+			dh.addDataset(name, d);
+		}
+		
+		dh.setFilePath("/notafile.dat");
+		
+		LoadedFile f = new LoadedFile(dh);
+		List<DataOptions> dol = f.getDataOptions();
+		assertEquals(4, dol.size());
+		DataOptions dataOptions = dol.get(0);
+		NDimensions nd = dataOptions.buildNDimensions();
+		//probably ok null here for now
+		PlottableObject po = new PlottableObject(null, nd);
+		dataOptions.setPlottableObject(po);
+		Map<String, int[]> allPossibleAxes = dataOptions.getAllPossibleAxes();
+		assertEquals(3, allPossibleAxes.size());
+		String[] axisOptions = dataOptions.getPlottableObject().getNDimensions().getAxisOptions(0);
+		//3 + indices
+		assertEquals(4, axisOptions.length);
+		
+		//This should do nothing
+		f.setOnlySignals(true);
+		dol = f.getDataOptions();
+		assertEquals(4, dol.size());
+		dataOptions = dol.get(0);
+        allPossibleAxes = dataOptions.getAllPossibleAxes();
+		assertEquals(3, allPossibleAxes.size());
+		axisOptions = dataOptions.getPlottableObject().getNDimensions().getAxisOptions(0);
+		assertEquals(4, axisOptions.length);
 		
 	}
 
