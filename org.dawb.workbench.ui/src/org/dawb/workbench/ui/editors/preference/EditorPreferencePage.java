@@ -40,7 +40,7 @@ import org.eclipse.ui.IWorkbenchPreferencePage;
 
 public class EditorPreferencePage extends FieldEditorPreferencePage implements IWorkbenchPreferencePage {
 
-	public static final String ID = "org.edna.workbench.editors.preferencePage";
+	public static final String ID = "org.dawb.workbench.editors.preferencePage";
 	
 	private StringFieldEditor formatFieldEditor;
 

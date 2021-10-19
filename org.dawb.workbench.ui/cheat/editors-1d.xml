@@ -16,7 +16,7 @@
       </description>
       <command
             required="false"
-            serialization="org.eclipse.ui.perspectives.showPerspective(org.eclipse.ui.perspectives.showPerspective.perspectiveId=org.edna.workbench.application.perspective.DataPerspective)"/>
+            serialization="org.eclipse.ui.perspectives.showPerspective(org.eclipse.ui.perspectives.showPerspective.perspectiveId=org.dawb.workbench.application.perspective.DataPerspective)"/>
    </item>
    <item
          title="Open File">

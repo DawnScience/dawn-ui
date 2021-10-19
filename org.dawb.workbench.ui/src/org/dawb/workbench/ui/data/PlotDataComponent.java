@@ -715,7 +715,7 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 				menuManager.add(new Action("Preferences...") {
 					@Override
 					public void run() {
-						PreferenceDialog pref = PreferencesUtil.createPreferenceDialogOn(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(), "org.edna.workbench.editors.preferencePage", null, null);
+						PreferenceDialog pref = PreferencesUtil.createPreferenceDialogOn(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(), EditorPreferencePage.ID, null, null);
 						if (pref != null) pref.open();
 					}
 				});

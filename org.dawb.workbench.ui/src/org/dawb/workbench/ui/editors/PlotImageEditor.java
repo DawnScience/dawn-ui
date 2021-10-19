@@ -20,6 +20,7 @@ import org.dawb.common.ui.views.HeaderTablePage;
 import org.dawb.common.util.io.FileUtils;
 import org.dawb.common.util.list.SortNatural;
 import org.dawb.workbench.ui.Activator;
+import org.dawb.workbench.ui.editors.preference.EditorPreferencePage;
 import org.dawnsci.plotting.actions.ActionBarWrapper;
 import org.eclipse.core.filesystem.EFS;
 import org.eclipse.core.filesystem.IFileStore;
@@ -294,7 +295,7 @@ public class PlotImageEditor extends EditorPart implements IEditorExtension, IRe
 		final Action tableColumns = new Action("Open editor preferences.", IAction.AS_PUSH_BUTTON) {
 			@Override
 			public void run() {
-				PreferenceDialog pref = PreferencesUtil.createPreferenceDialogOn(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(), "org.edna.workbench.editors.preferencePage", null, null);
+				PreferenceDialog pref = PreferencesUtil.createPreferenceDialogOn(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(), EditorPreferencePage.ID, null, null);
 				if (pref != null) pref.open();
 			}
 		};

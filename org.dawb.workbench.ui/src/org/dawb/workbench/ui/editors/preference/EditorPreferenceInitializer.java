@@ -30,8 +30,6 @@ public class EditorPreferenceInitializer extends AbstractPreferenceInitializer {
 		store.setDefault(EditorConstants.SHOW_LOCALNAME,         true);
 		store.setDefault(EditorConstants.DATA_FORMAT,            "#0.00");
 		store.setDefault(EditorConstants.PLAY_SPEED,             1500);
-        store.setDefault(EditorConstants.HIGHLIGHT_ACTORS_CHOICE, true);
-        
 		store.setDefault(EditorConstants.SAVE_SEL_DATA,           PlotDataSelection.AUTO.toString());
 		store.setDefault(EditorConstants.SAVE_LOG_FORMAT,         false);
 		store.setDefault(EditorConstants.SAVE_TIME_FORMAT,        false);

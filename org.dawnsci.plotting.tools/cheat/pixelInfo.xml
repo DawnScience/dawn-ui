@@ -22,17 +22,14 @@
 
      
 
-      <item
-
-         title="Data Browsing Perspective">
-
+    <item title="DataVis Perspective">
       <description>
-
-Please choose the data browsing perspective if you do not already have it selected.
-
-       </description>
-
-   </item>  
+         Please choose the DataVis perspective if you do not already have it selected (nothing will happen if you do not).
+      </description>
+      <command
+            required="false"
+            serialization="org.eclipse.ui.perspectives.showPerspective(org.eclipse.ui.perspectives.showPerspective.perspectiveId=org.dawnsci.datavis.DataVisPerspective)"/>
+   </item>
 
    
 

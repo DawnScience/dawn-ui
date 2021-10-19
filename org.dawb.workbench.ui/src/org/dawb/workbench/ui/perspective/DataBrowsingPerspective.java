@@ -17,14 +17,14 @@ import org.eclipse.ui.IPerspectiveFactory;
  *
  *   @author gerring
  *   @date Jul 19, 2010
- *   @project org.edna.workbench.application
+ *   @project org.dawb.workbench.application
  **/
 public class DataBrowsingPerspective implements IPerspectiveFactory {
 
 	/**
 	 * Old id maintained to keep old workspaces happy.
 	 */
-	public static final String ID = "org.edna.workbench.application.perspective.DataPerspective";
+	public static final String ID = "org.dawb.workbench.application.perspective.DataPerspective";
 	/**
 	 * Creates the initial layout for a page.
 	 */
@@ -46,7 +46,7 @@ public class DataBrowsingPerspective implements IPerspectiveFactory {
 		}
 		{
 			IFolderLayout folderLayout = layout.createFolder("folder_1", IPageLayout.BOTTOM, 0.7f, IPageLayout.ID_EDITOR_AREA);
-			folderLayout.addView("org.dawb.passerelle.views.ValueView");
+			folderLayout.addView("org.dawb.common.ui.views.ValueView");
 			folderLayout.addView("org.eclipse.ui.views.ProgressView");
 			folderLayout.addView("org.eclipse.ui.console.ConsoleView");
 			folderLayout.addView("org.dawb.workbench.plotting.views.toolPageView.1D");

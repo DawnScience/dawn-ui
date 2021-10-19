@@ -12,7 +12,7 @@
       <page
             category="uk.ac.diamond.scisoft.analysis.rcp.preferences.root"
             class="org.dawb.workbench.ui.editors.preference.EditorPreferencePage"
-            id="org.edna.workbench.editors.preferencePage"
+            id="org.dawb.workbench.editors.preferencePage"
             name="Editor Preferences">
       </page>
       <page
@@ -25,7 +25,7 @@
          point="org.eclipse.ui.commands">
       <command
             defaultHandler="org.dawb.workbench.ui.editors.preference.EditorPreferencesHandler"
-            id="org.edna.workbench.editors.preference.preferenceDialog"
+            id="org.dawb.workbench.editors.preference.preferenceDialog"
             name="Preferences...">
       </command>
       <command
@@ -99,37 +99,6 @@
       </editor> 
    </extension>
    <extension
-         point="org.eclipse.ui.editorActions">
-       
-       <editorContribution
-             id="org.edna.workbench.editors.modelEditorContribution"
-             targetID="com.isencia.passerelle.workbench.model.editor.ui.editors.modelEditor">
-          <action
-                class="org.dawb.workbench.ui.editors.actions.HightlightWorkflowHandler"
-                icon="icons/highlight_workflow.gif"
-                id="org.edna.workbench.editors.highlightWorkflowAction"
-                label="Highlight Actors During Run"
-                style="toggle"
-                toolbarPath="Normal/additions"
-                tooltip="Highlight a workflow actor while it is running.">
-          </action>
-       </editorContribution>
-       <editorContribution
-             id="org.edna.workbench.editors.modelEditorContribution"
-             targetID="com.isencia.passerelle.workbench.model.editor.ui.editors.wizardEditor">
-          <action
-                class="org.dawb.workbench.ui.editors.actions.HightlightWorkflowHandler"
-                icon="icons/highlight_workflow.gif"
-                id="org.edna.workbench.editors.highlightWorkflowAction"
-                label="Highlight Actors During Run"
-                style="toggle"
-                toolbarPath="Normal/additions"
-                tooltip="Highlight a workflow actor while it is running.">
-          </action>
-       </editorContribution>
-       
-   </extension>
-   <extension
          point="org.eclipse.help.toc">
       <toc
             file="toc.xml"
@@ -175,15 +144,8 @@
          point="org.eclipse.ui.cheatsheets.cheatSheetContent">
       <category
             id="org.dawb.workbench.ui.cheat.sheet.monitoring.category"
-            name="Monitoring Hardware">
+            name="Monitoring">
       </category>
-      <cheatsheet
-            category="org.dawb.workbench.ui.cheat.sheet.monitoring.category"
-            composite="false"
-            contentFile="cheat/views-monitor.xml"
-            id="org.dawb.workbench.ui.views.monitor"
-            name="Getting to Grips with Monitor View">
-      </cheatsheet>
       <cheatsheet
             category="org.dawb.workbench.ui.cheat.sheet.monitoring.category"
             composite="false"
@@ -204,7 +166,7 @@
       <perspective
             class="org.dawb.workbench.ui.perspective.DataBrowsingPerspective"
             icon="icons/application_view_gallery.png"
-            id="org.edna.workbench.application.perspective.DataPerspective"
+            id="org.dawb.workbench.application.perspective.DataPerspective"
             name="Data Browsing">
       </perspective>
    </extension>
@@ -254,20 +216,20 @@
             category="uk.ac.diamond.scisoft.analysis.rcp.wizards"
             class="org.dawb.workbench.ui.project.DataNewProjectWizard"
             icon="icons/Project-data.png"
-            id="org.edna.common.ui.project.DataWizard"
+            id="org.dawb.common.ui.project.DataWizard"
             name="Data Project (empty or with example data)"
             project="true">
       </wizard>
       <wizard
-            category="org.edna.common.ui.project.DataCategory"
+            category="org.dawb.common.ui.project.DataCategory"
             class="org.eclipse.dawnsci.hdf5.editor.H5Wizard"
             icon="icons/h5_editor.png"
-            id="org.edna.common.ui.project.H5Wizard"
+            id="org.dawb.common.ui.project.H5Wizard"
             name="H5 File"
             project="false">
       </wizard>
       <wizard
-            category="org.edna.common.ui.project.DataCategory"
+            category="org.dawb.common.ui.project.DataCategory"
             class="org.dawb.workbench.ui.data.wizard.PythonFilterWizard"
             id="org.dawb.workbench.ui.data.pythonFilterWizard"
             name="Python Filter">
@@ -298,7 +260,7 @@
    <extension
          point="org.eclipse.ui.perspectiveExtensions">
       <perspectiveExtension
-            targetID="org.edna.workbench.application.perspective.DataPerspective">
+            targetID="org.dawb.workbench.application.perspective.DataPerspective">
          <hiddenMenuItem
                id="org.eclipse.ui.run">
          </hiddenMenuItem>

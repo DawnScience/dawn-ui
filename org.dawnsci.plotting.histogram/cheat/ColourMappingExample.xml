@@ -5,13 +5,14 @@
 			This example will show you how to modify the colour mapping on an image to get the best out of your data.
 		</description>
 	</intro>
-	<item title="Go to the data browsing perspective">
-		<description>
-			This example will use the data browsing perspective, however the functionality is available in any perspective where there is an image displayed.
-		</description>
-		<command required="true"
-			serialization="org.eclipse.ui.perspectives.showPerspective(org.eclipse.ui.perspectives.showPerspective.perspectiveId=org.edna.workbench.application.perspective.DataPerspective)" />
-	</item>
+    <item title="DataVis Perspective">
+      <description>
+         Please choose the DataVis perspective if you do not already have it selected (nothing will happen if you do not).
+      </description>
+      <command
+            required="false"
+            serialization="org.eclipse.ui.perspectives.showPerspective(org.eclipse.ui.perspectives.showPerspective.perspectiveId=org.dawnsci.datavis.DataVisPerspective)"/>
+   </item>
 	<item title="Open some data">
 		<description>
 			The first thing to do is to open some image data, in this case in the project explorer select the data project, go into the examples folder and then double click on the pilatus300k.edf file to open it.
