@@ -13,7 +13,10 @@ import org.dawnsci.multidimensional.ui.hyper.IDatasetROIReducer;
 import org.dawnsci.multidimensional.ui.imagecuts.AdditionalCutDimension;
 import org.dawnsci.multidimensional.ui.imagecuts.PerpendicularCutsHelper;
 import org.dawnsci.multidimensional.ui.imagecuts.PerpendicularImageCutsComposite;
+import org.eclipse.dawnsci.plotting.api.IPlotActionSystem;
 import org.eclipse.dawnsci.plotting.api.IPlottingService;
+import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
+import org.eclipse.dawnsci.plotting.api.preferences.BasePlottingConstants;
 import org.eclipse.dawnsci.plotting.api.region.ILockTranslatable;
 import org.eclipse.dawnsci.plotting.api.region.IRegion;
 import org.eclipse.dawnsci.plotting.api.region.IRegionListener;
@@ -44,6 +47,7 @@ public class ArpesSlicePlotViewer extends AbstractHyperPlotViewer {
 	public void createControl(final Composite parent) {
 		innerCreateControl(parent, GridLayoutFactory.fillDefaults().numColumns(2).create());
 		createHyperComponent();
+		hyper.setInvertYAxis(false);
 		try {
 			cutComposite = new PerpendicularImageCutsComposite(control, SWT.None, Activator.getService(IPlottingService.class));
 			cutComposite.setLayoutData(GridDataFactory.fillDefaults().grab(false, true).create());
@@ -56,6 +60,20 @@ public class ArpesSlicePlotViewer extends AbstractHyperPlotViewer {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		
+		clearActions(hyper.getMainSystem());
+		clearActions(hyper.getSideSystem());
+		
+	}
+	
+	private void clearActions(IPlottingSystem<?> system) {
+		IPlotActionSystem plotActionSystem = system.getPlotActionSystem();
+		plotActionSystem.remove(BasePlottingConstants.REMOVE_REGION);
+		plotActionSystem.remove(BasePlottingConstants.SNAP_TO_GRID);
+		plotActionSystem.remove(system.getPlotName() + "/org.dawnsci.plotting.system.preference.undoUndo");
+		plotActionSystem.remove(system.getPlotName() + "/org.dawnsci.plotting.system.preference.undoRedo");
+		plotActionSystem.remove("org.dawb.workbench.fullscreen");
+		plotActionSystem.remove("org.dawb.workbench.plotting.rescale");
 		
 	}
 	
@@ -103,7 +121,10 @@ public class ArpesSlicePlotViewer extends AbstractHyperPlotViewer {
 		};
 		hyper.setExternalListeners(null, null, l, null);
 		hyper.setData(dp.lazyDataset, dp.axes, dp.slices, dp.order,reducers[0],reducers[1]);
+		
 		trace.setViewer(this);
+		
+		
 	}
 	
 	@SuppressWarnings("unchecked")

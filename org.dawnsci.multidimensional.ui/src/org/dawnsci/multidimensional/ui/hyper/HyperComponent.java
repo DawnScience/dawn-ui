@@ -76,6 +76,7 @@ public class HyperComponent {
 	private List<IAction> leftActions;
 	private List<IAction> rightActions;
 	
+	private boolean invertYAxis = true;
 	
 	private static final String SS1 = "uk.ac.diamond.scisoft.analysis.rcp.views.HyperPlotView.reducerGroup1";
 	private static final String SS2 = "uk.ac.diamond.scisoft.analysis.rcp.views.HyperPlotView.reducerGroup2";
@@ -161,6 +162,9 @@ public class HyperComponent {
 				daxes,
 				slices,
 				order, sideReducer);
+		
+		this.rightJob.setInvertYAxis(invertYAxis);
+		this.leftJob.setInvertYAxis(invertYAxis);
 		
 		cleanUpActions(sideSystem,rightActions);
 		cleanUpActions(mainSystem, leftActions);
@@ -314,6 +318,10 @@ public class HyperComponent {
 
 	public IPlottingSystem<?> getSideSystem() {
 		return sideSystem;
+	}
+	
+	public IPlottingSystem<?> getMainSystem() {
+		return mainSystem;
 	}
 
     public Object getAdapter(@SuppressWarnings("rawtypes") final Class clazz) {
@@ -512,4 +520,8 @@ public class HyperComponent {
 		return MetadataPlotUtils.getDataFromImageTrace(mainSystem);
 	}
 	
+	public void setInvertYAxis(boolean invertYAxis) {
+		this.invertYAxis = invertYAxis;
+	}
+
 }

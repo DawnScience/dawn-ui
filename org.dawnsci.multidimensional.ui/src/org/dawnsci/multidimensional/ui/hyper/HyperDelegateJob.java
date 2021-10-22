@@ -32,6 +32,8 @@ public class HyperDelegateJob extends Job {
 	private int[] order;
 	private Slice[] slices;
 	private IDatasetROIReducer reducer;
+	
+	private boolean invertYAxis = false;
 
 
 	public HyperDelegateJob(String name,
@@ -194,7 +196,12 @@ public class HyperDelegateJob extends Job {
 	private void updateImage(final IPlottingSystem<Composite> plot, final IDataset image, final List<IDataset> axes) {
 
 		plot.updatePlot2D(image, axes, null);
+		plot.getSelectedYAxis().setInverted(invertYAxis);
 
+	}
+
+	public void setInvertYAxis(boolean invertYAxis) {
+		this.invertYAxis = invertYAxis;
 	}
 
 	private List<IDataset> convertFrom2DToListOf1D(IDataset axis, IDataset data) {

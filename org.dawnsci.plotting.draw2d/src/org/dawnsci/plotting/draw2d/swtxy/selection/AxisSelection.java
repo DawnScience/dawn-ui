@@ -497,9 +497,11 @@ class AxisSelection extends AbstractSelectionRegion<RectangularROI> implements I
 		final double[] p2 = coords.getPositionFromValue(ept);
 
 		final Rectangle local = new Rectangle(new PrecisionPoint(p1[0], p1[1]), new PrecisionPoint(p2[0], p2[1]));
-		local.width = local.width-1;
-		local.height = local.height-1;
 		
+		//compensate for different rectangle constructors but dont let fall to zero
+		local.width = Math.max(local.width-1, 1);
+		local.height = Math.max(local.height-1, 1);
+
 		setLocalBounds(local, line1.getParent().getBounds());
 		
 		if (mover != null) {

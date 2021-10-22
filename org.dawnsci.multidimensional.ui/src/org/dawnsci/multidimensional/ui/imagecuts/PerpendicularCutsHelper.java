@@ -23,7 +23,6 @@ import org.eclipse.dawnsci.plotting.api.trace.ITrace;
 import org.eclipse.dawnsci.plotting.api.trace.ITraceListener;
 import org.eclipse.dawnsci.plotting.api.trace.TraceWillPlotEvent;
 import org.eclipse.january.dataset.IDataset;
-import org.eclipse.swt.widgets.Composite;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -196,6 +195,11 @@ public class PerpendicularCutsHelper {
 
 		if (axis != null) {
 			double step = (axis.getDouble(axis.getSize() - 1) - axis.getDouble(0)) / (axis.getSize() - 1);
+			
+			if (delta < Math.abs(step)) {
+				delta = Math.abs(step);
+			}
+			
 			double startval = value - delta / 2;
 			
 			if (step < 0) {
