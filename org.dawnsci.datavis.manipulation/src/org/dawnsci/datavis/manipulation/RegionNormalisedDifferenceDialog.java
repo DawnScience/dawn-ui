@@ -5,7 +5,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.dawb.common.ui.printing.IPrintImageProvider;
-import org.dawb.common.ui.printing.PlotPrintPreviewDialog;
+import org.dawb.common.ui.printing.PrintPreviewDialog;
 import org.dawb.common.ui.printing.PrintSettings;
 import org.dawnsci.datavis.api.IXYData;
 import org.dawnsci.plotting.AbstractPlottingSystem;
@@ -47,6 +47,8 @@ import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.printing.PrintDialog;
+import org.eclipse.swt.printing.PrinterData;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
@@ -278,8 +280,11 @@ public class RegionNormalisedDifferenceDialog extends Dialog {
 						return new Rectangle(rect.x, rect.y, rect.width, rect.height);
 					}			
 				};
-				PlotPrintPreviewDialog dialog = new PlotPrintPreviewDialog(prov, Display.getDefault(), settings);
-				settings=dialog.open();
+				Shell shell = Display.getDefault().getActiveShell();
+				PrintDialog printerDialog = new PrintDialog(shell);
+				PrinterData data = printerDialog.open();
+				PrintPreviewDialog dialog = new PrintPreviewDialog(shell, prov, settings, data);
+				settings = dialog.open();
 				
 			}
 

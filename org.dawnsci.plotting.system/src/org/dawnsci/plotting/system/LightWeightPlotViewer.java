@@ -19,7 +19,7 @@ import java.util.regex.Pattern;
 
 import org.dawb.common.ui.printing.IPrintImageProvider;
 import org.dawb.common.ui.printing.PlotExportPrintUtil;
-import org.dawb.common.ui.printing.PlotPrintPreviewDialog;
+import org.dawb.common.ui.printing.PrintPreviewDialog;
 import org.dawb.common.ui.printing.PrintSettings;
 import org.dawb.common.ui.util.EclipseUtils;
 import org.dawb.common.ui.wizard.PlotDataConversionWizard;
@@ -141,6 +141,7 @@ import org.eclipse.swt.widgets.Canvas;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.FileDialog;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IViewPart;
@@ -1640,6 +1641,20 @@ public class LightWeightPlotViewer<T> implements IPlottingSystemViewer<T>, IAnno
 
 	@Override
 	public void printPlotting(){
+		PrintDialog dialog      = new PrintDialog(Display.getDefault().getActiveShell(), SWT.NULL);
+		PrinterData printerData = dialog.open();
+		if (printerData != null) {
+			final PrintFigureOperation op = new PrintFigureOperation(new Printer(printerData), xyGraph);
+			op.setPrintMode(PrintFigureOperation.FIT_PAGE);
+			op.run("Print "+xyGraph.getTitle());
+		}
+	}
+
+	/**
+	 * Print scaled plotting to printer
+	 */
+	@Override
+	public void printScaledPlotting(){
 		if (settings==null) settings = new PrintSettings();
 		final IPrintImageProvider prov = new IPrintImageProvider() {
 			@Override
@@ -1652,22 +1667,11 @@ public class LightWeightPlotViewer<T> implements IPlottingSystemViewer<T>, IAnno
 				return new Rectangle(rect.x, rect.y, rect.width, rect.height);
 			}			
 		};
-		PlotPrintPreviewDialog dialog = new PlotPrintPreviewDialog(prov, Display.getDefault(), settings);
-		settings=dialog.open();
-	}
-
-	/**
-	 * Print scaled plotting to printer
-	 */
-	public void printScaledPlotting(){
-
-		PrintDialog dialog      = new PrintDialog(Display.getDefault().getActiveShell(), SWT.NULL);
-		PrinterData printerData = dialog.open();
-		// TODO There are options on PrintFigureOperation
-		if (printerData != null) {
-			final PrintFigureOperation op = new PrintFigureOperation(new Printer(printerData), xyGraph);
-			op.run("Print "+xyGraph.getTitle());
-		}
+		Shell shell = Display.getDefault().getActiveShell();
+		PrintDialog printerSelect = new PrintDialog(shell);
+		PrinterData details = printerSelect.open();
+		PrintPreviewDialog previewDialog = new PrintPreviewDialog(shell, prov, settings, details);
+		settings = previewDialog.open();
 	}
 
 	@Override
