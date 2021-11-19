@@ -187,6 +187,7 @@ public abstract class FunctionTreeViewerPluginTestBase extends PluginTestBase {
 		expandAll();
 		TreeViewer treeViewer = functionTreeViewer.getTreeViewer();
 		treeViewer.setSelection(new StructuredSelection(element));
+		treeViewer.getControl().setFocus();
 	}
 
 	protected String toString(Node... nodes) {

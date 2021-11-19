@@ -47,6 +47,7 @@ public class PasteHandler extends BaseHandler {
 						return true;
 					}
 				} else if (element instanceof FunctionModel
+						|| element instanceof AddNewFunctionModel
 						|| element instanceof OperatorModel) {
 					if (model instanceof SetFunctionModel) {
 						return true;
