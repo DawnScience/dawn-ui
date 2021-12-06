@@ -19,14 +19,13 @@ import org.eclipse.dawnsci.analysis.dataset.roi.RectangularROI;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.region.IRegion;
 import org.eclipse.dawnsci.plotting.api.region.IRegion.RegionType;
-import org.eclipse.january.IMonitor;
+import org.eclipse.dawnsci.plotting.api.region.IRegionListener;
+import org.eclipse.dawnsci.plotting.api.region.RegionEvent;
+import org.eclipse.dawnsci.plotting.api.region.RegionUtils;
 import org.eclipse.january.dataset.Dataset;
 import org.eclipse.january.dataset.IDataset;
 import org.eclipse.january.dataset.ILazyDataset;
 import org.eclipse.january.dataset.Slice;
-import org.eclipse.dawnsci.plotting.api.region.IRegionListener;
-import org.eclipse.dawnsci.plotting.api.region.RegionEvent;
-import org.eclipse.dawnsci.plotting.api.region.RegionUtils;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.ActionContributionItem;
 import org.eclipse.jface.action.IAction;
@@ -40,12 +39,11 @@ public class TraceReducer implements IDatasetROIReducer, IProvideReducerActions 
 	
 	@Override
 	public IDataset reduce(ILazyDataset data, List<IDataset> axes,
-			IROI roi, Slice[] slices, int[] order, IMonitor monitor) throws Exception {
+			IROI roi, Slice[] slices, int[] order) throws Exception {
 		
-		if (monitor.isCancelled()) return null;
 		if (roi instanceof RectangularROI) {
 			
-			Dataset output = ROISliceUtils.getDataset(data, (RectangularROI)roi, slices, new int[]{order[0],order[1]}, 1, monitor);
+			Dataset output = ROISliceUtils.getDataset(data, (RectangularROI)roi, slices, new int[]{order[0],order[1]}, 1, null);
 			
 			if (order[0] > order[1]) output = output.mean(order[0]).mean(order[1]);
 			else output = output.mean(order[1]).mean(order[0]);

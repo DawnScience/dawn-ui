@@ -16,7 +16,6 @@ import org.eclipse.dawnsci.analysis.dataset.roi.LinearROI;
 import org.eclipse.dawnsci.analysis.dataset.roi.ROISliceUtils;
 import org.eclipse.dawnsci.plotting.api.region.IRegion;
 import org.eclipse.dawnsci.plotting.api.region.IRegion.RegionType;
-import org.eclipse.january.IMonitor;
 import org.eclipse.january.dataset.DatasetFactory;
 import org.eclipse.january.dataset.IDataset;
 import org.eclipse.january.dataset.ILazyDataset;
@@ -31,11 +30,10 @@ public class TraceLineReducer implements IDatasetROIReducer {
 	
 	@Override
 	public IDataset reduce(ILazyDataset data, List<IDataset> axes,
-			IROI roi, Slice[] slices, int[] order, IMonitor monitor) throws Exception {
+			IROI roi, Slice[] slices, int[] order) throws Exception {
 		
-		if (monitor.isCancelled()) return null;
 		if (roi instanceof LinearROI) {
-			final IDataset image = ROISliceUtils.getDataset(data, (LinearROI)roi, slices,new int[]{order[0],order[1]},1, monitor);
+			final IDataset image = ROISliceUtils.getDataset(data, (LinearROI)roi, slices,new int[]{order[0],order[1]},1, null);
 			
 			IDataset length = DatasetFactory.createRange(IntegerDataset.class, image.getShape()[1]);
 			length.setName("Line Length");

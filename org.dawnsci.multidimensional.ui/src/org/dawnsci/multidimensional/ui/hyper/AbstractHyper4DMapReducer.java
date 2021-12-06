@@ -8,7 +8,6 @@ import org.eclipse.dawnsci.analysis.api.roi.IROI;
 import org.eclipse.dawnsci.analysis.dataset.roi.RectangularROI;
 import org.eclipse.dawnsci.plotting.api.region.IRegion.RegionType;
 import org.eclipse.dawnsci.plotting.api.trace.MetadataPlotUtils;
-import org.eclipse.january.IMonitor;
 import org.eclipse.january.dataset.Dataset;
 import org.eclipse.january.dataset.DatasetUtils;
 import org.eclipse.january.dataset.IDataset;
@@ -27,10 +26,7 @@ public abstract class AbstractHyper4DMapReducer implements IDatasetROIReducer {
 	protected int yOther;
 	
 	@Override
-	public IDataset reduce(ILazyDataset data, List<IDataset> axes, IROI roi, Slice[] slices, int[] order,
-			IMonitor monitor) throws Exception {
-		
-		if (monitor.isCancelled()) return null;
+	public IDataset reduce(ILazyDataset data, List<IDataset> axes, IROI roi, Slice[] slices, int[] order) throws Exception {
 		
 		SliceND s = new SliceND(data.getShape(),slices);
 		

@@ -35,7 +35,6 @@ import org.eclipse.dawnsci.plotting.api.trace.IImageTrace;
 import org.eclipse.dawnsci.plotting.api.trace.ITraceListener;
 import org.eclipse.dawnsci.plotting.api.trace.TraceEvent;
 import org.eclipse.draw2d.ColorConstants;
-import org.eclipse.january.IMonitor;
 import org.eclipse.january.dataset.DatasetFactory;
 import org.eclipse.january.dataset.IDataset;
 import org.eclipse.january.dataset.ILazyDataset;
@@ -430,18 +429,17 @@ public class Hyper2DTool extends AbstractToolPage {
 
 		@Override
 		public IDataset reduce(ILazyDataset data, List<IDataset> axes,
-				IROI roi, Slice[] slices, int[] order, IMonitor monitor) throws Exception {
+				IROI roi, Slice[] slices, int[] order) throws Exception {
 			
 			axis = axes.get(0);
 			
 			
-			if (monitor.isCancelled()) return null;
 			double point = roi.getPoint()[0];
 			int pos = ROISliceUtils.findPositionOfClosestValueInAxis(axes.get(1), point);
 			
 			Slice slice = new Slice(pos, pos+1, 1);
 		
-			IDataset sl = data.getSlice(monitor, slice, null).squeeze();
+			IDataset sl = data.getSlice(slice, null).squeeze();
 			return sl;
 		}
 
@@ -488,18 +486,16 @@ public class Hyper2DTool extends AbstractToolPage {
 
 		@Override
 		public IDataset reduce(ILazyDataset data, List<IDataset> axes,
-				IROI roi, Slice[] slices, int[] order, IMonitor monitor) throws Exception {
+				IROI roi, Slice[] slices, int[] order) throws Exception {
 			
 			axis = axes.get(1);
 			
 			double point = roi.getPoint()[0];
 			
-			if (monitor.isCancelled()) return null;
 			int pos = ROISliceUtils.findPositionOfClosestValueInAxis(axes.get(0), point);
 			
 			Slice slice = new Slice(pos, pos+1, 1);
-			if (monitor.isCancelled()) return null;
-			IDataset sl = data.getSlice(monitor, null, slice).squeeze();
+			IDataset sl = data.getSlice(slice).squeeze();
 			return sl;
 		}
 

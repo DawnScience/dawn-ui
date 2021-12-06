@@ -9,7 +9,6 @@ import org.eclipse.dawnsci.analysis.dataset.roi.RectangularROI;
 import org.eclipse.dawnsci.analysis.dataset.roi.XAxisBoxROI;
 import org.eclipse.dawnsci.plotting.api.region.IRegion;
 import org.eclipse.dawnsci.plotting.api.region.IRegion.RegionType;
-import org.eclipse.january.IMonitor;
 import org.eclipse.january.dataset.DatasetUtils;
 import org.eclipse.january.dataset.IDataset;
 import org.eclipse.january.dataset.ILazyDataset;
@@ -22,11 +21,10 @@ public class ArpesXImageReducer implements IDatasetROIReducer {
 	
 	@Override
 	public IDataset reduce(ILazyDataset data, List<IDataset> axes,
-			IROI roi, Slice[] slices, int[] order, IMonitor monitor)  throws Exception{
+			IROI roi, Slice[] slices, int[] order)  throws Exception{
 		
-		if (monitor.isCancelled()) return null;
 		if (roi instanceof RectangularROI) {
-			IDataset image = ROISliceUtils.getXAxisDataset2DAverage(data, (RectangularROI)roi, slices, order[0], monitor);
+			IDataset image = ROISliceUtils.getXAxisDataset2DAverage(data, (RectangularROI)roi, slices, order[0], null);
 			
 			if (order[0] < order[1]) image = DatasetUtils.transpose(image);
 			

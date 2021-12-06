@@ -12,7 +12,6 @@ import java.util.List;
 
 import org.eclipse.dawnsci.analysis.api.roi.IROI;
 import org.eclipse.dawnsci.plotting.api.region.IRegion.RegionType;
-import org.eclipse.january.IMonitor;
 import org.eclipse.january.dataset.IDataset;
 import org.eclipse.january.dataset.ILazyDataset;
 import org.eclipse.january.dataset.Slice;
@@ -45,7 +44,7 @@ public interface IDatasetROIReducer {
 	 * @return
 	 * @throws Exception
 	 */
-	IDataset reduce(ILazyDataset data, List<IDataset> axes, IROI roi, Slice[] slices, int[] order, IMonitor monitor)  throws Exception;
+	IDataset reduce(ILazyDataset data, List<IDataset> axes, IROI roi, Slice[] slices, int[] order)  throws Exception;
 	
 	List<RegionType> getSupportedRegionType();
 	

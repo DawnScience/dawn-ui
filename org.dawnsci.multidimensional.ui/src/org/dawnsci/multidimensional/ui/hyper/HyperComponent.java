@@ -11,6 +11,10 @@ package org.dawnsci.multidimensional.ui.hyper;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.Executor;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 import org.dawnsci.plotting.actions.ActionBarWrapper;
 import org.eclipse.dawnsci.analysis.api.roi.IROI;
@@ -68,8 +72,11 @@ public class HyperComponent {
 	private IROIListener roiListenerRight;
 	private IROIListener externalROIListenerLeft;
 	private IROIListener externalROIListenerRight;
-	private HyperDelegateJob leftJob;
-	private HyperDelegateJob rightJob;
+	
+	private Executor leftJobExecutor = new ThreadPoolExecutor(0, 1, 30L, TimeUnit.SECONDS, new ArrayBlockingQueue<>(1),
+			new ThreadPoolExecutor.DiscardOldestPolicy());
+	private Executor rightJobExecutor = new ThreadPoolExecutor(0, 1, 30L, TimeUnit.SECONDS, new ArrayBlockingQueue<>(1),
+			new ThreadPoolExecutor.DiscardOldestPolicy());
 	private IWorkbenchPart part;
 	private SashForm sashForm;
 	private static final Logger logger = LoggerFactory.getLogger(HyperComponent.class);
@@ -86,6 +93,10 @@ public class HyperComponent {
 	
 	public static final String LEFT_REGION_NAME = "Left Region";
 	public static final String RIGHT_REGION_NAME = "Right Region";
+	
+	private HyperRunnableFactory leftFactory;
+	private HyperRunnableFactory rightFactory;
+
 
 	// use to override the default value of left roi
 	private IROI myRoi;
@@ -115,12 +126,11 @@ public class HyperComponent {
     }
     
     public void updateData(ILazyDataset lazy, List<IDataset> daxes, Slice[] slices, int[] order) {
-    	leftJob.cancel();
-    	rightJob.cancel();
-    	leftJob.updateData(lazy, daxes, slices, order);
-    	rightJob.updateData(lazy, daxes, slices, order);
-    	leftJob.schedule();
-    	rightJob.schedule();
+    	
+    	HyperBean b = new HyperBean(lazy, daxes, slices, order);
+    	leftFactory.updateData(b);
+    	rightFactory.updateData(b);
+
     	
     }
 	
@@ -146,34 +156,18 @@ public class HyperComponent {
 	public void setData(ILazyDataset lazy, List<IDataset> daxes, Slice[] slices, int[] order,
 			IDatasetROIReducer mainReducer, IDatasetROIReducer sideReducer) {
 		
-		if (leftJob != null) leftJob.cancel();
-		if (rightJob != null) rightJob.cancel();
-		
-		//FIXME needs to be made more generic
-		this.leftJob = new HyperDelegateJob("Left update",
-				sideSystem,
-				lazy,
-				daxes,
-				slices, order, mainReducer);
-		
-		this.rightJob = new HyperDelegateJob("Right update",
-				mainSystem,
-				lazy,
-				daxes,
-				slices,
-				order, sideReducer);
-		
-		this.rightJob.setInvertYAxis(invertYAxis);
-		this.leftJob.setInvertYAxis(invertYAxis);
+		HyperBean b = new HyperBean(lazy, daxes, slices, order);
+		this.leftFactory = new HyperRunnableFactory(sideSystem, b, mainReducer);
+		this.rightFactory = new HyperRunnableFactory(mainSystem, b, sideReducer);
 		
 		cleanUpActions(sideSystem,rightActions);
 		cleanUpActions(mainSystem, leftActions);
 		
-		if (rightJob.getReducer() instanceof IProvideReducerActions) {
-			createActions((IProvideReducerActions)rightJob.getReducer(), sideSystem, rightActions,roiListenerRight,HYPERTRACE);
+		if (sideReducer instanceof IProvideReducerActions) {
+			createActions((IProvideReducerActions)sideReducer, sideSystem, rightActions,roiListenerRight,HYPERTRACE);
 		}
-		if (leftJob.getReducer() instanceof IProvideReducerActions) {
-			createActions((IProvideReducerActions)leftJob.getReducer(), mainSystem, leftActions,roiListenerLeft,HYPERIMAGE);
+		if (mainReducer instanceof IProvideReducerActions) {
+			createActions((IProvideReducerActions)mainReducer, mainSystem, leftActions,roiListenerLeft,HYPERIMAGE);
 		}
 		
 		mainSystem.clear();
@@ -252,9 +246,6 @@ public class HyperComponent {
 		
 		if (mainSystem != null && !mainSystem.isDisposed()) mainSystem.dispose();
 		if (sideSystem != null && !sideSystem.isDisposed()) sideSystem.dispose();
-		
-		if (leftJob != null) leftJob.cancel();
-		if (rightJob != null) rightJob.cancel();
 		
 	}
 	
@@ -501,19 +492,22 @@ public class HyperComponent {
 	}
 
 	protected void updateRight(IRegion r, IROI rb) {
-		if (leftJob == null) return;
-		if (!leftJob.getReducer().getSupportedRegionType().contains(r.getRegionType())) {
+		if (leftFactory == null) return;
+		if (!leftFactory.isSupported(r.getRegionType())) {
 			return;
 		}
-		leftJob.profile(r, rb);
+		Runnable run = leftFactory.createRunnable(r, rb, invertYAxis);
+		leftJobExecutor.execute(run);
 	}
 	
 	protected void updateLeft(IRegion r, IROI rb) {
-        if (rightJob == null) return;
-        if (!rightJob.getReducer().getSupportedRegionType().contains(r.getRegionType())) {
+		
+		if (rightFactory == null) return;
+		if (!rightFactory.isSupported(r.getRegionType())) {
 			return;
 		}
-		rightJob.profile(r,rb);
+		Runnable run = rightFactory.createRunnable(r, rb, invertYAxis);
+		rightJobExecutor.execute(run);
 	}
 	
 	public IDataset getLeftData() {

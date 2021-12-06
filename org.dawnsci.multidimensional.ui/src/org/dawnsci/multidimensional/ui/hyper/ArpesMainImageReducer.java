@@ -16,7 +16,6 @@ import org.eclipse.dawnsci.analysis.dataset.roi.LinearROI;
 import org.eclipse.dawnsci.analysis.dataset.roi.ROISliceUtils;
 import org.eclipse.dawnsci.plotting.api.region.IRegion;
 import org.eclipse.dawnsci.plotting.api.region.IRegion.RegionType;
-import org.eclipse.january.IMonitor;
 import org.eclipse.january.dataset.DatasetFactory;
 import org.eclipse.january.dataset.DatasetUtils;
 import org.eclipse.january.dataset.IDataset;
@@ -32,12 +31,11 @@ public class ArpesMainImageReducer implements IDatasetROIReducer {
 	
 	@Override
 	public IDataset reduce(ILazyDataset data, List<IDataset> axes,
-			IROI roi, Slice[] slices, int[] order, IMonitor monitor) throws Exception {
+			IROI roi, Slice[] slices, int[] order) throws Exception {
 		
-		if (monitor.isCancelled()) return null;
 		if (roi instanceof LinearROI) {
 			
-			final IDataset roiSlice = ROISliceUtils.getDataset(data, (LinearROI)roi, slices,new int[]{order[0],order[1]},1,monitor);
+			final IDataset roiSlice = ROISliceUtils.getDataset(data, (LinearROI)roi, slices,new int[]{order[0],order[1]},1, null);
 			final IDataset image    = DatasetUtils.transpose(roiSlice); 
 		
 			IDataset length = DatasetFactory.createRange(IntegerDataset.class, image.getShape()[1]);
