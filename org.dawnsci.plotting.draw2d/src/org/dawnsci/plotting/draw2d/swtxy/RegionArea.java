@@ -334,11 +334,15 @@ public class RegionArea extends PlotArea implements IPlotArea {
 	}
 	
 	public void clearRegions(boolean force) {
-		clearRegionsInternal(force);
+		clearRegionsInternal(force, false);
 		revalidate();
 	}
-	
-    protected void clearRegionsInternal(boolean force) {
+
+	/**
+	 * @param force if true, remove all regions, else remove user regions only
+	 * @param disposed set true if plot is being closed
+	 */
+    protected void clearRegionsInternal(boolean force, boolean disposed) {
 		clearRegionTool();
 		if (regions==null) return;
 		
@@ -351,8 +355,7 @@ public class RegionArea extends PlotArea implements IPlotArea {
 			region.remove();
 		}
 		regions.keySet().removeAll(deleted);
-		fireRegionsRemoved(new RegionEvent(this, removed));
-
+		fireRegionsRemoved(new RegionEvent(this, removed, disposed));
 	}
 	
 
@@ -823,7 +826,7 @@ public class RegionArea extends PlotArea implements IPlotArea {
 		
 		removeMouseMotionListener(positionListener);
 		clearTraces();
-		clearRegionsInternal(true);
+		clearRegionsInternal(true, true);
 		if (regionListeners!=null)     regionListeners.clear();
 		if (imageTraceListeners!=null) imageTraceListeners.clear();
 		if (regions!=null)             regions.clear();
