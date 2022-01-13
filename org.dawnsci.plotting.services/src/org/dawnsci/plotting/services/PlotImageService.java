@@ -47,7 +47,6 @@ import org.eclipse.january.dataset.DatasetUtils;
 import org.eclipse.january.dataset.IDataset;
 import org.eclipse.january.dataset.ILazyDataset;
 import org.eclipse.january.dataset.IntegerDataset;
-import org.eclipse.january.dataset.RGBDataset;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.resource.ImageRegistry;
 import org.eclipse.swt.SWT;
@@ -71,6 +70,7 @@ import org.eclipse.ui.services.AbstractServiceFactory;
 import org.eclipse.ui.services.IDisposable;
 import org.eclipse.ui.services.IServiceLocator;
 
+import uk.ac.diamond.scisoft.analysis.io.AWTImageUtils;
 import uk.ac.diamond.scisoft.analysis.utils.FileUtils;
 
 /**
@@ -425,10 +425,9 @@ public class PlotImageService extends AbstractServiceFactory implements IPlotIma
 	}
 	
 	public IDataset createDataset(final BufferedImage bufferedImage) {
-		return convertToRGBDataset(bufferedImage);
+		return AWTImageUtils.makeDatasets(bufferedImage, true)[0];
 	}
 
-    
     static ImageData convertToSWT(BufferedImage bufferedImage) {
         if (bufferedImage.getColorModel() instanceof DirectColorModel) {
             DirectColorModel colorModel = (DirectColorModel)bufferedImage.getColorModel();
@@ -473,69 +472,7 @@ public class PlotImageService extends AbstractServiceFactory implements IPlotIma
         }
         return null;
     }
-    
-    static RGBDataset convertToRGBDataset(BufferedImage bufferedImage) {
-    	
-        RGBDataset data = DatasetFactory.zeros(RGBDataset.class, bufferedImage.getHeight(), bufferedImage.getWidth());
-       
-        if (bufferedImage.getColorModel() instanceof DirectColorModel) {
-            DirectColorModel colorModel = (DirectColorModel)bufferedImage.getColorModel();
-            for (int y = 0; y < bufferedImage.getHeight(); y++) {
-                    for (int x = 0; x < bufferedImage.getWidth(); x++) {
-                            int value = bufferedImage.getRGB(x, y);
-                            RGB rgb = new RGB((value >> 16) & 0xFF, (value >> 8) & 0xFF, value & 0xFF); 
-                            data.set(new short[]{(short)rgb.red, (short)rgb.green, (short)rgb.blue}, y, x);
-                            if (colorModel.hasAlpha()) {
-                            	// TODO
-                                    //data.set(x, y, (rgb >> 24) & 0xFF);
-                            }
-                    }
-            }
-            return data;
-            
-        } else if (bufferedImage.getColorModel() instanceof IndexColorModel) {
-        	
-            IndexColorModel colorModel = (IndexColorModel)bufferedImage.getColorModel();
-            int size = colorModel.getMapSize();
-            byte[] reds = new byte[size];
-            byte[] greens = new byte[size];
-            byte[] blues = new byte[size];
-            colorModel.getReds(reds);
-            colorModel.getGreens(greens);
-            colorModel.getBlues(blues);
-            RGB[] rgbs = new RGB[size];
-            for (int i = 0; i < rgbs.length; i++) {
-                    rgbs[i] = new RGB(reds[i] & 0xFF, greens[i] & 0xFF, blues[i] & 0xFF);
-            }
-            PaletteData palette = new PaletteData(rgbs);
-            WritableRaster raster = bufferedImage.getRaster();
-            int[] pixelArray = new int[1];
-            for (int y = 0; y < bufferedImage.getHeight(); y++) {
-            	for (int x = 0; x < bufferedImage.getWidth(); x++) {
-            		raster.getPixel(x, y, pixelArray);
-            		RGB rgb = palette.getRGB(pixelArray[0]);
-            		data.set(new short[]{(short)rgb.red, (short)rgb.green, (short)rgb.blue}, y, x);
-            	}
-            }
-        } else {
 
-        	WritableRaster raster = bufferedImage.getRaster();
-        	int[] pixelArray = new int[3];
-        	for (int y = 0; y < bufferedImage.getHeight(); y++) {
-        		for (int x = 0; x < bufferedImage.getWidth(); x++) {
-        			raster.getPixel(x, y, pixelArray);
-        			data.set(new short[]{
-        					(short)pixelArray[0], 
-        					(short)pixelArray[1], 
-        					(short)pixelArray[2]},
-        					y, x);
-        		}
-        	}  
-        }
-       return data;
-    }
-
-    
     static Image getImageSWT(File file) {
         ImageIcon systemIcon = (ImageIcon) FileSystemView.getFileSystemView().getSystemIcon(file);
         if (systemIcon == null) // Happens when file does not exist

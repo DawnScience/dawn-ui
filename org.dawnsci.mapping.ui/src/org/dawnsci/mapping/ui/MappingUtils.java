@@ -19,7 +19,6 @@ import org.eclipse.january.dataset.IDataset;
 import org.eclipse.january.dataset.ILazyDataset;
 import org.eclipse.january.dataset.IndexIterator;
 import org.eclipse.january.dataset.Maths;
-import org.eclipse.january.dataset.RGBDataset;
 import org.eclipse.january.metadata.AxesMetadata;
 import org.eclipse.january.metadata.MetadataFactory;
 import org.slf4j.Logger;
@@ -311,15 +310,9 @@ public class MappingUtils {
 			nexus.addAttribute(group, TreeFactory.createAttribute("NX_class","NXdata"));
 			IDataset data = image.getMap().getSliceView();
 			AxesMetadata axm = data.getFirstMetadata(AxesMetadata.class);
-			if (data instanceof RGBDataset) {
-				data = DatasetUtils.createDatasetFromCompoundDataset((RGBDataset)data, false);
-				if (data.getShape().length == 3 && data.getShape()[2] == 3) {
-					data = data.getTransposedView(new int[]{2,0,1}).getSlice();
-				}
-			}
 			data.setName("data");
 			DataNode dNode = nexus.createData(group, data);
-			nexus.addAttribute(dNode, TreeFactory.createAttribute("interpretation","rgba-image"));
+			nexus.addAttribute(dNode, TreeFactory.createAttribute("interpretation","rgb-image"));
 			
 			IDataset y = axm.getAxis(0)[0].getSlice().squeeze();
 			y.setName(MetadataPlotUtils.removeSquareBrackets(y.getName()));
@@ -329,7 +322,7 @@ public class MappingUtils {
 			nexus.createData(group, x);
 			
 			nexus.addAttribute(group, TreeFactory.createAttribute("signal","data"));
-			nexus.addAttribute(group, TreeFactory.createAttribute("axes",new String[]{".",y.getName(),x.getName()}));
+			nexus.addAttribute(group, TreeFactory.createAttribute("axes",new String[]{y.getName(),x.getName(), "."}));
 		} catch (DatasetException de) {
 			logger.error("Could not slice dataset", de);
 		} catch (NexusException e) {

@@ -32,6 +32,7 @@ import org.eclipse.january.dataset.Dataset;
 import org.eclipse.january.dataset.DatasetUtils;
 import org.eclipse.january.dataset.IndexIterator;
 import org.eclipse.january.dataset.Maths;
+import org.eclipse.january.dataset.RGBByteDataset;
 import org.eclipse.january.dataset.RGBDataset;
 import org.eclipse.january.dataset.ShortDataset;
 import org.eclipse.january.dataset.Stats;
@@ -113,8 +114,8 @@ public class ImageService extends AbstractServiceFactory implements IImageServic
 		oImage = DatasetUtils.rotate90(oImage, origin.ordinal());
 		Dataset image = oImage;
 
-		if (image instanceof RGBDataset) {
-			return SWTImageUtils.createImageData((RGBDataset) image, 0, 255, null, null, null, false, false, false);
+		if (image instanceof RGBByteDataset || image instanceof RGBDataset) {
+			return SWTImageUtils.createImageData(image, 0, 255, null, null, null, false, false, false);
 		}
 
 		createMaxMin(bean);
@@ -139,7 +140,7 @@ public class ImageService extends AbstractServiceFactory implements IImageServic
 				value.imultiply(1./maxmax);
 			}
 			Maths.clip(value, value, 0, 1);
-			image = RGBDataset.createFromHSV(hue, null, value);
+			image = RGBByteDataset.createFromHSV(hue, null, value);
 			return SWTImageUtils.createImageData(image, 0, 255, null, null, null, false, false, false);
 		}
 

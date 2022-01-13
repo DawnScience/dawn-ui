@@ -24,7 +24,9 @@ import org.eclipse.dawnsci.plotting.api.tool.IToolPage.ToolPageRole;
 import org.eclipse.dawnsci.plotting.api.tool.IToolPageSystem;
 import org.eclipse.dawnsci.plotting.api.trace.IImageTrace;
 import org.eclipse.dawnsci.plotting.api.trace.IImageTrace.DownsampleType;
+import org.eclipse.january.dataset.IDataset;
 import org.eclipse.january.dataset.InterfaceUtils;
+import org.eclipse.january.dataset.RGBByteDataset;
 import org.eclipse.january.dataset.RGBDataset;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.preference.ColorSelector;
@@ -173,7 +175,8 @@ public class ImageTraceComposite extends Composite {
 			}
 		});
 
-		if (imageTrace.getData() instanceof RGBDataset) {
+		IDataset tData = imageTrace.getData();
+		if (tData instanceof RGBByteDataset || tData instanceof RGBDataset) {
 			histoChoice.setEnabled(false);
 		}
 		
@@ -240,7 +243,7 @@ public class ImageTraceComposite extends Composite {
 		lo.setMaximum(hi);
 		lo.setMinimum(0.001);
 		
-		if (imageTrace.getData() instanceof RGBDataset) {
+		if (tData instanceof RGBByteDataset || tData instanceof RGBDataset) {
 			histolabel.setEnabled(false);
 			histoChoice.setEnabled(false);
 			hiBox.setEnabled(false);

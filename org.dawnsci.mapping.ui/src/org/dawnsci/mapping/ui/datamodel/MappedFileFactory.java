@@ -14,6 +14,7 @@ import org.eclipse.january.dataset.DoubleDataset;
 import org.eclipse.january.dataset.IDataset;
 import org.eclipse.january.dataset.IDynamicDataset;
 import org.eclipse.january.dataset.ILazyDataset;
+import org.eclipse.january.dataset.RGBByteDataset;
 import org.eclipse.january.dataset.RGBDataset;
 import org.eclipse.january.dataset.Slice;
 import org.eclipse.january.metadata.AxesMetadata;
@@ -160,14 +161,14 @@ public class MappedFileFactory {
 			
 			if (d.getRank() == 3) {
 				d.clearMetadata(AxesMetadata.class);
-				RGBDataset ds = createRGBDataset(d, d.getShape()[2] == 3);
+				Dataset ds = createRGBDataset(d, d.getShape()[2] == 3);
 				ds.addMetadata(ax);
 				return new AssociatedImage(b.getName(), ds, path);
 			} else if (d.getRank() == 2) {
-				RGBDataset ds = DatasetUtils.createCompoundDataset(RGBDataset.class, d);
+				Class<? extends CompoundDataset> clazz = d.getElementClass().equals(Byte.class) ? RGBByteDataset.class : RGBDataset.class;
+				Dataset ds = DatasetUtils.createCompoundDataset(clazz, d);
 				ds.addMetadata(ax);
 				return new AssociatedImage(b.getName(), ds, path);
-				
 			}
 			
 		} catch (Exception e) {
@@ -206,22 +207,22 @@ public class MappedFileFactory {
 			logger.error("Error loading image stack",e);
 		}
 		return null;
-		
 	}
 	
-	private static RGBDataset createRGBDataset(Dataset d, boolean interleaved) {
+	private static Dataset createRGBDataset(Dataset d, boolean interleaved) {
 	
 		if (interleaved) {
-			
 			CompoundDataset cd = DatasetUtils.createCompoundDatasetFromLastAxis(d, true);
 			
-			return RGBDataset.createFromCompoundDataset(cd);
+			return cd.getElementClass().equals(Byte.class) ? RGBByteDataset.createFromCompoundDataset(cd) :
+					RGBDataset.createFromCompoundDataset(cd);
 		}
 
-		return DatasetUtils.createCompoundDataset(RGBDataset.class, new Dataset[] {
-				d.getSlice(new Slice(0,1,1),null,null).squeeze(),
-				d.getSlice(new Slice(1,2,1),null,null).squeeze(),
-				d.getSlice(new Slice(2,3,1),null,null).squeeze()});	
+		Class<? extends CompoundDataset> clazz = d.getElementClass().equals(Byte.class) ? RGBByteDataset.class : RGBDataset.class;
+		return DatasetUtils.createCompoundDataset(clazz,
+				d.getSliceView(new Slice(0,1,1), null, null).squeeze(),
+				d.getSliceView(new Slice(1,2,1), null, null).squeeze(),
+				d.getSliceView(new Slice(2,3,1), null, null).squeeze());
 	}
 	
 	private static AxesMetadata checkAndBuildAxesMetadata(List<String> axes, MappedBlockBean bean, IDataHolder dataHolder) {

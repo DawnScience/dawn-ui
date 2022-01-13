@@ -25,13 +25,13 @@ import org.eclipse.dawnsci.plotting.api.trace.IImageTrace;
 import org.eclipse.dawnsci.plotting.api.trace.MetadataPlotUtils;
 import org.eclipse.january.DatasetException;
 import org.eclipse.january.MetadataException;
+import org.eclipse.january.dataset.CompoundDataset;
 import org.eclipse.january.dataset.Dataset;
 import org.eclipse.january.dataset.DatasetFactory;
 import org.eclipse.january.dataset.DatasetUtils;
 import org.eclipse.january.dataset.DoubleDataset;
 import org.eclipse.january.dataset.IDataset;
 import org.eclipse.january.dataset.LinearAlgebra;
-import org.eclipse.january.dataset.RGBDataset;
 import org.eclipse.january.metadata.AxesMetadata;
 import org.eclipse.january.metadata.MetadataFactory;
 import org.eclipse.jface.dialogs.Dialog;
@@ -56,7 +56,7 @@ import org.slf4j.LoggerFactory;
 public class RectangleRegistrationDialog extends Dialog {
 	private IDataset image;
 	private IDataset map;
-	private IDataset registered;
+	private Dataset registered;
 	private IPlottingSystem<Composite> systemMap;
 	private IPlottingSystem<Composite> systemImage;
 	private IPlottingSystem<Composite> systemComposite;
@@ -333,9 +333,8 @@ public class RectangleRegistrationDialog extends Dialog {
 		
 	}
 	
-	public IDataset getRegisteredImage(){
+	public Dataset getRegisteredImage(){
 		return registered;
-		
 	}
 	
 	private void sanitizeROI(IROI roi, int[] shape) {
@@ -394,16 +393,17 @@ public class RectangleRegistrationDialog extends Dialog {
 		
 		MapToRotatedCartesian mrc = new MapToRotatedCartesian(0, 0, shape[1], shape[0], r*-1);
 		
-		IDataset im;
-		
-		if (image instanceof RGBDataset) {
-			
-			RGBDataset rgb = (RGBDataset)image;
-			im = DatasetUtils.createCompoundDataset(RGBDataset.class, mrc.value(rgb.getRedView()).get(0),
-								mrc.value(rgb.getGreenView()).get(0),
-								mrc.value(rgb.getBlueView()).get(0));
-			
-			
+		Dataset im;
+
+		if (image instanceof CompoundDataset) {
+			CompoundDataset cim = (CompoundDataset) image;
+			int e = cim.getElementsPerItem();
+			Dataset[] views = new Dataset[e];
+			for (int i = 0; i < e; i++) {
+				views[i] = cim.getElementsView(i);
+			}
+			List<Dataset> rim = mrc.value(views);
+			im = DatasetUtils.createCompoundDataset(cim.getClass(), rim.toArray(new Dataset[e]));
 		} else {
 			List<Dataset> value = mrc.value(image);
 			im = value.get(0);

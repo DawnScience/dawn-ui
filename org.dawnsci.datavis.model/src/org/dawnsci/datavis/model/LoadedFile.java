@@ -86,10 +86,8 @@ public class LoadedFile implements IDataObject, IDataFilePackage {
 				}
 				
 				for (Entry<DataNode,String> e : uniqueDataNodes.entrySet()) {
-					if (e.getKey().containsAttribute(INTERPRETATION) && 
-							e.getKey().getAttribute(INTERPRETATION).getFirstElement().equals("rgba-image")) {
-						e.toString();
-						
+					String interpretation = NexusTreeUtils.getFirstString(e.getKey().getAttribute(INTERPRETATION));
+					if (interpretation != null && (NexusConstants.INTERPRETATION_IMAGE_RGB.equals(interpretation) || NexusConstants.INTERPRETATION_IMAGE_RGBA.equals(interpretation))) {
 						ILazyDataset d = e.getKey().getDataset();
 						
 						int[] shape = d.getShape();

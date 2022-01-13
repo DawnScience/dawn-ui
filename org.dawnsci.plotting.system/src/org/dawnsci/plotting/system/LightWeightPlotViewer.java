@@ -93,6 +93,7 @@ import org.eclipse.draw2d.PrintFigureOperation;
 import org.eclipse.january.dataset.DatasetFactory;
 import org.eclipse.january.dataset.DoubleDataset;
 import org.eclipse.january.dataset.IDataset;
+import org.eclipse.january.dataset.RGBByteDataset;
 import org.eclipse.january.dataset.RGBDataset;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.ActionContributionItem;
@@ -1207,7 +1208,8 @@ public class LightWeightPlotViewer<T> implements IPlottingSystemViewer<T>, IAnno
 			xyGraph.addImageTrace((ImageTrace)image);
 			removeAdditionalAxes(); // Do not have others with images.
 
-			if (trace.getData() instanceof RGBDataset) {
+			IDataset tData = trace.getData();
+			if (tData instanceof RGBByteDataset || tData instanceof RGBDataset) {
 				intensity.setVisible(false);
 			} else {
 				intensity.setVisible(showIntensity);

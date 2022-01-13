@@ -9,6 +9,7 @@ import org.eclipse.january.dataset.Dataset;
 import org.eclipse.january.dataset.DatasetUtils;
 import org.eclipse.january.dataset.IDataset;
 import org.eclipse.january.dataset.LazyDynamicDataset;
+import org.eclipse.january.dataset.RGBByteDataset;
 import org.eclipse.january.dataset.RGBDataset;
 import org.eclipse.january.dataset.Slice;
 import org.eclipse.january.dataset.SliceND;
@@ -19,11 +20,14 @@ public class RGBLazyDynamicDataset extends LazyDynamicDataset {
 
 	private static final long serialVersionUID = 1L;
 
-	public RGBLazyDynamicDataset(String name, int dtype, int elements, int[] shape, int[] maxShape,
-			ILazyLoader loader) {
-		super(name, dtype, elements, shape, maxShape, loader);
+	public RGBLazyDynamicDataset(ILazyLoader loader, String name, int elements, Class<? extends Dataset> clazz, int[] shape, int[] maxShape) {
+		this(loader, name, elements, clazz, shape, maxShape, null);
 	}
-	
+
+	public RGBLazyDynamicDataset(ILazyLoader loader, String name, int elements, Class<? extends Dataset> clazz, int[] shape, int[] maxShape, int[] chunks) {
+		super(loader, name, elements, clazz, shape, maxShape, chunks);
+	}
+
 	public static RGBLazyDynamicDataset buildFromLazyDataset(LazyDynamicDataset lazy) {
 		
 		int[] shape = lazy.getShape();
@@ -38,9 +42,9 @@ public class RGBLazyDynamicDataset extends LazyDynamicDataset {
 		view.clearMetadata(null);
 		
 		ILazyLoader loader = new RGBLazyLoader(view, interleaved);
-		return new RGBLazyDynamicDataset(lazy.getName() + "RGB", lazy.getDType(),
-				lazy.getElementsPerItem(), getRGBShape(shape, interleaved),
-				getRGBShape(lazy.getMaxShape(), interleaved), loader);
+		return new RGBLazyDynamicDataset(loader, lazy.getName() + "RGB",
+				lazy.getElementsPerItem(), lazy.getInterface(), getRGBShape(shape, interleaved),
+				getRGBShape(lazy.getMaxShape(), interleaved));
 		
 	}
 
@@ -91,7 +95,7 @@ public class RGBLazyDynamicDataset extends LazyDynamicDataset {
 		@Override
 		public IDataset getDataset(IMonitor mon, SliceND slice) throws IOException {
 
-			int rgbDim = interleaved ? dataset.getRank()-1 : dataset.getRank() - 3;
+			int rgbDim = interleaved ? dataset.getRank() - 1 : dataset.getRank() - 3;
 
 			SliceND full = new SliceND(dataset.getShape());
 
@@ -113,11 +117,9 @@ public class RGBLazyDynamicDataset extends LazyDynamicDataset {
 				throw new IOException(e);
 			}
 
+			CompoundDataset comp;
 			if (interleaved) {
-				CompoundDataset comp = DatasetUtils.createCompoundDatasetFromLastAxis(all, true);
-				return RGBDataset.createFromCompoundDataset(comp);
-
-
+				comp = DatasetUtils.createCompoundDatasetFromLastAxis(all, true);
 			} else {
 
 				SliceND sR = new SliceND(all.getShape());
@@ -137,9 +139,11 @@ public class RGBLazyDynamicDataset extends LazyDynamicDataset {
 				dG.setShape(ss);
 				dB.setShape(ss);
 
-				CompoundDataset comp = DatasetUtils.createCompoundDataset(dR,dG,dB);
-				return RGBDataset.createFromCompoundDataset(comp);
+				comp = DatasetUtils.createCompoundDataset(dR,dG,dB);
 			}
+
+			return comp.getElementClass().equals(Byte.class) ? RGBByteDataset.createFromCompoundDataset(comp) :
+				RGBDataset.createFromCompoundDataset(comp);
 		}
 
 		@Override
@@ -147,7 +151,5 @@ public class RGBLazyDynamicDataset extends LazyDynamicDataset {
 			dataset.refreshShape();
 			return getRGBShape(dataset.getShape(),interleaved);
 		}
-		
 	}
-
 }

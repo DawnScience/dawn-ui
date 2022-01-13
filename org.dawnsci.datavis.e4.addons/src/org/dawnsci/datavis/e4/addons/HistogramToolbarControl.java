@@ -177,8 +177,8 @@ public class HistogramToolbarControl {
 			@Override
 			public void traceAdded(TraceEvent evt) {
 				Object source = evt.getSource();
-				if (source instanceof IPaletteTrace) {
-					IPaletteTrace pt = (IPaletteTrace)source;
+				if (hasPalette(source)) {
+					IPaletteTrace pt = (IPaletteTrace) source;
 					HistogramToolbarControl.this.trace = pt;
 					enable(true);
 					HistogramToolbarControl.this.lock.setSelection(!pt.isRescaleHistogram());
@@ -189,7 +189,6 @@ public class HistogramToolbarControl {
 					}
 					
 					HistogramToolbarControl.this.trace.addPaletteListener(listener);
-					
 				} else {
 					enable(false);
 					HistogramToolbarControl.this.trace = null;
@@ -200,19 +199,17 @@ public class HistogramToolbarControl {
 			@Override
 			public void traceUpdated(TraceEvent evt) {
 				Object source = evt.getSource();
-				if (source instanceof IPaletteTrace) {
-					IPaletteTrace pt = (IPaletteTrace)source;
+				if (hasPalette(source)) {
+					IPaletteTrace pt = (IPaletteTrace) source;
 					HistogramToolbarControl.this.trace = pt;
 					enable(true);
 					HistogramToolbarControl.this.lock.setSelection(!pt.isRescaleHistogram());
 					HistogramToolbarControl.this.low.setText(pt.getMin().toString());
 					HistogramToolbarControl.this.high.setText(pt.getMax().toString());
-					
 				} else {
 					enable(false);
 					HistogramToolbarControl.this.trace = null;
 				}
-				
 			}
 
 			@Override
@@ -253,7 +250,15 @@ public class HistogramToolbarControl {
 			}
 		};
 	}
-	
+
+	private static boolean hasPalette(Object source) {
+		if (source instanceof IPaletteTrace) {
+			IPaletteTrace pt = (IPaletteTrace) source;
+			return pt.getMin() != null;
+		}
+		return false;
+	}
+
 	private void updateMin() {
 		if (trace != null) {
 			String text = low.getText();

@@ -18,7 +18,9 @@ import org.eclipse.january.dataset.Dataset;
 import org.eclipse.january.dataset.DatasetFactory;
 import org.eclipse.january.dataset.DatasetUtils;
 import org.eclipse.january.dataset.IndexIterator;
+import org.eclipse.january.dataset.RGBByteDataset;
 import org.eclipse.january.dataset.RGBDataset;
+import org.eclipse.january.dataset.Slice;
 import org.eclipse.swt.graphics.ImageData;
 import org.eclipse.swt.graphics.PaletteData;
 import org.eclipse.swt.graphics.RGB;
@@ -29,7 +31,7 @@ import org.eclipse.ui.PlatformUI;
  */
 public class SWTImageUtils {
 
-	static private ImageData createImageFromRGBADataset(RGBDataset rgbdata, long minv, long maxv)
+	private static ImageData createImageFromRGBADataset(RGBDataset rgbdata, long minv, long maxv)
 	{
 		ImageData img;
 		final IndexIterator iter = rgbdata.getIterator(true);
@@ -82,6 +84,61 @@ public class SWTImageUtils {
 		return img;
 	}
 	
+	private static ImageData createImageFromRGBADataset(RGBByteDataset rgbdata, long minv, long maxv)
+	{
+		ImageData img;
+		final IndexIterator iter = rgbdata.getIterator(true);
+		final int[] pos = iter.getPos();
+		final int[] shape = rgbdata.getShape();
+		final int height = shape[0];
+		final int width = shape.length == 1 ? 1 : shape[1]; // allow 1D datasets to be saved
+		long delta = maxv - minv;
+		short off = (short) minv;
+
+		byte[] data = rgbdata.getData();
+		if (delta < 256 && rgbdata.getStrides() == null) { // can use data directly
+			img = new ImageData(width, height, 24, new PaletteData(0xff0000, 0x00ff00, 0x0000ff), 3*width, rgbdata.getData());
+		} else if (delta < 32) { // 555
+			img = new ImageData(width, height, 16, new PaletteData(0x7c00, 0x03e0, 0x001f));
+			while (iter.hasNext()) {
+				final int n = iter.index;
+				final int rgb = (((data[n] - off) & 0x1f) << 10) | (((data[n + 1] - off) & 0x1f) << 5) | ((data[n + 2] - off)& 0x1f);
+				img.setPixel(pos[1], pos[0], rgb);
+			}
+		} else if (delta < 64) { // 565
+			img = new ImageData(width, height, 16, new PaletteData(0xf800, 0x07e0, 0x001f));
+
+			while (iter.hasNext()) {
+				final int n = iter.index;
+				final int rgb = ((((data[n] - off) >> 1) & 0x1f) << 10) | (((data[n + 1] - off) & 0x3f) << 5) | (((data[n + 2] - off) >> 1) & 0x1f);
+				img.setPixel(pos[1], pos[0], rgb);
+			}
+		} else if (delta < 256) { // 888
+			img = new ImageData(width, height, 24, new PaletteData(0xff0000, 0x00ff00, 0x0000ff));
+
+			while (iter.hasNext()) {
+				final int n = iter.index;
+				final int rgb = (((data[n] - off) & 0xff) << 16) | (((data[n + 1] - off) & 0xff) << 8) | ((data[n + 2] - off) & 0xff);
+				img.setPixel(pos[1], pos[0], rgb);
+			}
+		} else {
+			int shift = 0;
+			while (delta >= 256) {
+				shift++;
+				delta >>= 1;
+			}
+
+			img = new ImageData(width, height, 24, new PaletteData(0xff0000, 0x00ff00, 0x0000ff));
+
+			while (iter.hasNext()) {
+				final int n = iter.index;
+				final int rgb = ((((data[n] - off) >> shift) & 0xff) << 16) | ((((data[n + 1] - off) >> shift) & 0xff) << 8) | (((data[n + 2] - off) >> shift) & 0xff);
+				img.setPixel(pos[1], pos[0], rgb);
+			}
+		}
+		return img;
+	}
+
 	static private ImageData createImageFromDataset(Dataset a,
 													double minv,
 													double maxv,
@@ -160,7 +217,7 @@ public class SWTImageUtils {
 	 * @return an ImageData object for SWT
 	 */
 	static public ImageData createImageData(Dataset a, Number min, Number max,
-			                                ITransferFunction redFunc,
+											ITransferFunction redFunc,
 											ITransferFunction greenFunc,
 											ITransferFunction blueFunc,
 											boolean inverseRed,
@@ -168,8 +225,10 @@ public class SWTImageUtils {
 											boolean inverseBlue) {
 		ImageData img;
 
-		if (a instanceof RGBDataset) {
-			img = createImageFromRGBADataset((RGBDataset)a, min.longValue(), max.longValue());
+		if (a instanceof RGBByteDataset) {
+			img = createImageFromRGBADataset((RGBByteDataset) a, min.longValue(), max.longValue());
+		} else if (a instanceof RGBDataset) {
+			img = createImageFromRGBADataset((RGBDataset) a, min.longValue(), max.longValue());
 		} else {
 			img = createImageFromDataset(a, min.doubleValue(), max.doubleValue(),redFunc,greenFunc,blueFunc,
 										 inverseRed,inverseGreen,inverseBlue);
@@ -193,12 +252,18 @@ public class SWTImageUtils {
 	static public ImageData createImageData(Dataset a, Number min, Number max,
 											PaletteData paletteData) throws Exception {
 		ImageData img;
-		if (a instanceof RGBDataset) {
-			img = createImageFromRGBADataset((RGBDataset)a, min.longValue(), max.longValue());
+		if (a instanceof RGBByteDataset) {
+			img = createImageFromRGBADataset((RGBByteDataset) a, min.longValue(), max.longValue());
+		} else if (a instanceof RGBDataset) {
+			img = createImageFromRGBADataset((RGBDataset) a, min.longValue(), max.longValue());
 		} else {
 			img = createImageFromDataset(a, paletteData);
 		}
 		return img;
+	}
+
+	private static int shift(int value, int shift) {
+		return shift < 0 ? value >>> -shift : value << shift;
 	}
 
 	/**
@@ -206,7 +271,7 @@ public class SWTImageUtils {
 	 * @param image
 	 * @return a RGB dataset
 	 */
-	static public RGBDataset createRGBDataset(final ImageData image) {
+	public static RGBDataset createRGBDataset(final ImageData image) {
 		final int[] data = new int[image.width];
 		final RGBDataset rgb = DatasetFactory.zeros(RGBDataset.class, image.height, image.width);
 		final short[] p = new short[3];
@@ -216,12 +281,9 @@ public class SWTImageUtils {
 				image.getPixels(0, i, image.width, data, 0);
 				for (int j = 0; j < image.width; j++) {
 					int value = data[j];
-					p[0] = palette.redShift >= 0 ? (short) ((value & palette.redMask) << palette.redShift) :
-						(short) ((value & palette.redMask) >>> -palette.redShift);
-					p[1] = palette.greenShift >= 0 ? (short) ((value & palette.greenMask) << palette.greenShift) :
-						(short) ((value & palette.greenMask) >>> -palette.greenShift);
-					p[2] = palette.blueShift >= 0 ? (short) ((value & palette.blueMask) << palette.blueShift) :
-						(short) ((value & palette.blueMask) >>> -palette.blueShift);
+					p[0] = (short) shift(value & palette.redMask, palette.redShift);
+					p[1] = (short) shift(value & palette.greenMask, palette.greenShift);
+					p[2] = (short) shift(value & palette.blueMask, palette.blueShift);
 					rgb.setItem(p, i, j);
 				}
 			}
@@ -242,6 +304,62 @@ public class SWTImageUtils {
 		return rgb;
 	}
 
+	private static boolean isRGBCompatible(ImageData image) {
+		if (image.depth == 24 && image.bytesPerLine % 3 == 0) { // three components
+			PaletteData p = image.palette;
+			return p.redShift == 16 && p.greenShift == 8 && p.blueShift == 0; // so RGB
+		}
+		return false;
+	}
+
+	/**
+	 * Create RGB dataset from an SWT image
+	 * @param image
+	 * @return a RGB dataset
+	 */
+	public static RGBByteDataset createRGBByteDataset(final ImageData image) {
+		final int[] data = new int[image.width];
+		RGBByteDataset rgb;
+		final byte[] p = new byte[3];
+		final PaletteData palette = image.palette;
+		if (palette.isDirect) {
+			if (isRGBCompatible(image)) {
+				int pad = (image.bytesPerLine - 3 * image.width) / 3;
+				rgb = DatasetFactory.createFromObject(RGBByteDataset.class, image.data, image.height, image.width + pad);
+				if (pad > 0) { // crop end of rows
+					rgb = (RGBByteDataset) rgb.getSliceView(null, new Slice(image.width), null);
+				}
+			} else {
+				rgb = DatasetFactory.zeros(RGBByteDataset.class, image.height, image.width);
+				for (int i = 0; i < image.height; i++) {
+					image.getPixels(0, i, image.width, data, 0);
+					for (int j = 0; j < image.width; j++) {
+						int value = data[j];
+						p[0] = (byte) shift(value & palette.redMask, palette.redShift);
+						p[1] = (byte) shift(value & palette.greenMask, palette.greenShift);
+						p[2] = (byte) shift(value & palette.blueMask, palette.blueShift);
+						rgb.setItem(p, i, j);
+					}
+				}
+			}
+		} else {
+			rgb = DatasetFactory.zeros(RGBByteDataset.class, image.height, image.width);
+			final RGB[] table = palette.getRGBs();
+			for (int i = 0; i < image.height; i++) {
+				image.getPixels(0, i, image.width, data, 0);
+				for (int j = 0; j < image.width; j++) {
+					RGB value = table[data[j]];
+					p[0] = (byte) value.red;
+					p[1] = (byte) value.green;
+					p[2] = (byte) value.blue;
+					rgb.setItem(p, i, j);
+				}
+			}
+		}
+
+		return rgb;
+	}
+
 	public static ImageData createImageData(double min, double max, double minCut, double maxCut, Dataset image, ImageServiceBean bean) {
 		int depth = bean.getDepth();
 		if (depth > 8) { // Depth > 8 will not work properly at the moment.
@@ -253,7 +371,7 @@ public class SWTImageUtils {
 		int size = 1 << depth;
 
 		final int[] shape = image.getShape();
-		if (bean.isCancelled()) return null;	
+		if (bean.isCancelled()) return null;
 
 		int len = image.getSize();
 		if (len == 0) return null;
@@ -348,7 +466,7 @@ public class SWTImageUtils {
 
 		int index = 0;
 		for (int i = 0; i<shape[0]; ++i) {
-			if (bean.isCancelled()) return null;				
+			if (bean.isCancelled()) return null;
 			for (int j = 0; j<shape[1]; ++j) {
 				
 				// This saves a value lookup when the pixel is certainly masked.
@@ -370,7 +488,7 @@ public class SWTImageUtils {
 			final byte[] scaledAlphaAsByte = new byte[len];
 			int k = 0;
 			for (int i = 0; i<shape[0]; ++i) {
-				if (bean.isCancelled()) return null;				
+				if (bean.isCancelled()) return null;
 				for (int j = 0; j<shape[1]; ++j) {
 					scaledAlphaAsByte[k] = (byte) (scaledImageAsByte[k] == transByte ? 0 : alpha);
 					k++;

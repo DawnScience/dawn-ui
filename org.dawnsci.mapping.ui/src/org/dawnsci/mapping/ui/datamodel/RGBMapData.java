@@ -1,13 +1,13 @@
 package org.dawnsci.mapping.ui.datamodel;
 
+import org.eclipse.january.dataset.ByteDataset;
 import org.eclipse.january.dataset.Dataset;
 import org.eclipse.january.dataset.DatasetFactory;
 import org.eclipse.january.dataset.DatasetUtils;
 import org.eclipse.january.dataset.IDataset;
 import org.eclipse.january.dataset.IndexIterator;
 import org.eclipse.january.dataset.Maths;
-import org.eclipse.january.dataset.RGBDataset;
-import org.eclipse.january.dataset.ShortDataset;
+import org.eclipse.january.dataset.RGBByteDataset;
 import org.eclipse.january.metadata.AxesMetadata;
 
 public class RGBMapData extends MappedData {
@@ -22,12 +22,12 @@ public class RGBMapData extends MappedData {
 	boolean redLog;
 	boolean greenLog;
 	boolean blueLog;
-	RGBDataset data;
+	RGBByteDataset data;
 	
 	public RGBMapData(String name, AbstractMapData parent, String path) {
 		super(name, parent.map, parent.parent, parent.path, false);
 		this.rgb = new AbstractMapData[3];
-		data = DatasetFactory.zeros(RGBDataset.class, parent.map.getShape());
+		data = DatasetFactory.zeros(RGBByteDataset.class, parent.map.getShape());
 		AxesMetadata ax = parent.getMap().getFirstMetadata(AxesMetadata.class);
 		data.setMetadata(ax);
 	}
@@ -71,7 +71,7 @@ public class RGBMapData extends MappedData {
 	}
 	
 	private void clearChannel(int channel){
-		data.setElements(DatasetFactory.zeros(ShortDataset.class, data.getShapeRef()), channel);
+		data.setElements(DatasetFactory.zeros(ByteDataset.class, data.getShapeRef()), channel);
 		
 	}
 	
@@ -92,7 +92,7 @@ public class RGBMapData extends MappedData {
 	
 	private Dataset updateDataset(Dataset ds, double min, double max, boolean log) {
 		Dataset out = ds.getSlice();
-		Dataset shortData = DatasetFactory.zeros(out, ShortDataset.class);
+		ByteDataset byteData = DatasetFactory.zeros(out, ByteDataset.class);
 		
 		if (log) {
 			out = Maths.log10(out);
@@ -104,13 +104,20 @@ public class RGBMapData extends MappedData {
 		IndexIterator it = out.getIterator();
 		while (it.hasNext()) {
 			double val = out.getElementDoubleAbs(it.index);
-			if (val < 0) shortData.setObjectAbs(it.index, 0);
-			else if (val > 255) shortData.setObjectAbs(it.index, 255);
-			else if (Double.isNaN(val)) shortData.setObjectAbs(it.index, 0);
-			else shortData.setObjectAbs(it.index,val);
+			byte v;
+			if (val < 0) {
+				v = 0;
+			} else if (val > 255) {
+				v = (byte) 255;
+			} else if (Double.isNaN(val)) {
+				v = 0;
+			} else {
+				v = (byte) val;
+			}
+			byteData.setAbs(it.index, v);
 		}
 		
-		return shortData;
+		return byteData;
 	}
 	
 	private Dataset update(Dataset ds, int lower, int upper, boolean log) {

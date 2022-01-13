@@ -24,6 +24,8 @@ import org.eclipse.dawnsci.plotting.api.trace.TraceEvent;
 import org.eclipse.january.dataset.Dataset;
 import org.eclipse.january.dataset.DatasetUtils;
 import org.eclipse.january.dataset.IDataset;
+import org.eclipse.january.dataset.RGBByteDataset;
+import org.eclipse.january.dataset.RGBDataset;
 import org.eclipse.ui.PlatformUI;
 
 /**
@@ -93,8 +95,11 @@ public class SurfaceTrace extends Image3DTrace implements ISurfaceTrace{
 		if (imageServiceBean==null) imageServiceBean = new ImageServiceBean();
 		imageServiceBean.setImage(data);
 
+		this.data = DatasetUtils.convertToDataset(data);
+
 		if (service==null) service = (IImageService)PlatformUI.getWorkbench().getService(IImageService.class);
-		if (rescaleHistogram) {
+		if (!(this.data instanceof RGBByteDataset || this.data instanceof RGBDataset) &&
+			rescaleHistogram) {
 			final double[] fa = service.getFastStatistics(imageServiceBean);
 			setMin(fa[0]);
 			setMax(fa[1]);
@@ -104,7 +109,6 @@ public class SurfaceTrace extends Image3DTrace implements ISurfaceTrace{
 			axes = Arrays.asList(axes.get(0), axes.get(1), null);
 		}
 
-		this.data = DatasetUtils.convertToDataset(data);
 		this.axes = axes;
 		if (isActive()) {
 			plotter.updatePlot(createAxisValues(), plotter.getWindow(getWindow()), plotType, this.data);

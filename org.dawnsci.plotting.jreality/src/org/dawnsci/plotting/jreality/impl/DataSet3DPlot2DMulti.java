@@ -39,6 +39,7 @@ import org.eclipse.january.dataset.Dataset;
 import org.eclipse.january.dataset.DatasetUtils;
 import org.eclipse.january.dataset.FloatDataset;
 import org.eclipse.january.dataset.IDataset;
+import org.eclipse.january.dataset.RGBByteDataset;
 import org.eclipse.january.dataset.RGBDataset;
 import org.eclipse.swt.graphics.Cursor;
 import org.eclipse.swt.widgets.Composite;
@@ -325,6 +326,7 @@ public class DataSet3DPlot2DMulti extends DataSet3DPlot2D {
 							}
 							if (texture != null) {
 								boolean useRGB = 
+									(currentData instanceof RGBByteDataset) ||
 									(currentData instanceof RGBDataset) ||
 									(currentData instanceof CompoundDataset &&
 									(currentData.getElementsPerItem() == 3 ||
@@ -405,7 +407,21 @@ public class DataSet3DPlot2DMulti extends DataSet3DPlot2D {
 		byte[] softwareImageRGBAdata = (byte[])imageDatas.get(currentTexture);
 		int si = 0;
 		int srcHeight = data.getShape()[0];
-		if (data instanceof RGBDataset) {
+
+		if (data instanceof RGBByteDataset) {
+			RGBByteDataset rgbData = (RGBByteDataset)data;
+			byte[] rgbImgData = rgbData.getData();
+			int srcWidth = rgbData.getShape()[1];
+			for (int y = 0; y < height; y++) {
+				int di = (xpos + (srcHeight -1 -ypos-(height-1-y))*srcWidth)*3;
+				for (int x = 0; x < width; x++) {
+					softwareImageRGBAdata[si++] = rgbImgData[di++];
+					softwareImageRGBAdata[si++] = rgbImgData[di++];
+					softwareImageRGBAdata[si++] = rgbImgData[di++];
+					softwareImageRGBAdata[si++] = ~0;
+				}
+			}
+		} else if (data instanceof RGBDataset) {
 			RGBDataset rgbData = (RGBDataset)data;
 			short[] rgbImgData = rgbData.getData();
 			int srcWidth = rgbData.getShape()[1];
@@ -821,6 +837,7 @@ public class DataSet3DPlot2DMulti extends DataSet3DPlot2D {
 					}
 					if (texture != null) {
 						boolean useRGB = 
+							(currentData instanceof RGBByteDataset) ||
 							(currentData instanceof RGBDataset) ||
 							(currentData instanceof CompoundDataset &&
 							(currentData.getElementsPerItem() == 3 ||

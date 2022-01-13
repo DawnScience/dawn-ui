@@ -74,6 +74,7 @@ import org.eclipse.january.dataset.Dataset;
 import org.eclipse.january.dataset.DatasetUtils;
 import org.eclipse.january.dataset.FloatDataset;
 import org.eclipse.january.dataset.IDataset;
+import org.eclipse.january.dataset.RGBByteDataset;
 import org.eclipse.january.dataset.RGBDataset;
 import org.eclipse.swt.SWTException;
 import org.eclipse.swt.graphics.Cursor;
@@ -758,7 +759,20 @@ public class DataSet3DPlot2D implements IDataSet3DCorePlot,
 		Texture2D currentTexture = textures.get(ap);
 		int si = 0;
 		int srcHeight = data.getShape()[0];
-		if (data instanceof RGBDataset) {
+		if (data instanceof RGBByteDataset) {
+			RGBByteDataset rgbData = (RGBByteDataset)data;
+			byte[] rgbImgData = rgbData.getData();
+			int srcWidth = rgbData.getShape()[1];
+			for (int y = 0; y < height; y++) {
+				int di = (xpos + (srcHeight -1 -ypos-(height-1-y))*srcWidth)*3;
+				for (int x = 0; x < width; x++) {
+					softwareImageRGBAdata[si++] = rgbImgData[di++];
+					softwareImageRGBAdata[si++] = rgbImgData[di++];
+					softwareImageRGBAdata[si++] = rgbImgData[di++];
+					softwareImageRGBAdata[si++] = ~0;
+				}
+			}
+		} else if (data instanceof RGBDataset) {
 			RGBDataset rgbData = (RGBDataset)data;
 			short[] rgbImgData = rgbData.getData();
 			int srcWidth = rgbData.getShape()[1];
@@ -966,10 +980,11 @@ public class DataSet3DPlot2D implements IDataSet3DCorePlot,
 		{
 			boolean createNewTexture = false;
 			boolean useRGB = 
+				(data instanceof RGBByteDataset) ||
 				(data instanceof RGBDataset) ||
- 	  	  	    (data instanceof CompoundDataset &&
+				(data instanceof CompoundDataset &&
 				(data.getElementsPerItem() == 3 ||
-		 		 data.getElementsPerItem() == 4));
+				 data.getElementsPerItem() == 4));
 			
 			if (!useRGB) {
 				currentImageType = 0;
@@ -1001,40 +1016,54 @@ public class DataSet3DPlot2D implements IDataSet3DCorePlot,
 			int srcHeight = data.getShape()[0];
 			int srcWidth = data.getShape()[1];
 			softwareImageRGBAdata = new byte[width * height * 4];
-			if (!(data instanceof RGBDataset))  { 
+			final byte alpha = ~0;
+
+			if (data instanceof RGBByteDataset) {
+				RGBByteDataset rgbData = (RGBByteDataset)data;
+				byte[] rgbImgData = rgbData.getData();
+				int k = 0;
 				for (int y = 0; y < height; y++) {
+					int yDataPos = srcHeight -1 -yPos-(height-1-y);
 					for (int x = 0; x < width; x++) {
-						int yDataPos = srcHeight -1 -yPos-(height-1-y);
+						int index = (x+xPos+yDataPos*srcWidth)*3;
+						softwareImageRGBAdata[k++] = rgbImgData[index++];
+						softwareImageRGBAdata[k++] = rgbImgData[index++];
+						softwareImageRGBAdata[k++] = rgbImgData[index];
+						softwareImageRGBAdata[k++] = alpha;
+					}
+				}
+			} else if (data instanceof RGBDataset) {
+				RGBDataset rgbData = (RGBDataset)data;
+				short[] rgbImgData = rgbData.getData();
+				int k = 0;
+				for (int y = 0; y < height; y++) {
+					int yDataPos = srcHeight -1 -yPos-(height-1-y);
+					for (int x = 0; x < width; x++) {
+						int index = (x+xPos+yDataPos*srcWidth)*3;
+						byte red = (byte) rgbImgData[index++];
+						byte green = (byte) rgbImgData[index++];
+						byte blue = (byte) rgbImgData[index];
+						softwareImageRGBAdata[k++] = red;
+						softwareImageRGBAdata[k++] = green;
+						softwareImageRGBAdata[k++] = blue;
+						softwareImageRGBAdata[k++] = alpha;
+					}
+				}
+			} else {
+				int k = 0;
+				for (int y = 0; y < height; y++) {
+					int yDataPos = srcHeight -1 -yPos-(height-1-y);
+					for (int x = 0; x < width; x++) {
 						double value = data.getDouble(yDataPos, x+xPos);
 						byte red = (byte)(255 * value / (maxValue - minValue));
 						byte green = (byte)(255 * value / (maxValue - minValue));
 						byte blue = (byte)(255 * value / (maxValue - minValue));
-						byte alpha = ~0;
-						softwareImageRGBAdata[(x + y * width)*4] = red;
-						softwareImageRGBAdata[(x + y * width)*4 + 1] = green;
-						softwareImageRGBAdata[(x + y * width)*4 + 2] = blue;
-						softwareImageRGBAdata[(x + y * width)*4 + 3] = alpha;					
+						softwareImageRGBAdata[k++] = red;
+						softwareImageRGBAdata[k++] = green;
+						softwareImageRGBAdata[k++] = blue;
+						softwareImageRGBAdata[k++] = alpha;
 					}
 				}
-			} else {
-				RGBDataset rgbData = (RGBDataset)data;
-				short[] rgbImgData = rgbData.getData();
-				for (int x = 0; x < width; x++)
-					for (int y = 0; y < height; y++)
-					{
-						int yDataPos = srcHeight -1 -yPos-(height-1-y);
-						short sRed = rgbImgData[(x+xPos+yDataPos*srcWidth)*3];
-						short sGreen = rgbImgData[(x+xPos+yDataPos*srcWidth)*3 + 1];
-						short sBlue = rgbImgData[(x+xPos+yDataPos*srcWidth)*3 + 2];
-						byte red = (byte)(sRed);
-						byte green = (byte)(sGreen);
-						byte blue = (byte)(sBlue);
-						byte alpha = ~0;
-						softwareImageRGBAdata[(x + y * width)*4] = red;
-						softwareImageRGBAdata[(x + y * width)*4 + 1] = green;
-						softwareImageRGBAdata[(x + y * width)*4 + 2] = blue;
-						softwareImageRGBAdata[(x + y * width)*4 + 3] = alpha;					
-					}				
 			}
 			de.jreality.shader.ImageData texImg = new de.jreality.shader.ImageData(softwareImageRGBAdata, width, height);
 			generateSoftwareTexture(ap, texImg);
@@ -1594,6 +1623,7 @@ public class DataSet3DPlot2D implements IDataSet3DCorePlot,
 					if (x+texWidth > maxWidth) texWidth = maxWidth-x;
 					if (y+texHeight > maxHeight) texHeight = maxHeight-y;					
 					softwareImageRGBAdata = new byte[texWidth * texHeight * 4];
+					int k = 0;
 					for (int sy = 0; sy < texHeight; sy++) {
 						for (int sx = 0; sx < texWidth; sx++) {
 							int yDataPos = height -1 -y-(texHeight-1-sy);							
@@ -1602,10 +1632,10 @@ public class DataSet3DPlot2D implements IDataSet3DCorePlot,
 							byte red = (byte) ((RGBAvalue >> 16) & 0xff);
 							byte green = (byte) ((RGBAvalue >> 8) & 0xff);
 							byte blue = (byte) ((RGBAvalue) & 0xff);
-							softwareImageRGBAdata[(sx + sy * texWidth) * 4] = red;
-							softwareImageRGBAdata[(sx + sy * texWidth) * 4 + 1] = green;
-							softwareImageRGBAdata[(sx + sy * texWidth) * 4 + 2] = blue;
-							softwareImageRGBAdata[(sx + sy * texWidth) * 4 + 3] = alpha;
+							softwareImageRGBAdata[k++] = red;
+							softwareImageRGBAdata[k++] = green;
+							softwareImageRGBAdata[k++] = blue;
+							softwareImageRGBAdata[k++] = alpha;
 						}
 					}
 					de.jreality.shader.ImageData texImg = new de.jreality.shader.ImageData(softwareImageRGBAdata, texWidth, texHeight);

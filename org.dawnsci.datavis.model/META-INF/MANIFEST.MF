@@ -8,10 +8,10 @@ Service-Component: OSGI-INF/*.xml
 Bundle-ActivationPolicy: lazy
 Automatic-Module-Name: org.dawnsci.datavis.model
 Export-Package: org.dawnsci.datavis.model
-Require-Bundle: org.eclipse.january;bundle-version="2.2.2",
+Require-Bundle: org.eclipse.january;bundle-version="2.3.2",
  org.eclipse.dawnsci.analysis.api;bundle-version="1.1.0",
  org.eclipse.swt,
- org.eclipse.dawnsci.analysis.dataset;bundle-version="1.0.0",
+ org.eclipse.dawnsci.analysis.dataset;bundle-version="1.1.1",
  org.eclipse.dawnsci.plotting.api,
  org.dawnsci.datavis.api;bundle-version="1.0.0";visibility:=reexport,
  uk.ac.diamond.scisoft.analysis,

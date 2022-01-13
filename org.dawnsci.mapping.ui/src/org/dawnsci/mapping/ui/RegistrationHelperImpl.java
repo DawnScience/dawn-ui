@@ -4,8 +4,8 @@ import org.dawnsci.mapping.ui.api.IMapFileController;
 import org.dawnsci.mapping.ui.datamodel.AssociatedImage;
 import org.dawnsci.mapping.ui.datamodel.IMapPlotController;
 import org.dawnsci.mapping.ui.dialog.RectangleRegistrationDialog;
+import org.eclipse.january.dataset.Dataset;
 import org.eclipse.january.dataset.IDataset;
-import org.eclipse.january.dataset.RGBDataset;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.PlatformUI;
@@ -31,14 +31,11 @@ public class RegistrationHelperImpl implements IRegistrationHelper {
 		
 		RectangleRegistrationDialog dialog = new RectangleRegistrationDialog(PlatformUI.getWorkbench().getDisplay().getActiveShell(), plotManager.getTopMap().getMap(),image);
 		if (dialog.open() != IDialogConstants.OK_ID) return;
-		RGBDataset ds = (RGBDataset)dialog.getRegisteredImage();
+		Dataset ds = dialog.getRegisteredImage();
 		ds.setName("Registered");
 		AssociatedImage asIm = new AssociatedImage("Registered", ds, path);
 		
-		BundleContext bundleContext =
-                FrameworkUtil.
-                getBundle(this.getClass()).
-                getBundleContext();
+		BundleContext bundleContext = FrameworkUtil.getBundle(this.getClass()).getBundleContext();
 		
 		IMapFileController f = bundleContext.getService(bundleContext.getServiceReference(IMapFileController.class));
 		

@@ -32,6 +32,7 @@ import org.eclipse.january.dataset.DatasetFactory;
 import org.eclipse.january.dataset.DatasetUtils;
 import org.eclipse.january.dataset.IDataset;
 import org.eclipse.january.dataset.IntegerDataset;
+import org.eclipse.january.dataset.RGBByteDataset;
 import org.eclipse.january.dataset.RGBDataset;
 import org.eclipse.january.dataset.Slice;
 import org.eclipse.jface.action.Action;
@@ -190,7 +191,11 @@ public class BoxProfileTool extends ProfileTool {
 		Dataset md = DatasetUtils.convertToDataset(image.getMask());
 		List<IDataset> axes = image.getAxes();
 
-		if (data instanceof RGBDataset) data = ((RGBDataset)data).getRedView();
+		if (data instanceof RGBByteDataset) {
+			data = ((RGBByteDataset) data).getRedView();
+		} else if (data instanceof RGBDataset) {
+			data = ((RGBDataset) data).getRedView();
+		}
 
 		Dataset[] box = ROIProfile.box(data, md, bounds, true);
 		if (box==null) return null;

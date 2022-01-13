@@ -1,8 +1,8 @@
 package org.dawnsci.mapping.ui.datamodel;
 
 import org.dawnsci.mapping.ui.MappingUtils;
+import org.eclipse.january.dataset.Dataset;
 import org.eclipse.january.dataset.IDataset;
-import org.eclipse.january.dataset.RGBDataset;
 
 
 
@@ -11,11 +11,11 @@ public class AssociatedImage implements PlottableMapObject {
 	private String name;
 	private String shortName;
 	private String path;
-	private RGBDataset image;
+	private Dataset image;
 	private double[] range;
 	private boolean plotted;
 
-	public AssociatedImage(String name, RGBDataset image, String path) {
+	public AssociatedImage(String name, Dataset image, String path) {
 		this.name = name;
 		this.image = image;
 		this.range = calculateRange(image);

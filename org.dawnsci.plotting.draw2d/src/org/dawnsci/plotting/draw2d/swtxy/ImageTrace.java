@@ -54,6 +54,7 @@ import org.eclipse.draw2d.Graphics;
 import org.eclipse.draw2d.geometry.Rectangle;
 import org.eclipse.january.DatasetException;
 import org.eclipse.january.dataset.BooleanDataset;
+import org.eclipse.january.dataset.CompoundDataset;
 import org.eclipse.january.dataset.DataEvent;
 import org.eclipse.january.dataset.Dataset;
 import org.eclipse.january.dataset.DatasetFactory;
@@ -64,6 +65,7 @@ import org.eclipse.january.dataset.IDataset;
 import org.eclipse.january.dataset.IDynamicShape;
 import org.eclipse.january.dataset.ILazyDataset;
 import org.eclipse.january.dataset.Maths;
+import org.eclipse.january.dataset.RGBByteDataset;
 import org.eclipse.january.dataset.RGBDataset;
 import org.eclipse.january.dataset.ShapeUtils;
 import org.eclipse.jface.preference.IPreferenceStore;
@@ -797,7 +799,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 				imageServiceBean.setMask(null); // Ensure we lose the mask!
 			}
 
-			if (rescaleType==ImageScaleType.REHISTOGRAM) { // Avoids changing colouring to 
+			if (rgbDataset == null && rescaleType==ImageScaleType.REHISTOGRAM) { // Avoids changing colouring to 
 				// max and min of new selection.
 
 				Range xRange = getXAxis().getRange();
@@ -823,28 +825,29 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 			ImageData imageData   = service.getImageData(imageServiceBean);
 			scaledData.setDownsampledImageData(imageData);
 
-			try {
-				ImageServiceBean intensityScaleBean = imageServiceBean.clone();
-				intensityScaleBean.setOrigin(ImageOrigin.TOP_LEFT);
-				intensityScaleBean.setTransposed(false);
-				// We send the image drawn with the same palette to the 
-				// intensityScale
-				// TODO FIXME This will not work in log mode
-				if (reducedFullImage instanceof RGBDataset) return true;
-				final DoubleDataset dds = DatasetFactory.zeros(DoubleDataset.class, INTENSITY_SCALE_ENTRIES, 1);
-				double max = getMax().doubleValue();
-				double inc = (max - getMin().doubleValue())/INTENSITY_SCALE_ENTRIES;
-				for (int i = 0; i < INTENSITY_SCALE_ENTRIES; i++) {
-					dds.set(max - (i*inc), i, 0);
+			if (rgbDataset == null) {
+				try {
+					ImageServiceBean intensityScaleBean = imageServiceBean.clone();
+					intensityScaleBean.setOrigin(ImageOrigin.TOP_LEFT);
+					intensityScaleBean.setTransposed(false);
+					// We send the image drawn with the same palette to the 
+					// intensityScale
+					// TODO FIXME This will not work in log mode
+					if (reducedFullImage instanceof RGBDataset) return true;
+					final DoubleDataset dds = DatasetFactory.zeros(DoubleDataset.class, INTENSITY_SCALE_ENTRIES, 1);
+					double max = getMax().doubleValue();
+					double inc = (max - getMin().doubleValue())/INTENSITY_SCALE_ENTRIES;
+					for (int i = 0; i < INTENSITY_SCALE_ENTRIES; i++) {
+						dds.set(max - (i*inc), i, 0);
+					}
+					intensityScaleBean.setImage(dds);
+					intensityScaleBean.setMask(null);
+					intensityScale.setImageData(service.getImageData(intensityScaleBean));
+					intensityScale.setLog10(getImageServiceBean().isLogColorScale());
+				} catch (Throwable ne) {
+					logger.warn("Cannot update intensity!");
 				}
-				intensityScaleBean.setImage(dds);
-				intensityScaleBean.setMask(null);
-				intensityScale.setImageData(service.getImageData(intensityScaleBean));
-				intensityScale.setLog10(getImageServiceBean().isLogColorScale());
-			} catch (Throwable ne) {
-				logger.warn("Cannot update intensity!");
 			}
-
 		} catch (Exception e) {
 			logger.error("Cannot create image from data!", e);
 		} finally {
@@ -1380,7 +1383,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 		fireSetRescaleListeners();
 	}
 
-	private RGBDataset rgbDataset;
+	private CompoundDataset rgbDataset;
 
 	@Override
 	public boolean setData(ILazyDataset im, List<? extends IDataset> axes, boolean performAuto) {
@@ -1464,13 +1467,21 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 			return false;
 		}
 
-		if (getPreferenceStore().getBoolean(PlottingConstants.IGNORE_RGB) && im instanceof RGBDataset) {
-			RGBDataset rgb = (RGBDataset) im;
-			im = rgb.createGreyDataset(DoubleDataset.class);
-			rgbDataset = rgb;
+		if (im instanceof RGBByteDataset || im instanceof RGBDataset) {
+			rgbDataset = (CompoundDataset) im;
+			if (getPreferenceStore().getBoolean(PlottingConstants.IGNORE_RGB)) {
+				if (rgbDataset instanceof RGBByteDataset) {
+					RGBByteDataset rgb = (RGBByteDataset) rgbDataset;
+					im = rgb.createGreyDataset(DoubleDataset.class);
+				} else if (rgbDataset instanceof RGBDataset) {
+					RGBDataset rgb = (RGBDataset) rgbDataset;
+					im = rgb.createGreyDataset(DoubleDataset.class);
+				}
+			}
 		} else {
 			rgbDataset = null;
 		}
+
 		if (plottingSystem!=null) try {
 			final TraceWillPlotEvent evt = new TraceWillPlotEvent(this, false);
 			evt.setImageData(im, axes);
@@ -1499,7 +1510,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 		imageServiceBean.setImage(im);
 
 		if (service==null) service = (IImageService)PlatformUI.getWorkbench().getService(IImageService.class);
-		if (rescaleHistogram) {
+		if (rescaleHistogram && rgbDataset == null) {
 			final double[] fa = service.getFastStatistics(imageServiceBean);
 			setMin(fa[0]);
 			setMax(fa[1]);
@@ -1518,7 +1529,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 
 			try {
 				if (getPreferenceStore().getBoolean(PlottingConstants.SHOW_INTENSITY)) {
-					plottingSystem.setShowIntensity(!(im instanceof RGBDataset));
+					plottingSystem.setShowIntensity(rgbDataset == null);
 				}
 			} catch (Exception ne) { // Not the end of the world if this fails!
 				logger.warn("Could not set whether to show intensity scale", ne);
