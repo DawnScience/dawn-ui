@@ -8,6 +8,7 @@
  */
 package org.dawnsci.plotting.expression;
 
+import org.eclipse.january.dataset.Dataset;
 import org.eclipse.january.dataset.LazyDataset;
 import org.eclipse.january.io.ILazyLoader;
 
@@ -18,8 +19,8 @@ class ExpressionLazyDataset extends LazyDataset {
 	 */
 	private static final long serialVersionUID = -4008063310659517138L;
 
-	public ExpressionLazyDataset(String name, int dtype, int[] shape, ILazyLoader loader) {
-		super(name, dtype, shape, loader);
+	public ExpressionLazyDataset(ILazyLoader loader, String name, Class<? extends Dataset> clazz, int[] shape) {
+		super(loader, name, clazz, shape);
 	}
 	
 	public void setShapeSilently(final int[] shape) {
