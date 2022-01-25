@@ -3,9 +3,9 @@ package org.dawnsci.datavis.model.test;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashSet;
+import java.util.HashMap;
 import java.util.List;
-import java.util.Set;
+import java.util.Map;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.dawnsci.plotting.api.IPlotActionSystem;
@@ -44,7 +44,7 @@ import org.eclipse.ui.IMemento;
 import org.eclipse.ui.IWorkbenchPart;
 
 public class MockPlottingSystem implements IPlottingSystem<Object> {
-	private static Set<ITrace> traces = new HashSet<ITrace>();
+	private static Map<String, ITrace> traces = new HashMap<>();
 
 	@Override
 	public <T> T getAdapter(Class<T> adapter) {
@@ -54,14 +54,14 @@ public class MockPlottingSystem implements IPlottingSystem<Object> {
 	@Override
 	public IImageTrace createImageTrace(String traceName) {
 		MockImageTrace mit = new MockImageTrace(traceName);
-		traces.add(mit);
+		traces.put(traceName, mit);
 		return mit;
 	}
 
 	@Override
 	public ILineTrace createLineTrace(String traceName) {
 		MockLineTrace mlt = new MockLineTrace(traceName);
-		traces.add(mlt);
+		traces.put(traceName, mlt);
 		return mlt;
 	}
 
@@ -112,12 +112,12 @@ public class MockPlottingSystem implements IPlottingSystem<Object> {
 
 	@Override
 	public void addTrace(ITrace trace) {
-		traces.add(trace);
+		traces.put(trace.getName(), trace);
 	}
 
 	@Override
 	public void removeTrace(ITrace trace) {
-		traces.remove(trace);
+		traces.remove(trace.getName());
 	}
 
 	@Override
@@ -127,7 +127,7 @@ public class MockPlottingSystem implements IPlottingSystem<Object> {
 
 	@Override
 	public Collection<ITrace> getTraces() {
-		return new ArrayList<>(traces);
+		return new ArrayList<>(traces.values());
 	}
 
 	@Override
@@ -138,7 +138,7 @@ public class MockPlottingSystem implements IPlottingSystem<Object> {
 	@Override
 	public Collection<ITrace> getTraces(Class<? extends ITrace> clazz) {
 		List<ITrace> l = new ArrayList<>();
-		for (ITrace t : traces) {
+		for (ITrace t : traces.values()) {
 			if (clazz.isInstance(t))
 				l.add(t);
 		}
@@ -148,7 +148,7 @@ public class MockPlottingSystem implements IPlottingSystem<Object> {
 	@Override
 	public <T extends ITrace> Collection<T> getTracesByClass(Class<T> clazz) {
 		List<T> l = new ArrayList<>();
-		for (ITrace t : traces) {
+		for (ITrace t : traces.values()) {
 			if (clazz.isInstance(t))
 				l.add(clazz.cast(t));
 		}

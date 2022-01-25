@@ -127,9 +127,8 @@ public class LoadedFile implements IDataObject, IDataFilePackage {
 				int ordinal = Integer.parseInt(m.group(1));
 				process = m.group(2);
 				shortName = m.group(3);
-				if (shortName.endsWith(DATA)) {
-					shortName = shortName.substring(0, shortName.length() - DATA.length());
-				}
+				shortName = DataOptionsUtils.stripDataEnding(shortName);
+
 				String p = processes.get(ordinal);
 				if (p == null) {
 					processes.put(ordinal, process);
@@ -166,13 +165,12 @@ public class LoadedFile implements IDataObject, IDataFilePackage {
 
 	// capture /processed/(auxiliary|summary)/%d-PROCESS_NAME/DATA_NAME
 	static final Pattern PROCESS_REGEX = Pattern.compile("/[^/]+/[^/]+/(\\d+)-([^/]+)/(.+)");
-	static final String DATA = "/data";
 
 	/**
 	 * name of NXdata group holding processed data
 	 */
 	public static final String RESULT = "result";
-	static final String RESULT_SUFFIX = RESULT + DATA;
+	static final String RESULT_SUFFIX = RESULT + DataOptionsUtils.DATA_ENDING;
 
 	public Collection<String> getProcesses() {
 		return allProcesses;

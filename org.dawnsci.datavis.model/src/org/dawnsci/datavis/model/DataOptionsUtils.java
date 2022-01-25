@@ -274,6 +274,19 @@ public class DataOptionsUtils {
 	}
 
 	private static final String SEP = Node.SEPARATOR;
+	static final String DATA_ENDING = SEP + NexusConstants.DATA_DATA;
+
+	/**
+	 * Strip any "/data" ending from name 
+	 * @param name
+	 * @return stripped name
+	 */
+	public static String stripDataEnding(String name) {
+		if (name.endsWith(DATA_ENDING)) { // remove NXdata's default signal name
+			return name.substring(0, name.length() - DATA_ENDING.length());
+		}
+		return name;
+	}
 
 	/**
 	 * Shortens dataset path
@@ -282,11 +295,9 @@ public class DataOptionsUtils {
 	 * @return last segment or last two if they are distinct
 	 */
 	public static String shortenDatasetPath(String name, boolean justLast) {
-		int i = name.lastIndexOf("/data");
-		if (i > 0) {
-			name = name.substring(0, i);
-		}
-		i = name.lastIndexOf(SEP);
+		name = stripDataEnding(name);
+
+		int i = name.lastIndexOf(SEP);
 		if (i > 0) {
 			String last = name.substring(i + 1);
 			if (!justLast) {
