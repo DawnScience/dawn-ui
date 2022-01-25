@@ -1136,6 +1136,7 @@ public class PlottingSystemImpl<T> extends AbstractPlottingSystem<T> {
 			@Override
 			public void run() {
 				removeAllTraces();
+				activeViewer.clearTraces();
 			}
 		});
 	}

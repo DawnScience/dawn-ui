@@ -313,10 +313,7 @@ public class PlotController implements IPlotController, ILoadedFileInitialiser {
 				
 				@Override
 				public void run() {
-					
-					for (ITrace t : traces) {
-						system.removeTrace(t);
-					}
+					system.clearTraces();
 				}
 			};
 			
