@@ -1360,6 +1360,8 @@ public class ToolPageView extends ViewPart implements IPartListener, IToolChange
 	}
 	
 	private boolean updatingActivated = false;
+	private Image oldIconImage = null;
+
 	public void toolChanged(ToolChangeEvent evt) {
 		
 		if (updatingActivated)                    return;
@@ -1501,7 +1503,14 @@ public class ToolPageView extends ViewPart implements IPartListener, IToolChange
 		if (getViewSite().getSecondaryId()!=null) return; // It is fixed
 		setPartName(tool.getTitle());
 		final ImageDescriptor des = tool.getImageDescriptor();
-		if (des!=null) setTitleImage(des.createImage());
+		if (des!=null) {
+			Image im = des.createImage();
+			if (oldIconImage != null) {
+				oldIconImage.dispose();
+			}
+			oldIconImage = im;
+			setTitleImage(im);
+		}
 	}
 	
 
@@ -1629,6 +1638,10 @@ public class ToolPageView extends ViewPart implements IPartListener, IToolChange
 		for(String partLoc : recs.keySet()) {
 			removeTools(partLoc, false);
 		}
+		if (oldIconImage != null) {
+			oldIconImage.dispose();
+		}
+		oldIconImage = null;
 		recs.clear();
 		recs = null;
 		
