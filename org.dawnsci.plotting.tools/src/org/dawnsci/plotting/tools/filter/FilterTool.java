@@ -76,9 +76,18 @@ public class FilterTool extends AbstractToolPage {
 		this.traceListener = new ITraceListener.Stub() {
 			@Override
 			public void traceUpdated(TraceEvent evt) {
-				boolean isOn = ((AbstractDelayedFilter)currentFilter).isFilterOn();
+				boolean isOn = currentFilter != null && ((AbstractDelayedFilter) currentFilter).isFilterOn();
 				if (isOn && !isResetting)
 					applyFilter();
+			}
+
+			@Override
+			public void traceRemoved(TraceEvent evt) {
+				originalData = null;
+				if (originalAxes != null) {
+					originalAxes.clear();
+					originalAxes = null;
+				}
 			}
 		};
  	}
@@ -226,9 +235,11 @@ public class FilterTool extends AbstractToolPage {
 			if (axes != null) {
 				IDataset xAxis = axes.get(0);
 				IDataset yAxis = axes.get(1);
-				originalAxes = new ArrayList<IDataset>();
-				originalAxes.add(xAxis.clone());
-				originalAxes.add(yAxis.clone());
+				if (xAxis != null && yAxis != null) {
+					originalAxes = new ArrayList<IDataset>();
+					originalAxes.add(xAxis.clone());
+					originalAxes.add(yAxis.clone());
+				}
 			}
 		}
 		// Apply the filter to the current image trace
