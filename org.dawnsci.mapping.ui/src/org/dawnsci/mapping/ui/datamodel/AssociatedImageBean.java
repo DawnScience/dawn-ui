@@ -2,8 +2,8 @@ package org.dawnsci.mapping.ui.datamodel;
 
 public class AssociatedImageBean {
 
-	private String name;
-	private String[] axes;
+	protected String name;
+	protected String[] axes;
 
 	public String getName() {
 		return name;

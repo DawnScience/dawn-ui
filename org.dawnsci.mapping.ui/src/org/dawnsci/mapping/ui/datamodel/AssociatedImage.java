@@ -102,5 +102,11 @@ public class AssociatedImage implements PlottableMapObject {
 		// RGB return null
 		return null;
 	}
+
+	@Override
+	public void setTransparency(int transparency) {
+		// unsupported for now
+		
+	}
 	
 }

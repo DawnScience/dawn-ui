@@ -135,7 +135,7 @@ public class MapActionUtils {
 		return action;
 	}
 	
-	public static IAction getMapPropertiesAction(final AbstractMapData map, final IMapPlotController manager, final IMapFileController fileManager) {
+	public static IAction getMapPropertiesAction(final PlottableMapObject map, final IMapPlotController manager, final IMapFileController fileManager) {
 		return new Action("Properties...") {
 			@Override
 			public void run() {

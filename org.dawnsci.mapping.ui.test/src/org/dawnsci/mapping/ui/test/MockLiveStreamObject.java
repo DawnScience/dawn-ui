@@ -122,4 +122,10 @@ public class MockLiveStreamObject implements LiveStreamMapObject {
 		return null;
 	}
 
+	@Override
+	public void setTransparency(int transparency) {
+		// TODO Auto-generated method stub
+		
+	}
+
 }

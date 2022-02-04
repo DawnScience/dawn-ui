@@ -196,6 +196,18 @@ public class MapNexusFileBuilderUtils {
 		}
 	}
 	
+	public static void makePixelImageStack(String path) throws NexusException {
+		NexusFileBuilder fileBuilder = new DefaultNexusFileBuilder(path);
+		NXroot nXroot = fileBuilder.getNXroot();
+		NXentry entry = NexusNodeFactory.createNXentry();
+		nXroot.addGroupNode(ENTRY1, entry);
+		NXdata sum = makeNXData(3, 2, true);
+		entry.addGroupNode(DETECTOR, sum);
+		
+		try (NexusBuilderFile file = fileBuilder.createFile(false)) {
+		}
+	}
+	
 	private static NXdata makeNXData(int rank, int detectorRank, boolean isEnergy) {
 		return makeNXData(rank, detectorRank, isEnergy, SMALLEST);
 	}
