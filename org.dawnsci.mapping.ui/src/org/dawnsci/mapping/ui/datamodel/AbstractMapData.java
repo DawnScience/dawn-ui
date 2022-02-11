@@ -319,6 +319,7 @@ public abstract class AbstractMapData implements LockableMapObject{
 		return transparency;
 	}
 
+	@Override
 	public void setTransparency(int transparency) {
 		this.transparency = transparency;
 	}

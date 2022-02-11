@@ -141,6 +141,18 @@ public interface IMapFileController {
 	 */
 	List<String> loadFiles(String[] paths, IProgressService progressService);
 	
+	
+	/**
+	 * Load files (including flag for pixel space images)
+	 * 
+	 * @param paths
+	 * @param progressService
+	 * @param pixelSpaceImage
+	 * @return
+	 */
+	List<String> loadFiles(String[] paths, IProgressService progressService, boolean pixelSpaceImage);
+	
+	
 	/**
 	 * Load these paths as live files
 	 * 
@@ -182,5 +194,7 @@ public interface IMapFileController {
 	 * @param file
 	 */
 	void registerUpdates(MappedDataFile file);
+
+
 }
 

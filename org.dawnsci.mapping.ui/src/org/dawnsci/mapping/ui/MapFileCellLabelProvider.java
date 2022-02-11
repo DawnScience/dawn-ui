@@ -2,6 +2,7 @@ package org.dawnsci.mapping.ui;
 
 import org.dawnsci.mapping.ui.datamodel.AbstractMapData;
 import org.dawnsci.mapping.ui.datamodel.AssociatedImage;
+import org.dawnsci.mapping.ui.datamodel.AssociatedImageStack;
 import org.dawnsci.mapping.ui.datamodel.LiveStreamMapObject;
 import org.dawnsci.mapping.ui.datamodel.MappedDataBlock;
 import org.dawnsci.mapping.ui.datamodel.MappedDataFile;
@@ -25,6 +26,7 @@ public class MapFileCellLabelProvider extends StyledCellLabelProvider {
 	private final Image camera= Activator.getImage("icons/camera-black.png");
 	private final Image plotted= Activator.getImage("icons/file-plotted.png");
 	private final Image remoteplotted= Activator.getImage("icons/live-plotted.png");
+	private final Image stack = Activator.getImage("icons/stack.png");
 	private Font italicFont = null;
 	private Font initialFont = null;
 	
@@ -40,6 +42,8 @@ public class MapFileCellLabelProvider extends StyledCellLabelProvider {
     	  cell.setImage(block);
       } else if (element instanceof AbstractMapData) {
     	  cell.setImage(map);
+      } else if (element instanceof AssociatedImageStack) {
+        	  cell.setImage(stack);
       } else if (element instanceof AssociatedImage) {
     	  cell.setImage(image);
       } else if (element instanceof LiveStreamMapObject) {
@@ -102,6 +106,7 @@ public class MapFileCellLabelProvider extends StyledCellLabelProvider {
 		camera.dispose();
 		plotted.dispose();
 		remoteplotted.dispose();
+		stack.dispose();
 		if (italicFont != null) italicFont.dispose();
 		super.dispose();
 	}

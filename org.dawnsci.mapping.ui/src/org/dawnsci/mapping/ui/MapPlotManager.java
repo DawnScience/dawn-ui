@@ -785,8 +785,8 @@ public class MapPlotManager implements IMapPlotController{
 			map = amd.getMap();
 			longName = amd.getLongName();
 		}
-		
-		
+
+
 		if (map == null) return null;
 		if (ob.getRange() == null) return null;
 		IImageTrace t = null;
@@ -796,7 +796,7 @@ public class MapPlotManager implements IMapPlotController{
 		} catch (Exception e) {
 			logger.error("Error creating image trace", e);
 		}
-	
+
 		return t;
 	}
 	

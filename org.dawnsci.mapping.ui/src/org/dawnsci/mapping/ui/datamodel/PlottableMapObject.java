@@ -46,6 +46,13 @@ public interface PlottableMapObject extends MapObject {
 	public int getTransparency();
 	
 	/**
+	 * Set the transparency value for the map
+	 * 
+	 * @return
+	 */
+	public void setTransparency(int transparency);
+	
+	/**
 	 * Set the color range for the map
 	 * 
 	 * @param range

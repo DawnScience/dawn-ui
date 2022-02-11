@@ -80,6 +80,12 @@ public class MappedFileFactory {
 			file.addMapObject(im.getLongName(), im);
 		}
 		
+		
+		for (AssociatedImageStackBean b : bean.getImageStacks()) {
+			AssociatedImageStack im = getAssociatedImageStack(path,b, dataHolder);
+			file.addMapObject(im.getLongName(), im);
+		}
+		
 		return file;
 	}
 	
@@ -171,8 +177,40 @@ public class MappedFileFactory {
 		
 	}
 	
-	private static RGBDataset createRGBDataset(Dataset d, boolean interleaved) {
+	private static AssociatedImageStack getAssociatedImageStack(String path, AssociatedImageStackBean b, IDataHolder dataHolder) {
+		try {
+			
+			ILazyDataset lz = dataHolder.getLazyDataset(b.getName());
+			
+			int rank = lz.getRank();
+			int[] shape = lz.getShape();
+			
+			AxesMetadata ax = MetadataFactory.createMetadata(AxesMetadata.class, rank);
+			
+			String[] axes = b.getAxes();
+			
+			for (int i = 0; i < axes.length; i++) {
+				if (i >= (rank - 2) || axes[i] == null) {
+					ax.setAxis(i, DatasetFactory.createRange(shape[i]));
+				} else {
+					ILazyDataset lzax = dataHolder.getLazyDataset(axes[i]);
+					ax.setAxis(i, lzax);
+				}
+			}
+			
+			lz.setMetadata(ax);
+			
+			return new AssociatedImageStack(b.getName(), lz, path);
+
+		} catch (Exception e) {
+			logger.error("Error loading image stack",e);
+		}
+		return null;
 		
+	}
+	
+	private static RGBDataset createRGBDataset(Dataset d, boolean interleaved) {
+	
 		if (interleaved) {
 			
 			CompoundDataset cd = DatasetUtils.createCompoundDatasetFromLastAxis(d, true);
@@ -193,7 +231,7 @@ public class MappedFileFactory {
 		try {
 			axm = MetadataFactory.createMetadata(AxesMetadata.class, axes.size());
 			for (int i = 0; i < axes.size(); i++) {
-				if (axes.get(i) == null) continue;
+				if (axes.get(i) == null)  continue;
 				ILazyDataset lz = dataHolder.getLazyDataset(axes.get(i));
 				lz.setName(axes.get(i));
 				

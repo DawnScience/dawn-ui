@@ -22,6 +22,7 @@ public class MappedDataFile implements MapObject{
 	private Map<String,MappedDataBlock> fullDataMap;
 	private Map<String,AbstractMapData> mapDataMap;
 	private Map<String,AssociatedImage> microscopeDataMap;
+	private Map<String,AssociatedImageStack> stackDataMap;
 	private double[] range;
 	private MappedDataFileBean descriptionBean;
 	private String parentPath;
@@ -40,6 +41,7 @@ public class MappedDataFile implements MapObject{
 		fullDataMap = new HashMap<>();
 		mapDataMap = new HashMap<>();
 		microscopeDataMap = new HashMap<>();
+		stackDataMap = new HashMap<>();
 	}
 	
 	public MappedDataFile(String path, LiveDataBean bean, IDataHolder dataHolder) {
@@ -121,7 +123,9 @@ public class MappedDataFile implements MapObject{
 			fullDataMap.put(name, (MappedDataBlock)object);
 		}else if (object instanceof AbstractMapData) {
 			mapDataMap.put(name, (AbstractMapData)object);
-		}else if (object instanceof AssociatedImage) {
+		}else if (object instanceof AssociatedImageStack) {
+			stackDataMap.put(name, (AssociatedImageStack)object);
+		} else if (object instanceof AssociatedImage) {
 			microscopeDataMap.put(name, (AssociatedImage)object);
 		}
 		
@@ -197,11 +201,12 @@ public class MappedDataFile implements MapObject{
 		mo.addAll(fullDataMap.values());
 		mo.addAll(mapDataMap.values());
 		mo.addAll(microscopeDataMap.values());
+		mo.addAll(stackDataMap.values());
 		return mo.toArray();
 	}
 	
 	public boolean isEmpty() {
-		return fullDataMap.isEmpty() && mapDataMap.isEmpty() && microscopeDataMap.isEmpty();
+		return fullDataMap.isEmpty() && mapDataMap.isEmpty() && microscopeDataMap.isEmpty() && stackDataMap.isEmpty();
 	}
 
 	public String getParentPath() {
@@ -220,7 +225,7 @@ public class MappedDataFile implements MapObject{
 	
 	public boolean hasDataPlotted() {
 		
-		if (mapDataMap.isEmpty() && microscopeDataMap.isEmpty() && fullDataMap.isEmpty()) {
+		if (mapDataMap.isEmpty() && microscopeDataMap.isEmpty() && fullDataMap.isEmpty() && stackDataMap.isEmpty()) {
 			return false;
 		}
 		
@@ -241,6 +246,13 @@ public class MappedDataFile implements MapObject{
 				return true;
 			}
 		}
+		
+		for (AssociatedImageStack d : stackDataMap.values()) {
+			if(d.isPlotted()) {
+				return true;
+			}
+		}
+		
 		return false;
 	}
 }

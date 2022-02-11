@@ -357,7 +357,17 @@ public class MappedDataBlock implements LockableMapObject {
 
 	@Override
 	public int getTransparency() {
+		if (mapRepresentation != null) {
+			return mapRepresentation.getTransparency();
+		}
 		return -1;
+	}
+	
+	@Override
+	public void setTransparency(int val) {
+		if (mapRepresentation != null) {
+			mapRepresentation.setTransparency(val);
+		}
 	}
 
 	@Override

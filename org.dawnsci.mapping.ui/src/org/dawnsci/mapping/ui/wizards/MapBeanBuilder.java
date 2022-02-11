@@ -9,6 +9,7 @@ import java.util.Map.Entry;
 
 import org.dawnsci.mapping.ui.MappingUtils;
 import org.dawnsci.mapping.ui.datamodel.AssociatedImageBean;
+import org.dawnsci.mapping.ui.datamodel.AssociatedImageStackBean;
 import org.dawnsci.mapping.ui.datamodel.MapBean;
 import org.dawnsci.mapping.ui.datamodel.MappedBlockBean;
 import org.dawnsci.mapping.ui.datamodel.MappedDataFileBean;
@@ -42,21 +43,42 @@ public class MapBeanBuilder {
 	
 	public static MappedDataFileBean buildBean(Tree tree, IFindInTree finder, String[] names) {
 		
+		MappedDataFileBean bean = new MappedDataFileBean();
+		
+		
+		List<DataInfo> datasets = buildDataStructures(tree,finder,names,bean);
+		
+		if (datasets.isEmpty() && !bean.getImages().isEmpty()) return bean;
+		
+		populateData(bean, datasets, names);
+		
+		if (bean.checkValid()) return bean;
+		
+		return null;
+	}
+	
+	private static List<DataInfo> buildDataStructures(Tree tree, IFindInTree finder, String[] names, MappedDataFileBean bean) {
+		
 		GroupNode groupNode = tree.getGroupNode();
 
 		Map<String,NodeLink> nodes = TreeUtils.treeBreadthFirstSearch(groupNode, finder, false, null);
 
 		List<String> images= new ArrayList<String>();
 		List<DataInfo> datasets = new ArrayList<DataInfo>();
-
-		MappedDataFileBean bean = new MappedDataFileBean();
-
+		
+		
 		for (Entry<String, NodeLink> entry : nodes.entrySet()) {
 			NodeLink value = entry.getValue();
 			Node n = value.getDestination();
 			if (!(n instanceof GroupNode)) continue;
 			String att = n.getAttribute("signal").getFirstElement();
 			DataNode dataNode = ((GroupNode)n).getDataNode(att);
+			
+			if (dataNode == null) {
+				//no signal dataset
+				continue;
+			}
+			
 			if (dataNode.containsAttribute("interpretation") && dataNode.getAttribute("interpretation").getFirstElement().equals("rgba-image")){
 				images.add(entry.getKey());
 				continue;
@@ -174,13 +196,8 @@ public class MapBeanBuilder {
 
 		for (String name : images) populateImage(bean, name, nodes.get(name));
 		
-		if (datasets.isEmpty() && !bean.getImages().isEmpty()) return bean;
+		return datasets;
 		
-		populateData(bean, datasets, names);
-		
-		if (bean.checkValid()) return bean;
-		
-		return null;
 	}
 
 	private static void populateData(MappedDataFileBean bean, List<DataInfo> infoList, String[] xyNames) {
@@ -228,8 +245,8 @@ public class MapBeanBuilder {
 				}
 				
 			} else {
-				xDim = slow ? 1 : d.axes.length -2;
-				yDim = slow ? 0 : d.axes.length -1;
+				xDim = slow ? minRank - 1 : d.axes.length -2;
+				yDim = slow ? minRank -2 : d.axes.length -1;
 			}
 			
 			if (d.rank == minRank && startCount != 1 && minRank != maxRank) continue;
@@ -343,6 +360,41 @@ public class MapBeanBuilder {
 		}
 		
 		
+	}
+	
+	public static MappedDataFileBean buildPixelImageBean(Tree tree) {
+		
+		IFindInTree finder = new NXDataFinder();
+		MappedDataFileBean bean = new MappedDataFileBean();
+		List<DataInfo> datasets = buildDataStructures(tree, finder, null, null);
+		
+		populatePixelImageData(bean,datasets);
+		
+		return bean;
+	}
+	
+	
+	public static void populatePixelImageData(MappedDataFileBean bean, List<DataInfo> datasets) {
+		
+		int maxRank = 0;
+		
+		for (DataInfo d : datasets) {
+			if (d.rank > maxRank) {
+				maxRank = d.rank;
+			}
+		}
+		
+		if (maxRank < 2) return;
+		
+		for (DataInfo d : datasets) {
+			if (d.rank == maxRank) {
+				
+				AssociatedImageStackBean aisb = new AssociatedImageStackBean();
+				aisb.setName(d.getFullName());
+				aisb.setAxes(d.getFullAxesNames());			
+				bean.addImageStack(aisb);
+			}
+		}
 	}
 	
 	private static class NXDataFinder implements IFindInTree {

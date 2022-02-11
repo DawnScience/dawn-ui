@@ -119,7 +119,7 @@ public class MappedDataView extends ViewPart {
 		viewer.addDoubleClickListener(event -> {
 			
 			Object e = ((StructuredSelection)event.getSelection()).getFirstElement();
-			if (e instanceof AbstractMapData || e instanceof MappedDataBlock || e instanceof AssociatedImage || e instanceof LiveStreamMapObject) {
+			if (e instanceof PlottableMapObject) {
 				if (e instanceof MappedDataBlock && !((MappedDataBlock)e).canPlot()) {
 					return;
 				}
@@ -196,10 +196,16 @@ public class MappedDataView extends ViewPart {
 					manager.add(MapActionUtils.getSaveImageAction((AssociatedImage)element));
 				}
 
-				if (element instanceof PlottableMapObject && ((PlottableMapObject)element).isPlotted()) {
+				if (element instanceof PlottableMapObject) {
 					PlottableMapObject p = (PlottableMapObject)element;
-					manager.add(MapActionUtils.getBringToFrontAction(p, plotManager));
-					manager.add(MapActionUtils.getSendToBackAction(p, plotManager));
+					
+					if (p.isPlotted()) {
+						manager.add(MapActionUtils.getBringToFrontAction(p, plotManager));
+						manager.add(MapActionUtils.getSendToBackAction(p, plotManager));
+					}
+					
+					manager.add(new Separator());
+					manager.add(MapActionUtils.getMapPropertiesAction(p ,plotManager, fileController));
 				}
 			}
 				

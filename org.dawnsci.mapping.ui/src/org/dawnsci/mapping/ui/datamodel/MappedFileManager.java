@@ -157,8 +157,14 @@ public class MappedFileManager implements IMapFileController{
 
 	@Override
 	public List<String> loadFiles(String[] paths, IProgressService progressService) {
+		return loadFiles(paths, progressService, false);
+	}
+
+	@Override
+	public List<String> loadFiles(String[] paths, IProgressService progressService, boolean pixelSpaceImage) {
 		
 		MapLoadingRunnable runnable = new MapLoadingRunnable(paths, null, true);
+		runnable.setPixelSpaceImage(pixelSpaceImage);
 		
 		if (progressService == null) {
 			ExecutorService ex = Executors.newSingleThreadExecutor();
@@ -188,7 +194,20 @@ public class MappedFileManager implements IMapFileController{
 	@Override
 	public List<String> loadFile(String path, MappedDataFileBean bean, IProgressService progressService) {
 		
-		MapLoadingRunnable runnable = new MapLoadingRunnable(new String[] {path}, bean, true);
+		return loadFiles(new String[] {path}, progressService, false);
+	}
+	
+	public List<String> loadFilesBlocking(String[] paths) {
+		MapLoadingRunnable runnable = new MapLoadingRunnable(paths, null, false);
+		runnable.run();
+		List<String> failed = runnable.getFailedLoadingFiles();
+		return failed;
+	}
+	
+	
+	public List<String> loadFile(String[] paths, IProgressService progressService, boolean pixelImage) {
+		
+        MapLoadingRunnable runnable = new MapLoadingRunnable(paths, null, true);
 		
 		if (progressService == null) {
 			ExecutorService ex = Executors.newSingleThreadExecutor();
@@ -204,13 +223,7 @@ public class MappedFileManager implements IMapFileController{
 		
 		List<String> failed = runnable.getFailedLoadingFiles();
 		return failed;
-	}
-	
-	public List<String> loadFilesBlocking(String[] paths) {
-		MapLoadingRunnable runnable = new MapLoadingRunnable(paths, null, false);
-		runnable.run();
-		List<String> failed = runnable.getFailedLoadingFiles();
-		return failed;
+		
 	}
 	
 	
@@ -321,6 +334,13 @@ public class MappedFileManager implements IMapFileController{
 		return b;
 	}
 	
+	private MappedDataFileBean buildPixelImageBeanFromTree(Tree tree){
+
+		MappedDataFileBean b = MapBeanBuilder.buildPixelImageBean(tree);
+
+		return b;
+	}
+	
 	@Override
 	public MappedDataArea getArea() {
 		return mappedDataArea;
@@ -403,7 +423,8 @@ public class MappedFileManager implements IMapFileController{
 		private String[] paths;
 		private MappedDataFileBean fileBean;
 		private boolean showWizard = true;
-		
+		private boolean pixelSpaceImage = false;
+
 		public MapLoadingRunnable(String[] paths, MappedDataFileBean bean, boolean wizard) {
 			this.paths = paths;
 			this.fileBean = bean;
@@ -431,7 +452,12 @@ public class MappedFileManager implements IMapFileController{
 					return;
 				}
 				
-				if (datasetNames != null && datasetNames.size() == 1 && datasetNames.containsKey("image-01")) {
+				if (pixelSpaceImage) {
+					fileBean = buildPixelImageBeanFromTree(dh.getTree());
+				}
+				
+				
+				if (datasetNames != null && datasetNames.size() == 1 && datasetNames.containsKey("image-01") && !pixelSpaceImage) {
 					IDataset im = null;
 					try {
 						im = loaderService.getDataset(path, null);
@@ -457,7 +483,6 @@ public class MappedFileManager implements IMapFileController{
 						//ignore
 					}
 				}
-				
 
 				if (fileBean == null) fileBean = LegacyMapBeanBuilder.tryLegacyLoaders(dh);
 				
@@ -484,6 +509,10 @@ public class MappedFileManager implements IMapFileController{
 		
 		public List<String> getFailedLoadingFiles() {
 			return null;
+		}
+		
+		public void setPixelSpaceImage(boolean pixelSpaceImage) {
+			this.pixelSpaceImage = pixelSpaceImage;
 		}
 
 	}

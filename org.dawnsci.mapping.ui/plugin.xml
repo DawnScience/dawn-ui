@@ -198,6 +198,20 @@
                </with>
             </visibleWhen>
             </menu>
+            <command
+                  commandId="org.dawnsci.mapping.ui.openpixelimage"
+                  id="org.dawnsci.mapping.ui.openpixelimage.command"
+                  label="Open Pixel Space Image...">
+               <visibleWhen
+                     checkEnabled="false">
+                  <with
+                        variable="activeWorkbenchWindow.activePerspective">
+                     <equals
+                           value="org.dawnsci.mapping.ui.dawn.mappingperspective">
+                     </equals>
+                  </with>
+               </visibleWhen>
+            </command>
          </menu>
       </menuContribution>
       <menuContribution
@@ -315,6 +329,11 @@
             defaultHandler="org.dawnsci.mapping.ui.actions.LockColourMapsHandler"
             id="org.dawnsci.mapping.ui.lockcolourmapstotop"
             name="Lock Colourmap Ranges to Top Map">
+      </command>
+      <command
+            defaultHandler="org.dawnsci.mapping.ui.actions.OpenPixelSpaceImageHandler"
+            id="org.dawnsci.mapping.ui.openpixelimage"
+            name="Open Pixel Space Image">
       </command>
    </extension>
 

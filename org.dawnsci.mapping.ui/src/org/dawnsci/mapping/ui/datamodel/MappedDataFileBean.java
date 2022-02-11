@@ -8,6 +8,7 @@ public class MappedDataFileBean {
 	private List<MappedBlockBean> blocks = new ArrayList<MappedBlockBean>();
 	private List<MapBean> maps = new ArrayList<MapBean>();
 	private List<AssociatedImageBean> images = new ArrayList<AssociatedImageBean>();
+	private List<AssociatedImageStackBean> imageStacks = new ArrayList<AssociatedImageStackBean>();
 	private LiveDataBean liveBean = null;
 	private int scanRank;
 	
@@ -30,6 +31,10 @@ public class MappedDataFileBean {
 	public void addImage(AssociatedImageBean bean) {
 		images.add(bean);
 	}
+	
+	public void addImageStack(AssociatedImageStackBean bean) {
+		imageStacks.add(bean);
+	}
 
 	public List<MappedBlockBean> getBlocks() {
 		return blocks;
@@ -42,6 +47,9 @@ public class MappedDataFileBean {
 	public List<AssociatedImageBean> getImages() {
 		return images;
 	}
+	public List<AssociatedImageStackBean> getImageStacks() {
+		return imageStacks;
+	}
 	
 	public boolean isEmpty(){
 		return blocks.isEmpty() && maps.isEmpty() && images.isEmpty();
@@ -49,8 +57,15 @@ public class MappedDataFileBean {
 	
 	public boolean checkValid() {
 		
+		//valid files will either have a block or image stack
+		if (!imageStacks.isEmpty() && blocks.isEmpty()) {
+			for (AssociatedImageStackBean b : imageStacks) {
+				if (!b.checkValid()) return false;
+			}
+			return true;
+		}
+		
 		if (blocks.isEmpty()) return false;
-//		if (maps.isEmpty()) return false;
 		
 		for (MappedBlockBean b : blocks) {
 			if (!b.checkValid()) return false;

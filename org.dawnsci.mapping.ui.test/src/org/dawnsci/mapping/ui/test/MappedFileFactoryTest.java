@@ -38,6 +38,7 @@ public class MappedFileFactoryTest {
 	private static File gridZDiode = null;
 	private static File lineDiode = null;
 	private static File lineZDiode = null;
+	private static File pixelImage = null;
 	private static ILoaderService loaderService;
 	
 	@BeforeClass
@@ -50,6 +51,7 @@ public class MappedFileFactoryTest {
 		gridZDiode = folder.newFile("gridZDiode.nxs");
 		lineDiode = folder.newFile("lineDiode.nxs");
 		lineZDiode = folder.newFile("lineZDiode.nxs");
+		pixelImage = folder.newFile("pixelImage.nxs");
 		loaderService = new LoaderServiceImpl();
 
 		
@@ -61,6 +63,7 @@ public class MappedFileFactoryTest {
 		MapNexusFileBuilderUtils.makeDiodeGridScanEnergy(gridZDiode.getAbsolutePath());
 		MapNexusFileBuilderUtils.makeDiodeLineScan(lineDiode.getAbsolutePath());
 		MapNexusFileBuilderUtils.makeDiodeLineScanEnergy(lineZDiode.getAbsolutePath());
+		MapNexusFileBuilderUtils.makePixelImageStack(pixelImage.getAbsolutePath());
 		
 		
 	}
@@ -289,6 +292,16 @@ public class MappedFileFactoryTest {
 		b = mdf.getDataBlockMap().values().iterator().next();
 		assertEquals(2,b.getLazy().getRank());
 		assertEquals(2,b.getMap().getRank());
+	}
+	
+	@Test
+	public void loadPixelImage() throws Exception{
+
+		IDataHolder data = LoaderFactory.getData(pixelImage.getAbsolutePath());
+		MappedDataFileBean buildBean = MapBeanBuilder.buildPixelImageBean(data.getTree());
+		
+		assertNotNull(buildBean);
+		assertTrue(buildBean.checkValid());
 	}
 
 }

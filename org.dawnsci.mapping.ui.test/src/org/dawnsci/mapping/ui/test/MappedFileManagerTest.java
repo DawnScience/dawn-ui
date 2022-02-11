@@ -193,6 +193,12 @@ public class MappedFileManagerTest {
 				// TODO Auto-generated method stub
 				
 			}
+
+			@Override
+			public void setTransparency(int transparency) {
+				// TODO Auto-generated method stub
+				
+			}
 		});
 		
 		assertFalse(manager.getPlottedObjects().isEmpty());
