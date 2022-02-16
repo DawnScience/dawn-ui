@@ -13,6 +13,7 @@ import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.eclipse.ui.preferences.ScopedPreferenceStore;
 import org.osgi.framework.BundleContext;
@@ -32,8 +33,10 @@ public class PlottingSystemActivator extends AbstractUIPlugin {
 		return imageDescriptorFromPlugin(ID, path);
 	}
 
-	public static Image getImage(String path) {
-		return getImageDescriptor(path).createImage();
+	public static void setButtonImage(Button b, String path) {
+		Image i = getImageDescriptor(path).createImage();
+		b.setImage(i);
+		b.addDisposeListener(e -> i.dispose());
 	}
 
 	public static IPreferenceStore getPlottingPreferenceStore() {

@@ -66,7 +66,6 @@ import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
-import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -94,8 +93,8 @@ public class FunctionFittingTool extends AbstractToolPage implements IFunctionSe
 
 	private static final Logger logger = LoggerFactory.getLogger(FunctionFittingTool.class);
 
-	private static final Image FIT = Activator.getImage("icons/chart_curve_go.png");
-	private static final Image UPDATE = Activator.getImage("icons/arrow_refresh_small.png");
+	private static final String FIT = "icons/chart_curve_go.png";
+	private static final String UPDATE = "icons/arrow_refresh_small.png";
 
 	private Control control;
 	private boolean autoRefit;
@@ -154,7 +153,7 @@ public class FunctionFittingTool extends AbstractToolPage implements IFunctionSe
 		final Button autoRefitButton = new Button(actionComposite, SWT.TOGGLE);
 		autoRefitButton.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
 		autoRefitButton.setText("Auto Refit");
-		autoRefitButton.setImage(FIT);
+		autoRefitButton.setImage(Activator.getImageAndAddDisposeListener(autoRefitButton, FIT));
 		autoRefitButton.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseUp(MouseEvent e) {
@@ -166,7 +165,7 @@ public class FunctionFittingTool extends AbstractToolPage implements IFunctionSe
 		updateAllButton = new Button(actionComposite, SWT.PUSH);
 		updateAllButton.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
 		updateAllButton.setText("Update All");
-		updateAllButton.setImage(UPDATE);
+		updateAllButton.setImage(Activator.getImageAndAddDisposeListener(updateAllButton, UPDATE));
 		updateAllButton.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {

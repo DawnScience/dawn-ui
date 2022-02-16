@@ -153,9 +153,11 @@ public class RegionSumTool extends AbstractToolPage implements IROIListener {
 
 				FontData fontData = dlg.open();
 				if (fontData != null) {
-					if (sumDisplay.getFont() != null)
-						sumDisplay.getFont().dispose();
+					Font oFont = sumDisplay.getFont();
 					sumDisplay.setFont(new Font(parent.getShell().getDisplay(), fontData));
+					if (oFont != null) {
+						oFont.dispose();
+					}
 					sumDisplay.update(sumDisplay.getText());
 				}
 			}
@@ -410,7 +412,13 @@ public class RegionSumTool extends AbstractToolPage implements IROIListener {
 	@Override
 	public void dispose() {
 		deactivate();
-		if (sumDisplay!=null) sumDisplay.dispose();
+		if (sumDisplay!=null) {
+			sumDisplay.dispose();
+			Font font = sumDisplay.getFont();
+			if (font != null && !font.isDisposed()) {
+				font.dispose();
+			}
+		}
 		sumDisplay = null;
 		super.dispose();
 	}

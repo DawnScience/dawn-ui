@@ -17,7 +17,7 @@ import org.eclipse.swt.graphics.Image;
 
 public class ContentProposalLabelProvider extends BaseLabelProvider implements ILabelProvider {
 
-	private static final Image LINK = Activator.getImage("link.png");
+	private final Image LINK = Activator.getImage("link.png");
 
 	@Override
 	public Image getImage(Object element) {
@@ -38,5 +38,9 @@ public class ContentProposalLabelProvider extends BaseLabelProvider implements I
 		return element.toString();
 	}
 
-
+	@Override
+	public void dispose() {
+		super.dispose();
+		LINK.dispose();
+	}
 }

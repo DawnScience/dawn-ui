@@ -117,7 +117,8 @@ public class PlayCellEditor extends AppliableCellEditor {
 		});
 
         this.play = new Button(area, SWT.TOGGLE);
-        play.setImage(Activator.getImage("icons/control_play_blue.png"));
+        Activator.setButtonImage(play, "icons/control_play_blue.png");
+
         final GridData playData = new GridData(SWT.CENTER, SWT.FILL, false, true);
         playData.widthHint  = 24;
         playData.heightHint = 24;
@@ -203,8 +204,7 @@ public class PlayCellEditor extends AppliableCellEditor {
 		} else {
 			// make the comboBox 10 characters wide
 			GC gc = new GC(area);
-			layoutData.minimumWidth = (gc.getFontMetrics()
-					.getAverageCharWidth() * 10) + 10;
+			layoutData.minimumWidth = (int) (gc.getFontMetrics().getAverageCharacterWidth() * 10) + 10;
 			gc.dispose();
 		}
 		if (rowHeight>-1) {

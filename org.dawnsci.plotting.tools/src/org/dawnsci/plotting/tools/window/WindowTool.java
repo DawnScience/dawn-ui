@@ -270,8 +270,8 @@ public class WindowTool extends AbstractToolPage {
 		errorLabel = new CLabel(sliceControl, SWT.WRAP);
 		errorLabel.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 3, 1));
 		errorLabel.setText("The slice range is too large.");
-		errorLabel.setImage(Activator.getImage("icons/error.png"));
-        
+		errorLabel.setImage(Activator.getImageAndAddDisposeListener(errorLabel, "icons/error.png"));
+
 		sliceSlider.addMouseMoveListener(new MouseMoveListener() {
 			@Override
 			public void mouseMove(MouseEvent e) {

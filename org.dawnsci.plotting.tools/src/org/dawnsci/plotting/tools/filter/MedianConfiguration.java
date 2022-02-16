@@ -13,7 +13,7 @@ public class MedianConfiguration extends RadiusFilterConfiguration {
 		Composite content = super.createControl(parent);
 
 		Label info = new Label(content, SWT.WRAP);
-		info.setImage(Activator.getImage("icons/info.png"));
+		info.setImage(Activator.getImageAndAddDisposeListener(info, "icons/info.png"));
 		info.setText(getDescription());
 		info.setLayoutData(new GridData(SWT.FILL, SWT.BOTTOM, true, true, 3, 1));
 		return content;

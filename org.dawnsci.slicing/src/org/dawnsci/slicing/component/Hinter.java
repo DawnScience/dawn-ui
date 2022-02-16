@@ -51,8 +51,8 @@ class Hinter {
 
 				final GC    gc   = new GC(control);
 				final Point size = gc.textExtent(hint);
+				gc.dispose();
 				tooltip.show(new Point(-size.x-15, 0));
-
 			}
 		});
 

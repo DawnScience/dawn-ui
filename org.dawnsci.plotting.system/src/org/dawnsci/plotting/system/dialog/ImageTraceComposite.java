@@ -259,7 +259,8 @@ public class ImageTraceComposite extends Composite {
 	
 			final Button openHisto = new Button(group, SWT.NONE);
 			openHisto.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false, 1, 1));
-			openHisto.setImage(PlottingSystemActivator.getImage("icons/color_wheel.png"));
+			PlottingSystemActivator.setButtonImage(openHisto, "icons/color_wheel.png");
+			
 			openHisto.addSelectionListener(new SelectionAdapter() {
 				@Override
 				public void widgetSelected(SelectionEvent e) {
@@ -349,7 +350,7 @@ public class ImageTraceComposite extends Composite {
 
 		final Button reset = new Button(cuts, SWT.NONE);
 		reset.setLayoutData(new GridData());		
-		reset.setImage(PlottingSystemActivator.getImage("icons/reset.gif"));
+		PlottingSystemActivator.setButtonImage(reset, "icons/reset.gif");
 		reset.setText("Reset");
 		reset.setToolTipText("Reset cut bounds");
 		reset.addSelectionListener(new SelectionAdapter() {

@@ -17,6 +17,7 @@ import org.dawnsci.common.widgets.gda.function.internal.model.SetFunctionModel;
 import org.eclipse.dawnsci.analysis.api.fitting.functions.IFunction;
 import org.eclipse.dawnsci.analysis.api.fitting.functions.IOperator;
 import org.eclipse.jface.preference.JFacePreferences;
+import org.eclipse.jface.resource.ImageRegistry;
 import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.viewers.BaseLabelProvider;
 import org.eclipse.jface.viewers.DelegatingStyledCellLabelProvider.IStyledLabelProvider;
@@ -35,12 +36,25 @@ import uk.ac.diamond.scisoft.analysis.fitting.functions.JexlExpressionFunction.J
 public class FunctionLabelProvider extends BaseLabelProvider implements
 		IStyledLabelProvider {
 
-	private static final Image CURVE = Activator.getImage("chart_curve.png");
-	private static final Image LINK = Activator.getImage("link.png");
-	private static final Image BULLET_BLUE = Activator
-			.getImage("bullet_blue.png");
-	private static final Image BULLET_ORANGE = Activator
-			.getImage("bullet_orange.png");
+	private static final String CURVE = "chart_curve.png";
+	private static final String LINK = "link.png";
+	private static final String BULLET_BLUE = "bullet_blue.png";
+	private static final String BULLET_ORANGE = "bullet_orange.png";
+
+	private static void putIfAbsent(String path) {
+		if (IMAGE_REG.get(path) == null) {
+			IMAGE_REG.put(path, Activator.getImage(path));
+		}
+	}
+	private static final ImageRegistry IMAGE_REG;
+	static {
+		IMAGE_REG = JFaceResources.getImageRegistry();
+		putIfAbsent(CURVE);
+		putIfAbsent(LINK);
+		putIfAbsent(BULLET_BLUE);
+		putIfAbsent(BULLET_ORANGE);
+	}
+
 	public static final Styler ERROR_STYLER = new Styler() {
 		@Override
 		public void applyStyles(TextStyle textStyle) {
@@ -64,12 +78,12 @@ public class FunctionLabelProvider extends BaseLabelProvider implements
 		} else if (element instanceof FunctionModel) {
 			if (((FunctionModel)element).getFunction() instanceof JexlExpressionFunction)
 
-				return LINK;
-			return CURVE;
+				return IMAGE_REG.get(LINK);
+			return IMAGE_REG.get(CURVE);
 		} else if (element instanceof OperatorModel) {
-			return BULLET_BLUE;
+			return IMAGE_REG.get(BULLET_BLUE);
 		} else if (element instanceof ParameterModel) {
-			return BULLET_ORANGE;
+			return IMAGE_REG.get(BULLET_ORANGE);
 		}
 
 		return null;

@@ -49,6 +49,7 @@ import org.eclipse.january.dataset.ILazyDataset;
 import org.eclipse.january.dataset.IntegerDataset;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.resource.ImageRegistry;
+import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.Image;
@@ -87,21 +88,19 @@ public class PlotImageService extends AbstractServiceFactory implements IPlotIma
 		
 	}
 	
-	private static float minimumThreshold = 0.98f;
-	private static int colourMapChoice    = 1;
-    private static ImageRegistry imageRegistry;
-    
-    @Override
+	private static ImageRegistry imageRegistry;
+
+	@Override
 	public Image createImage(final File f, final int width, int height) {
 		
 		if (f.isDirectory()) {
 			final Image image = Activator.getImageDescriptor("icons/folder.gif").createImage();
 			final Image blank = new Image(Display.getDefault(), width, height);
 			GC gc = new GC(blank);
-	        gc.drawImage(image, (width/2)-image.getImageData().width/2, height/2-image.getImageData().height/2);
-	        gc.dispose();
-	        
-	        return blank;
+			gc.drawImage(image, (width/2)-image.getImageData().width/2, height/2-image.getImageData().height/2);
+			gc.dispose();
+			image.dispose();
+			return blank;
 		}
 		
 		try {
@@ -110,7 +109,7 @@ public class PlotImageService extends AbstractServiceFactory implements IPlotIma
 		    
 		} catch (Throwable ne) {
 			
-			if (imageRegistry == null) imageRegistry = new ImageRegistry(Display.getDefault());
+			if (imageRegistry == null) imageRegistry = JFaceResources.getImageRegistry();
 			final String extension = FileUtils.getFileExtension(f);
 			Image image = imageRegistry.get(extension);
 			if (image != null) return image;
@@ -128,10 +127,11 @@ public class PlotImageService extends AbstractServiceFactory implements IPlotIma
 		final Image image = PlatformUI.getWorkbench().getEditorRegistry().getImageDescriptor(f.getAbsolutePath()).createImage();
 		final Image blank = new Image(Display.getDefault(), width, height);
 		GC gc = new GC(blank);
-        gc.drawImage(image, (width/2)-image.getImageData().width/2, height/2-image.getImageData().height/2);
-        gc.dispose();
-        
-        return blank;
+		gc.drawImage(image, (width/2)-image.getImageData().width/2, height/2-image.getImageData().height/2);
+		gc.dispose();
+		image.dispose();
+
+		return blank;
 	}
 	
 	private Dataset getThumbnail(final File f, final int wdith, final int height) throws Throwable {
@@ -373,7 +373,7 @@ public class PlotImageService extends AbstractServiceFactory implements IPlotIma
 
 		final String ext = FileUtils.getFileExtension(file);
 		if (imageRegistry == null)
-			imageRegistry = new ImageRegistry();
+			imageRegistry = JFaceResources.getImageRegistry();
 
 		Image returnImage = imageRegistry.get(ext);
 		if (returnImage != null)
@@ -497,6 +497,9 @@ public class PlotImageService extends AbstractServiceFactory implements IPlotIma
 		//file should not be null, but if it is, then try a folder name (next line should be deleted)
 //		if (file==null) file = isWindowsOS() ? new File("C:/Windows/") : new File("/etc");
 		//if next line causes NPE, then uncommenting previous line is quick fix, but not optimal
+		if (imageRegistry == null) {
+			imageRegistry = JFaceResources.getImageRegistry();
+		}
 		if( file.getName().isEmpty() ) { //It is a root folder
 			if (rootFolderImage==null) {
 				/**
@@ -508,6 +511,7 @@ public class PlotImageService extends AbstractServiceFactory implements IPlotIma
 				} else {
 					rootFolderImage = Activator.getImageDescriptor("icons/folder.gif").createImage();
 				}
+				imageRegistry.put(Activator.PLUGIN_ID + ":root_folder", rootFolderImage);
 			}
 			return rootFolderImage;
 		} else {
@@ -521,6 +525,7 @@ public class PlotImageService extends AbstractServiceFactory implements IPlotIma
 				} else {
 					folderImage = Activator.getImageDescriptor("icons/folder.gif").createImage();
 				}
+				imageRegistry.put(Activator.PLUGIN_ID + ":folder", folderImage);
 			}
 			return folderImage;
 		}

@@ -46,6 +46,7 @@ import org.eclipse.swt.dnd.DragSourceEvent;
 import org.eclipse.swt.dnd.DropTargetEvent;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Combo;
@@ -70,7 +71,6 @@ import org.slf4j.LoggerFactory;
 /**
  * File Viewer based on the SWT FileViewer example
  */
-@SuppressWarnings("restriction")
 public class FileViewer {
 
 	private static final Logger logger = LoggerFactory.getLogger(FileViewer.class);
@@ -131,6 +131,14 @@ public class FileViewer {
 		}
 	};
 
+	private Image parentImage;
+
+	private Image refreshImage;
+
+	private Image layoutImage;
+
+	private Image preferenceImage;
+
 	/**
 	 * Closes the main program.
 	 */
@@ -140,6 +148,11 @@ public class FileViewer {
 		getIconCache().freeResources();
 		if (tableExplo != null)
 			tableExplo.getTableViewer().removeSelectionChangedListener(tableSelectionChangedListener);
+
+		if (parentImage != null) parentImage.dispose();
+		if (refreshImage != null) refreshImage.dispose();
+		if (layoutImage != null) layoutImage.dispose();
+		if (preferenceImage != null) preferenceImage.dispose();
 	}
 
 	/**
@@ -208,7 +221,8 @@ public class FileViewer {
 		bar.setBackground(parent.getBackground());
 		ToolItem parentToolItem = new ToolItem(bar, SWT.NONE);
 		parentToolItem.setToolTipText(Utils.getResourceString(FileViewerConstants.PARENT_TIP));
-		parentToolItem.setImage(Activator.getImage("icons/arrow-090.png"));
+		parentImage = Activator.getImage("icons/arrow-090.png");
+		parentToolItem.setImage(parentImage);
 		parentToolItem.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent event) {
@@ -220,7 +234,8 @@ public class FileViewer {
 
 		ToolItem refreshToolItem = new ToolItem(bar, SWT.NONE);
 		refreshToolItem.setToolTipText(Utils.getResourceString(FileViewerConstants.REFRESH_TIP));
-		refreshToolItem.setImage(Activator.getImage("icons/arrow-circle-double-135.png"));
+		refreshImage = Activator.getImage("icons/arrow-circle-double-135.png");
+		refreshToolItem.setImage(refreshImage);
 		refreshToolItem.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent event) {
@@ -232,7 +247,8 @@ public class FileViewer {
 
 		ToolItem layoutToolItem = new ToolItem(bar, SWT.NONE);
 		layoutToolItem.setToolTipText(Utils.getResourceString(FileViewerConstants.LAYOUT_TIP));
-		layoutToolItem.setImage(Activator.getImage("icons/layout-design.png"));
+		layoutImage = Activator.getImage("icons/layout-design.png");
+		layoutToolItem.setImage(layoutImage);
 		layoutToolItem.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent event) {
@@ -244,7 +260,8 @@ public class FileViewer {
 
 		ToolItem preferencesToolItem = new ToolItem(bar, SWT.NONE);
 		preferencesToolItem.setToolTipText(Utils.getResourceString(FileViewerConstants.PREFERENCES_TIP));
-		preferencesToolItem.setImage(Activator.getImage("icons/preferences.png"));
+		preferenceImage = Activator.getImage("icons/preferences.png");
+		preferencesToolItem.setImage(preferenceImage);
 		preferencesToolItem.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent event) {

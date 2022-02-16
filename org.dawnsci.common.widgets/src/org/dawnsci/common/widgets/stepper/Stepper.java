@@ -726,6 +726,9 @@ public class Stepper extends Canvas {
 	@Override
 	public void dispose() {
 		listeners.clear();
+		if (sliderImage != null && !sliderImage.isDisposed()) {
+			sliderImage.dispose();
+		}
 	}
 
 	public void setText(String lblText) {

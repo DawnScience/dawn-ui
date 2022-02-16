@@ -12,6 +12,8 @@ import org.dawnsci.common.widgets.gda.Activator;
 import org.dawnsci.common.widgets.gda.function.descriptors.IFunctionDescriptor;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.jface.fieldassist.IContentProposal;
+import org.eclipse.jface.resource.ImageRegistry;
+import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.swt.graphics.Image;
 
 /**
@@ -19,9 +21,20 @@ import org.eclipse.swt.graphics.Image;
  *
  */
 public class FunctionContentProposal implements IContentProposal, IAdaptable {
-	private static final Image CURVE = Activator.getImage("chart_curve.png");
-	private static final Image BULLET_BLUE = Activator
-			.getImage("bullet_blue.png");
+	private static final String CURVE = "chart_curve.png";
+	private static final String BULLET_BLUE = "bullet_blue.png";
+
+	private static void putIfAbsent(String path) {
+		if (IMAGE_REG.get(path) == null) {
+			IMAGE_REG.put(path, Activator.getImage(path));
+		}
+	}
+	private static final ImageRegistry IMAGE_REG;
+	static {
+		IMAGE_REG = JFaceResources.getImageRegistry();
+		putIfAbsent(CURVE);
+		putIfAbsent(BULLET_BLUE);
+	}
 
 	private IFunctionDescriptor functionDescriptor;
 
@@ -31,7 +44,7 @@ public class FunctionContentProposal implements IContentProposal, IAdaptable {
 	}
 
 	@Override
-	public Object getAdapter(@SuppressWarnings("rawtypes") Class adapter) {
+	public <T> T getAdapter(Class<T> adapter) {
 		return functionDescriptor.getAdapter(adapter);
 	}
 
@@ -67,9 +80,9 @@ public class FunctionContentProposal implements IContentProposal, IAdaptable {
 	 */
 	public Image getImage() {
 		if (functionDescriptor.isOperator()) {
-			return BULLET_BLUE;
+			return IMAGE_REG.get(BULLET_BLUE);
 		} else {
-			return CURVE;
+			return IMAGE_REG.get(CURVE);
 		}
 	}
 }

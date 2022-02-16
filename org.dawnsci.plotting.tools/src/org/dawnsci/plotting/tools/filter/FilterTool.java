@@ -168,7 +168,7 @@ public class FilterTool extends AbstractToolPage {
 		
 		final Button apply = new Button(buttons, SWT.PUSH);
 		apply.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, true, true));
-		apply.setImage(Activator.getImage("icons/apply.gif"));
+		apply.setImage(Activator.getImageAndAddDisposeListener(apply, "icons/apply.gif"));
 		apply.setText("Apply");
 		apply.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
@@ -178,7 +178,7 @@ public class FilterTool extends AbstractToolPage {
 		
 		final Button reset = new Button(buttons, SWT.PUSH);
 		reset.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, true, true));
-		reset.setImage(Activator.getImage("icons/reset.gif"));
+		reset.setImage(Activator.getImageAndAddDisposeListener(reset, "icons/reset.gif"));
 		reset.setText("Reset");
 		reset.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {

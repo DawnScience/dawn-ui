@@ -148,12 +148,15 @@ public class ConfigDialog extends Dialog {
 				int idx = fontCombo.getSelectionIndex();
 				org.eclipse.swt.graphics.Font font = getSWTFont(fonts[idx]);
 				scaleFontLabel.setText(fontCombo.getText());
+				org.eclipse.swt.graphics.Font oFont = scaleFontLabel.getFont();
 				scaleFontLabel.setFont(font);
+				oFont.dispose();
 			}
 		});
 		scaleFontLabel = new Label(fontComp, SWT.NONE);
 		scaleFontLabel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1));
 		scaleFontLabel.setText(fontCombo.getText());
+		scaleFontLabel.setFont(getSWTFont(fonts[0]));
 		
 		return container;
 	}
@@ -276,4 +279,16 @@ public class ConfigDialog extends Dialog {
 		return new Point(500, 750);
 	}
 
+	@Override
+	public boolean close() {
+		boolean ok = super.close();
+		if (ok ) {
+			org.eclipse.swt.graphics.Font f = scaleFontLabel.getFont();
+			if (!f.isDisposed()) {
+				f.dispose();
+			}
+		}
+
+		return ok;
+	}
 }

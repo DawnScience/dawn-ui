@@ -737,6 +737,8 @@ public class PeakFindingTool extends AbstractToolPage implements IRegionListener
 	public void dispose() {
 		deactivate();
 		super.dispose();
+		widget.dispose();
+
 		// TODO: kill manager jobs... maybe might not be storing the jobs...
 	}
 

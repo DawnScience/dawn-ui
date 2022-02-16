@@ -14,6 +14,7 @@ import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.widgets.Widget;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.eclipse.ui.preferences.ScopedPreferenceStore;
 import org.osgi.framework.BundleContext;
@@ -28,14 +29,36 @@ public class Activator extends AbstractUIPlugin {
 		super.start(context);
         staticActivator = this;
     }
-	
-    public static ImageDescriptor getImageDescriptor(String path) {
-        return imageDescriptorFromPlugin("org.dawnsci.plotting.tools", path);
-    }
-    		 
-    public static Image getImage(String path) {
-        return getImageDescriptor(path).createImage();
-    }
+
+	/**
+	 * Get image descriptor from given path
+	 * @param path plugin relative path of image file
+	 * @return image descriptor
+	 */
+	public static ImageDescriptor getImageDescriptor(String path) {
+		return imageDescriptorFromPlugin(PLUGIN_ID, path);
+	}
+
+	/**
+	 * Get image from given path. The caller should dispose of it
+	 * @param path plugin relative path of image file
+	 * @return image
+	 */
+	public static Image getImage(String path) {
+		return getImageDescriptor(path).createImage();
+	}
+
+	/**
+	 * Get image from given path and add dispose listener so caller does not need to dispose
+	 * @param w widget
+	 * @param path plugin relative path of image file
+	 * @return image
+	 */
+	public static Image getImageAndAddDisposeListener(Widget w, String path) {
+		Image i = getImageDescriptor(path).createImage();
+		w.addDisposeListener(e -> i.dispose());
+		return i;
+	}
 
     private static IPreferenceStore plottingPreferences;
 	public static IPreferenceStore getPlottingPreferenceStore() {
