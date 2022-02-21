@@ -21,7 +21,6 @@ import com.jogamp.nativewindow.ScalableSurface;
 import com.jogamp.newt.event.KeyListener;
 import com.jogamp.newt.event.MouseListener;
 import com.jogamp.newt.opengl.GLWindow;
-import com.jogamp.newt.swt.NewtCanvasSWT;
 import com.jogamp.opengl.GL;
 import com.jogamp.opengl.GLAnimatorControl;
 import com.jogamp.opengl.GLCapabilitiesImmutable;

@@ -11,6 +11,7 @@ import java.util.Map;
 import org.dawb.common.ui.menu.CheckableActionGroup;
 import org.dawb.common.ui.menu.MenuAction;
 import org.dawnsci.jzy3d.hidpi.CanvasNewtScaledSWT;
+import org.dawnsci.jzy3d.hidpi.NewtCanvasSWT;
 import org.dawnsci.jzy3d.hidpi.SWTScaledChartComponentFactory;
 import org.dawnsci.jzy3d.toolbar.ConfigDialog;
 import org.dawnsci.jzy3d.volume.Texture3D;
@@ -65,7 +66,6 @@ import org.slf4j.LoggerFactory;
 
 import com.jogamp.newt.event.MouseAdapter;
 import com.jogamp.newt.event.MouseEvent;
-import com.jogamp.newt.swt.NewtCanvasSWT;
 
 public class JZY3DPlotViewer extends IPlottingSystemViewer.Stub<Composite> {
 	
