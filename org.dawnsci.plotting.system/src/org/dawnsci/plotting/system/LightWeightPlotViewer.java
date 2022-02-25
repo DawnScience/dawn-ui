@@ -1686,7 +1686,9 @@ public class LightWeightPlotViewer<T> implements IPlottingSystemViewer<T>, IAnno
 		FileDialog dialog = new FileDialog(Display.getDefault().getActiveShell(), SWT.SAVE);
 		String [] filterExtensions = new String [] {"*.png;*.PNG;*.jpg;*.JPG;*.jpeg;*.JPEG", "*.ps;*.eps", "*.svg;*.SVG"};
 		if (filename!=null) {
-			dialog.setFilterPath((new File(filename)).getParent());
+			File file = new File(filename);
+			dialog.setFilterPath(file.getParent());
+			dialog.setFileName(file.getName());
 		} else {
 			String filterPath = "/";
 			String platform = SWT.getPlatform();
