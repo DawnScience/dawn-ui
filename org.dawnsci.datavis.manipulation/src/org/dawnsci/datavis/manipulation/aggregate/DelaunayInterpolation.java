@@ -101,7 +101,7 @@ public class DelaunayInterpolation {
 
 	private static void baryCentricInterpolate(DoubleDataset zp, Dataset za, Dataset zb, Dataset zc, double fb, double fc) {
 		int n = zp.getSize();
-		for (int i = 0; i < n; n++) {
+		for (int i = 0; i < n; i++) {
 			double z = za.getDouble(i);
 			zp.setAbs(i, z + fb*(zb.getDouble(i) - z) + fc*(zc.getDouble(i) - z));
 		}
