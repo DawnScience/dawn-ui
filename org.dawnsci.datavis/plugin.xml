@@ -91,6 +91,12 @@
                      <equals
                            value="uk.ac.diamond.daq.mapping.ui.experiment.MappingPerspective">
                      </equals>
+                     <equals
+                           value="uk.ac.gda.beamline.i18.perspective.mapping">
+                     </equals>
+                     <equals
+                           value="uk.ac.diamond.daq.beamline.k11.perspective.Diffraction">
+                     </equals>
                   </or>
                </with>
             </visibleWhen>
