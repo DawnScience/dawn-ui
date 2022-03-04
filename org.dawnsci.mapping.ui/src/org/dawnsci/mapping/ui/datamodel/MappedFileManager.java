@@ -30,7 +30,6 @@ import org.eclipse.january.IMonitor;
 import org.eclipse.january.dataset.IDataset;
 import org.eclipse.january.metadata.IMetadata;
 import org.eclipse.jface.operation.IRunnableWithProgress;
-import org.eclipse.scanning.api.ui.IStageScanConfiguration;
 import org.eclipse.ui.progress.IProgressService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,7 +40,7 @@ public class MappedFileManager implements IMapFileController{
 	
 	private ILoaderService loaderService;
 	private IRemoteDatasetService remoteService;
-	private IStageScanConfiguration stageScanConfig;
+	
 	private ILiveMappingFileService liveService;
 	private IRecentPlaces recentPlaces;
 	
@@ -52,10 +51,6 @@ public class MappedFileManager implements IMapFileController{
 	
 	public void setRemoveService(IRemoteDatasetService service) {
 		this.remoteService = service;
-	}
-	
-	public void setStageScanConfiguration(IStageScanConfiguration scanConfig) {
-		this.stageScanConfig = scanConfig;
 	}
 	
 	public void setLiveMappingService(ILiveMappingFileService lServ) {
@@ -323,15 +318,16 @@ public class MappedFileManager implements IMapFileController{
 	}
 	
 	private MappedDataFileBean buildBeanFromTree(Tree tree){
-		MappedDataFileBean b = null;
-		if (stageScanConfig == null){
-			b = MapBeanBuilder.buildBean(tree);
-		} else {
-			String x = stageScanConfig.getPlotXAxisName();
-			String y = stageScanConfig.getPlotYAxisName();
-			b = MapBeanBuilder.buildBean(tree,x,y);
+		
+		if (liveService != null) {
+			String[] axisNames = liveService.getAxisNames();
+			if (axisNames.length == 2) {
+				return MapBeanBuilder.buildBean(tree,axisNames[0],axisNames[1]);
+			}
 		}
-		return b;
+		
+		return MapBeanBuilder.buildBean(tree);
+		
 	}
 	
 	private MappedDataFileBean buildPixelImageBeanFromTree(Tree tree){
@@ -642,5 +638,17 @@ public class MappedFileManager implements IMapFileController{
 			localReloadFile(path, force);
 		}
 		
+	}
+
+	@Override
+	public String getSaveName(String name) {
+		if (liveService != null) {
+			try {
+				return liveService.getSaveName(name);
+			} catch (Exception e) {
+				logger.error("Could not create safe file name", e);
+			}
+		}
+		return null;
 	}
 }

@@ -31,7 +31,6 @@ import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.TreeViewer;
-import org.eclipse.scanning.api.scan.IFilePathService;
 import org.eclipse.swt.dnd.Clipboard;
 import org.eclipse.swt.dnd.TextTransfer;
 import org.eclipse.swt.dnd.Transfer;
@@ -311,7 +310,7 @@ public class MapActionUtils {
 				String outPath;
 				
 				try {
-					outPath = getFilePath();
+					outPath = manager.getSaveName("snapshot");
 				} catch (Exception e) {
 					logger.error("Could not save snapshot",e);
 					return;
@@ -324,13 +323,6 @@ public class MapActionUtils {
 			    manager.loadFiles(new String[]{outPath}, null);
 			}
 		};
-	}
-	
-	private static String getFilePath() throws Exception {
-		final IFilePathService filePathService = Activator.getService(IFilePathService.class);
-		final String processedFilesDir = filePathService.getProcessingDir();
-
-		return filePathService.getNextPath(processedFilesDir, "snapshot");
 	}
 	
 	public static IAction getBringToFrontAction(final PlottableMapObject map, final IMapPlotController manager) {

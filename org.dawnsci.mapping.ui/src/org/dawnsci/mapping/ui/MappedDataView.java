@@ -27,7 +27,6 @@ import org.eclipse.jface.viewers.ITreeSelection;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TreeSelection;
 import org.eclipse.jface.viewers.TreeViewer;
-import org.eclipse.scanning.api.scan.IFilePathService;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.dnd.DND;
 import org.eclipse.swt.dnd.DropTarget;
@@ -171,15 +170,13 @@ public class MappedDataView extends ViewPart {
 				Object element = selection.getFirstElement();
 				
 				if (element instanceof LiveStreamMapObject) {
-					IFilePathService s = Activator.getService(IFilePathService.class);
-					//should only be in gda
-					if (s.getProcessingDir() != null) {
-						IAction a = MapActionUtils.getSaveStreamAction((LiveStreamMapObject)element,fileController);
-						if (((LiveStreamMapObject)element).getMap() == null) {
-							a.setEnabled(false);
-						}
-						manager.add(a);
+					//Live streams should only be in gda
+					IAction a = MapActionUtils.getSaveStreamAction((LiveStreamMapObject)element,fileController);
+					if (((LiveStreamMapObject)element).getMap() == null) {
+						a.setEnabled(false);
 					}
+					manager.add(a);
+
 				}
 
 				if (element instanceof MappedDataFile) {

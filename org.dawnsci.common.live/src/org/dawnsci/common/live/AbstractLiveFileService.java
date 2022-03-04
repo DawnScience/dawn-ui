@@ -165,7 +165,7 @@ public abstract class AbstractLiveFileService {
 			try {
 				attach();
 			} catch (Exception e) {
-				// TODO: handle exception
+				logger.debug("Could not add attach live listener", e);
 			}
 			
 		}

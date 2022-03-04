@@ -194,6 +194,12 @@ public interface IMapFileController {
 	 * @param file
 	 */
 	void registerUpdates(MappedDataFile file);
+	
+	/**
+	 * Gets a directory to save snapshots into
+	 * @return
+	 */
+	String getSaveName(String name);
 
 
 }
