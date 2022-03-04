@@ -12,7 +12,7 @@
 
 	<appender name="DebugFILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
 		<filter class="ch.qos.logback.classic.filter.ThresholdFilter">
-			<level>ERROR</level>
+			<level>WARN</level>
 		</filter>
 
 		<file>${java.io.tmpdir}/${user.name}-dawn.log</file>
@@ -34,35 +34,6 @@
 
 		<encoder>
 			<pattern>%d %-5level %logger - %m %ex %n</pattern>
-		</encoder>
-	</appender>
-
-	<appender name="HTML" class="ch.qos.logback.core.rolling.RollingFileAppender">
-		<filter class="ch.qos.logback.classic.filter.ThresholdFilter">
-			<level>ERROR</level>
-		</filter>
-
-		<file>${user.home}/dawnlog.html</file>
-
-		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-			<!-- daily rollover -->
-			<fileNamePattern>${user.home}/dawnlog_%d{yyyy-MM-dd}.%i.html</fileNamePattern>
-
-			<timeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
-				<!-- or whenever the file size reaches 20MB -->
-				<maxFileSize>20MB</maxFileSize>
-			</timeBasedFileNamingAndTriggeringPolicy>
-
-			<!-- keep 1 days' worth of history as we are only a GUI -->
-			<maxHistory>1</maxHistory>
-
-			<cleanHistoryOnStart>true</cleanHistoryOnStart>
-		</rollingPolicy>
-
-		<encoder class="ch.qos.logback.core.encoder.LayoutWrappingEncoder">
-			<layout class="ch.qos.logback.classic.html.HTMLLayout">
-				<pattern>%relative%date{dd-MMM-yyyy;HH:mm:ss}%thread%level%logger%msg</pattern>
-			</layout>
 		</encoder>
 	</appender>
 
@@ -126,7 +97,6 @@
 	<root>
 		<level value="ALL" />
 		<appender-ref ref="DebugFILE" />
-		<appender-ref ref="HTML" />
 		<appender-ref ref="STDOUT" />
 		<if condition='isDefined("graylog.host")'>
 		<then>
