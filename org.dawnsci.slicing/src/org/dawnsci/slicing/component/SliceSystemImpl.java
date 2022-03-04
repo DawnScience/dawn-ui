@@ -75,6 +75,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.SWTError;
 import org.eclipse.swt.custom.CLabel;
 import org.eclipse.swt.custom.StyledText;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
@@ -302,7 +303,11 @@ public class SliceSystemImpl extends AbstractSliceSystem {
 		    GridUtils.setVisible(infoLabel,         true);
 		    infoLabel.setText(" "+label);
 		    if (icon==null) icon = getActionByPlotType(sliceType).getImageDescriptor();
+		    Image i = infoLabel.getImage();
 		    infoLabel.setImage(icon.createImage(Display.getDefault()));
+		    if (i != null && !i.isDisposed()) {
+		    	i.dispose();
+		    }
 		    infoLabel.setText(" "+label);
 		}
 	}
@@ -842,6 +847,14 @@ public class SliceSystemImpl extends AbstractSliceSystem {
 		}
 		advancedColumns.clear();
 		super.dispose();
+		Image i = errorLabel.getImage();
+		if (i != null && !i.isDisposed()) {
+			i.dispose();
+		}
+		i = infoLabel.getImage();
+		if (i != null && !i.isDisposed()) {
+			i.dispose();
+		}
 		sliceJob.cancel();
 		saveSettings();
 	}

@@ -49,6 +49,7 @@ import org.eclipse.swt.custom.StackLayout;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Cursor;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
@@ -91,6 +92,10 @@ public abstract class AbstractNavigationView extends ViewPart implements ISelect
  
 	// Services
 	protected IDataSourceManager connectionManager;
+
+	private Image modeIconImage;
+
+	private Image removeImage;
 	
 	
 	public AbstractNavigationView() {
@@ -203,7 +208,8 @@ public abstract class AbstractNavigationView extends ViewPart implements ISelect
 		    toolbar.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 		    
 		    final ToolItem  remove = new ToolItem(toolbar, SWT.PUSH);
-		    remove.setImage(Activator.getImageDescriptor("icons/ui-tooltip--minus.png").createImage());
+		    removeImage = Activator.getImageDescriptor("icons/ui-tooltip--minus.png").createImage();
+		    remove.setImage(removeImage);
 		    remove.setToolTipText("Remove this breadcrumb from the combined searach.");
 		    
 		    crumbs.layout(new Control[]{container});
@@ -442,6 +448,12 @@ public abstract class AbstractNavigationView extends ViewPart implements ISelect
  		for (BreadcrumbViewer bviewer : bviewers) bviewer.removeSelectionChangedListener(this);
 		bviewers.clear();
 		super.dispose();
+		if (modeIconImage != null) { // do manually as title image is not backed by image descriptor
+			modeIconImage.dispose();
+		}
+		if (removeImage != null) {
+			removeImage.dispose();
+		}
 	}
 
 	/**
@@ -582,7 +594,11 @@ public abstract class AbstractNavigationView extends ViewPart implements ISelect
 			pages.get(mode).setActionsActive(true, man);
 			setPartName(mode.getLabel());
 			if (mode.hasIcon()) {
-				AbstractNavigationView.this.setTitleImage(mode.getIcon().createImage());
+				if (modeIconImage != null) {
+					modeIconImage.dispose();
+				}
+				modeIconImage = mode.getIcon().createImage();
+				setTitleImage(modeIconImage);
 			}
 			man.update(true);
 		}

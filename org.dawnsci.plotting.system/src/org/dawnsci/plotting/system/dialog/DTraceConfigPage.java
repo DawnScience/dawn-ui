@@ -41,7 +41,7 @@ public class DTraceConfigPage extends TraceConfigPage {
 		Button export = new Button(composite, SWT.NONE);
 		export.setText("Export data...");
 		export.setToolTipText("Export trace to ascii (dat file)");
-		export.setImage(PlottingSystemActivator.getImageDescriptor("icons/data-export.png").createImage());
+		PlottingSystemActivator.setButtonImage(export, "icons/data-export.png");
 		export.setLayoutData(new GridData(SWT.BEGINNING, SWT.BEGINNING, false, false, 2, 1));
 		export.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {

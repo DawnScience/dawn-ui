@@ -1650,6 +1650,11 @@ public class ToolPageView extends ViewPart implements IPartListener, IToolChange
 		
 		systems.clear();
 		systems = null;
+
+		if (toolImageOverride != null && !toolImageOverride.isDisposed()) {
+			toolImageOverride.dispose();
+			toolImageOverride = null;
+		}
 	}
 	
 	@Override

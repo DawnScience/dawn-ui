@@ -204,7 +204,7 @@ public abstract class SelectorWidget {
 
 		if (hasResourceButton) {
 			resourceButton = new Button(container, SWT.PUSH);
-			resourceButton.setImage(Activator.getImageDescriptor("icons/Project-data.png").createImage());
+			Activator.setButtonImage(resourceButton, "icons/Project-data.png");
 			resourceButton.setToolTipText("Select a "+(isFolderSelector?"folder":"file")+" inside a project");
 			resourceButton.addSelectionListener(new SelectionAdapter() {
 				@Override
@@ -212,10 +212,11 @@ public abstract class SelectorWidget {
 					handleResourceBrowse(e, fileExtensions);
 				}
 			});
+			
 		}
 
 		fileButton = new Button(container, SWT.PUSH);
-		fileButton.setImage(Activator.getImageDescriptor("icons/folder.png").createImage());
+		Activator.setButtonImage(fileButton, "icons/folder.png");
 		fileButton.setToolTipText("Select an external "+(isFolderSelector?"folder":"file"));
 		fileButton.addSelectionListener(new SelectionAdapter() {
 			@Override

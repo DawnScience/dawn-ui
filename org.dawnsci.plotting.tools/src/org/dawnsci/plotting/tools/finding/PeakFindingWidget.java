@@ -11,6 +11,7 @@ import org.eclipse.january.dataset.Dataset;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -46,6 +47,10 @@ public class PeakFindingWidget {
 	List<IdentifiedPeak> peaks = new ArrayList<IdentifiedPeak>();
 	Dataset xData = null;
 	Dataset yData = null ;
+
+	private Image searchImage;
+
+	private Image searchingImage;
 	
 	public PeakFindingWidget(PeakFindingManager controller){
 		this.manager = controller;
@@ -70,7 +75,7 @@ public class PeakFindingWidget {
 				manager.activateSearchRegion();
 			}
 		});
-		adjustSearchBtn.setImage(Activator.getImageDescriptor("icons/plot-tool-peak-fit.png").createImage());
+		adjustSearchBtn.setImage(Activator.getImageAndAddDisposeListener(adjustSearchBtn, "icons/plot-tool-peak-fit.png"));
 		
 		Composite boundsConfig = new Composite(configureComposite, SWT.NONE);
 		boundsConfig.setLayoutData(new GridData(SWT.FILL, SWT.LEFT, true, false));
@@ -201,7 +206,7 @@ public class PeakFindingWidget {
 		Activator.getPlottingPreferenceStore().setValue(PeakFindingConstants.PeakAlgorithm, peakfinderCombo.getText().toString());		
 		
 		runPeakSearch = new Button(configure, SWT.PUSH);
-		runPeakSearch.setImage(Activator.getImageDescriptor("icons/peakSearch.png").createImage());
+		runPeakSearch.setImage(Activator.getImageAndAddDisposeListener(runPeakSearch, "icons/peakSearch.png"));
 		runPeakSearch.setText("Run Peak Finder");
 		runPeakSearch.setLayoutData(new GridData(GridData.FILL_BOTH));
 		runPeakSearch.addSelectionListener(new SelectionAdapter() {
@@ -226,7 +231,10 @@ public class PeakFindingWidget {
 
 			}
 		});
-	
+
+		searchImage = Activator.getImageDescriptor("icons/peakSearch.png").createImage();
+		searchingImage = Activator.getImageDescriptor("icons/peakSearching.png").createImage();
+
 		//TODO: check is searching instead
 		manager.addPeakListener(new IPeakOpportunityListener() {
 			@Override
@@ -251,7 +259,7 @@ public class PeakFindingWidget {
 			@Override
 			public void isPeakFinding() {
 				runPeakSearch.setEnabled(false);
-				runPeakSearch.setImage(Activator.getImageDescriptor("icons/peakSearching.png").createImage());
+				runPeakSearch.setImage(searchingImage);
 
 	 			if(xData != null && yData != null){	 				
 	 				//TODO: set the searching mode ...
@@ -262,14 +270,14 @@ public class PeakFindingWidget {
 					peaks.clear();
 					manager.setPeaksId(peaks);
 					runPeakSearch.setEnabled(true);
-					runPeakSearch.setImage(Activator.getImageDescriptor("icons/peakSearch.png").createImage());
+					runPeakSearch.setImage(searchImage);
 				}
 			}
 
 			@Override
 			public void finishedPeakFinding() {
 				runPeakSearch.setEnabled(true);
-				runPeakSearch.setImage(Activator.getImageDescriptor("icons/peakSearch.png").createImage());
+				runPeakSearch.setImage(searchImage);
 			}
 
 			@Override
@@ -280,7 +288,15 @@ public class PeakFindingWidget {
 		});
 	
 	}
-	
+
+	public void dispose() {
+		if (searchImage != null) {
+			searchImage.dispose();
+		}
+		if (searchingImage != null) {
+			searchingImage.dispose();
+		}
+	}
 	public void setLowerBound(double lowerVal) {
 		lwrBndVal.setDouble(lowerVal);
 		lwrBndVal.update();

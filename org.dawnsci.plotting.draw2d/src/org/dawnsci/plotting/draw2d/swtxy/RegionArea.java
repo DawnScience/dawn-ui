@@ -831,6 +831,7 @@ public class RegionArea extends PlotArea implements IPlotArea {
 		if (vectorTraces!=null)        vectorTraces.clear();
 		if (positionListeners!=null)   positionListeners.clear();
 		if (clickListeners!=null)      clickListeners.clear();
+		if (positionCursor != null) positionCursor.dispose();
 	}
 
 	/**

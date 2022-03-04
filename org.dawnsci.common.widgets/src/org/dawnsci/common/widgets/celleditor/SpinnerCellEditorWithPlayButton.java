@@ -86,7 +86,7 @@ public class SpinnerCellEditorWithPlayButton extends AppliableCellEditor {
         spinner.on();
        
         this.play = new Button(area, SWT.TOGGLE);
-        play.setImage(Activator.getImage("/icons/control_play_blue.png"));
+        Activator.setButtonImage(play, "/icons/control_play_blue.png");
         final GridData playData = new GridData(SWT.CENTER, SWT.CENTER, false, false);
         playData.widthHint  = 24;
         playData.heightHint = 24;

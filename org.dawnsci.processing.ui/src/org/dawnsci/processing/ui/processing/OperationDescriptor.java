@@ -196,8 +196,13 @@ public class OperationDescriptor implements ISeriesItemDescriptor {
 			final Bundle   bundle= Platform.getBundle(cont);
 			final URL      entry = bundle.getEntry(icon);
 			final ImageDescriptor des = ImageDescriptor.createFromURL(entry);
-			icons.put(identity, des.createImage());		
-			
+			if (icons.containsKey(identity)) {
+				Image i = icons.get(identity);
+				if (!i.isDisposed()) {
+					i.dispose();
+				}
+			}
+			icons.put(identity, des.createImage());
 		}
 		
 	}
@@ -279,5 +284,15 @@ public class OperationDescriptor implements ISeriesItemDescriptor {
 	 */
 	public void setEnabled(boolean enabled) {
 		this.enabled = enabled;
+	}
+
+	public void dispose() {
+		if (icons != null) {
+			for (Image i : icons.values()) {
+				if (!i.isDisposed()) {
+					i.dispose();
+				}
+			}
+		}
 	}
 }

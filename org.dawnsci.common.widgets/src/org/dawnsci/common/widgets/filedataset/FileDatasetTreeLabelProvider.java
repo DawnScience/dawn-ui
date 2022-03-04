@@ -7,9 +7,9 @@ import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.swt.graphics.Image;
 
 public class FileDatasetTreeLabelProvider extends LabelProvider {
-	private static final Image folderImage = Activator.getImage("icons/vogella_folder.gif");
-	private static final Image driveImage = Activator.getImage("icons/vogella_filenav_nav.gif");
-	private static final Image fileImage = Activator.getImage("icons/vogella_file_obj.gif");
+	private final Image folderImage = Activator.getImage("icons/vogella_folder.gif");
+	private final Image driveImage = Activator.getImage("icons/vogella_filenav_nav.gif");
+	private final Image fileImage = Activator.getImage("icons/vogella_file_obj.gif");
 
 	@Override
 	public String getText(Object element) {
@@ -26,5 +26,13 @@ public class FileDatasetTreeLabelProvider extends LabelProvider {
 		if (file.isDirectory())
 			return file.getParent() != null ? folderImage : driveImage;
 		return fileImage;
+	}
+
+	@Override
+	public void dispose() {
+		super.dispose();
+		folderImage.dispose();
+		driveImage.dispose();
+		fileImage.dispose();
 	}
 }

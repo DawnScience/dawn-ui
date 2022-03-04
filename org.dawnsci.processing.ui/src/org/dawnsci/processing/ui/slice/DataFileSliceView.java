@@ -676,7 +676,8 @@ public class DataFileSliceView extends ViewPart {
 		IWorkbenchPartSite site = getSite();
 		if (site == null) return null;
 		IViewPart view = site.getPage().findView(ProcessingView.ID);
-		
+		if (view == null) return null;
+
 		Object ob = view.getAdapter(IOperation.class);
 		IOperation<? extends IOperationModel, ? extends OperationData>[] ops = null;
 		

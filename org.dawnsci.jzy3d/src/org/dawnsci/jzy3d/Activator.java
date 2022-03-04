@@ -54,11 +54,7 @@ public class Activator extends AbstractUIPlugin implements BundleActivator {
 	public static ImageDescriptor getImageDescriptor(String path) {
         return imageDescriptorFromPlugin(PLUGIN_ID, path);
     }
-    		 
-    public static Image getImage(String path) {
-        return getImageDescriptor(path).createImage();
-    }
-    
+
     public static <T> T getService(final Class<T> serviceClass) {
 		if (bundleContext == null) return null;
 		ServiceReference<T> ref = bundleContext.getServiceReference(serviceClass);

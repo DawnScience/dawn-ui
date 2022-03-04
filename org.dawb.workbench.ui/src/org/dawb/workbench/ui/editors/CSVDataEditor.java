@@ -43,6 +43,7 @@ import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.window.ToolTip;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CLabel;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
@@ -404,6 +405,12 @@ public class CSVDataEditor extends EditorPart implements IReusableEditor, IPageC
 		if (tableViewer!=null) tableViewer.getControl().dispose();
      	if (main!=null)        main.dispose();
      	if (data!=null)        data.clear();
+     	if (errorLabel != null) {
+     		Image i = errorLabel.getImage();
+     		if (!i.isDisposed()) {
+     			i.dispose();
+     		}
+     	}
      	dataProvider = null;
     	super.dispose();
     }

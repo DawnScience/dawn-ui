@@ -49,9 +49,9 @@ class IntensityLabelPainter {
 		
 		if (system==null)          return;
 		if (!system.isShowValueLabels()) return;
-		
+		Font f = new Font(Display.getCurrent(), new FontData("Dialog", 10, SWT.NORMAL));
 		try {
-			graphics.setFont(new Font(Display.getCurrent(), new FontData("Dialog", 10, SWT.NORMAL)));
+			graphics.setFont(f);
 			
 			final IAxis xAxis = system.getSelectedXAxis();
 			final IAxis yAxis = system.getSelectedYAxis();
@@ -97,6 +97,8 @@ class IntensityLabelPainter {
 		} catch (Throwable ne) {
 			logger.debug("Unable to process labels!", ne);
 			return;
+		} finally {
+			f.dispose();
 		}
 	}
 

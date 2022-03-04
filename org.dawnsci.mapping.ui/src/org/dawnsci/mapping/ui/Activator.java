@@ -52,16 +52,26 @@ public class Activator extends AbstractUIPlugin {
 	public static Activator getDefault() {
 		return plugin;
 	}
-	
+
+	/**
+	 * Get image descriptor from given path
+	 * @param path plugin relative path of image file
+	 * @return image descriptor
+	 */
 	public static ImageDescriptor getImageDescriptor(String path) {
-        return imageDescriptorFromPlugin("org.dawnsci.mapping.ui", path);
-    }
-    		 
-    public static Image getImage(String path) {
-        return getImageDescriptor(path).createImage();
-    }
-    
-    public static <T> T getService(final Class<T> serviceClass) {
+		return imageDescriptorFromPlugin(PLUGIN_ID, path);
+	}
+
+	/**
+	 * Get image from given path. The caller should dispose of it
+	 * @param path plugin relative path of image file
+	 * @return image
+	 */
+	public static Image getImage(String path) {
+		return getImageDescriptor(path).createImage();
+	}
+
+	public static <T> T getService(final Class<T> serviceClass) {
 		if (bundleContext == null) return null;
 		ServiceReference<T> ref = bundleContext.getServiceReference(serviceClass);
 		if (ref==null) return null;

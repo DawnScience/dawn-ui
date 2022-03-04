@@ -86,7 +86,6 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.ui.PlatformUI;
-import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.eclipse.ui.progress.IProgressService;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
@@ -211,8 +210,8 @@ public class LoadedFilePart {
 		qfw.addListener(new QuickFileWidgetListener());
 		
 		
-		ticked = AbstractUIPlugin.imageDescriptorFromPlugin("org.dawnsci.datavis.view", "icons/ticked.png").createImage();
-		unticked = AbstractUIPlugin.imageDescriptorFromPlugin("org.dawnsci.datavis.view", "icons/unticked.gif").createImage();
+		ticked = Activator.getImageDescriptor("icons/ticked.png").createImage();
+		unticked = Activator.getImageDescriptor("icons/unticked.gif").createImage();
 		
 		viewer.setContentProvider(new IStructuredContentProvider() {
 
@@ -511,7 +510,9 @@ public class LoadedFilePart {
 		fileController.detachLive();
 		ticked.dispose();
 		unticked.dispose();
-		
+		icon.dispose();
+		iconLive.dispose();
+
 		IPreferenceStore ps = Activator.getDefault().getPreferenceStore();
 		ps.setValue(DataVisPreferenceConstants.SIGNALS_ONLY,fileController.isOnlySignals());
 	}

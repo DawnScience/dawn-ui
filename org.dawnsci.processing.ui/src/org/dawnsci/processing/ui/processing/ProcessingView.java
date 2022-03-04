@@ -341,5 +341,16 @@ public class ProcessingView extends ViewPart {
 		}
 		return buf.toString();
 	}
+
+	@Override
+	public void dispose() {
+		super.dispose();
+
+		if (saved != null) {
+			for (OperationDescriptor s : saved) {
+				s.dispose();
+			}
+		}
+	}
 }
 

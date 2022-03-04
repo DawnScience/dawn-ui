@@ -91,7 +91,7 @@ public class ResourceChoiceBox {
 
 		this.resourceButton = new Button(composite, SWT.PUSH);
 		resourceButton.setText("...");
-		resourceButton.setImage(Activator.getImageDescriptor("icons/Project-data.png").createImage());
+		Activator.setButtonImage(resourceButton, "icons/Project-data.png");
 		resourceButton.setToolTipText("Browse to "+(isDirectory()?"folder":"file")+" inside a project");
 		resourceButton.addSelectionListener(new SelectionAdapter() {
 			@Override
@@ -103,7 +103,7 @@ public class ResourceChoiceBox {
 		
 		this.fileButton = new Button(composite, SWT.PUSH);
 		fileButton.setText("...");
-		fileButton.setImage(Activator.getImageDescriptor("icons/data_folder_link.gif").createImage());
+		Activator.setButtonImage(fileButton, "icons/data_folder_link.gif");
 		fileButton.setToolTipText("Browse to an external "+(isDirectory()?"folder":"file")+".");
 		fileButton.addSelectionListener(new SelectionAdapter() {
 			@Override

@@ -55,6 +55,7 @@ import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Cursor;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -186,7 +187,7 @@ public abstract class AbstractTableDelegate implements INavigationDelegate {
 		
 		errorLabel = new CLabel(searchComposite, SWT.NONE);
 		errorLabel.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
-		errorLabel.setImage(Activator.getDefault().getImageDescriptor("icons/exclamation.png").createImage());
+		errorLabel.setImage(Activator.getImageDescriptor("icons/exclamation.png").createImage());
 		GridUtils.setVisible(errorLabel, false);
 
 		this.tableViewer   = new TableViewer(contents, SWT.FULL_SELECTION | SWT.MULTI | SWT.V_SCROLL | SWT.VIRTUAL);
@@ -470,6 +471,12 @@ public abstract class AbstractTableDelegate implements INavigationDelegate {
 	public void dispose() {
 		if (actions!=null) actions.clear();
 		tableViewer.getTable().dispose();
+		if (errorLabel != null) {
+			Image i = errorLabel.getImage();
+			if (!i.isDisposed()) {
+				i.dispose();
+			}
+		}
 	}
 	
 	public void setEnabled(boolean enabled) {
