@@ -84,7 +84,7 @@ public class DataOptionsUtilsTest extends AbstractTestModel {
 				verify(mockFile,times(1)).addNode(string.capture(), node.capture());
 				
 				String value = string.getValue();
-				assertEquals("/entry", value);
+				assertEquals("/entry1", value);
 				
 				Node nodeCap = node.getValue();
 				

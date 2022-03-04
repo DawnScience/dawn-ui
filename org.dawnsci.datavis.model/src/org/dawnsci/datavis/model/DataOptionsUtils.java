@@ -145,7 +145,7 @@ public class DataOptionsUtils {
 		
 		try (NexusFile nf = factory.newNexusFile(filePath)) {
 			nf.createAndOpenToWrite();
-			nf.addNode(Tree.ROOT + "entry", entry);
+			nf.addNode(Tree.ROOT + "entry1", entry);
 		} 
 	}
 	
