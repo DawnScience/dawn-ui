@@ -494,7 +494,7 @@ public class ImageARPESRemappingProcessTool extends ImageProcessingTool {
 
 		// make axis correction to regrid here
 		//double KPStep = kParallel.peakToPeak().doubleValue()/(dataRegion.getShape()[0]-1);
-		//Dataset kParaAxis = DatasetFactory.createRange(kParallel.min().doubleValue()+(KPStep), kParallel.max().doubleValue()-(KPStep), KPStep, Dataset.FLOAT64);
+		//Dataset kParaAxis = DatasetFactory.createRange(kParallel.min().doubleValue()+(KPStep), kParallel.max().doubleValue()-(KPStep), KPStep);
 				
 		// prepare the results
 		// Dataset remappedRegion = InterpolatorUtils.remapAxis(dataRegion, 0, kParallel, kParaAxis);

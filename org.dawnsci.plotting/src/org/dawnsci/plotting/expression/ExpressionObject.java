@@ -24,7 +24,6 @@ import org.eclipse.dawnsci.analysis.api.expressions.IExpressionService;
 import org.eclipse.dawnsci.plotting.api.expressions.IExpressionObject;
 import org.eclipse.dawnsci.plotting.api.expressions.IVariableManager;
 import org.eclipse.january.IMonitor;
-import org.eclipse.january.dataset.Dataset;
 import org.eclipse.january.dataset.DatasetFactory;
 import org.eclipse.january.dataset.DoubleDataset;
 import org.eclipse.january.dataset.IDataset;
@@ -235,7 +234,7 @@ class ExpressionObject implements IExpressionObject {
 			    
 			    if (largestShape!=null) {
 		        	ILazyLoader loader = new ExpressionLazyLoader(suggestedName, getExpressionString(), provider);
-		        	lazy = new ExpressionLazyDataset(suggestedName, Dataset.FLOAT64, largestShape, loader);
+		        	lazy = new ExpressionLazyDataset(loader, suggestedName, DoubleDataset.class, largestShape);
 			    }
 
 			}

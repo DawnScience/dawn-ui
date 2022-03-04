@@ -3,7 +3,6 @@ package org.dawnsci.mapping.ui.test;
 import java.io.IOException;
 
 import org.eclipse.january.IMonitor;
-import org.eclipse.january.dataset.Dataset;
 import org.eclipse.january.dataset.DatasetFactory;
 import org.eclipse.january.dataset.DoubleDataset;
 import org.eclipse.january.dataset.IDataListener;
@@ -27,7 +26,7 @@ public class DynamicRandomLazyDataset extends LazyDynamicDataset {
 
 
 	public DynamicRandomLazyDataset(int[][] shapes, int[] maxShape) {
-		super("random_dynamic", Dataset.FLOAT64, 1, shapes[0], maxShape, null);
+		super(null, "random_dynamic", 1, DoubleDataset.class, shapes[0], maxShape, null);
 
 		loader = new DynamicLazyLoader();
 		shapeArrays = shapes;
