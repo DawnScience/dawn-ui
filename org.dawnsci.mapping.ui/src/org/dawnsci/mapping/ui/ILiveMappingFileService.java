@@ -11,4 +11,7 @@ public interface ILiveMappingFileService  extends ILiveFileService{
 	
 	public void setInitialFiles(String[] files);
 	
+	public String[] getAxisNames();
+	
+	public String getSaveName(String name) throws Exception;
 }
