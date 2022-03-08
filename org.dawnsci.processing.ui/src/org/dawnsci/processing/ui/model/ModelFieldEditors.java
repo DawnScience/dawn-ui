@@ -3,6 +3,7 @@ package org.dawnsci.processing.ui.model;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.Hashtable;
@@ -29,6 +30,7 @@ import org.eclipse.dawnsci.analysis.api.processing.model.ModelField;
 import org.eclipse.dawnsci.analysis.api.processing.model.ModelUtils;
 import org.eclipse.dawnsci.analysis.api.processing.model.OperationModelField;
 import org.eclipse.dawnsci.analysis.api.roi.IROI;
+import org.eclipse.dawnsci.analysis.api.tree.Node;
 import org.eclipse.dawnsci.analysis.dataset.slicer.SliceFromSeriesMetadata;
 import org.eclipse.jface.fieldassist.ContentProposal;
 import org.eclipse.jface.fieldassist.ContentProposalAdapter;
@@ -328,7 +330,30 @@ public class ModelFieldEditors {
 		
 		return ed;
 	}
-	
+
+	private static List<String> createCandidateStems(String path) {
+		String p = path;
+		if (path.startsWith(Node.SEPARATOR)) {
+			p = path.substring(1);
+		}
+		if (p.isEmpty()) {
+			return Arrays.asList(path);
+		}
+
+		String[] stems = p.split(Node.SEPARATOR);
+		int n = stems.length;
+		StringBuilder current = new StringBuilder(stems[0]);
+		for (int i = 1; i < n; i++) {
+			current.append(Node.SEPARATOR);
+			current.append(stems[i]);
+			stems[i] = current.toString();
+		}
+
+		List<String> candidates = Arrays.asList(stems);
+		Collections.reverse(candidates);
+		return candidates;
+	}
+
 	private static void triggerDatasetNameJob(final TextCellEditorWithContentProposal ed, final String path){
 		
 		if (ed == null) return;
@@ -341,22 +366,28 @@ public class ModelFieldEditors {
 				
 				if (path == null) return Status.CANCEL_STATUS;
 				final Map<String, int[]> datasetInfo = DatasetNameUtils.getDatasetInfo(path, null);
-				datasetInfo.toString();
-				
+
 				final IContentProposalProvider cpp = new IContentProposalProvider() {
 					
 					@Override
 					public IContentProposal[] getProposals(String contents, int position) {
+						List<String> stems = createCandidateStems(contents);
 						List<IContentProposal> prop = new ArrayList<IContentProposal>();
-						
 						for (String key : datasetInfo.keySet()) {
-							if (key.startsWith(contents)) prop.add(new ContentProposal(key));
+							for (String s : stems) {
+								if (key.startsWith(s)) {
+									prop.add(new ContentProposal(key));
+									break;
+								}
+							}
 						}
-						
+
 						if (prop.isEmpty()) {
-							for(String key : datasetInfo.keySet()) prop.add(new ContentProposal(key));
+							for (String key : datasetInfo.keySet()) {
+								prop.add(new ContentProposal(key));
+							}
 						}
-						
+
 						return prop.toArray(new IContentProposal[prop.size()]);
 					}
 				};
