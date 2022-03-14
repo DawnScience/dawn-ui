@@ -21,10 +21,6 @@
          version="0.0.0"/>
 
    <includes
-         id="org.eclipse.emf.common"
-         version="0.0.0"/>
-
-   <includes
          id="org.eclipse.emf.ecore"
          version="0.0.0"/>
 
@@ -40,15 +36,16 @@
          id="org.eclipse.ecf.filetransfer.feature"
          version="0.0.0"/>
 
-   <plugin
-         id="org.eclipse.ui"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
+   <includes
+         id="org.eclipse.equinox.p2.core.feature"
+         version="0.0.0"/>
+
+   <includes
+         id="org.eclipse.emf.common"
+         version="0.0.0"/>
 
    <plugin
-         id="org.eclipse.ui.ide"
+         id="org.eclipse.ui"
          download-size="0"
          install-size="0"
          version="0.0.0"
@@ -90,56 +87,7 @@
          unpack="false"/>
 
    <plugin
-         id="org.eclipse.equinox.p2.engine"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
-         id="org.eclipse.equinox.p2.metadata"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
-         id="org.eclipse.equinox.p2.core"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
          id="org.eclipse.compare.core"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
-         id="org.eclipse.equinox.p2.repository"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
-         id="org.eclipse.equinox.security"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
-         id="org.eclipse.equinox.p2.metadata.repository"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
-         id="org.tukaani.xz"
          download-size="0"
          install-size="0"
          version="0.0.0"
@@ -160,6 +108,13 @@
          unpack="false"/>
 
    <plugin
+         id="org.eclipse.ui.ide"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
          id="org.eclipse.e4.ui.ide"
          download-size="0"
          install-size="0"
@@ -167,7 +122,14 @@
          unpack="false"/>
 
    <plugin
-         id="org.eclipse.equinox.concurrent"
+         id="org.eclipse.core.resources"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="org.eclipse.core.filesystem"
          download-size="0"
          install-size="0"
          version="0.0.0"
