@@ -101,6 +101,7 @@ public class EllipseFitSelection extends FitSelectionRegion<EllipticalFitROI> {
 		
 		@Override
 		protected void outlineShape(Graphics graphics, Rectangle parentBounds) {
+			graphics.pushState();
 			graphics.setLineWidth(EllipseFitSelection.this.getLineWidth());
 			graphics.setForegroundColor(getRegionColor());
 			graphics.setAlpha(EllipseFitSelection.this.getAlpha());
@@ -117,6 +118,7 @@ public class EllipseFitSelection extends FitSelectionRegion<EllipticalFitROI> {
 				graphics.setFont(labelFont);
 				graphics.fillString(label, pa.translate(pb).scale(0.5).translate(0, -labeldim.height));
 			}
+			graphics.popState();
 		}
 
 		@Override
