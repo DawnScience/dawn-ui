@@ -6,4 +6,5 @@
    </service>
    <reference bind="setStageScanConfiguration" cardinality="1..1" interface="org.eclipse.scanning.api.ui.IStageScanConfiguration" name="IStageScanConfiguration" policy="static"/>
    <reference bind="setEventService" cardinality="1..1" interface="org.eclipse.scanning.api.event.IEventService" name="IEventService" policy="static"/>
+   <reference bind="setFilePathService" cardinality="1..1" interface="org.eclipse.scanning.api.scan.IFilePathService" name="IFilePathService" policy="static"/>
 </scr:component>
