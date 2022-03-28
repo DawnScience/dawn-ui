@@ -79,9 +79,12 @@ public class MapBeanBuilder {
 				continue;
 			}
 			
-			if (dataNode.containsAttribute("interpretation") && dataNode.getAttribute("interpretation").getFirstElement().equals("rgba-image")){
-				images.add(entry.getKey());
-				continue;
+			if (dataNode.containsAttribute("interpretation")) {
+				String interp = dataNode.getAttribute("interpretation").getFirstElement();
+				if (interp.contains("rgb")) {
+					images.add(entry.getKey());
+					continue;
+				}
 			}
 			
 //			Attribute a = n.getAttribute("axes");

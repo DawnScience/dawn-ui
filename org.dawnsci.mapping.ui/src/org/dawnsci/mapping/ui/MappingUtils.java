@@ -13,6 +13,7 @@ import org.eclipse.dawnsci.nexus.NexusFile;
 import org.eclipse.dawnsci.plotting.api.trace.MetadataPlotUtils;
 import org.eclipse.january.DatasetException;
 import org.eclipse.january.MetadataException;
+import org.eclipse.january.dataset.CompoundDataset;
 import org.eclipse.january.dataset.Dataset;
 import org.eclipse.january.dataset.DatasetUtils;
 import org.eclipse.january.dataset.IDataset;
@@ -311,6 +312,9 @@ public class MappingUtils {
 			IDataset data = image.getMap().getSliceView();
 			AxesMetadata axm = data.getFirstMetadata(AxesMetadata.class);
 			data.setName("data");
+			if (data instanceof CompoundDataset) {
+				data = ((CompoundDataset) data).asNonCompoundDataset(true);
+			}
 			DataNode dNode = nexus.createData(group, data);
 			nexus.addAttribute(dNode, TreeFactory.createAttribute("interpretation","rgb-image"));
 			
