@@ -37,6 +37,7 @@ public class SelectionRegionFactory {
 		SUPPORTED_REGIONS.add(RegionType.BOX);
 		SUPPORTED_REGIONS.add(RegionType.PERIMETERBOX);
 		SUPPORTED_REGIONS.add(RegionType.GRID);
+		SUPPORTED_REGIONS.add(RegionType.CENTERED_GRID);
 		SUPPORTED_REGIONS.add(RegionType.RING);
 		SUPPORTED_REGIONS.add(RegionType.XAXIS);
 		SUPPORTED_REGIONS.add(RegionType.YAXIS);
@@ -90,6 +91,9 @@ public class SelectionRegionFactory {
 			break;
 		case GRID:
 			region = new GridSelection(name, coords);
+			break;
+		case CENTERED_GRID:
+			region = new CenteredGridSelection(name, coords);
 			break;
 		case HYPERBOLA:
 			region = new HyperbolaSelection(name, coords);
