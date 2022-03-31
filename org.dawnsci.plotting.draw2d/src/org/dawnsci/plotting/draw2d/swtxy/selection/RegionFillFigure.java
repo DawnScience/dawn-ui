@@ -93,23 +93,16 @@ public abstract class RegionFillFigure<T extends IROI> extends Shape implements 
 	 * Overridden so that we can set enabled to false and have the
 	 * shape draw the same.
 	 */
+	@Override
 	public void paintFigure(Graphics graphics) {
-		
-		if (!areaTranslatable) {
-			if (getAntialias() != null) {
-				graphics.setAntialias(getAntialias().intValue());
-			}
-			if (getAlpha() != null) {
-				graphics.setAlpha(getAlpha().intValue());
-			}
-			if (fill) {
-				fillShape(graphics);
-			}
-			outlineShape(graphics);
-		} else {
-			super.paintFigure(graphics);
+		boolean reset = !areaTranslatable && !isEnabled();
+		if (reset) {
+			setEnabled(true);
 		}
-		
+		super.paintFigure(graphics);
+		if (reset) {
+			setEnabled(false);
+		}
 	}
 
 	public boolean isAreaTranslatable() {
