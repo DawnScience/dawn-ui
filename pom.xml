@@ -39,25 +39,6 @@
 								<goal>run</goal>
 							</goals>
 						</execution>
-						<!-- SCI-10234 This should be removed after update to 2022-03 tp -->
-						<execution> <!-- hack to use fixed swt fragment -->
-							<phase>pre-integration-test</phase>
-							<id>replace-swt-linux-fragment</id>
-							<configuration>
-								<target name="replace-swt-linux-fragment">
-									<echo message="Replacing SWT Linux Fragment"/>
-									<delete file="${project.build.directory}/products/${project.artifactId}/linux/gtk/x86_64/plugins/org.eclipse.swt.gtk.linux.x86_64_3.117.0.v20210906-0842.jar"/>
-									<move file="${project.build.directory}/org.eclipse.swt.gtk.linux.x86_64_3.117.0.v20220221-1348.jar" todir="${project.build.directory}/products/${project.artifactId}/linux/gtk/x86_64/plugins"/>
-									<replace file="${project.build.directory}/products/${project.artifactId}/linux/gtk/x86_64/configuration/org.eclipse.equinox.simpleconfigurator/bundles.info">
-										<replacefilter token="org.eclipse.swt.gtk.linux.x86_64,3.117.0.v20210906-0842" value="org.eclipse.swt.gtk.linux.x86_64,3.117.0.v20220221-1348"/>
-										<replacefilter token="org.eclipse.swt.gtk.linux.x86_64_3.117.0.v20210906-0842.jar" value="org.eclipse.swt.gtk.linux.x86_64_3.117.0.v20220221-1348.jar"/>
-									</replace>
-								</target>
-							</configuration>
-							<goals>
-								<goal>run</goal>
-							</goals>
-						</execution>
 						<execution> <!--  remove window system segment from zip file names -->
 							<phase>post-integration-test</phase>
 							<id>rename-products-archives</id>
@@ -95,26 +76,6 @@
 							<goals>
 								<goal>archive-products</goal>
 							</goals>
-						</execution>
-					</executions>
-				</plugin>
-				<!-- SCI-10234 This should be removed after update to 2022-03 tp -->
-				<plugin>
-					<groupId>com.googlecode.maven-download-plugin</groupId>
-					<artifactId>download-maven-plugin</artifactId>
-					<version>${download.maven.plugin.version}</version>
-					<executions>
-						<execution>
-							<phase>process-resources</phase>
-							<goals>
-								<goal>wget</goal>
-							</goals>
-							<configuration>
-								<!-- download modified version of swt linux fragment -->
-								<url>https://alfred.diamond.ac.uk/p2/diamond/R202202251118/repository/plugins/org.eclipse.swt.gtk.linux.x86_64_3.117.0.v20220221-1348.jar</url>
-								<sha256>d5484b72585ae83722ce391535b32178fb710020c472d75bdd0b8ba6b70d7ec6</sha256>
-								<unpack>false</unpack>
-							</configuration>
 						</execution>
 					</executions>
 				</plugin>
