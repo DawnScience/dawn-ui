@@ -568,6 +568,7 @@ public class HistogramToolPage2 extends AbstractToolPage implements IToolPage {
 
 		@Override
 		public void traceAdded(TraceEvent evt) {
+			if (!(evt.getSource() instanceof IPaletteTrace)) return;
 			IPaletteTrace p = (IPaletteTrace) evt.getSource();
 			activePaletteTrace.set(p);
 			updateHistogramUIElements(p);

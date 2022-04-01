@@ -30,6 +30,7 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 
@@ -53,9 +54,11 @@ public class HistogramToolbarControl {
 	private Text high;
 	
 	private Image lockImage;
+	private Image unlockImage;
+	private Image nolockImage;
 	
 	private Composite control;
-	
+
 	@PostConstruct
 	public void createControl(Composite parent) {
 		control = new Composite(parent, SWT.None);
@@ -72,17 +75,17 @@ public class HistogramToolbarControl {
 			try {
 				ImageDescriptor imd = ImageDescriptor.createFromURL(new URL("platform:/plugin/org.dawnsci.datavis.e4.addons/icons/lock.png"));
 				lockImage =  imd.createImage();
+				unlockImage = new Image(Display.getCurrent(), lockImage, SWT.IMAGE_DISABLE);
+				nolockImage = new Image(Display.getCurrent(), lockImage, SWT.IMAGE_GRAY);
 			} catch (Exception e) {
 				
 			}
 		}
 		
-		if (lockImage != null) {
-			lock.setImage(lockImage);
-		} else {
+		if (lockImage == null) {
 			lock.setText("Lock");
 		}
-		
+
 		lock.setToolTipText("Lock min and max colourmap values");
 		
 		lock.addSelectionListener(new SelectionAdapter() {
@@ -90,7 +93,9 @@ public class HistogramToolbarControl {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				if (trace != null) {
-					trace.setRescaleHistogram(!lock.getSelection());
+					boolean rescale = !lock.getSelection();
+					trace.setRescaleHistogram(rescale);
+					lock.setImage(rescale ? unlockImage : lockImage);
 				}
 				
 			}
@@ -180,17 +185,10 @@ public class HistogramToolbarControl {
 				if (hasPalette(source)) {
 					IPaletteTrace pt = (IPaletteTrace) source;
 					HistogramToolbarControl.this.trace = pt;
-					enable(true);
-					HistogramToolbarControl.this.lock.setSelection(!pt.isRescaleHistogram());
-					
-					if ((pt.getMin() != null) && (pt.getMax() != null)) {
-						HistogramToolbarControl.this.low.setText(pt.getMin().toString());
-						HistogramToolbarControl.this.high.setText(pt.getMax().toString());
-					}
-					
+					updateUI(pt);
 					HistogramToolbarControl.this.trace.addPaletteListener(listener);
 				} else {
-					enable(false);
+					enable(null);
 					HistogramToolbarControl.this.trace = null;
 				}
 				
@@ -202,12 +200,9 @@ public class HistogramToolbarControl {
 				if (hasPalette(source)) {
 					IPaletteTrace pt = (IPaletteTrace) source;
 					HistogramToolbarControl.this.trace = pt;
-					enable(true);
-					HistogramToolbarControl.this.lock.setSelection(!pt.isRescaleHistogram());
-					HistogramToolbarControl.this.low.setText(pt.getMin().toString());
-					HistogramToolbarControl.this.high.setText(pt.getMax().toString());
+					updateUI(pt);
 				} else {
-					enable(false);
+					enable(null);
 					HistogramToolbarControl.this.trace = null;
 				}
 			}
@@ -219,8 +214,7 @@ public class HistogramToolbarControl {
 					HistogramToolbarControl.this.trace.removePaletteListener(listener);
 					HistogramToolbarControl.this.trace = null;
 				}
-				
-				enable(false);
+				enable(null);
 			}
 			
 		};
@@ -237,16 +231,13 @@ public class HistogramToolbarControl {
 
 		plottingService.addRegistrationListener(regListener);
 		
-		enable(false);
+		enable(null);
 		
 		listener = new IPaletteListener.Stub() {
 			@Override 
 			protected void updateEvent(PaletteEvent evt) {
 				IPaletteTrace t = evt.getTrace();
-				enable(true);
-				HistogramToolbarControl.this.lock.setSelection(!t.isRescaleHistogram());
-				HistogramToolbarControl.this.low.setText(t.getMin().toString());
-				HistogramToolbarControl.this.high.setText(t.getMax().toString());
+				updateUI(t);
 			}
 		};
 	}
@@ -254,7 +245,7 @@ public class HistogramToolbarControl {
 	private static boolean hasPalette(Object source) {
 		if (source instanceof IPaletteTrace) {
 			IPaletteTrace pt = (IPaletteTrace) source;
-			return pt.getMin() != null;
+			return pt.getMin() != null && pt.getMax() != null;
 		}
 		return false;
 	}
@@ -294,29 +285,38 @@ public class HistogramToolbarControl {
 	@PreDestroy
 	public void dispose() {
 		if (lockImage != null) lockImage.dispose();
+		if (unlockImage != null) unlockImage.dispose();
+		if (nolockImage != null) nolockImage.dispose();
 		if (system != null) system.removeTraceListener(traceListener);
 		plottingService.removeRegistrationListener(regListener);
 	}
-	
+
 	public void setSystemTrace(IPlottingSystem<?> system, IPaletteTrace trace) {
 		this.system = system;
 		this.trace = trace;
 		updateUI(trace);
 	}
-	
+
 	private void updateUI(IPaletteTrace trace) {
-		low.setText(Double.toString(trace.getMin().doubleValue()));
-		high.setText(Double.toString(trace.getMax().doubleValue()));
-		lock.setSelection(!trace.isRescaleHistogram());
+		low.setText(trace.getMin().toString());
+		high.setText(trace.getMax().toString());
+		enable(trace);
 	}
-	
-	private void enable(boolean enable) {
+
+	private void enable(IPaletteTrace pt) {
+		boolean enable = pt != null;
 		Control[] children = control.getChildren();
 		
 		for (Control c : children) {
 			c.setEnabled(enable);
 		}
-		
+
+		boolean rescale = enable ? pt.isRescaleHistogram() : true;
+		lock.setSelection(!rescale);
+		if (lockImage != null) {
+			lock.setImage(enable ? (rescale ? unlockImage : lockImage) : nolockImage);
+		} else {
+			lock.setGrayed(!enable);
+		}
 	}
-	
 }
