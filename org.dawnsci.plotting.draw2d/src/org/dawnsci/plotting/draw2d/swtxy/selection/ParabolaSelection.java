@@ -81,11 +81,13 @@ public class ParabolaSelection extends LockableSelectionRegion<ParabolicROI> {
 			outlineShape(graphics, parentBounds, false);
 
 			if (label != null && isShowLabel()) {
+				graphics.pushState();
 				graphics.setAlpha(192);
 				graphics.setForegroundColor(labelColour);
 				graphics.setBackgroundColor(ColorConstants.white);
 				graphics.setFont(labelFont);
 				graphics.fillString(label, getPoint(Math.PI * 0.75));
+				graphics.popState();
 			}
 		}
 

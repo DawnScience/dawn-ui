@@ -85,6 +85,7 @@ public class PolylineSelection extends ROISelectionRegion<IPolylineROI> {
 
 		@Override
 		protected void outlineShape(Graphics graphics) {
+			graphics.pushState();
 			Rectangle b = getParent().getBounds();
 			Draw2DUtils.drawClippedPolyline(graphics, points, b, false);
 			if (isShowLabel()) {
@@ -96,6 +97,7 @@ public class PolylineSelection extends ROISelectionRegion<IPolylineROI> {
 					// Ok no label then.
 				}
 			}
+			graphics.popState();
 		}
 
 		@Override

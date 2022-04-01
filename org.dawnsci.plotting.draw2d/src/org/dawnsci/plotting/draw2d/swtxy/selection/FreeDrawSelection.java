@@ -188,6 +188,7 @@ public class FreeDrawSelection extends ROISelectionRegion<FreeDrawROI> {
 
 		@Override
 		protected void outlineShape(Graphics graphics) {
+			graphics.pushState();
 			graphics.setForegroundColor(getRegionColor());
 			graphics.setAlpha(getAlpha());
 			graphics.setLineWidth(getLineWidth());
@@ -203,6 +204,7 @@ public class FreeDrawSelection extends ROISelectionRegion<FreeDrawROI> {
 			if (isShowLabel()) {
 				graphics.drawText(getName(), points.getMidpoint());
 			}
+			graphics.popState();
 		}
 
 		@Override

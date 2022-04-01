@@ -99,6 +99,7 @@ public class CircleFitSelection extends FitSelectionRegion<CircularFitROI> {
 		
 		@Override
 		protected void outlineShape(Graphics graphics, Rectangle parentBounds) {
+			graphics.pushState();
 			graphics.setLineWidth(CircleFitSelection.this.getLineWidth());
 			graphics.setForegroundColor(getRegionColor());
 			graphics.setAlpha(CircleFitSelection.this.getAlpha());
@@ -115,6 +116,7 @@ public class CircleFitSelection extends FitSelectionRegion<CircularFitROI> {
 				graphics.setFont(labelFont);
 				graphics.fillString(label, pa.translate(pb).scale(0.5).translate(0, -labeldim.height));
 			}
+			graphics.popState();
 		}
 
 		@Override
