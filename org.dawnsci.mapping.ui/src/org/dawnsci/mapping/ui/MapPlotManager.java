@@ -50,6 +50,7 @@ import org.eclipse.dawnsci.plotting.api.trace.IVectorTrace;
 import org.eclipse.dawnsci.plotting.api.trace.IVectorTrace.ArrowConfiguration;
 import org.eclipse.dawnsci.plotting.api.trace.IVectorTrace.VectorNormalization;
 import org.eclipse.dawnsci.plotting.api.trace.MetadataPlotUtils;
+import org.eclipse.dawnsci.plotting.api.trace.IImageTrace.DownsampleType;
 import org.eclipse.january.DatasetException;
 import org.eclipse.january.dataset.Dataset;
 import org.eclipse.january.dataset.DatasetFactory;
@@ -694,6 +695,9 @@ public class MapPlotManager implements IMapPlotController{
 		trace.setDynamicData(dataset);
 		trace.setGlobalRange(o.getRange());
 		trace.setAxes(o.getAxes(), false);
+		
+		trace.setDownsampleType(DownsampleType.POINT);
+		
 		return trace;
 	
 	}
