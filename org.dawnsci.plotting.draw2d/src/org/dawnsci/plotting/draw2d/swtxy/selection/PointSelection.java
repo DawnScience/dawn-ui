@@ -10,6 +10,7 @@ package org.dawnsci.plotting.draw2d.swtxy.selection;
 
 import org.dawnsci.plotting.draw2d.swtxy.translate.TranslationListener;
 import org.eclipse.dawnsci.analysis.dataset.roi.PointROI;
+import org.eclipse.dawnsci.analysis.dataset.roi.handler.PointROIHandler;
 import org.eclipse.dawnsci.analysis.dataset.roi.handler.ROIHandler;
 import org.eclipse.dawnsci.plotting.api.axis.ICoordinateSystem;
 import org.eclipse.draw2d.Figure;
@@ -17,7 +18,6 @@ import org.eclipse.draw2d.Graphics;
 import org.eclipse.draw2d.IFigure;
 import org.eclipse.draw2d.geometry.Point;
 import org.eclipse.draw2d.geometry.PointList;
-import org.eclipse.draw2d.geometry.PrecisionPoint;
 import org.eclipse.draw2d.geometry.Rectangle;
 
 public class PointSelection extends ROISelectionRegion<PointROI> {
@@ -60,11 +60,6 @@ public class PointSelection extends ROISelectionRegion<PointROI> {
 	}
 
 	@Override
-	protected PointROI createROI(boolean recordResult) {
-		return super.createROI(recordResult);
-	}
-
-	@Override
 	public void setMobile(boolean mobile) {
 		if (mobile == isMobile())
 			return;
@@ -84,7 +79,7 @@ public class PointSelection extends ROISelectionRegion<PointROI> {
 
 		@Override
 		protected ROIHandler<PointROI> createROIHandler(PointROI roi) {
-			return null;
+			return new PointROIHandler(roi);
 		}
 
 		@Override
@@ -98,11 +93,6 @@ public class PointSelection extends ROISelectionRegion<PointROI> {
 			croi.setPoint(cs.getValueFromPosition(p.x(), p.y()));
 			region.createROI(true);
 			configureHandles();
-		}
-
-		@Override
-		protected TranslationListener createHandleNotifier() {
-			return region.createRegionNotifier();
 		}
 
 		@Override
@@ -125,65 +115,6 @@ public class PointSelection extends ROISelectionRegion<PointROI> {
 			RectangularHandle h = super.addHandle(x, y, mobile, visible, listener);
 			h.setLocationAbsolute(true);
 			return h;
-		}
-
-		@Override
-		protected Rectangle updateFromHandles() {
-			Rectangle b = null;
-			for (IFigure f : handles) { // this is called first so update points
-				if (f instanceof SelectionHandle) {
-					SelectionHandle h = (SelectionHandle) f;
-					Point pt = h.getSelectionPoint();
-					double[] p = cs.getValueFromPosition(pt.x(), pt.y());
-					croi.setPoint(p);
-					if(shape.isGridSnap()) {
-						p[0] = Math.round(p[0]);
-						p[1] = Math.round(p[1]);
-						double[] pos = cs.getPositionFromValue(p[0], p[1]);
-						h.setSelectionPoint(new Point((int)pos[0], (int)pos[1]));
-					}
-					if (b == null) {
-						b = new Rectangle(h.getBounds());
-					} else {
-						b.union(h.getBounds());
-					}
-				}
-			}
-			return b;
-		}
-
-		/**
-		 * Update according to ROI
-		 * @param proi
-		 */
-		public void updateFromROI(PointROI proi) {
-			int imax = handles.size();
-			if (croi == null) {
-				croi = proi;
-			}
-
-			double[] p = proi.getPoint();
-			if (croi != proi)
-				croi.setPoint(p[0], p[1]);
-			double[] pnt  = cs.getPositionFromValue(p);
-			Rectangle b = null;
-			if (imax != 1) {
-				for (int i = imax-1; i >= 0; i--) {
-					removeHandle((SelectionHandle) handles.remove(i));
-				}
-				boolean mobile = region.isMobile();
-				boolean visible = isVisible() && mobile;
-				b = addHandle(pnt[0], pnt[1], mobile, visible, handleListener).getBounds();
-				region.setRegionObjects(this, handles);
-			} else {
-				Point pt = new PrecisionPoint(pnt[0], pnt[1]);
-				SelectionHandle h = (SelectionHandle) handles.get(0);
-				h.setSelectionPoint(pt);
-				b = h.getBounds();
-			}
-
-			if (b != null)
-				setBounds(b);
 		}
 
 		public void setHandleVisible() {

@@ -152,20 +152,22 @@ abstract public class PolylineROIShape<T extends IPolylineROI> extends ROIShape<
 			fTranslators.add(mover);
 			region.setRegionObjects(this, handles);
 		} else {
-			for (int i = 0; i < imax; i++) {
-				IROI p = proi.getPoint(i);
-				if (proi != croi)
-					croi.setPoint(i, p);
-				double[] pnt = cs.getPositionFromValue(p.getPointRef());
-				Point pt = new PrecisionPoint(pnt[0], pnt[1]);
-				points.setPoint(pt, i);
-				SelectionHandle h = (SelectionHandle) handles.get(i);
-				h.setSelectionPoint(pt);
-				Rectangle hb = h.getBounds();
-				if (b == null) {
-					b = new Rectangle(hb);
-				} else {
-					b.union(hb);
+			if (troi != null) { // do not update if there's dragging going on 
+				for (int i = 0; i < imax; i++) {
+					IROI p = proi.getPoint(i);
+					if (proi != croi)
+						croi.setPoint(i, p);
+					double[] pnt = cs.getPositionFromValue(p.getPointRef());
+					Point pt = new PrecisionPoint(pnt[0], pnt[1]);
+					points.setPoint(pt, i);
+					SelectionHandle h = (SelectionHandle) handles.get(i);
+					h.setSelectionPoint(pt);
+					Rectangle hb = h.getBounds();
+					if (b == null) {
+						b = new Rectangle(hb);
+					} else {
+						b.union(hb);
+					}
 				}
 			}
 		}
