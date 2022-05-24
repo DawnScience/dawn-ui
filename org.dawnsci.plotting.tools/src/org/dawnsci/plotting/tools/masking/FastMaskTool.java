@@ -491,6 +491,7 @@ public class FastMaskTool extends AbstractToolPage {
 							IPersistentFile f = ps.getPersistentFile(fileName);
 							Map<String, IDataset> masks = f.getMasks(null);
 							for (IDataset m : masks.values()) buffer.merge(DatasetUtils.convertToDataset(m));
+							f.close();
 
 						} catch (Exception e1) {
 							logger.error("Could not load mask",e1);
