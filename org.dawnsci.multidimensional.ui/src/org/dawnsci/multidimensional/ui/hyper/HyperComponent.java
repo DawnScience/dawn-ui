@@ -210,7 +210,6 @@ public class HyperComponent {
 			region.setUserRegion(false);
 			region.addROIListener(this.roiListenerLeft);
 			sideSystem.clear();
-			updateRight(region, rroi);
 			
 			IRegion windowRegion = null;
 			if (createSideROI) {
@@ -220,7 +219,6 @@ public class HyperComponent {
 				windowRegion.setROI(broi);
 				sideSystem.addRegion(windowRegion);
 				windowRegion.setUserRegion(false);
-				updateLeft(windowRegion,windowRegion.getROI());
 			} 
 		} catch (Exception e) {
 			logger.error("Error adding regions to hyperview: " + e.getMessage());
@@ -243,9 +241,13 @@ public class HyperComponent {
 	}
 	
 	public void dispose() {
-		
-		if (mainSystem != null && !mainSystem.isDisposed()) mainSystem.dispose();
-		if (sideSystem != null && !sideSystem.isDisposed()) sideSystem.dispose();
+
+		if (mainSystem != null) {
+			mainSystem.dispose();
+		}
+		if (sideSystem != null) {
+			sideSystem.dispose();
+		}
 		
 	}
 	

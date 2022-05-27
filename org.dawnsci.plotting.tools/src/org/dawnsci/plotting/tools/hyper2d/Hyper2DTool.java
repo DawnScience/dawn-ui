@@ -110,9 +110,9 @@ public class Hyper2DTool extends AbstractToolPage {
 			}
 		}
 		
+		component.setExternalListeners(getRightROIListener(), getLeftROIListener(), getRightRegionListener(),getLeftRegionListener());
+		component.setData(ds, ax, new Slice[2], new int[]{0,1}, new SideReducer(), new MainReducer());
 		
-		component.setExternalListeners(getLeftROIListener(), getRightROIListener(), getLeftRegionListener(), getRightRegionListener());
-		component.setData(ds, ax, new Slice[2], new int[]{0,1}, new MainReducer(), new SideReducer());
 	}
 	
 	@Override
@@ -133,8 +133,9 @@ public class Hyper2DTool extends AbstractToolPage {
 	
 	@Override
 	public void dispose() {
-		component.dispose();
 		super.dispose();
+		component.dispose();
+		
 	}
 
 	@Override
@@ -157,9 +158,11 @@ public class Hyper2DTool extends AbstractToolPage {
 	}
 	
 	private void removeAllRegions(String name) {
-		Collection<IRegion> regions = getPlottingSystem().getRegions();
+		IPlottingSystem<Object> ps = getPlottingSystem();
+		if (ps == null) return;
+		Collection<IRegion> regions = ps.getRegions();
 		for (IRegion re : regions) {
-			if (re.getName().startsWith(name)) getPlottingSystem().removeRegion(re);
+			if (re.getName().startsWith(name)) ps.removeRegion(re);
 		}
 	}
 	
@@ -222,7 +225,7 @@ public class Hyper2DTool extends AbstractToolPage {
 		if (r == null) return;
 		Collection<IRegion> regions = null;
 		if (isMainPlotUpdate) { // if update is on the main plotting system
-			if (right) { 
+			if (!right) { 
 				regions = component.getSideSystem().getRegions();
 			} else {
 				regions = ((IRegionSystem) component.getAdapter(IPlottingSystem.class)).getRegions();
@@ -322,13 +325,8 @@ public class Hyper2DTool extends AbstractToolPage {
 				if (source.getROI() == null) return;
 				
 				try {
-//					IRegion r = getPlottingSystem().createRegion(source.getName(), RegionType.YAXIS_LINE);
-//					YAxisBoxROI roi = new YAxisBoxROI();
-//					double x = source.getROI().getPointX();
-//					
-//					updateROI(roi,x,false,r, false);
+
 					boolean origin = getImageTrace().getImageOrigin().isOnLeadingDiagonal();
-//					boolean origin = true;
 					IRegion r = createRegion(source, origin);
 					r.setRegionColor(ColorConstants.blue);
 					r.setName(source.getName());
@@ -387,13 +385,8 @@ public class Hyper2DTool extends AbstractToolPage {
 				if (source.getROI() == null) return;
 				
 				try {
-//					IRegion r = getPlottingSystem().createRegion(source.getName(), RegionType.XAXIS_LINE);
-//					XAxisBoxROI roi = new XAxisBoxROI();
-//					double x = source.getROI().getPointX();
-//					
-//					updateROI(roi,x,true,r, false);
+
 					boolean origin = getImageTrace().getImageOrigin().isOnLeadingDiagonal();
-//					boolean origin = true;
 					IRegion r = createRegion(source, !origin);
 					r.setRegionColor(ColorConstants.blue);
 					r.setName(source.getName());
@@ -432,7 +425,6 @@ public class Hyper2DTool extends AbstractToolPage {
 				IROI roi, Slice[] slices, int[] order) throws Exception {
 			
 			axis = axes.get(0);
-			
 			
 			double point = roi.getPoint()[0];
 			int pos = ROISliceUtils.findPositionOfClosestValueInAxis(axes.get(1), point);
@@ -487,7 +479,6 @@ public class Hyper2DTool extends AbstractToolPage {
 		@Override
 		public IDataset reduce(ILazyDataset data, List<IDataset> axes,
 				IROI roi, Slice[] slices, int[] order) throws Exception {
-			
 			axis = axes.get(1);
 			
 			double point = roi.getPoint()[0];
@@ -495,7 +486,7 @@ public class Hyper2DTool extends AbstractToolPage {
 			int pos = ROISliceUtils.findPositionOfClosestValueInAxis(axes.get(0), point);
 			
 			Slice slice = new Slice(pos, pos+1, 1);
-			IDataset sl = data.getSlice(slice).squeeze();
+			IDataset sl = data.getSlice((Slice)null,slice).squeeze();
 			return sl;
 		}
 
