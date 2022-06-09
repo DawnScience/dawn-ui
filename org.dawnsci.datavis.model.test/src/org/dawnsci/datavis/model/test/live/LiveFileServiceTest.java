@@ -22,7 +22,7 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
-import org.mockito.Matchers;
+import org.mockito.ArgumentMatchers;
 
 
 public class LiveFileServiceTest {
@@ -66,10 +66,10 @@ public class LiveFileServiceTest {
 		assertFalse(fileController.getLoadedFiles().isEmpty());
 		
 		captured.refreshRequest();
-		verify(liveFileService,times(1)).runUpdate(any(Runnable.class),Matchers.eq(false));
+		verify(liveFileService,times(1)).runUpdate(any(Runnable.class),ArgumentMatchers.eq(false));
 		
 		captured.localReload(path,false);
-		verify(liveFileService,times(1)).runUpdate(any(Runnable.class),Matchers.eq(true));
+		verify(liveFileService,times(1)).runUpdate(any(Runnable.class),ArgumentMatchers.eq(true));
 		
 	}
 
