@@ -94,6 +94,10 @@ public class PeakFittingToolOperation extends AbstractOperation<PeakFittingToolM
 			//log
 			return null;
 		}
+		
+		if (bean == null) {
+			return null;
+		}
 
 		List<IDataset> output = new ArrayList<>();
 
