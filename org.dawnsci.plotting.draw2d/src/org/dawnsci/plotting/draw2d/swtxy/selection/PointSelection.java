@@ -65,7 +65,7 @@ public class PointSelection extends ROISelectionRegion<PointROI> {
 			return;
 
 		super.setMobile(mobile);
-		if (!mobile) {
+		if (!mobile && shape != null) {
 			((RPoint) shape).setHandleVisible(); // always show handle
 		}
 	}
