@@ -18,7 +18,7 @@ import org.eclipse.january.dataset.Slice;
 import org.eclipse.ui.services.AbstractServiceFactory;
 import org.eclipse.ui.services.IServiceLocator;
 
-import com.thoughtworks.xstream.core.util.CompositeClassLoader;
+import uk.ac.diamond.scisoft.analysis.utils.CompositeClassLoader;
 
 /**
  * Defines the class loader that should be used for RMI communications.
