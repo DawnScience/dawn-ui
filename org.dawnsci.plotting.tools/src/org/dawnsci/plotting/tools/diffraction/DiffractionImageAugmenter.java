@@ -299,7 +299,7 @@ public class DiffractionImageAugmenter implements IDetectorPropertyListener, IDi
 				count++;
 			}
 			drawResolutionConics(calibrantRingsList, "calibrant", RING_TYPE.CALIBRANT);
-			if (isShowingBeamCenter())
+			if (isShowingBeamCenter() && !centreMoved)
 				drawResolutionBeamPosition();
 		} else {
 			hideConics(RING_TYPE.CALIBRANT);
