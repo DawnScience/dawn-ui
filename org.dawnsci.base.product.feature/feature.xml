@@ -228,14 +228,14 @@
          unpack="false"/>
 
    <plugin
-         id="uk.ac.gda.common.activemq"
+         id="com.github.tschoonj.xraylib"
          download-size="0"
          install-size="0"
          version="0.0.0"
          unpack="false"/>
 
    <plugin
-         id="com.github.tschoonj.xraylib"
+         id="uk.ac.diamond.platform-messaging"
          download-size="0"
          install-size="0"
          version="0.0.0"
