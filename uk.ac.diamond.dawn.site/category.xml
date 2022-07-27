@@ -3,10 +3,19 @@
    <feature id="org.dawnsci.base.product.feature">
       <category name="dawn.base.category"/>
    </feature>
+   <feature id="org.dawnsci.base.product.feature.source">
+      <category name="dawn.base.category"/>
+   </feature>
    <feature id="uk.ac.diamond.dawn.product.feature">
       <category name="dawn.diamond.category"/>
    </feature>
+   <feature id="uk.ac.diamond.dawn.product.feature.source">
+      <category name="dawn.diamond.category"/>
+   </feature>
    <feature id="uk.ac.diamond.scisoft.peema.feature">
+      <category name="dawn.diamond.category"/>
+   </feature>
+   <feature id="uk.ac.diamond.scisoft.peema.feature.source">
       <category name="dawn.diamond.category"/>
    </feature>
    <category-def name="dawn.base.category" label="Dawn Scientific Software (base features)">
