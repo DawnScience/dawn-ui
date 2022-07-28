@@ -10,9 +10,12 @@ package org.dawnsci.commandserver.processing;
 
 import org.eclipse.dawnsci.nexus.INexusFileFactory;
 
+import uk.ac.gda.common.activemq.ISessionService;
+
 public class ServiceHolder {
 
 	private INexusFileFactory nexusFileFactory;
+	private ISessionService sessionService;
 
 	public ServiceHolder() {
 		
@@ -24,5 +27,13 @@ public class ServiceHolder {
 
 	public void setNexusFileFactory(INexusFileFactory nexusFileFactory) {
 		this.nexusFileFactory = nexusFileFactory;
+	}
+
+	public ISessionService getSessionService() {
+		return sessionService;
+	}
+
+	public void setSessionService(ISessionService sessionService) {
+		this.sessionService = sessionService;
 	}
 }

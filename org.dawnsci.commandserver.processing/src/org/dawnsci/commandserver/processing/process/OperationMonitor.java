@@ -1,19 +1,23 @@
 package org.dawnsci.commandserver.processing.process;
 
-import java.net.URI;
+import javax.jms.JMSException;
+import javax.jms.Message;
+import javax.jms.Session;
+import javax.jms.Topic;
 
 import org.dawnsci.commandserver.processing.Activator;
 import org.dawnsci.commandserver.processing.process.ProcessingMessage.ProcessingStatus;
 import org.dawnsci.commandserver.processing.process.ProcessingMessage.SwmrStatus;
 import org.eclipse.january.IMonitor;
-import org.eclipse.scanning.api.event.EventException;
-import org.eclipse.scanning.api.event.IEventService;
-import org.eclipse.scanning.api.event.core.IPublisher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import uk.ac.diamond.scisoft.analysis.processing.IFlushMonitor;
 import uk.ac.diamond.scisoft.analysis.processing.bean.OperationBean;
+import uk.ac.gda.common.activemq.ISessionService;
 
 /**
  * Simply logs the message returned from the operations.
@@ -27,27 +31,19 @@ public class OperationMonitor implements IMonitor, IFlushMonitor {
 	
 	private static final Logger logger = LoggerFactory.getLogger(OperationMonitor.class);
 
-	private OperationBean obean;
+	private OperationBean 	      obean;
 	//Total and count currently not used but likely to be in future
-	private int           total;
-	private int           count;
-	private boolean       cancelled;
-	private IPublisher<ProcessingMessage> publisher; 
+	private int           	      total;
+	private int           	      count;
+	private boolean       		  cancelled;
+	private final ISessionService sessionService;
+	private final ObjectMapper 	  mapper;
 	
 	public OperationMonitor(OperationBean obean, int total) {
 		this.obean       = obean;
 		this.total       = total;
-		
-		if (obean.getPublisherURI() == null || obean.getPublisherURI().isEmpty()) {
-			logger.debug("No publisher URI set");
-		} else {
-			try {
-				IEventService eventService = Activator.getService(IEventService.class);
-				 publisher = eventService.createPublisher(new URI(obean.getPublisherURI()), PROCESSING_TOPIC);
-			} catch (Exception e) {
-				logger.error("Could not create publisher:",e);
-			}
-		}
+		this.sessionService = Activator.getService(ISessionService.class);
+		this.mapper = new ObjectMapper().findAndRegisterModules();
 	}
 	
 	@Override
@@ -86,18 +82,41 @@ public class OperationMonitor implements IMonitor, IFlushMonitor {
 	}
 	
 	private void buildMessageAndBroadcast(ProcessingStatus status) {
-		if (publisher == null) {
+		if (sessionService == null) {
+			logger.debug("Ignoring message request as there is no session");
 			return;
 		}
 		
 		ProcessingMessage m = new ProcessingMessage(obean.getOutputFilePath(),
 				obean.getFilePath(), status, obean.isReadable() ? SwmrStatus.ACTIVE : SwmrStatus.DISABLED);
+		sendProcessingMessageWithBestEffort(m);
+	}
 
+	private void sendProcessingMessageWithBestEffort(ProcessingMessage processingMessage) {
 		try {
-			publisher.broadcast(m);
-		} catch (EventException e) {
-			logger.error("Could not broadcast message:",e);
-		}
-
+			// Create a session for sending a single message
+			Session session = createSession();
+			
+			// Serialize message to JSON
+			String asJson = mapper.writeValueAsString(processingMessage);
+			
+			// Broadcast message to topic
+			Message message = session.createTextMessage(asJson);
+			Topic topic = session.createTopic(PROCESSING_TOPIC);
+			session.createProducer(topic).send(message);
+		} catch (JMSException | JsonProcessingException | NullPointerException e) {
+			// NullPointer case is because ISessionService throws a NullPointer if the
+			// connection fails
+			logger.error("Could not broadcast message", e);
+		}	
+	}
+	
+	private Session createSession() throws JMSException {
+		// Laziness means that an error will only be thrown the first time this is tried
+		String publisherUri = obean.getPublisherURI();
+		if (obean.getPublisherURI() == null || obean.getPublisherURI().isEmpty())
+			throw new JMSException("No publisher URI set");
+		
+		return sessionService.getSession(publisherUri, false, Session.AUTO_ACKNOWLEDGE);
 	}
 }
