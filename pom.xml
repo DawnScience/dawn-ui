@@ -130,12 +130,7 @@
 				<activeByDefault>true</activeByDefault>
 			</activation>
 			<modules>
-				<module>org.dawnsci.common.live</module>
-				<module>org.dawnsci.datavis.live</module>
-				<module>org.dawnsci.datavis.live.test</module>
-				<module>org.dawnsci.mapping.ui.live</module>
 				<module>org.dawnsci.processing.python.ui</module>
-                <module>org.dawnsci.visualisation.remote.feature</module>
 			</modules>
 		</profile>
 		<profile>
