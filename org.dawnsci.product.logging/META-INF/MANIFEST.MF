@@ -3,6 +3,7 @@ Bundle-ManifestVersion: 2
 Bundle-Name: Dawn Logger Configuration
 Bundle-SymbolicName: org.dawnsci.product.logging
 Bundle-Version: 1.1.1.qualifier
-Fragment-Host: ch.qos.logback.classic;bundle-version="[1.0.7,2.0.0)"
+Fragment-Host: ch.qos.logback.classic;bundle-version="[1.0.7,1.2.3.v20200428-2012)"
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Automatic-Module-Name: org.dawnsci.product.logging
+Require-Bundle: ch.qos.logback.core;bundle-version="[1.2.3,1.2.3.v20200428-2012)"
