@@ -62,7 +62,28 @@ public class SurfacePlotROI extends RectangularROI {
 		this.yAspect = yAspect;
 		spt = new double[]{startX,startY};
 	}
-	
+
+	/**
+	 * Copy constructor
+	 * @param orig
+	 */
+	public SurfacePlotROI(SurfacePlotROI orig) {
+		super(orig);
+		startX = orig.startX;
+		startY = orig.startY;
+		endX = orig.endX;
+		endY = orig.endY;
+		xSamplingMode = orig.xSamplingMode;
+		ySamplingMode = orig.ySamplingMode;
+		xAspect = orig.xAspect;
+		yAspect = orig.yAspect;
+	}
+
+	@Override
+	public SurfacePlotROI copy() {
+		return new SurfacePlotROI(this);
+	}
+
 	@Override
 	public String toString() {
 		return "("+startX+", "+startY+")("+endX+", "+endY+")";
