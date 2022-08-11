@@ -84,10 +84,10 @@ public class PlotImageService extends AbstractServiceFactory implements IPlotIma
 	static {
 		System.out.println("Starting PlotImageService");
 	}
+
 	public PlotImageService() {
-		
 	}
-	
+
 	private static ImageRegistry imageRegistry;
 
 	@Override
@@ -105,8 +105,7 @@ public class PlotImageService extends AbstractServiceFactory implements IPlotIma
 		
 		try {
 			final Dataset thumb = getThumbnail(f, width, height);
-		    return createImageSWT(thumb, null);
-		    
+			return createImageSWT(thumb, null);
 		} catch (Throwable ne) {
 			
 			if (imageRegistry == null) imageRegistry = JFaceResources.getImageRegistry();
@@ -119,7 +118,7 @@ public class PlotImageService extends AbstractServiceFactory implements IPlotIma
 			if (imageData != null) {
 				image = new Image(Display.getDefault(), imageData);
 				imageRegistry.put(extension, image);
-			    return image;
+				return image;
 			}
 
 		}
@@ -133,7 +132,7 @@ public class PlotImageService extends AbstractServiceFactory implements IPlotIma
 
 		return blank;
 	}
-	
+
 	private Dataset getThumbnail(final File f, final int wdith, final int height) throws Throwable {
 		final ILoaderService loader = ServiceLoader.getLoaderService();
 		IDataHolder dh = loader.getData(f.getAbsolutePath(),null);
@@ -162,17 +161,16 @@ public class PlotImageService extends AbstractServiceFactory implements IPlotIma
 		}
 
 		return null;
-		
 	}
 
 	/**
 	 * Modified from fable
 	 * @param thumbnail
 	 * @return
-	 * @throws Exception 
+	 * @throws Exception
 	 */
 	public Image createImageSWT(final IDataset thumbnail, ImageServiceBean bean) throws Exception {
-        
+
 		final ScopedPreferenceStore store = new ScopedPreferenceStore(InstanceScope.INSTANCE, IPlottingSystem.PREFERENCE_STORE);
 		
 		if (bean==null) {
@@ -188,9 +186,7 @@ public class PlotImageService extends AbstractServiceFactory implements IPlotIma
 	}
 
 	@Override
-	public Object create(Class serviceInterface, IServiceLocator parentLocator,
-			IServiceLocator locator) {
-		
+	public Object create(Class serviceInterface, IServiceLocator parentLocator, IServiceLocator locator) {
 		if (serviceInterface==IPlotImageService.class) {
 			return new PlotImageService();
 		} else if (serviceInterface==IFileIconService.class) {
@@ -214,15 +210,12 @@ public class PlotImageService extends AbstractServiceFactory implements IPlotIma
 			final Dataset thumb = getThumbnail(set, width, height);
 			if (thumb==null) return null;
 			return createImage(thumb, (ImageServiceBean)data.getImageServiceBean());
-			
 		} else {
-
 			PlotDisposable pd  = (PlotDisposable)data.getDisposable();
 			if (pd == null) pd = (PlotDisposable)createPlotDisposable(null);
 			final PlotDisposable plotDisposable = pd;
 			
 			final IPlottingSystem<?> system = pd.getSystem();
-		
 			
 			final Image[] scaled = new Image[1];
 			
@@ -285,24 +278,23 @@ public class PlotImageService extends AbstractServiceFactory implements IPlotIma
 					}
 					
 					if (width>=300) {
-						scaled[0]   = ((AbstractPlottingSystem)system).getImage(new Rectangle(0, 0, width, height));
+						scaled[0]   = ((AbstractPlottingSystem<?>)system).getImage(new Rectangle(0, 0, width, height));
 					
 					} else { // They wanted an icon
-			            final Image unscaled = ((AbstractPlottingSystem)system).getImage(new Rectangle(0, 0, 300, 300));
-			            scaled[0]   = new Image(display, unscaled.getImageData().scaledTo(width, height));
+						final Image unscaled = ((AbstractPlottingSystem<?>) system).getImage(new Rectangle(0, 0, 300, 300));
+						scaled[0] = new Image(display, unscaled.getImageData().scaledTo(width, height));
 					}
 					
 					// They are inefficiently make a new plot part each time.
 					if (data.getDisposable()==null) plotDisposable.dispose();
 				}
 			});
-            return scaled[0];
+			return scaled[0];
 		}
 	}
-	
+
 	@Override
 	public IDisposable createPlotDisposable(String plotName) throws Exception {
-		
 		// We plot to an offscreen plotting system, then take a screen shot of this.
 		final PlotDisposable ret = new PlotDisposable();
 		IPlottingSystem<?> system = plotName!=null 
@@ -333,9 +325,8 @@ public class PlotImageService extends AbstractServiceFactory implements IPlotIma
 		
 		return ret;
 	}
-	
+
 	protected static class PlotDisposable implements IDisposable {
-		
 		private IPlottingSystem<?> system;
 		private Shell           shell;
 
@@ -413,86 +404,85 @@ public class PlotImageService extends AbstractServiceFactory implements IPlotIma
 
 		return returnImage;
 	}
-	
-	/**
-	 * Create a square image from a specified file, f of given side size, size in pixels.
-	 * @param f
-	 * @param size
-	 * @return
-	 */
+
+	@Override
 	public Image createImage(final BufferedImage image) {
-		return new Image(null,convertToSWT(image) );
+		return new Image(null,convertToSWT(image));
 	}
-	
+
+	@Override
 	public IDataset createDataset(final BufferedImage bufferedImage) {
 		return AWTImageUtils.makeDatasets(bufferedImage, true)[0];
 	}
 
-    static ImageData convertToSWT(BufferedImage bufferedImage) {
-        if (bufferedImage.getColorModel() instanceof DirectColorModel) {
-            DirectColorModel colorModel = (DirectColorModel)bufferedImage.getColorModel();
-            PaletteData palette = new PaletteData(colorModel.getRedMask(), colorModel.getGreenMask(), colorModel.getBlueMask());
-            ImageData data = new ImageData(bufferedImage.getWidth(), bufferedImage.getHeight(), colorModel.getPixelSize(), palette);
-            for (int y = 0; y < data.height; y++) {
-                    for (int x = 0; x < data.width; x++) {
-                            int rgb = bufferedImage.getRGB(x, y);
-                            int pixel = palette.getPixel(new RGB((rgb >> 16) & 0xFF, (rgb >> 8) & 0xFF, rgb & 0xFF)); 
-                            data.setPixel(x, y, pixel);
-                            if (colorModel.hasAlpha()) {
-                                    data.setAlpha(x, y, (rgb >> 24) & 0xFF);
-                            }
-                    }
-            }
-            return data;            
-        } else if (bufferedImage.getColorModel() instanceof IndexColorModel) {
-            IndexColorModel colorModel = (IndexColorModel)bufferedImage.getColorModel();
-            int size = colorModel.getMapSize();
-            byte[] reds = new byte[size];
-            byte[] greens = new byte[size];
-            byte[] blues = new byte[size];
-            colorModel.getReds(reds);
-            colorModel.getGreens(greens);
-            colorModel.getBlues(blues);
-            RGB[] rgbs = new RGB[size];
-            for (int i = 0; i < rgbs.length; i++) {
-                    rgbs[i] = new RGB(reds[i] & 0xFF, greens[i] & 0xFF, blues[i] & 0xFF);
-            }
-            PaletteData palette = new PaletteData(rgbs);
-            ImageData data = new ImageData(bufferedImage.getWidth(), bufferedImage.getHeight(), colorModel.getPixelSize(), palette);
-            data.transparentPixel = colorModel.getTransparentPixel();
-            WritableRaster raster = bufferedImage.getRaster();
-            int[] pixelArray = new int[1];
-            for (int y = 0; y < data.height; y++) {
-                    for (int x = 0; x < data.width; x++) {
-                            raster.getPixel(x, y, pixelArray);
-                            data.setPixel(x, y, pixelArray[0]);
-                    }
-            }
-            return data;
-        }
-        return null;
-    }
+	static ImageData convertToSWT(BufferedImage bufferedImage) {
+		if (bufferedImage.getColorModel() instanceof DirectColorModel) {
+			DirectColorModel colorModel = (DirectColorModel) bufferedImage.getColorModel();
+			PaletteData palette = new PaletteData(colorModel.getRedMask(), colorModel.getGreenMask(),
+					colorModel.getBlueMask());
+			ImageData data = new ImageData(bufferedImage.getWidth(), bufferedImage.getHeight(),
+					colorModel.getPixelSize(), palette);
+			for (int y = 0; y < data.height; y++) {
+				for (int x = 0; x < data.width; x++) {
+					int rgb = bufferedImage.getRGB(x, y);
+					int pixel = palette.getPixel(new RGB((rgb >> 16) & 0xFF, (rgb >> 8) & 0xFF, rgb & 0xFF));
+					data.setPixel(x, y, pixel);
+					if (colorModel.hasAlpha()) {
+						data.setAlpha(x, y, (rgb >> 24) & 0xFF);
+					}
+				}
+			}
+			return data;
+		} else if (bufferedImage.getColorModel() instanceof IndexColorModel) {
+			IndexColorModel colorModel = (IndexColorModel) bufferedImage.getColorModel();
+			int size = colorModel.getMapSize();
+			byte[] reds = new byte[size];
+			byte[] greens = new byte[size];
+			byte[] blues = new byte[size];
+			colorModel.getReds(reds);
+			colorModel.getGreens(greens);
+			colorModel.getBlues(blues);
+			RGB[] rgbs = new RGB[size];
+			for (int i = 0; i < rgbs.length; i++) {
+				rgbs[i] = new RGB(reds[i] & 0xFF, greens[i] & 0xFF, blues[i] & 0xFF);
+			}
+			PaletteData palette = new PaletteData(rgbs);
+			ImageData data = new ImageData(bufferedImage.getWidth(), bufferedImage.getHeight(),
+					colorModel.getPixelSize(), palette);
+			data.transparentPixel = colorModel.getTransparentPixel();
+			WritableRaster raster = bufferedImage.getRaster();
+			int[] pixelArray = new int[1];
+			for (int y = 0; y < data.height; y++) {
+				for (int x = 0; x < data.width; x++) {
+					raster.getPixel(x, y, pixelArray);
+					data.setPixel(x, y, pixelArray[0]);
+				}
+			}
+			return data;
+		}
+		return null;
+	}
 
-    static Image getImageSWT(File file) {
-        ImageIcon systemIcon = (ImageIcon) FileSystemView.getFileSystemView().getSystemIcon(file);
-        if (systemIcon == null) // Happens when file does not exist
-            return null;
-        java.awt.Image image = systemIcon.getImage();
-        if (image instanceof BufferedImage) {
-            return new Image(Display.getDefault(), convertToSWT((BufferedImage)image));
-        }
-        int width = image.getWidth(null);
-        int height = image.getHeight(null);
-        BufferedImage bufferedImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
-        Graphics2D g2d = bufferedImage.createGraphics();
-        g2d.drawImage(image, 0, 0, null);
-        g2d.dispose();
-        return new Image(Display.getDefault(), convertToSWT(bufferedImage));
-    }
-    
-    private static Image folderImage;
-    private static Image rootFolderImage;
-    
+	static Image getImageSWT(File file) {
+		ImageIcon systemIcon = (ImageIcon) FileSystemView.getFileSystemView().getSystemIcon(file);
+		if (systemIcon == null) // Happens when file does not exist
+			return null;
+		java.awt.Image image = systemIcon.getImage();
+		if (image instanceof BufferedImage) {
+			return new Image(Display.getDefault(), convertToSWT((BufferedImage) image));
+		}
+		int width = image.getWidth(null);
+		int height = image.getHeight(null);
+		BufferedImage bufferedImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+		Graphics2D g2d = bufferedImage.createGraphics();
+		g2d.drawImage(image, 0, 0, null);
+		g2d.dispose();
+		return new Image(Display.getDefault(), convertToSWT(bufferedImage));
+	}
+
+	private static Image folderImage;
+	private static Image rootFolderImage;
+
 	private Image getFolderImage(File file) {
 		//file should not be null, but if it is, then try a folder name (next line should be deleted)
 //		if (file==null) file = isWindowsOS() ? new File("C:/Windows/") : new File("/etc");
