@@ -206,13 +206,6 @@
          unpack="false"/>
 
    <plugin
-         id="org.eclipse.dawnsci.xdi"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
          id="tec.units.indriya"
          download-size="0"
          install-size="0"
