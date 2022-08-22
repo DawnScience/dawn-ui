@@ -120,6 +120,7 @@
 		<module>uk.ac.diamond.screenshot.gui</module>
 		<module>uk.ac.diamond.screenshot.gui.survey</module>
 		<module>uk.ac.diamond.screenshot.osgi</module>
+		<module>org.dawnsci.thirdparty.activemq.feature</module>
         <module>org.dawnsci.plotting.svg.feature</module>
 	</modules>
 

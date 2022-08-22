@@ -133,10 +133,6 @@
          id="org.eclipse.dawnsci.nexus.feature"
          version="0.0.0"/>
 
-   <includes
-         id="uk.ac.diamond.daq.thirdparty.activemq.feature"
-         version="0.0.0"/>
-
    <plugin
          id="uk.ac.diamond.scisoft.analysis.rcp.contributions"
          download-size="0"
