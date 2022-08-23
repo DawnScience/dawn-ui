@@ -120,7 +120,6 @@
 		<module>uk.ac.diamond.screenshot.gui</module>
 		<module>uk.ac.diamond.screenshot.gui.survey</module>
 		<module>uk.ac.diamond.screenshot.osgi</module>
-		<module>org.dawnsci.thirdparty.activemq.feature</module>
         <module>org.dawnsci.plotting.svg.feature</module>
 	</modules>
 
@@ -173,6 +172,7 @@
 				<module>org.dawnsci.surfacescatter.ui</module>
 				<module>org.dawnsci.processing.python.ui</module>
 				<module>org.dawnsci.python.feature</module>
+				<module>org.dawnsci.thirdparty.activemq.feature</module>
 				<module>org.dawnsci.commandserver.processing</module>
 				<module>org.dawnsci.commandserver.processing.feature</module>
 				<module>uk.ac.diamond.dawn.base.product.feature</module>
@@ -185,6 +185,7 @@
 				<module>org.dawnsci.surfacescatter.ui</module>
 				<module>org.dawnsci.processing.python.ui</module>
 				<module>org.dawnsci.python.feature</module>
+				<module>org.dawnsci.thirdparty.activemq.feature</module>
 				<module>org.dawnsci.commandserver.processing</module>
 				<module>org.dawnsci.commandserver.processing.feature</module>
 				<module>uk.ac.diamond.dawn.base.product.feature</module>
