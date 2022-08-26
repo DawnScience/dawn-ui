@@ -40,6 +40,7 @@ import org.eclipse.january.dataset.DatasetUtils;
 import org.eclipse.january.dataset.ILazyDataset;
 import org.eclipse.january.dataset.InterfaceUtils;
 import org.eclipse.january.dataset.LazyDynamicDataset;
+import org.eclipse.january.metadata.IMetadata;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -489,11 +490,13 @@ public class LoadedFile implements IDataObject, IDataFilePackage {
 				logger.warn("Label {} does not have rank 0", labelName);
 				return null;
 			} catch (Exception e) {
-				logger.error("Could not read label {}", labelName,e);
+				logger.error("Could not read label {}", labelName, e);
 			}
 		} else {
+			IMetadata metadata = dataHolder.get().getMetadata();
+			if (metadata == null) return null;
 			try {
-				Serializable metaValue = dataHolder.get().getMetadata().getMetaValue(labelName);
+				Serializable metaValue = metadata.getMetaValue(labelName);
 				if (metaValue == null) return null;
 				Dataset d = DatasetFactory.createFromObject(metaValue);
 				d.squeeze();
@@ -501,10 +504,8 @@ public class LoadedFile implements IDataObject, IDataFilePackage {
 					return convertFromString(labelName, d);
 				}
 				logger.warn("Label {} does not have rank 0", labelName);
-				return null;
-				
 			} catch (MetadataException e) {
-				return null;
+				logger.error("Problem getting label {}", labelName, e);
 			}
 		}
 		return null;
