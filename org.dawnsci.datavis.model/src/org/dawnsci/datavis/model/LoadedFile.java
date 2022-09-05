@@ -143,7 +143,7 @@ public class LoadedFile implements IDataObject, IDataFilePackage {
 			}
 
 			boolean notString = !lazyDataset.getElementClass().equals(String.class);
-			if (notString && (lazyDataset.getSize() != 1 || signals.containsKey(n))) {
+			if (notString && (lazyDataset.getSize() > 1 || signals.containsKey(n))) {
 				NexusSignal s = signals.getOrDefault(n, null);
 				DataOptions d = new DataOptions(n, this, s);
 				d.setShortName(shortName);
