@@ -40,6 +40,7 @@ import org.eclipse.january.dataset.DatasetUtils;
 import org.eclipse.january.dataset.ILazyDataset;
 import org.eclipse.january.dataset.InterfaceUtils;
 import org.eclipse.january.dataset.LazyDynamicDataset;
+import org.eclipse.january.dataset.ShapeUtils;
 import org.eclipse.january.metadata.IMetadata;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -143,7 +144,7 @@ public class LoadedFile implements IDataObject, IDataFilePackage {
 			}
 
 			boolean notString = !lazyDataset.getElementClass().equals(String.class);
-			if (notString && (lazyDataset.getSize() > 1 || signals.containsKey(n))) {
+			if (notString && (ShapeUtils.calcLongSize(lazyDataset.getShape()) > 1 || signals.containsKey(n))) {
 				NexusSignal s = signals.getOrDefault(n, null);
 				DataOptions d = new DataOptions(n, this, s);
 				d.setShortName(shortName);
