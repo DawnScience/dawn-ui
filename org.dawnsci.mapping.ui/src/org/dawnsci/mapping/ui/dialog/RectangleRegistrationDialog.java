@@ -403,7 +403,11 @@ public class RectangleRegistrationDialog extends Dialog {
 				views[i] = cim.getElementsView(i);
 			}
 			List<Dataset> rim = mrc.value(views);
-			im = DatasetUtils.createCompoundDataset(cim.getClass(), rim.toArray(new Dataset[e]));
+
+			for (int i = 0; i < e; i++) { // two datasets returned per view
+				views[i] = rim.get(2 * i);
+			}
+			im = DatasetUtils.createCompoundDataset(cim.getClass(), views);
 		} else {
 			List<Dataset> value = mrc.value(image);
 			im = value.get(0);
