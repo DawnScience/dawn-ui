@@ -24,12 +24,10 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.dawb.common.ui.DawbUtils;
-import org.dawb.common.ui.util.DialogUtils;
 import org.dawb.common.ui.util.EclipseUtils;
 import org.dawb.common.util.io.FileUtils;
 import org.dawb.common.util.io.PropUtils;
 import org.dawb.workbench.ui.Activator;
-import org.dawb.workbench.ui.data.wizard.PythonFilterWizard;
 import org.dawb.workbench.ui.editors.preference.EditorConstants;
 import org.dawb.workbench.ui.editors.preference.EditorPreferencePage;
 import org.dawb.workbench.ui.transferable.TransferableDataObject;
@@ -103,7 +101,6 @@ import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.window.ToolTip;
 import org.eclipse.jface.window.Window;
-import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.events.KeyListener;
@@ -446,8 +443,7 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 							final Color plotColor = get1DPlotColor(cn);
 							if (plotColor!=null) {
 								gc.setForeground(plotColor);
-								int offset = cn.getFilterPath()!=null ? 20 : 0;
-								gc.drawText(cn.getDisplayName(rootName), item.getBounds().x+16+offset, item.getBounds().y+1);
+								gc.drawText(cn.getDisplayName(rootName), item.getBounds().x+16, item.getBounds().y+1);
 								event.doit = false;
 							}
 							gc.setAlpha(origAlpha);
@@ -752,74 +748,6 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 		});
 	}
 
-
-	private PlotDataFilterProvider filterProvider;
-	/**
-	 * Choose a jython file to be used as the filter or create a new one.
-	 * 
-	 * @param ob
-	 */
-	@SuppressWarnings("unused")
-	private void chooseFilterFile(ITransferableDataObject ob) {
-
-        if (ob==null) return;
-        
-		PythonFilterWizard wiz=null;
-		try {
-			wiz = (PythonFilterWizard)EclipseUtils.openWizard(PythonFilterWizard.ID, false);
-		} catch (Exception e) {
-			logger.error("Cannot open wizard "+PythonFilterWizard.ID, e);
-		}
-		
-		// TODO Should be non modal, it takes a while.
-		WizardDialog wd = new  WizardDialog(Display.getDefault().getActiveShell(), wiz);
-		wd.setTitle(wiz.getWindowTitle());
-		wd.create();
-		wd.getShell().setSize(650, 800);
-		DialogUtils.centerDialog(Display.getCurrent().getActiveShell(), wd.getShell());
-		wd.open();
-
-		final String filterPath =  wiz.getPythonPath();
-		if (filterPath==null) return;
-         
-        if (ob.getFilterPath()!=null) {
-        	boolean ok = MessageDialog.openConfirm(Display.getDefault().getActiveShell(), "Confirm Overwrite", 
-        			                  "Do you want to replace filter '"+ob.getFilterPath()+"' with '"+filterPath);
-        	if (!ok) return; 
-        }
-		
-        ob.setFilterPath(filterPath);
-        
-        saveExpressions(); // TODO save filters as well.
-        
-        // We now create a filter which calls the associated cpython interperter to filter the data.
-        if (filterProvider==null) filterProvider = new PlotDataFilterProvider(getPlottingSystem());
-        try {
-        	filterProvider.createFilter(ob); // TODO Rank from dialog
-        } catch (Exception ne) {
-        	ob.setFilterPath(null);
-        	String message = ne.getMessage()!=null ? ne.getMessage() : "Filter '"+ob.getFilterPath()+"' is not a valid python script!";
-        	MessageDialog.openInformation(Display.getDefault().getActiveShell(), "Cannot set filter", message);
-        	Activator.getDefault().getLog().log(new Status(IStatus.WARNING, Activator.PLUGIN_ID, message));
-        }
-
-        ob.setChecked(!ob.isChecked());
-        selectionChanged(ob, true);
-	}
-	
-	
-	protected void clearFilterFile(ITransferableDataObject ob) {
-
-		if (ob==null) return;
-		if (filterProvider!=null) filterProvider.deleteFilter(ob); 
-		ob.setFilterPath(null);
-		
-        ob.setChecked(!ob.isChecked());
-        selectionChanged(ob, true);
-		
-	}
-
-
 	protected void updateActions(IAction copy, 
 								IAction paste, 
 								IAction delete, 
@@ -1015,18 +943,6 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 		return names;
 	}
 
-	/**
-	 * if the table selection is reducible
-	 */
-	private boolean isSelectionReducible() {
-		for(ITransferableDataObject ob : selections) {
-			if (ob==null) continue;
-			ILazyDataset lazy = ob.getLazyData(null);
-			if (lazy!=null && lazy.getRank() >= 3) return true;
-		}
-		return false;
-	}
-	
 	private ExpressionEditingSupport     expressionEditor;
 	private VariableNameEditingSupport   variableEditor;
 	
@@ -1688,11 +1604,6 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 			dataViewer.getTable().removeMouseListener(this);
 			dataViewer.getTable().removeKeyListener(this);
 		}
-		if (filterProvider!=null) {
-			filterProvider.dispose();
-			filterProvider = null;
-		}
-		
 	}
 
 	public void addExpression() {
