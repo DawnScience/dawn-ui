@@ -228,12 +228,6 @@
             name="H5 File"
             project="false">
       </wizard>
-      <wizard
-            category="org.dawb.common.ui.project.DataCategory"
-            class="org.dawb.workbench.ui.data.wizard.PythonFilterWizard"
-            id="org.dawb.workbench.ui.data.pythonFilterWizard"
-            name="Python Filter">
-      </wizard>
    </extension>
    <extension
          point="org.eclipse.ui.startup">

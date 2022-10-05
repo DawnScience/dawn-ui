@@ -37,7 +37,6 @@ class DataSetColumnLabelProvider extends ColumnLabelProvider implements IStyledL
 	private Color BLACK = PlatformUI.getWorkbench().getDisplay().getSystemColor(SWT.COLOR_BLACK);
 	private Image checkedIcon;
 	private Image uncheckedIcon;
-	private Image filteredIcon;
 	
 	private int columnIndex;
 	private PlotDataComponent component;
@@ -52,20 +51,13 @@ class DataSetColumnLabelProvider extends ColumnLabelProvider implements IStyledL
 			id = Activator.getImageDescriptor("icons/unticked.gif");
 			uncheckedIcon =  id.createImage();
 		}
-		
-		if (columnIndex == 1) {
-			ImageDescriptor id = Activator.getImageDescriptor("icons/filter.png");
-			filteredIcon = id.createImage();
-		}
 	}
 	
 	public void dispose() {
 		if (checkedIcon!=null)   checkedIcon.dispose();
 		if (uncheckedIcon!=null) uncheckedIcon.dispose();
-		if (filteredIcon!=null)  filteredIcon.dispose();
 		checkedIcon=null;
 		uncheckedIcon=null;
-		filteredIcon=null;
 	}
 	
 	public Image getImage(Object ob) {
@@ -73,10 +65,6 @@ class DataSetColumnLabelProvider extends ColumnLabelProvider implements IStyledL
 		final ITransferableDataObject element = (ITransferableDataObject)ob;
 		if (columnIndex==0) {
 		    return element.isChecked() ? checkedIcon : uncheckedIcon;
-		} if (columnIndex==1) {
-			if (element.getFilterPath()!=null) {
-				return filteredIcon;
-			}
 		}
 		
 		return null;
@@ -92,12 +80,6 @@ class DataSetColumnLabelProvider extends ColumnLabelProvider implements IStyledL
 		StyledString ret = columnIndex == 3 ||  columnIndex == 4 ||  columnIndex == 5
 				         ? new StyledString(text, StyledString.DECORATIONS_STYLER)
 				         : new StyledString(text);
-		
-		final ITransferableDataObject ob = (ITransferableDataObject)element;
-		if (ob.getFilterPath()!=null) {
-			String name = ob.getFilterPath().substring(ob.getFilterPath().lastIndexOf('/')+1);
-			ret.append(new StyledString("   ["+name+"]", StyledString.QUALIFIER_STYLER));
-		}
 		
 		if (ret!=null && !"".equals(ret.getString())) {
 			
