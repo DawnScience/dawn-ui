@@ -197,14 +197,14 @@ public class XYRegionConfigDialog extends XYGraphConfigDialog {
 				int index = regionGraph.getRegionArea().getTraceList().indexOf(selectedTrace);
 				if (index > 0) {
 					Composite traceComp = getTraceConfigPageList().get(index).getComposite();
-					setTraceTabSelected(index, tabFolder, getTraceCombo(), traceComp);
+					setTraceTabSelected(index, getTraceCombo(), traceComp);
 				}
 			} else {
 				tabFolder.setSelection(imageTraceIndex);
 				int index = 0; // FIXME if there is ever more than one image allowed to be plotted.
 				if (index > 0) {
 					Composite traceComp = imageTraceConfigPageList.get(index);
-					setTraceTabSelected(index, tabFolder, imageTraceCombo, traceComp);
+					setTraceTabSelected(index, imageTraceCombo, traceComp);
 				}
 			}
 		}
@@ -235,17 +235,12 @@ public class XYRegionConfigDialog extends XYGraphConfigDialog {
 		return new DTraceConfigPage(getXYGraph(), trace);
 	}
 
-	private static final void setTraceTabSelected(int index, TabFolder tabFolder, Combo combo, Composite composite) {
+	private static final void setTraceTabSelected(int index, Combo combo, Composite composite) {
 
 		combo.select(index);
-
-		final TabItem traces = tabFolder.getItem(index);
-		final Composite traceTabComposite = (Composite)traces.getControl();
-		final Composite traceConfigComposite = (Composite)traceTabComposite.getChildren()[1];
-		final StackLayout sl = (StackLayout)traceConfigComposite.getLayout();
+		final StackLayout sl = (StackLayout)composite.getParent().getLayout();
 		sl.topControl = composite;
-		traceTabComposite.layout(true, true);
-
+		composite.layout(true, true);
 	}
 
 	protected void applyChanges(){	
