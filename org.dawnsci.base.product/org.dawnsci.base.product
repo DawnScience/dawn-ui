@@ -22,9 +22,6 @@ Version 2.28.0
 openFile
 --launcher.appendVmargs
       </programArgs>
-      <programArgsMac>-vm
-../Eclipse/jre/Contents/Home/bin
-      </programArgsMac>
       <vmArgs>-Xms256m
 -Xmx1024m
 -Dosgi.requiredJavaVersion=1.8.0
@@ -60,6 +57,7 @@ openFile
 
    <features>
       <feature id="org.dawnsci.base.product.feature"/>
+      <feature id="org.eclipse.justj.openjdk.hotspot.jre.minimal.stripped" installMode="root"/>
    </features>
 
    <configurations>
