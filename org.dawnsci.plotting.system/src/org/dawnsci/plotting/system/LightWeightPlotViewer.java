@@ -1925,6 +1925,7 @@ public class LightWeightPlotViewer<T> implements IPlottingSystemViewer<T>, IAnno
 	 * Please override for draw2d listeners.
 	 * @deprecated draw2d Specific
 	 */
+	@Deprecated
 	public void removeMouseClickListener(MouseListener mcl) {
 		if (getXYRegionGraph()                ==null) return;
 		if (getXYRegionGraph().getRegionArea()==null) return;
