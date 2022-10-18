@@ -16,7 +16,8 @@ Require-Bundle: org.eclipse.dawnsci.plotting.api,
  org.dawnsci.datavis.model,
  org.dawnsci.common.widgets
 Import-Package: org.dawb.common.ui.menu,
- org.slf4j;version="1.7.25"
+ org.slf4j;version="1.7.25",
+ uk.ac.diamond.daq.util.logging.deprecation
 Service-Component: OSGI-INF/serviceManager.xml
 Bundle-Activator: org.dawnsci.jzy3d.Activator
 Bundle-ActivationPolicy: lazy

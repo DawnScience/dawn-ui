@@ -19,8 +19,11 @@ import org.eclipse.core.runtime.IExtension;
 import org.eclipse.core.runtime.IExtensionPoint;
 import org.eclipse.core.runtime.IExtensionRegistry;
 import org.eclipse.core.runtime.Platform;
+import uk.ac.diamond.daq.util.logging.deprecation.DeprecationLogger;
 
 public class ExtensionPointManager {
+	
+	private static final DeprecationLogger logger = DeprecationLogger.getLogger(ExtensionPointManager.class);
 	private static final String TRANSFER_FUNCTION_ID = "org.dawnsci.plotting.histogram.channelColourScheme";
 	private static final String COLOUR_CATEGORY_ID = "org.dawnsci.plotting.histogram.colourCategory";
 	private static final String COLOUR_SCHEME_ID = "org.dawnsci.plotting.histogram.colourScheme";
@@ -143,8 +146,9 @@ public class ExtensionPointManager {
 	 * @return
 	 * @deprecated Use {@link #getTransferFunctionFromID(String)}
 	 */
-	@Deprecated
+	@Deprecated(since="Dawn 1.6")
 	public TransferFunctionContribution getTransferFunctionByID(String id) {
+		logger.deprecatedMethod("getTransferFunctionByID(String)", null, "getTransferFunctionFromID(String)");
 		return getTransferFunctionFromID(id);
 	}
 

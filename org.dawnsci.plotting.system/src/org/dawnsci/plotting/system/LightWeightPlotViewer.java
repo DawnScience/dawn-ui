@@ -8,6 +8,7 @@
  */
 package org.dawnsci.plotting.system;
 
+import uk.ac.diamond.daq.util.logging.deprecation.DeprecationLogger;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -147,8 +148,6 @@ import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IViewPart;
 import org.eclipse.ui.IWorkbenchPart;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Package private. This class deals with plotting actions specific to the
@@ -159,7 +158,7 @@ import org.slf4j.LoggerFactory;
  */
 public class LightWeightPlotViewer<T> implements IPlottingSystemViewer<T>, IAnnotationSystem, IRegionSystem, IAxisSystem, IPrintablePlotting, ITraceActionProvider, IAdaptable {
 
-	private static final Logger logger = LoggerFactory.getLogger(LightWeightPlotViewer.class);
+	private static final DeprecationLogger logger = DeprecationLogger.getLogger(LightWeightPlotViewer.class);
 
 	// Canvas used in SWT mode
 	private Canvas           figureCanvas;
@@ -1068,6 +1067,7 @@ public class LightWeightPlotViewer<T> implements IPlottingSystemViewer<T>, IAnno
 	 * @return
 	 */
 	@Override
+	@Deprecated(since="at least 2015")
 	public List<ILineTrace> createLineTraces(final String                title, 
 			final IDataset              x, 
 			final List<? extends IDataset> ys,
@@ -1075,7 +1075,7 @@ public class LightWeightPlotViewer<T> implements IPlottingSystemViewer<T>, IAnno
 			final Map<String,ITrace>    traceMap,
 			final Map<Object, Color>    colorMap,
 			final IProgressMonitor      monitor) {
-
+		logger.deprecatedMethod("createLineTraces(String, IDataset, List<? extends IDataset>, List<String>, Map<String, ITrace>, Map<Object, Color>, IProgressMonitor)");
 		final String rootName = system.getRootName();
 
 		final IAxis xAxis = getSelectedXAxis();
@@ -1737,8 +1737,11 @@ public class LightWeightPlotViewer<T> implements IPlottingSystemViewer<T>, IAnno
 	AbstractPlottingSystem<T> getSystem() {
 		return system;
 	}
+	
 
+	@Deprecated(since="at least 2015")
 	public void setXFirst(boolean xfirst) {
+		logger.deprecatedMethod("setXFirst(boolean)");
 		this.plotActionsCreator.setXfirstButtons(xfirst);
 	}
 
@@ -1925,8 +1928,9 @@ public class LightWeightPlotViewer<T> implements IPlottingSystemViewer<T>, IAnno
 	 * Please override for draw2d listeners.
 	 * @deprecated draw2d Specific
 	 */
-	@Deprecated
+	@Deprecated(since="Dawn 1.7.1")
 	public void removeMouseClickListener(MouseListener mcl) {
+		logger.deprecatedMethod("removeMouseClickListener(MouseListener)");
 		if (getXYRegionGraph()                ==null) return;
 		if (getXYRegionGraph().getRegionArea()==null) return;
 		getXYRegionGraph().getRegionArea().removeAuxilliaryClickListener(mcl);

@@ -169,8 +169,6 @@ public class DataSet3DPlot1D implements IDataSet3DCorePlot, AreaSelectListener, 
 	private SceneGraphComponent secondaryXAxisLabel = null;
 	private SceneGraphComponent topClip = null;
 	private SceneGraphComponent bottomClip = null;
-	@SuppressWarnings("unused")
-	private ArrayPoolUtility pool = null;
 	private QuadMeshFactory areaSelectFactory = null;
 
 	private String xAxisLabelStr = null;
@@ -252,7 +250,6 @@ public class DataSet3DPlot1D implements IDataSet3DCorePlot, AreaSelectListener, 
 			font_scale_axis = FONT_AXIS_SCALE_SOFTWARE;
 		}
 		this.app = app;
-		pool = new ArrayPoolUtility();
 		tickFactory = new TickFactory(TickFormatting.plainMode);
 		tool = new AreaSelectTool();
 		actionTool = new PlotActionTool();

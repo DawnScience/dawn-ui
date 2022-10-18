@@ -18,9 +18,11 @@ import org.eclipse.dawnsci.plotting.api.axis.IAxisListener;
 import org.eclipse.dawnsci.plotting.api.axis.ICoordinateSystem;
 import org.eclipse.dawnsci.plotting.api.axis.ICoordinateSystemListener;
 import org.eclipse.dawnsci.plotting.api.trace.IImageTrace;
+import uk.ac.diamond.daq.util.logging.deprecation.DeprecationLogger;
 
 public class RegionCoordinateSystem implements ICoordinateSystem, IAxisListener {
 
+	private static final DeprecationLogger logger = DeprecationLogger.getLogger(RegionCoordinateSystem.class);
 	private IImageTrace imageTrace;
 	private IAxis x,y;
 	private boolean isDisposed=false;
@@ -84,7 +86,9 @@ public class RegionCoordinateSystem implements ICoordinateSystem, IAxisListener 
 	}
 
 	@Override
+	@Deprecated(since="at least 2015")
 	public int[] getValuePosition(double... value) {
+		logger.deprecatedMethod("getValuePosition(int...)", null, "getValueFromPosition(int...)");
 		double[] pos = getPositionFromValue(value[0], value[1]);
 		return new int[] {(int) pos[0], (int) pos[1]};
 	}
@@ -110,7 +114,9 @@ public class RegionCoordinateSystem implements ICoordinateSystem, IAxisListener 
 	}
 
 	@Override
+	@Deprecated(since="at least 2015")
 	public double[] getPositionValue(int... position) {
+		logger.deprecatedMethod("getPositionValue(int...)", null, "getPositionFromValue(int...)");
 		checkDisposed();
 
 		return transformPositionToValue(position[0], position[1]);

@@ -18,3 +18,4 @@ Automatic-Module-Name: org.dawnsci.multidimensional.ui
 Bundle-ActivationPolicy: lazy
 Export-Package: org.dawnsci.multidimensional.ui.hyper,
  org.dawnsci.multidimensional.ui.imagecuts
+Import-Package: uk.ac.diamond.daq.util.logging.deprecation
