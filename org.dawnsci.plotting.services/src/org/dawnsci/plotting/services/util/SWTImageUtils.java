@@ -445,6 +445,9 @@ public class SWTImageUtils {
 			// 1 less than size and then 1 for each bound colour is lost.
 			scale = (size - 1) / (max - min);
 			maxPixel = max - min;
+		} else if (max == min) {
+			scale = 1;
+			maxPixel = max;
 		} else {
 			scale = 1;
 			maxPixel = 0xFF;

@@ -31,6 +31,7 @@ import org.eclipse.january.dataset.BooleanDataset;
 import org.eclipse.january.dataset.Dataset;
 import org.eclipse.january.dataset.DatasetUtils;
 import org.eclipse.january.dataset.IndexIterator;
+import org.eclipse.january.dataset.InterfaceUtils;
 import org.eclipse.january.dataset.Maths;
 import org.eclipse.january.dataset.RGBByteDataset;
 import org.eclipse.january.dataset.RGBDataset;
@@ -289,6 +290,8 @@ public class ImageService extends AbstractServiceFactory implements IImageServic
 		    if (bean.isLogColorScale() && ret != null) {
 		    	ret = new double[]{Math.pow(10, ret[0]), Math.pow(10, ret[1]), -1};
 			}
+		    
+			sanitise_stats(ret, InterfaceUtils.isInteger(image.getClass()));
 
 			return ret;
 		}
@@ -347,8 +350,25 @@ public class ImageService extends AbstractServiceFactory implements IImageServic
 		if (bean.isLogColorScale()) {
 			return new double[]{Math.pow(10, min), Math.pow(10, retMax), Math.pow(10, retExtra)};
 		}
+		
+		double[] ret = new double[]{min, retMax, retExtra, max};
+		
+		sanitise_stats(ret, InterfaceUtils.isInteger(image.getClass()));
 
-		return new double[]{min, retMax, retExtra, max};
+		return ret;
+	}
+	
+	private void sanitise_stats(double[] output, boolean isInteger) {
+		if (output[0] == output[1]) {
+	    	
+	    	if (isInteger) {
+	    		output[0] = output[0] - 1;
+	    		output[1] = output[1] + 1; 
+	    	} else {
+	    		output[0] = Math.nextDown(output[0]);
+	    		output[1] = Math.nextUp(output[1]);
+	    	}
+	    }
 	}
 
 	@Override
