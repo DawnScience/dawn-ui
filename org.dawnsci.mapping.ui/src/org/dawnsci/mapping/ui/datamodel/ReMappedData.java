@@ -19,7 +19,7 @@ import org.slf4j.LoggerFactory;
 public class ReMappedData extends AbstractMapData {
 
 	private IDataset lookup;
-	private IDataset flatMap;
+	private Dataset flatMap;
 	private int[] shape;
 	
 	private static final Logger logger = LoggerFactory.getLogger(ReMappedData.class);
@@ -39,13 +39,13 @@ public class ReMappedData extends AbstractMapData {
 	
 	@Override
 	public IDataset getMap(){
-		if (map == null && !live) updateRemappedData(shape);
+		if (cachedMap == null && !live) updateRemappedData(shape);
 		
-		if (map == null) return null;
+		if (cachedMap == null) return null;
 		
 		Dataset d = null;
 		try {
-			d = DatasetUtils.sliceAndConvertLazyDataset(map);
+			d = DatasetUtils.sliceAndConvertLazyDataset(cachedMap);
 		} catch (DatasetException e) {
 			logger.error("Could not slice lazy dataset",e);
 		}
@@ -54,14 +54,14 @@ public class ReMappedData extends AbstractMapData {
 	}
 	
 	private void updateRemappedData(int[] shape) {
-		IDataset fm = flatMap;
+		Dataset fm = flatMap;
 		if (fm == null) {
 			
-			if (baseMap.getSize() == 1 & live) return;
+			if (baseMap.getSize() == 1 && live) return;
 		
 			try {
 				if (baseMap.getSize() == 1) {
-					map = baseMap.getSlice();
+					cachedMap = DatasetUtils.sliceAndConvertLazyDataset(baseMap);
 					lookup = DatasetFactory.zeros(1);
 					return;
 				}
@@ -72,7 +72,7 @@ public class ReMappedData extends AbstractMapData {
 					fm = DatasetUtils.sliceAndConvertLazyDataset(baseMap);
 
 				} else {
-					fm = baseMap.getSlice(parent.getMapDims().getMapSlice(baseMap));
+					fm = DatasetUtils.convertToDataset(baseMap.getSlice(parent.getMapDims().getMapSlice(baseMap)));
 					fm.squeeze();
 				}
 			} catch (DatasetException e) {
@@ -89,7 +89,7 @@ public class ReMappedData extends AbstractMapData {
 		}
 		
 		fm = LivePlottingUtils.cropNanValuesFromAxes(fm,!mapDims.isRemappingRequired());
-		IDataset[] remapData = MappingUtils.remapData(fm, shape, 0);
+		Dataset[] remapData = MappingUtils.remapData(fm, shape, 0);
 		
 		if (remapData == null) return;
 		
@@ -99,7 +99,7 @@ public class ReMappedData extends AbstractMapData {
 		
 		setRange(MappingUtils.getRange(remapData[0], true));
 		
-		map = remapData[0];
+		cachedMap = remapData[0];
 		lookup = remapData[1];
 		
 	}
@@ -110,7 +110,7 @@ public class ReMappedData extends AbstractMapData {
 	
 	public void setShape(int[] shape){
 		this.shape = shape;
-//		map = null;
+
 		updateRemappedData(shape);
 	}
 	
@@ -138,12 +138,6 @@ public class ReMappedData extends AbstractMapData {
 		}
 		return parent.getSpectrum(index);
 	}
-
-	@Override
-	public boolean isLive() {
-		return live;
-	}
-
 	
 	public void update() {
 		synchronized (getLock()) {
@@ -161,7 +155,7 @@ public class ReMappedData extends AbstractMapData {
 	}
 
 	@Override
-	protected IDataset sanitizeRank(IDataset data, MapScanDimensions dims) {
+	protected Dataset sanitizeRank(Dataset data, MapScanDimensions dims) {
 		if (data.getRank() == 1) {
 			return data;
 		}
@@ -179,7 +173,7 @@ public class ReMappedData extends AbstractMapData {
 		
 		int[] shape = new int[] {oShape[dim]};
 		
-		IDataset view = data.getSliceView();
+		Dataset view = DatasetUtils.convertToDataset(data.getSliceView());
 		view.clearMetadata(null);
 		view.setShape(shape);
 		

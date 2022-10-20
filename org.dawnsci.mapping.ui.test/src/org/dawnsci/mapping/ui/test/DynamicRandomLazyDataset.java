@@ -11,7 +11,6 @@ import org.eclipse.january.dataset.IDatasetChangeChecker;
 import org.eclipse.january.dataset.IDynamicDataset;
 import org.eclipse.january.dataset.ILazyDataset;
 import org.eclipse.january.dataset.LazyDynamicDataset;
-import org.eclipse.january.dataset.Random;
 import org.eclipse.january.dataset.ShapeUtils;
 import org.eclipse.january.dataset.SliceND;
 import org.eclipse.january.io.ILazyLoader;
@@ -21,8 +20,9 @@ public class DynamicRandomLazyDataset extends LazyDynamicDataset {
 	private static final long serialVersionUID = 1L;
 	private int[][] shapeArrays;
 	ILazyDataset dataset = null;
-	private int count = 0;
+	private int count = 1;
 	boolean endNan = false;
+	boolean enableIncrement = false;
 
 
 	public DynamicRandomLazyDataset(int[][] shapes, int[] maxShape) {
@@ -39,6 +39,7 @@ public class DynamicRandomLazyDataset extends LazyDynamicDataset {
 		dataset = other.dataset;
 		count   = other.count;
 		endNan  = other.endNan;
+		enableIncrement = other.enableIncrement;
 	}
 
 	public void setEndNan(boolean endNan) {
@@ -60,10 +61,12 @@ public class DynamicRandomLazyDataset extends LazyDynamicDataset {
 
 	@Override
 	public boolean refreshShape() {
-		if (count == 0){
-			count++;
+		
+		if (!enableIncrement) {
 			return true;
 		}
+		
+		enableIncrement = false;
 
 		if (count < shapeArrays.length) {
 			int[] s = shapeArrays[count++];
@@ -74,6 +77,10 @@ public class DynamicRandomLazyDataset extends LazyDynamicDataset {
 		}
 
 		return true;
+	}
+
+	public void setEnableIncrement(boolean enableIncrement) {
+		this.enableIncrement = enableIncrement;
 	}
 
 	@Override
@@ -108,7 +115,12 @@ public class DynamicRandomLazyDataset extends LazyDynamicDataset {
 				if (endNan && slice.isAll()) s.set(Double.NaN, s.getSize()-1);
 				return s;
 			}
-			return Random.rand(shape).getSlice(slice);
+			
+			long size = ShapeUtils.calcLongSize(slice.getShape());
+			DoubleDataset s = DatasetFactory.createRange(size);
+			s.setShape(slice.getShape());
+			
+			return s;
 		}
 	}
 }

@@ -3,6 +3,8 @@ package org.dawnsci.mapping.ui.datamodel;
 import org.dawnsci.mapping.ui.MappingUtils;
 import org.eclipse.dawnsci.plotting.api.trace.MetadataPlotUtils;
 import org.eclipse.january.DatasetException;
+import org.eclipse.january.dataset.Dataset;
+import org.eclipse.january.dataset.DatasetUtils;
 import org.eclipse.january.dataset.IDataset;
 import org.eclipse.january.dataset.ILazyDataset;
 import org.eclipse.january.dataset.SliceND;
@@ -52,15 +54,10 @@ public class MappedData extends AbstractMapData{
 		return new MappedData(name, ds, parent, path, false);
 	}
 
-	
-	public boolean isLive() {
-		return live;
-	}
-	
 	public void update() {
 		if (live) {
 			synchronized (getLock()) {
-			map = updateMap();
+				cachedMap = updateMap();
 			}
 		}
 	}
@@ -71,13 +68,20 @@ public class MappedData extends AbstractMapData{
 	}
 
 	@Override
-	protected IDataset sanitizeRank(IDataset data, MapScanDimensions dims) {
+	protected Dataset sanitizeRank(Dataset data, MapScanDimensions dims) {
 		if (data.getRank() == 2) {
 			return data;
 		}
 		
 		int xd = dims.getxDim();
 		int yd = dims.getyDim();
+		
+		//deal with transpose elsewhere
+		if (xd < yd) {
+			int tmp = xd;
+			xd = yd;
+			yd = tmp;
+		}
 		
 		AxesMetadata ax = data.getFirstMetadata(AxesMetadata.class);
 		
@@ -90,7 +94,7 @@ public class MappedData extends AbstractMapData{
 		
 		int[] shape = new int[] {oShape[yd], oShape[xd]};
 		
-		IDataset view = data.getSliceView();
+		Dataset view = DatasetUtils.convertToDataset(data.getSliceView());
 		view.clearMetadata(null);
 		view.setShape(shape);
 		

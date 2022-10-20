@@ -39,7 +39,7 @@ public class VectorMapData extends MappedData {
     private NumberOfSymmetryFolds folds = null;
 
 	public VectorMapData(String name, AbstractMapData parent, String path, boolean showAsComplex, NumberOfSymmetryFolds folds) {
-		super(name, parent.map, parent.parent, parent.path, false);
+		super(name, parent.cachedMap, parent.parent, parent.path, false);
 		this.vectorMapData = new AbstractMapData[2];
 		this.showAsComplex = showAsComplex;
 		this.folds = folds;

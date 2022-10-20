@@ -25,7 +25,7 @@ public class MockDatasetConnectorTest {
 		
 		assertArrayEquals(first, slice.getShape());
 		
-		dataset.refreshShape();
+		MapTestUtils.enableIncrement(dataset);
 		dataset.refreshShape();
 		
 		assertArrayEquals(second, dataset.getShape());
@@ -34,6 +34,7 @@ public class MockDatasetConnectorTest {
 		
 		assertArrayEquals(second, slice.getShape());
 		
+		MapTestUtils.enableIncrement(dataset);
 		dataset.refreshShape();
 		
 		assertArrayEquals(third, dataset.getShape());
@@ -51,5 +52,4 @@ public class MockDatasetConnectorTest {
 		assertArrayEquals(third, slice.getShape());
 		
 	}
-
 }

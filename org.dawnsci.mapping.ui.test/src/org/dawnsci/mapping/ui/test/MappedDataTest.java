@@ -16,12 +16,14 @@ import org.dawnsci.mapping.ui.datamodel.MappedDataBlock;
 import org.eclipse.dawnsci.analysis.api.io.IDataHolder;
 import org.eclipse.january.dataset.Comparisons;
 import org.eclipse.january.dataset.Dataset;
+import org.eclipse.january.dataset.DatasetFactory;
 import org.eclipse.january.dataset.DatasetUtils;
 import org.eclipse.january.dataset.DoubleDataset;
 import org.eclipse.january.dataset.IDataset;
 import org.eclipse.january.dataset.IDynamicDataset;
 import org.eclipse.january.dataset.ILazyDataset;
 import org.eclipse.january.dataset.Random;
+import org.eclipse.january.dataset.ShapeUtils;
 import org.eclipse.january.metadata.AxesMetadata;
 import org.eclipse.january.metadata.MetadataFactory;
 import org.eclipse.january.metadata.MetadataType;
@@ -95,6 +97,7 @@ public class MappedDataTest {
 	public void testGetData() {
 		IDataset d = gridScanMap.getMap();
 		assertNotNull(d);
+		assertArrayEquals(new int[] {10, 11}, d.getShape());
 	}
 
 	@Test
@@ -145,27 +148,113 @@ public class MappedDataTest {
 		
 		MapScanDimensions msd =new MapScanDimensions(1, 0, 2);
 		
-		IDynamicDataset dataset = MappedDataBlockTest.getLiveDataset();
-		LiveRemoteAxes axes = MappedDataBlockTest.getLiveAxes();
+		IDynamicDataset dataset = MapTestUtils.getLiveDataset();
+		LiveRemoteAxes axes = MapTestUtils.getLiveAxes();
 		
 		AxesMetadata axm = MetadataFactory.createMetadata(AxesMetadata.class, dataset.getRank());
 		axm.setAxis(0, axes.getAxes()[0]);
-		axm.setAxis(1, axes.getAxes()[0]);
+		axm.setAxis(1, axes.getAxes()[1]);
 		dataset.addMetadata(axm);
 		Object lock = new Object();
 		MappedDataBlock liveBlock =  new MappedDataBlock("live", dataset,"livePath", msd,null, true);
 		liveBlock.setLock(lock);
-		MappedData md = new MappedData("map", MappedDataBlockTest.getLiveMap(), liveBlock, "livePath", true);
+		IDynamicDataset liveMap = MapTestUtils.getLiveMap();
+		MappedData md = new MappedData("map", liveMap, liveBlock, "livePath", true);
 		md.setLock(lock);
 		md.update();
 		
 		IDataset map = md.getMap();
 		
+		MapTestUtils.enableIncrement(dataset,liveMap);
 		md.update();
 		
 		map = md.getMap();
 		
 		assertNotNull(map);
+		assertArrayEquals(new int[] {2,7}, map.getShape());
+		
+		AxesMetadata meta = map.getFirstMetadata(AxesMetadata.class);
+		ILazyDataset[] ax = meta.getAxes();
+		IDataset y = ax[0].getSlice();
+		IDataset x = ax[1].getSlice();
+		
+		assertEquals(map.getShape()[0],y.getShape()[0]);
+		assertEquals(map.getShape()[1],x.getShape()[1]);
+		
+		assertTrue(Comparisons.allTrue(Comparisons.isFinite(y)));
+		
+		MapTestUtils.enableIncrement(dataset,liveMap);
+        md.update();
+		
+		map = md.getMap();
+		
+		assertNotNull(map);
+		//only 6 since axes end is nan
+		assertArrayEquals(new int[] {6,7}, map.getShape());
+		
+		meta = map.getFirstMetadata(AxesMetadata.class);
+		ax = meta.getAxes();
+		y = ax[0].getSlice();
+		x = ax[1].getSlice();
+		
+		assertEquals(map.getShape()[0],y.getShape()[0]);
+		assertEquals(map.getShape()[1],x.getShape()[1]);
+		
+		assertTrue(Comparisons.allTrue(Comparisons.isFinite(y)));
+	}
+
+	
+	@Test
+	public void testLiveVersionFastIsY() throws Exception{
+		
+		MapScanDimensions msd =new MapScanDimensions(0, 1, 2);
+		
+		IDynamicDataset dataset = MapTestUtils.getLiveDataset();
+		LiveRemoteAxes axes = MapTestUtils.getLiveAxes();
+		
+		AxesMetadata axm = MetadataFactory.createMetadata(AxesMetadata.class, dataset.getRank());
+		axm.setAxis(0, axes.getAxes()[0]);
+		axm.setAxis(1, axes.getAxes()[1]);
+		dataset.addMetadata(axm);
+		Object lock = new Object();
+		MappedDataBlock liveBlock =  new MappedDataBlock("live", dataset,"livePath", msd,null, true);
+		liveBlock.setLock(lock);
+		IDynamicDataset liveMap = MapTestUtils.getLiveMap();
+		MappedData md = new MappedData("map", liveMap, liveBlock, "livePath", true);
+		md.setLock(lock);
+		md.update();
+		
+		IDataset map = md.getMap();
+		
+		MapTestUtils.enableIncrement(dataset,liveMap);
+		md.update();
+		
+		map = md.getMap();
+		
+		assertNotNull(map);
+		assertArrayEquals(new int[] {7,2}, map.getShape());
+		
+		long size = ShapeUtils.calcLongSize(map.getShape());
+		Dataset s = DatasetFactory.createRange(size);
+		s.setShape(new int[] {map.getShape()[1],map.getShape()[0]});
+		s = s.transpose();
+		
+		assertArrayEquals(((DoubleDataset)s).getData(), ((DoubleDataset)map).getData(),0);
+		
+		MapTestUtils.enableIncrement(dataset,liveMap);
+		md.update();
+		map = md.getMap();
+		
+		assertNotNull(map);
+		//only 6 since axes end is nan
+		assertArrayEquals(new int[] {7,6}, map.getShape());
+		
+		size = ShapeUtils.calcLongSize(map.getShape());
+		s = DatasetFactory.createRange(size);
+		s.setShape(new int[] {map.getShape()[1],map.getShape()[0]});
+		s = s.transpose();
+		
+		assertArrayEquals(((DoubleDataset)s).getData(), ((DoubleDataset)map).getData(),0);
 		
 		AxesMetadata meta = map.getFirstMetadata(AxesMetadata.class);
 		ILazyDataset[] ax = meta.getAxes();
@@ -197,8 +286,6 @@ public class MappedDataTest {
 		
 		assertNotNull(spectrum);
 		
-		
-		
 		IDataset map = m.getMap();
 		
 		assertArrayEquals(new int[] {11, 12}, map.getShape());
@@ -206,6 +293,26 @@ public class MappedDataTest {
 		IDataset map2 = m.getMapForDims(0, 1);
 		
 		assertArrayEquals(new int[] {10, 11}, map2.getShape());
+		
+	}
+	
+	@Test
+	public void testFastIsY() throws Exception {
+		
+		IDataHolder data = LoaderFactory.getData(file.getAbsolutePath());
+		ILazyDataset lazyDataset = data.getLazyDataset(MapNexusFileBuilderUtils.DETECTOR_PATH);
+		
+		MapScanDimensions msd = new MapScanDimensions(0, 1, 2);
+		MappedDataBlock b = new MappedDataBlock(MapNexusFileBuilderUtils.DETECTOR_PATH,
+				lazyDataset, file.getAbsolutePath(),msd,null,false);
+		
+		ILazyDataset sum = data.getLazyDataset(MapNexusFileBuilderUtils.SUM_PATH);
+		
+		MappedData m = new MappedData(MapNexusFileBuilderUtils.SUM_PATH, sum.getSlice(), b,fileEnergy.getAbsolutePath(),false);
+		
+		IDataset map = m.getMap();
+
+		assertArrayEquals(new int[] {11, 10}, map.getShape());
 		
 	}
 

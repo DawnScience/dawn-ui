@@ -178,7 +178,7 @@ public class MappingUtils {
 	}
 	
 	
-	public static IDataset[] remapData(IDataset flatMap, int[] shape, int scanDim){
+	public static Dataset[] remapData(IDataset flatMap, int[] shape, int scanDim){
 		if (flatMap == null) return null;
 		
 		IDataset[] axes = MetadataPlotUtils.getAxesForDimension(flatMap, scanDim);
@@ -210,11 +210,11 @@ public class MappingUtils {
 		} catch (MetadataException e) {
 			logger.error("Could not create axis metadata",e);
 		}
-		IDataset map = data.get(1);
+		Dataset map = data.get(1);
 		map.addMetadata(axm);
-		IDataset lookup = data.get(3);
+		Dataset lookup = data.get(3);
 		
-		return new IDataset[] {map,lookup};
+		return new Dataset[] {map,lookup};
 	}
 	
 	/**

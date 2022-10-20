@@ -120,22 +120,10 @@ public class MappedFileFactory {
 			if (!isLive) {
 
 				try {
-				//hack for old i18
-				if (block.getScanRank() < lz.getRank()) {
-					Dataset d = DatasetUtils.sliceAndConvertLazyDataset(lz);
-					d= d.sum(d.getRank()-1);
-					lz = d;
-				}
 
 				block.getMapDims().setMapAxes(block.getLazy(), lz);
 
 				lz = DatasetUtils.sliceAndConvertLazyDataset(lz);
-
-				if (block.isTransposed()) {
-					Dataset ds = DatasetUtils.convertToDataset((IDataset)lz);
-					lz = ds.transpose();
-
-				}
 				
 				} catch (Exception e) {
 					logger.error("Could not slice map",e);

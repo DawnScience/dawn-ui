@@ -4,6 +4,8 @@ import org.dawnsci.mapping.ui.LivePlottingUtils;
 import org.dawnsci.mapping.ui.MappingUtils;
 import org.eclipse.january.DatasetException;
 import org.eclipse.january.MetadataException;
+import org.eclipse.january.dataset.Dataset;
+import org.eclipse.january.dataset.DatasetUtils;
 import org.eclipse.january.dataset.IDataset;
 import org.eclipse.january.dataset.IDynamicDataset;
 import org.eclipse.january.dataset.ILazyDataset;
@@ -20,7 +22,7 @@ public abstract class AbstractMapData implements LockableMapObject{
 	private String shortName;
 	private String nameSuffix = "";
 	protected String path;
-	protected IDataset map;
+	protected Dataset cachedMap;
 	protected ILazyDataset baseMap;
 	protected MappedDataBlock oParent;
 	protected MappedDataBlock parent;
@@ -34,7 +36,7 @@ public abstract class AbstractMapData implements LockableMapObject{
 	
 	private static final Logger logger = LoggerFactory.getLogger(AbstractMapData.class);
 	
-	public AbstractMapData(String name, ILazyDataset map, MappedDataBlock parent, String path, boolean live) {
+	protected AbstractMapData(String name, ILazyDataset map, MappedDataBlock parent, String path, boolean live) {
 		this.name = name;
 		this.baseMap = map;
 		this.path = path;
@@ -44,9 +46,6 @@ public abstract class AbstractMapData implements LockableMapObject{
 		if (!live) range = calculateRange(map);
 	}
 	
-	@Override
-	public abstract IDataset getSpectrum(double x, double y);
-	
 	public MappedData makeNewMapWithParent(String name, IDataset ds) {
 		return new MappedData(name, ds, parent, path, false);
 	}
@@ -55,70 +54,36 @@ public abstract class AbstractMapData implements LockableMapObject{
 	public IDataset getMap(){
 		try {
 
-			if (map != null) return map;
+			if (cachedMap != null) return cachedMap;
+			
+			if (isLive()) {
+				cachedMap = updateMap();
+				return cachedMap;
+			}
 
 			if (baseMap.getSize() == 1) return null;
 
 			MapScanDimensions mapDims = parent.getMapDims();
 			SliceND s = mapDims.getMapSlice(baseMap);
-			IDataset slice;
+			Dataset slice;
 
-			slice = baseMap.getSlice(s);
+			slice = DatasetUtils.sliceAndConvertLazyDataset(baseMap.getSlice(s));
 			
-			map = make2D(slice,mapDims.getxDim(), mapDims.getyDim());
+			Dataset tmp = sanitizeRank(slice, mapDims);
+			
+			if (mapDims.isTransposed() && tmp != null) {
+				cachedMap = tmp.transpose();
+			} else {
+				cachedMap = tmp;
+			}
 
-			return map;
+			return cachedMap;
 			
 		} catch (DatasetException e) {
 			logger.error("Could not slice map");
 		}
 
 		return null;
-	}
-	
-	private IDataset make2D(IDataset d, int xd, int yd) {
-		
-		if (d.getRank() == 2) {
-			return d;
-		}
-		
-		AxesMetadata ax = d.getFirstMetadata(AxesMetadata.class);
-		
-		if (ax == null) return null;
-		
-		ILazyDataset[] axx = ax.getAxis(xd);
-		ILazyDataset[] axy = ax.getAxis(yd);
-		
-		int[] oShape = d.getShape();
-		
-		int[] shape = new int[] {oShape[yd], oShape[xd]};
-		
-		IDataset view = d.getSliceView();
-		view.clearMetadata(null);
-		view.setShape(shape);
-		
-		buildSuffix(new SliceND(d.getShape()), ax);
-		
-		try {
-			AxesMetadata md = MetadataFactory.createMetadata(AxesMetadata.class, 2);
-			
-			for (ILazyDataset l : axx) {
-				md.setAxis(1, l.getSliceView().squeezeEnds());
-			}
-			
-			for (ILazyDataset l : axy) {
-				md.setAxis(0, l.getSliceView().squeezeEnds());
-			}
-			
-			view.setMetadata(md);
-			
-			return view;
-			
-		} catch (Exception e) {
-			logger.error("Could not create axes metadata",e);
-			return null;
-		}
-		
 	}
 	
 	protected void buildSuffix(SliceND slice, AxesMetadata m) {
@@ -233,7 +198,7 @@ public abstract class AbstractMapData implements LockableMapObject{
 	}
 	
 	
-	protected IDataset updateMap() {
+	protected Dataset updateMap() {
 		if (!live) return null;
 
 		long startTime = System.currentTimeMillis();
@@ -265,15 +230,24 @@ public abstract class AbstractMapData implements LockableMapObject{
 			mapDims.updateNonXYScanSlice(baseMap.getShape());
 			SliceND mapSlice = mapDims.getMapSlice(baseMap);
 			long preSlice = System.currentTimeMillis();
-			IDataset slice = baseMap.getSlice(mapSlice);
+			Dataset slice = DatasetUtils.convertToDataset(baseMap.getSlice(mapSlice));
 			logger.info("Slice of data from {} took {} ms", name, (System.currentTimeMillis()-preSlice));
 			
 			
 			slice = sanitizeRank(slice, mapDims);
+			if (slice == null) return null;
+			
+			if (mapDims.isTransposed()) {
+				slice = slice.transpose();
+			}
 
 			slice = LivePlottingUtils.cropNanValuesFromAxes(slice,!mapDims.isRemappingRequired());
 			if (slice == null) return null;
-			setRange(MappingUtils.getRange(slice, !mapDims.isRemappingRequired()));
+			
+			double[] r = MappingUtils.getRange(slice, !mapDims.isRemappingRequired());
+			setRange(r);
+			
+
 			
 			logger.info("Update of data from {} took {} ms", name, (System.currentTimeMillis()-startTime));
 			return slice;
@@ -288,12 +262,16 @@ public abstract class AbstractMapData implements LockableMapObject{
 
 	}
 	
-	protected abstract IDataset sanitizeRank(IDataset data, MapScanDimensions dims);
+	protected abstract Dataset sanitizeRank(Dataset data, MapScanDimensions dims);
 	
 	public abstract ILazyDataset getData();
 	
 	
 	protected abstract double[] calculateRange(ILazyDataset map);
+	
+	public boolean isLive() {
+		return live;
+	}
 	
 	protected void setRange(double[] range) {
 		this.range = range;
@@ -348,13 +326,13 @@ public abstract class AbstractMapData implements LockableMapObject{
 
 	public void replaceLiveDataset(ILazyDataset map) {
 		live = false;
-		this.map = null;
+		this.cachedMap = null;
 		this.baseMap = map;
 		setRange(calculateRange(baseMap));
 	}
 	
 	public void clearCachedMap() {
-		map = null;
+		cachedMap = null;
 	}
 	
 	@Override

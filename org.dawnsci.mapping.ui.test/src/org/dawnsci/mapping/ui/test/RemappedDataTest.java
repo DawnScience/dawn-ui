@@ -23,8 +23,8 @@ public class RemappedDataTest {
 		
 		MapScanDimensions msd =new MapScanDimensions(0, 0, 1);
 		
-		IDynamicDataset dataset = MappedDataBlockTest.getLiveLinearDataset();
-		LiveRemoteAxes axes = MappedDataBlockTest.getLiveLinearAxes();
+		IDynamicDataset dataset = MapTestUtils.getLiveLinearDataset();
+		LiveRemoteAxes axes = MapTestUtils.getLiveLinearAxes();
 		AxesMetadata axm = MetadataFactory.createMetadata(AxesMetadata.class, dataset.getRank());
 		axm.setAxis(0, axes.getAxes()[0]);
 		axm.addAxis(0, axes.getxAxisForRemapping());
@@ -32,7 +32,7 @@ public class RemappedDataTest {
 		Object lock = new Object();
 		MappedDataBlock liveBlock = new MappedDataBlock("live", dataset,"livePath", msd,null, true);
 		liveBlock.setLock(lock);
-		ReMappedData md = new ReMappedData("map", MappedDataBlockTest.getLiveLinearMap(), liveBlock, "livePath", true);
+		ReMappedData md = new ReMappedData("map", MapTestUtils.getLiveLinearMap(), liveBlock, "livePath", true);
 		md.setLock(lock);
 		md.update();
 		

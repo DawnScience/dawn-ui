@@ -147,7 +147,7 @@ public class LivePlottingUtils {
 		return ax.getSlice(s);
 	}
 	
-	public static IDataset cropNanValuesFromAxes(IDataset map, boolean is2D) {
+	public static Dataset cropNanValuesFromAxes(Dataset map, boolean is2D) {
 		SliceND slice = new SliceND(map.getShape());
 		
 		AxesMetadata axes = map.getFirstMetadata(AxesMetadata.class);
