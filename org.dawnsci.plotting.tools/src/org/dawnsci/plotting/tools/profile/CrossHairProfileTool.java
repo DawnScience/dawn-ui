@@ -568,7 +568,7 @@ public class CrossHairProfileTool extends AbstractToolPage implements IROIListen
                     
 					// We set the range of y to the intensity range
 					if (profilePlotter.getTraces()!=null) {
-						double max = Double.MIN_VALUE;
+						double max = -Double.MAX_VALUE;
 						double min = Double.MAX_VALUE;
 						for (ITrace iTrace : profilePlotter.getTraces()) {
 							max = Math.max(max, iTrace.getData().max().doubleValue());
