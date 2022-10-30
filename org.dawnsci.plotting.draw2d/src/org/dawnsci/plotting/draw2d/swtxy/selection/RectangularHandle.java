@@ -13,7 +13,6 @@ import org.dawnsci.plotting.draw2d.swtxy.util.RotatableRectangle;
 import org.eclipse.dawnsci.plotting.api.axis.ICoordinateSystem;
 import org.eclipse.draw2d.Figure;
 import org.eclipse.draw2d.Shape;
-import org.eclipse.draw2d.geometry.PrecisionPoint;
 import org.eclipse.swt.graphics.Color;
 
 public class RectangularHandle extends SelectionHandle {
@@ -39,10 +38,8 @@ public class RectangularHandle extends SelectionHandle {
 		} else {
 			angle = 0;
 		}
-		int x = (int) params[0];
-		int y = (int) params[1];
-		double[] pt = coords.getValueFromPosition(x, y);
-		location = new PrecisionPoint(pt[0], pt[1]);
+		int x = (int) Math.round(params[0]);
+		int y = (int) Math.round(params[1]);
 		return new RotatableRectangle(x, y, side, side, angle);
 	}
 }
