@@ -398,10 +398,10 @@ public abstract class AbstractBeamlineConfigurationPlotter implements IBeamlineC
 			yAxis.setInverted(true);
 			IAxis xAxis = system.getAxes().get(0);
 			
-			double maxX = Double.MIN_VALUE;
-			double minX = Double.MAX_VALUE;
-			double maxY = Double.MIN_VALUE;
-			double minY = Double.MAX_VALUE;
+			double maxX = Double.NEGATIVE_INFINITY;
+			double minX = Double.POSITIVE_INFINITY;
+			double maxY = Double.NEGATIVE_INFINITY;
+			double minY = Double.POSITIVE_INFINITY;
 			
 			// The regions to take into account when scaling the plot
 			List<IRegion> regions = Arrays.asList(system.getRegion(DETECTOR_REGION), 
@@ -419,7 +419,7 @@ public abstract class AbstractBeamlineConfigurationPlotter implements IBeamlineC
 				}
 			}
 			
-			if(maxX == Double.MIN_VALUE || minX == Double.MAX_VALUE || maxY == Double.MIN_VALUE || minY == Double.MAX_VALUE){
+			if (Double.isInfinite(maxX) || Double.isInfinite(minX) || Double.isInfinite(maxY) || Double.isInfinite(minY)){
 				maxX = 100; minX = -100; maxY = 100; minY = -100;
 			}
 				
