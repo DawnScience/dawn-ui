@@ -37,7 +37,6 @@ public abstract class SelectionHandle extends Figure implements IMobileFigure {
 	private Figure          label;
 	protected ICoordinateSystem   coords;
 	private int             alpha=100;
-	protected Point         location;
 	
 	/**
 	 * May be used for handles that always report/receive precise location
@@ -77,6 +76,7 @@ public abstract class SelectionHandle extends Figure implements IMobileFigure {
  	}
 
 	private void refresh() {
+		Point location = getPreciseLocation();
 		Rectangle b = new Rectangle(location, new Point(location.x()+200, location.y()+20));
 		b.union(shape.getBounds());
         setBounds(b);
@@ -127,7 +127,7 @@ public abstract class SelectionHandle extends Figure implements IMobileFigure {
 		this.shape.setCursor(cursor);
 	}
 
-	public Point getSelectionPoint() {
+	public PrecisionPoint getSelectionPoint() {
 		final Point loc = getPreciseLocation();
 		final Rectangle bnds = shape.getBounds();
 		return new PrecisionPoint(loc.preciseX() + bnds.width()/2, loc.preciseY() + bnds.height()/2);

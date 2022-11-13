@@ -37,9 +37,12 @@ import org.eclipse.draw2d.FigureListener;
 import org.eclipse.draw2d.Graphics;
 import org.eclipse.draw2d.IFigure;
 import org.eclipse.draw2d.MouseEvent;
+import org.eclipse.draw2d.geometry.Dimension;
 import org.eclipse.draw2d.geometry.Point;
 import org.eclipse.draw2d.geometry.PointList;
+import org.eclipse.draw2d.geometry.PrecisionDimension;
 import org.eclipse.draw2d.geometry.PrecisionPoint;
+import org.eclipse.draw2d.geometry.PrecisionRectangle;
 import org.eclipse.draw2d.geometry.Rectangle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -87,12 +90,12 @@ class AxisSelection extends AbstractSelectionRegion<RectangularROI> implements I
 	@Override
 	public void createContents(final Figure parent) {
 		
-		this.regionArea  = (RegionArea)parent;
-     	this.line1       = new LineFigure(true,  parent.getBounds());
+		this.regionArea = (RegionArea)parent;
+     	this.line1 = new LineFigure(parent.getBounds());
      	
      	
      	if (regionType==RegionType.XAXIS || regionType==RegionType.YAXIS) {
-    	    this.line2  = new LineFigure(false, parent.getBounds());
+    	    this.line2 = new LineFigure(parent.getBounds());
     	    this.connection = new RegionFillFigure<RectangularROI>(this) {
     	    	@Override
     	    	public void paintFigure(Graphics gc) {
@@ -229,21 +232,18 @@ class AxisSelection extends AbstractSelectionRegion<RectangularROI> implements I
 	public void paintBeforeAdded(final Graphics gc, PointList clicks, Rectangle parentBounds) {
 		
 		final Rectangle bounds = new Rectangle(clicks.getFirstPoint(), clicks.getLastPoint());
-		Rectangle r  = getSelectionBounds(bounds, parentBounds);
-		
-		
+		Rectangle r = getSelectionBounds(bounds.resize(-1, -1), parentBounds); // as constructor grows rectangle
+
 		gc.setLineStyle(Graphics.LINE_DOT);
 		
-		boolean isNotBox = regionType==RegionType.XAXIS || regionType==RegionType.YAXIS;
+		boolean isBox = regionType==RegionType.XAXIS || regionType==RegionType.YAXIS;
 		
-     	if (isDrawnOnX()) {
-     		if (isNotBox) r.width+=2;
-			gc.drawLine(r.getBottomRight(), r.getTopRight());
-			if (isNotBox) gc.drawLine(r.getBottomLeft(),  r.getTopLeft());
+		if (isDrawnOnX()) {
+			gc.drawLine(r.getBottomLeft(), r.getTopLeft());
+			if (isBox) gc.drawLine(r.getBottomRight(), r.getTopRight());
 		} else {
-			if (isNotBox) r.height+=2;
-			gc.drawLine(r.getTopLeft(),     r.getTopRight());
-			if (isNotBox) gc.drawLine(r.getBottomLeft(),  r.getBottomRight());
+			gc.drawLine(r.getTopLeft(), r.getTopRight());
+			if (isBox) gc.drawLine(r.getBottomLeft(), r.getBottomRight());
 		}
 		gc.setBackgroundColor(getRegionColor());
 		gc.setAlpha(getAlpha());
@@ -255,26 +255,20 @@ class AxisSelection extends AbstractSelectionRegion<RectangularROI> implements I
 			                             Rectangle parentBounds) {
 		
 		Rectangle r;
-		
-		if (isDrawnOnX()) { // Draw vertical lines
-			r = new Rectangle(new Point(bounds.getLocation().x,    parentBounds.getLocation().y), 
-					          new Point(bounds.getBottomRight().x, parentBounds.getBottomRight().y));
-		
-		} else { // Draw horizontal lines
-			r = new Rectangle(new Point(parentBounds.getLocation().x,    bounds.getLocation().y), 
-                              new Point(parentBounds.getBottomRight().x, bounds.getBottomRight().y));
-			
+		if (isDrawnOnX()) { // extend to top and bottom of parent
+			r = new Rectangle(new Point(bounds.x, parentBounds.y),
+					new Dimension(bounds.width, parentBounds.height));
+		} else { // extend to left and right of parent
+			r = new Rectangle(new Point(parentBounds.x, bounds.y),
+					new Dimension(parentBounds.width, bounds.height));
 		}
-		
-		r.height = r.height-1;
-		r.width = r.width-1;
 		
 		return r;
 	}
 
 	@Override
 	protected String getCursorPath() {
-		if (regionType==RegionType.XAXIS) {
+		if (regionType==RegionType.XAXIS || regionType==RegionType.XAXIS_LINE) {
 			return "icons/Cursor-horiz.png";
 		} else {
 			return "icons/Cursor-vert.png";
@@ -282,12 +276,9 @@ class AxisSelection extends AbstractSelectionRegion<RectangularROI> implements I
 	}
 	
 	protected final class LineFigure extends Figure implements IMobileFigure {
-		
-		private boolean first;
 		private FigureTranslator mover;
 		
-		LineFigure(final boolean first, Rectangle parent) {
-			this.first = first;
+		LineFigure(Rectangle parent) {
 			setOpaque(false);
 			updateBounds(parent,true);			
 			this.mover = new FigureTranslator(getXyGraph(), this);
@@ -359,19 +350,12 @@ class AxisSelection extends AbstractSelectionRegion<RectangularROI> implements I
 			final Rectangle b = getBounds();
 
 			if (isDrawnOnX()) {
-				if (first) {
-				    gc.drawLine(b.getTopLeft(), b.getBottomLeft());
-				} else {
-					gc.drawLine(b.getTopRight().translate(-1, 0), b.getBottomRight().translate(-1, 0));
-				}
+				gc.drawLine(b.getTopLeft(), b.getBottomLeft());
 			} else {
-				if (first) {
-				    gc.drawLine(b.getTopLeft(), b.getTopRight());
-				} else {
-				    gc.drawLine(b.getBottomLeft().translate(0,1), b.getBottomRight().translate(0,1));
-				}
+				gc.drawLine(b.getTopLeft(), b.getTopRight());
 			}
 		}
+
 		public void setMobile(boolean mobile) {
 			mover.setActive(mobile);
 			if (!mobile) {
@@ -419,16 +403,42 @@ class AxisSelection extends AbstractSelectionRegion<RectangularROI> implements I
 
 	protected Rectangle getRectangleFromVertices() {
  		final Point loc1   = line1.getLocation();
-		final Point loc4   = line2 != null 
-				           ? line2.getBounds().getBottomRight()
-				           : line1.getBounds().getBottomRight();
-		Rectangle size = new Rectangle(loc1, loc4);
-		size.height = size.height-1;
-		size.width = size.width-1;
-		
+
+ 		Rectangle otherBounds = line2 == null ? line1.getBounds() : line2.getBounds();
+		final Point loc4 = isDrawnOnX() ? otherBounds.getBottomLeft() : otherBounds.getTopRight();
+		Rectangle size = new Rectangle(loc1, loc4).resize(-1, -1); // as constructor grows rectangle
+
 		return size;
 	}
 
+	private void reverse(double[] a1, double[] a2, int i) {
+		double tmp = a1[i];
+		a1[i] = a2[i];
+		a2[i] = tmp;
+	}
+
+	private RectangularROI getRoiFromRectangle(final Rectangle rect) {
+
+		double[] a1 = coords.getValueFromPosition(rect.x, rect.y);
+		double[] a2 = coords.getValueFromPosition(rect.x+rect.width, rect.y+rect.height);
+		if (coords.isXReversed()) reverse(a1,a2,0);
+		if (coords.isYReversed()) reverse(a1,a2,1);
+
+		double x = a1[0]; double y = a1[1];
+		double w = a2[0] - a1[0]; double h = a2[1] - a1[1];
+
+		if (w<0) {
+			w = Math.abs(w);
+			x-= w;
+		}
+		if (h<0) {
+			h = Math.abs(h);
+			y-= h;
+		}
+
+		return createROI(x, y, w, h, 0);
+	}
+	
 	@Override
 	public RectangularROI createROI(boolean recordResult) {
 		if (line1!=null) {
@@ -443,8 +453,7 @@ class AxisSelection extends AbstractSelectionRegion<RectangularROI> implements I
 		return super.getROI();
 	}
 
-	@Override
-	protected RectangularROI createROI(double ptx, double pty, double width, double height, double angle) {
+	private RectangularROI createROI(double ptx, double pty, double width, double height, double angle) {
 		RectangularROI rroi = null;
 		switch (regionType) {
 		case XAXIS:
@@ -460,7 +469,7 @@ class AxisSelection extends AbstractSelectionRegion<RectangularROI> implements I
 			rroi = new YAxisLineBoxROI(ptx, pty, width, height, angle);
 			break;
 		default:
-			rroi = getRoiFromRectangle(new Rectangle((int)ptx, (int)pty, (int)width, (int)height));
+			rroi = new RectangularROI(ptx, pty, width, height, angle);
 		}
 		return rroi;
 	}
@@ -479,28 +488,18 @@ class AxisSelection extends AbstractSelectionRegion<RectangularROI> implements I
 		
 		if (line1 == null || roi == null || isMoving) return;
 
-		double[] spt = null;
-		double[] ept = null;
-
 		if (!(roi instanceof RectangularROI)) {
 			roi = convertROI(roi);
-		}
-		if (roi instanceof RectangularROI) {
-			RectangularROI rroi = (RectangularROI) roi;
-			spt = rroi.getPointRef();
-			ept = rroi.getEndPoint();
-		} else {
-			return;
+			if (!(roi instanceof RectangularROI)) {
+				return;
+			}
 		}
 
-		final double[] p1 = coords.getPositionFromValue(spt);
-		final double[] p2 = coords.getPositionFromValue(ept);
+		RectangularROI rroi = (RectangularROI) roi;
+		final double[] p1 = coords.getPositionFromValue(rroi.getPointRef());
+		final double[] p2 = coords.getPositionFromValue(rroi.getEndPoint());
 
-		final Rectangle local = new Rectangle(new PrecisionPoint(p1[0], p1[1]), new PrecisionPoint(p2[0], p2[1]));
-		
-		//compensate for different rectangle constructors but dont let fall to zero
-		local.width = Math.max(local.width-1, 1);
-		local.height = Math.max(local.height-1, 1);
+		final PrecisionRectangle local = new PrecisionRectangle(new PrecisionPoint(p1[0], p1[1]), new PrecisionDimension(p2[0] - p1[0], p2[1] - p1[1]));
 
 		setLocalBounds(local, line1.getParent().getBounds());
 		
@@ -539,7 +538,8 @@ class AxisSelection extends AbstractSelectionRegion<RectangularROI> implements I
 	@Override
 	public void initialize(PointList clicks) {
 		if (line1!=null) {
-			setLocalBounds(new Rectangle(clicks.getFirstPoint(), clicks.getLastPoint()), regionArea.getBounds());
+			final Rectangle bounds = new Rectangle(clicks.getFirstPoint(), clicks.getLastPoint());
+			setLocalBounds(bounds.resize(-1, -1), regionArea.getBounds()); // as constructor grows rectangle
 			createROI(true);
 			fireROIChanged();
 		}
@@ -551,10 +551,10 @@ class AxisSelection extends AbstractSelectionRegion<RectangularROI> implements I
 
 			if (isDrawnOnX()) {
 				line1.setLocation(bounds.getTopLeft());
-				if (line2!=null) line2.setLocation(new Point(bounds.getTopRight().x-getLineAreaWidth(), bounds.getTopRight().y));
+				if (line2!=null) line2.setLocation(bounds.getTopRight());
 			} else {
 				line1.setLocation(bounds.getTopLeft());
-				if (line2!=null) line2.setLocation(new Point(bounds.getBottomLeft().x, bounds.getBottomLeft().y-getLineAreaWidth()));
+				if (line2!=null) line2.setLocation(bounds.getBottomLeft());
 			}
 		}
 		updateBounds();
@@ -659,7 +659,7 @@ class AxisSelection extends AbstractSelectionRegion<RectangularROI> implements I
 
 	@Override
 	public int getMaximumMousePresses() {
-		return 2;
+		return regionType == RegionType.XAXIS || regionType == RegionType.YAXIS ? 2 : 1;
 	}
 
 	public final void remove() {

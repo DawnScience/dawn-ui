@@ -17,7 +17,6 @@ import org.dawnsci.plotting.draw2d.swtxy.RegionBean;
 import org.dawnsci.plotting.draw2d.swtxy.translate.TranslationEvent;
 import org.dawnsci.plotting.draw2d.swtxy.translate.TranslationListener;
 import org.eclipse.dawnsci.analysis.api.roi.IROI;
-import org.eclipse.dawnsci.analysis.dataset.roi.RectangularROI;
 import org.eclipse.dawnsci.plotting.api.PlotType;
 import org.eclipse.dawnsci.plotting.api.axis.CoordinateSystemEvent;
 import org.eclipse.dawnsci.plotting.api.axis.ICoordinateSystem;
@@ -570,53 +569,4 @@ public abstract class AbstractSelectionRegion<T extends IROI> extends AbstractRe
 		}
 		return false;
 	}
-
-	protected RectangularROI getRoiFromRectangle(final Rectangle rect) {
-
-		double[] a1 = coords.getValueFromPosition(rect.x, rect.y);
-		double[] a2 = coords.getValueFromPosition(rect.x+rect.width, rect.y+rect.height);
-		if (coords.isXReversed()) reverse(a1,a2,0);
-		if (coords.isYReversed()) reverse(a1,a2,1);
-
-		double x = a1[0]; double y = a1[1];
-		double w = a2[0] - a1[0]; double h = a2[1] - a1[1];
-
-		if (w<0) {
-			w = Math.abs(w);
-			x-= w;
-		}
-		if (h<0) {
-			h = Math.abs(h);
-			y-= h;
-		}
-
-		return createROI(x, y, w, h, 0);
-	}
-	
-	/**
-	 * Used from getRoiFromRectangle to get a ROI from the rectangle.
-	 * 
-	 * @param ptx
-	 * @param pty
-	 * @param width
-	 * @param height
-	 * @param angle
-	 * @return
-	 */
-	protected RectangularROI createROI(double ptx, double pty, double width, double height, double angle) {
-		RectangularROI tmp = new RectangularROI(ptx, pty, width, height, angle);
-		if (roi != null) {
-			tmp.setPlot(roi.isPlot());
-			// set the Region isActive flag
-			this.setActive(roi.isPlot());
-		}
-		return tmp;
-	}
-	
-	protected void reverse(double[] a1, double[] a2, int i) {
-		double tmp = a1[i];
-		a1[i] = a2[i];
-		a2[i] = tmp;
-	}
-
 }
