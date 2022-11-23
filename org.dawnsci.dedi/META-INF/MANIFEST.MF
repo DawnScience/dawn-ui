@@ -4,7 +4,7 @@ Bundle-Name: DEDI
 Bundle-SymbolicName: org.dawnsci.dedi;singleton:=true
 Bundle-Version: 1.0.0.qualifier
 Bundle-Activator: org.dawnsci.dedi.Activator
-Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Bundle-RequiredExecutionEnvironment: JavaSE-17
 Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime,
  org.eclipse.dawnsci.plotting.api;bundle-version="1.2.0",

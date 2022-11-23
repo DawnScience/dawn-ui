@@ -23,7 +23,7 @@ Require-Bundle: org.eclipse.core.runtime;bundle-version="3.8.0",
  si.uom.si-units;bundle-version="0.9.0",
  tec.units.indriya;bundle-version="1.0.0",
  tec.uom.lib.uom-lib-common;bundle-version="1.0.3"
-Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Bundle-RequiredExecutionEnvironment: JavaSE-17
 Bundle-ActivationPolicy: lazy
 Service-Component: OSGI-INF/*.xml
 Eclipse-BuddyPolicy: registered

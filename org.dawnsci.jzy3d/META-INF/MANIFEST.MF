@@ -3,7 +3,7 @@ Bundle-ManifestVersion: 2
 Bundle-Name: Dawn Jzy3d
 Bundle-SymbolicName: org.dawnsci.jzy3d;singleton:=true
 Bundle-Version: 1.0.0.qualifier
-Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Bundle-RequiredExecutionEnvironment: JavaSE-17
 Require-Bundle: org.eclipse.dawnsci.plotting.api,
  org.jzy3d.api.ebr;bundle-version="1.0.1",
  org.eclipse.january,

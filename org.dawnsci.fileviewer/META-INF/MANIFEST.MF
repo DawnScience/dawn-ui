@@ -22,7 +22,7 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.january,
  org.eclipse.dawnsci.nexus,
  org.dawb.common.util
-Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Bundle-RequiredExecutionEnvironment: JavaSE-17
 Import-Package: javax.annotation;version="1.2.0",
  javax.inject;version="1.0.0",
  org.slf4j;version="1.7.6",

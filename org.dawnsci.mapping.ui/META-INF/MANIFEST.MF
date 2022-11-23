@@ -24,7 +24,7 @@ Require-Bundle: org.eclipse.ui,
  org.dawnsci.datavis.api;bundle-version="1.0.0",
  org.dawnsci.january.ui;bundle-version="1.0.0",
  org.dawnsci.multidimensional.ui
-Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Bundle-RequiredExecutionEnvironment: JavaSE-17
 Bundle-ActivationPolicy: lazy
 Service-Component: OSGI-INF/*.xml
 Import-Package: org.eclipse.core.resources,

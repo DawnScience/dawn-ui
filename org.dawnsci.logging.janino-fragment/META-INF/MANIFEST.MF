@@ -4,6 +4,6 @@ Bundle-Name: Dawn Janino-fragment
 Bundle-SymbolicName: org.dawnsci.logging.janino-fragment
 Bundle-Version: 1.0.0.qualifier
 Automatic-Module-Name: org.dawnsci.logging.janino-fragment
-Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Bundle-RequiredExecutionEnvironment: JavaSE-17
 Fragment-Host: org.codehaus.janino.janino
 Require-Bundle: ch.qos.logback.core;bundle-version="1.2.3"

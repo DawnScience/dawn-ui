@@ -4,7 +4,7 @@ Bundle-Name: Plotting Histogram Tests
 Bundle-SymbolicName: org.dawnsci.plotting.histogram.test
 Bundle-Version: 1.0.0.qualifier
 Fragment-Host: org.dawnsci.plotting.histogram;bundle-version="1.1.0"
-Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Bundle-RequiredExecutionEnvironment: JavaSE-17
 Require-Bundle: org.junit;bundle-version="4.10.0",
  org.eclipse.ui.ide;bundle-version="3.8.2",
  org.eclipse.core.resources,

@@ -16,7 +16,7 @@ Require-Bundle: org.eclipse.ui,
  org.dawnsci.datavis.api,
  org.dawnsci.plotting,
  org.dawnsci.multidimensional.ui
-Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Bundle-RequiredExecutionEnvironment: JavaSE-17
 Bundle-ActivationPolicy: lazy
 Import-Package: org.eclipse.draw2d,
  org.slf4j;version="[1.7.2,2.0.0)"
