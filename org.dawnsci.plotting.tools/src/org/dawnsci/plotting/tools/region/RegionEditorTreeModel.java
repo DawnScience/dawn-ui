@@ -161,7 +161,7 @@ public class RegionEditorTreeModel extends AbstractNodeModel {
 		node.setValue(value, unit);
 		node.setFormat(pointFormat);
 		if (editable) {
-			node.setLowerBound(Double.MIN_VALUE);
+			node.setLowerBound(-Double.MAX_VALUE);
 			node.setUpperBound(Double.MAX_VALUE);
 			node.setIncrement(increment);
 			node.addAmountListener(new AmountListener<Angle>() {
@@ -200,7 +200,7 @@ public class RegionEditorTreeModel extends AbstractNodeModel {
 			node.setValue(value, (Unit<Length>)unit);
 			if (editable) {
 				node.setIncrement(increment);
-				node.setLowerBound(Double.MIN_VALUE);
+				node.setLowerBound(-Double.MAX_VALUE);
 				node.setUpperBound(Double.MAX_VALUE);
 				node.addAmountListener(new AmountListener<Length>() {
 					@Override

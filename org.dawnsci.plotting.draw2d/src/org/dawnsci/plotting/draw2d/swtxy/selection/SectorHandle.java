@@ -62,7 +62,6 @@ public class SectorHandle extends SelectionHandle {
 		RotatableEllipse ell = (RotatableEllipse) parent;
 		PointList list = new PointList(2*ARC_POINTS);
 		affine = ell.getAffineTransform();
-		location = new PrecisionPoint(affine.getTranslationX(), affine.getTranslationY());
 
 		final double sx = affine.getScaleX();
 		final double sy = affine.getScaleY();
