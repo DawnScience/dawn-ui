@@ -24,38 +24,28 @@ class SavuParameterEditorLabelProvider extends ColumnLabelProvider {
 
 	@Override
 	public String getText(Object element) {
-		final SavuParameterEditorRowDataModel model = (SavuParameterEditorRowDataModel)element;
+		final SavuParameterEditorRowDataModel model = (SavuParameterEditorRowDataModel) element;
 		DecimalFormat pointFormat = new DecimalFormat("##0.0###");
-		switch (column) {
+		return switch (column) {
 		case 0:
-
-			return model.getKey(); 
+			yield model.getKey();
 		case 1:
-
-			Object outVal = model.getValue(); 
-				if (outVal instanceof Double) {
-					return pointFormat.format(outVal);
-
-				}
-				if (outVal instanceof Integer) {
-					return outVal.toString();
-
-				}
-
-				if (outVal instanceof Boolean) {
-					return outVal.toString();
-				}
-
-				if (outVal instanceof String) {
-					return outVal.toString();
-				}
-
+			Object outVal = model.getValue();
+			if (outVal instanceof Double) {
+				yield pointFormat.format(outVal);
+			}
+			if (outVal instanceof Integer || outVal instanceof Boolean) {
+				yield outVal.toString();
+			}
+			if (outVal instanceof String str) {
+				yield str;
+			}
+			/* FALLTHROUGH */
 		case 2:
-
-			return model.getDescription();
+			yield model.getDescription();
 		default:
-			return "Index out of bounds";
-		}
+			yield "Index out of bounds";
+		};
 	}
 
 	@Override

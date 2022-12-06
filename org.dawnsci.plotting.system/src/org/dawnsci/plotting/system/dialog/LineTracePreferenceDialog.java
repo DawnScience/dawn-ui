@@ -204,13 +204,12 @@ public class LineTracePreferenceDialog extends Dialog {
 	@Override
 	protected void buttonPressed(int buttonId) {
 		switch (buttonId) {
-		case APPLY_FIRST:
-		case APPLY_LAST:
-		case APPLY_ALL:
+		case APPLY_FIRST, APPLY_LAST, APPLY_ALL:
 			applyToTraces(buttonId);
 			break;
 		case RESET_GLOBAL:
 			prefs.resetPreferences();
+			/* FALLTHROUGH */
 		case RESET_LOCAL:
 			initialize();
 			break;

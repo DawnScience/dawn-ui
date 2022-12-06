@@ -317,29 +317,29 @@ public class ConfigureOperationModelWizardPage extends AbstractOperationModelWiz
 		if (range == null) range = minMax.clone();
 		range = range.clone();
 		
-		switch (type) {
+		return switch (type) {
 		case XRANGE:
 			if (input.is2D() && axes != null && axes[1] != null) {
 				range[0] = Maths.abs(Maths.subtract(axes[1], range[0])).argMin();
 				range[1] = Maths.abs(Maths.subtract(axes[1], range[1])).argMin();
 			}
-				return new XAxisBoxROI(range[0],0,range[1]-range[0],0,0);
+			yield new XAxisBoxROI(range[0],0,range[1]-range[0],0,0);
 		case YRANGE:
 			if (input.is2D() && axes != null && axes[0] != null) {
 				range[0] = Maths.abs(Maths.subtract(axes[0], range[0])).argMin();
 				range[1] = Maths.abs(Maths.subtract(axes[0], range[1])).argMin();
 			}
-				return new YAxisBoxROI(0, range[0], 0, range[1] - range[0], 0);
+			yield new YAxisBoxROI(0, range[0], 0, range[1] - range[0], 0);
 		case XSINGLE:
 			if (input.is2D() && axes != null && axes[1] != null) {
 				range[0] = Maths.abs(Maths.subtract(axes[1], range[0])).argMin();
 			}
-			return new XAxisBoxROI(range[0],0,range[0],0,0);
+			yield new XAxisBoxROI(range[0],0,range[0],0,0);
 		case YSINGLE:
 			if (input.is2D() && axes != null && axes[0] != null) {
 				range[0] = Maths.abs(Maths.subtract(axes[0], range[0])).argMin();
 			}
-				return new YAxisBoxROI(0, range[0], 0, range[0], 0);
+			yield new YAxisBoxROI(0, range[0], 0, range[0], 0);
 		case XYRANGE:
 			if (input.is2D() && axes != null) {
 				if (axes[1] != null) {
@@ -351,13 +351,12 @@ public class ConfigureOperationModelWizardPage extends AbstractOperationModelWiz
 					range[3] = Maths.abs(Maths.subtract(axes[0], range[3])).argMin();
 				}
 				
-				return new RectangularROI(new double[]{range[0],range[1]}, new double[]{range[2],range[3]});
+				yield new RectangularROI(new double[]{range[0],range[1]}, new double[]{range[2],range[3]});
 			}
+			yield null;
 		default:
-			break;
-		}
-		
-		return null;
+			yield null;
+		};
 	}
 	
 

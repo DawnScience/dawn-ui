@@ -111,6 +111,7 @@ public class PowderCheckJob extends Job {
 			break;
 		case Cake:
 			integrateCake(dataset, metadata, monitor);
+			break;
 		default:
 			break;
 		}
