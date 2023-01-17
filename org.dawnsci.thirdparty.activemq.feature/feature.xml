@@ -18,7 +18,7 @@
    </license>
 
    <plugin
-         id="org.apache.activemq.activemq-osgi"
+         id="org.apache.activemq.osgi"
          download-size="0"
          install-size="0"
          version="0.0.0"
