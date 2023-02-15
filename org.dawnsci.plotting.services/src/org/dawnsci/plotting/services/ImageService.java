@@ -137,7 +137,7 @@ public class ImageService extends AbstractServiceFactory implements IImageServic
 			if (max - min > Math.ulp(maxmax)) {
 				value.isubtract(min);
 				value.imultiply(1./(max - min));
-			} else {
+			} else if (maxmax > 0) {
 				value.imultiply(1./maxmax);
 			}
 			Maths.clip(value, value, 0, 1);
@@ -213,8 +213,8 @@ public class ImageService extends AbstractServiceFactory implements IImageServic
 		
 		if (bean.getMax()==null) {
 			if (stats==null) stats = getFastStatistics(bean); // do not get unless have to
-		    bean.setMax(stats[1]);
-		}		
+			bean.setMax(stats[1]);
+		}
 	}
 
 	/**
@@ -263,7 +263,7 @@ public class ImageService extends AbstractServiceFactory implements IImageServic
 	 * it is useful as return array[3].
 	 * 
 	 * @param bean
-	 * @return [0] = min [1] = max(=mean*constant) [2] = mean [3] max
+	 * @return [0] = min [1] = max(=mean*constant) [2] = ???
 	 */
 	public double[] getFastStatistics(ImageServiceBean bean) {
 		
@@ -287,10 +287,10 @@ public class ImageService extends AbstractServiceFactory implements IImageServic
 				ret = new double[] {Double.NaN, Double.NaN,-1};
 			}
 
-		    if (bean.isLogColorScale() && ret != null) {
-		    	ret = new double[]{Math.pow(10, ret[0]), Math.pow(10, ret[1]), -1};
+			if (bean.isLogColorScale() && ret != null) {
+				ret = new double[] { Math.pow(10, ret[0]), Math.pow(10, ret[1]), -1 };
 			}
-		    
+
 			sanitise_stats(ret, InterfaceUtils.isInteger(image.getClass()));
 
 			return ret;
@@ -359,16 +359,19 @@ public class ImageService extends AbstractServiceFactory implements IImageServic
 	}
 	
 	private void sanitise_stats(double[] output, boolean isInteger) {
-		if (output[0] == output[1]) {
-	    	
-	    	if (isInteger) {
-	    		output[0] = output[0] - 1;
-	    		output[1] = output[1] + 1; 
-	    	} else {
-	    		output[0] = Math.nextDown(output[0]);
-	    		output[1] = Math.nextUp(output[1]);
-	    	}
-	    }
+		double a = output[0];
+		if (a == output[1]) {
+			if (isInteger) {
+				output[0] = a - 1;
+				output[1] = a + 1;
+			} else if (a != 0) {
+				output[0] = Math.nextDown(output[0]);
+				output[1] = Math.nextUp(output[1]);
+			} else { // special case as Double.MIN_VALUE causes problems in later use
+				output[0] = -Math.pow(2, -52);
+				output[1] = -output[0];
+			}
+		}
 	}
 
 	@Override
