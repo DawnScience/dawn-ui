@@ -130,8 +130,6 @@ public class SetUpProcessWizardPage extends WizardPage {
 			public void widgetSelected(SelectionEvent e) {
 				if (!d1.getSelection()) return;
 				updateDataset(dataOption.getName(), LINE_OPTIONS);
-				updatePlot();
-				
 			}
 			
 		});
@@ -142,8 +140,6 @@ public class SetUpProcessWizardPage extends WizardPage {
 			public void widgetSelected(SelectionEvent e) {
 				if (!d2.getSelection()) return;
 				updateDataset(dataOption.getName(), IMAGE_OPTIONS);
-				updatePlot();
-				
 			}
 
 		});
@@ -168,7 +164,6 @@ public class SetUpProcessWizardPage extends WizardPage {
 				}
 				
 				updateDataset(sel.getKey(), options);
-				
 			}
 		});
 		
@@ -244,13 +239,11 @@ public class SetUpProcessWizardPage extends WizardPage {
 									@Override
 									public void sliceChanged(SliceChangeEvent event) {
 										// TODO Auto-generated method stub
-										
 									}
 									
 									@Override
 									public void optionsChanged(SliceChangeEvent event) {
 										updatePlot();
-										
 									}
 									
 									@Override
@@ -263,23 +256,30 @@ public class SetUpProcessWizardPage extends WizardPage {
 								table.setInput(nDimensions);
 
 								updatePlot();
-								
 							}
 						});
 						
 					} catch (Exception e) {
-						logger.error("Error getting dataset information",e);
+						showException("Error getting dataset information", e);
 					}
-					
 				}
 			});
 		} catch (Exception e) {
-			logger.error("Error getting dataset infomation",e);
+			showException("Error getting dataset infomation", e);
 		}
 	}
-	
-	private void updatePlot() {
 
+	private void showException(String context, Exception e) {
+		if (e != null) {
+			logger.error(context, e);
+			String message = context + e.getMessage();
+			Display.getDefault().asyncExec(() -> setErrorMessage(message));
+		} else {
+			Display.getDefault().asyncExec(() -> setErrorMessage(context));
+		}
+	}
+
+	private void updatePlot() {
 			NDimensions nd = new NDimensions(nDimensions);
 			for (int i = 0; i < nd.getRank(); i++) {
 				if (nd.getDescription(i).isEmpty()) {
@@ -293,8 +293,9 @@ public class SetUpProcessWizardPage extends WizardPage {
 				try {
 					IDataset d = dataOption.getLazyDataset().getSlice(s).squeeze();
 					Display.getDefault().asyncExec(() -> MetadataPlotUtils.plotDataWithMetadata(d, system));
+					showException(null, null);
 				} catch (DatasetException e) {
-					logger.error("Error slicing data for plot");
+					showException("Error slicing data for plot", e);
 				}
 			});
 	}
@@ -322,7 +323,7 @@ public class SetUpProcessWizardPage extends WizardPage {
 				
 			}
 		});
-			table.setInput(nDimensions);
+		table.setInput(nDimensions);
 		
 		updatePlot();
 	}
@@ -413,7 +414,7 @@ public class SetUpProcessWizardPage extends WizardPage {
 			system.createPlotPart(displayPlotComp, "Slice", actionBarWrapper, PlotType.IMAGE, null);
 			
 		} catch (Exception e) {
-			logger.error("cannot create plotting system",e);
+			showException("cannot create plotting system",e);
 		}
 	}
 	
