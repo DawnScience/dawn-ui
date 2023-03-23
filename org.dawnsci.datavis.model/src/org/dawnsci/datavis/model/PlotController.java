@@ -242,7 +242,6 @@ public class PlotController implements IPlotController, ILoadedFileInitialiser {
 				system.reset();
 				if (system.getSelectedXAxis() != null) system.getSelectedXAxis().setTitle("");
 				if (system.getSelectedYAxis() != null) system.getSelectedYAxis().setTitle("");
-				system.setTitle("");
 				for (PlotModeChangeEventListener l : listeners) l.plotModeChanged();
 			}
 		}
@@ -821,7 +820,6 @@ public class PlotController implements IPlotController, ILoadedFileInitialiser {
 		try {
 			modeSwitching = true;
 			getPlottingSystem().reset();
-			getPlottingSystem().setTitle("");
 			
 			currentMode = mode;
 			updateInnerPlotMode(dOption, currentMode);
@@ -853,7 +851,6 @@ public class PlotController implements IPlotController, ILoadedFileInitialiser {
 			system.reset();
 			if (system.getSelectedXAxis() != null) system.getSelectedXAxis().setTitle("");
 			if (system.getSelectedYAxis() != null) system.getSelectedYAxis().setTitle("");
-			system.setTitle("");
 		}
 
 		Runnable r = new Runnable() {

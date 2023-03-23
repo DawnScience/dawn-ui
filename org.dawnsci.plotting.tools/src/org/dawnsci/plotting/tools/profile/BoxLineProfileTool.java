@@ -102,7 +102,6 @@ public class BoxLineProfileTool extends ProfileTool implements IProfileToolPage 
 		}
 
 		profilePlottingSystem.setShowLegend(false);
-		profilePlottingSystem.setTitle("");
 
 		Action plotAverage = new Action("Plot Average Box Profiles", IAction.AS_CHECK_BOX) {
 			@Override

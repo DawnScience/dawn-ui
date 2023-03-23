@@ -1074,6 +1074,7 @@ public class PlottingSystemImpl<T> extends AbstractPlottingSystem<T> {
 
 	@Override
 	public void reset() {
+		super.setTitle(""); // needed as base class holds state
 		DisplayUtils.syncExec(new Runnable() {
 			@Override
 			public void run() {
