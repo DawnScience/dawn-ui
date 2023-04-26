@@ -121,14 +121,4 @@
          version="0.0.0"
          unpack="false"/>
 
-   <includes
-         id="uk.ac.diamond.cpython.feature"
-         version="0.0.0"
-         arch="x86_64"/>
-
-   <includes
-         id="uk.ac.diamond.scisoft.spectroscopy.cpython.feature"
-         version="0.0.0"
-         arch="x86_64"/>
-
 </feature>
