@@ -24,6 +24,7 @@ import org.dawnsci.datavis.model.ILoadedFileInitialiser;
 import org.dawnsci.datavis.view.ActionServiceManager;
 import org.dawnsci.datavis.view.DataOptionsUIUtils;
 import org.dawnsci.datavis.view.ExpressionDialog;
+import org.dawnsci.datavis.view.parts.CopyToClipboardAction;
 import org.dawnsci.january.ui.utils.SelectionUtils;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.dawnsci.analysis.api.expressions.IExpressionService;
@@ -158,8 +159,14 @@ public class DataOptionTableViewer {
 
 			@Override
 			public void menuAboutToShow(IMenuManager manager) {
+				
 				DataOptions dataOptions = SelectionUtils.getFirstFromSelection(tableViewer.getSelection(), DataOptions.class);
 				if (dataOptions != null) {
+					
+					if (dataOptions.getName() != null) {
+						manager.add(new CopyToClipboardAction(dataOptions.getName()));
+					}
+					
 					Action a = new Action("Take view") {
 						@Override
 						public void run() {
