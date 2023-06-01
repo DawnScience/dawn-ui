@@ -5,7 +5,7 @@
 
 	<groupId>dawn</groupId>
 	<artifactId>uk.ac.diamond.dawn.product</artifactId>
-	<version>2.30.0-SNAPSHOT</version>
+	<version>2.31.0-SNAPSHOT</version>
 	<packaging>eclipse-repository</packaging>
 
 	<parent>
