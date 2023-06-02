@@ -29,6 +29,7 @@ openFile
 -Dpydev.funding.hide=true
       </vmArgs>
       <vmArgsMac>-XstartOnFirstThread
+-Djava.awt.headless=true
 -Dorg.eclipse.swt.internal.carbon.smallFonts
       </vmArgsMac>
    </launcherArgs>
