@@ -12,7 +12,9 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.draw2d,
  org.dawnsci.plotting,
  org.dawnsci.datavis.api,
- org.eclipse.dawnsci.analysis.dataset
+ org.eclipse.dawnsci.analysis.dataset,
+ org.dawnsci.plotting.histogram,
+ org.eclipse.swt
 Bundle-RequiredExecutionEnvironment: JavaSE-17
 Automatic-Module-Name: org.dawnsci.multidimensional.ui
 Bundle-ActivationPolicy: lazy

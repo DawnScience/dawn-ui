@@ -15,6 +15,10 @@
             class="org.dawnsci.multidimensional.ui.arpes.ArpesSlicePlotViewer"
             id="org.dawnsci.multidimensional.ui.arpes.ArpesSlicePlotViewer">
       </plottingViewer>
+      <plottingViewer
+            class="org.dawnsci.multidimensional.ui.imagecompare.ImageComparePlotViewer"
+            id="org.dawnsci.multidimensional.ui.imagecompare.ImageComparePlotViewer">
+      </plottingViewer>
    </extension>
    <extension
          point="org.dawnsci.datavis.api.plotmode">
@@ -37,6 +41,11 @@
             class="org.dawnsci.multidimensional.ui.arpes.PlotModeArpesSlice"
             name="ARPES Slicing"
             priority="0">
+      </plotmode>
+      <plotmode
+            class="org.dawnsci.multidimensional.ui.imagecompare.PlotModeImageCompare"
+            name="Image Compare"
+            priority="5">
       </plotmode>
    </extension>
       <extension

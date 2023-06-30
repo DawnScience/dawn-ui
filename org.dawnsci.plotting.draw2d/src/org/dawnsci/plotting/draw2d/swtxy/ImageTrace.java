@@ -1197,8 +1197,11 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 			imageOrigin = isHorizontal ? ImageOrigin.TOP_LEFT : ImageOrigin.BOTTOM_RIGHT;
 			break;
 		}
-
-		imageServiceBean.setOrigin(imageOrigin);
+        
+		if (imageServiceBean != null) {
+			imageServiceBean.setOrigin(imageOrigin);
+		}
+		
 	}
 
 	/**
