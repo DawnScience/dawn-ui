@@ -87,8 +87,12 @@ public class DataManipulationExtensionContributionFactory extends ExtensionContr
 				Action concat = new Action("Concatenate"){
 					@Override
 					public void run() {
-
-						IDataset comb = buildCombined(data);
+						IDataset comb = null;
+						try {
+							comb = buildCombined(data);
+						} catch (Exception e) {
+							MessageDialog.openError(shell, "Error", "Problem with get compatible XY data: " + e.getMessage());
+						}
 
 						if (comb != null ) {
 							CombineDialog c = new CombineDialog(shell, comb);
@@ -102,8 +106,12 @@ public class DataManipulationExtensionContributionFactory extends ExtensionContr
 				Action average = new Action("Average") {
 					@Override
 					public void run() {
-
-						IDataset comb = buildCombined(data);
+						IDataset comb = null;
+						try {
+							comb = buildCombined(data);
+						} catch (Exception e) {
+							MessageDialog.openError(shell, "Error", "Problem with get compatible XY data: " + e.getMessage());
+						}
 
 						if (comb == null) {
 							MessageDialog.openError(shell, "No valid data.", "No valid data was found to average.\n(1D slices are currently not supported).");
@@ -182,9 +190,13 @@ public class DataManipulationExtensionContributionFactory extends ExtensionContr
 				Action sub = new Action("Subtract"){
 					@Override
 					public void run() {
+						List<IXYData> xy = null;
+						try {
+							xy = getCompatibleXY(data);
+						} catch (Exception e) {
+							MessageDialog.openError(shell, "Error", "Problem with get compatible XY data: " + e.getMessage());
+						}
 
-						List<IXYData> xy = getCompatibleXY(data);
-						
 						ListDialog d = new ListDialog(shell);
 						d.setTitle("Select file to subtract");
 						d.setContentProvider(new ArrayContentProvider());
@@ -270,9 +282,13 @@ public class DataManipulationExtensionContributionFactory extends ExtensionContr
 				Action xmcd = new Action("XMCD"){
 					@Override
 					public void run() {
+						List<IXYData> xy = null;
+						try {
+							xy = getCompatibleXY(data);
+						} catch (Exception e) {
+							MessageDialog.openError(shell, "Error", "Problem with get compatible XY data: " + e.getMessage());
+						}
 
-						List<IXYData> xy = getCompatibleXY(data);
-						
 						if (xy != null && xy.size() == 2) {
 							RegionNormalisedDifferenceDialog d = new RegionNormalisedDifferenceDialog(shell, xy.get(0), xy.get(1));
 							if (d.open() == Dialog.OK) {
@@ -289,7 +305,6 @@ public class DataManipulationExtensionContributionFactory extends ExtensionContr
 						} else {
 							MessageDialog.openError(shell, "Error", "XMCD requires two files to be selected in the table");
 						}
-						
 					}
 				};
 				

@@ -63,7 +63,9 @@ public class RegionNormalisedDifferenceDialog extends Dialog {
 	
 	private IXYData first;
 	private IXYData second;
-	
+	private IDataset firstX;
+	private IDataset secondX;
+
 	private double scale = 1;
 	private Color[] colors;
 	private RectangularROI linearRoi;
@@ -75,7 +77,19 @@ public class RegionNormalisedDifferenceDialog extends Dialog {
 		super(parentShell);
 		
 		this.first = first;
+		firstX = first.getX();
+		if (firstX == null) {
+			IDataset y = first.getY();
+			firstX = DatasetFactory.createRange(y.getSize());
+			firstX.setShape(y.getShape());
+		}
 		this.second = second;
+		secondX = second.getX();
+		if (secondX == null) {
+			IDataset y = second.getY();
+			secondX = DatasetFactory.createRange(y.getSize());
+			secondX.setShape(y.getShape());
+		}
 	}
 	
 	protected Control createDialogArea(Composite parent) {
@@ -101,8 +115,8 @@ public class RegionNormalisedDifferenceDialog extends Dialog {
 		
 		first.getY().setName(first.getFileName() + ":" +first.getDatasetName());
 		second.getY().setName(second.getFileName() + ":" +second.getDatasetName());
-		regionSystem.createPlot1D(first.getX(), Arrays.asList(first.getY()), null);
-		regionSystem.createPlot1D(second.getX(), Arrays.asList(second.getY()), null);
+		regionSystem.createPlot1D(firstX, Arrays.asList(first.getY()), null);
+		regionSystem.createPlot1D(secondX, Arrays.asList(second.getY()), null);
 		regionSystem.setTitle("");
 		
 		Button subtractLinear = new Button(container, SWT.CHECK);
@@ -111,8 +125,8 @@ public class RegionNormalisedDifferenceDialog extends Dialog {
 		try {
 			IRegion r = regionSystem.createRegion("Normalisation region", RegionType.XAXIS);
 			RectangularROI roi = new RectangularROI();
-			roi.setPoint(first.getX().min().doubleValue(), 0.0);
-			roi.setLengths(DatasetUtils.convertToDataset(first.getX()).peakToPeak(true).doubleValue()/20,1);
+			roi.setPoint(firstX.min().doubleValue(), 0.0);
+			roi.setLengths(DatasetUtils.convertToDataset(firstX).peakToPeak(true).doubleValue()/20,1);
 			r.setROI(roi);
 			regionSystem.addRegion(r);
 			
@@ -196,10 +210,10 @@ public class RegionNormalisedDifferenceDialog extends Dialog {
 	public Dataset getData() {
 		
 		Dataset d = calculateDifference();
-		Dataset sum = cumTrapz(first.getX(),d);
+		Dataset sum = cumTrapz(firstX,d);
 		try {
 			AxesMetadata m = MetadataFactory.createMetadata(AxesMetadata.class, 1);
-			m.setAxis(0, first.getX());
+			m.setAxis(0, firstX);
 			m.addAxis(0, sum);
 			d.setMetadata(m);
 
@@ -297,8 +311,8 @@ public class RegionNormalisedDifferenceDialog extends Dialog {
 	}
 	
 	private double[] calculateLinear(RectangularROI roi, Dataset data) {
-		int tmpMin = ROISliceUtils.findPositionOfClosestValueInAxis(first.getX(), roi.getPointX());
-		int tmpMax = ROISliceUtils.findPositionOfClosestValueInAxis(first.getX(), roi.getPointX()+roi.getLength(0));
+		int tmpMin = ROISliceUtils.findPositionOfClosestValueInAxis(firstX, roi.getPointX());
+		int tmpMax = ROISliceUtils.findPositionOfClosestValueInAxis(firstX, roi.getPointX()+roi.getLength(0));
 		
 		if (tmpMin > tmpMax) {
 			int tmp = tmpMin;
@@ -312,14 +326,14 @@ public class RegionNormalisedDifferenceDialog extends Dialog {
 	
 	private double[] linearFit(int tmpMin, int tmpMax) {
 		//Linear fit across region
-		SliceND s = new SliceND(first.getX().getShape());
+		SliceND s = new SliceND(firstX.getShape());
 
 		s.setSlice(0, tmpMin,tmpMax,1);
 
 		Dataset dif = calculateDifference();
 
 		dif = dif.getSlice(s);
-		IDataset r = first.getX().getSlice(s);
+		IDataset r = firstX.getSlice(s);
 
 		DoubleDataset linear = DatasetFactory.ones(DoubleDataset.class,new int[] {dif.getShape()[0],2});
 		s = new SliceND(linear.getShape());
@@ -338,8 +352,8 @@ public class RegionNormalisedDifferenceDialog extends Dialog {
 	private double[] twoPointLinear(Dataset data, int tmpMin, int tmpMax) {
 		//simple two point linear baseline
 		//may still be needed
-		double x1 = first.getX().getDouble(tmpMin);
-		double x2 = first.getX().getDouble(tmpMax);
+		double x1 = firstX.getDouble(tmpMin);
+		double x2 = firstX.getDouble(tmpMax);
 
 		double y1 = data.getDouble(tmpMin);
 		double y2 = data.getDouble(tmpMax);
@@ -352,8 +366,8 @@ public class RegionNormalisedDifferenceDialog extends Dialog {
 	}
 	
 	private void updateScale(RectangularROI roi) {
-		int tmpMin = ROISliceUtils.findPositionOfClosestValueInAxis(first.getX(), roi.getPointX());
-		int tmpMax = ROISliceUtils.findPositionOfClosestValueInAxis(first.getX(), roi.getPointX()+roi.getLength(0));
+		int tmpMin = ROISliceUtils.findPositionOfClosestValueInAxis(firstX, roi.getPointX());
+		int tmpMax = ROISliceUtils.findPositionOfClosestValueInAxis(firstX, roi.getPointX()+roi.getLength(0));
 		
 		if (tmpMin > tmpMax) {
 			int tmp = tmpMin;
@@ -361,7 +375,7 @@ public class RegionNormalisedDifferenceDialog extends Dialog {
 			tmpMax = tmp;
 		}
 		
-		SliceND s = new SliceND(first.getX().getShape());
+		SliceND s = new SliceND(firstX.getShape());
 		
 		s.setSlice(0, tmpMin,tmpMax,1);
 		
@@ -386,17 +400,17 @@ public class RegionNormalisedDifferenceDialog extends Dialog {
 		
 		if (linearRoi != null) {
 			double[] mc = calculateLinear(linearRoi,dif);
-			IDataset linear = Maths.multiply(first.getX(),mc[0]).iadd(mc[1]);
+			IDataset linear = Maths.multiply(firstX,mc[0]).iadd(mc[1]);
 			dif.isubtract(linear);
 		}
 		
-		Dataset sum = cumTrapz(first.getX(),dif);
+		Dataset sum = cumTrapz(firstX,dif);
 		sum.setName("sum");
 		
-		Dataset zero = DatasetFactory.zeros(DoubleDataset.class, first.getX().getShape());
+		Dataset zero = DatasetFactory.zeros(DoubleDataset.class, firstX.getShape());
 		zero.setName("zeroth line");
 		
-		List<ITrace> t = differenceSystem.updatePlot1D(first.getX(), Arrays.asList(zero,sum,dif),null);
+		List<ITrace> t = differenceSystem.updatePlot1D(firstX, Arrays.asList(zero,sum,dif),null);
 		
 		if (colors == null) {
 			colors = getColors();
