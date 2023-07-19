@@ -327,7 +327,10 @@ public class ImageService extends AbstractServiceFactory implements IImageServic
 		double retMax = Double.NaN;
 		double retExtra = Double.NaN;
 		
-		if (bean.getHistogramType()==HistoType.MEDIAN) { 
+		if (bean.getHistogramType() == HistoType.FULL_RANGE) {
+			retMax = max;
+			
+		} else if (bean.getHistogramType()==HistoType.MEDIAN) { 
 			
 			double median = Double.NaN;
 			try {
