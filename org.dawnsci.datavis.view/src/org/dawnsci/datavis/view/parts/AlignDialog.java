@@ -10,9 +10,11 @@
 package org.dawnsci.datavis.view.parts;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.dawnsci.datavis.api.IDataPackage;
 import org.dawnsci.datavis.api.IXYData;
@@ -21,6 +23,9 @@ import org.dawnsci.datavis.model.DataOptions;
 import org.dawnsci.datavis.model.IFileController;
 import org.dawnsci.datavis.model.IPlotController;
 import org.dawnsci.datavis.model.IPlotDataModifier;
+import org.dawnsci.datavis.model.PlotEventObject;
+import org.dawnsci.datavis.model.PlotEventObject.PlotEventType;
+import org.dawnsci.datavis.model.PlotModeChangeEventListener;
 import org.eclipse.dawnsci.analysis.api.roi.IRectangularROI;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.axis.IAxis;
@@ -32,14 +37,17 @@ import org.eclipse.dawnsci.plotting.api.region.ROIEvent;
 import org.eclipse.dawnsci.plotting.api.region.RegionEvent;
 import org.eclipse.dawnsci.plotting.api.trace.ILineTrace;
 import org.eclipse.dawnsci.plotting.api.trace.ITrace;
+import org.eclipse.january.MetadataException;
 import org.eclipse.january.dataset.Dataset;
-import org.eclipse.january.dataset.DatasetFactory;
 import org.eclipse.january.dataset.DatasetUtils;
 import org.eclipse.january.dataset.IDataset;
 import org.eclipse.january.dataset.Maths;
 import org.eclipse.january.dataset.Slice;
+import org.eclipse.january.metadata.AxesMetadata;
+import org.eclipse.january.metadata.MetadataFactory;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.ColumnViewerEditor;
@@ -73,7 +81,7 @@ import org.slf4j.LoggerFactory;
 
 import uk.ac.diamond.scisoft.analysis.dataset.function.AlignToHalfGaussianPeak;
 
-public class AlignDialog extends Dialog implements IRegionListener {
+public class AlignDialog extends Dialog implements IRegionListener, PlotModeChangeEventListener {
 
 	protected static final Logger logger = LoggerFactory.getLogger(AlignDialog.class);
 
@@ -83,17 +91,20 @@ public class AlignDialog extends Dialog implements IRegionListener {
 
 	private Map<String, PlotItem> plotItems = new LinkedHashMap<>();
 
-	private Button resetButton;
 	private IRectangularROI currentROI = null;
 	private boolean forceToZero;
 	private boolean resampleX;
 	private boolean plotAverage;
 	private AlignToHalfGaussianPeak align = new AlignToHalfGaussianPeak(false);
 
+	private Button resetButton;
 	private Button plotAverageButton;
+	private Button storeAutoAlignShifts;
+	private Button restoreAutoAlignShifts;
 	private TableViewer resultTable;
 	private Color originalColour = null;
 	private static Color doneColour = null;
+	private List<Double> shiftsStore = new ArrayList<>();
 
 	public AlignDialog(Shell parentShell, IFileController fc, IPlotController pc) {
 		super(parentShell);
@@ -105,6 +116,7 @@ public class AlignDialog extends Dialog implements IRegionListener {
 		plotController = pc; 
 		plottingSystem = pc.getPlottingSystem();
 		plottingSystem.addRegionListener(this);
+		plotController.addPlotModeListener(this);
 	}
 
 	@Override
@@ -174,6 +186,7 @@ public class AlignDialog extends Dialog implements IRegionListener {
 		b = new Button(alignComp, SWT.CHECK);
 		b.setText("Force to zero");
 		b.setToolTipText("Make align to zero unconditionally; reselect region");
+		b.setSelection(forceToZero);
 		b.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -187,6 +200,7 @@ public class AlignDialog extends Dialog implements IRegionListener {
 		b = new Button(alignComp, SWT.CHECK);
 		b.setText("Resample");
 		b.setToolTipText("Interpolate to common x points");
+		b.setSelection(resampleX);
 		b.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -290,6 +304,33 @@ public class AlignDialog extends Dialog implements IRegionListener {
 		resultTable.getControl().pack(); // update to display as many rows in table as possible
 		updateResetButton();
 
+		Composite storeComp = new Composite(comp, SWT.NONE);
+		storeComp.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+		storeComp.setLayout(new RowLayout());
+		storeAutoAlignShifts = new Button(storeComp, SWT.PUSH);
+		storeAutoAlignShifts.setText("Store");
+		storeAutoAlignShifts.setToolTipText("Save auto-align shifts");
+		storeAutoAlignShifts.setEnabled(false);
+		storeAutoAlignShifts.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				restoreAutoAlignShifts.setEnabled(true);
+				storeShiftsFromAutoAlign();
+			}
+		});
+		restoreAutoAlignShifts = new Button(storeComp, SWT.PUSH);
+		restoreAutoAlignShifts.setText("Restore");
+		restoreAutoAlignShifts.setToolTipText("Reload saved auto-align shifts as manual shifts");
+		restoreAutoAlignShifts.setEnabled(!shiftsStore.isEmpty());
+		restoreAutoAlignShifts.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				if (!setManualShiftsFromStore()) {
+					MessageDialog.openError(getParentShell(), "Error", "There are more plots than stored shifts. Re-align plots and store.");
+				}
+			}
+		});
+
 		return comp;
 	}
 
@@ -304,21 +345,6 @@ public class AlignDialog extends Dialog implements IRegionListener {
 	}
 
 	private void updatePlotItems() {
-		if (!plotItems.isEmpty()) {
-			return;
-		}
-
-		for (ILineTrace t : plottingSystem.getTracesByClass(ILineTrace.class)) {
-			String n = t.getName();
-			if (RESAMPLE_AVERAGE.equals(n)) {
-				continue;
-			}
-			PlotItem pi = new PlotItem(n);
-			plotItems.put(n, pi);
-			pi.setX(DatasetUtils.convertToDataset(t.getXData()));
-			pi.setY(DatasetUtils.convertToDataset(t.getYData()));
-		}
-
 		// update index
 		List<? extends IDataPackage> plotData = fileController.getImmutableFileState();
 		List<IXYData> xyData = DataPackageUtils.getXYData(plotData, false);
@@ -326,6 +352,15 @@ public class AlignDialog extends Dialog implements IRegionListener {
 		if (lmax < 2) {
 			return;
 		}
+		List<String> plotNames = new ArrayList<String>();
+		for (ILineTrace t : plottingSystem.getTracesByClass(ILineTrace.class)) {
+			String n = t.getName();
+			if (RESAMPLE_AVERAGE.equals(n)) {
+				continue;
+			}
+			plotNames.add(n);
+		}
+
 		IDataPackage pd = plotData.get(0);
 		String fn = pd.getFilePath();
 		String dn = pd.getName();
@@ -335,7 +370,31 @@ public class AlignDialog extends Dialog implements IRegionListener {
 		int[] pdIndex = new int[lmax]; // index values for plotData list
 		int[] xyIndex = new int[lmax]; // index values for xyData list
 		int si = 0;
+		IPlotDataModifier modifier = plotController.getEnabledPlotModifier();
+		if (modifier != null && !modifier.supportsRank(1)) {
+			modifier = null;
+		}
 		for (IXYData d : xyData) { // gather inputs to shifter
+			Dataset x = DatasetUtils.convertToDataset(d.getX());
+			Dataset y = DatasetUtils.convertToDataset(d.getY());
+			String n = plotNames.get(i);
+			plotNames.add(n);
+			PlotItem pi = plotItems.get(n);
+			if (pi == null) {
+				pi = new PlotItem(n);
+				plotItems.put(n, pi);
+			} else {
+				pi.setManual(0);
+			}
+			pi.setAuto(0);
+			pi.setX(x);
+			if (modifier != null) {
+				y = DatasetUtils.convertToDataset(modifier.modifyForDisplay(y));
+				setAxesMetadata(x, y);
+			}
+			pi.setY(y);
+			System.err.printf("Trace %s: %s\n", n, y.getSliceView(new Slice(12)).toString(true));
+
 			while (!fn.equals(d.getFileName()) || !dn.equals(d.getDatasetName())) {
 				si = 0;
 				if (++ip < ipmax) {
@@ -351,6 +410,13 @@ public class AlignDialog extends Dialog implements IRegionListener {
 			xyIndex[i] = si++;
 			i++;
 		}
+
+		Set<String> removeItems = new HashSet<>(plotItems.keySet());
+		removeItems.removeAll(plotNames);
+		for (String n: removeItems) {
+			plotItems.remove(n);
+		}
+
 		i = 0;
 		for (PlotItem pi : plotItems.values()) {
 			pi.setIndex(pdIndex[i], xyIndex[i]);
@@ -489,40 +555,16 @@ public class AlignDialog extends Dialog implements IRegionListener {
 	private void alignPlots(double lx, double hx) {
 		logger.debug("Region bounds are {}, {}", lx, hx);
 		removeAveragePlot();
-		List<? extends IDataPackage> plotData = fileController.getImmutableFileState();
 
-		List<IXYData> xyData = DataPackageUtils.getXYData(plotData, false);
-		int lmax = xyData.size();
-		if (lmax < 2) {
+		int imax = plotItems.size();
+		if (imax < 2) {
 			return;
 		}
-		IDataset[] input = new IDataset[2 * lmax];
-
-		IDataPackage pd = plotData.get(0);
-		String fn = pd.getFilePath();
-		String dn = pd.getName();
-		int ip = 0;
-		int ipmax = plotData.size();
+		Dataset[] input = new Dataset[2 * imax];
 		int i = 0;
-		int[] pdIndex = new int[lmax]; // index values for plotData list
-		int[] xyIndex = new int[lmax]; // index values for xyData list
-		int si = 0;
-		for (IXYData d : xyData) { // gather inputs to shifter
-			while (!fn.equals(d.getFileName()) || !dn.equals(d.getDatasetName())) {
-				si = 0;
-				if (++ip < ipmax) {
-					pd = plotData.get(ip);
-					fn = pd.getFilePath();
-					dn = pd.getName();
-				} else {
-					pd = null;
-					break;
-				}
-			}
-			pdIndex[i/2] = ip;
-			xyIndex[i/2] = si++;
-			input[i++] = d.getX();
-			input[i++] = d.getY();
+		for (PlotItem pi : plotItems.values()) {
+			input[i++] = pi.getX();
+			input[i++] = pi.getY();
 		}
 
 		align.setPeakZone(lx, hx);
@@ -530,36 +572,44 @@ public class AlignDialog extends Dialog implements IRegionListener {
 		List<Double> shifts = AlignToHalfGaussianPeak.calculateShifts(resampleX, forceToZero || (lx <= 0 && hx >= 0), 0, posn, input);
 
 		i = 0;
+		int[] pdIndex = new int[imax]; // index values for plotData list
+		Dataset[] data = new Dataset[input.length];
+		double[] firstXShift = {Double.NaN};
 		for (PlotItem pi : plotItems.values()) {
-			pi.setIndex(pdIndex[i/2], xyIndex[i/2]);
+			pdIndex[i/2] = pi.getIndex()[0];
 			double delta = pi.getManual();
 			Dataset x = pi.getX();
-			Double s = shifts.get(i);
-			if (s == null) {
-				s = shifts.get(i + 1);
-				if (s != null && delta != 0) { // translate to index-space
-					double xd = x.getDouble(1) - x.getDouble(0);
+			Double sX = shifts.get(i);
+			Double sY = null;
+			Double s = sX;
+			if (sX == null) {
+				sY = shifts.get(i + 1);
+				if (sY != null) { // translate to index-space
+					double xd = Math.abs(x.getDouble(1) - x.getDouble(0));
+					s = sY * xd; // so displays are in x-space
 					delta /= xd; // TODO remove when shifts are all in x-space
-					shifts.set(i + 1, s - delta);
-					s *= xd; // so displays are in x-space
+					sY += delta;
 				}
 			} else {
 				if (delta != 0) {
-					shifts.set(i, s + delta);
+					sX += delta;
 				}
 			}
 			if (s != null) {
 				pi.setAuto(s);
 			}
+			Dataset[] results = AlignToHalfGaussianPeak.shiftData(firstXShift, sX, sY, input[i], input[i+1]);
+			data[i] = results[0];
+			data[i + 1] = results[1];
 			i += 2;
 		}
-		List<Dataset> data = AlignToHalfGaussianPeak.shiftData(shifts, input);
 
 		// gather and store in corresponding plot data
 		List<Dataset> store = new ArrayList<>();
 		int cip = pdIndex[0];
-		pd = plotData.get(cip);
-		for (int j = 0; j < input.length; j += 2) {
+		List<? extends IDataPackage> plotData = fileController.getImmutableFileState();
+		IDataPackage pd = plotData.get(cip);
+		for (int j = 0; j < data.length; j += 2) {
 			int nip = pdIndex[j/2]; 
 			if (nip != cip) {
 				storeXYData(pd, store);
@@ -567,8 +617,12 @@ public class AlignDialog extends Dialog implements IRegionListener {
 				cip = nip;
 				pd = plotData.get(cip);
 			}
-			store.add(data.get(j));
-			store.add(data.get(j + 1));
+			Dataset x = data[j];
+			Dataset y = data[j + 1];
+			setAxesMetadata(x, y);
+			System.err.printf("Aligned: %s\n", y.getSlice(new Slice(8)).toString(true));
+			store.add(x);
+			store.add(y);
 		}
 		storeXYData(pd, store);
 
@@ -583,8 +637,8 @@ public class AlignDialog extends Dialog implements IRegionListener {
 			if (RESAMPLE_AVERAGE.equals(n)) {
 				continue;
 			}
-			Dataset x = data.get(i);
-			Dataset d = data.get(i + 1);
+			Dataset x = data[i];
+			Dataset d = data[i + 1];
 			PlotItem pi = plotItems.get(n);
 			Dataset ox = pi.getX();
 			if (resampleX || x != ox) {
@@ -607,6 +661,7 @@ public class AlignDialog extends Dialog implements IRegionListener {
 		setRegionDone(true);
 		plottingSystem.repaint(false);
 		resultTable.refresh();
+		storeAutoAlignShifts.setEnabled(true);
 	}
 
 	// store aligned data in original data option
@@ -633,43 +688,89 @@ public class AlignDialog extends Dialog implements IRegionListener {
 		}
 	}
 
-	private void plotAverage(List<? extends IDataset> data, int minSize) {
+	private void storeShiftsFromAutoAlign() {
+		shiftsStore.clear();
+		for (PlotItem pi : plotItems.values()) {
+			shiftsStore.add(pi.getAuto());
+		}
+	}
+
+	private boolean setManualShiftsFromStore() {
+		if (plotItems.size() > shiftsStore.size()) {
+			return false;
+		}
+		int i = 0;
+		for (PlotItem pi : plotItems.values()) {
+			double d = shiftsStore.get(i++);
+			pi.setManual(d);
+			updateDerivedDataAndTrace(pi);
+		}
+		plottingSystem.repaint(false);
+		resultTable.refresh();
+		return true;
+	}
+
+	private void plotAverage(Dataset[] data, int minSize) {
 		Slice s = new Slice(minSize);
-		Dataset sum = DatasetFactory.zeros(DatasetUtils.convertToDataset(data.get(1)).getClass(), minSize);
-		int max = data.size();
-		for (int i = 0; i < max; i += 2) {
-			Dataset d = DatasetUtils.convertToDataset(data.get(i + 1));
+		Dataset sum = data[1].getSlice(s);
+		int max = data.length;
+		for (int i = 3; i < max; i += 2) {
+			Dataset d = DatasetUtils.convertToDataset(data[i]);
 			sum.iadd(d.getSliceView(s));
 		}
 		sum.idivide(max/2);
 		ILineTrace t = plottingSystem.createLineTrace(RESAMPLE_AVERAGE);
-		IDataset ox = data.get(0);
+		IDataset ox = data[0];
 		Dataset x = DatasetUtils.convertToDataset(ox).getSliceView(s);
 		x.setName(ox.getName());
 		t.setData(x, sum);
 		plottingSystem.addTrace(t);
 	}
 
-	private void updateDerivedDataAndTrace(double delta, PlotItem pi) {
+	private static void setAxesMetadata(IDataset x, IDataset y) {
+		try {
+			AxesMetadata am = MetadataFactory.createMetadata(AxesMetadata.class, 1);
+			am.setAxis(0, x);
+			y.setMetadata(am);
+		} catch (MetadataException e) {
+			logger.error("Could not create axes metadata", e);
+		}
+	}
+
+	private void updateDerivedDataAndTrace(PlotItem pi) {
+		String firstName = plotItems.keySet().iterator().next();
+		double firstXShift = 0;
+		if (!firstName.equals(pi.getName())) {
+			PlotItem firstItem = plotItems.get(firstName);
+			firstXShift = firstItem.getAuto();
+			if (firstXShift == 0) {
+				firstXShift = firstItem.getManual();
+			}
+		}
 		ITrace t = plottingSystem.getTrace(pi.getName());
 		if (t instanceof ILineTrace) {
 			ILineTrace lt = (ILineTrace) t;
-			Dataset nx;
-			IDataset ny;
+			Dataset x = pi.getX();
+			System.err.printf("Updated x-axis: %s\n", x.getSlice(new Slice(8)).toString(true));
+			double delta = pi.getAuto() + pi.getManual();
+			System.err.println("Shifting by " + delta + " and " + firstXShift);
+			Dataset nx = Maths.add(x, delta + firstXShift);
+			Dataset ny = pi.getY();
 			if (resampleX) {
-				nx = Maths.add(pi.getX(), delta);
-				ny = Maths.interpolate(nx, pi.getY(), pi.getX(), null, null);
-				nx = pi.getX();
-			} else {
-				delta += pi.getAuto();
-				nx = Maths.add(pi.getX(), delta);
-				ny = lt.getYData();
+				ny = Maths.interpolate(nx, ny, x, null, null);
+				nx = x;
 			}
+			setAxesMetadata(nx, ny);
 
 			int[] index = pi.getIndex();
 			if (index[0] >= 0) {
 				updateDerivedData(index, nx, ny);
 			}
+			IPlotDataModifier modifier = plotController.getEnabledPlotModifier();
+			if (modifier != null && modifier.supportsRank(1)) {
+				ny = DatasetUtils.convertToDataset(modifier.modifyForDisplay(ny));
+			}
+			System.err.printf("Updated trace %s: %s\n", pi.getName(), ny.getSlice(new Slice(8)).toString(true));
 
 			lt.setData(nx, ny);
 			lt.repaint();
@@ -677,16 +778,17 @@ public class AlignDialog extends Dialog implements IRegionListener {
 			if (plotAverage) {
 				removeAveragePlot();
 
-				List<IDataset> data = new ArrayList<>();
+				Dataset[] data = new Dataset[2 * plotItems.size()];
 				int minSize = Integer.MAX_VALUE;
+				int i = 0;
 				for (ILineTrace nt : plottingSystem.getTracesByClass(ILineTrace.class)) {
 					if (RESAMPLE_AVERAGE.equals(nt.getName())) {
 						continue;
 					}
-					IDataset x = nt.getXData();
-					minSize = Math.min(minSize, x.getSize());
-					data.add(x);
-					data.add(nt.getYData());
+					Dataset ntx = DatasetUtils.convertToDataset(nt.getXData());
+					minSize = Math.min(minSize, ntx.getSize());
+					data[i++] = ntx;
+					data[i++] = DatasetUtils.convertToDataset(nt.getYData());
 				}
 
 				plotAverage(data, minSize);
@@ -908,8 +1010,7 @@ public class AlignDialog extends Dialog implements IRegionListener {
 				PlotItem pi = ((PlotItem) element);
 				pi.setManual(delta);
 				getViewer().update(element, null);
-
-				updateDerivedDataAndTrace(delta, pi);
+				updateDerivedDataAndTrace(pi);
 			} catch (Exception e) {
 				// do nothing
 			}
@@ -921,5 +1022,25 @@ public class AlignDialog extends Dialog implements IRegionListener {
 	 */
 	public void reset() {
 		plotItems.clear();
+	}
+
+
+	@Override
+	public void plotModeChanged() {
+		// do nothing
+	}
+
+
+	@Override
+	public void plotStateEvent(PlotEventObject event) {
+		if (event.getEventType() == PlotEventType.READY) {
+			logger.debug("Updating plot items");
+			plotItems.clear();
+			updatePlotItems();
+			Display.getDefault().asyncExec(() -> {
+				removeRegion();
+				if (!resultTable.getTable().isDisposed()) resultTable.refresh();
+			});
+		}
 	}
 }

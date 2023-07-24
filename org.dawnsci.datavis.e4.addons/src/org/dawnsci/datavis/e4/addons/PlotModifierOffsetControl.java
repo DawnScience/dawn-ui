@@ -34,7 +34,9 @@ public class PlotModifierOffsetControl {
 	private Image stackImage;
 	private Composite control;
 	private PlotModeChangeEventListener listener;
-	
+	private static final String STACK_TIP = "Stack XY data (using current x axis range)";
+	private static final String NORM_TIP = "Normalise data (between 0-1)";
+
 	@Inject
 	private IPlotController controller;
 	
@@ -64,18 +66,19 @@ public class PlotModifierOffsetControl {
 		} else {
 			stackButton.setText("Stack");
 		}
-		
-		stackButton.setToolTipText("Stack XY data (using current x axis range)");
-		
+		setStackButtonToolTip(false);
+
 		normButton = new Button(control, SWT.TOGGLE);
-		normButton.setToolTipText("Normalise data (between 0-1)");
+		setNormButtonToolTip(false);
 		normButton.addSelectionListener(new SelectionAdapter() {
 			
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				IPlotDataModifier pm = controller.getEnabledPlotModifier();
 				if (pm instanceof PlotDataModifierStack) {
-					((PlotDataModifierStack)pm).setNormalise(normButton.getSelection());
+					boolean n = normButton.getSelection();
+					setNormButtonToolTip(n);
+					((PlotDataModifierStack)pm).setNormalise(n);
 					controller.forceReplot();
 				}
 			}
@@ -135,11 +138,12 @@ public class PlotModifierOffsetControl {
 							normButton.setEnabled(true);
 						}
 					}
-					
+					setStackButtonToolTip(true);
 				} else {
 					s.setEnabled(false);
 					normButton.setEnabled(false);
 					controller.enablePlotModifier(null);
+					setStackButtonToolTip(false);
 				}
 			}
 			
@@ -163,7 +167,15 @@ public class PlotModifierOffsetControl {
 		controller.addPlotModeListener(listener);
 		
 	}
-	
+
+	private void setNormButtonToolTip(boolean s) {
+		normButton.setToolTipText(s ? NORM_TIP + " on" : NORM_TIP);
+	}
+
+	private void setStackButtonToolTip(boolean s) {
+		stackButton.setToolTipText(s ? STACK_TIP + " on" : STACK_TIP);
+	}
+
 	private void plotControllerUpdate() {
 
 		boolean selected = false;
@@ -187,7 +199,7 @@ public class PlotModifierOffsetControl {
 		enable(enable);
 		
 		stackButton.setSelection(selected);	
-
+		setStackButtonToolTip(selected);
 	}
 	
 	@PreDestroy
