@@ -22,7 +22,9 @@ import org.eclipse.dawnsci.analysis.api.tree.NodeLink;
 import org.eclipse.dawnsci.analysis.api.tree.Tree;
 import org.eclipse.dawnsci.analysis.api.tree.TreeUtils;
 import org.eclipse.dawnsci.nexus.NexusConstants;
+import org.eclipse.january.dataset.Dataset;
 import org.eclipse.january.dataset.DatasetFactory;
+import org.eclipse.january.dataset.DatasetUtils;
 import org.eclipse.january.dataset.IDataset;
 import org.eclipse.january.dataset.StringDataset;
 
@@ -53,6 +55,32 @@ public class MapBeanBuilder {
 		populateData(bean, datasets, names);
 		
 		if (bean.checkValid()) return bean;
+		
+		return null;
+	}
+	
+	private static String findOtherAxis(Node n, String[] names, String[] axNames, boolean useSet) {
+		
+		
+		String suffix;
+		
+		if (useSet) {
+			suffix = NexusConstants.DATA_AXESSET_SUFFIX + NexusConstants.DATA_INDICES_SUFFIX;	
+		} else {
+			suffix = NexusConstants.DATA_INDICES_SUFFIX;
+		}
+		
+		Iterator<? extends Attribute> it = n.getAttributeIterator();
+		while (it.hasNext()) {
+			Attribute next = it.next();
+			String name = next.getName();
+			if (name.startsWith(names[0]) && name.endsWith(suffix)) {
+				Dataset v = DatasetUtils.convertToDataset(next.getValue());
+				int index = Integer.parseInt(v.getString());
+				axNames[index] = names[1] + name.substring(names[0].length(), name.length()-8);
+				return names[0] + name.substring(names[0].length(), name.length()-8);
+			}
+		}
 		
 		return null;
 	}
@@ -129,20 +157,13 @@ public class MapBeanBuilder {
 			
 			String remap = null;
 			if (finder instanceof NXDataFinderWithAxes && ((NXDataFinderWithAxes)finder).isRemappingRequired() && names != null) {
-				Iterator<? extends Attribute> it = n.getAttributeIterator();
-				while (it.hasNext()) {
-					Attribute next = it.next();
-					String name = next.getName();
-					if (name.startsWith(names[0]) && name.endsWith(NexusConstants.DATA_INDICES_SUFFIX)) {
-						IDataset v = next.getValue();
-						int index = v.getRank() == 0 ? Integer.parseInt(v.getString()) : Integer.parseInt(v.getString(0));
-						axNames[index] = names[1] + name.substring(names[0].length(), name.length()-8);
-						remap = names[0] + name.substring(names[0].length(), name.length()-8);
-						break;
-						
-					}
+				remap = findOtherAxis(n, names, axNames, true);
+				
+				if (remap == null) {
+					remap = findOtherAxis(n, names, axNames, false);
 				}
 			}
+
 
 			DataInfo dataInfo = new DataInfo(Node.SEPARATOR+entry.getKey(), att , axNames, squeezedRank);
 			if (remap != null) dataInfo.xAxisForRemapping = remap;
