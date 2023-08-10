@@ -42,7 +42,11 @@ public class DataManipulationUtils {
 	 * @return commonData
 	 */
 	public static List<IXYData> getCompatibleDatasets(List<IXYData> data, IDataset testX, int[] outIndices){
-		return getCompatibleDatasets(data, testX, outIndices, false);
+		try {
+			return getCompatibleDatasets(data, testX, outIndices, false);
+		} catch (Exception e) {
+			return getCompatibleDatasets(data, testX, outIndices, true);
+		}
 	}
 
 	public static List<IXYData> getCompatibleDatasets(List<IXYData> data, IDataset testX, int[] outIndices, boolean linear){
