@@ -1,6 +1,7 @@
 package org.dawnsci.datavis.manipulation;
 
 import java.time.Instant;
+import java.util.Arrays;
 
 import org.dawb.common.util.eclipse.BundleUtils;
 import org.eclipse.dawnsci.analysis.api.io.ScanFileHolderException;
@@ -20,11 +21,14 @@ import org.eclipse.january.dataset.ILazyDataset;
 import org.eclipse.january.metadata.AxesMetadata;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Shell;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import uk.ac.diamond.scisoft.analysis.io.DataHolder;
 import uk.ac.diamond.scisoft.analysis.io.RawTextSaver;
 
 public class FileWritingUtils {
+	private static Logger logger = LoggerFactory.getLogger(FileWritingUtils.class);
 
 	
 	public static boolean writeNexus(String path, INexusFileFactory fileFactory, Dataset data) {
@@ -82,17 +86,24 @@ public class FileWritingUtils {
 		DataHolder dh = new DataHolder();
 		AxesMetadata md = data.getFirstMetadata(AxesMetadata.class);
 		ILazyDataset[] axes = md.getAxis(0);
+		if (logger.isDebugEnabled()) {
+			logger.debug("Data's first dimension axes:");
+			for (ILazyDataset a: axes) {
+				logger.debug("{}", a == null ? "null" : Arrays.toString(a.getShape()));
+			}
+		}
+
 		IDataset[] dArray = null;
 		if (axes[0] != null) {
 			
-			dArray = new IDataset[axes[1] == null ? 2 : 3];
+			dArray = new IDataset[axes.length < 2 || axes[1] == null ? 2 : 3];
 			
 			try {
 				
 				dArray[0] = getAxisPadded(axes[0]);
-				data.setShape(data.getShape()[0],1);
+				data.setShape(data.getSize(),1);
 				dArray[1] = data;
-				if (axes[1] != null) {
+				if (dArray.length > 2) {
 					dArray[2] = getAxisPadded(axes[1]);
 				}
 				data = DatasetUtils.concatenate(dArray, 1);
@@ -162,9 +173,8 @@ public class FileWritingUtils {
 	}
 	
 	private static IDataset getAxisPadded(ILazyDataset l) throws DatasetException {
-		IDataset y = l.getSlice();
-		y = y.squeeze();
-		y.setShape(y.getShape()[0],1);
+		Dataset y = DatasetUtils.sliceAndConvertLazyDataset(l);
+		y.setShape(y.getSize(), 1);
 		return y;
 	}
 

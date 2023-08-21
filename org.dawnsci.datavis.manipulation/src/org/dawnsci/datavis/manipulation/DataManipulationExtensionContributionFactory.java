@@ -57,10 +57,13 @@ import org.eclipse.ui.dialogs.ListDialog;
 import org.eclipse.ui.menus.ExtensionContributionFactory;
 import org.eclipse.ui.menus.IContributionRoot;
 import org.eclipse.ui.services.IServiceLocator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import uk.ac.diamond.scisoft.analysis.utils.ReflMergeUtils;
 
 public class DataManipulationExtensionContributionFactory extends ExtensionContributionFactory {
+	private static Logger logger = LoggerFactory.getLogger(DataManipulationExtensionContributionFactory.class);
 
 	public DataManipulationExtensionContributionFactory() {
 	}
@@ -87,11 +90,15 @@ public class DataManipulationExtensionContributionFactory extends ExtensionContr
 				Action concat = new Action("Concatenate"){
 					@Override
 					public void run() {
+						if (data.size() < 2) {
+							MessageDialog.openError(shell, "Error", "Only one file selected, please select more");
+							return;
+						}
 						IDataset comb = null;
 						try {
 							comb = buildCombined(data);
 						} catch (Exception e) {
-							MessageDialog.openError(shell, "Error", "Problem with get compatible XY data: " + e.getMessage());
+							MessageDialog.openError(shell, "Error", "Problem getting compatible XY data: " + e.getMessage());
 						}
 
 						if (comb != null ) {
@@ -106,11 +113,15 @@ public class DataManipulationExtensionContributionFactory extends ExtensionContr
 				Action average = new Action("Average") {
 					@Override
 					public void run() {
+						if (data.size() < 2) {
+							MessageDialog.openError(shell, "Error", "Only one file selected, please select more");
+							return;
+						}
 						IDataset comb = null;
 						try {
 							comb = buildCombined(data);
 						} catch (Exception e) {
-							MessageDialog.openError(shell, "Error", "Problem with get compatible XY data: " + e.getMessage());
+							MessageDialog.openError(shell, "Error", "Problem getting compatible XY data: " + e.getMessage());
 						}
 
 						if (comb == null) {
@@ -135,14 +146,15 @@ public class DataManipulationExtensionContributionFactory extends ExtensionContr
 
 							StringBuilder builder = new StringBuilder(name);
 							builder.append("_");
-							builder.append(new File(n.getStringAbs(0)).getName());
+							builder.append(extractFileNameStem(n.getStringAbs(0)));
 							builder.append("_");
-							builder.append(new File(n.getStringAbs(n.getSize()-1)).getName());
+							builder.append(extractFileNameStem(n.getStringAbs(n.getSize() - 1)));
 
 							name = builder.toString();
 						}
 						
-						transferAxisOne(d,mean);
+						transferAxisOne(d, mean);
+						logger.debug("Averaged data has shape {}", Arrays.toString(mean.getShapeRef()));
 
 						FileDialog fd = new FileDialog(shell, SWT.SAVE);
 						String[] exts = new String[] {".dat",".xye",".nxs",".h5"};
@@ -190,11 +202,15 @@ public class DataManipulationExtensionContributionFactory extends ExtensionContr
 				Action sub = new Action("Subtract"){
 					@Override
 					public void run() {
+						if (data.size() < 2) {
+							MessageDialog.openError(shell, "Error", "Only one file selected, please select more");
+							return;
+						}
 						List<IXYData> xy = null;
 						try {
 							xy = getCompatibleXY(data);
 						} catch (Exception e) {
-							MessageDialog.openError(shell, "Error", "Problem with get compatible XY data: " + e.getMessage());
+							MessageDialog.openError(shell, "Error", "Problem getting compatible XY data: " + e.getMessage());
 						}
 
 						ListDialog d = new ListDialog(shell);
@@ -286,7 +302,7 @@ public class DataManipulationExtensionContributionFactory extends ExtensionContr
 						try {
 							xy = getCompatibleXY(data);
 						} catch (Exception e) {
-							MessageDialog.openError(shell, "Error", "Problem with get compatible XY data: " + e.getMessage());
+							MessageDialog.openError(shell, "Error", "Problem getting compatible XY data: " + e.getMessage());
 						}
 
 						if (xy != null && xy.size() == 2) {
@@ -531,5 +547,9 @@ public class DataManipulationExtensionContributionFactory extends ExtensionContr
 		return;
 	}
 
-	
+	private String extractFileNameStem(String fileDataPath) {
+		String fName = fileDataPath.split(":")[0];
+		fName = new File(fName).getName();
+		return fName.substring(0, fName.lastIndexOf("."));
+	}
 }
