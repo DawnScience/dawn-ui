@@ -1737,9 +1737,8 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 			ILoaderService  service = Activator.getService(ILoaderService.class);
 			final String    name    = editor.getTitle();
 			final Matcher   matcher = service.getStackMatcher(name);
-			if (matcher.matches()) {
-				String index       = matcher.group(2);
-				if (index!=null) index = removeLeadingZeros(index);
+			if (matcher != null && matcher.matches()) {
+				String index = matcher.group(2);
 				if (Integer.parseInt(index) == 1) {
 					String lazySetName = matcher.group(1);
                     if (dataHolder.contains(lazySetName)) {
@@ -1796,15 +1795,6 @@ public class PlotDataComponent implements IVariableManager, MouseListener, KeyLi
 			dataViewer.refresh();
 		}
 		
-	}
-
-	private static String removeLeadingZeros(String index) {
-		int i = 0;
-		int imax = index.length();
-		while (i < imax && index.charAt(i++) == '0') {
-		}
-
-		return i == 0 ? index : index.substring(i);
 	}
 
 	public void refresh() {
