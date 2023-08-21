@@ -144,9 +144,14 @@ public class DataManipulationUtils {
 			Dataset x = DatasetUtils.convertToDataset(d.getX());
 			Dataset y = DatasetUtils.convertToDataset(d.getY());
 
-			Dataset id = linear ? Maths.interpolate(x, y, xnew, null, null) : Interpolation1D.splineInterpolation(x, y, xnew);
-			output.add(new XYDataImpl(xnew, id, d.getLabel(),
-					d.getFileName(), d.getDatasetName(), d.getLabelName(), new SliceND(xnew.getShape())));
+			try {
+				Dataset id = linear ? Maths.interpolate(x, y, xnew, null, null) : Interpolation1D.splineInterpolation(x, y, xnew);
+				output.add(new XYDataImpl(xnew, id, d.getLabel(),
+						d.getFileName(), d.getDatasetName(), d.getLabelName(), new SliceND(xnew.getShape())));
+			} catch (Exception e) {
+				throw new IllegalArgumentException(String.format("cannot interpolate values in %s:%s as \n%s",
+						d.getFileName(), d.getDatasetName(), e.toString()), e);
+			}
 		}
 
 		return output;
