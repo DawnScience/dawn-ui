@@ -362,7 +362,7 @@ public class BoxLineProfileTool extends ProfileTool implements IProfileToolPage 
 
 			if (xFull != null) {
 				int xstart = Math.max(0, spt[a]);
-				int xend = Math.min(spt[a] + len[a] + 1, data.getShapeRef()[a]);
+				int xend = Math.min(spt[a] + len[a] + 1, data.getShapeRef()[1-a]);
 				xend = Math.min(xend, xFull.getSize()); // assume axis is 1D
 				xi = DatasetUtils.convertToDataset(xFull.getSlice(new Slice(xstart, xend)));
 				xi.setName(xFull.getName());
