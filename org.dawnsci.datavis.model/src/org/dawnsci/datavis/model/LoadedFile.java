@@ -37,6 +37,7 @@ import org.eclipse.january.MetadataException;
 import org.eclipse.january.dataset.Dataset;
 import org.eclipse.january.dataset.DatasetFactory;
 import org.eclipse.january.dataset.DatasetUtils;
+import org.eclipse.january.dataset.IDynamicDataset;
 import org.eclipse.january.dataset.ILazyDataset;
 import org.eclipse.january.dataset.InterfaceUtils;
 import org.eclipse.january.dataset.LazyDynamicDataset;
@@ -141,9 +142,21 @@ public class LoadedFile implements IDataObject, IDataFilePackage {
 				process = RESULT;
 				processes.put(-1, RESULT);
 			}
+			
+			boolean okMaxShape = true;
+			
+			if (lazyDataset instanceof IDynamicDataset) {
+				int[] max = ((IDynamicDataset) lazyDataset).getMaxShape();
+				for (int i : max) {
+					if (i == 0) {
+						okMaxShape = false;
+						break;
+					}
+				}
+			}
 
 			boolean notString = !lazyDataset.getElementClass().equals(String.class);
-			if (notString && (ShapeUtils.calcLongSize(lazyDataset.getShape()) > 1 || signals.containsKey(n))) {
+			if (notString && okMaxShape &&  (ShapeUtils.calcLongSize(lazyDataset.getShape()) > 1 || signals.containsKey(n))) {
 				NexusSignal s = signals.getOrDefault(n, null);
 				DataOptions d = new DataOptions(n, this, s);
 				d.setShortName(shortName);
