@@ -5,7 +5,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
-import org.dawnsci.processing.ui.ServiceHolder;
+import org.dawnsci.datavis.api.IRecentPlaces;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -14,8 +14,11 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.dawnsci.analysis.api.conversion.IConversionContext;
 import org.eclipse.dawnsci.analysis.api.conversion.IProcessingConversionInfo;
 import org.eclipse.dawnsci.analysis.api.io.IDataHolder;
+import org.eclipse.dawnsci.analysis.api.io.ILoaderService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import uk.ac.diamond.osgi.services.ServiceProvider;
 
 public class FileManager {
 	
@@ -114,7 +117,7 @@ public class FileManager {
 				
 				boolean goodFile = false;
 				try {
-					IDataHolder holder = ServiceHolder.getLoaderService().getData(paths[i], null);
+					IDataHolder holder = ServiceProvider.getService(ILoaderService.class).getData(paths[i], null);
 					goodFile = holder.contains(datasetName);
 					if (goodFile) {
 						if (context.getFilePaths().contains(paths[i])){
@@ -135,7 +138,7 @@ public class FileManager {
 			
 			for (int i = 0; i < out.length; i++) {
 				if (out[i]) {
-					ServiceHolder.getRecentPlaces().addFiles(paths[i]);
+					ServiceProvider.getService(IRecentPlaces.class).addFiles(paths[i]);
 					break;
 				}
 			}

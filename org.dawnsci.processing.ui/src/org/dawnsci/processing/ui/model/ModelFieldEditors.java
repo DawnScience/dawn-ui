@@ -15,7 +15,6 @@ import org.dawb.common.ui.util.EclipseUtils;
 import org.dawnsci.common.widgets.celleditor.TextCellEditorWithContentProposal;
 import org.dawnsci.plotting.roi.RegionCellEditor;
 import org.dawnsci.processing.ui.ProcessingEventConstants;
-import org.dawnsci.processing.ui.ServiceHolder;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -61,6 +60,8 @@ import org.osgi.service.event.EventConstants;
 import org.osgi.service.event.EventHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import uk.ac.diamond.osgi.services.ServiceProvider;
 
 public class ModelFieldEditors {
 	
@@ -176,7 +177,7 @@ public class ModelFieldEditors {
 	   	if (enableIf!=null && !"".equals(enableIf)) {
 	   		
 	   		try {
-		   		final IExpressionService service = ServiceHolder.getExpressionService();
+		   		final IExpressionService service = ServiceProvider.getService(IExpressionService.class);
 		   		final IExpressionEngine  engine  = service.getExpressionEngine();
 		   		engine.createExpression(enableIf);
 		   		

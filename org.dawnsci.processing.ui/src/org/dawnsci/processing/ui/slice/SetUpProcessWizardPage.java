@@ -22,10 +22,10 @@ import org.dawnsci.january.model.NDimensions;
 import org.dawnsci.january.model.SliceChangeEvent;
 import org.dawnsci.january.ui.dataconfigtable.DataConfigurationTable;
 import org.dawnsci.plotting.actions.ActionBarWrapper;
-import org.dawnsci.processing.ui.ServiceHolder;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.dawnsci.analysis.api.conversion.IConversionContext;
 import org.eclipse.dawnsci.analysis.api.io.IDataHolder;
+import org.eclipse.dawnsci.analysis.api.io.ILoaderService;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.PlotType;
 import org.eclipse.dawnsci.plotting.api.PlottingFactory;
@@ -60,6 +60,8 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import uk.ac.diamond.osgi.services.ServiceProvider;
 
 public class SetUpProcessWizardPage extends WizardPage {
 
@@ -177,7 +179,7 @@ public class SetUpProcessWizardPage extends WizardPage {
 					
 					try {
 						
-						IDataHolder dh = ServiceHolder.getLoaderService().getData(context.getFilePaths().get(0), null);
+						IDataHolder dh = ServiceProvider.getService(ILoaderService.class).getData(context.getFilePaths().get(0), null);
 						
 						loadedFile = new LoadedFile(dh);
 						

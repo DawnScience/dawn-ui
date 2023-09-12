@@ -12,7 +12,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.dawnsci.processing.ui.ServiceHolder;
 import org.dawnsci.processing.ui.api.IOperationModelWizard;
 import org.dawnsci.processing.ui.api.IOperationSetupWizardPage;
 import org.dawnsci.processing.ui.api.IOperationUIService;
@@ -25,6 +24,7 @@ import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.dawnsci.analysis.api.conversion.ProcessingOutputType;
+import org.eclipse.dawnsci.analysis.api.io.ILoaderService;
 import org.eclipse.dawnsci.analysis.api.persistence.IPersistenceService;
 import org.eclipse.dawnsci.analysis.api.persistence.IPersistentFile;
 import org.eclipse.dawnsci.analysis.api.processing.Atomic;
@@ -52,6 +52,7 @@ import org.osgi.service.event.EventAdmin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import uk.ac.diamond.osgi.services.ServiceProvider;
 import uk.ac.diamond.scisoft.analysis.processing.visitor.NexusFileExecutionVisitor;
 import uk.ac.diamond.scisoft.analysis.utils.FileUtils;
 
@@ -170,7 +171,7 @@ public class OperationUIServiceImpl implements IOperationUIService {
 	
 		if (operationsFile != null) {
 			try {
-				IPersistenceService service = ServiceHolder.getPersistenceService();
+				IPersistenceService service = ServiceProvider.getService(IPersistenceService.class);
 				IPersistentFile pf = service.getPersistentFile(operationsFile);
 				operations = pf.getOperations();
 				operationsList = Arrays.asList(operations);
@@ -198,7 +199,7 @@ public class OperationUIServiceImpl implements IOperationUIService {
 		
 		boolean isHDF5 = false;
 		try {
-			Tree tree = ServiceHolder.getLoaderService().getData(metadata.getFilePath(), null).getTree();
+			Tree tree = ServiceProvider.getService(ILoaderService.class).getData(metadata.getFilePath(), null).getTree();
 			isHDF5 = tree != null;
 		} catch (Exception e2) {
 			logger.error("Could not read tree",e2);
@@ -230,8 +231,7 @@ public class OperationUIServiceImpl implements IOperationUIService {
 						runProcessing(metadata, path, monitor, operations, foutputType);
 						Map<String,String> props = new HashMap<>();
 						props.put(PlottingEventConstants.SINGLE_FILE_PROPERTY, path);
-						EventAdmin eventAdmin = ServiceHolder.getEventAdmin();
-						eventAdmin.postEvent(new Event(PlottingEventConstants.FILE_OPEN_EVENT, props));
+						ServiceProvider.getService(EventAdmin.class).postEvent(new Event(PlottingEventConstants.FILE_OPEN_EVENT, props));
 					} catch (final Exception e) {
 						
 						logger.error(e.getMessage(), e);
@@ -249,7 +249,7 @@ public class OperationUIServiceImpl implements IOperationUIService {
 		
 		try {
 			IMonitor mon = new ProgressMonitorWrapper(monitor);
-			IOperationService service = ServiceHolder.getOperationService();
+			IOperationService service = ServiceProvider.getService(IOperationService.class);
 			IOperationContext cc = service.createContext();
 			ILazyDataset local = meta.getParent().getSliceView();
 			SliceFromSeriesMetadata ssm = new SliceFromSeriesMetadata(meta.getSourceInfo());

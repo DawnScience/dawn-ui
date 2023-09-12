@@ -8,7 +8,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
-import org.dawnsci.processing.ui.ServiceHolder;
 import org.dawnsci.processing.ui.model.OperationModelViewer;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -65,6 +64,7 @@ import org.eclipse.ui.part.IPageSite;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import uk.ac.diamond.osgi.services.ServiceProvider;
 import uk.ac.diamond.scisoft.analysis.diffraction.DSpacing;
 import uk.ac.diamond.scisoft.analysis.io.DiffractionMetadata;
 import uk.ac.diamond.scisoft.analysis.processing.operations.mask.ImportMaskModel;
@@ -509,7 +509,7 @@ public class XRD2ToolPage extends AbstractToolPage {
 				 
 				 if (o instanceof AzimuthalPixelIntegrationOperation && roi != null) {
 					if (maskOutside == null) {
-						IOperationService opServer = ServiceHolder.getOperationService();
+						IOperationService opServer = ServiceProvider.getService(IOperationService.class);
 						try {
 							maskOutside = (MaskOutsideRegionOperation) opServer.create("uk.ac.diamond.scisoft.analysis.processing.operations.mask.MaskOutsideRegionOperation");
 							
@@ -563,7 +563,7 @@ public class XRD2ToolPage extends AbstractToolPage {
 			OperationHolder h = new OperationHolder();
 			
 			try {
-				IOperationService opServer = ServiceHolder.getOperationService();
+				IOperationService opServer = ServiceProvider.getService(IOperationService.class);
 				h.azimuthalIntegration = (AzimuthalPixelIntegrationOperation<AzimuthalPixelIntegrationModel>) opServer.create("uk.ac.diamond.scisoft.analysis.processing.operations.powder.AzimuthalPixelIntegrationOperation");
 				h.maskImport = (ImportMaskOperation<ImportMaskModel>)opServer.create("uk.ac.diamond.scisoft.analysis.processing.operations.ImportMaskOperation");
 				h.calibrationImport = (DiffractionMetadataImportOperation)opServer.create("uk.ac.diamond.scisoft.analysis.processing.operations.DiffractionMetadataImportOperation");

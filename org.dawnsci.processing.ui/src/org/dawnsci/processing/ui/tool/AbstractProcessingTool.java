@@ -10,8 +10,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.dawnsci.processing.ui.Activator;
-import org.dawnsci.processing.ui.ServiceHolder;
 import org.dawnsci.processing.ui.api.IOperationSetupWizardPage;
+import org.dawnsci.processing.ui.api.IOperationUIService;
 import org.dawnsci.processing.ui.model.OperationModelViewer;
 import org.dawnsci.processing.ui.model.OperationModelWizard;
 import org.dawnsci.processing.ui.model.OperationModelWizardDialog;
@@ -25,6 +25,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.dawnsci.analysis.api.conversion.ProcessingOutputType;
+import org.eclipse.dawnsci.analysis.api.io.ILoaderService;
 import org.eclipse.dawnsci.analysis.api.processing.Atomic;
 import org.eclipse.dawnsci.analysis.api.processing.ExecutionType;
 import org.eclipse.dawnsci.analysis.api.processing.IOperation;
@@ -83,6 +84,7 @@ import org.osgi.service.event.EventAdmin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import uk.ac.diamond.osgi.services.ServiceProvider;
 import uk.ac.diamond.scisoft.analysis.processing.visitor.NexusFileExecutionVisitor;
 import uk.ac.diamond.scisoft.analysis.utils.FileUtils;
 
@@ -188,7 +190,7 @@ public abstract class AbstractProcessingTool extends AbstractToolPage {
 				if (inputData == null) return;
 				if (!inputData.getCurrentOperations().get(0).getModel().equals(model)) return;
 				
-				IOperationSetupWizardPage wizardPage = ServiceHolder.getOperationUIService().getWizardPage(inputData.getCurrentOperations().get(0));
+				IOperationSetupWizardPage wizardPage = ServiceProvider.getService(IOperationUIService.class).getWizardPage(inputData.getCurrentOperations().get(0));
 				
 				OperationModelWizard wizard = new OperationModelWizard(inputData.getInputData(), wizardPage);
 				wizard.setWindowTitle("Operation Model Configuration");
@@ -437,7 +439,7 @@ public abstract class AbstractProcessingTool extends AbstractToolPage {
 		
 		boolean isHDF5 = false;
 		try {
-			Tree tree = ServiceHolder.getLoaderService().getData(parentMeta.getFilePath(), null).getTree();
+			Tree tree = ServiceProvider.getService(ILoaderService.class).getData(parentMeta.getFilePath(), null).getTree();
 			isHDF5 = tree != null;
 		} catch (Exception e2) {
 			logger.error("Could not read tree",e2);
@@ -469,8 +471,7 @@ public abstract class AbstractProcessingTool extends AbstractToolPage {
 						runProcessing(parentMeta, path, monitor);
 						Map<String,String> props = new HashMap<>();
 						props.put(PlottingEventConstants.SINGLE_FILE_PROPERTY, path);
-						EventAdmin eventAdmin = ServiceHolder.getEventAdmin();
-						eventAdmin.postEvent(new Event(PlottingEventConstants.FILE_OPEN_EVENT, props));
+						ServiceProvider.getService(EventAdmin.class).postEvent(new Event(PlottingEventConstants.FILE_OPEN_EVENT, props));
 						parentMeta.toString();
 					} catch (final Exception e) {
 						
@@ -490,7 +491,7 @@ public abstract class AbstractProcessingTool extends AbstractToolPage {
 		
 		try {
 			IMonitor mon = new ProgressMonitorWrapper(monitor);
-			IOperationService service = ServiceHolder.getOperationService();
+			IOperationService service = ServiceProvider.getService(IOperationService.class);
 			IOperationContext cc = service.createContext();
 			ILazyDataset local = meta.getParent().getSliceView();
 			SliceFromSeriesMetadata ssm = new SliceFromSeriesMetadata(meta.getSourceInfo());

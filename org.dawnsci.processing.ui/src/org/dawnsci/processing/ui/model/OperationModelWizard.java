@@ -4,9 +4,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import org.dawnsci.processing.ui.ServiceHolder;
 import org.dawnsci.processing.ui.api.IOperationModelWizard;
 import org.dawnsci.processing.ui.api.IOperationSetupWizardPage;
+import org.dawnsci.processing.ui.api.IOperationUIService;
 import org.eclipse.dawnsci.analysis.api.persistence.IPersistenceService;
 import org.eclipse.dawnsci.analysis.api.persistence.IPersistentFile;
 import org.eclipse.dawnsci.analysis.api.processing.IOperation;
@@ -18,6 +18,8 @@ import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.Wizard;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import uk.ac.diamond.osgi.services.ServiceProvider;
 
 public class OperationModelWizard extends Wizard implements IOperationModelWizard {
 
@@ -95,7 +97,7 @@ public class OperationModelWizard extends Wizard implements IOperationModelWizar
 
 	@Override
 	public void saveOutputFile(String filename) throws Exception {
-		IPersistenceService service = ServiceHolder.getPersistenceService();
+		IPersistenceService service = ServiceProvider.getService(IPersistenceService.class);
 		IPersistentFile pf = service.createPersistentFile(filename);
 		
 		List<IOperation> operationsList = new ArrayList<>();
@@ -116,12 +118,12 @@ public class OperationModelWizard extends Wizard implements IOperationModelWizar
 
 	@Override
 	public void setTemplateFile(String filename) throws Exception {
-		IPersistenceService service = ServiceHolder.getPersistenceService();
+		IPersistenceService service = ServiceProvider.getService(IPersistenceService.class);
 		IPersistentFile pf = service.getPersistentFile(filename);
 		IOperation<? extends IOperationModel, ? extends OperationData>[] operations = pf.getOperations();
 		templateWizardPages.clear(); // remove any possible template wizardpages
 		Arrays.stream(operations).forEachOrdered(operation -> {
-			IOperationSetupWizardPage wizardPage = ServiceHolder.getOperationUIService().getWizardPage(operation);
+			IOperationSetupWizardPage wizardPage = ServiceProvider.getService(IOperationUIService.class).getWizardPage(operation);
 			templateWizardPages.add(wizardPage);
 			addPage(wizardPage);
 		});

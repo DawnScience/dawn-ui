@@ -8,8 +8,8 @@ import java.util.Map;
 import org.dawb.common.ui.util.EclipseUtils;
 import org.dawnsci.processing.ui.Activator;
 import org.dawnsci.processing.ui.ProcessingEventConstants;
-import org.dawnsci.processing.ui.ServiceHolder;
 import org.dawnsci.processing.ui.api.IOperationSetupWizardPage;
+import org.dawnsci.processing.ui.api.IOperationUIService;
 import org.dawnsci.processing.ui.processing.OperationDescriptor;
 import org.eclipse.dawnsci.analysis.api.processing.IOperationInputData;
 import org.eclipse.dawnsci.analysis.api.processing.model.IOperationModel;
@@ -31,6 +31,8 @@ import org.osgi.service.event.EventConstants;
 import org.osgi.service.event.EventHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import uk.ac.diamond.osgi.services.ServiceProvider;
 
 public class OperationModelView extends ViewPart implements ISelectionListener {
 
@@ -59,16 +61,15 @@ public class OperationModelView extends ViewPart implements ISelectionListener {
 				if (inputData == null) return;
 				if (!inputData.getCurrentOperations().get(0).getModel().equals(model)) return;
 			
-				IOperationSetupWizardPage wizardPage = ServiceHolder.getOperationUIService().getWizardPage(inputData.getCurrentOperations().get(0));
+				IOperationSetupWizardPage wizardPage = ServiceProvider.getService(IOperationUIService.class).getWizardPage(inputData.getCurrentOperations().get(0));
 				
 				OperationModelWizard wizard = new OperationModelWizard(inputData.getInputData(), wizardPage);
 				wizard.setWindowTitle("Operation Model Configuration");
 				OperationModelWizardDialog dialog = new OperationModelWizardDialog(getSite().getShell(), wizard);
 				dialog.create();
 				if (dialog.open() == Dialog.OK) {
-					EventAdmin eventAdmin = ServiceHolder.getEventAdmin();
 					Map<String,IOperationInputData> props = new HashMap<>();
-					eventAdmin.postEvent(new Event(ProcessingEventConstants.PROCESS_UPDATE, props));
+					ServiceProvider.getService(EventAdmin.class).postEvent(new Event(ProcessingEventConstants.PROCESS_UPDATE, props));
 					modelEditor.refresh();
 				}
 			}

@@ -37,7 +37,8 @@ Require-Bundle: org.eclipse.core.runtime,
  org.dawnsci.january.model;bundle-version="1.0.0",
  org.dawnsci.january.ui;bundle-version="1.0.0",
  org.dawnsci.datavis.api;bundle-version="1.0.0",
- org.dawnsci.datavis.model;bundle-version="1.0.0"
+ org.dawnsci.datavis.model;bundle-version="1.0.0",
+ uk.ac.diamond.osgi;bundle-version="1.2.0"
 Bundle-ActivationPolicy: lazy
 Bundle-RequiredExecutionEnvironment: JavaSE-17
 Service-Component: OSGI-INF/*.xml

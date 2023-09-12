@@ -7,7 +7,6 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 import org.dawnsci.processing.ui.Activator;
-import org.dawnsci.processing.ui.ServiceHolder;
 import org.dawnsci.processing.ui.slice.DataFileSliceView;
 import org.dawnsci.processing.ui.slice.FileManager;
 import org.dawnsci.processing.ui.slice.IOperationErrorInformer;
@@ -46,6 +45,8 @@ import org.eclipse.ui.part.ResourceTransfer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import uk.ac.diamond.osgi.services.ServiceProvider;
+
 public class OperationTableUtils {
 	
 	private static final Logger logger = LoggerFactory.getLogger(OperationTableUtils.class);
@@ -73,8 +74,8 @@ public class OperationTableUtils {
 	}
 	
 	private static String readOperationsToSeriesTableFromFile(Shell shell, String filename, SeriesTable table, OperationFilter opFilter) throws Exception {
-		IPersistenceService service = ServiceHolder.getPersistenceService();
-		IOperationService os = ServiceHolder.getOperationService();
+		IPersistenceService service = ServiceProvider.getService(IPersistenceService.class);
+		IOperationService os = ServiceProvider.getService(IOperationService.class);
 		try (IPersistentFile pf = service.getPersistentFile(filename)) {
 			IOperation<? extends IOperationModel, ? extends OperationData>[] operations = pf.getOperations();
 			if (operations == null) return null;
@@ -101,7 +102,7 @@ public class OperationTableUtils {
 
 	private static String readDataOriginFromFile(Shell shell, String filename) {
 		try {
-			IPersistenceService service = ServiceHolder.getPersistenceService();
+			IPersistenceService service = ServiceProvider.getService(IPersistenceService.class);
 			try (IPersistentFile pf = service.getPersistentFile(filename)) {
 				OriginMetadata dataOrigin = pf.getOperationDataOrigin();
 				return dataOrigin == null ? null : dataOrigin.getFilePath();

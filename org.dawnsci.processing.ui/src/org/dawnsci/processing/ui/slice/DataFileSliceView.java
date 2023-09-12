@@ -27,7 +27,6 @@ import org.dawnsci.processing.ui.IProcessDisplayHelper;
 import org.dawnsci.processing.ui.ProcessingEventConstants;
 import org.dawnsci.processing.ui.ProcessingOutputView;
 import org.dawnsci.processing.ui.ProcessingPerspective;
-import org.dawnsci.processing.ui.ServiceHolder;
 import org.dawnsci.processing.ui.preference.ProcessingConstants;
 import org.dawnsci.processing.ui.processing.OperationDescriptor;
 import org.dawnsci.processing.ui.processing.ProcessingView;
@@ -36,9 +35,11 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.dawnsci.analysis.api.conversion.IConversionContext;
+import org.eclipse.dawnsci.analysis.api.conversion.IConversionService;
 import org.eclipse.dawnsci.analysis.api.conversion.IProcessingConversionInfo;
 import org.eclipse.dawnsci.analysis.api.conversion.ProcessingOutputType;
 import org.eclipse.dawnsci.analysis.api.io.IDataHolder;
+import org.eclipse.dawnsci.analysis.api.io.ILoaderService;
 import org.eclipse.dawnsci.analysis.api.processing.ExecutionType;
 import org.eclipse.dawnsci.analysis.api.processing.IExecutionVisitor;
 import org.eclipse.dawnsci.analysis.api.processing.IOperation;
@@ -122,6 +123,7 @@ import org.osgi.service.event.EventHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import uk.ac.diamond.osgi.services.ServiceProvider;
 import uk.ac.diamond.scisoft.analysis.processing.visitor.NexusFileExecutionVisitor;
 
 public class DataFileSliceView extends ViewPart {
@@ -147,7 +149,9 @@ public class DataFileSliceView extends ViewPart {
 	private boolean dataVisAvailable = false;
 	private boolean loadIntoDataVis = false;
 	
-	private final static Logger logger = LoggerFactory.getLogger(DataFileSliceView.class);
+	private static final Logger logger = LoggerFactory.getLogger(DataFileSliceView.class);
+	
+	private final EventAdmin eventAdmin = ServiceProvider.getService(EventAdmin.class);
 
 	@SuppressWarnings("unchecked")
 	@Override
@@ -167,7 +171,6 @@ public class DataFileSliceView extends ViewPart {
 			public void selectionChanged(SelectionChangedEvent event) {
 				if (event.getSelection() instanceof StructuredSelection) {
 					inputData = null;
-					EventAdmin eventAdmin = ServiceHolder.getEventAdmin();
 					Map<String,IOperationInputData> props = new HashMap<>();
 					props.put("data", inputData);
 					eventAdmin.postEvent(new Event(ProcessingEventConstants.DATA_UPDATE, props));
@@ -208,7 +211,6 @@ public class DataFileSliceView extends ViewPart {
 			@Override
 			public void sliceChanged(SliceChangeEvent event) {
 				inputData = null;
-				EventAdmin eventAdmin = ServiceHolder.getEventAdmin();
 				Map<String,IOperationInputData> props = new HashMap<>();
 				props.put("data", inputData);
 				eventAdmin.postEvent(new Event(ProcessingEventConstants.DATA_UPDATE, props));
@@ -463,7 +465,7 @@ public class DataFileSliceView extends ViewPart {
 				String filePath = fileManager.getFilePaths().get(0);
 				boolean isHDF5 = false;
 				try {
-					Tree tree = ServiceHolder.getLoaderService().getData(filePath, null).getTree();
+					Tree tree = ServiceProvider.getService(ILoaderService.class).getData(filePath, null).getTree();
 					isHDF5 = tree != null;
 				} catch (Exception e2) {
 					// TODO Auto-generated catch block
@@ -508,7 +510,7 @@ public class DataFileSliceView extends ViewPart {
 							ProgressMonitorWithFiles fileMonitor = new ProgressMonitorWithFiles(monitor);
 							fileManager.getContext().setMonitor(fileMonitor);
 							try {
-								ServiceHolder.getConversionService().process(fileManager.getContext());
+								ServiceProvider.getService(IConversionService.class).process(fileManager.getContext());
 							} catch (final Exception e) {
 								Display.getDefault().asyncExec(new Runnable() {
 									public void run() {
@@ -562,7 +564,6 @@ public class DataFileSliceView extends ViewPart {
 				fileManager.clear();
 				csw.disable();
 				
-				EventAdmin eventAdmin = ServiceHolder.getEventAdmin();
 				Map<String,IDataset> props = new HashMap<>();
 				props.put("data", null);
 				eventAdmin.postEvent(new Event(ProcessingEventConstants.INITIAL_UPDATE, props));
@@ -616,7 +617,6 @@ public class DataFileSliceView extends ViewPart {
 			fileManager.clear();
 			csw.disable();
 			currentSliceLabel.setText("Current slice of data: [ - - - - -]");
-			EventAdmin eventAdmin = ServiceHolder.getEventAdmin();
 			Map<String,IDataset> props = new HashMap<>();
 			props.put("data", null);
 			eventAdmin.postEvent(new Event(ProcessingEventConstants.INITIAL_UPDATE, props));
@@ -656,7 +656,7 @@ public class DataFileSliceView extends ViewPart {
 	
 	private void updateSliceWidget(String path) {
 		try {
-			IDataHolder dh = ServiceHolder.getLoaderService().getData(path, new IMonitor.Stub());
+			IDataHolder dh = ServiceProvider.getService(ILoaderService.class).getData(path, new IMonitor.Stub());
 			ILazyDataset lazy = dh.getLazyDataset(fileManager.getContext().getDatasetNames().get(0));
 			int[] shape = lazy.getShape();
 			
@@ -699,11 +699,11 @@ public class DataFileSliceView extends ViewPart {
 		
 		for (String path : context.getFilePaths()) {
 			try {
-				IMetadata metadata = ServiceHolder.getLoaderService().getMetadata(path, null);
+				IMetadata metadata = ServiceProvider.getService(ILoaderService.class).getMetadata(path, null);
 				int[] s = metadata.getDataShapes().get(name);
 				if (s == null) {
 					try {
-						s = ServiceHolder.getLoaderService().getData(path, null).getLazyDataset(name).getShape();
+						s = ServiceProvider.getService(ILoaderService.class).getData(path, null).getLazyDataset(name).getShape();
 					} catch (Exception e) {
 						logger.warn("Can't get shape to calculate work from");
 					}
@@ -784,7 +784,7 @@ public class DataFileSliceView extends ViewPart {
 				
 				if (path == null) path = context.getFilePaths().get(0);
 				
-				final IDataHolder   dh = ServiceHolder.getLoaderService().getData(path, new IMonitor.Stub());
+				final IDataHolder   dh = ServiceProvider.getService(ILoaderService.class).getData(path, new IMonitor.Stub());
 				ILazyDataset lazyDataset = dh.getLazyDataset(context.getDatasetNames().get(0));
 				
 				if (lazyDataset == null) {
@@ -797,7 +797,7 @@ public class DataFileSliceView extends ViewPart {
 				Map<Integer, String> axesNames = context.getAxesNames();
 				
 				if (axesNames != null) {
-					AxesMetadata am = ServiceHolder.getLoaderService().getAxesMetadata(lazyDataset, path, axesNames, true);
+					AxesMetadata am = ServiceProvider.getService(ILoaderService.class).getAxesMetadata(lazyDataset, path, axesNames, true);
 					lazyDataset.setMetadata(am);
 //					AxesMetadata axMeta = SlicedDataUtils.createAxisMetadata(path, lazyDataset, axesNames);
 //					if (axMeta != null) lazyDataset.setMetadata(axMeta);
@@ -814,7 +814,6 @@ public class DataFileSliceView extends ViewPart {
 				} else {
 					firstSlice = lazyDataset.getSlice(s);
 				}
-				EventAdmin eventAdmin = ServiceHolder.getEventAdmin();
 				Map<String,IDataset> props = new HashMap<>();
 				props.put("data", firstSlice.getSliceView().squeeze());
 				eventAdmin.postEvent(new Event(ProcessingEventConstants.INITIAL_UPDATE, props));
@@ -879,7 +878,6 @@ public class DataFileSliceView extends ViewPart {
 				
 				} catch (OperationException e) {
 					logger.info(e.getMessage(), e);
-					EventAdmin eventAdmin = ServiceHolder.getEventAdmin();
 					Map<String,OperationException> props = new HashMap<>();
 					props.put("error", e);
 					eventAdmin.postEvent(new Event(ProcessingEventConstants.ERROR, props));
@@ -888,14 +886,12 @@ public class DataFileSliceView extends ViewPart {
 					logger.error(e.getMessage(), e);
 					String message = e.getMessage();
 					if (message == null) message = "Unexpected error!";
-					EventAdmin eventAdmin = ServiceHolder.getEventAdmin();
 					Map<String,OperationException> props = new HashMap<>();
 					props.put("error", new OperationException(null, message));
 					eventAdmin.postEvent(new Event(ProcessingEventConstants.ERROR, props));
 					return Status.CANCEL_STATUS;
 				} finally {
 					if (sliceVisitor != null) {
-						EventAdmin eventAdmin = ServiceHolder.getEventAdmin();
 						inputData = sliceVisitor.getOperationInputData();
 						Map<String,IOperationInputData> propsOID = new HashMap<>();
 						propsOID.put("data", inputData);
@@ -995,7 +991,7 @@ public class DataFileSliceView extends ViewPart {
 		@Override
 		public IConversionContext init(String path) {
 			
-			IConversionContext context = ServiceHolder.getConversionService().open(path);
+			IConversionContext context = ServiceProvider.getService(IConversionService.class).open(path);
 			
 			return setupwizard(context);
 		}
