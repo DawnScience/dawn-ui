@@ -84,6 +84,8 @@ import org.eclipse.ui.preferences.ScopedPreferenceStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import uk.ac.diamond.osgi.services.ServiceProvider;
+
 /**
  * A trace which draws an image to the plot.
  * 
@@ -136,7 +138,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 	 */
 	private boolean imageTransposed = false;
 
-	private IImageService service;
+	private IImageService imageService;
 
 	private boolean xTicksAtEnd, yTicksAtEnd;
 
@@ -148,8 +150,8 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 		this.name  = name;
 		this.intensityScale = intensityScale;
 
-		this.service = ServiceHolder.getImageService();
-		this.imageServiceBean = service.createBeanFromPreferences();
+		this.imageService = ServiceProvider.getService(IImageService.class);
+		this.imageServiceBean = imageService.createBeanFromPreferences();
 		imageTransposed = imageServiceBean.isTransposed();
 		setPaletteName(getPreferenceStore().getString(BasePlottingConstants.COLOUR_SCHEME));
 
@@ -289,11 +291,10 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 
 	@Override
 	public void setPalette(String paletteName) {
-		IPaletteService pservice = ServiceHolder.getPaletteService();
+		IPaletteService pservice = ServiceProvider.getService(IPaletteService.class);
 		final PaletteData paletteData = pservice.getDirectPaletteData(paletteName);
 		setPaletteName(paletteName);
 		setPaletteData(paletteData);
-
 	}
 
 	private enum ImageScaleType {
@@ -815,14 +816,14 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 				ImageServiceBean histoBean = imageServiceBean.clone();
 				histoBean.setImage(slice);
 				if (fullMask!=null) histoBean.setMask(slice(getYAxis().getRange(), getXAxis().getRange(), fullMask));
-				double[] fa = service.getFastStatistics(histoBean);
+				double[] fa = imageService.getFastStatistics(histoBean);
 				setMin(fa[0]);
 				setMax(fa[1]);
 
 			}
 
 			this.imageServiceBean.setAlpha(getAlpha());
-			ImageData imageData   = service.getImageData(imageServiceBean);
+			ImageData imageData   = imageService.getImageData(imageServiceBean);
 			scaledData.setDownsampledImageData(imageData);
 
 			if (rgbDataset == null) {
@@ -842,7 +843,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 					}
 					intensityScaleBean.setImage(dds);
 					intensityScaleBean.setMask(null);
-					intensityScale.setImageData(service.getImageData(intensityScaleBean));
+					intensityScale.setImageData(imageService.getImageData(intensityScaleBean));
 					intensityScale.setLog10(getImageServiceBean().isLogColorScale());
 				} catch (Throwable ne) {
 					logger.warn("Cannot update intensity!");
@@ -1086,7 +1087,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 		if (imageServiceBean!=null) imageServiceBean.dispose();
 
 		this.imageServiceBean = null;
-		this.service          = null;
+		this.imageService          = null;
 		this.intensityScale   = null;
 
 		if (dynamic != null) {
@@ -1512,9 +1513,9 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 		if (imageServiceBean==null) imageServiceBean = new ImageServiceBean();
 		imageServiceBean.setImage(im);
 
-		if (service==null) service = (IImageService)PlatformUI.getWorkbench().getService(IImageService.class);
+		if (imageService==null) imageService = ServiceProvider.getService(IImageService.class);
 		if (rescaleHistogram && rgbDataset == null) {
-			final double[] fa = service.getFastStatistics(imageServiceBean);
+			final double[] fa = imageService.getFastStatistics(imageServiceBean);
 			setMin(fa[0]);
 			setMax(fa[1]);
 		}
