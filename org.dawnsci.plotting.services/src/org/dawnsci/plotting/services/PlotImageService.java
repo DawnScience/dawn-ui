@@ -71,6 +71,7 @@ import org.eclipse.ui.services.AbstractServiceFactory;
 import org.eclipse.ui.services.IDisposable;
 import org.eclipse.ui.services.IServiceLocator;
 
+import uk.ac.diamond.osgi.services.ServiceProvider;
 import uk.ac.diamond.scisoft.analysis.io.AWTImageUtils;
 import uk.ac.diamond.scisoft.analysis.utils.FileUtils;
 
@@ -134,7 +135,7 @@ public class PlotImageService extends AbstractServiceFactory implements IPlotIma
 	}
 
 	private Dataset getThumbnail(final File f, final int wdith, final int height) throws Throwable {
-		final ILoaderService loader = ServiceLoader.getLoaderService();
+		final ILoaderService loader = ServiceProvider.getService(ILoaderService.class);
 		IDataHolder dh = loader.getData(f.getAbsolutePath(),null);
 		ILazyDataset lz = dh.getLazyDataset(0);
 		if (lz.getRank() == 2) {
@@ -175,7 +176,7 @@ public class PlotImageService extends AbstractServiceFactory implements IPlotIma
 		
 		if (bean==null) {
 			bean = new ImageServiceBean();
-			final IPaletteService pservice = ServiceLoader.getPaletteService();
+			final IPaletteService pservice = ServiceProvider.getService(IPaletteService.class);
 			bean.setPalette(pservice.getDirectPaletteData(store.getString(PlottingConstants.COLOUR_SCHEME)));
 			bean.setOrigin(ImageOrigin.forLabel(store.getString(PlottingConstants.ORIGIN_PREF)));
 		}

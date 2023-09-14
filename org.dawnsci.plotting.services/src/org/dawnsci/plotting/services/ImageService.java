@@ -47,6 +47,8 @@ import org.eclipse.ui.preferences.ScopedPreferenceStore;
 import org.eclipse.ui.services.AbstractServiceFactory;
 import org.eclipse.ui.services.IServiceLocator;
 
+import uk.ac.diamond.osgi.services.ServiceProvider;
+
 /**
  * 
  
@@ -467,7 +469,7 @@ public class ImageService extends AbstractServiceFactory implements IImageServic
 			imageServiceBean.setHi(store.getDouble(BasePlottingConstants.HISTO_HI));
 			
 			try {
-				IPaletteService pservice = ServiceLoader.getPaletteService();
+				IPaletteService pservice = ServiceProvider.getService(IPaletteService.class);
 				if (pservice !=null) {
 					final String scheme = store.getString(BasePlottingConstants.COLOUR_SCHEME);
 						
