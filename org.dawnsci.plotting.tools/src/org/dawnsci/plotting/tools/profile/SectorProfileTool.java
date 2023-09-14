@@ -16,7 +16,6 @@ import java.util.List;
 import org.dawb.common.ui.menu.CheckableActionGroup;
 import org.dawb.common.ui.menu.MenuAction;
 import org.dawnsci.plotting.tools.Activator;
-import org.dawnsci.plotting.tools.ServiceLoader;
 import org.dawnsci.plotting.tools.utils.ToolUtils;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.dawnsci.analysis.api.diffraction.DetectorProperties;
@@ -25,6 +24,7 @@ import org.eclipse.dawnsci.analysis.api.diffraction.DiffractionCrystalEnvironmen
 import org.eclipse.dawnsci.analysis.api.diffraction.IDetectorPropertyListener;
 import org.eclipse.dawnsci.analysis.api.diffraction.IDiffractionCrystalEnvironmentListener;
 import org.eclipse.dawnsci.analysis.api.io.ILoaderService;
+import org.eclipse.dawnsci.analysis.api.metadata.IDiffractionMetadata;
 import org.eclipse.dawnsci.analysis.api.roi.IROI;
 import org.eclipse.dawnsci.analysis.dataset.roi.SectorROI;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
@@ -40,7 +40,6 @@ import org.eclipse.dawnsci.plotting.api.trace.ILineTrace;
 import org.eclipse.dawnsci.plotting.api.trace.ITrace;
 import org.eclipse.january.dataset.Dataset;
 import org.eclipse.january.dataset.IDataset;
-import org.eclipse.dawnsci.analysis.api.metadata.IDiffractionMetadata;
 import org.eclipse.january.metadata.IMetadata;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.ActionContributionItem;
@@ -49,6 +48,8 @@ import org.eclipse.jface.action.IContributionItem;
 import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Display;
+
+import uk.ac.diamond.osgi.services.ServiceProvider;
 
 public abstract class SectorProfileTool extends ProfileTool implements IDetectorPropertyListener, IDiffractionCrystalEnvironmentListener {
 
@@ -356,7 +357,7 @@ public abstract class SectorProfileTool extends ProfileTool implements IDetector
 	}
 	
 	protected IMetadata getMetaData() {
-		ILoaderService service = ServiceLoader.getLoaderService();
+		ILoaderService service = ServiceProvider.getService(ILoaderService.class);
 		IDiffractionMetadata meta = service.getLockedDiffractionMetaData();
 		
 		if (meta!= null)
@@ -370,9 +371,9 @@ public abstract class SectorProfileTool extends ProfileTool implements IDetector
 	@Override
 	public void detectorPropertiesChanged(DetectorPropertyEvent evt) {
 		
-		if (evt.getSource() instanceof DetectorProperties) {
+		if (evt.getSource() instanceof DetectorProperties detProperties) {
 			if(evt.hasBeamCentreChanged()) {
-				updateSectorCenters(((DetectorProperties)evt.getSource()).getBeamCentreCoords());
+				updateSectorCenters(detProperties.getBeamCentreCoords());
 			} else {
 				update(null, null, false);
 			}

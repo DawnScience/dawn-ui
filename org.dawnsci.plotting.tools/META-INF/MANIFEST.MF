@@ -44,7 +44,8 @@ Require-Bundle: org.eclipse.ui,
  si.uom.si-units;bundle-version="0.9.0",
  tec.uom.lib.uom-lib-common;bundle-version="1.0.3",
  tec.units.indriya;bundle-version="1.0.0",
- org.apache.commons.collections4;bundle-version="4.1.0"
+ org.apache.commons.collections4;bundle-version="4.1.0",
+ uk.ac.diamond.osgi;bundle-version="1.2.0"
 Import-Package: javax.vecmath,
  org.eclipse.draw2d,
  org.eclipse.draw2d.geometry,

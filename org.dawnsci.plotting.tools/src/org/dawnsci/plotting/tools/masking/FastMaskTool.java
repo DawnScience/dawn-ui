@@ -15,7 +15,6 @@ import org.dawb.common.ui.wizard.persistence.PersistenceExportWizard;
 import org.dawnsci.common.widgets.dialog.FileSelectionDialog;
 import org.dawnsci.plotting.roi.ROIEditTable;
 import org.dawnsci.plotting.tools.Activator;
-import org.dawnsci.plotting.tools.ServiceLoader;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -86,6 +85,7 @@ import org.eclipse.swt.widgets.Text;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import uk.ac.diamond.osgi.services.ServiceProvider;
 import uk.ac.diamond.scisoft.analysis.io.NexusDiffractionCalibrationReader;
 
 public class FastMaskTool extends AbstractToolPage {
@@ -495,7 +495,7 @@ public class FastMaskTool extends AbstractToolPage {
 					Runnable r = () -> {
 
 						try {
-							IPersistenceService ps = ServiceLoader.getPersistenceService();
+							IPersistenceService ps = ServiceProvider.getService(IPersistenceService.class);
 							IPersistentFile f = ps.getPersistentFile(fileName);
 							Map<String, IDataset> masks = f.getMasks(null);
 							for (IDataset m : masks.values()) buffer.merge(DatasetUtils.convertToDataset(m));

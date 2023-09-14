@@ -12,7 +12,6 @@ import java.util.Map;
 
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.ObjectUtils;
-import org.dawnsci.plotting.tools.ServiceLoader;
 import org.eclipse.dawnsci.analysis.api.io.ILoaderService;
 import org.eclipse.dawnsci.analysis.api.tree.GroupNode;
 import org.eclipse.dawnsci.analysis.dataset.slicer.SliceFromSeriesMetadata;
@@ -41,6 +40,7 @@ import org.osgi.service.event.EventAdmin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import uk.ac.diamond.osgi.services.ServiceProvider;
 import uk.ac.diamond.scisoft.analysis.io.NexusTreeUtils;
 
 class DataReduction2DToolModel extends DataReduction2DToolObservableModel {
@@ -203,7 +203,7 @@ class DataReduction2DToolModel extends DataReduction2DToolObservableModel {
 		exportToGenericNexusFile(newFilePath, imageTrace, rangeDataList, deletedIndices);
 		Map<String,String> props = new HashMap<>();
 		props.put(PlottingEventConstants.SINGLE_FILE_PROPERTY, newFilePath);
-		EventAdmin eventAdmin = ServiceLoader.getEventAdmin();
+		EventAdmin eventAdmin = ServiceProvider.getService(EventAdmin.class); 
 		eventAdmin.postEvent(new Event(PlottingEventConstants.FILE_OPEN_EVENT, props));
 	}
 	
@@ -542,7 +542,7 @@ class DataReduction2DToolModel extends DataReduction2DToolObservableModel {
 	
 		SliceFromSeriesMetadata sliceMetadata = trace.getData().getFirstMetadata(SliceFromSeriesMetadata.class);
 		if (sliceMetadata != null) {
-			ILoaderService loaderService = ServiceLoader.getLoaderService();
+			ILoaderService loaderService = ServiceProvider.getService(ILoaderService.class);
 			loaderService.clearSoftReferenceCache(sliceMetadata.getFilePath());
 			try {
 				IDataset dataset = loaderService.getDataset(sliceMetadata.getFilePath(), sliceMetadata.getDatasetName(), null).getSlice(sliceMetadata.getSliceInfo().getSliceFromInput());

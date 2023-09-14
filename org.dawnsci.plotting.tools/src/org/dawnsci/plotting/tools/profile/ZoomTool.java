@@ -14,10 +14,11 @@ import java.util.Collection;
 import java.util.List;
 
 import org.dawnsci.plotting.tools.Activator;
-import org.dawnsci.plotting.tools.ServiceLoader;
 import org.dawnsci.plotting.tools.utils.ToolUtils;
+import org.dawnsci.processing.ui.api.IOperationUIService;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.dawnsci.analysis.api.processing.IOperation;
+import org.eclipse.dawnsci.analysis.api.processing.IOperationService;
 import org.eclipse.dawnsci.analysis.api.roi.IROI;
 import org.eclipse.dawnsci.analysis.dataset.roi.RectangularROI;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
@@ -35,6 +36,8 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Display;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import uk.ac.diamond.osgi.services.ServiceProvider;
 
 public class ZoomTool extends ProfileTool {
 	
@@ -58,7 +61,7 @@ public class ZoomTool extends ProfileTool {
 						if (bounds==null)        continue;
 						if (!region.isVisible()) continue;
 						
-						ZoomProfileToolOperation op = (ZoomProfileToolOperation)ServiceLoader.getOperationService().create(new ZoomProfileToolOperation().getId());
+						ZoomProfileToolOperation op = (ZoomProfileToolOperation)ServiceProvider.getService(IOperationService.class).create(new ZoomProfileToolOperation().getId());
 						ZoomProfileToolModel model = op.getModel();
 						model.setRegion(bounds);
 						op.setPassUnmodifiedData(true);
@@ -75,7 +78,7 @@ public class ZoomTool extends ProfileTool {
 					last.setPassUnmodifiedData(false);
 					last.setStoreOutput(false);
 					
-					ServiceLoader.getOperationUIService().runProcessingWithUI(ops.toArray(new IOperation<?, ?>[ops.size()]), sliceMetadata, null);
+					ServiceProvider.getService(IOperationUIService.class).runProcessingWithUI(ops.toArray(new IOperation<?, ?>[ops.size()]), sliceMetadata, null);
 				} catch (Exception e) {
 					MessageDialog.openError(getSite().getShell(), "Error Reducing Data!", "Could not reduce data! " + e.getMessage());
 					logger.error("Could not reduce data!", e);

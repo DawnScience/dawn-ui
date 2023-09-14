@@ -21,10 +21,11 @@ import org.dawb.common.ui.menu.CheckableActionGroup;
 import org.dawb.common.ui.menu.MenuAction;
 import org.dawb.common.ui.util.EclipseUtils;
 import org.dawnsci.plotting.tools.Activator;
-import org.dawnsci.plotting.tools.ServiceLoader;
 import org.dawnsci.plotting.tools.preference.FittingPreferencePage;
+import org.dawnsci.processing.ui.api.IOperationUIService;
 import org.eclipse.dawnsci.analysis.api.fitting.functions.IPeak;
 import org.eclipse.dawnsci.analysis.api.processing.IOperation;
+import org.eclipse.dawnsci.analysis.api.processing.IOperationService;
 import org.eclipse.dawnsci.analysis.api.processing.model.IOperationModel;
 import org.eclipse.dawnsci.analysis.dataset.roi.LinearROI;
 import org.eclipse.dawnsci.analysis.dataset.roi.RectangularROI;
@@ -57,6 +58,7 @@ import org.eclipse.ui.dialogs.PreferencesUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import uk.ac.diamond.osgi.services.ServiceProvider;
 import uk.ac.diamond.scisoft.analysis.fitting.FittingConstants;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.FunctionFactory;
 import uk.ac.diamond.scisoft.analysis.fitting.functions.FunctionSquirts;
@@ -353,13 +355,13 @@ public class PeakFittingTool extends AbstractFittingTool implements IRegionListe
 			@Override
 			public void run() {
 				try {
-					PeakFittingToolOperation op = (PeakFittingToolOperation)ServiceLoader.getOperationService().create(new PeakFittingToolOperation().getId());
+					PeakFittingToolOperation op = (PeakFittingToolOperation)ServiceProvider.getService(IOperationService.class).create(new PeakFittingToolOperation().getId());
 					IOperationModel model = op.getModel();
 					((PeakFittingToolModel)model).setRoi(getFitBounds());
 					
-					IOperation<?, ?> noData = ServiceLoader.getOperationService().create("uk.ac.diamond.scisoft.analysis.processing.operations.NoDataOperation");
+					IOperation<?, ?> noData = ServiceProvider.getService(IOperationService.class).create("uk.ac.diamond.scisoft.analysis.processing.operations.NoDataOperation");
 					
-					ServiceLoader.getOperationUIService().runProcessingWithUI(new IOperation[] {op,noData}, sliceMetadata, null);
+					ServiceProvider.getService(IOperationUIService.class).runProcessingWithUI(new IOperation[] {op,noData}, sliceMetadata, null);
 				} catch (Exception e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();

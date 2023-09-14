@@ -16,7 +16,6 @@ import org.dawb.common.ui.menu.MenuAction;
 import org.dawb.common.ui.util.EclipseUtils;
 import org.dawnsci.common.widgets.dialog.FileSelectionDialog;
 import org.dawnsci.plotting.tools.Activator;
-import org.dawnsci.plotting.tools.ServiceLoader;
 import org.dawnsci.plotting.tools.diffraction.DiffractionUtils;
 import org.eclipse.dawnsci.analysis.api.diffraction.DetectorProperties;
 import org.eclipse.dawnsci.analysis.api.io.ILoaderService;
@@ -56,6 +55,7 @@ import org.eclipse.ui.part.IPageSite;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import uk.ac.diamond.osgi.services.ServiceProvider;
 import uk.ac.diamond.scisoft.analysis.diffraction.powder.AbstractPixelIntegration;
 import uk.ac.diamond.scisoft.analysis.diffraction.powder.PixelIntegrationUtils.IntegrationMode;
 import uk.ac.diamond.scisoft.analysis.io.NexusDiffractionCalibrationReader;
@@ -98,7 +98,7 @@ public class PowderIntegrationTool extends AbstractToolPage {
 			}
 		};
 		
-		this.service = ServiceLoader.getLoaderService();
+		this.service = ServiceProvider.getService(ILoaderService.class);
 		statusString = new String[1];
 	}
 

@@ -19,6 +19,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.dawnsci.analysis.api.image.IImageTransform;
 import org.eclipse.dawnsci.analysis.dataset.roi.RectangularROI;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.PlotType;
@@ -54,6 +55,7 @@ import org.eclipse.ui.part.IPageSite;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import uk.ac.diamond.osgi.services.ServiceProvider;
 import uk.ac.diamond.scisoft.analysis.diffraction.powder.MapTo2DUtils;
 
 public class ImageRotateTool extends AbstractToolPage {
@@ -489,7 +491,7 @@ public class ImageRotateTool extends AbstractToolPage {
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
 			try {
-				IDataset rotated = ServiceLoader.getTransformer().rotate(image, angle, hasSameShape);
+				IDataset rotated = ServiceProvider.getService(IImageTransform.class).rotate(image, angle, hasSameShape);
 				rotated.setName("rotated-" + image.getName());
 				rotatedSystem.updatePlot2D(rotated, axes, monitor);
 			} catch (Exception e1) {

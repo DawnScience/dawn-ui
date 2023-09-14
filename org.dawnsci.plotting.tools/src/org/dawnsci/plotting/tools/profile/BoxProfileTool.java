@@ -15,9 +15,10 @@ import java.util.List;
 
 import org.dawb.common.ui.menu.MenuAction;
 import org.dawnsci.plotting.tools.Activator;
-import org.dawnsci.plotting.tools.ServiceLoader;
+import org.dawnsci.processing.ui.api.IOperationUIService;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.dawnsci.analysis.api.processing.IOperation;
+import org.eclipse.dawnsci.analysis.api.processing.IOperationService;
 import org.eclipse.dawnsci.analysis.api.roi.IROI;
 import org.eclipse.dawnsci.analysis.dataset.roi.RectangularROI;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
@@ -42,6 +43,7 @@ import org.eclipse.swt.SWT;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import uk.ac.diamond.osgi.services.ServiceProvider;
 import uk.ac.diamond.scisoft.analysis.roi.ROIProfile;
 
 public class BoxProfileTool extends ProfileTool {
@@ -280,7 +282,7 @@ public class BoxProfileTool extends ProfileTool {
 						if (bounds==null)        continue;
 						if (!region.isVisible()) continue;
 						
-						BoxProfileToolOperation op = (BoxProfileToolOperation)ServiceLoader.getOperationService().create(new BoxProfileToolOperation().getId());
+						BoxProfileToolOperation op = (BoxProfileToolOperation)ServiceProvider.getService(IOperationService.class).create(new BoxProfileToolOperation().getId());
 						BoxProfileToolModel model = op.getModel();
 						model.setRoi(bounds);
 						op.setPassUnmodifiedData(true);
@@ -297,7 +299,7 @@ public class BoxProfileTool extends ProfileTool {
 					last.setPassUnmodifiedData(false);
 					last.setStoreOutput(false);
 					
-					ServiceLoader.getOperationUIService().runProcessingWithUI(ops.toArray(new IOperation<?, ?>[ops.size()]), sliceMetadata, null);
+					ServiceProvider.getService(IOperationUIService.class).runProcessingWithUI(ops.toArray(new IOperation<?, ?>[ops.size()]), sliceMetadata, null);
 				} catch (Exception e) {
 					MessageDialog.openError(getSite().getShell(), "Error Reducing Data!", "Could not reduce data! " + e.getMessage());
 					logger.error("Could not reduce data!", e);

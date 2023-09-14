@@ -17,7 +17,6 @@ import java.util.List;
 import java.util.Set;
 
 import org.dawnsci.plotting.tools.Activator;
-import org.dawnsci.plotting.tools.ServiceLoader;
 import org.dawnsci.plotting.tools.powderlines.EoSLineTool.EosDetailsComposite;
 import org.dawnsci.plotting.tools.powderlines.PowderLinesModel.PowderLineCoord;
 import org.eclipse.dawnsci.analysis.api.io.IDataHolder;
@@ -67,6 +66,8 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import uk.ac.diamond.osgi.services.ServiceProvider;
 
 /**
  * A tool to allow the importation of powder line data from either a 
@@ -475,7 +476,7 @@ public class PowderLineTool extends AbstractToolPage {
 			FileDialog chooser = new FileDialog(theShell, SWT.OPEN);
 			String chosenFile = chooser.open();
 			
-			ILoaderService loaderService = ServiceLoader.getLoaderService();
+			ILoaderService loaderService = ServiceProvider.getService(ILoaderService.class);
 			IDataHolder dataHolder = null;
 			// Get the data from the file
 			try {
@@ -483,7 +484,7 @@ public class PowderLineTool extends AbstractToolPage {
 			
 			} catch (Exception e) {
 				if (chosenFile != null)
-					logger.info("PowderLineTool: Could not read line data from " + chosenFile + ".");
+					logger.info("PowderLineTool: Could not read line data from {}.", chosenFile);
 				return;
 			}
 			boolean haveData = false;
@@ -491,7 +492,7 @@ public class PowderLineTool extends AbstractToolPage {
 			// Try to read a named Dataset
 			for (String dName : dSpacingNames) {
 				Dataset theDataset= DatasetUtils.convertToDataset(dataHolder.getDataset(dName));
-				if (theDataset != null && theDataset instanceof DoubleDataset) {
+				if (theDataset instanceof DoubleDataset) {
 					lines = (DoubleDataset) DatasetUtils.convertToDataset(theDataset);
 					haveData = true;
 				}

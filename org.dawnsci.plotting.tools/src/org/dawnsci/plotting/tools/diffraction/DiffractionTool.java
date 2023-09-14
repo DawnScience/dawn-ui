@@ -33,7 +33,6 @@ import org.dawnsci.common.widgets.tree.NumericNode;
 import org.dawnsci.common.widgets.tree.UnitEditingSupport;
 import org.dawnsci.common.widgets.tree.ValueEditingSupport;
 import org.dawnsci.plotting.tools.Activator;
-import org.dawnsci.plotting.tools.ServiceLoader;
 import org.dawnsci.plotting.tools.preference.DiffractionDefaultsPreferencePage;
 import org.dawnsci.plotting.tools.preference.detector.DiffractionDetectorPreferencePage;
 import org.dawnsci.plotting.tools.preference.diffraction.DiffractionPreferencePage;
@@ -115,6 +114,7 @@ import org.eclipse.ui.dialogs.PreferencesUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import uk.ac.diamond.osgi.services.ServiceProvider;
 import uk.ac.diamond.scisoft.analysis.crystallography.CalibrantSelectedListener;
 import uk.ac.diamond.scisoft.analysis.crystallography.CalibrantSelectionEvent;
 import uk.ac.diamond.scisoft.analysis.crystallography.CalibrationFactory;
@@ -172,8 +172,7 @@ public class DiffractionTool extends AbstractToolPage implements CalibrantSelect
 			}
 		};
 		
-		this.service = ServiceLoader.getLoaderService();
-      
+		this.service = ServiceProvider.getService(ILoaderService.class);
 	}
 
 	protected void updateIntensity() {

@@ -13,7 +13,6 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.dawnsci.plotting.tools.ServiceLoader;
 import org.dawnsci.plotting.tools.history.operation.Operator;
 import org.eclipse.dawnsci.plotting.api.expressions.IExpressionObject;
 import org.eclipse.dawnsci.plotting.api.expressions.IExpressionObjectService;
@@ -25,6 +24,8 @@ import org.eclipse.january.dataset.DatasetUtils;
 import org.eclipse.january.dataset.IDataset;
 import org.eclipse.january.dataset.IntegerDataset;
 import org.eclipse.swt.graphics.RGB;
+
+import uk.ac.diamond.osgi.services.ServiceProvider;
 
 class HistoryBean {
 	
@@ -72,7 +73,7 @@ class HistoryBean {
 	HistoryBean(IVariableManager varManager) {
 		this.variableManager = varManager;
 		try {
-			this.service = ServiceLoader.getExpressionObjectService();
+			this.service = ServiceProvider.getService(IExpressionObjectService.class);
 		} catch (Exception e) {
 			this.service = null; // allowed to be null.
 		}

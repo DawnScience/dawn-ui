@@ -16,7 +16,6 @@ import java.util.Map;
 import org.dawb.common.ui.util.EclipseUtils;
 import org.dawb.common.ui.wizard.persistence.PersistenceExportWizard;
 import org.dawnsci.plotting.tools.Activator;
-import org.dawnsci.plotting.tools.ServiceLoader;
 import org.dawnsci.plotting.tools.history.operation.Operator;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.runtime.Status;
@@ -68,6 +67,7 @@ import org.eclipse.ui.commands.ICommandService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import uk.ac.diamond.osgi.services.ServiceProvider;
 import uk.ac.diamond.scisoft.analysis.utils.OSUtils;
 
 public abstract class AbstractHistoryTool extends AbstractToolPage implements MouseListener, KeyListener, IVariableManager {
@@ -231,11 +231,8 @@ public abstract class AbstractHistoryTool extends AbstractToolPage implements Mo
 
 		public VariableNameEditingSupport(ColumnViewer viewer) {
 			super(viewer);
-			try {
-				this.service = ServiceLoader.getExpressionObjectService();
-			} catch (Exception e) {
-				this.service = null; // allowed to be null.
-			}
+			this.service = ServiceProvider.getOptionalService(
+					IExpressionObjectService.class).orElse(null);
 		}
 
 		@Override
