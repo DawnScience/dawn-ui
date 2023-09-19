@@ -9,6 +9,7 @@ import java.io.File;
 import org.dawnsci.mapping.ui.datamodel.MappedDataFileBean;
 import org.dawnsci.mapping.ui.wizards.MapBeanBuilder;
 import org.eclipse.dawnsci.analysis.api.io.IDataHolder;
+import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.ClassRule;
 import org.junit.Test;
@@ -28,6 +29,8 @@ public class MapBeanBuilderTest {
 	
 	@BeforeClass
 	public static void buildData() throws Exception {
+		MapNexusFileBuilderUtils.setUpServices();
+		
 		file = folder.newFile("file1.nxs");
 		file1 = folder.newFile("file2.nxs");
 		file2 = folder.newFile("file3.nxs");
@@ -38,6 +41,10 @@ public class MapBeanBuilderTest {
 		MapNexusFileBuilderUtils.makeMultipleDiodeGridScan(file3.getAbsolutePath());
 	}
 	
+	@AfterClass
+	public static void tearDown() {
+		MapNexusFileBuilderUtils.tearDownServices();
+	}
 	
 	@Test
 	public void testBuildBean() throws Exception {

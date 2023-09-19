@@ -27,6 +27,7 @@ import org.eclipse.january.dataset.ShapeUtils;
 import org.eclipse.january.metadata.AxesMetadata;
 import org.eclipse.january.metadata.MetadataFactory;
 import org.eclipse.january.metadata.MetadataType;
+import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.ClassRule;
 import org.junit.Ignore;
@@ -48,6 +49,8 @@ public class MappedDataTest {
 	
 	@BeforeClass
 	public static void buildData() throws Exception {
+		MapNexusFileBuilderUtils.setUpServices();
+		
 		file = folder.newFile("file1.nxs");
 		MapNexusFileBuilderUtils.makeGridScanWithSum(file.getAbsolutePath());
 		IDataHolder data = LoaderFactory.getData(file.getAbsolutePath());
@@ -67,6 +70,11 @@ public class MappedDataTest {
 		fileEnergy = folder.newFile("file3.nxs");
 		MapNexusFileBuilderUtils.makeGridScanWithZandSum(fileEnergy.getAbsolutePath());
 		
+	}
+	
+	@AfterClass
+	public static void tearDown() throws Exception {
+		MapNexusFileBuilderUtils.tearDownServices();
 	}
 	
 	@Test

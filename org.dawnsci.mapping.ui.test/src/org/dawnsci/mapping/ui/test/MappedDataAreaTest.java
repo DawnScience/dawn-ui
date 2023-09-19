@@ -10,6 +10,7 @@ import org.dawnsci.mapping.ui.datamodel.MappedDataFileBean;
 import org.dawnsci.mapping.ui.datamodel.MappedFileFactory;
 import org.dawnsci.mapping.ui.wizards.MapBeanBuilder;
 import org.eclipse.dawnsci.analysis.api.io.IDataHolder;
+import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.ClassRule;
 import org.junit.Test;
@@ -26,11 +27,17 @@ public class MappedDataAreaTest {
 	private static File grid = null;
 
 	@BeforeClass
-	public static void buildData() throws Exception {
+	public static void buildData() throws Exception {		
+		MapNexusFileBuilderUtils.setUpServices();
+
 		grid = folder.newFile("grid.nxs");
 		MapNexusFileBuilderUtils.makeGridScanWithSum(grid.getAbsolutePath());
 	}
 	
+	@AfterClass
+	public static void tearDown() throws Exception {
+		MapNexusFileBuilderUtils.tearDownServices();
+	}
 	
 	@Test
 	public void test() throws Exception {

@@ -14,6 +14,7 @@ import org.dawnsci.mapping.ui.datamodel.MappedDataFile;
 import org.dawnsci.mapping.ui.datamodel.MappedFileManager;
 import org.eclipse.january.dataset.IDataset;
 import org.eclipse.january.dataset.IDynamicShape;
+import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.ClassRule;
 import org.junit.Test;
@@ -30,11 +31,16 @@ public class MappedFileManagerTest {
 	
 	@BeforeClass
 	public static void buildData() throws Exception {
-		file = folder.newFile("file1.nxs");
-		MapNexusFileBuilderUtils.makeGridScanWithSum(file.getAbsolutePath());
+		MapNexusFileBuilderUtils.setUpServices();
 		
+		file = folder.newFile("file1.nxs");
+		MapNexusFileBuilderUtils.makeGridScanWithSum(file.getAbsolutePath());		
 	}
 	
+	@AfterClass
+	public static void tearDown() throws Exception {
+		MapNexusFileBuilderUtils.tearDownServices();
+	}
 	
 	@Test
 	public void test() throws InterruptedException {

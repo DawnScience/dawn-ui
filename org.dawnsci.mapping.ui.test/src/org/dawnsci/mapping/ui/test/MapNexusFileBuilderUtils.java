@@ -4,17 +4,19 @@ import java.util.Arrays;
 
 import org.eclipse.dawnsci.analysis.api.tree.Node;
 import org.eclipse.dawnsci.hdf5.nexus.NexusFileFactoryHDF5;
+import org.eclipse.dawnsci.nexus.INexusFileFactory;
 import org.eclipse.dawnsci.nexus.NXdata;
 import org.eclipse.dawnsci.nexus.NXentry;
 import org.eclipse.dawnsci.nexus.NXroot;
 import org.eclipse.dawnsci.nexus.NexusException;
 import org.eclipse.dawnsci.nexus.NexusNodeFactory;
-import org.eclipse.dawnsci.nexus.ServiceHolder;
 import org.eclipse.dawnsci.nexus.builder.NexusBuilderFile;
 import org.eclipse.dawnsci.nexus.builder.NexusFileBuilder;
 import org.eclipse.dawnsci.nexus.builder.impl.DefaultNexusFileBuilder;
 import org.eclipse.january.dataset.DatasetFactory;
 import org.eclipse.january.dataset.DoubleDataset;
+
+import uk.ac.diamond.osgi.services.ServiceProvider;
 
 public class MapNexusFileBuilderUtils {
 
@@ -33,7 +35,13 @@ public class MapNexusFileBuilderUtils {
 	
 	public static final String[] FASTEST_AXES = new String[] {STAGE_X,STAGE_Y,STAGE_Z,TEMPERATURE};
 	
-	static { new ServiceHolder().setNexusFileFactory(new NexusFileFactoryHDF5()); }
+	public static void setUpServices() {
+		ServiceProvider.setService(INexusFileFactory.class, new NexusFileFactoryHDF5());
+	}
+	
+	public static void tearDownServices() {
+		ServiceProvider.reset();
+	}
 	
 	public static void makeGridScanWithSum(String path) throws NexusException {
 		NexusFileBuilder fileBuilder = new DefaultNexusFileBuilder(path);

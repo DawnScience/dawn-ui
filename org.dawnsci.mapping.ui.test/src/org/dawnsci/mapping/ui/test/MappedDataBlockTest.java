@@ -17,6 +17,7 @@ import org.eclipse.january.dataset.IDynamicDataset;
 import org.eclipse.january.dataset.ILazyDataset;
 import org.eclipse.january.metadata.AxesMetadata;
 import org.eclipse.january.metadata.MetadataFactory;
+import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.ClassRule;
 import org.junit.Test;
@@ -38,6 +39,8 @@ public class MappedDataBlockTest {
 	
 	@BeforeClass
 	public static void buildData() throws Exception {
+		MapNexusFileBuilderUtils.setUpServices();
+		
 		file = folder.newFile("file1.nxs");
 		file1 = folder.newFile("file2.nxs");
 		file2 = folder.newFile("file3.nxs");
@@ -67,7 +70,12 @@ public class MappedDataBlockTest {
 				lazyDataset,file2.getAbsolutePath(),msd,null,false);
 		
 	}
-
+	
+	@AfterClass
+	public static void tearDown() throws Exception {
+		MapNexusFileBuilderUtils.tearDownServices();
+	}
+	
 	@Test
 	public void testGetSpectrumIntInt() throws Exception {
 		ILazyDataset spectrum = gridScanBlock.getSpectrum(0, 0);

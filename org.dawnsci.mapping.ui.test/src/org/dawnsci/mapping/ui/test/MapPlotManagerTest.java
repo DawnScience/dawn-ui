@@ -18,6 +18,7 @@ import org.eclipse.dawnsci.plotting.api.IPlottingService;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.trace.IImageTrace;
 import org.eclipse.dawnsci.plotting.api.trace.ITrace;
+import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.ClassRule;
 import org.junit.Test;
@@ -34,9 +35,15 @@ public class MapPlotManagerTest {
 	
 	@BeforeClass
 	public static void buildData() throws Exception {
+		MapNexusFileBuilderUtils.setUpServices();
+
 		file = folder.newFile("file1.nxs");
 		MapNexusFileBuilderUtils.makeGridScanWithSum(file.getAbsolutePath());
-		
+	}
+	
+	@AfterClass
+	public static void tearDown() throws Exception {
+		MapNexusFileBuilderUtils.tearDownServices();
 	}
 	
 	@Test
