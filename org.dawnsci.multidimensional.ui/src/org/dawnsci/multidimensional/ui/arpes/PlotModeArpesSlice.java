@@ -36,7 +36,7 @@ public class PlotModeArpesSlice extends PlotModeHyper {
 			try {
 				view3d = view3d.getSlice();
 			} catch (Exception e) {
-				logger.debug("Could not read data into memory, using lazy version", e);
+				logger.debug("Could not read data into memory, using lazy version");
 			}
 		}
 		

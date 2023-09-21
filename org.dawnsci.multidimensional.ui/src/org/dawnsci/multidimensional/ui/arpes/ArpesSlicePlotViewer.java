@@ -22,6 +22,7 @@ import org.eclipse.dawnsci.plotting.api.region.IRegion;
 import org.eclipse.dawnsci.plotting.api.region.IRegionListener;
 import org.eclipse.dawnsci.plotting.api.region.RegionEvent;
 import org.eclipse.dawnsci.plotting.api.trace.ITrace;
+import org.eclipse.january.dataset.IDataset;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.swt.SWT;
@@ -101,6 +102,8 @@ public class ArpesSlicePlotViewer extends AbstractHyperPlotViewer {
 		
 		IDatasetROIReducer[] reducers = new IDatasetROIReducer[] {new ArpesXImageReducer(), arpesSideImageReducer};
 		
+		final IDataset ax0 = dp.axes.get(0);
+		
 		IRegionListener l = new IRegionListener.Stub() {
 			
 			@Override
@@ -113,7 +116,7 @@ public class ArpesSlicePlotViewer extends AbstractHyperPlotViewer {
 						((ILockTranslatable) source).translateOnly(true);
 					}
 					
-					AdditionalCutDimension d = new AdditionalCutDimension((IRegion)source, dp.axes.get(0));
+					AdditionalCutDimension d = new AdditionalCutDimension((IRegion)source, ax0);
 					helper.setAdditionalCutDimension(d);
 				}
 				
@@ -121,7 +124,6 @@ public class ArpesSlicePlotViewer extends AbstractHyperPlotViewer {
 		};
 		hyper.setExternalListeners(null, null, l, null);
 		hyper.setData(dp.lazyDataset, dp.axes, dp.slices, dp.order,reducers[0],reducers[1]);
-		
 		trace.setViewer(this);
 		
 		

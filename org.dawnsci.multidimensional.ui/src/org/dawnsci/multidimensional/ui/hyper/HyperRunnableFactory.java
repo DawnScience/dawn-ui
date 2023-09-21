@@ -9,6 +9,7 @@ import org.eclipse.dawnsci.analysis.api.roi.IROI;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.region.IRegion;
 import org.eclipse.dawnsci.plotting.api.region.IRegion.RegionType;
+import org.eclipse.dawnsci.plotting.api.trace.IImageTrace;
 import org.eclipse.dawnsci.plotting.api.trace.ILineTrace;
 import org.eclipse.dawnsci.plotting.api.trace.ITrace;
 import org.eclipse.dawnsci.plotting.api.trace.TraceUtils;
@@ -85,7 +86,15 @@ public class HyperRunnableFactory {
 					if (output.getName() == null || output.getName().isEmpty()) {
 						output.setName("Image");
 					}
-					updateImage(plot,output,outputAxes);
+
+					Display.getDefault().asyncExec(new Runnable() {
+						@Override
+						public void run() {
+							updateImage(plot,output,outputAxes);
+						}});
+
+					
+					
 				} else {
 
 					IDataset axis = null;
@@ -126,6 +135,9 @@ public class HyperRunnableFactory {
 			Display.getDefault().asyncExec(new Runnable() {
 				@Override
 				public void run() {
+					
+					plot.clear();
+					plot.getAxes().clear();
 
 					Collection<ITrace> traces = plot.getTraces(ILineTrace.class);
 
@@ -170,6 +182,7 @@ public class HyperRunnableFactory {
 				Display.getDefault().asyncExec(new Runnable() {
 					@Override
 					public void run() {
+						
 						for (ITrace trace : traceOut) {
 							trace.setUserObject(region);
 							if (trace instanceof ILineTrace){
@@ -187,8 +200,13 @@ public class HyperRunnableFactory {
 
 		private void updateImage(final IPlottingSystem<Composite> plot, final IDataset image, final List<IDataset> axes) {
 
-			plot.updatePlot2D(image, axes, null);
+			plot.clear();
+			plot.getAxes().clear();
+			IImageTrace trace = plot.createImageTrace(image.getName());
+			trace.setData(image, axes, false);
+			plot.addTrace(trace);
 			plot.getSelectedYAxis().setInverted(invertYAxis);
+			plot.repaint();
 
 		}
 
