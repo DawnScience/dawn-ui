@@ -34,8 +34,10 @@ import org.eclipse.dawnsci.plotting.api.tool.ToolPageFactory;
 import org.eclipse.dawnsci.plotting.api.trace.IImageTrace;
 import org.eclipse.dawnsci.plotting.api.trace.ITraceListener;
 import org.eclipse.dawnsci.plotting.api.trace.TraceEvent;
+import org.eclipse.january.dataset.ByteDataset;
 import org.eclipse.january.dataset.Dataset;
 import org.eclipse.january.dataset.DatasetUtils;
+import org.eclipse.january.dataset.RGBByteDataset;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IToolBarManager;
@@ -484,7 +486,12 @@ public class RegionSumTool extends AbstractToolPage implements IROIListener {
 			logger.debug("Error getting region data:"+ e);
 		}
 		//round the Sum to n decimal
-		double value = DoubleUtils.roundDouble(((Number) dataRegion.sum(true)).doubleValue(), precision);
+		double value;
+		if (dataRegion instanceof RGBByteDataset dataRegionGrey) {
+			value = DoubleUtils.roundDouble(((Number) dataRegionGrey.createGreyDataset(ByteDataset.class).sum(true)).doubleValue(), precision);
+		} else {
+			value = DoubleUtils.roundDouble(((Number) dataRegion.sum(true)).doubleValue(), precision);
+		}
 
 		if(isSciNotation){
 			sumStr = sciNotationFormat.format(value);
