@@ -393,7 +393,7 @@ public class AlignDialog extends Dialog implements IRegionListener, PlotModeChan
 				setAxesMetadata(x, y);
 			}
 			pi.setY(y);
-			System.err.printf("Trace %s: %s\n", n, y.getSliceView(new Slice(12)).toString(true));
+			logger.debug("Trace {}: {}", n, y.getSliceView(new Slice(12)).toString(true));
 
 			while (!fn.equals(d.getFileName()) || !dn.equals(d.getDatasetName())) {
 				si = 0;
@@ -603,6 +603,7 @@ public class AlignDialog extends Dialog implements IRegionListener, PlotModeChan
 			data[i + 1] = results[1];
 			i += 2;
 		}
+		logger.debug("Plot align: first shift in X = {}", firstXShift[0]);
 
 		// gather and store in corresponding plot data
 		List<Dataset> store = new ArrayList<>();
@@ -620,7 +621,7 @@ public class AlignDialog extends Dialog implements IRegionListener, PlotModeChan
 			Dataset x = data[j];
 			Dataset y = data[j + 1];
 			setAxesMetadata(x, y);
-			System.err.printf("Aligned: %s\n", y.getSlice(new Slice(8)).toString(true));
+			logger.debug("Aligned: {}", y.getSlice(new Slice(8)).toString(true));
 			store.add(x);
 			store.add(y);
 		}
@@ -740,7 +741,7 @@ public class AlignDialog extends Dialog implements IRegionListener, PlotModeChan
 	private void updateDerivedDataAndTrace(PlotItem pi) {
 		String firstName = plotItems.keySet().iterator().next();
 		double firstXShift = 0;
-		if (!firstName.equals(pi.getName())) {
+		if (resampleX && !firstName.equals(pi.getName())) {
 			PlotItem firstItem = plotItems.get(firstName);
 			firstXShift = firstItem.getAuto();
 			if (firstXShift == 0) {
@@ -751,9 +752,9 @@ public class AlignDialog extends Dialog implements IRegionListener, PlotModeChan
 		if (t instanceof ILineTrace) {
 			ILineTrace lt = (ILineTrace) t;
 			Dataset x = pi.getX();
-			System.err.printf("Updated x-axis: %s\n", x.getSlice(new Slice(8)).toString(true));
+			logger.debug("Updated x-axis: {}", x.getSlice(new Slice(8)).toString(true));
 			double delta = pi.getAuto() + pi.getManual();
-			System.err.println("Shifting by " + delta + " and " + firstXShift);
+			logger.debug("Shifting by {} and {}", delta, firstXShift);
 			Dataset nx = Maths.add(x, delta + firstXShift);
 			Dataset ny = pi.getY();
 			if (resampleX) {
@@ -770,7 +771,7 @@ public class AlignDialog extends Dialog implements IRegionListener, PlotModeChan
 			if (modifier != null && modifier.supportsRank(1)) {
 				ny = DatasetUtils.convertToDataset(modifier.modifyForDisplay(ny));
 			}
-			System.err.printf("Updated trace %s: %s\n", pi.getName(), ny.getSlice(new Slice(8)).toString(true));
+			logger.debug("Updated trace {}: {}", pi.getName(), ny.getSlice(new Slice(8)).toString(true));
 
 			lt.setData(nx, ny);
 			lt.repaint();
