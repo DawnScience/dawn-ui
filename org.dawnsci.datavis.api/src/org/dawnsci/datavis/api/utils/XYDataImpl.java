@@ -12,9 +12,9 @@ public class XYDataImpl implements IXYData {
 	private String datasetName;
 	private String labelName;
 	private SliceND slice;
-	private double label;
+	private String label;
 	
-	public XYDataImpl(IDataset x, IDataset y, double label, String filename, String datasetName, String labelName, SliceND slice) {
+	public XYDataImpl(IDataset x, IDataset y, String label, String filename, String datasetName, String labelName, SliceND slice) {
 		this.x = x;
 		this.y = y;
 		this.label = label;
@@ -55,7 +55,7 @@ public class XYDataImpl implements IXYData {
 	}
 
 	@Override
-	public double getLabel() {
+	public String getLabel() {
 		return label;
 	}
 

@@ -46,6 +46,7 @@ import org.eclipse.january.dataset.DoubleDataset;
 import org.eclipse.january.dataset.IDataset;
 import org.eclipse.january.dataset.IDynamicDataset;
 import org.eclipse.january.dataset.ILazyDataset;
+import org.eclipse.january.dataset.InterfaceUtils;
 import org.eclipse.january.dataset.ShapeUtils;
 import org.eclipse.january.dataset.Slice;
 import org.eclipse.january.dataset.SliceND;
@@ -632,7 +633,7 @@ public class PlotController implements IPlotController, ILoadedFileInitialiser {
 			}
 
 			Dataset lv = f.getLabelValue();
-			x.set(lv == null ? i : lv.getDouble(), i);
+			x.set(lv == null || !InterfaceUtils.isNumerical(lv.getClass()) ? i : lv.getDouble(), i);
 			Dataset pd = DatasetUtils.convertToDataset(data[0]);
 			y.set(pd.getDouble(), i);
 		}

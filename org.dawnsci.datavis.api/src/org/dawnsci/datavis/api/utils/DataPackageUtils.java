@@ -141,6 +141,6 @@ public class DataPackageUtils {
 	 */
 	public static IXYData createXYData(IDataset x, IDataset y, IDataPackage dp) {
 		Dataset lv = DatasetUtils.convertToDataset(dp.getLabelValue());
-		return new XYDataImpl(x, y, lv == null ? Double.NaN : lv.getDouble(), dp.getFilePath(), dp.getName(), lv == null ? null : lv.getName(), null);
+		return new XYDataImpl(x, y, lv == null ? "NaN" : lv.getString(), dp.getFilePath(), dp.getName(), lv == null ? null : lv.getName(), null);
 	}
 }

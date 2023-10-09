@@ -7,6 +7,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.ListIterator;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import org.dawnsci.datavis.api.DataVisConstants;
@@ -33,6 +34,7 @@ import org.eclipse.january.dataset.Dataset;
 import org.eclipse.january.dataset.DatasetUtils;
 import org.eclipse.january.dataset.IDataset;
 import org.eclipse.january.dataset.ILazyDataset;
+import org.eclipse.january.dataset.InterfaceUtils;
 import org.eclipse.january.dataset.Maths;
 import org.eclipse.january.dataset.StringDataset;
 import org.eclipse.january.metadata.AxesMetadata;
@@ -286,9 +288,18 @@ public class DataManipulationExtensionContributionFactory extends ExtensionContr
 								.filter(IDataFilePackage::isSelected)
 								.collect(Collectors.toList());
 
-						if (selected != null && selected.size() > 0) {
-							Dialog a = new AggregateDialog(shell, selected);
-							a.open();
+						if (selected != null && !selected.isEmpty()) {
+							String label = selected.get(0).getLabelName();
+							if (selected.stream()
+									.map(s -> s.getLabelValue(label))
+									.filter(Objects::nonNull)
+									.anyMatch(d -> !InterfaceUtils.isNumerical(d.getClass()))
+								) {
+								MessageDialog.openError(shell, "No valid label values", "Label values must be numbers");
+							} else {
+								Dialog a = new AggregateDialog(shell, selected);
+								a.open();
+							}
 						} else {
 							MessageDialog.openError(shell, "No valid data.", "No valid data was found to aggregate");
 						}
