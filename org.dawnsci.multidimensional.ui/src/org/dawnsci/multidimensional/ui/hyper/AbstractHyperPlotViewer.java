@@ -103,10 +103,27 @@ public class AbstractHyperPlotViewer extends IPlottingSystemViewer.Stub<Composit
 	public void removeTrace(ITrace trace) {
 		if (this.trace == trace){
 			this.trace = null;
+			//might be significant data in memory, need to clear it
+			hyper.clearData();
 			hyper.clear();
 		}
 		
 	}
+	
+	@Override
+	public void clearTraces() {
+		//might be significant data in memory, need to clear it
+		hyper.clearData();
+		
+	}
+	
+	@Override
+	public void reset(boolean force) {
+		//might be significant data in memory, need to clear it
+		hyper.clearData();
+		
+	}
+
 	
 	protected class HyperDataPackage {
 		

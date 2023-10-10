@@ -33,10 +33,8 @@ import org.eclipse.dawnsci.plotting.api.trace.ILineTrace;
 import org.eclipse.dawnsci.plotting.api.trace.ITrace;
 import org.eclipse.dawnsci.plotting.api.trace.MetadataPlotUtils;
 import org.eclipse.draw2d.ColorConstants;
-import org.eclipse.january.dataset.DatasetFactory;
 import org.eclipse.january.dataset.IDataset;
 import org.eclipse.january.dataset.ILazyDataset;
-import org.eclipse.january.dataset.ShortDataset;
 import org.eclipse.january.dataset.Slice;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IContributionItem;
@@ -170,9 +168,6 @@ public class HyperComponent {
 			createActions((IProvideReducerActions)mainReducer, mainSystem, leftActions,roiListenerLeft,HYPERIMAGE);
 		}
 		
-		mainSystem.clear();
-		mainSystem.getAxes().clear();
-		
 		int axisCount = 0;
 		
 		if (mainReducer.isOutput1D()) {
@@ -181,15 +176,12 @@ public class HyperComponent {
 			List<IDataset> ax2d = new ArrayList<IDataset>();
 			ax2d.add(daxes.get(axisCount++));
 			ax2d.add(daxes.get(axisCount++));
-			mainSystem.createPlot2D(DatasetFactory.zeros(ShortDataset.class, ax2d.get(0).getSize(), ax2d.get(1).getSize()), ax2d, null);
 		}
 		
 		for (IRegion region : mainSystem.getRegions()) {
 			mainSystem.removeRegion(region);
 		}
 		
-		sideSystem.clear();
-		sideSystem.getAxes().clear();
 		
 		boolean createSideROI = sideReducer.createROI();
 		
@@ -209,7 +201,6 @@ public class HyperComponent {
 			
 			region.setUserRegion(false);
 			region.addROIListener(this.roiListenerLeft);
-			sideSystem.clear();
 			
 			IRegion windowRegion = null;
 			if (createSideROI) {
@@ -227,6 +218,11 @@ public class HyperComponent {
 
 	public void setMyRoi(IROI myRoi) {
 		this.myRoi = myRoi;
+	}
+	
+	public void clearData() {
+		leftFactory = null;
+		rightFactory = null;
 	}
 	
 	public void clear() {
