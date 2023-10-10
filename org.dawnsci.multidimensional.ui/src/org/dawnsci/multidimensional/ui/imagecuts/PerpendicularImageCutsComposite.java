@@ -131,8 +131,8 @@ public class PerpendicularImageCutsComposite extends Composite {
 		tableComposite.setLayout(columnLayout);
 
 		int itemCount = 2;
-		int itemHeight = viewer.getTable().getItemHeight();
-		int headerHeight = viewer.getTable().getHeaderHeight();
+		int itemHeight = viewer.getTable().getItemHeight()+2;
+		int headerHeight = viewer.getTable().getHeaderHeight()+2;
 		int h = (1 + itemCount) * itemHeight + headerHeight;
 		tableGridData.minimumHeight = h;
 		tableGridData.heightHint = h;

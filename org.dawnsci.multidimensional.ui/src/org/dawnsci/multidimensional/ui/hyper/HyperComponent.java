@@ -10,6 +10,7 @@
 package org.dawnsci.multidimensional.ui.hyper;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.Executor;
@@ -128,6 +129,18 @@ public class HyperComponent {
     	HyperBean b = new HyperBean(lazy, daxes, slices, order);
     	leftFactory.updateData(b);
     	rightFactory.updateData(b);
+    	
+    	Collection<IRegion> lregions = sideSystem.getRegions();
+    	
+    	for (IRegion l : lregions) {
+    		updateLeft(l, l.getROI());
+    	}
+    	
+    	Collection<IRegion> rregions = mainSystem.getRegions();
+    	
+    	for (IRegion r : rregions) {
+    		updateRight(r, r.getROI());
+    	}
 
     	
     }
@@ -137,8 +150,8 @@ public class HyperComponent {
 	}
 	
 	public void setExternalListeners(IROIListener roiLeft, IROIListener roiRight, IRegionListener regionLeft, IRegionListener regionRight) {
-		if (externalRegionListenerLeft != null) sideSystem.removeRegionListener(externalRegionListenerLeft);
-		if (externalRegionListenerRight != null) mainSystem.removeRegionListener(externalRegionListenerRight);
+		if (externalRegionListenerLeft != null) mainSystem.removeRegionListener(externalRegionListenerLeft);
+		if (externalRegionListenerRight != null) sideSystem.removeRegionListener(externalRegionListenerRight);
 		
 		externalRegionListenerLeft = regionLeft;
 		externalRegionListenerRight = regionRight;
