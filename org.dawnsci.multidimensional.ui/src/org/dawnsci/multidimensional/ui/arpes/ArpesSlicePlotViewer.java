@@ -34,6 +34,7 @@ public class ArpesSlicePlotViewer extends AbstractHyperPlotViewer {
 
 	private PerpendicularImageCutsComposite cutComposite;
 	private PerpendicularCutsHelper helper;
+	private IRegion[] cachedSideRegions;
 
 	public ArpesSlicePlotViewer() {
 		
@@ -82,6 +83,7 @@ public class ArpesSlicePlotViewer extends AbstractHyperPlotViewer {
 
 		if (trace instanceof BaseHyperTrace) {
 			
+			helper.setCachedRegions(cachedSideRegions);
 			helper.activate(this.cutComposite);
 			hyper.clear();
 			
@@ -148,6 +150,15 @@ public class ArpesSlicePlotViewer extends AbstractHyperPlotViewer {
 			return true;
 		}
 		return false;
+	}
+	
+	@Override
+	public void removeTrace(ITrace trace) {
+		Collection<IRegion> cachedSideRegionsCollection = hyper.getSideSystem().getRegions();
+		if (cachedSideRegionsCollection!=null) {
+			cachedSideRegions = cachedSideRegionsCollection.toArray(IRegion[]::new);
+		}				
+		super.removeTrace(trace);		
 	}
 	
 	@Override

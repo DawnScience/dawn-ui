@@ -43,7 +43,11 @@ public class PerpendicularCutsHelper {
 	private AdditionalCutDimension additionalCut;
 	
 	private IRegion[] regions;
+	private IRegion[] cachedRegions;
 	private boolean inUpdate = false;
+	
+	private int xDeltaInitFactor = 30; //close to a required delta = 1 deg for MBS L4Ang0d8 lense mode and 835 region size
+	private int yDeltaInitFactor = 12; //close to a required delta = 0.05 eV for MBS analyser PE=10eV and 1034 region size
 	
 	public PerpendicularCutsHelper(IPlottingSystem<?> system) {
 		this.plottingSystem = system;
@@ -85,13 +89,13 @@ public class PerpendicularCutsHelper {
 			plottingSystem.setPlotType(PlotType.IMAGE);
 			IRegion xr = plottingSystem.createRegion(X_REGION_NAME, RegionType.XAXIS);
 
-			int xDelta = shape[1] / 10;
+			int xDelta = shape[1] / xDeltaInitFactor;
 
 			XAxisBoxROI xroi = new XAxisBoxROI(shape[1] / 2 - (xDelta / 2), 0, xDelta, 1, 0);
 			xr.setROI(xroi);
 			xr.setUserRegion(true);
 
-			int yDelta = shape[0] / 10;
+			int yDelta = shape[0] / yDeltaInitFactor;
 
 			IRegion yr = plottingSystem.createRegion(Y_REGION_NAME, RegionType.YAXIS);
 			YAxisBoxROI yroi = new YAxisBoxROI(0, shape[0] / 2 - (yDelta / 2), 1, yDelta, 0);
@@ -110,7 +114,13 @@ public class PerpendicularCutsHelper {
 			if (yr instanceof ILockTranslatable) {
 				((ILockTranslatable) yr).translateOnly(true);
 			}
-
+			
+			if ((cachedRegions != null) && (cachedRegions.length!=0)) {
+				for (IRegion cachedRegion : cachedRegions) {
+					if (cachedRegion.getRegionType()==RegionType.XAXIS) xr.setROI(cachedRegion.getROI()); else yr.setROI(cachedRegion.getROI());
+					}
+			}
+			
 			this.regions = regions;
 			return regions;
 		} catch (Exception e) {
@@ -350,9 +360,13 @@ public class PerpendicularCutsHelper {
 			plottingSystem.removeRegion(regions[0]);
 			plottingSystem.removeRegion(regions[1]);
 			regions = null;
+			cachedRegions = null;
 		}
 		
 		composite.removeListener(cutUpdateListener);
 	}
 	
+	public void setCachedRegions(IRegion[] regions) {
+		this.cachedRegions = regions;
+	}	
 }

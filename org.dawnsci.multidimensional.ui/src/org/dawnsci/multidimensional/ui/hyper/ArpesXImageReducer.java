@@ -65,10 +65,8 @@ public class ArpesXImageReducer implements IDatasetROIReducer {
 	}
 
 	@Override
-	public IROI getInitialROI(List<IDataset> axes, int[] order) {
-		double len = axes.get(order[0]).getSize();
-		
-		return new XAxisBoxROI(len/2, 0, len/10, 0,0);
+	public IROI getInitialROI(List<IDataset> axes, int[] order) {		
+		return new XAxisBoxROI(0, 0, 1, 0,0);
 	}
 
 }
