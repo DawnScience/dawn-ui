@@ -17,5 +17,5 @@ public interface IXYData {
 
 	IDataset getX();
 
-	double getLabel();
+	String getLabel();
 }

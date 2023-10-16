@@ -15,7 +15,6 @@ import org.eclipse.january.dataset.Comparisons.Monotonicity;
 import org.eclipse.january.dataset.Dataset;
 import org.eclipse.january.dataset.DatasetFactory;
 import org.eclipse.january.dataset.DatasetUtils;
-import org.eclipse.january.dataset.DoubleDataset;
 import org.eclipse.january.dataset.IDataset;
 import org.eclipse.january.dataset.ILazyDataset;
 import org.eclipse.january.dataset.Maths;
@@ -190,7 +189,7 @@ public class DataManipulationUtils {
 
 		IDataset[] all = new IDataset[list.size()];
 		Dataset names = DatasetFactory.zeros(StringDataset.class, all.length);
-		Dataset labels = DatasetFactory.zeros(DoubleDataset.class, all.length);
+		Dataset labels = DatasetFactory.zeros(StringDataset.class, all.length);
 
 		int count = 0;
 		boolean anyNaNs = false;
@@ -198,10 +197,16 @@ public class DataManipulationUtils {
 		for (IXYData file : list) {
 
 			names.set(new File(file.getFileName()).getName() + ":" + file.getDatasetName(), count);
-			double l = file.getLabel();
-			if (Double.isNaN(l)) {
-				anyNaNs = true;
-			} else if (lName == null) {
+			String l = file.getLabel();
+			try {
+				double v = Double.parseDouble(l);
+				if (Double.isNaN(v)) {
+					anyNaNs = true;
+				}
+			} catch (Exception e) {
+				// do nothing
+			}
+			if (lName == null) {
 				lName = file.getLabelName();
 			}
 			labels.set(l, count);
