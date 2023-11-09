@@ -5,7 +5,6 @@ import java.util.List;
 
 import org.eclipse.dawnsci.plotting.api.axis.IAxis;
 import org.eclipse.dawnsci.plotting.api.histogram.IImageService;
-import org.eclipse.dawnsci.plotting.api.histogram.IPaletteService;
 import org.eclipse.january.dataset.DatasetUtils;
 import org.eclipse.january.dataset.FloatDataset;
 import org.eclipse.january.dataset.IDataset;
@@ -16,10 +15,12 @@ import org.jzy3d.colors.colormaps.ColorMapGrayscale;
 import org.jzy3d.plot3d.primitives.AbstractDrawable;
 import org.jzy3d.plot3d.primitives.Shape;
 
+import uk.ac.diamond.osgi.services.ServiceProvider;
+
 public abstract class Abstract2DJZY3DTrace extends AbstractColorMapTrace {
 	
-	public Abstract2DJZY3DTrace(IPaletteService paletteService, IImageService imageService, String pallette) {
-		super(paletteService, imageService, pallette);
+	protected Abstract2DJZY3DTrace(String pallette) {
+		super(pallette);
 	}
 
 	private AbstractDrawable shape;
@@ -34,7 +35,7 @@ public abstract class Abstract2DJZY3DTrace extends AbstractColorMapTrace {
 	}
 
 	public void setData(IDataset data, IDataset[] axes) {
-		
+		IImageService imageService = ServiceProvider.getService(IImageService.class);
 		if (getImageServiceBean() == null) {
 			bean = imageService.createBeanFromPreferences();
 		}

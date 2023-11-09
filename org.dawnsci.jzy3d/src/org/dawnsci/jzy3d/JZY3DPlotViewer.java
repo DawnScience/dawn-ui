@@ -541,11 +541,11 @@ public class JZY3DPlotViewer extends IPlottingSystemViewer.Stub<Composite> {
 	public <U extends ITrace> U createTrace(String name, Class<U> clazz) {
 		U trace = null;
 		if (clazz == ISurfaceMeshTrace.class) {
-			trace = (U) new SurfaceMeshTraceImpl(ServiceManager.getPaletteService(),ServiceManager.getImageService(),getPreferenceStore().getString(BasePlottingConstants.COLOUR_SCHEME));
+			trace = (U) new SurfaceMeshTraceImpl(getPreferenceStore().getString(BasePlottingConstants.COLOUR_SCHEME));
 		} else if (clazz == IWaterfallTrace.class) {
-			trace = (U) new WaterfallTraceImpl(ServiceManager.getPaletteService(),ServiceManager.getImageService(),getPreferenceStore().getString(BasePlottingConstants.COLOUR_SCHEME));
+			trace = (U) new WaterfallTraceImpl(getPreferenceStore().getString(BasePlottingConstants.COLOUR_SCHEME));
 		} else if (clazz == IVolumeTrace.class) {
-			trace = (U) new VolumeTraceImpl(ServiceManager.getPaletteService(),ServiceManager.getImageService(),getPreferenceStore().getString(BasePlottingConstants.COLOUR_SCHEME));
+			trace = (U) new VolumeTraceImpl(getPreferenceStore().getString(BasePlottingConstants.COLOUR_SCHEME));
 		}
 
 		if (trace != null) {

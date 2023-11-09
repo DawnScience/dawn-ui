@@ -6,7 +6,6 @@ import java.util.List;
 
 import org.dawnsci.jzy3d.volume.Texture3D;
 import org.eclipse.dawnsci.plotting.api.histogram.IImageService;
-import org.eclipse.dawnsci.plotting.api.histogram.IPaletteService;
 import org.eclipse.dawnsci.plotting.api.trace.IVolumeTrace;
 import org.eclipse.january.dataset.DatasetUtils;
 import org.eclipse.january.dataset.FloatDataset;
@@ -17,6 +16,8 @@ import org.jzy3d.plot3d.primitives.AbstractDrawable;
 import org.jzy3d.plot3d.primitives.Shape;
 
 import com.jogamp.opengl.util.GLBuffers;
+
+import uk.ac.diamond.osgi.services.ServiceProvider;
 
 public class VolumeTraceImpl extends Abstract2DJZY3DTrace implements IVolumeTrace {
 
@@ -30,8 +31,8 @@ public class VolumeTraceImpl extends Abstract2DJZY3DTrace implements IVolumeTrac
 	
 	private int downsampling = 1;
 	
-	public VolumeTraceImpl(IPaletteService paletteService, IImageService imageService, String palette) {
-		super(paletteService, imageService, palette);
+	public VolumeTraceImpl(String palette) {
+		super(palette);
 	}
 
 	@Override
@@ -41,19 +42,18 @@ public class VolumeTraceImpl extends Abstract2DJZY3DTrace implements IVolumeTrac
 
 	@Override
 	public List<IDataset> getAxes() {
-		return Arrays.asList(new IDataset[] {xAxis,yAxis,zAxis});
+		return Arrays.asList(xAxis,yAxis,zAxis);
 	}
 
 	@Override
 	public boolean isActive() {
-		// TODO Auto-generated method stub
 		return false;
 	}
 
 	@Override
 	public void setData(IDataset data, IDataset[] axes, Number min, Number max) {
 		if (getImageServiceBean() == null) {
-			bean = imageService.createBeanFromPreferences();
+			bean = ServiceProvider.getService(IImageService.class).createBeanFromPreferences();
 		}
 		
 		bean.setImage(data);

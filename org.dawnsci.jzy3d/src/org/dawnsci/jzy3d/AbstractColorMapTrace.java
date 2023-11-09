@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.Set;
 
 import org.eclipse.dawnsci.plotting.api.histogram.HistogramBound;
-import org.eclipse.dawnsci.plotting.api.histogram.IImageService;
 import org.eclipse.dawnsci.plotting.api.histogram.IPaletteService;
 import org.eclipse.dawnsci.plotting.api.histogram.ImageServiceBean;
 import org.eclipse.dawnsci.plotting.api.trace.IPaletteListener;
@@ -17,11 +16,10 @@ import org.jzy3d.colors.Color;
 import org.jzy3d.colors.ColorMapper;
 import org.jzy3d.colors.colormaps.AbstractColorMap;
 
+import uk.ac.diamond.osgi.services.ServiceProvider;
+
 public abstract class AbstractColorMapTrace implements IPaletteTrace {
 
-	protected IPaletteService paletteService;
-	protected IImageService imageService;
-	
 	protected ImageServiceBean bean;
 	private PaletteData paletteData;
 	private String paletteName;
@@ -39,9 +37,7 @@ public abstract class AbstractColorMapTrace implements IPaletteTrace {
 	
 	private Set<IPaletteListener> paletteListeners;
 	
-	public AbstractColorMapTrace(IPaletteService paletteService, IImageService imageService, String palette) {
-		this.paletteService = paletteService;
-		this.imageService = imageService;
+	protected AbstractColorMapTrace(String palette) {
 		setPalette(palette);
 	}
 	
@@ -191,7 +187,7 @@ public abstract class AbstractColorMapTrace implements IPaletteTrace {
 
 	@Override
 	public void setPalette(String paletteName) {
-		
+		final IPaletteService paletteService = ServiceProvider.getService(IPaletteService.class);
 		final PaletteData p = paletteService.getDirectPaletteData(paletteName);
         setPaletteName(paletteName);
         setPaletteData(p);
@@ -200,7 +196,6 @@ public abstract class AbstractColorMapTrace implements IPaletteTrace {
 
 	@Override
 	public ImageServiceBean getImageServiceBean() {
-		// TODO Auto-generated method stub
 		return bean;
 	}
 
