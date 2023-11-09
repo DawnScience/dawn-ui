@@ -12,17 +12,19 @@ import static org.mockito.Mockito.withSettings;
 
 import java.util.List;
 
+import org.dawnsci.datavis.api.ILiveFileService;
 import org.dawnsci.datavis.model.FileController;
 import org.dawnsci.datavis.model.ILiveLoadedFileListener;
 import org.dawnsci.datavis.model.ILiveLoadedFileService;
 import org.dawnsci.datavis.model.IRefreshable;
-import org.dawnsci.datavis.model.LiveServiceManager;
 import org.dawnsci.datavis.model.LoadedFile;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.ArgumentMatchers;
+
+import uk.ac.diamond.osgi.services.ServiceProvider;
 
 
 public class LiveFileServiceTest {
@@ -36,7 +38,7 @@ public class LiveFileServiceTest {
 	
 	@AfterClass
 	public static void clean() throws Exception {
-		new LiveServiceManager().setILiveFileService(null);
+		ServiceProvider.reset();
 	}
 	
 	@Test
@@ -45,7 +47,7 @@ public class LiveFileServiceTest {
 		String path = "/tmp/myfile.test";
 		
 		ILiveLoadedFileService liveFileService = mock(ILiveLoadedFileService.class);
-		new LiveServiceManager().setILiveFileService(liveFileService);
+		ServiceProvider.setService(ILiveFileService.class, liveFileService);
 		ArgumentCaptor<ILiveLoadedFileListener> listener = ArgumentCaptor.forClass(ILiveLoadedFileListener.class);
 		
 		assertTrue(fileController.getLoadedFiles().isEmpty());

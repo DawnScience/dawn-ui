@@ -10,6 +10,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
+import org.dawnsci.datavis.api.ILiveFileService;
 import org.dawnsci.datavis.api.IRecentPlaces;
 import org.dawnsci.datavis.api.IScriptFileOpener;
 import org.dawnsci.datavis.model.fileconfig.CurrentStateFileConfiguration;
@@ -25,6 +26,8 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.progress.IProgressService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import uk.ac.diamond.osgi.services.ServiceProvider;
 
 public class FileController implements IFileController {
 
@@ -45,7 +48,7 @@ public class FileController implements IFileController {
 	}
 
 	private LoadedFiles loadedFiles;
-	private ILiveLoadedFileListener listener;
+	private ILiveLoadedFileListener listener = new LiveFileListener();
 	private AtomicBoolean onlySignals = new AtomicBoolean(false);
 	private String labelName;
 	
@@ -97,22 +100,13 @@ public class FileController implements IFileController {
 	}
 	
 	public void attachLive() {
-		
-		if (LiveServiceManager.getILiveFileService() != null) {
-			
-			if (listener == null) {
-				listener = new LiveFileListener();
-			}
-			
-			LiveServiceManager.getILiveFileService().addLiveFileListener(listener);
-
-		}
+		ServiceProvider.getOptionalService(ILiveFileService.class)
+				.ifPresent(service -> service.addLiveFileListener(listener));
 	}
 	
 	public void detachLive() {
-		if (LiveServiceManager.getILiveFileService() != null && listener != null) {
-			LiveServiceManager.getILiveFileService().removeLiveFileListener(listener);
-		}
+		ServiceProvider.getOptionalService(ILiveFileService.class)
+				.ifPresent(service -> service.removeLiveFileListener(listener));
 	}
 	
 	/* (non-Javadoc)
@@ -511,7 +505,7 @@ public class FileController implements IFileController {
 				}
 			};
 
-			LiveServiceManager.getILiveFileService().runUpdate(r,false);
+			ServiceProvider.getService(ILiveFileService.class).runUpdate(r,false);
 		}
 
 		@Override
@@ -558,7 +552,7 @@ public class FileController implements IFileController {
 				}
 			};
 			
-			LiveServiceManager.getILiveFileService().runUpdate(r,true);
+			ServiceProvider.getService(ILiveFileService.class).runUpdate(r,true);
 		}
 
 		@Override

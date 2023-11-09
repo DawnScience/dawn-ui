@@ -19,7 +19,6 @@ import org.dawnsci.datavis.model.DataOptions;
 import org.dawnsci.datavis.model.FileController;
 import org.dawnsci.datavis.model.FileControllerUtils;
 import org.dawnsci.datavis.model.IFileController.OpenMode;
-import org.dawnsci.datavis.model.LiveServiceManager;
 import org.dawnsci.datavis.model.LoadedFile;
 import org.dawnsci.datavis.model.PlotController;
 import org.dawnsci.january.model.ISliceChangeListener;
@@ -84,12 +83,10 @@ public class PlotControllerTest extends AbstractTestModel {
 			
 		};
 		plottingSystem = new MockPlottingSystem();
-		new LiveServiceManager().setILiveFileService(null);
 		fileController = new FileController();
 		fileController.setRecentPlaces(p);
 		fileController.setLoaderService(new LoaderServiceImpl());
 		plotManager = new PlotController(plottingSystem,fileController,exService);
-		
 	}
 	
 
