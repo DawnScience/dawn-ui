@@ -70,6 +70,7 @@ import org.eclipse.swt.widgets.Text;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import uk.ac.diamond.osgi.services.ServiceProvider;
 import uk.ac.diamond.scisoft.analysis.utils.VersionSort;
 
 /**
@@ -106,7 +107,7 @@ public class FolderPreviewDialog extends Dialog {
 		super(parentShell);
 		this.filenames = filenames;
 
-		lService = DataVisManipulationServiceManager.getLoaderService();
+		lService = ServiceProvider.getService(ILoaderService.class);
 	}
 
 	@Override

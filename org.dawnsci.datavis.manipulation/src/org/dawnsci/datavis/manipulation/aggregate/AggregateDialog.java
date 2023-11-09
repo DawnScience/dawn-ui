@@ -24,11 +24,13 @@ import org.dawnsci.datavis.api.IDataFilePackage;
 import org.dawnsci.datavis.api.IXYData;
 import org.dawnsci.datavis.api.utils.DataPackageUtils;
 import org.dawnsci.datavis.manipulation.DataManipulationUtils;
-import org.dawnsci.datavis.manipulation.DataVisManipulationServiceManager;
 import org.dawnsci.datavis.manipulation.FileWritingUtils;
 import org.dawnsci.datavis.model.FileControllerUtils;
 import org.dawnsci.datavis.model.IFileController;
 import org.eclipse.dawnsci.analysis.api.expressions.IExpressionEngine;
+import org.eclipse.dawnsci.analysis.api.expressions.IExpressionService;
+import org.eclipse.dawnsci.nexus.INexusFileFactory;
+import org.eclipse.dawnsci.plotting.api.IPlottingService;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.PlotType;
 import org.eclipse.dawnsci.plotting.api.trace.ILineTrace;
@@ -81,6 +83,7 @@ import org.eclipse.swt.widgets.Text;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import uk.ac.diamond.osgi.services.ServiceProvider;
 import uk.ac.diamond.scisoft.analysis.dataset.function.Histogram;
 import uk.ac.diamond.scisoft.analysis.dataset.function.Histogram2D;
 
@@ -127,13 +130,12 @@ public class AggregateDialog extends Dialog {
 		super(parentShell);
 
 		try {
-			system = DataVisManipulationServiceManager.getPlottingService().createPlottingSystem();
+			system = ServiceProvider.getService(IPlottingService.class).createPlottingSystem();
 		} catch (Exception e) {
 			logger.error("Error creating Aggregate plotting system:", e);
 		}
 
-		engine = DataVisManipulationServiceManager.getExpressionService().getExpressionEngine();
-
+		engine = ServiceProvider.getService(IExpressionService.class).getExpressionEngine();
 		this.data = data;
 		labelOptions = getLabelOptions();
 		initializeChosenLabels();
@@ -914,10 +916,11 @@ public class AggregateDialog extends Dialog {
 		if (dialog.open() == Dialog.CANCEL) return;
 		lastPath = dialog.getPath();
 
-		boolean success = FileWritingUtils.writeProcessedData(DataVisManipulationServiceManager.getNexusFileFactory(), getShell(), getClass().getSimpleName(), lastPath, AGGREGATED_ENTRY, aggregate);
+		boolean success = FileWritingUtils.writeProcessedData(ServiceProvider.getService(INexusFileFactory.class),
+				getShell(), getClass().getSimpleName(), lastPath, AGGREGATED_ENTRY, aggregate);
 
 		if (success) {
-			IFileController fc = DataVisManipulationServiceManager.getFileController();
+			IFileController fc = ServiceProvider.getService(IFileController.class);
 			FileControllerUtils.loadFile(fc, lastPath);
 		}
 	}

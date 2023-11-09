@@ -62,6 +62,7 @@ import org.eclipse.ui.services.IServiceLocator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import uk.ac.diamond.osgi.services.ServiceProvider;
 import uk.ac.diamond.scisoft.analysis.utils.ReflMergeUtils;
 
 public class DataManipulationExtensionContributionFactory extends ExtensionContributionFactory {
@@ -78,7 +79,7 @@ public class DataManipulationExtensionContributionFactory extends ExtensionContr
 		xyTools.addMenuListener(new IMenuListener() {
 
 			private String getLastRecentDirectory() {
-				IRecentPlaces places = DataVisManipulationServiceManager.getRecentPlaces();
+				IRecentPlaces places = ServiceProvider.getService(IRecentPlaces.class);
 				return places.getRecentDirectories().get(0);
 			}
 
@@ -183,18 +184,15 @@ public class DataManipulationExtensionContributionFactory extends ExtensionContr
 						boolean success = false;
 
 						if (ext.equals(exts[2]) || ext.equals(exts[3])) {
-
-							INexusFileFactory fileFactory = DataVisManipulationServiceManager.getNexusFileFactory();
-
+							INexusFileFactory fileFactory = ServiceProvider.getService(INexusFileFactory.class);
 							success = FileWritingUtils.writeNexus(open, fileFactory, mean);
-							
 						}
 						else {
 							success = FileWritingUtils.writeText(open, mean);
 						}
 						
 						if (success) {
-							IFileController fc = DataVisManipulationServiceManager.getFileController();
+							IFileController fc = ServiceProvider.getService(IFileController.class);
 							FileControllerUtils.loadFile(fc,open);
 						}
 						
@@ -270,7 +268,7 @@ public class DataManipulationExtensionContributionFactory extends ExtensionContr
 						}
 						
 						if (!paths.isEmpty()) {
-							IFileController fc = DataVisManipulationServiceManager.getFileController();
+							IFileController fc = ServiceProvider.getService(IFileController.class);
 							FileControllerUtils.loadFiles(fc,paths.toArray(new String[paths.size()]), null);
 						}
 						
@@ -282,7 +280,7 @@ public class DataManipulationExtensionContributionFactory extends ExtensionContr
 					@Override
 					public void run() {
 
-						IFileController fc = DataVisManipulationServiceManager.getFileController();
+						IFileController fc = ServiceProvider.getService(IFileController.class);
 						List<IDataFilePackage> selected = fc == null ? null :
 							fc.getLoadedFiles().stream()
 								.filter(IDataFilePackage::isSelected)
@@ -325,7 +323,7 @@ public class DataManipulationExtensionContributionFactory extends ExtensionContr
 								String open = f.open();
 								
 								if (open != null && FileWritingUtils.writeText(open, d.getData())) {
-									IFileController fc = DataVisManipulationServiceManager.getFileController();
+									IFileController fc = ServiceProvider.getService(IFileController.class);
 									FileControllerUtils.loadFile(fc,open);
 								}
 							}
@@ -425,7 +423,7 @@ public class DataManipulationExtensionContributionFactory extends ExtensionContr
 						boolean success = FileWritingUtils.writeDat(open, dataToWrite);
 						
 						if (success) {
-							IFileController fc = DataVisManipulationServiceManager.getFileController();
+							IFileController fc = ServiceProvider.getService(IFileController.class);
 							FileControllerUtils.loadFile(fc,open);
 						} else {
 							MessageDialog.openError(shell, "Error", "It has not been possible to write the data file.");
@@ -449,7 +447,7 @@ public class DataManipulationExtensionContributionFactory extends ExtensionContr
 					public void run() {
 
 						try {
-							IFileController fc = DataVisManipulationServiceManager.getFileController();
+							IFileController fc = ServiceProvider.getService(IFileController.class);
 							ComponentFitModel model = getComponentFit(fc);
 							ComponentFitDialog d = new ComponentFitDialog(shell, model);
 							d.open();

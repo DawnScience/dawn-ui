@@ -57,6 +57,8 @@ import org.eclipse.swt.widgets.Shell;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import uk.ac.diamond.osgi.services.ServiceProvider;
+
 public class RegionNormalisedDifferenceDialog extends Dialog {
 	
 	private static final Logger logger = LoggerFactory.getLogger(RegionNormalisedDifferenceDialog.class);
@@ -97,7 +99,7 @@ public class RegionNormalisedDifferenceDialog extends Dialog {
 		container.setLayout(new GridLayout(1, false));
 		container.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
-		IPlottingService plottingService = DataVisManipulationServiceManager.getPlottingService();
+		IPlottingService plottingService = ServiceProvider.getService(IPlottingService.class);
 		try {
 			regionSystem = plottingService.createPlottingSystem();
 			differenceSystem = plottingService.createPlottingSystem();

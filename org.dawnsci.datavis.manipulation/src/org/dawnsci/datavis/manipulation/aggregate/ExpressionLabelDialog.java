@@ -7,9 +7,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.dawnsci.datavis.manipulation.DataVisManipulationServiceManager;
 import org.eclipse.dawnsci.analysis.api.expressions.IExpressionEngine;
 import org.eclipse.dawnsci.analysis.api.expressions.IExpressionService;
+import org.eclipse.dawnsci.plotting.api.IPlottingService;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.PlotType;
 import org.eclipse.dawnsci.plotting.api.trace.ILineTrace;
@@ -41,6 +41,8 @@ import org.eclipse.swt.widgets.Text;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import uk.ac.diamond.osgi.services.ServiceProvider;
+
 public class ExpressionLabelDialog extends Dialog {
 	private static final Logger logger = LoggerFactory.getLogger(ExpressionLabelDialog.class);
 
@@ -56,13 +58,13 @@ public class ExpressionLabelDialog extends Dialog {
 		super(parentShell);
 
 		try {
-			system = DataVisManipulationServiceManager.getPlottingService().createPlottingSystem();
+			system = ServiceProvider.getService(IPlottingService.class).createPlottingSystem();
 		} catch (Exception e) {
 			logger.error("Error creating Combine plotting system:", e);
 		}
 		this.variables = datasets;
 
-		IExpressionService expressionService = DataVisManipulationServiceManager.getExpressionService();
+		IExpressionService expressionService = ServiceProvider.getService(IExpressionService.class);
 		engine = expressionService.getExpressionEngine();
 		Map<String, Object> vars = new HashMap<>();
 		for (Dataset v : variables.values()) {

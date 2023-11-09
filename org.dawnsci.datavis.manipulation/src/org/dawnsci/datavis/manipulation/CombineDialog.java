@@ -8,9 +8,11 @@ import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.dawnsci.analysis.api.io.IDataHolder;
 import org.eclipse.dawnsci.analysis.api.tree.GroupNode;
 import org.eclipse.dawnsci.analysis.tree.TreeFactory;
+import org.eclipse.dawnsci.nexus.INexusFileFactory;
 import org.eclipse.dawnsci.nexus.NexusConstants;
 import org.eclipse.dawnsci.nexus.NexusFile;
 import org.eclipse.dawnsci.nexus.NexusUtils;
+import org.eclipse.dawnsci.plotting.api.IPlottingService;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.PlotType;
 import org.eclipse.dawnsci.plotting.api.trace.IImageTrace;
@@ -43,6 +45,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import uk.ac.diamond.osgi.services.ServiceProvider;
 import uk.ac.diamond.scisoft.analysis.io.LoaderFactory;
 
 public class CombineDialog extends Dialog implements IAdaptable{
@@ -97,7 +100,7 @@ public class CombineDialog extends Dialog implements IAdaptable{
 		}
 
 		try {
-			system = DataVisManipulationServiceManager.getPlottingService().createPlottingSystem();
+			system = ServiceProvider.getService(IPlottingService.class).createPlottingSystem();
 		} catch (Exception e) {
 			logger.error("Error creating Combine plotting system:", e);
 		}
@@ -212,7 +215,7 @@ public class CombineDialog extends Dialog implements IAdaptable{
 				if (dialog.open() == Dialog.CANCEL ) return;
 				lastPath = dialog.getPath();
 				
-				try (NexusFile nexus = DataVisManipulationServiceManager.getNexusFileFactory().newNexusFile(lastPath)) {
+				try (NexusFile nexus = ServiceProvider.getService(INexusFileFactory.class).newNexusFile(lastPath)) {
 					nexus.openToWrite(true);
 					GroupNode nxentry = NexusUtils.writeNXclass(nexus, null, "entry", NexusConstants.ENTRY);
 					GroupNode nxdata = NexusUtils.writeNXclass(nexus, nxentry, "data", NexusConstants.DATA);

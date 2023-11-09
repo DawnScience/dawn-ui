@@ -2,7 +2,6 @@ package org.dawnsci.datavis.manipulation.componentfit;
 
 import java.util.Iterator;
 
-import org.dawnsci.datavis.manipulation.DataVisManipulationServiceManager;
 import org.dawnsci.plotting.actions.ActionBarWrapper;
 import org.eclipse.dawnsci.plotting.api.IPlottingService;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
@@ -28,6 +27,8 @@ import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Spinner;
+
+import uk.ac.diamond.osgi.services.ServiceProvider;
 
 public class ComponentFitDialog extends Dialog {
 
@@ -58,7 +59,7 @@ public class ComponentFitDialog extends Dialog {
 		Composite container = (Composite) super.createDialogArea(parent);
 		
 		try {
-			IPlottingService plottingService = DataVisManipulationServiceManager.getPlottingService();
+			IPlottingService plottingService = ServiceProvider.getService(IPlottingService.class);
 			fitPlot = plottingService.createPlottingSystem();
 			concPlot = plottingService.createPlottingSystem();
 			resPlot = plottingService.createPlottingSystem();

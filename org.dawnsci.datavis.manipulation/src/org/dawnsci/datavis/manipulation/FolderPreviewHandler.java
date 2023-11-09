@@ -33,6 +33,8 @@ import org.osgi.service.event.EventAdmin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import uk.ac.diamond.osgi.services.ServiceProvider;
+
 /**
  * Handler to launch the FolderPreviewDialog
  * <p>
@@ -49,8 +51,8 @@ public class FolderPreviewHandler extends AbstractHandler {
 		
 		DirectoryDialog dialog = new DirectoryDialog(HandlerUtil.getActiveShell(event),SWT.NONE);
 		
-		IRecentPlaces recentPlaces = DataVisManipulationServiceManager.getRecentPlaces();
-		final EventAdmin admin = DataVisManipulationServiceManager.getEventAdmin();
+		IRecentPlaces recentPlaces = ServiceProvider.getService(IRecentPlaces.class);
+		final EventAdmin admin = ServiceProvider.getService(EventAdmin.class);
 		
 		if (!recentPlaces.getRecentDirectories().isEmpty()) {
 			dialog.setFilterPath(recentPlaces.getRecentDirectories().get(0));
