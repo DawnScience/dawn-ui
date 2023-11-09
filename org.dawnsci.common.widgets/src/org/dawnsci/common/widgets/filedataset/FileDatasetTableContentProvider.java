@@ -4,11 +4,13 @@ import java.io.File;
 import java.util.Arrays;
 
 import org.apache.commons.math3.util.Pair;
-import org.dawnsci.common.widgets.LocalServiceManager;
 import org.eclipse.dawnsci.analysis.api.io.IDataHolder;
+import org.eclipse.dawnsci.analysis.api.io.ILoaderService;
 import org.eclipse.january.dataset.ILazyDataset;
 import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.Viewer;
+
+import uk.ac.diamond.osgi.services.ServiceProvider;
 
 public class FileDatasetTableContentProvider implements IStructuredContentProvider {
 
@@ -36,7 +38,7 @@ public class FileDatasetTableContentProvider implements IStructuredContentProvid
 		
 		// try opening the file
 		try {
-			IDataHolder dh = LocalServiceManager.getLoaderService().getData(file.getAbsolutePath(), null);
+			IDataHolder dh = ServiceProvider.getService(ILoaderService.class).getData(file.getAbsolutePath(), null);
 			@SuppressWarnings("unchecked")
 			Pair<String, ILazyDataset>[] rv = Arrays.stream(dh.getNames())
 				.map(datasetName -> new Pair<String, ILazyDataset>(datasetName, dh.getLazyDataset(datasetName)))
