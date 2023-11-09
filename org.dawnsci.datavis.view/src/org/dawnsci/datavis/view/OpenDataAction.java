@@ -13,6 +13,8 @@ import org.eclipse.ui.IWorkbenchPage;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
 
+import uk.ac.diamond.osgi.services.ServiceProvider;
+
 public class OpenDataAction extends Action {
 	
 	private ISelectionProvider provider;
@@ -56,14 +58,10 @@ public class OpenDataAction extends Action {
 		ISelection selection = provider.getSelection();
 		if (!selection.isEmpty()) {
 			IStructuredSelection sSelection = (IStructuredSelection) selection;
-			if (sSelection.size() == 1 && sSelection.getFirstElement() instanceof IFile) {
-
-				IFile file = (IFile)sSelection.getFirstElement();
+			if (sSelection.size() == 1 && sSelection.getFirstElement() instanceof IFile file) {
 				String loc = file.getRawLocation().toOSString();
 
-
-				final EventAdmin admin = ActionServiceManager.getEventAdmin();
-				
+				final EventAdmin admin = ServiceProvider.getService(EventAdmin.class);
 				Map<String,String[]> props = new HashMap<>();
 				props.put(PlottingEventConstants.MULTIPLE_FILE_PROPERTY, new String[] {loc});
 				admin.sendEvent(new Event(PlottingEventConstants.FILE_OPEN_EVENT, props));

@@ -3,11 +3,9 @@ package org.dawnsci.datavis.view.perspective;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.dawnsci.datavis.model.IFileController;
 import org.dawnsci.datavis.model.LoadedFile;
-import org.dawnsci.datavis.view.ActionServiceManager;
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
@@ -15,13 +13,15 @@ import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.ui.ISources;
 import org.eclipse.ui.handlers.HandlerUtil;
 
+import uk.ac.diamond.osgi.services.ServiceProvider;
+
 public class FileCloseHandler extends AbstractHandler {
 
 	@Override
 	public Object execute(ExecutionEvent event) throws ExecutionException {
 		List<LoadedFile> list = getSelectedFiles(event);
 
-		IFileController controller = ActionServiceManager.getFileController();
+		IFileController controller = ServiceProvider.getService(IFileController.class);
 		controller.unloadFiles(list);
 
 		return null;
@@ -34,15 +34,14 @@ public class FileCloseHandler extends AbstractHandler {
 	}
 
 	private List<LoadedFile> getSelectedFiles(Object evaluationContext) {
-		Object variable = evaluationContext instanceof ExecutionEvent ? HandlerUtil.getVariable((ExecutionEvent) evaluationContext, ISources.ACTIVE_CURRENT_SELECTION_NAME):
+		Object variable = evaluationContext instanceof ExecutionEvent executionEvent ?
+				HandlerUtil.getVariable(executionEvent, ISources.ACTIVE_CURRENT_SELECTION_NAME):
 				HandlerUtil.getVariable(evaluationContext, ISources.ACTIVE_CURRENT_SELECTION_NAME);
 
-		if (variable instanceof StructuredSelection) {
-			List<LoadedFile> list = Arrays.stream(((StructuredSelection) variable).toArray())
+		if (variable instanceof StructuredSelection sel) {
+			return Arrays.stream(sel.toArray())
 			.filter(LoadedFile.class::isInstance)
-			.map(LoadedFile.class::cast).collect(Collectors.toList());
-			
-			return list;
+			.map(LoadedFile.class::cast).toList();
 		}
 
 		return Collections.emptyList();

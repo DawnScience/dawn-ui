@@ -5,7 +5,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.dawnsci.datavis.api.IRecentPlaces;
-import org.dawnsci.datavis.view.ActionServiceManager;
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
@@ -17,6 +16,8 @@ import org.eclipse.swt.widgets.Shell;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
 
+import uk.ac.diamond.osgi.services.ServiceProvider;
+
 public class FileOpenHandler extends AbstractHandler {
 
 	@Override
@@ -24,8 +25,8 @@ public class FileOpenHandler extends AbstractHandler {
 		Shell shell = Display.getDefault().getActiveShell();
 		FileDialog dialog = new FileDialog(shell,SWT.MULTI);
 		
-		IRecentPlaces recentPlaces = ActionServiceManager.getRecentPlaces();
-		final EventAdmin admin = ActionServiceManager.getEventAdmin();
+		IRecentPlaces recentPlaces = ServiceProvider.getService(IRecentPlaces.class);
+		final EventAdmin admin = ServiceProvider.getService(EventAdmin.class);
 
 		if (!recentPlaces.getRecentDirectories().isEmpty()) {
 			dialog.setFilterPath(recentPlaces.getRecentDirectories().get(0));

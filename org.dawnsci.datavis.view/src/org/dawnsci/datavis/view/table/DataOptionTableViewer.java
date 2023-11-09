@@ -21,7 +21,6 @@ import org.dawnsci.datavis.model.DataOptionsSlice;
 import org.dawnsci.datavis.model.DataOptionsUtils;
 import org.dawnsci.datavis.model.IFileController;
 import org.dawnsci.datavis.model.ILoadedFileInitialiser;
-import org.dawnsci.datavis.view.ActionServiceManager;
 import org.dawnsci.datavis.view.DataOptionsUIUtils;
 import org.dawnsci.datavis.view.ExpressionDialog;
 import org.dawnsci.datavis.view.parts.CopyToClipboardAction;
@@ -64,6 +63,8 @@ import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
+
+import uk.ac.diamond.osgi.services.ServiceProvider;
 
 public class DataOptionTableViewer {
 
@@ -188,7 +189,7 @@ public class DataOptionTableViewer {
 					Action exprAction = new Action("Apply expression...") {
 						@Override
 						public void run() {
-							IExpressionService service = ActionServiceManager.getExpressionService();
+							IExpressionService service = ServiceProvider.getService(IExpressionService.class);
 							ExpressionDialog dialog = new ExpressionDialog(tableComposite.getShell(), service, dataOptions, controller);
 							int retVal = dialog.open();
 							if (retVal == Window.OK) {
@@ -222,7 +223,7 @@ public class DataOptionTableViewer {
 						Action save = new Action("Save to Nexus...") {
 							@Override
 							public void run() {
-								IRecentPlaces service = ActionServiceManager.getRecentPlaces();
+								IRecentPlaces service = ServiceProvider.getService(IRecentPlaces.class);
 								
 								DataOptionsUIUtils.saveToFile(dataOptions, service == null ? null : service.getCurrentDefaultDirectory());
 							}

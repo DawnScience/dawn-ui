@@ -15,6 +15,8 @@ import org.eclipse.swt.widgets.Shell;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import uk.ac.diamond.osgi.services.ServiceProvider;
+
 public class DataOptionsUIUtils {
 
 	private static final Logger logger = LoggerFactory.getLogger(DataOptionsUIUtils.class);
@@ -30,7 +32,7 @@ public class DataOptionsUIUtils {
 		String[] fileNames = dialog.getFileNames();
 
 		try {
-			INexusFileFactory nexusFileFactory = ActionServiceManager.getNexusFileFactory();
+			INexusFileFactory nexusFileFactory = ServiceProvider.getService(INexusFileFactory.class);
 			DataOptionsUtils.saveToFile(dataOptions, dialog.getFilterPath() + File.separator + fileNames[0], nexusFileFactory);
 
 		} catch (DatasetException e) {
