@@ -23,7 +23,8 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.nebula.widgets.opal.rangeslider;bundle-version="1.0.0",
  org.dawnsci.datavis.api;bundle-version="1.0.0",
  org.dawnsci.january.ui;bundle-version="1.0.0",
- org.dawnsci.multidimensional.ui
+ org.dawnsci.multidimensional.ui,
+ uk.ac.diamond.osgi;bundle-version="1.2.0"
 Bundle-RequiredExecutionEnvironment: JavaSE-17
 Bundle-ActivationPolicy: lazy
 Service-Component: OSGI-INF/*.xml

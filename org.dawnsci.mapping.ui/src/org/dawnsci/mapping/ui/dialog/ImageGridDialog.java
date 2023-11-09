@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.dawnsci.mapping.ui.ILiveMapFileListener;
-import org.dawnsci.mapping.ui.LiveServiceManager;
+import org.dawnsci.mapping.ui.ILiveMappingFileService;
 import org.dawnsci.mapping.ui.datamodel.AbstractMapData;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -31,10 +31,12 @@ import org.eclipse.ui.PlatformUI;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import uk.ac.diamond.osgi.services.ServiceProvider;
+
 public class ImageGridDialog extends Dialog{
 	
 	private List<IDataset> data;
-	private List<IPlottingSystem<Composite>> systems = new ArrayList<IPlottingSystem<Composite>>();
+	private List<IPlottingSystem<Composite>> systems = new ArrayList<>();
 	private static final int MIN_REFRESH_TIME = 5000;
 	private MultiPlotJob job;
 	private List<MapAndPlot> mapsWithPlots;
@@ -45,8 +47,8 @@ public class ImageGridDialog extends Dialog{
 	public ImageGridDialog(Shell parentShell, List<AbstractMapData> maps) {
 		super(parentShell);
 
-		data = new ArrayList<IDataset>(maps.size());
-		mapsWithPlots = new ArrayList<MapAndPlot>();
+		data = new ArrayList<>(maps.size());
+		mapsWithPlots = new ArrayList<>();
 		for (AbstractMapData map : maps) {
 			data.add(map.getMap());
 			try {
@@ -116,10 +118,8 @@ public class ImageGridDialog extends Dialog{
 				}
 			};
 			
-			if (LiveServiceManager.getLiveMappingFileService() != null) {
-				LiveServiceManager.getLiveMappingFileService().addLiveFileListener(listener);
-			}
-			
+			ServiceProvider.getOptionalService(ILiveMappingFileService.class)
+					.ifPresent(service -> service.addLiveFileListener(listener));
 		}
 		
 		return container;
@@ -138,11 +138,8 @@ public class ImageGridDialog extends Dialog{
 	
 	
 	private void unsubscribe(){
-		
-		if (LiveServiceManager.getLiveMappingFileService() != null && listener != null) {
-			LiveServiceManager.getLiveMappingFileService().removeLiveFileListener(listener);
-		}
-		
+		ServiceProvider.getOptionalService(ILiveMappingFileService.class)
+				.ifPresent(service -> service.removeLiveFileListener(listener));
 	}
 	
 	@Override
