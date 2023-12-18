@@ -10,7 +10,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
-import org.dawnsci.datavis.api.ILiveFileService;
 import org.dawnsci.datavis.api.IRecentPlaces;
 import org.dawnsci.datavis.api.IScriptFileOpener;
 import org.dawnsci.datavis.model.fileconfig.CurrentStateFileConfiguration;
@@ -100,12 +99,12 @@ public class FileController implements IFileController {
 	}
 	
 	public void attachLive() {
-		ServiceProvider.getOptionalService(ILiveFileService.class)
+		ServiceProvider.getOptionalService(ILiveLoadedFileService.class)
 				.ifPresent(service -> service.addLiveFileListener(listener));
 	}
 	
 	public void detachLive() {
-		ServiceProvider.getOptionalService(ILiveFileService.class)
+		ServiceProvider.getOptionalService(ILiveLoadedFileService.class)
 				.ifPresent(service -> service.removeLiveFileListener(listener));
 	}
 	
@@ -505,7 +504,7 @@ public class FileController implements IFileController {
 				}
 			};
 
-			ServiceProvider.getService(ILiveFileService.class).runUpdate(r,false);
+			ServiceProvider.getService(ILiveLoadedFileService.class).runUpdate(r,false);
 		}
 
 		@Override
@@ -552,7 +551,7 @@ public class FileController implements IFileController {
 				}
 			};
 			
-			ServiceProvider.getService(ILiveFileService.class).runUpdate(r,true);
+			ServiceProvider.getService(ILiveLoadedFileService.class).runUpdate(r,true);
 		}
 
 		@Override

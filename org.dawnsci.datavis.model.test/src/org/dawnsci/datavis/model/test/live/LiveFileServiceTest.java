@@ -12,7 +12,6 @@ import static org.mockito.Mockito.withSettings;
 
 import java.util.List;
 
-import org.dawnsci.datavis.api.ILiveFileService;
 import org.dawnsci.datavis.model.FileController;
 import org.dawnsci.datavis.model.ILiveLoadedFileListener;
 import org.dawnsci.datavis.model.ILiveLoadedFileService;
@@ -47,7 +46,7 @@ public class LiveFileServiceTest {
 		String path = "/tmp/myfile.test";
 		
 		ILiveLoadedFileService liveFileService = mock(ILiveLoadedFileService.class);
-		ServiceProvider.setService(ILiveFileService.class, liveFileService);
+		ServiceProvider.setService(ILiveLoadedFileService.class, liveFileService);
 		ArgumentCaptor<ILiveLoadedFileListener> listener = ArgumentCaptor.forClass(ILiveLoadedFileListener.class);
 		
 		assertTrue(fileController.getLoadedFiles().isEmpty());
