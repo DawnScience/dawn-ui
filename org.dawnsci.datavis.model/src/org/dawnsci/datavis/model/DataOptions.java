@@ -179,8 +179,10 @@ public class DataOptions implements IDataObject, IDataPackage {
 		try {
 			ax = MetadataFactory.createMetadata(AxesMetadata.class, axes.length);
 			for (int i = 0; i < axes.length ; i++) {
-				ILazyDataset lzAxes = parent.getLazyDataset(axes[i]);
+				String axName = axes[i];
+				ILazyDataset lzAxes = parent.getLazyDataset(axName);
 				if (lzAxes == null) continue;
+				lzAxes.setName(axName);
 				if (!(lzAxes.getRank() ==1 || lzAxes.getRank() == local.getRank())) {
 					int rank = local.getRank();
 					int[] shape = local.getShape();
