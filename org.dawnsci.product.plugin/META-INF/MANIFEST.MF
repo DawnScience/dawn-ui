@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Dawn Product Plugin
 Bundle-SymbolicName: org.dawnsci.product.plugin;singleton:=true
-Bundle-Version: 1.0.0.qualifier
+Bundle-Version: 2.33.0.qualifier
 Bundle-Activator: org.dawnsci.product.plugin.Activator
 Bundle-Vendor: DAWN Collaboration
 Require-Bundle: org.eclipse.ui,
