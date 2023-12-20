@@ -106,10 +106,6 @@ public class AggregateDialog extends Dialog {
 	private boolean[] undefinedAxis = new boolean[2];
 	private List<LabelOption> labelOptions;
 
-	private HistogramBin yBins;
-
-	private HistogramBin xBins;
-
 	private boolean showHistogram;
 
 	private Button plot;
@@ -360,7 +356,7 @@ public class AggregateDialog extends Dialog {
 		}
 
 		void update(HistogramBin b) {
-			bin = b.clone();
+			bin = b;
 			name.setText(bin.getName());
 			name.setEnabled(true);
 			name.requestLayout();
@@ -636,20 +632,18 @@ public class AggregateDialog extends Dialog {
 
 		if (updateBins) {
 			if (undefinedAxis[0]) {
-				xBins = null;
 				xBinsParameters.clear();
 			} else {
-				xBins = HistogramBin.calculateQuantization(x);
+				HistogramBin xBins = HistogramBin.calculateQuantization(x);
 				xBinsParameters.update(xBins);
 				logger.debug("x histogram bins: {}", xBins);
 			}
 			if (undefinedAxis[1]) {
-				yBins = null;
 				yBinsParameters.clear();
 			} else {
-				yBins = HistogramBin.calculateQuantization(y);
+				HistogramBin yBins = HistogramBin.calculateQuantization(y);
 				yBinsParameters.update(yBins);
-				logger.debug("y histogram bins: {}", xBins);
+				logger.debug("y histogram bins: {}", yBins);
 			}
 		}
 
@@ -661,6 +655,8 @@ public class AggregateDialog extends Dialog {
 	}
 
 	private void binAndPlotLabelValues(Dataset x, Dataset y) {
+		HistogramBin xBins = xBinsParameters.getBin();
+		HistogramBin yBins = yBinsParameters.getBin();
 		if (undefinedAxis[1] || yBins.getSteps() == 1) {
 			// 1D
 			Histogram h = new Histogram(xBins.createBinEdges(true));
@@ -747,6 +743,7 @@ public class AggregateDialog extends Dialog {
 			return;
 		}
 		xy = DataManipulationUtils.getCompatibleDatasets(xy, null, null, true);
+		HistogramBin xBins = xBinsParameters.getBin();
 		aggregate = null;
 		if (undefinedAxis[0]) {
 			// concatenate 1D
@@ -756,7 +753,7 @@ public class AggregateDialog extends Dialog {
 			// interpolate 1D across x label bins
 			Dataset l = getLabelDataset(chosenLabels.get(0));
 			Dataset tmp = verticalStack(xy); // so axis runs down column
-			Dataset x = xBins.createBinEdges(false).getSliceView(new Slice(-1));
+			Dataset x = xBins.createBinEdges(false);
 			int xSize = x.getSize(); // label x
 			int aSize = tmp.getShapeRef()[0]; // axis
 			DoubleDataset agg = DatasetFactory.zeros(aSize, xSize);
@@ -771,6 +768,7 @@ public class AggregateDialog extends Dialog {
 		} else {
 			// interpolated 2D across x and y label bins
 			Dataset x = xBins.createBinEdges(false).getSliceView(new Slice(-1));
+			HistogramBin yBins = yBinsParameters.getBin();
 			Dataset y = yBins.createBinEdges(false).getSliceView(new Slice(-1));
 
 			Dataset lx = getLabelDataset(chosenLabels.get(0));
