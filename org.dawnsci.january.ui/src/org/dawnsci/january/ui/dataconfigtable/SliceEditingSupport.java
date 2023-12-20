@@ -11,6 +11,8 @@ import org.eclipse.jface.viewers.TextCellEditor;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.FocusEvent;
 import org.eclipse.swt.events.FocusListener;
+import org.eclipse.swt.events.KeyAdapter;
+import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.events.MouseAdapter;
 import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.events.MouseTrackAdapter;
@@ -91,9 +93,78 @@ public class SliceEditingSupport extends EditingSupport {
 					}
 				}
 			});
+			
+			t.addKeyListener(new KeyAdapter() {
+				
+				@Override
+				public void keyPressed(KeyEvent e) {
+					
+					switch (e.keyCode) {
+					case (SWT.ARROW_UP):
+						updateSliceWithKeys(true,false);
+					    break;
+					case (SWT.ARROW_DOWN):
+						updateSliceWithKeys(false,false);
+					    break;
+					case (SWT.PAGE_UP):
+						updateSliceWithKeys(true,true);
+					    break;
+					case (SWT.PAGE_DOWN):
+						updateSliceWithKeys(false,true);
+					    break;
+					default:
+						break;
+					}
+				}
+			});
 		}
 	}
 
+	private void updateSliceWithKeys(boolean up, boolean page) {
+		
+		int delta = page ? 10 : 1;
+		
+		Slice slice = getSlice(currentDimension);
+		
+		//If up change stop first, else change start
+		if (up) {
+			
+			int end = getSize(currentDimension);
+			Integer stop = slice.getStop();
+			
+			if (stop == end) {
+				return;
+			}
+			
+			if (stop + delta > end) {
+				delta = end - stop;
+			}
+			
+			slice.setStop(stop+delta);
+			slice.setStart(slice.getStart()+delta);
+			
+		} else {
+			
+			Integer start = slice.getStart();
+			
+			if (start == 0) {
+				return;
+			}
+			
+			if (start - delta < 0) {
+				delta = start;
+			}
+			
+			slice.setStart(start-delta);
+			slice.setStop(slice.getStop()-delta);
+		}
+
+		setSlice(currentDimension, slice);
+		editor.setValue(slice.toString());
+
+	}
+	
+	
 	@Override
 	protected CellEditor getCellEditor(Object element) {
 		currentDimension = (int) element;
