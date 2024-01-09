@@ -70,5 +70,4 @@ Export-Package: org.dawnsci.plotting.tools,
  org.dawnsci.plotting.tools.region,
  org.dawnsci.plotting.tools.window
 Bundle-ActivationPolicy: lazy
-Service-Component: OSGI-INF/*.xml
 Automatic-Module-Name: org.dawnsci.plotting.tools

@@ -26,7 +26,6 @@ Require-Bundle: org.eclipse.core.runtime;bundle-version="3.8.0",
  uk.ac.diamond.osgi;bundle-version="1.2.0"
 Bundle-RequiredExecutionEnvironment: JavaSE-17
 Bundle-ActivationPolicy: lazy
-Service-Component: OSGI-INF/*.xml
 Eclipse-BuddyPolicy: registered
 Import-Package: org.osgi.framework;version="1.7.0",
  org.slf4j;version="[1.7.2,2.0.0)"
