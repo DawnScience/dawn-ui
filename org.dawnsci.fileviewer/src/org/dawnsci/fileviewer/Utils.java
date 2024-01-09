@@ -29,6 +29,7 @@ import org.eclipse.dawnsci.analysis.api.io.IDataHolder;
 import org.eclipse.dawnsci.analysis.api.io.ILoaderService;
 import org.eclipse.dawnsci.analysis.api.tree.DataNode;
 import org.eclipse.dawnsci.analysis.api.tree.GroupNode;
+import org.eclipse.dawnsci.nexus.INexusFileFactory;
 import org.eclipse.dawnsci.nexus.NexusFile;
 import org.eclipse.january.DatasetException;
 import org.eclipse.january.dataset.DatasetUtils;
@@ -38,6 +39,8 @@ import org.eclipse.january.metadata.IMetadata;
 import org.eclipse.swt.program.Program;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import uk.ac.diamond.osgi.services.ServiceProvider;
 
 public class Utils {
 
@@ -180,7 +183,7 @@ public class Utils {
 	}
 	
 	private static String getFileScanCmdStringNexus(String filePath) {
-		try (NexusFile nxsFile = ServiceHolder.getNexusFactory().newNexusFile(filePath)) {
+		try (NexusFile nxsFile = ServiceProvider.getService(INexusFileFactory.class).newNexusFile(filePath)) {
 			nxsFile.openToRead();
 			GroupNode rootNode = nxsFile.getGroup("/", false);
 			if (rootNode == null)
@@ -204,7 +207,7 @@ public class Utils {
 	
 	private static String getFileScanCmdStringDat(String filePath) {
 		try {
-			ILoaderService loader = ServiceHolder.getLoaderService();
+			ILoaderService loader = ServiceProvider.getService(ILoaderService.class);
 			IDataHolder dh = loader.getData(filePath, true, null);
 			IMetadata meta = dh.getMetadata();
 			Collection<String> metanames = meta.getMetaNames();
