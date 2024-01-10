@@ -16,7 +16,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.dawnsci.breadcrumb.navigation.Activator;
-import org.dawnsci.breadcrumb.navigation.ExpressionServiceHolder;
 import org.dawnsci.breadcrumb.navigation.preference.NavigationConstants;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -31,6 +30,8 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Display;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import uk.ac.diamond.osgi.services.ServiceProvider;
 
 /**
  * Because this content is pseudo lazy, we implement the 
@@ -59,7 +60,7 @@ public abstract class AbstractLazyContentProvider implements ISortableLazyConten
 		this.wildJob = new WildJob();
 		this.sortJob = new SortJob();
 		try {
-			this.expressionService = ExpressionServiceHolder.getExpressionService();
+			this.expressionService = ServiceProvider.getService(IExpressionService.class);
 		} catch (Exception e) {
 			logger.error("Cannot get expression service - required for queary search in ISPyB client!", e);
 		}

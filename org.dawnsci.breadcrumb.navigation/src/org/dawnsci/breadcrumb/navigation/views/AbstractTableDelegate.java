@@ -23,7 +23,6 @@ import org.dawb.common.ui.actions.ExportTableAction;
 import org.dawb.common.ui.menu.CheckableActionGroup;
 import org.dawb.common.ui.util.GridUtils;
 import org.dawnsci.breadcrumb.navigation.Activator;
-import org.dawnsci.breadcrumb.navigation.ExpressionServiceHolder;
 import org.dawnsci.breadcrumb.navigation.preference.NavigationConstants;
 import org.dawnsci.breadcrumb.navigation.table.AbstractLazyContentProvider;
 import org.dawnsci.breadcrumb.navigation.table.AbstractLazyLabelProvider;
@@ -69,6 +68,8 @@ import org.eclipse.swt.widgets.TableColumn;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import uk.ac.diamond.osgi.services.ServiceProvider;
+
 /**
  * Class which encapsulates code for generically adding a table to the visit navigation view.
  * 
@@ -113,7 +114,7 @@ public abstract class AbstractTableDelegate implements INavigationDelegate {
 		
 		this.updateJob = createUpdateJob();
 		try {
-			this.expressionService = ExpressionServiceHolder.getExpressionService();
+			this.expressionService = ServiceProvider.getService(IExpressionService.class);
 		} catch (Exception e) {
 			logger.error("Cannot get IExpressionService - ISPyB must have an IExpressionService in order to function!", e);
 		}
