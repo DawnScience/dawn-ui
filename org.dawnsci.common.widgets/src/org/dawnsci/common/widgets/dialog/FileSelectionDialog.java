@@ -106,11 +106,11 @@ public class FileSelectionDialog extends Dialog {
 		return files;
 	}
 
-	public void setFiles(String[] files) {
+	public void setFiles(String... files) {
 		this.files = files;
 	}
 
-	public void setExtensions(String[] extensions) {
+	public void setExtensions(String... extensions) {
 		this.extensions = extensions;
 	}
 

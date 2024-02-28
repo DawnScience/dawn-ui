@@ -13,6 +13,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -27,6 +28,7 @@ import org.dawnsci.datavis.manipulation.DataManipulationUtils;
 import org.dawnsci.datavis.manipulation.FileWritingUtils;
 import org.dawnsci.datavis.model.FileControllerUtils;
 import org.dawnsci.datavis.model.IFileController;
+import org.dawnsci.datavis.model.LoadedFile;
 import org.eclipse.dawnsci.analysis.api.expressions.IExpressionEngine;
 import org.eclipse.dawnsci.analysis.api.expressions.IExpressionService;
 import org.eclipse.dawnsci.nexus.INexusFileFactory;
@@ -252,7 +254,7 @@ public class AggregateDialog extends Dialog {
 		WidgetFactory.text(SWT.NONE).text("Start").layoutData(gdf.create()).create(textColumn);
 		WidgetFactory.text(SWT.NONE).text("Stop").layoutData(gdf.create()).create(textColumn);
 		WidgetFactory.text(SWT.NONE).text("Step").layoutData(gdf.create()).create(textColumn);
-		WidgetFactory.text(SWT.NONE).text("Bins").layoutData(gdf.create()).create(textColumn);
+		WidgetFactory.text(SWT.NONE).text("Points").layoutData(gdf.create()).create(textColumn);
 
 		Composite labelXColumn = WidgetFactory.composite(SWT.NONE).create(detailsPane);
 		labelXColumn.setLayoutData(gdf.create());
@@ -712,9 +714,11 @@ public class AggregateDialog extends Dialog {
 
 	@Override
 	protected void createButtonsForButtonBar(Composite parent) {
-		createButton(parent, IDialogConstants.DETAILS_ID, "Aggregate", false);
+		Button aButton = createButton(parent, IDialogConstants.DETAILS_ID, "Aggregate", false);
+		aButton.setToolTipText("Aggregate plot values into configured bins");
 		saveButton = createButton(parent, IDialogConstants.FINISH_ID, "Save", false);
 		saveButton.setEnabled(false);
+		saveButton.setToolTipText("Save aggregated plot as NeXus/HDF5 file");
 
 		createButton(parent, IDialogConstants.OK_ID, IDialogConstants.CLOSE_LABEL, true);
 	}
@@ -747,21 +751,23 @@ public class AggregateDialog extends Dialog {
 		aggregate = null;
 		if (undefinedAxis[0]) {
 			// concatenate 1D
-			aggregate = verticalStack(xy, xy.size());
+			aggregate = verticalStackByFileOrName(xy);
 			setAxes(aggregate, xy.get(0).getX(), null);
 		} else if (undefinedAxis[1]) {
 			// interpolate 1D across x label bins
 			Dataset l = getLabelDataset(chosenLabels.get(0));
-			Dataset tmp = verticalStack(xy); // so axis runs down column
+			Dataset tmp = verticalStackByLabel(xy); // so axis runs down column
 			Dataset x = xBins.createBinEdges(false);
 			int xSize = x.getSize(); // label x
 			int aSize = tmp.getShapeRef()[0]; // axis
 			DoubleDataset agg = DatasetFactory.zeros(aSize, xSize);
-			SliceND s = new SliceND(agg.getShapeRef());
+			SliceND st = new SliceND(tmp.getShapeRef());
+			SliceND sa = new SliceND(agg.getShapeRef());
 			for (int i = 0; i < aSize; i++) { // for each axis value
-				s.setSlice(0, i, i+1, 1);
-				Dataset ia = Maths.interpolate(l, tmp.getSliceView(s).squeeze(), x, null, null);
-				agg.setSlice(ia, s);
+				st.setSlice(0, i, i+1, 1);
+				sa.setSlice(0, i, i+1, 1);
+				Dataset ia = Maths.interpolate(l, tmp.getSliceView(st).squeeze(), x, null, null);
+				agg.setSlice(ia, sa);
 			}
 			aggregate = agg;
 			setAxes(aggregate, xy.get(0).getX(), x);
@@ -807,10 +813,10 @@ public class AggregateDialog extends Dialog {
 		}
 	}
 
-	private static Dataset verticalStack(List<IXYData> list, int width) {
+	private static Dataset verticalStackByFileOrName(List<IXYData> list) {
 		if (list == null || list.isEmpty()) return null;
 
-		IDataset[] all = new IDataset[width];
+		IDataset[] all = new IDataset[list.size()];
 
 		IXYData fxy = list.get(0);
 		String fn = fxy.getFileName();
@@ -824,9 +830,9 @@ public class AggregateDialog extends Dialog {
 				if (count > 1) {
 					sum.idivide(count);
 				}
-				sum.setShape(sum.getSize(), 1);
-				count = 1;
+				sum.setShape(-1, 1);
 				all[w++] = sum;
+				count = 1;
 				sum = DatasetUtils.copy(DoubleDataset.class, ds);
 				fn = xy.getFileName();
 				dn = xy.getDatasetName();
@@ -836,24 +842,79 @@ public class AggregateDialog extends Dialog {
 			}
 		}
 		sum.idivide(count);
-		sum.setShape(sum.getSize(), 1);
+		sum.setShape(-1, 1);
 		all[w++] = sum;
-		if (w != width) {
-			throw new IllegalArgumentException("Could not average XY correctly");
+
+		if (w != all.length) {
+			all = Arrays.copyOf(all, w);
 		}
 
 		return DatasetUtils.concatenate(all, 1);
 	}
 
-	private static Dataset verticalStack(List<IXYData> list) {
+
+	private Dataset verticalStackByLabel(List<IXYData> list) {
 		if (list == null || list.isEmpty()) return null;
 
+		String labelName = chosenLabels.get(0).getLabel();
+
+		List<String> labels = null;
+		Iterator<IXYData> it = list.iterator();
+		IXYData xy = it.next();
+
+		if (!labelName.equals(xy.getLabelName()) || "NaN".equals(xy.getLabel())) {
+			// form list of label values if label not set or mismatch
+			labels = new ArrayList<>();
+			for (IDataFilePackage dp : data) {
+				if (dp instanceof LoadedFile lf) {
+					String currentFile = lf.getFilePath();
+					Dataset values = lf.getLabelValue(labelName);
+					String value = null;
+					if (values.getSize() == 1) {
+						value = values.getString();
+					}
+					int i = 0;
+					while (currentFile.equals(xy.getFileName())) {
+						labels.add(value == null ? values.getString(i++) : value);
+						if (!it.hasNext()) {
+							break;
+						}
+						xy = it.next();
+					}
+				}
+			}
+		}
+
 		IDataset[] all = new IDataset[list.size()];
+		IXYData fxy = list.get(0);
+		String label = labels == null ? fxy.getLabel() : labels.get(0);
+		Dataset sum = DatasetFactory.zeros(fxy.getY().getShape());
+		int count = 0;
 		int w = 0;
-		for (IXYData file : list) {
-			Dataset ds = DatasetUtils.convertToDataset(file.getY()).getSliceView().squeeze();
-			ds.setShape(ds.getSize(), 1);
-			all[w++] = ds;
+		for (int i = 0, imax = list.size(); i < imax; i++) {
+			xy = list.get(i);
+			Dataset ds = DatasetUtils.convertToDataset(xy.getY()).getSliceView().squeeze();
+			String l = labels == null ? xy.getLabel() : labels.get(i);
+			if (label.equals(l)) {
+				count++;
+				sum.iadd(ds);
+			} else {
+				if (count > 1) {
+					sum.idivide(count);
+				}
+				sum.setShape(-1, 1);
+				all[w++] = sum;
+				count = 1;
+				sum = DatasetUtils.copy(DoubleDataset.class, ds);
+				label = l;
+			}
+		}
+		sum.idivide(count);
+		sum.setShape(-1, 1);
+		all[w++] = sum;
+
+		if (w != all.length) {
+			all = Arrays.copyOf(all, w);
 		}
 
 		return DatasetUtils.concatenate(all, 1);
@@ -909,7 +970,8 @@ public class AggregateDialog extends Dialog {
 		} else {
 			dialog.setPath(System.getProperty("user.home"));
 		}
-		
+		dialog.setFiles("NeXus", "HDF5");
+		dialog.setExtensions("*.nxs", "*.hdf5;*.h5");
 		dialog.create();
 		if (dialog.open() == Dialog.CANCEL) return;
 		lastPath = dialog.getPath();
