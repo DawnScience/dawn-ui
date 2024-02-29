@@ -135,7 +135,8 @@ public class XRD2ToolPage extends AbstractToolPage {
 		statusLabel.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false));
 		
 		Composite lower = new Composite(control, SWT.NONE);
-		lower.setLayout(new GridLayout());
+		lower.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+		lower.setLayout(new FillLayout());
 		
 		OperationModelViewer modelEditor = new OperationModelViewer(false);
 		modelEditor.createPartControl(lower);
