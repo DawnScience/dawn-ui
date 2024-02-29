@@ -146,7 +146,9 @@ public class DataOptionTableViewer {
 	
 	
 	public void createControl(Composite parent) {
-		Text text = new Text(parent, SWT.BORDER);
+		Text text = new Text(parent, SWT.BORDER | SWT.SEARCH | SWT.ICON_SEARCH);
+		text.setMessage("Filter Datasets");
+		text.setToolTipText("Only show datasets whose name contains the entered text. Does not remove plotted datasets.");
 		text.setLayoutData(GridDataFactory.fillDefaults().grab(true, false).create());
 		tableComposite = new Composite(parent, SWT.None);
 		tableViewer = new TableViewer(tableComposite, SWT.FULL_SELECTION | SWT.BORDER);
