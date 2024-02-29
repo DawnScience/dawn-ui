@@ -34,6 +34,7 @@ import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.MenuManager;
+import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.TableColumnLayout;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.ArrayContentProvider;
@@ -52,6 +53,8 @@ import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.ModifyEvent;
+import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Color;
@@ -61,6 +64,7 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.Table;
+import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 
@@ -141,13 +145,24 @@ public class DataOptionTableViewer {
 	}
 	
 	
-	
-
 	public void createControl(Composite parent) {
+		Text text = new Text(parent, SWT.BORDER);
+		text.setLayoutData(GridDataFactory.fillDefaults().grab(true, false).create());
 		tableComposite = new Composite(parent, SWT.None);
 		tableViewer = new TableViewer(tableComposite, SWT.FULL_SELECTION | SWT.BORDER);
 		tableViewer.getTable().setHeaderVisible(true);
 		ColumnViewerToolTipSupport.enableFor(tableViewer);
+		DataOptionViewerFilter dovf = new DataOptionViewerFilter();
+		tableViewer.addFilter(dovf);
+		
+		text.addModifyListener(new ModifyListener() {
+			
+			@Override
+			public void modifyText(ModifyEvent e) {
+				dovf.setFilterString(text.getText());
+				tableViewer.refresh();
+			}
+		});
 
 		ticked = AbstractUIPlugin.imageDescriptorFromPlugin("org.dawnsci.datavis.view", "icons/ticked.png").createImage();
 		unticked = AbstractUIPlugin.imageDescriptorFromPlugin("org.dawnsci.datavis.view", "icons/unticked.gif").createImage();
