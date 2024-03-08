@@ -6,6 +6,7 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.dialogs.ElementListSelectionDialog;
 
 /**
@@ -27,6 +28,14 @@ public class ResettableListDialog extends ElementListSelectionDialog {
 				return null;
 			}
 		});
+	}
+
+	@Override
+	protected Text createFilterText(Composite parent) {
+		Text filterText = super.createFilterText(parent);
+		filterText.setToolTipText("Show only datasets whose name contains the entered text");
+		filterText.setMessage("Filter label datasets");
+		return filterText;
 	}
 
 	void setResettable(boolean canReset) {

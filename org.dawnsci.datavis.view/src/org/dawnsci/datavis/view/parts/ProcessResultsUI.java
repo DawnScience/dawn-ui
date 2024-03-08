@@ -10,8 +10,10 @@
 package org.dawnsci.datavis.view.parts;
 
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.dawnsci.datavis.api.IPlotMode;
 import org.dawnsci.datavis.model.DataOptions;
@@ -53,7 +55,7 @@ import org.slf4j.LoggerFactory;
 public class ProcessResultsUI extends Composite implements IDatasetStateChanger {
 	protected static final Logger logger = LoggerFactory.getLogger(ProcessResultsUI.class);
 
-	private List<String> allProcesses = new ArrayList<>();
+	private Set<String> allProcesses = new LinkedHashSet<>();
 
 	private ComboViewer processCombo;
 	private DataOptionTableViewer processViewer;
@@ -173,12 +175,6 @@ public class ProcessResultsUI extends Composite implements IDatasetStateChanger 
 		}
 
 		internalInitialize(files);
-		if (!files.isEmpty()) {
-			LoadedFile file = files.get(0);
-			currentFile = file.getFilePath();
-			updateCombo(file);
-			updateTable(file);
-		}
 	}
 
 	private void deselectAll() {
@@ -196,11 +192,13 @@ public class ProcessResultsUI extends Composite implements IDatasetStateChanger 
 		int n = files.size();
 		if (n > 0) {
 			for (LoadedFile f : files) {
-				for (String p : f.getProcesses()) {
-					if (!allProcesses.contains(p)) {
-						allProcesses.add(p);
-					}
-				}
+				allProcesses.addAll(f.getProcesses());
+			}
+			if (currentFile == null || n == 1) {
+				LoadedFile file = files.get(0);
+				currentFile = file.getFilePath();
+				updateCombo(file);
+				updateTable(file);
 			}
 		} else {
 			updateCombo(null);
@@ -209,17 +207,20 @@ public class ProcessResultsUI extends Composite implements IDatasetStateChanger 
 	}
 
 	private void updateCombo(LoadedFile file) {
-		List<String> ps;
 		int previous = -1;
 		
-		if (file == null) {
-			ps = Collections.emptyList();
-		} else {
-			ps = new ArrayList<>(file.getProcesses());
+		if (file != null) {
+			List<String> ps = new ArrayList<>(file.getProcesses());
 			previous = ps.indexOf(currentProcess);
-			if (previous < 0 && ps.size() > 0) {
+			if (previous < 0 && !ps.isEmpty()) {
 				currentProcess = ps.get(ps.size() - 1);
-				previous = allProcesses.indexOf(currentProcess);
+				previous = 0;
+				for (String p : allProcesses) {
+					if (p.equals(currentProcess)) {
+						break;
+					}
+					previous++;
+				}
 			}
 		}
 
@@ -364,6 +365,7 @@ public class ProcessResultsUI extends Composite implements IDatasetStateChanger 
 						String path = f.getFilePath();
 						if (!path.equals(currentFile)) {
 							currentFile = path;
+							internalInitialize(files);
 						}
 					}
 				}
@@ -379,7 +381,29 @@ public class ProcessResultsUI extends Composite implements IDatasetStateChanger 
 			} else {
 				// deselect; loadFiles; setOnlySignals; validateState; LFL.fileLoaded
 				// reset process state with all files
-				internalInitialize(fileController.getLoadedFiles());
+				LoadedFile f = event.getLoadedFile();
+				if (f == null) {
+					internalInitialize(fileController.getLoadedFiles());
+				} else {
+					checkDataOptions();
+				}
+			}
+		}
+	}
+
+	private void checkDataOptions() {
+		Set<String> currentSelected = new HashSet<>();
+		for (DataOptions s : currentSelection) {
+			if (s.isSelected()) {
+				currentSelected.add(s.getName());
+			}
+		}
+		for (LoadedFile f : fileController.getLoadedFiles()) {
+			List<DataOptions> fSelected = f.getSelectedDataOptions();
+			for (DataOptions o : fSelected) {
+				if (!currentSelected.contains(o.getName())) {
+					o.setSelected(false);
+				}
 			}
 		}
 	}

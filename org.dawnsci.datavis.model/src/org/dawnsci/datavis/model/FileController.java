@@ -340,7 +340,7 @@ public class FileController implements IFileController {
 				}
 			}
 
-			fireStateChangeListenersLoad(false, false, null, null);
+			fireStateChangeListenersLoad(false, false, files.isEmpty() ? null : files.get(0), null);
 		}
 		
 		public List<String> getFailedLoadingFiles(){
