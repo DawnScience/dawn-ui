@@ -1511,5 +1511,10 @@ public class PlottingSystemImpl<T> extends AbstractPlottingSystem<T> {
 		}
 		return super.getAdapter(adapter);
 	}
+
+	@Override
+	public IPlottingSystemViewer<T> getActiveViewer() {
+		return activeViewer;
+	}
 }
 

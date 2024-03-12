@@ -8,7 +8,6 @@
  */
 package org.dawnsci.plotting.system;
 
-import uk.ac.diamond.daq.util.logging.deprecation.DeprecationLogger;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -148,6 +147,8 @@ import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IViewPart;
 import org.eclipse.ui.IWorkbenchPart;
+
+import uk.ac.diamond.daq.util.logging.deprecation.DeprecationLogger;
 
 /**
  * Package private. This class deals with plotting actions specific to the
@@ -1787,6 +1788,10 @@ public class LightWeightPlotViewer<T> implements IPlottingSystemViewer<T>, IAnno
 
 	public void setKeepAspect(boolean checked){
 		xyGraph.setKeepAspect(checked);
+	}
+	
+	public void setUseAspectFromLabel(boolean checked){
+		xyGraph.setUseAspectFromLabel(checked);
 	}
 
 	public void setShiftPoint(org.eclipse.draw2d.geometry.Point point) {

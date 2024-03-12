@@ -48,6 +48,7 @@ public class AspectAxis extends DAxis implements IAxis {
 	private AspectAxis relativeTo;
 	private Range      maximumRange;
 	private boolean    keepAspect; // This is so that the user may have images with and without aspect in the same application.
+	private boolean useAspectFromLabel = false;
 	private Dataset labelData;
 	
 	public AspectAxis(String title, boolean yAxis) {
@@ -97,15 +98,31 @@ public class AspectAxis extends DAxis implements IAxis {
 	public String getDirection() {
 		return isHorizontal() ? "x" : "y";
 	}
+	
+	private double calcLabelPixelInterval(Dataset label, double rangePixels) {
+		
+		int size = label.getSize()-1;
+		double dataStart = label.getDouble(0);
+		double dataStop = label.getDouble(size);
+		
+		return rangePixels* Math.abs((dataStop-dataStart)/size);
+		
+	}
 
 	public void checkBounds(final boolean zooming) {
 		if (relativeTo == null) return;
 		if (!keepAspect)        return;
 		
 		// We keep aspect if the other axis has a larger range than this axis.
-		final double  thisRange     = getInterval(getRange());
-		final double  relRange      = getInterval(relativeTo.getRange());
+		double  thisRange     = getInterval(getRange());
+		double  relRange      = getInterval(relativeTo.getRange());
 		final Rectangle calcBounds  = getBounds().getCopy();
+		
+		if (useAspectFromLabel && this.labelData != null && relativeTo.labelData != null) {
+
+			thisRange = calcLabelPixelInterval(this.labelData, thisRange);
+			relRange = calcLabelPixelInterval(this.relativeTo.labelData, relRange);
+		}
 
 		precheckTickLength = isHorizontal() ? calcBounds.width : calcBounds.height;
 		precheckTickLength -= 2 * getMargin();
@@ -303,7 +320,15 @@ public class AspectAxis extends DAxis implements IAxis {
 	public void setKeepAspect(boolean keepAspect) {
 		this.keepAspect = keepAspect;
 	}
+	
+	public boolean isUseAspectFromLabel() {
+		return useAspectFromLabel;
+	}
 
+	public void setUseAspectFromLabel(boolean useAspectFromLabel) {
+		this.useAspectFromLabel = useAspectFromLabel;
+	}
+	
 	public Range getMaximumRange() {
 		return maximumRange;
 	}
