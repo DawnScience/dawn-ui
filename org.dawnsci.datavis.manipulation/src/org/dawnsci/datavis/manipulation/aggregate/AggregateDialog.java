@@ -26,6 +26,7 @@ import org.dawnsci.datavis.api.IXYData;
 import org.dawnsci.datavis.api.utils.DataPackageUtils;
 import org.dawnsci.datavis.manipulation.DataManipulationUtils;
 import org.dawnsci.datavis.manipulation.FileWritingUtils;
+import org.dawnsci.datavis.model.DataOptionsUtils;
 import org.dawnsci.datavis.model.FileControllerUtils;
 import org.dawnsci.datavis.model.IFileController;
 import org.dawnsci.datavis.model.LoadedFile;
@@ -797,7 +798,8 @@ public class AggregateDialog extends Dialog {
 				ILazyDataset a = i < axes.length ? axes[i] : null;
 				if (a != null) {
 					a = a.getSliceView();
-					a.setName(MetadataPlotUtils.removeSquareBrackets(a.getName()));
+					String n = MetadataPlotUtils.removeSquareBrackets(a.getName());
+					a.setName(DataOptionsUtils.shortenDatasetPath(n, true));
 				} else {
 					a = DatasetFactory.createRange(IntegerDataset.class, d.getShapeRef()[i]);
 				}
