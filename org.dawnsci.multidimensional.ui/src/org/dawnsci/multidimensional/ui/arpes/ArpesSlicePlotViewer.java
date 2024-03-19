@@ -168,4 +168,7 @@ public class ArpesSlicePlotViewer extends AbstractHyperPlotViewer {
 		return l;
 	}
 
+	public IPlottingSystem<?> getHyperMainSystem() {
+		return hyper.getMainSystem();
+	}
 }

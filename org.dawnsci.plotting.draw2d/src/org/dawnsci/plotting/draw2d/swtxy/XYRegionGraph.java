@@ -286,6 +286,17 @@ public class XYRegionGraph extends XYGraph {
 			if (axis instanceof AspectAxis) ((AspectAxis) axis).setKeepAspect(checked);
 		}
 	}
+	
+	public void setUseAspectFromLabel(boolean checked) {
+		for (Axis axis : getXAxisList()) {
+			if (axis instanceof AspectAxis) ((AspectAxis) axis).setUseAspectFromLabel(checked);
+		}
+		for (Axis axis : getYAxisList()) {
+			if (axis instanceof AspectAxis) ((AspectAxis) axis).setUseAspectFromLabel(checked);
+		}
+	}
+	
+	
 
 	/**
 	 * Zooms about the central point a factor (-ve for out) usually +-0.1
