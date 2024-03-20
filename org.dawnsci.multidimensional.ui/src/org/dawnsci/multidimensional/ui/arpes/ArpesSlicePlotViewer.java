@@ -13,6 +13,7 @@ import org.dawnsci.multidimensional.ui.hyper.IDatasetROIReducer;
 import org.dawnsci.multidimensional.ui.imagecuts.AdditionalCutDimension;
 import org.dawnsci.multidimensional.ui.imagecuts.PerpendicularCutsHelper;
 import org.dawnsci.multidimensional.ui.imagecuts.PerpendicularImageCutsComposite;
+import org.dawnsci.plotting.system.LightWeightPlotViewer;
 import org.eclipse.dawnsci.plotting.api.IPlotActionSystem;
 import org.eclipse.dawnsci.plotting.api.IPlottingService;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
@@ -31,43 +32,46 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Layout;
 
 public class ArpesSlicePlotViewer extends AbstractHyperPlotViewer {
+	private static final String MAIN_TITLE = "Constant Energy Map";
+	private static final String SIDE_TITLE = "Detector Image";
 
 	private PerpendicularImageCutsComposite cutComposite;
 	private PerpendicularCutsHelper helper;
 	private IRegion[] cachedSideRegions;
 
 	public ArpesSlicePlotViewer() {
-		
+
 	}
-	
+
+	@Override
 	protected void innerCreateControl(Composite parent, Layout layout) {
 		control = new SashForm(parent, SWT.None);
 		control.setLayout(layout);
 	}
-	
+
 	@Override
 	public void createControl(final Composite parent) {
 		innerCreateControl(parent, GridLayoutFactory.fillDefaults().numColumns(2).create());
 		createHyperComponent();
 		hyper.setInvertYAxis(false);
 		try {
-			cutComposite = new PerpendicularImageCutsComposite(control, SWT.None, Activator.getService(IPlottingService.class));
+			cutComposite = new PerpendicularImageCutsComposite(control, SWT.None,
+					Activator.getService(IPlottingService.class), true);
 			cutComposite.setLayoutData(GridDataFactory.fillDefaults().grab(false, true).create());
 			this.helper = new PerpendicularCutsHelper(hyper.getSideSystem());
 			if (control instanceof SashForm) {
-				((SashForm) control).setWeights(new int[] {2,1});
+				((SashForm) control).setWeights(new int[] { 2, 1 });
 			}
-			
+
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
+
 		clearActions(hyper.getMainSystem());
 		clearActions(hyper.getSideSystem());
-		
+
 	}
-	
+
 	private void clearActions(IPlottingSystem<?> system) {
 		IPlotActionSystem plotActionSystem = system.getPlotActionSystem();
 		plotActionSystem.remove(BasePlottingConstants.REMOVE_REGION);
@@ -76,18 +80,20 @@ public class ArpesSlicePlotViewer extends AbstractHyperPlotViewer {
 		plotActionSystem.remove(system.getPlotName() + "/org.dawnsci.plotting.system.preference.undoRedo");
 		plotActionSystem.remove("org.dawb.workbench.fullscreen");
 		plotActionSystem.remove("org.dawb.workbench.plotting.rescale");
-		
+
 	}
-	
-	public boolean addTrace(ITrace trace){
+
+	@Override
+	public boolean addTrace(ITrace trace) {
 
 		if (trace instanceof BaseHyperTrace) {
-			
+
 			helper.setCachedRegions(cachedSideRegions);
 			helper.activate(this.cutComposite);
 			hyper.clear();
-			
-			BaseHyperTrace h = (BaseHyperTrace)trace;
+			setTitles();
+
+			BaseHyperTrace h = (BaseHyperTrace) trace;
 			this.trace = h;
 
 			plotHyper3D(h);
@@ -96,71 +102,69 @@ public class ArpesSlicePlotViewer extends AbstractHyperPlotViewer {
 		}
 		return false;
 	}
-	
+
 	private void plotHyper3D(BaseHyperTrace trace) {
 		HyperDataPackage dp = buildDataPackage(trace);
-		
+
 		ArpesSideImageReducer arpesSideImageReducer = new ArpesSideImageReducer();
-		
-		IDatasetROIReducer[] reducers = new IDatasetROIReducer[] {new ArpesXImageReducer(), arpesSideImageReducer};
-		
+
+		IDatasetROIReducer[] reducers = new IDatasetROIReducer[] { new ArpesXImageReducer(), arpesSideImageReducer };
+
 		final IDataset ax0 = dp.axes.get(0);
-		
+
 		IRegionListener l = new IRegionListener.Stub() {
-			
+
 			@Override
 			public void regionAdded(RegionEvent evt) {
 				evt.toString();
 				Object source = evt.getSource();
 				if (source instanceof IRegion) {
-					
+
 					if (source instanceof ILockTranslatable) {
 						((ILockTranslatable) source).translateOnly(true);
 					}
-					
-					AdditionalCutDimension d = new AdditionalCutDimension((IRegion)source, ax0);
+
+					AdditionalCutDimension d = new AdditionalCutDimension((IRegion) source, ax0);
 					helper.setAdditionalCutDimension(d);
 				}
-				
+
 			}
 		};
 		hyper.setExternalListeners(null, null, l, null);
-		hyper.setData(dp.lazyDataset, dp.axes, dp.slices, dp.order,reducers[0],reducers[1]);
+		hyper.setData(dp.lazyDataset, dp.axes, dp.slices, dp.order, reducers[0], reducers[1]);
 		trace.setViewer(this);
-		
-		
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	@Override
-	public  <U extends ITrace> U createTrace(String name, Class<U> clazz) {
-		
+	public <U extends ITrace> U createTrace(String name, Class<U> clazz) {
+
 		if (clazz == IArpesSliceTrace.class) {
 			ArpesSliceTrace hyperTrace = new ArpesSliceTrace();
 			hyperTrace.setName(name);
-			return (U)hyperTrace;
+			return (U) hyperTrace;
 		}
 		return null;
 	}
-	
+
 	@Override
 	public boolean isTraceTypeSupported(Class<? extends ITrace> trace) {
-		
+
 		if (IArpesSliceTrace.class.isAssignableFrom(trace)) {
 			return true;
 		}
 		return false;
 	}
-	
+
 	@Override
 	public void removeTrace(ITrace trace) {
 		Collection<IRegion> cachedSideRegionsCollection = hyper.getSideSystem().getRegions();
-		if (cachedSideRegionsCollection!=null) {
+		if (cachedSideRegionsCollection != null) {
 			cachedSideRegions = cachedSideRegionsCollection.toArray(IRegion[]::new);
-		}				
-		super.removeTrace(trace);		
+		}
+		super.removeTrace(trace);
 	}
-	
+
 	@Override
 	public Collection<Class<? extends ITrace>> getSupportTraceTypes() {
 		List<Class<? extends ITrace>> l = new ArrayList<>();
@@ -168,7 +172,20 @@ public class ArpesSlicePlotViewer extends AbstractHyperPlotViewer {
 		return l;
 	}
 
-	public IPlottingSystem<?> getHyperMainSystem() {
-		return hyper.getMainSystem();
+	public void setMainSystemUseAspectFromLabel(boolean useAspectFromLabel) {
+		if (hyper.getMainSystem().getActiveViewer() instanceof LightWeightPlotViewer<?> lwp) {
+			lwp.setUseAspectFromLabel(useAspectFromLabel);
+		}
+	}
+
+	public void setSideSystemUseAspectFromLabel(boolean useAspectFromLabel) {
+		if (hyper.getSideSystem().getActiveViewer() instanceof LightWeightPlotViewer<?> lwp) {
+			lwp.setUseAspectFromLabel(useAspectFromLabel);
+		}
+	}
+
+	private void setTitles() {
+		hyper.getMainSystem().setTitle(MAIN_TITLE);
+		hyper.getSideSystem().setTitle(SIDE_TITLE);
 	}
 }
