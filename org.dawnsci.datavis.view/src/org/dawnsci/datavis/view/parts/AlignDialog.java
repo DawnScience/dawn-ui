@@ -41,7 +41,6 @@ import org.eclipse.january.MetadataException;
 import org.eclipse.january.dataset.Dataset;
 import org.eclipse.january.dataset.DatasetUtils;
 import org.eclipse.january.dataset.IDataset;
-import org.eclipse.january.dataset.Maths;
 import org.eclipse.january.dataset.Slice;
 import org.eclipse.january.metadata.AxesMetadata;
 import org.eclipse.january.metadata.MetadataFactory;
@@ -95,7 +94,7 @@ public class AlignDialog extends Dialog implements IRegionListener, PlotModeChan
 	private boolean forceToZero;
 	private boolean resampleX;
 	private boolean plotAverage;
-	private AlignToHalfGaussianPeak align = new AlignToHalfGaussianPeak(false);
+	private AlignToHalfGaussianPeak align = new AlignToHalfGaussianPeak(true);
 
 	private Button resetButton;
 	private Button plotAverageButton;
@@ -105,6 +104,8 @@ public class AlignDialog extends Dialog implements IRegionListener, PlotModeChan
 	private Color originalColour = null;
 	private static Color doneColour = null;
 	private List<Double> shiftsStore = new ArrayList<>();
+
+	private boolean crossingZero;
 
 	public AlignDialog(Shell parentShell, IFileController fc, IPlotController pc) {
 		super(parentShell);
@@ -134,18 +135,22 @@ public class AlignDialog extends Dialog implements IRegionListener, PlotModeChan
 
 	@Override
 	public void regionNameChanged(RegionEvent evt, String oldName) {
+		// do nothing
 	}
 
 	@Override
 	public void regionCreated(RegionEvent evt) {
+		// do nothing
 	}
 
 	@Override
 	public void regionCancelled(RegionEvent evt) {
+		// do nothing
 	}
 
 	@Override
 	public void regionAdded(RegionEvent evt) {
+		// do nothing
 	}
 
 	@Override
@@ -162,9 +167,10 @@ public class AlignDialog extends Dialog implements IRegionListener, PlotModeChan
 
 		Button b = new Button(alignComp, SWT.PUSH);
 		b.setText("Align");
-		b.setToolTipText("Click and drag to select region on plot.\n"
-				+ "Align spectra using leftmost leading slope in selected region.\n"
-				+ "It aligns to first line or to zero if the selected region encloses zero.");
+		b.setToolTipText("""
+			Click and drag to select region on plot.
+			Align spectra using leftmost leading slope in selected region.
+			It aligns to first line or to zero if the selected region encloses zero.""");
 		b.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -235,14 +241,10 @@ public class AlignDialog extends Dialog implements IRegionListener, PlotModeChan
 		resultTable = new TableViewer(resultComp, SWT.NONE);
 		ColumnViewerToolTipSupport.enableFor(resultTable);
 
-		resultTable.setContentProvider(new IStructuredContentProvider() {
-			
-			@Override
-			public Object[] getElements(Object inputElement) {
-				@SuppressWarnings("unchecked")
-				Map<String, PlotItem> input = (Map<String, PlotItem>) inputElement;
-				return input.values().toArray(new PlotItem[input.size()]);
-			}
+		resultTable.setContentProvider((IStructuredContentProvider) inputElement -> {
+			@SuppressWarnings("unchecked")
+			Map<String, PlotItem> input = (Map<String, PlotItem>) inputElement;
+			return input.values().toArray(new PlotItem[input.size()]);
 		});
 
 		resultTable.getTable().setHeaderVisible(true);
@@ -267,7 +269,8 @@ public class AlignDialog extends Dialog implements IRegionListener, PlotModeChan
 		auto.setLabelProvider(new ColumnLabelProvider() {
 			@Override
 			public String getText(Object element) {
-				return Double.toString(((PlotItem) element).getAuto());
+				double value = ((PlotItem) element).getAuto();
+				return Double.isNaN(value) ? "--" : Double.toString(value);
 			}
 		});
 		column = auto.getColumn();
@@ -393,18 +396,18 @@ public class AlignDialog extends Dialog implements IRegionListener, PlotModeChan
 				setAxesMetadata(x, y);
 			}
 			pi.setY(y);
-			logger.debug("Trace {}: {}", n, y.getSliceView(new Slice(12)).toString(true));
+			if (logger.isDebugEnabled()) {
+				logger.debug("Trace {}: {}", n, y.getSliceView(new Slice(12)).toString(true));
+			}
 
 			while (!fn.equals(d.getFileName()) || !dn.equals(d.getDatasetName())) {
 				si = 0;
-				if (++ip < ipmax) {
-					pd = plotData.get(ip);
-					fn = pd.getFilePath();
-					dn = pd.getName();
-				} else {
-					pd = null;
+				if (++ip >= ipmax) {
 					break;
 				}
+				pd = plotData.get(ip);
+				fn = pd.getFilePath();
+				dn = pd.getName();
 			}
 			pdIndex[i] = ip;
 			xyIndex[i] = si++;
@@ -444,18 +447,14 @@ public class AlignDialog extends Dialog implements IRegionListener, PlotModeChan
 			}
 		}
 		if (r == null) {
-			r = createRegion();
+			createRegion();
 		} else {
 			if (!r.isVisible()) {
 				r.setVisible(true);
 			}
 
 			double[] xs = getLimits();
-			if (xs != null) {
-				if (!ensureRegionOK(r, xs)) {
-					return;
-				}
-
+			if (xs != null && ensureRegionOK(r, xs)) {
 				alignPlots(xs[0], xs[1]);
 			}
 		}
@@ -470,6 +469,7 @@ public class AlignDialog extends Dialog implements IRegionListener, PlotModeChan
 
 				@Override
 				public void roiSelected(ROIEvent evt) {
+					// do nothing
 				}
 
 				@Override
@@ -541,6 +541,7 @@ public class AlignDialog extends Dialog implements IRegionListener, PlotModeChan
 		} else {
 			return null;
 		}
+		crossingZero = lx <= 0 && hx >= 0;
 		return new double[] {lx, hx};
 	}
 
@@ -569,41 +570,20 @@ public class AlignDialog extends Dialog implements IRegionListener, PlotModeChan
 
 		align.setPeakZone(lx, hx);
 		List<Double> posn = align.value(input);
-		List<Double> shifts = AlignToHalfGaussianPeak.calculateShifts(resampleX, forceToZero || (lx <= 0 && hx >= 0), 0, posn, input);
 
 		i = 0;
 		int[] pdIndex = new int[imax]; // index values for plotData list
-		Dataset[] data = new Dataset[input.length];
-		double[] firstXShift = {Double.NaN};
+		List<Double> newPosn = new ArrayList<>();
 		for (PlotItem pi : plotItems.values()) {
-			pdIndex[i/2] = pi.getIndex()[0];
-			double delta = pi.getManual();
-			Dataset x = pi.getX();
-			Double sX = shifts.get(i);
-			Double sY = null;
-			Double s = sX;
-			if (sX == null) {
-				sY = shifts.get(i + 1);
-				if (sY != null) { // translate to index-space
-					double xd = Math.abs(x.getDouble(1) - x.getDouble(0));
-					s = sY * xd; // so displays are in x-space
-					delta /= xd; // TODO remove when shifts are all in x-space
-					sY += delta;
-				}
-			} else {
-				if (delta != 0) {
-					sX += delta;
-				}
-			}
-			if (s != null) {
-				pi.setAuto(s);
-			}
-			Dataset[] results = AlignToHalfGaussianPeak.shiftData(firstXShift, sX, sY, input[i], input[i+1]);
-			data[i] = results[0];
-			data[i + 1] = results[1];
-			i += 2;
+			pdIndex[i] = pi.getIndex()[0];
+			Double sX = posn.get(i);
+			double s = sX == null ? Double.NaN : sX;
+			pi.setAuto(s);
+			newPosn.add(s + pi.getManual());
+			i++;
 		}
-		logger.debug("Plot align: first shift in X = {}", firstXShift[0]);
+		
+		Dataset[] data = AlignToHalfGaussianPeak.alignToPositions(resampleX, forceToZero || crossingZero ? 0 : Double.NaN, newPosn, input);
 
 		// gather and store in corresponding plot data
 		List<Dataset> store = new ArrayList<>();
@@ -621,7 +601,6 @@ public class AlignDialog extends Dialog implements IRegionListener, PlotModeChan
 			Dataset x = data[j];
 			Dataset y = data[j + 1];
 			setAxesMetadata(x, y);
-			logger.debug("Aligned: {}", y.getSlice(new Slice(8)).toString(true));
 			store.add(x);
 			store.add(y);
 		}
@@ -672,8 +651,7 @@ public class AlignDialog extends Dialog implements IRegionListener, PlotModeChan
 		if (n % 2 == 1) {
 			logger.warn("List has odd number of datasets; last item will be ignored");
 		}
-		if (dp instanceof DataOptions) {
-			DataOptions o = (DataOptions) dp;
+		if (dp instanceof DataOptions o) {
 			o = o.getParent().getDataOption(dp.getName());
 
 			if (n == 0) {
@@ -739,28 +717,39 @@ public class AlignDialog extends Dialog implements IRegionListener, PlotModeChan
 	}
 
 	private void updateDerivedDataAndTrace(PlotItem pi) {
-		String firstName = plotItems.keySet().iterator().next();
-		double firstXShift = 0;
-		if (resampleX && !firstName.equals(pi.getName())) {
-			PlotItem firstItem = plotItems.get(firstName);
-			firstXShift = firstItem.getAuto();
-			if (firstXShift == 0) {
-				firstXShift = firstItem.getManual();
+		double firstXShift = Double.NaN;
+		PlotItem firstItem = null;
+		for (PlotItem p : plotItems.values()) {
+			firstXShift = p.getAuto() + p.getManual();
+			if (Double.isFinite(firstXShift)) {
+				firstItem = p;
+				break;
 			}
 		}
+
+		Dataset firstX = firstItem.getX();
+		Dataset firstY = firstItem.getY();
+
 		ITrace t = plottingSystem.getTrace(pi.getName());
-		if (t instanceof ILineTrace) {
-			ILineTrace lt = (ILineTrace) t;
+		if (t instanceof ILineTrace lt) {
 			Dataset x = pi.getX();
-			logger.debug("Updated x-axis: {}", x.getSlice(new Slice(8)).toString(true));
+			if (logger.isDebugEnabled()) {
+				logger.debug("Updated x-axis: {}", x.getSlice(new Slice(8)).toString(true));
+			}
 			double delta = pi.getAuto() + pi.getManual();
 			logger.debug("Shifting by {} and {}", delta, firstXShift);
-			Dataset nx = Maths.add(x, delta + firstXShift);
+
+			Dataset nx = pi.getX();
 			Dataset ny = pi.getY();
-			if (resampleX) {
-				ny = Maths.interpolate(nx, ny, x, null, null);
-				nx = x;
-			}
+
+			List<Double> newPosn = new ArrayList<>();
+			newPosn.add(firstXShift);
+			newPosn.add(delta);
+			Dataset[] input = new Dataset[] {firstX, firstY, nx, ny};
+			double firstPos = forceToZero || crossingZero ? 0 : Double.NaN;
+			Dataset[] result = AlignToHalfGaussianPeak.alignToPositions(resampleX, firstPos, newPosn, input);
+			nx = result[2];
+			ny = result[3];
 			setAxesMetadata(nx, ny);
 
 			int[] index = pi.getIndex();
@@ -771,7 +760,9 @@ public class AlignDialog extends Dialog implements IRegionListener, PlotModeChan
 			if (modifier != null && modifier.supportsRank(1)) {
 				ny = DatasetUtils.convertToDataset(modifier.modifyForDisplay(ny));
 			}
-			logger.debug("Updated trace {}: {}", pi.getName(), ny.getSlice(new Slice(8)).toString(true));
+			if (logger.isDebugEnabled()) {
+				logger.debug("Updated trace {}: {}", pi.getName(), ny.getSlice(new Slice(8)).toString(true));
+			}
 
 			lt.setData(nx, ny);
 			lt.repaint();
@@ -801,8 +792,7 @@ public class AlignDialog extends Dialog implements IRegionListener, PlotModeChan
 		List<? extends IDataPackage> plotData = fileController.getImmutableFileState();
 		IDataPackage dp = plotData.get(index[0]);
 
-		if (dp instanceof DataOptions) {
-			DataOptions o = (DataOptions) dp;
+		if (dp instanceof DataOptions o) {
 			o = o.getParent().getDataOption(dp.getName());
 			List<IXYData> list = o.getDerivedData(IXYData.class);
 			if (list == null) {
@@ -887,31 +877,10 @@ public class AlignDialog extends Dialog implements IRegionListener, PlotModeChan
 	private void removeRegion() {
 		IRegion r = plottingSystem.getRegion(ALIGN_REGION);
 		if (r != null) {
-			if (plottingSystem.getTracesByClass(ILineTrace.class).size() == 0) {
+			if (plottingSystem.getTracesByClass(ILineTrace.class).isEmpty()) {
 				currentROI = null;
 			}
 			plottingSystem.removeRegion(r);
-		}
-	}
-
-	/**
-	 * Refresh region
-	 */
-	public void refreshRegion() {
-		if (currentROI != null) {
-			IRegion r = plottingSystem.getRegion(ALIGN_REGION);
-			if (r == null) {
-				r = createRegion();
-				plottingSystem.addRegion(r);
-			}
-			if (r != null) {
-				if (!r.isVisible()) {
-					r.setVisible(true);
-				}
-				if (ensureRegionOK(r, getLimits()) && r.getROI() != currentROI) {
-					r.setROI(currentROI);
-				}
-			}
 		}
 	}
 
@@ -920,7 +889,8 @@ public class AlignDialog extends Dialog implements IRegionListener, PlotModeChan
 		private double auto;
 		private double manual;
 		private int[] index;
-		private Dataset x, y;
+		private Dataset x;
+		private Dataset y;
 
 		public PlotItem(String name) {
 			this.name = name;
@@ -993,13 +963,16 @@ public class AlignDialog extends Dialog implements IRegionListener, PlotModeChan
 
 		@Override
 		protected boolean canEdit(Object element) {
+			if (element instanceof PlotItem pi) { // don't allow edits of 1st row
+				return pi != plotItems.values().iterator().next();
+			}
 			return true;
 		}
 
 		@Override
 		protected Object getValue(Object element) {
-			if (element instanceof PlotItem) {
-				return String.valueOf(((PlotItem) element).getManual());
+			if (element instanceof PlotItem pi) {
+				return String.valueOf(pi.getManual());
 			}
 			return null;
 		}
@@ -1008,10 +981,11 @@ public class AlignDialog extends Dialog implements IRegionListener, PlotModeChan
 		protected void setValue(Object element, Object value) {
 			try {
 				double delta = Double.parseDouble((String) value);
-				PlotItem pi = ((PlotItem) element);
-				pi.setManual(delta);
-				getViewer().update(element, null);
-				updateDerivedDataAndTrace(pi);
+				if (element instanceof PlotItem pi) {
+					pi.setManual(delta);
+					getViewer().update(element, null);
+					updateDerivedDataAndTrace(pi);
+				}
 			} catch (Exception e) {
 				// do nothing
 			}
