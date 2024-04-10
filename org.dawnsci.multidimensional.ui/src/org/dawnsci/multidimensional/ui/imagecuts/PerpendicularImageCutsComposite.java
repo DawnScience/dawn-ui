@@ -43,11 +43,13 @@ import org.eclipse.swt.widgets.Label;
 /**
  * Composite to display the results of a set of perpendicular cuts through an
  * image
- * 
+ *
  */
 public class PerpendicularImageCutsComposite extends Composite {
 
 	private static final MathContext PRECISION = new MathContext(6, RoundingMode.HALF_UP);
+	private static final String Y_PROFILE_TITLE = "MDC";
+	private static final String X_PROFILE_TITLE = "EDC";
 
 	private IPlottingSystem<Composite> xProfile;
 	private IPlottingSystem<Composite> yProfile;
@@ -59,6 +61,11 @@ public class PerpendicularImageCutsComposite extends Composite {
 	private PerpendicularCutsListener listener;
 
 	public PerpendicularImageCutsComposite(Composite parent, int style, IPlottingService plotService) throws Exception {
+		this(parent, style, plotService, false);
+	}
+
+	public PerpendicularImageCutsComposite(Composite parent, int style, IPlottingService plotService,
+			boolean useTitlesExt) throws Exception {
 		super(parent, style);
 		this.setLayout(new GridLayout());
 
@@ -68,11 +75,17 @@ public class PerpendicularImageCutsComposite extends Composite {
 		xProfile.createPlotPart(this, "PCutsXProfile", null, PlotType.XY, null);
 		xProfile.getPlotComposite().setLayoutData(GridDataFactory.fillDefaults().grab(true, true).create());
 		xProfile.setShowLegend(false);
+		if (useTitlesExt) {
+			xProfile.setTitle(X_PROFILE_TITLE);
+		}
 		tightenAxes(xProfile);
 
 		yProfile.createPlotPart(this, "PCutsYProfile", null, PlotType.XY, null);
 		yProfile.getPlotComposite().setLayoutData(GridDataFactory.fillDefaults().grab(true, true).create());
 		yProfile.setShowLegend(false);
+		if (useTitlesExt) {
+			yProfile.setTitle(Y_PROFILE_TITLE);
+		}
 		tightenAxes(yProfile);
 
 		Composite configComposite = new Composite(this, SWT.None);
@@ -131,8 +144,8 @@ public class PerpendicularImageCutsComposite extends Composite {
 		tableComposite.setLayout(columnLayout);
 
 		int itemCount = 2;
-		int itemHeight = viewer.getTable().getItemHeight()+2;
-		int headerHeight = viewer.getTable().getHeaderHeight()+2;
+		int itemHeight = viewer.getTable().getItemHeight() + 2;
+		int headerHeight = viewer.getTable().getHeaderHeight() + 2;
 		int h = (1 + itemCount) * itemHeight + headerHeight;
 		tableGridData.minimumHeight = h;
 		tableGridData.heightHint = h;
@@ -147,8 +160,9 @@ public class PerpendicularImageCutsComposite extends Composite {
 		sumLabel = new Label(g, SWT.NONE);
 
 		FontData[] fontData = sumLabel.getFont().getFontData();
-		for (int i = 0; i < fontData.length; ++i)
+		for (int i = 0; i < fontData.length; ++i) {
 			fontData[i].setHeight(20);
+		}
 
 		final Font newFont = new Font(getDisplay(), fontData);
 		sumLabel.setFont(newFont);
@@ -222,16 +236,17 @@ public class PerpendicularImageCutsComposite extends Composite {
 		listeners.stream().forEach(l -> l.updateRequested(value, delta, type));
 	}
 
-	public void update(IDataset data, IDataset xaxis, IDataset yaxis, RectangularROI xROI, RectangularROI yROI, AdditionalCutDimension d) {
+	public void update(IDataset data, IDataset xaxis, IDataset yaxis, RectangularROI xROI, RectangularROI yROI,
+			AdditionalCutDimension d) {
 		runner.runAsync(data, xaxis, yaxis, xROI, yROI, d);
 	}
 
 	private String doubleToStringWithPrecision(double d) {
-		
+
 		if (Double.isNaN(d)) {
 			return Double.toString(Double.NaN);
 		}
-		
+
 		BigDecimal bd = BigDecimal.valueOf(d).round(PRECISION).stripTrailingZeros();
 		// stop 100 going to 1.0E2
 		if (bd.precision() >= 1 && bd.precision() < PRECISION.getPrecision() && bd.scale() < 0
@@ -252,10 +267,12 @@ public class PerpendicularImageCutsComposite extends Composite {
 			cellEditor = new TextCellEditor((Composite) getViewer().getControl());
 		}
 
+		@Override
 		protected CellEditor getCellEditor(Object element) {
 			return cellEditor;
 		}
 
+		@Override
 		protected Object getValue(Object element) {
 
 			if (element instanceof CutData) {
@@ -266,6 +283,7 @@ public class PerpendicularImageCutsComposite extends Composite {
 			return "";
 		}
 
+		@Override
 		protected void setValue(Object element, Object value) {
 			if (element instanceof CutData) {
 				CutData d = (CutData) element;
@@ -276,8 +294,7 @@ public class PerpendicularImageCutsComposite extends Composite {
 				} catch (Exception e) {
 					return;
 				}
-				
-				
+
 				if (this.value) {
 					fireListeners(valueString, d.getDelta(), d.getType());
 				} else {

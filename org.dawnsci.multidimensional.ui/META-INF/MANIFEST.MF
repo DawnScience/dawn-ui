@@ -21,4 +21,5 @@ Bundle-ActivationPolicy: lazy
 Export-Package: org.dawnsci.multidimensional.ui.hyper,
  org.dawnsci.multidimensional.ui.imagecuts,
  org.dawnsci.multidimensional.ui.arpes
-Import-Package: uk.ac.diamond.daq.util.logging.deprecation
+Import-Package: org.dawnsci.plotting.system,
+ uk.ac.diamond.daq.util.logging.deprecation
