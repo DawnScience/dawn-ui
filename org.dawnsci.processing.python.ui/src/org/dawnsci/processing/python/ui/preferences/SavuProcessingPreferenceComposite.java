@@ -38,9 +38,9 @@ public class SavuProcessingPreferenceComposite extends Composite {
 	 * @param parent
 	 * @param style
 	 */
-	
+
 	private static final Logger logger = LoggerFactory.getLogger(SavuProcessingPreferenceComposite.class);
-	
+
 	private final List list;
 
 	private Label descriptionLabel;
@@ -52,18 +52,21 @@ public class SavuProcessingPreferenceComposite extends Composite {
 
 		setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		setLayout(new GridLayout(2, false));
-		
+
 		Label lblAvailableSavuPlugin = new Label(this, SWT.NONE);
 		lblAvailableSavuPlugin.setText("List of Available Savu Plugins");
 		FontDescriptor descriptor = FontDescriptor.createFrom(lblAvailableSavuPlugin.getFont()).setStyle(SWT.BOLD);
 		Font bigFont = descriptor.createFont(lblAvailableSavuPlugin.getDisplay());
 		lblAvailableSavuPlugin.setFont(bigFont);
 		lblAvailableSavuPlugin.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false, 2, 1));
-		
+		//Must dispose of custom fonts to prevent memory leak
+		lblAvailableSavuPlugin.addDisposeListener(e ->
+			lblAvailableSavuPlugin.getFont().dispose()
+		);
 		list = new List(this, SWT.BORDER | SWT.V_SCROLL);
 		list.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		list.addSelectionListener(new SelectionAdapter() {
-			
+
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				String[] selection = list.getSelection();
@@ -78,7 +81,7 @@ public class SavuProcessingPreferenceComposite extends Composite {
 					descriptionLabel.setText(description.trim());
 			}
 		});
-		
+
 		Button btnNewButton = new Button(this, SWT.PUSH);
 		btnNewButton.addSelectionListener(new SelectionAdapter() {
 			@Override
@@ -99,11 +102,11 @@ public class SavuProcessingPreferenceComposite extends Composite {
 							out.writeObject(pd);
 							// I should here write out the parameter lists in files with a title of the plugin name.
 						}
-						Set<String> myset = pd.keySet();			
+						Set<String> myset = pd.keySet();
 						String[] stuff = myset.toArray(new String[myset.size()]);
 						pluginDict = pd;
 						list.setItems(stuff);
-						for (Map.Entry<String, Object> entry : pd.entrySet()) {	
+						for (Map.Entry<String, Object> entry : pd.entrySet()) {
 							Map<String, Object> ppd = findme.getPluginParameters(entry.getKey());
 							logger.debug(entry.getKey());
 							String pluginFilePath = getWorkspacePath()+entry.getKey()+".ser";
@@ -116,10 +119,10 @@ public class SavuProcessingPreferenceComposite extends Composite {
 							}
 						}
 					} catch (Exception exc) {
-						Display.getCurrent().syncExec(() -> 
+						Display.getCurrent().syncExec(() ->
 							ErrorDialog.openError(SavuProcessingPreferenceComposite.this.getShell(), "Could not get Savu Plugins!", null, new Status(IStatus.WARNING, "org.dawnsci.processing.python.ui", "Click on Details to see the exception messages", exc))
 						);
-					} 
+					}
 					if (findme != null)
 						findme.stopPythonService();
 				});
@@ -137,16 +140,16 @@ public class SavuProcessingPreferenceComposite extends Composite {
 		descriptionLabelGridData.minimumHeight = 100;
 		descriptionLabel.setLayoutData(descriptionLabelGridData);
 	}
-	
+
 	private String getWorkspacePath() {
 		return ResourcesPlugin.getWorkspace().getRoot().getLocation().toString() + File.separator;
 	}
-	
+
 	private String getSavuPluginPath() {
 		String wspacePath = getWorkspacePath();
 		return wspacePath + "savu_plugin_info.ser";
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	public void populateList() {
 		// if the plugin dict already exist then populate the list from that automatically
@@ -154,12 +157,11 @@ public class SavuProcessingPreferenceComposite extends Composite {
 				ObjectInputStream in = new ObjectInputStream(fileIn);
 				) {
 			pluginDict = (Map<String, Object>) in.readObject();
-			Set<String> myset = pluginDict.keySet();			
+			Set<String> myset = pluginDict.keySet();
 			String[] stuff = myset.toArray(new String[myset.size()]);
 			list.setItems(stuff);
 		} catch (Exception e) {
 			logger.debug("Savu plugin file could not be opened", e);
-		}  
-		
+		}
 	}
 }
