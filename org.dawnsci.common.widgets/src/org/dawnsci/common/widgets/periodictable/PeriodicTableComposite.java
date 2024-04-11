@@ -18,7 +18,6 @@ import org.eclipse.swt.graphics.Font;
 public class PeriodicTableComposite extends Composite {
 
 	class PeriodicTableButton {
-
 		private final int Z;
 		private final String element;
 		private final Button button;
@@ -38,6 +37,10 @@ public class PeriodicTableComposite extends Composite {
 			Font bigFont = descriptor.createFont(button.getDisplay());
 			button.setFont(bigFont);
 			button.setText(element);
+			//Must dispose of custom fonts to prevent memory leak
+			button.addDisposeListener(e ->
+				button.getFont().dispose()
+			);
 		}
 		
 		public int getZ() {
@@ -62,16 +65,16 @@ public class PeriodicTableComposite extends Composite {
 	// in the entire jar
 	static final String[] MendelArray = { "",
 		"H", "He", "Li", "Be", "B", "C", "N", "O", "F", "Ne",
-	    "Na", "Mg", "Al", "Si", "P", "S", "Cl", "Ar", "K", "Ca",
-	    "Sc", "Ti", "V", "Cr", "Mn", "Fe", "Co", "Ni", "Cu", "Zn",
-	    "Ga", "Ge", "As", "Se", "Br", "Kr", "Rb", "Sr", "Y", "Zr",
-	    "Nb", "Mo", "Tc", "Ru", "Rh", "Pd", "Ag", "Cd", "In", "Sn",
-	    "Sb", "Te", "I", "Xe", "Cs", "Ba", "La", "Ce", "Pr", "Nd",
-	    "Pm", "Sm", "Eu", "Gd", "Tb", "Dy", "Ho", "Er", "Tm", "Yb",
-	    "Lu", "Hf", "Ta", "W", "Re", "Os", "Ir", "Pt", "Au", "Hg",
-	    "Tl", "Pb", "Bi", "Po", "At", "Rn", "Fr", "Ra", "Ac", "Th",
-	    "Pa", "U", "Np", "Pu", "Am", "Cm", "Bk", "Cf", "Es", "Fm",
-	    "Md", "No", "Lr", "Rf", "Db", "Sg", "Bh"
+		"Na", "Mg", "Al", "Si", "P", "S", "Cl", "Ar", "K", "Ca",
+		"Sc", "Ti", "V", "Cr", "Mn", "Fe", "Co", "Ni", "Cu", "Zn",
+		"Ga", "Ge", "As", "Se", "Br", "Kr", "Rb", "Sr", "Y", "Zr",
+		"Nb", "Mo", "Tc", "Ru", "Rh", "Pd", "Ag", "Cd", "In", "Sn",
+		"Sb", "Te", "I", "Xe", "Cs", "Ba", "La", "Ce", "Pr", "Nd",
+		"Pm", "Sm", "Eu", "Gd", "Tb", "Dy", "Ho", "Er", "Tm", "Yb",
+		"Lu", "Hf", "Ta", "W", "Re", "Os", "Ir", "Pt", "Au", "Hg",
+		"Tl", "Pb", "Bi", "Po", "At", "Rn", "Fr", "Ra", "Ac", "Th",
+		"Pa", "U", "Np", "Pu", "Am", "Cm", "Bk", "Cf", "Es", "Fm",
+		"Md", "No", "Lr", "Rf", "Db", "Sg", "Bh"
 	};
 	
 	private final PeriodicTableButton[] periodicTableButtons = new PeriodicTableButton[MendelArray.length];
@@ -191,18 +194,18 @@ public class PeriodicTableComposite extends Composite {
 	}
 	
 	protected static String AtomicNumberToSymbol(int Z) {
-	    if (Z < 1 || Z > MendelArray.length) {
-	    	return null;
-	    }
-	    return MendelArray[Z];
+		if (Z < 1 || Z > MendelArray.length) {
+			return null;
+		}
+		return MendelArray[Z];
 	}
 
 	protected static int SymbolToAtomicNumber(String symbol) {
-	    for (int i = 1 ; i < MendelArray.length ; i++) {
-	    	if (symbol.equals(MendelArray[i])) {
-	    		return i;
-	    	}
-	    }
-	    return 0;
-	 }
+		for (int i = 1 ; i < MendelArray.length ; i++) {
+			if (symbol.equals(MendelArray[i])) {
+				return i;
+			}
+		}
+		return 0;
+	}
 }
