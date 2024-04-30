@@ -26,12 +26,14 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.dawnsci.analysis.api.conversion.IConversionContext;
 import org.eclipse.dawnsci.analysis.api.io.IDataHolder;
 import org.eclipse.dawnsci.analysis.api.io.ILoaderService;
+import org.eclipse.dawnsci.analysis.dataset.SlicingUtils;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.PlotType;
 import org.eclipse.dawnsci.plotting.api.PlottingFactory;
 import org.eclipse.dawnsci.plotting.api.trace.MetadataPlotUtils;
 import org.eclipse.january.DatasetException;
-import org.eclipse.january.dataset.IDataset;
+import org.eclipse.january.dataset.Dataset;
+import org.eclipse.january.dataset.ILazyDataset;
 import org.eclipse.january.dataset.ShapeUtils;
 import org.eclipse.january.dataset.Slice;
 import org.eclipse.january.dataset.SliceND;
@@ -293,7 +295,8 @@ public class SetUpProcessWizardPage extends WizardPage {
 			
 			executor.execute(() -> {
 				try {
-					IDataset d = dataOption.getLazyDataset().getSlice(s).squeeze();
+					ILazyDataset ld = dataOption.getLazyDataset();
+					Dataset d = SlicingUtils.sliceWithAxesMetadata(ld, s).squeeze();
 					Display.getDefault().asyncExec(() -> MetadataPlotUtils.plotDataWithMetadata(d, system));
 					showException(null, null);
 				} catch (DatasetException e) {
@@ -301,7 +304,7 @@ public class SetUpProcessWizardPage extends WizardPage {
 				}
 			});
 	}
-	
+
 	private void updateDataset(String name, Object[] options) {
 		dataOption = loadedFile.getDataOption(name);
 		nDimensions = dataOption.buildNDimensions();

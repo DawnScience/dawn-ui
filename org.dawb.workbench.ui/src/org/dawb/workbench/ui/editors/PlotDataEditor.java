@@ -50,6 +50,7 @@ import org.eclipse.dawnsci.slicing.api.system.ISliceSystem;
 import org.eclipse.dawnsci.slicing.api.system.SliceSource;
 import org.eclipse.january.dataset.IDataset;
 import org.eclipse.january.dataset.ILazyDataset;
+import org.eclipse.january.metadata.AxesMetadata;
 import org.eclipse.january.metadata.IMetadata;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.util.IPropertyChangeListener;
@@ -294,6 +295,10 @@ public class PlotDataEditor extends EditorPart implements IReusableEditor, ISlic
 				
 				final IVariableManager man  = (IVariableManager)getAdapter(IVariableManager.class);
 				final ILazyDataset     lazy = selections[0].getLazyData(null);
+				if (lazy != null) {
+					// work around January bug
+					lazy.clearMetadata(AxesMetadata.class);
+				}
 				sliceSystem.setData(new SliceSource(man, lazy, object.getName(), EclipseUtils.getFilePath(getEditorInput()), object.isExpression()));
 
 				return;

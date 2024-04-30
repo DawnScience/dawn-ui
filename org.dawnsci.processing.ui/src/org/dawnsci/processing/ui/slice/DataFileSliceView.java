@@ -49,6 +49,7 @@ import org.eclipse.dawnsci.analysis.api.processing.OperationData;
 import org.eclipse.dawnsci.analysis.api.processing.OperationException;
 import org.eclipse.dawnsci.analysis.api.processing.model.IOperationModel;
 import org.eclipse.dawnsci.analysis.api.tree.Tree;
+import org.eclipse.dawnsci.analysis.dataset.SlicingUtils;
 import org.eclipse.dawnsci.analysis.dataset.slicer.SliceFromSeriesMetadata;
 import org.eclipse.dawnsci.analysis.dataset.slicer.SliceInformation;
 import org.eclipse.dawnsci.analysis.dataset.slicer.Slicer;
@@ -799,21 +800,17 @@ public class DataFileSliceView extends ViewPart {
 				if (axesNames != null) {
 					AxesMetadata am = ServiceProvider.getService(ILoaderService.class).getAxesMetadata(lazyDataset, path, axesNames, true);
 					lazyDataset.setMetadata(am);
-//					AxesMetadata axMeta = SlicedDataUtils.createAxisMetadata(path, lazyDataset, axesNames);
-//					if (axMeta != null) lazyDataset.setMetadata(axMeta);
-//					else lazyDataset.clearMetadata(AxesMetadata.class);
 				}
-				
-				
-//				int[] dataDims = Slicer.getDataDimensions(lazyDataset.getShape(), context.getSliceDimensions());
+
 				Slice[] s = csw.getCurrentSlice();
 				//Plot input, probably a bit wasteful to do each time
-				IDataset firstSlice = null;
-				if (lazyDataset instanceof IDataset) {
-					firstSlice = ((IDataset)lazyDataset).getSliceView(s);
+				IDataset firstSlice;
+				if (lazyDataset instanceof IDataset i) {
+					firstSlice = i.getSliceView(s);
 				} else {
-					firstSlice = lazyDataset.getSlice(s);
+					firstSlice = SlicingUtils.sliceWithAxesMetadata(lazyDataset, new SliceND(lazyDataset.getShape(), s));
 				}
+				
 				Map<String,IDataset> props = new HashMap<>();
 				props.put("data", firstSlice.getSliceView().squeeze());
 				eventAdmin.postEvent(new Event(ProcessingEventConstants.INITIAL_UPDATE, props));

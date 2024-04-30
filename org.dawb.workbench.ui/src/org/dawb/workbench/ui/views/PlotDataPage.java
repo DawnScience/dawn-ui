@@ -31,7 +31,6 @@ import org.eclipse.dawnsci.plotting.api.expressions.IVariableManager;
 import org.eclipse.dawnsci.slicing.api.SlicingFactory;
 import org.eclipse.dawnsci.slicing.api.data.ITransferableDataObject;
 import org.eclipse.dawnsci.slicing.api.editor.ISlicablePlottingPart;
-import org.eclipse.dawnsci.slicing.api.system.DimensionalListener;
 import org.eclipse.dawnsci.slicing.api.system.ISliceSystem;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
@@ -51,7 +50,7 @@ import org.slf4j.LoggerFactory;
 
 public class PlotDataPage extends Page implements IAdaptable {
 
-	private final static Logger logger = LoggerFactory.getLogger(PlotDataPage.class);
+	private static final Logger logger = LoggerFactory.getLogger(PlotDataPage.class);
 	
 	private ISlicablePlottingPart          editor;
 	private PlotDataComponent       dataSetComponent;
@@ -83,8 +82,6 @@ public class PlotDataPage extends Page implements IAdaptable {
 	private PlotDataPage(ISlicablePlottingPart ed) {
 		this.editor = ed;
 	}
-
-	private DimensionalListener dataReductionDimensionalListener;
 
 	@Override
 	public void createControl(final Composite parent) {
@@ -167,10 +164,8 @@ public class PlotDataPage extends Page implements IAdaptable {
 			sliceComponent.setPlottingSystem(this.dataSetComponent.getPlottingSystem());
 			sliceComponent.createPartControl(form);
 			sliceComponent.setVisible(false);
-			
+			sliceComponent.addAxisChoiceListener(null);
 			getSite().setSelectionProvider(sliceComponent.getSelectionProvider());
-			
-			sliceComponent.addDimensionalListener(dataReductionDimensionalListener);
 	
 			form.setWeights(new int[] {40, 60});
 			
@@ -192,14 +187,13 @@ public class PlotDataPage extends Page implements IAdaptable {
 	public void dispose() {
 		IWorkspace workspace = ResourcesPlugin.getWorkspace();
 		if (workspace!=null && resourceListener!=null) {
-            workspace.removeResourceChangeListener(resourceListener);
+			workspace.removeResourceChangeListener(resourceListener);
 		}
 		if (dataSetComponent!=null) dataSetComponent.dispose();
 		if (sliceComponent!=null) {
-			sliceComponent.removeDimensionalListener(dataReductionDimensionalListener);
 			sliceComponent.dispose();
 		}
- 		super.dispose();
+		super.dispose();
 	}
 
 	public IVariableManager getDataSetComponent() {

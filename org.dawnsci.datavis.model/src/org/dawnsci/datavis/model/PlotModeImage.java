@@ -4,13 +4,13 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import org.eclipse.dawnsci.analysis.dataset.SlicingUtils;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.histogram.ImageServiceBean;
 import org.eclipse.dawnsci.plotting.api.trace.IImageTrace;
 import org.eclipse.dawnsci.plotting.api.trace.ITrace;
 import org.eclipse.dawnsci.plotting.api.trace.MetadataPlotUtils;
 import org.eclipse.january.dataset.Dataset;
-import org.eclipse.january.dataset.DatasetUtils;
 import org.eclipse.january.dataset.IDataset;
 import org.eclipse.january.dataset.ILazyDataset;
 import org.eclipse.january.dataset.Slice;
@@ -53,13 +53,13 @@ public class PlotModeImage implements IPlotModeColored {
 	
 	public IDataset[] sliceForPlot(ILazyDataset lz, SliceND slice, Object[] options, IPlottingSystem<?> system) throws Exception {
 		long t = System.currentTimeMillis();
-		Dataset data = DatasetUtils.convertToDataset(lz.getSlice(slice));
-		logger.debug("Slice time {} ms for slice {} of {}", (System.currentTimeMillis()-t), slice.toString(), lz.getName());
+		Dataset data = SlicingUtils.sliceWithAxesMetadata(lz, slice);
+		logger.debug("Slice time {} ms for slice {} of {}", (System.currentTimeMillis()-t), slice, lz.getName());
 		data.setErrors(null);
 		updateName(lz.getName(),data,slice);
 		data.squeeze();
 		if (data.getRank() != 2) return null;
-		if (transposeNeeded(options)) data = data.getTransposedView(null);
+		if (transposeNeeded(options)) data = data.getTransposedView();
 		return new IDataset[]{data};
 	}
 	
