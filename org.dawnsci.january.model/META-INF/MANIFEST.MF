@@ -3,7 +3,7 @@ Bundle-ManifestVersion: 2
 Bundle-Name: January Model
 Bundle-SymbolicName: org.dawnsci.january.model
 Bundle-Version: 1.0.0.qualifier
-Bundle-RequiredExecutionEnvironment: JavaSE-17
+Bundle-RequiredExecutionEnvironment: JavaSE-21
 Automatic-Module-Name: org.dawnsci.january.model
 Require-Bundle: org.eclipse.january;bundle-version="2.1.5"
 Export-Package: org.dawnsci.january.model

@@ -3,7 +3,7 @@ Bundle-ManifestVersion: 2
 Bundle-Name: Surfacescatter UI
 Bundle-SymbolicName: org.dawnsci.surfacescatter.ui;singleton:=true
 Bundle-Version: 1.0.0.qualifier
-Bundle-RequiredExecutionEnvironment: JavaSE-17
+Bundle-RequiredExecutionEnvironment: JavaSE-21
 Bundle-Activator: org.dawnsci.surfacescatter.ui.Activator
 Require-Bundle: org.eclipse.jface;bundle-version="3.11.1",
  org.eclipse.ui;bundle-version="3.107.0",

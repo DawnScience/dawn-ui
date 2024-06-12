@@ -40,7 +40,7 @@ Require-Bundle: org.eclipse.core.runtime,
  org.dawnsci.datavis.model;bundle-version="1.0.0",
  uk.ac.diamond.osgi;bundle-version="1.2.0"
 Bundle-ActivationPolicy: lazy
-Bundle-RequiredExecutionEnvironment: JavaSE-17
+Bundle-RequiredExecutionEnvironment: JavaSE-21
 Service-Component: OSGI-INF/*.xml
 Export-Package: org.dawnsci.processing.ui,
  org.dawnsci.processing.ui.converters.avi;x-internal:=true,

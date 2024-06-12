@@ -7,6 +7,6 @@ Bundle-Activator: org.dawnsci.product.plugin.Activator
 Bundle-Vendor: DAWN Collaboration
 Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime
-Bundle-RequiredExecutionEnvironment: JavaSE-17
+Bundle-RequiredExecutionEnvironment: JavaSE-21
 Bundle-ActivationPolicy: lazy
 Automatic-Module-Name: org.dawnsci.product.plugin

@@ -5,5 +5,5 @@ Bundle-SymbolicName: org.dawnsci.jzy3d.test
 Bundle-Version: 1.0.0.qualifier
 Fragment-Host: org.dawnsci.jzy3d
 Automatic-Module-Name: org.dawnsci.jzy3d.test
-Bundle-RequiredExecutionEnvironment: JavaSE-17
+Bundle-RequiredExecutionEnvironment: JavaSE-21
 Require-Bundle: org.junit

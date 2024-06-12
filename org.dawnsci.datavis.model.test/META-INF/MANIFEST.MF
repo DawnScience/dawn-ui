@@ -4,7 +4,7 @@ Bundle-Name: DataVis Model Tests
 Bundle-SymbolicName: org.dawnsci.datavis.model.test
 Bundle-Version: 1.0.0.qualifier
 Fragment-Host: org.dawnsci.datavis.model;bundle-version="1.0.0"
-Bundle-RequiredExecutionEnvironment: JavaSE-17
+Bundle-RequiredExecutionEnvironment: JavaSE-21
 Require-Bundle: org.junit,
  org.eclipse.dawnsci.hdf5;bundle-version="1.3.0",
  org.eclipse.dawnsci.nexus,

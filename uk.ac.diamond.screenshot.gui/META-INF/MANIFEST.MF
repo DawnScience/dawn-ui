@@ -4,7 +4,7 @@ Bundle-Name: Screenshot GUI
 Bundle-SymbolicName: uk.ac.diamond.screenshot.gui;singleton:=true
 Bundle-Version: 1.0.0.qualifier
 Bundle-Vendor: Diamond Light Source
-Bundle-RequiredExecutionEnvironment: JavaSE-17
+Bundle-RequiredExecutionEnvironment: JavaSE-21
 Import-Package: org.slf4j;version="[1.7.2,2.0.0)",
  uk.ac.diamond.screenshot.api
 Require-Bundle: org.eclipse.ui;bundle-version="3.0.0"

@@ -5,7 +5,7 @@ Bundle-SymbolicName: org.dawnsci.common.widgets.gda;singleton:=true
 Bundle-Version: 1.2.0.qualifier
 Bundle-Activator: org.dawnsci.common.widgets.gda.Activator
 Bundle-Vendor: Diamond Light Source
-Bundle-RequiredExecutionEnvironment: JavaSE-17
+Bundle-RequiredExecutionEnvironment: JavaSE-21
 Import-Package: org.eclipse.dawnsci.analysis.api.expressions,
  org.eclipse.jface.text,
  org.eclipse.jface.text.source,
