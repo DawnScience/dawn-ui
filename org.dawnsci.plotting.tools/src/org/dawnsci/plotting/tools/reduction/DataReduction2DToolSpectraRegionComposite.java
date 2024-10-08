@@ -6,7 +6,7 @@ import java.util.List;
 
 import org.dawnsci.plotting.tools.Activator;
 import org.eclipse.core.databinding.DataBindingContext;
-import org.eclipse.core.databinding.beans.BeanProperties;
+import org.eclipse.core.databinding.beans.typed.BeanProperties;
 import org.eclipse.core.databinding.observable.list.IObservableList;
 import org.eclipse.core.databinding.observable.list.ListDiff;
 import org.eclipse.core.databinding.observable.list.ListDiffVisitor;
@@ -21,12 +21,12 @@ import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.databinding.viewers.ObservableListContentProvider;
 import org.eclipse.jface.databinding.viewers.ObservableMapLabelProvider;
-import org.eclipse.jface.databinding.viewers.ViewerProperties;
-import org.eclipse.jface.databinding.viewers.ViewersObservables;
+import org.eclipse.jface.databinding.viewers.typed.ViewerProperties;
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.viewers.CheckboxTableViewer;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.TableViewerColumn;
+import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
@@ -111,7 +111,7 @@ class DataReduction2DToolSpectraRegionComposite extends DataReduction2DToolObser
 		dataBindingCtx.bindList(
 				ViewerProperties.multipleSelection().observe(spectraRegionTableViewer), selectedRegionSpectraList);
 		dataBindingCtx.bindSet(
-				ViewersObservables.observeCheckedElements(spectraRegionTableViewer, DataReduction2DToolSpectraRegionDataNode.class),
+				ViewerProperties.checkedElements(DataReduction2DToolSpectraRegionDataNode.class).observe((Viewer) spectraRegionTableViewer),
 				checkedRegionSpectraList);
 	}
 
