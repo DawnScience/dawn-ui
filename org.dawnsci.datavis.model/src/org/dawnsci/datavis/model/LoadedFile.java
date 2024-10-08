@@ -154,6 +154,10 @@ public class LoadedFile implements IDataObject, IDataFilePackage {
 					}
 				}
 			}
+			
+			if (lazyDataset.getSize() == 0) {
+				okMaxShape = false;
+			}
 
 			boolean notString = !lazyDataset.getElementClass().equals(String.class);
 			if (notString && okMaxShape &&  (ShapeUtils.calcLongSize(lazyDataset.getShape()) > 1 || signals.containsKey(n))) {
@@ -207,6 +211,7 @@ public class LoadedFile implements IDataObject, IDataFilePackage {
 		} else {
 			out = new ArrayList<>(dataOptions.values());
 		}
+		
 
 		out.addAll(virtualDataOptions.values());
 		
