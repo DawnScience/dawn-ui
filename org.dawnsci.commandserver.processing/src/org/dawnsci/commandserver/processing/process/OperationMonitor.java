@@ -17,7 +17,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import uk.ac.diamond.scisoft.analysis.processing.IFlushMonitor;
 import uk.ac.diamond.scisoft.analysis.processing.bean.OperationBean;
-import uk.ac.gda.common.activemq.ISessionService;
+import uk.ac.diamond.mq.ISessionService;
 
 /**
  * Simply logs the message returned from the operations.
