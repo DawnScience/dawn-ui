@@ -6,7 +6,10 @@ import java.io.IOException;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.charset.Charset;
+import java.nio.file.Paths;
+import java.util.Optional;
 
+import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.swt.SWT;
@@ -27,7 +30,7 @@ public class ReleaseNotesPage extends InstallationPage {
 	private String releaseNotesFileName = "release-notes.txt";
 
 	public ReleaseNotesPage() {
-		// TODO Auto-generated constructor stub
+		// do nothing
 	}
 
 	@Override
@@ -45,30 +48,33 @@ public class ReleaseNotesPage extends InstallationPage {
 		gridData.widthHint = convertHorizontalDLUsToPixels(400);
 		text.setLayoutData(gridData);
 		text.setFont(JFaceResources.getTextFont());
-		
-		String releaseText = "";
+
+		String releaseText;
 		try {
-			
-			String fullPath = Platform.getInstallLocation().getURL().getPath().toString()+releaseNotesFileName;
-			releaseText = readFile(fullPath);
-			text.setText(releaseText);
+			File path = new File(Platform.getInstallLocation().getURL().getPath()+releaseNotesFileName);
+			String fullPath = null;
+			if (path.exists()) {
+				fullPath = path.getAbsolutePath();
+			} else {
+				Optional<File> loc = FileLocator.getBundleFileLocation(Platform.getBundle("org.dawnsci.product.plugin"));
+				if (loc.isPresent()) {
+					fullPath = Paths.get(loc.get().getParentFile().getAbsolutePath(), "org.dawnsci.base.product.feature", "release", releaseNotesFileName).toString();
+				}
+			}
+			releaseText = fullPath != null ? readFile(fullPath) : "Release notes file could not be found";
 		} catch (IOException e) {
-			e.printStackTrace();
-			text.setText("The following path could not be found "+releaseText);
+			releaseText = "The following path could not be loaded: " + e.getMessage();
 		}
+		text.setText(releaseText);
 	}
 
 	private String readFile(String path) throws IOException {
-		FileInputStream stream = new FileInputStream(new File(path));
-		try {
+		try (FileInputStream stream = new FileInputStream(new File(path))) {
 			FileChannel fc = stream.getChannel();
 			MappedByteBuffer bb = fc.map(FileChannel.MapMode.READ_ONLY, 0,
 					fc.size());
 			/* Instead of using default, pass in a decoder. */
 			return Charset.defaultCharset().decode(bb).toString();
-		} finally {
-			stream.close();
 		}
 	}
-
 }
