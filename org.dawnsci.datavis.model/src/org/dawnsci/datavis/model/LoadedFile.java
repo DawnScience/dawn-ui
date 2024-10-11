@@ -331,18 +331,22 @@ public class LoadedFile implements IDataObject, IDataFilePackage {
 			if (NexusTreeUtils.isNXClass(s, NexusConstants.DATA) && d instanceof DataNode) {
 				DataNode dn = (DataNode)d;
 				String name = NexusTreeUtils.getFirstString(s.getAttribute(NexusConstants.DATA_SIGNAL));
+				String[] aux_signals = NexusTreeUtils.getStringArray(s.getAttribute(NexusConstants.DATA_AUX_SIGNALS));
 				String key = e.getKey();
 				
 				//Only post 2014  NXData Nexus tagging runs through here,
 				//NXdata may have many pre-2014 signal tags from GDA
 				//and this code does not work for more than one signal in a node
 				if ((name != null && (key.equals(name) || key.endsWith(Node.SEPARATOR + name)))) {
-					String path = Tree.ROOT + key;
-					String nxdatapath = path.substring(0,path.lastIndexOf(Node.SEPARATOR)) + Node.SEPARATOR;
-					NexusSignal ns = new NexusSignal(path, dn.getRank());
-					buildNexusSignalFromGroup(s, ns, nxdatapath, name);
-					signals.put(path,ns);
+					updateSignals(name,key,dn,s, true);
+				} else if (aux_signals != null) {
+					for (String auxs : aux_signals) {
+						if (key.equals(auxs) || key.endsWith(Node.SEPARATOR + auxs)) {
+							updateSignals(auxs,key,dn,s,false);
+						}
+					}
 				}
+				
 				//do "something" with pre-2014 tagged
 				if (name == null) {
 					Attribute attribute = dn.getAttribute(NexusConstants.DATA_SIGNAL);
@@ -366,6 +370,14 @@ public class LoadedFile implements IDataObject, IDataFilePackage {
 		return out;
 	}
 	
+	private void updateSignals(String name, String key, DataNode dn, GroupNode source, boolean primarySignal) {
+		String path = Tree.ROOT + key;
+		String nxdatapath = path.substring(0,path.lastIndexOf(Node.SEPARATOR)+1);
+		NexusSignal ns = new NexusSignal(path, dn.getRank());
+		buildNexusSignalFromGroup(source, ns, nxdatapath, name, primarySignal);
+		signals.put(path,ns);
+	}
+	
 	protected void storeNXData(GroupNode source, DataNode signal, String key) { 
 
 		if (NexusTreeUtils.isNXClass(source, NexusConstants.DATA)) {
@@ -374,17 +386,12 @@ public class LoadedFile implements IDataObject, IDataFilePackage {
 			//NXdata may have many pre-2014 signal tags from GDA
 			//and this code does not work for more than one signal in a node
 			if ((name != null && (key.equals(name) || key.endsWith(Node.SEPARATOR + name)))) {
-				String path = Tree.ROOT + key;
-				
-				String nxdatapath = path.substring(0,path.lastIndexOf(Node.SEPARATOR)) + Node.SEPARATOR;
-				NexusSignal ns = new NexusSignal(path, signal.getRank());
-				buildNexusSignalFromGroup(source, ns, nxdatapath, name);
-				signals.put(path,ns);
+				updateSignals(name,key,signal,source, true);
 			}
 		}
 	}
 	
-	private void buildNexusSignalFromGroup(GroupNode gn, NexusSignal signal, String location, String name) {
+	private void buildNexusSignalFromGroup(GroupNode gn, NexusSignal signal, String location, String name, boolean primarySignal) {
 		
 		String[] tmp = NexusTreeUtils.getStringArray(gn.getAttribute(NexusConstants.DATA_AXES));
 		if (tmp != null && tmp.length == signal.getRank()) {
@@ -417,8 +424,14 @@ public class LoadedFile implements IDataObject, IDataFilePackage {
 			}
 		}
 		
-		if (gn.containsDataNode(NexusConstants.DATA_ERRORS)) {
+		if (gn.containsDataNode(name + NexusConstants.DATA_ERRORS_SUFFIX)) {
+			signal.setUncertainties(location + name + NexusConstants.DATA_ERRORS_SUFFIX);
+		}else if (gn.containsDataNode(name + NexusConstants.DATA_UNCERTAINTY_SUFFIX)) {
+			signal.setUncertainties(location + name + NexusConstants.DATA_UNCERTAINTY_SUFFIX);
+		} else if (primarySignal && gn.containsDataNode(NexusConstants.DATA_ERRORS)) {
 			signal.setUncertainties(location + NexusConstants.DATA_ERRORS);
+		} else if (primarySignal && gn.containsDataNode(NexusConstants.DATA_UNCERTAINTIES)) {
+			signal.setUncertainties(location + NexusConstants.DATA_UNCERTAINTIES);
 		}
 	}
 	

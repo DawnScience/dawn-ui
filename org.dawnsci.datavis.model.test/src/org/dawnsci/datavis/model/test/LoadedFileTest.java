@@ -289,7 +289,7 @@ public class LoadedFileTest  extends AbstractTestModel {
 		GroupNode root = TreeFactory.createGroupNode(0);
 		root.addGroupNode(entry, en);
 		t.setGroupNode(root);
-		
+
 		DataHolder dh = new DataHolder();
 		dh.setTree(t);
 		
@@ -380,6 +380,92 @@ public class LoadedFileTest  extends AbstractTestModel {
 		axisOptions = dataOptions.getPlottableObject().getNDimensions().getAxisOptions(0);
 		assertEquals(4, axisOptions.length);
 		
+	}
+	
+	@Test
+	public void testNexusAuxSignals() throws MetadataException {
+		
+		String signal = "data";
+		String auxSignal1 = "aux_signal1";
+		String signalErrors = NexusConstants.DATA_UNCERTAINTIES;
+		String auxSignal1Errors = "aux_signal1" + NexusConstants.DATA_ERRORS_SUFFIX;
+		String auxSignal2 = "aux_signal2";
+		String notAuxSignal = "not_aux_signal";
+		String data = "nexusdata";
+		String set = "readback" + NexusConstants.DATA_AXESSET_SUFFIX;
+		String entry = "entry";
+		
+		NXentry en = NexusNodeFactory.createNXentry();
+		NXdata nx = NexusNodeFactory.createNXdata();
+		
+		en.addGroupNode(data, nx);
+		
+		//signal datasets
+		makeDataNode(signal,nx);
+		makeDataNode(auxSignal1,nx);
+		makeDataNode(auxSignal2,nx);
+		makeDataNode(notAuxSignal,nx);
+		makeDataNode(signalErrors,nx);
+		makeDataNode(auxSignal1Errors,nx);
+		
+		//set axis
+		DataNode dn = TreeFactory.createDataNode(0);
+		DoubleDataset dds = DatasetFactory.zeros(new int[] {4});
+		dds.setName(set);
+		dn.setDataset(dds);
+		nx.addDataNode(set, dn);
+		
+		nx.setAttributeSignal(signal);
+		nx.addAttribute(TreeFactory.createAttribute(NexusConstants.DATA_AXES, new String[] {set, NexusConstants.DATA_AXESEMPTY}));
+		nx.addAttribute(TreeFactory.createAttribute(set + NexusConstants.DATA_INDICES_SUFFIX, 0));
+		nx.addAttribute(TreeFactory.createAttribute(NexusConstants.DATA_AUX_SIGNALS, new String[] {auxSignal1, auxSignal2}));
+		
+		Tree t = TreeFactory.createTreeFile(0, "/tmp/aux_signals_nexus.nxs");
+		GroupNode root = TreeFactory.createGroupNode(0);
+		root.addGroupNode(entry, en);
+		t.setGroupNode(root);
+
+		DataHolder dh = new DataHolder();
+		dh.setTree(t);
+		
+		HDF5Loader.updateDataHolder(dh, true);
+		
+		LoadedFile f = new LoadedFile(dh);
+		
+		List<DataOptions> dataOptions = f.getDataOptions(false);
+		
+		assertEquals(7, dataOptions.size());
+		
+		dataOptions = f.getDataOptions(true);
+		
+		assertEquals(3, dataOptions.size());
+		
+		DataOptions signalDO = f.getDataOption(Tree.ROOT + entry + Node.SEPARATOR + data + Node.SEPARATOR + signal);
+		
+		ILazyDataset lz = signalDO.getLazyDataset();
+		
+		assertNotNull(lz.getErrors());
+		
+		DataOptions auxSignal1DO = f.getDataOption(Tree.ROOT + entry + Node.SEPARATOR + data + Node.SEPARATOR + auxSignal1);
+		
+		lz = auxSignal1DO.getLazyDataset();
+		
+		assertNotNull(lz.getErrors());
+		
+		DataOptions auxSignal2DO = f.getDataOption(Tree.ROOT + entry + Node.SEPARATOR + data + Node.SEPARATOR + auxSignal2);
+		
+		lz = auxSignal2DO.getLazyDataset();
+		
+		assertNull(lz.getErrors());
+		
+	}
+	
+	private void makeDataNode(String name, GroupNode parent) {
+		DataNode dn = TreeFactory.createDataNode(0);
+		DoubleDataset dds = DatasetFactory.zeros(new int[] {4,5});
+		dds.setName(name);
+		dn.setDataset(dds);
+		parent.addDataNode(name, dn);
 	}
 
 }
