@@ -361,7 +361,11 @@ public class MappingUtils {
 		} else {
 			int lastIndexOf = name.lastIndexOf(Node.SEPARATOR);
 			int last2 = name.lastIndexOf(Node.SEPARATOR,  lastIndexOf-1);
-			return name.substring(last2+1, lastIndexOf);
+			
+			String sub1 = name.substring(lastIndexOf+1);
+			String sub2 = name.substring(last2+1, lastIndexOf);
+			
+			return sub1.toLowerCase().equals("data") ? sub2 : sub1;
 		}
 	}
 }

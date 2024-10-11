@@ -99,7 +99,7 @@ public class MapBeanBuilder {
 			NodeLink value = entry.getValue();
 			Node n = value.getDestination();
 			if (!(n instanceof GroupNode)) continue;
-			String att = n.getAttribute("signal").getFirstElement();
+			String att = n.getAttribute(NexusConstants.DATA_SIGNAL).getFirstElement();
 			DataNode dataNode = ((GroupNode)n).getDataNode(att);
 			
 			if (dataNode == null) {
@@ -169,6 +169,23 @@ public class MapBeanBuilder {
 			if (remap != null) dataInfo.xAxisForRemapping = remap;
 
 			datasets.add(dataInfo);
+			
+			Attribute auxSig = n.getAttribute(NexusConstants.DATA_AUX_SIGNALS);
+			
+			if (auxSig != null) {
+				IDataset auxSigDs = auxSig.getValue();
+				GroupNode gn = (GroupNode)n;
+				if (auxSigDs instanceof StringDataset) {
+					String[] data = ((StringDataset) auxSigDs).getData();
+					
+					for (String s : data) {
+						if (gn.containsDataNode(s)) {
+							DataInfo di = new DataInfo(Node.SEPARATOR+entry.getKey(), s , axNames, squeezedRank);
+							datasets.add(di);
+						}
+					}
+				}
+			}
 		}
 		
 		if (names == null && !datasets.isEmpty()) {
