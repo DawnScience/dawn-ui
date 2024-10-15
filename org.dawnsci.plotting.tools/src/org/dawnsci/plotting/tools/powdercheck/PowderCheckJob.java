@@ -63,6 +63,7 @@ public class PowderCheckJob extends Job {
 	
 	IPlottingSystem<?> system;
 	Dataset dataset;
+	Dataset mask;
 	IDiffractionMetadata metadata;
 	List<PowderCheckResult> resultList;
 	XAxis xAxis = XAxis.ANGLE;
@@ -74,9 +75,10 @@ public class PowderCheckJob extends Job {
 		resultList = new ArrayList<PowderCheckResult>();
 	}
 
-	public void setData(Dataset dataset, IDiffractionMetadata metadata) {
+	public void setData(Dataset dataset, IDiffractionMetadata metadata, Dataset mask) {
 		this.dataset = dataset;
 		this.metadata = metadata;
+		this.mask = mask;
 	}
 
 	public void setCheckMode(PowderCheckMode mode) {
@@ -101,16 +103,16 @@ public class PowderCheckJob extends Job {
 		system.setEnabled(false);
 		switch (mode) {
 		case FullImage:
-			integrateFullSectorAndShowLines(dataset, metadata, monitor);
+			integrateFullSectorAndShowLines(dataset, metadata, mask, monitor);
 			break;
 		case PeakFit:
-			integrateFullSectorPeakFit(dataset, metadata, monitor);
+			integrateFullSectorPeakFit(dataset, metadata, mask, monitor);
 			break;
 		case Quadrants:
-			integrateQuadrants(dataset,metadata, monitor);
+			integrateQuadrants(dataset,metadata, mask, monitor);
 			break;
 		case Cake:
-			integrateCake(dataset, metadata, monitor);
+			integrateCake(dataset, metadata, mask, monitor);
 			break;
 		default:
 			break;
@@ -119,7 +121,7 @@ public class PowderCheckJob extends Job {
 		return Status.OK_STATUS;
 	}
 	
-	private IStatus integrateCake(Dataset data, IDiffractionMetadata md, IProgressMonitor monitor) {
+	private IStatus integrateCake(Dataset data, IDiffractionMetadata md, Dataset mask, IProgressMonitor monitor) {
 
 		int[] shape = data.getShape();
 		double[] farCorner = new double[]{0,0};
@@ -129,6 +131,7 @@ public class PowderCheckJob extends Job {
 
 		int maxDistance = (int)Math.sqrt(Math.pow(centre[0]-farCorner[0],2)+Math.pow(centre[1]-farCorner[1],2));
 		PixelSplittingIntegration2D npsi = new PixelSplittingIntegration2D(md, maxDistance,maxDistance);
+		npsi.setMask(mask);
 		npsi.setAxisType(xAxis);
 
 		List<Dataset> out = npsi.integrate(data);
@@ -140,10 +143,11 @@ public class PowderCheckJob extends Job {
 		
 	}
 
-	private IStatus integrateQuadrants(Dataset data, IDiffractionMetadata md, IProgressMonitor monitor) {
+	private IStatus integrateQuadrants(Dataset data, IDiffractionMetadata md, Dataset mask, IProgressMonitor monitor) {
 		
 		int nBins = 36;
 		NonPixelSplittingIntegration2D npsi = new NonPixelSplittingIntegration2D(md);
+		npsi.setMask(mask);
 		npsi.setAxisType(xAxis);
 		npsi.setAzimuthalRange(new double[]{-180,180});
 		npsi.setNumberOfAzimuthalBins(nBins);
@@ -160,13 +164,6 @@ public class PowderCheckJob extends Job {
 			sv.setName("Line: " + i*10 +" to " + (i*10+10));
 			ys.add(sv);
 		}
-		
-//		for (int i = -180; i <= 170; i+=10) {
-//			npsi.setAzimuthalRange(new double[]{i, i+10});
-//			List<Dataset> out = npsi.integrate(data);
-//			out.get(1).setName("Line: " + i +" to " + (i+10));
-//			system.updatePlot1D(out.get(0), Arrays.asList(new IDataset[]{out.get(1)}), null);
-//		}
 
 		system.updatePlot1D(out.get(0), ys, null);
 		setPlottingSystemAxes();
@@ -177,16 +174,17 @@ public class PowderCheckJob extends Job {
 		return Status.OK_STATUS;
 	}
 
-	private IStatus integrateFullSectorAndShowLines(Dataset data, IDiffractionMetadata md, IProgressMonitor monitor) {
-		integrateFullSector(data, md, monitor);
+	private IStatus integrateFullSectorAndShowLines(Dataset data, IDiffractionMetadata md, Dataset mask, IProgressMonitor monitor) {
+		integrateFullSector(data, md, mask, monitor);
 		updateCalibrantLines();
 		return Status.OK_STATUS;
 	}
 	
-	private List<Dataset> integrateFullSector(Dataset data, IDiffractionMetadata md, IProgressMonitor monitor) {
+	private List<Dataset> integrateFullSector(Dataset data, IDiffractionMetadata md, Dataset mask, IProgressMonitor monitor) {
 
 		NonPixelSplittingIntegration npsi = new NonPixelSplittingIntegration(md);
 		npsi.setAxisType(xAxis);
+		npsi.setMask(mask);
 		
 		List<Dataset> out = npsi.integrate(data);
 
@@ -196,9 +194,9 @@ public class PowderCheckJob extends Job {
 		return out;
 	}
 	
-	private IStatus integrateFullSectorPeakFit(Dataset data, IDiffractionMetadata md, IProgressMonitor monitor) {
+	private IStatus integrateFullSectorPeakFit(Dataset data, IDiffractionMetadata md, Dataset mask, IProgressMonitor monitor) {
 		
-		List<Dataset> out =  integrateFullSector(data, md, monitor);
+		List<Dataset> out =  integrateFullSector(data, md, mask, monitor);
 		
 		Dataset baseline = BaselineGeneration.rollingBallBaseline(out.get(1), 10);
 		

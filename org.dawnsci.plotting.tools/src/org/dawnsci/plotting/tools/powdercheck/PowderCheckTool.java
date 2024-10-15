@@ -28,10 +28,14 @@ import org.eclipse.dawnsci.plotting.api.PlottingFactory;
 import org.eclipse.dawnsci.plotting.api.tool.AbstractToolPage;
 import org.eclipse.dawnsci.plotting.api.tool.IToolPageSystem;
 import org.eclipse.dawnsci.plotting.api.trace.IImageTrace;
+import org.eclipse.dawnsci.plotting.api.trace.IPaletteListener;
 import org.eclipse.dawnsci.plotting.api.trace.ITraceListener;
+import org.eclipse.dawnsci.plotting.api.trace.PaletteEvent;
 import org.eclipse.dawnsci.plotting.api.trace.TraceEvent;
 import org.eclipse.january.dataset.Dataset;
 import org.eclipse.january.dataset.DatasetUtils;
+import org.eclipse.january.dataset.IDataset;
+import org.eclipse.january.metadata.MaskMetadata;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.preference.PreferenceDialog;
@@ -81,6 +85,7 @@ public class PowderCheckTool extends AbstractToolPage {
 
 
 	private ITraceListener            traceListener;
+	private IPaletteListener          paletteListener;
 	private CalibrantSelectedListener calListener;
 	
 	public PowderCheckTool() {
@@ -117,6 +122,13 @@ public class PowderCheckTool extends AbstractToolPage {
 				PowderCheckTool.this.update();
 			}
 
+		};
+		
+		this.paletteListener = new IPaletteListener.Stub() {
+			@Override
+			public void maskChanged(PaletteEvent evt) {
+				PowderCheckTool.this.update();
+			}
 		};
 	}
 
@@ -184,6 +196,8 @@ public class PowderCheckTool extends AbstractToolPage {
 			return;
 		}
 		
+		im.addPaletteListener(paletteListener);
+		
 		final Dataset ds = DatasetUtils.convertToDataset(im.getData());
 		if (ds==null) return;
 			
@@ -194,6 +208,8 @@ public class PowderCheckTool extends AbstractToolPage {
 			logger.error("No Diffraction Metadata");
 			return;
 		}
+		
+		Dataset mask = DatasetUtils.convertToDataset(im.getMask());
 		
 		if (updatePlotJob == null) {
 			updatePlotJob= new PowderCheckJob(system);
@@ -225,7 +241,7 @@ public class PowderCheckTool extends AbstractToolPage {
 		updatePlotJob.cancel();
 		updatePlotJob.setAxisMode(xAxis);
 		updatePlotJob.setCheckMode(PowderCheckMode.FullImage);
-		updatePlotJob.setData(ds, m);
+		updatePlotJob.setData(ds, m, mask);
 		if (fullImage != null)	fullImage.run();
 		
 	}
