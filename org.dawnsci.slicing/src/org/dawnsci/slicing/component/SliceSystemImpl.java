@@ -187,10 +187,11 @@ public class SliceSystemImpl extends AbstractSliceSystem {
 		final Composite bottom = new Composite(area, SWT.NONE);
 		bottom.setLayout(new GridLayout(1, false));
 		bottom.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		
+
 		this.errorLabel = new CLabel(bottom, SWT.WRAP);
 		errorLabel.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 		errorLabel.setImage(Activator.getImageDescriptor("icons/error.png").createImage());
+		errorLabel.addDisposeListener((e) -> errorLabel.getImage().dispose());
 		GridUtils.setVisible(errorLabel,         false);
 		
 		this.infoLabel = new CLabel(bottom, SWT.NONE);
