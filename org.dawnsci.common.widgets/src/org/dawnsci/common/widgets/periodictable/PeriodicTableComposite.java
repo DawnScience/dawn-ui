@@ -25,7 +25,7 @@ public class PeriodicTableComposite extends Composite {
 		public PeriodicTableButton(Composite parent, int Z) {
 			button = new Button(parent, SWT.FLAT | SWT.CENTER);
 			this.Z = Z;
-			element = MendelArray[Z];
+			element = PeriodicTable.atomicNumberToSymbol(Z);
 			button.addSelectionListener(new SelectionAdapter() {
 				@Override
 				public void widgetSelected(SelectionEvent e) {
@@ -60,24 +60,7 @@ public class PeriodicTableComposite extends Composite {
 		}
 	}
 	
-	// shamelessly copied from xraylib as this allows us to use
-	// SymbolToAtomicNumber and AtomicNumberToSymbol without pulling
-	// in the entire jar
-	static final String[] MendelArray = { "",
-		"H", "He", "Li", "Be", "B", "C", "N", "O", "F", "Ne",
-		"Na", "Mg", "Al", "Si", "P", "S", "Cl", "Ar", "K", "Ca",
-		"Sc", "Ti", "V", "Cr", "Mn", "Fe", "Co", "Ni", "Cu", "Zn",
-		"Ga", "Ge", "As", "Se", "Br", "Kr", "Rb", "Sr", "Y", "Zr",
-		"Nb", "Mo", "Tc", "Ru", "Rh", "Pd", "Ag", "Cd", "In", "Sn",
-		"Sb", "Te", "I", "Xe", "Cs", "Ba", "La", "Ce", "Pr", "Nd",
-		"Pm", "Sm", "Eu", "Gd", "Tb", "Dy", "Ho", "Er", "Tm", "Yb",
-		"Lu", "Hf", "Ta", "W", "Re", "Os", "Ir", "Pt", "Au", "Hg",
-		"Tl", "Pb", "Bi", "Po", "At", "Rn", "Fr", "Ra", "Ac", "Th",
-		"Pa", "U", "Np", "Pu", "Am", "Cm", "Bk", "Cf", "Es", "Fm",
-		"Md", "No", "Lr", "Rf", "Db", "Sg", "Bh"
-	};
-	
-	private final PeriodicTableButton[] periodicTableButtons = new PeriodicTableButton[MendelArray.length];
+	private final PeriodicTableButton[] periodicTableButtons = new PeriodicTableButton[PeriodicTable.getMendelArray().size()];
 	private final HashSet<IPeriodicTableButtonPressedListener> listeners = new HashSet<>();
 
 	private final int maxZ;
@@ -174,7 +157,7 @@ public class PeriodicTableComposite extends Composite {
 	}
 	
 	public Button getButton(String element) {
-		int Z = SymbolToAtomicNumber(element);
+		int Z = PeriodicTable.symbolToAtomicNumber(element);
 		if (Z < 1 || Z > maxZ)
 			throw new ArrayIndexOutOfBoundsException();
 		return periodicTableButtons[Z].getButton();
@@ -191,21 +174,5 @@ public class PeriodicTableComposite extends Composite {
 	private void fireListeners(int Z, String element, Button button) {
 		PeriodicTableButtonPressedEvent event = new PeriodicTableButtonPressedEvent(this, Z, element, button);
 		for (IPeriodicTableButtonPressedListener listener : listeners) listener.buttonPressed(event);
-	}
-	
-	protected static String AtomicNumberToSymbol(int Z) {
-		if (Z < 1 || Z > MendelArray.length) {
-			return null;
-		}
-		return MendelArray[Z];
-	}
-
-	protected static int SymbolToAtomicNumber(String symbol) {
-		for (int i = 1 ; i < MendelArray.length ; i++) {
-			if (symbol.equals(MendelArray[i])) {
-				return i;
-			}
-		}
-		return 0;
 	}
 }
