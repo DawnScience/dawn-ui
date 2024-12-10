@@ -36,21 +36,14 @@ public class PlotModeImage implements IPlotModeColored {
 	}
 	
 	public boolean transposeNeeded(Object[] options){
-		
-		boolean transpose = false;
-		for (int i = 0; i < options.length; i++) {
-			if (options[i] != null && !((String)options[i]).isEmpty()) {
-				if (options[i].equals(getOptions()[1])) {
-					transpose = false;
-					break;
-				} else {
-					transpose = true;
-					break;
-				}
+		String opt = getOptions()[1];
+		for (Object o : options) {
+			if (o instanceof String s && !s.isEmpty()) {
+				return !s.equals(opt);
 			}
 		}
-		
-		return transpose;
+
+		return false;
 	}
 
 	@Override
@@ -75,8 +68,6 @@ public class PlotModeImage implements IPlotModeColored {
 		}
 		
 		try {
-
-//			IDataset[] md =MetadataPlotUtils.getAxesAsIDatasetArray(data);
 			AxesMetadata m = data.getFirstMetadata(AxesMetadata.class);
 			if (m == null) return;
 			ILazyDataset[] md = m.getAxes();
@@ -123,7 +114,7 @@ public class PlotModeImage implements IPlotModeColored {
 		List<IDataset> ax = null;
 		
 		if (metadata != null) {
-			ax = new ArrayList<IDataset>();
+			ax = new ArrayList<>();
 			ILazyDataset[] axes = metadata.getAxes();
 			if (axes != null) {
 				
@@ -152,10 +143,12 @@ public class PlotModeImage implements IPlotModeColored {
 					if (axis instanceof StringDataset) {
 						ax.add(null);
 					} else {
-
-						if (axis.getRank() != 1) {
+						int lastDim = axis.getRank() - 1;
+						if (lastDim > 1) { // TODO check if this is actually used
 							SliceND s = new SliceND(axis.getShape());
-							s.setSlice(0, 0, 1, 1);
+							for (int i = 0; i < lastDim; i++) {
+								s.setSlice(i, 0, 1, 1);
+							}
 							axis = axis.getSlice(s).squeeze();
 						}
 						axis.setName(MetadataPlotUtils.removeSquareBrackets(axis.getName()));
@@ -163,46 +156,35 @@ public class PlotModeImage implements IPlotModeColored {
 					}
 
 				}
-				
-				
-//				for (ILazyDataset a : axes) {
-//					
-//					IDataset axis = a.getSlice().squeeze();
-//					
-//					if (axis.getRank() == 2) {
-//						
-//					}
-//					
-//					ax.add(a == null ? null : a.getSlice().squeeze());
-//				}
+
 				Collections.reverse(ax);
 			}
 		}
 		
 		IImageTrace trace = null;
 		
-//		String name = MetadataPlotUtils.removeSquareBrackets(d.getName());
-//		d.setName(name);
-		//deal with updates
 		boolean isUpdate = false;
-		if (update == null) {
+		if (update == null) { // TODO it seems that update is always null(!) so we should refactor the code
 			trace = system.createImageTrace(d.getName());
 			trace.setDataName(d.getName());
 		} else {
-			if (update[0] instanceof IImageTrace) {
-				trace = (IImageTrace) update[0];
+			if (update[0] instanceof IImageTrace iTrace) {
+				trace = iTrace;
 				isUpdate = true;
+			} else {
+				system.removeTrace(update[0]);
 			}
 			
-			for (int i = 0; i < update.length; i++) {
-				if (i==0 && update[i] instanceof IImageTrace) {
-					continue;
-				}
+			for (int i = 1; i < update.length; i++) {
 				system.removeTrace(update[i]);
 			}
 		}
 		
-		
+		if (trace == null) {
+			logger.warn("Updates missing");
+			return;
+		}
+
 		trace.setData(d, ax, false);
 		trace.setUserObject(userObject);
 		if (minMax != null) {
@@ -219,8 +201,7 @@ public class PlotModeImage implements IPlotModeColored {
 			system.getSelectedXAxis().setRange(range[0], range[1]);
 			system.getSelectedYAxis().setRange(range[2], range[3]);
 		}
-		logger.debug("Display time " + (System.currentTimeMillis()-t) + " ms");
-		
+		logger.debug("Display time {}ms", System.currentTimeMillis() - t);
 	}
 
 	@Override

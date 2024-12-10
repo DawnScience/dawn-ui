@@ -7,6 +7,7 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.dawnsci.datavis.api.IDataPackage;
@@ -130,8 +131,8 @@ public class DataOptions implements IDataObject, IDataPackage {
 	
 	private Map<String, int[]> getAxesMaxShapes() {
 		
-		if (parent instanceof IRefreshable) {
-			return ((IRefreshable) parent).getDataMaxShapes();
+		if (parent instanceof IRefreshable refreshable) {
+			return refreshable.getDataMaxShapes();
 		}
 		
 		return null;
@@ -178,93 +179,26 @@ public class DataOptions implements IDataObject, IDataPackage {
 		if (axes == null) return;
 		try {
 			ax = MetadataFactory.createMetadata(AxesMetadata.class, axes.length);
+			int[] shape = local.getShape();
+			int rank = shape.length;
 			for (int i = 0; i < axes.length ; i++) {
 				String axName = axes[i];
-				ILazyDataset lzAxes = parent.getLazyDataset(axName);
-				if (lzAxes == null) continue;
-				lzAxes.setName(axName);
-				if (!(lzAxes.getRank() ==1 || lzAxes.getRank() == local.getRank())) {
-					int rank = local.getRank();
-					int[] shape = local.getShape();
-					int[] axShape = lzAxes.getShape();
-					int axRank = lzAxes.getRank();
-					int[] newShape = new int[local.getRank()];
-					Arrays.fill(newShape, 1);
-
-					int[] idx = new int[axRank];
-					Arrays.fill(idx, -1);
-					Boolean[] found = new Boolean[axRank];
-					Arrays.fill(found, false);
-					int max = rank;
-
-					for (int j = axRank-1; j >= 0; j--) {
-						int id = axShape[j];
-						updateShape(j, max, shape, id, idx, found);
-
-					}
-
-					boolean allFound = !Arrays.asList(found).contains(false);
-					//has it only not found size 1 dims?
-					if (!allFound) {
-						boolean allOnes = true;
-						for (int j = 0; j < found.length; j++) {
-							if (!found[j] && axShape[j] != 1) {
-								allOnes = false;
-								break;
-							} else if (!found[j] && axShape[j] == 1) {
-								idx[j] = j;
-							}
-
-						}
-
-						allFound = allOnes;
-					}
-
-					if (!allFound) {
-						continue;
-					}
-
-					for (int j = 0; j < axRank; j++) {
-						newShape[idx[j]] = axShape[j];
-					}
-
-					try {
-						lzAxes = lzAxes.getSliceView();
-						lzAxes.setShape(newShape);
-						ax.setAxis(i, lzAxes);
-					} catch (Exception e) {
-						logger.error("Error setting axes", e);
-					}
-
-				} else {
-					ILazyDataset l = parent.getLazyDataset(axes[i]);
-					ax.setAxis(i,l);
+				ILazyDataset lzAxis = parent.getLazyDataset(axName);
+				if (lzAxis == null) continue;
+				lzAxis.setName(axName);
+				int axRank= lzAxis.getRank();
+				if (!(axRank == 1 || axRank == rank)) {
+					int[] lShape = lzAxis.getShape();
+					int[] map = DataOptionsUtils.mapAxisToDataShape(i, lShape, shape);
+					lzAxis = DataOptionsUtils.getMappedAxis(rank, lzAxis, map);
+					logger.debug("Remapping axis from {} with {} to {}", Arrays.toString(lShape), Arrays.toString(map), Arrays.toString(lzAxis.getShape()));
 				}
-
+				ax.setAxis(i, lzAxis);
 			}
 			local.setMetadata(ax);
 		} catch (MetadataException e) {
 			logger.error("Error creating axes metadata", e);
 		}
-	}
-
-	private boolean updateShape(int i, int max, int[] shape, int id, int[] idx, Boolean[] found){
-
-		int[] idxc = idx.clone();
-		Arrays.sort(idxc);
-
-		for (int j = max -1 ; j >= 0; j--) {
-
-			if (id == shape[j] && Arrays.binarySearch(idxc, j) < 0) {
-				idx[i] = j;
-				found[i] = true;
-				max = j;
-				return true;
-			}
-
-		}
-
-		return false;
 	}
 
 	public void setAxes(String[] axesNames) {
@@ -400,9 +334,9 @@ public class DataOptions implements IDataObject, IDataPackage {
 		}
 
 		// find first class that extends or implements parameter 
-		for (Class<?> c : derivedData.keySet()) {
-			if (clazz.isAssignableFrom(c)) {
-				return (List<T>) derivedData.get(c);
+		for (Entry<Class<?>, List<?>> e : derivedData.entrySet()) {
+			if (clazz.isAssignableFrom(e.getKey())) {
+				return (List<T>) e.getValue();
 			}
 		}
 

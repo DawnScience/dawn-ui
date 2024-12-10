@@ -32,6 +32,7 @@ public class PlottingPreferenceInitializer extends AbstractPreferenceInitializer
 		store.setDefault(PlottingConstants.ORIGIN_PREF,     ImageOrigin.TOP_LEFT.getLabel());
 		store.setDefault(PlottingConstants.TRANSPOSE_PREF,  false);
 		store.setDefault(PlottingConstants.ASPECT,          true);
+		store.setDefault(PlottingConstants.INTERPOLATE_PIXEL_POSN, true);
 		store.setDefault(PlottingConstants.SNAP_TO_GRID,    false);
 		store.setDefault(PlottingConstants.SHOW_AXES,       true);
 		store.setDefault(PlottingConstants.SHOW_INTENSITY,  true);

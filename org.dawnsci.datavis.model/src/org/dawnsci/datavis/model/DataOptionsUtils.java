@@ -1,9 +1,20 @@
 package org.dawnsci.datavis.model;
 
+import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.IntStream;
+
 import org.dawnsci.datavis.api.IPlotMode;
 import org.dawnsci.january.model.NDimensions;
 import org.eclipse.dawnsci.analysis.api.tree.Node;
 import org.eclipse.dawnsci.analysis.api.tree.Tree;
+import org.eclipse.dawnsci.analysis.dataset.SlicingUtils;
 import org.eclipse.dawnsci.analysis.dataset.slicer.SliceViewIterator;
 import org.eclipse.dawnsci.nexus.INexusFileFactory;
 import org.eclipse.dawnsci.nexus.NXdata;
@@ -15,18 +26,24 @@ import org.eclipse.dawnsci.nexus.NexusNodeFactory;
 import org.eclipse.dawnsci.plotting.api.trace.MetadataPlotUtils;
 import org.eclipse.january.DatasetException;
 import org.eclipse.january.IMonitor;
+import org.eclipse.january.MetadataException;
 import org.eclipse.january.dataset.Dataset;
 import org.eclipse.january.dataset.DatasetFactory;
 import org.eclipse.january.dataset.DatasetUtils;
 import org.eclipse.january.dataset.DoubleDataset;
 import org.eclipse.january.dataset.IDataset;
+import org.eclipse.january.dataset.IDynamicDataset;
 import org.eclipse.january.dataset.ILazyDataset;
 import org.eclipse.january.dataset.RunningAverage;
 import org.eclipse.january.metadata.AxesMetadata;
+import org.eclipse.january.metadata.IMetadata;
+import org.eclipse.january.metadata.MetadataFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class DataOptionsUtils {
+	private DataOptionsUtils() {
+	}
 	
 	private static final Logger logger = LoggerFactory.getLogger(DataOptionsUtils.class);
 	
@@ -35,8 +52,8 @@ public class DataOptionsUtils {
 
 	public static DataOptions buildView(DataOptions op) {
 		
-		if (op instanceof DataOptionsDataset) {
-			return new DataOptionsDatasetSlice((DataOptionsDataset)op, op.getPlottableObject().getNDimensions().buildSliceND());
+		if (op instanceof DataOptionsDataset dod) {
+			return new DataOptionsDatasetSlice(dod, op.getPlottableObject().getNDimensions().buildSliceND());
 		}
 		
 		return new DataOptionsSlice(op, op.getPlottableObject().getNDimensions().buildSliceND());
@@ -45,7 +62,6 @@ public class DataOptionsUtils {
 	public static DataOptions average(DataOptions data, IMonitor monitor) {
 
 		SliceViewIterator iterator = buildIterator(data);
-		iterator.hasNext();
 
 		try {
 
@@ -80,7 +96,6 @@ public class DataOptionsUtils {
 
 
 		SliceViewIterator iterator = buildIterator(data);
-		iterator.hasNext();
 
 		try {
 
@@ -312,5 +327,127 @@ public class DataOptionsUtils {
 			name = last;
 		}
 		return name;
+	}
+
+	/**
+	 * Map axis shape to data shape
+	 * @param d d-th dimension of data
+	 * @param aShape axis shape
+	 * @param dShape data shape
+	 * @return map of index from axis to data dimensions
+	 */
+	public static int[] mapAxisToDataShape(int d, int[] aShape, int[] dShape) {
+		// maps lengths to indexes in data shape
+		int dRank = dShape.length;
+		Map<Integer, List<Integer>> lengthIndexes = new HashMap<>();
+		for (int j = 0; j < dRank; j++) {
+			lengthIndexes.computeIfAbsent(dShape[j], n -> new ArrayList<>()).add(j);
+		}
+
+		int aRank = aShape.length;
+		int[] map = new int[aRank];
+		Arrays.fill(map, -1);
+
+		// dShape = [12, 100, 1600, 1600]
+		// length indexes = {12: [0], 100: [1], 1600; [2,3]
+		// aShape = [12, 100, 1600] => (0,1,2) for d=2
+		for (int i = 0; i < aRank; i++) {
+			int l = aShape[i];
+			List<Integer> idxs = lengthIndexes.get(l);
+			if (idxs.size() == 1) {
+				map[i] = idxs.getFirst();
+				idxs.clear();
+			} else if (idxs.contains(d)) {
+				// prioritise matching given dimension
+				map[i] = d;
+				idxs.remove((Integer) d);
+			} else {
+				map[i] = idxs.getFirst();
+				idxs.removeFirst();
+			}
+		}
+
+		return map;
+	}
+
+	/**
+	 * Get mapped axis dataset
+	 * @param dRank data rank
+	 * @param axis dataset
+	 * @param map mapping from axis dimension to data
+	 * @return mapping view of axis
+	 */
+	public static ILazyDataset getMappedAxis(int dRank, ILazyDataset axis, int[] map) {
+		int[] order = IntStream.range(0, map.length)
+		.boxed().sorted(Comparator.comparingInt(i -> map[i])).mapToInt(i -> i).toArray();
+		int[] sMap = map.clone();
+		Arrays.sort(sMap);
+		return reshapeWithNewDims(dRank, axis.getTransposedView(order), sMap);
+	}
+
+	/**
+	 * Reshape dataset with new dimensions added
+	 * @param d dataset
+	 * @param dims new dimensions
+	 * @return reshaped dataset
+	 */
+	public static ILazyDataset reshapeWithNewDims(int dRank, ILazyDataset d, int[] map) {
+		if (map == null || map.length == 0) {
+			return d;
+		}
+
+		int[] max = d instanceof IDynamicDataset dynamic ? dynamic.getMaxShape() : null;
+
+		int[][] nShapes = insertNewDims(dRank, d.getShape(), max, map);
+
+		ILazyDataset rLazy = d.getSliceView();
+		IDynamicDataset dynamic = rLazy instanceof IDynamicDataset dyn? dyn: null;
+		if (dynamic != null) {
+			// workaround different rank shape/maxShape bug in LazyDynamicDataset
+			if (d.getRank() != dRank) {
+				dynamic.setShape(nShapes[0]);
+				if (max != null && max.length != dRank) {
+					try {
+						Field mField = dynamic.getClass().getDeclaredField("maxShape");
+						mField.setAccessible(true);
+						mField.set(dynamic, nShapes[1]);
+						IMetadata md = MetadataFactory.createMetadata(IMetadata.class, Collections.emptyMap());
+						md.addDataInfo(SlicingUtils.ORIGINAL_MAX_SHAPE, max);
+						dynamic.addMetadata(md);
+					} catch (NoSuchFieldException | SecurityException | IllegalArgumentException | IllegalAccessException | MetadataException e) {
+						logger.error("Could not work around max shape having different rank", e);
+					}
+				}
+			} else {
+				dynamic.resize(nShapes[0]);
+				dynamic.setMaxShape(nShapes[1]);
+			}
+		} else {
+			rLazy.setShape(nShapes[0]);
+		}
+		return rLazy;
+	}
+
+	/**
+	 * Insert new dimensions into shape and maxShape
+	 * @param dRank
+	 * @param shape
+	 * @param max
+	 * @param map
+	 * @return expanded shape and maxShape
+	 */
+	static int[][] insertNewDims(int dRank, int[] shape, int[] max, int... map) {
+		int[] nShape = new int[dRank];
+		Arrays.fill(nShape, 1);
+		int[] mShape = max == null ? null : nShape.clone();
+
+		for (int i = 0; i < map.length; i++) {
+			int m = map[i];
+			nShape[m] = shape[i];
+			if (mShape != null) {
+				mShape[m] = max[i];
+			}
+		}
+		return new int[][] {nShape, mShape};
 	}
 }

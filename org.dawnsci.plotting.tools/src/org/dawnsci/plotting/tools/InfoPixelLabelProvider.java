@@ -117,11 +117,11 @@ public class InfoPixelLabelProvider extends ColumnLabelProvider {
 				try {
 					if (Double.isNaN(xLabel)) xLabel = xIndex;
 					if (Double.isNaN(yLabel)) yLabel = yIndex;
-					axisPt = coords.getValueAxisLocation(new double[]{xLabel, yLabel});
+					axisPt = coords.getValueAxisLocation(xLabel, yLabel);
 					xLabel = axisPt[0];
 					yLabel = axisPt[1];
 				} catch (Exception e) {
-					logger.debug("error: "+e);
+					logger.debug("Could not get axis values", e);
 				}
 			}
 
