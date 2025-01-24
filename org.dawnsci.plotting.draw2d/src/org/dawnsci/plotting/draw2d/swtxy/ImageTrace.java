@@ -88,7 +88,7 @@ import uk.ac.diamond.osgi.services.ServiceProvider;
 
 /**
  * A trace which draws an image to the plot.
- * 
+ *
  * @author Matthew Gerring
  *
  */
@@ -118,7 +118,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 	 */
 	private boolean          isMaximumZoom;
 	/**
-	 * Used to define if the zoom is at an extent large enough to show a 
+	 * Used to define if the zoom is at an extent large enough to show a
 	 * label grid for the intensity.
 	 */
 	private boolean          isLabelZoom;
@@ -144,7 +144,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 
 	private double[] globalRange;
 
-	public ImageTrace(final String name, 
+	public ImageTrace(final String name,
 			final ColorMapRamp intensityScale) {
 
 		this.name  = name;
@@ -260,8 +260,9 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 		}
 	}
 
-	public Dataset getImage() {
-		return image;
+	@Override
+	public Image getImage() {
+		return getScaledImageData().getScaledImage();
 	}
 
 	public PaletteData getPaletteData() {
@@ -301,7 +302,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 		// Going up in order of work done
 		NO_REIMAGE,
 		REIMAGE_ALLOWED,
-		FORCE_REIMAGE, 
+		FORCE_REIMAGE,
 		REHISTOGRAM;
 	}
 
@@ -309,9 +310,9 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 	/**
 	 * Get the current image which can be used by the composite trace.
 	 * @return
-	 * @throws Exception 
+	 * @throws Exception
 	 */
-	protected ScaledImageData getScaledImageData() {	
+	protected ScaledImageData getScaledImageData() {
 		return scaledData;
 	}
 
@@ -358,9 +359,9 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 	 * and saved in the scaledData field. The image is downsampled. If rescaleAllowed
 	 * is set to false, the current bin is not checked and the last scaled image
 	 * is always used.
-	 *  
+	 *
 	 * Do not synchronized this method - it can cause a race condition on linux only.
-	 * 
+	 *
 	 * @return true if scaledImage created.
 	 */
 	protected boolean createScaledImage(ImageScaleType rescaleType, final IProgressMonitor monitor) {
@@ -371,7 +372,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 			return false;
 		}
 		boolean requireImageGeneration = scaledData.getDownsampledImageData() == null ||
-				rescaleType==ImageScaleType.FORCE_REIMAGE || 
+				rescaleType==ImageScaleType.FORCE_REIMAGE ||
 				rescaleType==ImageScaleType.REHISTOGRAM; // We know that it is needed
 
 		// If we just changed downsample scale, we force the update.
@@ -443,7 +444,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 					yMin = temp;
 				}
 
-				// factors to scale image data 
+				// factors to scale image data
 				double xScale = bounds.width / (xMax - xMin);
 				double yScale = bounds.height / (yMax - yMin);
 
@@ -524,7 +525,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 	private boolean buildImageRelativeToAxes(ImageData imageData) {
 
 		// slice data to get current zoom area
-		/**     
+		/**
 		 *      x1,y1--------------x2,y2
 		 *        |                  |
 		 *        |                  |
@@ -542,23 +543,23 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 		if (xAxis == null || yAxis == null) return false;
 
 		if (xAxis.getSize() == 1 && yAxis.getSize() == 1) return false;
-		
+
 		double dx = 0;
 		double dy = 0;
-		
+
 		if (xAxis.getSize() > 1) {
 			dx = (xAxis.getDouble(-1) - xAxis.getDouble(0))/(xAxis.getSize()-1);
 		}
-		
+
 		if (yAxis.getSize() > 1) {
 			dy = (yAxis.getDouble(-1) - yAxis.getDouble(0))/(yAxis.getSize()-1);
 		}
-		
+
 		if (dx == 0 && dy == 0) {
 			logger.error("Axis steps both zero!");
 			return false;
 		}
-		
+
 		dx = dx != 0 ? dx : dy;
 		dy = dy != 0 ? dy : dx;
 
@@ -630,9 +631,9 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 		return true;
 
 	}
-	
+
 	/**
-	 * 
+	 *
 	 * @param axis
 	 * @param plotAxis
 	 * @param step - axis step size
@@ -640,16 +641,16 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 	 */
 	private int[] generateStartLengthPositionArray(Dataset axis, AspectAxis plotAxis, double step) {
 		int end = axis.getSize()-1;
-		
+
 		double minData = axis.min().doubleValue();
 		double maxData = axis.max().doubleValue();
-		
+
 		double astep = Math.abs(step);
-		
+
 		//adjust axis min/max so centre of pixel is at axis value
 		minData -= astep/2;
 		maxData += astep/2;
-		
+
 		//get data coords visible on screen
 		double[] visibleLimits = calculatePlotDataLimits(minData, maxData, plotAxis);
 		if (visibleLimits == null) {
@@ -680,7 +681,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 		double pixelScale = Math.abs((visibleLimitsPixel[0]-visibleLimitsPixel[1]) / ((double)sizeData));
 
 		int scaled = Math.max(1, (int) (sizeData*pixelScale));
-		
+
 		//if axis not increasing
 		//flip start index and scaling
 		if (step < 0) {
@@ -690,7 +691,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 
 		return new int[] {startIdx, sizeData, visibleLimitsPixel[0], scaled};
 	}
-		
+
 
 
 	private ImageData sliceImageData(ImageData imageData, int width, int height, int xPix, int yPix, int ySize) {
@@ -714,13 +715,13 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 			// NOTE Assumes 24 Bit Images
 			final int[] pixels = new int[width];
 			data = new ImageData(width, height, imageData.depth, new PaletteData(0xff0000, 0x00ff00, 0x0000ff));
-			for (int y = 0; y < height; y++) {					
+			for (int y = 0; y < height; y++) {
 				imageData.getPixels(xPix, y+yPix, width, pixels, 0);
 				data.setPixels(0, y, width, pixels, 0);
 			}
 			if (imageData.alphaData != null) {
 				final byte[] alphas = new byte[width];
-				for (int y = 0; y < height; y++) {					
+				for (int y = 0; y < height; y++) {
 					imageData.getAlphas(xPix, y+yPix, width, alphas, 0);
 					data.setAlphas(0, y, width, alphas, 0);
 				}
@@ -759,7 +760,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 
 		return new int[]{v1, v2};
 	}
-	
+
 	private final double[] calculatePlotDataLimits(double minData, double maxData, IAxis axis) {
 		double min = axis.getLower();
 		double max = axis.getUpper();
@@ -800,7 +801,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 				imageServiceBean.setMask(null); // Ensure we lose the mask!
 			}
 
-			if (rgbDataset == null && rescaleType==ImageScaleType.REHISTOGRAM) { // Avoids changing colouring to 
+			if (rgbDataset == null && rescaleType==ImageScaleType.REHISTOGRAM) { // Avoids changing colouring to
 				// max and min of new selection.
 
 				Range xRange = getXAxis().getRange();
@@ -831,7 +832,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 					ImageServiceBean intensityScaleBean = imageServiceBean.clone();
 					intensityScaleBean.setOrigin(ImageOrigin.TOP_LEFT);
 					intensityScaleBean.setTransposed(false);
-					// We send the image drawn with the same palette to the 
+					// We send the image drawn with the same palette to the
 					// intensityScale
 					// TODO FIXME This will not work in log mode
 					if (reducedFullImage instanceof RGBDataset) return true;
@@ -960,7 +961,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 
 	@Override
 	public IDataset getDownsampled() {
-		return getDownsampled(getImage());
+		return getDownsampled(getData());
 	}
 
 	public IDataset getDownsampledMask() {
@@ -973,7 +974,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 	 * This gives a pixel count of 1,4,16 or 64 for the bin. If 1 no
 	 * binning at all is done and no downsampling is being done, getDownsampled()
 	 * will return the Dataset ok even if bin is one (no downsampling).
-	 * 
+	 *
 	 * @param slice
 	 * @param bounds
 	 * @return
@@ -1024,7 +1025,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 		/**
 		 * This is not actually needed except that when there
 		 * are a number of opens of an image, e.g. when moving
-		 * around an h5 gallery with arrow keys, it looks smooth 
+		 * around an h5 gallery with arrow keys, it looks smooth
 		 * with this in.
 		 */
 		if (scaledData.getScaledImage()==null || !isKeepAspectRatio() || lastAspectRatio!=isKeepAspectRatio()) {
@@ -1198,15 +1199,15 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 			imageOrigin = isHorizontal ? ImageOrigin.TOP_LEFT : ImageOrigin.BOTTOM_RIGHT;
 			break;
 		}
-        
+
 		if (imageServiceBean != null) {
 			imageServiceBean.setOrigin(imageOrigin);
 		}
-		
+
 	}
 
 	/**
-	 * We do a bit here to ensure that 
+	 * We do a bit here to ensure that
 	 * not too many calls to createScaledImage(...) are made.
 	 */
 	@Override
@@ -1242,13 +1243,13 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 		return shape;
 	}
 	/*
-	 * T=false                                 T=true                            
-	 *                                                                           
-	 * TL                TR                    TL                TR              
+	 * T=false                                 T=true
+	 *
+	 * TL                TR                    TL                TR
 	 *  x = 0, shape[1]   x = shape[0], 0       x = 0, shape[1]   x = shape[1], 0
 	 *  y = shape[0], 0   y = shape[1], 0       y = shape[0], 0   y = shape[0], 0
-	 *                                                                           
-	 * BL                BR                    BL                BR              
+	 *
+	 * BL                BR                    BL                BR
 	 *  x = 0, shape[0]   x = shape[1], 0       x = 0, shape[1]   x = shape[0], 0
 	 *  y = 0, shape[1]   y = 0, shape[0]       y = 0, shape[0]   y = 0, shape[1]
 	 */
@@ -1404,7 +1405,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 
 	private boolean internalSetDynamicData(IDynamicShape dynamic) {
 		this.dynamic = dynamic;
-		ILazyDataset lazy = dynamic instanceof ILazyDataset ? (ILazyDataset) dynamic : dynamic.getDataset(); 
+		ILazyDataset lazy = dynamic instanceof ILazyDataset ? (ILazyDataset) dynamic : dynamic.getDataset();
 		boolean flag = setDataInternal(lazy, null, false);
 		dynamic.addDataListener(this);
 		return flag;
@@ -1457,7 +1458,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 			this.image = im;
 			internalSetAxes(axes);
 			// is this enough?
-			if (imageServiceBean==null){ 
+			if (imageServiceBean==null){
 				imageServiceBean = new ImageServiceBean();
 			}
 
@@ -1503,7 +1504,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 
 		// The image is drawn low y to the top left but the axes are low y to the bottom right
 		// We do not currently reflect it as it takes too long. Instead in the slice
-		// method, we allow for the fact that the dataset is in a different orientation to 
+		// method, we allow for the fact that the dataset is in a different orientation to
 		// what is plotted.
 		if (image==null) return false;
 		this.image = im;
@@ -1880,7 +1881,7 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 	}
 
 	/**
-	 * 
+	 *
 	 * @param bd
 	 */
 	public void setMask(IDataset mask) {
@@ -1945,12 +1946,12 @@ public class ImageTrace extends Figure implements IImageTrace, IAxisListener, IT
 	}
 
 	/**
-	 * If the axis data set has been set, this method will return 
+	 * If the axis data set has been set, this method will return
 	 * a selection region in the coordinates of the axes labels rather
 	 * than the indices.
-	 * 
+	 *
 	 * Ellipse and Sector rois are not currently supported.
-	 * 
+	 *
 	 * @return ROI in label coordinates. This roi is not that useful after it
 	 *         is created. The data processing needs rois with indices.
 	 */

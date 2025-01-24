@@ -22,12 +22,15 @@ import org.eclipse.dawnsci.plotting.api.region.ILockTranslatable;
 import org.eclipse.dawnsci.plotting.api.region.IRegion;
 import org.eclipse.dawnsci.plotting.api.region.IRegionListener;
 import org.eclipse.dawnsci.plotting.api.region.RegionEvent;
+import org.eclipse.dawnsci.plotting.api.trace.IImageTrace;
 import org.eclipse.dawnsci.plotting.api.trace.ITrace;
 import org.eclipse.january.dataset.IDataset;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
+import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Layout;
 
@@ -38,7 +41,6 @@ public class ArpesSlicePlotViewer extends AbstractHyperPlotViewer {
 	private PerpendicularImageCutsComposite cutComposite;
 	private PerpendicularCutsHelper helper;
 	private IRegion[] cachedSideRegions;
-
 	public ArpesSlicePlotViewer() {
 
 	}
@@ -69,7 +71,6 @@ public class ArpesSlicePlotViewer extends AbstractHyperPlotViewer {
 
 		clearActions(hyper.getMainSystem());
 		clearActions(hyper.getSideSystem());
-
 	}
 
 	private void clearActions(IPlottingSystem<?> system) {
@@ -149,7 +150,6 @@ public class ArpesSlicePlotViewer extends AbstractHyperPlotViewer {
 
 	@Override
 	public boolean isTraceTypeSupported(Class<? extends ITrace> trace) {
-
 		if (IArpesSliceTrace.class.isAssignableFrom(trace)) {
 			return true;
 		}
@@ -163,6 +163,15 @@ public class ArpesSlicePlotViewer extends AbstractHyperPlotViewer {
 			cachedSideRegions = cachedSideRegionsCollection.toArray(IRegion[]::new);
 		}
 		super.removeTrace(trace);
+	}
+
+	@Override
+	public Image getImage(Rectangle size) {
+		IImageTrace tr = (IImageTrace) hyper.getMainSystem().getTraces().stream().findFirst().orElse(null);
+		if ((tr!=null) && (tr.getImage() instanceof Image result)) {
+			return result;
+		}
+		return null;
 	}
 
 	@Override
