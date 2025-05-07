@@ -15,22 +15,22 @@ import org.eclipse.january.dataset.Slice;
 public class CurrentStateFileConfiguration implements ILoadedFileConfiguration {
 
 	private List<DataOptions> state;
-	
+
 	@Override
 	public boolean configure(LoadedFile f) {
 		if (state == null || state.isEmpty()) return false;
-		
+
 		Map<String, int[]> dataShapes = f.getDataShapes();
-		
+
 		boolean found = false;
-		
+
 		for (DataOptions o : state) {
 			if (o.isSelected() && o.getPlottableObject() != null && dataShapes.containsKey(o.getName())) {
 				PlottableObject plotObject = o.getPlottableObject();
 				DataOptions dataOption = f.getDataOption(o.getName());
-				if (plotObject.getNDimensions() == null) continue;
-				if (dataShapes.get(o.getName()).length == plotObject.getNDimensions().getRank()) {
-					NDimensions nDimensions = plotObject.getNDimensions();
+				NDimensions nDimensions = plotObject.getNDimensions();
+				if (nDimensions == null || dataOption == null) continue;
+				if (dataShapes.get(o.getName()).length == nDimensions.getRank()) {
 					IPlotMode plotMode = plotObject.getPlotMode();
 					NDimensions newND = dataOption.buildNDimensions();
 					newND.setOptions(plotMode.getOptions());
@@ -45,7 +45,7 @@ public class CurrentStateFileConfiguration implements ILoadedFileConfiguration {
 							}
 							newND.setSlice(i, s);
 						}
-						
+
 						String[] axisOptions = newND.getAxisOptions(i);
 						String axis = nDimensions.getAxis(i);
 						Optional<String> first = Arrays.stream(axisOptions).filter(s-> axis.equals(s)).findFirst();
@@ -56,11 +56,9 @@ public class CurrentStateFileConfiguration implements ILoadedFileConfiguration {
 						found = true;
 					}
 				}
-				
+
 			}
 		}
-		
-		
 		return found;
 	}
 
