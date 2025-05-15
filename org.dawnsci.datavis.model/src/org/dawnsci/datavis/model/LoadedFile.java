@@ -154,13 +154,14 @@ public class LoadedFile implements IDataObject, IDataFilePackage {
 					}
 				}
 			}
-			
-			if (lazyDataset.getSize() == 0) {
+
+			long longSize = ShapeUtils.calcLongSize(lazyDataset.getShape());
+			if (longSize == 0) {
 				okMaxShape = false;
 			}
 
 			boolean notString = !lazyDataset.getElementClass().equals(String.class);
-			if (notString && okMaxShape &&  (ShapeUtils.calcLongSize(lazyDataset.getShape()) > 1 || signals.containsKey(n))) {
+			if (notString && okMaxShape &&  (longSize > 1 || signals.containsKey(n))) {
 				NexusSignal s = signals.getOrDefault(n, null);
 				DataOptions d = new DataOptions(n, this, s);
 				d.setShortName(shortName);
