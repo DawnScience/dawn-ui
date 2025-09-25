@@ -58,7 +58,7 @@ public class NexusFileConfigurationTest {
 			dataNode.addAttribute(TreeFactory.createAttribute(NexusConstants.DATA_AXES, new String[]{"axisX", "axisY"}));
 			
 			DoubleDataset data = DatasetFactory.createRange(DoubleDataset.class, 100);
-			data.reshape(10, 10);
+			data.setShape(10, 10);
 			DoubleDataset dataXY = DatasetFactory.createRange(DoubleDataset.class, 10);
 			
 			dataNode.addAttribute(TreeFactory.createAttribute("axisX" + NexusConstants.DATA_INDICES_SUFFIX, Long.valueOf(0)));
@@ -106,7 +106,7 @@ public class NexusFileConfigurationTest {
 			dataNode.addAttribute(TreeFactory.createAttribute(NexusConstants.NXCLASS, NexusConstants.DATA));
 			
 			DoubleDataset data = DatasetFactory.createRange(DoubleDataset.class, 100);
-			data.reshape(10, 10);
+			data.setShape(10, 10);
 			DoubleDataset dataXY = DatasetFactory.createRange(DoubleDataset.class, 10);
 		
 			DataNode axisXNode = NexusTreeUtils.createDataNode("axisX", dataXY, null);
