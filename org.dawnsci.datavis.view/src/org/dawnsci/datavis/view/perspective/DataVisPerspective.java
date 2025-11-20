@@ -10,9 +10,7 @@ import org.eclipse.ui.IViewLayout;
 
 public class DataVisPerspective implements IPerspectiveFactory {
 
-	public static final String ID = DataVisConstants.DATAVIS_PERSPECTIVE_ID;
-
-	private static final String PLOT_ID = "org.dawnsci.datavis.view.parts.Plot";
+	private static final String PLOT_ID = DataVisConstants.PLOT_ID;
 
 	public void createInitialLayout(IPageLayout layout) {
 		

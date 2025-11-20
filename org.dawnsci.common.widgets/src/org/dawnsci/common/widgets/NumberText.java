@@ -9,6 +9,7 @@
 
 package org.dawnsci.common.widgets;
 
+import java.text.NumberFormat;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -39,6 +40,7 @@ public class NumberText extends Composite {
 	private final Text text;
 	private final Set<SelectionListener> listeners = new HashSet<>();
 	private String goodText = "";
+	private final NumberFormat numberFormat = NumberFormat.getNumberInstance();
 
 	public NumberText(Composite parent, int style) {
 		super(parent, SWT.NONE);
@@ -63,6 +65,11 @@ public class NumberText extends Composite {
 				processSelection(true, e);
 			}
 		});
+		numberFormat.setMaximumFractionDigits(15);
+	}
+
+	public void setDecimalPlaces(int p) {
+		numberFormat.setMaximumFractionDigits(p);
 	}
 
 	private static void verifyDouble(VerifyEvent e) {
@@ -148,7 +155,7 @@ public class NumberText extends Composite {
 		if (number == null) {
 			goodText = "";
 		} else {
-			goodText = number.toString();
+			goodText = numberFormat.format(number);
 		}
 		text.setText(goodText);
 	}

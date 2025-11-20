@@ -19,6 +19,7 @@ import org.dawnsci.datavis.api.utils.DataPackageUtils;
 import org.dawnsci.datavis.manipulation.aggregate.AggregateDialog;
 import org.dawnsci.datavis.manipulation.componentfit.ComponentFitDialog;
 import org.dawnsci.datavis.manipulation.componentfit.ComponentFitModel;
+import org.dawnsci.datavis.manipulation.overlapmerge.OverlapMergeDialog;
 import org.dawnsci.datavis.model.DataOptions;
 import org.dawnsci.datavis.model.FileControllerUtils;
 import org.dawnsci.datavis.model.IFileController;
@@ -433,6 +434,25 @@ public class DataManipulationExtensionContributionFactory extends ExtensionContr
 				
 				stitch.setToolTipText("Stitch together selected dataset, and normalise the total external reflection to 1.");
 
+				Action overlapMerge = new Action("Overlap merge") {
+					@Override
+					public void run() {
+						List<IXYData> xyData = DataPackageUtils.getXYData(data, false, true);
+						if (xyData.size() != 2) {
+							MessageDialog.openError(shell, "Error", "Two datasets are required for merging");
+							return;
+						}
+						try {
+							OverlapMergeDialog a = new OverlapMergeDialog(shell, xyData);
+							a.requireOverlap();
+							a.open();
+						} catch (IllegalArgumentException | DatasetException e) {
+							MessageDialog.openError(shell, "Error", "Could not initialise data for overlap merge: " + e.getMessage());
+						}
+					}
+				};
+				overlapMerge.setToolTipText("Merge together two overlapping datasets");
+
 				if (data == null || data.isEmpty()) {
 					concat.setEnabled(false);
 					average.setEnabled(false);
@@ -440,6 +460,7 @@ public class DataManipulationExtensionContributionFactory extends ExtensionContr
 					aggregate.setEnabled(false);
 					xmcd.setEnabled(false);
 					stitch.setEnabled(false);
+					overlapMerge.setEnabled(false);
 				}
 
 				Action componentFit = new Action("Component Fit"){
@@ -465,6 +486,7 @@ public class DataManipulationExtensionContributionFactory extends ExtensionContr
 				xyTools.add(aggregate);
 				xyTools.add(xmcd);
 				xyTools.add(stitch);
+				xyTools.add(overlapMerge);
 				xyTools.add(componentFit);
 			}
 		});

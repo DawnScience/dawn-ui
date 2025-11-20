@@ -22,7 +22,6 @@ import org.dawnsci.datavis.model.IFileController;
 import org.dawnsci.datavis.model.IRefreshable;
 import org.dawnsci.datavis.model.LoadedFile;
 import org.dawnsci.datavis.view.Activator;
-import org.dawnsci.datavis.view.perspective.DataVisPerspective;
 import org.dawnsci.datavis.view.preference.DataVisPreferenceConstants;
 import org.dawnsci.datavis.view.quickfile.IQuickFileWidgetListener;
 import org.dawnsci.datavis.view.quickfile.QuickFileWidget;
@@ -527,7 +526,7 @@ public class LoadedFilePart {
 	 * @return perspective that this part belongs to
 	 */
 	protected String getPerspectiveID() {
-		return DataVisPerspective.ID;
+		return DataVisConstants.DATAVIS_PERSPECTIVE_ID;
 	}
 
 	@Inject
