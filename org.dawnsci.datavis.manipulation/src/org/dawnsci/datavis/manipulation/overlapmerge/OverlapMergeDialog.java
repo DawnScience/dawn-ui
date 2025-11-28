@@ -1,5 +1,6 @@
 package org.dawnsci.datavis.manipulation.overlapmerge;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
@@ -10,6 +11,7 @@ import org.dawnsci.common.widgets.NumberText;
 import org.dawnsci.datavis.api.DataVisConstants;
 import org.dawnsci.datavis.api.IXYData;
 import org.eclipse.dawnsci.analysis.api.roi.IROI;
+import org.eclipse.dawnsci.analysis.api.tree.Node;
 import org.eclipse.dawnsci.analysis.dataset.roi.XAxisBoxROI;
 import org.eclipse.dawnsci.plotting.api.IPlottingService;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
@@ -24,6 +26,12 @@ import org.eclipse.dawnsci.plotting.api.trace.MetadataPlotUtils;
 import org.eclipse.january.DatasetException;
 import org.eclipse.january.dataset.Dataset;
 import org.eclipse.january.dataset.DatasetUtils;
+import org.eclipse.january.dataset.IDataset;
+import org.eclipse.january.dataset.ILazyDataset;
+import org.eclipse.january.dataset.Slice;
+import org.eclipse.january.dataset.SliceND;
+import org.eclipse.january.dataset.SliceNDIterator;
+import org.eclipse.january.metadata.OriginMetadata;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.layout.RowLayoutFactory;
@@ -42,6 +50,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Group;
+import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -57,8 +66,6 @@ public class OverlapMergeDialog extends Dialog implements IROIListener {
 	private IPlottingSystem<?> system;
 	private IRegion region;
 
-	private NumberText regionFraction;
-
 	private NormOption normOpt;
 
 	private double[] ends;
@@ -71,9 +78,14 @@ public class OverlapMergeDialog extends Dialog implements IROIListener {
 
 	private NumberText regionStop;
 
-	private Dataset[] mergedData;
-
 	private String savePath;
+
+	private Dataset[] allYA;
+
+	private Dataset[] allYB;
+
+	private boolean plotAll;
+	private int pairCount;
 
 	private static double mergeFraction = 0.95;
 	private static final String X_AXIS_REGION = "X overlap merge region";
@@ -85,14 +97,86 @@ public class OverlapMergeDialog extends Dialog implements IROIListener {
 		super(parentShell);
 
 		this.xyData = xyData;
-		IXYData firstXY = xyData.get(0);
-		IXYData secondXY = xyData.get(1);
-		Dataset xA = DatasetUtils.convertToDataset(firstXY.getX());
+		IXYData xyA = xyData.get(0);
+		IXYData xyB = xyData.get(1);
+		Dataset xA = DatasetUtils.convertToDataset(xyA.getX());
+		int axisSliceCount = getSliceCount(xA.getFirstMetadata(OriginMetadata.class));
+		if (axisSliceCount != 1) {
+			throw new IllegalArgumentException(String.format("First x-axis must be a single slice (not %d)", axisSliceCount));
+		}
 		xA.setName(MetadataPlotUtils.removeSquareBrackets(xA.getName()));
-		Dataset xB = DatasetUtils.convertToDataset(secondXY.getX());
+		Dataset xB = DatasetUtils.convertToDataset(xyB.getX());
+		axisSliceCount = getSliceCount(xB.getFirstMetadata(OriginMetadata.class));
+		if (axisSliceCount != 1) {
+			throw new IllegalArgumentException(String.format("Second x-axis must be a single slice (not %d)", axisSliceCount));
+		}
 		xB.setName(MetadataPlotUtils.removeSquareBrackets(xB.getName()));
+
+		pairCount = 1;
+		OriginMetadata omdYA = xyA.getY().getFirstMetadata(OriginMetadata.class);
+		ILazyDataset allA = omdYA.getParent();
+		if (allA.getRank() > 1) {
+			pairCount = getSliceCount(omdYA);
+		}
+
+		OriginMetadata omdYB = xyB.getY().getFirstMetadata(OriginMetadata.class);
+		ILazyDataset allB = omdYB.getParent();
+		if (allB.getRank() > 1) {
+			int sliceCount = getSliceCount(omdYB);
+			if (pairCount != sliceCount) {
+				logger.warn("Number of lines ({}) from {}#{} does not match ({}) from {}#{}",
+						pairCount, sliceCount,
+						omdYA.getFilePath(), omdYA.getDatasetName(),
+						omdYB.getFilePath(), omdYB.getDatasetName());
+				pairCount = 1;
+			}
+		}
+
+		allYA = new Dataset[pairCount];
+		allYB = new Dataset[pairCount];
+		getSlicedData(omdYA, xyA, allA, allYA);
+		getSlicedData(omdYB, xyB, allB, allYB);
+		plotAll = false;
+
 		overlapMerge = new OverlapMerge(xA, xB);
 		ends = overlapMerge.getOverlap();
+	}
+
+	/**
+	 * @param omd
+	 * @return number of slices in shape
+	 */
+	private int getSliceCount(OriginMetadata omd) {
+		Slice[] oSlice = omd.getSliceInOutput();
+		int[] shape = omd.getParent().getShape();
+		int slicedCount = 1;
+		for (int i = 0; i < oSlice.length; i++) {
+			Slice s = oSlice[i];
+			int l = shape[i];
+			if (l != 1 && s.getNumSteps() == 1) {
+				int step = s.getStep();
+				Slice nSlice = new Slice(s.getStart(), null, step);
+				nSlice.setLength(l);
+				slicedCount *= nSlice.getNumSteps();
+			}
+		}
+		return slicedCount;
+	}
+
+	private SliceNDIterator getSliceIterator(OriginMetadata omd) {
+		Slice[] oSlice = omd.getSliceInOutput();
+		int[] shape = omd.getParent().getShape();
+		List<Integer> dataDims = new ArrayList<>();
+		Slice[] nSlice = new Slice[oSlice.length];
+		for (int i = 0; i < oSlice.length; i++) {
+			Slice s = oSlice[i];
+			if (s.getNumSteps() != 1) {
+				nSlice[i] = s.clone();
+				dataDims.add(i);
+			}
+		}
+		int[] ddims = dataDims.stream().mapToInt(Integer::intValue).toArray();
+		return new SliceNDIterator(new SliceND(shape, nSlice), ddims);
 	}
 
 	@Override
@@ -135,6 +219,27 @@ public class OverlapMergeDialog extends Dialog implements IROIListener {
 
 		RowLayoutFactory rlFactory = RowLayoutFactory.swtDefaults();
 		GroupFactory gFactory = WidgetFactory.group(SWT.NONE);
+		Group dataGroup = gFactory.create(container);
+		dataGroup.setLayout(gLFactory.create());
+		dataGroup.setText("Data");
+		Composite dComp = new Composite(dataGroup, SWT.NONE);
+		RowLayout dLayout = rlFactory.create();
+		dLayout.center = true;
+		dComp.setLayout(dLayout);
+		Label pairCountLabel = WidgetFactory.label(SWT.NONE).create(dComp);
+		pairCountLabel.setText(String.format("Pairs: %d ", pairCount));
+		pairCountLabel.setToolTipText("Number of pairs of lines available");
+		Button useAllPairs = WidgetFactory.button(SWT.PUSH).create(dComp);
+		useAllPairs.setText("Plot all");
+		useAllPairs.setToolTipText("Click to plot all pairs of lines");
+		useAllPairs.setEnabled(pairCount > 1);
+		useAllPairs.addSelectionListener(SelectionListener.widgetSelectedAdapter(e -> {
+			if (!plotAll) {
+				plotAll = true;
+				plotAllPairs();
+			}
+		}));
+
 		Group olGroup = gFactory.create(container);
 		olGroup.setLayout(gLFactory.create());
 		olGroup.setText("Overlap");
@@ -144,7 +249,7 @@ public class OverlapMergeDialog extends Dialog implements IROIListener {
 		rLayout.center = true; // bug in JFace 3.27 does not copy over center field
 		finder.setLayout(rLayout);
 		WidgetFactory.label(SWT.NONE).create(finder).setText("Fraction:");
-		regionFraction = new NumberText(finder, SWT.BORDER);
+		NumberText regionFraction = new NumberText(finder, SWT.BORDER);
 		regionFraction.setDecimalPlaces(2);
 		regionFraction.setToolTipText("Fraction of overlap to auto-select - must be in (0,1)");
 		regionFraction.setValue(mergeFraction);
@@ -214,7 +319,7 @@ public class OverlapMergeDialog extends Dialog implements IROIListener {
 		Button fixFirstButton = rbFactory.create(fitGroup);
 		fixFirstButton.setText("1st");
 		fixFirstButton.setSelection(true);
-		fixFirstButton.setToolTipText("Normalize to 1st curve");
+		fixFirstButton.setToolTipText("Normalize to 1st line");
 		fixFirstButton.addSelectionListener(SelectionListener.widgetSelectedAdapter(
 			e -> {
 				normOpt = OverlapMerge.NormOption.FIRST;
@@ -222,7 +327,7 @@ public class OverlapMergeDialog extends Dialog implements IROIListener {
 			}));
 		Button fixSecondButton = rbFactory.create(fitGroup);
 		fixSecondButton.setText("2nd");
-		fixSecondButton.setToolTipText("Normalize to 2nd curve");
+		fixSecondButton.setToolTipText("Normalize to 2nd line");
 		fixSecondButton.addSelectionListener(SelectionListener.widgetSelectedAdapter(
 			e -> {
 				normOpt = OverlapMerge.NormOption.SECOND;
@@ -374,7 +479,77 @@ public class OverlapMergeDialog extends Dialog implements IROIListener {
 
 	public void requireOverlap() throws DatasetException {
 		if (!overlapMerge.isOverlapping()) {
-			throw new DatasetException("Curves do not overlap");
+			throw new DatasetException("Lines do not overlap");
+		}
+	}
+
+	private String getName(String fileName) {
+		String name = fileName;
+		if (name.contains(Node.SEPARATOR)) {
+			name = name.substring(name.lastIndexOf(Node.SEPARATOR) + 1);
+		}
+		return name;
+	}
+
+	private void getSlicedData(OriginMetadata omd, IXYData xy, ILazyDataset whole, Dataset[] all) {
+		SliceNDIterator it = getSliceIterator(omd);
+		String yName = getName(xy.getFileName());
+
+		int i = 0;
+		SliceND s = it.getCurrentSlice();
+		while (it.hasNext() && i < pairCount) {
+			Dataset y = null;
+			try {
+				y = DatasetUtils.convertToDataset(whole.getSlice(s)).squeeze(true);
+				y.setName(String.format("%s[%s]", yName, s));
+			} catch (DatasetException e) {
+				logger.error("Could not load data from {} for {}", xy.getFileName(), s);
+			}
+			all[i++] = y;
+		}
+	}
+
+	private void plotAllPairs() {
+		IXYData firstXY = xyData.get(0);
+		IXYData secondXY = xyData.get(1);
+
+		// replace first lines' names
+		String firstFileName = getName(firstXY.getFileName());
+		String secondFileName = getName(secondXY.getFileName());
+		Collection<ITrace> traces = system.getTraces(ILineTrace.class);
+		for (ITrace t : traces) {
+			if (t instanceof ILineTrace lt) {
+				String dName = lt.getDataName();
+				if (dName != null) {
+					if (dName.startsWith(firstFileName)) {
+						lt.setName(allYA[0].getName());
+					} else if (dName.startsWith(secondFileName)) {
+						lt.setName(allYB[0].getName());
+					}
+				}
+			}
+		}
+
+		plotSlices(firstXY.getX(), allYA);
+		plotSlices(secondXY.getX(), allYB);
+		mergeAndPlot();
+	}
+
+	private void plotSlices(IDataset x, Dataset[] all) {
+		for (Dataset y : all) {
+			if (y == null) {
+				continue;
+			}
+			String tName = y.getName();
+			ITrace trace = system.getTrace(tName);
+			ILineTrace lTrace;
+			if (trace instanceof ILineTrace lineTrace) {
+				lTrace = lineTrace;
+			} else {
+				lTrace = system.createLineTrace(tName);
+				system.addTrace(lTrace);
+			}
+			lTrace.setData(x, y);
 		}
 	}
 
@@ -384,19 +559,35 @@ public class OverlapMergeDialog extends Dialog implements IROIListener {
 		Dataset yA = DatasetUtils.convertToDataset(firstXY.getY());
 		Dataset yB = DatasetUtils.convertToDataset(secondXY.getY());
 
+		String suffix = "";
+		if (pairCount > 1) {
+			suffix = "-0";
+		}
+		mergeAndPlot(OM_TRACE_NAME + suffix, OM_DATASET_NAME + suffix, yA, yB);
+		if (plotAll) {
+			for (int i = 1; i < pairCount; i++) {
+				Dataset a = allYA[i];
+				Dataset b = allYB[i];
+				suffix = "-" + i;
+				mergeAndPlot(OM_TRACE_NAME + suffix, OM_DATASET_NAME + suffix, a, b);
+			}
+		}
+	}
+
+	private void mergeAndPlot(String tName, String dName, Dataset yA, Dataset yB) {
 		try {
-			ITrace trace = system.getTrace(OM_TRACE_NAME);
+			ITrace trace = system.getTrace(tName);
 			ILineTrace lTrace;
 			if (trace instanceof ILineTrace lineTrace) {
 				lTrace = lineTrace;
 			} else {
-				lTrace = system.createLineTrace(OM_TRACE_NAME);
+				lTrace = system.createLineTrace(tName);
 				system.addTrace(lTrace);
 			}
 			lTrace.setVisible(true);
 			lTrace.setTraceType(TraceType.DASH_LINE);
-			mergedData = overlapMerge.mergeOverlap(yA, yB, normOpt);
-			mergedData[1].setName(OM_DATASET_NAME);
+			Dataset[] mergedData = overlapMerge.mergeOverlap(yA, yB, normOpt);
+			mergedData[1].setName(dName);
 			lTrace.setData(mergedData[0], mergedData[1]);
 			lTrace.setTraceType(TraceType.SOLID_LINE);
 		} catch (DatasetException e) {
@@ -423,7 +614,7 @@ public class OverlapMergeDialog extends Dialog implements IROIListener {
 
 	@Override
 	protected Point getInitialSize() {
-		return new Point(300, 360);
+		return new Point(300, 440);
 	}
 
 	@Override

@@ -437,9 +437,10 @@ public class DataManipulationExtensionContributionFactory extends ExtensionContr
 				Action overlapMerge = new Action("Overlap merge") {
 					@Override
 					public void run() {
-						List<IXYData> xyData = DataPackageUtils.getXYData(data, false, true);
+						List<IXYData> xyData = DataPackageUtils.getXYData(data, true, true);
 						if (xyData.size() != 2) {
-							MessageDialog.openError(shell, "Error", "Two datasets are required for merging");
+							logger.error("Need two lines to use overlap merge");
+							MessageDialog.openError(shell, "Error", "Two lines are required for merging");
 							return;
 						}
 						try {
@@ -447,11 +448,12 @@ public class DataManipulationExtensionContributionFactory extends ExtensionContr
 							a.requireOverlap();
 							a.open();
 						} catch (IllegalArgumentException | DatasetException e) {
+							logger.error("Could not initialise data for overlap merge", e);
 							MessageDialog.openError(shell, "Error", "Could not initialise data for overlap merge: " + e.getMessage());
 						}
 					}
 				};
-				overlapMerge.setToolTipText("Merge together two overlapping datasets");
+				overlapMerge.setToolTipText("Merge together two overlapping lines");
 
 				if (data == null || data.isEmpty()) {
 					concat.setEnabled(false);
@@ -522,11 +524,11 @@ public class DataManipulationExtensionContributionFactory extends ExtensionContr
 
 	private List<IDataFilePackage> getSuitableData(ISelection selection){
 
-		if (selection instanceof StructuredSelection) {
+		if (selection instanceof StructuredSelection ss) {
 
-			return Arrays.stream(((StructuredSelection)selection).toArray())
+			return Arrays.stream(ss.toArray())
 					.filter(IDataFilePackage.class::isInstance)
-					.map(IDataFilePackage.class::cast).collect(Collectors.toList());
+					.map(IDataFilePackage.class::cast).toList();
 		}
 
 		return Collections.emptyList();

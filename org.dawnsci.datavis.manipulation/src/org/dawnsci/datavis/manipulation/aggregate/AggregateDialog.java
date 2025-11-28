@@ -18,7 +18,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 import org.dawnsci.common.widgets.dialog.FileSelectionDialog;
 import org.dawnsci.datavis.api.IDataFilePackage;
@@ -110,8 +109,10 @@ public class AggregateDialog extends Dialog {
 	private List<LabelOption> labelOptions;
 
 	private boolean showHistogram;
+	private boolean transposeAggregate;
 
 	private Button plot;
+	private Button transpose;
 
 	private LabelColumn xBinsParameters;
 
@@ -202,12 +203,13 @@ public class AggregateDialog extends Dialog {
 		name.setLabelProvider(new ColumnLabelProvider() {
 			@Override
 			public String getText(Object element) {
-				return new File(((IDataFilePackage)element).getFilePath()).getName();
+				if (element instanceof IDataFilePackage dfp) return new File(dfp.getFilePath()).getName();
+				return null;
 			}
 
 			@Override
 			public String getToolTipText(Object element) {
-				if (element instanceof IDataFilePackage) return ((IDataFilePackage) element).getFilePath();
+				if (element instanceof IDataFilePackage dfp) return dfp.getFilePath();
 				return null;
 			};
 		});
@@ -268,7 +270,16 @@ public class AggregateDialog extends Dialog {
 		yBinsParameters = new LabelColumn(labelYColumn);
 
 		// space
-		new Text(entryPane, SWT.NONE);
+		WidgetFactory.text(SWT.NONE).create(entryPane);
+		
+		transpose = WidgetFactory.button(SWT.CHECK).create(entryPane);
+		transpose.setText("Transpose aggregate");
+		transpose.setToolTipText("Switch X/Y in aggregated data");
+		transpose.addSelectionListener(SelectionListener.widgetSelectedAdapter(e -> {
+			transposeAggregate = transpose.getSelection();
+			plotAggregate();
+		}));
+		transpose.setSelection(transposeAggregate);
 
 		// TODO
 		// add GridROI?
@@ -533,7 +544,7 @@ public class AggregateDialog extends Dialog {
 		} else { // remove chosen label X for label Y
 			LabelOption other = chosenLabels.get(0);
 			choice = labelOptions.stream().filter(o -> !o.equals(other))
-					.collect(Collectors.toList()).toArray(new LabelOption[0]);
+					.toArray(LabelOption[]::new);
 		}
 		d.setElements(choice);
 		LabelOption chosen = chosenLabels.get(i);
@@ -586,8 +597,8 @@ public class AggregateDialog extends Dialog {
 		return data.stream()
 				.flatMap(f -> f.getLabelOptions().stream())
 				.distinct()
-				.map(l -> new LabelOption(l))
-				.collect(Collectors.toList());
+				.map(LabelOption::new)
+				.toList();
 	}
 
 	private Dataset getLabelValues(int i) {
@@ -601,8 +612,7 @@ public class AggregateDialog extends Dialog {
 	}
 
 	public Dataset getLabelDataset(LabelOption labelOption) {
-		if (labelOption instanceof ExpressionLabelOption) {
-			ExpressionLabelOption elo = (ExpressionLabelOption) labelOption;
+		if (labelOption instanceof ExpressionLabelOption elo) {
 			Map<String, Object> vars = new LinkedHashMap<>();
 			for (LabelOption l : elo.getVariables()) {
 				Dataset d = getLabelDataset(l);
@@ -621,7 +631,7 @@ public class AggregateDialog extends Dialog {
 					.filter(Objects::nonNull)
 					.filter(d -> InterfaceUtils.isNumerical(d.getClass()))
 					.map(Dataset::getDouble)
-					.collect(Collectors.toList());
+					.toList();
 			values = DatasetFactory.createFromList(DoubleDataset.class, v);
 			values.setName(labelOption.getName());
 			labelOption.setValues(values);
@@ -927,7 +937,7 @@ public class AggregateDialog extends Dialog {
 			return;
 		}
 
-		Dataset d = aggregate;
+		Dataset d = transposeAggregate ? aggregate.getTransposedView() : aggregate;
 		int r = d.getRank();
 		if (r > 3) {
 			Slice[] s = new Slice[r];
@@ -978,8 +988,9 @@ public class AggregateDialog extends Dialog {
 		if (dialog.open() == Dialog.CANCEL) return;
 		lastPath = dialog.getPath();
 
+		Dataset out = transposeAggregate ? aggregate.getTransposedView() : aggregate;
 		boolean success = FileWritingUtils.writeProcessedData(ServiceProvider.getService(INexusFileFactory.class),
-				getShell(), getClass().getSimpleName(), lastPath, AGGREGATED_ENTRY, aggregate);
+				getShell(), getClass().getSimpleName(), lastPath, AGGREGATED_ENTRY, out);
 
 		if (success) {
 			IFileController fc = ServiceProvider.getService(IFileController.class);
