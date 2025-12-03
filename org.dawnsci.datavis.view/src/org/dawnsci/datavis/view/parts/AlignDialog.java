@@ -43,6 +43,7 @@ import org.eclipse.january.dataset.DatasetUtils;
 import org.eclipse.january.dataset.IDataset;
 import org.eclipse.january.dataset.Slice;
 import org.eclipse.january.metadata.AxesMetadata;
+import org.eclipse.january.metadata.IMetadata;
 import org.eclipse.january.metadata.MetadataFactory;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
@@ -619,6 +620,8 @@ public class AlignDialog extends Dialog implements IRegionListener, PlotModeChan
 			}
 			Dataset x = data[i];
 			Dataset d = data[i + 1];
+			copyIMetadata(t, d);
+
 			PlotItem pi = plotItems.get(n);
 			Dataset ox = pi.getX();
 			if (resampleX || x != ox) {
@@ -642,6 +645,20 @@ public class AlignDialog extends Dialog implements IRegionListener, PlotModeChan
 		plottingSystem.repaint(false);
 		resultTable.refresh();
 		storeAutoAlignShifts.setEnabled(true);
+	}
+
+	private void copyIMetadata(ILineTrace t, Dataset y) {
+		IDataset yo = t.getYData();
+		try {
+			List<IMetadata> metadata = yo.getMetadata(IMetadata.class);
+			if (metadata != null) {
+				for (IMetadata m : metadata) {
+					y.addMetadata(m);
+				}
+			}
+		} catch (MetadataException e) {
+			logger.error("Could not copy metadata for {}", yo.getName(), e);
+		}
 	}
 
 	// store aligned data in original data option
@@ -764,6 +781,7 @@ public class AlignDialog extends Dialog implements IRegionListener, PlotModeChan
 				logger.debug("Updated trace {}: {}", pi.getName(), ny.getSlice(new Slice(8)).toString(true));
 			}
 
+			copyIMetadata(lt, ny);
 			lt.setData(nx, ny);
 			lt.repaint();
 
@@ -863,6 +881,7 @@ public class AlignDialog extends Dialog implements IRegionListener, PlotModeChan
 	@Override
 	public boolean close() {
 		plottingSystem.removeRegionListener(this);
+		plotController.removePlotModeListener(this);
 		if (getReturnCode() == Window.CANCEL) {
 			plotOriginal();
 			removeRegion();
