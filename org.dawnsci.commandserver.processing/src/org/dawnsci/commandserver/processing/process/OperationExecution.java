@@ -32,6 +32,7 @@ import org.eclipse.january.metadata.MetadataFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import uk.ac.diamond.scisoft.analysis.io.HDF5Loader;
 import uk.ac.diamond.scisoft.analysis.io.NexusTreeUtils;
 import uk.ac.diamond.scisoft.analysis.processing.bean.OperationBean;
 import uk.ac.diamond.scisoft.analysis.processing.visitor.NexusFileExecutionVisitor;
@@ -246,7 +247,8 @@ public class OperationExecution {
 		try {
 			logger.debug("Trying dataholder");
 			lservice.clearSoftReferenceCache(filePath);
-			holder = lservice.getData(filePath, new IMonitor.Stub());
+			HDF5Loader l = new HDF5Loader(filePath);
+			holder = l.loadFile();
 
 			ILazyDataset lz = null;
 			MetadataFactory.registerClass(DynamicAxesMetadataImpl.class);
