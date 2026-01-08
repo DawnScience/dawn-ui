@@ -13,7 +13,11 @@ import java.awt.image.ColorModel;
 import java.awt.image.DirectColorModel;
 import java.awt.image.IndexColorModel;
 import java.awt.image.WritableRaster;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.TreeMap;
 
 import org.dawnsci.plotting.services.util.SWTImageUtils;
 import org.eclipse.core.runtime.Platform;
@@ -27,7 +31,6 @@ import org.eclipse.dawnsci.plotting.api.histogram.ImageServiceBean.HistoType;
 import org.eclipse.dawnsci.plotting.api.histogram.ImageServiceBean.ImageOrigin;
 import org.eclipse.dawnsci.plotting.api.histogram.functions.FunctionContainer;
 import org.eclipse.dawnsci.plotting.api.preferences.BasePlottingConstants;
-import org.eclipse.january.dataset.BooleanDataset;
 import org.eclipse.january.dataset.Dataset;
 import org.eclipse.january.dataset.DatasetUtils;
 import org.eclipse.january.dataset.IndexIterator;
@@ -125,8 +128,8 @@ public class ImageService extends AbstractServiceFactory implements IImageServic
 		double max = getMax(bean);
 		double min = getMin(bean);
 
-		double maxCut = getMaxCut(bean);
-		double minCut = getMinCut(bean);
+		double maxCut = bean.getMaximumCutValue();
+		double minCut = bean.getMinimumCutValue();
 
 		if (oImage.isComplex()) { // handle complex datasets by creating RGB dataset
 			Dataset hue = Maths.angle(oImage, true);
@@ -191,20 +194,6 @@ public class ImageService extends AbstractServiceFactory implements IImageServic
 		return Math.max(bean.getMin().doubleValue(), bean.getMinimumCutBound().getBound().doubleValue());
 	}
 	
-	private double getMaxCut(ImageServiceBean bean) {
-		if (bean.getMaximumCutBound()==null || bean.getMaximumCutBound().getBound()==null) {
-			return Double.POSITIVE_INFINITY;
-		}
-		return bean.getMaximumCutBound().getBound().doubleValue();
-	}
-	
-	private double getMinCut(ImageServiceBean bean) {
-		if (bean.getMinimumCutBound()==null || bean.getMinimumCutBound().getBound()==null) {
-			return Double.NEGATIVE_INFINITY;
-		}
-		return bean.getMinimumCutBound().getBound().doubleValue();
-	}
-
 	private void createMaxMin(ImageServiceBean bean) {
 		
 		double[] stats  = null;
@@ -271,19 +260,22 @@ public class ImageService extends AbstractServiceFactory implements IImageServic
 		
 		Dataset image = getImageLoggedData(bean);
 
+		Dataset mask = bean.getMask() == null ? null : DatasetUtils.convertToDataset(bean.getMask());
+
+		double maxCut = bean.getMaximumCutValue();
+		double minCut = bean.getMinimumCutValue();
+
 		if (bean.getHistogramType() == HistoType.OUTLIER_VALUES) {
 			double[] ret = null;
 			
-			Dataset mask = bean.getMask() == null ? null : DatasetUtils.convertToDataset(bean.getMask());
-			
 			try {
-			    double[] stats = Stats.outlierValues(image,mask,true, bean.getLo(), bean.getHi(), -1);
-			    ret = new double[]{stats[0], stats[1], -1};
+				double[] stats = outlierValues(image, mask, true, bean.getLo(), bean.getHi(), minCut, maxCut, -1);
+				ret = new double[]{stats[0], stats[1], -1};
 			} catch (IllegalArgumentException iae) {
 				bean.setLo(10);
 				bean.setHi(90);
-			    double[] stats = Stats.outlierValues(image,mask,true, bean.getLo(), bean.getHi(), -1);
-			    ret = new double[]{stats[0], stats[1], -1};
+				double[] stats = outlierValues(image, mask, true, bean.getLo(), bean.getHi(), minCut, maxCut, -1);
+				ret = new double[]{stats[0], stats[1], -1};
 			} catch (NoSuchElementException e) {
 				//data all NaN
 				ret = new double[] {Double.NaN, Double.NaN,-1};
@@ -297,41 +289,46 @@ public class ImageService extends AbstractServiceFactory implements IImageServic
 
 			return ret;
 		}
-		
+
+		final boolean checkMin = Double.isFinite(minCut);
+		final boolean checkMax = Double.isFinite(maxCut);
+
 		double min = Double.MAX_VALUE;
 		double max = -Double.MAX_VALUE;
 		double sum = 0.0;
 		int size = 0;
 		
-		BooleanDataset mask = bean.getMask() == null ? null : DatasetUtils.cast(BooleanDataset.class, bean.getMask());
-
-	    // Big loop warning:
-	    final IndexIterator it = image.getIterator();
-	    final IndexIterator mit = mask == null ? null : mask.getIterator();
+		// Big loop warning:
+		final IndexIterator it = image.getIterator();
+		final IndexIterator mit = mask == null ? null : mask.getIterator();
+		
 		while (it.hasNext()) {
 			
 			final double val = image.getElementDoubleAbs(it.index);
-			if (mit != null && mit.hasNext()) {
-				if (!mask.getElementBooleanAbs(mit.index)) {
-					continue; // Masked!
-			    }
+			if (mit != null && mit.hasNext() && !mask.getElementBooleanAbs(mit.index)) {
+				continue; // Masked!
 			}
 
-			if (Double.isNaN(val))      continue;
-			if (!bean.isInBounds(val))  continue;
+			if (Double.isNaN(val)) continue;
+			if (checkMin && val <= minCut) {
+				continue;
+			}
+			if (checkMax && val >= maxCut) {
+				continue;
+			}
+
 
 			sum += val;
 			if (val < min) min = val;
 			if (val > max) max = val;
 			size++;
 		}
-		
+
 		double retMax = Double.NaN;
 		double retExtra = Double.NaN;
-		
+
 		if (bean.getHistogramType() == HistoType.FULL_RANGE) {
 			retMax = max;
-			
 		} else if (bean.getHistogramType()==HistoType.MEDIAN) { 
 			
 			double median = Double.NaN;
@@ -363,7 +360,7 @@ public class ImageService extends AbstractServiceFactory implements IImageServic
 		return ret;
 	}
 	
-	private void sanitise_stats(double[] output, boolean isInteger) {
+	private static void sanitise_stats(double[] output, boolean isInteger) {
 		double a = output[0];
 		if (a == output[1]) {
 			if (isInteger) {
@@ -379,6 +376,212 @@ public class ImageService extends AbstractServiceFactory implements IImageServic
 		}
 	}
 
+	/**
+	 * Calculate approximate outlier values. These are defined as the values in the dataset
+	 * that are approximately below and above the given thresholds - in terms of percentages
+	 * of dataset size.
+	 * <p>
+	 * It approximates by limiting the number of items (given by length) used internally by
+	 * data structures - the larger this is, the more accurate will those outlier values become.
+	 * The actual thresholds used are returned in the array.
+	 * <p>
+	 * Also, the low and high values will be made distinct if possible by adjusting the thresholds
+	 * @param a dataset
+	 * @param mask can be null
+	 * @param value value of mask to match to include for calculation
+	 * @param lo percentage threshold for lower limit
+	 * @param hi percentage threshold for higher limit
+	 * @param minCut
+	 * @param maxCut
+	 * @param length maximum number of items used internally, if negative, then unlimited
+	 * @return double array with low and high values, and low and high percentage thresholds
+	 */
+	private double[] outlierValues(final Dataset a, final Dataset mask, final boolean value, double lo, double hi, double minCut, double maxCut, final int length) {
+		if (lo <= 0 || hi <= 0 || lo >= hi || hi >= 100  || Double.isNaN(lo)|| Double.isNaN(hi)) {
+			throw new IllegalArgumentException("Thresholds must be between (0,100) and in order");
+		}
+		final int size = a.getSize();
+		int nl = Math.max((int) ((lo*size)/100), 1);
+		if (length > 0 && nl > length)
+			nl = length;
+		int nh = Math.max((int) (((100-hi)*size)/100), 1);
+		if (length > 0 && nh > length)
+			nh = length;
+
+		IndexIterator it = mask == null ? a.getIterator() : a.getBooleanIterator(mask, value);
+		double[] results = Math.max(nl, nh) > 640 ? outlierValuesMap(a, it, nl, nh, minCut, maxCut) : outlierValuesList(a, it, nl, nh, minCut, maxCut);
+
+		results[2] = results[2]*100./size;
+		results[3] = 100. - results[3]*100./size;
+		return results;
+	}
+
+	static double[] outlierValuesMap(final Dataset a, final IndexIterator it, int nl, int nh, double minCut, double maxCut) {
+		final TreeMap<Double, Integer> lMap = new TreeMap<Double, Integer>();
+		final TreeMap<Double, Integer> hMap = new TreeMap<Double, Integer>();
+		final boolean checkMin = Double.isFinite(minCut);
+		final boolean checkMax = Double.isFinite(maxCut);
+
+		int ml = 0;
+		int mh = 0;
+		while (it.hasNext()) {
+			Double x = a.getElementDoubleAbs(it.index);
+			if (Double.isNaN(x)) {
+				continue;
+			}
+			if (checkMin && x <= minCut) {
+				continue;
+			}
+			if (checkMax && x >= maxCut) {
+				continue;
+			}
+			Integer i;
+			if (ml == nl) {
+				Double k = lMap.lastKey();
+				if (x < k) {
+					i = lMap.get(k) - 1;
+					if (i == 0) {
+						lMap.remove(k);
+					} else {
+						lMap.put(k, i);
+					}
+					i = lMap.get(x);
+					if (i == null) {
+						lMap.put(x, 1);
+					} else {
+						lMap.put(x, i + 1);
+					}
+				}
+			} else {
+				i = lMap.get(x);
+				if (i == null) {
+					lMap.put(x, 1);
+				} else {
+					lMap.put(x, i + 1);
+				}
+				ml++;
+			}
+
+			if (mh == nh) {
+				Double k = hMap.firstKey();
+				if (x > k) {
+					i = hMap.get(k) - 1;
+					if (i == 0) {
+						hMap.remove(k);
+					} else {
+						hMap.put(k, i);
+					}
+					i = hMap.get(x);
+					if (i == null) {
+						hMap.put(x, 1);
+					} else {
+						hMap.put(x, i+1);
+					}
+				}
+			} else {
+				i = hMap.get(x);
+				if (i == null) {
+					hMap.put(x, 1);
+				} else {
+					hMap.put(x, i+1);
+				}
+				mh++;
+			}
+		}
+
+		// Attempt to make values distinct
+		double lx = lMap.lastKey();
+		double hx = hMap.firstKey();
+		if (lx >= hx) {
+			Double h = hMap.higherKey(lx);
+			if (h != null) {
+				hx = h;
+				mh--;
+			} else {
+				Double l = lMap.lowerKey(hx);
+				if (l != null) {
+					lx = l;
+					ml--;
+				}
+			}
+		}
+
+		return new double[] {lMap.lastKey(), hMap.firstKey(), ml, mh};
+	}
+
+	static double[] outlierValuesList(final Dataset a, final IndexIterator it, int nl, int nh, double minCut, double maxCut) {
+		final List<Double> lList = new ArrayList<Double>(nl);
+		final List<Double> hList = new ArrayList<Double>(nh);
+		final boolean checkMin = Double.isFinite(minCut);
+		final boolean checkMax = Double.isFinite(maxCut);
+
+		double lx = Double.POSITIVE_INFINITY;
+		double hx = Double.NEGATIVE_INFINITY;
+
+		while (it.hasNext()) {
+			double x = a.getElementDoubleAbs(it.index);
+			if (Double.isNaN(x)) {
+				continue;
+			}
+			if (checkMin && x <= minCut) {
+				continue;
+			}
+			if (checkMax && x >= maxCut) {
+				continue;
+			}
+			if (x < lx) {
+				if (lList.size() == nl) {
+					lList.remove(lx);
+				}
+				lList.add(x);
+				lx = Collections.max(lList);
+			} else if (x == lx) {
+				if (lList.size() < nl) {
+					lList.add(x);
+				}
+			}
+
+			if (x > hx) {
+				if (hList.size() == nh) {
+					hList.remove(hx);
+				}
+				hList.add(x);
+				hx = Collections.min(hList);
+			} else if (x == hx) {
+				if (hList.size() < nh) {
+					hList.add(x);
+				}
+			}
+		}
+
+		nl = lList.size();
+		nh = hList.size();
+
+		// Attempt to make values distinct
+		if (lx >= hx) {
+			Collections.sort(hList);
+			for (double h : hList) {
+				if (h > hx) {
+					hx = h;
+					break;
+				}
+				nh--;
+			}
+			if (lx >= hx) {
+				Collections.sort(lList);
+				Collections.reverse(lList);
+				for (double l : lList) {
+					if (l < lx) {
+						lx = l;
+						break;
+					}
+					nl--;
+				}
+			}
+		}
+		return new double[] {lx, hx, nl, nh};
+	}
+
 	@Override
 	public Object create(@SuppressWarnings("rawtypes") Class serviceInterface, IServiceLocator parentLocator, IServiceLocator locator) {
 		
@@ -387,12 +590,7 @@ public class ImageService extends AbstractServiceFactory implements IImageServic
 		} 
 		return null;
 	}
-	
-	public static final class SDAFunctionBean {
-		
-	}
 
-	
 	/**
 	 * Converts an SWT ImageData to an AWT BufferedImage.
 	 * 
