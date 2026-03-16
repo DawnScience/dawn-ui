@@ -5,12 +5,12 @@
       version="2.41.0.qualifier"
       provider-name="DAWN Collaboration">
 
-   <description url="http://www.example.com/description">
-      [Enter Feature Description here.]
+   <description url="https://dawnsci.org/about/">
+      Dawn is an open source software (licence) for the visualisation and processing of scientific data
    </description>
 
    <copyright url="http://www.example.com/copyright">
-      Copyright (c) 2010 - 2025, Diamond Light Source Ltd.
+      Copyright (c) 2010 - 2026, Diamond Light Source Ltd.
    </copyright>
 
    <license url="http://www.eclipse.org/legal/epl-v10.html">
