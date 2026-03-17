@@ -12,6 +12,9 @@ import org.eclipse.january.IMonitor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import uk.ac.diamond.mq.activemq.ManagedActiveMQSessionService;
+import uk.ac.diamond.mq.rabbitmq.ManagedRabbitMQSessionService;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -42,7 +45,13 @@ public class OperationMonitor implements IMonitor, IFlushMonitor {
 	public OperationMonitor(OperationBean obean, int total) {
 		this.obean       = obean;
 		this.total       = total;
-		this.sessionService = Activator.getService(ISessionService.class);
+		
+		if (obean.isUseRabbitMQ()) {
+			this.sessionService = new ManagedRabbitMQSessionService();
+		} else {
+			this.sessionService = new ManagedActiveMQSessionService();
+		}
+
 		this.mapper = new ObjectMapper().findAndRegisterModules();
 	}
 	
