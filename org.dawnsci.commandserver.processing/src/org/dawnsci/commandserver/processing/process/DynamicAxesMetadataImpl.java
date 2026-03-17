@@ -46,7 +46,7 @@ public class DynamicAxesMetadataImpl implements AxesMetadata {
 				continue;
 			List<ILazyDataset> list = new ArrayList<ILazyDataset>();
 			for (ILazyDataset l : ol) {
-				ILazyDataset lv = l == null ? null : l.getSliceView();
+				ILazyDataset lv = l == null ? null : l.clone();
 				list.add(lv);
 				if (lv != null) {
 					int ihc = System.identityHashCode(lv);
@@ -131,7 +131,7 @@ public class DynamicAxesMetadataImpl implements AxesMetadata {
 		
 		if (axisDim.length == 1) {
 			int ad = axisDim[0];
-			ILazyDataset view = axisData.getSliceView();
+			ILazyDataset view = axisData.clone();
 			view.clearMetadata(AxesMetadata.class);
 			int r = axisData.getRank(); 
 			if (r != allAxes.length) {
@@ -147,7 +147,7 @@ public class DynamicAxesMetadataImpl implements AxesMetadata {
 		} else if (allAxes.length == axisData.getRank()){
 			return axisData;
 		} else {
-			ILazyDataset view = axisData.getSliceView();
+			ILazyDataset view = axisData.clone();
 			view.clearMetadata(AxesMetadata.class);
 			int[] newShape = new int[allAxes.length];
 			Arrays.fill(newShape, 1);
@@ -207,7 +207,7 @@ public class DynamicAxesMetadataImpl implements AxesMetadata {
 					int[] newShape = shape.clone();
 					Arrays.fill(newShape, 1);
 					newShape[i] = k;
-					logger.debug("For null or 1 dim {} has new shape {}",l.getName(),Arrays.toString(newShape));
+					logger.debug("For null or 1 dim {} has new shape {} and old shape {}",l.getName(),Arrays.toString(newShape),Arrays.toString(l.getShape()));
 					l.setShape(newShape);
 					axis.set(j, l);
 				} else {
