@@ -79,7 +79,7 @@
       <editor
             class="org.dawb.workbench.ui.editors.H5MultiEditor"
             default="true"
-            extensions="h5, hd5, hdf5, nxs, nexus, hdf, mat, nc"
+            extensions="h5, hd5, hdf5, nxs, nexus, hdf, mat, nc, hspy"
             icon="icons/h5_editor.png"
             id="org.dawb.workbench.editor.H5Editor"
             name="Nexus/HDF5 Editor">
@@ -92,7 +92,7 @@
       <editor
             class="org.eclipse.dawnsci.hdf5.editor.H5Editor"
             default="false"
-            extensions="h5, hd5, hdf5, nxs, nexus, hdf, mat"
+            extensions="h5, hd5, hdf5, nxs, nexus, hdf, mat, nc, hspy"
             icon="icons/h5_editor.png"
             id="org.dawb.hdf5.editor.raw.tree"
             name="Big Tree Editor">
