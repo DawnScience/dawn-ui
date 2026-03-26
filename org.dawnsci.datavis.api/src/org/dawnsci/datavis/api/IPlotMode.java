@@ -1,5 +1,7 @@
 package org.dawnsci.datavis.api;
 
+import java.text.DecimalFormat;
+
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.trace.ITrace;
 import org.eclipse.january.dataset.IDataset;
@@ -11,7 +13,15 @@ import org.eclipse.january.dataset.SliceND;
  *
  */
 public interface IPlotMode {
-
+	/**
+	 * This is the extra digits of precision used to format a number
+	 * for use in a plot dataset name. It is defined to supplement
+	 * the {@link DecimalFormat} string used in the selected X-axis's
+	 * formatter. By default, this implies up to 5 (or 7) decimal
+	 * places when the number is 1e-4 < n < 1e4 (or otherwise)
+	 */
+	public static final int PLOT_DATA_NUMBER_EXTRA_PRECISION = 3;
+	
 	/**
 	 * Get the options describing the axes of the plot
 	 * <p>
@@ -88,6 +98,4 @@ public interface IPlotMode {
 	 * @return dataDimensions
 	 */
 	public int[] getDataDimensions(Object[] currentOptions);
-
-	
 }

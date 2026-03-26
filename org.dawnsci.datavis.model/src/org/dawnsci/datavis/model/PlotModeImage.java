@@ -6,6 +6,7 @@ import java.util.List;
 
 import org.eclipse.dawnsci.analysis.dataset.SlicingUtils;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
+import org.eclipse.dawnsci.plotting.api.axis.IAxis;
 import org.eclipse.dawnsci.plotting.api.histogram.ImageServiceBean;
 import org.eclipse.dawnsci.plotting.api.trace.IImageTrace;
 import org.eclipse.dawnsci.plotting.api.trace.ITrace;
@@ -28,7 +29,8 @@ public class PlotModeImage implements IPlotModeColored {
 	
 	protected Number[] minMax;
 	private double[] range;
-	
+
+	@Override
 	public String[] getOptions() {
 		return options;
 	}
@@ -50,20 +52,21 @@ public class PlotModeImage implements IPlotModeColored {
 		
 		return transpose;
 	}
-	
+
+	@Override
 	public IDataset[] sliceForPlot(ILazyDataset lz, SliceND slice, Object[] options, IPlottingSystem<?> system) throws Exception {
 		long t = System.currentTimeMillis();
 		Dataset data = SlicingUtils.sliceWithAxesMetadata(lz, slice);
 		logger.debug("Slice time {} ms for slice {} of {}", (System.currentTimeMillis()-t), slice, lz.getName());
 		data.setErrors(null);
-		updateName(lz.getName(),data,slice);
+		updateName(system.getSelectedXAxis(), lz.getName(),data,slice);
 		data.squeeze();
 		if (data.getRank() != 2) return null;
 		if (transposeNeeded(options)) data = data.getTransposedView();
 		return new IDataset[]{data};
 	}
 	
-	private void updateName(String name, IDataset data, SliceND slice){
+	private void updateName(IAxis xAxis, String name, IDataset data, SliceND slice){
 		
 		data.setName(name);
 		
@@ -97,9 +100,9 @@ public class PlotModeImage implements IPlotModeColored {
 				if (d == null || d.getSize() != 1){
 					builder.append(s[i].toString());
 				} else {
-					d.setShape(new int[]{1});
+					d.setShape(1);
 					double val = d.getDouble(0);
-					builder.append(Double.toString(val));
+					builder.append(xAxis.format(val, PLOT_DATA_NUMBER_EXTRA_PRECISION));
 				}
 				builder.append(",");
 			}
@@ -111,7 +114,8 @@ public class PlotModeImage implements IPlotModeColored {
 			logger.error("Could not build name");
 		}
 	}
-	
+
+	@Override
 	public void displayData(IDataset[] data, ITrace[] update, IPlottingSystem<?> system, Object userObject) throws Exception {
 		long t = System.currentTimeMillis();
 		IDataset d = data[0];

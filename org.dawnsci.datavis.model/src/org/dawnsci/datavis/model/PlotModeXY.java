@@ -5,6 +5,7 @@ import org.eclipse.dawnsci.analysis.dataset.SlicingUtils;
 import org.eclipse.dawnsci.analysis.dataset.slicer.SliceFromSeriesMetadata;
 import org.eclipse.dawnsci.analysis.dataset.slicer.SliceViewIterator;
 import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
+import org.eclipse.dawnsci.plotting.api.axis.IAxis;
 import org.eclipse.dawnsci.plotting.api.trace.ILineTrace;
 import org.eclipse.dawnsci.plotting.api.trace.ILineTrace.ErrorBarType;
 import org.eclipse.dawnsci.plotting.api.trace.ILineTrace.PointStyle;
@@ -31,7 +32,7 @@ public class PlotModeXY implements IPlotMode {
 	private boolean usePoints = false;
 	private boolean drawYErrorInArea = false;
 
-	private final static Logger logger = LoggerFactory.getLogger(PlotModeXY.class);
+	private static final Logger logger = LoggerFactory.getLogger(PlotModeXY.class);
 
 	/**
 	 * Construct XY mode with line plotting
@@ -47,6 +48,7 @@ public class PlotModeXY implements IPlotMode {
 		this.usePoints = usePoints;
 	}
 
+	@Override
 	public String[] getOptions() {
 		return options;
 	}
@@ -87,14 +89,14 @@ public class PlotModeXY implements IPlotMode {
 		while (it.hasNext()) {
 			ILazyDataset next = it.next();
 			Dataset d = DatasetUtils.sliceAndConvertLazyDataset(next);
-			updateName(lz.getName(), d, slice, getDataDimensions(options)[0]);
+			updateName(system.getSelectedXAxis(), lz.getName(), d, slice, getDataDimensions(options)[0]);
 			all[count++] = d.squeeze();
 			
 		}
 		return all;
 	}
 
-	private void updateName(String name, IDataset data, SliceND slice, int dataDim){
+	private void updateName(IAxis xAxis, String name, IDataset data, SliceND slice, int dataDim){
 		data.setName(name);
 		
 		if (data.getRank() == 1) {
@@ -122,13 +124,13 @@ public class PlotModeXY implements IPlotMode {
 					if (d == null) {
 						builder.append(s[i].toString());
 					} else {
-						if (d.getSize() == 1) d.setShape(new int[]{1});
+						if (d.getSize() == 1) d.setShape(1);
 						
 						if (d instanceof StringDataset) {
 							builder.append(d.getString(0));
 						} else {
 							double val = DatasetUtils.convertToDataset(d).getElementDoubleAbs(0);
-							builder.append(Double.toString(val));
+							builder.append(xAxis.format(val, PLOT_DATA_NUMBER_EXTRA_PRECISION));
 						}
 					}
 					
