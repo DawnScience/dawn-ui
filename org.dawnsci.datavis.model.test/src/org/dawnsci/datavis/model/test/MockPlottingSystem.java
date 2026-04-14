@@ -539,6 +539,15 @@ public class MockPlottingSystem implements IPlottingSystem<Object> {
 	}
 
 	@Override
+	public void setColorScheme(String colorScheme) {
+	}
+
+	@Override
+	public String getColorScheme() {
+		return null;
+	}
+
+	@Override
 	public boolean isRescale() {
 		return false;
 	}

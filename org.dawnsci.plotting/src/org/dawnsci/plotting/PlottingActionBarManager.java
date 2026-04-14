@@ -94,7 +94,11 @@ public class PlottingActionBarManager implements IPlotActionSystem {
 		this.system = system;
 		this.actionMap = new HashMap<ActionType, List<ActionContainer>>(ActionType.values().length);
 	}
-	
+
+	public IPlottingSystem<?> getSystem() {
+		return system;
+	}
+
 	private final static String defaultGroupName = "org.dawb.common.ui.plot.groupAll";
 	/**
      * 
@@ -239,7 +243,7 @@ public class PlottingActionBarManager implements IPlotActionSystem {
         	if (actions!=null) for (ActionContainer ac : actions) {
         		String groupId = ac.getGroupId().substring(ac.getGroupId().indexOf('/')+1);
                 if (visMap.containsKey(groupId)) {
-                	if (visMap.get(groupId) && actionType.isCompatible(type)) {
+                	if (visMap.get(groupId).booleanValue() && actionType.isCompatible(type)) {
                 		ac.insert(false);
             		} else {
             			ac.remove();

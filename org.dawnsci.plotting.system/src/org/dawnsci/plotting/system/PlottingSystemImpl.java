@@ -117,6 +117,8 @@ public class PlottingSystemImpl<T> extends AbstractPlottingSystem<T> {
 	private List<IPlottingSystemViewer<T>>  viewers;
 	private IPlottingSystemViewer<T>        activeViewer;
 
+	private String colorScheme = null;
+
 	/**
 	 * Boolean to set if the intensity value labels should be shown at high zoom.
 	 */
@@ -144,6 +146,16 @@ public class PlottingSystemImpl<T> extends AbstractPlottingSystem<T> {
 	public void setShowValueLabels(boolean showValueLabels) {
 		this.showValueLabels = showValueLabels;
 		PlottingSystemActivator.getPlottingPreferenceStore().setValue(PlottingConstants.SHOW_VALUE_LABELS, showValueLabels);
+	}
+
+	@Override
+	public void setColorScheme(String colorScheme) {
+		this.colorScheme = colorScheme;
+	}
+
+	@Override
+	public String getColorScheme() {
+		return colorScheme;
 	}
 
 	private List<IPlottingSystemViewer<T>> createViewerList() {
@@ -824,8 +836,8 @@ public class PlottingSystemImpl<T> extends AbstractPlottingSystem<T> {
 
 	private void setPaletteData(IPaletteTrace trace) {
 		PaletteData palette = null;
-		if (trace.getPaletteData()==null) {
-			final String schemeName = PlottingSystemActivator.getPlottingPreferenceStore().getString(PlottingConstants.COLOUR_SCHEME);
+		if (colorScheme != null || trace.getPaletteData()==null) {
+			String schemeName = colorScheme == null ? PlottingSystemActivator.getPlottingPreferenceStore().getString(PlottingConstants.COLOUR_SCHEME) : colorScheme;
 
 			final Collection<ITrace> col = getTraces(IImageTrace.class);
 			if (col!=null && col.size()>0) {
