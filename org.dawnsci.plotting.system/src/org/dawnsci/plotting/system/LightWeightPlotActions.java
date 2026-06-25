@@ -75,7 +75,6 @@ import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.jface.window.Window;
-import org.eclipse.nebula.visualization.internal.xygraph.toolbar.AddAnnotationDialog;
 import org.eclipse.nebula.visualization.internal.xygraph.toolbar.RemoveAnnotationDialog;
 import org.eclipse.nebula.visualization.internal.xygraph.undo.AddAnnotationCommand;
 import org.eclipse.nebula.visualization.internal.xygraph.undo.IOperationsManagerListener;
@@ -525,7 +524,7 @@ class LightWeightPlotActions {
 		final Action addAnnotation = new Action("Add Annotation...", PlottingSystemActivator.getImageDescriptor("icons/Add_Annotation.png")) {
 			public void run() {
 				AddAnnotationDialog dialog = new AddAnnotationDialog(Display.getCurrent().getActiveShell(), (IXYGraph) xyGraph);
-				if(dialog.open() == Window.OK){
+				if (dialog.open() == Window.OK) {
 					xyGraph.addAnnotation(dialog.getAnnotation());
 					xyGraph.getOperationsManager().addCommand(
 							new AddAnnotationCommand((IXYGraph) xyGraph, dialog.getAnnotation()));

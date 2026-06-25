@@ -893,14 +893,13 @@ public class LightWeightPlotViewer<T> implements IPlottingSystemViewer<T>, IAnno
 			}
 
 			final Action addAnnotation = new Action("Add annotation to '"+name+"'", PlottingSystemActivator.getImageDescriptor("icons/TraceAnnotation.png")) {
+				@Override
 				public void run() {
 					final String annotName = AnnotationUtils.getUniqueAnnotation(name+" annotation ", sys);
-					if (trace instanceof LineTraceImpl) {
-						final LineTraceImpl lt = (LineTraceImpl)trace;
-						xyGraph.addAnnotation(new Annotation(annotName, lt.getTrace()));
-					} else {
-						xyGraph.addAnnotation(new Annotation(annotName, xyGraph.getPrimaryXAxis(), xyGraph.getPrimaryYAxis()));
-					}
+					Annotation annot = trace instanceof LineTraceImpl lt ? new Annotation(annotName, lt.getTrace()) :
+						new Annotation(annotName, xyGraph.getPrimaryXAxis(), xyGraph.getPrimaryYAxis());
+					AnnotationWrapper.applyAnnotationPreferences(annot);
+					xyGraph.addAnnotation(annot);
 				}
 			};
 			manager.add(addAnnotation);
@@ -1312,7 +1311,7 @@ public class LightWeightPlotViewer<T> implements IPlottingSystemViewer<T>, IAnno
 		final Axis xAxis = (Axis) getSelectedXAxis();
 		final Axis yAxis = (Axis) getSelectedYAxis();
 
-		return new AnnotationWrapper(name, xAxis, yAxis);
+		return new AnnotationWrapper(name, xAxis, yAxis).applyPreferences();
 	}
 
 	@Override

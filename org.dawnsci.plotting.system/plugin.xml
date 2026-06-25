@@ -20,6 +20,12 @@
          point="org.eclipse.ui.preferencePages">
       <page
             category="uk.ac.diamond.scisoft.analysis.rcp.preferences.root"
+            class="org.dawnsci.plotting.system.preference.AnnotationConfigurationPreferencePage"
+            id="org.dawnsci.plotting.system.annotationPreferencePage"
+            name="Plot Annotations">
+      </page>
+      <page
+            category="uk.ac.diamond.scisoft.analysis.rcp.preferences.root"
             class="org.dawnsci.plotting.system.preference.ToolbarConfigurationPreferencePage"
             id="org.dawnsci.plotting.system.toolbarPreferencePage"
             name="Plot Toolbar">

@@ -9,11 +9,16 @@
 package org.dawnsci.plotting.system;
 
 import org.eclipse.dawnsci.plotting.api.annotation.IAnnotation;
+import org.eclipse.dawnsci.plotting.api.preferences.BasePlottingConstants;
+import org.eclipse.jface.preference.PreferenceConverter;
 import org.eclipse.nebula.visualization.xygraph.figures.Annotation;
-import org.eclipse.nebula.visualization.xygraph.figures.Axis;
 import org.eclipse.nebula.visualization.xygraph.figures.Annotation.CursorLineStyle;
+import org.eclipse.nebula.visualization.xygraph.figures.Axis;
+import org.eclipse.nebula.visualization.xygraph.util.XYGraphMediaFactory;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Font;
+import org.eclipse.swt.graphics.FontData;
+import org.eclipse.swt.graphics.RGB;
 
 public class AnnotationWrapper implements IAnnotation {
 
@@ -133,4 +138,22 @@ public class AnnotationWrapper implements IAnnotation {
 		annotation.setVisible(isVis);
 	}
 
+	@Override
+	public IAnnotation applyPreferences() {
+		applyAnnotationPreferences(annotation);
+		return this;
+	}
+
+	/**
+	 * Apply preferences to given annotation (see {@link BasePlottingConstants#ANNOTATION_COLOUR} and {@link BasePlottingConstants#ANNOTATION_FONT})
+	 * @param annotation
+	 */
+	public static void applyAnnotationPreferences(Annotation annot) {
+		XYGraphMediaFactory medFactory = XYGraphMediaFactory.getInstance();
+		RGB color = PreferenceConverter.getColor(PlottingSystemActivator.getPlottingPreferenceStore(), BasePlottingConstants.ANNOTATION_COLOUR);
+		annot.setAnnotationColor(medFactory.getColor(color));
+
+		FontData font = PreferenceConverter.getFontData(PlottingSystemActivator.getPlottingPreferenceStore(), BasePlottingConstants.ANNOTATION_FONT);
+		annot.setFont(medFactory.getFont(font)); // don't use setAnnotatedFont as the configuration page doesn't affect that
+	}
 }
