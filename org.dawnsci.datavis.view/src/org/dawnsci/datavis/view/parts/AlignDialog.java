@@ -95,7 +95,8 @@ public class AlignDialog extends Dialog implements IRegionListener, PlotModeChan
 	private boolean forceToZero;
 	private boolean resampleX;
 	private boolean plotAverage;
-	private AlignToHalfGaussianPeak align = new AlignToHalfGaussianPeak(true);
+	private boolean useRisingSide = true;
+	private AlignToHalfGaussianPeak align = new AlignToHalfGaussianPeak(useRisingSide);
 
 	private Button resetButton;
 	private Button plotAverageButton;
@@ -218,6 +219,20 @@ public class AlignDialog extends Dialog implements IRegionListener, PlotModeChan
 					plotAverage = false;
 					plotAverageButton.setSelection(plotAverage);
 				}
+				selectRegion(false);
+			}
+		});
+
+		b = new Button(alignComp, SWT.CHECK);
+		b.setText("Rising");
+		b.setToolTipText("Use rising side of peak for fitting (otherwise fit falling side)");
+		b.setSelection(useRisingSide);
+		b.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				Button button = (Button) e.getSource();
+				useRisingSide = button.getSelection();
+				align.setUseRisingSide(useRisingSide);
 				selectRegion(false);
 			}
 		});
@@ -356,7 +371,7 @@ public class AlignDialog extends Dialog implements IRegionListener, PlotModeChan
 		if (lmax < 2) {
 			return;
 		}
-		List<String> plotNames = new ArrayList<String>();
+		List<String> plotNames = new ArrayList<>();
 		for (ILineTrace t : plottingSystem.getTracesByClass(ILineTrace.class)) {
 			String n = t.getName();
 			if (RESAMPLE_AVERAGE.equals(n)) {
@@ -484,6 +499,10 @@ public class AlignDialog extends Dialog implements IRegionListener, PlotModeChan
 					double[] xs = getLimits();
 					if (xs != null) {
 						alignPlots(xs[0], xs[1]);
+						if (forceToZero && !crossingZero) { // centre region to zero
+							double dx = currentROI.getLength(0);
+							currentROI.setPoint(-dx/2, 0);
+						}
 					}
 				}
 			});
@@ -652,7 +671,7 @@ public class AlignDialog extends Dialog implements IRegionListener, PlotModeChan
 		try {
 			List<IMetadata> metadata = yo.getMetadata(IMetadata.class);
 			if (metadata != null) {
-				for (IMetadata m : metadata) {
+				for (IMetadata m : List.copyOf(metadata)) {
 					y.addMetadata(m);
 				}
 			}
