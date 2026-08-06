@@ -11,7 +11,6 @@ package org.dawnsci.plotting.system;
 
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 
 import org.dawb.common.ui.menu.CheckableActionGroup;
@@ -23,7 +22,6 @@ import org.dawnsci.plotting.PlottingActionBarManager;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.dawnsci.plotting.api.ActionType;
-import org.eclipse.dawnsci.plotting.api.IPlottingSystem;
 import org.eclipse.dawnsci.plotting.api.ManagerType;
 import org.eclipse.dawnsci.plotting.api.histogram.IPaletteService;
 import org.eclipse.dawnsci.plotting.api.preferences.BasePlottingConstants;
@@ -62,18 +60,11 @@ public class PlotActionsManagerImpl extends PlottingActionBarManager {
 
 	private static final Logger logger = LoggerFactory.getLogger(PlotActionsManagerImpl.class);
 
-	private PlottingSystemImpl<?>        system;
-
 	protected PlotActionsManagerImpl(PlottingSystemImpl<?> system) {
 		super(system);
-		this.system = system;
 	}
 
-	public IPlottingSystem<?> getSystem() {
-		return system;
-	}
-
-	private static String lastscreeshot_filename;
+	private static String lastScreenshotFilename;
 
 	public void createExportActions() {
 		final IAction exportActionDropDown = getExportActions();
@@ -103,7 +94,7 @@ public class PlotActionsManagerImpl extends PlottingActionBarManager {
 			// choosing the folder.
 			public void run(){
 				try {
-					lastscreeshot_filename = system.savePlotting(lastscreeshot_filename);
+					lastScreenshotFilename = system.savePlotting(lastScreenshotFilename);
 				} catch (Exception e) {
 					final Status status = new Status(IStatus.ERROR, "org.dawnsci.plotting.system", e.getMessage());
 					ErrorDialog.openError(Display.getDefault().getActiveShell(), "Cannot save screenshot", 
@@ -147,8 +138,8 @@ public class PlotActionsManagerImpl extends PlottingActionBarManager {
 					system.setFocus();
 					IWizard wiz = EclipseUtils.openWizard(PersistenceExportWizard.ID, false);
 					
-					if (wiz instanceof PersistenceExportWizard) {
-						((PersistenceExportWizard) wiz).setPlottingSystem(system);
+					if (wiz instanceof PersistenceExportWizard pWiz) {
+						pWiz.setPlottingSystem(system);
 					}
 					
 					WizardDialog wd = new  WizardDialog(Display.getCurrent().getActiveShell(), wiz);
@@ -174,7 +165,7 @@ public class PlotActionsManagerImpl extends PlottingActionBarManager {
 					wiz.setFilePath(lastPath);
 					WizardDialog wd = new  WizardDialog(Display.getCurrent().getActiveShell(), wiz);
 					wd.setTitle(wiz.getWindowTitle());
-					if (wiz instanceof PlotDataConversionWizard) ((PlotDataConversionWizard)wiz).setPlottingSystem(system);
+					if (wiz instanceof PlotDataConversionWizard pWiz) pWiz.setPlottingSystem(system);
 					wd.open();
 					lastPath = wiz.getFilePath();
 					
@@ -270,11 +261,10 @@ public class PlotActionsManagerImpl extends PlottingActionBarManager {
 
 	protected void selectedPaletteChanged(final String paletteName) {
 		final Collection<ITrace> traces = system.getTraces();
+		getSystem().setColorScheme(paletteName);
 		if (traces!=null) for (final ITrace trace: traces) {
-			if (trace instanceof IPaletteTrace) {
-				final IPaletteTrace paletteTrace = (IPaletteTrace) trace;
-				paletteTrace.setPalette(paletteName);
-				PlottingSystemActivator.getPlottingPreferenceStore().setValue(PlottingConstants.COLOUR_SCHEME, paletteName);
+			if (trace instanceof IPaletteTrace pTrace) {
+				pTrace.setPalette(paletteName);
 			}
 		}
 	}
@@ -286,13 +276,16 @@ public class PlotActionsManagerImpl extends PlottingActionBarManager {
 		final IPaletteService pservice = PlottingSystemActivator.getService(IPaletteService.class);
 		final Collection<String> names = pservice.getColorSchemes();
 
-		String schemeName = PlottingSystemActivator.getPlottingPreferenceStore().getString(PlottingConstants.COLOUR_SCHEME);
+		String schemeName = getSystem().getColorScheme();
+		if (schemeName == null) {
+			schemeName = PlottingSystemActivator.getPlottingPreferenceStore().getString(PlottingConstants.COLOUR_SCHEME);
+		}
 
 		final MenuAction lutCombo = new MenuAction("Color");
 		lutCombo.setId(getClass().getName()+lutCombo.getText());
 		lutCombo.setImageDescriptor(PlottingSystemActivator.getImageDescriptor("icons/color_wheel.png"));
 
-		final Map<String, IAction> paletteActions = new HashMap<String, IAction>(names.size());
+		final Map<String, IAction> paletteActions = HashMap.newHashMap(names.size());
 		CheckableActionGroup group      = new CheckableActionGroup();
 		
 		Collection<String> categoryNames = pservice.getColorCategories();
@@ -322,22 +315,18 @@ public class PlotActionsManagerImpl extends PlottingActionBarManager {
 		}
 		lutCombo.setToolTipText("Histogram");
 
-		registerMenuBarGroup(lutCombo.getId()+".group");
-		registerAction(lutCombo.getId()+".group", lutCombo, ActionType.IMAGE, ManagerType.MENUBAR);
+		String lutGroupName = lutCombo.getId() + ".group";
+		registerMenuBarGroup(lutGroupName);
+		registerAction(lutGroupName, lutCombo, ActionType.IMAGE, ManagerType.MENUBAR);
 
-		this.paletteMenuListener = new IMenuListener() {
-			@Override
-			public void menuAboutToShow(IMenuManager manager) {
-				Collection<ITrace> traces = system.getTraces();
-				for (Iterator<ITrace> iterator = traces.iterator(); iterator.hasNext();) {
-					ITrace trace = (ITrace) iterator.next();
-					if (trace instanceof IImageTrace) {
-						IImageTrace image = (IImageTrace) trace;
-						String colorSchemeName = image.getPaletteName();
-						if (colorSchemeName!=null) {
-							IAction scheme = paletteActions.get(colorSchemeName);
-							if (scheme!=null) scheme.setChecked(true);
-						}
+		this.paletteMenuListener = (IMenuManager manager) -> {
+			Collection<ITrace> traces = system.getTraces();
+			for (ITrace trace: traces) {
+				if (trace instanceof IPaletteTrace pTrace) {
+					String colorSchemeName = pTrace.getPaletteName();
+					if (colorSchemeName!=null) {
+						IAction scheme = paletteActions.get(colorSchemeName);
+						if (scheme!=null) scheme.setChecked(true);
 					}
 				}
 			}
@@ -349,8 +338,8 @@ public class PlotActionsManagerImpl extends PlottingActionBarManager {
 					public void propertyChange(final PropertyChangeEvent event) {
 						if (isInterestedProperty(event)) {
 							final Object newValue = event.getNewValue();
-							if (newValue instanceof String)
-								selectedPaletteChanged((String) newValue);
+							if (newValue instanceof String newString)
+								selectedPaletteChanged(newString);
 						}
 					}
 					private boolean isInterestedProperty(
@@ -371,8 +360,8 @@ public class PlotActionsManagerImpl extends PlottingActionBarManager {
 					// setLogColorScale so that
 					// it just does the right thing.
 					p.getImageServiceBean().setLogColorScale(this.isChecked());
-					if (p.isRescaleHistogram() && p instanceof IImageTrace) {
-						((IImageTrace)p).rehistogram();
+					if (p.isRescaleHistogram() && p instanceof IImageTrace iTrace) {
+						iTrace.rehistogram();
 					} else {
 						// XXX: Doing a image.repaint() is not sufficient, force
 						// more
@@ -382,13 +371,13 @@ public class PlotActionsManagerImpl extends PlottingActionBarManager {
 					}
 					}
 				}
-				PlottingSystemActivator.getPlottingPreferenceStore().setValue(PlottingConstants.CM_LOGSCALE, this.isChecked());
+				PlottingSystemActivator.getPlottingPreferenceStore().setValue(BasePlottingConstants.CM_LOGSCALE, this.isChecked());
 			}
 		};
 		
 		logColorScale.setId(getClass().getName()+".logColorScale");
 		logColorScale.setChecked(PlottingSystemActivator.getPlottingPreferenceStore().getBoolean(PlottingConstants.CM_LOGSCALE));
-		registerAction(lutCombo.getId()+".group",logColorScale, ActionType.IMAGE, ManagerType.MENUBAR);
+		registerAction(lutGroupName, logColorScale, ActionType.IMAGE, ManagerType.MENUBAR);
 		
 		final Action invertColorScale = new Action("Invert color scale", IAction.AS_CHECK_BOX) {
 			public void run() {
@@ -399,14 +388,14 @@ public class PlotActionsManagerImpl extends PlottingActionBarManager {
 					for (IPaletteTrace p : ps) {
 						p.setPalette(p.getPaletteName());
 					}
-					PlottingSystemActivator.getPlottingPreferenceStore().setValue(PlottingConstants.CM_INVERTED, this.isChecked());
+					PlottingSystemActivator.getPlottingPreferenceStore().setValue(BasePlottingConstants.CM_INVERTED, this.isChecked());
 				}
 			}
 		};
 		
 		invertColorScale.setId(getClass().getName()+".invertColorScale");
 		invertColorScale.setChecked(PlottingSystemActivator.getPlottingPreferenceStore().getBoolean(PlottingConstants.CM_INVERTED));
-		registerAction(lutCombo.getId()+".group",invertColorScale, ActionType.IMAGE, ManagerType.MENUBAR);
+		registerAction(lutGroupName, invertColorScale, ActionType.IMAGE, ManagerType.MENUBAR);
 
 		
 	}

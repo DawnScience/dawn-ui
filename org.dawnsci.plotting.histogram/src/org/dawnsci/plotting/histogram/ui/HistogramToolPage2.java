@@ -384,8 +384,7 @@ public class HistogramToolPage2 extends AbstractToolPage implements IToolPage {
 
 		Assert.isTrue(getPlottingSystem() != null, "Plotting system must not be null");
 
-		logger.debug("HistogramToolPage: activate. Plotting System "
-				+ getPlottingSystem().hashCode());
+		logger.debug("HistogramToolPage: activate. Plotting System is {}", getPlottingSystem().hashCode());
 		getPlottingSystem().addTraceListener(traceListener);
 
 		IPaletteTrace p = getLastPaletteTrace();
@@ -393,7 +392,7 @@ public class HistogramToolPage2 extends AbstractToolPage implements IToolPage {
 		activePaletteTrace.set(p);
 		if (p != null) {
 			p.addPaletteListener(paletteListener);
-			logger.debug("HistogramToolPage: activate - palette trace " + p.hashCode());
+			logger.debug("HistogramToolPage: activate - palette trace is {}", p.hashCode());
 			updateHistogramUIElements(p);
 		} else {
 			updateHistogramUIElements(null);
@@ -430,7 +429,7 @@ public class HistogramToolPage2 extends AbstractToolPage implements IToolPage {
 		super.deactivate();
 
 		if (getPlottingSystem() != null){
-			logger.debug("HistogramToolPage: deactivate. Plotting System " + getPlottingSystem().hashCode());
+			logger.debug("HistogramToolPage: deactivate. Plotting System is {}", getPlottingSystem().hashCode());
 			getPlottingSystem().removeTraceListener(traceListener);
 			
 			Collection<IPaletteTrace> traces = getPlottingSystem().getTracesByClass(IPaletteTrace.class);
@@ -498,11 +497,12 @@ public class HistogramToolPage2 extends AbstractToolPage implements IToolPage {
 	 * the selected colour scheme
 	 */
 	private void setPalette() {
+		String selectedColormap = colourMapViewer.getCombo().getText();
 		IPaletteTrace p = activePaletteTrace.get();
 		if (p != null) {
-			String selectedColormap = colourMapViewer.getCombo().getText();
 			p.setPalette(selectedColormap);
 		}
+		getPlottingSystem().setColorScheme(selectedColormap);
 	}
 
 	@Override
@@ -548,14 +548,17 @@ public class HistogramToolPage2 extends AbstractToolPage implements IToolPage {
 	private final class TraceListener implements ITraceListener {
 		@Override
 		public void traceWillPlot(TraceWillPlotEvent evt) {
+			// do nothing
 		}
 
 		@Override
 		public void tracesAdded(TraceEvent evt) {
+			// do nothing
 		}
 
 		@Override
 		public void traceCreated(TraceEvent evt) {
+			// do nothing
 		}
 
 		@Override
@@ -589,7 +592,7 @@ public class HistogramToolPage2 extends AbstractToolPage implements IToolPage {
 
 	};
 
-	private final class PaletteListener extends IPaletteListener.Stub{
+	private final class PaletteListener extends IPaletteListener.Stub {
 		@Override
 		public void rescaleHistogramChanged(PaletteEvent evt) {
 			boolean locked = !((IPaletteTrace)evt.getSource()).isRescaleHistogram();
@@ -608,8 +611,9 @@ public class HistogramToolPage2 extends AbstractToolPage implements IToolPage {
 	}
 
 	private IPaletteService getPaletteService() {
-		if (pservice == null)
-			return pservice = (IPaletteService) PaletteService.getPaletteService();
+		if (pservice == null) {
+			pservice = PaletteService.getPaletteService();
+		}
 		return pservice;
 	}
 }
